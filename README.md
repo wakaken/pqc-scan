@@ -57,6 +57,7 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 - Hybrid detection pipeline: `tree-sitter` + `regex`
 - Rule-driven findings with severity, confidence, and quantum risk tags
 - Migration guidance per finding (runtime/language-aware recommended actions)
+- Rule and severity reference: [docs/rules-reference.md](docs/rules-reference.md)
 - Source snippet extraction with highlighted matched line (HTML + JSON)
 - CBOM export (`cbom.json`)
 - Dependency inventory export (`dependency-sbom.json`)
@@ -175,6 +176,12 @@ Human-friendly triage report with:
 - finding metadata
 - highlighted source snippets
 - recommended migration actions
+
+#### HTML Report Preview
+
+The screenshot below shows a real `report.html` example with grouped findings, an occurrences table, highlighted source snippets, and recommended actions.
+
+![HTML report example](docs/html-report-exmaple.jpg)
 
 ### `report.md`
 
