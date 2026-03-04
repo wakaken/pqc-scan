@@ -179,6 +179,13 @@ pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
 - ハイライト付きソーススニペット
 - 推奨移行アクション
 
+#### HTMLレポートのサンプル
+
+以下のスクリーンショットは、実際の `report.html` 出力例です。  
+ルール単位の集約表示、Occurrencesテーブル、ハイライト付きスニペット、Recommended Actions を確認できます。
+
+![HTMLレポート例](docs/html-report-exmaple.jpg)
+
 ### `report.md`
 
 監査メモ、Pull Request、成果物保管に適したポータブルなテキスト形式のレポートです。
