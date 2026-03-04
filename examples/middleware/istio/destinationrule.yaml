@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: insecure-dr
+spec:
+  host: example.internal
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      minProtocolVersion: TLSV1_0
+      ciphers: ["ECDHE-RSA-AES128-GCM-SHA256", "TLS_RSA_WITH_AES_128_CBC_SHA"]

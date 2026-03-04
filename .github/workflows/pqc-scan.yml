@@ -1,0 +1,35 @@
+name: pqc-scan
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        run: cargo build --workspace --release
+
+      - name: Run pqc-scan
+        run: cargo run --bin pqc-scan -- scan . --format sarif --out-dir ./pqc-report --rules-dir ./rules
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ./pqc-report/report.sarif
+
+      - name: Upload Dependency SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: pqc-dependency-sbom
+          path: ./pqc-report/dependency-sbom.json

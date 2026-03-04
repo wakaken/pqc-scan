@@ -1,0 +1,16 @@
+[service]
+name = "rust-payment-service"
+
+[tls]
+min_version = "TLSv1.0"
+cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+legacy_cipher = "TLS_RSA_WITH_AES_128_CBC_SHA"
+
+[jwt]
+algorithm = "RS512"
+id_token_signed_response_alg = "RS256"
+kid = "legacy-rsa-key"
+
+[pki]
+signature_algorithm = "sha256WithRSAEncryption"
+key_size = 2048

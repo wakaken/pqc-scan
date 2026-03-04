@@ -1,0 +1,17 @@
+service: ruby-auth-gateway
+environment: production
+
+auth:
+  jwt_alg: RS256
+  backup_alg: PS256
+  id_token_signed_response_alg: RS256
+  key_type: RSA
+  kid: legacy-rsa-key
+
+tls:
+  min_version: TLSv1.0
+  cipher_suite: TLS_RSA_WITH_AES_128_CBC_SHA
+
+pki:
+  signature_algorithm: sha256WithRSAEncryption
+  key_size: 2048
