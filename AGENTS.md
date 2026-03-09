@@ -77,7 +77,10 @@ Tasks are stored in the `tasks/` directory as YAML files.
 See `tasks/README.md` for details.
 
 Task lifecycle:
-pending → planned → in-progress → review → ci-check → done
+pending → planned → in-progress → review → done
+
+Optional status:
+- blocked
 
 Agents must only update statuses according to their roles.
 
@@ -94,8 +97,8 @@ Agents must review the following before executing work:
 
 Agents must also consult knowledge documents:
 
-- `docs/ARCHITECTURE.md`
-- `docs/BEST-PRACTICE.md`
+- `docs/architecture.md`
+- `docs/BEST-PRACTICES.md`
 - `docs/DECISIONS.md`
 - `docs/MISTAKES.md`
 - `docs/PATTERNS.md`

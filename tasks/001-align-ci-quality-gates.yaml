@@ -1,0 +1,28 @@
+id: 001
+title: Align CI with declared Rust toolchain and enforce quality gates
+type: quality
+priority: high
+status: blocked
+owner: Evaluator Agent
+description: >
+  `.github/workflows/pqc-scan.yml` currently builds and runs the scanner, but it does not
+  enforce `cargo fmt`, `cargo test`, or `cargo clippy`. The workflow also uses a generic
+  stable toolchain instead of explicitly aligning with `rust-toolchain.toml`, while local
+  verification showed `cargo clippy --workspace --all-targets -- -D warnings` is not
+  currently runnable in this environment. Add CI quality gates and validate toolchain/component
+  compatibility without changing scan output behavior.
+implementation_steps:
+  - Review `rust-toolchain.toml` and `.github/workflows/pqc-scan.yml` and decide how CI should honor the declared toolchain.
+  - Update the workflow to run formatting, tests, and clippy before the scan job or as separate jobs.
+  - Verify that clippy is available for the selected toolchain in CI, and adjust setup if the current configuration is incompatible.
+  - Keep the existing SARIF and dependency SBOM upload path intact.
+required_files:
+  - rust-toolchain.toml
+  - .github/workflows/pqc-scan.yml
+testing_requirements:
+  - cargo fmt --all --check
+  - cargo test --workspace
+  - cargo clippy --workspace --all-targets -- -D warnings
+security_considerations:
+  - Preserve existing scan and SARIF generation behavior used by downstream security tooling.
+  - Do not weaken cryptographic checks or bypass failing validation steps.

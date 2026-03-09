@@ -1,0 +1,30 @@
+id: 006
+title: Align agent prompts with the current task lifecycle
+type: docs
+priority: high
+status: done
+owner: Evaluator Agent
+description: >
+  The repository now uses `pending → planned → in-progress → review → done` with
+  optional `blocked`, but some agent prompts still encode older transition assumptions.
+  In particular, `prompts/EVALUATOR.md` only describes `done` and `pending` outcomes,
+  which does not match the current documented lifecycle or the existing `001=blocked`
+  task state. Align prompt guidance with the current lifecycle so agents apply status
+  transitions consistently.
+implementation_steps:
+  - Review `prompts/EVALUATOR.md`, `prompts/REVIEWER.md`, `prompts/EXECUTOR.md`, `AGENTS.md`, and `docs/TASK-LIFECYCLE.md` to identify lifecycle and ownership mismatches.
+  - Update the relevant prompt files so status transitions and blocked handling are consistent with the documented lifecycle.
+  - Verify that prompt wording still preserves the existing security and validation expectations.
+required_files:
+  - prompts/EVALUATOR.md
+  - prompts/REVIEWER.md
+  - prompts/EXECUTOR.md
+  - AGENTS.md
+  - docs/TASK-LIFECYCLE.md
+  - tasks/001-align-ci-quality-gates.yaml
+testing_requirements:
+  - Manual verification that prompt files and lifecycle docs describe the same status model
+  - Search for stale lifecycle assumptions after the update
+security_considerations:
+  - Keep blocked handling explicit so unresolved high-risk work does not get forced to done or pending incorrectly
+  - Preserve reviewer and evaluator expectations around validation, security checks, and stop conditions

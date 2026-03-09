@@ -58,3 +58,32 @@ pub fn is_sbom_file(path: &Path) -> bool {
         || name.contains("cyclonedx")
         || name.contains("spdx")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    fn detects_supported_dependency_manifests() {
+        assert!(is_dependency_manifest(Path::new("Cargo.toml")));
+        assert!(is_dependency_manifest(Path::new("nested/example.gemspec")));
+        assert!(is_dependency_manifest(Path::new("frontend/pnpm-lock.yaml")));
+        assert!(!is_dependency_manifest(Path::new("README.md")));
+    }
+
+    #[test]
+    fn detects_certificate_extensions_case_insensitively() {
+        assert!(is_certificate_file(Path::new("certs/server.PEM")));
+        assert!(is_certificate_file(Path::new("certs/bundle.p12")));
+        assert!(!is_certificate_file(Path::new("certs/server.txt")));
+    }
+
+    #[test]
+    fn detects_sbom_filenames_by_common_conventions() {
+        assert!(is_sbom_file(Path::new("dependency-sbom.json")));
+        assert!(is_sbom_file(Path::new("service-bom.cdx.json")));
+        assert!(is_sbom_file(Path::new("backend.spdx.json")));
+        assert!(!is_sbom_file(Path::new("package-lock.json")));
+    }
+}

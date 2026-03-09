@@ -245,3 +245,51 @@ fn ceil_char_boundary(text: &str, mut idx: usize) -> usize {
     }
     idx
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn mask_preview_masks_private_key_markers() {
+        assert_eq!(
+            mask_preview("-----BEGIN PRIVATE KEY-----"),
+            "[masked-private-key]"
+        );
+    }
+
+    #[test]
+    fn mask_preview_truncates_long_text() {
+        assert_eq!(
+            mask_preview("abcdefghijklmnopqrstuvwxyz"),
+            "abcdefgh***uvwxyz"
+        );
+    }
+
+    #[test]
+    fn line_col_for_offset_handles_multiline_text() {
+        let text = "alpha\nbeta\ngamma";
+        let offset = text.find("gamma").expect("gamma");
+        assert_eq!(line_col_for_offset(text, offset), (3, 1));
+    }
+
+    #[test]
+    fn snippet_around_clips_and_masks_sensitive_content() {
+        let text = "prefix -----BEGIN PRIVATE KEY----- suffix";
+        let start = text.find("PRIVATE").expect("private");
+        let end = start + "PRIVATE KEY".len();
+        assert_eq!(snippet_around(text, start, end, 10), "[masked-private-key]");
+    }
+
+    #[test]
+    fn scannable_file_detects_binary_and_relative_paths() {
+        let file =
+            ScannableFile::from_bytes(PathBuf::from("/repo/src/app.bin"), vec![0, 159, 146, 150]);
+        assert!(file.text.is_none());
+        assert_eq!(
+            file.as_relative_path(std::path::Path::new("/repo")),
+            "src/app.bin"
+        );
+    }
+}

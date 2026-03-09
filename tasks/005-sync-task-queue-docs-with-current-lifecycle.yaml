@@ -1,0 +1,27 @@
+id: 005
+title: Synchronize task queue documentation with the current lifecycle
+type: docs
+priority: high
+status: done
+owner: Evaluator Agent
+description: >
+  `tasks/README.md` still documents only the task fields and does not explain the
+  current lifecycle or the optional `blocked` status. Since `ci-check` was removed,
+  the task queue documentation should be aligned with `AGENTS.md` and
+  `docs/TASK-LIFECYCLE.md` so future agents do not reintroduce stale states or
+  inconsistent workflow assumptions.
+implementation_steps:
+  - Review `tasks/README.md`, `AGENTS.md`, and `docs/TASK-LIFECYCLE.md` to identify the authoritative lifecycle and ownership model.
+  - Update `tasks/README.md` so it documents the current statuses, expected transitions, and when `blocked` should be used.
+  - Check task examples or queue-facing docs for stale lifecycle terminology and align examples where necessary.
+required_files:
+  - tasks/README.md
+  - AGENTS.md
+  - docs/TASK-LIFECYCLE.md
+  - tasks/001-align-ci-quality-gates.yaml
+testing_requirements:
+  - Manual verification that `tasks/README.md`, `AGENTS.md`, and `docs/TASK-LIFECYCLE.md` describe the same lifecycle
+  - Search for stale lifecycle terms in `tasks/` and related docs after the update
+security_considerations:
+  - Preserve the current security and completion guidance while updating workflow terminology
+  - Keep the meaning of `blocked` explicit so high-risk or underspecified work still stops for human review

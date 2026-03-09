@@ -1,0 +1,31 @@
+id: 004
+title: Clarify the boundaries between PATTERNS.md and BEST-PRACTICES.md
+type: docs
+priority: high
+status: done
+owner: Evaluator Agent
+description: >
+  `docs/PATTERNS.md` and `docs/BEST-PRACTICES.md` currently overlap, and `PATTERNS.md`
+  still reads more like duplicated workflow guidance than a reusable pattern catalog.
+  Reorganize these documents so their roles are explicit: `BEST-PRACTICES.md` should hold
+  normative guidance, while `PATTERNS.md` should focus on recurring design and implementation
+  patterns in this repository.
+implementation_steps:
+  - Define the intended scope of `docs/PATTERNS.md` and `docs/BEST-PRACTICES.md` in concrete terms and remove duplicated guidance where possible.
+  - Rewrite `docs/PATTERNS.md` into a repository-specific pattern catalog, focusing on repeatable structures such as thin CLI entrypoints, detector extensibility, report writer extension points, and documentation synchronization patterns.
+  - Keep `docs/BEST-PRACTICES.md` focused on normative development guidance and ensure it complements, rather than duplicates, `docs/PATTERNS.md`.
+  - Verify that references from `AGENTS.md` and related knowledge docs still point to the correct documents after the rewrite.
+required_files:
+  - docs/PATTERNS.md
+  - docs/BEST-PRACTICES.md
+  - AGENTS.md
+  - docs/MISTAKES.md
+  - docs/TASK-LIFECYCLE.md
+testing_requirements:
+  - Manual review that the two documents have clearly different responsibilities
+  - Manual verification that referenced document paths still exist
+  - `cargo test --workspace` if any implementation guidance changes require accompanying code changes
+security_considerations:
+  - Preserve all existing security constraints and stop conditions documented for agents
+  - Do not remove guidance that prevents secret exposure, weak cryptographic handling, or compatibility regressions
+  - Keep task status terminology aligned with the current lifecycle documentation
