@@ -1,135 +1,139 @@
-# AGENTS.md
+# Patterns
 
-This repository is operated by AI agents working in a coordinated workflow.
-
----
-
-# Project
-
-This repository contains **pqc-scan**, a Rust-based CLI tool that detects
-Post-Quantum Cryptography (PQC) migration risks in source code.
-
-Security and correctness are critical.
+This document captures recurring repository-specific design and implementation patterns.
+Use it to understand how this codebase is typically extended.
+For normative rules and contributor expectations, see `docs/BEST-PRACTICES.md`.
 
 ---
 
-# Agents
+## Thin CLI Entrypoints
 
-The system uses the following agents:
+Pattern:
+- keep `main` focused on argument parsing, top-level error reporting, and process exit
+- move command behavior into helpers that return explicit results or exit status values
 
-1. Planner  
-2. Executor 
-3. Reviewer  
-4. Evaluator  
-5. Reflection  
-6. Monitor  
+Why it works here:
+- CLI behavior stays compatible while remaining easy to test
+- stdout and stderr can be asserted without spawning a subprocess
 
-Agents must follow the workflow defined below.
-
----
-
-# Workflow
-
-Agents collaborate through a shared task queue.
-
-1. Planner selects tasks
-2. Executor implements changes
-3. Reviewer evaluates code
-4. Evaluator runs build/tests
-5. Reflection records lessons
-6. Monitor creates new tasks
+Current example:
+- `crates/pqc_scan_cli/src/main.rs`
 
 ---
 
-# Task Queue
+## Pipeline-Centered Scanning
 
-Tasks are stored in `tasks/` as YAML files.
+Pattern:
+- keep orchestration in the core pipeline
+- let repository walking, detection, normalization, recommendation enrichment, and reporting remain distinct stages
 
-Lifecycle:
+Why it works here:
+- security-sensitive logic stays inspectable
+- new detection capabilities can be added without rewriting the whole scan flow
 
-pending → planned → in-progress → review → ci-check → done
-
-Agents must update statuses according to their roles.
-
----
-
-# Knowledge Sources
-
-Agents must read the following before starting work:
-
-- README.md
-- README.ja.md
-- docs/architecture.md
-- docs/rules-reference.md
-- memory/best-practices.md
-- memory/decisions.md
-- memory/mistakes.md
+Current example:
+- `crates/pqc_scan_core/src/pipeline.rs`
+- `crates/pqc_scan_core/src/walker.rs`
 
 ---
 
-# pqc-scan Constraints
+## Detector Extension Pattern
 
-When modifying rule files:
+Pattern:
+- implement the shared detector trait
+- keep detector-specific parsing and matching local to the detector crate
+- register new detectors through the default detector list rather than wiring them ad hoc
+- add targeted tests for both detection hits and sensitive-output handling when a detector touches key or certificate material
 
-rules/default/*.yml
+Why it works here:
+- new detector kinds remain isolated
+- the scan pipeline can treat detectors uniformly
+- regressions in masking or fallback behavior are caught close to the detector implementation
 
-Requirements:
-
-- rule IDs must be unique
-- schema must remain valid
-- update rules-reference.md when necessary
-
----
-
-# Development
-
-Development commands are documented in:
-
-docs/development.md
+Current example:
+- `crates/pqc_scan_detectors/src/lib.rs`
+- `crates/pqc_scan_detectors/src/regex_detector.rs`
+- `crates/pqc_scan_detectors/src/tree_sitter_detector.rs`
 
 ---
 
-# Security Rules
+## Rule-Driven Matching
 
-Agents must:
+Pattern:
+- encode detection logic in YAML rules where possible
+- compile and validate rule data at load time
+- keep rule IDs unique and update rule reference docs with rule changes
 
-- validate inputs
-- avoid exposing secrets
-- preserve cryptographic integrity
-- maintain CLI compatibility
+Why it works here:
+- detection coverage can evolve without invasive code changes
+- invalid rules fail early instead of producing silent scan drift
 
----
-
-# Development Principles
-
-Prefer:
-
-- small safe changes
-- tests for new logic
-- minimal diffs
-
-Avoid:
-
-- large refactors
-- breaking output formats
+Current example:
+- `crates/pqc_scan_rules/src/lib.rs`
+- `rules/default/*.yml`
+- `docs/rules-reference.md`
 
 ---
 
-# Documentation
+## Report Writer Extension Pattern
 
-User-visible changes must update:
+Pattern:
+- add new output formats in the reporting crate
+- keep sanitization centralized before format-specific rendering
+- preserve existing output paths and field stability unless a planned compatibility change is approved
 
-README.md  
-README.ja.md
+Why it works here:
+- sensitive data handling remains consistent across formats
+- downstream tooling can rely on stable report contracts
+
+Current example:
+- `crates/pqc_scan_report/src/lib.rs`
+- `crates/pqc_scan_report/src/json_report.rs`
+- `crates/pqc_scan_report/src/sarif_report.rs`
 
 ---
 
-# Stop Conditions
+## Report Contract Test Pattern
 
-Agents must stop if:
+Pattern:
+- keep deterministic writer-level tests next to HTML and Markdown report generators
+- assert grouped finding rendering, format-specific escaping, recommended-action sections, and masked evidence output
+- use synthetic findings with masked placeholders instead of raw sensitive fixtures
 
-- cryptographic logic changes are unclear
-- rule system compatibility may break
-- architectural changes are required
+Why it works here:
+- report outputs are compatibility surfaces and can regress during refactors even when core finding data stays correct
+- escaping and masking behavior are security-sensitive and should be checked in the final rendered format, not only in lower-level helpers
 
-Human review is required in such cases.
+Current example:
+- `crates/pqc_scan_report/src/html_report.rs`
+- `crates/pqc_scan_report/src/markdown_report.rs`
+
+---
+
+## Documentation Synchronization Pattern
+
+Pattern:
+- when renaming docs or changing workflow terms, update all agent-facing references in the same patch
+- keep task lifecycle terminology aligned across `AGENTS.md`, `docs/TASK-LIFECYCLE.md`, prompts, and task files
+
+Why it works here:
+- agents depend on these files as operational inputs
+- inconsistent wording causes workflow mistakes and duplicate repair work
+
+Current example:
+- `AGENTS.md`
+- `docs/TASK-LIFECYCLE.md`
+- `prompts/EVALUATOR.md`
+
+---
+
+## Task Queue Pattern
+
+Pattern:
+- keep tasks small and role-driven
+- let Planner move tasks to `planned`, Executor to `in-progress`, Reviewer review the implementation, and Evaluator close the loop with `done`
+- use `blocked` when progress depends on unavailable validation or human decisions
+
+Why it works here:
+- responsibilities stay auditable
+- unfinished work remains visible without overloading normal completion states

@@ -1,0 +1,24 @@
+id: 002
+title: Add CLI behavior tests for scan and rules commands
+type: test
+priority: high
+status: done
+owner: Evaluator Agent
+description: >
+  The CLI crate has no tests, even though it contains command parsing, `--fail-on` exit behavior,
+  rules loading, and report format selection. Add focused tests around command behavior so that
+  contract regressions are caught before release.
+implementation_steps:
+  - Identify testable seams in `crates/pqc_scan_cli/src/main.rs`, especially argument parsing and command dispatch.
+  - Add unit or integration tests for `scan`, `rules list`, invalid rule directories, and fail-on exit threshold handling.
+  - Refactor only if necessary to make behavior testable while preserving the public CLI surface.
+required_files:
+  - crates/pqc_scan_cli/src/main.rs
+  - crates/pqc_scan_cli/Cargo.toml
+  - rules/default
+testing_requirements:
+  - cargo test --workspace
+  - Targeted CLI tests covering success and failure exit paths
+security_considerations:
+  - Maintain CLI compatibility and current exit-code semantics relied on by CI automation.
+  - Ensure tests do not print sensitive key material or depend on unsafe fixture contents.

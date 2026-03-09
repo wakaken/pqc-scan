@@ -1,0 +1,28 @@
+id: 009
+title: Add report writer contract tests for HTML and Markdown outputs
+type: test
+priority: high
+status: done
+owner: Evaluator Agent
+description: >
+  Scan output stability is a documented compatibility requirement, but current
+  report tests mainly cover sanitization and SARIF field naming. Add focused,
+  deterministic tests for HTML and Markdown report writers so grouped findings,
+  escaping, and recommended-action rendering stay stable across refactors.
+implementation_steps:
+  - Review `crates/pqc_scan_report/src/lib.rs`, `html_report.rs`, `markdown_report.rs`, and `grouping.rs` to identify output contracts not currently covered by tests.
+  - Add targeted tests that exercise grouped finding rendering, Markdown table escaping, HTML escaping, and recommended-action sections without changing report format behavior.
+  - Reuse synthetic findings and masked evidence so the tests validate both output shape and sensitive-content handling.
+required_files:
+  - crates/pqc_scan_report/src/lib.rs
+  - crates/pqc_scan_report/src/html_report.rs
+  - crates/pqc_scan_report/src/markdown_report.rs
+  - crates/pqc_scan_report/src/grouping.rs
+  - crates/pqc_scan_report/Cargo.toml
+testing_requirements:
+  - cargo test --workspace
+  - Targeted report-writer tests covering HTML and Markdown output contracts
+security_considerations:
+  - Preserve masking behavior for private-key-like and base64-like evidence in all rendered formats.
+  - Do not expose raw sensitive material in fixtures, snapshots, or assertion strings.
+  - Keep report field names and user-facing output structure backward compatible.

@@ -1,0 +1,28 @@
+id: 008
+title: Add unit tests for core helper logic
+type: test
+priority: high
+status: done
+owner: Evaluator Agent
+description: >
+  `crates/pqc_scan_core/src/classifier.rs`, `model.rs`, and `risk.rs` contain
+  deterministic helper logic that currently has no direct tests. Add focused
+  unit tests for manifest/certificate/SBOM classification, text masking and
+  snippet helpers, and severity adjustment rules so core behavior stays stable.
+implementation_steps:
+  - Review `classifier.rs`, `model.rs`, and `risk.rs` to identify pure helper paths that can be tested without filesystem, network, or external tooling.
+  - Add tests for dependency/certificate/SBOM classification and for text helpers such as `mask_preview`, `line_col_for_offset`, and `snippet_around`.
+  - Add tests for risk/severity adjustment, especially sensitive-category promotion and private-key escalation behavior.
+  - Keep fixtures synthetic and deterministic.
+required_files:
+  - crates/pqc_scan_core/src/classifier.rs
+  - crates/pqc_scan_core/src/model.rs
+  - crates/pqc_scan_core/src/risk.rs
+  - crates/pqc_scan_core/src/lib.rs
+testing_requirements:
+  - cargo test --workspace
+  - Targeted unit tests for classifier/model/risk helpers
+security_considerations:
+  - Preserve masking behavior for sensitive previews and snippets.
+  - Do not weaken severity escalation logic for private-key evidence or sensitive categories.
+  - Keep helper tests synthetic so no secret or environment-dependent data is introduced.

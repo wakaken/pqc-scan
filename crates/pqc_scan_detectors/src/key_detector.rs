@@ -73,3 +73,59 @@ impl Detector for KeyDetector {
         Ok(out)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    fn rules_dir() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../rules/default")
+            .canonicalize()
+            .expect("rules dir")
+    }
+
+    #[test]
+    fn detects_private_key_header_and_masks_evidence() {
+        let detector = KeyDetector::default();
+        let rules = RuleSet::load_from_dir(&rules_dir()).expect("load rules");
+        let file = ScannableFile::from_bytes(
+            PathBuf::from("fixtures/id_rsa"),
+            b"before\n-----BEGIN RSA PRIVATE KEY-----\nABCDEF\n-----END RSA PRIVATE KEY-----\n"
+                .to_vec(),
+        );
+
+        let detections = detector.detect(&file, &rules).expect("detect");
+
+        assert_eq!(detections.len(), 1);
+        let detection = &detections[0];
+        assert_eq!(detection.rule_id, "PRIVATE_KEY_RSA_HEADER");
+        assert_eq!(detection.location.line, 2);
+        assert_eq!(detection.location.column, 1);
+        assert_eq!(detection.evidence.r#type, "private_key");
+        assert_eq!(detection.evidence.r#match, "[masked-private-key]");
+        assert_eq!(
+            detection.evidence.snippet_preview,
+            "[masked-private-key-material]"
+        );
+        assert_eq!(
+            detection.evidence.metadata.get("detector"),
+            Some(&"key_detector".to_string())
+        );
+    }
+
+    #[test]
+    fn ignores_text_without_private_key_markers() {
+        let detector = KeyDetector::default();
+        let rules = RuleSet::load_from_dir(&rules_dir()).expect("load rules");
+        let file = ScannableFile::from_bytes(
+            PathBuf::from("fixtures/config.txt"),
+            b"ssh-rsa is present but no private key header is here\n".to_vec(),
+        );
+
+        let detections = detector.detect(&file, &rules).expect("detect");
+
+        assert!(detections.is_empty());
+    }
+}

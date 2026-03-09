@@ -158,3 +158,95 @@ fn signature_name(oid: &str) -> String {
         _ => oid.to_string(),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    const VALID_RSA_CERT_PEM: &str = "-----BEGIN CERTIFICATE-----\n\
+MIIDETCCAfmgAwIBAgIUY/Qll3SQZ80iLq9sOCMCJDDxxHowDQYJKoZIhvcNAQEL\n\
+BQAwGDEWMBQGA1UEAwwNcHFjLXNjYW4tdGVzdDAeFw0yNjAzMDkwNjMyMzJaFw0y\n\
+NzAzMDkwNjMyMzJaMBgxFjAUBgNVBAMMDXBxYy1zY2FuLXRlc3QwggEiMA0GCSqG\n\
+SIb3DQEBAQUAA4IBDwAwggEKAoIBAQC3aW8C4+2yqCv/5qf+8Uw44lABc3OAFx+C\n\
+Bo2yd1ONUQK89n+vEYu4nH2CiphB9evkUejXFP6zQr191Tn0KLeB4ugSuJBForPs\n\
+UvPiiyF27iyUAKOrcsTuac05xmRtVcGrAKV7YauVFMWGePaCkh+C56dH+vcHI+/A\n\
+VrulRDBGEduQh/3tLzwsFmLYxKoHHRbns48A0PBN1Ugk8T7rRroSarcyUwzQwRu7\n\
+ZzzVOICE8KGDqWrzGygQ1YT1M0ED9Sy3bkGBCsFaKcaQq0zp23MT/QVUxfMAoPJ8\n\
+3RPZe+0SDasCF1SUzL6a+77anApzaSkAqDFqqWdxqUssaOHsQRO/AgMBAAGjUzBR\n\
+MB0GA1UdDgQWBBSU8+L0gcCDCDXScvjncW9QKb7FHDAfBgNVHSMEGDAWgBSU8+L0\n\
+gcCDCDXScvjncW9QKb7FHDAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUA\n\
+A4IBAQBuKXCbD4RdYAircgtA/N8RdUkmW/xZKmEesWF3dDsH3EOCY6sgql4DWGQ2\n\
+gQRnz/IJIoe5htjwxvRxxsiB3COr9eip4tCHSJ7bJlNomjYTwX9TcN/U/8VaxPj/\n\
+aA5ABtG3Rh1/v2w5lSKSQFhCpTze11NmMdvoJssrJswtvUUL+JwpbwIkcj8q3bw3\n\
+V4rbUZ6U4htW/EQrafwTopsnT6D9EltghIBrT5gJ7oE2FHQAxnzbgWMTwf+2iaZr\n\
+6PYiUKam9H4m8e0sHBdPLJOOEu2GlG3pf05NpOUwIKbyedic5GnI140MSh8nl2fW\n\
+YaIFrdcmPh3KlSLTCZod7SfAVUCY\n\
+-----END CERTIFICATE-----\n";
+
+    fn rules_dir() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../rules/default")
+            .canonicalize()
+            .expect("rules dir")
+    }
+
+    #[test]
+    fn falls_back_to_container_match_for_unparseable_pem() {
+        let detector = CertificateDetector;
+        let rules = RuleSet::load_from_dir(&rules_dir()).expect("load rules");
+        let file = ScannableFile::from_bytes(
+            PathBuf::from("fixtures/broken-cert.pem"),
+            b"-----BEGIN CERTIFICATE-----\nnot-a-real-cert\n-----END CERTIFICATE-----\n".to_vec(),
+        );
+
+        let detections = detector.detect(&file, &rules).expect("detect");
+
+        assert_eq!(detections.len(), 1);
+        let detection = &detections[0];
+        assert_eq!(detection.rule_id, "CERT_PEM_CONTAINER");
+        assert_eq!(detection.evidence.r#match, "broken-cert.pem");
+        assert_eq!(
+            detection.evidence.snippet_preview,
+            "certificate container detected"
+        );
+        assert_eq!(
+            detection.evidence.metadata.get("extension"),
+            Some(&"pem".to_string())
+        );
+    }
+
+    #[test]
+    fn matches_certificate_metadata_for_valid_rsa_pem() {
+        let detector = CertificateDetector;
+        let rules = RuleSet::load_from_dir(&rules_dir()).expect("load rules");
+        let file = ScannableFile::from_bytes(
+            PathBuf::from("fixtures/valid-cert.pem"),
+            VALID_RSA_CERT_PEM.as_bytes().to_vec(),
+        );
+
+        let detections = detector.detect(&file, &rules).expect("detect");
+        let ids = detections
+            .iter()
+            .map(|d| d.rule_id.as_str())
+            .collect::<Vec<_>>();
+
+        assert!(ids.contains(&"CERT_RSA_SIGNATURE"));
+        assert!(detections
+            .iter()
+            .all(|d| d.evidence.r#type == "certificate"));
+        assert!(detections
+            .iter()
+            .any(|d| d.evidence.metadata.contains_key("signature_oid")));
+        assert!(detections.iter().any(|d| d
+            .evidence
+            .snippet_preview
+            .contains("sig=sha256WithRSAEncryption")));
+        assert!(detections.iter().any(|d| {
+            d.evidence
+                .metadata
+                .get("signature_oid")
+                .is_some_and(|oid| oid == "1.2.840.113549.1.1.11")
+        }));
+    }
+}

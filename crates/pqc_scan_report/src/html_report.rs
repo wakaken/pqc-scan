@@ -629,3 +629,145 @@ pre code {
 }
 "#
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::{TimeZone, Utc};
+    use pqc_scan_core::{
+        CbomEntry, CodeExample, Evidence, Finding, Location, RecommendedAction, ScanResult,
+        ScanSummary, SourceSnippet, SourceSnippetLine,
+    };
+    use pqc_scan_rules::{Risk, Severity};
+    use std::collections::BTreeMap;
+    use std::fs;
+    use std::path::PathBuf;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn temp_file(prefix: &str, extension: &str) -> PathBuf {
+        let mut path = std::env::temp_dir();
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock drift")
+            .as_nanos();
+        path.push(format!(
+            "pqc-scan-{prefix}-{}-{nanos}.{extension}",
+            std::process::id()
+        ));
+        path
+    }
+
+    fn sample_result() -> ScanResult {
+        let action = RecommendedAction {
+            action_id: "tls-migrate-1".to_string(),
+            title: "Adopt <ML-KEM> & rotate".to_string(),
+            priority: "p1".to_string(),
+            rationale: "Replace \"RSA\" <soon> & avoid fallback".to_string(),
+            steps: vec![
+                "Set policy <strict>".to_string(),
+                "Roll keys & certs".to_string(),
+            ],
+            references: vec!["https://example.com/guide?mode=html&v=1".to_string()],
+            code_examples: vec![CodeExample {
+                language: "rust".to_string(),
+                before: "let alg = \"rsa<legacy>\";".to_string(),
+                after: "let alg = \"ml-kem\" && ready;".to_string(),
+            }],
+        };
+
+        let finding = |id: &str, file: &str, line: usize, evidence: &str, snippet: &str| Finding {
+            finding_id: id.to_string(),
+            rule_id: "TLS_RSA_DEPRECATED".to_string(),
+            category: "TLS".to_string(),
+            risk: Risk::QuantumVulnerable,
+            severity: Severity::High,
+            confidence: 0.91,
+            description: "TLS <RSA> & fallback".to_string(),
+            migration_hint: "Switch to <ML-KEM> & rotate".to_string(),
+            location: Location {
+                file: file.to_string(),
+                line,
+                column: 7,
+            },
+            evidence: Evidence {
+                r#type: "regex_match".to_string(),
+                r#match: evidence.to_string(),
+                snippet_preview: snippet.to_string(),
+                metadata: BTreeMap::new(),
+            },
+            recommended_actions: vec![action.clone()],
+            source_snippet: Some(SourceSnippet {
+                lines: vec![SourceSnippetLine {
+                    line,
+                    text: snippet.to_string(),
+                    highlighted: true,
+                }],
+            }),
+        };
+
+        ScanResult {
+            generated_at: Utc
+                .with_ymd_and_hms(2025, 1, 2, 3, 4, 5)
+                .single()
+                .expect("valid timestamp"),
+            findings: vec![
+                finding(
+                    "f1",
+                    "service<prod>.yaml",
+                    12,
+                    "[masked-private-key-material] <sensitive>",
+                    "cipher <rsa> & fallback",
+                ),
+                finding(
+                    "f2",
+                    "gateway&edge.yaml",
+                    40,
+                    "[masked-sensitive-content] & sample",
+                    "allow <legacy> & log",
+                ),
+            ],
+            cbom: vec![CbomEntry {
+                component: "service<prod>.yaml".to_string(),
+                algorithm: "TLS_RSA".to_string(),
+                usage_type: "TLS".to_string(),
+                location: "service<prod>.yaml:12".to_string(),
+                quantum_risk: Risk::QuantumVulnerable,
+                migration_hint: "Switch to <ML-KEM> & rotate".to_string(),
+            }],
+            dependency_sbom: Vec::new(),
+            summary: ScanSummary {
+                total_findings: 2,
+                by_severity: BTreeMap::from([("high".to_string(), 2)]),
+                by_risk: BTreeMap::from([("quantum-vulnerable".to_string(), 2)]),
+                scanned_files: 2,
+                skipped_files: 0,
+            },
+        }
+    }
+
+    #[test]
+    fn html_report_escapes_grouped_findings_and_renders_actions() {
+        let path = temp_file("html-report-contract", "html");
+        let result = sample_result();
+
+        write_html_report(&result, &path).expect("write html report");
+
+        let rendered = fs::read_to_string(&path).expect("read html report");
+
+        assert!(rendered.contains("TLS_RSA_DEPRECATED"));
+        assert!(rendered.contains("<span class=\"count\">2 hits</span>"));
+        assert!(rendered.contains("TLS &lt;RSA&gt; &amp; fallback"));
+        assert!(rendered.contains("service&lt;prod&gt;.yaml"));
+        assert!(rendered.contains("gateway&amp;edge.yaml"));
+        assert!(rendered.contains("[masked-private-key-material] &lt;sensitive&gt;"));
+        assert!(rendered.contains("[masked-sensitive-content] &amp; sample"));
+        assert!(rendered.contains("Recommended Actions"));
+        assert!(rendered.contains("Adopt &lt;ML-KEM&gt; &amp; rotate"));
+        assert!(rendered.contains("Replace &quot;RSA&quot; &lt;soon&gt; &amp; avoid fallback"));
+        assert!(rendered.contains("https://example.com/guide?mode=html&amp;v=1"));
+        assert!(rendered.contains("cipher &lt;rsa&gt; &amp; fallback"));
+        assert!(rendered.contains("allow &lt;legacy&gt; &amp; log"));
+
+        let _ = fs::remove_file(path);
+    }
+}

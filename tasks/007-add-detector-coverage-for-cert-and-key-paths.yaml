@@ -1,0 +1,30 @@
+id: 007
+title: Add detector coverage for certificate and key detection paths
+type: test
+priority: high
+status: done
+owner: Evaluator Agent
+description: >
+  `crates/pqc_scan_detectors/src/certificate_detector.rs` and
+  `crates/pqc_scan_detectors/src/key_detector.rs` are security-sensitive detector
+  paths, but they currently have no direct tests. Add focused tests for certificate
+  container matching, certificate metadata matching, and private-key marker
+  detection so regressions are caught early.
+implementation_steps:
+  - Review `certificate_detector.rs` and `key_detector.rs` to identify deterministic behaviors that can be tested without network or external tooling.
+  - Add tests for certificate container fallback behavior and for metadata-based certificate matches where practical.
+  - Add tests ensuring private-key markers are detected and evidence is masked.
+  - Keep test fixtures minimal and avoid embedding sensitive real key material.
+required_files:
+  - crates/pqc_scan_detectors/src/certificate_detector.rs
+  - crates/pqc_scan_detectors/src/key_detector.rs
+  - crates/pqc_scan_detectors/src/lib.rs
+  - rules/default/cert.yml
+  - rules/default/ssh.yml
+testing_requirements:
+  - cargo test --workspace
+  - Targeted detector tests covering certificate and key detection behavior
+security_considerations:
+  - Do not introduce real secret material into fixtures or snapshots.
+  - Preserve masking behavior for private-key evidence.
+  - Keep certificate parsing tests deterministic and limited to repository-local inputs.

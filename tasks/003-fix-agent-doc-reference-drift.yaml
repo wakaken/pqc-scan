@@ -1,0 +1,25 @@
+id: 003
+title: Fix agent documentation reference drift
+type: docs
+priority: medium
+status: done
+owner: Evaluator Agent
+description: >
+  Agent-facing documentation currently points to files that do not exist or do not match actual
+  filenames, such as `docs/ARCHITECTURE.md`, `docs/BEST-PRACTICE.md`, and `docs/development.md`.
+  This creates workflow friction and can cause agents to miss required context. Reconcile the
+  references with the current repository layout.
+implementation_steps:
+  - Audit `AGENTS.md`, `docs/PATTERNS.md`, and related instructions for broken or outdated paths.
+  - Update references to actual files or create the missing lightweight documents if they are intended to exist.
+  - Keep English/Japanese documentation policy intact if user-visible instructions change.
+required_files:
+  - AGENTS.md
+  - docs/PATTERNS.md
+  - docs/BEST-PRACTICES.md
+  - docs/TASK-LIFECYCLE.md
+  - docs/architecture.md
+testing_requirements:
+  - Manual verification that every referenced document path exists after the change
+security_considerations:
+  - Avoid changing operational guidance in ways that weaken security review or validation expectations.
