@@ -1,0 +1,26 @@
+id: 014
+title: Add filter options to rules list output
+type: feature
+priority: medium
+status: pending
+owner: Monitor Agent
+description: >
+  `pqc-scan rules list` always prints the full rule catalog, which becomes noisy when users
+  only need one kind or one severity band. Add optional filters such as `--kind` and
+  `--severity` so the CLI can narrow the displayed rules without changing the underlying
+  rule set.
+implementation_steps:
+  - Extend `rules list` argument parsing with optional filters that map cleanly onto existing rule metadata.
+  - Apply filtering after loading rules while keeping the current summary output understandable.
+  - Add CLI tests covering filtered and unfiltered behavior.
+  - Update README documentation for the new filter options if implemented.
+required_files:
+  - crates/pqc_scan_cli/src/main.rs
+  - README.md
+  - README.ja.md
+testing_requirements:
+  - cargo test --workspace
+  - Targeted CLI tests for filtered rule listing
+security_considerations:
+  - Preserve current default behavior when filters are not provided.
+  - Avoid introducing ambiguous filter semantics that could hide rule coverage unexpectedly.

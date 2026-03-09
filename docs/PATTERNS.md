@@ -44,6 +44,7 @@ Pattern:
 - keep detector-specific parsing and matching local to the detector crate
 - register new detectors through the default detector list rather than wiring them ad hoc
 - add targeted tests for both detection hits and sensitive-output handling when a detector touches key or certificate material
+- when a detector parses multiple manifest families, keep representative tests for manifest, lockfile, and SBOM inputs so inventory metadata stays stable
 
 Why it works here:
 - new detector kinds remain isolated
