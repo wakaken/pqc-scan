@@ -139,6 +139,7 @@ In practice:
 ```bash
 pqc-scan scan <path> [--format json|html|md|sarif|all] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N]
 pqc-scan rules list [--rules-dir ./rules]
+pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
 
 ### Recommended usage from your product repository
@@ -160,6 +161,9 @@ pqc-scan scan . --format sarif --out-dir ./pqc-report --rules-dir /path/to/pqc-s
 
 # CI failure gate
 pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
+
+# Inspect one rule in detail
+pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
 
 ## Report Outputs

@@ -1,0 +1,26 @@
+id: 013
+title: Add a rules show command for inspecting a single rule
+type: feature
+priority: high
+status: done
+owner: Evaluator Agent
+description: >
+  The CLI currently supports `pqc-scan rules list`, but there is no focused way to inspect
+  one rule in detail from the terminal. Add `pqc-scan rules show <RULE_ID>` so users can
+  review a single built-in or custom rule without scanning the full catalog output.
+implementation_steps:
+  - Extend the CLI command model in `crates/pqc_scan_cli/src/main.rs` with a `rules show` subcommand that accepts a rule id and `--rules-dir`.
+  - Load rules from the selected directory, look up the requested rule, and print a stable human-readable detail view including id, kind, category, severity, risk, confidence, scope, migration hint, and pattern.
+  - Return a clear error when the requested rule id does not exist, without changing existing `rules list` behavior.
+  - Add CLI tests for both success and missing-rule cases.
+required_files:
+  - crates/pqc_scan_cli/src/main.rs
+  - README.md
+  - README.ja.md
+testing_requirements:
+  - cargo test --workspace
+  - Targeted CLI tests covering `rules show` success and failure paths
+security_considerations:
+  - Keep CLI output stable and avoid exposing any content beyond the loaded rule definitions.
+  - Preserve existing `rules list` and `scan` behavior relied on by automation.
+  - Do not weaken error handling around missing or invalid rule directories.

@@ -860,27 +860,214 @@ mod tests {
         dir
     }
 
-    #[test]
-    fn package_json_dependency_detection_reports_actual_line() {
-        let root = temp_dir("dep-line");
+    fn dependency_rules(root: &std::path::Path, pattern: &str) -> RuleSet {
         let rules_dir = root.join("rules");
         fs::create_dir_all(&rules_dir).expect("create rules dir");
         fs::write(
             rules_dir.join("dependency.yml"),
-            r#"
-- id: DEP_OPENSSL
+            format!(
+                r#"
+- id: DEP_MATCH
   kind: dependency
   category: Dependency
   severity: medium
   risk: quantum-vulnerable
   confidence: 0.8
   migration_hint: migrate
-  pattern: "openssl"
+  pattern: "{pattern}"
   scope: code
-"#,
+"#
+            ),
         )
         .expect("write rule");
-        let rules = RuleSet::load_from_dir(&rules_dir).expect("load rules");
+        RuleSet::load_from_dir(&rules_dir).expect("load rules")
+    }
+
+    fn detection_for_rule<'a>(
+        detections: &'a [Detection],
+        rule_id: &str,
+        dep_name: &str,
+    ) -> &'a Detection {
+        detections
+            .iter()
+            .find(|d| {
+                d.rule_id == rule_id
+                    && d.evidence.metadata.get("dep_name").map(String::as_str) == Some(dep_name)
+            })
+            .expect("matching detection exists")
+    }
+
+    #[test]
+    fn cargo_toml_detects_manifest_dependencies_and_preserves_unknown_workspace_versions() {
+        let root = temp_dir("dep-cargo-toml");
+        let rules = dependency_rules(&root, "openssl|ring");
+        let manifest_path = root.join("Cargo.toml");
+        let manifest = r#"[package]
+name = "demo"
+version = "0.1.0"
+
+[dependencies]
+openssl = { version = "0.10", features = ["vendored"] }
+serde = { workspace = true }
+
+[build-dependencies]
+ring = "0.17"
+"#;
+
+        let file = ScannableFile::from_bytes(manifest_path.clone(), manifest.as_bytes().to_vec());
+        let detector = DependencyDetector;
+        let detections = detector.detect(&file, &rules).expect("run detector");
+
+        let openssl_inventory = detection_for_rule(&detections, INVENTORY_RULE_ID, "openssl");
+        assert_eq!(openssl_inventory.location.line, 6);
+        assert_eq!(
+            openssl_inventory
+                .evidence
+                .metadata
+                .get("dep_purl")
+                .map(String::as_str),
+            Some("pkg:cargo/openssl@0.10")
+        );
+
+        let ring_finding = detection_for_rule(&detections, "DEP_MATCH", "ring");
+        assert_eq!(ring_finding.location.line, 10);
+        assert_eq!(ring_finding.evidence.r#type, "dependency");
+
+        let serde_inventory = detection_for_rule(&detections, INVENTORY_RULE_ID, "serde");
+        assert_eq!(
+            serde_inventory
+                .evidence
+                .metadata
+                .get("dep_version")
+                .map(String::as_str),
+            Some("unknown")
+        );
+    }
+
+    #[test]
+    fn cargo_lock_uses_package_block_lines_and_versions() {
+        let root = temp_dir("dep-cargo-lock");
+        let rules = dependency_rules(&root, "openssl");
+        let manifest_path = root.join("Cargo.lock");
+        let manifest = r#"[[package]]
+name = "openssl"
+version = "0.10.64"
+
+[[package]]
+name = "serde"
+version = "1.0.210"
+"#;
+
+        let file = ScannableFile::from_bytes(manifest_path.clone(), manifest.as_bytes().to_vec());
+        let detector = DependencyDetector;
+        let detections = detector.detect(&file, &rules).expect("run detector");
+
+        let openssl_inventory = detection_for_rule(&detections, INVENTORY_RULE_ID, "openssl");
+        assert_eq!(
+            openssl_inventory.location.file,
+            manifest_path.to_string_lossy()
+        );
+        assert_eq!(openssl_inventory.location.line, 1);
+        assert_eq!(
+            openssl_inventory
+                .evidence
+                .metadata
+                .get("dep_version")
+                .map(String::as_str),
+            Some("0.10.64")
+        );
+
+        let openssl_finding = detection_for_rule(&detections, "DEP_MATCH", "openssl");
+        assert_eq!(openssl_finding.location.line, 1);
+        assert_eq!(openssl_finding.location.column, 1);
+    }
+
+    #[test]
+    fn requirements_txt_ignores_comments_and_option_lines() {
+        let root = temp_dir("dep-requirements");
+        let rules = dependency_rules(&root, "cryptography");
+        let manifest_path = root.join("requirements.txt");
+        let manifest = r#"# generated
+--extra-index-url https://example.invalid/simple
+cryptography>=41.0.0
+pyopenssl==24.1.0
+"#;
+
+        let file = ScannableFile::from_bytes(manifest_path, manifest.as_bytes().to_vec());
+        let detector = DependencyDetector;
+        let detections = detector.detect(&file, &rules).expect("run detector");
+
+        let crypto_inventory = detection_for_rule(&detections, INVENTORY_RULE_ID, "cryptography");
+        assert_eq!(crypto_inventory.location.line, 3);
+        assert_eq!(
+            crypto_inventory
+                .evidence
+                .metadata
+                .get("dep_version")
+                .map(String::as_str),
+            Some("41.0.0")
+        );
+        assert!(!detections.iter().any(|d| {
+            d.evidence.metadata.get("dep_name").map(String::as_str) == Some("extra-index-url")
+        }));
+    }
+
+    #[test]
+    fn cyclonedx_sbom_dependencies_use_sbom_metadata_and_purl_ecosystem() {
+        let root = temp_dir("dep-sbom");
+        let rules = dependency_rules(&root, "openssl");
+        let manifest_path = root.join("service-bom.cdx.json");
+        let manifest = r#"{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "type": "library",
+      "name": "openssl",
+      "version": "1.1.1w",
+      "purl": "pkg:generic/openssl@1.1.1w"
+    }
+  ]
+}"#;
+
+        let file = ScannableFile::from_bytes(manifest_path.clone(), manifest.as_bytes().to_vec());
+        let detector = DependencyDetector;
+        let detections = detector.detect(&file, &rules).expect("run detector");
+
+        let inventory = detection_for_rule(&detections, INVENTORY_RULE_ID, "openssl");
+        assert_eq!(
+            inventory
+                .evidence
+                .metadata
+                .get("dep_source_type")
+                .map(String::as_str),
+            Some("sbom")
+        );
+        assert_eq!(
+            inventory
+                .evidence
+                .metadata
+                .get("dep_ecosystem")
+                .map(String::as_str),
+            Some("generic")
+        );
+
+        let finding = detection_for_rule(&detections, "DEP_MATCH", "openssl");
+        assert_eq!(finding.location.file, manifest_path.to_string_lossy());
+        assert_eq!(finding.evidence.r#type, "sbom_dependency");
+        assert_eq!(
+            finding
+                .evidence
+                .metadata
+                .get("dep_purl")
+                .map(String::as_str),
+            Some("pkg:generic/openssl@1.1.1w")
+        );
+    }
+
+    #[test]
+    fn package_json_dependency_detection_reports_actual_line() {
+        let root = temp_dir("dep-line");
+        let rules = dependency_rules(&root, "openssl");
 
         let manifest_path = root.join("package.json");
         let manifest = r#"{
@@ -898,7 +1085,7 @@ mod tests {
 
         let dep = detections
             .iter()
-            .find(|d| d.rule_id == "DEP_OPENSSL")
+            .find(|d| d.rule_id == "DEP_MATCH")
             .expect("dependency finding exists");
 
         assert_eq!(dep.location.file, manifest_path.to_string_lossy());

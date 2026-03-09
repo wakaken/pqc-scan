@@ -55,10 +55,19 @@ struct ScanArgs {
 #[derive(Debug, Subcommand)]
 enum RulesCommand {
     List(RulesListArgs),
+    Show(RulesShowArgs),
 }
 
 #[derive(Debug, Parser)]
 struct RulesListArgs {
+    #[arg(long, default_value = "./rules")]
+    rules_dir: PathBuf,
+}
+
+#[derive(Debug, Parser)]
+struct RulesShowArgs {
+    rule_id: String,
+
     #[arg(long, default_value = "./rules")]
     rules_dir: PathBuf,
 }
@@ -158,6 +167,7 @@ fn run_cli<WOut: Write, WErr: Write>(
         Commands::Scan(args) => scan_cmd(args, stdout, stderr),
         Commands::Rules { command } => match command {
             RulesCommand::List(args) => list_rules_cmd(args, stdout),
+            RulesCommand::Show(args) => show_rule_cmd(args, stdout),
         },
     }
 }
@@ -219,6 +229,34 @@ fn list_rules_cmd<WOut: Write>(args: RulesListArgs, stdout: &mut WOut) -> Result
             "{} | kind={:?} | severity={} | risk={}",
             rule.id, rule.kind, rule.severity, rule.risk
         )?;
+    }
+
+    Ok(ExitStatus::Success)
+}
+
+fn show_rule_cmd<WOut: Write>(args: RulesShowArgs, stdout: &mut WOut) -> Result<ExitStatus> {
+    let rules = RuleSet::load_from_dir(&args.rules_dir)
+        .with_context(|| format!("failed to load rules from {}", args.rules_dir.display()))?;
+
+    let rule = rules.get(&args.rule_id).with_context(|| {
+        format!(
+            "rule '{}' not found under {}",
+            args.rule_id,
+            args.rules_dir.display()
+        )
+    })?;
+
+    writeln!(stdout, "id: {}", rule.id)?;
+    writeln!(stdout, "kind: {:?}", rule.kind)?;
+    writeln!(stdout, "category: {}", rule.category)?;
+    writeln!(stdout, "severity: {}", rule.severity)?;
+    writeln!(stdout, "risk: {}", rule.risk)?;
+    writeln!(stdout, "confidence: {:.2}", rule.confidence)?;
+    writeln!(stdout, "scope: {}", rule.scope)?;
+    writeln!(stdout, "migration_hint: {}", rule.migration_hint)?;
+    writeln!(stdout, "pattern: {}", rule.pattern)?;
+    if let Some(description) = &rule.description {
+        writeln!(stdout, "description: {}", description)?;
     }
 
     Ok(ExitStatus::Success)
@@ -365,6 +403,46 @@ mod tests {
         assert!(stderr.is_empty(), "unexpected stderr: {stderr}");
         assert!(stdout.contains("rules loaded:"));
         assert!(stdout.contains("API_BC_RSA_ENGINE | kind=Regex"));
+    }
+
+    #[test]
+    fn rules_show_command_prints_single_rule_details() {
+        let args = vec![
+            "pqc-scan".to_string(),
+            "rules".to_string(),
+            "show".to_string(),
+            "JWT_RS256".to_string(),
+            "--rules-dir".to_string(),
+            rules_dir().display().to_string(),
+        ];
+
+        let (result, stdout, stderr) = run_cli_test(args);
+
+        assert_eq!(result.expect("rules show succeeds"), ExitStatus::Success);
+        assert!(stderr.is_empty(), "unexpected stderr: {stderr}");
+        assert!(stdout.contains("id: JWT_RS256"));
+        assert!(stdout.contains("kind: Regex"));
+        assert!(stdout.contains("category: JWT"));
+        assert!(stdout.contains("severity: high"));
+        assert!(stdout.contains("risk: quantum-vulnerable"));
+        assert!(stdout.contains("scope: code"));
+        assert!(stdout.contains("pattern: \\bRS256\\b"));
+    }
+
+    #[test]
+    fn rules_show_command_errors_for_missing_rule_id() {
+        let args = vec![
+            "pqc-scan".to_string(),
+            "rules".to_string(),
+            "show".to_string(),
+            "MISSING_RULE".to_string(),
+            "--rules-dir".to_string(),
+            rules_dir().display().to_string(),
+        ];
+
+        let (result, _stdout, _stderr) = run_cli_test(args);
+        let err = result.expect_err("missing rule should fail");
+        assert!(err.to_string().contains("rule 'MISSING_RULE' not found"));
     }
 
     #[test]

@@ -141,6 +141,7 @@ CLIツールは以下の通り実行します。
 ```bash
 pqc-scan scan <path> [--format json|html|md|sarif|all] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N]
 pqc-scan rules list [--rules-dir ./rules]
+pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
 
 ### プロダクトリポジトリでの推奨実行方法
@@ -162,6 +163,9 @@ pqc-scan scan . --format sarif --out-dir ./pqc-report --rules-dir /path/to/pqc-s
 
 # CI失敗ゲート
 pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
+
+# 1つのルール詳細を確認
+pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
 
 ## レポート出力
