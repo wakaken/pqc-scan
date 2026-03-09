@@ -1,0 +1,27 @@
+id: 010
+title: Add contract tests for JSON, CBOM, and dependency SBOM outputs
+type: test
+priority: high
+status: done
+owner: Evaluator Agent
+description: >
+  Output stability is a documented compatibility requirement, but the JSON-oriented
+  writers in `crates/pqc_scan_report/src/json_report.rs` currently have no direct
+  tests. Add focused contract tests for `report.json`, `cbom.json`, and
+  `dependency-sbom.json` so serialized field names, key sections, and sanitized
+  content remain stable across refactors.
+implementation_steps:
+  - Review `crates/pqc_scan_report/src/json_report.rs` and the existing report tests to identify the stable JSON contracts that are not yet asserted directly.
+  - Add deterministic tests that write `report.json`, `cbom.json`, and `dependency-sbom.json` and assert the expected top-level structure and representative serialized fields.
+  - Reuse synthetic findings and inventory entries so the tests also verify masking and avoid sensitive fixture contents.
+required_files:
+  - crates/pqc_scan_report/src/json_report.rs
+  - crates/pqc_scan_report/src/lib.rs
+  - crates/pqc_scan_core/src/model.rs
+testing_requirements:
+  - cargo test --workspace
+  - Targeted report-writer tests covering JSON, CBOM, and dependency SBOM contracts
+security_considerations:
+  - Preserve masking behavior for private-key-like and base64-like content in serialized outputs.
+  - Keep JSON field names and report structure backward compatible for downstream tooling.
+  - Use only synthetic, masked fixture data in tests.

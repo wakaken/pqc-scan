@@ -96,8 +96,9 @@ Current example:
 ## Report Contract Test Pattern
 
 Pattern:
-- keep deterministic writer-level tests next to HTML and Markdown report generators
-- assert grouped finding rendering, format-specific escaping, recommended-action sections, and masked evidence output
+- keep deterministic writer-level tests next to JSON, HTML, and Markdown report generators
+- assert grouped finding rendering, format-specific escaping, stable serialized field names, recommended-action sections, and masked evidence output
+- cover inventory-oriented outputs such as `cbom.json` and `dependency-sbom.json` when report contracts are extended
 - use synthetic findings with masked placeholders instead of raw sensitive fixtures
 
 Why it works here:
@@ -105,6 +106,7 @@ Why it works here:
 - escaping and masking behavior are security-sensitive and should be checked in the final rendered format, not only in lower-level helpers
 
 Current example:
+- `crates/pqc_scan_report/src/json_report.rs`
 - `crates/pqc_scan_report/src/html_report.rs`
 - `crates/pqc_scan_report/src/markdown_report.rs`
 

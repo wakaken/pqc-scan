@@ -1,0 +1,27 @@
+id: 012
+title: Expand dependency detector parser coverage across manifest formats
+type: test
+priority: high
+status: pending
+owner: Monitor Agent
+description: >
+  `crates/pqc_scan_detectors/src/dependency_detector.rs` contains parser logic for many
+  manifest and SBOM formats, but current direct coverage is limited to a single
+  `package.json` line-number test. Add focused tests for representative manifest formats
+  and inventory extraction behavior so dependency findings and `dependency-sbom.json`
+  inputs remain stable across refactors.
+implementation_steps:
+  - Review the parser entry points in `dependency_detector.rs` and select a small set of representative formats such as `Cargo.toml`, `Cargo.lock`, `requirements.txt`, and one SBOM JSON input.
+  - Add deterministic tests that verify extracted dependency names, versions, source metadata, and line-number behavior where applicable.
+  - Reuse synthetic manifest contents and avoid external downloads or environment-dependent fixtures.
+required_files:
+  - crates/pqc_scan_detectors/src/dependency_detector.rs
+  - crates/pqc_scan_core/src/classifier.rs
+  - crates/pqc_scan_report/src/json_report.rs
+testing_requirements:
+  - cargo test --workspace
+  - Targeted dependency detector tests covering multiple manifest and SBOM formats
+security_considerations:
+  - Keep fixtures synthetic and free of secrets.
+  - Preserve dependency inventory field stability consumed by report writers.
+  - Avoid changing dependency matching semantics while adding coverage.

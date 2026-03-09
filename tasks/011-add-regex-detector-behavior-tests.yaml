@@ -1,0 +1,27 @@
+id: 011
+title: Add direct behavior tests for RegexDetector
+type: test
+priority: high
+status: done
+owner: Evaluator Agent
+description: >
+  `crates/pqc_scan_detectors/src/regex_detector.rs` has no direct tests even though it
+  is responsible for line and column calculation, comment-only suppression, masking,
+  and match collection limits. Add focused tests so rule-driven regex detections remain
+  stable and security-sensitive evidence handling is verified close to the detector.
+implementation_steps:
+  - Review `regex_detector.rs`, `comment_filter.rs`, and the detector trait wiring to identify deterministic behaviors that can be exercised without filesystem or network dependencies.
+  - Add tests for positive matches, comment-only suppression where applicable, masked evidence output, and the per-rule match cap.
+  - Keep fixtures synthetic and ensure tests do not embed raw private key material.
+required_files:
+  - crates/pqc_scan_detectors/src/regex_detector.rs
+  - crates/pqc_scan_detectors/src/comment_filter.rs
+  - crates/pqc_scan_detectors/src/lib.rs
+  - crates/pqc_scan_rules/src/lib.rs
+testing_requirements:
+  - cargo test --workspace
+  - Targeted detector tests covering regex matching, masking, and comment filtering behavior
+security_considerations:
+  - Preserve masking behavior for sensitive evidence previews.
+  - Avoid fixtures that contain real secrets or ambiguous detector inputs.
+  - Keep rule matching semantics backward compatible.

@@ -131,8 +131,8 @@ mod tests {
     use super::*;
     use chrono::Utc;
     use pqc_scan_core::{
-        CbomEntry, Evidence, Finding, Location, ScanResult, ScanSummary, SourceSnippet,
-        SourceSnippetLine,
+        CbomEntry, DependencySbomEntry, Evidence, Finding, Location, ScanResult, ScanSummary,
+        SourceSnippet, SourceSnippetLine,
     };
     use pqc_scan_rules::{Risk, Severity};
     use serde_json::Value;
@@ -197,7 +197,14 @@ mod tests {
                 quantum_risk: Risk::QuantumVulnerable,
                 migration_hint: "remove rsa".to_string(),
             }],
-            dependency_sbom: Vec::new(),
+            dependency_sbom: vec![DependencySbomEntry {
+                name: "openssl".to_string(),
+                version: "1.1.1".to_string(),
+                ecosystem: "system".to_string(),
+                source_file: "Dockerfile".to_string(),
+                source_type: "manifest".to_string(),
+                purl: "pkg:generic/openssl@1.1.1".to_string(),
+            }],
             summary: ScanSummary {
                 total_findings: 1,
                 by_severity: BTreeMap::from([("high".to_string(), 1)]),
@@ -222,6 +229,36 @@ mod tests {
         assert!(!json_report.contains(LONG_BASE64_SECRET));
         assert!(!html_report.contains(LONG_BASE64_SECRET));
         assert!(json_report.contains("[masked-private-key-material]"));
+    }
+
+    #[test]
+    fn write_reports_preserves_json_inventory_contracts() {
+        let out_dir = temp_dir("report-json-contract");
+        let result = sample_result();
+        write_reports(&result, &out_dir, ReportFormat::Json).expect("write json reports");
+
+        let json_report =
+            fs::read_to_string(out_dir.join("report.json")).expect("read report.json");
+        let cbom = fs::read_to_string(out_dir.join("cbom.json")).expect("read cbom.json");
+        let dependency_sbom = fs::read_to_string(out_dir.join("dependency-sbom.json"))
+            .expect("read dependency-sbom.json");
+
+        let json_value: Value = serde_json::from_str(&json_report).expect("parse report.json");
+        let cbom_value: Value = serde_json::from_str(&cbom).expect("parse cbom.json");
+        let dependency_value: Value =
+            serde_json::from_str(&dependency_sbom).expect("parse dependency-sbom.json");
+
+        assert_eq!(
+            json_value["findings"][0]["evidence"]["match"],
+            "[masked-private-key-material]"
+        );
+        assert_eq!(
+            json_value["findings"][0]["evidence"]["snippet_preview"],
+            "[masked-sensitive-content]"
+        );
+        assert_eq!(cbom_value[0]["algorithm"], "TLS_RSA");
+        assert_eq!(dependency_value[0]["source_file"], "Dockerfile");
+        assert!(dependency_value[0].get("sourceFile").is_none());
     }
 
     #[test]
