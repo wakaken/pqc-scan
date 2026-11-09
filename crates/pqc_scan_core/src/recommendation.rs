@@ -284,6 +284,10 @@ fn detect_middleware_targets_for_finding(finding: &Finding) -> Vec<&'static str>
         rule.starts_with("nginx_") || location.contains("nginx"),
     );
     push_if(
+        "httpd",
+        rule.starts_with("httpd_") || location.contains("httpd") || location.contains("apache"),
+    );
+    push_if(
         "envoy",
         rule.starts_with("envoy_") || location.contains("envoy"),
     );
@@ -629,17 +633,36 @@ fn add_tls_actions(
     actions: &mut Vec<RecommendedAction>,
     finding: &Finding,
     _language: Option<&'static str>,
-    profile: &RuntimeProfile,
+    _profile: &RuntimeProfile,
 ) {
+    let setting = match finding.rule_id.as_str() {
+        "PQC_GO_TLS_DISABLED" => Some("GODEBUG=tlsmlkem=0"),
+        "PQC_JAVA_CLASSICAL_GROUPS" => Some("jdk.tls.namedGroups"),
+        "PQC_RUBY_CLASSICAL_GROUPS" => Some("groups= / ecdh_curves="),
+        _ => None,
+    };
+    if let Some(setting) = setting {
+        push_action(actions,RecommendedAction {
+            action_id:"tls.review-pqc-override".to_string(),
+            title:format!("Review the explicit PQC override: {setting}"),
+            priority:"near-term".to_string(),
+            rationale:"The detected setting restricts hybrid key exchange. It does not establish RSA usage or the negotiated TLS version.".to_string(),
+            steps:vec![format!("Inspect {setting} at this location and confirm why the override is required."),"Verify deployed library and peer support before testing a hybrid group or removing the override.".to_string(),"Check key exchange, TLS protocol version and certificate signatures separately; TLS 1.3 alone does not establish PQC protection.".to_string()],
+            references:vec!["https://go.dev/doc/godebug".to_string(),"https://www.rfc-editor.org/rfc/rfc9325.html#section-3.1.1".to_string()],
+            code_examples:Vec::new(),
+        });
+        return;
+    }
     push_action(
         actions,
         RecommendedAction {
             action_id: "tls.remove-rsa-kex".to_string(),
-            title: "Eliminate RSA key exchange and enforce TLS 1.2+".to_string(),
+            title: "Prefer TLS 1.3 and review legacy key exchange".to_string(),
             priority: "near-term".to_string(),
             rationale: "RSA key exchange and legacy protocol versions are high-priority migration blockers for PQC readiness.".to_string(),
             steps: vec![
-                "Set minimum protocol version to TLS 1.2 or 1.3.".to_string(),
+                "Prefer TLS 1.3; restrict connections to TLS 1.3 when all peers support it. Disable TLS 1.0 and 1.1.".to_string(),
+                "Retain securely configured TLS 1.2 only where interoperability requires it, and record the compatibility reason.".to_string(),
                 "Prefer ECDHE today and plan hybrid KEM suites for next phase.".to_string(),
                 "Continuously test interoperability across clients and load balancers.".to_string(),
             ],
@@ -648,8 +671,8 @@ fn add_tls_actions(
         },
     );
 
-    let location = finding.location.file.to_ascii_lowercase();
-    if location.contains("nginx") || profile.middleware_targets.contains("nginx") {
+    let targets = detect_middleware_targets_for_finding(finding);
+    if targets.contains(&"nginx") {
         push_action(
             actions,
             RecommendedAction {
@@ -658,7 +681,7 @@ fn add_tls_actions(
                 priority: "near-term".to_string(),
                 rationale: "nginx config was detected and can be remediated with explicit protocol and cipher policies.".to_string(),
                 steps: vec![
-                    "Set `ssl_protocols TLSv1.2 TLSv1.3;`.".to_string(),
+                    "Prefer `ssl_protocols TLSv1.3;` when all peers support it; retain TLSv1.2 only for a documented interoperability need.".to_string(),
                     "Remove RSA key-exchange suites and keep forward-secret suites only.".to_string(),
                 ],
                 references: vec!["https://nginx.org/en/docs/http/ngx_http_ssl_module.html".to_string()],
@@ -667,7 +690,7 @@ fn add_tls_actions(
         );
     }
 
-    if location.contains("httpd") || profile.middleware_targets.contains("httpd") {
+    if targets.contains(&"httpd") {
         push_action(
             actions,
             RecommendedAction {
@@ -676,7 +699,7 @@ fn add_tls_actions(
                 priority: "near-term".to_string(),
                 rationale: "Apache TLS settings can be migrated safely via explicit protocol and cipher controls.".to_string(),
                 steps: vec![
-                    "Set `SSLProtocol -all +TLSv1.2 +TLSv1.3`.".to_string(),
+                    "Prefer `SSLProtocol -all +TLSv1.3` when all peers support it; retain TLSv1.2 only for a documented interoperability need.".to_string(),
                     "Review `SSLCipherSuite` and remove RSA key-exchange suites.".to_string(),
                 ],
                 references: vec!["https://httpd.apache.org/docs/trunk/mod/mod_ssl.html".to_string()],
@@ -685,7 +708,7 @@ fn add_tls_actions(
         );
     }
 
-    if location.contains("envoy") || profile.middleware_targets.contains("envoy") {
+    if targets.contains(&"envoy") {
         push_action(
             actions,
             RecommendedAction {
@@ -694,7 +717,7 @@ fn add_tls_actions(
                 priority: "near-term".to_string(),
                 rationale: "Envoy control-plane config supports strict min/max protocol and cipher suite policy.".to_string(),
                 steps: vec![
-                    "Set `tls_minimum_protocol_version: TLSv1_2` or higher.".to_string(),
+                    "Prefer `tls_minimum_protocol_version: TLSv1_3`; use TLSv1_2 only when interoperability requires it.".to_string(),
                     "Remove RSA-dependent suites from `cipher_suites`.".to_string(),
                 ],
                 references: vec!["https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto".to_string()],
@@ -703,7 +726,7 @@ fn add_tls_actions(
         );
     }
 
-    if location.contains("istio") || profile.middleware_targets.contains("istio") {
+    if targets.contains(&"istio") {
         push_action(
             actions,
             RecommendedAction {
@@ -712,7 +735,7 @@ fn add_tls_actions(
                 priority: "near-term".to_string(),
                 rationale: "Istio DestinationRule/Gateway policies should mirror TLS modernization and hybrid-readiness goals.".to_string(),
                 steps: vec![
-                    "Set minimum TLS version to 1.2+ in mesh and gateway resources.".to_string(),
+                    "Prefer TLS 1.3 in mesh and gateway resources; retain TLS 1.2 only where interoperability requires it.".to_string(),
                     "Reduce classical RSA dependency in configured cipher sets.".to_string(),
                 ],
                 references: vec!["https://istio.io/latest/docs/reference/config/networking/destination-rule/".to_string()],
@@ -721,7 +744,7 @@ fn add_tls_actions(
         );
     }
 
-    if location.contains("ingress") || profile.middleware_targets.contains("k8s") {
+    if targets.contains(&"k8s") {
         push_action(
             actions,
             RecommendedAction {
@@ -730,7 +753,7 @@ fn add_tls_actions(
                 priority: "near-term".to_string(),
                 rationale: "Kubernetes edge resources are frequent concentration points for legacy TLS policy.".to_string(),
                 steps: vec![
-                    "Set explicit TLS 1.2+ minimum version in ingress controller settings.".to_string(),
+                    "Prefer TLS 1.3 in ingress controller settings; retain TLS 1.2 only where interoperability requires it.".to_string(),
                     "Use policy-as-code checks to block reintroduction of legacy suites.".to_string(),
                 ],
                 references: vec!["https://kubernetes.io/docs/concepts/services-networking/ingress/".to_string()],
@@ -1024,6 +1047,72 @@ mod tests {
                 .any(|a| a.action_id == expected_action_id),
             "expected action {expected_action_id} to be present for {rule_id}:{file}"
         );
+    }
+
+    #[test]
+    fn tls_local_actions_do_not_borrow_unrelated_repository_middleware() {
+        let mut profile = RuntimeProfile::default();
+        for target in ["nginx", "httpd", "envoy", "istio", "k8s"] {
+            profile.middleware_targets.insert(target.to_string());
+        }
+        let mut f = make_finding("GO_TLS_RSA_IMPORT", "TLS", "go/token_service.go");
+        annotate_findings(std::slice::from_mut(&mut f), &profile);
+        assert!(f
+            .recommended_actions
+            .iter()
+            .all(|a| !a.action_id.ends_with("-hardening")));
+        f = make_finding("NGINX_SSL_PROTOCOLS_LEGACY", "TLS", "settings.conf");
+        annotate_findings(std::slice::from_mut(&mut f), &profile);
+        assert!(f
+            .recommended_actions
+            .iter()
+            .any(|a| a.action_id == "tls.nginx-hardening"));
+        for (rule, file) in [
+            ("HTTPD_SSLPROTOCOL_LEGACY", "settings.conf"),
+            ("TLS_VERSION_1_0", "middleware/httpd/httpd.conf"),
+            ("TLS_VERSION_1_0", "etc/apache2/ports.conf"),
+        ] {
+            f = make_finding(rule, "TLS", file);
+            annotate_findings(std::slice::from_mut(&mut f), &profile);
+            assert!(
+                f.recommended_actions
+                    .iter()
+                    .any(|a| a.action_id == "tls.httpd-hardening"),
+                "{rule}:{file}"
+            );
+        }
+    }
+
+    #[test]
+    fn tls_guidance_prefers_13_and_pqc_overrides_do_not_assert_rsa_use() {
+        for id in [
+            "PQC_GO_TLS_DISABLED",
+            "PQC_JAVA_CLASSICAL_GROUPS",
+            "PQC_RUBY_CLASSICAL_GROUPS",
+        ] {
+            let mut f = make_finding(id, "TLS", "overrides.conf");
+            annotate_findings(std::slice::from_mut(&mut f), &RuntimeProfile::default());
+            assert!(f
+                .recommended_actions
+                .iter()
+                .any(|a| a.action_id == "tls.review-pqc-override"));
+            assert!(f
+                .recommended_actions
+                .iter()
+                .all(|a| a.action_id != "tls.remove-rsa-kex"));
+        }
+        let mut f = make_finding("TLS_VERSION_1_0", "TLS", "tls.conf");
+        annotate_findings(std::slice::from_mut(&mut f), &RuntimeProfile::default());
+        let a = f
+            .recommended_actions
+            .iter()
+            .find(|a| a.action_id == "tls.remove-rsa-kex")
+            .unwrap();
+        assert!(a.steps.iter().any(|s| s.contains("Prefer TLS 1.3")));
+        assert!(a
+            .steps
+            .iter()
+            .any(|s| s.contains("TLS 1.2") && s.contains("interoperability")));
     }
 
     #[test]

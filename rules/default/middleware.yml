@@ -4,7 +4,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.80
-  migration_hint: Restrict Ingress TLS protocols to TLS 1.2+.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "nginx\\.ingress\\.kubernetes\\.io/ssl-protocols\\s*:\\s*['\"]?[^\\n\"]*TLSv1(?:\\.0|\\.1)?(?:$|[^0-9.])"
   scope: config
   description: Legacy TLS is enabled in a Kubernetes Ingress annotation.
@@ -26,7 +26,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.65
-  migration_hint: Raise the minimum TLS version in Gateway API configuration.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "minVersion\\s*:\\s*TLSv1(?:\\.0|\\.1)?(?:$|[^0-9.])"
   scope: config
   description: TLSv1.x is configured in Kubernetes Gateway settings.
@@ -37,7 +37,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.85
-  migration_hint: Update nginx ssl_protocols to TLSv1.2 TLSv1.3.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "(?m)^\\s*ssl_protocols\\s+[^;]*(TLSv1(?:\\.0|\\.1)?(?:$|[^0-9.]))"
   scope: config
   description: Legacy TLSv1.x is enabled in nginx configuration.
@@ -70,7 +70,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.72
-  migration_hint: Update proxy_ssl_protocols to TLS 1.2+.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "(?m)^\\s*proxy_ssl_protocols\\s+[^;]*(TLSv1(?:\\.0|\\.1)?(?:$|[^0-9.]))"
   scope: config
   description: Legacy TLS protocols are enabled for nginx upstream TLS.
@@ -81,7 +81,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.84
-  migration_hint: Restrict Apache SSLProtocol to TLS 1.2+.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "(?m)^\\s*SSLProtocol\\s+.*(TLSv1(?:\\.0|\\.1)?(?:$|[^0-9.]))"
   scope: config
   description: Legacy TLSv1.x is enabled in Apache httpd configuration.
@@ -114,7 +114,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.80
-  migration_hint: Set Envoy tls_minimum_protocol_version to TLSv1_2 or later.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "tls_minimum_protocol_version\\s*:\\s*TLSv1_[01]"
   scope: config
   description: Envoy configuration allows TLSv1.0/1.1.
@@ -125,7 +125,7 @@
   severity: medium
   risk: non-quantum-risk
   confidence: 0.55
-  migration_hint: Raise Envoy tls_maximum_protocol_version to a modern value.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "tls_maximum_protocol_version\\s*:\\s*TLSv1_[01]"
   scope: config
   description: Envoy maximum TLS version is pinned too low.
@@ -158,7 +158,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.74
-  migration_hint: Update minimum TLS version in Istio DestinationRule.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "minProtocolVersion\\s*:\\s*TLSV1_[01]"
   scope: config
   description: Istio configuration permits TLSv1.0/1.1.
@@ -180,7 +180,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.70
-  migration_hint: Modernize TLS protocol settings in Istio Gateway.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "(?s)minProtocolVersion\\s*:\\s*TLSV1_[01]"
   scope: config
   description: TLSv1.0/1.1 setting detected in Istio Gateway configuration.
@@ -191,7 +191,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.65
-  migration_hint: Exclude TLSv1.0/1.1 from HAProxy bind options.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "(?m)^\\s*bind\\s+[^\\n]*\\bssl\\b[^\\n]*(tlsv10|tlsv11)"
   scope: config
   description: HAProxy configuration explicitly enables TLSv1.0/1.1.
@@ -202,7 +202,7 @@
   severity: medium
   risk: non-quantum-risk
   confidence: 0.58
-  migration_hint: Raise minVersion in Traefik TLS options.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "(?i)minversion\\s*:\\s*versiontls1(0|1)"
   scope: config
   description: Traefik configuration contains a low minimum TLS version.

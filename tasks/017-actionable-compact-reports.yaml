@@ -2,8 +2,8 @@ id: '017'
 title: Make reports concise and tie actions to source locations
 type: feature
 priority: high
-status: pending
-owner: Planner Agent
+status: review
+owner: Executor Agent
 depends_on: ['016']
 description: >
   Help product engineers find the source location to inspect and its next action
@@ -87,6 +87,7 @@ testing_requirements:
   - cargo fmt --all --check
   - cargo test --workspace
   - cargo clippy --workspace --all-targets -- -D warnings
+  - node --test shell/compact-report.test.cjs
   - JWT_RS256 fixtures in Java, Node and Python show each runtime's actions only beside its own source location.
   - Different actions sharing one ID survive; identical common actions appear only once with links from occurrences.
   - More than three hits in one file remain individually accessible, including findings without snippets and unknown lines.
@@ -109,3 +110,37 @@ security_considerations:
   - Never issue an automatic RS256-to-ML-DSA replacement instruction without JOSE and verifier compatibility checks.
   - Keep source/evidence masked and escape all untrusted text, including filter and link labels.
   - Without scripting, show all records with native expandable details and explain that interactive filters/pagination are unavailable; never hide records behind script-only controls.
+implementation_evidence:
+  baseline_commit: c528b6c
+  human_reports: Compact bilingual HTML with native details, search, filters and two-level pagination; Markdown summary, location rows and full-payload action catalog
+  completeness: All 290 example findings retained; risk candidates 276, informational inventory 14
+  recommendation_scope: Local middleware checks no longer borrow repository-wide targets; Apache rule and path support retained
+  tls: Prefer TLS 1.3, qualified TLS 1.2 interoperability exception, no TLS 1.3-only PQC claim; PQC overrides receive setting-specific checks
+  rules: Only migration_hint prose changed in 15 existing rules; detection patterns, IDs and classification unchanged
+validation:
+  date: '2026-11-09'
+  workspace_tests: 76 passed, 0 failed
+  test_log: target/pqc-refresh/017-tests.log
+  javascript_tests: 3 passed; Node built-in runner with simulated DOM, not real-browser acceptance
+  build: passed
+  formatting_check: passed
+  clippy: passed with warnings denied
+  diff_check: passed
+  samples:
+    - target/task017-ja/report.html
+    - target/task017-ja/report.md
+    - target/task017-en/report.html
+    - target/task017-en/report.md
+  sample_generation: Both languages, all six formats, 290 findings, 55 scanned files and 2 skipped files
+  compatibility: Compared all 290 finding records against baseline and between languages, excluding intentionally changed migration_hint and recommended_actions; evidence, locations and classifications match
+  independent_review:
+    agent: Locke
+    method: Read-only source and generated HTML/Markdown/JSON inspection; no browser acceptance claimed
+    round_1: Four valid findings fixed; unrelated middleware actions, inconsistent English TLS hint, irrelevant next-action selection, missing Markdown inventory separation
+    round_2: Previous four fixes confirmed; Apache-specific guidance regression found and fixed with rule/path positive cases and unrelated-Go negative case
+    round_3: No remaining findings in reviewed scope; Apache guidance restored, unrelated Go unaffected, all 290 findings and Markdown links retained in both languages
+    corrective_cycles: 2
+  unexecuted:
+    - Actual desktop/mobile browser layout, keyboard operation and offline acceptance; local-file browser access is restricted
+    - Remote CI on final task 017 changes; changes have not been committed or pushed
+  next_action: Obtain actual browser acceptance before marking done. Task remains review, not complete.

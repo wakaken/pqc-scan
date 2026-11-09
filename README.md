@@ -189,6 +189,20 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 
 ### Japanese Reports
 
+HTML reports start with a compact, severity-sorted rule list. Search by rule or
+file, filter severity/risk, and switch between risk candidates and informational
+inventory. Rules and their occurrences are paginated in groups of 20. Expand a
+rule, then a location, to see its source context and applicable actions. Identical
+shared guidance is linked instead of repeating it at every location. Different
+recommendations sharing an action ID remain distinct. Without JavaScript, all
+records remain available through native expandable details. No external scripts
+or network connection are required. Markdown provides a linked rule/location index.
+
+TLS guidance prefers TLS 1.3, retaining securely configured TLS 1.2 only for an
+identified interoperability need. PQC override settings receive setting-specific
+checks rather than an assertion of RSA usage. Machine schemas and detection
+results remain stable; recommendation text and applicability intentionally improve.
+
 Use `--lang ja` for Japanese HTML and Markdown reports. English remains the default
 (`--lang en`). JSON, SARIF, CBOM and dependency SBOM retain their existing content
 regardless of this option. Finding IDs, paths, evidence, code and reference URLs

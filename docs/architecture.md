@@ -199,6 +199,14 @@ For each finding:
 
 ## Reporting Layer
 
+The internal grouping model retains every occurrence and its own action list,
+including missing-snippet findings. Shared guidance is the intersection of full
+serialized action payloads, not action IDs. A common compact renderer serves both
+languages, with native expandable details and an offline script for filters,
+20-item pagination and deep links. Machine serialization does not depend on this
+presentation model. Script behavior has dependency-free Node test-double coverage;
+this is distinct from actual browser/visual acceptance.
+
 Human-facing HTML and Markdown support `--lang en|ja` (default `en`). The reporting
 crate keeps the original `write_reports` entrypoint as an English wrapper and adds
 `write_reports_with_language`. Japanese presentation uses a built-in rule/action

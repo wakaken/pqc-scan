@@ -98,7 +98,7 @@ fn japanese_human_reports_preserve_machine_output_and_source_evidence() {
     assert!(html.contains("耐量子暗号への移行調査レポート"));
     assert!(html.contains("Goのハイブリッド鍵共有を無効にする設定"));
     assert!(html.contains("要確認"));
-    assert!(html.contains("<li>確認すること："));
+    assert!(html.contains("確認すること"));
     assert!(!html.contains("確認してほしいこと"));
     assert!(html.contains("GODEBUG=tlsmlkem=0"));
     assert!(html.contains("&lt;prod&gt;&amp;.conf"));
@@ -107,7 +107,7 @@ fn japanese_human_reports_preserve_machine_output_and_source_evidence() {
     assert!(!html.contains("<script>alert(1)</script>"));
     let md = fs::read_to_string(root.join("ja/report.md")).unwrap();
     assert!(md.contains("検出箇所"));
-    assert!(md.contains("\n\n確認すること："));
+    assert!(md.contains("確認すること"));
     assert!(!md.contains("確認してほしいこと"));
     assert!(md.contains("PQC_GO_TLS_DISABLED"));
     assert!(!md.contains("Review tlsmlkem=0"));
@@ -159,7 +159,7 @@ fn japanese_human_reports_preserve_machine_output_and_source_evidence() {
     .unwrap();
     assert!(fs::read_to_string(root.join("empty/report.html"))
         .unwrap()
-        .contains("検出件数"));
+        .contains("該当する検出はありませんでした"));
     assert!(!root.join("empty/report.md").exists());
     assert!(root.join("empty/cbom.json").exists());
     fs::remove_dir_all(root).unwrap();

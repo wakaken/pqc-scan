@@ -355,7 +355,8 @@ mod tests {
         assert!(html.contains("Goのハイブリッド鍵共有を無効にする設定"));
         assert!(html.contains("example.py"));
         let md = fs::read_to_string(out.join("report.md")).unwrap();
-        assert!(md.contains("次に行うこと"));
+        assert!(md.contains("検出箇所"));
+        assert!(md.contains("tlsmlkem=0"));
         let json: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
         assert_eq!(json["summary"]["total_findings"], 10);

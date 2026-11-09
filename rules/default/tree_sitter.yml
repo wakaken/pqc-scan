@@ -125,7 +125,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.75
-  migration_hint: Upgrade to TLS 1.2+ and include PQC-hybrid plans.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "(?i)(?:^|[^A-Za-z0-9])TLSv1(?:\\.0|\\.1)?(?:$|[^0-9.])|TLSv1_0|TLSv1_1"
   scope: "java,javascript,typescript,python,go,rust,ruby"
   description: Legacy TLS version literals detected in AST nodes.

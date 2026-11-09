@@ -1,12 +1,7 @@
-use std::{collections::HashMap, fmt::Write, path::Path};
+use std::path::Path;
 
 use anyhow::Result;
-use pqc_scan_core::{RecommendedAction, ScanResult};
-
-use crate::grouping::{group_findings, summarize_lines};
-
-const TITLE: &str = "耐量子暗号への移行調査レポート";
-const NOTICE: &str = "コードや設定にある暗号利用の手掛かりをまとめています。実際の通信で選ばれた暗号や、製品全体のPQC対応完了を確認した結果ではありません。";
+use pqc_scan_core::{Finding, RecommendedAction, ScanResult};
 
 type RuleCopy = (&'static str, &'static str);
 
@@ -33,9 +28,9 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
         "API_BC_RSA_ENGINE" => ("BouncyCastleのRSA処理が見つかりました。", "利用中の版とプロバイダーを確認し、PQC対応APIへの移行を検討してください。"),
         "TLS_RSA_KEY_EXCHANGE" | "TLS_RSA_CIPHER_SUITE" | "TS_TLS_RSA_CIPHER_LITERAL" => ("RSAに依存するTLS暗号スイートの記述が見つかりました。", "接続相手との互換性を確認し、X25519MLKEM768などのハイブリッド鍵共有を検討してください。旧Kyber方式とは通信形式が異なります。"),
         "TLS_ECDHE_RSA" => ("ECDHE-RSAを使うTLS暗号スイートの記述が見つかりました。", "鍵共有とRSA署名を分けて確認し、ハイブリッド鍵共有とPQC認証の移行計画を立ててください。"),
-        "TLS_VERSION_1_0" => ("TLS 1.0を示す記述が見つかりました。", "利用箇所を確認し、TLS 1.2以降へ更新してください。"),
-        "TLS_VERSION_1_1" => ("TLS 1.1を示す記述が見つかりました。", "利用箇所を確認し、TLS 1.2以降へ更新してください。"),
-        "TS_TLS_LEGACY_VERSION_LITERAL" | "NODE_TLS_MIN_VERSION" => ("古いTLSバージョンを許可する記述が見つかりました。", "実際の設定を確認し、TLS 1.2以降に制限してください。"),
+        "TLS_VERSION_1_0" => ("TLS 1.0を示す記述が見つかりました。", "TLS 1.0・1.1を廃止し、TLS 1.3を優先してください。TLS 1.2は接続相手との互換性が必要な場合に限り、安全な設定で残してください。"),
+        "TLS_VERSION_1_1" => ("TLS 1.1を示す記述が見つかりました。", "TLS 1.0・1.1を廃止し、TLS 1.3を優先してください。TLS 1.2は接続相手との互換性が必要な場合に限り、安全な設定で残してください。"),
+        "TS_TLS_LEGACY_VERSION_LITERAL" | "NODE_TLS_MIN_VERSION" => ("古いTLSバージョンを許可する記述が見つかりました。", "TLS 1.3を優先し、接続相手がすべて対応していれば1.3に限定してください。TLS 1.2を残す場合は互換性の理由と安全な設定を確認してください。"),
         "TLS_CERT_PIN_RSA" => ("RSA証明書の固定設定を示す記述が見つかりました。", "証明書を更新するときに通信が止まらないよう、固定設定とPQC移行をあわせて計画してください。"),
         "TS_RSA_KEY_SIZE_LITERAL" => ("RSAの鍵長に関する数値が見つかりました。", "この数値が実際のRSA鍵生成に使われているか、周辺のコードを確認してください。"),
         "TS_CERT_SIGALG_LITERAL" => ("証明書の署名方式に関する記述が見つかりました。", "実際の証明書と発行手順を確認し、PQC署名への移行候補を調べてください。"),
@@ -76,29 +71,29 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
         "CERT_ML_DSA_PUBLIC_KEY" => ("証明書の公開鍵方式にML-DSAのOIDが見つかりました。", "公開鍵方式と証明書の署名方式は別の情報です。署名と信頼チェーンも確認してください。"),
         "CERT_SLH_DSA_SIGNATURE" => ("証明書の署名方式にSLH-DSAのOIDが見つかりました。", "署名方式の宣言を読み取った結果です。署名の正しさ、信頼チェーン、検証側の対応は別に確認してください。"),
         "CERT_SLH_DSA_PUBLIC_KEY" => ("証明書の公開鍵方式にSLH-DSAのOIDが見つかりました。", "公開鍵方式と証明書の署名方式は別の情報です。署名と信頼チェーンも確認してください。"),
-        "K8S_INGRESS_SSL_PROTOCOLS_LEGACY" | "K8S_GATEWAYAPI_TLSV1" => ("Kubernetesの入口の設定に古いTLS方式を許可する記述が見つかりました。", "Ingress・Gatewayの設定を確認し、TLS 1.2以降に制限してください。"),
+        "K8S_INGRESS_SSL_PROTOCOLS_LEGACY" | "K8S_GATEWAYAPI_TLSV1" => ("Kubernetesの入口の設定に古いTLS方式を許可する記述が見つかりました。", "Ingress・GatewayではTLS 1.3を優先してください。TLS 1.2は互換性が必要な接続に限り、安全な設定で残してください。"),
         "K8S_INGRESS_RSA_CIPHERS" => ("Kubernetes IngressにRSA依存の暗号スイート設定が見つかりました。", "コントローラーと接続元の対応を確認し、ハイブリッド鍵共有への移行を検討してください。"),
-        "NGINX_SSL_PROTOCOLS_LEGACY" => ("nginxに古いTLS方式を許可する設定が見つかりました。", "ssl_protocolsをTLSv1.2・TLSv1.3へ更新する計画を立ててください。"),
-        "NGINX_PROXY_SSL_PROTOCOLS_LEGACY" => ("nginxの接続先向けTLS設定に古い方式が見つかりました。", "proxy_ssl_protocolsを確認し、接続先との互換性を確かめてTLS 1.2以降に制限してください。"),
+        "NGINX_SSL_PROTOCOLS_LEGACY" => ("nginxに古いTLS方式を許可する設定が見つかりました。", "ssl_protocolsではTLSv1.3を優先し、接続元がすべて対応していればTLSv1.3だけを許可してください。TLSv1.2を残す場合は互換性の理由を確認してください。"),
+        "NGINX_PROXY_SSL_PROTOCOLS_LEGACY" => ("nginxの接続先向けTLS設定に古い方式が見つかりました。", "proxy_ssl_protocolsではTLS 1.3を優先してください。TLS 1.2は接続先との互換性が必要な場合に限り、安全な設定で残してください。"),
         "NGINX_SSL_CIPHERS_RSA" => ("nginxにRSA依存・弱い暗号スイートの設定が見つかりました。", "暗号スイートを見直し、ハイブリッド鍵共有へ移行できる構成を検討してください。"),
         "NGINX_SSL_PREFER_SERVER_CIPHERS_OFF" => ("nginxでサーバー側の暗号方式の優先設定が無効になっています。", "接続元への影響を確認し、サーバー側の優先設定を有効にしてください。"),
-        "HTTPD_SSLPROTOCOL_LEGACY" => ("Apache httpdに古いTLS方式を許可する設定が見つかりました。", "SSLProtocolを確認し、TLS 1.2以降に制限してください。"),
+        "HTTPD_SSLPROTOCOL_LEGACY" => ("Apache httpdに古いTLS方式を許可する設定が見つかりました。", "SSLProtocolではTLS 1.3を優先してください。TLS 1.2を残す場合は、接続元との互換性の理由と安全な設定を確認してください。"),
         "HTTPD_SSLCIPHERSUITE_RSA" => ("Apache httpdにRSA依存・弱い暗号スイートの設定が見つかりました。", "SSLCipherSuiteを確認し、RSA鍵交換への依存を減らす計画を立ててください。"),
         "HTTPD_SSLHONORCIPHERORDER_OFF" => ("Apacheでサーバー側の暗号方式の優先設定が無効になっています。", "接続元への影響を確認し、SSLHonorCipherOrderをOnにしてください。"),
-        "ENVOY_TLS_MIN_VERSION_LEGACY" => ("EnvoyのTLS最低バージョンが低い設定になっています。", "tls_minimum_protocol_versionをTLSv1_2以降にしてください。"),
-        "ENVOY_TLS_MAX_VERSION_LEGACY" => ("EnvoyのTLS最高バージョンが古い値に制限されています。", "tls_maximum_protocol_versionを確認し、新しいTLS方式を使えるようにしてください。"),
+        "ENVOY_TLS_MIN_VERSION_LEGACY" => ("EnvoyのTLS最低バージョンが低い設定になっています。", "tls_minimum_protocol_versionはTLSv1_3を優先してください。TLSv1_2は接続相手との互換性が必要な場合に限って検討してください。"),
+        "ENVOY_TLS_MAX_VERSION_LEGACY" => ("EnvoyのTLS最高バージョンが古い値に制限されています。", "tls_maximum_protocol_versionを確認し、TLS 1.3を優先して使えるようにしてください。TLS 1.2は互換性が必要な場合に限って検討してください。"),
         "ENVOY_CIPHER_SUITES_RSA" => ("EnvoyにRSA依存・弱い暗号スイートの設定が見つかりました。", "cipher_suitesの指定と接続先を確認し、RSA依存の方式を見直してください。"),
         "ENVOY_SIGNATURE_ALGORITHMS_RSA" => ("EnvoyにRSA署名方式の明示的な設定が見つかりました。", "署名方式の設定にPQC移行計画を反映し、証明書と接続先の対応を確認してください。"),
-        "ISTIO_DESTINATIONRULE_TLSV1" | "ISTIO_GATEWAY_TLSV1" => ("IstioにTLS 1.0・1.1を許可する記述が見つかりました。", "DestinationRule・GatewayのTLS最低バージョンを確認して更新してください。"),
+        "ISTIO_DESTINATIONRULE_TLSV1" | "ISTIO_GATEWAY_TLSV1" => ("IstioにTLS 1.0・1.1を許可する記述が見つかりました。", "DestinationRule・GatewayではTLS 1.3を優先してください。TLS 1.2は互換性が必要な接続に限って残し、TLS 1.0・1.1は無効にしてください。"),
         "ISTIO_DESTINATIONRULE_RSA_CIPHERS" => ("IstioにRSA依存・弱い暗号スイートの設定が見つかりました。", "暗号スイートの設定と接続先を確認し、RSAへの依存を減らす計画を立ててください。"),
-        "HAPROXY_BIND_TLSV1" => ("HAProxyにTLS 1.0・1.1を有効にする記述が見つかりました。", "bindオプションを確認し、TLS 1.0・1.1を許可対象から外してください。"),
-        "TRAEFIK_TLS_OPTIONS_LEGACY" => ("TraefikのTLS最低バージョンが低い設定になっています。", "TLSオプションのminVersionを確認し、対応する新しい版に引き上げてください。"),
+        "HAPROXY_BIND_TLSV1" => ("HAProxyにTLS 1.0・1.1を有効にする記述が見つかりました。", "bindオプションからTLS 1.0・1.1を外し、TLS 1.3を優先してください。TLS 1.2を残す場合は互換性の理由を確認してください。"),
+        "TRAEFIK_TLS_OPTIONS_LEGACY" => ("TraefikのTLS最低バージョンが低い設定になっています。", "TLSオプションのminVersionはTLS 1.3を優先してください。TLS 1.2は接続相手との互換性が必要な場合に限って検討してください。"),
         "DEP_LIBSSH" | "DEP_PARAMIKO" | "DEP_OPENSSL" | "DEP_BOUNCYCASTLE" | "DEP_BORINGSSL" | "DEP_PYCRYPTODOME" | "DEP_PYCA_CRYPTOGRAPHY" | "DEP_GO_JOSE" | "DEP_JAVA_BOUNCYCASTLE" | "DEP_RUST_OPENSSL" | "DEP_RUST_RSA_CRATE" | "DEP_RUBY_OPENSSL" | "DEP_RUBY_JWT" => ("暗号処理に関係するライブラリへの依存が見つかりました。", "表にあるライブラリ名と版を確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
         _ => return None,
     })
 }
 
-fn severity(value: &str) -> &str {
+pub(crate) fn severity(value: &str) -> &str {
     match value {
         "critical" => "緊急",
         "high" => "高",
@@ -109,7 +104,7 @@ fn severity(value: &str) -> &str {
     }
 }
 
-fn risk(value: &str) -> &str {
+pub(crate) fn risk(value: &str) -> &str {
     match value {
         "quantum-safe" => "PQC方式の参照あり（対応完了の保証ではありません）",
         "quantum-uncertain" => "要確認（実装や設定の確認が必要）",
@@ -119,65 +114,28 @@ fn risk(value: &str) -> &str {
     }
 }
 
-fn category(value: &str) -> &str {
-    match value {
-        "PQC" => "耐量子暗号",
-        "CryptoAPI" => "暗号API",
-        "PKI" => "証明書・公開鍵基盤",
-        "Middleware" => "ミドルウェア設定",
-        _ => value,
+pub(crate) fn localize_finding(source: &Finding) -> Finding {
+    let mut finding = source.clone();
+    if let Some((description, hint)) = rule_text(&finding.rule_id) {
+        finding.description = description.to_string();
+        finding.migration_hint = hint.to_string();
+    } else {
+        finding.description = format!(
+            "日本語の説明が未登録のルールです。原文：{}",
+            finding.description
+        );
+        finding.migration_hint =
+            format!("ルール作成者の確認事項（原文）：{}", finding.migration_hint);
     }
-}
-
-fn localize(source: &ScanResult) -> ScanResult {
-    let mut result = source.clone();
-    for finding in &mut result.findings {
-        if let Some((description, hint)) = rule_text(&finding.rule_id) {
-            finding.description = description.to_string();
-            finding.migration_hint = hint.to_string();
-        } else {
-            finding.description = format!(
-                "日本語の説明が未登録のルールです。原文：{}",
-                finding.description
-            );
-            finding.migration_hint =
-                format!("ルール作成者の確認事項（原文）：{}", finding.migration_hint);
-        }
-        for action in &mut finding.recommended_actions {
-            localize_action(action, &finding.location.file);
-        }
+    for action in &mut finding.recommended_actions {
+        localize_action(action, &finding.location.file);
     }
-    let hints: HashMap<_, _> = source
-        .findings
-        .iter()
-        .filter_map(|finding| {
-            rule_text(&finding.rule_id).map(|(_, hint)| {
-                (
-                    (
-                        format!("{}:{}", finding.location.file, finding.location.line),
-                        finding.evidence.r#match.as_str(),
-                        finding.migration_hint.as_str(),
-                    ),
-                    hint,
-                )
-            })
-        })
-        .collect();
-    for entry in &mut result.cbom {
-        entry.migration_hint = hints
-            .get(&(
-                entry.location.clone(),
-                entry.algorithm.as_str(),
-                entry.migration_hint.as_str(),
-            ))
-            .map(|hint| hint.to_string())
-            .unwrap_or_else(|| format!("日本語未登録の確認事項（原文）：{}", entry.migration_hint));
-    }
-    result
+    finding
 }
 
 fn action_text(id: &str) -> Option<(&'static str, &'static str, &'static [&'static str])> {
     Some(match id {
+        "tls.review-pqc-override" => ("PQCの上書き設定を確認する", "検出した設定はハイブリッド鍵共有を制限しています。RSAの利用や実際のTLSバージョンを確認した結果ではありません。", &["この箇所のGODEBUG、jdk.tls.namedGroups、groups=・ecdh_curves=のうち、検出対象の設定を確認してください。", "設定が必要な理由と接続相手の対応を確認してから、ハイブリッド方式や既定設定で通信を試してください。", "鍵共有、TLSバージョン、証明書の署名方式は別々に確認してください。TLS 1.3であるだけではPQC対応とは判断できません。"]),
         "incident.private-key-rotation" => ("露出した秘密鍵を失効し、更新する", "秘密鍵のヘッダーが検出されています。漏えいの範囲と利用先を速やかに確認してください。", &["対象の鍵を失効・再発行し、影響する認証情報も更新してください。", "その鍵で署名したトークンやセッションの扱いを確認してください。", "鍵を専用の保管先へ移し、リポジトリへの再混入を防いでください。"]),
         "plan.hybrid-migration" => ("既存方式とPQCを併用し、段階的に移行する", "検出した方式には、量子計算による将来のリスクがあります。接続相手との互換性を確かめながら移行を進めてください。", &["利用箇所と担当チームを洗い出してください。", "既存方式とPQCの併用を試し、一括切替の前に影響を確認してください。", "旧方式を廃止する条件と時期を決めてください。"]),
         "dependency.track-pqc-readiness" => ("依存ライブラリのPQC対応を確認する", "PQCへの移行方法は、利用しているライブラリの版や設定にも左右されます。", &["dependency-sbom.jsonで現在の版を確認し、更新候補を決めてください。", "リリース情報でPQC機能とAPIの変更を確認してください。", "本番導入の前にPQC・ハイブリッド方式の結合テストを行ってください。"]),
@@ -191,12 +149,12 @@ fn action_text(id: &str) -> Option<(&'static str, &'static str, &'static [&'stat
         "java.jca-ml-dsa-ml-kem" => ("Java標準のPQC APIへの移行を検討する", "対応するJDKでは、JCAの標準方式名でML-DSA・ML-KEMを指定できます。", &["署名用途ではML-DSAへの切替を検討し、検証側の対応を確認してください。", "ML-KEMは鍵共有に使う方式です。TLSなどの対応は別に確認してください。", "移行中は旧方式の署名も検証できる期間を設けてください。"]),
         "java.runtime-upgrade-for-pqc" => ("Javaの実行環境をPQC APIに対応する版へ更新する", "現在のJavaの版では標準PQC APIを使えない可能性があります。版が不明な場合は実環境を確認してください。", &["ML-KEM・ML-DSAはJDK 24以降を更新候補にしてください。", "本番への適用前にCIで互換性を試してください。"]),
         "java.bouncycastle-pqc" => ("BouncyCastleによるPQC対応を検討する", "標準APIを使えない環境では、ライブラリによる対応が移行候補になります。", &["BouncyCastleの版とプロバイダーの登録方法を確認してください。", "ML-DSA・ML-KEMのパラメーターを選び、検証環境で試してください。", "プロバイダーの優先順位とFIPSなどの運用要件への影響を記録してください。"]),
-        "tls.remove-rsa-kex" => ("TLSの方式とバージョンを見直す", "RSA鍵交換や古いTLS設定は移行時の確認対象です。この一般的な確認項目だけで、RSAの利用が確定するわけではありません。", &["TLSの最低バージョンを1.2または1.3に設定してください。", "ECDHEなどの現行方式を確認し、ハイブリッド鍵共有への移行も計画してください。", "クライアントと負荷分散装置を含め、互換性を継続して確認してください。"]),
-        "tls.nginx-hardening" => ("nginxのTLS設定を見直す", "プロトコルと暗号スイートを明示し、移行前後の動作を確認してください。", &["ssl_protocols TLSv1.2 TLSv1.3; を設定してください。", "RSA鍵交換を使う暗号スイートを確認し、前方秘匿性を持つ方式へ見直してください。"]),
-        "tls.httpd-hardening" => ("Apache httpdのTLS設定を見直す", "プロトコルと暗号スイートの変更は、接続元との互換性を確認して進めてください。", &["SSLProtocol -all +TLSv1.2 +TLSv1.3 を設定してください。", "SSLCipherSuiteを見直し、RSA鍵交換を使う方式を確認してください。"]),
-        "tls.envoy-hardening" => ("EnvoyのTLS設定を見直す", "最低・最高バージョンと暗号スイートを設定で管理できます。", &["tls_minimum_protocol_versionをTLSv1_2以降に設定してください。", "cipher_suitesのRSA依存の方式を確認して見直してください。"]),
-        "tls.istio-hardening" => ("IstioのTLS設定を移行計画に合わせる", "DestinationRuleとGatewayの設定を揃えて、接続への影響を確認してください。", &["サービス間通信とゲートウェイのTLS最低バージョンを1.2以降にしてください。", "設定されているRSA依存の暗号スイートを確認してください。"]),
-        "tls.k8s-ingress-hardening" => ("Kubernetesの入口のTLS設定を更新する", "Ingressなどの入口では、複数サービスに共通のTLS設定が使われます。", &["IngressコントローラーのTLS最低バージョンを1.2以降に明示してください。", "古い方式の再混入を設定検査で防いでください。"]),
+        "tls.remove-rsa-kex" => ("TLS 1.3を優先し、鍵共有方式を確認する", "RSA鍵交換や古いTLS設定は移行時の確認対象です。この一般的な確認項目だけで、RSAの利用が確定するわけではありません。", &["TLS 1.3を優先し、全接続先が対応していれば1.3だけを許可してください。TLS 1.0・1.1は無効にしてください。", "TLS 1.2は互換性が必要な場合に限り、安全な設定で残してください。理由を記録し、鍵共有方式のPQC対応も別に確認してください。", "クライアントと負荷分散装置を含め、互換性を継続して確認してください。"]),
+        "tls.nginx-hardening" => ("nginxのTLS設定を見直す", "プロトコルと暗号スイートを明示し、移行前後の動作を確認してください。", &["接続元がすべて対応していればssl_protocols TLSv1.3; を設定してください。TLSv1.2を残す場合は互換性の理由を確認してください。", "RSA鍵交換を使う暗号スイートを確認し、前方秘匿性を持つ方式へ見直してください。"]),
+        "tls.httpd-hardening" => ("Apache httpdのTLS設定を見直す", "プロトコルと暗号スイートの変更は、接続元との互換性を確認して進めてください。", &["接続元がすべて対応していればSSLProtocol -all +TLSv1.3を設定してください。TLSv1.2を残す場合は互換性の理由を確認してください。", "SSLCipherSuiteを見直し、RSA鍵交換を使う方式を確認してください。"]),
+        "tls.envoy-hardening" => ("EnvoyのTLS設定を見直す", "最低・最高バージョンと暗号スイートを設定で管理できます。", &["tls_minimum_protocol_versionはTLSv1_3を優先し、TLSv1_2は互換性が必要な場合に限って検討してください。", "cipher_suitesのRSA依存の方式を確認して見直してください。"]),
+        "tls.istio-hardening" => ("IstioのTLS設定を移行計画に合わせる", "DestinationRuleとGatewayの設定を揃えて、接続への影響を確認してください。", &["サービス間通信とゲートウェイではTLS 1.3を優先し、TLS 1.2は互換性が必要な場合に限って残してください。", "設定されているRSA依存の暗号スイートを確認してください。"]),
+        "tls.k8s-ingress-hardening" => ("Kubernetesの入口のTLS設定を更新する", "Ingressなどの入口では、複数サービスに共通のTLS設定が使われます。", &["IngressコントローラーではTLS 1.3を優先し、TLS 1.2は互換性が必要な接続に限って残してください。", "古い方式の再混入を設定検査で防いでください。"]),
         "pki.hybrid-certificate-roadmap" => ("証明書の発行と信頼設定の更新を計画する", "証明書の方式変更には、認証局、証明書チェーン、検証側の対応が必要です。", &["CBOMで証明書の署名方式と鍵情報を確認してください。", "本番以外の信頼設定でハイブリッド証明書チェーンを試してください。", "ルート・中間・サーバー証明書の再発行手順を決めてください。"]),
         "cryptoapi.abstraction-layer" => ("暗号方式を切り替えられる共通処理を設ける", "方式に依存する呼出しを分離すると、古典暗号からPQCへ段階的に移行しやすくなります。", &["署名・検証・鍵共有を共通の処理にまとめてください。", "設定で古典・ハイブリッド・PQCの各実装を選べる構成を検討してください。", "実装の変更を結合テストで確認してください。"]),
         "k8s.pqc-signature-readiness-note" | "nginx.pqc-signature-readiness-note" | "envoy.pqc-signature-readiness-note" | "istio.pqc-signature-readiness-note" | "haproxy.pqc-signature-readiness-note" | "traefik.pqc-signature-readiness-note" => ("接続経路全体でPQC証明書の署名を検証できるか確認する", "ハイブリッド鍵共有への対応と、PQC署名の証明書への対応は別です。TLSライブラリ、プロバイダー、各接続先の条件を確認してください。", &["元の参考資料と対象の製品・版を確認してください。", "入口、サービス間通信、認証局、クライアントを含めてML-DSA・SLH-DSA証明書の互換性を試してください。", "本番で必須にする前に、段階的な試験と切戻し手順を用意してください。"]),
@@ -204,7 +162,7 @@ fn action_text(id: &str) -> Option<(&'static str, &'static str, &'static [&'stat
     })
 }
 
-fn localize_action(action: &mut RecommendedAction, file: &str) {
+pub(crate) fn localize_action(action: &mut RecommendedAction, file: &str) {
     if let Some((title, rationale, steps)) = action_text(&action.action_id) {
         action.title = title.to_string();
         action.rationale = rationale.to_string();
@@ -235,7 +193,7 @@ fn localize_action(action: &mut RecommendedAction, file: &str) {
     .to_string();
 }
 
-fn html(value: &str) -> String {
+pub(crate) fn html(value: &str) -> String {
     value
         .replace('&', "&amp;")
         .replace('<', "&lt;")
@@ -244,9 +202,11 @@ fn html(value: &str) -> String {
         .replace('\'', "&#39;")
 }
 
-fn md(value: &str) -> String {
+pub(crate) fn md(value: &str) -> String {
     value
         .replace('\\', "\\\\")
+        .replace('[', "\\[")
+        .replace(']', "\\]")
         .replace('|', "\\|")
         .replace('`', "\\`")
         .replace('<', "&lt;")
@@ -255,176 +215,10 @@ fn md(value: &str) -> String {
 }
 
 pub(crate) fn write_html(result: &ScanResult, path: &Path) -> Result<()> {
-    let result = localize(result);
-    let groups = group_findings(&result.findings);
-    let mut out = String::new();
-    writeln!(out, "<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>{TITLE}</title><style>{}</style></head><body><main class=\"container\">", crate::html_report::css())?;
-    writeln!(out, "<header class=\"top\"><h1>{TITLE}</h1><p>作成日時：{}</p><p>{NOTICE}</p></header><section class=\"summary\">", result.generated_at)?;
-    for (label, count) in [
-        ("検出件数", result.summary.total_findings),
-        ("ルールの種類", groups.len()),
-        ("調査したファイル", result.summary.scanned_files),
-        ("対象外のファイル", result.summary.skipped_files),
-        ("依存関係の件数", result.dependency_sbom.len()),
-    ] {
-        writeln!(out, "<div class=\"metric\"><div class=\"metric-label\">{label}</div><div class=\"metric-value\">{count}</div></div>")?;
-    }
-    writeln!(out, "</section><h2>検出結果</h2><p>「参考情報」は問題の指摘ではなく、暗号利用の棚卸しです。「PQC方式の参照あり」も製品全体の安全性を保証しません。ファイル名を開くと周辺のコードを確認できます。</p>")?;
-    if groups.is_empty() {
-        writeln!(out, "<p>該当する検出はありませんでした。</p>")?;
-    }
-    for group in groups {
-        writeln!(out, "<article class=\"finding\"><h3><code>{}</code> <span class=\"sev {}\">{}</span> <span class=\"count\">{}件</span></h3><p>{}</p><ul class=\"kv\"><li>分類：{}</li><li>判断の目安：{}</li><li>該当ファイル：{}件</li><li>確認すること：{}</li></ul>", html(group.rule_id), html(&group.severity), severity(&group.severity), group.total_hits, html(group.description), html(category(group.category)), risk(&group.risk), group.files.len(), html(group.migration_hint))?;
-        writeln!(out, "<h4>検出箇所</h4><div class=\"occurrence-scroll\"><table class=\"occ-table\"><thead><tr><th>ファイル</th><th>件数</th><th>行番号</th><th>検出した記述</th></tr></thead><tbody>")?;
-        for file in group.files {
-            writeln!(
-                out,
-                "<tr><td><details><summary><code>{}</code></summary>",
-                html(file.file)
-            )?;
-            for finding in &file.sample_findings {
-                if let Some(snippet) = &finding.source_snippet {
-                    writeln!(out, "<div class=\"snippet-wrap\"><p>周辺のコード（{}行・{}列）</p><div class=\"code-lines\">", finding.location.line, finding.location.column)?;
-                    for line in &snippet.lines {
-                        writeln!(out, "<span class=\"{}\"><span class=\"ln\">{}</span><span class=\"tx\">{}</span></span>", if line.highlighted {"line hl"} else {"line"}, line.line, html(&line.text))?;
-                    }
-                    writeln!(out, "</div></div>")?;
-                } else {
-                    writeln!(out, "<p>周辺のコードは取得できませんでした。元のファイルを確認してください。</p>")?;
-                }
-            }
-            writeln!(
-                out,
-                "</details></td><td>{}</td><td>{}</td><td><code>{}</code></td></tr>",
-                file.hits,
-                html(&summarize_lines(&file.lines, 16)),
-                html(file.sample_evidence.first().copied().unwrap_or("-"))
-            )?;
-        }
-        writeln!(out, "</tbody></table></div>")?;
-        if !group.recommended_actions.is_empty() {
-            writeln!(out, "<h4>次に行うこと</h4>")?;
-        }
-        for action in group.recommended_actions {
-            writeln!(
-                out,
-                "<div class=\"actions\"><h4>{}（{}）</h4><p>{}</p><ol>",
-                html(&action.title),
-                html(&action.priority),
-                html(&action.rationale)
-            )?;
-            for step in &action.steps {
-                writeln!(out, "<li>{}</li>", html(step))?;
-            }
-            writeln!(out, "</ol><p>参考資料</p><ul>")?;
-            for reference in &action.references {
-                if reference.starts_with("https://") || reference.starts_with("http://") {
-                    writeln!(
-                        out,
-                        "<li><a href=\"{}\" rel=\"noopener noreferrer\">{}</a></li>",
-                        html(reference),
-                        html(reference)
-                    )?;
-                } else {
-                    writeln!(out, "<li>{}</li>", html(reference))?;
-                }
-            }
-            writeln!(out, "</ul>")?;
-            for example in &action.code_examples {
-                writeln!(out, "<p>変更前（{}）</p><pre><code>{}</code></pre><p>変更後</p><pre><code>{}</code></pre>", html(&example.language), html(&example.before), html(&example.after))?;
-            }
-            writeln!(out, "</div>")?;
-        }
-        writeln!(out, "</article>")?;
-    }
-    writeln!(out, "</main></body></html>")?;
-    std::fs::write(path, out)?;
-    Ok(())
+    crate::compact::html_report(result, path, crate::ReportLanguage::Ja)
 }
-
 pub(crate) fn write_markdown(result: &ScanResult, path: &Path) -> Result<()> {
-    let result = localize(result);
-    let mut out = format!("# {TITLE}\n\n{NOTICE}\n\n作成日時：{}\n\n検出{}件、調査したファイル{}件、対象外{}件、依存関係{}件。\n\n## 重大度の内訳\n\n|重大度|件数|\n|---|---:|\n", result.generated_at, result.summary.total_findings, result.summary.scanned_files, result.summary.skipped_files, result.dependency_sbom.len());
-    for (level, count) in &result.summary.by_severity {
-        writeln!(out, "|{}|{}|", severity(level), count)?;
-    }
-    writeln!(
-        out,
-        "\n## 検出結果\n\n「参考情報」は問題の指摘ではなく、暗号利用の棚卸しです。\n"
-    )?;
-    if result.findings.is_empty() {
-        writeln!(out, "該当する検出はありませんでした。\n")?;
-    }
-    for group in group_findings(&result.findings) {
-        writeln!(out, "### {}（{}、{}件）\n\n{}\n\n分類：{}\n\n判断の目安：{}\n\n確認すること：{}\n\n検出箇所：\n\n|ファイル|件数|行番号|検出した記述|\n|---|---:|---|---|", md(group.rule_id), severity(&group.severity), group.total_hits, md(group.description), md(category(group.category)), risk(&group.risk), md(group.migration_hint))?;
-        for file in group.files {
-            writeln!(
-                out,
-                "|{}|{}|{}|{}|",
-                md(file.file),
-                file.hits,
-                summarize_lines(&file.lines, 20),
-                md(file.sample_evidence.first().copied().unwrap_or("-"))
-            )?;
-        }
-        if !group.recommended_actions.is_empty() {
-            writeln!(out, "\n次に行うこと：\n")?;
-        }
-        for action in group.recommended_actions {
-            writeln!(
-                out,
-                "#### {}（{}）\n\n{}\n",
-                md(&action.title),
-                md(&action.priority),
-                md(&action.rationale)
-            )?;
-            for (i, step) in action.steps.iter().enumerate() {
-                writeln!(out, "{}. {}", i + 1, md(step))?;
-            }
-            writeln!(out, "\n参考資料：\n")?;
-            for reference in &action.references {
-                writeln!(out, "- {}", md(reference))?;
-            }
-            for example in &action.code_examples {
-                writeln!(
-                    out,
-                    "\n変更前（{}）：\n\n    {}\n\n変更後：\n\n    {}\n",
-                    md(&example.language),
-                    example.before.replace('\n', "\n    "),
-                    example.after.replace('\n', "\n    ")
-                )?;
-            }
-        }
-        writeln!(out)?;
-    }
-    writeln!(out, "## 暗号利用の一覧（CBOM）\n\n|構成要素|検出した方式・記述|用途|場所|判断の目安|確認事項|\n|---|---|---|---|---|---|")?;
-    for entry in &result.cbom {
-        writeln!(
-            out,
-            "|{}|{}|{}|{}|{}|{}|",
-            md(&entry.component),
-            md(&entry.algorithm),
-            md(category(&entry.usage_type)),
-            md(&entry.location),
-            risk(entry.quantum_risk.as_str()),
-            md(&entry.migration_hint)
-        )?;
-    }
-    writeln!(out, "\n## 依存ライブラリの一覧（SBOM）\n\n|種類|名前|バージョン|取得元の種類|ファイル|PURL|\n|---|---|---|---|---|---|")?;
-    for dep in &result.dependency_sbom {
-        writeln!(
-            out,
-            "|{}|{}|{}|{}|{}|{}|",
-            md(&dep.ecosystem),
-            md(&dep.name),
-            md(&dep.version),
-            md(&dep.source_type),
-            md(&dep.source_file),
-            md(&dep.purl)
-        )?;
-    }
-    std::fs::write(path, out)?;
-    Ok(())
+    crate::compact::markdown_report(result, path, crate::ReportLanguage::Ja)
 }
 
 #[cfg(test)]

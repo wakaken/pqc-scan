@@ -1,3 +1,4 @@
+mod compact;
 mod grouping;
 mod html_report;
 mod japanese;
