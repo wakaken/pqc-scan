@@ -96,3 +96,27 @@ executed. Task 023 remains pending. Task 040 is preserved on its separate local
 branch; if later combined, re-review its exact self-scan expectation registry against
 these intentional certificate-rule/evidence changes. No scan finding is suppressed
 by task 021 and no publication is authorized here.
+
+## Publication preparation (separately authorized)
+
+The user subsequently authorized pushing both task 040 and task 021 and preparing
+PRs. To preserve one task per PR, task 040 targets `develop`; task 021 is stacked on
+`codex/ci-self-scan-expectations`. Retarget task 021 to `develop` after the CI
+prerequisite merges. No merge is authorized by this publication request. The local
+prerequisite merge preserves both reviewed implementation commits and resolves the
+two README additions without conflict; no Rust/rule/helper behavior was added.
+
+Task 021 now carries its exact self-scan registry maintenance in the same PR:
+refresh the moved inline-test source/result binding, eight existing public
+certificate expectations and two new test/public-fixture file registrations. Remove
+the three obsolete ECDSA-as-DSA expectations. The registry has 83 files and 618
+exact groups; raw 746 = reviewed omissions 618 + retained 128. All six product
+signature-name mapping observations remain present in the upload copy. No blanket
+suppression, automatic CI learning, cryptographic weakening or threshold change.
+
+Independent `ci_self_scan_review` approved this integration registry update,
+recomputed every source/full-result binding and partition, checked public DSA facts
+with OpenSSL and independently passed all 21 Node tests. Fresh combined local
+build/fmt/workspace tests (139)/clippy/Node tests (21) passed. Logs and exact
+raw/upload/audit evidence are under ignored `target/publish-021/`. Remote Actions
+and Code Scanning conclusions remain pending at local preparation time.
