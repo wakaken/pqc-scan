@@ -406,7 +406,7 @@ mod tests {
             })
             .collect();
         unreported.sort_unstable();
-        assert_eq!(unreported, ["certificate_detector", "dependency_detector"]);
+        assert_eq!(unreported, ["dependency_detector"]);
         assert!(diagnostics.get("findings").is_none());
         let read = |out: &Path, file: &str| {
             serde_json::from_str::<serde_json::Value>(&fs::read_to_string(out.join(file)).unwrap())

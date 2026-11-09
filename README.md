@@ -131,11 +131,36 @@ In practice:
 
 ### Certificate and Key Support
 
-- Certificate files: `.pem`, `.crt`, `.cer`, `.der`, `.p12`, `.pfx`
+- Certificate candidates: `.pem`, `.crt`, `.cer`, `.der` (PEM or DER selected by
+  content). `.p12`/`.pfx` produce container signals only; their contents are unsupported.
 - Private key markers:
   - `BEGIN RSA PRIVATE KEY`
   - `BEGIN PRIVATE KEY`
   - `BEGIN OPENSSH PRIVATE KEY`
+
+Certificate parsing separates the signature algorithm from the subject public key.
+RSA key size is the modulus bit length; EC size comes from supported named curves
+(P-256/P-384/P-521), not encoded point length. Ed25519/Ed448/X25519/X448 encoded
+lengths are recorded separately, without inventing RSA key size or security strength.
+Unknown/PQC subject-key encodings retain their OID and public fingerprints with
+unknown semantic size; a PQC OID is not proof of a valid PQC key.
+
+Existing certificate evidence metadata now includes public certificate/SPKI SHA-256
+fingerprints, explicitly named encoded byte lengths, key type/parameters, known
+semantic size/curve, validity timestamps and object positions. PEM bundles preserve
+each certificate's real line/column and block index, including distinct certificates
+sharing one public key. DER retains the legacy 1:1 location; `byte_offset: "0"`
+identifies the object, not a source-code position. Malformed/unsupported blocks retain
+other parsed certificates and report incomplete inspection through `--diagnostics`.
+No certificate signatures, chains or mathematical key/point validity are verified;
+PKCS#12 decryption and standalone public-key file detection are not implemented.
+
+Corrected sizes and PEM positions intentionally change affected certificate evidence,
+findings and IDs; CLI options, report structures and rule definitions stay compatible.
+Broad legacy rules still combine filename/signature/size/expiry text, so filename
+matches and ECDSA-to-DSA confusion remain known classification limitations for task 021.
+Files containing EC/DSA/encrypted private-key PEM markers also receive file-wide source
+snippet masking; this does not add new private-key detection rules or decrypt keys.
 
 ### Middleware/Config Coverage
 
@@ -230,9 +255,14 @@ languages and no applicable rules are outside the corresponding detector scope.
 `Complete` refers only to the supported pattern/marker strategy, not general
 symbol resolution, runtime use or discovery of every key format.
 
-**Current limitation:** dependency and certificate detectors still use the legacy
-adapter and report `detector_not_reported`. Full nonempty scans therefore normally
-remain `unknown`, or become `partial` when a limit/parser issue is observed; strict
+Certificate detection also reports applicability and parsing/attribute completeness.
+Malformed or mixed/unknown-attribute certificates yield `detector_partial`; unsupported
+containers yield `detector_unsupported`. A container finding does not prove that its
+contents were inspected. Unmatched but parsed certificates need not produce a finding.
+
+**Current limitation:** the dependency detector still uses the legacy adapter and
+reports `detector_not_reported`. Full nonempty scans therefore normally remain
+`unknown`, or become `partial` when a limit/parser issue is observed; strict
 mode returns 3 in either case. Existing report schemas and the diagnostics schema
 version remain unchanged; diagnostic values now reflect the additional outcomes.
 
