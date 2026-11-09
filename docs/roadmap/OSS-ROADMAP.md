@@ -145,7 +145,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Out of scope:** No automatic PQC certificate deployment or blanket severity rewrite.
 
-**Dependencies:** 020, 023.
+**Dependencies:** 020 and a reviewed certificate-only baseline before implementation. The user-requested 021 execution captures that focused baseline and old/new truth-unit comparison; the broader cross-language/performance study 023 remains related pending work, not a prerequisite for exact OID/type/time corrections. No product-wide accuracy budget is inferred.
 
 **Risks:** Existing classification/rule meanings change; this requires human review.
 
@@ -157,7 +157,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Implementation sequence (one PR):** 1. reviewed predicate/classification specification; 2. exact matching; 3. validity and migration docs.
 
-**Decision gate:** AGENTS.md human review before classification/rule-semantic implementation; this plan is not approval.
+**Decision gate:** The explicit user request to implement 021 authorizes the corrections in its reviewed [concrete specification](TASK-021-IMPLEMENTATION.md). Additional CLI/schema/general scoring or migration-policy changes remain subject to separate human review.
 
 **Queue:** [021-certificate-classification-policy.yaml](../../tasks/021-certificate-classification-policy.yaml).
 

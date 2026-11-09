@@ -4,11 +4,11 @@
   severity: high
   risk: quantum-vulnerable
   confidence: 0.72
-  migration_hint: Migrate to ML-DSA or hybrid certificate chains.
-  pattern: "(?i)sha(1|224|256|384|512)WithRSAEncryption|1\\.2\\.840\\.113549\\.1\\.1\\.(5|11|12|13)"
-  scope: certificate
+  migration_hint: Verify issuer, verifier and key-format support before evaluating standardized PQC certificate
+    signatures.
+  pattern: ^1\.2\.840\.113549\.1\.1\.(?:4|5|10|11|12|13|14)$
+  scope: signature_oid
   description: Certificate signed with an RSA-based algorithm detected.
-
 - id: CERT_SHA1_SIGNATURE
   kind: certificate
   category: PKI
@@ -16,76 +16,72 @@
   risk: non-quantum-risk
   confidence: 0.85
   migration_hint: Upgrade certificate signatures to SHA-256 or stronger.
-  pattern: "(?i)sha1WithRSAEncryption|1\\.2\\.840\\.113549\\.1\\.1\\.5"
-  scope: certificate
+  pattern: ^(?:1\.2\.840\.113549\.1\.1\.5|1\.2\.840\.10040\.4\.3|1\.2\.840\.10045\.4\.1)$
+  scope: signature_oid
   description: SHA-1 certificate signature detected.
-
 - id: CERT_RSA_1024
   kind: certificate
   category: PKI
   severity: critical
   risk: non-quantum-risk
   confidence: 0.88
-  migration_hint: Use 3072-bit+ keys or migrate to PQC.
-  pattern: "\\b1024\\b"
-  scope: certificate
-  description: Certificate with a 1024-bit key detected.
-
+  migration_hint: Confirm actual use and issuer/verifier support; replace weak deployed keys while planning purpose-appropriate
+    PQC migration.
+  pattern: ^1024$
+  scope: rsa_modulus_bits
+  description: Certificate subject public key is 1024-bit RSA.
 - id: CERT_RSA_2048
   kind: certificate
   category: PKI
   severity: high
   risk: quantum-vulnerable
   confidence: 0.78
-  migration_hint: Introduce hybrid certificates.
-  pattern: "\\b2048\\b"
-  scope: certificate
-  description: Certificate with a 2048-bit RSA key detected.
-
+  migration_hint: Plan supported PQC certificate signatures with issuer and peer compatibility checks; larger classical
+    keys alone do not remove quantum exposure.
+  pattern: ^2048$
+  scope: rsa_modulus_bits
+  description: Certificate subject public key is 2048-bit RSA.
 - id: CERT_RSA_3072
   kind: certificate
   category: PKI
   severity: medium
   risk: quantum-vulnerable
   confidence: 0.65
-  migration_hint: Run PQC certificate proof-of-concept trials.
-  pattern: "\\b3072\\b"
-  scope: certificate
-  description: Certificate with a 3072-bit RSA key detected.
-
+  migration_hint: Evaluate standardized PQC signatures in supported issuance and verification environments.
+  pattern: ^3072$
+  scope: rsa_modulus_bits
+  description: Certificate subject public key is 3072-bit RSA.
 - id: CERT_ECDSA_SIGNATURE
   kind: certificate
   category: PKI
   severity: medium
-  risk: quantum-uncertain
-  confidence: 0.60
+  risk: quantum-vulnerable
+  confidence: 0.6
   migration_hint: Evaluate ML-DSA and SLH-DSA alternatives.
-  pattern: "(?i)ecdsa-with-SHA(256|384|512)|1\\.2\\.840\\.10045\\.4\\.3\\.[234]"
-  scope: certificate
+  pattern: ^1\.2\.840\.10045\.(?:4\.1|4\.3\.[1-4])$
+  scope: signature_oid
   description: ECDSA certificate signature detected.
-
 - id: CERT_DSA_SIGNATURE
   kind: certificate
   category: PKI
   severity: high
-  risk: non-quantum-risk
-  confidence: 0.70
-  migration_hint: Decommission DSA usage.
-  pattern: "(?i)dsa|1\\.2\\.840\\.10040"
-  scope: certificate
+  risk: quantum-vulnerable
+  confidence: 0.7
+  migration_hint: Plan a supported replacement for DSA signing; assess legacy verification separately from quantum
+    exposure.
+  pattern: ^(?:1\.2\.840\.10040\.4\.3|2\.16\.840\.1\.101\.3\.4\.3\.[12])$
+  scope: signature_oid
   description: DSA-based certificate signature detected.
-
 - id: CERT_MD5_SIGNATURE
   kind: certificate
   category: PKI
   severity: critical
   risk: non-quantum-risk
-  confidence: 0.90
+  confidence: 0.9
   migration_hint: Reissue the certificate immediately.
-  pattern: "(?i)md5|1\\.2\\.840\\.113549\\.1\\.1\\.4"
-  scope: certificate
+  pattern: ^1\.2\.840\.113549\.1\.1\.4$
+  scope: signature_oid
   description: MD5 certificate signature detected.
-
 - id: CERT_P12_CONTAINER
   kind: certificate
   category: PKI
@@ -93,39 +89,58 @@
   risk: quantum-uncertain
   confidence: 0.35
   migration_hint: Audit algorithms used inside PKCS#12/PFX containers.
-  pattern: "(?i)\\.(p12|pfx)$"
+  pattern: (?i)\.(p12|pfx)$
   scope: certificate
   description: PKCS#12/PFX container file detected.
-
 - id: CERT_PEM_CONTAINER
   kind: certificate
   category: PKI
   severity: low
   risk: quantum-uncertain
-  confidence: 0.30
+  confidence: 0.3
   migration_hint: Validate signing algorithms in PEM-based certificates.
-  pattern: "(?i)\\.(pem|crt|cer|der)$"
+  pattern: (?i)\.(pem|crt|cer|der)$
   scope: certificate
   description: Certificate container file detected.
-
 - id: CERT_EXPIRY_2026_OR_BEFORE
   kind: certificate
   category: PKI
   severity: medium
   risk: non-quantum-risk
   confidence: 0.25
-  migration_hint: Include PQC migration requirements in renewal plans.
-  pattern: "20(1[0-9]|2[0-6])"
-  scope: certificate
-  description: Certificate metadata suggests a near-term expiration window.
-
+  migration_hint: Use current-time validity findings for renewal decisions; retain this legacy cutoff only for compatibility.
+  pattern: ^before_2027$
+  scope: legacy_not_after_2026
+  description: Parsed certificate expiry is at or before 2026 (legacy fixed cutoff, not current validity).
 - id: CERT_OID_RSA_PSS
   kind: certificate
   category: PKI
   severity: high
   risk: quantum-vulnerable
   confidence: 0.62
-  migration_hint: Plan phased migration to PQC signatures.
-  pattern: "1\\.2\\.840\\.113549\\.1\\.1\\.10"
-  scope: certificate
+  migration_hint: Verify issuer, verifier and key-format support before evaluating standardized PQC certificate
+    signatures.
+  pattern: ^1\.2\.840\.113549\.1\.1\.10$
+  scope: signature_oid
   description: RSASSA-PSS OID detected.
+- id: CERT_EXPIRED
+  kind: certificate
+  category: PKI
+  severity: medium
+  risk: non-quantum-risk
+  confidence: 0.9
+  migration_hint: Confirm whether the certificate is deployed and renew it where required; check issuer and verifier
+    compatibility.
+  pattern: ^expired$
+  scope: certificate_validity
+  description: Certificate is expired at the recorded assessment time.
+- id: CERT_NOT_YET_VALID
+  kind: certificate
+  category: PKI
+  severity: medium
+  risk: non-quantum-risk
+  confidence: 0.9
+  migration_hint: Check intended deployment time and the system clock; use a currently valid certificate where required.
+  pattern: ^not_yet_valid$
+  scope: certificate_validity
+  description: Certificate validity has not started at the recorded assessment time.

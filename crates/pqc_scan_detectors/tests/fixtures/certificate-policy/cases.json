@@ -1,0 +1,297 @@
+{
+  "version": 1,
+  "assessment_time_unix": 1794182400,
+  "truth_unit": "Exact rule/certificate observation for declared OID, subject size and parsed validity; not signature/trust verification.",
+  "cases": [
+    {
+      "name": "rsa-2048",
+      "source": "certificates/rsa2048.der",
+      "path": "rsa-2048.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "rsa-1024",
+      "source": "certificates/rsa1024.der",
+      "path": "rsa-1024.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_RSA_1024",
+        "CERT_RSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "rsa-3072",
+      "source": "certificates/rsa3072.der",
+      "path": "rsa-3072.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_RSA_3072",
+        "CERT_RSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "ecdsa",
+      "source": "certificates/p256.der",
+      "path": "ecdsa.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_ECDSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "rsa-signed-ec",
+      "source": "certificates/p256-rsa-signed.der",
+      "path": "mixed.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_RSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "dsa-sha256",
+      "source": "certificate-policy/dsa-sha256.der",
+      "path": "opaque.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_DSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "dsa-sha1",
+      "source": "certificate-policy/dsa-sha256.der",
+      "path": "dsa-sha1.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_DSA_SIGNATURE",
+        "CERT_SHA1_SIGNATURE"
+      ],
+      "signature_oid_hex": "2a8648ce380403"
+    },
+    {
+      "name": "ecdsa-sha1",
+      "source": "certificates/p256.der",
+      "path": "ecdsa-sha1.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_ECDSA_SIGNATURE",
+        "CERT_SHA1_SIGNATURE"
+      ],
+      "signature_oid_hex": "2a8648ce3d0401"
+    },
+    {
+      "name": "rsa-sha1",
+      "source": "certificates/rsa2048.der",
+      "path": "rsa-sha1.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE",
+        "CERT_SHA1_SIGNATURE"
+      ],
+      "signature_oid_hex": "2a864886f70d010105",
+      "signature_parameters": "null"
+    },
+    {
+      "name": "rsa-md5",
+      "source": "certificates/rsa2048.der",
+      "path": "rsa-md5.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_MD5_SIGNATURE",
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE"
+      ],
+      "signature_oid_hex": "2a864886f70d010104",
+      "signature_parameters": "null"
+    },
+    {
+      "name": "pss-signature",
+      "source": "certificates/rsa2048.der",
+      "path": "pss-signature.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_OID_RSA_PSS",
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE"
+      ],
+      "signature_oid_hex": "2a864886f70d01010a",
+      "signature_parameters": "pss_sha256"
+    },
+    {
+      "name": "pss-subject-only",
+      "source": "certificates/rsa2048.der",
+      "path": "pss-subject-only.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE"
+      ],
+      "public_key_pss": true
+    },
+    {
+      "name": "unknown-signature",
+      "source": "certificates/rsa2048.der",
+      "path": "unknown-signature.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_RSA_2048"
+      ],
+      "signature_oid_hex": "2a864886f70d01016e",
+      "signature_parameters": "null"
+    },
+    {
+      "name": "pqc-signature",
+      "source": "certificates/rsa2048.der",
+      "path": "pqc-signature.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_ML_DSA_SIGNATURE",
+        "CERT_RSA_2048"
+      ],
+      "signature_oid_hex": "608648016503040311"
+    },
+    {
+      "name": "pqc-subject",
+      "source": "certificates/rsa2048.der",
+      "path": "rsa-2048-pqc.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "public_key_oid_hex": "608648016503040311",
+      "expected_rules": [
+        "CERT_ML_DSA_PUBLIC_KEY",
+        "CERT_RSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "spoofed-ec",
+      "source": "certificates/p256.der",
+      "path": "sha1WithRSAEncryption-md5-dsa-1024-2026.pem",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_ECDSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "spoofed-ed",
+      "source": "certificates/ed25519.der",
+      "path": "rsa-1024-2026.der",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": []
+    },
+    {
+      "name": "expired",
+      "source": "certificates/rsa2048.der",
+      "path": "expired.der",
+      "before": "100101000000Z",
+      "after": "210101000000Z",
+      "expected_rules": [
+        "CERT_EXPIRED",
+        "CERT_EXPIRY_2026_OR_BEFORE",
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "not-yet-valid",
+      "source": "certificates/rsa2048.der",
+      "path": "not-yet-valid.der",
+      "before": "300101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_NOT_YET_VALID",
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "legacy-cutoff",
+      "source": "certificates/rsa2048.der",
+      "path": "legacy-cutoff.der",
+      "before": "200101000000Z",
+      "after": "261231235959Z",
+      "expected_rules": [
+        "CERT_EXPIRY_2026_OR_BEFORE",
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "after-legacy-cutoff",
+      "source": "certificates/rsa2048.der",
+      "path": "after-legacy-cutoff.der",
+      "before": "200101000000Z",
+      "after": "270101000000Z",
+      "expected_rules": [
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "generalized-time",
+      "source": "certificates/rsa2048.der",
+      "path": "generalized-time.der",
+      "before": "200101000000Z",
+      "after": "20500101000000Z",
+      "expected_rules": [
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE"
+      ]
+    },
+    {
+      "name": "reversed-interval",
+      "source": "certificates/rsa2048.der",
+      "path": "reversed-interval.der",
+      "before": "400101000000Z",
+      "after": "200101000000Z",
+      "expected_rules": [
+        "CERT_RSA_2048",
+        "CERT_RSA_SIGNATURE"
+      ],
+      "expected_status": "partial"
+    },
+    {
+      "name": "malformed",
+      "source": "certificates/rsa2048.der",
+      "path": "sha1WithRSAEncryption-md5-dsa-1024-2026.pem",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_PEM_CONTAINER"
+      ],
+      "malformed": true,
+      "expected_status": "partial"
+    },
+    {
+      "name": "unsupported-container",
+      "source": "certificates/rsa2048.der",
+      "path": "sha1WithRSAEncryption-md5-dsa-1024-2026.p12",
+      "before": "200101000000Z",
+      "after": "400101000000Z",
+      "expected_rules": [
+        "CERT_P12_CONTAINER"
+      ],
+      "malformed": true,
+      "expected_status": "unsupported"
+    }
+  ]
+}
