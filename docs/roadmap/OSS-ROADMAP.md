@@ -8,7 +8,11 @@ Retain the five workspace crates and their detectors/rules/report APIs. No exist
 
 Read the [vision](../product/PRODUCT-VISION.md), [gap evidence](../quality/CURRENT-GAP-ANALYSIS.md), [architecture](../architecture/NEXT-GEN-ARCHITECTURE.md), [domain model](../architecture/DOMAIN-MODEL.md), [probe design](../architecture/TLS-SSH-PROBE-DESIGN.md) and [quality gates](../quality/QUALITY-GATES.md). YAML files are queue records; this roadmap explains purpose and sequencing. Planning alone never marks an implementation task done.
 
-Size estimates describe relative scope, unknowns and verification burden, not days. PR splits are incremental slices within a task; completing one slice does not complete the whole task. Planner can create child tasks on selection after checking IDs/dependencies, rather than expanding a PR silently.
+Size estimates describe relative scope, unknowns and verification burden, not days. The default is **one task, one PR**, including its implementation, tests and documentation. Implementation steps are an ordered sequence within that PR; they do not create separate task records, PRs or lifecycle states. A task is complete only after its whole scope and acceptance criteria are validated.
+
+Keep a feasibility study separate when its evidence is needed to decide whether or how to implement a feature: task 031 precedes TLS implementation in 032, and deferred SSH study 039 does not authorize a negotiated-SSH feature. These are separate tasks with distinct outcomes, each normally delivered in one PR. Do not routinely split API, CLI, tests and documentation into separate PRs.
+
+If actual implementation proves too large or reveals a necessary independent decision, Planner may revise task boundaries before proceeding, documenting the reason, independently reviewable outcomes and dependencies. Do not preallocate A/B/C child tasks or PRs. Conditional steps are evaluated within the selected task; record a justified omission rather than scheduling a second PR automatically.
 
 Task `required_files` identifies existing extension points; `planned_new_paths`, where present, names proposed modules/crates/schemas without creating them. Core modules remain within the existing crate. Only tasks 032/033 propose protocol crates, conditional on their prior gates. Specific corpus/helper filenames can be refined by the selected implementer without changing responsibility or contracts.
 
@@ -29,10 +33,9 @@ Tasks 018, 022 and 023 may start independently. Corrections need not wait for a 
 
 ## First implementation PR and completion conditions
 
-Select **018-A**: preserve public ScanResult, scan_repository and existing Detector implementations while adding detailed outcomes and typed read/detector failure accounting. The first regression fixture distinguishes a failed read/failed detector from successful zero findings and retains another detector's hit. Account for accurate counters and unknown applicability; do not claim that a legacy adapter proves completeness.
+Select **task 018 as one PR**: preserve public ScanResult, scan_repository and existing Detector implementations while adding detailed outcomes and typed read/detector failure accounting. Start with regression fixtures that distinguish a failed read/failed detector from successful zero findings and retain another detector's hit. Add accurate counters and unknown applicability; do not claim that a legacy adapter proves completeness. Then expose warnings and opt-in diagnostics/require-complete behavior after the interface decision, with the tests and both READMEs in the same PR.
 
-018-B exposes warnings and opt-in diagnostics/require-complete behavior after the interface decision. The whole task requires both slices, unchanged legacy schema/ID contracts, failure/empty/partial/counter/exit tests, both READMEs, pinned build/fmt/test/clippy, Reviewer acceptance and Evaluator evidence. Remaining parser/cap gaps remain explicitly unknown until follow-up tasks; default scan exit semantics are retained.
-
+Completion requires the entire task: detailed API and CLI integration, unchanged legacy schema/ID contracts, failure/empty/partial/counter/exit tests, both READMEs, pinned build/fmt/test/clippy, Reviewer acceptance and Evaluator evidence. Approval of the interface remains a decision gate within this task, not a preplanned separate PR. Remaining parser/cap gaps remain explicitly unknown until their already defined follow-up tasks; default scan exit semantics are retained.
 
 ## Phase 0: inspection correctness and quality baseline
 
@@ -62,7 +65,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Size / unknowns / validation load:** Medium; moderate validation burden.
 
-**Recommended PRs:** 018-A: detailed API and failure/counter tests; 018-B: opt-in CLI diagnostics and both READMEs.
+**Implementation sequence (one PR):** 1. detailed API and failure/counter tests; 2. opt-in CLI diagnostics and both READMEs.
 
 **Decision gate:** Approve additive artifact/CLI names and opt-in exit policy; do not replace legacy storage.
 
@@ -92,7 +95,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Size / unknowns / validation load:** Small/medium; boundary-case validation.
 
-**Recommended PRs:** 019-A: regex budget; 019-B: AST/key outcomes.
+**Implementation sequence (one PR):** 1. regex budget; 2. AST/key outcomes.
 
 **Decision gate:** Normal role review; document expected result deltas.
 
@@ -122,7 +125,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Size / unknowns / validation load:** Medium; ASN.1 and fixture review.
 
-**Recommended PRs:** 020-A: typed parser/public fixtures; 020-B: detailed outcomes, object identity and docs.
+**Implementation sequence (one PR):** 1. typed parser/public fixtures; 2. detailed outcomes, object identity and docs.
 
 **Decision gate:** Review corrected cryptographic-attribute specification before implementation.
 
@@ -152,7 +155,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Size / unknowns / validation load:** Medium; high cryptographic/compatibility review burden.
 
-**Recommended PRs:** 021-A: reviewed predicate/classification specification; 021-B: exact matching; 021-C: validity and migration docs.
+**Implementation sequence (one PR):** 1. reviewed predicate/classification specification; 2. exact matching; 3. validity and migration docs.
 
 **Decision gate:** AGENTS.md human review before classification/rule-semantic implementation; this plan is not approval.
 
@@ -182,7 +185,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Size / unknowns / validation load:** Small; schema and Unicode validation.
 
-**Recommended PRs:** 022: location correction and tests.
+**Implementation sequence (one PR):** 1. location correction and tests.
 
 **Decision gate:** Normal role review; preserve schema version and document corrected values.
 
@@ -212,7 +215,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Size / unknowns / validation load:** Medium/high; labeling and measurement dominate.
 
-**Recommended PRs:** 023-A: corpus and labels; 023-B: evaluator/benchmark harness; 023-C: baseline and budget review.
+**Implementation sequence (one PR):** 1. corpus and labels; 2. evaluator/benchmark harness; 3. baseline and budget review.
 
 **Decision gate:** Agree measurement protocol and budgets after measuring; no predetermined percentages.
 
@@ -242,7 +245,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Size / unknowns / validation load:** Medium; language-specific uncertainty.
 
-**Recommended PRs:** 024-A: occurrence correction; 024-B: measured grammar/API follow-up only if justified.
+**Implementation sequence (one PR):** 1. occurrence correction; 2. measured grammar/API improvements only if justified within this task.
 
 **Decision gate:** Review dependency cost before adding a grammar.
 
@@ -272,7 +275,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Size / unknowns / validation load:** Small/medium; compatibility review.
 
-**Recommended PRs:** 028-A: validation/loader errors; 028-B: source/fixture quality manifest.
+**Implementation sequence (one PR):** 1. validation/loader errors; 2. source/fixture quality manifest.
 
 **Decision gate:** Human approval before rejecting existing custom semantics or changing detection patterns.
 
@@ -302,7 +305,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Size / unknowns / validation load:** Medium; cross-format security validation.
 
-**Recommended PRs:** 029-A: data-flow/canaries; 029-B: demonstrated fixes.
+**Implementation sequence (one PR):** 1. data-flow/canaries; 2. demonstrated fixes.
 
 **Decision gate:** Review concrete data flow; do not assert unproven leakage.
 
@@ -336,7 +339,7 @@ Add focused core modules, versioned native output and local policy. Separate alg
 
 **Size / unknowns / validation load:** Large but incremental; high identity/contract validation.
 
-**Recommended PRs:** 025-A: safe observation types; 025-B: inventory and identity adapters; 025-C: native schema and explicit CLI.
+**Implementation sequence (one PR):** 1. safe observation types; 2. inventory and identity adapters; 3. native schema and explicit CLI.
 
 **Decision gate:** Approve native v1 artifact and identity scope; no default schema replacement.
 
@@ -366,7 +369,7 @@ Add focused core modules, versioned native output and local policy. Separate alg
 
 **Size / unknowns / validation load:** Medium/high; standard/applicability review.
 
-**Recommended PRs:** 026-A: assessment/catalog; 026-B: profiles and policy; 026-C: explicit CLI and guidance.
+**Implementation sequence (one PR):** 1. assessment/catalog; 2. profiles and policy; 3. explicit CLI and guidance.
 
 **Decision gate:** Human review for changed rule/classification or legacy severity; choose profile applicability.
 
@@ -396,7 +399,7 @@ Add focused core modules, versioned native output and local policy. Separate alg
 
 **Size / unknowns / validation load:** Medium; ecosystem matrix.
 
-**Recommended PRs:** 027-A: parser provenance; 027-B: inventory/purl contract.
+**Implementation sequence (one PR):** 1. parser provenance; 2. inventory/purl contract.
 
 **Decision gate:** Review intentional semantic correction and document legacy projection limitations.
 
@@ -430,7 +433,7 @@ Implement reviewed endpoint safety, demonstrate pinned API/provider feasibility,
 
 **Size / unknowns / validation load:** Medium/high; network/platform validation.
 
-**Recommended PRs:** 030-A: pure policy/config; 030-B: bounded transport and isolated tests.
+**Implementation sequence (one PR):** 1. pure policy/config; 2. bounded transport and isolated tests.
 
 **Decision gate:** Maintainers choose allowlist defaults, reviewed hard caps and explicit command shape.
 
@@ -460,7 +463,7 @@ Implement reviewed endpoint safety, demonstrate pinned API/provider feasibility,
 
 **Size / unknowns / validation load:** Medium; high uncertainty until spike.
 
-**Recommended PRs:** 031: isolated feasibility record and dependency decision.
+**Implementation sequence (one PR):** 1. isolated feasibility record and dependency decision.
 
 **Decision gate:** Approve backend/features/platforms after spike; no custom TLS fallback.
 
@@ -490,7 +493,7 @@ Implement reviewed endpoint safety, demonstrate pinned API/provider feasibility,
 
 **Size / unknowns / validation load:** Medium/high; protocol/build/identity validation.
 
-**Recommended PRs:** 032-A: optional crate/session; 032-B: CLI/model/assessment; 032-C: isolated matrix/docs.
+**Implementation sequence (one PR):** 1. optional crate/session; 2. CLI/model/assessment; 3. isolated matrix/docs.
 
 **Decision gate:** Backend selection and network defaults must already pass 030/031 decisions.
 
@@ -524,7 +527,7 @@ Collect bounded unauthenticated KEXINIT offers only. Separate server candidates 
 
 **Size / unknowns / validation load:** Medium/high; bounded protocol parser review.
 
-**Recommended PRs:** 033-A: parser/fixtures; 033-B: explicit command/transport; 033-C: isolated interoperability/docs.
+**Implementation sequence (one PR):** 1. parser/fixtures; 2. explicit command/transport; 3. isolated interoperability/docs.
 
 **Decision gate:** Review parser scope/caps; full library needs separately justified decision.
 
@@ -558,7 +561,7 @@ Add separate standard documents, completeness-aware comparison and new diagnosti
 
 **Size / unknowns / validation load:** Medium/high; standards mapping validation.
 
-**Recommended PRs:** 034-A: mapping/schema fixtures; 034-B: exporters/CLI; 034-C: semantic/consumer validation.
+**Implementation sequence (one PR):** 1. mapping/schema fixtures; 2. exporters/CLI; 3. semantic/consumer validation.
 
 **Decision gate:** Approve separate filenames/format; never replace old arrays without new migration approval.
 
@@ -588,7 +591,7 @@ Add separate standard documents, completeness-aware comparison and new diagnosti
 
 **Size / unknowns / validation load:** Medium; correspondence/false-resolution validation.
 
-**Recommended PRs:** 035-A: exact compare and scope checks; 035-B: uncertain move correspondence/reporting.
+**Implementation sequence (one PR):** 1. exact compare and scope checks; 2. uncertain move correspondence/reporting.
 
 **Decision gate:** Approve explicit repository scope and heuristic matching behavior.
 
@@ -618,7 +621,7 @@ Add separate standard documents, completeness-aware comparison and new diagnosti
 
 **Size / unknowns / validation load:** Small/medium; language/browser review.
 
-**Recommended PRs:** 036-A: diagnostic/catalog parity; 036-B: runtime sections after probe availability.
+**Implementation sequence (one PR):** 1. diagnostic/catalog parity; 2. runtime sections after probe availability.
 
 **Decision gate:** No runtime LLM; add optional runtime sections only after their feature exists.
 
@@ -652,7 +655,7 @@ Prepare packaging/security/upgrade and clean-install evidence in 038 before fina
 
 **Size / unknowns / validation load:** High validation load; integration, not redesign.
 
-**Recommended PRs:** 037-A: CI matrix/gates; 037-B: release-candidate evidence/support contract.
+**Implementation sequence (one PR):** 1. CI matrix/gates; 2. release-candidate evidence/support contract.
 
 **Decision gate:** Maintainers approve baseline-derived budgets and release scope.
 
@@ -682,7 +685,7 @@ Prepare packaging/security/upgrade and clean-install evidence in 038 before fina
 
 **Size / unknowns / validation load:** Medium/high; packaging/platform unknowns.
 
-**Recommended PRs:** 038-A: release inventory/decision; 038-B: install/rule assets; 038-C: security/release/upgrade docs.
+**Implementation sequence (one PR):** 1. release inventory/decision; 2. install/rule assets; 3. security/release/upgrade docs.
 
 **Decision gate:** Choose channels/support window; external publication requires separate authorization.
 
@@ -716,7 +719,7 @@ Do not prebuild platform infrastructure. Enterprise aggregation, ownership, RBAC
 
 **Size / unknowns / validation load:** Unknown until selected; deliberately deferred.
 
-**Recommended PRs:** 039: conditional investigation only.
+**Implementation sequence (one PR):** 1. conditional investigation only.
 
 **Decision gate:** No Phase 3 dependency; maintainers must justify negotiated-session use case first.
 

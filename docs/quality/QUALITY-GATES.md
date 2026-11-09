@@ -8,6 +8,8 @@ Every implementation task must record exact HEAD/worktree, selected scope, comma
 
 Planner selects `pending -> planned`; Executor moves `in-progress -> review`; Reviewer assesses correctness/security/compatibility; Evaluator alone marks `done` after required evidence; Reflection updates durable knowledge without duplication. This design adds pending work only. Preserve the existing 014/016 statuses and the pilot's scope. When an implementation encounters an AGENTS.md stop condition, stop before changing rule semantics, storage contracts or high-risk architecture, and obtain the required human decision.
 
+The default delivery unit is one task, one PR, including implementation, tests and documentation. Internal implementation steps are not separate PRs or task states. Necessary prerequisite feasibility studies retain their own task and decision gate. This changes delivery planning, not acceptance criteria or role ownership.
+
 Source review, local execution, independent review, browser acceptance and remote CI are different evidence classes. Do not report one as another. Failed/unavailable validation stays explicit. A rule count, test declaration count or successful test count is not a quality score.
 
 ## Baseline study before numeric targets (task 023)

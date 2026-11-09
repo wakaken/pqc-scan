@@ -47,4 +47,6 @@ Local helper changes are corrections, not a license to replace a detector framew
 
 First establish measured precision/recall by detection family, inspection coverage, reproducibility, runtime/memory and export conformance. Then agree improvement budgets using that baseline; rule counts and successful test counts are not accuracy metrics. [Quality gates](../quality/QUALITY-GATES.md) define evidence requirements.
 
-This design records recommendations, not human approval of future schema, rule-semantic or high-risk architectural changes. See the [roadmap](../roadmap/OSS-ROADMAP.md) for PR-sized work and decision gates, the [domain model](../architecture/DOMAIN-MODEL.md) for evidence semantics and the [boundary](OSS-ENTERPRISE-BOUNDARY.md) for platform responsibilities.
+The default delivery unit is one task with its implementation, tests and documentation in one PR; a necessary prerequisite feasibility study can remain a separate task.
+
+This design records recommendations, not human approval of future schema, rule-semantic or high-risk architectural changes. See the [roadmap](../roadmap/OSS-ROADMAP.md) for task scope and decision gates, the [domain model](../architecture/DOMAIN-MODEL.md) for evidence semantics and the [boundary](OSS-ENTERPRISE-BOUNDARY.md) for platform responsibilities.
