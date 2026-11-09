@@ -2,7 +2,9 @@ use anyhow::Result;
 
 use crate::comment_filter::should_skip_comment_only_match;
 use pqc_scan_core::model::{line_col_for_offset, mask_preview, snippet_around};
-use pqc_scan_core::{Detection, Detector, Evidence, Location, ScannableFile};
+use pqc_scan_core::{
+    Detection, Detector, DetectorOutcome, DetectorStatus, Evidence, Location, ScannableFile,
+};
 use pqc_scan_rules::{RuleKind, RuleSet};
 
 #[derive(Debug, Default)]
@@ -14,22 +16,49 @@ impl Detector for RegexDetector {
     }
 
     fn detect(&self, file: &ScannableFile, rules: &RuleSet) -> Result<Vec<Detection>> {
+        Ok(self.detect_detailed(file, rules)?.into_detections())
+    }
+
+    fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
         let text = match file.text.as_ref() {
             Some(v) => v,
-            None => return Ok(Vec::new()),
+            None => {
+                return Ok(DetectorOutcome::new(
+                    Vec::new(),
+                    DetectorStatus::NotApplicable,
+                ))
+            }
         };
 
         let mut out = Vec::new();
+        let mut status = DetectorStatus::NotApplicable;
 
         for rule in rules.by_kind(RuleKind::Regex) {
+            if status == DetectorStatus::NotApplicable {
+                status = DetectorStatus::Complete;
+            }
             let regex = match rule.compiled_pattern() {
                 Some(v) => v,
-                None => continue,
+                None => {
+                    if status != DetectorStatus::Truncated {
+                        status = DetectorStatus::Partial;
+                    }
+                    continue;
+                }
             };
 
-            for found in regex.find_iter(text).take(32) {
+            let mut accepted = 0;
+            for (examined, found) in regex.find_iter(text).enumerate() {
+                if examined >= crate::MAX_RULE_MATCH_CANDIDATES {
+                    status = DetectorStatus::Truncated;
+                    break;
+                }
                 if should_skip_comment_only_match(&file.path, text, found.start()) {
                     continue;
+                }
+                if accepted == 32 {
+                    status = DetectorStatus::Truncated;
+                    break;
                 }
                 let (line, column) = line_col_for_offset(text, found.start());
                 out.push(Detection {
@@ -49,10 +78,11 @@ impl Detector for RegexDetector {
                         ]),
                     },
                 });
+                accepted += 1;
             }
         }
 
-        Ok(out)
+        Ok(DetectorOutcome::new(out, status))
     }
 }
 

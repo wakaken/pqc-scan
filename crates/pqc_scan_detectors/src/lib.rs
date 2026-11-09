@@ -9,6 +9,10 @@ use std::sync::Arc;
 
 use pqc_scan_core::Detector;
 
+// Accepted-hit caps are separate. One additional iterator look-ahead may establish
+// remaining candidates, but is never filtered, emitted or counted as an omitted hit.
+const MAX_RULE_MATCH_CANDIDATES: usize = 4096;
+
 pub fn default_detectors() -> Vec<Arc<dyn Detector>> {
     vec![
         Arc::new(tree_sitter_detector::TreeSitterDetector),

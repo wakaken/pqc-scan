@@ -6,11 +6,16 @@ use tree_sitter::{Language, Parser};
 
 use crate::comment_filter::should_skip_comment_only_match_for_language;
 use pqc_scan_core::model::mask_preview;
-use pqc_scan_core::{Detection, Detector, Evidence, Location, ScannableFile};
+use pqc_scan_core::{
+    Detection, Detector, DetectorOutcome, DetectorStatus, Evidence, Location, ScannableFile,
+};
 use pqc_scan_rules::{RuleKind, RuleSet};
 
 #[derive(Debug, Default)]
 pub struct TreeSitterDetector;
+
+const MAX_CANDIDATE_NODES: usize = 4096;
+const MAX_SCHEDULED_NODES: usize = 100_000;
 
 #[derive(Debug, Clone)]
 struct CandidateNode {
@@ -27,29 +32,52 @@ impl Detector for TreeSitterDetector {
     }
 
     fn detect(&self, file: &ScannableFile, rules: &RuleSet) -> Result<Vec<Detection>> {
+        Ok(self.detect_detailed(file, rules)?.into_detections())
+    }
+
+    fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
         let text = match file.text.as_ref() {
             Some(v) => v,
-            None => return Ok(Vec::new()),
+            None => {
+                return Ok(DetectorOutcome::new(
+                    Vec::new(),
+                    DetectorStatus::NotApplicable,
+                ))
+            }
         };
 
         let (language, language_name) = match resolve_language(&file.path) {
             Some(v) => v,
-            None => return Ok(Vec::new()),
+            None => {
+                return Ok(DetectorOutcome::new(
+                    Vec::new(),
+                    DetectorStatus::NotApplicable,
+                ))
+            }
         };
 
-        let mut parser = Parser::new();
-        if parser.set_language(&language).is_err() {
-            return Ok(Vec::new());
+        if !rules
+            .by_kind(RuleKind::TreeSitter)
+            .any(|rule| scope_matches(&rule.scope, language_name))
+        {
+            return Ok(DetectorOutcome::new(
+                Vec::new(),
+                DetectorStatus::NotApplicable,
+            ));
         }
 
-        let tree = match parser.parse(text, None) {
-            Some(v) => v,
-            None => return Ok(Vec::new()),
-        };
+        let mut parser = Parser::new();
+        parser
+            .set_language(&language)
+            .map_err(|_| anyhow::anyhow!("failed to initialize source parser"))?;
 
-        let candidates = collect_candidate_nodes(text, &tree);
-        if candidates.is_empty() {
-            return Ok(Vec::new());
+        let tree = parser
+            .parse(text, None)
+            .ok_or_else(|| anyhow::anyhow!("source parser produced no tree"))?;
+
+        let (candidates, mut status) = collect_candidate_nodes(text, &tree);
+        if tree.root_node().has_error() && status != DetectorStatus::Truncated {
+            status = DetectorStatus::Partial;
         }
 
         let mut out = Vec::new();
@@ -63,23 +91,27 @@ impl Detector for TreeSitterDetector {
 
             let regex = match rule.compiled_pattern() {
                 Some(v) => v,
-                None => continue,
+                None => {
+                    if status != DetectorStatus::Truncated {
+                        status = DetectorStatus::Partial;
+                    }
+                    continue;
+                }
             };
 
             let mut rule_hits = 0usize;
-            for candidate in &candidates {
+            let mut examined = 0usize;
+            'candidates: for candidate in &candidates {
                 // Python/Ruby call nodes are enabled only for the new PQC inventory.
                 if candidate.kind == "call" && !rule.id.starts_with("PQC_") {
                     continue;
                 }
-                if rule_hits >= 32 {
-                    break;
-                }
-
                 for hit in regex.find_iter(&candidate.text) {
-                    if rule_hits >= 32 {
-                        break;
+                    if examined >= crate::MAX_RULE_MATCH_CANDIDATES {
+                        status = DetectorStatus::Truncated;
+                        break 'candidates;
                     }
+                    examined += 1;
                     if should_skip_comment_only_match_for_language(
                         language_name,
                         &candidate.text,
@@ -107,9 +139,14 @@ impl Detector for TreeSitterDetector {
                         line,
                         normalize_match_for_dedup(hit.as_str())
                     );
-                    if !dedup.insert(dedup_key) {
+                    if dedup.contains(&dedup_key) {
                         continue;
                     }
+                    if rule_hits == 32 {
+                        status = DetectorStatus::Truncated;
+                        break 'candidates;
+                    }
+                    dedup.insert(dedup_key);
 
                     let mut metadata = BTreeMap::new();
                     metadata.insert("detector".to_string(), self.name().to_string());
@@ -136,18 +173,28 @@ impl Detector for TreeSitterDetector {
             }
         }
 
-        Ok(out)
+        Ok(DetectorOutcome::new(out, status))
     }
 }
 
-fn collect_candidate_nodes(text: &str, tree: &tree_sitter::Tree) -> Vec<CandidateNode> {
+fn collect_candidate_nodes(
+    text: &str,
+    tree: &tree_sitter::Tree,
+) -> (Vec<CandidateNode>, DetectorStatus) {
     let mut out = Vec::new();
     let mut stack = vec![tree.root_node()];
+    let mut scheduled = 1;
+    let mut status = DetectorStatus::Complete;
 
-    while let Some(node) = stack.pop() {
+    'walk: while let Some(node) = stack.pop() {
         let mut cursor = node.walk();
         for child in node.children(&mut cursor) {
+            if scheduled >= MAX_SCHEDULED_NODES {
+                status = DetectorStatus::Truncated;
+                break 'walk;
+            }
             stack.push(child);
+            scheduled += 1;
         }
 
         if !node.is_named() {
@@ -161,33 +208,46 @@ fn collect_candidate_nodes(text: &str, tree: &tree_sitter::Tree) -> Vec<Candidat
 
         let raw_text = match node.utf8_text(text.as_bytes()) {
             Ok(v) => v,
-            Err(_) => continue,
+            Err(_) => {
+                if status != DetectorStatus::Truncated {
+                    status = DetectorStatus::Partial;
+                }
+                continue;
+            }
         };
         if raw_text.trim().is_empty() {
             continue;
         }
 
-        let clipped = clip_text(raw_text, 2000);
+        if out.len() >= MAX_CANDIDATE_NODES {
+            status = DetectorStatus::Truncated;
+            break;
+        }
+        let (clipped, was_clipped) = clip_text(raw_text, 2000);
+        if was_clipped {
+            status = DetectorStatus::Truncated;
+        }
         let point = node.start_position();
         out.push(CandidateNode {
             kind: kind.to_string(),
             text: clipped,
-            snippet_preview: clip_text(raw_text.trim(), 240),
+            snippet_preview: clip_text(raw_text.trim(), 240).0,
             line: point.row + 1,
             column: point.column + 1,
         });
     }
 
-    out
+    (out, status)
 }
 
-fn clip_text(input: &str, max_chars: usize) -> String {
-    if input.chars().count() <= max_chars {
-        return input.to_string();
+fn clip_text(input: &str, max_chars: usize) -> (String, bool) {
+    if let Some((boundary, _)) = input.char_indices().nth(max_chars) {
+        let mut out = input[..boundary].to_string();
+        out.push_str("...");
+        (out, true)
+    } else {
+        (input.to_string(), false)
     }
-    let mut out: String = input.chars().take(max_chars).collect();
-    out.push_str("...");
-    out
 }
 
 fn is_semantic_node_kind(kind: &str) -> bool {

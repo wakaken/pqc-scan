@@ -396,7 +396,17 @@ mod tests {
         assert_eq!(diagnostics["coverage"]["status"], "unknown");
         assert_eq!(diagnostics["coverage"]["selected_files"], 1);
         assert_eq!(diagnostics["coverage"]["unknown_files"], 1);
-        assert_eq!(diagnostics["diagnostics"].as_array().unwrap().len(), 5);
+        let mut unreported: Vec<_> = diagnostics["diagnostics"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|d| {
+                assert_eq!(d["code"], "detector_not_reported");
+                d["detector"].as_str().unwrap()
+            })
+            .collect();
+        unreported.sort_unstable();
+        assert_eq!(unreported, ["certificate_detector", "dependency_detector"]);
         assert!(diagnostics.get("findings").is_none());
         let read = |out: &Path, file: &str| {
             serde_json::from_str::<serde_json::Value>(&fs::read_to_string(out.join(file)).unwrap())
