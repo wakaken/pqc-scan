@@ -398,6 +398,6 @@ remain language-independent. No runtime translation service is used.
   2. register enum variant and output path mapping
 
 Task 025 adds the opt-in Cryptographic Inventory and Evidence Report beside the
-legacy pipeline. `--inventory-json` writes `scan.inventory.v1.json`; the original
-`--native-json`/filename remain supported. See [INVENTORY-REPORT-V1.md](architecture/INVENTORY-REPORT-V1.md)
+legacy pipeline. `--inventory-json` writes `scan.inventory.v1.json` and is the only
+CLI switch for that report; `--native-json` has been removed. See [INVENTORY-REPORT-V1.md](architecture/INVENTORY-REPORT-V1.md)
 for identity, assurance and export losses.

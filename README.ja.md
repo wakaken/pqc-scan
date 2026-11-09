@@ -242,9 +242,9 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
 ```
 
-互換性のため、旧指定 `--native-json` は引き続き旧ファイル `scan.native.v1.json` を出力します。
-新旧を両方指定すると、1回のスキャン結果を同じ内容で両ファイルに出力します。
-`--repository-scope` はどちらの指定とも併用できます。JSONの項目・スキーマの版・ID生成は変更しません。
+このレポートのCLI指定は `--inventory-json` に統一しました。旧指定 `--native-json` は廃止したため、
+`--inventory-json` へ置き換え、読み込むファイルも `scan.native.v1.json` から
+`scan.inventory.v1.json` へ変更してください。JSONの項目・スキーマの版・ID生成は変更しません。
 
 ### 検査の完全性と診断情報
 

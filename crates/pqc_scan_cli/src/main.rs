@@ -12,8 +12,8 @@ use pqc_scan_core::{
 };
 use pqc_scan_detectors::default_detectors;
 use pqc_scan_report::{
-    write_diagnostics, write_inventory_json, write_native_json, write_reports_with_language,
-    ReportFormat, ReportLanguage,
+    write_diagnostics, write_inventory_json, write_reports_with_language, ReportFormat,
+    ReportLanguage,
 };
 use pqc_scan_rules::{RuleSet, Severity};
 
@@ -38,7 +38,6 @@ enum Commands {
 }
 
 #[derive(Debug, Parser)]
-#[command(group(clap::ArgGroup::new("inventory_capture").args(["inventory_json", "native_json"]).multiple(true)))]
 struct ScanArgs {
     path: PathBuf,
 
@@ -69,12 +68,8 @@ struct ScanArgs {
     #[arg(long)]
     inventory_json: bool,
 
-    /// Compatibility option: write the same report to scan.native.v1.json.
-    #[arg(long)]
-    native_json: bool,
-
     /// Non-secret project identifier for inventory correspondence keys; never a remote URL.
-    #[arg(long, requires = "inventory_capture")]
+    #[arg(long, requires = "inventory_json")]
     repository_scope: Option<String>,
 
     /// Return exit code 3 unless every selected inspection is known to be complete.
@@ -238,7 +233,7 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     };
 
     let detectors = default_detectors();
-    let document = if args.inventory_json || args.native_json {
+    let document = if args.inventory_json {
         let options = NativeOptions::new(args.repository_scope.as_deref())?;
         scan_repository_native(&config, &rules, &detectors, &options)?
     } else {
@@ -253,9 +248,6 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     }
     if args.inventory_json {
         outputs.push(write_inventory_json(&document, &args.out_dir)?);
-    }
-    if args.native_json {
-        outputs.push(write_native_json(&document, &args.out_dir)?);
     }
     for out in outputs {
         writeln!(stdout, "written {}", out.display())?;

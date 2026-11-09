@@ -153,7 +153,7 @@ fn inventory_is_explicit_and_legacy_outputs_are_a_shadow_not_a_replacement() {
 }
 
 #[test]
-fn native_private_markers_do_not_export_payload_and_remain_language_independent() {
+fn inventory_private_markers_do_not_export_payload_and_remain_language_independent() {
     let f = Fixture(std::env::temp_dir().join(format!("pqc025-private-{}", std::process::id())));
     let input = f.0.join("input");
     std::fs::create_dir_all(&input).unwrap();
@@ -180,7 +180,7 @@ fn native_private_markers_do_not_export_payload_and_remain_language_independent(
             &rules,
             &out,
             &[
-                "--native-json",
+                "--inventory-json",
                 "--repository-scope",
                 "test/private",
                 "--lang",
@@ -197,7 +197,7 @@ fn native_private_markers_do_not_export_payload_and_remain_language_independent(
             "report.sarif",
             "report.html",
             "report.md",
-            "scan.native.v1.json",
+            "scan.inventory.v1.json",
         ] {
             assert!(
                 !std::fs::read_to_string(out.join(name))
@@ -207,7 +207,7 @@ fn native_private_markers_do_not_export_payload_and_remain_language_independent(
             );
         }
         let n: Value =
-            serde_json::from_slice(&std::fs::read(out.join("scan.native.v1.json")).unwrap())
+            serde_json::from_slice(&std::fs::read(out.join("scan.inventory.v1.json")).unwrap())
                 .unwrap();
         assert!(n["observations"]
             .as_array()
@@ -223,8 +223,8 @@ fn native_private_markers_do_not_export_payload_and_remain_language_independent(
 }
 
 #[test]
-fn native_schema_and_references_cover_public_certificates_dependencies_and_rejected_package_paths()
-{
+fn inventory_schema_and_references_cover_public_certificates_dependencies_and_rejected_package_paths(
+) {
     let f = Fixture(std::env::temp_dir().join(format!("pqc025-mixed-{}", std::process::id())));
     let input = f.0.join("input");
     std::fs::create_dir_all(&input).unwrap();
@@ -236,9 +236,14 @@ fn native_schema_and_references_cover_public_certificates_dependencies_and_rejec
     .unwrap();
     std::fs::write(input.join("package.json"),r#"{"dependencies":{"test-package":"1.2.3-beta.1","/SECRET_CANARY/absolute":"1.0.0","foo//bar":"1.0.0"}}"#).unwrap();
     let out = f.0.join("out");
-    let result = cli(&input, &workspace.join("rules"), &out, &["--native-json"]);
+    let result = cli(
+        &input,
+        &workspace.join("rules"),
+        &out,
+        &["--inventory-json"],
+    );
     assert!(result.status.success());
-    let raw = std::fs::read_to_string(out.join("scan.native.v1.json")).unwrap();
+    let raw = std::fs::read_to_string(out.join("scan.inventory.v1.json")).unwrap();
     assert!(!raw.contains("CANARY"));
     assert!(!raw.contains("foo//bar"));
     let native: Value = serde_json::from_str(&raw).unwrap();
@@ -284,69 +289,64 @@ fn native_schema_and_references_cover_public_certificates_dependencies_and_rejec
 }
 
 #[test]
-fn inventory_and_native_options_preserve_filenames_and_share_one_capture_when_combined() {
-    let f = Fixture(std::env::temp_dir().join(format!("pqc025-names-{}", std::process::id())));
+fn inventory_option_is_the_only_cli_switch_and_preserves_exit_behavior() {
+    let f = Fixture(std::env::temp_dir().join(format!("pqc025-only-{}", std::process::id())));
     let input = f.0.join("input");
     let rules = f.0.join("rules");
     std::fs::create_dir_all(&input).unwrap();
     std::fs::create_dir_all(&rules).unwrap();
     std::fs::write(input.join("app.txt"), "RSA\n").unwrap();
     std::fs::write(rules.join("rule.yml"),r#"[{"id":"TEST_RENAME","kind":"regex","category":"test","severity":"high","risk":"quantum-vulnerable","confidence":0.5,"migration_hint":"Review fixture.","pattern":"RSA","scope":"code"}]"#).unwrap();
-    for (i, (flags, inventory, native)) in [
-        (vec!["--inventory-json"], true, false),
-        (vec!["--native-json"], false, true),
-        (vec!["--inventory-json", "--native-json"], true, true),
+    for (i, (flags, exit)) in [
+        (vec![], 0),
+        (vec!["--fail-on", "high"], 2),
+        (vec!["--require-complete"], 3),
+        (vec!["--require-complete", "--fail-on", "high"], 3),
     ]
     .into_iter()
     .enumerate()
     {
-        for (j, (exit_flags, exit)) in [
-            (vec![], 0),
-            (vec!["--fail-on", "high"], 2),
-            (vec!["--require-complete"], 3),
-            (vec!["--require-complete", "--fail-on", "high"], 3),
-        ]
-        .into_iter()
-        .enumerate()
-        {
-            let out = f.0.join(format!("{i}-{j}"));
-            let mut args = flags.clone();
-            args.extend(["--repository-scope", "test/project"]);
-            args.extend(exit_flags);
-            let result = cli(&input, &rules, &out, &args);
-            assert_eq!(
-                result.status.code(),
-                Some(exit),
-                "{}",
-                String::from_utf8_lossy(&result.stderr)
-            );
-            assert_eq!(out.join("scan.inventory.v1.json").exists(), inventory);
-            assert_eq!(out.join("scan.native.v1.json").exists(), native);
-            if inventory && native {
-                assert_eq!(
-                    std::fs::read(out.join("scan.inventory.v1.json")).unwrap(),
-                    std::fs::read(out.join("scan.native.v1.json")).unwrap(),
-                    "same run and observation IDs, captured once"
-                );
-            }
-            let filename = if inventory {
-                "scan.inventory.v1.json"
-            } else {
-                "scan.native.v1.json"
-            };
-            let value: Value =
-                serde_json::from_slice(&std::fs::read(out.join(filename)).unwrap()).unwrap();
-            assert_eq!(value["repository_scope"], "test/project");
-            assert_eq!(value["observations"].as_array().unwrap().len(), 1);
-        }
+        let out = f.0.join(format!("valid-{i}"));
+        let mut args = vec!["--inventory-json", "--repository-scope", "test/project"];
+        args.extend(flags);
+        let result = cli(&input, &rules, &out, &args);
+        assert_eq!(
+            result.status.code(),
+            Some(exit),
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        assert!(out.join("scan.inventory.v1.json").exists());
+        assert!(!out.join("scan.native.v1.json").exists());
+        let n: Value =
+            serde_json::from_slice(&std::fs::read(out.join("scan.inventory.v1.json")).unwrap())
+                .unwrap();
+        assert_eq!(n["repository_scope"], "test/project");
+        assert_eq!(n["observations"].as_array().unwrap().len(), 1);
     }
     let out = f.0.join("no-scope");
-    let result = cli(&input, &rules, &out, &["--inventory-json"]);
-    assert!(result.status.success());
-    let value: Value =
+    assert!(cli(&input, &rules, &out, &["--inventory-json"])
+        .status
+        .success());
+    let n: Value =
         serde_json::from_slice(&std::fs::read(out.join("scan.inventory.v1.json")).unwrap())
             .unwrap();
-    assert!(value["repository_scope"].is_null());
+    assert!(n["repository_scope"].is_null());
+    for (i, flags) in [
+        vec!["--native-json"],
+        vec!["--inventory-json", "--native-json"],
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let out = f.0.join(format!("removed-{i}"));
+        let result = cli(&input, &rules, &out, &flags);
+        assert!(!result.status.success());
+        assert!(
+            String::from_utf8_lossy(&result.stderr).contains("unexpected argument '--native-json'")
+        );
+        assert!(!out.exists(), "reject before writing reports");
+    }
     let help = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
         .args(["scan", "--help"])
         .output()
@@ -357,5 +357,6 @@ fn inventory_and_native_options_preserve_filenames_and_share_one_capture_when_co
         String::from_utf8_lossy(&help.stderr)
     );
     assert!(help.contains("--inventory-json"));
+    assert!(!help.contains("--native-json"));
     assert!(help.contains("Cryptographic Inventory and Evidence Report"));
 }

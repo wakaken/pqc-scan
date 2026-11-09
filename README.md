@@ -253,10 +253,10 @@ assessment. See the [contract and limitations](docs/architecture/INVENTORY-REPOR
 pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
 ```
 
-For compatibility, `--native-json` still writes the original `scan.native.v1.json`.
-Selecting both options writes identical content to both files from one capture.
-`--repository-scope` works with either option. JSON fields, schema version and ID
-generation are unchanged.
+`--inventory-json` is the only CLI option for this report. The former `--native-json`
+option has been removed; replace it with `--inventory-json` and read
+`scan.inventory.v1.json` instead of `scan.native.v1.json`. JSON fields, schema
+version and ID generation are unchanged.
 
 ### Inspection diagnostics
 

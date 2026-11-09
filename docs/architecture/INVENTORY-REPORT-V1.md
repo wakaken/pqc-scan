@@ -3,12 +3,17 @@
 The user-facing name is **暗号資産・検出根拠レポート** in Japanese.
 `--inventory-json` writes `scan.inventory.v1.json`. This is an original pqc-scan
 JSON format, not the name of a shared standard. `--format all` alone still writes
-the six legacy reports. `--repository-scope team/project` requires either report
+the six legacy reports. `--repository-scope team/project` requires the report
 option and must be a non-secret relative project identifier.
 
-Compatibility: `--native-json` writes the original `scan.native.v1.json`. Both
-flags together write byte-identical files from one capture. The library adds
-`write_inventory_json`; `write_native_json` retains its original filename.
+`--inventory-json` is the only CLI switch for this report. The former
+`--native-json` is rejected as an unknown argument, including when combined with
+the current switch, before report output. CLI consumers must use
+`--inventory-json` and read `scan.inventory.v1.json`. The CLI does not produce
+`scan.native.v1.json`. Existing files in the output directory are not deleted.
+The library's `write_inventory_json` is the current writer; the existing
+`write_native_json` function still retains its original filename for library
+compatibility, without exposing another CLI switch.
 Core API names (`NativeScan`, `NativeOptions`, `scan_repository_native`,
 `ScanDocument::native`) remain available. JSON field names, identity scheme,
 ID generation and schema version do not change with the descriptive rename.

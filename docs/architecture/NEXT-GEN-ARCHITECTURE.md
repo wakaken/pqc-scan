@@ -3,7 +3,7 @@
 Naming update: the user-facing report is now **Cryptographic Inventory and Evidence
 Report** (暗号資産・検出根拠レポート), selected by `--inventory-json` and written to
 `scan.inventory.v1.json`. Earlier native naming below is historical/internal;
-`--native-json` and its original filename remain supported. The
+`--native-json` has been removed from the CLI. The
 [current contract](INVENTORY-REPORT-V1.md) specifies compatibility.
 
 
