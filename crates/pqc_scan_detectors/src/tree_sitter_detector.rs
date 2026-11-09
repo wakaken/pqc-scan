@@ -68,6 +68,10 @@ impl Detector for TreeSitterDetector {
 
             let mut rule_hits = 0usize;
             for candidate in &candidates {
+                // Python/Ruby call nodes are enabled only for the new PQC inventory.
+                if candidate.kind == "call" && !rule.id.starts_with("PQC_") {
+                    continue;
+                }
                 if rule_hits >= 32 {
                     break;
                 }
@@ -195,6 +199,7 @@ fn is_semantic_node_kind(kind: &str) -> bool {
         || kind == "selector_expression"
         || kind == "call_expression"
         || kind == "method_invocation"
+        || kind == "call"
 }
 
 fn scope_matches(scope: &str, language: &str) -> bool {

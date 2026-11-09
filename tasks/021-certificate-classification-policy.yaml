@@ -1,0 +1,37 @@
+id: "021"
+title: "Correct exact certificate classification and validity assessment"
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: "0"
+description: "Correct exact certificate classification and validity assessment. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-021"
+change_size: "Medium; high cryptographic/compatibility review burden"
+decision_gate: "AGENTS.md human review before classification/rule-semantic implementation; this plan is not approval."
+change_categories:
+  - "Existing implementation correction"
+depends_on:
+  - "020"
+  - "023"
+required_files:
+  - "rules/default/cert.yml"
+  - "crates/pqc_scan_detectors/src/certificate_detector.rs"
+  - "crates/pqc_scan_core/src/risk.rs"
+  - "docs/rules-reference.md"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Specify exact typed/OID predicates, custom-rule compatibility and expected output deltas."
+  - "Prevent ECDSA-to-DSA confusion and filename-based key size matches."
+  - "Review separate quantum/classical classification and fixed-clock validity evaluation; retain old rule IDs/semantics until approved migration."
+out_of_scope:
+  - "No automatic PQC certificate deployment or blanket severity rewrite."
+risks:
+  - "Existing classification/rule meanings change; this requires human review."
+acceptance:
+  - "ECDSA emits no DSA-only finding; RSA size predicates require RSA subject keys."
+  - "Validity uses parsed timestamps and explicit clock; intended classification deltas are approved."
+testing_requirements:
+  - "Filename-spoof, ECDSA/DSA pairs, fixed-clock boundaries and old/new corpus result diff."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

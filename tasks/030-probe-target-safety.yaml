@@ -1,0 +1,39 @@
+id: "030"
+title: "Implement explicit endpoint policy and bounded probe transport"
+type: feature
+priority: medium
+status: pending
+planned_new_paths:
+  - "crates/pqc_scan_core/src/target_policy.rs"
+owner: Planner Agent
+phase: "2"
+description: "Implement explicit endpoint policy and bounded probe transport. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-030"
+change_size: "Medium/high; network/platform validation"
+decision_gate: "Maintainers choose allowlist defaults, reviewed hard caps and explicit command shape."
+change_categories:
+  - "New feature addition"
+depends_on:
+  - "025"
+  - "029"
+required_files:
+  - "crates/pqc_scan_core/src/lib.rs"
+  - "crates/pqc_scan_core/src/model.rs"
+  - "crates/pqc_scan_cli/src/main.rs"
+  - "Cargo.toml"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Add concrete target-policy types and finite deadline/attempt/traffic accounting without protocol dependencies."
+  - "Validate all bounded DNS answers/CIDRs/mapped IPv6; pin SocketAddr and check connected peer; SNI is separate."
+  - "Prevent proxy/config expansion, re-resolution, redirects and auto-retries."
+out_of_scope:
+  - "No discovery, bulk targets, management server or auth infrastructure."
+risks:
+  - "DNS rebinding, mixed addresses, uncancelled I/O and aggregate budget bypass."
+acceptance:
+  - "Only validated authorized socket addresses connect."
+  - "Normal scan never networks; limits/failures produce typed outcomes."
+testing_requirements:
+  - "Mock resolver/socket tests and isolated loopback binding/cancellation/budget cases with no egress."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

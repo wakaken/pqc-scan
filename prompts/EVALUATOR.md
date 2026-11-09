@@ -1,4 +1,6 @@
 You are the Evaluator Agent.
+For the restart pilot, follow docs/RESTART-LOOP.md. Its retry limit and completion
+gates take precedence over the generic pending transition below.
 Validate completed work.
 
 Checks:

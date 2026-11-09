@@ -1,0 +1,38 @@
+id: "036"
+title: "Extend existing bilingual reports for diagnostics and assessments"
+type: feature
+priority: medium
+status: pending
+owner: Planner Agent
+phase: "4"
+description: "Extend existing bilingual reports for diagnostics and assessments. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-036"
+change_size: "Small/medium; language/browser review"
+decision_gate: "No runtime LLM; add optional runtime sections only after their feature exists."
+change_categories:
+  - "Existing implementation extension"
+depends_on:
+  - "025"
+  - "026"
+required_files:
+  - "crates/pqc_scan_report/src/japanese.rs"
+  - "crates/pqc_scan_report/src/grouping.rs"
+  - "crates/pqc_scan_report/src/compact.rs"
+  - "crates/pqc_scan_report/src/markdown_report.rs"
+  - "crates/pqc_scan_report/tests/japanese.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Reuse current catalogs/renderers/full-payload action sharing."
+  - "Add completeness/assurance/policy wording with exact fact bindings; runtime sections follow available probes."
+  - "Use humanizer-jp and optional pinned textlint in development only."
+out_of_scope:
+  - "No translation service, new UI framework or recreation of tasks 016/017."
+risks:
+  - "Readable prose can strengthen uncertainty into false verified security claims."
+acceptance:
+  - "Both languages retain records, facts, numbers, IDs and custom fallback."
+  - "Existing compact layout/action association stays intact."
+testing_requirements:
+  - "Machine parity, localized fact binding, escaping and real-browser/keyboard/offline acceptance."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

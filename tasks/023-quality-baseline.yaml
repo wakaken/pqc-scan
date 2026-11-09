@@ -1,0 +1,35 @@
+id: "023"
+title: "Establish labeled accuracy and reproducibility baselines"
+type: improvement
+priority: high
+status: pending
+planned_new_paths:
+  - "tests/quality/ (reviewed corpus and evaluation harness; final layout selected by Planner)"
+owner: Planner Agent
+phase: "0"
+description: "Establish labeled accuracy and reproducibility baselines. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-023"
+change_size: "Medium/high; labeling and measurement dominate"
+decision_gate: "Agree measurement protocol and budgets after measuring; no predetermined percentages."
+change_categories:
+  - "Existing implementation extension"
+depends_on: []
+required_files:
+  - "crates/pqc_scan_detectors/tests/pqc_readiness.rs"
+  - "examples/pqc-readiness/"
+  - "docs/quality/QUALITY-GATES.md"
+  - ".github/workflows/pqc-scan.yml"
+implementation_steps:
+  - "Reuse fixtures/tests and add reviewed truth units, corpus/version/licenses and tuning/holdout split."
+  - "Measure per-family TP/FP/FN/ambiguity and coverage; before diagnostics exist mark completeness unmeasurable."
+  - "Measure repeatability, wall/CPU/RSS under recorded environment; propose budgets only after results."
+out_of_scope:
+  - "No invented targets, private repositories or external endpoints."
+risks:
+  - "Corpus bias and template leakage inflate metrics."
+acceptance:
+  - "Reviewed baseline records denominators, unsupported populations, config, environment and versions."
+  - "Maintainers review measured budgets; rule/test counts are not accuracy."
+testing_requirements:
+  - "Independent labeling/adjudication, evaluator sanity fixtures and repeat local measurements."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

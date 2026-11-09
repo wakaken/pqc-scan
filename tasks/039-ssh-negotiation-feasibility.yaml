@@ -1,0 +1,31 @@
+id: "039"
+title: "Evaluate completed SSH KEX without authentication as a future option"
+type: feature
+priority: low
+status: pending
+owner: Planner Agent
+phase: "future"
+description: "Evaluate completed SSH KEX without authentication as a future option. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-039"
+change_size: "Unknown until selected; deliberately deferred"
+decision_gate: "No Phase 3 dependency; maintainers must justify negotiated-session use case first."
+change_categories:
+  - "New feature addition"
+depends_on:
+  - "033"
+required_files:
+  - "docs/architecture/TLS-SSH-PROBE-DESIGN.md"
+  - "docs/roadmap/OSS-ROADMAP.md"
+implementation_steps:
+  - "Only if a concrete use case is selected, compare russh/ssh2 in isolated local harnesses."
+  - "Prove completed KEX, verified host signature with trusted pins/known-host input and zero service/userauth/channel requests."
+  - "Record public API/algorithm/provider/build limits; propose separate implementation if justified."
+out_of_scope:
+  - "No shipped negotiated mode, credentials or homegrown cryptography."
+risks:
+  - "Libraries may hide offers or automatically send auth-related service requests."
+acceptance:
+  - "Accept/reject candidates with evidence and explicit unknowns; offers stay advertised."
+testing_requirements:
+  - "Sanitized message-type record, local trusted-host positive/negative cases and source/API review."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

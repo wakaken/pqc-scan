@@ -4,7 +4,7 @@
   severity: high
   risk: quantum-vulnerable
   confidence: 0.70
-  migration_hint: Move to hybrid KEX such as X25519+Kyber.
+  migration_hint: Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats.
   pattern: "TLS_RSA_"
   scope: code
   description: TLS RSA key-exchange suite detected.
@@ -26,7 +26,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.75
-  migration_hint: Upgrade to TLS 1.2 or later.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "(?:^|[^A-Za-z0-9])TLSv1(?:\\.0)?(?:$|[^0-9.])"
   scope: code
   description: Legacy TLS 1.0 configuration detected.
@@ -37,7 +37,7 @@
   severity: high
   risk: non-quantum-risk
   confidence: 0.75
-  migration_hint: Upgrade to TLS 1.2 or later.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "TLSv1\\.1"
   scope: code
   description: Legacy TLS 1.1 configuration detected.
@@ -92,7 +92,7 @@
   severity: medium
   risk: non-quantum-risk
   confidence: 0.65
-  migration_hint: Set minVersion to TLSv1.2 or later.
+  migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "minVersion\\s*:\\s*['\"]TLSv1"
   scope: code
   description: Node.js TLS minimum version may be too weak.

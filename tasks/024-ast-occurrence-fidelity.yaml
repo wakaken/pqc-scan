@@ -1,0 +1,36 @@
+id: "024"
+title: "Preserve AST occurrences and characterize grammar limits"
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: "0"
+description: "Preserve AST occurrences and characterize grammar limits. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-024"
+change_size: "Medium; language-specific uncertainty"
+decision_gate: "Review dependency cost before adding a grammar."
+change_categories:
+  - "Existing implementation correction"
+  - "Existing implementation extension"
+depends_on:
+  - "023"
+required_files:
+  - "crates/pqc_scan_detectors/src/tree_sitter_detector.rs"
+  - "crates/pqc_scan_detectors/src/comment_filter.rs"
+  - "crates/pqc_scan_detectors/tests/pqc_readiness.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Distinguish nested duplicate candidates from separate same-line calls using spans/columns."
+  - "Characterize JS-grammar TypeScript handling, aliases and same-named functions."
+  - "Add only corpus-justified structural improvements; proper TS grammar requires measured benefit."
+out_of_scope:
+  - "No whole-program resolver, dataflow engine or tree-sitter rewrite."
+risks:
+  - "Traversal/grammar changes can alter precision, recall and performance."
+acceptance:
+  - "Distinct same-line calls survive without duplicate parent/child hits."
+  - "Grammar/API limits are measured and documented."
+testing_requirements:
+  - "Alias/local-function/string/TS/nested/same-line fixtures, holdout and performance comparison."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

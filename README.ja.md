@@ -62,6 +62,21 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 
 ## CBOM と SBOM の違い
 
+### PQC対応状況の棚卸し（2026年11月9日）
+
+7言語のML-KEM・ML-DSA参照、NodeのSLH-DSA鍵生成、PQC対応候補の依存関係、
+旧Kyber・Dilithium名、Java・Rubyの古典方式限定TLS設定、Goの
+`GODEBUG=tlsmlkem=0` を検出します。静的な手掛かりであり、実際の通信方式の確認ではありません。
+証明書のML-DSA・SLH-DSA署名OIDと公開鍵OIDは別々に照合し、ファイル名では判定しません。
+署名・信頼チェーンの検証は行いません。既存の出力フィールド名とルールIDを維持し、
+追加の情報レベルの検出もCBOM・SARIFに含めます。
+
+`quantum-safe` は参照された暗号方式の分類であり、製品全体の安全性や移行完了の保証ではありません。
+依存関係は `quantum-uncertain` とし、解決済みバージョン・provider・features・接続相手を確認します。
+Node cryptoとWebCryptoでは必要なマイナーバージョンが異なります。
+ブラウザやTypeScriptの実行環境は別途確認し、JWT署名の変更前にJOSE・ライブラリ・検証側の互換性を確認してください。
+[静的検証例と公式資料](examples/pqc-readiness/README.md)も参照してください。
+
 | 成果物 | 目的 | 問い |
 |---|---|---|
 | `dependency-sbom.json` | ソフトウェア依存関係の棚卸し | 「どのパッケージ/ライブラリが含まれているか？」 |
@@ -139,7 +154,7 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 CLIツールは以下の通り実行します。
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -168,7 +183,77 @@ pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
 pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
 
+### 検査の完全性と診断情報
+
+ファイルの読み込みや検出器の実行に失敗しても、ほかの検出結果は保持します。
+検査が部分成功・失敗・不明の場合、CLIは標準エラーへ警告を1回表示します。
+既定の終了コードは従来どおり、成功が0、実行エラーが1、`--fail-on` の到達が2です。
+検出がゼロでも、検査できたとは限りません。
+
+`--diagnostics` を付けると、`--out-dir` に `diagnostics.json` を追加出力します。
+別ファイルとして `schema_version: "1"`、生成時刻、検査範囲、集計値、理由コードを記録します。
+検出器・I/Oのエラー本文やファイル内容は含めません。
+既存6形式のファイル名と機械出力スキーマは維持し、`--format all` だけでは追加しません。
+`--lang` の対象も従来どおりHTMLとMarkdownです。
+
+```bash
+pqc-scan scan . --diagnostics --require-complete --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+```
+
+`--require-complete` は、検査の完了を確認できない場合に、要求されたレポートを出力してから
+終了コード**3**を返します。優先順位は、実行エラーの1、完全性を確認できない場合の3、
+検出しきい値到達の2です。2つのオプションは単独でも使えます。
+有効な検査範囲に対象ファイルがなければ完了扱いになりますが、範囲外に暗号がないという意味ではありません。
+
+**現時点の制約：** 既存の組み込み検出器は互換アダプターを使い、内部の解析成功・適用可否・
+検出上限への到達をまだ報告しません。このため、対象ファイルがあるスキャンは通常 `unknown` となり、
+厳密モードではエラーがなくても3を返します。タスク018の対象は外側の読み込み・実行失敗の集計です。
+検出器ごとの解析・上限の診断は後続タスクで扱い、今回の変更で検出動作は変えません。
+
+従来の `scanned_files` は、引き続きwalkerが選択したファイル数です。
+新しい集計では、選択・読み込み成功／失敗・解析完了・部分成功・解析失敗・未対応・対象外・不明を区別します。
+列挙できたポリシー除外と列挙失敗は別に集計し、ignoreで見えない件数は不明として明示します。
+完了の判定は、既存のignore設定・既定の除外・サイズ制限を含む検査範囲内に限ります。
+
+ライブラリ向けには `scan_repository_detailed` と、アクセサーで参照する `ScanDocument` を追加しました。
+既存の `scan_repository`、`ScanResult`、レポートAPI、`Detector::detect` 実装は維持します。
+検出器は `detect_detailed` と `DetectorOutcome` で検査結果を報告できます。
+`Complete` は検査の完了を表し、安全性の保証ではありません。
+
 ## レポート出力
+
+### 日本語レポート
+
+HTMLでは、重大度順の短いルール一覧から確認を始めます。ルール名・説明・ファイル名の検索と、
+重大度・リスクの絞り込みに対応し、「対応候補」とPQC参照などの「参考情報」を切り替えられます。
+ルールと検出箇所はそれぞれ20件ずつ表示します。
+ルール、検出箇所の順に開くと、その箇所のコードと対応を確認できます。
+同じ共通手順は繰り返さず参照リンクにまとめ、IDが同じでも内容の異なる対応案は残します。
+JavaScriptが無効な場合は全件を表示し、標準の折りたたみで確認できます。
+外部スクリプトや通信は不要です。Markdownにもルール・検出箇所への索引を設けています。
+
+TLSの推奨は1.3を優先し、1.2は互換性が必要な場合に限って安全な設定で残す方針です。
+PQCの上書き設定にはその設定の確認手順を示し、RSA利用を断定しません。
+検出結果と機械出力の構造は維持しますが、推奨文とその適用対象は改善しています。
+
+`--lang ja` を付けると、HTMLとMarkdownを日本語で出力します。
+既定は英語で、`--lang en` でも指定できます。
+
+```bash
+pqc-scan scan . --lang ja --format all --out-dir ./pqc-report-ja --rules-dir /path/to/pqc-scan/rules
+```
+
+見出し、組み込みルールの説明、確認事項、推奨アクションを日本語で記載します。
+「参考情報」は問題の指摘ではなく、暗号利用の棚卸しです。
+PQCの記述が見つかっても、実際の通信や製品全体の対応完了を保証するものではありません。
+
+JSON・SARIF・CBOM・依存関係SBOMは、言語指定によらず従来の内容を維持します。
+検出ID、ファイル名、ソースコード、方式名、参考URLも書き換えません。
+独自ルールや対応案に日本語文面がない場合は、その旨を明示して原文を残します。
+訳文はプログラムに含まれており、翻訳サービスへコードを送信することはありません。
+
+文章の推敲には[humanizer-jp](https://github.com/tqkqt0/humanizer-jp)を使用しています。
+スキルは開発時の編集方針として使い、CLIの実行には必要ありません。
 
 ### `report.json`
 

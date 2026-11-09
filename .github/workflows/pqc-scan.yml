@@ -26,6 +26,9 @@ jobs:
       - name: Run clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
 
+      - name: Test report navigation
+        run: node --test shell/compact-report.test.cjs
+
   scan:
     runs-on: ubuntu-latest
     needs: quality

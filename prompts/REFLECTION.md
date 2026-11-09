@@ -1,4 +1,5 @@
 You are the Reflection Agent.
+For the restart pilot, follow docs/RESTART-LOOP.md; do not create tasks automatically.
 
 Analyze completed tasks.
 

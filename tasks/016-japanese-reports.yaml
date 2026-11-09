@@ -1,0 +1,64 @@
+id: 016
+title: Add readable Japanese HTML and Markdown reports
+type: feature
+priority: high
+status: review
+owner: Executor Agent
+description: >
+  Add --lang en|ja (default en) for human-facing HTML and Markdown reports.
+  Preserve machine output, source evidence, identifiers and English defaults.
+  Use the installed humanizer-jp skill to review neutral, concrete Japanese copy.
+implementation_steps:
+  - Add failing report and CLI tests for Japanese output and English compatibility.
+  - Add a deterministic Japanese presentation catalog for all built-in rules and actions.
+  - Render Japanese labels, explanations, risk meanings and next steps without changing source evidence.
+  - Preserve untranslated custom text with an explicit notice rather than guessing its meaning.
+  - Update both READMEs and generate Japanese sample reports.
+testing_requirements:
+  - cargo build --workspace
+  - cargo fmt --all --check
+  - cargo test --workspace
+  - cargo clippy --workspace --all-targets -- -D warnings
+  - Verify built-in translation coverage, masking, escaping, unchanged machine output and English defaults
+  - Review generated Japanese samples for factual certainty and readability
+security_considerations:
+  - Do not send repository contents to a translation service or use runtime LLM calls.
+  - Preserve masking, code, paths, URLs and cryptographic identifiers.
+acceptance:
+  - HTML and Markdown can be generated with --lang ja.
+  - Findings and recommended actions use reviewed Japanese text.
+  - Machine outputs and detection logic are independent of report language.
+  - Custom rules without Japanese copy are explicitly identified and retain original text.
+implementation_evidence:
+  language_option: --lang en|ja; default en
+  human_reports: Japanese HTML and Markdown with built-in descriptions, confirmation points, actions and risk meanings
+  coverage: All 117 built-in rule IDs and all built-in recommendation action IDs covered by catalog tests
+  compatibility: Original write_reports API retained as English wrapper; machine formats and source evidence unchanged
+  custom_content: Explicit untranslated notice with escaped original text
+  wording_feedback: Changed Japanese HTML and Markdown heading to 確認すること; regression assertions cover both formats
+  authoring_skill:
+    source: https://github.com/tqkqt0/humanizer-jp
+    installed_path: /Users/waka/.codex/skills/humanizer-jp
+    version: 1.0.0
+    policy: Neutral technical prose, concrete checks, no invented claims or promotional phrasing
+validation:
+  date: '2026-11-09'
+  build: passed
+  formatting_check: passed
+  workspace_tests: 73 passed, 0 failed
+  clippy: passed with warnings denied
+  diff_check: passed
+  test_log: target/pqc-refresh/japanese-tests.log
+  sample: target/pqc-report-ja/report.html
+  full_example_sample: target/pqc-report-ja-all/report.html
+  sample_scan: 10 findings, all six artifacts generated
+  full_example_scan: 290 findings, all six artifacts generated
+  machine_compatibility: Compared actual example outputs with pre-localization outputs; JSON except generation time, SARIF, CBOM and SBOM unchanged
+  report_tests: English default byte compatibility, Japanese labels, all built-in copy coverage, custom fallback, escaping, masking, source preservation, empty result and selected format
+  cli_tests: Japanese scan, English default and invalid language rejection
+  text_review: Generated Markdown and HTML text checked against the writing policy; no built-in fallback gaps in full example report
+  review: Sequential self-review only; no independent review claimed
+  unexecuted:
+    - Browser interaction and visual layout; local file browser access is restricted
+    - Remote CI for this working diff; no commit or push requested for task 016
+  next_action: Review the generated Japanese report and publish when requested; do not treat browser or CI checks as passed

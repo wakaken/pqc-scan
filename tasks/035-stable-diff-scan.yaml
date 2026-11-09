@@ -1,0 +1,38 @@
+id: "035"
+title: "Compare scans with identity and completeness limits"
+type: feature
+priority: medium
+status: pending
+planned_new_paths:
+  - "crates/pqc_scan_core/src/diff.rs"
+owner: Planner Agent
+phase: "4"
+description: "Compare scans with identity and completeness limits. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-035"
+change_size: "Medium; correspondence/false-resolution validation"
+decision_gate: "Approve explicit repository scope and heuristic matching behavior."
+change_categories:
+  - "New feature addition"
+depends_on:
+  - "025"
+  - "026"
+required_files:
+  - "crates/pqc_scan_core/src/model.rs"
+  - "crates/pqc_scan_cli/src/main.rs"
+  - "crates/pqc_scan_report/src/lib.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Compare compatible native documents using exact asset/occurrence keys."
+  - "Report added/removed/changed/unresolved; move/similarity candidates remain heuristic."
+  - "Disclose rule/profile/scope drift and prevent resolution claims for uninspected targets."
+out_of_scope:
+  - "No history DB, automatic rename proof or stable use of legacy ID."
+risks:
+  - "Duplicate anchors/moves/partial scans can mimic progress."
+acceptance:
+  - "Root/line/move/duplicate cases have explicit behavior."
+  - "Failed/skipped target never becomes resolved solely by absence."
+testing_requirements:
+  - "Paired golden scope/identity/coverage/schema-mismatch fixtures and deterministic ordering."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

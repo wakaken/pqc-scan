@@ -1,0 +1,175 @@
+- id: PQC_JAVA_API
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.80
+  migration_hint: JDK 24+ provides ML-KEM and ML-DSA; verify provider and protocol support independently.
+  pattern: '(?:KEM|Signature|KeyPairGenerator)\s*\.\s*getInstance\(\s*"ML-(?:KEM|DSA)(?:-(?:512|768|1024|44|65|87))?"'
+  scope: java
+  description: Standard PQC algorithm requested through Java APIs; runtime success is not established.
+
+- id: PQC_GO_API
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.80
+  migration_hint: crypto/mlkem requires Go 1.24+; crypto/mldsa requires Go 1.27+. Verify actual call sites.
+  pattern: '"crypto/(?:mlkem|mldsa)"'
+  scope: go
+  description: Standard Go PQC package imported; import alone does not prove negotiated protection.
+
+- id: PQC_NODE_API
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.80
+  migration_hint: Node crypto requires 24.6+ for ML-DSA, 24.7+ for ML-KEM, and 24.8+ for SLH-DSA. Check runtime support.
+  pattern: '\bgenerateKeyPair(?:Sync)?\(\s*[''"](?:ml-kem-(?:512|768|1024)|ml-dsa-(?:44|65|87)|slh-dsa-(?:sha2|shake)-(?:128|192|256)[sf])[''"]'
+  scope: javascript,typescript
+  description: Node-style PQC key generation call; bindings and actual execution require confirmation.
+
+- id: PQC_WEBCRYPTO_API
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.75
+  migration_hint: Node WebCrypto supports ML-KEM and ML-DSA from 24.7; browser support must be checked separately.
+  pattern: '\bgenerateKey\(\s*\{\s*name\s*:\s*[''"]ML-(?:KEM-(?:512|768|1024)|DSA-(?:44|65|87))[''"]'
+  scope: javascript,typescript
+  description: WebCrypto-style PQC algorithm request; this is not proof of browser support.
+
+- id: PQC_PYTHON_API
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.80
+  migration_hint: cryptography 47 added ML-KEM and ML-DSA; 48 adds OpenSSL 3.5+ support. Confirm backend capability.
+  pattern: '\b(?:mlkem\.)?MLKEM(?:768|1024)PrivateKey\.generate\(|\b(?:mldsa\.)?MLDSA(?:44|65|87)PrivateKey\.generate\('
+  scope: python
+  description: Python PQC key generation reference; backend support is not established.
+
+- id: PQC_RUST_API
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.75
+  migration_hint: Confirm crate version, features and provider; a RustCrypto reference alone does not enable PQC TLS.
+  pattern: '\b(?:ml_kem|ml_dsa|slh_dsa)::[A-Za-z][A-Za-z0-9_]*'
+  scope: rust
+  description: Rust PQC crate symbol referenced; execution and protocol use require confirmation.
+
+- id: PQC_RUBY_API
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.65
+  migration_hint: Verify openssl gem and linked OpenSSL/provider capabilities, not Ruby version alone.
+  pattern: '[''"]ML-(?:KEM-(?:512|768|1024)|DSA-(?:44|65|87))[''"]'
+  scope: ruby
+  description: Ruby PQC algorithm literal referenced; key generation or signing success is not established.
+
+- id: PQC_GO_TLS_DISABLED
+  kind: regex
+  category: TLS
+  severity: medium
+  risk: quantum-uncertain
+  confidence: 0.80
+  migration_hint: Review why tlsmlkem=0 is set; Go 1.24+ enables hybrid ML-KEM TLS by default. Test peers before removing overrides.
+  pattern: '(?m)^\s*(?:export\s+)?GODEBUG\s*=\s*[''"]?[^\n]*\btlsmlkem=0(?:[,''"\s]|$)'
+  scope: config
+  description: Go hybrid TLS default explicitly disabled; inspect effective environment and group overrides.
+
+- id: PQC_JAVA_CLASSICAL_GROUPS
+  kind: regex
+  category: TLS
+  severity: medium
+  risk: quantum-uncertain
+  confidence: 0.80
+  migration_hint: Review explicit group restrictions against the deployed JSSE version and peer support.
+  pattern: '(?im)^\s*jdk\.tls\.namedGroups\s*=\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\s*,\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*\s*$'
+  scope: config
+  description: Java property explicitly lists only recognized classical TLS groups.
+
+- id: PQC_RUBY_CLASSICAL_GROUPS
+  kind: regex
+  category: TLS
+  severity: medium
+  risk: quantum-uncertain
+  confidence: 0.75
+  migration_hint: Review groups= or ecdh_curves= restrictions with the linked TLS library; test hybrid group interoperability.
+  pattern: '(?im)^\s*[A-Za-z_][A-Za-z0-9_]*\.(?:groups|ecdh_curves)\s*=\s*[''"](?:X25519|X448|P-256|P-384|P-521)(?::(?:X25519|X448|P-256|P-384|P-521))*[''"]\s*$'
+  scope: config
+  description: Ruby-style group assignment explicitly restricts the recognized list to classical groups.
+
+- id: DEP_PQC_CAPABLE_LIBRARY
+  kind: dependency
+  category: PQC
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.60
+  migration_hint: Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection.
+  pattern: '^(?:(?:rustls|aws-lc-rs|ml-kem|ml-dsa|slh-dsa|openssl)\s+\S+\s+cargo\b|@noble/post-quantum\s+\S+\s+npm\b|cryptography\s+\S+\s+pypi\b|openssl\s+\S+\s+gem\b|org\.bouncycastle:bcprov-jdk18on\s+\S+\s+maven\b)'
+  scope: dependency
+  description: Library with version-dependent PQC capabilities inventoried; capability is not an enabled-state finding.
+
+- id: PQC_DRAFT_ALGORITHM
+  kind: tree_sitter
+  category: PQC
+  severity: medium
+  risk: quantum-uncertain
+  confidence: 0.75
+  migration_hint: Identify the exact implementation and wire format; draft Kyber/Dilithium names are not evidence of final ML-KEM/ML-DSA conformance.
+  pattern: '\b(?:X25519Kyber768Draft00|Kyber(?:512|768|1024)|Dilithium[235])\b'
+  scope: java,go,javascript,typescript,python,rust,ruby
+  description: Pre-standard PQC algorithm name referenced; check compatibility before replacing it.
+
+- id: CERT_ML_DSA_SIGNATURE
+  kind: certificate
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.95
+  migration_hint: ML-DSA signature OID inventoried; validate signatures, trust chains and peer support separately.
+  pattern: '^2\.16\.840\.1\.101\.3\.4\.3\.(?:17|18|19)$'
+  scope: signature_oid
+  description: Parsed certificate declares an ML-DSA signature algorithm; no cryptographic validation performed.
+
+- id: CERT_ML_DSA_PUBLIC_KEY
+  kind: certificate
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.95
+  migration_hint: ML-DSA public key OID inventoried; certificate signature and trust are separate properties.
+  pattern: '^2\.16\.840\.1\.101\.3\.4\.3\.(?:17|18|19)$'
+  scope: public_key_oid
+  description: Parsed certificate declares an ML-DSA subject public key algorithm.
+
+- id: CERT_SLH_DSA_SIGNATURE
+  kind: certificate
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.95
+  migration_hint: SLH-DSA signature OID inventoried; validate signatures, trust chains and peer support separately.
+  pattern: '^2\.16\.840\.1\.101\.3\.4\.3\.(?:2[0-9]|3[01])$'
+  scope: signature_oid
+  description: Parsed certificate declares an SLH-DSA signature algorithm; no cryptographic validation performed.
+
+- id: CERT_SLH_DSA_PUBLIC_KEY
+  kind: certificate
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.95
+  migration_hint: SLH-DSA public key OID inventoried; certificate signature and trust are separate properties.
+  pattern: '^2\.16\.840\.1\.101\.3\.4\.3\.(?:2[0-9]|3[01])$'
+  scope: public_key_oid
+  description: Parsed certificate declares an SLH-DSA subject public key algorithm.

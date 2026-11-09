@@ -204,6 +204,20 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
         _ => {}
     }
 
+    if matches!(category.as_str(), "cryptoapi" | "jwt" | "tls" | "pki") {
+        if let Some((step, reference)) = runtime_pqc_capabilities(language) {
+            push_action(&mut actions, RecommendedAction {
+                action_id: "runtime.verify-pqc-capabilities".to_string(),
+                title: "Verify deployed runtime and protocol PQC capabilities".to_string(),
+                priority: "planned".to_string(),
+                rationale: "Source declarations and primitive availability do not establish deployment or peer support.".to_string(),
+                steps: vec![step.to_string(), "Check resolved versions, provider/features and interoperability before changing production policy.".to_string()],
+                references: vec![reference.to_string()],
+                code_examples: Vec::new(),
+            });
+        }
+    }
+
     if finding.rule_id.starts_with("DEP_") {
         push_action(
             &mut actions,
@@ -227,6 +241,18 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
     }
 
     actions
+}
+
+fn runtime_pqc_capabilities(language: Option<&str>) -> Option<(&'static str, &'static str)> {
+    Some(match language? {
+        "java" => ("JDK 24 adds ML-KEM and ML-DSA primitives. Check deployed JSSE hybrid TLS support separately and inspect jdk.tls.namedGroups restrictions.", "https://docs.oracle.com/en/java/javase/27/security/java-secure-socket-extension-jsse-reference-guide.html"),
+        "go" => ("Go 1.24 adds crypto/mlkem and hybrid TLS defaults; Go 1.27 adds crypto/mldsa and ML-DSA X.509/TLS signatures. Inspect GODEBUG and explicit group restrictions.", "https://go.dev/doc/go1.27"),
+        "javascript" | "typescript" => ("Node crypto ML-DSA requires 24.6+, ML-KEM 24.7+, SLH-DSA 24.8+; WebCrypto ML-DSA/ML-KEM requires 24.7+. Verify browser support independently of TypeScript declarations.", "https://nodejs.org/api/webcrypto.html"),
+        "python" => ("cryptography 48 adds OpenSSL 3.5+ support for ML-KEM/ML-DSA; 47 introduced APIs requiring AWS-LC/BoringSSL. Confirm resolved version and backend.", "https://cryptography.io/en/50.0.2/changelog/"),
+        "rust" => ("rustls 0.23.22 adds X25519MLKEM768 with aws-lc-rs; 0.23.27 prefers it by default. Inspect provider, features and custom groups; ring is not equivalent.", "https://docs.rs/rustls/latest/src/rustls/manual/defaults.rs.html"),
+        "ruby" => ("Check openssl gem and linked library/provider versions. gem 4 adds groups=, sigalgs= and negotiated group inspection; Ruby version alone is insufficient.", "https://ruby.github.io/openssl/History_md.html"),
+        _ => return None,
+    })
 }
 
 fn detect_middleware_targets_for_finding(finding: &Finding) -> Vec<&'static str> {
@@ -256,6 +282,10 @@ fn detect_middleware_targets_for_finding(finding: &Finding) -> Vec<&'static str>
     push_if(
         "nginx",
         rule.starts_with("nginx_") || location.contains("nginx"),
+    );
+    push_if(
+        "httpd",
+        rule.starts_with("httpd_") || location.contains("httpd") || location.contains("apache"),
     );
     push_if(
         "envoy",
@@ -404,6 +434,7 @@ fn add_jwt_actions(
                 "Restrict accepted alg values and explicitly deny weak/legacy defaults.".to_string(),
                 "Introduce short-lived tokens during the migration phase.".to_string(),
                 "Prepare verifier rollout before signer rollout to avoid compatibility outages.".to_string(),
+                "Confirm JOSE algorithm identifiers, key encoding, JWT library support and all verifiers before changing token signatures; primitive support alone is insufficient.".to_string(),
             ],
             references: vec!["https://www.rfc-editor.org/rfc/rfc7519".to_string()],
             code_examples: Vec::new(),
@@ -415,7 +446,7 @@ fn add_jwt_actions(
         Some("javascript") | Some("typescript") => {
             let node24 = version_at_least(profile.node_version.as_deref(), 24);
             let title = if node24 {
-                "Use Node.js WebCrypto PQC algorithms (ML-DSA / ML-KEM)"
+                "Check Node.js minor version and WebCrypto PQC capabilities"
             } else {
                 "Upgrade Node.js runtime for built-in WebCrypto PQC support"
             };
@@ -431,8 +462,8 @@ fn add_jwt_actions(
                     },
                     rationale: "Node.js runtime level determines whether built-in PQC APIs are available for direct migration.".to_string(),
                     steps: vec![
-                        "Validate runtime support for ML-DSA/ML-KEM in your Node.js LTS baseline.".to_string(),
-                        "Migrate signing and key exchange to WebCrypto and phase out classical-only JWT usage.".to_string(),
+                        "Node crypto: ML-DSA 24.6+, ML-KEM 24.7+, SLH-DSA 24.8+; WebCrypto ML-DSA/ML-KEM 24.7+. Check exact runtime and algorithm support.".to_string(),
+                        "Distinguish Node.js from browser execution; TypeScript types do not establish runtime capabilities. ML-KEM key exchange does not replace JWT signatures.".to_string(),
                     ],
                     references: vec!["https://nodejs.org/api/webcrypto.html".to_string()],
                     code_examples: vec![CodeExample {
@@ -453,6 +484,7 @@ fn add_jwt_actions(
                     rationale: "Go migration is typically introduced via hybrid KEM for transport/session keys while JWT signing transitions separately.".to_string(),
                     steps: vec![
                         "Use `crypto/mlkem` for key encapsulation where available.".to_string(),
+                        "Go 1.24+ provides crypto/mlkem and hybrid TLS defaults; Go 1.27+ provides crypto/mldsa and ML-DSA X.509/TLS 1.3 signatures. Confirm deployed toolchain and peer support.".to_string(),
                         "Keep compatibility by running classical + PQC in parallel during rollout.".to_string(),
                     ],
                     references: vec!["https://pkg.go.dev/crypto/mlkem".to_string()],
@@ -470,9 +502,9 @@ fn add_jwt_actions(
                     rationale: "Python ecosystem PQC support is evolving, so isolating signing behind an internal API reduces lock-in.".to_string(),
                     steps: vec![
                         "Abstract JWT signing behind an interface to swap implementation safely.".to_string(),
-                        "Evaluate `liboqs-python` or provider-backed OpenSSL paths for pilot environments.".to_string(),
+                        "Evaluate cryptography 48+ for ML-KEM/ML-DSA with OpenSSL 3.5+; 47 introduced the APIs with AWS-LC/BoringSSL requirements. Handle unsupported backend algorithms explicitly.".to_string(),
                     ],
-                    references: vec!["https://github.com/open-quantum-safe/liboqs-python".to_string()],
+                    references: vec!["https://cryptography.io/en/50.0.2/changelog/".to_string()],
                     code_examples: Vec::new(),
                 },
             );
@@ -488,8 +520,9 @@ fn add_jwt_actions(
                     steps: vec![
                         "Replace direct RSA calls with trait-based signer interfaces.".to_string(),
                         "Add PQC/hybrid implementations behind cargo features and integration tests.".to_string(),
+                        "For transport, inspect rustls resolved version and provider: 0.23.22 adds X25519MLKEM768; 0.23.27 prefers it by default with aws-lc-rs. ring and custom groups require separate review.".to_string(),
                     ],
-                    references: vec!["https://github.com/open-quantum-safe/liboqs-rust".to_string()],
+                    references: vec!["https://docs.rs/rustls/latest/src/rustls/manual/defaults.rs.html".to_string()],
                     code_examples: Vec::new(),
                 },
             );
@@ -505,6 +538,7 @@ fn add_jwt_actions(
                     steps: vec![
                         "Isolate OpenSSL/JWT calls in one service object.".to_string(),
                         "Integrate a PQC-capable signer via provider or sidecar.".to_string(),
+                        "Inspect openssl gem and linked library/provider versions; gem 4 adds groups=, sigalgs= and negotiated group inspection. Ruby version alone does not establish PQC support.".to_string(),
                     ],
                     references: vec!["https://docs.ruby-lang.org/en/master/OpenSSL/PKey.html".to_string()],
                     code_examples: Vec::new(),
@@ -599,17 +633,36 @@ fn add_tls_actions(
     actions: &mut Vec<RecommendedAction>,
     finding: &Finding,
     _language: Option<&'static str>,
-    profile: &RuntimeProfile,
+    _profile: &RuntimeProfile,
 ) {
+    let setting = match finding.rule_id.as_str() {
+        "PQC_GO_TLS_DISABLED" => Some("GODEBUG=tlsmlkem=0"),
+        "PQC_JAVA_CLASSICAL_GROUPS" => Some("jdk.tls.namedGroups"),
+        "PQC_RUBY_CLASSICAL_GROUPS" => Some("groups= / ecdh_curves="),
+        _ => None,
+    };
+    if let Some(setting) = setting {
+        push_action(actions,RecommendedAction {
+            action_id:"tls.review-pqc-override".to_string(),
+            title:format!("Review the explicit PQC override: {setting}"),
+            priority:"near-term".to_string(),
+            rationale:"The detected setting restricts hybrid key exchange. It does not establish RSA usage or the negotiated TLS version.".to_string(),
+            steps:vec![format!("Inspect {setting} at this location and confirm why the override is required."),"Verify deployed library and peer support before testing a hybrid group or removing the override.".to_string(),"Check key exchange, TLS protocol version and certificate signatures separately; TLS 1.3 alone does not establish PQC protection.".to_string()],
+            references:vec!["https://go.dev/doc/godebug".to_string(),"https://www.rfc-editor.org/rfc/rfc9325.html#section-3.1.1".to_string()],
+            code_examples:Vec::new(),
+        });
+        return;
+    }
     push_action(
         actions,
         RecommendedAction {
             action_id: "tls.remove-rsa-kex".to_string(),
-            title: "Eliminate RSA key exchange and enforce TLS 1.2+".to_string(),
+            title: "Prefer TLS 1.3 and review legacy key exchange".to_string(),
             priority: "near-term".to_string(),
             rationale: "RSA key exchange and legacy protocol versions are high-priority migration blockers for PQC readiness.".to_string(),
             steps: vec![
-                "Set minimum protocol version to TLS 1.2 or 1.3.".to_string(),
+                "Prefer TLS 1.3; restrict connections to TLS 1.3 when all peers support it. Disable TLS 1.0 and 1.1.".to_string(),
+                "Retain securely configured TLS 1.2 only where interoperability requires it, and record the compatibility reason.".to_string(),
                 "Prefer ECDHE today and plan hybrid KEM suites for next phase.".to_string(),
                 "Continuously test interoperability across clients and load balancers.".to_string(),
             ],
@@ -618,8 +671,8 @@ fn add_tls_actions(
         },
     );
 
-    let location = finding.location.file.to_ascii_lowercase();
-    if location.contains("nginx") || profile.middleware_targets.contains("nginx") {
+    let targets = detect_middleware_targets_for_finding(finding);
+    if targets.contains(&"nginx") {
         push_action(
             actions,
             RecommendedAction {
@@ -628,7 +681,7 @@ fn add_tls_actions(
                 priority: "near-term".to_string(),
                 rationale: "nginx config was detected and can be remediated with explicit protocol and cipher policies.".to_string(),
                 steps: vec![
-                    "Set `ssl_protocols TLSv1.2 TLSv1.3;`.".to_string(),
+                    "Prefer `ssl_protocols TLSv1.3;` when all peers support it; retain TLSv1.2 only for a documented interoperability need.".to_string(),
                     "Remove RSA key-exchange suites and keep forward-secret suites only.".to_string(),
                 ],
                 references: vec!["https://nginx.org/en/docs/http/ngx_http_ssl_module.html".to_string()],
@@ -637,7 +690,7 @@ fn add_tls_actions(
         );
     }
 
-    if location.contains("httpd") || profile.middleware_targets.contains("httpd") {
+    if targets.contains(&"httpd") {
         push_action(
             actions,
             RecommendedAction {
@@ -646,7 +699,7 @@ fn add_tls_actions(
                 priority: "near-term".to_string(),
                 rationale: "Apache TLS settings can be migrated safely via explicit protocol and cipher controls.".to_string(),
                 steps: vec![
-                    "Set `SSLProtocol -all +TLSv1.2 +TLSv1.3`.".to_string(),
+                    "Prefer `SSLProtocol -all +TLSv1.3` when all peers support it; retain TLSv1.2 only for a documented interoperability need.".to_string(),
                     "Review `SSLCipherSuite` and remove RSA key-exchange suites.".to_string(),
                 ],
                 references: vec!["https://httpd.apache.org/docs/trunk/mod/mod_ssl.html".to_string()],
@@ -655,7 +708,7 @@ fn add_tls_actions(
         );
     }
 
-    if location.contains("envoy") || profile.middleware_targets.contains("envoy") {
+    if targets.contains(&"envoy") {
         push_action(
             actions,
             RecommendedAction {
@@ -664,7 +717,7 @@ fn add_tls_actions(
                 priority: "near-term".to_string(),
                 rationale: "Envoy control-plane config supports strict min/max protocol and cipher suite policy.".to_string(),
                 steps: vec![
-                    "Set `tls_minimum_protocol_version: TLSv1_2` or higher.".to_string(),
+                    "Prefer `tls_minimum_protocol_version: TLSv1_3`; use TLSv1_2 only when interoperability requires it.".to_string(),
                     "Remove RSA-dependent suites from `cipher_suites`.".to_string(),
                 ],
                 references: vec!["https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto".to_string()],
@@ -673,7 +726,7 @@ fn add_tls_actions(
         );
     }
 
-    if location.contains("istio") || profile.middleware_targets.contains("istio") {
+    if targets.contains(&"istio") {
         push_action(
             actions,
             RecommendedAction {
@@ -682,7 +735,7 @@ fn add_tls_actions(
                 priority: "near-term".to_string(),
                 rationale: "Istio DestinationRule/Gateway policies should mirror TLS modernization and hybrid-readiness goals.".to_string(),
                 steps: vec![
-                    "Set minimum TLS version to 1.2+ in mesh and gateway resources.".to_string(),
+                    "Prefer TLS 1.3 in mesh and gateway resources; retain TLS 1.2 only where interoperability requires it.".to_string(),
                     "Reduce classical RSA dependency in configured cipher sets.".to_string(),
                 ],
                 references: vec!["https://istio.io/latest/docs/reference/config/networking/destination-rule/".to_string()],
@@ -691,7 +744,7 @@ fn add_tls_actions(
         );
     }
 
-    if location.contains("ingress") || profile.middleware_targets.contains("k8s") {
+    if targets.contains(&"k8s") {
         push_action(
             actions,
             RecommendedAction {
@@ -700,7 +753,7 @@ fn add_tls_actions(
                 priority: "near-term".to_string(),
                 rationale: "Kubernetes edge resources are frequent concentration points for legacy TLS policy.".to_string(),
                 steps: vec![
-                    "Set explicit TLS 1.2+ minimum version in ingress controller settings.".to_string(),
+                    "Prefer TLS 1.3 in ingress controller settings; retain TLS 1.2 only where interoperability requires it.".to_string(),
                     "Use policy-as-code checks to block reintroduction of legacy suites.".to_string(),
                 ],
                 references: vec!["https://kubernetes.io/docs/concepts/services-networking/ingress/".to_string()],
@@ -994,6 +1047,131 @@ mod tests {
                 .any(|a| a.action_id == expected_action_id),
             "expected action {expected_action_id} to be present for {rule_id}:{file}"
         );
+    }
+
+    #[test]
+    fn tls_local_actions_do_not_borrow_unrelated_repository_middleware() {
+        let mut profile = RuntimeProfile::default();
+        for target in ["nginx", "httpd", "envoy", "istio", "k8s"] {
+            profile.middleware_targets.insert(target.to_string());
+        }
+        let mut f = make_finding("GO_TLS_RSA_IMPORT", "TLS", "go/token_service.go");
+        annotate_findings(std::slice::from_mut(&mut f), &profile);
+        assert!(f
+            .recommended_actions
+            .iter()
+            .all(|a| !a.action_id.ends_with("-hardening")));
+        f = make_finding("NGINX_SSL_PROTOCOLS_LEGACY", "TLS", "settings.conf");
+        annotate_findings(std::slice::from_mut(&mut f), &profile);
+        assert!(f
+            .recommended_actions
+            .iter()
+            .any(|a| a.action_id == "tls.nginx-hardening"));
+        for (rule, file) in [
+            ("HTTPD_SSLPROTOCOL_LEGACY", "settings.conf"),
+            ("TLS_VERSION_1_0", "middleware/httpd/httpd.conf"),
+            ("TLS_VERSION_1_0", "etc/apache2/ports.conf"),
+        ] {
+            f = make_finding(rule, "TLS", file);
+            annotate_findings(std::slice::from_mut(&mut f), &profile);
+            assert!(
+                f.recommended_actions
+                    .iter()
+                    .any(|a| a.action_id == "tls.httpd-hardening"),
+                "{rule}:{file}"
+            );
+        }
+    }
+
+    #[test]
+    fn tls_guidance_prefers_13_and_pqc_overrides_do_not_assert_rsa_use() {
+        for id in [
+            "PQC_GO_TLS_DISABLED",
+            "PQC_JAVA_CLASSICAL_GROUPS",
+            "PQC_RUBY_CLASSICAL_GROUPS",
+        ] {
+            let mut f = make_finding(id, "TLS", "overrides.conf");
+            annotate_findings(std::slice::from_mut(&mut f), &RuntimeProfile::default());
+            assert!(f
+                .recommended_actions
+                .iter()
+                .any(|a| a.action_id == "tls.review-pqc-override"));
+            assert!(f
+                .recommended_actions
+                .iter()
+                .all(|a| a.action_id != "tls.remove-rsa-kex"));
+        }
+        let mut f = make_finding("TLS_VERSION_1_0", "TLS", "tls.conf");
+        annotate_findings(std::slice::from_mut(&mut f), &RuntimeProfile::default());
+        let a = f
+            .recommended_actions
+            .iter()
+            .find(|a| a.action_id == "tls.remove-rsa-kex")
+            .unwrap();
+        assert!(a.steps.iter().any(|s| s.contains("Prefer TLS 1.3")));
+        assert!(a
+            .steps
+            .iter()
+            .any(|s| s.contains("TLS 1.2") && s.contains("interoperability")));
+    }
+
+    #[test]
+    fn crypto_api_guidance_covers_every_runtime_without_claiming_deployment_support() {
+        for (file, required) in [
+            ("app.java", "JDK 24"),
+            ("app.go", "Go 1.27"),
+            ("app.js", "24.7"),
+            ("app.ts", "browser"),
+            ("app.py", "cryptography 48"),
+            ("app.rs", "aws-lc-rs"),
+            ("app.rb", "linked"),
+        ] {
+            let mut finding = make_finding("API_TEST", "CryptoAPI", file);
+            annotate_findings(
+                std::slice::from_mut(&mut finding),
+                &RuntimeProfile::default(),
+            );
+            let action = finding
+                .recommended_actions
+                .iter()
+                .find(|a| a.action_id == "runtime.verify-pqc-capabilities")
+                .expect("runtime guidance");
+            assert!(action.steps.iter().any(|step| step.contains(required)));
+            assert!(!action.references.is_empty());
+        }
+    }
+
+    #[test]
+    fn pqc_inventory_does_not_receive_classical_migration_actions() {
+        let mut finding = make_finding("PQC_JAVA_API", "PQC", "Example.java");
+        finding.risk = pqc_scan_rules::Risk::QuantumSafe;
+        annotate_findings(
+            std::slice::from_mut(&mut finding),
+            &RuntimeProfile::default(),
+        );
+        assert!(finding
+            .recommended_actions
+            .iter()
+            .all(|a| a.action_id != "plan.hybrid-migration"));
+    }
+
+    #[test]
+    fn jwt_guidance_requires_protocol_compatibility_and_current_runtime_options() {
+        for (file, expected) in [
+            ("app.go", "crypto/mldsa"),
+            ("app.py", "cryptography 48"),
+            ("app.rs", "rustls"),
+            ("app.rb", "groups="),
+        ] {
+            let mut finding = make_finding("JWT_RS256", "JWT", file);
+            annotate_findings(
+                std::slice::from_mut(&mut finding),
+                &RuntimeProfile::default(),
+            );
+            let text = format!("{:?}", finding.recommended_actions);
+            assert!(text.contains(expected), "missing {expected} for {file}");
+            assert!(text.contains("JOSE"));
+        }
     }
 
     #[test]

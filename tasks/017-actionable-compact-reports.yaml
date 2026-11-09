@@ -1,0 +1,164 @@
+id: '017'
+title: Make reports concise and tie actions to source locations
+type: feature
+priority: high
+status: done
+owner: Evaluator Agent
+depends_on: ['016']
+description: >
+  Help product engineers find the source location to inspect and its next action
+  without reading long lists of generic guidance. Preserve complete findings while
+  progressively disclosing details. Apply readable Japanese editing using
+  humanizer-jp and retain English language support.
+observed_problems:
+  - Rule-level action aggregation mixes recommendations from multiple languages and files.
+  - Action-ID-only deduplication can discard different payloads sharing an ID.
+  - FileOccurrence retains only three snippet samples, which is insufficient as the complete occurrence list.
+  - Generic migration plans, references and examples repeat and overwhelm the useful local instructions.
+  - TLS guidance presents the compatibility floor of 1.2 without explaining why 1.3 is preferred.
+  - PQC-disabled settings currently receive generic RSA-removal guidance without RSA evidence.
+completed_small_edit:
+  task: '016'
+  change: Japanese HTML and Markdown heading changed to 確認すること
+scope:
+  - Compact human-facing HTML reports in both languages and readable Markdown with a linked summary.
+  - Preserve existing CLI language defaults and report filenames.
+  - Preserve machine schemas, finding IDs, locations, risk and severity; do not add or weaken detection rules.
+  - Recommendation prose and applicability may change intentionally and must be documented and tested.
+  - No runtime translation service, new frontend framework, or automatic source modification.
+layout:
+  overview:
+    - Show severity counts, files affected and a short explanation of static-analysis limits.
+    - Separate actionable risk candidates from informational PQC/dependency inventory; never label the latter as product-wide completion.
+    - Default to the risk-candidate list, with an explicit count and control to reveal inventory.
+  list:
+    - One compact row per rule with a readable title, stable rule ID, highest severity, hit count and affected-file count.
+    - Order by severity descending, then rule ID; paginate HTML at 20 rule groups.
+    - Filter by severity/risk and search rule ID, title or file path; display filtered and total counts.
+    - All groups start collapsed; filter and pagination must not silently discard findings.
+  occurrence_details:
+    - Expanding a rule shows file, line, column, matched evidence and one short next-action summary per occurrence.
+    - Expanding an occurrence shows its highlighted source context and applicable local actions directly together.
+    - Use every underlying finding, not the three snippet samples; provide 20-occurrence pagination inside each HTML rule.
+    - Show missing snippets and unknown line numbers explicitly, without dropping their actions.
+    - Keep different finding IDs distinct even if locations overlap; cross-link related rules rather than silently merging them.
+  shared_guidance:
+    - Show generic planning, references and before/after examples once in collapsed shared sections.
+    - Move an action to a group's shared section only when its full payload is identical for every occurrence.
+    - Compare ID, title, priority, rationale, ordered steps, references and examples; never deduplicate by ID alone.
+    - Occurrences link to shared guidance instead of repeating it, while retaining their local next-action summary.
+    - Preserve per-language actions and label repository-wide or inferred guidance as shared checks, not verified facts about a source line.
+  markdown:
+    - Put a compact summary and anchored rule index first, followed by location/action rows.
+    - Keep full details and shared references in later linked sections; omit duplicate generic text.
+    - Markdown remains complete without requiring HTML details support or scripts.
+tls_policy:
+  recommendation: >
+    Prefer TLS 1.3. If every peer supports it, consider restricting connections to
+    TLS 1.3. Retain TLS 1.2 only where interoperability requires it, with secure
+    configuration and an identified compatibility reason. Do not permit TLS 1.0/1.1.
+  qualifications:
+    - Distinguish the recommended target from the minimum compatibility floor.
+    - Do not claim future TLS versions are automatically safe or that TLS 1.3 alone provides PQC.
+    - Separate TLS protocol version, key exchange and certificate signature readiness.
+    - Apply consistent recommendations to English core guidance, Japanese copy and configuration examples.
+    - PQC_GO_TLS_DISABLED, PQC_JAVA_CLASSICAL_GROUPS and PQC_RUBY_CLASSICAL_GROUPS get setting-specific checks; do not infer RSA usage from these findings.
+  sources:
+    - https://www.rfc-editor.org/rfc/rfc9325.html#section-3.1.1
+    - https://www.rfc-editor.org/rfc/rfc8446.html#section-1.2
+implementation_steps:
+  - Add mixed-language and multi-occurrence acceptance fixtures before changing grouping.
+  - Retain complete occurrence/action association in the internal presentation model without changing serialized scan types.
+  - Separate identical shared guidance from local instructions using full-payload equality.
+  - Build compact HTML lists and accessible occurrence details using existing styles and lightweight local JavaScript.
+  - Add the Markdown summary/index and occurrence-specific action sections.
+  - Update TLS guidance with target/compatibility distinction and setting-specific applicability.
+  - Review Japanese copy with humanizer-jp and update both READMEs for intentional presentation changes.
+required_files:
+  - crates/pqc_scan_report/src/grouping.rs
+  - crates/pqc_scan_report/src/japanese.rs
+  - crates/pqc_scan_report/src/html_report.rs
+  - crates/pqc_scan_report/src/markdown_report.rs
+  - crates/pqc_scan_core/src/recommendation.rs
+  - README.md
+  - README.ja.md
+testing_requirements:
+  - cargo build --workspace
+  - cargo fmt --all --check
+  - cargo test --workspace
+  - cargo clippy --workspace --all-targets -- -D warnings
+  - node --test shell/compact-report.test.cjs
+  - JWT_RS256 fixtures in Java, Node and Python show each runtime's actions only beside its own source location.
+  - Different actions sharing one ID survive; identical common actions appear only once with links from occurrences.
+  - More than three hits in one file remain individually accessible, including findings without snippets and unknown lines.
+  - TLS 1.0/1.1 guidance prefers 1.3 with a qualified 1.2 exception; TLS 1.2 is not labeled inherently vulnerable or PQC-complete.
+  - PQC override fixtures do not assert RSA usage; recommendations refer to the detected setting.
+  - Check 0, 1 and 1000 findings, duplicate locations, filters returning no matches, pagination and deterministic sorting.
+  - Verify English/Japanese parity, escaping, private-key masking, unknown custom text and unchanged finding/schema contracts.
+  - Browser acceptance on desktop and mobile widths; keyboard-only expand, filter and pagination; offline local report use.
+  - Markdown acceptance confirms a summary-to-location-to-action path and complete, linked details.
+acceptance:
+  - With scripting enabled, initial HTML view contains only summary, controls and at most 20 compact rule rows; full guidance is collapsed.
+  - A user can reach a source location and its next action from the summary in at most two expansions.
+  - No local recommendation is borrowed from an unrelated occurrence or lost through action-ID deduplication.
+  - Every finding remains accessible and counts reconcile after filtering and pagination.
+  - Generic text is not replicated per occurrence; references and examples remain reachable.
+  - A practical check using the examples report records the path from JWT_RS256 to a chosen file/line and applicable action.
+  - Required checks and human/browser acceptance are recorded separately; unexecuted checks do not count as passing.
+security_considerations:
+  - Preserve the distinction between detection evidence, a confirmation step and a proposed fix.
+  - Never issue an automatic RS256-to-ML-DSA replacement instruction without JOSE and verifier compatibility checks.
+  - Keep source/evidence masked and escape all untrusted text, including filter and link labels.
+  - Without scripting, show all records with native expandable details and explain that interactive filters/pagination are unavailable; never hide records behind script-only controls.
+implementation_evidence:
+  baseline_commit: c528b6c
+  human_reports: Compact bilingual HTML with native details, search, filters and two-level pagination; Markdown summary, location rows and full-payload action catalog
+  completeness: All 290 example findings retained; risk candidates 276, informational inventory 14
+  recommendation_scope: Local middleware checks no longer borrow repository-wide targets; Apache rule and path support retained
+  tls: Prefer TLS 1.3, qualified TLS 1.2 interoperability exception, no TLS 1.3-only PQC claim; PQC overrides receive setting-specific checks
+  rules: Only migration_hint prose changed in 15 existing rules; detection patterns, IDs and classification unchanged
+validation:
+  date: '2026-11-09'
+  workspace_tests: 76 passed, 0 failed
+  test_log: target/pqc-refresh/017-tests.log
+  javascript_tests: 3 passed; Node built-in runner with simulated DOM, not real-browser acceptance
+  build: passed
+  formatting_check: passed
+  clippy: passed with warnings denied
+  diff_check: passed
+  samples:
+    - target/task017-ja/report.html
+    - target/task017-ja/report.md
+    - target/task017-en/report.html
+    - target/task017-en/report.md
+  sample_generation: Both languages, all six formats, 290 findings, 55 scanned files and 2 skipped files
+  compatibility: Compared all 290 finding records against baseline and between languages, excluding intentionally changed migration_hint and recommended_actions; evidence, locations and classifications match
+  independent_review:
+    agent: Locke
+    method: Read-only source and generated HTML/Markdown/JSON inspection; no browser acceptance claimed
+    round_1: Four valid findings fixed; unrelated middleware actions, inconsistent English TLS hint, irrelevant next-action selection, missing Markdown inventory separation
+    round_2: Previous four fixes confirmed; Apache-specific guidance regression found and fixed with rule/path positive cases and unrelated-Go negative case
+    round_3: No remaining findings in reviewed scope; Apache guidance restored, unrelated Go unaffected, all 290 findings and Markdown links retained in both languages
+    corrective_cycles: 2
+  remote_ci:
+    commit: 55ebdc2c896924bcfee876418fc8e86814729c59
+    url: https://github.com/wakaken/pqc-scan/actions/runs/42569775492
+    result: success; quality and scan jobs passed
+  browser_acceptance:
+    date: '2026-11-09'
+    reporter: User
+    sample: target/task017-ja/report.html
+    method: User manually checked the Japanese report in their local browser and reported no issues
+    passed:
+      - Display
+      - Search
+      - Filtering
+      - Pagination
+    limitations: Browser/version, viewport sizes, keyboard-only operation and offline mode were not separately reported; do not infer individual passes for these conditions
+    agent_access: Local-file access was denied by browser URL policy; this is user-reported acceptance, not agent-operated browser verification
+  completion:
+    date: '2026-11-09'
+    evaluator: Evaluator Agent
+    basis: Automated validation and independent review recorded above, successful CI on the implementation commit, and user-reported browser acceptance with explicit approval to close task 017
+    scope: User accepted the reported browser checks as sufficient for closure; unreported browser conditions remain limitations, not claimed passes
+  next_action: No further task 017 implementation work scheduled

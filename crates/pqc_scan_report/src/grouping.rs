@@ -1,170 +1,15 @@
+use pqc_scan_core::{Finding, RecommendedAction, ScanResult};
 use std::collections::{BTreeMap, BTreeSet};
-
-use pqc_scan_core::{Finding, RecommendedAction};
-
-pub(crate) struct FileOccurrence<'a> {
-    pub file: &'a str,
-    pub hits: usize,
-    pub lines: Vec<usize>,
-    pub sample_evidence: Vec<&'a str>,
-    pub sample_findings: Vec<&'a Finding>,
+pub(crate) struct RuleGroup<'a> {
+    pub(crate) id: &'a str,
+    pub(crate) occurrences: Vec<&'a Finding>,
+    pub(crate) shared: Vec<&'a RecommendedAction>,
+    pub(crate) shared_keys: BTreeSet<String>,
+    pub(crate) rank: u8,
 }
 
-pub(crate) struct GroupedFinding<'a> {
-    pub rule_id: &'a str,
-    pub category: &'a str,
-    pub risk: String,
-    pub severity: String,
-    pub description: &'a str,
-    pub migration_hint: &'a str,
-    pub total_hits: usize,
-    pub files: Vec<FileOccurrence<'a>>,
-    pub sample_evidence: Vec<&'a str>,
-    pub recommended_actions: Vec<&'a RecommendedAction>,
-}
-
-pub(crate) fn group_findings(findings: &[Finding]) -> Vec<GroupedFinding<'_>> {
-    let mut buckets: BTreeMap<String, Vec<&Finding>> = BTreeMap::new();
-    for finding in findings {
-        buckets
-            .entry(finding.rule_id.clone())
-            .or_default()
-            .push(finding);
-    }
-
-    let mut groups = Vec::new();
-    for (_rule_id, mut bucket) in buckets {
-        if bucket.is_empty() {
-            continue;
-        }
-        bucket.sort_by(|a, b| {
-            a.location
-                .file
-                .cmp(&b.location.file)
-                .then(a.location.line.cmp(&b.location.line))
-                .then(a.location.column.cmp(&b.location.column))
-        });
-
-        let representative = bucket[0];
-        let severity = bucket
-            .iter()
-            .fold(representative.severity.to_string(), |acc, f| {
-                if severity_rank(&f.severity.to_string()) > severity_rank(&acc) {
-                    f.severity.to_string()
-                } else {
-                    acc
-                }
-            });
-
-        let mut by_file: BTreeMap<&str, Vec<&Finding>> = BTreeMap::new();
-        for finding in &bucket {
-            by_file
-                .entry(finding.location.file.as_str())
-                .or_default()
-                .push(*finding);
-        }
-
-        let mut file_occurrences = Vec::new();
-        for (file, mut file_findings) in by_file {
-            file_findings.sort_by(|a, b| {
-                a.location
-                    .line
-                    .cmp(&b.location.line)
-                    .then(a.location.column.cmp(&b.location.column))
-            });
-
-            let hits = file_findings.len();
-            let mut lines = BTreeSet::new();
-            let mut sample_evidence = Vec::new();
-            let mut sample_findings = Vec::new();
-            for finding in &file_findings {
-                if finding.location.line > 0 {
-                    lines.insert(finding.location.line);
-                }
-                let evidence = finding.evidence.r#match.as_str();
-                if !evidence.is_empty() && !sample_evidence.contains(&evidence) {
-                    sample_evidence.push(evidence);
-                }
-                if sample_evidence.len() >= 3 {
-                    // keep looping to find snippet samples
-                }
-                if finding.source_snippet.is_some() && sample_findings.len() < 3 {
-                    sample_findings.push(*finding);
-                }
-            }
-
-            file_occurrences.push(FileOccurrence {
-                file,
-                hits,
-                lines: lines.into_iter().collect(),
-                sample_evidence,
-                sample_findings,
-            });
-        }
-
-        let mut action_ids = BTreeSet::new();
-        let mut actions = Vec::new();
-        for finding in &bucket {
-            for action in &finding.recommended_actions {
-                if action_ids.insert(action.action_id.clone()) {
-                    actions.push(action);
-                }
-            }
-        }
-
-        let mut sample_evidence = Vec::new();
-        for finding in &bucket {
-            let evidence = finding.evidence.r#match.as_str();
-            if !evidence.is_empty() && !sample_evidence.contains(&evidence) {
-                sample_evidence.push(evidence);
-            }
-            if sample_evidence.len() >= 3 {
-                break;
-            }
-        }
-
-        groups.push(GroupedFinding {
-            rule_id: &representative.rule_id,
-            category: &representative.category,
-            risk: representative.risk.to_string(),
-            severity,
-            description: &representative.description,
-            migration_hint: &representative.migration_hint,
-            total_hits: bucket.len(),
-            files: file_occurrences,
-            sample_evidence,
-            recommended_actions: actions,
-        });
-    }
-
-    groups.sort_by(|a, b| {
-        severity_rank(&b.severity)
-            .cmp(&severity_rank(&a.severity))
-            .then(b.total_hits.cmp(&a.total_hits))
-            .then(a.rule_id.cmp(b.rule_id))
-    });
-
-    groups
-}
-
-pub(crate) fn summarize_lines(lines: &[usize], max_lines: usize) -> String {
-    if lines.is_empty() {
-        return "unknown".to_string();
-    }
-
-    let mut shown = lines
-        .iter()
-        .take(max_lines)
-        .map(|line| line.to_string())
-        .collect::<Vec<_>>();
-    if lines.len() > max_lines {
-        shown.push(format!("... +{} more", lines.len() - max_lines));
-    }
-    shown.join(", ")
-}
-
-fn severity_rank(severity: &str) -> u8 {
-    match severity {
+pub(crate) fn rank(value: &str) -> u8 {
+    match value {
         "critical" => 5,
         "high" => 4,
         "medium" => 3,
@@ -174,13 +19,86 @@ fn severity_rank(severity: &str) -> u8 {
     }
 }
 
+pub(crate) fn key(action: &RecommendedAction) -> String {
+    // All action fields participate: a shared ID does not imply shared advice.
+    serde_json::to_string(action).expect("action contains only serializable text")
+}
+
+pub(crate) fn group_findings(result: &ScanResult) -> Vec<RuleGroup<'_>> {
+    let mut buckets: BTreeMap<&str, Vec<&Finding>> = BTreeMap::new();
+    for finding in &result.findings {
+        buckets.entry(&finding.rule_id).or_default().push(finding);
+    }
+    let mut groups = Vec::new();
+    for (id, mut occurrences) in buckets {
+        occurrences.sort_by(|a, b| {
+            (
+                &a.location.file,
+                a.location.line,
+                a.location.column,
+                &a.finding_id,
+            )
+                .cmp(&(
+                    &b.location.file,
+                    b.location.line,
+                    b.location.column,
+                    &b.finding_id,
+                ))
+        });
+        let mut common: BTreeSet<_> = occurrences[0].recommended_actions.iter().map(key).collect();
+        for finding in &occurrences[1..] {
+            let keys: BTreeSet<_> = finding.recommended_actions.iter().map(key).collect();
+            common.retain(|candidate| keys.contains(candidate));
+        }
+        if occurrences.len() == 1 {
+            common.retain(|candidate| {
+                occurrences[0]
+                    .recommended_actions
+                    .iter()
+                    .any(|a| key(a) == *candidate && general(a))
+            });
+        }
+        let mut shared = Vec::new();
+        let mut seen = BTreeSet::new();
+        for action in &occurrences[0].recommended_actions {
+            let k = key(action);
+            if common.contains(&k) && seen.insert(k) {
+                shared.push(action);
+            }
+        }
+        let rank = occurrences
+            .iter()
+            .map(|f| rank(f.severity.as_str()))
+            .max()
+            .unwrap_or(0);
+        groups.push(RuleGroup {
+            id,
+            occurrences,
+            shared,
+            shared_keys: common,
+            rank,
+        });
+    }
+    groups.sort_by(|a, b| b.rank.cmp(&a.rank).then(a.id.cmp(b.id)));
+    groups
+}
+
+fn general(action: &RecommendedAction) -> bool {
+    matches!(
+        action.action_id.as_str(),
+        "plan.hybrid-migration"
+            | "dependency.track-pqc-readiness"
+            | "runtime.verify-pqc-capabilities"
+            | "pki.hybrid-certificate-roadmap"
+            | "cryptoapi.abstraction-layer"
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pqc_scan_core::{Evidence, Finding, Location};
+    use pqc_scan_core::{Evidence, Location};
     use pqc_scan_rules::{Risk, Severity};
-    use std::collections::BTreeMap;
-
     fn finding(rule: &str, file: &str, line: usize) -> Finding {
         Finding {
             finding_id: format!("{rule}-{file}-{line}"),
@@ -208,21 +126,21 @@ mod tests {
     }
 
     #[test]
-    fn groups_by_rule_id_and_splits_files() {
-        let findings = vec![
-            finding("TS_JWT_RSA_ALGS", "a.ts", 10),
-            finding("TS_JWT_RSA_ALGS", "a.ts", 12),
-            finding("TS_JWT_RSA_ALGS", "b.ts", 20),
-            finding("JWT_RS256", "c.ts", 30),
+    fn groups_retain_all_occurrences_and_sort_by_severity_then_rule() {
+        let mut findings = vec![
+            finding("Z", "a.rs", 5),
+            finding("A", "a.rs", 1),
+            finding("Z", "a.rs", 4),
+            finding("Z", "a.rs", 3),
+            finding("Z", "a.rs", 2),
+            finding("Z", "a.rs", 1),
         ];
-        let groups = group_findings(&findings);
-
-        assert_eq!(groups.len(), 2);
-        let ts_group = groups
-            .iter()
-            .find(|g| g.rule_id == "TS_JWT_RSA_ALGS")
-            .expect("ts group");
-        assert_eq!(ts_group.total_hits, 3);
-        assert_eq!(ts_group.files.len(), 2);
+        findings[0].severity = Severity::Critical;
+        let result:ScanResult=serde_json::from_value(serde_json::json!({"generated_at":"2026-11-09T00:00:00Z","findings":findings,"cbom":[],"dependency_sbom":[],"summary":{"total_findings":6,"by_severity":{},"by_risk":{},"scanned_files":1,"skipped_files":0}})).unwrap();
+        let groups = group_findings(&result);
+        assert_eq!(groups[0].id, "Z");
+        assert_eq!(groups[0].occurrences.len(), 5);
+        assert_eq!(groups[0].occurrences[0].location.line, 1);
+        assert_eq!(groups[1].id, "A");
     }
 }

@@ -1,0 +1,39 @@
+id: "027"
+title: "Distinguish declared dependency constraints from resolved versions"
+type: feature
+priority: high
+status: pending
+owner: Planner Agent
+phase: "1"
+description: "Distinguish declared dependency constraints from resolved versions. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-027"
+change_size: "Medium; ecosystem matrix"
+decision_gate: "Review intentional semantic correction and document legacy projection limitations."
+change_categories:
+  - "Existing implementation correction"
+  - "Existing implementation extension"
+depends_on:
+  - "025"
+required_files:
+  - "crates/pqc_scan_detectors/src/dependency_detector.rs"
+  - "crates/pqc_scan_core/src/pipeline.rs"
+  - "crates/pqc_scan_core/src/model.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Preserve declared constraint, optional resolved version and source provenance."
+  - "Only assert versioned purl with resolution evidence; retain path/git/workspace unknowns."
+  - "Keep legacy flat projection and avoid fabricated dependency relationships."
+  - "Replace internal parse-to-empty fallbacks with typed detailed outcomes for valid zero-dependency input, malformed supported input and unsupported formats; retain usable partial inventory."
+out_of_scope:
+  - "No package downloads or universal resolver."
+risks:
+  - "Manifest/lock conflicts and ecosystem identities can merge incorrectly."
+acceptance:
+  - "Manifest ^1.2.3 alone is not asserted as installed 1.2.3 in native inventory."
+  - "Lock/conflicting origins remain traceable; old array shape retained."
+  - "Malformed supported JSON/manifest input is distinguishable from valid zero dependencies; unsupported/not-reported parsing never becomes CompleteWithinScope."
+testing_requirements:
+  - "Manifest-only/lock/workspace/path/git/ecosystem/malformed fixtures."
+  - "Assert distinct outcomes for successful empty input, malformed supported JSON, unsupported versions/formats and partial parse results."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

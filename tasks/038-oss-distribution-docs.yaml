@@ -1,0 +1,47 @@
+id: "038"
+title: "Prepare reproducible OSS packaging and operating documentation"
+type: feature
+priority: medium
+status: pending
+planned_new_paths:
+  - "SECURITY.md"
+  - ".github/workflows/release.yml (preparation only; publication separately authorized)"
+owner: Planner Agent
+phase: "5"
+description: "Prepare reproducible OSS packaging and operating documentation. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-038"
+change_size: "Medium/high; packaging/platform unknowns"
+decision_gate: "Choose channels/support window; external publication requires separate authorization."
+change_categories:
+  - "Existing implementation extension"
+  - "New feature addition"
+depends_on:
+  - "028"
+  - "029"
+  - "032"
+  - "033"
+  - "034"
+  - "035"
+  - "036"
+required_files:
+  - "Cargo.toml"
+  - "crates/pqc_scan_cli/Cargo.toml"
+  - ".github/workflows/"
+  - "docs/"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Inventory actual external release channels before packaging decisions."
+  - "Define supported OS/arch, rule asset installation/discovery and optional probe variants."
+  - "Prepare artifact hashes/license/security/update/release workflow and reproducibility evidence."
+  - "Update both READMEs for install/upgrade/authorization/offline use; publication is separate."
+out_of_scope:
+  - "No push, package publication, signing credential setup or hosted service."
+risks:
+  - "Missing rule assets and native platform differences; supply-chain claims need evidence."
+acceptance:
+  - "Clean installation finds reviewed rules and operates offline."
+  - "Packaging/provenance plan is reviewable; publication is not implied."
+testing_requirements:
+  - "Clean installs/rule discovery on declared platforms; license/hash/build checks and bilingual doc acceptance."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

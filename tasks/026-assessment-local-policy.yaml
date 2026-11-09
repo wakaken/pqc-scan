@@ -1,0 +1,44 @@
+id: "026"
+title: "Separate assessment axes and add explainable local policy"
+type: feature
+priority: high
+status: pending
+planned_new_paths:
+  - "crates/pqc_scan_core/src/assessment.rs"
+  - "crates/pqc_scan_core/src/policy.rs"
+owner: Planner Agent
+phase: "1"
+description: "Separate assessment axes and add explainable local policy. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-026"
+change_size: "Medium/high; standard/applicability review"
+decision_gate: "Human review for changed rule/classification or legacy severity; choose profile applicability."
+change_categories:
+  - "Existing implementation extension"
+  - "New feature addition"
+depends_on:
+  - "025"
+  - "021"
+required_files:
+  - "crates/pqc_scan_core/src/risk.rs"
+  - "crates/pqc_scan_core/src/recommendation.rs"
+  - "crates/pqc_scan_core/src/model.rs"
+  - "crates/pqc_scan_cli/src/main.rs"
+  - "docs/product/STANDARDS-REGISTER.md"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Add pure assessment/policy functions with quantum/classical/certainty/usage/context/priority/policy separation."
+  - "Keep algorithm construction and standardization status separate from quantum exposure; assess hybrid components/combiner and known parameter-specific symmetric/hash results explicitly."
+  - "Version local profiles, provenance and Pass/Fail/Indeterminate/NotApplicable decisions."
+  - "Attach candidate purpose/status/runtime/provider/peer prerequisites; retain RecommendedAction presentation."
+  - "Add explicit offline policy evaluation; keep legacy severity unless separately approved."
+out_of_scope:
+  - "No approval server, remote rules, automatic crypto edits or universal deadlines."
+risks:
+  - "Incomplete context/dependency presence can be mistaken for deployment readiness."
+acceptance:
+  - "Quantum and classical concerns coexist; incomplete scope cannot produce false clean pass."
+  - "Heuristic confidence stays uncalibrated; JWT/PKI prerequisites remain explicit."
+testing_requirements:
+  - "Policy tables, unknown context, incomplete coverage, reproducibility and KEM/signature/JOSE prerequisite cases."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

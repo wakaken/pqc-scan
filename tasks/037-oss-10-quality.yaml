@@ -1,0 +1,48 @@
+id: "037"
+title: "Demonstrate supported-scope OSS 1.0 quality"
+type: feature
+priority: medium
+status: pending
+owner: Planner Agent
+phase: "5"
+description: "Demonstrate supported-scope OSS 1.0 quality. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-037"
+change_size: "High validation load; integration, not redesign"
+decision_gate: "Maintainers approve baseline-derived budgets and release scope."
+change_categories:
+  - "Existing implementation extension"
+depends_on:
+  - "019"
+  - "021"
+  - "022"
+  - "024"
+  - "026"
+  - "027"
+  - "028"
+  - "029"
+  - "032"
+  - "033"
+  - "034"
+  - "035"
+  - "036"
+  - "038"
+required_files:
+  - ".github/workflows/pqc-scan.yml"
+  - "crates/"
+  - "docs/quality/QUALITY-GATES.md"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Run agreed holdout/performance/privacy/reproducibility and feature/platform matrix."
+  - "Publish schema/support/compatibility policies and explicit residual limitations."
+  - "Record separate unit/browser/protocol/current-HEAD CI evidence."
+out_of_scope:
+  - "No universal accuracy/compliance guarantee or publication."
+risks:
+  - "Unmeasured regressions and unbounded support claims."
+acceptance:
+  - "Agreed measured budgets pass or maintainers explicitly revise release scope."
+  - "No supported-path silent failure; schemas/privacy/reproducibility gates pass."
+testing_requirements:
+  - "Pinned build/fmt/test/clippy, Node/browser, offline schemas, corpus, isolated protocols, clean platforms and independent evaluation."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

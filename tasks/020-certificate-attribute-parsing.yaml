@@ -1,0 +1,35 @@
+id: "020"
+title: "Parse certificate and public-key attributes accurately"
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: "0"
+description: "Parse certificate and public-key attributes accurately. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-020"
+change_size: "Medium; ASN.1 and fixture review"
+decision_gate: "Review corrected cryptographic-attribute specification before implementation."
+change_categories:
+  - "Existing implementation correction"
+  - "Existing implementation extension"
+depends_on:
+  - "018"
+required_files:
+  - "crates/pqc_scan_detectors/src/certificate_detector.rs"
+  - "crates/pqc_scan_core/src/classifier.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Reuse x509-parser/pem with content-based PEM/DER detection including .crt/.cer."
+  - "Separate signature OID, SPKI type/parameters, RSA modulus bits, EC curve and encoded size."
+  - "Retain public DER/SPKI fingerprints and object positions; report malformed/unsupported formats; expose narrow parser helpers for later TLS reuse."
+out_of_scope:
+  - "No private-key decryption, PKCS#12 passwords, signature/chain validation or new PKI framework."
+risks:
+  - "Corrected key evidence changes are intentional; unknown/PQC encodings cannot be treated as RSA."
+acceptance:
+  - "Known public fixtures yield correct semantic sizes and separate signature/subject-key attributes."
+  - "Bundles retain distinct object identity and unsupported containers have explicit outcomes."
+testing_requirements:
+  - "RSA 1024/2048/3072, P-256, Ed25519, unknown/PQC OID, DER extension, malformed and bundle fixtures."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."

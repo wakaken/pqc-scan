@@ -1,5 +1,7 @@
+mod compact;
 mod grouping;
 mod html_report;
+mod japanese;
 mod json_report;
 mod markdown_report;
 mod sarif_report;
@@ -8,7 +10,15 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 
-use pqc_scan_core::ScanResult;
+use pqc_scan_core::{ScanDocument, ScanResult};
+
+/// Write only the explicitly requested, versioned inspection diagnostics artifact.
+pub fn write_diagnostics(document: &ScanDocument, out_dir: &Path) -> Result<PathBuf> {
+    std::fs::create_dir_all(out_dir)?;
+    let path = out_dir.join("diagnostics.json");
+    json_report::write_diagnostics(document, &path)?;
+    Ok(path)
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ReportFormat {
@@ -17,6 +27,13 @@ pub enum ReportFormat {
     Markdown,
     Sarif,
     All,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum ReportLanguage {
+    #[default]
+    En,
+    Ja,
 }
 
 impl ReportFormat {
@@ -38,6 +55,16 @@ pub fn write_reports(
     out_dir: &Path,
     format: ReportFormat,
 ) -> Result<Vec<PathBuf>> {
+    write_reports_with_language(result, out_dir, format, ReportLanguage::En)
+}
+
+/// Localize human-facing reports only; machine outputs retain their stable content.
+pub fn write_reports_with_language(
+    result: &ScanResult,
+    out_dir: &Path,
+    format: ReportFormat,
+    language: ReportLanguage,
+) -> Result<Vec<PathBuf>> {
     std::fs::create_dir_all(out_dir)?;
     let mut sanitized = result.clone();
     sanitize_scan_result(&mut sanitized);
@@ -52,12 +79,20 @@ pub fn write_reports(
             }
             ReportFormat::Html => {
                 let path = out_dir.join("report.html");
-                html_report::write_html_report(&sanitized, &path)?;
+                if language == ReportLanguage::Ja {
+                    japanese::write_html(&sanitized, &path)?;
+                } else {
+                    html_report::write_html_report(&sanitized, &path)?;
+                }
                 path
             }
             ReportFormat::Markdown => {
                 let path = out_dir.join("report.md");
-                markdown_report::write_markdown_report(&sanitized, &path)?;
+                if language == ReportLanguage::Ja {
+                    japanese::write_markdown(&sanitized, &path)?;
+                } else {
+                    markdown_report::write_markdown_report(&sanitized, &path)?;
+                }
                 path
             }
             ReportFormat::Sarif => {

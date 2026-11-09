@@ -5,12 +5,10 @@ priority: high
 status: blocked
 owner: Evaluator Agent
 description: >
-  `.github/workflows/pqc-scan.yml` currently builds and runs the scanner, but it does not
-  enforce `cargo fmt`, `cargo test`, or `cargo clippy`. The workflow also uses a generic
-  stable toolchain instead of explicitly aligning with `rust-toolchain.toml`, while local
-  verification showed `cargo clippy --workspace --all-targets -- -D warnings` is not
-  currently runnable in this environment. Add CI quality gates and validate toolchain/component
-  compatibility without changing scan output behavior.
+  CI already enforces formatting, tests, and clippy with Rust 1.93.1, matching
+  rust-toolchain.toml. Local clippy was restored on 2026-11-09 after finding its
+  cargo-clippy executable missing. Confirm scan artifacts and HTML interaction before
+  closing this task; do not bypass the failed gate or change scan output behavior.
 implementation_steps:
   - Review `rust-toolchain.toml` and `.github/workflows/pqc-scan.yml` and decide how CI should honor the declared toolchain.
   - Update the workflow to run formatting, tests, and clippy before the scan job or as separate jobs.
@@ -26,3 +24,58 @@ testing_requirements:
 security_considerations:
   - Preserve existing scan and SARIF generation behavior used by downstream security tooling.
   - Do not weaken cryptographic checks or bypass failing validation steps.
+restart_record:
+  date: '2026-11-09'
+  baseline_head: be5c760adb7d1d4d99e39d35d87d2956079db76e
+  initial_worktree: clean
+  environment: Rust 1.93.1, aarch64-apple-darwin
+  checks:
+    - command: cargo build --workspace
+      exit_code: 0
+    - command: cargo fmt --all --check
+      exit_code: 0
+    - command: cargo test --workspace
+      exit_code: 0
+      result: 58 tests passed
+    - command: cargo clippy --workspace --all-targets -- -D warnings
+      exit_code: 0
+      result: Passed after restoring the missing executable and reinstalling clippy
+    - command: cargo run --bin pqc-scan -- scan ./examples --format all --out-dir ./target/restart-baseline --rules-dir ./rules
+      exit_code: 0
+      result: 273 findings, 46 scanned files, 1 skipped file; all six report formats written
+  ci:
+    url: https://github.com/wakaken/pqc-scan/actions/runs/22880210587
+    result: Historical run for baseline HEAD; quality and scan succeeded
+    artifacts: API returned no available artifacts; contents not verified
+  unexecuted:
+    - Browser verification of HTML; local file URL rejected by browser tool policy
+    - Before/after report compatibility comparison for task 014
+    - Real product acceptance; target repository path not yet supplied
+    - Task 014 implementation
+  synthetic_acceptance:
+    command: cargo test -p pqc_scan_cli synthetic_scan_acceptance_checks_all_reports
+    exit_code: 0
+    result: Positive hit, negative cases, gitignore, masking, six outputs, inventory consistency, and SARIF count passed
+  loop_protocol: docs/RESTART-LOOP.md
+  latest_worktree_validation:
+    build: passed
+    formatting_check: passed
+    workspace_tests: 59 passed
+    clippy: passed
+    diff_check: passed
+    ci: Not run for modified worktree; baseline historical CI is not substituted
+    review: Sequential self-review only; no independent review claimed
+    changes: CLI synthetic acceptance test, existing serde_json dev dependency, pilot protocol and role prompts
+  repair_attempts: 1
+  environment_repair:
+    authorization: User approved clippy reinstallation
+    cause: Installed component metadata existed but bin/cargo-clippy was missing
+    source: https://static.rust-lang.org/dist/2026-02-12/clippy-1.93.1-aarch64-apple-darwin.tar.xz
+    sha256: 33d57654b0f19360cc4deecbaf248586f89ce9d345df2d54ee8d5541cf7c9f95
+    action: Restored missing executable from verified official archive, then removed and added component using rustup
+    report_directory: target/restart-baseline
+  next_action: >
+    Have the user inspect target/restart-baseline/report.html in their browser and
+    confirm that file expansion, source snippets, and recommended actions work.
+    Obtain the real product repository path for acceptance.
+    Resume task 014 only after the baseline gate is satisfied. Do not mark done yet.
