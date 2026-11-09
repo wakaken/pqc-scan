@@ -26,8 +26,8 @@ jobs:
       - name: Run clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
 
-      - name: Test report navigation
-        run: node --test shell/compact-report.test.cjs
+      - name: Test report navigation and self-scan preparation
+        run: node --test shell/*.test.cjs
 
   scan:
     runs-on: ubuntu-latest
@@ -50,10 +50,31 @@ jobs:
       - name: Run pqc-scan
         run: cargo run --bin pqc-scan -- scan . --format sarif --out-dir ./pqc-report --rules-dir ./rules
 
+      - name: Prepare actionable Code Scanning results
+        run: >-
+          node shell/prepare-code-scanning.cjs
+          --input ./pqc-report/report.sarif
+          --expectations docs/quality/SELF-SCAN-EXPECTATIONS.json
+          --root .
+          --output ./pqc-report/code-scanning.sarif
+          --audit ./pqc-report/code-scanning-audit.json
+
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: ./pqc-report/report.sarif
+          sarif_file: ./pqc-report/code-scanning.sarif
+
+      - name: Preserve full self-scan evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pqc-self-scan-evidence
+          if-no-files-found: error
+          path: |
+            ./pqc-report/report.sarif
+            ./pqc-report/code-scanning.sarif
+            ./pqc-report/code-scanning-audit.json
+            ./docs/quality/SELF-SCAN-EXPECTATIONS.json
 
       - name: Upload Dependency SBOM
         uses: actions/upload-artifact@v4
