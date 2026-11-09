@@ -378,6 +378,22 @@ Cryptographic Bill of Materials with algorithm/location/risk/migration inventory
 
 Dependency inventory extracted from manifests and SBOM files.
 
+### SARIF locations
+
+SARIF remains version 2.1.0. File paths are percent-encoded UTF-8 URI references
+(literal `%`, spaces, `#` and `?` are encoded); absolute paths become file URIs.
+Windows native separators are normalized on Windows; Unix backslashes are literal.
+An unknown line (`0` in native JSON) produces an artifact-only location. A known
+line with unknown column omits `startColumn`; an empty path omits `locations`.
+Columns are one-based Unicode code points (`columnKind: unicodeCodePoints`),
+including one column per emoji, combining code point or tab, rather than visual
+width or UTF-16 units. Legacy AST columns mix byte and character offsets: SARIF
+keeps a column only when the existing unmasked snippet proves an ASCII prefix;
+otherwise it retains the line only. Missing, masked or clipped prefixes cannot
+prove a column. Native JSON locations/IDs, other reports, CLI flags and filenames
+are unchanged. These corrections intentionally replace invalid/misleading SARIF
+positions and unescaped paths. See the [contract and validation record](docs/quality/SARIF-LOCATION-CONTRACT-022.md).
+
 ## Security and Privacy Controls
 
 - Full private key material is never emitted.

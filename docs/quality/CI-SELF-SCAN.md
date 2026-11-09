@@ -75,3 +75,23 @@ Local Rust 1.93.1 offline build/fmt/clippy succeeded; 125 workspace tests and 21
 The actual workflow YAML was parsed and its scan/preparation commands executed locally, redirecting only output paths under ignored `target/task040/` and adding Cargo offline. Final partition: **746 raw = 618 reviewed omissions + 128 retained**. All 745 pre-change raw results still exist; the additional result is the new intentional shell acceptance input. The task020 synthetic private-marker result is omitted from the upload copy. Full raw evidence remains, and retained product/rule observations and metadata are unchanged.
 
 No push, PR, live alert dismissal or remote Actions/Code Scanning check was executed. Remote acceptance is pending a separately authorized publication. `actionlint` is unavailable; YAML and local command execution are recorded without claiming full hosted-workflow acceptance. Exact tested source/registry digests and logs are recorded in task 040. No performance/accuracy benchmark or renderer change is part of this task.
+
+## Task 022 location correction
+
+Expectation version 1 also accepts `column: null` to bind an explicitly reviewed
+line-only SARIF result. This matches only an absent `startColumn`, not zero,
+explicit null, or a present positive column. The positive start line, literal
+safe path, complete source/result SHA-256 and exact occurrence count remain
+mandatory. Unknown-line/artifact-only and encoded/indirect paths remain retained;
+the helper does not decode URIs. Existing positive-column registrations retain
+their meaning.
+
+Task 022 re-reviewed the 109 existing test groups affected solely by omitted
+unproven AST columns and rebound their full-result digests to explicit null
+columns. It refreshed the source binding for the appended helper test and
+registered six observations confined to the new writer-contract Unicode input
+and its lookup. No production finding was newly registered. Local partition:
+752 raw = 624 reviewed test observations + 128 retained. The retained payloads
+match the previous 128 observations, allowing only the intended omission of
+unproven columns. Raw bytes and run metadata (including columnKind) are preserved.
+See [task 022 evidence](SARIF-LOCATION-CONTRACT-022.md) for limitations and checks.
