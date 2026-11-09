@@ -154,7 +154,7 @@ Node cryptoとWebCryptoでは必要なマイナーバージョンが異なりま
 CLIツールは以下の通り実行します。
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -184,6 +184,27 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
 
 ## レポート出力
+
+### 日本語レポート
+
+`--lang ja` を付けると、HTMLとMarkdownを日本語で出力します。
+既定は英語で、`--lang en` でも指定できます。
+
+```bash
+pqc-scan scan . --lang ja --format all --out-dir ./pqc-report-ja --rules-dir /path/to/pqc-scan/rules
+```
+
+見出し、組み込みルールの説明、確認事項、推奨アクションを日本語で記載します。
+「参考情報」は問題の指摘ではなく、暗号利用の棚卸しです。
+PQCの記述が見つかっても、実際の通信や製品全体の対応完了を保証するものではありません。
+
+JSON・SARIF・CBOM・依存関係SBOMは、言語指定によらず従来の内容を維持します。
+検出ID、ファイル名、ソースコード、方式名、参考URLも書き換えません。
+独自ルールや対応案に日本語文面がない場合は、その旨を明示して原文を残します。
+訳文はプログラムに含まれており、翻訳サービスへコードを送信することはありません。
+
+文章の推敲には[humanizer-jp](https://github.com/tqkqt0/humanizer-jp)を使用しています。
+スキルは開発時の編集方針として使い、CLIの実行には必要ありません。
 
 ### `report.json`
 

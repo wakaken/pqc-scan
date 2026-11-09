@@ -156,7 +156,7 @@ In practice:
 ## CLI
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -186,6 +186,25 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
 
 ## Report Outputs
+
+### Japanese Reports
+
+Use `--lang ja` for Japanese HTML and Markdown reports. English remains the default
+(`--lang en`). JSON, SARIF, CBOM and dependency SBOM retain their existing content
+regardless of this option. Finding IDs, paths, evidence, code and reference URLs
+are never translated. Japanese reports explain the findings and next steps using
+a built-in catalog; no repository data is sent to a translation service.
+
+```bash
+pqc-scan scan . --lang ja --format all --out-dir ./pqc-report-ja --rules-dir /path/to/pqc-scan/rules
+```
+
+Built-in rule descriptions and recommended actions have Japanese copy. Custom
+rules or actions without a translation show an explicit notice and retain the
+original text. `quantum-safe` is displayed as a PQC reference, not a declaration
+that the product is safe or migration is complete. Japanese wording was reviewed
+using [humanizer-jp](https://github.com/tqkqt0/humanizer-jp); that skill is an
+authoring aid, not a runtime dependency.
 
 ### `report.json`
 

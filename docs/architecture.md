@@ -199,6 +199,13 @@ For each finding:
 
 ## Reporting Layer
 
+Human-facing HTML and Markdown support `--lang en|ja` (default `en`). The reporting
+crate keeps the original `write_reports` entrypoint as an English wrapper and adds
+`write_reports_with_language`. Japanese presentation uses a built-in rule/action
+catalog, after sanitization, and never rewrites source evidence. Unknown custom
+text is retained with an untranslated notice. JSON, SARIF and both inventories
+remain language-independent. No runtime translation service is used.
+
 ### JSON (`report.json`)
 
 - full machine-readable scan result

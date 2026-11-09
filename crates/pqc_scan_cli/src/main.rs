@@ -9,7 +9,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 
 use pqc_scan_core::{pipeline, scan_repository, ScanConfig};
 use pqc_scan_detectors::default_detectors;
-use pqc_scan_report::{write_reports, ReportFormat};
+use pqc_scan_report::{write_reports_with_language, ReportFormat, ReportLanguage};
 use pqc_scan_rules::{RuleSet, Severity};
 
 #[derive(Debug, Parser)]
@@ -38,6 +38,10 @@ struct ScanArgs {
 
     #[arg(long, value_enum, default_value_t = FormatArg::All)]
     format: FormatArg,
+
+    /// Language of HTML and Markdown reports; machine outputs remain unchanged.
+    #[arg(long, value_enum, default_value_t = LanguageArg::En)]
+    lang: LanguageArg,
 
     #[arg(long, default_value = "./pqc-report")]
     out_dir: PathBuf,
@@ -79,6 +83,21 @@ enum FormatArg {
     Md,
     Sarif,
     All,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+enum LanguageArg {
+    En,
+    Ja,
+}
+
+impl From<LanguageArg> for ReportLanguage {
+    fn from(value: LanguageArg) -> Self {
+        match value {
+            LanguageArg::En => Self::En,
+            LanguageArg::Ja => Self::Ja,
+        }
+    }
 }
 
 impl From<FormatArg> for ReportFormat {
@@ -193,7 +212,8 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     let detectors = default_detectors();
     let result = scan_repository(&config, &rules, &detectors)?;
 
-    let outputs = write_reports(&result, &args.out_dir, args.format.into())?;
+    let outputs =
+        write_reports_with_language(&result, &args.out_dir, args.format.into(), args.lang.into())?;
     for out in outputs {
         writeln!(stdout, "written {}", out.display())?;
     }
@@ -308,6 +328,53 @@ mod tests {
         let stdout = String::from_utf8(stdout).expect("utf8 stdout");
         let stderr = String::from_utf8(stderr).expect("utf8 stderr");
         (result, stdout, stderr)
+    }
+
+    #[test]
+    fn scan_japanese_language_localizes_human_reports() {
+        let out = temp_dir("japanese-cli");
+        let (result, _, stderr) = run_cli_test(vec![
+            "pqc-scan".into(),
+            "scan".into(),
+            workspace_root()
+                .join("examples/pqc-readiness")
+                .display()
+                .to_string(),
+            "--out-dir".into(),
+            out.display().to_string(),
+            "--rules-dir".into(),
+            rules_dir().display().to_string(),
+            "--lang".into(),
+            "ja".into(),
+        ]);
+        assert_eq!(result.unwrap(), ExitStatus::Success);
+        assert!(stderr.is_empty());
+        let html = fs::read_to_string(out.join("report.html")).unwrap();
+        assert!(html.contains("耐量子暗号への移行調査レポート"));
+        assert!(html.contains("対応完了の保証ではありません"));
+        assert!(html.contains("Goのハイブリッド鍵共有を無効にする設定"));
+        assert!(html.contains("example.py"));
+        let md = fs::read_to_string(out.join("report.md")).unwrap();
+        assert!(md.contains("次に行うこと"));
+        let json: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
+        assert_eq!(json["summary"]["total_findings"], 10);
+        assert!(json["findings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|f| f["description"].as_str().unwrap().starts_with("Go hybrid")));
+        fs::remove_dir_all(out).unwrap();
+    }
+
+    #[test]
+    fn report_language_defaults_to_english_and_rejects_unknown_values() {
+        assert!(Cli::try_parse_from(["pqc-scan", "scan", ".", "--lang", "fr"]).is_err());
+        let cli = Cli::try_parse_from(["pqc-scan", "scan", "."]).unwrap();
+        let Commands::Scan(args) = cli.command else {
+            panic!("expected scan")
+        };
+        assert_eq!(args.lang, LanguageArg::En);
     }
 
     #[test]

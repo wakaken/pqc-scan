@@ -348,7 +348,7 @@ document.addEventListener('click', (event) => {
 "#
 }
 
-fn css() -> &'static str {
+pub(crate) fn css() -> &'static str {
     r#"
 :root {
   --bg: #f5f7fb;
