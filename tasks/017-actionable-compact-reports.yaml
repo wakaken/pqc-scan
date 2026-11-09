@@ -2,8 +2,8 @@ id: '017'
 title: Make reports concise and tie actions to source locations
 type: feature
 priority: high
-status: review
-owner: Executor Agent
+status: done
+owner: Evaluator Agent
 depends_on: ['016']
 description: >
   Help product engineers find the source location to inspect and its next action
@@ -140,7 +140,25 @@ validation:
     round_2: Previous four fixes confirmed; Apache-specific guidance regression found and fixed with rule/path positive cases and unrelated-Go negative case
     round_3: No remaining findings in reviewed scope; Apache guidance restored, unrelated Go unaffected, all 290 findings and Markdown links retained in both languages
     corrective_cycles: 2
-  unexecuted:
-    - Actual desktop/mobile browser layout, keyboard operation and offline acceptance; local-file browser access is restricted
-    - Remote CI on final task 017 changes; changes have not been committed or pushed
-  next_action: Obtain actual browser acceptance before marking done. Task remains review, not complete.
+  remote_ci:
+    commit: 55ebdc2c896924bcfee876418fc8e86814729c59
+    url: https://github.com/wakaken/pqc-scan/actions/runs/42569775492
+    result: success; quality and scan jobs passed
+  browser_acceptance:
+    date: '2026-11-09'
+    reporter: User
+    sample: target/task017-ja/report.html
+    method: User manually checked the Japanese report in their local browser and reported no issues
+    passed:
+      - Display
+      - Search
+      - Filtering
+      - Pagination
+    limitations: Browser/version, viewport sizes, keyboard-only operation and offline mode were not separately reported; do not infer individual passes for these conditions
+    agent_access: Local-file access was denied by browser URL policy; this is user-reported acceptance, not agent-operated browser verification
+  completion:
+    date: '2026-11-09'
+    evaluator: Evaluator Agent
+    basis: Automated validation and independent review recorded above, successful CI on the implementation commit, and user-reported browser acceptance with explicit approval to close task 017
+    scope: User accepted the reported browser checks as sufficient for closure; unreported browser conditions remain limitations, not claimed passes
+  next_action: No further task 017 implementation work scheduled
