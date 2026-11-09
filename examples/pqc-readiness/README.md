@@ -23,3 +23,9 @@ Reviewed official sources (2026-11-09):
 - https://ruby.github.io/openssl/History_md.html
 - https://www.rfc-editor.org/rfc/rfc9881.html
 - https://www.rfc-editor.org/rfc/rfc9909.html
+
+Task 023 reuses these exact bytes as the `readiness-017` tuning lineage in
+[`tests/quality/corpus.json`](../../tests/quality/corpus.json). The independently authored approval-adapter holdout, truth labels, evaluator and
+performance recipe are
+in [`tests/quality/PROTOCOL.md`](../../tests/quality/PROTOCOL.md). Passing these
+existing positive fixtures alone is not a measured precision/recall claim.

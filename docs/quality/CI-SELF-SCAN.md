@@ -95,3 +95,16 @@ and its lookup. No production finding was newly registered. Local partition:
 match the previous 128 observations, allowing only the intended omission of
 unproven columns. Raw bytes and run metadata (including columnKind) are preserved.
 See [task 022 evidence](SARIF-LOCATION-CONTRACT-022.md) for limitations and checks.
+
+## Task 023 baseline fixtures
+
+Task023 adds exactly 21 reviewed known-location observations from 15 explicit
+baseline fixture/generator sources. These are positive, negative and unsupported
+controls, not product configuration. No existing source/result allowance changes.
+The partition is 776 raw = 645 reviewed omissions + 131 retained (99 verified
+source files). All prior 128 retained results remain unchanged. Three new
+unknown-line SBOM dependency observations remain in the upload because the
+existing strict projection does not register artifact-only locations. No URI
+handling/line validation/threshold was weakened to suppress these results.
+Hosted alert-check success is unverified; these three observations remain eligible
+for it. See [the measured baseline record](TASK-023-BASELINE.md).

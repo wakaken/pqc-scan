@@ -460,6 +460,25 @@ inputs require review of their source/result bindings before registration; CI do
 not automatically learn or accept findings. See the
 [policy and maintenance guide](docs/quality/CI-SELF-SCAN.md).
 
+
+## Developer quality baseline
+
+Task 023 adds a source-labeled, offline evaluation corpus and a Python standard-
+library harness. It measures the existing CLI without changing scan rules or
+report formats. Build with `cargo build --workspace --release --locked`, then run:
+
+```bash
+python3 -m unittest discover -s tests/quality -p 'test_*.py'
+python3 tests/quality/run.py --binary target/release/pqc-scan --build-profile release --out-dir target/quality-baseline
+```
+
+Use a new output directory for each run. Fixtures are materialized into a temporary
+root outside ignored build directories; generated reports remain under `target/`.
+CI preserves the measurements and full reports. Accuracy and performance budgets
+remain unapproved proposals; the small synthetic holdout does not represent
+real-world accuracy. See the [protocol](tests/quality/PROTOCOL.md) and
+[measured baseline](docs/quality/TASK-023-BASELINE.md).
+
 ## License
 
 MIT

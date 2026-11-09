@@ -1,0 +1,2597 @@
+{
+  "version": 1,
+  "environment": {
+    "scannerVersion": {
+      "command": [
+        "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+        "--version"
+      ],
+      "exitCode": 1,
+      "stdout": ""
+    },
+    "head": {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exitCode": 0,
+      "stdout": "35d988e03629cb15b17a94af81b1e74266a344ff"
+    },
+    "branch": {
+      "command": [
+        "git",
+        "branch",
+        "--show-current"
+      ],
+      "exitCode": 0,
+      "stdout": "codex/task-022-sarif-location"
+    },
+    "worktree": {
+      "command": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exitCode": 0,
+      "stdout": "M .github/workflows/pqc-scan.yml\n M README.ja.md\n M README.md\n M docs/quality/CI-SELF-SCAN.md\n M docs/quality/QUALITY-GATES.md\n M docs/quality/SELF-SCAN-EXPECTATIONS.json\n M examples/pqc-readiness/README.md\n M tasks/023-quality-baseline.yaml\n?? docs/quality/TASK-023-BASELINE.md\n?? docs/quality/task023/\n?? docs/superpowers/plans/2026-11-10-quality-baseline.md\n?? tests/"
+    },
+    "rust": {
+      "command": [
+        "rustc",
+        "-Vv"
+      ],
+      "exitCode": 0,
+      "stdout": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8"
+    },
+    "cargo": {
+      "command": [
+        "cargo",
+        "-V"
+      ],
+      "exitCode": 0,
+      "stdout": "cargo 1.93.1 (083ac5135 2025-12-15)"
+    },
+    "python": "3.12.7 (main, Nov 26 2024, 10:53:16) [Clang 16.0.0 (clang-1600.0.26.4)]",
+    "platform": "macOS-27.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "cpuCount": 12,
+    "hardware": {
+      "machdep.cpu.brand_string": {
+        "command": [
+          "sysctl",
+          "-n",
+          "machdep.cpu.brand_string"
+        ],
+        "exitCode": 0,
+        "stdout": "Apple M4 Pro"
+      },
+      "hw.memsize": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.memsize"
+        ],
+        "exitCode": 0,
+        "stdout": "51539607552"
+      },
+      "hw.ncpu": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.ncpu"
+        ],
+        "exitCode": 0,
+        "stdout": "12"
+      }
+    },
+    "binary": "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+    "binarySha256": "a90b622410ed39478b842adf7af78e33646517708a7a11912ba724c247cc157b",
+    "buildProfile": "release",
+    "features": "workspace defaults, no extra features requested",
+    "runtimeSourceBindings": {
+      "Cargo.lock": "007f6c5a612b0c168157734a13dc17a9c82bea5cc7653448b7bdbda3ba0c1158",
+      "Cargo.toml": "8f82e10ab0fd1308a2759c0a5722c39e45276a371367f951becfd231672e5ccf",
+      "crates/pqc_scan_cli/Cargo.toml": "b05393ff420248bb34472567857265bc4acbf4f52f05e7b5a70ad4d542fb63f0",
+      "crates/pqc_scan_cli/src/main.rs": "cb9e39542e3780b3e02fc718a6ecb0f7cf3b91baf58c8d28344e43308a9f647c",
+      "crates/pqc_scan_cli/tests/sarif_locations.rs": "240337072dce8fa9e830ce2de7acf673db4ba52c95dfe6112e1b1492ccdb95da",
+      "crates/pqc_scan_core/Cargo.toml": "206cc3a543fc7452837010bd1973ce97db5f565e24fa876853bde45ea870e0b7",
+      "crates/pqc_scan_core/src/classifier.rs": "d225b96684e8a8a80fe6f9b09fb9da54a0c8b7f7be193291e1e8737b57f80fd2",
+      "crates/pqc_scan_core/src/diagnostic.rs": "6085a63b7bb84ab92f0b387419904f5a77037363c5cc5abf2d573cd29c93bc97",
+      "crates/pqc_scan_core/src/error.rs": "9a891ee40697705d3d3642aae5fd633acf291c5abc66a118ed7b0e9321d1e898",
+      "crates/pqc_scan_core/src/lib.rs": "1ffbfc5a63074d5d23fbf2c2979324c6d5509537bc12a96d8676d371a178b387",
+      "crates/pqc_scan_core/src/model.rs": "3e7ffb40d045d890a54d49263c65e46d9ffd78a02110e70d48830156122eedd7",
+      "crates/pqc_scan_core/src/pipeline.rs": "c7e919a4e7987ea41757d8482487b3bb07cc124d8fe53a3592ccf592714ccd61",
+      "crates/pqc_scan_core/src/recommendation.rs": "3201017c23fd6a432be611da52b1474c21c9aa1850efefe5d25dd95ba905d233",
+      "crates/pqc_scan_core/src/risk.rs": "74672b217077909b68a35ced37a41de16bedac6a8340e2cbf9ecb35ba62cdefa",
+      "crates/pqc_scan_core/src/walker.rs": "7f154d2598cae17f1966eed28cd2711b5f4d9a771f60bfedf7a45c959212bf9a",
+      "crates/pqc_scan_detectors/Cargo.toml": "115885b8819cf56a6318357bdb219a25467b61b7e89a02a32fc3a584629abe04",
+      "crates/pqc_scan_detectors/src/certificate_detector/attributes.rs": "b3e7d5c34a6aaf29f29c82cc074b15b259e235aa637008902db0501c658add3b",
+      "crates/pqc_scan_detectors/src/certificate_detector.rs": "21cf7892ff6def46a01b9f8dd3747ed1e4b0b1c64dce8a647940b45fdf6779a7",
+      "crates/pqc_scan_detectors/src/comment_filter.rs": "14e3cc6956382edeb2732547e625a17eac4104faabe77cc537cc64f1d6d1a432",
+      "crates/pqc_scan_detectors/src/dependency_detector.rs": "52c0d8a2fe84bb6d910c856ebb0e8b48651cbd84a69414567bad530320375ae1",
+      "crates/pqc_scan_detectors/src/key_detector.rs": "60d1e7ddab98e8ade53f61cfce96519d8762ffa64df6069b4add0d8bfcf4508b",
+      "crates/pqc_scan_detectors/src/lib.rs": "8acd88271779ca2dd903497345a4f91f27ba1497a435645253ada357bd87b18f",
+      "crates/pqc_scan_detectors/src/regex_detector.rs": "ffcd845b95893b6774a56894d4949a76712b974766cbb3e8a07d5e7a52db5f53",
+      "crates/pqc_scan_detectors/src/tree_sitter_detector.rs": "0ecfba8ac3f8044f7ee10b150310338a694634f4754a63f7e338145ea664378f",
+      "crates/pqc_scan_detectors/tests/bounded_outcomes.rs": "c9c85c55e6aa083dfbb6f741a742345a8450d1085ecb244f4c94b6ed287bc468",
+      "crates/pqc_scan_detectors/tests/certificate_attributes.rs": "9847de5407fb55d0ff43f870c2cb1bbf62d834d6464e1e2b80094445d8e8794e",
+      "crates/pqc_scan_detectors/tests/certificate_policy.rs": "a1394888c8f45b7b615b3a7d731342d411bb9564b3bb22e5c0b917e3d3dfdd30",
+      "crates/pqc_scan_detectors/tests/pqc_readiness.rs": "b4fe44cda77b8e3c92253744b547c7322bde9885a706b1880e90b3ea40742977",
+      "crates/pqc_scan_report/Cargo.toml": "0acfe6d763039bb03930e487fc18dbece907dafb078f34902e69ee90108c28a4",
+      "crates/pqc_scan_report/src/compact.css": "59fd2dab8a96a8589eccb54c158f4cbab1ba8935d1ff36a3754c562798b0e435",
+      "crates/pqc_scan_report/src/compact.js": "7d8626208b67ea25964f29ec1983fc086571ec824cec39dbd316ffe4ab02f377",
+      "crates/pqc_scan_report/src/compact.rs": "2a486ef77a5c7b493b88d325dbb039372f8ade4a11c3e56ddd7816f6e837d3d6",
+      "crates/pqc_scan_report/src/grouping.rs": "4ab4ead81459d5a1cac823f43be718f578e2c93321979047615e080bd9e30ae1",
+      "crates/pqc_scan_report/src/html_report.rs": "364769e90d9d79a1703bfd651c942a10db7b7dd38aa0ca0d8f0ec1390a201fbe",
+      "crates/pqc_scan_report/src/japanese.rs": "80bbe70a64a1a07d10b117cd2c52425feae4342c59962ba43b808c942f25fa7d",
+      "crates/pqc_scan_report/src/json_report.rs": "daed2d178c69f9214404bcb6deb37a294e848e3690628c0ad3d796291c487a1c",
+      "crates/pqc_scan_report/src/lib.rs": "76320438c193fa98490d10d743ebc073b344bda675833088667b4233a6f63112",
+      "crates/pqc_scan_report/src/markdown_report.rs": "5da35a29a47521e1038c729f4fc50a97d61b3d03cb662aabb1df6aa8487d5989",
+      "crates/pqc_scan_report/src/sarif_report.rs": "07165114d1af5a250b3824fca2e583071c701e5ded93bd986ea749c1517e732c",
+      "crates/pqc_scan_report/tests/compact.rs": "2746b409b56e41c4da65a7139c336bf67411f839fa7766b7af286ade7b0f032d",
+      "crates/pqc_scan_report/tests/japanese.rs": "a67a2be940715b94863f76388e2098e1aece07a741111c469c7b543140caff49",
+      "crates/pqc_scan_report/tests/sarif_contract.rs": "6793d90098a2c1e5451d772618d74272c00a486850d92aeda24a96ece8d76c8a",
+      "crates/pqc_scan_rules/Cargo.toml": "5dbd75cd2045e18fa02c3ee3e3abab201f15b8321478c5d766b91213919a0cad",
+      "crates/pqc_scan_rules/src/lib.rs": "8c5fd5f082ce2680c15008d5288b578e738b5f8cba049adcfab315fb09103706",
+      "rules/default/cert.yml": "97b333ea8cab9269a18b91cd12aad58e7258d5ed6b0ce27157b372f511b052aa",
+      "rules/default/crypto_api.yml": "8020d85ef00fae35571427521f975b022b9b9e72cdcbb6f0687925cf5c40865e",
+      "rules/default/jwt.yml": "8d79f81a4b90c64b68301d19fc5a2255deef9e47e1871aed1181f498883866ae",
+      "rules/default/middleware.yml": "58cca7b8dd25144a1f40a306d46ec5619fbf7da4504140b2607af7b34404b145",
+      "rules/default/pqc.yml": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a",
+      "rules/default/ssh.yml": "2508cfbb33e200e57603a4bb0ed34c3e37c0a592f4ee4d03259310357d1cf004",
+      "rules/default/tls.yml": "9c4a18c98005d4ca581c0eb0f3595ee7e762dc2a626e4166d8eb9b0be0ccbe0a",
+      "rules/default/tree_sitter.yml": "34ae0e842ce9e36cff90da2d188d8eb842fa00755af7b2eac8e90a09a7cde69b",
+      "rust-toolchain.toml": "02dee3b2b81f2c5e7064c6bb118cf19e859100fcc33c220e5ec52ce4b0586b12"
+    },
+    "runtimeSourceDigest": "9cf7460d2b7907654806cc1aa2e11c2cc68d821e933de104c3715937f7fe04d4",
+    "harnessBindings": {
+      "tests/quality/.gitignore": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b",
+      "tests/quality/LABELING.md": "9d28e647e76fd9d60b357a975d8927fdc38f6a0aa0deb5869d4ab4a4e3d2f345",
+      "tests/quality/PROTOCOL.md": "28d37934f6a584294fd8093b2f343b936b3f492dae023d8f57664fdc35b2a018",
+      "tests/quality/README.md": "5be55eaaf5527d79d7dc543e445e3d8b7f614c052182eb5d9ca187b505a6f818",
+      "tests/quality/corpus/holdout/alias.js": "7d58c51df7e31549f82cfa19bb4356c204f72491761757e629b598025ecf3cb0",
+      "tests/quality/corpus/holdout/alias.py": "4c6075a16eab63415181bb215246c953ed9014f9c645f54b5ea048588aae4159",
+      "tests/quality/corpus/holdout/broken-sbom.json": "da17634a7a07be65c4857bda1acf025405f17beb209cbf147bb282b6d5537b38",
+      "tests/quality/corpus/holdout/broken.py": "8b84d8321ea29c29752a7c387a709f18476c7f0586cd0240b4c5ac704dd93911",
+      "tests/quality/corpus/holdout/comments.go": "bce8357f907519427a605ffa3c3affe089aca72d87b088d7d3a6affe7620eec6",
+      "tests/quality/corpus/holdout/dead.java": "3b81457219b6040d461b3fd92359abad3a2b4b0328a2928a2272ff724f4ee22a",
+      "tests/quality/corpus/holdout/display.rb": "5868bd512f68b57d668cb048edf083559469cb6c8ac4c80fc7de40f862fd5514",
+      "tests/quality/corpus/holdout/draft.js": "30bfc2ac3fbc6f274253ec31758185c38364f0eee54d156d55668e17e8407f82",
+      "tests/quality/corpus/holdout/dynamic.js": "405e66636d85c4ea745f1ee8095cffc7d9c2ac45de0db35421d07bc1fccfd0fb",
+      "tests/quality/corpus/holdout/ec.pem": "fc937a852095fec66cf8c4ca0ef3a127080f76349251314bd5efdbf2722c48bf",
+      "tests/quality/corpus/holdout/hybrid.conf": "7fe8f5a8967a374a96f08ea742b0ce32190a22831f697c6dd1f8074367a22715",
+      "tests/quality/corpus/holdout/misleading-rsa1024.der": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a",
+      "tests/quality/corpus/holdout/package.json": "c44c3ab7ac8b389084906401974e14fb18332a2bfdf30fa1e11c9ae24375d636",
+      "tests/quality/corpus/holdout/sbom.json": "bff788222cc36ba2c036cf01572934e8a869977b0f93c52677bcdfdc73354209",
+      "tests/quality/corpus/holdout/shadow.js": "321acad5b8bf7bbaf493969960c4486f5e0bd80426ec01aa5ef22b398a46495b",
+      "tests/quality/corpus/holdout/shadow.rs": "bfbb3506bb6d436d59e7376c64345036d37fc6cf76353711a0a5eebc6d3611d7",
+      "tests/quality/corpus/holdout/twice.js": "215041df173a998413b343af4587f6ae37dbd7f9818b02acbf6db9beb5a4c458",
+      "tests/quality/corpus/holdout/typed.ts": "2893a1e31de8eb6d148545207a3744f0fd4fe37ef91001948708d98f6a8372af",
+      "tests/quality/corpus/holdout/unsupported.p12": "21d5532eb4d67a8300d83517252fa2346856f545102b2871cb1d84dfbcfcd879",
+      "tests/quality/corpus/holdout/unsupported.swift": "1740448ee9942425ae418d0597d32fec01231f0e789ff29bffec673e3cda1847",
+      "tests/quality/corpus/independent-holdout/ApprovalEnvelope.java": "784e1c3fe210d4d478b6533803ce3b8d61fe404abe561466f3888a8a98fbf085",
+      "tests/quality/corpus/independent-holdout/Cargo.toml": "9d5c95d2039b358198ded7e3adbde2df71a2d0f05037b93257273895300e4e1d",
+      "tests/quality/corpus/independent-holdout/approval_backend.py": "d2a6c4e718070019c0ddde6c6f8c89e8b38bd3003f929987517dbcad6e71da8b",
+      "tests/quality/corpus/independent-holdout/archive-policy.xml": "9b36fc1f8fa21dcacc48759ecd0f8a6888f27da23a53defaac5da88ef1700454",
+      "tests/quality/corpus/independent-holdout/rotation-policy.xml": "99d7fb3cb222db8615740e6c6c1c0aa2ee87ddd44af8b8e846dcaae7a7edffcb",
+      "tests/quality/corpus/independent-holdout/rotation_queue.js": "192403855215249f848024c95c0714d6ec8536209b792e1264118abd6bc3ce37",
+      "tests/quality/corpus/tuning/Cargo.toml": "453861245a2ca426485b73170599f7dbbbf579ece670486a2937ee89eb1ec34f",
+      "tests/quality/corpus/tuning/marker.pem": "01943b633a3356101a5d40a441aea4ef094b81e10e5c8fe7cb0e4830cb89d244",
+      "tests/quality/corpus/tuning/public.pem": "ff0bb17cd98606195d979b4aaf179c54430a8ca74254b23a7642d1fd5a813661",
+      "tests/quality/corpus-initial.json": "285d9610cc9cd6dea9e4e0752f7501a9535fc62c7cfbe7df2dc0743c05963708",
+      "tests/quality/corpus.json": "d6fa706b8f2c2c1267e9e1f0383d6318f4c11b2761f8785b6d7865797ee2afb6",
+      "tests/quality/evaluate.py": "70e1588016dc950980a1ea49b1de6c5a7bd00344f452ce0710e0488c508a5c71",
+      "tests/quality/holdout-additions.json": "bff463e78fff68c58a3574d8c74a865d74cecff43e79be5cada08d983dccde0f",
+      "tests/quality/labels-a.json": "94026685243b2652f437b8530e902f0cccd1e094e99a3c3a7ff5ecdc2276c9c9",
+      "tests/quality/labels-b.json": "48f482cd204c566484b8144a0dd6c980e4342ca1c2200db288cb84d8bf51004a",
+      "tests/quality/labels-final-a.json": "308c9eea4f4e479517cf780a9a9c780053b0f6205d696d674b1eb074c65a33b9",
+      "tests/quality/labels-final-c.json": "e66a440e0600b82e6dea3986c694add4f11b1a5fd312c99412fe8d243b9f28b3",
+      "tests/quality/run.py": "75169ed3691d77c64471189e62497fdd0fe3185a7e3188d170be7c9cf9a8be34",
+      "tests/quality/test_evaluate.py": "9adc0ffe7dbf0c7bdd1c3fd91ab1b0b2006ad061851ce2673241fb5b41a1c30e",
+      "tests/quality/test_run.py": "72bef03f2de663ae6b908060f448ebb5c5bc02d13a79c2166b51471b09afd616",
+      "tests/quality/truth.json": "9604ed3298d2b120d0337b013f9a13273b666253f29a8cb700807b39dbb9579c"
+    },
+    "harnessDigest": "238eb590eee043629dcd9283ae3c07e6c6989d35b2e9d6da5a03042826a3c6de",
+    "clockUtc": "2026-11-09T21:05:49.895663+00:00",
+    "cachePolicy": "first measured run after materialization, then warm; OS cold cache unmeasured",
+    "wallTimer": "monotonic, 5 ms child-completion polling; launch/report writing included"
+  },
+  "corpusVersion": "023-v2",
+  "corpusSha256": "d6fa706b8f2c2c1267e9e1f0383d6318f4c11b2761f8785b6d7865797ee2afb6",
+  "truthSha256": "9604ed3298d2b120d0337b013f9a13273b666253f29a8cb700807b39dbb9579c",
+  "budgets": {
+    "status": "unapproved; descriptive baseline only",
+    "enforced": false
+  },
+  "corpusInput": {
+    "files": 41,
+    "bytes": 5746,
+    "sha256": "1abb39e425c119373c84ac0fa6aa6d8736672e25db93fea4eeab5ee6bf670479",
+    "bindings": {
+      "tuning/Example.java": {
+        "sha256": "0e85111ba0861ed1adbf11582b408b754e7300186a254e080ad26d54ff008f91",
+        "bytes": 103
+      },
+      "tuning/example.go": {
+        "sha256": "92c791f42e4ad5d06216e95ed068d0d4fa82618b12a719e1d8ad32fdcb148b40",
+        "bytes": 39
+      },
+      "tuning/example.js": {
+        "sha256": "9a0356327a073ee9900b5676519d431890051c3196e19038d4caba098882b2b2",
+        "bytes": 35
+      },
+      "tuning/example.ts": {
+        "sha256": "bf8e02bc2d060fbceff397a4f7da84665499cd739c54d8dc9c13bd57477f987a",
+        "bytes": 58
+      },
+      "tuning/example.py": {
+        "sha256": "44012c92b5174cbe34cdb59448cc97de2e2c76f0353c2cd11ffc61360b0c43b3",
+        "bytes": 36
+      },
+      "tuning/example.rs": {
+        "sha256": "3734f7dcc12bd02e1bd6c417ec9ffbccd7d137d19b9adf2129a24234fcb8d511",
+        "bytes": 22
+      },
+      "tuning/example.rb": {
+        "sha256": "49edc6d8e25531f6fa13a5c4850d74705c9d33bae43056968509b59130ba3602",
+        "bytes": 40
+      },
+      "tuning/negative.js": {
+        "sha256": "0ae53a924c59b13dfb4f2b47da8f1939b3d28924bad12c13a3c62ad1ea8c8e0a",
+        "bytes": 95
+      },
+      "tuning/overrides.conf": {
+        "sha256": "e1eddea5af6403893423874639df8c75b70bb064d0508e0604ed2a137628c459",
+        "bytes": 84
+      },
+      "tuning/variants/alias.js": {
+        "sha256": "7d58c51df7e31549f82cfa19bb4356c204f72491761757e629b598025ecf3cb0",
+        "bytes": 79
+      },
+      "tuning/variants/shadow.js": {
+        "sha256": "321acad5b8bf7bbaf493969960c4486f5e0bd80426ec01aa5ef22b398a46495b",
+        "bytes": 88
+      },
+      "tuning/variants/twice.js": {
+        "sha256": "215041df173a998413b343af4587f6ae37dbd7f9818b02acbf6db9beb5a4c458",
+        "bytes": 70
+      },
+      "tuning/variants/dead.java": {
+        "sha256": "3b81457219b6040d461b3fd92359abad3a2b4b0328a2928a2272ff724f4ee22a",
+        "bytes": 93
+      },
+      "tuning/variants/comments.go": {
+        "sha256": "bce8357f907519427a605ffa3c3affe089aca72d87b088d7d3a6affe7620eec6",
+        "bytes": 41
+      },
+      "tuning/variants/alias.py": {
+        "sha256": "4c6075a16eab63415181bb215246c953ed9014f9c645f54b5ea048588aae4159",
+        "bytes": 101
+      },
+      "tuning/variants/shadow.rs": {
+        "sha256": "bfbb3506bb6d436d59e7376c64345036d37fc6cf76353711a0a5eebc6d3611d7",
+        "bytes": 52
+      },
+      "tuning/variants/display.rb": {
+        "sha256": "5868bd512f68b57d668cb048edf083559469cb6c8ac4c80fc7de40f862fd5514",
+        "bytes": 17
+      },
+      "tuning/variants/typed.ts": {
+        "sha256": "2893a1e31de8eb6d148545207a3744f0fd4fe37ef91001948708d98f6a8372af",
+        "bytes": 94
+      },
+      "tuning/variants/dynamic.js": {
+        "sha256": "405e66636d85c4ea745f1ee8095cffc7d9c2ac45de0db35421d07bc1fccfd0fb",
+        "bytes": 42
+      },
+      "tuning/variants/draft.js": {
+        "sha256": "30bfc2ac3fbc6f274253ec31758185c38364f0eee54d156d55668e17e8407f82",
+        "bytes": 79
+      },
+      "tuning/variants/broken.py": {
+        "sha256": "8b84d8321ea29c29752a7c387a709f18476c7f0586cd0240b4c5ac704dd93911",
+        "bytes": 35
+      },
+      "tuning/variants/unsupported.swift": {
+        "sha256": "1740448ee9942425ae418d0597d32fec01231f0e789ff29bffec673e3cda1847",
+        "bytes": 32
+      },
+      "tuning/variants/hybrid.conf": {
+        "sha256": "7fe8f5a8967a374a96f08ea742b0ce32190a22831f697c6dd1f8074367a22715",
+        "bytes": 98
+      },
+      "tuning/Cargo.toml": {
+        "sha256": "453861245a2ca426485b73170599f7dbbbf579ece670486a2937ee89eb1ec34f",
+        "bytes": 56
+      },
+      "holdout/sbom.json": {
+        "sha256": "bff788222cc36ba2c036cf01572934e8a869977b0f93c52677bcdfdc73354209",
+        "bytes": 92
+      },
+      "holdout/package.json": {
+        "sha256": "c44c3ab7ac8b389084906401974e14fb18332a2bfdf30fa1e11c9ae24375d636",
+        "bytes": 38
+      },
+      "holdout/broken-sbom.json": {
+        "sha256": "da17634a7a07be65c4857bda1acf025405f17beb209cbf147bb282b6d5537b38",
+        "bytes": 17
+      },
+      "tuning/rsa1024.der": {
+        "sha256": "460c0ba80b18533902efdb3b33b226751c891360a8db40459e50ea8de8f1d895",
+        "bytes": 523
+      },
+      "tuning/p256-rsa-signed.der": {
+        "sha256": "b9dfe7fbed4a8dad920638498c2ea519de9179d7e95316a86a5f8765cb9f80c9",
+        "bytes": 577
+      },
+      "tuning/p521.der": {
+        "sha256": "48cab491739aeee9a28ae4593db4424c1c33135e7d2bb6c107fd2815e2cd4fda",
+        "bytes": 524
+      },
+      "holdout/misleading-rsa1024.der": {
+        "sha256": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a",
+        "bytes": 18
+      },
+      "holdout/unsupported.p12": {
+        "sha256": "21d5532eb4d67a8300d83517252fa2346856f545102b2871cb1d84dfbcfcd879",
+        "bytes": 28
+      },
+      "tuning/marker.pem": {
+        "sha256": "01943b633a3356101a5d40a441aea4ef094b81e10e5c8fe7cb0e4830cb89d244",
+        "bytes": 86
+      },
+      "tuning/public.pem": {
+        "sha256": "ff0bb17cd98606195d979b4aaf179c54430a8ca74254b23a7642d1fd5a813661",
+        "bytes": 81
+      },
+      "holdout/ec.pem": {
+        "sha256": "fc937a852095fec66cf8c4ca0ef3a127080f76349251314bd5efdbf2722c48bf",
+        "bytes": 90
+      },
+      "holdout/approval-adapter/ApprovalEnvelope.java": {
+        "sha256": "784e1c3fe210d4d478b6533803ce3b8d61fe404abe561466f3888a8a98fbf085",
+        "bytes": 510
+      },
+      "holdout/approval-adapter/approval_backend.py": {
+        "sha256": "d2a6c4e718070019c0ddde6c6f8c89e8b38bd3003f929987517dbcad6e71da8b",
+        "bytes": 306
+      },
+      "holdout/approval-adapter/rotation_queue.js": {
+        "sha256": "192403855215249f848024c95c0714d6ec8536209b792e1264118abd6bc3ce37",
+        "bytes": 441
+      },
+      "holdout/approval-adapter/archive-policy.xml": {
+        "sha256": "9b36fc1f8fa21dcacc48759ecd0f8a6888f27da23a53defaac5da88ef1700454",
+        "bytes": 293
+      },
+      "holdout/approval-adapter/rotation-policy.xml": {
+        "sha256": "99d7fb3cb222db8615740e6c6c1c0aa2ee87ddd44af8b8e846dcaae7a7edffcb",
+        "bytes": 299
+      },
+      "holdout/approval-adapter/Cargo.toml": {
+        "sha256": "9d5c95d2039b358198ded7e3adbde2df71a2d0f05037b93257273895300e4e1d",
+        "bytes": 334
+      }
+    }
+  },
+  "accuracy": {
+    "groups": {
+      "holdout/source_api": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 1,
+        "tn": 2,
+        "positive": 3,
+        "negative": 2,
+        "ambiguous": 1,
+        "unsupported": 0,
+        "excluded_predictions": 0,
+        "eligible": 5,
+        "precision_denominator": 2,
+        "recall_denominator": 3,
+        "precision": 1.0,
+        "recall": 0.6666666666666666
+      },
+      "holdout/draft": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "positive": 0,
+        "negative": 0,
+        "ambiguous": 0,
+        "unsupported": 0,
+        "excluded_predictions": 0,
+        "eligible": 0,
+        "precision_denominator": 0,
+        "recall_denominator": 0,
+        "precision": null,
+        "recall": null
+      },
+      "holdout/config": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "tn": 1,
+        "positive": 1,
+        "negative": 1,
+        "ambiguous": 0,
+        "unsupported": 0,
+        "excluded_predictions": 0,
+        "eligible": 2,
+        "precision_denominator": 0,
+        "recall_denominator": 1,
+        "precision": null,
+        "recall": 0.0
+      },
+      "holdout/dependency": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 1,
+        "tn": 2,
+        "positive": 2,
+        "negative": 2,
+        "ambiguous": 0,
+        "unsupported": 1,
+        "excluded_predictions": 0,
+        "eligible": 4,
+        "precision_denominator": 1,
+        "recall_denominator": 2,
+        "precision": 1.0,
+        "recall": 0.5
+      },
+      "holdout/certificate": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "positive": 0,
+        "negative": 0,
+        "ambiguous": 0,
+        "unsupported": 2,
+        "excluded_predictions": 0,
+        "eligible": 0,
+        "precision_denominator": 0,
+        "recall_denominator": 0,
+        "precision": null,
+        "recall": null
+      },
+      "holdout/key": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0,
+        "positive": 0,
+        "negative": 0,
+        "ambiguous": 0,
+        "unsupported": 1,
+        "excluded_predictions": 0,
+        "eligible": 0,
+        "precision_denominator": 0,
+        "recall_denominator": 0,
+        "precision": null,
+        "recall": null
+      },
+      "tuning/source_api": {
+        "tp": 9,
+        "fp": 3,
+        "fn": 5,
+        "tn": 3,
+        "positive": 14,
+        "negative": 6,
+        "ambiguous": 1,
+        "unsupported": 1,
+        "excluded_predictions": 0,
+        "eligible": 20,
+        "precision_denominator": 12,
+        "recall_denominator": 14,
+        "precision": 0.75,
+        "recall": 0.6428571428571429
+      },
+      "tuning/draft": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "tn": 2,
+        "positive": 1,
+        "negative": 2,
+        "ambiguous": 0,
+        "unsupported": 0,
+        "excluded_predictions": 0,
+        "eligible": 3,
+        "precision_denominator": 1,
+        "recall_denominator": 1,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "tuning/config": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "tn": 3,
+        "positive": 3,
+        "negative": 3,
+        "ambiguous": 0,
+        "unsupported": 0,
+        "excluded_predictions": 0,
+        "eligible": 6,
+        "precision_denominator": 3,
+        "recall_denominator": 3,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "tuning/dependency": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "tn": 1,
+        "positive": 1,
+        "negative": 1,
+        "ambiguous": 0,
+        "unsupported": 0,
+        "excluded_predictions": 0,
+        "eligible": 2,
+        "precision_denominator": 1,
+        "recall_denominator": 1,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "tuning/certificate": {
+        "tp": 4,
+        "fp": 0,
+        "fn": 0,
+        "tn": 2,
+        "positive": 4,
+        "negative": 2,
+        "ambiguous": 0,
+        "unsupported": 0,
+        "excluded_predictions": 0,
+        "eligible": 6,
+        "precision_denominator": 4,
+        "recall_denominator": 4,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "tuning/key": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "tn": 1,
+        "positive": 1,
+        "negative": 1,
+        "ambiguous": 0,
+        "unsupported": 0,
+        "excluded_predictions": 0,
+        "eligible": 2,
+        "precision_denominator": 1,
+        "recall_denominator": 1,
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "out_of_scope_predictions": 10,
+    "details": [
+      {
+        "unit": "u045",
+        "ruleId": "PRIVATE_KEY_PKCS8_HEADER",
+        "location": {
+          "file": "tuning/marker.pem",
+          "line": 1,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u041",
+        "ruleId": "CERT_ECDSA_SIGNATURE",
+        "location": {
+          "file": "tuning/p521.der",
+          "line": 1,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u038",
+        "ruleId": "CERT_RSA_SIGNATURE",
+        "location": {
+          "file": "tuning/rsa1024.der",
+          "line": 1,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u039",
+        "ruleId": "CERT_RSA_SIGNATURE",
+        "location": {
+          "file": "tuning/p256-rsa-signed.der",
+          "line": 1,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u037",
+        "ruleId": "CERT_RSA_1024",
+        "location": {
+          "file": "tuning/rsa1024.der",
+          "line": 1,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u032",
+        "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+        "location": {
+          "file": "tuning/Cargo.toml",
+          "line": 2,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u034",
+        "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+        "location": {
+          "file": "holdout/sbom.json",
+          "line": 0,
+          "column": 0
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u007",
+        "ruleId": "PQC_RUBY_API",
+        "location": {
+          "file": "tuning/example.rb",
+          "line": 1,
+          "column": 28
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u022",
+        "ruleId": "PQC_RUBY_API",
+        "location": {
+          "file": "tuning/variants/display.rb",
+          "line": 1,
+          "column": 6
+        },
+        "disposition": "fp"
+      },
+      {
+        "unit": "u025",
+        "ruleId": "PQC_DRAFT_ALGORITHM",
+        "location": {
+          "file": "tuning/variants/draft.js",
+          "line": 1,
+          "column": 19
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u021",
+        "ruleId": "PQC_RUST_API",
+        "location": {
+          "file": "tuning/variants/shadow.rs",
+          "line": 2,
+          "column": 5
+        },
+        "disposition": "fp"
+      },
+      {
+        "unit": "u006",
+        "ruleId": "PQC_RUST_API",
+        "location": {
+          "file": "tuning/example.rs",
+          "line": 1,
+          "column": 5
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u004",
+        "ruleId": "PQC_WEBCRYPTO_API",
+        "location": {
+          "file": "tuning/example.ts",
+          "line": 1,
+          "column": 8
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u017",
+        "ruleId": "PQC_NODE_API",
+        "location": {
+          "file": "tuning/variants/twice.js",
+          "line": 1,
+          "column": 36
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u015",
+        "ruleId": "PQC_NODE_API",
+        "location": {
+          "file": "tuning/variants/shadow.js",
+          "line": 2,
+          "column": 1
+        },
+        "disposition": "fp"
+      },
+      {
+        "unit": "u003",
+        "ruleId": "PQC_NODE_API",
+        "location": {
+          "file": "tuning/example.js",
+          "line": 1,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u052",
+        "ruleId": "PQC_NODE_API",
+        "location": {
+          "file": "holdout/approval-adapter/rotation_queue.js",
+          "line": 6,
+          "column": 14
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u005",
+        "ruleId": "PQC_PYTHON_API",
+        "location": {
+          "file": "tuning/example.py",
+          "line": 1,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u002",
+        "ruleId": "PQC_GO_API",
+        "location": {
+          "file": "tuning/example.go",
+          "line": 3,
+          "column": 8
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u048",
+        "ruleId": "PQC_JAVA_API",
+        "location": {
+          "file": "holdout/approval-adapter/ApprovalEnvelope.java",
+          "line": 5,
+          "column": 29
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u001",
+        "ruleId": "PQC_JAVA_API",
+        "location": {
+          "file": "tuning/Example.java",
+          "line": 3,
+          "column": 9
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u018",
+        "ruleId": "PQC_JAVA_API",
+        "location": {
+          "file": "tuning/variants/dead.java",
+          "line": 1,
+          "column": 55
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u013",
+        "ruleId": "PQC_RUBY_CLASSICAL_GROUPS",
+        "location": {
+          "file": "tuning/overrides.conf",
+          "line": 3,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u011",
+        "ruleId": "PQC_GO_TLS_DISABLED",
+        "location": {
+          "file": "tuning/overrides.conf",
+          "line": 1,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u012",
+        "ruleId": "PQC_JAVA_CLASSICAL_GROUPS",
+        "location": {
+          "file": "tuning/overrides.conf",
+          "line": 2,
+          "column": 1
+        },
+        "disposition": "tp"
+      },
+      {
+        "unit": "u008",
+        "ruleId": "PQC_NODE_API",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u009",
+        "ruleId": "PQC_NODE_API",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u010",
+        "ruleId": "PQC_DRAFT_ALGORITHM",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u014",
+        "ruleId": "PQC_NODE_API",
+        "disposition": "fn"
+      },
+      {
+        "unit": "u016",
+        "ruleId": "PQC_NODE_API",
+        "disposition": "fn"
+      },
+      {
+        "unit": "u019",
+        "ruleId": "PQC_GO_API",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u020",
+        "ruleId": "PQC_PYTHON_API",
+        "disposition": "fn"
+      },
+      {
+        "unit": "u023",
+        "ruleId": "PQC_WEBCRYPTO_API",
+        "disposition": "fn"
+      },
+      {
+        "unit": "u026",
+        "ruleId": "PQC_DRAFT_ALGORITHM",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u027",
+        "ruleId": "PQC_PYTHON_API",
+        "disposition": "fn"
+      },
+      {
+        "unit": "u029",
+        "ruleId": "PQC_GO_TLS_DISABLED",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u030",
+        "ruleId": "PQC_JAVA_CLASSICAL_GROUPS",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u031",
+        "ruleId": "PQC_RUBY_CLASSICAL_GROUPS",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u033",
+        "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u035",
+        "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u040",
+        "ruleId": "CERT_RSA_2048",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u042",
+        "ruleId": "CERT_RSA_SIGNATURE",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u046",
+        "ruleId": "PRIVATE_KEY_PKCS8_HEADER",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u049",
+        "ruleId": "PQC_JAVA_API",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u050",
+        "ruleId": "PQC_JAVA_API",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u051",
+        "ruleId": "PQC_PYTHON_API",
+        "disposition": "fn"
+      },
+      {
+        "unit": "u054",
+        "ruleId": "PQC_JAVA_CLASSICAL_GROUPS",
+        "disposition": "fn"
+      },
+      {
+        "unit": "u055",
+        "ruleId": "PQC_JAVA_CLASSICAL_GROUPS",
+        "disposition": "tn"
+      },
+      {
+        "unit": "u056",
+        "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+        "disposition": "fn"
+      },
+      {
+        "unit": "u057",
+        "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+        "disposition": "tn"
+      }
+    ]
+  },
+  "repeatability": {
+    "repeats": 3,
+    "semanticStable": true,
+    "diagnosticStable": true,
+    "rawOrderStable": true,
+    "scoreStable": true,
+    "samples": [
+      {
+        "command": [
+          "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+          "scan",
+          "/tmp/pqc023-input-u7h8_r3q/accuracy",
+          "--format",
+          "all",
+          "--diagnostics",
+          "--threads",
+          "1",
+          "--rules-dir",
+          "/Users/waka/development/pqc/pqc-scan/rules",
+          "--out-dir",
+          "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/accuracy-0"
+        ],
+        "exitCode": 0,
+        "timedOut": false,
+        "wallSeconds": 0.027661291998811066,
+        "cpuSeconds": 0.020002,
+        "peakRssBytes": 17530880,
+        "resourceMethod": "wait4 per child",
+        "rssNativeUnit": "bytes",
+        "semanticDigest": "05398345e12479e832be37fc1ebc90eeb78a852e112f08c43f242177efed88ac",
+        "orderDigest": "dbbf6ec04af6810f93a64138058bf011cf6275a573e8a1b17e1c98001dc1c7db",
+        "coverage": {
+          "selected_files": 41,
+          "read_ok_files": 41,
+          "read_failed_files": 0,
+          "analyzed_files": 0,
+          "partial_files": 7,
+          "analysis_failed_files": 0,
+          "unsupported_files": 0,
+          "not_applicable_files": 0,
+          "unknown_files": 34,
+          "excluded_enumerated_files": 0,
+          "enumeration_failed_entries": 0,
+          "not_enumerated_population": true,
+          "status": "partial"
+        },
+        "scope": {
+          "max_file_size_bytes": 2097152,
+          "git_ignore": true,
+          "git_global": true,
+          "git_exclude": true,
+          "default_excludes": [
+            ".git",
+            "node_modules",
+            "target",
+            "dist",
+            "docs"
+          ],
+          "markdown_excluded": true
+        },
+        "diagnosticCodes": [
+          "detector_not_reported",
+          "detector_partial",
+          "detector_unsupported"
+        ],
+        "diagnosticDigest": "0f082711a1cde38ce4cfa577a9844700b60b84aa6d6d6d3e9caad8a2157b0164",
+        "findingCount": 35,
+        "outputBytes": 264541
+      },
+      {
+        "command": [
+          "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+          "scan",
+          "/tmp/pqc023-input-u7h8_r3q/accuracy",
+          "--format",
+          "all",
+          "--diagnostics",
+          "--threads",
+          "1",
+          "--rules-dir",
+          "/Users/waka/development/pqc/pqc-scan/rules",
+          "--out-dir",
+          "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/accuracy-1"
+        ],
+        "exitCode": 0,
+        "timedOut": false,
+        "wallSeconds": 0.05425541699514724,
+        "cpuSeconds": 0.033007999999999996,
+        "peakRssBytes": 17776640,
+        "resourceMethod": "wait4 per child",
+        "rssNativeUnit": "bytes",
+        "semanticDigest": "05398345e12479e832be37fc1ebc90eeb78a852e112f08c43f242177efed88ac",
+        "orderDigest": "dbbf6ec04af6810f93a64138058bf011cf6275a573e8a1b17e1c98001dc1c7db",
+        "coverage": {
+          "selected_files": 41,
+          "read_ok_files": 41,
+          "read_failed_files": 0,
+          "analyzed_files": 0,
+          "partial_files": 7,
+          "analysis_failed_files": 0,
+          "unsupported_files": 0,
+          "not_applicable_files": 0,
+          "unknown_files": 34,
+          "excluded_enumerated_files": 0,
+          "enumeration_failed_entries": 0,
+          "not_enumerated_population": true,
+          "status": "partial"
+        },
+        "scope": {
+          "max_file_size_bytes": 2097152,
+          "git_ignore": true,
+          "git_global": true,
+          "git_exclude": true,
+          "default_excludes": [
+            ".git",
+            "node_modules",
+            "target",
+            "dist",
+            "docs"
+          ],
+          "markdown_excluded": true
+        },
+        "diagnosticCodes": [
+          "detector_not_reported",
+          "detector_partial",
+          "detector_unsupported"
+        ],
+        "diagnosticDigest": "0f082711a1cde38ce4cfa577a9844700b60b84aa6d6d6d3e9caad8a2157b0164",
+        "findingCount": 35,
+        "outputBytes": 264552
+      },
+      {
+        "command": [
+          "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+          "scan",
+          "/tmp/pqc023-input-u7h8_r3q/accuracy",
+          "--format",
+          "all",
+          "--diagnostics",
+          "--threads",
+          "1",
+          "--rules-dir",
+          "/Users/waka/development/pqc/pqc-scan/rules",
+          "--out-dir",
+          "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/accuracy-2"
+        ],
+        "exitCode": 0,
+        "timedOut": false,
+        "wallSeconds": 0.02366129199799616,
+        "cpuSeconds": 0.019094,
+        "peakRssBytes": 17481728,
+        "resourceMethod": "wait4 per child",
+        "rssNativeUnit": "bytes",
+        "semanticDigest": "05398345e12479e832be37fc1ebc90eeb78a852e112f08c43f242177efed88ac",
+        "orderDigest": "dbbf6ec04af6810f93a64138058bf011cf6275a573e8a1b17e1c98001dc1c7db",
+        "coverage": {
+          "selected_files": 41,
+          "read_ok_files": 41,
+          "read_failed_files": 0,
+          "analyzed_files": 0,
+          "partial_files": 7,
+          "analysis_failed_files": 0,
+          "unsupported_files": 0,
+          "not_applicable_files": 0,
+          "unknown_files": 34,
+          "excluded_enumerated_files": 0,
+          "enumeration_failed_entries": 0,
+          "not_enumerated_population": true,
+          "status": "partial"
+        },
+        "scope": {
+          "max_file_size_bytes": 2097152,
+          "git_ignore": true,
+          "git_global": true,
+          "git_exclude": true,
+          "default_excludes": [
+            ".git",
+            "node_modules",
+            "target",
+            "dist",
+            "docs"
+          ],
+          "markdown_excluded": true
+        },
+        "diagnosticCodes": [
+          "detector_not_reported",
+          "detector_partial",
+          "detector_unsupported"
+        ],
+        "diagnosticDigest": "0f082711a1cde38ce4cfa577a9844700b60b84aa6d6d6d3e9caad8a2157b0164",
+        "findingCount": 35,
+        "outputBytes": 264540
+      }
+    ]
+  },
+  "benchmarks": {
+    "small": {
+      "recipe": "1 deterministic complete corpus copies; not accuracy truth",
+      "input": {
+        "files": 41,
+        "bytes": 5746,
+        "sha256": "1abb39e425c119373c84ac0fa6aa6d8736672e25db93fea4eeab5ee6bf670479"
+      },
+      "samples": [
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/small",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/small-0"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.024912458000471815,
+          "cpuSeconds": 0.017304,
+          "peakRssBytes": 16990208,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "dcde7475b5958bd8862a5cc69a8e66b675e3969cc2cbfcbd8844ba111fda9f92",
+          "orderDigest": "9560b49d53feb37471a42f4929cece5e07e63385451f26782a530a55b2b36b95",
+          "coverage": {
+            "selected_files": 41,
+            "read_ok_files": 41,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 7,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 34,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "0f082711a1cde38ce4cfa577a9844700b60b84aa6d6d6d3e9caad8a2157b0164",
+          "findingCount": 35,
+          "outputBytes": 264514,
+          "cacheClass": "first-measured"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/small",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/small-1"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.024151582998456433,
+          "cpuSeconds": 0.016905999999999997,
+          "peakRssBytes": 17088512,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "dcde7475b5958bd8862a5cc69a8e66b675e3969cc2cbfcbd8844ba111fda9f92",
+          "orderDigest": "9560b49d53feb37471a42f4929cece5e07e63385451f26782a530a55b2b36b95",
+          "coverage": {
+            "selected_files": 41,
+            "read_ok_files": 41,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 7,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 34,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "0f082711a1cde38ce4cfa577a9844700b60b84aa6d6d6d3e9caad8a2157b0164",
+          "findingCount": 35,
+          "outputBytes": 264526,
+          "cacheClass": "warm"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/small",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/small-2"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.022659000009298325,
+          "cpuSeconds": 0.017728999999999998,
+          "peakRssBytes": 16973824,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "dcde7475b5958bd8862a5cc69a8e66b675e3969cc2cbfcbd8844ba111fda9f92",
+          "orderDigest": "9560b49d53feb37471a42f4929cece5e07e63385451f26782a530a55b2b36b95",
+          "coverage": {
+            "selected_files": 41,
+            "read_ok_files": 41,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 7,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 34,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "0f082711a1cde38ce4cfa577a9844700b60b84aa6d6d6d3e9caad8a2157b0164",
+          "findingCount": 35,
+          "outputBytes": 264526,
+          "cacheClass": "warm"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/small",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/small-3"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.020011915999930352,
+          "cpuSeconds": 0.016633,
+          "peakRssBytes": 16990208,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "dcde7475b5958bd8862a5cc69a8e66b675e3969cc2cbfcbd8844ba111fda9f92",
+          "orderDigest": "9560b49d53feb37471a42f4929cece5e07e63385451f26782a530a55b2b36b95",
+          "coverage": {
+            "selected_files": 41,
+            "read_ok_files": 41,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 7,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 34,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "0f082711a1cde38ce4cfa577a9844700b60b84aa6d6d6d3e9caad8a2157b0164",
+          "findingCount": 35,
+          "outputBytes": 264514,
+          "cacheClass": "warm"
+        }
+      ],
+      "warmDistribution": {
+        "wallSeconds": {
+          "min": 0.020011915999930352,
+          "median": 0.022659000009298325,
+          "max": 0.024151582998456433,
+          "samples": [
+            0.024151582998456433,
+            0.022659000009298325,
+            0.020011915999930352
+          ]
+        },
+        "cpuSeconds": {
+          "min": 0.016633,
+          "median": 0.016905999999999997,
+          "max": 0.017728999999999998,
+          "samples": [
+            0.016905999999999997,
+            0.017728999999999998,
+            0.016633
+          ]
+        },
+        "peakRssBytes": {
+          "min": 16973824,
+          "median": 16990208,
+          "max": 17088512,
+          "samples": [
+            17088512,
+            16973824,
+            16990208
+          ]
+        }
+      },
+      "firstMeasured": {
+        "command": [
+          "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+          "scan",
+          "/tmp/pqc023-input-u7h8_r3q/small",
+          "--format",
+          "all",
+          "--diagnostics",
+          "--threads",
+          "1",
+          "--rules-dir",
+          "/Users/waka/development/pqc/pqc-scan/rules",
+          "--out-dir",
+          "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/small-0"
+        ],
+        "exitCode": 0,
+        "timedOut": false,
+        "wallSeconds": 0.024912458000471815,
+        "cpuSeconds": 0.017304,
+        "peakRssBytes": 16990208,
+        "resourceMethod": "wait4 per child",
+        "rssNativeUnit": "bytes",
+        "semanticDigest": "dcde7475b5958bd8862a5cc69a8e66b675e3969cc2cbfcbd8844ba111fda9f92",
+        "orderDigest": "9560b49d53feb37471a42f4929cece5e07e63385451f26782a530a55b2b36b95",
+        "coverage": {
+          "selected_files": 41,
+          "read_ok_files": 41,
+          "read_failed_files": 0,
+          "analyzed_files": 0,
+          "partial_files": 7,
+          "analysis_failed_files": 0,
+          "unsupported_files": 0,
+          "not_applicable_files": 0,
+          "unknown_files": 34,
+          "excluded_enumerated_files": 0,
+          "enumeration_failed_entries": 0,
+          "not_enumerated_population": true,
+          "status": "partial"
+        },
+        "scope": {
+          "max_file_size_bytes": 2097152,
+          "git_ignore": true,
+          "git_global": true,
+          "git_exclude": true,
+          "default_excludes": [
+            ".git",
+            "node_modules",
+            "target",
+            "dist",
+            "docs"
+          ],
+          "markdown_excluded": true
+        },
+        "diagnosticCodes": [
+          "detector_not_reported",
+          "detector_partial",
+          "detector_unsupported"
+        ],
+        "diagnosticDigest": "0f082711a1cde38ce4cfa577a9844700b60b84aa6d6d6d3e9caad8a2157b0164",
+        "findingCount": 35,
+        "outputBytes": 264514,
+        "cacheClass": "first-measured"
+      }
+    },
+    "medium": {
+      "recipe": "8 deterministic complete corpus copies; not accuracy truth",
+      "input": {
+        "files": 328,
+        "bytes": 45968,
+        "sha256": "14df13f8fbfdfc58f23fb7a7f40312ec531f9e5678af8074a3fff82b39bef3c3"
+      },
+      "samples": [
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/medium",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/medium-0"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.05179620899434667,
+          "cpuSeconds": 0.042775999999999995,
+          "peakRssBytes": 19824640,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "6595eed66d5df706e2fc449a3ca53954698eed6660008600b3116e066a2179b4",
+          "orderDigest": "cf9c292391d82d61c290c7479b0bf967ffdca6ee37fe2a8ccc74b1b9a2ea747f",
+          "coverage": {
+            "selected_files": 328,
+            "read_ok_files": 328,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 56,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 272,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "cf41a1db649726fe9121646afb13cd2a0141f9d147f8cc3cbaadc915b17097d3",
+          "findingCount": 280,
+          "outputBytes": 1563090,
+          "cacheClass": "first-measured"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/medium",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/medium-1"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.0533162909996463,
+          "cpuSeconds": 0.042471999999999996,
+          "peakRssBytes": 19742720,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "6595eed66d5df706e2fc449a3ca53954698eed6660008600b3116e066a2179b4",
+          "orderDigest": "cf9c292391d82d61c290c7479b0bf967ffdca6ee37fe2a8ccc74b1b9a2ea747f",
+          "coverage": {
+            "selected_files": 328,
+            "read_ok_files": 328,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 56,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 272,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "cf41a1db649726fe9121646afb13cd2a0141f9d147f8cc3cbaadc915b17097d3",
+          "findingCount": 280,
+          "outputBytes": 1563089,
+          "cacheClass": "warm"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/medium",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/medium-2"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.05888337499345653,
+          "cpuSeconds": 0.044386999999999996,
+          "peakRssBytes": 19922944,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "6595eed66d5df706e2fc449a3ca53954698eed6660008600b3116e066a2179b4",
+          "orderDigest": "cf9c292391d82d61c290c7479b0bf967ffdca6ee37fe2a8ccc74b1b9a2ea747f",
+          "coverage": {
+            "selected_files": 328,
+            "read_ok_files": 328,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 56,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 272,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "cf41a1db649726fe9121646afb13cd2a0141f9d147f8cc3cbaadc915b17097d3",
+          "findingCount": 280,
+          "outputBytes": 1563090,
+          "cacheClass": "warm"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/medium",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/medium-3"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.06242112499603536,
+          "cpuSeconds": 0.04349499999999999,
+          "peakRssBytes": 19759104,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "6595eed66d5df706e2fc449a3ca53954698eed6660008600b3116e066a2179b4",
+          "orderDigest": "cf9c292391d82d61c290c7479b0bf967ffdca6ee37fe2a8ccc74b1b9a2ea747f",
+          "coverage": {
+            "selected_files": 328,
+            "read_ok_files": 328,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 56,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 272,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "cf41a1db649726fe9121646afb13cd2a0141f9d147f8cc3cbaadc915b17097d3",
+          "findingCount": 280,
+          "outputBytes": 1563089,
+          "cacheClass": "warm"
+        }
+      ],
+      "warmDistribution": {
+        "wallSeconds": {
+          "min": 0.0533162909996463,
+          "median": 0.05888337499345653,
+          "max": 0.06242112499603536,
+          "samples": [
+            0.0533162909996463,
+            0.05888337499345653,
+            0.06242112499603536
+          ]
+        },
+        "cpuSeconds": {
+          "min": 0.042471999999999996,
+          "median": 0.04349499999999999,
+          "max": 0.044386999999999996,
+          "samples": [
+            0.042471999999999996,
+            0.044386999999999996,
+            0.04349499999999999
+          ]
+        },
+        "peakRssBytes": {
+          "min": 19742720,
+          "median": 19759104,
+          "max": 19922944,
+          "samples": [
+            19742720,
+            19922944,
+            19759104
+          ]
+        }
+      },
+      "firstMeasured": {
+        "command": [
+          "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+          "scan",
+          "/tmp/pqc023-input-u7h8_r3q/medium",
+          "--format",
+          "all",
+          "--diagnostics",
+          "--threads",
+          "1",
+          "--rules-dir",
+          "/Users/waka/development/pqc/pqc-scan/rules",
+          "--out-dir",
+          "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/medium-0"
+        ],
+        "exitCode": 0,
+        "timedOut": false,
+        "wallSeconds": 0.05179620899434667,
+        "cpuSeconds": 0.042775999999999995,
+        "peakRssBytes": 19824640,
+        "resourceMethod": "wait4 per child",
+        "rssNativeUnit": "bytes",
+        "semanticDigest": "6595eed66d5df706e2fc449a3ca53954698eed6660008600b3116e066a2179b4",
+        "orderDigest": "cf9c292391d82d61c290c7479b0bf967ffdca6ee37fe2a8ccc74b1b9a2ea747f",
+        "coverage": {
+          "selected_files": 328,
+          "read_ok_files": 328,
+          "read_failed_files": 0,
+          "analyzed_files": 0,
+          "partial_files": 56,
+          "analysis_failed_files": 0,
+          "unsupported_files": 0,
+          "not_applicable_files": 0,
+          "unknown_files": 272,
+          "excluded_enumerated_files": 0,
+          "enumeration_failed_entries": 0,
+          "not_enumerated_population": true,
+          "status": "partial"
+        },
+        "scope": {
+          "max_file_size_bytes": 2097152,
+          "git_ignore": true,
+          "git_global": true,
+          "git_exclude": true,
+          "default_excludes": [
+            ".git",
+            "node_modules",
+            "target",
+            "dist",
+            "docs"
+          ],
+          "markdown_excluded": true
+        },
+        "diagnosticCodes": [
+          "detector_not_reported",
+          "detector_partial",
+          "detector_unsupported"
+        ],
+        "diagnosticDigest": "cf41a1db649726fe9121646afb13cd2a0141f9d147f8cc3cbaadc915b17097d3",
+        "findingCount": 280,
+        "outputBytes": 1563090,
+        "cacheClass": "first-measured"
+      }
+    },
+    "large": {
+      "recipe": "32 deterministic complete corpus copies; not accuracy truth",
+      "input": {
+        "files": 1312,
+        "bytes": 183872,
+        "sha256": "26dc6c3eeacf915f7d4fc4007a2a4af7dccf9a301ed56e7b52120718ee41d2df"
+      },
+      "samples": [
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/large",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/large-0"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.18052308300684672,
+          "cpuSeconds": 0.143572,
+          "peakRssBytes": 33030144,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "f4d6c8070d170017778c21cf3a8f06446ece1fa1af96575bd659ff63868fc356",
+          "orderDigest": "93e1e3d89424680a715cc9e4ddf2bef0b66e8ef81ca8695a02f976a3987d9eb0",
+          "coverage": {
+            "selected_files": 1312,
+            "read_ok_files": 1312,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 224,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 1088,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "6b4ef1408f26d82f1d2671edcbed657d43b4281e1d584de7ecde1d54e9643bfb",
+          "findingCount": 1120,
+          "outputBytes": 5999843,
+          "cacheClass": "first-measured"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/large",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/large-1"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.17576391701004468,
+          "cpuSeconds": 0.144667,
+          "peakRssBytes": 34521088,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "f4d6c8070d170017778c21cf3a8f06446ece1fa1af96575bd659ff63868fc356",
+          "orderDigest": "93e1e3d89424680a715cc9e4ddf2bef0b66e8ef81ca8695a02f976a3987d9eb0",
+          "coverage": {
+            "selected_files": 1312,
+            "read_ok_files": 1312,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 224,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 1088,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "6b4ef1408f26d82f1d2671edcbed657d43b4281e1d584de7ecde1d54e9643bfb",
+          "findingCount": 1120,
+          "outputBytes": 5999843,
+          "cacheClass": "warm"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/large",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/large-2"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.17086737501085736,
+          "cpuSeconds": 0.141617,
+          "peakRssBytes": 34095104,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "f4d6c8070d170017778c21cf3a8f06446ece1fa1af96575bd659ff63868fc356",
+          "orderDigest": "93e1e3d89424680a715cc9e4ddf2bef0b66e8ef81ca8695a02f976a3987d9eb0",
+          "coverage": {
+            "selected_files": 1312,
+            "read_ok_files": 1312,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 224,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 1088,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "6b4ef1408f26d82f1d2671edcbed657d43b4281e1d584de7ecde1d54e9643bfb",
+          "findingCount": 1120,
+          "outputBytes": 5999843,
+          "cacheClass": "warm"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/large",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/large-3"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.15045225000358187,
+          "cpuSeconds": 0.128598,
+          "peakRssBytes": 33210368,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "f4d6c8070d170017778c21cf3a8f06446ece1fa1af96575bd659ff63868fc356",
+          "orderDigest": "93e1e3d89424680a715cc9e4ddf2bef0b66e8ef81ca8695a02f976a3987d9eb0",
+          "coverage": {
+            "selected_files": 1312,
+            "read_ok_files": 1312,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 224,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 1088,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_partial",
+            "detector_unsupported"
+          ],
+          "diagnosticDigest": "6b4ef1408f26d82f1d2671edcbed657d43b4281e1d584de7ecde1d54e9643bfb",
+          "findingCount": 1120,
+          "outputBytes": 5999843,
+          "cacheClass": "warm"
+        }
+      ],
+      "warmDistribution": {
+        "wallSeconds": {
+          "min": 0.15045225000358187,
+          "median": 0.17086737501085736,
+          "max": 0.17576391701004468,
+          "samples": [
+            0.17576391701004468,
+            0.17086737501085736,
+            0.15045225000358187
+          ]
+        },
+        "cpuSeconds": {
+          "min": 0.128598,
+          "median": 0.141617,
+          "max": 0.144667,
+          "samples": [
+            0.144667,
+            0.141617,
+            0.128598
+          ]
+        },
+        "peakRssBytes": {
+          "min": 33210368,
+          "median": 34095104,
+          "max": 34521088,
+          "samples": [
+            34521088,
+            34095104,
+            33210368
+          ]
+        }
+      },
+      "firstMeasured": {
+        "command": [
+          "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+          "scan",
+          "/tmp/pqc023-input-u7h8_r3q/large",
+          "--format",
+          "all",
+          "--diagnostics",
+          "--threads",
+          "1",
+          "--rules-dir",
+          "/Users/waka/development/pqc/pqc-scan/rules",
+          "--out-dir",
+          "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/large-0"
+        ],
+        "exitCode": 0,
+        "timedOut": false,
+        "wallSeconds": 0.18052308300684672,
+        "cpuSeconds": 0.143572,
+        "peakRssBytes": 33030144,
+        "resourceMethod": "wait4 per child",
+        "rssNativeUnit": "bytes",
+        "semanticDigest": "f4d6c8070d170017778c21cf3a8f06446ece1fa1af96575bd659ff63868fc356",
+        "orderDigest": "93e1e3d89424680a715cc9e4ddf2bef0b66e8ef81ca8695a02f976a3987d9eb0",
+        "coverage": {
+          "selected_files": 1312,
+          "read_ok_files": 1312,
+          "read_failed_files": 0,
+          "analyzed_files": 0,
+          "partial_files": 224,
+          "analysis_failed_files": 0,
+          "unsupported_files": 0,
+          "not_applicable_files": 0,
+          "unknown_files": 1088,
+          "excluded_enumerated_files": 0,
+          "enumeration_failed_entries": 0,
+          "not_enumerated_population": true,
+          "status": "partial"
+        },
+        "scope": {
+          "max_file_size_bytes": 2097152,
+          "git_ignore": true,
+          "git_global": true,
+          "git_exclude": true,
+          "default_excludes": [
+            ".git",
+            "node_modules",
+            "target",
+            "dist",
+            "docs"
+          ],
+          "markdown_excluded": true
+        },
+        "diagnosticCodes": [
+          "detector_not_reported",
+          "detector_partial",
+          "detector_unsupported"
+        ],
+        "diagnosticDigest": "6b4ef1408f26d82f1d2671edcbed657d43b4281e1d584de7ecde1d54e9643bfb",
+        "findingCount": 1120,
+        "outputBytes": 5999843,
+        "cacheClass": "first-measured"
+      }
+    },
+    "pathological": {
+      "recipe": "one JS string with 10000 repeated RSA JWT tokens, intentionally bounded/truncated",
+      "input": {
+        "files": 1,
+        "bytes": 60017,
+        "sha256": "d7ada4956aeef3f7b71646df810f347c7dbf65f936fd5545dfcb8932e783a249"
+      },
+      "samples": [
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/pathological",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/pathological-0"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.02090029099781532,
+          "cpuSeconds": 0.015482,
+          "peakRssBytes": 14581760,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "4fa6b6b97a1eadc5ca4da7dfd90ef4db426af24c454bb9a7354f02acb27ffa41",
+          "orderDigest": "38db0f2ff32d877ce3ceb9adbf2434fcc9b48827d51ea66b66454562c1b5540e",
+          "coverage": {
+            "selected_files": 1,
+            "read_ok_files": 1,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 1,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 0,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_truncated"
+          ],
+          "diagnosticDigest": "bb929118c93bd919f23e97e5101af7c44c4a30f880938d9c872c375d67030bbc",
+          "findingCount": 66,
+          "outputBytes": 514610,
+          "cacheClass": "first-measured"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/pathological",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/pathological-1"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.02069787500659004,
+          "cpuSeconds": 0.016739999999999998,
+          "peakRssBytes": 14893056,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "4fa6b6b97a1eadc5ca4da7dfd90ef4db426af24c454bb9a7354f02acb27ffa41",
+          "orderDigest": "38db0f2ff32d877ce3ceb9adbf2434fcc9b48827d51ea66b66454562c1b5540e",
+          "coverage": {
+            "selected_files": 1,
+            "read_ok_files": 1,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 1,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 0,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_truncated"
+          ],
+          "diagnosticDigest": "bb929118c93bd919f23e97e5101af7c44c4a30f880938d9c872c375d67030bbc",
+          "findingCount": 66,
+          "outputBytes": 514622,
+          "cacheClass": "warm"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/pathological",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/pathological-2"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.021262249996652827,
+          "cpuSeconds": 0.01621,
+          "peakRssBytes": 14516224,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "4fa6b6b97a1eadc5ca4da7dfd90ef4db426af24c454bb9a7354f02acb27ffa41",
+          "orderDigest": "38db0f2ff32d877ce3ceb9adbf2434fcc9b48827d51ea66b66454562c1b5540e",
+          "coverage": {
+            "selected_files": 1,
+            "read_ok_files": 1,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 1,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 0,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_truncated"
+          ],
+          "diagnosticDigest": "bb929118c93bd919f23e97e5101af7c44c4a30f880938d9c872c375d67030bbc",
+          "findingCount": 66,
+          "outputBytes": 514610,
+          "cacheClass": "warm"
+        },
+        {
+          "command": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc023-input-u7h8_r3q/pathological",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/pathological-3"
+          ],
+          "exitCode": 0,
+          "timedOut": false,
+          "wallSeconds": 0.021065417007775977,
+          "cpuSeconds": 0.016628999999999998,
+          "peakRssBytes": 14532608,
+          "resourceMethod": "wait4 per child",
+          "rssNativeUnit": "bytes",
+          "semanticDigest": "4fa6b6b97a1eadc5ca4da7dfd90ef4db426af24c454bb9a7354f02acb27ffa41",
+          "orderDigest": "38db0f2ff32d877ce3ceb9adbf2434fcc9b48827d51ea66b66454562c1b5540e",
+          "coverage": {
+            "selected_files": 1,
+            "read_ok_files": 1,
+            "read_failed_files": 0,
+            "analyzed_files": 0,
+            "partial_files": 1,
+            "analysis_failed_files": 0,
+            "unsupported_files": 0,
+            "not_applicable_files": 0,
+            "unknown_files": 0,
+            "excluded_enumerated_files": 0,
+            "enumeration_failed_entries": 0,
+            "not_enumerated_population": true,
+            "status": "partial"
+          },
+          "scope": {
+            "max_file_size_bytes": 2097152,
+            "git_ignore": true,
+            "git_global": true,
+            "git_exclude": true,
+            "default_excludes": [
+              ".git",
+              "node_modules",
+              "target",
+              "dist",
+              "docs"
+            ],
+            "markdown_excluded": true
+          },
+          "diagnosticCodes": [
+            "detector_not_reported",
+            "detector_truncated"
+          ],
+          "diagnosticDigest": "bb929118c93bd919f23e97e5101af7c44c4a30f880938d9c872c375d67030bbc",
+          "findingCount": 66,
+          "outputBytes": 514623,
+          "cacheClass": "warm"
+        }
+      ],
+      "warmDistribution": {
+        "wallSeconds": {
+          "min": 0.02069787500659004,
+          "median": 0.021065417007775977,
+          "max": 0.021262249996652827,
+          "samples": [
+            0.02069787500659004,
+            0.021262249996652827,
+            0.021065417007775977
+          ]
+        },
+        "cpuSeconds": {
+          "min": 0.01621,
+          "median": 0.016628999999999998,
+          "max": 0.016739999999999998,
+          "samples": [
+            0.016739999999999998,
+            0.01621,
+            0.016628999999999998
+          ]
+        },
+        "peakRssBytes": {
+          "min": 14516224,
+          "median": 14532608,
+          "max": 14893056,
+          "samples": [
+            14893056,
+            14516224,
+            14532608
+          ]
+        }
+      },
+      "firstMeasured": {
+        "command": [
+          "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+          "scan",
+          "/tmp/pqc023-input-u7h8_r3q/pathological",
+          "--format",
+          "all",
+          "--diagnostics",
+          "--threads",
+          "1",
+          "--rules-dir",
+          "/Users/waka/development/pqc/pqc-scan/rules",
+          "--out-dir",
+          "/Users/waka/development/pqc/pqc-scan/target/task023/baseline-complete/pathological-0"
+        ],
+        "exitCode": 0,
+        "timedOut": false,
+        "wallSeconds": 0.02090029099781532,
+        "cpuSeconds": 0.015482,
+        "peakRssBytes": 14581760,
+        "resourceMethod": "wait4 per child",
+        "rssNativeUnit": "bytes",
+        "semanticDigest": "4fa6b6b97a1eadc5ca4da7dfd90ef4db426af24c454bb9a7354f02acb27ffa41",
+        "orderDigest": "38db0f2ff32d877ce3ceb9adbf2434fcc9b48827d51ea66b66454562c1b5540e",
+        "coverage": {
+          "selected_files": 1,
+          "read_ok_files": 1,
+          "read_failed_files": 0,
+          "analyzed_files": 0,
+          "partial_files": 1,
+          "analysis_failed_files": 0,
+          "unsupported_files": 0,
+          "not_applicable_files": 0,
+          "unknown_files": 0,
+          "excluded_enumerated_files": 0,
+          "enumeration_failed_entries": 0,
+          "not_enumerated_population": true,
+          "status": "partial"
+        },
+        "scope": {
+          "max_file_size_bytes": 2097152,
+          "git_ignore": true,
+          "git_global": true,
+          "git_exclude": true,
+          "default_excludes": [
+            ".git",
+            "node_modules",
+            "target",
+            "dist",
+            "docs"
+          ],
+          "markdown_excluded": true
+        },
+        "diagnosticCodes": [
+          "detector_not_reported",
+          "detector_truncated"
+        ],
+        "diagnosticDigest": "bb929118c93bd919f23e97e5101af7c44c4a30f880938d9c872c375d67030bbc",
+        "findingCount": 66,
+        "outputBytes": 514610,
+        "cacheClass": "first-measured"
+      }
+    }
+  },
+  "localRawArtifacts": "target/task023/baseline-complete/",
+  "omittedFromCommittedSummary": "Deterministically regenerable per-copy benchmark path bindings only; full local summary retains them.",
+  "proposedBudgets": {
+    "status": "unapproved, maintainer decision pending",
+    "accuracy": "For the same frozen eligible unit set only: TP must not decrease, FP/FN must not increase per split/family; do not turn null denominators into targets. No global accuracy percentage proposed.",
+    "performance": {
+      "small": {
+        "wallSecondsSignal": 0.04830316599691287,
+        "peakRssBytesSignal": 34177024
+      },
+      "medium": {
+        "wallSecondsSignal": 0.12484224999207072,
+        "peakRssBytesSignal": 39845888
+      },
+      "large": {
+        "wallSecondsSignal": 0.35152783402008936,
+        "peakRssBytesSignal": 69042176
+      },
+      "pathological": {
+        "wallSecondsSignal": 0.04252449999330565,
+        "peakRssBytesSignal": 29786112
+      }
+    },
+    "basis": "Provisional review signals of twice observed warm max, chosen after measurement as heuristic headroom, not statistically inferred guarantees. Same host/profile/config/bytes and repeated corroboration required; CI does not enforce these values."
+  }
+}

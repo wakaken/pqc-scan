@@ -2,12 +2,12 @@ id: "023"
 title: "Establish labeled accuracy and reproducibility baselines"
 type: improvement
 priority: high
-status: pending
+status: review
 planned_new_paths:
   - "tests/quality/ (reviewed corpus and evaluation harness; final layout selected by Planner)"
-owner: Planner Agent
+owner: Executor Agent
 phase: "0"
-description: "Establish labeled accuracy and reproducibility baselines. Planning only; implementation and validation have not started."
+description: "Establish labeled accuracy and reproducibility baselines. Development-only corpus/evaluator baseline; production CLI and formats remain unchanged."
 plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-023"
 change_size: "Medium/high; labeling and measurement dominate"
 decision_gate: "Agree measurement protocol and budgets after measuring; no predetermined percentages."
@@ -33,3 +33,34 @@ acceptance:
 testing_requirements:
   - "Independent labeling/adjudication, evaluator sanity fixtures and repeat local measurements."
   - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+implementation_plan: "docs/superpowers/plans/2026-11-10-quality-baseline.md"
+
+implementation_record:
+  base_head: "35d988e03629cb15b17a94af81b1e74266a344ff"
+  branch: "codex/task-022-sarif-location"
+  branch_policy: "Same branch explicitly requested; separate task023 local commit; no push/PR/merge."
+  lifecycle: ["Planner: pending -> planned", "Executor: in-progress -> review"]
+  protocol: "tests/quality/PROTOCOL.md"
+  corpus_version: "023-v2"
+  corpus_sha256: "d6fa706b8f2c2c1267e9e1f0383d6318f4c11b2761f8785b6d7865797ee2afb6"
+  truth: "tests/quality/truth.json"
+  labels: ["tests/quality/labels-final-a.json", "tests/quality/labels-final-c.json"]
+  corpus: "41 files / 57 units; 30 positive, 20 negative, 2 ambiguous, 5 unsupported."
+  lineage_audit: "Initial derived-template holdout invalidated and retained as exploratory evidence; all readiness-derived units moved together to tuning. Independently authored replacement holdout labeled before measurement. No matcher tuning."
+  baseline: "docs/quality/task023/BASELINE.json"
+  verification_report: "docs/quality/TASK-023-BASELINE.md"
+  independent_review: "docs/quality/TASK-023-REVIEW.md"
+  artifacts: "target/task023/baseline-complete/, target/task023/self-scan-final/, target/task023/command-results.json"
+  validation: "Offline build/fmt/test/clippy passed; 145 Rust, 20 Python, 22 Node tests; 3 stable semantic/diagnostic/score repeats and 4 performance workloads with 3 warm samples each."
+  compatibility: "Production crates/rules/dependencies/CLI/report formats and projection helper are unchanged from task022; existing regressions run unchanged."
+  self_scan: "776 raw = 645 reviewed omissions + 131 retained; all previous 128 retained unchanged, three new artifact-only SBOM results remain eligible for Code Scanning."
+  budgets:
+    status: "UNAPPROVED; no numeric accuracy/performance gate enforced"
+    proposal: "Corpus-specific TP/FP/FN nonregression plus provisional 2x observed warm wall/RSS maximum review signals, subject to same environment and corroboration."
+    decision_gate: "Await maintainer review of concrete protocol and measured proposal; do not mark done before that decision."
+  unexecuted: ["Hosted Actions/Code Scanning", "Linux/Windows execution", "True OS cold cache", "Multi-host/real-product performance and accuracy", "Maintainer budget approval"]
+  reflection: "Source-only lineage audit is necessary even for hand-authored adversarial tests; metadata names alone cannot prove independent holdout. Keep exploratory history, freeze new source-only labels before measuring, and retain null denominators and unsupported populations."
+
+  review_outcome: "Independent review023 final technical approval, no unresolved material findings; 20 Python tests independently passed and final source/measurement bindings verified."
+  evaluation_outcome: "Local technical acceptance passed. Keep review until maintainer protocol/measured-budget approval; no premature done status."

@@ -436,6 +436,24 @@ Windowsではネイティブの区切り文字を正規化し、Unixのバック
 新しい意図的なテスト入力は、ソースと所見をレビューしてから台帳へ登録します。CIによる自動登録は行いません。
 詳しくは[ポリシーと更新手順](docs/quality/CI-SELF-SCAN.md)を参照してください。
 
+
+## 開発者向け品質ベースライン
+
+タスク023では、独立した正解ラベル付きの評価入力とPython標準ライブラリだけで動く
+計測ハーネスを追加しました。検出ルール・既存CLI・出力形式は変更しません。
+`cargo build --workspace --release --locked` の後、以下を実行します。
+
+```bash
+python3 -m unittest discover -s tests/quality -p 'test_*.py'
+python3 tests/quality/run.py --binary target/release/pqc-scan --build-profile release --out-dir target/quality-baseline
+```
+
+実行ごとに新しい出力ディレクトリを指定してください。入力はビルド除外ディレクトリの外に
+一時配置し、生成レポートは `target/` 以下に保存します。CIでも測定結果と全レポートを保存します。
+精度・性能の予算は未承認の提案です。小規模な合成評価入力の結果を実際の製品全体の精度と
+同一視しないでください。[評価手順](tests/quality/PROTOCOL.md)と
+[測定結果](docs/quality/TASK-023-BASELINE.md)に対象範囲と制約を記録しています。
+
 ## ライセンス
 
 MIT

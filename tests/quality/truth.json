@@ -1,0 +1,308 @@
+{
+  "version": 1,
+  "corpusSha256": "d6fa706b8f2c2c1267e9e1f0383d6318f4c11b2761f8785b6d7865797ee2afb6",
+  "labelSources": {
+    "labels-final-a.json": "308c9eea4f4e479517cf780a9a9c780053b0f6205d696d674b1eb074c65a33b9",
+    "labels-final-c.json": "e66a440e0600b82e6dea3986c694add4f11b1a5fd312c99412fe8d243b9f28b3"
+  },
+  "adjudicator": "Coordinator, source-only before first revised holdout measurement; independent labels reference corpus 023-v2",
+  "disagreements": [
+    {
+      "id": "u027",
+      "a": "positive",
+      "c": "unsupported"
+    }
+  ],
+  "labels": [
+    {
+      "id": "u001",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: Signature.getInstance に ML-DSA を指定した名目的な API 参照です。 C: Signature.getInstance が ML-DSA を明示しており、名目上のPQC署名API参照です。"
+    },
+    {
+      "id": "u002",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: crypto/mlkem の import 宣言です。 C: crypto/mlkem のインポートであり、名目上のPQC API参照です。"
+    },
+    {
+      "id": "u003",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: generateKeyPairSync に ML-KEM の固定名を指定しています。 C: generateKeyPairSync に ml-kem-768 が明示されています。省略されたインポートはプロトコル上許容されます。"
+    },
+    {
+      "id": "u004",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: subtle.generateKey の name に ML-DSA-65 を指定しています。 C: subtle.generateKey に ML-DSA-65 が明示されたWebCrypto参照です。"
+    },
+    {
+      "id": "u005",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: mlkem.MLKEM768PrivateKey.generate の名目的な API 参照です。 C: MLKEM768PrivateKey.generate の名目上のPQC API参照です。"
+    },
+    {
+      "id": "u006",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: ml_kem::MlKem768 の use 宣言です。 C: ml_kem クレートの MlKem768 を参照する use 宣言です。"
+    },
+    {
+      "id": "u007",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: OpenSSL::PKey.generate_key に ML-DSA-65 を指定しています。 C: OpenSSL::PKey.generate_key に ML-DSA-65 が明示されています。"
+    },
+    {
+      "id": "u008",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: 行コメント内の文字列であり API 参照ではありません。 C: 対象行の呼び出しは行コメント内にあり、API参照ではありません。"
+    },
+    {
+      "id": "u009",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: ML_KEM_helper は変数名のみで、API 呼び出しや import ではありません。 C: ML_KEM_helper は数値を保持する識別子であり、暗号API参照ではありません。"
+    },
+    {
+      "id": "u010",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: X25519MLKEM768 は旧ドラフト名ではありません。 C: X25519MLKEM768 は最終方式名であり、旧ドラフト名ではありません。"
+    },
+    {
+      "id": "u011",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: GODEBUG の tlsmlkem=0 は ML-KEM の明示的な無効化設定です。 C: GODEBUG の tlsmlkem=0 はPQC TLS機能の明示的無効化です。"
+    },
+    {
+      "id": "u012",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: namedGroups は x25519 と secp256r1 の古典方式のみです。 C: jdk.tls.namedGroups の列挙は x25519 と secp256r1 の古典群のみです。"
+    },
+    {
+      "id": "u013",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: groups は X25519 と P-256 の古典方式のみです。 C: ctx.groups の列挙は X25519 と P-256 の古典群のみです。"
+    },
+    {
+      "id": "u014",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: node:crypto の generateKeyPairSync の明示的な別名 pair を ML-KEM 名で呼び出しています。 C: node:crypto から別名 pair としてインポートされたAPIへ ml-kem-768 を渡しています。"
+    },
+    {
+      "id": "u015",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: generateKeyPairSync は文字列長を返すローカル関数として定義されています。 C: generateKeyPairSync は同じファイルで定義された文字列長を返すローカル関数です。"
+    },
+    {
+      "id": "u016",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: 同一行の最初の固定 ML-KEM API 呼び出しです。 C: 対象区間の最初の generateKeyPairSync 呼び出しが ml-kem-768 を指定しています。"
+    },
+    {
+      "id": "u017",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: 同一行の二つ目の独立した固定 ML-KEM API 呼び出しです。 C: 対象区間の二つ目の generateKeyPairSync 呼び出しも独立して ml-kem-768 を指定しています。"
+    },
+    {
+      "id": "u018",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: 到達不能分岐でも Signature.getInstance と ML-DSA の静的参照があります。 C: 到達不能な分岐でも Signature.getInstance の ML-DSA 参照は静的に存在します。"
+    },
+    {
+      "id": "u019",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: crypto/mlkem の import は行コメント内にあります。 C: crypto/mlkem の記述はコメント内であり、実際のインポート宣言ではありません。"
+    },
+    {
+      "id": "u020",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: 明示的に import した MLKEM768PrivateKey の別名 Key に由来する generate 参照です。 C: PQCモジュールからインポートした MLKEM768PrivateKey の別名 Key に対する生成参照です。"
+    },
+    {
+      "id": "u021",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: ml_kem はローカルモジュールで、Dummy はそのローカル型です。 C: ml_kem は明示的に定義されたローカルの Dummy モジュールであり、暗号クレートではありません。"
+    },
+    {
+      "id": "u022",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: puts によるアルゴリズム文字列の表示であり暗号 API 参照ではありません。 C: puts は ML-DSA-65 という文字列を表示するだけで、暗号APIを呼びません。"
+    },
+    {
+      "id": "u023",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: 型注釈付き代入内に subtle.generateKey と ML-DSA-65 の静的参照があります。 C: TypeScriptの型注釈があっても、subtle.generateKey は ML-DSA-65 を明示しています。"
+    },
+    {
+      "id": "u024",
+      "label": "ambiguous",
+      "reason": "Independent reviewers agree. A: algorithmFromCaller の値をソースから確定できません。 C: algorithmFromCaller のローカルな値がなく、呼び出しがPQC方式を選ぶかは決定できません。"
+    },
+    {
+      "id": "u025",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: X25519Kyber768Draft00 は旧 Kyber ドラフト名の明示的な参照です。 C: X25519Kyber768Draft00 は旧ドラフト方式名の静的参照です。"
+    },
+    {
+      "id": "u026",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: X25519MLKEM768 は旧ドラフト名ではありません。 C: X25519MLKEM768 は旧ドラフト方式名ではありません。"
+    },
+    {
+      "id": "u027",
+      "label": "positive",
+      "reason": "Source-only adjudication before first revised holdout measurement: named mlkem.MLKEM768PrivateKey.generate member reference is explicit. Protocol scores nominal static references, not syntactic completeness/execution. Missing closing delimiter is independent parser incompleteness, not absence of this identifiable reference. Preserve both original labels and disagreement."
+    },
+    {
+      "id": "u028",
+      "label": "unsupported",
+      "reason": "Independent reviewers agree. A: Swift は指定された Node API の対応言語ではありません。 C: Swift入力は指定されたNode APIファミリーおよび対応ソース言語の対象外です。"
+    },
+    {
+      "id": "u029",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: tlsmlkem=1 は明示的な無効化値 0 ではありません。 C: tlsmlkem=1 は有効化指定であり、明示的無効化ではありません。"
+    },
+    {
+      "id": "u030",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: namedGroups に X25519MLKEM768 が含まれ、古典方式のみではありません。 C: 群リストに X25519MLKEM768 を含むため、古典群のみの設定ではありません。"
+    },
+    {
+      "id": "u031",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: groups に X25519MLKEM768 が含まれ、古典方式のみではありません。 C: 群リストに X25519MLKEM768 を含むため、古典群のみの設定ではありません。"
+    },
+    {
+      "id": "u032",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: Cargo の dependencies に ml-kem を宣言しています。実行時有効化とは別の事実です。 C: Cargo依存宣言がPQC実装パッケージ ml-kem を明示します。実行時有効化は判断していません。"
+    },
+    {
+      "id": "u033",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: my-rustls-wrapper は rustls パッケージそのものではありません。 C: 宣言された my-rustls-wrapper は rustls とは異なるパッケージで、名前の一部の一致は能力の根拠になりません。"
+    },
+    {
+      "id": "u034",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: JSON エスケープを復号した名前は openssl で、purl も Cargo の openssl を明示します。依存宣言の存在だけを判断しています。 C: JSONのUnicodeエスケープを復号すると openssl となり、Cargo purl も同じパッケージを明示します。"
+    },
+    {
+      "id": "u035",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: npm の rustls という同名パッケージであり、対象の Cargo パッケージを確定しません。 C: npm依存の rustls という名前は、CargoのPQC対応 rustls パッケージの宣言を確立しません。"
+    },
+    {
+      "id": "u036",
+      "label": "unsupported",
+      "reason": "Independent reviewers agree. A: JSON が配列開始で途切れており、完全な依存宣言は確定できません。 C: 未完のJSON配列しかなく、完全な依存パッケージ宣言を確立できません。"
+    },
+    {
+      "id": "u037",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: 同一ハッシュの公開 manifest は RSA 公開鍵と 1024 bit を明示しています。 C: 対象DERと一致する公開manifestは、subjectを rsaEncryption の1024ビット公開鍵と記録しています。"
+    },
+    {
+      "id": "u038",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: 同一ハッシュの公開 manifest の署名は sha256WithRSAEncryption です。 C: 対象DERと一致する公開manifestは sha256WithRSAEncryption 署名を記録しています。"
+    },
+    {
+      "id": "u039",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: 同一ハッシュの公開 manifest は EC 主体鍵とは独立して RSA 署名を明示しています。 C: 公開manifestは、EC subjectとは別に sha256WithRSAEncryption の発行者署名を記録しています。"
+    },
+    {
+      "id": "u040",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: 公開 manifest の主体公開鍵は P-256 の EC 鍵であり RSA-2048 ではありません。 C: 公開manifestのsubjectは256ビットのEC鍵であり、2048ビットRSA鍵ではありません。"
+    },
+    {
+      "id": "u041",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: 同一ハッシュの公開 manifest の P-521 証明書の署名は ecdsa-with-SHA256 です。 C: 対象DERの公開manifestは ecdsa-with-SHA256 署名を記録しています。"
+    },
+    {
+      "id": "u042",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: 公開 manifest の署名は ECDSA であり RSA ではありません。 C: 対象DERの公開manifestはECDSA署名を記録し、RSA署名ではありません。"
+    },
+    {
+      "id": "u043",
+      "label": "unsupported",
+      "reason": "Independent reviewers agree. A: 内容は not a certificate という文字列で、ファイル名から RSA サイズは確定できません。 C: 実体は証明書ではない短いテキストです。ファイル名からRSA鍵長を確立できません。"
+    },
+    {
+      "id": "u044",
+      "label": "unsupported",
+      "reason": "Independent reviewers agree. A: PKCS#12 の内容検査は対象外であり、入力も synthetic-invalid-container です。署名属性を確定できません。 C: 未対応PKCS12コンテナー名の不正な合成入力であり、内部の証明書署名属性を確立できません。"
+    },
+    {
+      "id": "u045",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: BEGIN PRIVATE KEY という対象マーカーがあります。合成の無効本文を実在鍵とは判断しません。 C: BEGIN PRIVATE KEY マーカーが存在します。合成の不正な本文を有効な秘密鍵とは判定していません。"
+    },
+    {
+      "id": "u046",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: BEGIN PUBLIC KEY は対象の private マーカーではありません。 C: BEGIN PUBLIC KEY は公開鍵マーカーであり、指定された秘密鍵マーカーではありません。"
+    },
+    {
+      "id": "u047",
+      "label": "unsupported",
+      "reason": "Independent reviewers agree. A: BEGIN EC PRIVATE KEY は列挙された PKCS#8/RSA/OpenSSH マーカー形式の対象外です。合成本文を鍵として解釈しません。 C: EC PRIVATE KEY は指定されたPKCS8秘密鍵マーカーファミリーの対象外です。合成本文の鍵の実在性は判断しません。"
+    },
+    {
+      "id": "u048",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: javax.crypto.KEM.getInstance の複数行引数は固定値 ML-KEM です。完全修飾された名目的な PQC API 参照です。 C: 複数行の javax.crypto.KEM.getInstance 呼び出しが文字列 ML-KEM を引数に指定しています。"
+    },
+    {
+      "id": "u049",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: java.security.Signature.getInstance の固定引数は SHA256withRSA で、PQC アルゴリズムではありません。 C: java.security.Signature.getInstance は SHA256withRSA を指定しており、PQC方式ではありません。"
+    },
+    {
+      "id": "u050",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: AUDIT_EVENT に代入する監査用文字列であり API 参照ではありません。 C: AUDIT_EVENT の値は監査用の説明文字列であり、PQC API参照ではありません。"
+    },
+    {
+      "id": "u051",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: cryptography.hazmat.primitives.asymmetric.mldsa から MLDSA87PrivateKey を明示的に import しています。未使用でも静的参照です。 C: 複数行の from 宣言は cryptography の mldsa から MLDSA87PrivateKey を明示的にインポートします。未使用でも参照に数えます。"
+    },
+    {
+      "id": "u052",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: node:crypto 由来の nodeCrypto.generateKeyPair が固定値 ml-dsa-87 を引数に受け取ります。複数行でも参照とアルゴリズムは確定できます。 C: node:crypto 由来の nodeCrypto.generateKeyPair が、複数行の引数で ml-dsa-87 を明示します。"
+    },
+    {
+      "id": "u053",
+      "label": "ambiguous",
+      "reason": "Independent reviewers agree. A: policyAlgorithm は関数の外部から渡され、このソースに固定値やローカルな解決根拠がありません。 C: policyAlgorithm は呼び出し元から渡される引数でローカルに決定可能な値がなく、PQC方式かは確定できません。"
+    },
+    {
+      "id": "u054",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: Java properties の XML entry が jdk.tls.namedGroups に secp384r1 と secp521r1 の古典方式のみを設定しています。検出実装の構文対応可否とは別に設定内容は確定できます。 C: Java properties形式のXML entry は jdk.tls.namedGroups に secp384r1 と secp521r1 の古典群だけを割り当てます。"
+    },
+    {
+      "id": "u055",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: Java properties の XML entry に X25519MLKEM768 が含まれ、古典方式のみの設定ではありません。 C: Java properties形式のXML entry の群リストに X25519MLKEM768 が含まれるため、古典群限定ではありません。"
+    },
+    {
+      "id": "u056",
+      "label": "positive",
+      "reason": "Independent reviewers agree. A: Cargo の dependencies.approval-kem テーブルの package 値が実パッケージ ml-kem を明示します。別名と default-features=false は宣言の存在を否定しません。 C: Cargo依存テーブルの別名 approval-kem は package = ml-kem によりPQCパッケージの同一性を明示します。default-features=false は宣言の存在を否定しません。"
+    },
+    {
+      "id": "u057",
+      "label": "negative",
+      "reason": "Independent reviewers agree. A: dependencies.serde はシリアライズ用の serde を宣言し、対象の PQC 暗号ライブラリ宣言ではありません。 C: serde は直列化用依存宣言であり、このソースからPQC対応暗号ライブラリーの宣言は確立しません。"
+    }
+  ],
+  "historicalEvidence": {
+    "corpus-initial.json": "285d9610cc9cd6dea9e4e0752f7501a9535fc62c7cfbe7df2dc0743c05963708",
+    "labels-a.json": "94026685243b2652f437b8530e902f0cccd1e094e99a3c3a7ff5ecdc2276c9c9",
+    "labels-b.json": "48f482cd204c566484b8144a0dd6c980e4342ca1c2200db288cb84d8bf51004a"
+  }
+}
