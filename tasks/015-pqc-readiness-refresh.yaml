@@ -2,8 +2,8 @@ id: 015
 title: Refresh PQC inventory and guidance across seven languages
 type: feature
 priority: high
-status: review
-owner: Executor Agent
+status: done
+owner: Evaluator Agent
 description: >
   User-requested expansion beyond the task 014 restart pilot. Preserve existing
   edits and report schemas. Implement eight reviewed candidates sequentially:
@@ -55,10 +55,20 @@ validation:
   intentional_changes: New findings, updated recommendations and migration hints, additive certificate public_key_oid metadata
   coverage: Seven-language positive/negative cases, exact dependency ecosystem checks, all 15 PQC signature/public-key OIDs, malformed and filename-spoof negatives, old DSA false-positive regression, all-format CLI acceptance
   review: Sequential self-review found and corrected dependency ecosystem ambiguity and PQC display-name collision with classical DSA rules; independent review not performed
+  publication_validation:
+    implementation_commit: 977d589cf16d20f0598dced9f5ebd264fb428291
+    ci_url: https://github.com/wakaken/pqc-scan/actions/runs/42561202785
+    quality: passed (formatting, workspace tests, clippy)
+    scan: passed (release build, scan, SARIF upload, dependency SBOM upload)
+    artifact: Downloaded pqc-dependency-sbom and validated 230 entries and their inventory fields
+    artifact_directory: target/pqc-refresh/ci-42561202785
+    scan_log: target/pqc-refresh/ci-42561202785-scan.log
+    local_recheck: Build, fmt check, 69 tests, clippy and baseline comparison passed again before publication
+    review_result: Accepted after sequential diff review; no outstanding findings in the task scope
+    completion_scope: Static scanner implementation and its declared acceptance tests; production runtime and browser acceptance are not claimed
   unexecuted:
-    - Remote CI for publication commit; awaiting push and evaluation
     - Browser interaction; local file browser access previously rejected
     - Real product acceptance; repository path not supplied
     - Runtime cryptographic interoperability; fixtures are static scanner inputs, not executable crypto implementations
   publication_branch: codex/pqc-readiness-refresh
-  next_action: Push publication commit and evaluate its CI before closing task 015; keep browser, real-product and runtime checks explicitly unexecuted
+  next_action: Task 015 is complete; browser, real-product and runtime checks remain explicitly unexecuted follow-up acceptance
