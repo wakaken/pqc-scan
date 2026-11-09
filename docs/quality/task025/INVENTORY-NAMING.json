@@ -1,0 +1,281 @@
+{
+  "version": 1,
+  "baseHead": "7e4d0ce226fed69fe6573462aa63dde02a71425f",
+  "branch": "codex/task-022-sarif-location",
+  "scope": "task025 user-facing name/flag/filename compatibility follow-up",
+  "runtimeSourceBindings": {
+    "Cargo.lock": "007f6c5a612b0c168157734a13dc17a9c82bea5cc7653448b7bdbda3ba0c1158",
+    "Cargo.toml": "8f82e10ab0fd1308a2759c0a5722c39e45276a371367f951becfd231672e5ccf",
+    "crates/pqc_scan_cli/Cargo.toml": "b05393ff420248bb34472567857265bc4acbf4f52f05e7b5a70ad4d542fb63f0",
+    "crates/pqc_scan_cli/src/main.rs": "92a207fb374752d4f3fba6e4b450f3f6b89bb5650c32bc18406e7d0fa888a614",
+    "crates/pqc_scan_cli/tests/ast_occurrences.rs": "5a50cb26c7c529d459a7de5491248e3a340cf74eb2dab31f2a92622c369319e5",
+    "crates/pqc_scan_cli/tests/native_json.rs": "5ee6e2f8deeb392bda17a5fd978d1072890cbb103c76d9eb000d497736e9a1c8",
+    "crates/pqc_scan_cli/tests/sarif_locations.rs": "240337072dce8fa9e830ce2de7acf673db4ba52c95dfe6112e1b1492ccdb95da",
+    "crates/pqc_scan_core/Cargo.toml": "206cc3a543fc7452837010bd1973ce97db5f565e24fa876853bde45ea870e0b7",
+    "crates/pqc_scan_core/src/classifier.rs": "d225b96684e8a8a80fe6f9b09fb9da54a0c8b7f7be193291e1e8737b57f80fd2",
+    "crates/pqc_scan_core/src/compat.rs": "a7aff4aed22f293fbbd8cd845616e51049aade5d4bdcad7c6cd06337020517c7",
+    "crates/pqc_scan_core/src/diagnostic.rs": "bc30d99b21ba6d2bf2ee6e2b452526a1a79b3e8663d1645a7b20952123ef4532",
+    "crates/pqc_scan_core/src/error.rs": "9a891ee40697705d3d3642aae5fd633acf291c5abc66a118ed7b0e9321d1e898",
+    "crates/pqc_scan_core/src/identity.rs": "46cf39a8ee49fc480fef948165c138d3a3bb87650b847a922ac3de9a0996fda3",
+    "crates/pqc_scan_core/src/inventory.rs": "a08323dd66acdd782a6b6c53ff0ab87844e16740440d1a1b5f919a5f86a44f42",
+    "crates/pqc_scan_core/src/lib.rs": "52d7391f34cb1dd07137b806f8ced6e966e0544330dc3e6631fad11d47dc752e",
+    "crates/pqc_scan_core/src/model.rs": "3e7ffb40d045d890a54d49263c65e46d9ffd78a02110e70d48830156122eedd7",
+    "crates/pqc_scan_core/src/observation.rs": "43341e76674042c63331b243e4b0fff99dc89b450b9411373fcb9c9630daef92",
+    "crates/pqc_scan_core/src/pipeline.rs": "eb3a760976d0781a7fc7a544f16129f9ecf9d6b6e552b97b398ade8a51efbb90",
+    "crates/pqc_scan_core/src/recommendation.rs": "3201017c23fd6a432be611da52b1474c21c9aa1850efefe5d25dd95ba905d233",
+    "crates/pqc_scan_core/src/risk.rs": "74672b217077909b68a35ced37a41de16bedac6a8340e2cbf9ecb35ba62cdefa",
+    "crates/pqc_scan_core/src/walker.rs": "7f154d2598cae17f1966eed28cd2711b5f4d9a771f60bfedf7a45c959212bf9a",
+    "crates/pqc_scan_core/tests/native_capture.rs": "36bf7928558620c2b27194bd7f61277bd6bc7412180c0e236324a7dbcbb93984",
+    "crates/pqc_scan_detectors/Cargo.toml": "115885b8819cf56a6318357bdb219a25467b61b7e89a02a32fc3a584629abe04",
+    "crates/pqc_scan_detectors/src/certificate_detector/attributes.rs": "b3e7d5c34a6aaf29f29c82cc074b15b259e235aa637008902db0501c658add3b",
+    "crates/pqc_scan_detectors/src/certificate_detector.rs": "9535aa413698527f867dd11170a34bdb1ddec08df25f1892d40ffb30db8ea729",
+    "crates/pqc_scan_detectors/src/comment_filter.rs": "14e3cc6956382edeb2732547e625a17eac4104faabe77cc537cc64f1d6d1a432",
+    "crates/pqc_scan_detectors/src/dependency_detector.rs": "146d3f1b0fcb544c0ddf5d24add68831019858fbeddd3a0f7a0a4d3231fb13d7",
+    "crates/pqc_scan_detectors/src/key_detector.rs": "9db512320790b5d5ce93a6d0881dd84c24b3e9701dbcb69063425f82e6843c6d",
+    "crates/pqc_scan_detectors/src/lib.rs": "8acd88271779ca2dd903497345a4f91f27ba1497a435645253ada357bd87b18f",
+    "crates/pqc_scan_detectors/src/regex_detector.rs": "5abc8836b7fb9db5457ea91ce1279060798131ff05f47cfaafa9d2fc1a9e9a61",
+    "crates/pqc_scan_detectors/src/tree_sitter_detector.rs": "4463f12afffff1096e5efa3190ed76c089b1aa81ad940496d952fa17955f29d3",
+    "crates/pqc_scan_detectors/tests/ast_occurrences.rs": "a3ee7c7ef581e0af296209806b10307032c43904a009afa20faa8310e9a1b242",
+    "crates/pqc_scan_detectors/tests/bounded_outcomes.rs": "c9c85c55e6aa083dfbb6f741a742345a8450d1085ecb244f4c94b6ed287bc468",
+    "crates/pqc_scan_detectors/tests/certificate_attributes.rs": "9847de5407fb55d0ff43f870c2cb1bbf62d834d6464e1e2b80094445d8e8794e",
+    "crates/pqc_scan_detectors/tests/certificate_policy.rs": "a1394888c8f45b7b615b3a7d731342d411bb9564b3bb22e5c0b917e3d3dfdd30",
+    "crates/pqc_scan_detectors/tests/native_inventory.rs": "b7ccf112ce05ee590a7ff5f78a4224b9bf21b3864c8246194a4b977006fd79b8",
+    "crates/pqc_scan_detectors/tests/pqc_readiness.rs": "769c0d8e96df10d618aff6e7f90fefde878bb701662cb40a2be4df4755693be2",
+    "crates/pqc_scan_report/Cargo.toml": "0acfe6d763039bb03930e487fc18dbece907dafb078f34902e69ee90108c28a4",
+    "crates/pqc_scan_report/src/compact.css": "59fd2dab8a96a8589eccb54c158f4cbab1ba8935d1ff36a3754c562798b0e435",
+    "crates/pqc_scan_report/src/compact.js": "7d8626208b67ea25964f29ec1983fc086571ec824cec39dbd316ffe4ab02f377",
+    "crates/pqc_scan_report/src/compact.rs": "2a486ef77a5c7b493b88d325dbb039372f8ade4a11c3e56ddd7816f6e837d3d6",
+    "crates/pqc_scan_report/src/grouping.rs": "4ab4ead81459d5a1cac823f43be718f578e2c93321979047615e080bd9e30ae1",
+    "crates/pqc_scan_report/src/html_report.rs": "364769e90d9d79a1703bfd651c942a10db7b7dd38aa0ca0d8f0ec1390a201fbe",
+    "crates/pqc_scan_report/src/japanese.rs": "80bbe70a64a1a07d10b117cd2c52425feae4342c59962ba43b808c942f25fa7d",
+    "crates/pqc_scan_report/src/json_report.rs": "f43009f3a10100e85abb6683e9a83935d7ea6c8a866ed5b08830b11e671fff89",
+    "crates/pqc_scan_report/src/lib.rs": "05de91af4e4157ed05ad112ba961db9f2c87a3bd42bdb446d780a429bfda61b3",
+    "crates/pqc_scan_report/src/markdown_report.rs": "5da35a29a47521e1038c729f4fc50a97d61b3d03cb662aabb1df6aa8487d5989",
+    "crates/pqc_scan_report/src/sarif_report.rs": "07165114d1af5a250b3824fca2e583071c701e5ded93bd986ea749c1517e732c",
+    "crates/pqc_scan_report/tests/compact.rs": "2746b409b56e41c4da65a7139c336bf67411f839fa7766b7af286ade7b0f032d",
+    "crates/pqc_scan_report/tests/japanese.rs": "a67a2be940715b94863f76388e2098e1aece07a741111c469c7b543140caff49",
+    "crates/pqc_scan_report/tests/sarif_contract.rs": "6793d90098a2c1e5451d772618d74272c00a486850d92aeda24a96ece8d76c8a",
+    "crates/pqc_scan_rules/Cargo.toml": "5dbd75cd2045e18fa02c3ee3e3abab201f15b8321478c5d766b91213919a0cad",
+    "crates/pqc_scan_rules/src/lib.rs": "8c5fd5f082ce2680c15008d5288b578e738b5f8cba049adcfab315fb09103706",
+    "rules/default/cert.yml": "97b333ea8cab9269a18b91cd12aad58e7258d5ed6b0ce27157b372f511b052aa",
+    "rules/default/crypto_api.yml": "8020d85ef00fae35571427521f975b022b9b9e72cdcbb6f0687925cf5c40865e",
+    "rules/default/jwt.yml": "8d79f81a4b90c64b68301d19fc5a2255deef9e47e1871aed1181f498883866ae",
+    "rules/default/middleware.yml": "58cca7b8dd25144a1f40a306d46ec5619fbf7da4504140b2607af7b34404b145",
+    "rules/default/pqc.yml": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a",
+    "rules/default/ssh.yml": "2508cfbb33e200e57603a4bb0ed34c3e37c0a592f4ee4d03259310357d1cf004",
+    "rules/default/tls.yml": "9c4a18c98005d4ca581c0eb0f3595ee7e762dc2a626e4166d8eb9b0be0ccbe0a",
+    "rules/default/tree_sitter.yml": "34ae0e842ce9e36cff90da2d188d8eb842fa00755af7b2eac8e90a09a7cde69b",
+    "rust-toolchain.toml": "02dee3b2b81f2c5e7064c6bb118cf19e859100fcc33c220e5ec52ce4b0586b12"
+  },
+  "schemaSha256": "9de66059f1704141c5e24b7d590770053cbce4bf16598a0da0bc7cc4130ea8f0",
+  "goldenSha256": "b1c7eb3a440222de49807c22e56ed727e8623de932e4388302d3c9fa29d810b5",
+  "beforeBinarySha256": "03ccb94e5579ce98489bd703ce7c3c96729d353b329c8592762b73cce515cc4b",
+  "afterBinarySha256": "7d1b35f78310db525276c57f4a284c6d8e7b62f4550501dfa503c5b17969ec63",
+  "rustTests": 177,
+  "pythonTests": 20,
+  "nodeTests": 22,
+  "executedChecks": [
+    {
+      "name": "build",
+      "command": [
+        "cargo",
+        "build",
+        "--offline",
+        "--workspace"
+      ],
+      "exit": 0,
+      "log": "target/task025-rename/build.log"
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "target/task025-rename/fmt.log"
+    },
+    {
+      "name": "tests",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--workspace"
+      ],
+      "exit": 0,
+      "log": "target/task025-rename/tests.log"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--offline",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "log": "target/task025-rename/clippy.log"
+    },
+    {
+      "name": "python-tests",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_*.py"
+      ],
+      "exit": 0,
+      "log": "target/task025-rename/python-tests.log"
+    },
+    {
+      "name": "node-tests",
+      "command": [
+        "node",
+        "--test",
+        "shell/compact-report.test.cjs",
+        "shell/prepare-code-scanning.test.cjs"
+      ],
+      "exit": 0,
+      "log": "target/task025-rename/node-tests.log"
+    },
+    {
+      "name": "release-build",
+      "command": [
+        "cargo",
+        "build",
+        "--offline",
+        "--workspace",
+        "--release"
+      ],
+      "exit": 0,
+      "log": "target/task025-rename/release-build.log"
+    },
+    {
+      "name": "legacy-and-inventory-shadow",
+      "command": [
+        "python3",
+        "/tmp/pqc025-name-shadow.py"
+      ],
+      "exit": 0,
+      "log": "target/task025-rename/legacy-shadow.log"
+    },
+    {
+      "name": "ci-projection",
+      "command": [
+        "node",
+        "shell/prepare-code-scanning.cjs",
+        "--input",
+        "target/task025-rename/self-after/report.sarif",
+        "--expectations",
+        "docs/quality/SELF-SCAN-EXPECTATIONS.json",
+        "--root",
+        ".",
+        "--output",
+        "target/task025-rename/code-scanning.sarif",
+        "--audit",
+        "target/task025-rename/code-scanning-audit.json"
+      ],
+      "exit": 0,
+      "log": "target/task025-rename/ci-projection.log"
+    }
+  ],
+  "legacyShadow": {
+    "before": {
+      "exit": 0,
+      "findings": 814
+    },
+    "before-native": {
+      "exit": 0,
+      "findings": 814,
+      "report.json": "equal except generated_at",
+      "cbom.json": "equal except generated_at",
+      "dependency-sbom.json": "equal except generated_at",
+      "report.sarif": "equal except generated_at",
+      "diagnostics.json": "equal except generated_at",
+      "report.html": "equal except generated instant",
+      "report.md": "equal except generated instant"
+    },
+    "after": {
+      "exit": 0,
+      "findings": 814,
+      "report.json": "equal except generated_at",
+      "cbom.json": "equal except generated_at",
+      "dependency-sbom.json": "equal except generated_at",
+      "report.sarif": "equal except generated_at",
+      "diagnostics.json": "equal except generated_at",
+      "report.html": "equal except generated instant",
+      "report.md": "equal except generated instant"
+    },
+    "after-native": {
+      "exit": 0,
+      "findings": 814,
+      "report.json": "equal except generated_at",
+      "cbom.json": "equal except generated_at",
+      "dependency-sbom.json": "equal except generated_at",
+      "report.sarif": "equal except generated_at",
+      "diagnostics.json": "equal except generated_at",
+      "report.html": "equal except generated instant",
+      "report.md": "equal except generated instant",
+      "inventoryPayload": "equal to saved original native payload after run/time/observation ID reference normalization"
+    },
+    "after-inventory": {
+      "exit": 0,
+      "findings": 814,
+      "report.json": "equal except generated_at",
+      "cbom.json": "equal except generated_at",
+      "dependency-sbom.json": "equal except generated_at",
+      "report.sarif": "equal except generated_at",
+      "diagnostics.json": "equal except generated_at",
+      "report.html": "equal except generated instant",
+      "report.md": "equal except generated instant",
+      "inventoryPayload": "equal to saved original native payload after run/time/observation ID reference normalization"
+    },
+    "after-both": {
+      "exit": 0,
+      "findings": 814,
+      "report.json": "equal except generated_at",
+      "cbom.json": "equal except generated_at",
+      "dependency-sbom.json": "equal except generated_at",
+      "report.sarif": "equal except generated_at",
+      "diagnostics.json": "equal except generated_at",
+      "report.html": "equal except generated instant",
+      "report.md": "equal except generated instant",
+      "inventoryPayload": "equal to saved original native payload after run/time/observation ID reference normalization"
+    }
+  },
+  "ciProjection": {
+    "rawResults": 814,
+    "expectedResults": 660,
+    "retainedResults": 154,
+    "rawSarifSha256": "4e862c7f65177eac1624d3236ac92856eccdcb2352f4b2b57cc8529f7b17a666",
+    "expectationsSha256": "509aa7430c3b2f1d74f1f26c63ba0dca30ad3187a612f08fa754631266f41453"
+  },
+  "ciVerifiedSources": 99,
+  "ciReboundEntries": 37,
+  "ciReboundFiles": 2,
+  "newOmissionRegistrations": 0,
+  "unchangedContracts": [
+    "JSON payload and IDs",
+    "schema path and $id (title-only change)",
+    "core/detectors/rules/dependencies",
+    "legacy writer and default filenames"
+  ],
+  "independentReviewSourceSha256": "11003cc556d398966c6b9582437a434424cf211aab5b90d578d0af8b6df9c0d6",
+  "limitations": [
+    "No remote CI, push, PR or merge",
+    "No performance remeasurement: naming/writer dispatch only; core/detectors unchanged",
+    "Previous task025 implementation evidence remains historical"
+  ],
+  "localArtifacts": "/Users/waka/development/pqc/pqc-scan/target/task025-rename"
+}

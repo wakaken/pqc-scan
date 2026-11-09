@@ -210,7 +210,7 @@ snippet masking; this does not add new private-key detection rules or decrypt ke
 ## CLI
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--native-json] [--repository-scope ID]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -239,6 +239,25 @@ pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
 pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
 
+### Cryptographic Inventory and Evidence Report
+
+`--inventory-json` adds `scan.inventory.v1.json` with method-specific observations,
+normalized algorithm/public-key/certificate/dependency assets, and links to legacy
+findings. This is pqc-scan's own JSON format. It is opt-in even with `--format all`;
+existing reports and IDs remain unchanged. Use `--repository-scope team/project`
+with inventory capture to enable weak cross-scan source correlation. Omit secret
+or absolute identifiers. The report does not assert active use, trust or a PQC
+assessment. See the [contract and limitations](docs/architecture/INVENTORY-REPORT-V1.md).
+
+```bash
+pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
+```
+
+For compatibility, `--native-json` still writes the original `scan.native.v1.json`.
+Selecting both options writes identical content to both files from one capture.
+`--repository-scope` works with either option. JSON fields, schema version and ID
+generation are unchanged.
+
 ### Inspection diagnostics
 
 Read failures and detector errors retain other findings and produce typed inspection
@@ -246,18 +265,6 @@ diagnostics. The CLI prints one completeness warning to stderr when inspection i
 partial, failed or unknown. Default exit codes remain unchanged: 0 for success,
 1 for an operational error and 2 when `--fail-on` is reached. No findings does not
 prove that inspection completed.
-
-`--native-json` adds `scan.native.v1.json` with method-specific observations,
-normalized algorithm/public-key/certificate/dependency assets, and links to legacy
-findings. It is opt-in even with `--format all`; existing reports and IDs remain
-unchanged. Use `--repository-scope team/project` only with native capture to enable
-weak cross-scan source correlation. Omit secret or absolute identifiers.
-Native data does not assert active use, trust or a PQC assessment. See the
-[native v1 contract and limitations](docs/architecture/NATIVE-SCAN-V1.md).
-
-```bash
-pqc-scan scan . --native-json --repository-scope team/project --rules-dir ./rules
-```
 
 Use `--diagnostics` to additionally write `diagnostics.json` in `--out-dir`.
 This separate artifact has `schema_version: "1"`, generation time, declared scope,
@@ -395,14 +402,14 @@ Dependency inventory extracted from manifests and SBOM files.
 SARIF remains version 2.1.0. File paths are percent-encoded UTF-8 URI references
 (literal `%`, spaces, `#` and `?` are encoded); absolute paths become file URIs.
 Windows native separators are normalized on Windows; Unix backslashes are literal.
-An unknown line (`0` in native JSON) produces an artifact-only location. A known
+An unknown line (`0` in `report.json`) produces an artifact-only location. A known
 line with unknown column omits `startColumn`; an empty path omits `locations`.
 Columns are one-based Unicode code points (`columnKind: unicodeCodePoints`),
 including one column per emoji, combining code point or tab, rather than visual
 width or UTF-16 units. Legacy AST columns mix byte and character offsets: SARIF
 keeps a column only when the existing unmasked snippet proves an ASCII prefix;
 otherwise it retains the line only. Missing, masked or clipped prefixes cannot
-prove a column. Native JSON locations/IDs, other reports, CLI flags and filenames
+prove a column. `report.json` locations/IDs, other reports, CLI flags and filenames
 are unchanged. These corrections intentionally replace invalid/misleading SARIF
 positions and unescaped paths. See the [contract and validation record](docs/quality/SARIF-LOCATION-CONTRACT-022.md).
 
@@ -471,7 +478,6 @@ policy; normal scans and user report formats are unaffected. New intentional tes
 inputs require review of their source/result bindings before registration; CI does
 not automatically learn or accept findings. See the
 [policy and maintenance guide](docs/quality/CI-SELF-SCAN.md).
-
 
 ## AST occurrence precision
 

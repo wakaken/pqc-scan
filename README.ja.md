@@ -199,7 +199,7 @@ EC・DSA・暗号化秘密鍵のPEMマーカーを含むファイルも、ソー
 CLIツールは以下の通り実行します。
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--native-json] [--repository-scope ID]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -228,24 +228,30 @@ pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
 pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
 
+### 暗号資産・検出根拠レポート
+
+`--inventory-json` を付けると、観測方法ごとの記録、アルゴリズム・公開鍵・証明書・依存関係の
+棚卸し、従来の検出結果との対応を含む `scan.inventory.v1.json` を追加します。
+これはpqc-scan独自のJSON形式です。`--format all` だけでは追加されず、従来レポートとIDは維持します。
+`--repository-scope team/project` はこのオプションと併用し、スキャン間でソース位置を
+対応付ける弱い手掛かりを付与します。秘密情報や絶対パスは指定しないでください。
+実際の稼働、証明書の信頼性、PQC対応判定を保証するものではありません。
+詳細は[形式・識別方法・制約](docs/architecture/INVENTORY-REPORT-V1.md)を参照してください。
+
+```bash
+pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
+```
+
+互換性のため、旧指定 `--native-json` は引き続き旧ファイル `scan.native.v1.json` を出力します。
+新旧を両方指定すると、1回のスキャン結果を同じ内容で両ファイルに出力します。
+`--repository-scope` はどちらの指定とも併用できます。JSONの項目・スキーマの版・ID生成は変更しません。
+
 ### 検査の完全性と診断情報
 
 ファイルの読み込みや検出器の実行に失敗しても、ほかの検出結果は保持します。
 検査が部分成功・失敗・不明の場合、CLIは標準エラーへ警告を1回表示します。
 既定の終了コードは従来どおり、成功が0、実行エラーが1、`--fail-on` の到達が2です。
 検出がゼロでも、検査できたとは限りません。
-
-`--native-json` を付けると、観測方法ごとの記録、アルゴリズム・公開鍵・証明書・依存関係の
-棚卸し、従来の検出結果との対応を含む `scan.native.v1.json` を追加します。
-`--format all` だけでは追加されず、従来レポートとIDは維持します。
-`--repository-scope team/project` はこのオプションと併用し、スキャン間でソース位置を
-対応付ける弱い手掛かりを付与します。秘密情報や絶対パスは指定しないでください。
-実際の稼働、証明書の信頼性、PQC対応判定を保証するものではありません。
-詳細は[形式・識別方法・制約](docs/architecture/NATIVE-SCAN-V1.md)を参照してください。
-
-```bash
-pqc-scan scan . --native-json --repository-scope team/project --rules-dir ./rules
-```
 
 `--diagnostics` を付けると、`--out-dir` に `diagnostics.json` を追加出力します。
 別ファイルとして `schema_version: "1"`、生成時刻、検査範囲、集計値、理由コードを記録します。
@@ -447,7 +453,6 @@ Windowsではネイティブの区切り文字を正規化し、Unixのバック
 通常のスキャンや利用者向け出力形式には影響しません。
 新しい意図的なテスト入力は、ソースと所見をレビューしてから台帳へ登録します。CIによる自動登録は行いません。
 詳しくは[ポリシーと更新手順](docs/quality/CI-SELF-SCAN.md)を参照してください。
-
 
 ## ASTによる出現箇所の保持
 
