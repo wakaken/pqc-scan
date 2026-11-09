@@ -2,9 +2,9 @@
 
 This document lists all built-in detection rules shipped in `rules/default/` and explains severity levels used in reports.
 
-- Total rules: **117**
+- Total rules: **119**
 - Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`
-- Kind breakdown: `certificate`: 16, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 22
+- Kind breakdown: `certificate`: 18, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 22
 
 ## Severity Levels
 
@@ -12,7 +12,7 @@ This document lists all built-in detection rules shipped in `rules/default/` and
 |---|---|---|
 | `critical` (7) | Immediate security impact or sensitive material exposure. | Treat as urgent; remediate before release when possible. |
 | `high` (41) | Strong crypto risk in production paths. | Prioritize in active migration backlog. |
-| `medium` (51) | Meaningful migration signal requiring design/planning. | Schedule remediation with clear owner and target release. |
+| `medium` (53) | Meaningful migration signal requiring design/planning. | Schedule remediation with clear owner and target release. |
 | `low` (6) | Contextual or lower-confidence finding. | Triage and backlog when confirmed. |
 | `info` (12) | Inventory-only informational signal. | Track for visibility and architecture review. |
 
@@ -53,6 +53,32 @@ Certificate OID scopes never fall back to matching filenames. Signature and key
 algorithms are distinct; evidence metadata for parsed certificates includes
 `public_key_oid` alongside `signature_oid`. No serialized struct fields change.
 
+### Exact certificate predicates and validity (task 021)
+
+Built-in signature rules match whole parsed OIDs; RSA-size rules require a known
+RSA/PSS subject modulus. Filenames are never algorithm/size/expiry facts for these
+scopes. `CERT_ECDSA_SIGNATURE` and `CERT_DSA_SIGNATURE` now carry
+`quantum-vulnerable`; their unchanged base severities medium/high become high/critical
+under the existing PKI risk engine. Weak digest/key concerns remain separate
+findings; legacy DSA verification is distinguished from new signing. Confidence
+values are uncalibrated rule heuristics, not measured probabilities.
+
+`certificate_validity` exposes expired/not_yet_valid/valid at the detector's explicit
+Unix-second clock. `not_before <= now <= not_after` is valid. The two new IDs are
+medium conventional-risk signals and do not prove active deployment or trust.
+`legacy_not_after_2026` keeps the date-named old ID as a fixed parsed cutoff
+(`not_after < 1798761600`), not a moving expiry rule. Invalid intervals cannot satisfy
+these time predicates. Unknown/unsupported parsing retains honest diagnostics.
+
+Legacy custom `certificate`/other scopes retain their old composite target except
+newly reserved `rsa_modulus_bits`, `certificate_validity`, `legacy_not_after_2026`.
+`signature_oid`/`public_key_oid` remain identifier targets. New typed evidence may
+change affected certificate finding IDs/CBOM strings; no serialized field/enum or
+core scoring/ID algorithm changes. PSS digest parameters and unlisted signature
+identifiers are not exhaustively assessed. See the
+[specification](roadmap/TASK-021-IMPLEMENTATION.md) and
+[focused baseline](quality/CERTIFICATE-BASELINE-021.md).
+
 ### Original catalog
 
 | Rule ID | Kind | Category | Severity | Risk | Confidence | Scope | Source | Description | Migration Hint | Pattern |
@@ -67,18 +93,20 @@ algorithms are distinct; evidence metadata for parsed certificates includes
 | `API_PY_RSA_MODULE` | `regex` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.50 | `code` | `crypto_api.yml` | Python RSA API usage detected. | Evaluate PQC-capable libraries for Python crypto implementations. | `from\s+Crypto\.PublicKey\s+import\s+RSA\|cryptography\.hazmat\.primitives\.asymmetric\.rsa` |
 | `API_RSA_KEYPAIR_GENERATOR` | `regex` | CryptoAPI | `high` | `quantum-vulnerable` | 0.65 | `code` | `crypto_api.yml` | Java RSA key-generation API usage detected. | Replace key-generation APIs with PQC-capable implementations. | `KeyPairGenerator\.getInstance\(\s*"RSA"` |
 | `API_SIGNATURE_RSA` | `regex` | CryptoAPI | `high` | `quantum-vulnerable` | 0.62 | `code` | `crypto_api.yml` | RSA signature API usage detected. | Migrate to ML-DSA signing APIs. | `Signature\.getInstance\(\s*"SHA(1\|224\|256\|384\|512)withRSA"` |
-| `CERT_DSA_SIGNATURE` | `certificate` | PKI | `high` | `non-quantum-risk` | 0.70 | `certificate` | `cert.yml` | DSA-based certificate signature detected. | Decommission DSA usage. | `(?i)dsa\|1\.2\.840\.10040` |
-| `CERT_ECDSA_SIGNATURE` | `certificate` | PKI | `medium` | `quantum-uncertain` | 0.60 | `certificate` | `cert.yml` | ECDSA certificate signature detected. | Evaluate ML-DSA and SLH-DSA alternatives. | `(?i)ecdsa-with-SHA(256\|384\|512)\|1\.2\.840\.10045\.4\.3\.[234]` |
-| `CERT_EXPIRY_2026_OR_BEFORE` | `certificate` | PKI | `medium` | `non-quantum-risk` | 0.25 | `certificate` | `cert.yml` | Certificate metadata suggests a near-term expiration window. | Include PQC migration requirements in renewal plans. | `20(1[0-9]\|2[0-6])` |
-| `CERT_MD5_SIGNATURE` | `certificate` | PKI | `critical` | `non-quantum-risk` | 0.90 | `certificate` | `cert.yml` | MD5 certificate signature detected. | Reissue the certificate immediately. | `(?i)md5\|1\.2\.840\.113549\.1\.1\.4` |
-| `CERT_OID_RSA_PSS` | `certificate` | PKI | `high` | `quantum-vulnerable` | 0.62 | `certificate` | `cert.yml` | RSASSA-PSS OID detected. | Plan phased migration to PQC signatures. | `1\.2\.840\.113549\.1\.1\.10` |
+| `CERT_DSA_SIGNATURE` | `certificate` | PKI | `high` | `quantum-vulnerable` | 0.70 | `signature_oid` | `cert.yml` | DSA-based certificate signature detected. | Plan a supported replacement for DSA signing; assess legacy verification separately from quantum exposure. | `^(?:1\.2\.840\.10040\.4\.3\|2\.16\.840\.1\.101\.3\.4\.3\.[12])$` |
+| `CERT_ECDSA_SIGNATURE` | `certificate` | PKI | `medium` | `quantum-vulnerable` | 0.60 | `signature_oid` | `cert.yml` | ECDSA certificate signature detected. | Evaluate ML-DSA and SLH-DSA alternatives. | `^1\.2\.840\.10045\.(?:4\.1\|4\.3\.[1-4])$` |
+| `CERT_EXPIRY_2026_OR_BEFORE` | `certificate` | PKI | `medium` | `non-quantum-risk` | 0.25 | `legacy_not_after_2026` | `cert.yml` | Parsed certificate expiry is at or before 2026 (legacy fixed cutoff, not current validity). | Use current-time validity findings for renewal decisions; retain this legacy cutoff only for compatibility. | `^before_2027$` |
+| `CERT_MD5_SIGNATURE` | `certificate` | PKI | `critical` | `non-quantum-risk` | 0.90 | `signature_oid` | `cert.yml` | MD5 certificate signature detected. | Reissue the certificate immediately. | `^1\.2\.840\.113549\.1\.1\.4$` |
+| `CERT_OID_RSA_PSS` | `certificate` | PKI | `high` | `quantum-vulnerable` | 0.62 | `signature_oid` | `cert.yml` | RSASSA-PSS OID detected. | Verify issuer, verifier and key-format support before evaluating standardized PQC certificate signatures. | `^1\.2\.840\.113549\.1\.1\.10$` |
 | `CERT_P12_CONTAINER` | `certificate` | PKI | `medium` | `quantum-uncertain` | 0.35 | `certificate` | `cert.yml` | PKCS#12/PFX container file detected. | Audit algorithms used inside PKCS#12/PFX containers. | `(?i)\.(p12\|pfx)$` |
 | `CERT_PEM_CONTAINER` | `certificate` | PKI | `low` | `quantum-uncertain` | 0.30 | `certificate` | `cert.yml` | Certificate container file detected. | Validate signing algorithms in PEM-based certificates. | `(?i)\.(pem\|crt\|cer\|der)$` |
-| `CERT_RSA_1024` | `certificate` | PKI | `critical` | `non-quantum-risk` | 0.88 | `certificate` | `cert.yml` | Certificate with a 1024-bit key detected. | Use 3072-bit+ keys or migrate to PQC. | `\b1024\b` |
-| `CERT_RSA_2048` | `certificate` | PKI | `high` | `quantum-vulnerable` | 0.78 | `certificate` | `cert.yml` | Certificate with a 2048-bit RSA key detected. | Introduce hybrid certificates. | `\b2048\b` |
-| `CERT_RSA_3072` | `certificate` | PKI | `medium` | `quantum-vulnerable` | 0.65 | `certificate` | `cert.yml` | Certificate with a 3072-bit RSA key detected. | Run PQC certificate proof-of-concept trials. | `\b3072\b` |
-| `CERT_RSA_SIGNATURE` | `certificate` | PKI | `high` | `quantum-vulnerable` | 0.72 | `certificate` | `cert.yml` | Certificate signed with an RSA-based algorithm detected. | Migrate to ML-DSA or hybrid certificate chains. | `(?i)sha(1\|224\|256\|384\|512)WithRSAEncryption\|1\.2\.840\.113549\.1\.1\.(5\|11\|12\|13)` |
-| `CERT_SHA1_SIGNATURE` | `certificate` | PKI | `critical` | `non-quantum-risk` | 0.85 | `certificate` | `cert.yml` | SHA-1 certificate signature detected. | Upgrade certificate signatures to SHA-256 or stronger. | `(?i)sha1WithRSAEncryption\|1\.2\.840\.113549\.1\.1\.5` |
+| `CERT_RSA_1024` | `certificate` | PKI | `critical` | `non-quantum-risk` | 0.88 | `rsa_modulus_bits` | `cert.yml` | Certificate subject public key is 1024-bit RSA. | Confirm actual use and issuer/verifier support; replace weak deployed keys while planning purpose-appropriate PQC migration. | `^1024$` |
+| `CERT_RSA_2048` | `certificate` | PKI | `high` | `quantum-vulnerable` | 0.78 | `rsa_modulus_bits` | `cert.yml` | Certificate subject public key is 2048-bit RSA. | Plan supported PQC certificate signatures with issuer and peer compatibility checks; larger classical keys alone do not remove quantum exposure. | `^2048$` |
+| `CERT_RSA_3072` | `certificate` | PKI | `medium` | `quantum-vulnerable` | 0.65 | `rsa_modulus_bits` | `cert.yml` | Certificate subject public key is 3072-bit RSA. | Evaluate standardized PQC signatures in supported issuance and verification environments. | `^3072$` |
+| `CERT_RSA_SIGNATURE` | `certificate` | PKI | `high` | `quantum-vulnerable` | 0.72 | `signature_oid` | `cert.yml` | Certificate signed with an RSA-based algorithm detected. | Verify issuer, verifier and key-format support before evaluating standardized PQC certificate signatures. | `^1\.2\.840\.113549\.1\.1\.(?:4\|5\|10\|11\|12\|13\|14)$` |
+| `CERT_SHA1_SIGNATURE` | `certificate` | PKI | `critical` | `non-quantum-risk` | 0.85 | `signature_oid` | `cert.yml` | SHA-1 certificate signature detected. | Upgrade certificate signatures to SHA-256 or stronger. | `^(?:1\.2\.840\.113549\.1\.1\.5\|1\.2\.840\.10040\.4\.3\|1\.2\.840\.10045\.4\.1)$` |
+| `CERT_EXPIRED` | `certificate` | PKI | `medium` | `non-quantum-risk` | 0.90 | `certificate_validity` | `cert.yml` | Certificate is expired at the recorded assessment time. | Confirm whether the certificate is deployed and renew it where required; check issuer and verifier compatibility. | `^expired$` |
+| `CERT_NOT_YET_VALID` | `certificate` | PKI | `medium` | `non-quantum-risk` | 0.90 | `certificate_validity` | `cert.yml` | Certificate validity has not started at the recorded assessment time. | Check intended deployment time and the system clock; use a currently valid certificate where required. | `^not_yet_valid$` |
 | `DEP_BORINGSSL` | `dependency` | TLS | `low` | `quantum-uncertain` | 0.40 | `dependency` | `tls.yml` | BoringSSL dependency detected. | Evaluate BoringSSL PQC experiment paths. | `(?i)\bboringssl\b` |
 | `DEP_BOUNCYCASTLE` | `dependency` | TLS | `medium` | `quantum-uncertain` | 0.45 | `dependency` | `tls.yml` | BouncyCastle dependency detected. | Verify BouncyCastle PQC support status. | `(?i)\bbouncycastle\b` |
 | `DEP_GO_JOSE` | `dependency` | CryptoAPI | `low` | `quantum-uncertain` | 0.42 | `dependency` | `crypto_api.yml` | Go JOSE dependency detected. | Confirm PQC support status in go-jose. | `(?i)\bgo-jose\b\|gopkg\.in/square/go-jose` |

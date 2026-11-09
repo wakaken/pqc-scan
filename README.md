@@ -155,10 +155,39 @@ other parsed certificates and report incomplete inspection through `--diagnostic
 No certificate signatures, chains or mathematical key/point validity are verified;
 PKCS#12 decryption and standalone public-key file detection are not implemented.
 
-Corrected sizes and PEM positions intentionally change affected certificate evidence,
-findings and IDs; CLI options, report structures and rule definitions stay compatible.
-Broad legacy rules still combine filename/signature/size/expiry text, so filename
-matches and ECDSA-to-DSA confusion remain known classification limitations for task 021.
+Built-in certificate signature rules use exact parsed OIDs. RSA-size rules require
+an RSA/PSS subject modulus, so filenames or EC point sizes cannot satisfy them.
+ECDSA and DSA are classified `quantum-vulnerable`; under the unchanged PKI promotion
+policy their final severities are high and critical respectively. SHA-1/MD5 and
+weak-RSA findings express separate classical concerns. DSA migration guidance
+separates replacement of signing from legacy signature verification.
+
+`CERT_EXPIRED` and `CERT_NOT_YET_VALID` use parsed UTC timestamps and an explicit
+Unix-second assessment clock; both validity endpoints are inclusive. The old
+`CERT_EXPIRY_2026_OR_BEFORE` ID retains its fixed parsed cutoff before 2027-01-01
+UTC and is labeled legacy; it is not an alias for current expiry. Reversed ranges
+or unavailable assessment clocks prevent a complete validity verdict while
+retaining static facts. Time findings record `assessment_time_unix` and
+`validity_status` in the existing evidence metadata map.
+
+The CLI creates a fresh detector registry per scan. `default_detectors()` captures
+its certificate assessment time at construction; library callers reusing that
+registry reuse that time and should recreate it for a fresh-time assessment.
+`CertificateDetector::at(unix_seconds)` provides an explicit fixed-time detector;
+the public unit detector and legacy entrypoints remain available.
+
+Existing custom `certificate` and other legacy scopes keep composite-text matching,
+except the newly reserved opt-in scopes `rsa_modulus_bits`, `certificate_validity`
+and `legacy_not_after_2026`. External packs previously using those exact strings as
+opaque legacy labels should rename them (or use `certificate`) before upgrading.
+Existing `signature_oid`/`public_key_oid` scopes remain exact identifier inputs.
+Corrected facts, typed evidence and risk tags intentionally change affected
+certificate findings, IDs and legacy CBOM algorithm strings; CLI options, report
+structures/enums and core ID/scoring algorithms remain unchanged. No signature,
+chain or runtime-use guarantee follows. PSS digest parameters and unlisted
+signature OIDs are not fully assessed; absence of a hash finding does not prove a
+safe digest. See [classification specification](docs/roadmap/TASK-021-IMPLEMENTATION.md)
+and [focused baseline](docs/quality/CERTIFICATE-BASELINE-021.md).
 Files containing EC/DSA/encrypted private-key PEM markers also receive file-wide source
 snippet masking; this does not add new private-key detection rules or decrypt keys.
 

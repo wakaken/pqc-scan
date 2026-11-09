@@ -193,15 +193,31 @@ strategy, not full semantic analysis or exhaustive private-key format support.
 - Detailed outcomes distinguish Complete/NotApplicable/Partial/Unsupported. Known
   malformed key structures, unknown key semantics and mixed bundles cannot Complete.
   Container fallback is retained as a finding signal, never successful parsing.
-- Existing rule scopes and broad legacy matching inputs stay compatible, except
-  corrected semantic size replaces encoded BIT STRING length. Unrelated findings
-  stay unchanged; certificate evidence/positions/IDs may intentionally change.
-  Filename-based predicates, ECDSA/DSA confusion and expiry policy remain task 021.
+- Built-in signature rules use exact parsed OIDs; new `rsa_modulus_bits` requires
+  a measured RSA/PSS subject modulus. ECDSA/DSA risk tags are quantum-vulnerable;
+  existing PKI severity promotion remains unchanged. Classical weak-digest/key
+  findings and legacy DSA verification guidance remain separate concerns.
+- New `certificate_validity` targets expired/not_yet_valid/valid using explicit
+  Unix seconds with inclusive endpoints. `legacy_not_after_2026` retains the old
+  date-named rule's fixed cutoff before 2027-01-01 UTC. Reversed intervals or an
+  unavailable required clock retain static hits and prevent complete assessment.
+- `CertificateDetector::at(i64)` supplies a fixed detector. Default registry creation
+  captures its instant once; CLI creates a registry per scan. A reused library
+  registry reuses its instant; rebuild it for fresh-time analysis. Direct legacy
+  unit-detector calls capture per-call time. No ScanConfig/Detector trait change.
+- Legacy custom composite scopes remain compatible except the three newly reserved
+  opt-in names above. Typed time findings add only assessment time/status to the
+  existing evidence map. Signature/subject/time evidence is separated; affected
+  certificate IDs and legacy CBOM values intentionally change, not the ID algorithm
+  or report structure. Unrelated findings and the task 020 parser remain unchanged.
+  Full simultaneous assessment modeling and broad accuracy studies remain tasks
+  026/023, and PSS digest-parameter interpretation remains limited.
 - Source snippets from files carrying EC/DSA/encrypted private PEM markers are
   masked file-wide, extending the existing RSA/PKCS#8/OpenSSH protection. Bodies of
   unsupported blocks are never decoded/exported by certificate parsing.
 
-See [task 020 specification/evidence](roadmap/TASK-020-IMPLEMENTATION.md) and
+See [task 021 specification/evidence](roadmap/TASK-021-IMPLEMENTATION.md),
+[task 020 specification/evidence](roadmap/TASK-020-IMPLEMENTATION.md) and
 [public fixture provenance](../crates/pqc_scan_detectors/tests/fixtures/certificates/README.md).
 
 ### Key detector

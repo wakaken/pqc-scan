@@ -121,10 +121,10 @@
     },
     {
       "path": "crates/pqc_scan_detectors/src/certificate_detector.rs",
-      "sha256": "08a9625654a9992d15d43dbc976d93a385fa45b47081650ebd95a598c9d8adff",
+      "sha256": "21cf7892ff6def46a01b9f8dd3747ed1e4b0b1c64dce8a647940b45fdf6779a7",
       "reason": "Reviewed inline unit-test input under the cfg(test) module; production observations are not registered.",
       "results": [
-        {"ruleId":"TS_CERT_SIGALG_LITERAL","line":487,"column":28,"sha256":"601beda1d6413903ec54ca438505f9efa89d663da7ff4251993579dd63b909ff","count":1}
+        {"ruleId":"TS_CERT_SIGALG_LITERAL","line":621,"column":28,"sha256":"7681492a37f1811f1ff24250dc19219de98889f1a95419d2a951af08f24f7fa6","count":1}
       ]
     },
     {
@@ -332,11 +332,28 @@
       ]
     },
     {
+      "path": "crates/pqc_scan_detectors/tests/certificate_policy.rs",
+      "sha256": "a1394888c8f45b7b615b3a7d731342d411bb9564b3bb22e5c0b917e3d3dfdd30",
+      "reason": "Reviewed task 021 integration-test clock literals; production observations are not registered.",
+      "results": [
+        {"ruleId":"TS_RSA_KEY_SIZE_LITERAL","line":265,"column":30,"sha256":"eddd6bbd564db8bfc67b83395da586f15019f2218d99cef0cba03df62495e731","count":1},
+        {"ruleId":"TS_RSA_KEY_SIZE_LITERAL","line":328,"column":60,"sha256":"31f85aecec315048dde0c3a06fdc847e8b3db86954a40a05e6733b0bda46a3c6","count":1}
+      ]
+    },
+    {
+      "path": "crates/pqc_scan_detectors/tests/fixtures/certificate-policy/dsa-sha256.der",
+      "sha256": "d1716546f0671af807eaab0a70d1d025e27313eacfd371aa399b8c73ddc8059d",
+      "reason": "Reviewed public-only DSA certificate fixture for task 021; not a production signing recommendation.",
+      "results": [
+        {"ruleId":"CERT_DSA_SIGNATURE","line":1,"column":1,"sha256":"59f741d3a1eae197f7473ae975b1fa1b0f7ba5a5628888d8a72277889cc99678","count":1}
+      ]
+    },
+    {
       "path": "crates/pqc_scan_detectors/tests/fixtures/certificates/p256-rsa-signed.der",
       "sha256": "b9dfe7fbed4a8dad920638498c2ea519de9179d7e95316a86a5f8765cb9f80c9",
       "reason": "Reviewed integration-test or synthetic fixture input; no production configuration.",
       "results": [
-        {"ruleId":"CERT_RSA_SIGNATURE","line":1,"column":1,"sha256":"98f4803d5737a81a9a43506c84dad2e7af035bede04f5bb35b81be87c9a0b7c2","count":1}
+        {"ruleId":"CERT_RSA_SIGNATURE","line":1,"column":1,"sha256":"f2438b592221604407023746c818715a19a7f770f4dfa6b358c8e0b90dd81e32","count":1}
       ]
     },
     {
@@ -344,8 +361,7 @@
       "sha256": "cc5b37ec71cff86a39f7eaf27a71fc33161b7b64242f09df03b716f262f249db",
       "reason": "Reviewed integration-test or synthetic fixture input; no production configuration.",
       "results": [
-        {"ruleId":"CERT_DSA_SIGNATURE","line":1,"column":1,"sha256":"89d82e56752addfcdf8cac608a206cbdf8f0a0e0771ac0ea55c0052d747310b8","count":1},
-        {"ruleId":"CERT_ECDSA_SIGNATURE","line":1,"column":1,"sha256":"bafa343d9c6a4bee050f3f4211b4f418cf5b217a3c248a274512074428e6bd28","count":1}
+        {"ruleId":"CERT_ECDSA_SIGNATURE","line":1,"column":1,"sha256":"e12abde6e647e0ef665622c61065c247a11bad8819d8d06deefba6a3bdb44ea3","count":1}
       ]
     },
     {
@@ -353,8 +369,7 @@
       "sha256": "b74f9fa5529a3ba184e317a176b69de9d2eddd7fafe9b506a3d379f1a7ed8125",
       "reason": "Reviewed integration-test or synthetic fixture input; no production configuration.",
       "results": [
-        {"ruleId":"CERT_DSA_SIGNATURE","line":1,"column":1,"sha256":"f4242ea2ecf6e9a249b6213d7de42da164b4491b11e9a319c3fdb9b00d8aee53","count":1},
-        {"ruleId":"CERT_ECDSA_SIGNATURE","line":1,"column":1,"sha256":"9f26d63b1e8f77ca4e212e86889be16ac919da9108b452c5769c99b74b9533c3","count":1}
+        {"ruleId":"CERT_ECDSA_SIGNATURE","line":1,"column":1,"sha256":"fefd7df9021d1a188e7d1960ed9b8db8d4cdfbab779059ef1c558d77e64f6b13","count":1}
       ]
     },
     {
@@ -362,8 +377,7 @@
       "sha256": "48cab491739aeee9a28ae4593db4424c1c33135e7d2bb6c107fd2815e2cd4fda",
       "reason": "Reviewed integration-test or synthetic fixture input; no production configuration.",
       "results": [
-        {"ruleId":"CERT_DSA_SIGNATURE","line":1,"column":1,"sha256":"5c607d7921d6f759c5b5c96a8d692d61b3fcd56c4e2a7649e4f13a8bc4ec5ae7","count":1},
-        {"ruleId":"CERT_ECDSA_SIGNATURE","line":1,"column":1,"sha256":"656d30f75a1fdc33725f911ec38aeeba3f595a009422cc557fb587c87653ac1a","count":1}
+        {"ruleId":"CERT_ECDSA_SIGNATURE","line":1,"column":1,"sha256":"9187398e079938e9683e24e31ec7097bf0534eaae85f825cb1c865210b571dbf","count":1}
       ]
     },
     {
@@ -371,8 +385,8 @@
       "sha256": "460c0ba80b18533902efdb3b33b226751c891360a8db40459e50ea8de8f1d895",
       "reason": "Reviewed integration-test or synthetic fixture input; no production configuration.",
       "results": [
-        {"ruleId":"CERT_RSA_1024","line":1,"column":1,"sha256":"1d2eae4461f8584bafd9abd6c73e28152803bb37e86ad55a8d5d3d9eda2ec8f2","count":1},
-        {"ruleId":"CERT_RSA_SIGNATURE","line":1,"column":1,"sha256":"e4f29550f100229e443188b1f844156986532cc56314492b50d82808dcb87893","count":1}
+        {"ruleId":"CERT_RSA_1024","line":1,"column":1,"sha256":"a9f61dba23c1fc4a2756dda2e57515a5b632d4e32f03a3b55089e700e8f3f810","count":1},
+        {"ruleId":"CERT_RSA_SIGNATURE","line":1,"column":1,"sha256":"5c67c8319f6139151befe4bfc3e6badf2ecd18185e11402ce96563f7707e1e5e","count":1}
       ]
     },
     {
@@ -380,8 +394,8 @@
       "sha256": "75f55d5e7df161d49e1e98ab26627e11d4c5658692252e73153fb38a23ba3147",
       "reason": "Reviewed integration-test or synthetic fixture input; no production configuration.",
       "results": [
-        {"ruleId":"CERT_RSA_2048","line":1,"column":1,"sha256":"a59da6a829a0ef585ec582d184eca455243afbaceff4b36641a53c9019fae5b8","count":1},
-        {"ruleId":"CERT_RSA_SIGNATURE","line":1,"column":1,"sha256":"31c5aefe666af30a060071ee6070f675fd6ab75019d4883cb61362e60505c876","count":1}
+        {"ruleId":"CERT_RSA_2048","line":1,"column":1,"sha256":"b25febcfbac2af92af6332cb5ef95a2e02dece1859b9569835483fde50188d71","count":1},
+        {"ruleId":"CERT_RSA_SIGNATURE","line":1,"column":1,"sha256":"9ebd94e7138b2edc38f195b3d40375d72bf9e789d93628353323f0ef1e3f2515","count":1}
       ]
     },
     {
@@ -389,8 +403,8 @@
       "sha256": "ca58745a1bda90cc3368a37ae4a97d9022c57f8b82da22ca41b4416e08586772",
       "reason": "Reviewed integration-test or synthetic fixture input; no production configuration.",
       "results": [
-        {"ruleId":"CERT_RSA_2048","line":1,"column":1,"sha256":"82759bec953ffc7d2f603b969f17fb683f1d8f24d37c40edf5a01ed599a15ca9","count":1},
-        {"ruleId":"CERT_RSA_SIGNATURE","line":1,"column":1,"sha256":"7c6e22c9860f8aa07e1a680d74382a836124e2fa36e2eb03454a736603550012","count":1}
+        {"ruleId":"CERT_RSA_2048","line":1,"column":1,"sha256":"b8333a37850dea3707c55b4d8070f48e96feee2a49725d7397d328b95a511fbf","count":1},
+        {"ruleId":"CERT_RSA_SIGNATURE","line":1,"column":1,"sha256":"9cc783aa3acbdb3f3ac498350299325ce003fe3cc53b909dc460da63c545eb81","count":1}
       ]
     },
     {
@@ -398,8 +412,8 @@
       "sha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46",
       "reason": "Reviewed integration-test or synthetic fixture input; no production configuration.",
       "results": [
-        {"ruleId":"CERT_RSA_3072","line":1,"column":1,"sha256":"c89bb4200349eab6c25f3b576ecb266fbe045850f4299474ca815bca9ea79c50","count":1},
-        {"ruleId":"CERT_RSA_SIGNATURE","line":1,"column":1,"sha256":"a36ee2e52ab660423ce57bde31706a3907a88585207d979aec84d2c6b3c65b19","count":1}
+        {"ruleId":"CERT_RSA_3072","line":1,"column":1,"sha256":"495430e6a1315588bb1a6468317d9f6990ef119672a5f5e1043dc3ae517c54fa","count":1},
+        {"ruleId":"CERT_RSA_SIGNATURE","line":1,"column":1,"sha256":"698189857fd469f34f2b13ae6f19eddea16e76096c1db5934e664632a51c495e","count":1}
       ]
     },
     {

@@ -18,7 +18,7 @@ pub fn default_detectors() -> Vec<Arc<dyn Detector>> {
         Arc::new(tree_sitter_detector::TreeSitterDetector),
         Arc::new(regex_detector::RegexDetector),
         Arc::new(dependency_detector::DependencyDetector),
-        Arc::new(certificate_detector::CertificateDetector),
+        Arc::new(certificate_detector::clock_snapshot()),
         Arc::new(key_detector::KeyDetector::default()),
     ]
 }

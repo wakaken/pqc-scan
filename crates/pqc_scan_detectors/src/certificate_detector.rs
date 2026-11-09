@@ -6,6 +6,7 @@ pub use attributes::{
 };
 
 use std::collections::BTreeMap;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::Result;
 use x509_parser::parse_x509_certificate;
@@ -38,6 +39,25 @@ impl Detector for CertificateDetector {
     }
 
     fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+        self.detect_with_time(file, rules, unix_seconds(SystemTime::now()))
+    }
+}
+
+impl CertificateDetector {
+    /// A fixed Unix-second assessment clock, reusable across files/scans.
+    /// This does not validate signatures, chains or actual certificate deployment.
+    pub fn at(assessment_time_unix: i64) -> impl Detector {
+        ClockedCertificateDetector {
+            assessment_time: Some(assessment_time_unix),
+        }
+    }
+
+    fn detect_with_time(
+        &self,
+        file: &ScannableFile,
+        rules: &RuleSet,
+        assessment_time: Option<i64>,
+    ) -> Result<DetectorOutcome> {
         if !classifier::is_certificate_file(&file.path)
             || rules.by_kind(RuleKind::Certificate).next().is_none()
         {
@@ -64,7 +84,14 @@ impl Detector for CertificateDetector {
             // Compatibility: a filename/container signal is not a parsed certificate.
             let mut out = Vec::new();
             for rule in rules.by_kind(RuleKind::Certificate) {
-                if matches!(rule.scope.as_str(), "signature_oid" | "public_key_oid") {
+                if matches!(
+                    rule.scope.as_str(),
+                    "signature_oid"
+                        | "public_key_oid"
+                        | "rsa_modulus_bits"
+                        | "certificate_validity"
+                        | "legacy_not_after_2026"
+                ) {
                     continue;
                 }
                 if rule
@@ -98,7 +125,25 @@ impl Detector for CertificateDetector {
             if info.status != DetectorStatus::Complete {
                 status = DetectorStatus::Partial;
             }
-            // Preserve legacy rule semantics; exact typed predicates belong to task 021.
+            let interval_valid = info.not_before_unix <= info.not_after_unix;
+            let validity = assessment_time.filter(|_| interval_valid).map(|now| {
+                if now < info.not_before_unix {
+                    "not_yet_valid"
+                } else if now > info.not_after_unix {
+                    "expired"
+                } else {
+                    "valid"
+                }
+            });
+            if !interval_valid
+                || (assessment_time.is_none()
+                    && rules
+                        .by_kind(RuleKind::Certificate)
+                        .any(|r| r.scope == "certificate_validity"))
+            {
+                status = DetectorStatus::Partial;
+            }
+            // Preserve composite input for legacy/custom scopes only.
             let legacy_signature = if info.signature_algorithm.starts_with("ML-DSA")
                 || info.signature_algorithm.starts_with("SLH-DSA")
             {
@@ -120,14 +165,58 @@ impl Detector for CertificateDetector {
                     status = DetectorStatus::Partial;
                     continue;
                 };
+                let typed_target;
                 let scoped_target = match rule.scope.as_str() {
                     "signature_oid" => &info.signature_oid,
                     "public_key_oid" => &info.public_key.algorithm_oid,
+                    "rsa_modulus_bits" => {
+                        if !matches!(
+                            info.public_key.algorithm_oid.as_str(),
+                            "1.2.840.113549.1.1.1" | "1.2.840.113549.1.1.10"
+                        ) || info.public_key.key_size_kind != "rsa_modulus"
+                        {
+                            continue;
+                        }
+                        let Some(bits) = info.public_key.key_bits else {
+                            continue;
+                        };
+                        typed_target = bits.to_string();
+                        &typed_target
+                    }
+                    "certificate_validity" => {
+                        let Some(state) = validity else {
+                            continue;
+                        };
+                        state
+                    }
+                    "legacy_not_after_2026" => {
+                        if !interval_valid {
+                            continue;
+                        }
+                        if info.not_after_unix < 1_798_761_600 {
+                            "before_2027"
+                        } else {
+                            "after_2026"
+                        }
+                    }
                     _ => &target,
                 };
                 if !regex.is_match(scoped_target) {
                     continue;
                 }
+                let mut metadata = object_metadata(&object);
+                let snippet_preview = match (rule.scope.as_str(), assessment_time) {
+                    ("certificate_validity", Some(now)) => {
+                        metadata.insert("assessment_time_unix".into(), now.to_string());
+                        metadata.insert("validity_status".into(), scoped_target.to_string());
+                        format!("validity={}, assessment_time_unix={}, not_before_unix={}, not_after_unix={}",
+                            scoped_target, now, info.not_before_unix, info.not_after_unix)
+                    }
+                    _ => format!(
+                        "sig={}, key_bits={}, expires={}",
+                        info.signature_algorithm, key_bits, info.expires_at
+                    ),
+                };
                 out.push(Detection {
                     rule_id: rule.id.clone(),
                     location: Location {
@@ -140,21 +229,66 @@ impl Detector for CertificateDetector {
                         r#match: match rule.scope.as_str() {
                             "public_key_oid" => info.public_key.algorithm.clone(),
                             "signature_oid" => info.signature_algorithm.clone(),
+                            "rsa_modulus_bits" => {
+                                format!("{} {}-bit", info.public_key.algorithm, scoped_target)
+                            }
+                            "certificate_validity" => scoped_target.to_string(),
+                            "legacy_not_after_2026" => {
+                                if scoped_target == "before_2027" {
+                                    "notAfter < 2027".into()
+                                } else {
+                                    "notAfter >= 2027".into()
+                                }
+                            }
                             _ => mask_preview(&format!(
                                 "{} {}-bit",
                                 info.signature_algorithm, key_bits
                             )),
                         },
-                        snippet_preview: format!(
-                            "sig={}, key_bits={}, expires={}",
-                            info.signature_algorithm, key_bits, info.expires_at
-                        ),
-                        metadata: object_metadata(&object),
+                        snippet_preview,
+                        metadata,
                     },
                 });
             }
         }
         Ok(DetectorOutcome::new(out, status))
+    }
+}
+
+struct ClockedCertificateDetector {
+    assessment_time: Option<i64>,
+}
+
+impl Detector for ClockedCertificateDetector {
+    fn name(&self) -> &'static str {
+        "certificate_detector"
+    }
+    fn detect(&self, file: &ScannableFile, rules: &RuleSet) -> Result<Vec<Detection>> {
+        Ok(self.detect_detailed(file, rules)?.into_detections())
+    }
+    fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+        CertificateDetector.detect_with_time(file, rules, self.assessment_time)
+    }
+}
+
+// Registry construction is the snapshot boundary. The CLI creates a new registry
+// per command; library callers can reuse an explicit assessment instant or rebuild.
+pub(crate) fn clock_snapshot() -> impl Detector {
+    ClockedCertificateDetector {
+        assessment_time: unix_seconds(SystemTime::now()),
+    }
+}
+
+fn unix_seconds(now: SystemTime) -> Option<i64> {
+    match now.duration_since(UNIX_EPOCH) {
+        Ok(duration) => i64::try_from(duration.as_secs()).ok(),
+        Err(error) => {
+            let duration = error.duration();
+            i64::try_from(duration.as_secs())
+                .ok()?
+                .checked_neg()?
+                .checked_sub(i64::from(duration.subsec_nanos() != 0))
+        }
     }
 }
 
@@ -491,5 +625,42 @@ YaIFrdcmPh3KlSLTCZod7SfAVUCY\n\
                 .get("signature_oid")
                 .is_some_and(|oid| oid == "1.2.840.113549.1.1.11")
         }));
+    }
+
+    #[test]
+    fn missing_assessment_clock_retains_static_facts_without_a_false_validity_verdict() {
+        let rules = RuleSet::load_from_dir(&rules_dir()).unwrap();
+        let file = ScannableFile::from_bytes(
+            PathBuf::from("public.pem"),
+            VALID_RSA_CERT_PEM.as_bytes().to_vec(),
+        );
+        let out = CertificateDetector
+            .detect_with_time(&file, &rules, None)
+            .unwrap();
+        assert_eq!(out.status(), DetectorStatus::Partial);
+        assert!(out
+            .detections()
+            .iter()
+            .any(|d| d.rule_id == "CERT_RSA_SIGNATURE"));
+        assert!(!out
+            .detections()
+            .iter()
+            .any(|d| ["CERT_EXPIRED", "CERT_NOT_YET_VALID"].contains(&d.rule_id.as_str())));
+        assert!(out
+            .detections()
+            .iter()
+            .all(|d| !d.evidence.metadata.contains_key("assessment_time_unix")));
+    }
+
+    #[test]
+    fn unix_clock_conversion_floors_seconds_on_both_sides_of_the_epoch() {
+        use std::time::Duration;
+        assert_eq!(unix_seconds(UNIX_EPOCH), Some(0));
+        assert_eq!(
+            unix_seconds(UNIX_EPOCH + Duration::new(1, 900_000_000)),
+            Some(1)
+        );
+        assert_eq!(unix_seconds(UNIX_EPOCH - Duration::from_nanos(1)), Some(-1));
+        assert_eq!(unix_seconds(UNIX_EPOCH - Duration::new(1, 1)), Some(-2));
     }
 }
