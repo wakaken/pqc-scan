@@ -65,6 +65,25 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 
 ## CBOM vs SBOM
 
+### PQC readiness inventory (2026-11-09)
+
+The scanner inventories ML-KEM/ML-DSA references across the seven languages,
+Node SLH-DSA key generation, selected PQC-capable dependencies, draft Kyber/Dilithium
+names, and explicit classical-only Java/Ruby TLS group settings or Go
+`GODEBUG=tlsmlkem=0`. These are static signals, not negotiated-state checks.
+Certificate ML-DSA/SLH-DSA signature and subject public-key OIDs are matched
+independently; filenames cannot establish PQC certificate support. Signatures and
+trust chains are not verified. Existing output field names and rule IDs remain
+unchanged; new informational findings also appear in CBOM and SARIF.
+
+`quantum-safe` on a finding describes the referenced primitive only, not the
+security or migration completeness of the product. Dependency findings remain
+`quantum-uncertain`: resolved version, provider, features and peer support must be
+checked. Node crypto and WebCrypto have different minimum minor versions; browser
+and TypeScript environments must be checked independently. JWT guidance requires
+JOSE/library/verifier compatibility before changing signatures. See
+[static fixtures and official references](examples/pqc-readiness/README.md).
+
 | Artifact | Purpose | Main Question |
 |---|---|---|
 | `dependency-sbom.json` | Software dependency inventory | "What packages/libraries are present?" |

@@ -1,0 +1,64 @@
+id: 015
+title: Refresh PQC inventory and guidance across seven languages
+type: feature
+priority: high
+status: review
+owner: Executor Agent
+description: >
+  User-requested expansion beyond the task 014 restart pilot. Preserve existing
+  edits and report schemas. Implement eight reviewed candidates sequentially:
+  guidance, API inventory, explicit TLS restrictions, dependency inventory rules,
+  draft algorithm identification, certificate OIDs, JWT guidance, and examples.
+implementation_steps:
+  - Add positive and negative detector tests before implementation.
+  - Add scoped PQC API rules, explicit TLS restriction rules, dependency and draft rules.
+  - Match certificate signature and public key OIDs independently without changing report fields.
+  - Update runtime and JWT recommendations with verified official references.
+  - Add seven-language static fixtures and synchronize both READMEs and rule reference.
+testing_requirements:
+  - cargo build --workspace
+  - cargo fmt --all --check
+  - cargo test --workspace
+  - cargo clippy --workspace --all-targets -- -D warnings
+  - All-format example scan and old-rule regression comparison
+security_considerations:
+  - No cryptographic operations or secret material in fixtures.
+  - API and dependency presence does not prove runtime support or negotiation.
+  - Preserve existing rule IDs, output field names, and private-key masking.
+acceptance:
+  - All eight candidates have implementation and test or fixture evidence.
+  - Certificate OIDs cannot be spoofed by filenames.
+  - Negative examples and existing tests pass.
+implementation_evidence:
+  guidance: Seven-runtime capability guidance with official references; version/provider caveats retained
+  api_inventory: Seven language rules, informational primitive-level classification only
+  tls_settings: Explicit Go disable override and recognized Java/Ruby classical-only lists
+  dependencies: Exact package and ecosystem matches; versions preserved in inventory, no enabled-state claim
+  draft_algorithms: Kyber/Dilithium draft names distinguished from final ML-KEM
+  certificates: ML-DSA and SLH-DSA signature/public-key OIDs matched independently
+  jwt: JOSE identifiers, key encoding, libraries and verifier rollout required before signature changes
+  examples: Seven checked-in static source fragments, negative case and TLS override fixture
+validation:
+  date: '2026-11-09'
+  baseline_head: be5c760adb7d1d4d99e39d35d87d2956079db76e
+  build: passed
+  formatting_check: passed
+  workspace_tests: 69 passed, 0 failed
+  clippy: passed with warnings denied
+  diff_check: passed
+  test_log: target/pqc-refresh/workspace-tests.log
+  example_scan: 290 findings, 55 scanned files, all six outputs written
+  pqc_scan: 10 findings (7 info PQC references and 3 medium configuration signals), high fail-on exits 0
+  report_directory: target/pqc-refresh/readiness
+  compatibility_log: target/pqc-refresh/compatibility.log
+  compatibility: Existing 273 finding identities, locations, severity, risk, confidence, evidence matches and snippets unchanged; dependency inventory and top-level fields unchanged
+  intentional_changes: New findings, updated recommendations and migration hints, additive certificate public_key_oid metadata
+  coverage: Seven-language positive/negative cases, exact dependency ecosystem checks, all 15 PQC signature/public-key OIDs, malformed and filename-spoof negatives, old DSA false-positive regression, all-format CLI acceptance
+  review: Sequential self-review found and corrected dependency ecosystem ambiguity and PQC display-name collision with classical DSA rules; independent review not performed
+  unexecuted:
+    - Remote CI for publication commit; awaiting push and evaluation
+    - Browser interaction; local file browser access previously rejected
+    - Real product acceptance; repository path not supplied
+    - Runtime cryptographic interoperability; fixtures are static scanner inputs, not executable crypto implementations
+  publication_branch: codex/pqc-readiness-refresh
+  next_action: Push publication commit and evaluate its CI before closing task 015; keep browser, real-product and runtime checks explicitly unexecuted

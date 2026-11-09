@@ -15,6 +15,8 @@ Each language folder includes source modules, runtime configuration files, and d
 
 ## Additional fixtures
 
+- `pqc-readiness/*`: seven-language static PQC references, negative cases and explicit TLS overrides (not executable migration recipes)
+
 - `middleware/*`: k8s/nginx/httpd/envoy/istio/haproxy/traefik TLS policy examples
 - `pki/*`: certificate and key-material samples
 - `sbom/*`: CycloneDX and SPDX dependency SBOM samples

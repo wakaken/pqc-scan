@@ -311,6 +311,144 @@ mod tests {
     }
 
     #[test]
+    fn pqc_fixtures_preserve_report_contract_and_do_not_trigger_high_gate() {
+        let out = temp_dir("pqc-reports");
+        let (result, stdout, stderr) = run_cli_test(vec![
+            "pqc-scan".into(),
+            "scan".into(),
+            workspace_root()
+                .join("examples/pqc-readiness")
+                .display()
+                .to_string(),
+            "--format".into(),
+            "all".into(),
+            "--out-dir".into(),
+            out.display().to_string(),
+            "--rules-dir".into(),
+            rules_dir().display().to_string(),
+            "--fail-on".into(),
+            "high".into(),
+        ]);
+        assert_eq!(result.unwrap(), ExitStatus::Success);
+        assert!(stderr.is_empty());
+        assert_eq!(stdout.matches("written ").count(), 6);
+        let report: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
+        let hits = report["findings"].as_array().unwrap();
+        assert_eq!(hits.len(), 10);
+        assert_eq!(
+            hits.iter()
+                .filter(|hit| hit["risk"] == "quantum-safe" && hit["severity"] == "info")
+                .count(),
+            7
+        );
+        assert!(hits
+            .iter()
+            .all(|hit| hit["location"]["file"] != "negative.js"));
+        assert!(hits
+            .iter()
+            .filter(|hit| hit["risk"] == "quantum-safe")
+            .all(|hit| hit.get("recommended_actions").is_none()));
+        let cbom: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(out.join("cbom.json")).unwrap()).unwrap();
+        assert_eq!(cbom, report["cbom"]);
+        assert_eq!(cbom.as_array().unwrap().len(), 10);
+        for file in ["report.html", "report.md", "report.sarif"] {
+            let text = fs::read_to_string(out.join(file)).unwrap();
+            assert!(text.contains("PQC_PYTHON_API"));
+            assert!(text.contains("example.py"));
+            if file != "report.sarif" {
+                assert!(text.contains("quantum-safe"));
+            }
+        }
+        fs::remove_dir_all(out).unwrap();
+    }
+
+    #[test]
+    fn synthetic_scan_acceptance_checks_all_reports() {
+        let repo = temp_dir("acceptance");
+        let out = temp_dir("acceptance-out");
+        write_file(&repo, "positive.js", "const alg = 'RS256';\n");
+        write_file(&repo, "negative.js", "// RS256\nconst RS256_helper = 1;\n");
+        write_file(&repo, ".gitignore", "ignored.js\n");
+        write_file(&repo, "ignored.js", "const alg = 'RS256';\n");
+        write_file(
+            &repo,
+            "synthetic.key",
+            "-----BEGIN RSA PRIVATE KEY-----\nSYNTHETIC_ACCEPTANCE_PAYLOAD\n-----END RSA PRIVATE KEY-----\n",
+        );
+        let (result, stdout, stderr) = run_cli_test(vec![
+            "pqc-scan".into(),
+            "scan".into(),
+            repo.display().to_string(),
+            "--format".into(),
+            "all".into(),
+            "--out-dir".into(),
+            out.display().to_string(),
+            "--rules-dir".into(),
+            rules_dir().display().to_string(),
+        ]);
+        assert_eq!(result.expect("acceptance scan"), ExitStatus::Success);
+        assert!(stderr.is_empty());
+        assert_eq!(stdout.matches("written ").count(), 6);
+        let json: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
+        let findings = json["findings"].as_array().unwrap();
+        let hit = findings
+            .iter()
+            .find(|f| f["rule_id"] == "JWT_RS256")
+            .unwrap();
+        assert_eq!(hit["location"]["file"], "positive.js");
+        assert_eq!(hit["location"]["line"], 1);
+        assert!(!hit["recommended_actions"].as_array().unwrap().is_empty());
+        assert!(hit["source_snippet"]["lines"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|line| line["highlighted"] == true && line["line"] == 1));
+        assert!(findings.iter().all(
+            |f| f["location"]["file"] != "negative.js" && f["location"]["file"] != "ignored.js"
+        ));
+        assert!(findings
+            .iter()
+            .any(|f| f["evidence"]["type"] == "private_key"));
+        for name in [
+            "report.json",
+            "report.html",
+            "report.md",
+            "report.sarif",
+            "cbom.json",
+            "dependency-sbom.json",
+        ] {
+            let text = fs::read_to_string(out.join(name)).unwrap();
+            assert!(
+                !text.contains("SYNTHETIC_ACCEPTANCE_PAYLOAD"),
+                "unmasked payload in {name}"
+            );
+            if name != "dependency-sbom.json" {
+                assert!(text.contains("positive.js"), "missing location in {name}");
+            }
+        }
+        for (file, field) in [
+            ("cbom.json", "cbom"),
+            ("dependency-sbom.json", "dependency_sbom"),
+        ] {
+            let inventory: serde_json::Value =
+                serde_json::from_str(&fs::read_to_string(out.join(file)).unwrap()).unwrap();
+            assert_eq!(inventory, json[field]);
+        }
+        let sarif: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(out.join("report.sarif")).unwrap()).unwrap();
+        assert_eq!(sarif["version"], "2.1.0");
+        assert_eq!(
+            sarif["runs"][0]["results"].as_array().unwrap().len(),
+            findings.len()
+        );
+        fs::remove_dir_all(repo).unwrap();
+        fs::remove_dir_all(out).unwrap();
+    }
+
+    #[test]
     fn scan_command_writes_requested_report() {
         let repo_dir = temp_dir("scan");
         let out_dir = temp_dir("scan-out");

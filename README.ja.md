@@ -62,6 +62,21 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 
 ## CBOM と SBOM の違い
 
+### PQC対応状況の棚卸し（2026年11月9日）
+
+7言語のML-KEM・ML-DSA参照、NodeのSLH-DSA鍵生成、PQC対応候補の依存関係、
+旧Kyber・Dilithium名、Java・Rubyの古典方式限定TLS設定、Goの
+`GODEBUG=tlsmlkem=0` を検出します。静的な手掛かりであり、実際の通信方式の確認ではありません。
+証明書のML-DSA・SLH-DSA署名OIDと公開鍵OIDは別々に照合し、ファイル名では判定しません。
+署名・信頼チェーンの検証は行いません。既存の出力フィールド名とルールIDを維持し、
+追加の情報レベルの検出もCBOM・SARIFに含めます。
+
+`quantum-safe` は参照された暗号方式の分類であり、製品全体の安全性や移行完了の保証ではありません。
+依存関係は `quantum-uncertain` とし、解決済みバージョン・provider・features・接続相手を確認します。
+Node cryptoとWebCryptoでは必要なマイナーバージョンが異なります。
+ブラウザやTypeScriptの実行環境は別途確認し、JWT署名の変更前にJOSE・ライブラリ・検証側の互換性を確認してください。
+[静的検証例と公式資料](examples/pqc-readiness/README.md)も参照してください。
+
 | 成果物 | 目的 | 問い |
 |---|---|---|
 | `dependency-sbom.json` | ソフトウェア依存関係の棚卸し | 「どのパッケージ/ライブラリが含まれているか？」 |

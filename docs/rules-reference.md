@@ -2,9 +2,9 @@
 
 This document lists all built-in detection rules shipped in `rules/default/` and explains severity levels used in reports.
 
-- Total rules: **101**
-- Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`
-- Kind breakdown: `certificate`: 12, `dependency`: 15, `key`: 3, `regex`: 57, `tree_sitter`: 14
+- Total rules: **117**
+- Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`
+- Kind breakdown: `certificate`: 16, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 22
 
 ## Severity Levels
 
@@ -12,13 +12,48 @@ This document lists all built-in detection rules shipped in `rules/default/` and
 |---|---|---|
 | `critical` (7) | Immediate security impact or sensitive material exposure. | Treat as urgent; remediate before release when possible. |
 | `high` (41) | Strong crypto risk in production paths. | Prioritize in active migration backlog. |
-| `medium` (47) | Meaningful migration signal requiring design/planning. | Schedule remediation with clear owner and target release. |
+| `medium` (51) | Meaningful migration signal requiring design/planning. | Schedule remediation with clear owner and target release. |
 | `low` (6) | Contextual or lower-confidence finding. | Triage and backlog when confirmed. |
-| `info` (0) | Inventory-only informational signal. | Track for visibility and architecture review. |
+| `info` (12) | Inventory-only informational signal. | Track for visibility and architecture review. |
 
 Note: final severity can be adjusted by context in the risk engine (for example TLS/PKI/JWT/authentication paths).
 
 ## Built-in Rule Catalog
+
+### PQC inventory additions (`pqc.yml`)
+
+`quantum-safe` classifies only the primitive referenced, not execution, backend
+availability, certificate validity, or completed migration. API rules are
+heuristic: aliases, computed names, multiline settings and custom TLS groups may
+not match. Only explicit recognized classical-only lists are flagged; absence of
+a PQC string does not prove a disabled state. Existing catalog rows below retain
+their rule IDs; TLS_RSA_KEY_EXCHANGE and SSH_RSA_ALGO guidance now distinguishes
+standard ML-KEM and classical Ed25519 respectively. YAML is authoritative.
+
+| Rule ID | Kind | Severity / Risk | Scope and interpretation |
+|---|---|---|---|
+| PQC_JAVA_API | tree_sitter | info / quantum-safe | Java JCA PQC request |
+| PQC_GO_API | tree_sitter | info / quantum-safe | Go standard PQC import |
+| PQC_NODE_API | tree_sitter | info / quantum-safe | JS/TS Node-style key generation |
+| PQC_WEBCRYPTO_API | tree_sitter | info / quantum-safe | JS/TS WebCrypto-style key generation |
+| PQC_PYTHON_API | tree_sitter | info / quantum-safe | Python PQC key generation |
+| PQC_RUST_API | tree_sitter | info / quantum-safe | RustCrypto symbol reference |
+| PQC_RUBY_API | tree_sitter | info / quantum-safe | Ruby algorithm literal |
+| PQC_GO_TLS_DISABLED | regex | medium / quantum-uncertain | Explicit GODEBUG override |
+| PQC_JAVA_CLASSICAL_GROUPS | regex | medium / quantum-uncertain | Recognized classical-only Java property |
+| PQC_RUBY_CLASSICAL_GROUPS | regex | medium / quantum-uncertain | Recognized classical-only Ruby assignment |
+| DEP_PQC_CAPABLE_LIBRARY | dependency | info / quantum-uncertain | Version-dependent capability; not enabled state |
+| PQC_DRAFT_ALGORITHM | tree_sitter | medium / quantum-uncertain | Pre-standard names; verify implementation |
+| CERT_ML_DSA_SIGNATURE | certificate | info / quantum-safe | Parsed signature_oid only; RFC 9881 |
+| CERT_ML_DSA_PUBLIC_KEY | certificate | info / quantum-safe | Parsed public_key_oid only; RFC 9881 |
+| CERT_SLH_DSA_SIGNATURE | certificate | info / quantum-safe | Parsed signature_oid only; RFC 9909 |
+| CERT_SLH_DSA_PUBLIC_KEY | certificate | info / quantum-safe | Parsed public_key_oid only; RFC 9909 |
+
+Certificate OID scopes never fall back to matching filenames. Signature and key
+algorithms are distinct; evidence metadata for parsed certificates includes
+`public_key_oid` alongside `signature_oid`. No serialized struct fields change.
+
+### Original catalog
 
 | Rule ID | Kind | Category | Severity | Risk | Confidence | Scope | Source | Description | Migration Hint | Pattern |
 |---|---|---|---|---|---:|---|---|---|---|---|
@@ -100,12 +135,12 @@ Note: final severity can be adjusted by context in the risk engine (for example 
 | `SSH_DH_GROUP1` | `regex` | SSH | `critical` | `non-quantum-risk` | 0.85 | `code` | `ssh.yml` | Weak SSH KEX group1 detected. | Move to group14+ or modern key-exchange methods. | `diffie-hellman-group1-sha1` |
 | `SSH_DH_GROUP14_SHA1` | `regex` | SSH | `medium` | `non-quantum-risk` | 0.60 | `code` | `ssh.yml` | SHA-1 dependent SSH KEX detected. | Retire SHA-1 based key exchange. | `diffie-hellman-group14-sha1` |
 | `SSH_DSS_SIGALG` | `regex` | SSH | `high` | `non-quantum-risk` | 0.80 | `code` | `ssh.yml` | Deprecated ssh-dss usage detected. | Disable ssh-dss. | `\bssh-dss\b` |
-| `SSH_RSA_ALGO` | `regex` | SSH | `high` | `quantum-vulnerable` | 0.70 | `code` | `ssh.yml` | ssh-rsa algorithm usage detected. | Consider ssh-ed25519 and a hybrid PQC key-management strategy. | `\bssh-rsa\b` |
+| `SSH_RSA_ALGO` | `regex` | SSH | `high` | `quantum-vulnerable` | 0.70 | `code` | `ssh.yml` | ssh-rsa algorithm usage detected. | Plan PQC host authentication separately from hybrid key exchange; ssh-ed25519 remains a classical signature algorithm. | `\bssh-rsa\b` |
 | `SSH_RSA_SHA2_SIGALG` | `regex` | SSH | `medium` | `quantum-vulnerable` | 0.55 | `code` | `ssh.yml` | RSA-SHA2 signature algorithm detected in SSH configuration. | Define a migration plan toward future PQC-ready signature schemes. | `rsa-sha2-(256\|512)` |
 | `TLS_CERT_PIN_RSA` | `regex` | TLS | `medium` | `quantum-vulnerable` | 0.42 | `code` | `tls.yml` | RSA certificate pinning configuration detected. | Plan PQC migration for certificate pinning targets. | `pin-.*rsa\|rsa-pin` |
 | `TLS_ECDHE_RSA` | `regex` | TLS | `medium` | `quantum-uncertain` | 0.50 | `code` | `tls.yml` | TLS_ECDHE_RSA usage detected. | Plan hybrid PQC key agreement adoption. | `TLS_ECDHE_RSA` |
 | `TLS_RSA_CIPHER_SUITE` | `regex` | TLS | `high` | `quantum-vulnerable` | 0.68 | `code` | `tls.yml` | RSA-based TLS cipher suite detected. | Migrate to PQC-ready or hybrid cipher suites. | `TLS_[A-Z0-9_]*_RSA_[A-Z0-9_]*` |
-| `TLS_RSA_KEY_EXCHANGE` | `regex` | TLS | `high` | `quantum-vulnerable` | 0.70 | `code` | `tls.yml` | TLS RSA key-exchange suite detected. | Move to hybrid KEX such as X25519+Kyber. | `TLS_RSA_` |
+| `TLS_RSA_KEY_EXCHANGE` | `regex` | TLS | `high` | `quantum-vulnerable` | 0.70 | `code` | `tls.yml` | TLS RSA key-exchange suite detected. | Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats. | `TLS_RSA_` |
 | `TLS_VERSION_1_0` | `regex` | TLS | `high` | `non-quantum-risk` | 0.75 | `code` | `tls.yml` | Legacy TLS 1.0 configuration detected. | Upgrade to TLS 1.2 or later. | `(?:^\|[^A-Za-z0-9])TLSv1(?:\.0)?(?:$\|[^0-9.])` |
 | `TLS_VERSION_1_1` | `regex` | TLS | `high` | `non-quantum-risk` | 0.75 | `code` | `tls.yml` | Legacy TLS 1.1 configuration detected. | Upgrade to TLS 1.2 or later. | `TLSv1\.1` |
 | `TRAEFIK_TLS_OPTIONS_LEGACY` | `regex` | Middleware | `medium` | `non-quantum-risk` | 0.58 | `config` | `middleware.yml` | Traefik configuration contains a low minimum TLS version. | Raise minVersion in Traefik TLS options. | `(?i)minversion\s*:\s*versiontls1(0\|1)` |

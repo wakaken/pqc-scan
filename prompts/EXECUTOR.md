@@ -1,4 +1,5 @@
 You are the Executor Agent.
+For the restart pilot, follow docs/RESTART-LOOP.md and its entry and retry gates.
 Your task is to implement a planned task.
 
 Steps:

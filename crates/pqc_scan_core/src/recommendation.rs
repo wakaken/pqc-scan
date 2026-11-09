@@ -204,6 +204,20 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
         _ => {}
     }
 
+    if matches!(category.as_str(), "cryptoapi" | "jwt" | "tls" | "pki") {
+        if let Some((step, reference)) = runtime_pqc_capabilities(language) {
+            push_action(&mut actions, RecommendedAction {
+                action_id: "runtime.verify-pqc-capabilities".to_string(),
+                title: "Verify deployed runtime and protocol PQC capabilities".to_string(),
+                priority: "planned".to_string(),
+                rationale: "Source declarations and primitive availability do not establish deployment or peer support.".to_string(),
+                steps: vec![step.to_string(), "Check resolved versions, provider/features and interoperability before changing production policy.".to_string()],
+                references: vec![reference.to_string()],
+                code_examples: Vec::new(),
+            });
+        }
+    }
+
     if finding.rule_id.starts_with("DEP_") {
         push_action(
             &mut actions,
@@ -227,6 +241,18 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
     }
 
     actions
+}
+
+fn runtime_pqc_capabilities(language: Option<&str>) -> Option<(&'static str, &'static str)> {
+    Some(match language? {
+        "java" => ("JDK 24 adds ML-KEM and ML-DSA primitives. Check deployed JSSE hybrid TLS support separately and inspect jdk.tls.namedGroups restrictions.", "https://docs.oracle.com/en/java/javase/27/security/java-secure-socket-extension-jsse-reference-guide.html"),
+        "go" => ("Go 1.24 adds crypto/mlkem and hybrid TLS defaults; Go 1.27 adds crypto/mldsa and ML-DSA X.509/TLS signatures. Inspect GODEBUG and explicit group restrictions.", "https://go.dev/doc/go1.27"),
+        "javascript" | "typescript" => ("Node crypto ML-DSA requires 24.6+, ML-KEM 24.7+, SLH-DSA 24.8+; WebCrypto ML-DSA/ML-KEM requires 24.7+. Verify browser support independently of TypeScript declarations.", "https://nodejs.org/api/webcrypto.html"),
+        "python" => ("cryptography 48 adds OpenSSL 3.5+ support for ML-KEM/ML-DSA; 47 introduced APIs requiring AWS-LC/BoringSSL. Confirm resolved version and backend.", "https://cryptography.io/en/50.0.2/changelog/"),
+        "rust" => ("rustls 0.23.22 adds X25519MLKEM768 with aws-lc-rs; 0.23.27 prefers it by default. Inspect provider, features and custom groups; ring is not equivalent.", "https://docs.rs/rustls/latest/src/rustls/manual/defaults.rs.html"),
+        "ruby" => ("Check openssl gem and linked library/provider versions. gem 4 adds groups=, sigalgs= and negotiated group inspection; Ruby version alone is insufficient.", "https://ruby.github.io/openssl/History_md.html"),
+        _ => return None,
+    })
 }
 
 fn detect_middleware_targets_for_finding(finding: &Finding) -> Vec<&'static str> {
@@ -404,6 +430,7 @@ fn add_jwt_actions(
                 "Restrict accepted alg values and explicitly deny weak/legacy defaults.".to_string(),
                 "Introduce short-lived tokens during the migration phase.".to_string(),
                 "Prepare verifier rollout before signer rollout to avoid compatibility outages.".to_string(),
+                "Confirm JOSE algorithm identifiers, key encoding, JWT library support and all verifiers before changing token signatures; primitive support alone is insufficient.".to_string(),
             ],
             references: vec!["https://www.rfc-editor.org/rfc/rfc7519".to_string()],
             code_examples: Vec::new(),
@@ -415,7 +442,7 @@ fn add_jwt_actions(
         Some("javascript") | Some("typescript") => {
             let node24 = version_at_least(profile.node_version.as_deref(), 24);
             let title = if node24 {
-                "Use Node.js WebCrypto PQC algorithms (ML-DSA / ML-KEM)"
+                "Check Node.js minor version and WebCrypto PQC capabilities"
             } else {
                 "Upgrade Node.js runtime for built-in WebCrypto PQC support"
             };
@@ -431,8 +458,8 @@ fn add_jwt_actions(
                     },
                     rationale: "Node.js runtime level determines whether built-in PQC APIs are available for direct migration.".to_string(),
                     steps: vec![
-                        "Validate runtime support for ML-DSA/ML-KEM in your Node.js LTS baseline.".to_string(),
-                        "Migrate signing and key exchange to WebCrypto and phase out classical-only JWT usage.".to_string(),
+                        "Node crypto: ML-DSA 24.6+, ML-KEM 24.7+, SLH-DSA 24.8+; WebCrypto ML-DSA/ML-KEM 24.7+. Check exact runtime and algorithm support.".to_string(),
+                        "Distinguish Node.js from browser execution; TypeScript types do not establish runtime capabilities. ML-KEM key exchange does not replace JWT signatures.".to_string(),
                     ],
                     references: vec!["https://nodejs.org/api/webcrypto.html".to_string()],
                     code_examples: vec![CodeExample {
@@ -453,6 +480,7 @@ fn add_jwt_actions(
                     rationale: "Go migration is typically introduced via hybrid KEM for transport/session keys while JWT signing transitions separately.".to_string(),
                     steps: vec![
                         "Use `crypto/mlkem` for key encapsulation where available.".to_string(),
+                        "Go 1.24+ provides crypto/mlkem and hybrid TLS defaults; Go 1.27+ provides crypto/mldsa and ML-DSA X.509/TLS 1.3 signatures. Confirm deployed toolchain and peer support.".to_string(),
                         "Keep compatibility by running classical + PQC in parallel during rollout.".to_string(),
                     ],
                     references: vec!["https://pkg.go.dev/crypto/mlkem".to_string()],
@@ -470,9 +498,9 @@ fn add_jwt_actions(
                     rationale: "Python ecosystem PQC support is evolving, so isolating signing behind an internal API reduces lock-in.".to_string(),
                     steps: vec![
                         "Abstract JWT signing behind an interface to swap implementation safely.".to_string(),
-                        "Evaluate `liboqs-python` or provider-backed OpenSSL paths for pilot environments.".to_string(),
+                        "Evaluate cryptography 48+ for ML-KEM/ML-DSA with OpenSSL 3.5+; 47 introduced the APIs with AWS-LC/BoringSSL requirements. Handle unsupported backend algorithms explicitly.".to_string(),
                     ],
-                    references: vec!["https://github.com/open-quantum-safe/liboqs-python".to_string()],
+                    references: vec!["https://cryptography.io/en/50.0.2/changelog/".to_string()],
                     code_examples: Vec::new(),
                 },
             );
@@ -488,8 +516,9 @@ fn add_jwt_actions(
                     steps: vec![
                         "Replace direct RSA calls with trait-based signer interfaces.".to_string(),
                         "Add PQC/hybrid implementations behind cargo features and integration tests.".to_string(),
+                        "For transport, inspect rustls resolved version and provider: 0.23.22 adds X25519MLKEM768; 0.23.27 prefers it by default with aws-lc-rs. ring and custom groups require separate review.".to_string(),
                     ],
-                    references: vec!["https://github.com/open-quantum-safe/liboqs-rust".to_string()],
+                    references: vec!["https://docs.rs/rustls/latest/src/rustls/manual/defaults.rs.html".to_string()],
                     code_examples: Vec::new(),
                 },
             );
@@ -505,6 +534,7 @@ fn add_jwt_actions(
                     steps: vec![
                         "Isolate OpenSSL/JWT calls in one service object.".to_string(),
                         "Integrate a PQC-capable signer via provider or sidecar.".to_string(),
+                        "Inspect openssl gem and linked library/provider versions; gem 4 adds groups=, sigalgs= and negotiated group inspection. Ruby version alone does not establish PQC support.".to_string(),
                     ],
                     references: vec!["https://docs.ruby-lang.org/en/master/OpenSSL/PKey.html".to_string()],
                     code_examples: Vec::new(),
@@ -994,6 +1024,65 @@ mod tests {
                 .any(|a| a.action_id == expected_action_id),
             "expected action {expected_action_id} to be present for {rule_id}:{file}"
         );
+    }
+
+    #[test]
+    fn crypto_api_guidance_covers_every_runtime_without_claiming_deployment_support() {
+        for (file, required) in [
+            ("app.java", "JDK 24"),
+            ("app.go", "Go 1.27"),
+            ("app.js", "24.7"),
+            ("app.ts", "browser"),
+            ("app.py", "cryptography 48"),
+            ("app.rs", "aws-lc-rs"),
+            ("app.rb", "linked"),
+        ] {
+            let mut finding = make_finding("API_TEST", "CryptoAPI", file);
+            annotate_findings(
+                std::slice::from_mut(&mut finding),
+                &RuntimeProfile::default(),
+            );
+            let action = finding
+                .recommended_actions
+                .iter()
+                .find(|a| a.action_id == "runtime.verify-pqc-capabilities")
+                .expect("runtime guidance");
+            assert!(action.steps.iter().any(|step| step.contains(required)));
+            assert!(!action.references.is_empty());
+        }
+    }
+
+    #[test]
+    fn pqc_inventory_does_not_receive_classical_migration_actions() {
+        let mut finding = make_finding("PQC_JAVA_API", "PQC", "Example.java");
+        finding.risk = pqc_scan_rules::Risk::QuantumSafe;
+        annotate_findings(
+            std::slice::from_mut(&mut finding),
+            &RuntimeProfile::default(),
+        );
+        assert!(finding
+            .recommended_actions
+            .iter()
+            .all(|a| a.action_id != "plan.hybrid-migration"));
+    }
+
+    #[test]
+    fn jwt_guidance_requires_protocol_compatibility_and_current_runtime_options() {
+        for (file, expected) in [
+            ("app.go", "crypto/mldsa"),
+            ("app.py", "cryptography 48"),
+            ("app.rs", "rustls"),
+            ("app.rb", "groups="),
+        ] {
+            let mut finding = make_finding("JWT_RS256", "JWT", file);
+            annotate_findings(
+                std::slice::from_mut(&mut finding),
+                &RuntimeProfile::default(),
+            );
+            let text = format!("{:?}", finding.recommended_actions);
+            assert!(text.contains(expected), "missing {expected} for {file}");
+            assert!(text.contains("JOSE"));
+        }
     }
 
     #[test]
