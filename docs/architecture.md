@@ -104,9 +104,9 @@ Coverage has disjoint file terminal states and reconciles selected = read-ok +
 read-failed, and read-ok = analyzed + partial + analysis-failed + unsupported +
 not-applicable + unknown. Enumeration failures are an additional entry count;
 ignore-hidden populations are not enumerable. Complete means complete within the
-declared scope, not absence of cryptography or product security. Current built-in
-detectors still use `NotReported`; their internal cap/parser accounting remains
-future work, so nonempty scans generally have unknown completeness.
+declared scope, not absence of cryptography or product security. Dependency and
+certificate detectors still use `NotReported`, so full nonempty scans generally
+have unknown completeness unless known partial inspection takes precedence.
 
 CLI adds a stderr notice and opt-in `--diagnostics` (`diagnostics.json`, schema 1)
 and `--require-complete` (code 3). Existing default output and codes remain; fatal
@@ -115,6 +115,32 @@ writers expose a separate `write_diagnostics` function; existing writer calls do
 not add the artifact. Diagnostic messages are fixed safe descriptions, never raw
 error chains or scanned contents. This is a diagnostics schema, not the proposed
 Phase 1 native inventory schema.
+
+### Bounded detector outcomes (task 019)
+
+Regex, tree-sitter and key detectors override `detect_detailed`; legacy `detect`
+consumes that same outcome without rerunning detection. No serialized fields,
+CLI switches, rule patterns, finding IDs or risk classification change. Accepted
+hits remain capped per rule/file at 32 (regex/AST) or 8 (keys). Regex eligibility
+uses the existing comment policy before consuming its accepted-hit budget. AST
+keeps its existing duplicate/embedded-identifier filters and traversal order.
+
+Exactly reaching an accepted-hit cap can still Complete if bounded look-ahead
+exhausts remaining candidates without another eligible unique hit. Regex/AST
+allow 4096 examined regex matches per rule/file plus one iterator look-ahead;
+key matching uses its ninth match as look-ahead. AST collection additionally
+retains at most 4096 semantic candidates and schedules at most 100000 tree nodes.
+Its existing 2000-character clipped candidate text stays compatible, with
+Unicode-safe bounded clipping and a Truncated outcome. Work-limit truncation
+means inspection stopped, not proof that a particular number of hits was omitted.
+The existing `detector_truncated` reason and partial coverage communicate both
+proven extra hits and conservative resource stops without adding a new schema.
+
+Valid supported inspection can Complete with zero hits; no applicable rules,
+nontext input or unsupported source language are NotApplicable. Error-containing
+ASTs keep hits and report Partial; parser setup/no-tree errors propagate through
+the existing safe DetectorFailed path. Complete is about the supported pattern
+strategy, not full semantic analysis or exhaustive private-key format support.
 
 ### Tree-sitter detector
 

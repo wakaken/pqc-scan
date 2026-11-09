@@ -44,7 +44,8 @@ impl DetectorOutcome {
         &self.detections
     }
 
-    pub(crate) fn into_detections(self) -> Vec<Detection> {
+    /// Consume an outcome for a legacy detector entrypoint without cloning hits.
+    pub fn into_detections(self) -> Vec<Detection> {
         self.detections
     }
 }

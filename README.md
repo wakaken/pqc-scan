@@ -210,12 +210,31 @@ requested completeness failure (3), then finding threshold (2). Neither option
 requires the other. A valid empty scope can complete, but this says nothing about
 cryptography outside that scope.
 
-**Current limitation:** the existing built-in detectors use the compatible legacy
-adapter, which does not report internal parser success, applicability or match-cap
-exhaustion. Nonempty scans therefore normally report `unknown` and strict mode
-returns 3, even if detectors return no errors. Task 018 accounts for outer read and
-execution failures; detector-specific limit/parser outcomes are later work. It
-does not certify a complete scan or change detection behavior.
+Regex, AST and key-marker detectors report applicability and bounded inspection
+outcomes. Accepted-hit limits remain **32 / 32 / 8 per rule and file**. Regex
+counts accepted hits after the existing comment filter, so comment-only matches
+no longer consume the accepted-hit quota. Existing language/comment policy is
+unchanged. Recovered source hits are an intentional detection correction.
+
+Exactly 32 (or 8) hits does not by itself prove truncation: the detector checks
+remaining candidates within a finite work budget. An additional eligible hit or
+an unfinished search at a work limit yields `detector_truncated`, retaining earlier
+hits and making inspection partial. No omitted-hit count is inferred. Regex/AST
+inspect at most 4096 match candidates per rule/file, plus one look-ahead. AST also
+retains at most 4096 semantic candidates and schedules at most 100000 tree nodes;
+its existing 2000-character candidate clipping now reports truncation. These are
+engineering safety bounds, not measured performance targets. AST parsing with
+error nodes retains available hits and reports `detector_partial`; initialization
+or no-tree failures are detector errors. Binary input, unsupported source
+languages and no applicable rules are outside the corresponding detector scope.
+`Complete` refers only to the supported pattern/marker strategy, not general
+symbol resolution, runtime use or discovery of every key format.
+
+**Current limitation:** dependency and certificate detectors still use the legacy
+adapter and report `detector_not_reported`. Full nonempty scans therefore normally
+remain `unknown`, or become `partial` when a limit/parser issue is observed; strict
+mode returns 3 in either case. Existing report schemas and the diagnostics schema
+version remain unchanged; diagnostic values now reflect the additional outcomes.
 
 The legacy `scanned_files` count still means files selected by the walker. New
 counters distinguish selected, read-ok, read-failed, analyzed, partial,
