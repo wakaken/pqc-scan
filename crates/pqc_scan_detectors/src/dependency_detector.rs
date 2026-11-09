@@ -29,6 +29,23 @@ impl Detector for DependencyDetector {
         "dependency_detector"
     }
 
+    fn detect_observed(
+        &self,
+        file: &ScannableFile,
+        rules: &RuleSet,
+    ) -> Result<pqc_scan_core::DetectorOutcome> {
+        let detections = self.detect(file, rules)?;
+        let drafts = detections
+            .iter()
+            .map(pqc_scan_core::ObservationDraft::dependency)
+            .collect();
+        Ok(pqc_scan_core::DetectorOutcome::new(
+            detections,
+            pqc_scan_core::DetectorStatus::NotReported,
+        )
+        .with_observations(drafts))
+    }
+
     fn detect(&self, file: &ScannableFile, rules: &RuleSet) -> Result<Vec<Detection>> {
         let is_manifest = classifier::is_dependency_manifest(&file.path);
         let is_sbom = classifier::is_sbom_file(&file.path);

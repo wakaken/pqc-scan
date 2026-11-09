@@ -19,6 +19,7 @@ pub enum DetectorStatus {
 pub struct DetectorOutcome {
     detections: Vec<Detection>,
     status: DetectorStatus,
+    observations: Vec<crate::observation::ObservationDraft>,
 }
 
 impl DetectorOutcome {
@@ -29,11 +30,27 @@ impl DetectorOutcome {
         } else {
             status
         };
-        Self { detections, status }
+        Self {
+            detections,
+            status,
+            observations: Vec::new(),
+        }
     }
 
     pub fn complete(detections: Vec<Detection>) -> Self {
         Self::new(detections, DetectorStatus::Complete)
+    }
+
+    pub fn with_observations(
+        mut self,
+        observations: Vec<crate::observation::ObservationDraft>,
+    ) -> Self {
+        self.observations = observations;
+        self
+    }
+
+    pub fn observations(&self) -> &[crate::observation::ObservationDraft] {
+        &self.observations
     }
 
     pub fn status(&self) -> DetectorStatus {
@@ -302,6 +319,7 @@ pub struct ScanDocument {
     diagnostics: Vec<ScanDiagnostic>,
     coverage: CoverageSummary,
     scope: InspectionScope,
+    native: Option<crate::inventory::NativeScan>,
 }
 
 impl ScanDocument {
@@ -319,6 +337,7 @@ impl ScanDocument {
             legacy,
             diagnostics,
             coverage,
+            native: None,
             scope: InspectionScope {
                 max_file_size_bytes: config.max_file_size_bytes,
                 git_ignore: true,
@@ -328,6 +347,15 @@ impl ScanDocument {
                 markdown_excluded: true,
             },
         }
+    }
+
+    pub fn native(&self) -> Option<&crate::inventory::NativeScan> {
+        self.native.as_ref()
+    }
+
+    pub(crate) fn with_native(mut self, native: crate::inventory::NativeScan) -> Self {
+        self.native = Some(native);
+        self
     }
 
     pub fn legacy(&self) -> &ScanResult {

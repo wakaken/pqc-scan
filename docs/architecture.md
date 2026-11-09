@@ -396,3 +396,6 @@ remain language-independent. No runtime translation service is used.
 - Add a new report format:
   1. implement writer module in `pqc_scan_report`
   2. register enum variant and output path mapping
+
+Task 025 adds opt-in native observation capture beside the legacy pipeline; see
+[NATIVE-SCAN-V1.md](architecture/NATIVE-SCAN-V1.md) for identity, assurance and export losses.

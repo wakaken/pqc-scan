@@ -210,7 +210,7 @@ snippet masking; this does not add new private-key detection rules or decrypt ke
 ## CLI
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--native-json] [--repository-scope ID]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -246,6 +246,18 @@ diagnostics. The CLI prints one completeness warning to stderr when inspection i
 partial, failed or unknown. Default exit codes remain unchanged: 0 for success,
 1 for an operational error and 2 when `--fail-on` is reached. No findings does not
 prove that inspection completed.
+
+`--native-json` adds `scan.native.v1.json` with method-specific observations,
+normalized algorithm/public-key/certificate/dependency assets, and links to legacy
+findings. It is opt-in even with `--format all`; existing reports and IDs remain
+unchanged. Use `--repository-scope team/project` only with native capture to enable
+weak cross-scan source correlation. Omit secret or absolute identifiers.
+Native data does not assert active use, trust or a PQC assessment. See the
+[native v1 contract and limitations](docs/architecture/NATIVE-SCAN-V1.md).
+
+```bash
+pqc-scan scan . --native-json --repository-scope team/project --rules-dir ./rules
+```
 
 Use `--diagnostics` to additionally write `diagnostics.json` in `--out-dir`.
 This separate artifact has `schema_version: "1"`, generation time, declared scope,

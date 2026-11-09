@@ -38,6 +38,19 @@ impl Detector for TreeSitterDetector {
     }
 
     fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+        self.detect_internal(file, rules, false)
+    }
+    fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+        self.detect_internal(file, rules, true)
+    }
+}
+impl TreeSitterDetector {
+    fn detect_internal(
+        &self,
+        file: &ScannableFile,
+        rules: &RuleSet,
+        observe: bool,
+    ) -> Result<DetectorOutcome> {
         let text = match file.text.as_ref() {
             Some(v) => v,
             None => {
@@ -82,6 +95,7 @@ impl Detector for TreeSitterDetector {
             status = DetectorStatus::Partial;
         }
 
+        let mut observations = Vec::new();
         let mut out = Vec::new();
         let file_path = file.path.to_string_lossy().into_owned();
 
@@ -175,12 +189,23 @@ impl Detector for TreeSitterDetector {
                             metadata,
                         },
                     });
+                    if observe {
+                        observations.push(pqc_scan_core::ObservationDraft::source(
+                            out.last().expect("accepted detection"),
+                            pqc_scan_core::ObservationMethod::AstPattern,
+                            hit.as_str(),
+                            Some((
+                                candidate.byte_start + hit.start(),
+                                candidate.byte_start + hit.end(),
+                            )),
+                        ));
+                    }
                     rule_hits += 1;
                 }
             }
         }
 
-        Ok(DetectorOutcome::new(out, status))
+        Ok(DetectorOutcome::new(out, status).with_observations(observations))
     }
 }
 

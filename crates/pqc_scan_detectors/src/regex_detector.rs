@@ -20,6 +20,19 @@ impl Detector for RegexDetector {
     }
 
     fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+        self.detect_internal(file, rules, false)
+    }
+    fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+        self.detect_internal(file, rules, true)
+    }
+}
+impl RegexDetector {
+    fn detect_internal(
+        &self,
+        file: &ScannableFile,
+        rules: &RuleSet,
+        observe: bool,
+    ) -> Result<DetectorOutcome> {
         let text = match file.text.as_ref() {
             Some(v) => v,
             None => {
@@ -30,6 +43,7 @@ impl Detector for RegexDetector {
             }
         };
 
+        let mut observations = Vec::new();
         let mut out = Vec::new();
         let mut status = DetectorStatus::NotApplicable;
 
@@ -78,11 +92,23 @@ impl Detector for RegexDetector {
                         ]),
                     },
                 });
+                if observe {
+                    observations.push(pqc_scan_core::ObservationDraft::source(
+                        out.last().expect("accepted detection"),
+                        if rule.scope == "config" {
+                            pqc_scan_core::ObservationMethod::Configuration
+                        } else {
+                            pqc_scan_core::ObservationMethod::LexicalMatch
+                        },
+                        found.as_str(),
+                        Some((found.start(), found.end())),
+                    ));
+                }
                 accepted += 1;
             }
         }
 
-        Ok(DetectorOutcome::new(out, status))
+        Ok(DetectorOutcome::new(out, status).with_observations(observations))
     }
 }
 

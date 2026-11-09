@@ -38,6 +38,10 @@ impl Detector for CertificateDetector {
         Ok(self.detect_detailed(file, rules)?.into_detections())
     }
 
+    fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+        self.inspect_with_time(file, rules, unix_seconds(SystemTime::now()), true)
+    }
+
     fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
         self.detect_with_time(file, rules, unix_seconds(SystemTime::now()))
     }
@@ -58,9 +62,18 @@ impl CertificateDetector {
         rules: &RuleSet,
         assessment_time: Option<i64>,
     ) -> Result<DetectorOutcome> {
-        if !classifier::is_certificate_file(&file.path)
-            || rules.by_kind(RuleKind::Certificate).next().is_none()
-        {
+        self.inspect_with_time(file, rules, assessment_time, false)
+    }
+
+    fn inspect_with_time(
+        &self,
+        file: &ScannableFile,
+        rules: &RuleSet,
+        assessment_time: Option<i64>,
+        observe: bool,
+    ) -> Result<DetectorOutcome> {
+        let applicable = rules.by_kind(RuleKind::Certificate).next().is_some();
+        if !classifier::is_certificate_file(&file.path) || (!applicable && !observe) {
             return Ok(DetectorOutcome::new(
                 Vec::new(),
                 DetectorStatus::NotApplicable,
@@ -117,10 +130,33 @@ impl CertificateDetector {
                     });
                 }
             }
-            return Ok(DetectorOutcome::new(out, status));
+            let mut drafts = Vec::new();
+            if observe {
+                drafts.push(pqc_scan_core::ObservationDraft::container(
+                    &file_path, status, &out,
+                ));
+            }
+            return Ok(DetectorOutcome::new(
+                out,
+                if applicable {
+                    status
+                } else {
+                    DetectorStatus::NotApplicable
+                },
+            )
+            .with_observations(drafts));
         }
         let mut out = Vec::new();
+        let mut observations = Vec::new();
+        if observe && status != DetectorStatus::Complete {
+            observations.push(pqc_scan_core::ObservationDraft::container(
+                &file_path,
+                status,
+                &[],
+            ));
+        }
         for object in objects {
+            let start = out.len();
             let info = &object.attributes;
             if info.status != DetectorStatus::Complete {
                 status = DetectorStatus::Partial;
@@ -250,8 +286,37 @@ impl CertificateDetector {
                     },
                 });
             }
+            if observe {
+                if let Some(facts) = pqc_scan_core::PublicCertificateFacts::from_parser_metadata(
+                    &object_metadata(&object),
+                ) {
+                    observations.push(pqc_scan_core::ObservationDraft::certificate(
+                        &file_path,
+                        object.line,
+                        object.column,
+                        object.object_index,
+                        facts,
+                        info.status,
+                        &out[start..],
+                    ));
+                } else {
+                    observations.push(pqc_scan_core::ObservationDraft::container(
+                        &file_path,
+                        DetectorStatus::Partial,
+                        &out[start..],
+                    ));
+                }
+            }
         }
-        Ok(DetectorOutcome::new(out, status))
+        Ok(DetectorOutcome::new(
+            out,
+            if applicable {
+                status
+            } else {
+                DetectorStatus::NotApplicable
+            },
+        )
+        .with_observations(observations))
     }
 }
 
@@ -268,6 +333,9 @@ impl Detector for ClockedCertificateDetector {
     }
     fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
         CertificateDetector.detect_with_time(file, rules, self.assessment_time)
+    }
+    fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+        CertificateDetector.inspect_with_time(file, rules, self.assessment_time, true)
     }
 }
 

@@ -33,11 +33,40 @@ pub fn scan_repository_detailed(
     scan_with_reader(config, rules, detectors, &|path| fs::read(path))
 }
 
+/// Capture native and legacy views during one detector execution, without changing defaults.
+pub fn scan_repository_native(
+    config: &ScanConfig,
+    rules: &RuleSet,
+    detectors: &[Arc<dyn Detector>],
+    options: &crate::NativeOptions,
+) -> Result<ScanDocument> {
+    scan_observed_with_reader(
+        config,
+        rules,
+        detectors,
+        &|path| fs::read(path),
+        Some(options),
+    )
+}
+
 fn scan_with_reader<F>(
     config: &ScanConfig,
     rules: &RuleSet,
     detectors: &[Arc<dyn Detector>],
     read: &F,
+) -> Result<ScanDocument>
+where
+    F: Fn(&std::path::Path) -> std::io::Result<Vec<u8>> + Sync,
+{
+    scan_observed_with_reader(config, rules, detectors, read, None)
+}
+
+fn scan_observed_with_reader<F>(
+    config: &ScanConfig,
+    rules: &RuleSet,
+    detectors: &[Arc<dyn Detector>],
+    read: &F,
+    native: Option<&crate::NativeOptions>,
 ) -> Result<ScanDocument>
 where
     F: Fn(&std::path::Path) -> std::io::Result<Vec<u8>> + Sync,
@@ -69,6 +98,7 @@ where
                     Err(_) => {
                         return FileOutcome {
                             detections: Vec::new(),
+                            observations: Vec::new(),
                             diagnostics: vec![ScanDiagnostic::new(
                                 DiagnosticCode::ReadFailed,
                                 Some(relative),
@@ -80,12 +110,13 @@ where
                 };
 
                 let file = ScannableFile::from_bytes(path.clone(), bytes);
-                inspect_file(&file, &relative, rules, detectors)
+                inspect_file(&file, &relative, rules, detectors, native.is_some())
             })
             .collect()
     });
 
     let mut detections = Vec::new();
+    let mut observations = Vec::new();
     for outcome in outcomes {
         use FileDisposition as D;
         if outcome.disposition != D::ReadFailed {
@@ -100,6 +131,7 @@ where
             D::NotApplicable => coverage.not_applicable_files += 1,
             D::Unknown => coverage.unknown_files += 1,
         }
+        observations.extend(outcome.observations);
         detections.extend(outcome.detections);
         diagnostics.extend(outcome.diagnostics);
     }
@@ -144,7 +176,20 @@ where
         dependency_sbom,
         summary,
     };
-    Ok(ScanDocument::new(legacy, diagnostics, coverage, config))
+    let mut document = ScanDocument::new(legacy, diagnostics, coverage, config);
+    if let Some(options) = native {
+        let native = crate::inventory::NativeScan::build(
+            &config.root,
+            rules,
+            &document.legacy().findings,
+            observations,
+            options,
+            serde_json::to_value(document.diagnostics_report())?,
+            &document.legacy().generated_at.to_rfc3339(),
+        );
+        document = document.with_native(native);
+    }
+    Ok(document)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -160,6 +205,7 @@ enum FileDisposition {
 
 struct FileOutcome {
     detections: Vec<Detection>,
+    observations: Vec<crate::ObservationDraft>,
     diagnostics: Vec<ScanDiagnostic>,
     disposition: FileDisposition,
 }
@@ -169,7 +215,9 @@ fn inspect_file(
     relative: &str,
     rules: &RuleSet,
     detectors: &[Arc<dyn Detector>],
+    native: bool,
 ) -> FileOutcome {
+    let mut observations = Vec::new();
     let mut detections = Vec::new();
     let mut diagnostics = Vec::new();
     let (mut complete, mut failed, mut unsupported, mut partial, mut unknown) =
@@ -178,7 +226,11 @@ fn inspect_file(
         diagnostics.push(ScanDiagnostic::new(DiagnosticCode::NoDetectors, None, None));
     }
     for detector in detectors {
-        let code = match detector.detect_detailed(file, rules) {
+        let code = match if native {
+            detector.detect_observed(file, rules)
+        } else {
+            detector.detect_detailed(file, rules)
+        } {
             Err(_) => {
                 failed = true;
                 Some(DiagnosticCode::DetectorFailed)
@@ -207,6 +259,13 @@ fn inspect_file(
                         Some(DiagnosticCode::DetectorNotReported)
                     }
                 };
+                observations.extend(
+                    outcome
+                        .observations()
+                        .iter()
+                        .cloned()
+                        .map(|draft| draft.bind_to_inspected_file(&file.path, relative)),
+                );
                 detections.extend(outcome.into_detections());
                 code
             }
@@ -237,6 +296,7 @@ fn inspect_file(
         FileDisposition::NotApplicable
     };
     FileOutcome {
+        observations,
         detections,
         diagnostics,
         disposition,

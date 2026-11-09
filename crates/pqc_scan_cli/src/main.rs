@@ -7,10 +7,12 @@ use std::{
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 
-use pqc_scan_core::{pipeline, scan_repository_detailed, ScanConfig};
+use pqc_scan_core::{
+    pipeline, scan_repository_detailed, scan_repository_native, NativeOptions, ScanConfig,
+};
 use pqc_scan_detectors::default_detectors;
 use pqc_scan_report::{
-    write_diagnostics, write_reports_with_language, ReportFormat, ReportLanguage,
+    write_diagnostics, write_native_json, write_reports_with_language, ReportFormat, ReportLanguage,
 };
 use pqc_scan_rules::{RuleSet, Severity};
 
@@ -60,6 +62,14 @@ struct ScanArgs {
     /// Write inspection coverage and safe failure reasons to diagnostics.json.
     #[arg(long)]
     diagnostics: bool,
+
+    /// Add scan.native.v1.json without changing selected legacy formats.
+    #[arg(long)]
+    native_json: bool,
+
+    /// Non-secret project identifier for native correspondence keys; never a remote URL.
+    #[arg(long, requires = "native_json")]
+    repository_scope: Option<String>,
 
     /// Return exit code 3 unless every selected inspection is known to be complete.
     #[arg(long)]
@@ -222,13 +232,21 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     };
 
     let detectors = default_detectors();
-    let document = scan_repository_detailed(&config, &rules, &detectors)?;
+    let document = if args.native_json {
+        let options = NativeOptions::new(args.repository_scope.as_deref())?;
+        scan_repository_native(&config, &rules, &detectors, &options)?
+    } else {
+        scan_repository_detailed(&config, &rules, &detectors)?
+    };
     let result = document.legacy();
 
     let mut outputs =
         write_reports_with_language(result, &args.out_dir, args.format.into(), args.lang.into())?;
     if args.diagnostics {
         outputs.push(write_diagnostics(&document, &args.out_dir)?);
+    }
+    if args.native_json {
+        outputs.push(write_native_json(&document, &args.out_dir)?);
     }
     for out in outputs {
         writeln!(stdout, "written {}", out.display())?;
