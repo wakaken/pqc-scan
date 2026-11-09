@@ -394,7 +394,26 @@ Example workflow:
 
 - `.github/workflows/pqc-scan.yml`
 
-This workflow builds the scanner, runs SARIF scan output, uploads SARIF to GitHub Code Scanning, and uploads `dependency-sbom.json` as an artifact.
+This repository's workflow runs Rust quality checks and all `shell/*.test.cjs`
+checks, then scans the full normal repository scope. Detection rules, severity and
+the scanner's raw `report.sarif` stay unchanged.
+
+For this repository's Code Scanning upload only, a preparation step omits exact
+reviewed synthetic/test observations listed in
+[`SELF-SCAN-EXPECTATIONS.json`](docs/quality/SELF-SCAN-EXPECTATIONS.json). Each entry
+binds the complete source-file SHA-256, the full result digest, rule/location and
+exact occurrence count. Changed/missing sources, new results, excess duplicates
+and unregistered production observations remain in the upload. No test directory
+or rule is broadly excluded, and GitHub's failure thresholds are not lowered.
+
+The `pqc-self-scan-evidence` artifact preserves raw SARIF, the separate
+`code-scanning.sarif` upload copy, `code-scanning-audit.json` and the exact expectation
+policy, even if preparation
+or upload fails. The existing dependency SBOM artifact is retained. This is CI-only
+policy; normal scans and user report formats are unaffected. New intentional test
+inputs require review of their source/result bindings before registration; CI does
+not automatically learn or accept findings. See the
+[policy and maintenance guide](docs/quality/CI-SELF-SCAN.md).
 
 ## License
 

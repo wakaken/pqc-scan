@@ -380,7 +380,23 @@ JSON・SARIF・CBOM・依存関係SBOMは、言語指定によらず従来の内
 
 - `.github/workflows/pqc-scan.yml`
 
-このワークフローは、スキャナーのビルド、SARIFスキャン出力、GitHub Code ScanningへのSARIFアップロード、および `dependency-sbom.json` のartifactアップロードを実行します。
+このリポジトリのワークフローは、Rustの品質チェックと `shell/*.test.cjs` を実行した後、
+通常の検査範囲全体をスキャンします。検出ルール、深刻度、生の `report.sarif` は変更しません。
+
+このリポジトリからCode Scanningへ送るコピーに限り、
+[`SELF-SCAN-EXPECTATIONS.json`](docs/quality/SELF-SCAN-EXPECTATIONS.json) に登録された
+検証済みのテスト入力の所見を取り除きます。ファイル全体のSHA-256、所見全体のダイジェスト、
+ルール・位置・件数がすべて一致した場合だけ適用します。
+ファイルの変更・欠落、新しい所見、想定を超えた重複、未登録の製品コードの所見は送信対象に残します。
+テストディレクトリやルールを一括で除外せず、GitHubの失敗基準も引き下げません。
+
+`pqc-self-scan-evidence` artifactには、生のSARIF、送信用の `code-scanning.sarif`、
+除外理由と件数を示す `code-scanning-audit.json`、適用した台帳を保存します。
+準備やアップロードが失敗しても保存を試みます。
+既存の依存関係SBOM artifactも維持します。この扱いは本リポジトリのCIに限り、
+通常のスキャンや利用者向け出力形式には影響しません。
+新しい意図的なテスト入力は、ソースと所見をレビューしてから台帳へ登録します。CIによる自動登録は行いません。
+詳しくは[ポリシーと更新手順](docs/quality/CI-SELF-SCAN.md)を参照してください。
 
 ## ライセンス
 
