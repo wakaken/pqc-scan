@@ -559,6 +559,9 @@ fn contains_private_key_marker(text: &str) -> bool {
     upper.contains("BEGIN RSA PRIVATE KEY")
         || upper.contains("BEGIN PRIVATE KEY")
         || upper.contains("BEGIN OPENSSH PRIVATE KEY")
+        || upper.contains("BEGIN EC PRIVATE KEY")
+        || upper.contains("BEGIN DSA PRIVATE KEY")
+        || upper.contains("BEGIN ENCRYPTED PRIVATE KEY")
 }
 
 fn mask_private_key_blocks(text: &str) -> String {

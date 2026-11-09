@@ -379,7 +379,7 @@ fn real_detector_outcomes_reach_pipeline_and_legacy_unknowns_remain_visible() {
             .iter()
             .filter(|d| d.code() == DiagnosticCode::DetectorNotReported)
             .count(),
-        2
+        1
     );
     std::fs::write(root.join("app.js"), "'RS256';\n".repeat(40)).unwrap();
     let truncated = scan_repository_detailed(&config, &f.rules, &supported).unwrap();

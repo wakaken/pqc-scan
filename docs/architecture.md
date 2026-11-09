@@ -104,8 +104,8 @@ Coverage has disjoint file terminal states and reconciles selected = read-ok +
 read-failed, and read-ok = analyzed + partial + analysis-failed + unsupported +
 not-applicable + unknown. Enumeration failures are an additional entry count;
 ignore-hidden populations are not enumerable. Complete means complete within the
-declared scope, not absence of cryptography or product security. Dependency and
-certificate detectors still use `NotReported`, so full nonempty scans generally
+declared scope, not absence of cryptography or product security. The dependency
+detector still uses `NotReported`, so full nonempty scans generally
 have unknown completeness unless known partial inspection takes precedence.
 
 CLI adds a stderr notice and opt-in `--diagnostics` (`diagnostics.json`, schema 1)
@@ -170,9 +170,39 @@ strategy, not full semantic analysis or exhaustive private-key format support.
 
 ### Certificate detector
 
-- Parses PEM/DER certificate data (`x509-parser`, `pem`)
-- Extracts signature algorithm, OID, key size, expiration
-- Matches certificate rules against extracted metadata
+- Existing extension candidacy is preserved; PEM/DER is selected by content for
+  `.pem/.crt/.cer/.der`. PKCS#12/PFX interiors remain explicitly Unsupported.
+- `certificate_detector/attributes.rs` owns public, path/rule-independent
+  `parse_certificate_der` / `parse_public_key_der` helpers. They return owned
+  attributes and fixed safe errors, require one fully consumed DER object and do
+  not perform signature/chain/point validation. The second helper accepts SPKI,
+  not standalone private/raw-PKCS#1 keys; standalone key file scanning is not added.
+- Signature OID and SPKI OID/parameters are separate. RSA length is the positive
+  modulus bit length, with sign padding and non-byte-aligned values handled.
+  Known named EC curves supply field bits (including P-521 = 521). Ed/X encoded
+  lengths are distinct from semantic size; unknown/PQC keys never inherit RSA size.
+  Parameter kind/OID/content digest is retained without arbitrary raw bytes;
+  RSA-PSS parameter constraints are not interpreted as a migration/security assessment.
+- SHA-256 identifies exact public certificate DER and SPKI DER. Explicit encoded
+  byte counts, optional semantic size/curve and parsed validity timestamps live
+  inside the existing evidence string map, without new report fields/schema versions.
+- PEM framing recovers valid neighbors around bad/unsupported blocks. Real PEM
+  line/column, 1-based block index and 0-based byte offset retain object provenance
+  through existing dedup/ID generation. DER keeps the legacy 1:1 location and offset
+  zero; trailing data prevents complete inspection. DER bundles are not parsed.
+- Detailed outcomes distinguish Complete/NotApplicable/Partial/Unsupported. Known
+  malformed key structures, unknown key semantics and mixed bundles cannot Complete.
+  Container fallback is retained as a finding signal, never successful parsing.
+- Existing rule scopes and broad legacy matching inputs stay compatible, except
+  corrected semantic size replaces encoded BIT STRING length. Unrelated findings
+  stay unchanged; certificate evidence/positions/IDs may intentionally change.
+  Filename-based predicates, ECDSA/DSA confusion and expiry policy remain task 021.
+- Source snippets from files carrying EC/DSA/encrypted private PEM markers are
+  masked file-wide, extending the existing RSA/PKCS#8/OpenSSH protection. Bodies of
+  unsupported blocks are never decoded/exported by certificate parsing.
+
+See [task 020 specification/evidence](roadmap/TASK-020-IMPLEMENTATION.md) and
+[public fixture provenance](../crates/pqc_scan_detectors/tests/fixtures/certificates/README.md).
 
 ### Key detector
 

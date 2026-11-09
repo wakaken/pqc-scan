@@ -1,21 +1,31 @@
+mod attributes;
+
+pub use attributes::{
+    parse_certificate_der, parse_public_key_der, CertificateAttributes, PublicDerParseError,
+    PublicKeyAttributes,
+};
+
+use std::collections::BTreeMap;
+
 use anyhow::Result;
 use x509_parser::parse_x509_certificate;
 
 use pqc_scan_core::classifier;
 use pqc_scan_core::model::mask_preview;
-use pqc_scan_core::{Detection, Detector, Evidence, Location, ScannableFile};
+use pqc_scan_core::{
+    Detection, Detector, DetectorOutcome, DetectorStatus, Evidence, Location, ScannableFile,
+};
 use pqc_scan_rules::{RuleKind, RuleSet};
 
 #[derive(Debug, Default)]
 pub struct CertificateDetector;
 
-#[derive(Debug)]
-struct CertInfo {
-    signature_algorithm: String,
-    signature_oid: String,
-    public_key_oid: String,
-    key_bits: usize,
-    expires_at: String,
+struct LocatedCertificate {
+    attributes: CertificateAttributes,
+    line: usize,
+    column: usize,
+    object_index: usize,
+    byte_offset: usize,
 }
 
 impl Detector for CertificateDetector {
@@ -24,66 +34,43 @@ impl Detector for CertificateDetector {
     }
 
     fn detect(&self, file: &ScannableFile, rules: &RuleSet) -> Result<Vec<Detection>> {
-        if !classifier::is_certificate_file(&file.path) {
-            return Ok(Vec::new());
-        }
+        Ok(self.detect_detailed(file, rules)?.into_detections())
+    }
 
-        let mut infos = Vec::new();
+    fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+        if !classifier::is_certificate_file(&file.path)
+            || rules.by_kind(RuleKind::Certificate).next().is_none()
+        {
+            return Ok(DetectorOutcome::new(
+                Vec::new(),
+                DetectorStatus::NotApplicable,
+            ));
+        }
         let ext = file.ext().unwrap_or_default().to_ascii_lowercase();
-
-        if ext == "pem" || ext == "crt" || ext == "cer" {
-            if let Some(text) = file.text.as_ref() {
-                if let Ok(blocks) = pem::parse_many(text) {
-                    for block in blocks {
-                        if !block.tag().contains("CERTIFICATE") {
-                            continue;
-                        }
-                        if let Ok((_, cert)) = parse_x509_certificate(block.contents()) {
-                            infos.push(CertInfo {
-                                signature_algorithm: signature_name(
-                                    cert.signature_algorithm.algorithm.to_id_string().as_str(),
-                                ),
-                                signature_oid: cert.signature_algorithm.algorithm.to_id_string(),
-                                public_key_oid: cert
-                                    .public_key()
-                                    .algorithm
-                                    .algorithm
-                                    .to_id_string(),
-                                key_bits: cert.public_key().subject_public_key.data.len() * 8,
-                                expires_at: format!("{:?}", cert.validity().not_after),
-                            });
-                        }
-                    }
-                }
+        let (objects, mut status) = if matches!(ext.as_str(), "p12" | "pfx") {
+            (Vec::new(), DetectorStatus::Unsupported)
+        } else {
+            // A DER name/extension may itself contain PEM-looking text. Prefer
+            // actual DER parsing rather than a substring-based format guess.
+            let der = parse_der_object(&file.bytes);
+            if der.0.is_empty() {
+                parse_pem_objects(&file.bytes)
+            } else {
+                der
             }
-        } else if ext == "der" {
-            if let Ok((_, cert)) = parse_x509_certificate(&file.bytes) {
-                infos.push(CertInfo {
-                    signature_algorithm: signature_name(
-                        cert.signature_algorithm.algorithm.to_id_string().as_str(),
-                    ),
-                    signature_oid: cert.signature_algorithm.algorithm.to_id_string(),
-                    public_key_oid: cert.public_key().algorithm.algorithm.to_id_string(),
-                    key_bits: cert.public_key().subject_public_key.data.len() * 8,
-                    expires_at: format!("{:?}", cert.validity().not_after),
-                });
-            }
-        }
-
-        let mut out = Vec::new();
-        let rule_iter = rules.by_kind(RuleKind::Certificate);
+        };
         let file_path = file.path.to_string_lossy().into_owned();
-
-        if infos.is_empty() {
-            for rule in rule_iter {
+        if objects.is_empty() {
+            // Compatibility: a filename/container signal is not a parsed certificate.
+            let mut out = Vec::new();
+            for rule in rules.by_kind(RuleKind::Certificate) {
                 if matches!(rule.scope.as_str(), "signature_oid" | "public_key_oid") {
                     continue;
                 }
-                let regex = match rule.compiled_pattern() {
-                    Some(v) => v,
-                    None => continue,
-                };
-                if regex.is_match(&file_path) {
+                if rule
+                    .compiled_pattern()
+                    .is_some_and(|r| r.is_match(&file_path))
+                {
                     out.push(Detection {
                         rule_id: rule.id.clone(),
                         location: Location {
@@ -92,23 +79,26 @@ impl Detector for CertificateDetector {
                             column: 1,
                         },
                         evidence: Evidence {
-                            r#type: "certificate".to_string(),
+                            r#type: "certificate".into(),
                             r#match: mask_preview(file.file_name().unwrap_or("certificate")),
-                            snippet_preview: "certificate container detected".to_string(),
-                            metadata: std::collections::BTreeMap::from([
-                                ("detector".to_string(), self.name().to_string()),
-                                ("extension".to_string(), ext.clone()),
+                            snippet_preview: "certificate container detected".into(),
+                            metadata: BTreeMap::from([
+                                ("detector".into(), self.name().into()),
+                                ("extension".into(), ext.clone()),
                             ]),
                         },
                     });
                 }
             }
-            return Ok(out);
+            return Ok(DetectorOutcome::new(out, status));
         }
-
-        for info in infos {
-            // Preserve legacy rule inputs: new PQC display names contain "DSA",
-            // which broad historical patterns would mistake for classical DSA.
+        let mut out = Vec::new();
+        for object in objects {
+            let info = &object.attributes;
+            if info.status != DetectorStatus::Complete {
+                status = DetectorStatus::Partial;
+            }
+            // Preserve legacy rule semantics; exact typed predicates belong to task 021.
             let legacy_signature = if info.signature_algorithm.starts_with("ML-DSA")
                 || info.signature_algorithm.starts_with("SLH-DSA")
             {
@@ -116,61 +106,211 @@ impl Detector for CertificateDetector {
             } else {
                 &info.signature_algorithm
             };
+            let key_bits = info
+                .public_key
+                .key_bits
+                .map(|n| n.to_string())
+                .unwrap_or_else(|| "unknown".into());
             let target = format!(
                 "{} {} {} {} {}",
-                file_path, legacy_signature, info.signature_oid, info.key_bits, info.expires_at
+                file_path, legacy_signature, info.signature_oid, key_bits, info.expires_at
             );
-
             for rule in rules.by_kind(RuleKind::Certificate) {
-                let regex = match rule.compiled_pattern() {
-                    Some(v) => v,
-                    None => continue,
+                let Some(regex) = rule.compiled_pattern() else {
+                    status = DetectorStatus::Partial;
+                    continue;
                 };
                 let scoped_target = match rule.scope.as_str() {
                     "signature_oid" => &info.signature_oid,
-                    "public_key_oid" => &info.public_key_oid,
+                    "public_key_oid" => &info.public_key.algorithm_oid,
                     _ => &target,
                 };
                 if !regex.is_match(scoped_target) {
                     continue;
                 }
-
                 out.push(Detection {
                     rule_id: rule.id.clone(),
                     location: Location {
                         file: file_path.clone(),
-                        line: 1,
-                        column: 1,
+                        line: object.line,
+                        column: object.column,
                     },
                     evidence: Evidence {
-                        r#type: "certificate".to_string(),
-                        r#match: if rule.scope == "public_key_oid" {
-                            signature_name(&info.public_key_oid)
-                        } else if rule.scope == "signature_oid" {
-                            info.signature_algorithm.clone()
-                        } else {
-                            mask_preview(&format!(
+                        r#type: "certificate".into(),
+                        r#match: match rule.scope.as_str() {
+                            "public_key_oid" => info.public_key.algorithm.clone(),
+                            "signature_oid" => info.signature_algorithm.clone(),
+                            _ => mask_preview(&format!(
                                 "{} {}-bit",
-                                info.signature_algorithm, info.key_bits
-                            ))
+                                info.signature_algorithm, key_bits
+                            )),
                         },
                         snippet_preview: format!(
                             "sig={}, key_bits={}, expires={}",
-                            info.signature_algorithm, info.key_bits, info.expires_at
+                            info.signature_algorithm, key_bits, info.expires_at
                         ),
-                        metadata: std::collections::BTreeMap::from([
-                            ("detector".to_string(), self.name().to_string()),
-                            ("signature_oid".to_string(), info.signature_oid.clone()),
-                            ("public_key_oid".to_string(), info.public_key_oid.clone()),
-                            ("expires_at".to_string(), info.expires_at.clone()),
-                        ]),
+                        metadata: object_metadata(&object),
                     },
                 });
             }
         }
-
-        Ok(out)
+        Ok(DetectorOutcome::new(out, status))
     }
+}
+
+fn object_metadata(object: &LocatedCertificate) -> BTreeMap<String, String> {
+    let info = &object.attributes;
+    let key = &info.public_key;
+    let mut m = BTreeMap::from([
+        ("detector".into(), "certificate_detector".into()),
+        ("signature_oid".into(), info.signature_oid.clone()),
+        (
+            "signature_algorithm".into(),
+            info.signature_algorithm.clone(),
+        ),
+        ("public_key_oid".into(), key.algorithm_oid.clone()),
+        ("public_key_algorithm".into(), key.algorithm.clone()),
+        ("key_size_kind".into(), key.key_size_kind.into()),
+        ("parameters_kind".into(), key.parameters_kind.into()),
+        (
+            "public_key_encoded_bytes".into(),
+            key.encoded_bytes.to_string(),
+        ),
+        ("spki_der_bytes".into(), key.spki_der_bytes.to_string()),
+        (
+            "certificate_der_bytes".into(),
+            info.certificate_der_bytes.to_string(),
+        ),
+        ("certificate_sha256".into(), info.certificate_sha256.clone()),
+        ("spki_sha256".into(), key.spki_sha256.clone()),
+        ("object_index".into(), object.object_index.to_string()),
+        ("byte_offset".into(), object.byte_offset.to_string()),
+        ("expires_at".into(), info.expires_at.clone()),
+        ("not_before_unix".into(), info.not_before_unix.to_string()),
+        ("not_after_unix".into(), info.not_after_unix.to_string()),
+    ]);
+    for (name, value) in [
+        ("key_bits", key.key_bits.map(|n| n.to_string())),
+        ("named_curve_oid", key.named_curve_oid.clone()),
+        ("named_curve", key.named_curve.map(str::to_string)),
+        ("parameters_oid", key.parameters_oid.clone()),
+        (
+            "parameters_content_sha256",
+            key.parameters_content_sha256.clone(),
+        ),
+    ] {
+        if let Some(value) = value {
+            m.insert(name.into(), value);
+        }
+    }
+    m
+}
+
+fn parse_der_object(bytes: &[u8]) -> (Vec<LocatedCertificate>, DetectorStatus) {
+    let Ok((rest, cert)) = parse_x509_certificate(bytes) else {
+        return (Vec::new(), DetectorStatus::Partial);
+    };
+    let consumed = bytes.len() - rest.len();
+    let Ok(attributes) = attributes::certificate_attributes(&cert, &bytes[..consumed]) else {
+        return (Vec::new(), DetectorStatus::Partial);
+    };
+    let status = if rest.is_empty() {
+        attributes.status
+    } else {
+        DetectorStatus::Partial
+    };
+    (
+        vec![LocatedCertificate {
+            attributes,
+            line: 1,
+            column: 1,
+            object_index: 1,
+            byte_offset: 0,
+        }],
+        status,
+    )
+}
+
+struct PemBlock<'a> {
+    label: &'a [u8],
+    byte_offset: usize,
+    line: usize,
+    column: usize,
+    index: usize,
+}
+
+// Frame blocks independently so one bad block cannot discard good neighbors.
+// Non-certificate bodies are never decoded or placed into evidence/errors.
+fn parse_pem_objects(bytes: &[u8]) -> (Vec<LocatedCertificate>, DetectorStatus) {
+    let mut objects = Vec::new();
+    let mut block: Option<PemBlock<'_>> = None;
+    let mut offset = 0;
+    let mut index = 0;
+    let mut malformed = false;
+    let mut unsupported = false;
+    for (line_index, line) in bytes.split_inclusive(|b| *b == b'\n').enumerate() {
+        let trimmed = line.trim_ascii();
+        if let Some(label) = pem_label(trimmed, b"-----BEGIN ") {
+            if block.is_some() {
+                malformed = true;
+            }
+            index += 1;
+            let leading = line.len() - line.trim_ascii_start().len();
+            block = Some(PemBlock {
+                label,
+                byte_offset: offset + leading,
+                line: line_index + 1,
+                column: leading + 1,
+                index,
+            });
+        } else if let Some(label) = pem_label(trimmed, b"-----END ") {
+            match block.take() {
+                Some(b) if b.label == label => {
+                    if label == b"CERTIFICATE" {
+                        let decoded = pem::parse(&bytes[b.byte_offset..offset + line.len()]);
+                        match decoded.and_then(|p| {
+                            parse_certificate_der(p.contents())
+                                .map_err(|_| pem::PemError::MalformedFraming)
+                        }) {
+                            Ok(attributes) => objects.push(LocatedCertificate {
+                                attributes,
+                                line: b.line,
+                                column: b.column,
+                                object_index: b.index,
+                                byte_offset: b.byte_offset,
+                            }),
+                            Err(_) => malformed = true,
+                        }
+                    } else {
+                        unsupported = true;
+                    }
+                }
+                _ => malformed = true,
+            }
+        } else if trimmed.starts_with(b"-----BEGIN") || trimmed.starts_with(b"-----END") {
+            malformed = true;
+        }
+        offset += line.len();
+    }
+    malformed |= block.is_some();
+    let incomplete_attributes = objects
+        .iter()
+        .any(|o| o.attributes.status != DetectorStatus::Complete);
+    let status = if malformed || incomplete_attributes || (!objects.is_empty() && unsupported) {
+        DetectorStatus::Partial
+    } else if unsupported {
+        DetectorStatus::Unsupported
+    } else if objects.is_empty() {
+        DetectorStatus::Partial
+    } else {
+        DetectorStatus::Complete
+    };
+    (objects, status)
+}
+
+fn pem_label<'a>(line: &'a [u8], prefix: &[u8]) -> Option<&'a [u8]> {
+    let label = line.strip_prefix(prefix)?.strip_suffix(b"-----")?;
+    (!label.is_empty()).then_some(label)
 }
 
 fn signature_name(oid: &str) -> String {
