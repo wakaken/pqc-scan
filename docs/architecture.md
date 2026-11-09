@@ -155,6 +155,25 @@ strategy, not full semantic analysis or exhaustive private-key format support.
   - Rust
   - Ruby
 
+### AST occurrence identity (task 024)
+
+Private candidates retain their parsed-source byte start and the real prefix
+length before any clipping ellipsis. Deduplication is per rule on absolute byte
+intervals, trimming only edge whitespace/quote wrappers so parent/child versions
+of one token share identity. Different same-line spans survive. It does not use
+line/text identity, change rule patterns or export a new span model. Legacy
+native line/column/evidence choice and the general finding-ID algorithm remain;
+AST columns still mix byte-based node starts and code-point relative offsets.
+SARIF retains its task022 conservative handling. Traversal/candidate/work/hit caps
+are unchanged; the dedup set now lives within each rule. Matches extending into
+a synthetic clipped suffix are rejected while Truncated stays visible.
+
+The JavaScript grammar remains the TypeScript/TSX parser. Syntax recovery and
+nominal API matching do not resolve aliases, local namesakes, actual execution
+or all comments inside ancestor text. Frozen corpus and grammar-subset tests
+record these limitations rather than silently expanding dependency support.
+See [the task024 evidence](quality/TASK-024-AST-OCCURRENCES.md).
+
 ### Regex detector
 
 - Fast lexical matching over text files

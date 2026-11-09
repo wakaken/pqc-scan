@@ -24,6 +24,8 @@ struct CandidateNode {
     snippet_preview: String,
     line: usize,
     column: usize,
+    byte_start: usize,
+    source_len: usize,
 }
 
 impl Detector for TreeSitterDetector {
@@ -81,7 +83,6 @@ impl Detector for TreeSitterDetector {
         }
 
         let mut out = Vec::new();
-        let mut dedup = HashSet::new();
         let file_path = file.path.to_string_lossy().into_owned();
 
         for rule in rules.by_kind(RuleKind::TreeSitter) {
@@ -99,6 +100,7 @@ impl Detector for TreeSitterDetector {
                 }
             };
 
+            let mut dedup = HashSet::new();
             let mut rule_hits = 0usize;
             let mut examined = 0usize;
             'candidates: for candidate in &candidates {
@@ -112,6 +114,10 @@ impl Detector for TreeSitterDetector {
                         break 'candidates;
                     }
                     examined += 1;
+                    // The clipping ellipsis is presentation, not source text.
+                    if hit.end() > candidate.source_len {
+                        continue;
+                    }
                     if should_skip_comment_only_match_for_language(
                         language_name,
                         &candidate.text,
@@ -132,13 +138,14 @@ impl Detector for TreeSitterDetector {
                         relative_col
                     };
 
-                    let dedup_key = format!(
-                        "{}:{}:{}:{}",
-                        rule.id,
-                        file_path,
-                        line,
-                        normalize_match_for_dedup(hit.as_str())
-                    );
+                    // Parent/child candidates can expose the same token with
+                    // different quote wrappers. Normalize only its boundaries;
+                    // distinct occurrences must never share a line/text key.
+                    let raw = hit.as_str();
+                    let leading = raw.len() - raw.trim_start_matches(is_match_boundary).len();
+                    let token = raw.trim_matches(is_match_boundary);
+                    let source_start = candidate.byte_start + hit.start() + leading;
+                    let dedup_key = (source_start, source_start + token.len());
                     if dedup.contains(&dedup_key) {
                         continue;
                     }
@@ -227,6 +234,11 @@ fn collect_candidate_nodes(
         if was_clipped {
             status = DetectorStatus::Truncated;
         }
+        let source_len = if was_clipped {
+            clipped.len() - 3 // clip_text appends an ASCII ellipsis.
+        } else {
+            clipped.len()
+        };
         let point = node.start_position();
         out.push(CandidateNode {
             kind: kind.to_string(),
@@ -234,6 +246,8 @@ fn collect_candidate_nodes(
             snippet_preview: clip_text(raw_text.trim(), 240).0,
             line: point.row + 1,
             column: point.column + 1,
+            byte_start: node.start_byte(),
+            source_len,
         });
     }
 
@@ -305,9 +319,8 @@ fn resolve_language(path: &Path) -> Option<(Language, &'static str)> {
     }
 }
 
-fn normalize_match_for_dedup(raw: &str) -> String {
-    raw.trim_matches(|c: char| c.is_whitespace() || matches!(c, '"' | '\'' | '`'))
-        .to_ascii_lowercase()
+fn is_match_boundary(c: char) -> bool {
+    c.is_whitespace() || matches!(c, '"' | '\'' | '`')
 }
 
 fn is_embedded_identifier_submatch(text: &str, start: usize, end: usize) -> bool {

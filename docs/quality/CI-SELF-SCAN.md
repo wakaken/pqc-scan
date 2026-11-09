@@ -108,3 +108,16 @@ existing strict projection does not register artifact-only locations. No URI
 handling/line validation/threshold was weakened to suppress these results.
 Hosted alert-check success is unverified; these three observations remain eligible
 for it. See [the measured baseline record](TASK-023-BASELINE.md).
+
+## Task 024 source-occurrence correction
+
+Same current source bytes scanned by old/new binaries produce 776/793 raw results;
+all prior raw records survive. Fifteen added observations are reviewed existing
+fixture occurrences: seven exact-position groups and six count bindings updated
+from one to two/three for distinct same-line source matches. The readiness test's
+source hash is refreshed; no other existing source allowance changes. Final
+partition: 793 raw = 660 reviewed omissions + 133 retained, 99 verified sources.
+Two new production recommendation/catalog observations are retained, as are all
+previous 131 retained results (including the three artifact-only SBOM observations).
+No helper/URI/threshold relaxation, broad registration or raw filtering is added.
+See [the occurrence compatibility and measurement record](TASK-024-AST-OCCURRENCES.md).

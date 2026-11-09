@@ -461,6 +461,24 @@ not automatically learn or accept findings. See the
 [policy and maintenance guide](docs/quality/CI-SELF-SCAN.md).
 
 
+## AST occurrence precision
+
+AST findings distinguish source spans per rule: repeated uses on the same line
+remain separate, while parent/child representations of the same lexical match
+produce one observation. The existing 32-hit rule/file cap and bounded-work
+truncation diagnostics remain. A display-only clipping ellipsis is never treated
+as source. CLI flags, report schemas/filenames and IDs for unchanged occurrences
+are preserved; finding counts and new occurrence IDs may increase intentionally.
+Legacy AST Unicode column limitations still apply (see SARIF locations above).
+
+TypeScript/TSX still use the pinned JavaScript grammar: plain JavaScript/JSX
+subsets may parse completely, while type syntax can produce partial inspection
+and missed API matches. Matching remains nominal and rule-based: imported aliases
+may be missed, local namesakes and display strings may be false positives, and
+comments inside matched ancestor text are not a full semantic comment analysis.
+No new grammar, symbol resolver or dataflow engine was added. See the
+[task 024 measurements and compatibility record](docs/quality/TASK-024-AST-OCCURRENCES.md).
+
 ## Developer quality baseline
 
 Task 023 adds a source-labeled, offline evaluation corpus and a Python standard-
