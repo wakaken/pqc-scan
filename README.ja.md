@@ -154,7 +154,7 @@ Node cryptoとWebCryptoでは必要なマイナーバージョンが異なりま
 CLIツールは以下の通り実行します。
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -182,6 +182,43 @@ pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
 # 1つのルール詳細を確認
 pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
+
+### 検査の完全性と診断情報
+
+ファイルの読み込みや検出器の実行に失敗しても、ほかの検出結果は保持します。
+検査が部分成功・失敗・不明の場合、CLIは標準エラーへ警告を1回表示します。
+既定の終了コードは従来どおり、成功が0、実行エラーが1、`--fail-on` の到達が2です。
+検出がゼロでも、検査できたとは限りません。
+
+`--diagnostics` を付けると、`--out-dir` に `diagnostics.json` を追加出力します。
+別ファイルとして `schema_version: "1"`、生成時刻、検査範囲、集計値、理由コードを記録します。
+検出器・I/Oのエラー本文やファイル内容は含めません。
+既存6形式のファイル名と機械出力スキーマは維持し、`--format all` だけでは追加しません。
+`--lang` の対象も従来どおりHTMLとMarkdownです。
+
+```bash
+pqc-scan scan . --diagnostics --require-complete --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+```
+
+`--require-complete` は、検査の完了を確認できない場合に、要求されたレポートを出力してから
+終了コード**3**を返します。優先順位は、実行エラーの1、完全性を確認できない場合の3、
+検出しきい値到達の2です。2つのオプションは単独でも使えます。
+有効な検査範囲に対象ファイルがなければ完了扱いになりますが、範囲外に暗号がないという意味ではありません。
+
+**現時点の制約：** 既存の組み込み検出器は互換アダプターを使い、内部の解析成功・適用可否・
+検出上限への到達をまだ報告しません。このため、対象ファイルがあるスキャンは通常 `unknown` となり、
+厳密モードではエラーがなくても3を返します。タスク018の対象は外側の読み込み・実行失敗の集計です。
+検出器ごとの解析・上限の診断は後続タスクで扱い、今回の変更で検出動作は変えません。
+
+従来の `scanned_files` は、引き続きwalkerが選択したファイル数です。
+新しい集計では、選択・読み込み成功／失敗・解析完了・部分成功・解析失敗・未対応・対象外・不明を区別します。
+列挙できたポリシー除外と列挙失敗は別に集計し、ignoreで見えない件数は不明として明示します。
+完了の判定は、既存のignore設定・既定の除外・サイズ制限を含む検査範囲内に限ります。
+
+ライブラリ向けには `scan_repository_detailed` と、アクセサーで参照する `ScanDocument` を追加しました。
+既存の `scan_repository`、`ScanResult`、レポートAPI、`Detector::detect` 実装は維持します。
+検出器は `detect_detailed` と `DetectorOutcome` で検査結果を報告できます。
+`Complete` は検査の完了を表し、安全性の保証ではありません。
 
 ## レポート出力
 

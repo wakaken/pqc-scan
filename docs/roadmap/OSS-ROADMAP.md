@@ -1,6 +1,6 @@
 # OSS evolution roadmap
 
-Design date: 2026-11-09. Baseline: `b3104f9a4193b1b21ea11ca060f06301de2e936b`. All 22 new tasks are **pending**, not selected, implemented or completed. Existing tasks 001-017 remain unchanged; 014 is pending, 016 is review and 017 is done. Explicit user-requested queue creation does not enable the automatic Monitor.
+Design date: 2026-11-09. Baseline: `b3104f9a4193b1b21ea11ca060f06301de2e936b`. At plan creation, all 22 new tasks were **pending**. Task YAML records are authoritative for current implementation and validation status. Existing tasks 001-017 remain unchanged; 014 is pending, 016 is review and 017 is done. Explicit user-requested queue creation does not enable the automatic Monitor.
 
 ## Principles and dependencies
 

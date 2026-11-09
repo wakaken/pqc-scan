@@ -10,7 +10,15 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 
-use pqc_scan_core::ScanResult;
+use pqc_scan_core::{ScanDocument, ScanResult};
+
+/// Write only the explicitly requested, versioned inspection diagnostics artifact.
+pub fn write_diagnostics(document: &ScanDocument, out_dir: &Path) -> Result<PathBuf> {
+    std::fs::create_dir_all(out_dir)?;
+    let path = out_dir.join("diagnostics.json");
+    json_report::write_diagnostics(document, &path)?;
+    Ok(path)
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ReportFormat {

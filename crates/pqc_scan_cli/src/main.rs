@@ -7,9 +7,11 @@ use std::{
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 
-use pqc_scan_core::{pipeline, scan_repository, ScanConfig};
+use pqc_scan_core::{pipeline, scan_repository_detailed, ScanConfig};
 use pqc_scan_detectors::default_detectors;
-use pqc_scan_report::{write_reports_with_language, ReportFormat, ReportLanguage};
+use pqc_scan_report::{
+    write_diagnostics, write_reports_with_language, ReportFormat, ReportLanguage,
+};
 use pqc_scan_rules::{RuleSet, Severity};
 
 #[derive(Debug, Parser)]
@@ -54,6 +56,14 @@ struct ScanArgs {
 
     #[arg(long, default_value_t = 0usize)]
     threads: usize,
+
+    /// Write inspection coverage and safe failure reasons to diagnostics.json.
+    #[arg(long)]
+    diagnostics: bool,
+
+    /// Return exit code 3 unless every selected inspection is known to be complete.
+    #[arg(long)]
+    require_complete: bool,
 }
 
 #[derive(Debug, Subcommand)]
@@ -145,6 +155,7 @@ fn main() {
 enum ExitStatus {
     Success,
     FailThreshold,
+    IncompleteInspection,
 }
 
 impl ExitStatus {
@@ -152,6 +163,7 @@ impl ExitStatus {
         match self {
             Self::Success => 0,
             Self::FailThreshold => 2,
+            Self::IncompleteInspection => 3,
         }
     }
 }
@@ -210,10 +222,14 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     };
 
     let detectors = default_detectors();
-    let result = scan_repository(&config, &rules, &detectors)?;
+    let document = scan_repository_detailed(&config, &rules, &detectors)?;
+    let result = document.legacy();
 
-    let outputs =
-        write_reports_with_language(&result, &args.out_dir, args.format.into(), args.lang.into())?;
+    let mut outputs =
+        write_reports_with_language(result, &args.out_dir, args.format.into(), args.lang.into())?;
+    if args.diagnostics {
+        outputs.push(write_diagnostics(&document, &args.out_dir)?);
+    }
     for out in outputs {
         writeln!(stdout, "written {}", out.display())?;
     }
@@ -221,6 +237,20 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     writeln!(stdout, "total findings: {}", result.summary.total_findings)?;
     writeln!(stdout, "scanned files: {}", result.summary.scanned_files)?;
     writeln!(stdout, "skipped files: {}", result.summary.skipped_files)?;
+
+    if !document.coverage().is_complete() {
+        writeln!(stderr,
+            "warning: inspection completeness is {}; use --diagnostics for details. No findings does not imply complete inspection.",
+            document.coverage().status().as_str()
+        )?;
+        if args.require_complete {
+            writeln!(
+                stderr,
+                "require-complete: inspection is not known to be complete"
+            )?;
+            return Ok(ExitStatus::IncompleteInspection);
+        }
+    }
 
     if let Some(level) = args.fail_on {
         let threshold: Severity = level.into();
@@ -331,6 +361,151 @@ mod tests {
     }
 
     #[test]
+    fn diagnostics_opt_in_exports_unknown_coverage_without_changing_legacy_json() {
+        let repo = temp_dir("diagnostics-input");
+        let plain = temp_dir("diagnostics-plain");
+        let detailed = temp_dir("diagnostics-extra");
+        write_file(&repo, "app.js", "const algorithm = 'RS256';\n");
+        let arguments = |out: &Path| {
+            vec![
+                "pqc-scan".into(),
+                "scan".into(),
+                repo.display().to_string(),
+                "--rules-dir".into(),
+                rules_dir().display().to_string(),
+                "--out-dir".into(),
+                out.display().to_string(),
+                "--threads".into(),
+                "1".into(),
+            ]
+        };
+        let (result, stdout, stderr) = run_cli_test(arguments(&plain));
+        assert_eq!(result.unwrap(), ExitStatus::Success);
+        assert_eq!(stdout.matches("written ").count(), 6);
+        assert!(!plain.join("diagnostics.json").exists());
+        assert!(stderr.contains("inspection completeness is unknown"));
+        let mut args = arguments(&detailed);
+        args.push("--diagnostics".into());
+        let (result, stdout, _) = run_cli_test(args);
+        assert_eq!(result.unwrap(), ExitStatus::Success);
+        assert_eq!(stdout.matches("written ").count(), 7);
+        let diagnostics: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(detailed.join("diagnostics.json")).unwrap())
+                .unwrap();
+        assert_eq!(diagnostics["schema_version"], "1");
+        assert_eq!(diagnostics["coverage"]["status"], "unknown");
+        assert_eq!(diagnostics["coverage"]["selected_files"], 1);
+        assert_eq!(diagnostics["coverage"]["unknown_files"], 1);
+        assert_eq!(diagnostics["diagnostics"].as_array().unwrap().len(), 5);
+        assert!(diagnostics.get("findings").is_none());
+        let read = |out: &Path, file: &str| {
+            serde_json::from_str::<serde_json::Value>(&fs::read_to_string(out.join(file)).unwrap())
+                .unwrap()
+        };
+        let mut before = read(&plain, "report.json");
+        let mut after = read(&detailed, "report.json");
+        before.as_object_mut().unwrap().remove("generated_at");
+        after.as_object_mut().unwrap().remove("generated_at");
+        assert_eq!(before, after);
+        for file in ["cbom.json", "dependency-sbom.json", "report.sarif"] {
+            assert_eq!(read(&plain, file), read(&detailed, file), "{file}");
+        }
+        for path in [repo, plain, detailed] {
+            fs::remove_dir_all(path).unwrap();
+        }
+    }
+
+    #[test]
+    fn require_complete_returns_three_before_finding_threshold_and_keeps_reports() {
+        let repo = temp_dir("strict-input");
+        let out = temp_dir("strict-output");
+        write_file(&repo, "app.js", "const algorithm = 'RS256';\n");
+        let (result, _, stderr) = run_cli_test(vec![
+            "pqc-scan".into(),
+            "scan".into(),
+            repo.display().to_string(),
+            "--rules-dir".into(),
+            rules_dir().display().to_string(),
+            "--out-dir".into(),
+            out.display().to_string(),
+            "--require-complete".into(),
+            "--diagnostics".into(),
+            "--fail-on".into(),
+            "high".into(),
+        ]);
+        assert_eq!(result.unwrap().code(), 3);
+        assert!(stderr.contains("require-complete"));
+        assert!(out.join("report.json").exists());
+        assert!(out.join("diagnostics.json").exists());
+        fs::remove_dir_all(repo).unwrap();
+        fs::remove_dir_all(out).unwrap();
+    }
+
+    #[test]
+    fn require_complete_accepts_empty_scope_and_operational_errors_stay_errors() {
+        let repo = temp_dir("strict-empty");
+        let out = temp_dir("strict-empty-out");
+        let args = |root: &Path, output: &Path| {
+            vec![
+                "pqc-scan".into(),
+                "scan".into(),
+                root.display().to_string(),
+                "--rules-dir".into(),
+                rules_dir().display().to_string(),
+                "--out-dir".into(),
+                output.display().to_string(),
+                "--require-complete".into(),
+                "--fail-on".into(),
+                "high".into(),
+            ]
+        };
+        let (result, _, stderr) = run_cli_test(args(&repo, &out));
+        assert_eq!(result.unwrap().code(), 0);
+        assert!(stderr.is_empty());
+        let (result, _, _) = run_cli_test(args(&repo.join("missing"), &out));
+        assert!(result.is_err());
+        let blocked = out.join("ordinary-file");
+        fs::write(&blocked, "not a directory").unwrap();
+        write_file(&repo, "hit.js", "RS256");
+        let (result, _, _) = run_cli_test(args(&repo, &blocked));
+        assert!(
+            result.is_err(),
+            "output errors must precede completeness/threshold gates"
+        );
+        fs::remove_dir_all(repo).unwrap();
+        fs::remove_dir_all(out).unwrap();
+    }
+
+    #[test]
+    fn require_complete_rejects_broken_ignore_policy_even_with_no_selected_files() {
+        let repo = temp_dir("strict-ignore");
+        let out = temp_dir("strict-ignore-out");
+        write_file(&repo, ".gitignore", "[z-a]SYNTHETIC_IGNORE_CONTENT\n*\n");
+        write_file(&repo, "ignored.txt", "ignored");
+        let (result, _, stderr) = run_cli_test(vec![
+            "pqc-scan".into(),
+            "scan".into(),
+            repo.display().to_string(),
+            "--rules-dir".into(),
+            rules_dir().display().to_string(),
+            "--out-dir".into(),
+            out.display().to_string(),
+            "--diagnostics".into(),
+            "--require-complete".into(),
+        ]);
+        assert_eq!(result.unwrap().code(), 3);
+        assert!(!stderr.contains("SYNTHETIC_IGNORE_CONTENT"));
+        let text = fs::read_to_string(out.join("diagnostics.json")).unwrap();
+        assert!(!text.contains("SYNTHETIC_IGNORE_CONTENT"));
+        let json: serde_json::Value = serde_json::from_str(&text).unwrap();
+        assert_eq!(json["coverage"]["selected_files"], 0);
+        assert_eq!(json["coverage"]["enumeration_failed_entries"], 1);
+        assert_eq!(json["coverage"]["status"], "failed");
+        fs::remove_dir_all(repo).unwrap();
+        fs::remove_dir_all(out).unwrap();
+    }
+
+    #[test]
     fn scan_japanese_language_localizes_human_reports() {
         let out = temp_dir("japanese-cli");
         let (result, _, stderr) = run_cli_test(vec![
@@ -348,7 +523,7 @@ mod tests {
             "ja".into(),
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert!(stderr.is_empty());
+        assert!(stderr.contains("inspection completeness is unknown"));
         let html = fs::read_to_string(out.join("report.html")).unwrap();
         assert!(html.contains("耐量子暗号への移行調査レポート"));
         assert!(html.contains("対応完了の保証ではありません"));
@@ -398,7 +573,7 @@ mod tests {
             "high".into(),
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert!(stderr.is_empty());
+        assert!(stderr.contains("inspection completeness is unknown"));
         assert_eq!(stdout.matches("written ").count(), 6);
         let report: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
@@ -457,7 +632,7 @@ mod tests {
             rules_dir().display().to_string(),
         ]);
         assert_eq!(result.expect("acceptance scan"), ExitStatus::Success);
-        assert!(stderr.is_empty());
+        assert!(stderr.contains("inspection completeness is unknown"));
         assert_eq!(stdout.matches("written ").count(), 6);
         let json: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
@@ -539,7 +714,10 @@ mod tests {
         let (result, stdout, stderr) = run_cli_test(args);
 
         assert_eq!(result.expect("scan succeeds"), ExitStatus::Success);
-        assert!(stderr.is_empty(), "unexpected stderr: {stderr}");
+        assert!(
+            stderr.contains("inspection completeness is unknown"),
+            "{stderr}"
+        );
         assert!(
             out_dir.join("report.json").exists(),
             "report.json should exist"

@@ -82,7 +82,39 @@ Compilation strategy:
 All detectors implement the shared `Detector` trait:
 
 - `name() -> &'static str`
-- `detect(file, rules) -> Vec<Detection>`
+- `detect(file, rules) -> Result<Vec<Detection>>`
+- Optional `detect_detailed(file, rules) -> Result<DetectorOutcome>`; the default
+  calls `detect` once and reports `NotReported`, preserving existing implementations.
+
+### Inspection diagnostics (task 018)
+
+`scan_repository_detailed` returns a private-field `ScanDocument` with the legacy
+`ScanResult`, diagnostics and coverage. `scan_repository` remains a wrapper over
+the same execution and returns the existing result; detectors are not run twice.
+Normalization, finding IDs, severity, recommendations and existing report schemas
+are unchanged. Per-file read/detector failures retain other results. Root/setup
+and report-write failures remain fatal. The detailed walker accounts for policy
+exclusions, metadata failures and soft ignore-policy errors separately from selected files.
+Iterator-level traversal failures, including root enumeration failures after
+successful metadata access, remain fatal as in the legacy walker. Soft errors
+attached to valid directory entries retain other results but prevent a complete
+inspection verdict.
+
+Coverage has disjoint file terminal states and reconciles selected = read-ok +
+read-failed, and read-ok = analyzed + partial + analysis-failed + unsupported +
+not-applicable + unknown. Enumeration failures are an additional entry count;
+ignore-hidden populations are not enumerable. Complete means complete within the
+declared scope, not absence of cryptography or product security. Current built-in
+detectors still use `NotReported`; their internal cap/parser accounting remains
+future work, so nonempty scans generally have unknown completeness.
+
+CLI adds a stderr notice and opt-in `--diagnostics` (`diagnostics.json`, schema 1)
+and `--require-complete` (code 3). Existing default output and codes remain; fatal
+errors take priority, then requested completeness, then finding threshold. Report
+writers expose a separate `write_diagnostics` function; existing writer calls do
+not add the artifact. Diagnostic messages are fixed safe descriptions, never raw
+error chains or scanned contents. This is a diagnostics schema, not the proposed
+Phase 1 native inventory schema.
 
 ### Tree-sitter detector
 

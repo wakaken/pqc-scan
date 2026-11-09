@@ -12,14 +12,43 @@ use crate::model::{
     CbomEntry, DependencySbomEntry, Detection, Finding, ScanConfig, ScanResult, ScanSummary,
     ScannableFile, SourceSnippet, SourceSnippetLine,
 };
-use crate::{recommendation, risk, walker, Detector};
+use crate::{
+    recommendation, risk, walker, CoverageSummary, Detector, DetectorStatus, DiagnosticCode,
+    ScanDiagnostic, ScanDocument,
+};
 
 pub fn scan_repository(
     config: &ScanConfig,
     rules: &RuleSet,
     detectors: &[Arc<dyn Detector>],
 ) -> Result<ScanResult> {
-    let (files, walk_stats) = walker::walk_repository(&config.root, config.max_file_size_bytes)?;
+    Ok(scan_repository_detailed(config, rules, detectors)?.into_legacy())
+}
+
+pub fn scan_repository_detailed(
+    config: &ScanConfig,
+    rules: &RuleSet,
+    detectors: &[Arc<dyn Detector>],
+) -> Result<ScanDocument> {
+    scan_with_reader(config, rules, detectors, &|path| fs::read(path))
+}
+
+fn scan_with_reader<F>(
+    config: &ScanConfig,
+    rules: &RuleSet,
+    detectors: &[Arc<dyn Detector>],
+    read: &F,
+) -> Result<ScanDocument>
+where
+    F: Fn(&std::path::Path) -> std::io::Result<Vec<u8>> + Sync,
+{
+    let walk = walker::walk_repository_detailed(&config.root, config.max_file_size_bytes)?;
+    let files = walk.files;
+    let mut diagnostics = walk.diagnostics;
+    let mut coverage = CoverageSummary::new();
+    coverage.selected_files = files.len() as u64;
+    coverage.excluded_enumerated_files = walk.excluded;
+    coverage.enumeration_failed_entries = walk.failed_entries;
 
     let thread_count = if config.threads == 0 {
         num_cpus::get()
@@ -30,23 +59,50 @@ pub fn scan_repository(
         .num_threads(thread_count)
         .build()?;
 
-    let detections: Vec<Detection> = pool.install(|| {
+    let outcomes: Vec<FileOutcome> = pool.install(|| {
         files
             .par_iter()
-            .flat_map(|path| {
-                let bytes = match fs::read(path) {
+            .map(|path| {
+                let relative = walker::relative_path(&config.root, path);
+                let bytes = match read(path) {
                     Ok(v) => v,
-                    Err(_) => return Vec::new(),
+                    Err(_) => {
+                        return FileOutcome {
+                            detections: Vec::new(),
+                            diagnostics: vec![ScanDiagnostic::new(
+                                DiagnosticCode::ReadFailed,
+                                Some(relative),
+                                None,
+                            )],
+                            disposition: FileDisposition::ReadFailed,
+                        }
+                    }
                 };
 
                 let file = ScannableFile::from_bytes(path.clone(), bytes);
-                detectors
-                    .iter()
-                    .flat_map(|detector| detector.detect(&file, rules).unwrap_or_default())
-                    .collect::<Vec<_>>()
+                inspect_file(&file, &relative, rules, detectors)
             })
             .collect()
     });
+
+    let mut detections = Vec::new();
+    for outcome in outcomes {
+        use FileDisposition as D;
+        if outcome.disposition != D::ReadFailed {
+            coverage.read_ok_files += 1;
+        }
+        match outcome.disposition {
+            D::ReadFailed => coverage.read_failed_files += 1,
+            D::Analyzed => coverage.analyzed_files += 1,
+            D::Partial => coverage.partial_files += 1,
+            D::Failed => coverage.analysis_failed_files += 1,
+            D::Unsupported => coverage.unsupported_files += 1,
+            D::NotApplicable => coverage.not_applicable_files += 1,
+            D::Unknown => coverage.unknown_files += 1,
+        }
+        detections.extend(outcome.detections);
+        diagnostics.extend(outcome.diagnostics);
+    }
 
     let dependency_sbom = build_dependency_sbom(&config.root, &detections);
     let runtime_profile =
@@ -66,8 +122,8 @@ pub fn scan_repository(
         total_findings: findings.len(),
         by_severity: BTreeMap::new(),
         by_risk: BTreeMap::new(),
-        scanned_files: walk_stats.scanned,
-        skipped_files: walk_stats.skipped,
+        scanned_files: walk.stats.scanned,
+        skipped_files: walk.stats.skipped,
     };
 
     for finding in &findings {
@@ -81,13 +137,110 @@ pub fn scan_repository(
             .or_insert(0) += 1;
     }
 
-    Ok(ScanResult {
+    let legacy = ScanResult {
         generated_at: Utc::now(),
         findings,
         cbom,
         dependency_sbom,
         summary,
-    })
+    };
+    Ok(ScanDocument::new(legacy, diagnostics, coverage, config))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum FileDisposition {
+    ReadFailed,
+    Analyzed,
+    Partial,
+    Failed,
+    Unsupported,
+    NotApplicable,
+    Unknown,
+}
+
+struct FileOutcome {
+    detections: Vec<Detection>,
+    diagnostics: Vec<ScanDiagnostic>,
+    disposition: FileDisposition,
+}
+
+fn inspect_file(
+    file: &ScannableFile,
+    relative: &str,
+    rules: &RuleSet,
+    detectors: &[Arc<dyn Detector>],
+) -> FileOutcome {
+    let mut detections = Vec::new();
+    let mut diagnostics = Vec::new();
+    let (mut complete, mut failed, mut unsupported, mut partial, mut unknown) =
+        (false, false, false, false, detectors.is_empty());
+    if detectors.is_empty() {
+        diagnostics.push(ScanDiagnostic::new(DiagnosticCode::NoDetectors, None, None));
+    }
+    for detector in detectors {
+        let code = match detector.detect_detailed(file, rules) {
+            Err(_) => {
+                failed = true;
+                Some(DiagnosticCode::DetectorFailed)
+            }
+            Ok(outcome) => {
+                let code = match outcome.status() {
+                    DetectorStatus::Complete => {
+                        complete = true;
+                        None
+                    }
+                    DetectorStatus::NotApplicable => None,
+                    DetectorStatus::Unsupported => {
+                        unsupported = true;
+                        Some(DiagnosticCode::DetectorUnsupported)
+                    }
+                    DetectorStatus::Partial => {
+                        partial = true;
+                        Some(DiagnosticCode::DetectorPartial)
+                    }
+                    DetectorStatus::Truncated => {
+                        partial = true;
+                        Some(DiagnosticCode::DetectorTruncated)
+                    }
+                    DetectorStatus::NotReported => {
+                        unknown = true;
+                        Some(DiagnosticCode::DetectorNotReported)
+                    }
+                };
+                detections.extend(outcome.into_detections());
+                code
+            }
+        };
+        if let Some(code) = code {
+            // Legacy coverage notices are detector-wide, avoiding one duplicate per file.
+            let target =
+                (code != DiagnosticCode::DetectorNotReported).then(|| relative.to_string());
+            diagnostics.push(ScanDiagnostic::new(
+                code,
+                target,
+                Some(detector.name().into()),
+            ));
+        }
+    }
+    let usable = complete || !detections.is_empty();
+    let disposition = if partial || ((failed || unsupported) && usable) {
+        FileDisposition::Partial
+    } else if failed {
+        FileDisposition::Failed
+    } else if unsupported {
+        FileDisposition::Unsupported
+    } else if unknown {
+        FileDisposition::Unknown
+    } else if complete {
+        FileDisposition::Analyzed
+    } else {
+        FileDisposition::NotApplicable
+    };
+    FileOutcome {
+        detections,
+        diagnostics,
+        disposition,
+    }
 }
 
 fn normalize_findings(
@@ -472,6 +625,345 @@ mod tests {
         dir.push(format!("pqc-scan-{prefix}-{}-{nanos}", std::process::id()));
         fs::create_dir_all(&dir).expect("create temp dir");
         dir
+    }
+
+    struct CompleteDetector;
+
+    impl Detector for CompleteDetector {
+        fn name(&self) -> &'static str {
+            "complete-test-detector"
+        }
+
+        fn detect(&self, file: &ScannableFile, _: &RuleSet) -> Result<Vec<Detection>> {
+            if !file.text.as_deref().unwrap_or("").contains("RS256") {
+                return Ok(Vec::new());
+            }
+            Ok(vec![Detection {
+                rule_id: "JWT_RS256".into(),
+                location: crate::Location {
+                    file: file.path.to_string_lossy().into_owned(),
+                    line: 1,
+                    column: 1,
+                },
+                evidence: crate::Evidence {
+                    r#type: "test".into(),
+                    r#match: "RS256".into(),
+                    snippet_preview: "RS256".into(),
+                    metadata: BTreeMap::new(),
+                },
+            }])
+        }
+
+        fn detect_detailed(
+            &self,
+            file: &ScannableFile,
+            rules: &RuleSet,
+        ) -> Result<crate::DetectorOutcome> {
+            Ok(crate::DetectorOutcome::complete(self.detect(file, rules)?))
+        }
+    }
+
+    struct LegacyEmptyDetector;
+
+    impl Detector for LegacyEmptyDetector {
+        fn name(&self) -> &'static str {
+            "legacy-empty"
+        }
+
+        fn detect(&self, _: &ScannableFile, _: &RuleSet) -> Result<Vec<Detection>> {
+            Ok(Vec::new())
+        }
+    }
+
+    struct FailingDetector;
+
+    impl Detector for FailingDetector {
+        fn name(&self) -> &'static str {
+            "failing-test-detector"
+        }
+
+        fn detect(&self, _: &ScannableFile, _: &RuleSet) -> Result<Vec<Detection>> {
+            anyhow::bail!("SYNTHETIC_ERROR_CONTENT_MUST_NOT_BE_EXPORTED")
+        }
+    }
+
+    fn test_rules() -> RuleSet {
+        RuleSet::load_from_dir(&PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../rules"))
+            .expect("checked-in rules")
+    }
+
+    fn test_config(root: PathBuf) -> ScanConfig {
+        ScanConfig {
+            root,
+            threads: 1,
+            ..ScanConfig::default()
+        }
+    }
+
+    fn assert_coverage_partitions(c: &crate::CoverageSummary) {
+        assert_eq!(
+            c.selected_files(),
+            c.read_ok_files() + c.read_failed_files()
+        );
+        assert_eq!(
+            c.read_ok_files(),
+            c.analyzed_files()
+                + c.partial_files()
+                + c.analysis_failed_files()
+                + c.unsupported_files()
+                + c.not_applicable_files()
+                + c.unknown_files()
+        );
+    }
+
+    #[test]
+    fn detailed_scan_distinguishes_empty_success_from_legacy_unknown() {
+        let root = temp_dir("inspection-empty");
+        fs::write(root.join("empty.txt"), "no cryptography").unwrap();
+        let config = test_config(root.clone());
+        let rules = test_rules();
+        let complete =
+            scan_repository_detailed(&config, &rules, &[Arc::new(CompleteDetector)]).unwrap();
+        assert!(complete.legacy().findings.is_empty());
+        assert!(complete.coverage().is_complete());
+        assert_eq!(complete.coverage().analyzed_files(), 1);
+        assert_coverage_partitions(complete.coverage());
+
+        let unknown =
+            scan_repository_detailed(&config, &rules, &[Arc::new(LegacyEmptyDetector)]).unwrap();
+        assert!(unknown.legacy().findings.is_empty());
+        assert_eq!(
+            unknown.coverage().status(),
+            crate::InspectionStatus::Unknown
+        );
+        assert_eq!(unknown.coverage().unknown_files(), 1);
+        assert!(unknown
+            .diagnostics()
+            .iter()
+            .any(|d| { d.code() == crate::DiagnosticCode::DetectorNotReported }));
+        assert_coverage_partitions(unknown.coverage());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn read_failure_retains_other_files_and_legacy_selected_count() {
+        let root = temp_dir("inspection-read");
+        fs::write(root.join("hit.js"), "RS256").unwrap();
+        fs::write(root.join("empty.txt"), "nothing").unwrap();
+        fs::write(root.join("unreadable.conf"), "unread").unwrap();
+        let document = scan_with_reader(
+            &test_config(root.clone()),
+            &test_rules(),
+            &[Arc::new(CompleteDetector)],
+            &|path| {
+                if path.ends_with("unreadable.conf") {
+                    Err(std::io::Error::other("SYNTHETIC_READ_ERROR_CONTENT"))
+                } else {
+                    fs::read(path)
+                }
+            },
+        )
+        .unwrap();
+        assert_eq!(document.legacy().findings.len(), 1);
+        assert_eq!(document.legacy().summary.scanned_files, 3);
+        assert_eq!(document.coverage().selected_files(), 3);
+        assert_eq!(document.coverage().read_failed_files(), 1);
+        assert_eq!(document.coverage().analyzed_files(), 2);
+        assert_eq!(
+            document.coverage().status(),
+            crate::InspectionStatus::Partial
+        );
+        assert_coverage_partitions(document.coverage());
+        let json = serde_json::to_value(document.diagnostics_report()).unwrap();
+        assert!(json["diagnostics"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|d| { d["code"] == "read_failed" && d["file"] == "unreadable.conf" }));
+        assert!(!json.to_string().contains("SYNTHETIC_READ_ERROR_CONTENT"));
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn detector_error_preserves_other_hits_and_does_not_export_error_content() {
+        let root = temp_dir("inspection-detector");
+        fs::write(root.join("hit.js"), "RS256").unwrap();
+        let document = scan_repository_detailed(
+            &test_config(root.clone()),
+            &test_rules(),
+            &[Arc::new(FailingDetector), Arc::new(CompleteDetector)],
+        )
+        .unwrap();
+        assert_eq!(document.legacy().findings.len(), 1);
+        assert_eq!(document.coverage().partial_files(), 1);
+        assert_eq!(document.coverage().analysis_failed_files(), 0);
+        assert_eq!(
+            document.coverage().status(),
+            crate::InspectionStatus::Partial
+        );
+        assert_coverage_partitions(document.coverage());
+        let json = serde_json::to_value(document.diagnostics_report()).unwrap();
+        assert_eq!(json["schema_version"], "1");
+        assert!(json["diagnostics"].as_array().unwrap().iter().any(|d| {
+            d["code"] == "detector_failed" && d["detector"] == "failing-test-detector"
+        }));
+        assert!(!json.to_string().contains("SYNTHETIC_ERROR_CONTENT"));
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn all_detector_errors_are_failed_not_empty_success() {
+        let root = temp_dir("inspection-failed");
+        fs::write(root.join("input.txt"), "anything").unwrap();
+        let document = scan_repository_detailed(
+            &test_config(root.clone()),
+            &test_rules(),
+            &[Arc::new(FailingDetector)],
+        )
+        .unwrap();
+        assert!(document.legacy().findings.is_empty());
+        assert_eq!(document.coverage().analysis_failed_files(), 1);
+        assert_eq!(
+            document.coverage().status(),
+            crate::InspectionStatus::Failed
+        );
+        assert_coverage_partitions(document.coverage());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn exclusions_describe_declared_scope_and_do_not_become_successful_inspections() {
+        let root = temp_dir("inspection-scope");
+        fs::write(root.join("README.md"), "ignored by policy").unwrap();
+        fs::write(root.join("big.txt"), "0123456789").unwrap();
+        fs::write(root.join("ok.txt"), "ok").unwrap();
+        let mut config = test_config(root.clone());
+        config.max_file_size_bytes = 4;
+        let document =
+            scan_repository_detailed(&config, &test_rules(), &[Arc::new(CompleteDetector)])
+                .unwrap();
+        assert_eq!(document.coverage().selected_files(), 1);
+        assert_eq!(document.coverage().excluded_enumerated_files(), 2);
+        assert_eq!(document.legacy().summary.skipped_files, 2);
+        assert!(document.coverage().is_complete());
+        assert!(document.coverage().not_enumerated_population());
+        let json = serde_json::to_value(document.diagnostics_report()).unwrap();
+        assert_eq!(json["scope"]["max_file_size_bytes"], 4);
+        assert_eq!(json["scope"]["git_ignore"], true);
+        assert_eq!(json["diagnostics"].as_array().unwrap().len(), 2);
+        assert_coverage_partitions(document.coverage());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    struct StatusDetector(DetectorStatus, bool);
+
+    impl Detector for StatusDetector {
+        fn name(&self) -> &'static str {
+            "status-test-detector"
+        }
+
+        fn detect(&self, file: &ScannableFile, rules: &RuleSet) -> Result<Vec<Detection>> {
+            if self.1 {
+                CompleteDetector.detect(file, rules)
+            } else {
+                Ok(Vec::new())
+            }
+        }
+
+        fn detect_detailed(
+            &self,
+            file: &ScannableFile,
+            rules: &RuleSet,
+        ) -> Result<crate::DetectorOutcome> {
+            Ok(crate::DetectorOutcome::new(
+                self.detect(file, rules)?,
+                self.0,
+            ))
+        }
+    }
+
+    #[test]
+    fn detailed_statuses_partition_files_without_claiming_false_completeness() {
+        use crate::InspectionStatus as I;
+        use DetectorStatus as S;
+        let root = temp_dir("inspection-status");
+        fs::write(root.join("hit.js"), "RS256").unwrap();
+        for (status, emit_hit, count_key, overall) in [
+            (S::Complete, false, "analyzed_files", I::CompleteWithinScope),
+            (
+                S::NotApplicable,
+                false,
+                "not_applicable_files",
+                I::CompleteWithinScope,
+            ),
+            (S::Unsupported, false, "unsupported_files", I::Partial),
+            (S::Partial, false, "partial_files", I::Partial),
+            (S::Truncated, false, "partial_files", I::Partial),
+            (S::NotReported, false, "unknown_files", I::Unknown),
+            // A hit contradicts "not applicable"; preserve it without declaring completion.
+            (S::NotApplicable, true, "partial_files", I::Partial),
+        ] {
+            let document = scan_repository_detailed(
+                &test_config(root.clone()),
+                &test_rules(),
+                &[Arc::new(StatusDetector(status, emit_hit))],
+            )
+            .unwrap();
+            assert_eq!(
+                document.coverage().status(),
+                overall,
+                "{status:?}, {emit_hit}"
+            );
+            let c = serde_json::to_value(document.coverage()).unwrap();
+            assert_eq!(c[count_key], 1, "{status:?}, {emit_hit}");
+            assert_eq!(document.legacy().findings.len(), usize::from(emit_hit));
+            assert_coverage_partitions(document.coverage());
+        }
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn selected_files_without_detectors_are_unknown_but_empty_scope_can_complete() {
+        let root = temp_dir("inspection-no-detectors");
+        let config = test_config(root.clone());
+        let empty = scan_repository_detailed(&config, &test_rules(), &[]).unwrap();
+        assert!(empty.coverage().is_complete());
+        fs::write(root.join("input.txt"), "nothing").unwrap();
+        let selected = scan_repository_detailed(&config, &test_rules(), &[]).unwrap();
+        assert_eq!(selected.coverage().unknown_files(), 1);
+        assert!(!selected.coverage().is_complete());
+        assert_coverage_partitions(selected.coverage());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn legacy_adapter_runs_once_and_wrapper_keeps_the_same_result() {
+        struct CountingLegacy(std::sync::atomic::AtomicUsize);
+        impl Detector for CountingLegacy {
+            fn name(&self) -> &'static str {
+                "counting-legacy"
+            }
+            fn detect(&self, file: &ScannableFile, rules: &RuleSet) -> Result<Vec<Detection>> {
+                self.0.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                CompleteDetector.detect(file, rules)
+            }
+        }
+        let root = temp_dir("inspection-wrapper");
+        fs::write(root.join("hit.js"), "RS256").unwrap();
+        let detector = Arc::new(CountingLegacy(std::sync::atomic::AtomicUsize::new(0)));
+        let detectors: Vec<Arc<dyn Detector>> = vec![detector.clone()];
+        let config = test_config(root.clone());
+        let rules = test_rules();
+        let legacy = scan_repository(&config, &rules, &detectors).unwrap();
+        assert_eq!(detector.0.load(std::sync::atomic::Ordering::SeqCst), 1);
+        let detailed = scan_repository_detailed(&config, &rules, &detectors).unwrap();
+        assert_eq!(detector.0.load(std::sync::atomic::Ordering::SeqCst), 2);
+        let mut before = serde_json::to_value(legacy).unwrap();
+        let mut after = serde_json::to_value(detailed.legacy()).unwrap();
+        before.as_object_mut().unwrap().remove("generated_at");
+        after.as_object_mut().unwrap().remove("generated_at");
+        assert_eq!(before, after);
+        fs::remove_dir_all(root).unwrap();
     }
 
     #[test]

@@ -156,7 +156,7 @@ In practice:
 ## CLI
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -184,6 +184,51 @@ pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
 # Inspect one rule in detail
 pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
+
+### Inspection diagnostics
+
+Read failures and detector errors retain other findings and produce typed inspection
+diagnostics. The CLI prints one completeness warning to stderr when inspection is
+partial, failed or unknown. Default exit codes remain unchanged: 0 for success,
+1 for an operational error and 2 when `--fail-on` is reached. No findings does not
+prove that inspection completed.
+
+Use `--diagnostics` to additionally write `diagnostics.json` in `--out-dir`.
+This separate artifact has `schema_version: "1"`, generation time, declared scope,
+coverage counters and safe reason codes. Arbitrary detector/I/O error contents and
+file contents are not included. The six existing report filenames and machine
+schemas remain unchanged; `--format all` does not implicitly enable diagnostics.
+`--lang` continues to affect HTML/Markdown only.
+
+```bash
+pqc-scan scan . --diagnostics --require-complete --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+```
+
+`--require-complete` returns **3** when inspection is not known to be complete,
+after writing the requested reports. Exit precedence is operational error (1),
+requested completeness failure (3), then finding threshold (2). Neither option
+requires the other. A valid empty scope can complete, but this says nothing about
+cryptography outside that scope.
+
+**Current limitation:** the existing built-in detectors use the compatible legacy
+adapter, which does not report internal parser success, applicability or match-cap
+exhaustion. Nonempty scans therefore normally report `unknown` and strict mode
+returns 3, even if detectors return no errors. Task 018 accounts for outer read and
+execution failures; detector-specific limit/parser outcomes are later work. It
+does not certify a complete scan or change detection behavior.
+
+The legacy `scanned_files` count still means files selected by the walker. New
+counters distinguish selected, read-ok, read-failed, analyzed, partial,
+analysis-failed, unsupported, not-applicable and unknown files. Enumerated policy
+exclusions and enumeration failures are separate; ignore-filtered populations are
+not counted and are explicitly unknown. Completeness is only within declared
+scope, including the existing ignore rules, default exclusions and size limit.
+
+Library users can call `scan_repository_detailed` and inspect the private-field
+`ScanDocument` through accessors. `scan_repository`, `ScanResult`, existing report
+writers and required `Detector::detect` implementations remain compatible.
+Detectors may opt into `detect_detailed` with an explicit `DetectorOutcome`;
+`Complete` is a statement about inspection, never a security verdict.
 
 ## Report Outputs
 

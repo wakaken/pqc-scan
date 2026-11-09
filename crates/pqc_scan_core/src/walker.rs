@@ -3,7 +3,9 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use ignore::WalkBuilder;
 
-const DEFAULT_EXCLUDES: &[&str] = &[".git", "node_modules", "target", "dist", "docs"];
+use crate::{DiagnosticCode, ScanDiagnostic};
+
+pub(crate) const DEFAULT_EXCLUDES: &[&str] = &[".git", "node_modules", "target", "dist", "docs"];
 
 #[derive(Debug, Clone, Default)]
 pub struct WalkStats {
@@ -12,6 +14,20 @@ pub struct WalkStats {
 }
 
 pub fn walk_repository(root: &Path, max_size_bytes: usize) -> Result<(Vec<PathBuf>, WalkStats)> {
+    let outcome = walk_repository_detailed(root, max_size_bytes)?;
+    Ok((outcome.files, outcome.stats))
+}
+
+pub(crate) struct WalkOutcome {
+    pub files: Vec<PathBuf>,
+    pub stats: WalkStats,
+    pub diagnostics: Vec<ScanDiagnostic>,
+    pub excluded: u64,
+    pub failed_entries: u64,
+}
+
+pub(crate) fn walk_repository_detailed(root: &Path, max_size_bytes: usize) -> Result<WalkOutcome> {
+    std::fs::metadata(root).with_context(|| "failed to access scan root")?;
     let mut builder = WalkBuilder::new(root);
     builder
         .standard_filters(true)
@@ -21,12 +37,37 @@ pub fn walk_repository(root: &Path, max_size_bytes: usize) -> Result<(Vec<PathBu
         .git_global(true)
         .git_exclude(true);
 
+    collect_entries(root, max_size_bytes, builder.build())
+}
+
+fn collect_entries(
+    root: &Path,
+    max_size_bytes: usize,
+    entries: impl IntoIterator<Item = std::result::Result<ignore::DirEntry, ignore::Error>>,
+) -> Result<WalkOutcome> {
     let mut files = Vec::new();
     let mut stats = WalkStats::default();
+    let mut diagnostics = Vec::new();
+    let mut excluded = 0;
+    let mut failed_entries = 0;
 
-    for entry in builder.build() {
-        let entry = entry.with_context(|| "failed to iterate repository")?;
+    for entry in entries {
+        // Iterator errors were fatal in the legacy walker, including root read_dir
+        // failures after successful metadata. Preserve that operational contract.
+        let entry = entry.map_err(|_| anyhow::anyhow!("failed to enumerate repository"))?;
         let path = entry.path();
+
+        // ignore attaches soft ignore-file errors to otherwise valid directories.
+        // Account for these before the directory early return, without exporting
+        // raw patterns/error contents or discarding the remaining usable entries.
+        if entry.error().is_some() {
+            failed_entries += 1;
+            diagnostics.push(ScanDiagnostic::new(
+                DiagnosticCode::EnumerationFailed,
+                Some(relative_path(root, path)),
+                None,
+            ));
+        }
 
         if entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
             continue;
@@ -34,6 +75,12 @@ pub fn walk_repository(root: &Path, max_size_bytes: usize) -> Result<(Vec<PathBu
 
         if should_exclude(path) {
             stats.skipped += 1;
+            excluded += 1;
+            diagnostics.push(ScanDiagnostic::new(
+                DiagnosticCode::ExcludedPath,
+                Some(relative_path(root, path)),
+                None,
+            ));
             continue;
         }
 
@@ -41,12 +88,24 @@ pub fn walk_repository(root: &Path, max_size_bytes: usize) -> Result<(Vec<PathBu
             Ok(m) => m,
             Err(_) => {
                 stats.skipped += 1;
+                failed_entries += 1;
+                diagnostics.push(ScanDiagnostic::new(
+                    DiagnosticCode::MetadataFailed,
+                    Some(relative_path(root, path)),
+                    None,
+                ));
                 continue;
             }
         };
 
         if meta.len() as usize > max_size_bytes {
             stats.skipped += 1;
+            excluded += 1;
+            diagnostics.push(ScanDiagnostic::new(
+                DiagnosticCode::FileTooLarge,
+                Some(relative_path(root, path)),
+                None,
+            ));
             continue;
         }
 
@@ -54,7 +113,20 @@ pub fn walk_repository(root: &Path, max_size_bytes: usize) -> Result<(Vec<PathBu
         files.push(path.to_path_buf());
     }
 
-    Ok((files, stats))
+    Ok(WalkOutcome {
+        files,
+        stats,
+        diagnostics,
+        excluded,
+        failed_entries,
+    })
+}
+
+pub(crate) fn relative_path(root: &Path, path: &Path) -> String {
+    path.strip_prefix(root)
+        .unwrap_or(path)
+        .to_string_lossy()
+        .into_owned()
 }
 
 fn should_exclude(path: &Path) -> bool {
@@ -89,6 +161,44 @@ mod tests {
         dir.push(format!("pqc-scan-{prefix}-{}-{nanos}", std::process::id()));
         fs::create_dir_all(&dir).expect("create temp dir");
         dir
+    }
+
+    #[test]
+    fn iterator_failures_remain_fatal_instead_of_becoming_successful_empty_scans() {
+        for depth in [0, 1] {
+            let error = ignore::Error::WithDepth {
+                depth,
+                err: Box::new(ignore::Error::Io(std::io::Error::other(
+                    "SYNTHETIC_ENUMERATION_ERROR_CONTENT",
+                ))),
+            };
+            let result = collect_entries(Path::new("."), 1024, [Err(error)]);
+            let Err(error) = result else {
+                panic!("iterator failure must remain fatal at depth {depth}")
+            };
+            assert!(!format!("{error:#}").contains("SYNTHETIC_ENUMERATION_ERROR_CONTENT"));
+        }
+    }
+
+    #[test]
+    fn ignore_parse_errors_are_diagnostic_even_if_all_files_are_excluded() {
+        let root = temp_dir("walker-ignore-error");
+        fs::write(
+            root.join(".gitignore"),
+            "[z-a]SYNTHETIC_IGNORE_CONTENT\n*\n",
+        )
+        .unwrap();
+        fs::write(root.join("ignored.txt"), "not scanned").unwrap();
+        let outcome = walk_repository_detailed(&root, 1024).unwrap();
+        assert!(outcome.files.is_empty());
+        assert_eq!(outcome.failed_entries, 1);
+        assert!(outcome
+            .diagnostics
+            .iter()
+            .any(|d| d.code() == DiagnosticCode::EnumerationFailed));
+        let json = serde_json::to_string(&outcome.diagnostics).unwrap();
+        assert!(!json.contains("SYNTHETIC_IGNORE_CONTENT"));
+        fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
