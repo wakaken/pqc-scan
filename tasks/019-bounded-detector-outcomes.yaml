@@ -1,0 +1,39 @@
+id: "019"
+title: "Expose detector limits after eligibility filtering"
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: "0"
+description: "Expose detector limits after eligibility filtering. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-019"
+change_size: "Small/medium; boundary-case validation"
+decision_gate: "Normal role review; document expected result deltas."
+change_categories:
+  - "Existing implementation correction"
+  - "Existing implementation extension"
+depends_on:
+  - "018"
+required_files:
+  - "crates/pqc_scan_detectors/src/regex_detector.rs"
+  - "crates/pqc_scan_detectors/src/tree_sitter_detector.rs"
+  - "crates/pqc_scan_detectors/src/key_detector.rs"
+  - "crates/pqc_scan_core/src/pipeline.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Implement detailed applicability/cap outcomes."
+  - "Separate examined candidates from accepted hits; apply accepted regex budget after comment filtering and retain a finite work budget."
+out_of_scope:
+  - "No unbounded scanning or silent default cap increase."
+risks:
+  - "Recovered hits are intentional result changes; exact-cap does not prove omitted matches."
+acceptance:
+  - "Limits preserve partial results and report known truncation or conservative limit-reached status."
+  - "No false CompleteWithinScope."
+testing_requirements:
+  - "32 comments plus code; 40 eligible hits; nine dummy key markers; exact-cap and cap-plus-one cases."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+recommended_pr_split:
+  - "019-A: regex budget"
+  - "019-B: AST/key outcomes"

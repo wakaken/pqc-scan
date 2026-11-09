@@ -1,0 +1,34 @@
+id: "022"
+title: "Emit valid SARIF for unknown and non-ASCII locations"
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: "0"
+description: "Emit valid SARIF for unknown and non-ASCII locations. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-022"
+change_size: "Small; schema and Unicode validation"
+decision_gate: "Normal role review; preserve schema version and document corrected values."
+change_categories:
+  - "Existing implementation correction"
+depends_on: []
+required_files:
+  - "crates/pqc_scan_report/src/sarif_report.rs"
+  - "crates/pqc_scan_detectors/src/dependency_detector.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Omit unknown regions; preserve known artifact locations."
+  - "Define valid URI encoding and column units."
+  - "Add offline pinned SARIF 2.1.0 validation and semantic fixtures."
+out_of_scope:
+  - "No invented line 1 or fake runtime source locations."
+risks:
+  - "Consumers may rely on previous invalid locations; document corrected semantics."
+acceptance:
+  - "Schema-valid unknown/Unicode/reserved-character locations with preserved rules/results/IDs."
+testing_requirements:
+  - "Writer fixtures, official schema validation and current SARIF contract regression."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+recommended_pr_split:
+  - "022: location correction and tests"

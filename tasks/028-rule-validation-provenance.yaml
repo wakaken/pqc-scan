@@ -1,0 +1,41 @@
+id: "028"
+title: "Strengthen rule validation and quality provenance compatibly"
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: "0"
+description: "Strengthen rule validation and quality provenance compatibly. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-028"
+change_size: "Small/medium; compatibility review"
+decision_gate: "Human approval before rejecting existing custom semantics or changing detection patterns."
+change_categories:
+  - "Existing implementation correction"
+  - "Existing implementation extension"
+depends_on:
+  - "018"
+  - "023"
+required_files:
+  - "crates/pqc_scan_rules/src/lib.rs"
+  - "rules/default/"
+  - "docs/rules-reference.md"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Report traversal failures; retain regex/duplicate-ID validation."
+  - "Validate finite bounded confidence and nonempty IDs; inventory custom-scope semantics before tightening."
+  - "Add companion metadata for standard edition, method limits and positive/negative fixtures."
+  - "Review all 117 current built-in rules against a purpose/algorithm/quantum/classical classification matrix; record unsupported constructs and gaps without silently changing detections."
+out_of_scope:
+  - "No rule DSL, breaking scope rejection or bulk rewrite."
+risks:
+  - "Loose custom packs may depend on current acceptance."
+acceptance:
+  - "Invalid confidence and partial rule loading cannot silently succeed."
+  - "Built-in/custom corpus preserves compatibility with reviewed warning/migration behavior."
+testing_requirements:
+  - "Empty IDs, numeric bounds/nonfinite, traversal injection, regex and legacy/custom scopes."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+recommended_pr_split:
+  - "028-A: validation/loader errors"
+  - "028-B: source/fixture quality manifest"

@@ -1,0 +1,38 @@
+id: "031"
+title: "Validate TLS API and provider feasibility before selection"
+type: feature
+priority: medium
+status: pending
+owner: Planner Agent
+phase: "2"
+description: "Validate TLS API and provider feasibility before selection. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-031"
+change_size: "Medium; high uncertainty until spike"
+decision_gate: "Approve backend/features/platforms after spike; no custom TLS fallback."
+change_categories:
+  - "New feature addition"
+depends_on:
+  - "020"
+  - "025"
+  - "030"
+required_files:
+  - "docs/architecture/TLS-SSH-PROBE-DESIGN.md"
+  - "Cargo.toml"
+  - "rust-toolchain.toml"
+implementation_steps:
+  - "Use isolated disposable harness to pin rustls/provider/features and build on Rust 1.93.1/selected platforms."
+  - "Prove actual protocol/suite/group and bounded certificate access with local peers."
+  - "Record unsupported APIs/groups, verifier limitations, native build cost and static feature isolation."
+  - "Treat rust-toolchain.toml as a reference constraint; do not raise Rust 1.93.1 to make a candidate compile without a separate compatibility decision."
+out_of_scope:
+  - "No public targets, insecure verifier bypass, custom TLS crypto or FIPS claim."
+risks:
+  - "Mutable docs do not prove compiler/MSRV/provider/platform behavior."
+acceptance:
+  - "Reviewed evidence record identifies actual API results and unknowns."
+  - "Backend choice has explicit supported facts and unsupported outcomes."
+testing_requirements:
+  - "Pinned local build matrix; direct group assertion; failed verifier/None and default-static dependencies."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+recommended_pr_split:
+  - "031: isolated feasibility record and dependency decision"

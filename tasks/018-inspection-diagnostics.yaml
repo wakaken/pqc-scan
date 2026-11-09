@@ -1,0 +1,43 @@
+id: "018"
+title: "Account for read and detector failures without changing legacy outputs"
+type: improvement
+priority: high
+status: pending
+planned_new_paths:
+  - "crates/pqc_scan_core/src/diagnostic.rs"
+owner: Planner Agent
+phase: "0"
+description: "Account for read and detector failures without changing legacy outputs. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-018"
+change_size: "Medium; moderate validation burden"
+decision_gate: "Approve additive artifact/CLI names and opt-in exit policy; do not replace legacy storage."
+change_categories:
+  - "Existing implementation correction"
+  - "Existing implementation extension"
+depends_on: []
+required_files:
+  - "crates/pqc_scan_core/src/pipeline.rs"
+  - "crates/pqc_scan_core/src/walker.rs"
+  - "crates/pqc_scan_core/src/lib.rs"
+  - "crates/pqc_scan_core/src/model.rs"
+  - "crates/pqc_scan_cli/src/main.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Add private-field ScanDocument/diagnostic/coverage API and object-safe detect_detailed default adapter; keep legacy wrapper and structs."
+  - "Aggregate read/detector failures with partial hits, accurate counters and NotReported legacy applicability."
+  - "Add stderr notice and opt-in diagnostics.json/require-complete behavior after interface review."
+out_of_scope:
+  - "No new inventory engine, rule changes or default machine-schema changes."
+risks:
+  - "Legacy adapters cannot prove completeness; old scanned_files meaning must remain stable."
+acceptance:
+  - "Successful empty inspection differs from errors and partial success."
+  - "Other detectors' hits survive a failure; old API/output/ID contracts remain valid."
+testing_requirements:
+  - "Injected read error and Err Detector plus successful detector; empty/partial/unknown outcomes."
+  - "Counter reconciliation, legacy golden outputs and CLI exit precedence."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+recommended_pr_split:
+  - "018-A: detailed API and failure/counter tests"
+  - "018-B: opt-in CLI diagnostics and both READMEs"

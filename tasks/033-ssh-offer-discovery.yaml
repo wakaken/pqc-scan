@@ -1,0 +1,43 @@
+id: "033"
+title: "Add bounded unauthenticated SSH algorithm discovery"
+type: feature
+priority: medium
+status: pending
+planned_new_paths:
+  - "crates/pqc_scan_probe_ssh/Cargo.toml"
+  - "crates/pqc_scan_probe_ssh/src/lib.rs"
+owner: Planner Agent
+phase: "3"
+description: "Add bounded unauthenticated SSH algorithm discovery. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-033"
+change_size: "Medium/high; bounded protocol parser review"
+decision_gate: "Review parser scope/caps; full library needs separately justified decision."
+change_categories:
+  - "New feature addition"
+depends_on:
+  - "026"
+  - "030"
+required_files:
+  - "Cargo.toml"
+  - "crates/pqc_scan_cli/src/main.rs"
+  - "crates/pqc_scan_report/src/lib.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Add optional pqc_scan_probe_ssh with bounded identification/KEXINIT parser/state machine."
+  - "Preserve ordered remote KEX/host-key candidates, extension markers and exact namespace/status."
+  - "Stop before KEX execution, service/userauth/channel requests; mark offers unauthenticated."
+out_of_scope:
+  - "No completed KEX, auth none/password/agent, host verification, commands or system ssh backend."
+risks:
+  - "Malicious framing, split reads, waiting-for-client KEXINIT and deceptive banners."
+acceptance:
+  - "Advertised candidates are never labeled negotiated."
+  - "Zero service/userauth/channel messages; malformed/limited outcomes are visible."
+testing_requirements:
+  - "Parser/fuzz fixtures, local classical/hybrid OpenSSH offers and message-type/resource assertions."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+recommended_pr_split:
+  - "033-A: parser/fixtures"
+  - "033-B: explicit command/transport"
+  - "033-C: isolated interoperability/docs"

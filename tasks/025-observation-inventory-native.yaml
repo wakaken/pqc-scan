@@ -1,0 +1,54 @@
+id: "025"
+title: "Add observations, normalized inventory and opt-in native JSON"
+type: feature
+priority: high
+status: pending
+planned_new_paths:
+  - "crates/pqc_scan_core/src/observation.rs"
+  - "crates/pqc_scan_core/src/inventory.rs"
+  - "crates/pqc_scan_core/src/identity.rs"
+  - "crates/pqc_scan_core/src/compat.rs"
+  - "schemas/native-scan-v1.schema.json"
+owner: Planner Agent
+phase: "1"
+description: "Add observations, normalized inventory and opt-in native JSON. Planning only; implementation and validation have not started."
+plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-025"
+change_size: "Large but incremental; high identity/contract validation"
+decision_gate: "Approve native v1 artifact and identity scope; no default schema replacement."
+change_categories:
+  - "Existing implementation extension"
+  - "New feature addition"
+depends_on:
+  - "018"
+  - "019"
+  - "020"
+  - "023"
+required_files:
+  - "crates/pqc_scan_core/src/model.rs"
+  - "crates/pqc_scan_core/src/pipeline.rs"
+  - "crates/pqc_scan_core/src/lib.rs"
+  - "crates/pqc_scan_detectors/src/"
+  - "crates/pqc_scan_report/src/json_report.rs"
+  - "crates/pqc_scan_cli/src/main.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Add focused core observation/inventory/identity/compat modules with safe evidence and assurance/usage distinctions."
+  - "Normalize exact algorithms, public cert/SPKI identities and separate source instances."
+  - "Add versioned length-delimited IDs and legacy-index/ID multimap associations while retaining legacy normalization."
+  - "Publish native schema and separately selected scan.native.v1.json with explicit loss notes."
+out_of_scope:
+  - "No new model/inventory crate, changed default schemas or replacement legacy ID algorithm."
+risks:
+  - "Weak/duplicate anchors and premature API freezing."
+acceptance:
+  - "Algorithm vs instance, certificate vs key and multi-method observations remain distinct."
+  - "New keys avoid tuple ambiguity/checkout roots; old IDs and machine shapes remain unchanged."
+  - "Native schema and legacy shadow comparison have reviewed fixtures."
+testing_requirements:
+  - "Schema/golden/tolerant-reader, root/line/move/duplicate/public-cert cases and old consumer entrypoints."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+recommended_pr_split:
+  - "025-A: safe observation types"
+  - "025-B: inventory and identity adapters"
+  - "025-C: native schema and explicit CLI"
