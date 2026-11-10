@@ -121,3 +121,44 @@ is an integrity check, not an authenticity or comprehensive permission policy.
 Notice gaps, browser/dependency acceptance, remote execution, other platforms and
 external publication remain unapproved or unexecuted. Final clean-source package
 records will supersede the preliminary archives above.
+
+## Final clean-commit local preparation
+
+The following clean-commit evidence supersedes dirty-snapshot packaging bindings
+above. Source-review corrections were accepted before execution. At HEAD
+`9201dc5022ea918e1416db7abf710db58a4bd855`, `git status --porcelain` was empty
+before each package and after all packaging/install commands. Every provenance
+records `source_dirty: false` and the SHA-256 of an empty tracked diff.
+No tracked documentation was edited until both variants' two archive generations
+and installation checks finished.
+
+| Variant | Archive SHA-256 (both repeats) | Supplied binary SHA-256 |
+|---|---|---|
+| static | `ef60fab5c8807796e99eafe9327d5ab275c3149391e3cc44149c49798b67dc7e` | `48e4096216794cc85e0dcf9b7585ed605a1e1dd902ac65e7779d447464574fb2` |
+| combined-probes | `4828e5c3a48e19edca474fd41bf77b40efd845e3af2dc5a34c9f0efd6d606f01` | `7cebb433c007c174affe3946b15030837ef0a46c8c9d1d28451e0493240d86fe` |
+
+Each variant executed two packaging commands, `cmp`, verification of both archives
+and an offline clean-prefix installation harness; all 12 commands exited0.
+Both installed `rules list`/`scan` command pairs exited0, produced 2 expected
+synthetic findings and ran under macOS sandbox-exec with `deny network*`.
+The external fixture SHA-256 was
+`0367002dc310edee63f28dda54ea17fa290a9817da5e2ca92af1652b12dffb44`.
+
+The packaging input manifest contains 125 explicitly selected source/assets/docs
+with aggregate digest
+`fcd8f74c22d27b22fb7a7e8d7395d7e5be748ba909920dd9b42718375b36e965`.
+This is the packaging tool's declared input scope, distinct from the parent's
+full product-build source inventory. Full per-file hashes, English/Japanese
+DISTRIBUTION/PROBING and SECURITY hashes, command arrays/exits, toolchain and exact
+archive/binary bindings are in [the durable JSON record](TASK-038-FINAL-CLEAN.json).
+Raw logs and installed command outputs remain in ignored
+`target/task-038/FINAL-CLEAN-RESULTS.json`, `final-{static,combined}-*.log` and
+`final-{static,combined}-install/INSTALL-RESULTS.json`. Archives and adjacent
+external hashes are in `final-{static,combined}-{first,second}/` under that root.
+These paths now contain the clean-commit results, replacing preliminary artifacts.
+
+The static/combined dependency inventories remain 139/168 packages with 5/9
+missing notice-file sets. Task038 remains blocked for notice review and dependency
+acceptance, including actual-browser task036. The manual workflow remains
+unexecuted; no remote CI, publication, signature authenticity, other-platform
+support or independent binary reproducibility is established by these results.

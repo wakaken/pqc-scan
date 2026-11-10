@@ -10,14 +10,15 @@ owner: Evaluator Agent
 phase: "5"
 description: "Prepare local macOS arm64 static/combined-probes archives and bilingual operating documentation. Preparation implemented; dependency and final acceptance gates remain open."
 preparation_evidence: "docs/quality/TASK-038-CHANNEL-INVENTORY.md"
-preparation_status: "Technical selection delegated: source checkout plus unpublished macOS arm64 static/combined-probes archives, latest verified development snapshot best-effort policy; both variants repeated byte-identically and clean-installed offline on a recorded dirty snapshot. Independent source review accepted after bounded-verifier/runner corrections; final revision build binding, notice gaps and dependency acceptance remain open."
+preparation_status: "Technical selection delegated: source checkout plus unpublished macOS arm64 static/combined-probes archives, latest verified development snapshot best-effort policy. Final clean 9201dc5 packages supersede preliminary dirty-snapshot samples: both variants byte-identical on repetition and clean-installed offline; independent source review accepted. Notice gaps and dependency/browser acceptance remain open."
 plan_reference: "docs/roadmap/TASK-038-IMPLEMENTATION.md"
 validation_evidence: "docs/quality/TASK-038-PREPARATION.md"
-blocker: "Preparation only: dependencies and final-revision acceptance remain open; static/combined inventories lack notice files for 5/9 packages. No publication authorized."
+blocker: "Preparation only: dependency/browser acceptance remains open; static/combined inventories lack notice files for 5/9 packages. No publication authorized."
 role_transitions:
   - "Planner: selected and planned under delegated local-preparation scope."
   - "Executor: in-progress preparation, targeted tests and both-variant repeatability/offline clean installs."
   - "Executor: blocked pending final builds, reviews, notices and dependencies; not done."
+  - "Evaluator: clean-source final package/build bindings and independent review verified; blocked remains for notices and dependency/browser acceptance."
 change_size: "Medium/high; packaging/platform unknowns"
 decision_gate: "Choose channels/support window; external publication requires separate authorization."
 change_categories:
@@ -53,3 +54,10 @@ acceptance:
 testing_requirements:
   - "Clean installs/rule discovery on declared platforms; license/hash/build checks and bilingual doc acceptance."
   - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+final_clean_binding:
+  head: "9201dc5022ea918e1416db7abf710db58a4bd855"
+  source_dirty: false
+  evidence: "docs/quality/TASK-038-FINAL-CLEAN.json"
+  source_inputs_sha256: "fcd8f74c22d27b22fb7a7e8d7395d7e5be748ba909920dd9b42718375b36e965"
+  result: "Both variants: two packages byte-identical, internal checksums verified, offline clean-prefix rules/scan exit0. Publication/dependencies/license gaps remain blocked."
