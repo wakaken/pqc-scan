@@ -236,7 +236,19 @@ where
     WOut: Write,
     WErr: Write,
 {
-    let cli = Cli::try_parse_from(args)?;
+    let cli = match Cli::try_parse_from(args) {
+        Ok(cli) => cli,
+        Err(error)
+            if matches!(
+                error.kind(),
+                clap::error::ErrorKind::DisplayHelp | clap::error::ErrorKind::DisplayVersion
+            ) =>
+        {
+            write!(stdout, "{error}")?;
+            return Ok(ExitStatus::Success);
+        }
+        Err(error) => return Err(error.into()),
+    };
     run_cli(cli, stdout, stderr)
 }
 

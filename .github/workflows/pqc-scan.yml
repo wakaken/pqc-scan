@@ -32,6 +32,43 @@ jobs:
       - name: Test baseline evaluator
         run: python3 -m unittest discover -s tests/quality -p 'test_*.py'
 
+  protocols:
+    runs-on: macos-15
+    needs: quality
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.93.1
+          components: rustfmt, clippy
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test optional feature union with loopback-only egress
+        run: python3 tests/protocol/run-isolated.py --out-dir target/protocol-ci --target-dir target/probe-runtime-build
+      - name: Check all optional-feature targets
+        run: cargo clippy --workspace --all-targets --all-features --locked --target-dir target/probe-runtime-build -- -D warnings
+      - name: Generate real local protocol report fixtures
+        run: >-
+          sandbox-exec -p '(version 1)(allow default)(deny network-outbound)(allow network-outbound (remote ip "localhost:*"))'
+          python3 tests/protocol/report-previews.py --binary target/probe-runtime-build/debug/pqc-scan --out-dir target/protocol-previews
+      - name: Test packaging bounds and exact-version notices
+        run: python3 -m unittest discover -s tests/distribution -v
+      - name: Preserve protocol evidence and synthetic reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pqc-optional-protocol-evidence
+          if-no-files-found: error
+          path: |
+            target/protocol-ci/
+            target/protocol-previews/
+
   baseline:
     runs-on: ubuntu-latest
     needs: quality

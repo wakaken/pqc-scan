@@ -101,6 +101,19 @@ Agents collaborate using a shared task queue as below.
 
 ---
 
+# Local Report Browser Verification
+
+- Use a temporary HTTP server bound to `127.0.0.1` for generated report checks;
+  do not repeatedly attempt unsupported `file://` navigation.
+- Serve a dedicated directory containing only the intended generated test reports.
+  Never serve the repository root, home directory or private production inputs.
+- Record actual browser/viewport observations and captures. Source/DOM unit tests
+  do not substitute for real layout, keyboard and loaded-offline checks.
+- Preserve the user's visible report tab and report the loopback URL. Keep or stop
+  the dedicated server according to the requested viewing workflow.
+
+---
+
 # Task Queue
 Tasks are stored in the `tasks/` directory as YAML files.
 See `tasks/README.md` for details.

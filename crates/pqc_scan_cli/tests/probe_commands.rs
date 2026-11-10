@@ -38,6 +38,9 @@ fn default_binary_has_no_probe_command() {
         .arg("--help")
         .output()
         .unwrap();
+    assert_eq!(help.status.code(), Some(0));
+    assert!(help.stderr.is_empty());
+    assert!(String::from_utf8_lossy(&help.stdout).contains("Usage:"));
     assert!(!String::from_utf8_lossy(&help.stdout).contains("probe"));
 }
 

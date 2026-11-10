@@ -45,9 +45,15 @@ build first. Binary provenance records the supplied binary's hash, not proof tha
 it was built from the recorded source. Bind it to separate build logs before any
 release. Dirty state, source inputs, features and tool versions appear in
 `PROVENANCE.json`. `DEPENDENCY-LICENSES.json` lists resolved normal/build packages
-for the selected target/features, their declared licenses and collected notices.
+for the selected target/features, their declared licenses and collected notices. Exact-version upstream fallbacks
+are checked against Cargo.lock checksum, archive VCS revision and bundled file
+hashes, with no network fetching during packaging.
 It is audit evidence, not legal certification or a proof of exact binary linkage.
-An empty notice list requires review before publication.
+Missing reviewed notices fail preparation. The five formerly missing static
+notice sets now include original upstream license texts. Four objc2-family
+statements remain explicitly review-required: they link license texts and flag
+Apple SDK-derived-work questions. They are not full permission texts or publication
+clearance; see [the pinned notice inventory](../../third_party/notices/README.md).
 
 Verify the archive's adjacent `.sha256` file using `shasum -a 256 -c FILE.sha256`
 from its directory. The Python verifier checks all internal member hashes and

@@ -67,6 +67,7 @@ cargo install --locked --path crates/pqc_scan_cli
 インストール後も、このリポジトリの `rules` ディレクトリを参照できる場所に残してください。
 バイナリにルールディレクトリは含まれないため、別のプロジェクトを調べるときは `--rules-dir` を絶対パスで指定します。
 コマンドが見つからない場合は、`~/.cargo/bin` が `PATH` に含まれているか確認してください。
+`pqc-scan --help`・`pqc-scan --version` で導入したコマンドを確認できます。どちらもスキャンや通信を行わず、正常終了します。
 
 ```bash
 pqc-scan scan /path/to/your-product --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules

@@ -65,6 +65,7 @@ cargo install --locked --path crates/pqc_scan_cli
 
 Keep the checkout's `rules` directory available after installation. The binary does not bundle that directory; use an absolute `--rules-dir` path when scanning another project.
 If the command is not found, check that `~/.cargo/bin` is in `PATH`.
+Use `pqc-scan --help` or `pqc-scan --version` to check the installed command; both exit successfully without scanning or networking.
 
 ```bash
 pqc-scan scan /path/to/your-product --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
