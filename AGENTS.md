@@ -76,18 +76,25 @@ Agents collaborate using a shared task queue as below.
 
 - The main agent performs investigation, planning, implementation, testing and
   documentation without delegating them to subagents.
-- After implementation is complete, use one reviewer subagent for the combined
-  change. Do not start a reviewer for every small edit or bookkeeping step.
-- Use at most one reviewer identity per user implementation request. Reuse that
-  reviewer for scoped verification of fixes; do not add parallel reviewers or a
-  separate evidence-review agent. Any additional subagent requires explicit
-  user authorization.
-- Give the reviewer concise requirements, the relevant diff and test results;
-  do not copy the whole conversation. The reviewer must not delegate further.
-- The main agent fixes findings and runs necessary tests. The reviewer relies
-  on those results unless a specific concern requires independent reproduction.
+- Use two review stages for each user implementation request:
+  1. After implementation, start one implementation-review subagent to review
+     the combined change for correctness, requirements and compatibility.
+  2. After the main agent completes the required tests, start one test-review
+     subagent to check whether the testing actually verifies the final change.
+     Check coverage, relevant positive/negative cases, meaningful assertions,
+     appropriate commands/features and evidence matching the final source.
+     Passing logs alone are not sufficient evidence of adequate testing.
+- Use at most two reviewer identities per user implementation request: one per
+  stage. Reuse each stage's reviewer for scoped verification of fixes or added
+  tests. Do not start a reviewer for each edit, test command or log file. Any
+  additional subagent requires explicit user authorization.
+- Give each reviewer concise requirements, the relevant diff and test results;
+  do not copy the whole conversation. Reviewers must not delegate further.
+- The main agent fixes findings and runs necessary tests. Reviewers rely on
+  those results unless a specific concern requires independent reproduction;
+  do not automatically repeat the full test suite.
 - Explanations, research and documentation-only edits do not automatically
-  trigger a subagent review.
+  trigger either subagent review stage.
 - The roles above describe responsibilities, not separate agent processes.
   Apply these limits when following project prompts, handoffs and skills; their
   generic delegation instructions do not authorize additional subagents.
