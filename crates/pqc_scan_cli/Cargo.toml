@@ -8,6 +8,7 @@ authors.workspace = true
 [features]
 default = []
 probe-transport = ["pqc_scan_core/probe-transport"]
+probe-tls = ["probe-transport", "dep:pqc_scan_probe_tls", "pqc_scan_probe_tls/runtime", "dep:ctrlc"]
 
 [[bin]]
 name = "pqc-scan"
@@ -17,6 +18,9 @@ path = "src/main.rs"
 anyhow.workspace = true
 clap.workspace = true
 serde_json.workspace = true
+serde.workspace = true
+ctrlc = { version = "=3.5.1", optional = true }
+pqc_scan_probe_tls = { path = "../pqc_scan_probe_tls", optional = true }
 pqc_scan_core = { path = "../pqc_scan_core" }
 pqc_scan_rules = { path = "../pqc_scan_rules" }
 pqc_scan_detectors = { path = "../pqc_scan_detectors" }

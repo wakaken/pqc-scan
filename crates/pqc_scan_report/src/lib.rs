@@ -4,6 +4,8 @@ pub use cyclonedx::write_cyclonedx_17;
 mod grouping;
 mod html_report;
 mod inspection;
+mod probe_report;
+pub use probe_report::write_probe_reports;
 mod japanese;
 mod json_report;
 mod markdown_report;

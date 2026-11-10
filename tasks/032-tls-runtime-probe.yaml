@@ -2,13 +2,20 @@ id: "032"
 title: "Add explicit TLS session diagnostics"
 type: feature
 priority: medium
-status: pending
+status: blocked
 planned_new_paths:
   - "crates/pqc_scan_probe_tls/Cargo.toml"
   - "crates/pqc_scan_probe_tls/src/lib.rs"
-owner: Planner Agent
+owner: Evaluator Agent
 phase: "2"
-description: "Add explicit TLS session diagnostics. Planning only; implementation and validation have not started."
+description: "Implement the selected verified fresh TLS probe using the approved explicit target policy and delegated backend choice."
+implementation_plan: "docs/superpowers/plans/2026-11-10-tls-runtime.md"
+lifecycle_record:
+  - "Planner selected pending -> planned under the delegated runtime contract."
+  - "Executor started planned -> in-progress with failing product API tests."
+  - "Executor handed TLS implementation to review; worker evidence: docs/quality/TASK-032-TLS-RUNTIME.md. Parent integration and independent evaluation remain required."
+evaluation_evidence: "docs/quality/RUNTIME-INTEGRATION-VALIDATION.md"
+blocker: "Protocol and common integration reviews accepted; real-browser desktop/mobile/keyboard/offline acceptance of the new human report remains unestablished under QUALITY-GATES.md. No source/protocol failure is being waived."
 plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-032"
 change_size: "Medium/high; protocol/build/identity validation"
 decision_gate: "Backend selection and network defaults must already pass 030/031 decisions."

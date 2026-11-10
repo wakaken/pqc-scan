@@ -17,6 +17,8 @@ use pqc_scan_report::{
 };
 use pqc_scan_rules::{RuleSet, Severity};
 mod diff_command;
+#[cfg(feature = "probe-tls")]
+mod probe_command;
 
 #[cfg(feature = "probe-transport")]
 mod probe_resolver;
@@ -34,6 +36,11 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    #[cfg(feature = "probe-tls")]
+    Probe {
+        #[command(subcommand)]
+        command: probe_command::ProbeCommand,
+    },
     #[cfg(feature = "probe-transport")]
     #[command(name = "__resolve-host", hide = true)]
     ResolveHost {
@@ -239,6 +246,15 @@ fn run_cli<WOut: Write, WErr: Write>(
     stderr: &mut WErr,
 ) -> Result<ExitStatus> {
     match cli.command {
+        #[cfg(feature = "probe-tls")]
+        Commands::Probe { command } => Ok(
+            if probe_command::run(command, stdout)? == pqc_scan_core::probe::ProbeOutcome::Completed
+            {
+                ExitStatus::Success
+            } else {
+                ExitStatus::IncompleteInspection
+            },
+        ),
         #[cfg(feature = "probe-transport")]
         Commands::ResolveHost { host } => {
             probe_resolver::resolve_helper(&host, stdout)?;

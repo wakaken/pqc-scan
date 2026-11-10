@@ -37,7 +37,8 @@ Point the scanner at a local repository. It inspects the following artifacts wit
 
 PKCS#12 (`.p12`/`.pfx`) supports unencrypted public-certificate extraction. Encrypted contents and private-key bags remain unsupported; no password, decryption or integrity/trust verification is performed.
 See [supported inputs and inspection limits](docs/user/COVERAGE.md) for the full file list, supported versions and parser boundaries.
-Live TLS/SSH endpoints and arbitrary programming languages are not scan targets.
+Live endpoints are inspected only through separately enabled, explicit [TLS probes](docs/user/PROBING.md).
+They are not repository scan targets. Arbitrary programming languages are not supported.
 
 <a id="features"></a>
 
@@ -95,6 +96,8 @@ inventories with the same explicit repository scope. See the [report guide](docs
 | [Scanning repositories](docs/user/SCANNING.md) | Select outputs, configure CI exit codes, inspect incomplete scans or run from source |
 | [Understanding reports](docs/user/REPORTS.md) | Interpret risk/PQC findings, choose an inventory, understand CBOM/SBOM or use local policy assessment |
 | [Supported inputs and inspection limits](docs/user/COVERAGE.md) | Check languages, file formats, certificate handling, rule packs, exclusions and privacy boundaries |
+| [Explicit TLS diagnostics](docs/user/PROBING.md) | Inspect one authorized endpoint with the optional protocol command |
+
 
 Each guide has a Japanese version linked at the top.
 
@@ -103,7 +106,9 @@ Each guide has a Japanese version linked at the top.
 ## Limits and privacy
 
 This is static, advisory analysis. False positives and missed references are possible; a finding does not prove runtime use, and zero findings does not prove complete inspection or safety.
-The scanner does not contact endpoints, validate certificate trust chains, install dependencies or certify PQC migration completion.
+Repository scans do not contact endpoints, validate certificate trust chains, install dependencies or certify PQC migration completion.
+Optional `probe` commands contact only the explicitly selected endpoint; TLS uses
+ordinary certificate/name validation, while SSH collects unauthenticated offers.
 
 Recognized private-key/credential syntax is masked, with deliberately conservative previews. This is not universal secret detection: unknown/obfuscated content and secrets placed in paths or identifiers can remain outside the policy.
 Review the [privacy and scan-scope limits](docs/user/COVERAGE.md#privacy) before sharing reports.
