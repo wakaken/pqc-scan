@@ -2,6 +2,7 @@ pub mod assessment;
 pub mod classifier;
 pub mod compat;
 pub mod diagnostic;
+pub mod diff;
 pub mod error;
 pub mod identity;
 pub mod inventory;

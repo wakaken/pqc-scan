@@ -12,6 +12,7 @@
 - [用途に合うレポートを選ぶ：CBOM・SBOMを含む](#choose-report)
 - [詳しい暗号資産の棚卸しを追加する](#inventory)
 - [CycloneDX 1.7形式で出力する](#cyclonedx)
+- [棚卸しを比較する](#diff)
 - [ローカル方針で評価する](#assessment)
 - [SARIFの位置情報を読む](#sarif-locations)
 
@@ -159,6 +160,21 @@ pqc-scan scan . --cyclonedx-17 --rules-dir /path/to/pqc-scan/rules --out-dir /pa
 標準の項目と併せて、`pqc-scan` の追加プロパティと変換時に失われた情報を確認してください。
 指定した版の条件や入力SBOMが申告する版は、インストールの証明ではありません。
 静的な方式名の参照を実通信の観測として扱わず、不明な事実、信頼検証、暗号強度、認証取得を推測して埋めることもありません。
+
+<a id="diff"></a>
+## 棚卸しを比較する
+
+両方のスキャンで `--inventory-json --repository-scope team/project` を指定して保存し、次のように比較します。
+
+```bash
+pqc-scan diff /path/to/before/scan.inventory.v1.json /path/to/after/scan.inventory.v1.json --repository-scope team/project --out-dir /path/to/new-diff
+```
+
+両入力には、指定した同じリポジトリ範囲と、互換性のあるスキーマ・識別方式が必要です。
+`scan.diff.v1.json` と `scan.diff.v1.md` を出力します。対応付けには棚卸しの資産・観測箇所のキーを使い、従来の所見IDやチェックアウト先の絶対パスでは同一性を判断しません。
+ルール、検査方針、検査範囲の変化も表示します。重複する手掛かりや、対象を検査した証拠がない差は未解決のままです。
+現在のinventory v1では対象ごとの網羅的な不在を証明できないため、消えた記録も未解決として扱います。消えたことだけで対処済みとは判断しません。
+一意に対応する別パスの記録は移動候補として示す場合がありますが、自動統合や、確認済みの改名としての扱いは行いません。
 
 <a id="assessment"></a>
 

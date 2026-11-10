@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pqc-scan.local/schemas/scan-diff-v1.schema.json",
+  "title": "Scoped inventory comparison v1",
+  "description": "Comparison of reported records only. Missing target inspection proof stays unresolved; no cryptographic remediation is inferred.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repository_scope",
+    "identity_scheme",
+    "drift",
+    "assets",
+    "occurrences",
+    "move_candidates",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "repository_scope": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*$"
+    },
+    "identity_scheme": {
+      "const": "pqc-scan-length-prefixed-sha256-v1"
+    },
+    "drift": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "rules_digest_changed",
+          "profile_changed",
+          "inspection_scope_changed",
+          "scanner_version_changed",
+          "catalog_version_changed",
+          "inspection_coverage_changed",
+          "native_completeness_changed"
+        ]
+      }
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/record"
+      }
+    },
+    "occurrences": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/record"
+      }
+    },
+    "move_candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/move"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_]+$"
+      }
+    }
+  },
+  "definitions": {
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "status",
+        "before_ids",
+        "after_ids",
+        "reasons"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^(asset|occurrence)-v1-[0-9a-f]{64}$|^(before|after):observation-v1-[0-9a-f]{64}$"
+        },
+        "status": {
+          "enum": [
+            "added",
+            "removed",
+            "changed",
+            "unchanged",
+            "unresolved"
+          ]
+        },
+        "before_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(asset|observation)-v1-[0-9a-f]{64}$"
+          }
+        },
+        "after_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(asset|observation)-v1-[0-9a-f]{64}$"
+          }
+        },
+        "reasons": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          }
+        }
+      }
+    },
+    "move": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "before_occurrence_key",
+        "after_occurrence_key",
+        "confidence",
+        "reason"
+      ],
+      "properties": {
+        "before_occurrence_key": {
+          "type": "string",
+          "pattern": "^occurrence-v1-[0-9a-f]{64}$"
+        },
+        "after_occurrence_key": {
+          "type": "string",
+          "pattern": "^occurrence-v1-[0-9a-f]{64}$"
+        },
+        "confidence": {
+          "const": "heuristic_only"
+        },
+        "reason": {
+          "const": "unique_semantic_anchor_with_changed_path_no_identity_merge"
+        }
+      }
+    }
+  }
+}

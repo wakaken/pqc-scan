@@ -16,6 +16,7 @@ use pqc_scan_report::{
     write_inventory_json, ReportFormat, ReportLanguage,
 };
 use pqc_scan_rules::{RuleSet, Severity};
+mod diff_command;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -31,10 +32,22 @@ struct Cli {
 #[derive(Debug, Subcommand)]
 enum Commands {
     Scan(ScanArgs),
+    /// Compare compatible inventories within one explicit repository scope.
+    Diff(DiffArgs),
     Rules {
         #[command(subcommand)]
         command: RulesCommand,
     },
+}
+
+#[derive(Debug, Parser)]
+struct DiffArgs {
+    before: PathBuf,
+    after: PathBuf,
+    #[arg(long)]
+    repository_scope: String,
+    #[arg(long)]
+    out_dir: PathBuf,
 }
 
 #[derive(Debug, Parser)]
@@ -219,6 +232,16 @@ fn run_cli<WOut: Write, WErr: Write>(
 ) -> Result<ExitStatus> {
     match cli.command {
         Commands::Scan(args) => scan_cmd(args, stdout, stderr),
+        Commands::Diff(args) => {
+            diff_command::run(
+                &args.before,
+                &args.after,
+                &args.repository_scope,
+                &args.out_dir,
+                stdout,
+            )?;
+            Ok(ExitStatus::Success)
+        }
         Commands::Rules { command } => match command {
             RulesCommand::List(args) => list_rules_cmd(args, stdout),
             RulesCommand::Show(args) => show_rule_cmd(args, stdout),

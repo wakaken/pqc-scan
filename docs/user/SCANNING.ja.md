@@ -22,6 +22,7 @@ CLIツールは以下の通り実行します。
 pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
+pqc-scan diff <before-inventory> <after-inventory> --repository-scope ID --out-dir DIR
 ```
 
 既定値は `--format all`、`--lang en`、`--out-dir ./pqc-report`、`--rules-dir ./rules`、`--threads 0`（自動選択）です。
@@ -31,7 +32,7 @@ pqc-scan rules show <rule-id> [--rules-dir ./rules]
 `--assessment-context` は評価方針を指定したときだけ使えます。全オプションは `pqc-scan scan --help` で確認できます。
 
 別ファイルのCycloneDX 1.7棚卸しには `--cyclonedx-17` を付けます。
-用途と制約は[形式の説明](REPORTS.ja.md#cyclonedx)を参照してください。
+用途と制約は[形式の説明](REPORTS.ja.md#cyclonedx)と[棚卸しの比較](REPORTS.ja.md#diff)を参照してください。
 
 ### プロダクトリポジトリでの推奨実行方法
 

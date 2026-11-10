@@ -11,6 +11,7 @@ After a scan, use the human report to investigate findings, then choose machine-
 - [Choose a report, including CBOM and SBOM](#choose-report)
 - [Capture richer inventory](#inventory)
 - [Export CycloneDX 1.7](#cyclonedx)
+- [Compare inventories](#diff)
 - [Use local policy assessment](#assessment)
 - [Read SARIF locations](#sarif-locations)
 
@@ -160,6 +161,24 @@ Read the `pqc-scan` properties and conversion-loss notes as well as the standard
 fields. A declared constraint or a version reported in an input SBOM is not proof
 of installation. Static references are not runtime protocol observations; missing
 facts, trust validation, security strength and certification are not invented.
+
+<a id="diff"></a>
+## Compare inventories
+
+Capture both scans with `--inventory-json --repository-scope team/project`, then:
+
+```bash
+pqc-scan diff /path/to/before/scan.inventory.v1.json /path/to/after/scan.inventory.v1.json --repository-scope team/project --out-dir /path/to/new-diff
+```
+
+Both inputs must use the requested scope and compatible schema/identity versions.
+The command writes `scan.diff.v1.json` and `scan.diff.v1.md`. Exact correspondence
+uses inventory asset/occurrence keys, not legacy finding IDs or checkout roots.
+Rule/profile/coverage changes are disclosed. Duplicate anchors and missing target
+inspection evidence stay unresolved; absence alone never proves remediation.
+Current inventory v1 cannot prove target-level exhaustive absence, so disappeared
+records remain unresolved. Unique changed-path pairs may be suggested as heuristic
+moves; they are never merged automatically or treated as verified renames.
 
 <a id="assessment"></a>
 
