@@ -78,6 +78,8 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 
 Zero findings does not mean every selected input was inspected. Read failures and detector errors retain other findings.
 When inspection is partial, failed or unknown, the CLI prints one warning to stderr.
+CLI HTML/Markdown also display inspection status and counters. Detailed safe
+reasons appear with `--diagnostics`; language selection changes human copy only.
 
 ### Save diagnostics and optionally fail CI
 

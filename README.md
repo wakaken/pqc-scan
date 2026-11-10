@@ -78,6 +78,7 @@ To produce Japanese HTML/Markdown, add `--lang ja`. [Running from source](docs/u
 
 Open `report.html` first. Review a finding's file location, source context and suggested checks before deciding on a change.
 Search and filters help you work through repeated findings; `report.md` provides a portable text version.
+Both show inspection status; selecting a local assessment also adds its advisory decisions.
 
 `--format all` writes six files: `report.html`, `report.md`, `report.json`, `report.sarif`, `cbom.json` and `dependency-sbom.json`.
 The last two list cryptographic findings and software dependencies respectively. Their purpose and relationship are explained in [choosing a report](docs/user/REPORTS.md#choose-report).

@@ -67,6 +67,9 @@ pub struct NativeScan {
     pub(crate) export_loss_notes: Vec<String>,
 }
 impl NativeScan {
+    pub fn run_id(&self) -> &str {
+        &self.run.id
+    }
     /// Validate v1 reference integrity while allowing future string vocabulary and fields.
     pub fn validate(&self) -> anyhow::Result<()> {
         anyhow::ensure!(

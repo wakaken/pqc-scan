@@ -122,6 +122,15 @@ fn next(f: &Finding, group: &RuleGroup<'_>, lang: ReportLanguage) -> String {
 }
 
 pub(crate) fn html_report(result: &ScanResult, path: &Path, lang: ReportLanguage) -> Result<()> {
+    html_report_with_context(result, path, lang, None)
+}
+
+pub(crate) fn html_report_with_context(
+    result: &ScanResult,
+    path: &Path,
+    lang: ReportLanguage,
+    context: Option<&crate::inspection::HumanContext<'_>>,
+) -> Result<()> {
     let groups = groups(result);
     let title = label(
         lang,
@@ -334,7 +343,11 @@ pub(crate) fn html_report(result: &ScanResult, path: &Path, lang: ReportLanguage
     }
     writeln!(
         out,
-        "</main><script>{}</script></body></html>",
+        "{}</main><script>{}</script></body></html>",
+        context
+            .map(|c| crate::inspection::html(c, lang))
+            .transpose()?
+            .unwrap_or_default(),
         include_str!("compact.js")
     )?;
     std::fs::write(path, out)?;
@@ -392,6 +405,15 @@ pub(crate) fn markdown_report(
     result: &ScanResult,
     path: &Path,
     lang: ReportLanguage,
+) -> Result<()> {
+    markdown_report_with_context(result, path, lang, None)
+}
+
+pub(crate) fn markdown_report_with_context(
+    result: &ScanResult,
+    path: &Path,
+    lang: ReportLanguage,
+    context: Option<&crate::inspection::HumanContext<'_>>,
 ) -> Result<()> {
     let groups = groups(result);
     let mut out = String::new();
@@ -613,6 +635,9 @@ pub(crate) fn markdown_report(
         result.cbom.len(),
         result.dependency_sbom.len()
     )?;
+    if let Some(context) = context {
+        out.push_str(&crate::inspection::markdown(context, lang)?);
+    }
     std::fs::write(path, out)?;
     Ok(())
 }

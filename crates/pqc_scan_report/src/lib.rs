@@ -1,6 +1,7 @@
 mod compact;
 mod grouping;
 mod html_report;
+mod inspection;
 mod japanese;
 mod json_report;
 mod markdown_report;
@@ -102,6 +103,35 @@ pub fn write_reports_with_language(
     format: ReportFormat,
     language: ReportLanguage,
 ) -> Result<Vec<PathBuf>> {
+    write_reports_context(result, out_dir, format, language, None)
+}
+
+/// Render scope-limited human diagnostics and an optional existing assessment.
+/// Machine artifacts and legacy writer entrypoints keep their contracts.
+pub fn write_document_reports(
+    document: &ScanDocument,
+    assessment: Option<&pqc_scan_core::policy::AssessmentReport>,
+    diagnostics: bool,
+    out_dir: &Path,
+    format: ReportFormat,
+    language: ReportLanguage,
+) -> Result<Vec<PathBuf>> {
+    let context = inspection::HumanContext {
+        document,
+        assessment,
+        diagnostics,
+    };
+    context.validate()?;
+    write_reports_context(document.legacy(), out_dir, format, language, Some(&context))
+}
+
+fn write_reports_context(
+    result: &ScanResult,
+    out_dir: &Path,
+    format: ReportFormat,
+    language: ReportLanguage,
+    context: Option<&inspection::HumanContext<'_>>,
+) -> Result<Vec<PathBuf>> {
     std::fs::create_dir_all(out_dir)?;
     let mut sanitized = result.clone();
     sanitize_scan_result(&mut sanitized);
@@ -116,7 +146,9 @@ pub fn write_reports_with_language(
             }
             ReportFormat::Html => {
                 let path = out_dir.join("report.html");
-                if language == ReportLanguage::Ja {
+                if let Some(context) = context {
+                    compact::html_report_with_context(&sanitized, &path, language, Some(context))?;
+                } else if language == ReportLanguage::Ja {
                     japanese::write_html(&sanitized, &path)?;
                 } else {
                     html_report::write_html_report(&sanitized, &path)?;
@@ -125,7 +157,14 @@ pub fn write_reports_with_language(
             }
             ReportFormat::Markdown => {
                 let path = out_dir.join("report.md");
-                if language == ReportLanguage::Ja {
+                if let Some(context) = context {
+                    compact::markdown_report_with_context(
+                        &sanitized,
+                        &path,
+                        language,
+                        Some(context),
+                    )?;
+                } else if language == ReportLanguage::Ja {
                     japanese::write_markdown(&sanitized, &path)?;
                 } else {
                     markdown_report::write_markdown_report(&sanitized, &path)?;

@@ -121,6 +121,12 @@ pub struct Observation {
     pub(crate) uncertainty: Vec<String>,
 }
 impl Observation {
+    pub fn assurance(&self) -> &str {
+        &self.assurance
+    }
+    pub fn usage(&self) -> &str {
+        &self.usage
+    }
     pub fn id(&self) -> &str {
         &self.id
     }

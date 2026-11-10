@@ -143,6 +143,12 @@ separate in inventory even when the legacy projection collapses them.
 
 ## Use local policy assessment
 
+CLI HTML/Markdown include inspection status and counters. `--diagnostics` adds
+safe detailed reasons; inventory capture also shows each observation's assurance
+and usage separately. Selecting a policy profile displays its overall and
+per-asset decisions with unchanged reason codes. This is local advisory analysis,
+not runtime verification, trust validation or migration-completion assurance.
+
 `--inventory-json --policy-profile migration-review-v1` adds a separate
 `scan.assessment.v1.json` with quantum/classical concerns, observation certainty,
 usage, priority and purpose-specific candidate prerequisites. Existing reports,

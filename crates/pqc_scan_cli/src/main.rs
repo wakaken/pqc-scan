@@ -12,7 +12,7 @@ use pqc_scan_core::{
 };
 use pqc_scan_detectors::default_detectors;
 use pqc_scan_report::{
-    write_assessment_json, write_diagnostics, write_inventory_json, write_reports_with_language,
+    write_assessment_json, write_diagnostics, write_document_reports, write_inventory_json,
     ReportFormat, ReportLanguage,
 };
 use pqc_scan_rules::{RuleSet, Severity};
@@ -273,8 +273,14 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     };
     let result = document.legacy();
 
-    let mut outputs =
-        write_reports_with_language(result, &args.out_dir, args.format.into(), args.lang.into())?;
+    let mut outputs = write_document_reports(
+        &document,
+        assessment.as_ref(),
+        args.diagnostics,
+        &args.out_dir,
+        args.format.into(),
+        args.lang.into(),
+    )?;
     if args.diagnostics {
         outputs.push(write_diagnostics(&document, &args.out_dir)?);
     }
