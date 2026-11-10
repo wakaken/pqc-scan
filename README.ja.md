@@ -1,16 +1,36 @@
 # pqc-scan - 耐量子暗号（PQC）スキャンツール
 
-`pqc-scan` は、耐量子暗号（PQC）への移行準備を支援するRust製CLIです。  
-リポジトリ内の暗号利用パターンをスキャンし、量子時代に関連するリスクを検出し、チーム向けに実行可能な移行レポートを生成します。
+English version: [README.md](README.md)
+
+`pqc-scan` は、耐量子暗号（PQC）への移行調査に使うRust製CLIです。
+ローカルのソースコード、設定、公開証明書、依存関係のファイルを読み、暗号方式への参照と確認すべき箇所をレポートにまとめます。
+接続先への通信、実際の稼働状況の確認、製品全体の安全性の認定は行いません。
 
 ## このツールの目的
 
-多くの組織ではソフトウェアサプライチェーン可視化のためにSBOMを導入していますが、PQC移行では **コードや設定における暗号利用の可視化** も必要です。  
-`pqc-scan` は、トリアージ、計画策定、CIに使える実践的な出力でその可視化を提供します。
+依存ライブラリの一覧だけでは、コードや設定に書かれた暗号利用を把握できません。
+JWT、TLS、PKI、SSHなどの移行を調べる際に、検出箇所と対処案を手掛かりとして使ってください。
+任意で出力する棚卸しとローカル評価では、観測した事実と判断を分けて記録します。
+
+## 実装状況
+
+タスク018〜029は、[OSSロードマップ](docs/roadmap/OSS-ROADMAP.md)のPhase 0・1に対応します。2026年11月10日時点の状態は次のとおりです。
+
+| Phase | タスク | 状態 |
+|---|---|---|
+| 0：検査の正確さと品質の基準作り | 018〜024、028、029 | 8件が`done`。023は測定手順と精度・性能の数値基準の承認待ちで`review` |
+| 1：観測記録・棚卸し・評価 | 025〜027 | 3件とも`done`。ローカル検証済みで、対応範囲と制約を記録 |
+
+Phaseの割り当てと実装記録は一致しています。ただし、Phase 0全体の完了や1.0リリースの品質認定を意味しません。
+023の評価入力と測定基盤は後続タスクでも使っていますが、利用したことと数値基準の承認は別です。
+[タスク別の照合結果と残る承認事項](docs/quality/PHASE-0-1-ALIGNMENT.md)を参照してください。
+
+接続先の安全制御、TLSの接続検査、SSHの対応方式調査、CycloneDX出力、スキャン結果の差分、評価情報の英日表示拡張、配布・リリース検証は今後の対象です。
+CycloneDXの読み込みには対応していますが、規格に準拠したCycloneDX形式のCBOM出力は未実装です。
 
 ## クイックスタート
 
-ご自身で利用されているプロダクトのリポジトリを以下のコマンドでスキャンします。
+調査するプロダクトのリポジトリを指定します。
 
 ```bash
 pqc-scan scan /path/to/your-product --format all --out-dir /path/to/your-product/pqc-report --rules-dir /path/to/pqc-scan/rules
@@ -27,11 +47,15 @@ pqc-scan scan /path/to/your-product --format all --out-dir /path/to/your-product
 
 ## インストール
 
-### Option A: `pqc-scan` コマンドとしてインストール（推奨）
+Rustは `rust-toolchain.toml` に指定した版と構成を使います。現在の指定はRust 1.93.1、rustfmt、clippyです。
+このリポジトリのソースからビルドしてください。ルールディレクトリは実行時にも必要なので、バイナリのインストール後も同じ版のルールを参照できる場所に残します。
+
+
+### コマンドとしてインストールする（推奨）
 
 ```bash
 cd /path/to/pqc-scan
-cargo install --path crates/pqc_scan_cli
+cargo install --locked --path crates/pqc_scan_cli
 ```
 
 その後、プロダクトリポジトリ側で実行します。
@@ -42,7 +66,7 @@ pqc-scan scan . --format all --out-dir ./pqc-report --rules-dir /path/to/pqc-sca
 
 インストール後に `pqc-scan: command not found` が表示される場合は、`~/.cargo/bin` が `PATH` に含まれているか確認してください。
 
-### Option B: インストールせずに実行（ソースからの直接実行）
+### インストールせずにソースから実行する
 
 インストールせず試す場合は、ソースから直接実行できます。
 
@@ -52,17 +76,18 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 
 ## ツールの主な機能
 
-- `tree-sitter` と `regex` を使ったハイブリッドな検出
-- 重大度、信頼度、量子リスクタグのレポート出力
-- 検出項目ごとの移行ガイダンス（ランタイム/言語に応じた推奨アクション）
-- マッチ行をハイライトしたソーススニペット抽出（HTML + JSON）
+- `tree-sitter` と正規表現を使った検出
+- 重大度、信頼度、量子リスクを付けた所見
+- 検出項目ごとの対処案（言語や実行環境に応じた移行手順）
+- 検出行を示すソース抜粋（HTML・JSON）
 - CBOMの出力（`cbom.json`）
-- 依存関係インベントリの出力（`dependency-sbom.json`）
-- GitHub Code Scanning向けSARIFを含むCI/CD向けの出力
+- 依存関係の棚卸し（`dependency-sbom.json`）
+- GitHub Code Scanning向けのSARIF 2.1.0出力
+- 検査範囲・失敗・上限を確認する診断情報と、任意の完全性チェック
+- 観測記録と所見を対応付けた暗号資産・検出根拠レポート
+- 量子リスクと従来型の弱点、移行の前提条件を分けるオフライン評価
 
-## CBOM と SBOM の違い
-
-### PQC対応状況の棚卸し（2026年11月9日）
+## PQC方式への参照
 
 7言語のML-KEM・ML-DSA参照、NodeのSLH-DSA鍵生成、PQC対応候補の依存関係、
 旧Kyber・Dilithium名、Java・Rubyの古典方式限定TLS設定、Goの
@@ -76,6 +101,8 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 Node cryptoとWebCryptoでは必要なマイナーバージョンが異なります。
 ブラウザやTypeScriptの実行環境は別途確認し、JWT署名の変更前にJOSE・ライブラリ・検証側の互換性を確認してください。
 [静的検証例と公式資料](examples/pqc-readiness/README.md)も参照してください。
+
+## CBOMとSBOMの違い
 
 | 成果物 | 目的 | 問い |
 |---|---|---|
@@ -97,13 +124,14 @@ Node cryptoとWebCryptoでは必要なマイナーバージョンが異なりま
 未知のscope文字列は引き続き受け付けます。検出器ごとに動作が異なるため、[読み込み・scopeの互換仕様](docs/architecture/RULE-VALIDATION.md)を参照してください。
 
 組み込み119件について、用途・暗号方式・量子リスク・従来型の弱点、参照資料の版、検査の限界、
-正例・負例をまとめた[開発用の品質資料](docs/quality/RULE-QUALITY.md)を追加しました。
+正例・負例をまとめた[開発用の品質資料](docs/quality/RULE-QUALITY.md)があります。
+244件のパターン検証例に、現在も残る8件の誤検出例を含めています。
 既知の誤検出も記録しますが、検出パターン・Risk・重大度・レポート形式は変更しません。
 正規表現の検証例は、実稼働や網羅的な精度、品質目標の承認を意味しません。
 
 ## 検出カバレッジ
 
-### Detectorモジュール
+### 検出器
 
 - `tree_sitter_detector`
 - `regex_detector`
@@ -111,18 +139,18 @@ Node cryptoとWebCryptoでは必要なマイナーバージョンが異なりま
 - `certificate_detector`
 - `key_detector`
 
-### Tree-sitterの対応言語
+### Tree-sitterの対象言語
 
 - Java
 - Go
 - JavaScript
-- TypeScript
+- TypeScript／TSX（JavaScript用文法を使用。型構文では部分解析になる場合あり）
 - Python
 - Rust
 - Ruby
 
-### 依存関係/マニフェストのファイル
-以下の依存関係/マニフェストファイルをスキャンします。
+### 依存関係・マニフェスト
+
 
 - `Cargo.toml`, `Cargo.lock`
 - `Gemfile`, `Gemfile.lock`, `gems.rb`, `gems.locked`, `*.gemspec`
@@ -131,13 +159,17 @@ Node cryptoとWebCryptoでは必要なマイナーバージョンが異なりま
 - `package.json`, `package-lock.json`, `pnpm-lock.yaml`
 - `requirements.txt`, `Pipfile.lock`, `poetry.lock`
 
-### SBOMファイル
-下記フォーマットのSBOMをスキャンします。
+### SBOMの読み込み
+
 
 - CycloneDX JSON（`*.cdx.json`, `*bom*.json`）
 - SPDX JSON（`*.spdx.json`, `*sbom*.json`）
 
-### 証明書/鍵ファイル
+対応範囲はCycloneDX 1.4〜1.7、SPDX 2.2〜2.3のコンポーネント・パッケージ情報です。
+入力の全項目の規格検証や、インストール済みであることの確認は行いません。規格に沿った出力とは別の機能です。
+構造化データの解析、簡易解析、対応する版と上限は[依存関係の確認根拠](docs/architecture/DEPENDENCY-PROVENANCE.md)に記載しています。
+
+### 証明書・鍵ファイル
 次の拡張子を証明書・鍵の検査候補として扱います。
 
 - 証明書候補: `.pem`, `.crt`, `.cer`, `.der`。内容からPEM／DERを判別します。
@@ -205,7 +237,7 @@ EC・DSA・暗号化秘密鍵のPEMマーカーを含むファイルも、ソー
 ### 組み込みルールセット
 
 - デフォルトルールは `rules/default/` 配下にあります。
-- 現在の組み込みルール数: **100以上**
+- 現在の組み込みルール数: 119件
 
 ## CLI
 
@@ -216,6 +248,12 @@ pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
+
+既定値は `--format all`、`--lang en`、`--out-dir ./pqc-report`、`--rules-dir ./rules`、`--threads 0`（自動選択）です。
+所見の重大度や検査の完全性による終了判定は、明示しない限り有効になりません。相対パスは実行時の作業ディレクトリを基準にします。
+
+`--repository-scope` と `--policy-profile` には `--inventory-json` が必要です。
+`--assessment-context` は評価方針を指定したときだけ使えます。全オプションは `pqc-scan scan --help` で確認できます。
 
 ### プロダクトリポジトリでの推奨実行方法
 
@@ -255,7 +293,7 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
 ```
 
-このレポートのCLI指定は `--inventory-json` に統一しました。旧指定 `--native-json` は廃止したため、
+このレポートのCLI指定は `--inventory-json` です。旧指定 `--native-json` は廃止したため、
 `--inventory-json` へ置き換え、読み込むファイルも `scan.native.v1.json` から
 `scan.inventory.v1.json` へ変更してください。JSONの項目・スキーマの版・ID生成は変更しません。
 
@@ -336,14 +374,31 @@ Ruby・Gradle・XML・requirements・Goの簡易解析では、引き続き `det
 列挙できたポリシー除外と列挙失敗は別に集計し、ignoreで見えない件数は不明として明示します。
 完了の判定は、既存のignore設定・既定の除外・サイズ制限を含む検査範囲内に限ります。
 
-ライブラリ向けには `scan_repository_detailed` と、アクセサーで参照する `ScanDocument` を追加しました。
+ライブラリでは `scan_repository_detailed` と、アクセサーで参照する `ScanDocument` を使えます。
 既存の `scan_repository`、`ScanResult`、レポートAPI、`Detector::detect` 実装は維持します。
 検出器は `detect_detailed` と `DetectorOutcome` で検査結果を報告できます。
 `Complete` は検査の完了を表し、安全性の保証ではありません。
 
 ## レポート出力
 
-### 日本語レポート
+| ファイル | 出力条件 | 内容 |
+|---|---|---|
+| `report.json` | `--format json` または `all` | 所見・検出根拠・対処案・集計 |
+| `report.html` | `--format html` または `all` | 検索・絞り込みできるHTML |
+| `report.md` | `--format md` または `all` | 保管・共有用のテキスト |
+| `report.sarif` | `--format sarif` または `all` | SARIF 2.1.0の所見 |
+| `cbom.json` | どの出力形式でも出力 | 従来の暗号利用一覧。CycloneDX形式ではない |
+| `dependency-sbom.json` | どの出力形式でも出力 | 従来の依存関係一覧。CycloneDX／SPDX形式ではない |
+| `diagnostics.json` | `--diagnostics` | 検査範囲・集計・安全な理由コード |
+| `scan.inventory.v1.json` | `--inventory-json` | 観測記録・暗号資産・従来の所見との対応 |
+| `scan.assessment.v1.json` | `--inventory-json --policy-profile migration-review-v1` | 別ファイルのローカル評価 |
+
+`--format all` の出力は従来の6ファイルです。残る3ファイルはそれぞれの指定が必要です。
+`--lang` が変えるのはHTML・Markdownの文面だけで、任意の機械出力を加えても変わりません。
+実行結果を比較するときは新しい出力先を使ってください。以前のファイルが残っていても、今回その出力を指定したとは限りません。
+
+
+### HTML・Markdownの読み方と日本語表示
 
 HTMLでは、重大度順の短いルール一覧から確認を始めます。ルール名・説明・ファイル名の検索と、
 重大度・リスクの絞り込みに対応し、「対応候補」とPQC参照などの「参考情報」を切り替えられます。
@@ -382,17 +437,17 @@ JSON・SARIF・CBOM・依存関係SBOMは、言語指定によらず従来の内
 
 ### `report.html`
 
-人間にとってみやすいHTML形式のレポートです。以下を含みます。
+調査担当者が確認するHTMLレポートです。
 
-- severityバッジ
-- findingメタデータ
-- ハイライト付きソーススニペット
-- 推奨移行アクション
+- 重大度の表示
+- 所見のメタデータ
+- 検出行を示すソース抜粋
+- 移行の対処案
 
 #### HTMLレポートのサンプル
 
-以下のスクリーンショットは、実際の `report.html` 出力例です。  
-ルール単位の集約表示、Occurrencesテーブル、ハイライト付きスニペット、Recommended Actions を確認できます。
+保存済みの画像は以前の出力例です。現在は上記のルール・検出箇所を順に開く表示を使います。
+この画像は、最新版をブラウザーで検証した証跡ではありません。
 
 ![HTMLレポート例](docs/html-report-exmaple.jpg)
 
@@ -428,53 +483,62 @@ Windowsではネイティブの区切り文字を正規化し、Unixのバック
 不正確なSARIF位置や未符号化パスに依存する処理には、この修正による差分が生じます。
 詳細は[契約と検証記録](docs/quality/SARIF-LOCATION-CONTRACT-022.md)を参照してください。
 
-## セキュリティ/プライバシー制御
+## セキュリティとプライバシー
 
-- 完全な秘密鍵情報は出力しません。
-- 機微なスニペット出力はマスクします。
-- リポジトリ走査時に `.gitignore` をチェックし記載のある成果物はスキャン対象外とします。
-- デフォルト除外: `.git`, `node_modules`, `target`, `dist`はデフォルトでスキャン対象外とします。
-- 2MB超のファイルはスキャン対象外とします。
+認識できる秘密鍵ブロックや認証情報は、出力する検出根拠でマスクします。
+RSA、汎用PKCS#8、OpenSSH、EC、DSA、暗号化秘密鍵のマーカー、単一行の名前付きパスワード・トークン・鍵の値、
+Bearer／Basicトークン、HTTP(S) URLの認証部分と名前付き認証クエリーが対象です。秘密鍵の解析や復号に対応するという意味ではありません。
+
+検出器を呼ぶ前に元のソースから位置を記録し、所見のIDと棚卸しの対応付けを確定してから出力値をマスクします。
+認証情報や秘密鍵を認識したファイルでは、短縮済みのプレビューに断片が残らないよう保守的に置き換えます。
+ライブラリに渡した結果も、呼び出し側の値を変えずにレポート出力時に処理します。
+メタデータの値、対処案とコード例、CBOM、依存関係の自由文にもマスク処理を適用します。
+型を限定した棚卸しや診断情報には、元の本文や任意のエラー本文を含めません。
+
+あらゆる秘密情報を見つける機能ではありません。未知・難読化された構文、任意の認証項目名、複数行の認証情報の位置追跡、構造を表す項目に埋め込まれた秘密は対象外です。
+パス、ID、repository scope、独自メタデータのキーには秘密情報を入れないでください。
+公開証明書の指紋・subjectなど、残す情報にも共有先に応じた確認が必要です。保守的な処理で公開テキストのプレビューも省略する場合があります。
+[対応構文・項目ごとの方針・制約](docs/architecture/EVIDENCE-PRIVACY.md)と[ダミー値による検証](docs/quality/TASK-029-EVIDENCE-PRIVACY.md)に詳細を記載しています。
+
+走査ではGitのignore設定を尊重し、既定で `.git`、`node_modules`、`target`、`dist`、`docs` とMarkdownファイルを除外します。
+2 MiBを超えるファイルも対象外です。テストディレクトリ全体を除外する動作はありません。
+スキャンに成功しても、除外したファイルや未対応形式に暗号利用がないとは判断できません。
 
 ## 精度と免責事項
 
-`pqc-scan` は、ルールとヒューリスティクスに基づく **ベストエフォートな静的解析** を行います。  
-トリアージと移行計画の高速化を目的としており、**形式的証明ツールではありません**。そのため、**100%の検出精度は保証できません**。
-
-以下を前提に利用してください:
-
-- 誤検知（False Positive）は発生し得ます。
-- 見逃し（False Negative）は発生し得ます。
-- 本番運用やコンプライアンス判断の前に、各環境での検証が必要です。
-
-本ツールの結果は助言的な情報です。専門家レビュー、アーキテクチャ文脈、実行時/セキュリティ試験と組み合わせて評価してください。
+ルールとパターンに基づく静的解析のため、誤検出も見逃しもあります。検出精度100%や形式的な証明を提供するものではありません。
+本番運用や規制適合の判断に使う前に、それぞれの環境で結果を確認してください。
+移行調査の手掛かりとして、専門家のレビュー、システムの構成、実行時の挙動やセキュリティ試験と併せて評価します。
 
 ## 既知の制約
 
 - 静的スキャンのみでは、実行時の暗号ネゴシエーション経路を完全には推定できません。
 - ライブラリ固有の挙動はバージョンや設定で変わる場合があります。
-- 一部のパーサ非依存フォーマットはヒューリスティック検出であり、カスタムルールが必要になる場合があります。
+- 構文解析を使わない形式ではパターンによる推定に制約があり、独自ルールが必要になる場合があります。
+
+所見はコードが実行される証拠ではありません。別名や同名の関数、文法の制約で誤検出・見逃しが起きます。
+依存関係の記録や証明書の解析だけでは、配備状態、証明書の信頼性、実装の品質は確認できません。
+検査の`Complete`と移行評価の合格は別の判断で、現在の評価方針は全体のPassを出しません。
 
 ## アーキテクチャ
 
 ワークスペースクレート:
 
-- `pqc_scan_cli`: CLI解析とコマンドディスパッチ
+- `pqc_scan_cli`: CLIの引数解析とコマンド処理
 - `pqc_scan_core`: スキャンパイプライン、リスクエンジン、重複排除、推奨アクション付与
-- `pqc_scan_rules`: YAMLルール読込とregexコンパイル
-- `pqc_scan_detectors`: detector実装
+- `pqc_scan_rules`: YAMLルールの読み込みと正規表現のコンパイル
+- `pqc_scan_detectors`: 検出器の実装
 - `pqc_scan_report`: JSON/HTML/Markdown/SARIF/CBOMライター
 
 詳細は [docs/architecture.md](docs/architecture.md) を参照してください。
 
 ## GitHub Actions
 
-サンプルワークフロー:
+[ワークフロー](.github/workflows/pqc-scan.yml)はRustのfmt・テスト・clippy、Nodeのレポート・CIポリシーテスト、Pythonの評価器テストを実行します。
+別のジョブでrelease版をビルドして固定の評価入力を測定し、`pqc-quality-baseline` に結果とレポートを保存します。
+未承認の精度・性能基準による失敗判定は行いません。
 
-- `.github/workflows/pqc-scan.yml`
-
-このリポジトリのワークフローは、Rustの品質チェックと `shell/*.test.cjs` を実行した後、
-通常の検査範囲全体をスキャンします。検出ルール、深刻度、生の `report.sarif` は変更しません。
+自己スキャンでは、品質チェック後に通常の検査範囲全体をスキャンします。送信準備の処理で、検出ルール・重大度や元の `report.sarif` は変更しません。
 
 このリポジトリからCode Scanningへ送るコピーに限り、
 [`SELF-SCAN-EXPECTATIONS.json`](docs/quality/SELF-SCAN-EXPECTATIONS.json) に登録された
@@ -486,7 +550,8 @@ Windowsではネイティブの区切り文字を正規化し、Unixのバック
 `pqc-self-scan-evidence` artifactには、生のSARIF、送信用の `code-scanning.sarif`、
 除外理由と件数を示す `code-scanning-audit.json`、適用した台帳を保存します。
 準備やアップロードが失敗しても保存を試みます。
-既存の依存関係SBOM artifactも維持します。この扱いは本リポジトリのCIに限り、
+依存関係SBOMの保存も設定しています。スキャンは `--format sarif` で実行し、SARIFと2種類の一覧を出力します。
+この扱いは本リポジトリのCIに限り、
 通常のスキャンや利用者向け出力形式には影響しません。
 検出ルールの定義、暗号名・OIDの一覧、翻訳や対処説明、実行しないサンプル文字列は、
 暗号処理の実行ではありませんが、利用を検出するパターンに一致する場合があります。
@@ -512,8 +577,9 @@ TypeScript/TSXは引き続きJavaScript用文法で解析します。JavaScript/
 
 ## 開発者向け品質ベースライン
 
-タスク023では、独立した正解ラベル付きの評価入力とPython標準ライブラリだけで動く
-計測ハーネスを追加しました。検出ルール・既存CLI・出力形式は変更しません。
+開発用の品質測定には、正解ラベル付きの評価入力とPython標準ライブラリだけで動く測定基盤を使います。
+入力は41ファイル・57評価単位で、正例30、負例20、曖昧2、未対応5に分かれます。
+独立したラベル付けと、調整用・評価専用の分離を記録しています。測定のために検出ルールや出力形式を変更することはありません。
 `cargo build --workspace --release --locked` の後、以下を実行します。
 
 ```bash
@@ -527,8 +593,25 @@ python3 tests/quality/run.py --binary target/release/pqc-scan --build-profile re
 同一視しないでください。[評価手順](tests/quality/PROTOCOL.md)と
 [測定結果](docs/quality/TASK-023-BASELINE.md)に対象範囲と制約を記録しています。
 
+## 開発と互換仕様
+
+```bash
+cargo build --workspace --locked
+cargo fmt --all --check
+cargo test --workspace --locked
+cargo clippy --workspace --all-targets -- -D warnings
+node --test shell/*.test.cjs
+python3 -m unittest discover -s tests/quality -p 'test_*.py'
+```
+
+詳しい仕様は[アーキテクチャ](docs/architecture.md)、[ルール一覧](docs/rules-reference.md)、[棚卸しv1](docs/architecture/INVENTORY-REPORT-V1.md)、[ローカル評価](docs/architecture/LOCAL-ASSESSMENT-V1.md)、[品質確認の基準](docs/quality/QUALITY-GATES.md)を参照してください。
+ライブラリの `scan_repository`、`ScanResult`、既存の検出器実装とレポート関数は、詳細・棚卸し用APIと併せて利用できます。
+内部の `Native*` 型名と `schemas/native-scan-v1.schema.json` は互換性のため残しています。廃止したCLI指定が使えるという意味ではありません。
+
+互換性の維持は、過去の誤った値まで固定するものではありません。
+証明書の判定修正、ASTの出現箇所の保持、依存関係の確認根拠の修正によって、所見・位置・purlや、それらから計算するIDが変わる場合があります。
+公開する構造とID計算法は維持し、秘密情報のマスクで自由文は変わります。版を比較するときは各契約の意図した差分も確認してください。
+
 ## ライセンス
 
 MIT
-
-検出根拠の出力では、対応する秘密鍵・認証情報の構文をマスクし、IDと出力スキーマを維持します。対応範囲と制約は[検出根拠のプライバシー契約](docs/architecture/EVIDENCE-PRIVACY.md)を参照してください。あらゆる秘密情報を検出する機能ではありません。

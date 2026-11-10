@@ -384,8 +384,8 @@ remain language-independent. No runtime translation service is used.
 
 ## Security Considerations
 
-- sensitive material is always masked in evidence/snippets
-- private key content is never exported
+- recognized private-key markers and credential syntax are masked in evidence/snippets
+- bounded export protection and its unsupported cases are specified in [EVIDENCE-PRIVACY.md](architecture/EVIDENCE-PRIVACY.md)
 - detector output is normalized before reporting
 - scan is read-only against repository contents
 

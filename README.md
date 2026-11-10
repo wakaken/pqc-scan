@@ -3,12 +3,24 @@
 Japanese version: [README.ja.md](README.ja.md)
 
 `pqc-scan` is a Rust CLI that helps teams prepare for post-quantum cryptography (PQC) migration.
-It scans repositories for cryptographic usage patterns, identifies quantum-relevant risk signals, and generates actionable migration reports for engineering and security teams.
+It scans local source, configuration, public certificates and dependency files for cryptographic references, then produces migration findings and review guidance. It does not contact endpoints, prove runtime use or certify that a product is quantum-safe.
 
 ## Why This Tool
 
-Many organizations already use SBOMs for software supply-chain visibility, but PQC migration also requires visibility into **cryptographic usage in code and configuration**.
-`pqc-scan` provides that visibility with practical outputs for triage, planning, and CI automation.
+A software dependency list does not show every cryptographic reference in code or configuration. Use the findings and source locations to investigate JWT, TLS, PKI, SSH and other migration work; use the optional inventory and local assessment to keep evidence separate from conclusions.
+
+## Implementation status
+
+Tasks 018–029 cover Phase 0 and Phase 1 of the [OSS roadmap](docs/roadmap/OSS-ROADMAP.md), with the following status as of 2026-11-10:
+
+| Phase | Tasks | Status |
+|---|---|---|
+| 0: inspection correctness and quality baseline | 018–024, 028, 029 | Eight `done`; 023 remains `review` pending maintainer approval of the measurement protocol and numeric accuracy/performance budgets |
+| 1: observations, inventory and assessment | 025–027 | All three `done`, with local validation and documented limits |
+
+The phase assignments match the implementation records. Phase 0 is not fully closed, and this is not a 1.0 release qualification. Task 023's reviewed corpus and measurement harness are in use; using that baseline for later tasks does not approve its proposed budgets. See the [task-by-task alignment and remaining gates](docs/quality/PHASE-0-1-ALIGNMENT.md).
+
+Endpoint safety, TLS probing, SSH discovery, CycloneDX export, scan diffing, extended bilingual assessment views and distribution/release qualification remain roadmap work. Reading CycloneDX input is supported; emitting a standards-compliant CycloneDX CBOM is not yet implemented.
 
 ## Quick Start
 
@@ -29,11 +41,14 @@ Generated files:
 
 ## Installation
 
+Install Rust with the toolchain and components pinned in `rust-toolchain.toml` (currently Rust 1.93.1, rustfmt and clippy). Build from this checkout; the rule directory is a separate runtime input and must remain available after installing the binary. Use a matching checkout and rule pack.
+
+
 ### Option A: Install as `pqc-scan` command (recommended)
 
 ```bash
 cd /path/to/pqc-scan
-cargo install --path crates/pqc_scan_cli
+cargo install --locked --path crates/pqc_scan_cli
 ```
 
 Then run from your product repository:
@@ -61,11 +76,12 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 - Source snippet extraction with highlighted matched line (HTML + JSON)
 - CBOM export (`cbom.json`)
 - Dependency inventory export (`dependency-sbom.json`)
-- CI/CD-friendly outputs including SARIF for GitHub Code Scanning
+- CI/CD-friendly outputs including SARIF 2.1.0 for GitHub Code Scanning
+- Explicit inspection diagnostics and an optional completeness gate
+- Opt-in Cryptographic Inventory and Evidence Report with observation-to-finding links
+- Offline advisory assessment with separate quantum/classical concerns and prerequisites
 
-## CBOM vs SBOM
-
-### PQC readiness inventory (2026-11-09)
+## PQC reference detection
 
 The scanner inventories ML-KEM/ML-DSA references across the seven languages,
 Node SLH-DSA key generation, selected PQC-capable dependencies, draft Kyber/Dilithium
@@ -84,6 +100,8 @@ and TypeScript environments must be checked independently. JWT guidance requires
 JOSE/library/verifier compatibility before changing signatures. See
 [static fixtures and official references](examples/pqc-readiness/README.md).
 
+## CBOM vs SBOM
+
 | Artifact | Purpose | Main Question |
 |---|---|---|
 | `dependency-sbom.json` | Software dependency inventory | "What packages/libraries are present?" |
@@ -100,13 +118,13 @@ In practice:
 Rule packs reject blank IDs, non-finite/out-of-range confidence (inclusive `0..1`),
 and traversal failures instead of returning a partially loaded pack. Existing CLI
 flags/report fields and valid custom scopes remain unchanged; malformed packs use
-the existing operational error exit code1. Review invalid custom metadata before
+the existing operational error exit code 1. Review invalid custom metadata before
 upgrading. Unknown scope strings remain accepted with their existing per-detector
 semantics; no new default warnings are emitted. See [loading/scope compatibility](docs/architecture/RULE-VALIDATION.md).
 
-All119 built-in rules have a [development-only quality companion](docs/quality/RULE-QUALITY.md)
+All 119 built-in rules have a [development-only quality companion](docs/quality/RULE-QUALITY.md)
 with separate purpose/algorithm/quantum/classical annotations, source editions,
-method limits and positive/negative pattern controls. It records known gaps without
+method limits and 244 positive/negative pattern controls, including eight retained known false-positive controls. It records known gaps without
 changing detection patterns, Risk/severity or report formats. These controls do not
 establish runtime use, universal accuracy or approved quality budgets.
 
@@ -125,7 +143,7 @@ establish runtime use, universal accuracy or approved quality budgets.
 - Java
 - Go
 - JavaScript
-- TypeScript
+- TypeScript / TSX (JavaScript grammar; type syntax can yield partial inspection)
 - Python
 - Rust
 - Ruby
@@ -143,6 +161,8 @@ establish runtime use, universal accuracy or approved quality budgets.
 
 - CycloneDX JSON (`*.cdx.json`, `*bom*.json`)
 - SPDX JSON (`*.spdx.json`, `*sbom*.json`)
+
+These are bounded component/package subsets: CycloneDX 1.4–1.7 and SPDX 2.2–2.3. They are input formats, not full-schema validation, installed-state proof or standards export. Structured dependency parsing, lexical fallbacks, supported versions and limits are listed in the [dependency provenance contract](docs/architecture/DEPENDENCY-PROVENANCE.md).
 
 ### Certificate and Key Support
 
@@ -219,7 +239,7 @@ snippet masking; this does not add new private-key detection rules or decrypt ke
 ### Built-in Rule Set
 
 - Default rules live under `rules/default/`
-- Current built-in rules: **100+**
+- Current built-in rules: 119
 - Full reference (all rule IDs + severity definitions): [docs/rules-reference.md](docs/rules-reference.md)
 
 ## CLI
@@ -229,6 +249,10 @@ pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
+
+Defaults are `--format all`, `--lang en`, `--out-dir ./pqc-report`, `--rules-dir ./rules` and `--threads 0` (automatic thread selection). No finding threshold or completeness gate is enabled by default. Paths are resolved from the current working directory.
+
+`--repository-scope` requires `--inventory-json`; `--policy-profile` also requires it. `--assessment-context` requires an explicit policy profile. Use `pqc-scan scan --help` for the complete option list.
 
 ### Recommended usage from your product repository
 
@@ -373,7 +397,22 @@ Detectors may opt into `detect_detailed` with an explicit `DetectorOutcome`;
 
 ## Report Outputs
 
-### Japanese Reports
+| File | Selection | Contents |
+|---|---|---|
+| `report.json` | `--format json` or `all` | Findings, evidence, recommendations and summary |
+| `report.html` | `--format html` or `all` | Interactive human report |
+| `report.md` | `--format md` or `all` | Portable human report |
+| `report.sarif` | `--format sarif` or `all` | SARIF 2.1.0 findings |
+| `cbom.json` | Every report format | Legacy flat cryptographic inventory; not CycloneDX |
+| `dependency-sbom.json` | Every report format | Legacy flat dependency inventory; not CycloneDX/SPDX |
+| `diagnostics.json` | `--diagnostics` | Inspection scope, coverage and safe reason codes |
+| `scan.inventory.v1.json` | `--inventory-json` | Typed observations, normalized assets and legacy associations |
+| `scan.assessment.v1.json` | `--inventory-json --policy-profile migration-review-v1` | Separate offline advisory assessment |
+
+`--format all` writes the six legacy files; it does not enable the three optional artifacts. `--lang` affects HTML/Markdown only, including when optional machine outputs are selected. Use a new output directory when comparing runs: files left by a previous run are not evidence that an option was selected in the current run.
+
+
+### Reading HTML and Markdown reports
 
 HTML reports start with a compact, severity-sorted rule list. Search by rule or
 file, filter severity/risk, and switch between risk candidates and informational
@@ -421,7 +460,7 @@ Human-friendly triage report with:
 
 #### HTML Report Preview
 
-The screenshot below shows a real `report.html` example with grouped findings, an occurrences table, highlighted source snippets, and recommended actions.
+This checked-in screenshot is an earlier report example. The current report uses the compact rule/location navigation described above; the image is not current browser acceptance evidence.
 
 ![HTML report example](docs/html-report-exmaple.jpg)
 
@@ -459,11 +498,13 @@ positions and unescaped paths. See the [contract and validation record](docs/qua
 
 ## Security and Privacy Controls
 
-- Full private key material is never emitted.
-- Sensitive snippet output is masked.
-- `.gitignore` is respected during repository walking.
-- Default excludes: `.git`, `node_modules`, `target`, `dist`, `docs/`, `*.md`.
-- Files larger than 2 MB are skipped.
+Recognized private-key blocks and credential literals are masked in exported evidence. The policy covers RSA, generic PKCS#8, OpenSSH, EC, DSA and encrypted private-key markers; single-line named password/token/key literals; Bearer/Basic tokens; and HTTP(S) userinfo and named credential query values. Marker masking does not add private-key parsing or decryption support.
+
+Core collects sensitive source positions before detector callbacks, then masks evidence after legacy IDs and inventory associations are established. Already-shortened previews are replaced conservatively for files with recognized private/credential context. Report writers also sanitize caller-created legacy results without mutating the caller. Metadata values, action text/code, CBOM and dependency text pass through bounded redaction; typed inventory and diagnostics omit raw payloads and arbitrary error text.
+
+This is not a universal secret scanner. Unknown/obfuscated syntax, arbitrary credential names, multiline credential position tracking and secret-bearing structural fields are outside the contract. Keep paths, IDs, repository scopes and custom metadata keys free of secrets. Public certificate fingerprints/subjects and other retained facts can still require distribution review. Some benign preview text is omitted conservatively. See the [supported syntax, field policy and limits](docs/architecture/EVIDENCE-PRIVACY.md) and [synthetic-canary verification](docs/quality/TASK-029-EVIDENCE-PRIVACY.md).
+
+Repository walking respects Git ignore settings. Default exclusions include `.git`, `node_modules`, `target`, `dist`, `docs` and Markdown files; files larger than 2 MiB are skipped. Test directories are not generally excluded. These scope limits mean a successful scan does not establish absence of cryptography in ignored or unsupported files.
 
 ## Accuracy and Disclaimer
 
@@ -483,6 +524,9 @@ By using this tool, you acknowledge that scan results are advisory and must be c
 - Static scanning cannot fully infer runtime crypto negotiation paths.
 - Library-specific behavior may differ by version and configuration.
 - Some parser-less formats are detected heuristically and may require custom rules.
+- Names, aliases and grammar limits can cause false positives or missed references; a rule match is not proof that code executes.
+- Dependency resolution claims and certificate parsing do not verify deployment, certificate trust or implementation quality.
+- Inspection `Complete` means complete within the declared strategy/scope; assessment outcomes are separate. The current advisory profile cannot produce aggregate Pass.
 
 ## Architecture
 
@@ -498,13 +542,10 @@ See [docs/architecture.md](docs/architecture.md) for details.
 
 ## GitHub Actions
 
-Example workflow:
-
-- `.github/workflows/pqc-scan.yml`
+The checked-in [workflow](.github/workflows/pqc-scan.yml) runs Rust fmt/tests/clippy, Node report/CI-policy tests and Python evaluator tests. A separate job builds the release scanner and measures the reviewed corpus, storing reports in `pqc-quality-baseline` without enforcing unapproved numeric budgets.
 
 This repository's workflow runs Rust quality checks and all `shell/*.test.cjs`
-checks, then scans the full normal repository scope. Detection rules, severity and
-the scanner's raw `report.sarif` stay unchanged.
+checks, then scans the full normal repository scope. The preparation step preserves the scanner's raw `report.sarif`, rule definitions and severity.
 
 For this repository's Code Scanning upload only, a preparation step omits exact
 reviewed test observations and fixed rule/catalog/guidance references listed in
@@ -517,7 +558,7 @@ or rule is broadly excluded, and GitHub's failure thresholds are not lowered.
 The `pqc-self-scan-evidence` artifact preserves raw SARIF, the separate
 `code-scanning.sarif` upload copy, `code-scanning-audit.json` and the exact expectation
 policy, even if preparation
-or upload fails. The existing dependency SBOM artifact is retained. This is CI-only
+or upload fails. The separate dependency SBOM artifact is also configured. The scan command uses `--format sarif`, which writes SARIF plus the two flat inventories. This is CI-only
 policy; normal scans and user report formats are unaffected. Rule definitions, algorithm-name vocabularies, OID labels, translated guidance and
 nonexecuted example strings can match usage patterns without performing
 cryptographic operations; only individually reviewed exact results are registered.
@@ -546,9 +587,7 @@ No new grammar, symbol resolver or dataflow engine was added. See the
 
 ## Developer quality baseline
 
-Task 023 adds a source-labeled, offline evaluation corpus and a Python standard-
-library harness. It measures the existing CLI without changing scan rules or
-report formats. Build with `cargo build --workspace --release --locked`, then run:
+The developer baseline uses a source-labeled offline corpus and a Python standard-library harness. Its frozen corpus has 41 files and 57 truth units (30 positive, 20 negative, two ambiguous and five unsupported), with independent labels and a tuning/holdout split. It measures the CLI without modifying scan rules or report formats. Build with `cargo build --workspace --release --locked`, then run:
 
 ```bash
 python3 -m unittest discover -s tests/quality -p 'test_*.py'
@@ -562,8 +601,21 @@ remain unapproved proposals; the small synthetic holdout does not represent
 real-world accuracy. See the [protocol](tests/quality/PROTOCOL.md) and
 [measured baseline](docs/quality/TASK-023-BASELINE.md).
 
+## Development and contracts
+
+```bash
+cargo build --workspace --locked
+cargo fmt --all --check
+cargo test --workspace --locked
+cargo clippy --workspace --all-targets -- -D warnings
+node --test shell/*.test.cjs
+python3 -m unittest discover -s tests/quality -p 'test_*.py'
+```
+
+See [architecture](docs/architecture.md), [rule reference](docs/rules-reference.md), [inventory v1](docs/architecture/INVENTORY-REPORT-V1.md), [local assessment](docs/architecture/LOCAL-ASSESSMENT-V1.md) and [quality gates](docs/quality/QUALITY-GATES.md). Library `scan_repository`, `ScanResult`, existing detector implementations and report writers remain supported alongside detailed/native entrypoints. Internal `Native*` type names and `schemas/native-scan-v1.schema.json` are retained compatibility names; they do not restore the removed CLI switch.
+
+Compatibility preserves public structures and identity algorithms, not every incorrect historical value. Certificate corrections, retained AST occurrences and dependency provenance can intentionally change findings, locations, purls or IDs derived from corrected facts. Privacy redaction changes free text. Review the corresponding contracts before comparing releases.
+
 ## License
 
 MIT
-
-Evidence exports apply bounded private-key/credential redaction while preserving IDs and report schemas. See the [evidence privacy contract](docs/architecture/EVIDENCE-PRIVACY.md) for supported syntax and limits. This is not a universal secret scanner.

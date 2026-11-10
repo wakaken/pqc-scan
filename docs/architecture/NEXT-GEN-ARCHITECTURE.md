@@ -11,7 +11,7 @@ Design date: 2026-11-09. Status: recommended design for review, not permission t
 
 ## Decision
 
-Retain the five-crate workspace. Add a diagnostic result path, precise certificate semantics and core modules for observations/inventory/assessment only when their associated tasks are selected. Add TLS and SSH as opt-in modules with independent network dependencies. No rewrite, framework migration, service layer or generic dynamic extension system is justified.
+Retain the five-crate workspace. Tasks 018–029 have implemented the diagnostic result path, precise certificate semantics and core modules for observations/inventory/assessment; task 023 retains its maintainer approval gate. See the [current alignment](../quality/PHASE-0-1-ALIGNMENT.md). Add TLS and SSH as opt-in modules with independent network dependencies. No rewrite, framework migration, service layer or generic dynamic extension system is justified.
 
 ```mermaid
 flowchart TD
@@ -82,7 +82,7 @@ Categories: steps 1-4 are **existing implementation corrections/extensions** plu
 
 ## Export contracts and mapping
 
-Retain `report.json`, `cbom.json`, `dependency-sbom.json` and existing SARIF as compatibility surfaces. `--format all` continues to mean its current format set. New `--native-json`, `--cyclonedx` and `--diagnostics` are proposed opt-ins; final names require CLI review. Suggested additional filenames: `scan.native.v1.json`, `cbom.cdx-1.7.json`, `dependency-sbom.cdx-1.7.json`, `diagnostics.json`.
+Retain `report.json`, `cbom.json`, `dependency-sbom.json` and existing SARIF as compatibility surfaces. `--format all` continues to mean its current format set. Implemented opt-ins are `--inventory-json` (`scan.inventory.v1.json`), `--diagnostics` (`diagnostics.json`) and `--inventory-json --policy-profile migration-review-v1` (`scan.assessment.v1.json`). The old `--native-json` name is removed. CycloneDX export remains proposed work; suggested `--cyclonedx`, `cbom.cdx-1.7.json` and `dependency-sbom.cdx-1.7.json` are not current CLI contracts.
 
 | Internal information | Native JSON | CycloneDX 1.7 design mapping | Legacy/SARIF treatment |
 |---|---|---|---|
