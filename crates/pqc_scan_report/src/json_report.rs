@@ -10,6 +10,13 @@ pub fn write_diagnostics(document: &ScanDocument, path: &Path) -> Result<()> {
     Ok(())
 }
 
+pub fn write_native_json(native: &pqc_scan_core::NativeScan, path: &Path) -> Result<()> {
+    native.validate()?;
+    let json = serde_json::to_string_pretty(native)?;
+    std::fs::write(path, json).with_context(|| format!("failed to write {}", path.display()))?;
+    Ok(())
+}
+
 pub fn write_json_report(result: &ScanResult, path: &Path) -> Result<()> {
     let json = serde_json::to_string_pretty(result)?;
     std::fs::write(path, json).with_context(|| format!("failed to write {}", path.display()))?;

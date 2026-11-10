@@ -1,16 +1,19 @@
 use std::{
     ffi::OsString,
-    io::{self, Write},
+    io::{self, Read, Write},
     path::PathBuf,
 };
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 
-use pqc_scan_core::{pipeline, scan_repository_detailed, ScanConfig};
+use pqc_scan_core::{
+    pipeline, scan_repository_detailed, scan_repository_native, NativeOptions, ScanConfig,
+};
 use pqc_scan_detectors::default_detectors;
 use pqc_scan_report::{
-    write_diagnostics, write_reports_with_language, ReportFormat, ReportLanguage,
+    write_assessment_json, write_diagnostics, write_inventory_json, write_reports_with_language,
+    ReportFormat, ReportLanguage,
 };
 use pqc_scan_rules::{RuleSet, Severity};
 
@@ -60,6 +63,22 @@ struct ScanArgs {
     /// Write inspection coverage and safe failure reasons to diagnostics.json.
     #[arg(long)]
     diagnostics: bool,
+
+    /// Write the Cryptographic Inventory and Evidence Report to scan.inventory.v1.json.
+    #[arg(long)]
+    inventory_json: bool,
+
+    /// Explicit offline advisory policy; writes scan.assessment.v1.json.
+    #[arg(long, value_parser = ["migration-review-v1"], requires = "inventory_json")]
+    policy_profile: Option<String>,
+
+    /// Bounded v1 enum/boolean context JSON; support is operator-declared, not verified.
+    #[arg(long, requires = "policy_profile")]
+    assessment_context: Option<PathBuf>,
+
+    /// Non-secret project identifier for inventory correspondence keys; never a remote URL.
+    #[arg(long, requires = "inventory_json")]
+    repository_scope: Option<String>,
 
     /// Return exit code 3 unless every selected inspection is known to be complete.
     #[arg(long)]
@@ -208,6 +227,19 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     stdout: &mut WOut,
     stderr: &mut WErr,
 ) -> Result<ExitStatus> {
+    let assessment_context = if let Some(path) = &args.assessment_context {
+        let file = std::fs::File::open(path)
+            .map_err(|_| anyhow::anyhow!("failed to read assessment context"))?;
+        let mut bytes = Vec::new();
+        file.take(16385)
+            .read_to_end(&mut bytes)
+            .map_err(|_| anyhow::anyhow!("failed to read assessment context"))?;
+        let text = std::str::from_utf8(&bytes)
+            .map_err(|_| anyhow::anyhow!("invalid assessment context encoding"))?;
+        pqc_scan_core::policy::AssessmentContext::from_json(text)?
+    } else {
+        pqc_scan_core::policy::AssessmentContext::default()
+    };
     let rules = RuleSet::load_from_dir(&args.rules_dir)
         .with_context(|| format!("failed to load rules from {}", args.rules_dir.display()))?;
 
@@ -222,13 +254,35 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     };
 
     let detectors = default_detectors();
-    let document = scan_repository_detailed(&config, &rules, &detectors)?;
+    let document = if args.inventory_json {
+        let options = NativeOptions::new(args.repository_scope.as_deref())?;
+        scan_repository_native(&config, &rules, &detectors, &options)?
+    } else {
+        scan_repository_detailed(&config, &rules, &detectors)?
+    };
+    let assessment = if let Some(profile) = &args.policy_profile {
+        Some(pqc_scan_core::policy::evaluate(
+            document
+                .native()
+                .ok_or_else(|| anyhow::anyhow!("policy requires inventory capture"))?,
+            &assessment_context,
+            profile,
+        )?)
+    } else {
+        None
+    };
     let result = document.legacy();
 
     let mut outputs =
         write_reports_with_language(result, &args.out_dir, args.format.into(), args.lang.into())?;
     if args.diagnostics {
         outputs.push(write_diagnostics(&document, &args.out_dir)?);
+    }
+    if args.inventory_json {
+        outputs.push(write_inventory_json(&document, &args.out_dir)?);
+    }
+    if let Some(report) = &assessment {
+        outputs.push(write_assessment_json(report, &args.out_dir)?);
     }
     for out in outputs {
         writeln!(stdout, "written {}", out.display())?;
@@ -361,7 +415,7 @@ mod tests {
     }
 
     #[test]
-    fn diagnostics_opt_in_exports_unknown_coverage_without_changing_legacy_json() {
+    fn diagnostics_opt_in_exports_complete_coverage_without_changing_legacy_json() {
         let repo = temp_dir("diagnostics-input");
         let plain = temp_dir("diagnostics-plain");
         let detailed = temp_dir("diagnostics-extra");
@@ -383,7 +437,7 @@ mod tests {
         assert_eq!(result.unwrap(), ExitStatus::Success);
         assert_eq!(stdout.matches("written ").count(), 6);
         assert!(!plain.join("diagnostics.json").exists());
-        assert!(stderr.contains("inspection completeness is unknown"));
+        assert!(stderr.is_empty(), "{stderr}");
         let mut args = arguments(&detailed);
         args.push("--diagnostics".into());
         let (result, stdout, _) = run_cli_test(args);
@@ -393,9 +447,9 @@ mod tests {
             serde_json::from_str(&fs::read_to_string(detailed.join("diagnostics.json")).unwrap())
                 .unwrap();
         assert_eq!(diagnostics["schema_version"], "1");
-        assert_eq!(diagnostics["coverage"]["status"], "unknown");
+        assert_eq!(diagnostics["coverage"]["status"], "complete_within_scope");
         assert_eq!(diagnostics["coverage"]["selected_files"], 1);
-        assert_eq!(diagnostics["coverage"]["unknown_files"], 1);
+        assert_eq!(diagnostics["coverage"]["unknown_files"], 0);
         let mut unreported: Vec<_> = diagnostics["diagnostics"]
             .as_array()
             .unwrap()
@@ -406,7 +460,7 @@ mod tests {
             })
             .collect();
         unreported.sort_unstable();
-        assert_eq!(unreported, ["dependency_detector"]);
+        assert!(unreported.is_empty());
         assert!(diagnostics.get("findings").is_none());
         let read = |out: &Path, file: &str| {
             serde_json::from_str::<serde_json::Value>(&fs::read_to_string(out.join(file)).unwrap())
@@ -430,6 +484,7 @@ mod tests {
         let repo = temp_dir("strict-input");
         let out = temp_dir("strict-output");
         write_file(&repo, "app.js", "const algorithm = 'RS256';\n");
+        write_file(&repo, "Gemfile", "gem ENV['DYNAMIC_DEPENDENCY']\n");
         let (result, _, stderr) = run_cli_test(vec![
             "pqc-scan".into(),
             "scan".into(),
@@ -533,7 +588,7 @@ mod tests {
             "ja".into(),
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert!(stderr.contains("inspection completeness is unknown"));
+        assert!(stderr.is_empty(), "{stderr}");
         let html = fs::read_to_string(out.join("report.html")).unwrap();
         assert!(html.contains("耐量子暗号への移行調査レポート"));
         assert!(html.contains("対応完了の保証ではありません"));
@@ -583,7 +638,7 @@ mod tests {
             "high".into(),
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert!(stderr.contains("inspection completeness is unknown"));
+        assert!(stderr.is_empty(), "{stderr}");
         assert_eq!(stdout.matches("written ").count(), 6);
         let report: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
@@ -642,7 +697,7 @@ mod tests {
             rules_dir().display().to_string(),
         ]);
         assert_eq!(result.expect("acceptance scan"), ExitStatus::Success);
-        assert!(stderr.contains("inspection completeness is unknown"));
+        assert!(stderr.is_empty(), "{stderr}");
         assert_eq!(stdout.matches("written ").count(), 6);
         let json: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
@@ -724,10 +779,7 @@ mod tests {
         let (result, stdout, stderr) = run_cli_test(args);
 
         assert_eq!(result.expect("scan succeeds"), ExitStatus::Success);
-        assert!(
-            stderr.contains("inspection completeness is unknown"),
-            "{stderr}"
-        );
+        assert!(stderr.is_empty(), "{stderr}");
         assert!(
             out_dir.join("report.json").exists(),
             "report.json should exist"

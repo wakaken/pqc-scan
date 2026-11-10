@@ -1,0 +1,242 @@
+{
+  "reviewer": "labels023_b",
+  "method": "independent source-only pre-measurement labeling",
+  "corpusSha256": "285d9610cc9cd6dea9e4e0752f7501a9535fc62c7cfbe7df2dc0743c05963708",
+  "labels": [
+    {
+      "id": "u001",
+      "label": "positive",
+      "reason": "Signature.getInstance(\"ML-DSA\") is a nominal PQC signature API reference; omitted imports are permitted."
+    },
+    {
+      "id": "u002",
+      "label": "positive",
+      "reason": "The active crypto/mlkem import is a nominal PQC Go API/import reference."
+    },
+    {
+      "id": "u003",
+      "label": "positive",
+      "reason": "The static generateKeyPairSync call explicitly supplies the ML-KEM-768 algorithm."
+    },
+    {
+      "id": "u004",
+      "label": "positive",
+      "reason": "The nominal subtle.generateKey call explicitly supplies ML-DSA-65."
+    },
+    {
+      "id": "u005",
+      "label": "positive",
+      "reason": "The nominal mlkem.MLKEM768PrivateKey.generate call references the ML-KEM key API."
+    },
+    {
+      "id": "u006",
+      "label": "positive",
+      "reason": "The active use declaration references the ml_kem crate API without local shadowing."
+    },
+    {
+      "id": "u007",
+      "label": "positive",
+      "reason": "OpenSSL::PKey.generate_key explicitly supplies ML-DSA-65; this is an API call rather than display text."
+    },
+    {
+      "id": "u008",
+      "label": "negative",
+      "reason": "The apparent Node API invocation is entirely inside a line comment and is not a source API use."
+    },
+    {
+      "id": "u009",
+      "label": "negative",
+      "reason": "ML_KEM_helper is an ordinary identifier assignment with no nominated cryptographic API reference."
+    },
+    {
+      "id": "u010",
+      "label": "negative",
+      "reason": "X25519MLKEM768 is a final hybrid group name, not an old draft algorithm name."
+    },
+    {
+      "id": "u011",
+      "label": "positive",
+      "reason": "The explicit GODEBUG assignment sets tlsmlkem=0, disabling that setting."
+    },
+    {
+      "id": "u012",
+      "label": "positive",
+      "reason": "The namedGroups assignment lists only the classical x25519 and secp256r1 groups."
+    },
+    {
+      "id": "u013",
+      "label": "positive",
+      "reason": "The groups assignment lists only the classical X25519 and P-256 groups."
+    },
+    {
+      "id": "u014",
+      "label": "positive",
+      "reason": "pair is explicitly imported as an alias of node:crypto generateKeyPairSync and is called with ML-KEM-768."
+    },
+    {
+      "id": "u015",
+      "label": "negative",
+      "reason": "The call resolves to an explicitly declared local string-length function, not the nominal Node cryptographic API."
+    },
+    {
+      "id": "u016",
+      "label": "positive",
+      "reason": "The first separate static generateKeyPairSync occurrence explicitly names ML-KEM-768."
+    },
+    {
+      "id": "u017",
+      "label": "positive",
+      "reason": "The second separate static generateKeyPairSync occurrence explicitly names ML-KEM-768; same-line occurrences remain distinct."
+    },
+    {
+      "id": "u018",
+      "label": "positive",
+      "reason": "The unreachable branch still contains a nominal Signature.getInstance(\"ML-DSA\") static API reference."
+    },
+    {
+      "id": "u019",
+      "label": "negative",
+      "reason": "The crypto/mlkem import text is commented out and does not constitute an active import."
+    },
+    {
+      "id": "u020",
+      "label": "positive",
+      "reason": "Key is explicitly imported from the cryptography ML-KEM private-key API and its generate method is referenced."
+    },
+    {
+      "id": "u021",
+      "label": "negative",
+      "reason": "ml_kem is an explicitly declared local module containing Dummy, so this use is a local namesake rather than a PQC crate API."
+    },
+    {
+      "id": "u022",
+      "label": "negative",
+      "reason": "puts displays an isolated algorithm string; the protocol expressly excludes this from API truth."
+    },
+    {
+      "id": "u023",
+      "label": "positive",
+      "reason": "The typed TypeScript assignment contains a nominal subtle.generateKey call with ML-DSA-65."
+    },
+    {
+      "id": "u024",
+      "label": "ambiguous",
+      "reason": "algorithmFromCaller has no locally resolvable value; the bytes cannot establish whether the nominal key-generation call selects PQC."
+    },
+    {
+      "id": "u025",
+      "label": "positive",
+      "reason": "X25519Kyber768Draft00 explicitly references an old Kyber draft hybrid group name."
+    },
+    {
+      "id": "u026",
+      "label": "negative",
+      "reason": "X25519MLKEM768 is a final group name and does not reference an old draft name."
+    },
+    {
+      "id": "u027",
+      "label": "unsupported",
+      "reason": "The fragment ends inside an incomplete call. Although the nominal API spelling is visible, it does not establish a complete API usage unit as asked; malformed undecidable units are excluded by the protocol."
+    },
+    {
+      "id": "u028",
+      "label": "unsupported",
+      "reason": "The fragment is Swift, outside the supported source-language population and the nominated Node API family."
+    },
+    {
+      "id": "u029",
+      "label": "negative",
+      "reason": "tlsmlkem=1 is an enabled setting and does not explicitly disable PQC TLS."
+    },
+    {
+      "id": "u030",
+      "label": "negative",
+      "reason": "The namedGroups list includes the hybrid X25519MLKEM768 group, so it is not classical-only."
+    },
+    {
+      "id": "u031",
+      "label": "negative",
+      "reason": "The groups list includes hybrid X25519MLKEM768, so it is not classical-only."
+    },
+    {
+      "id": "u032",
+      "label": "positive",
+      "reason": "Cargo explicitly declares the ml-kem dependency; declaration truth does not assert runtime availability or enablement."
+    },
+    {
+      "id": "u033",
+      "label": "negative",
+      "reason": "my-rustls-wrapper is a distinct package name; its spelling does not establish a declaration of the rustls package."
+    },
+    {
+      "id": "u034",
+      "label": "positive",
+      "reason": "JSON decoding yields openssl and its purl explicitly identifies pkg:cargo/openssl; this establishes dependency presence only."
+    },
+    {
+      "id": "u035",
+      "label": "negative",
+      "reason": "The package.json declaration identifies an npm dependency named rustls, not the nominated Cargo rustls package; identical spelling does not establish ecosystem identity."
+    },
+    {
+      "id": "u036",
+      "label": "unsupported",
+      "reason": "The JSON terminates inside an array before any complete component; no complete dependency declaration can be established."
+    },
+    {
+      "id": "u037",
+      "label": "positive",
+      "reason": "The public manifest hash matches these DER bytes and records rsaEncryption with a 1024-bit subject public key."
+    },
+    {
+      "id": "u038",
+      "label": "positive",
+      "reason": "The matching public manifest records sha256WithRSAEncryption as this certificate signature algorithm."
+    },
+    {
+      "id": "u039",
+      "label": "positive",
+      "reason": "The matching public manifest records sha256WithRSAEncryption independently of the EC subject key."
+    },
+    {
+      "id": "u040",
+      "label": "negative",
+      "reason": "The matching public manifest identifies an id-ecPublicKey P-256 subject, not an RSA-2048 subject; the issuer signature does not change subject type."
+    },
+    {
+      "id": "u041",
+      "label": "positive",
+      "reason": "The matching public manifest records ecdsa-with-SHA256 for this public certificate."
+    },
+    {
+      "id": "u042",
+      "label": "negative",
+      "reason": "The matching public manifest records an ECDSA signature rather than an RSA signature."
+    },
+    {
+      "id": "u043",
+      "label": "unsupported",
+      "reason": "The bytes are plain non-certificate text. The misleading filename cannot establish an RSA modulus or any certificate attribute."
+    },
+    {
+      "id": "u044",
+      "label": "unsupported",
+      "reason": "The input is an unsupported PKCS12 candidate with synthetic invalid contents; no inner signature attribute is established."
+    },
+    {
+      "id": "u045",
+      "label": "positive",
+      "reason": "The exact BEGIN PRIVATE KEY marker is present. This labels a PKCS8 marker only; the synthetic body is not a valid private key."
+    },
+    {
+      "id": "u046",
+      "label": "negative",
+      "reason": "BEGIN PUBLIC KEY is a public marker and is not the nominated BEGIN PRIVATE KEY marker."
+    },
+    {
+      "id": "u047",
+      "label": "unsupported",
+      "reason": "The marker is BEGIN EC PRIVATE KEY, an unsupported private-key marker population under the protocol and not one of the nominated built-in private-marker formats; its synthetic body is not a real key."
+    }
+  ]
+}

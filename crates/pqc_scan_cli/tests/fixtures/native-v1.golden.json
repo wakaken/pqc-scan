@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "identity_scheme": "pqc-scan-length-prefixed-sha256-v1",
+  "scanner_version": "0.1.0",
+  "catalog_version": "native-exact-identifiers-1",
+  "profile": "static-native-v1",
+  "rules_digest": "rules-v1-bd3e2080a4ee8734b100c5839b8018d06a083cda5b8cb170d39dbd527c9a9f0b",
+  "run": {
+    "id": "RUN",
+    "attempt_id": "static-1",
+    "generated_at": "TIME"
+  },
+  "repository_scope": "test/project",
+  "scope": {
+    "default_excludes": [
+      ".git",
+      "node_modules",
+      "target",
+      "dist",
+      "docs"
+    ],
+    "git_exclude": true,
+    "git_global": true,
+    "git_ignore": true,
+    "markdown_excluded": true,
+    "max_file_size_bytes": 2097152
+  },
+  "coverage": {
+    "analysis_failed_files": 0,
+    "analyzed_files": 1,
+    "enumeration_failed_entries": 0,
+    "excluded_enumerated_files": 0,
+    "not_applicable_files": 0,
+    "not_enumerated_population": true,
+    "partial_files": 0,
+    "read_failed_files": 0,
+    "read_ok_files": 1,
+    "selected_files": 1,
+    "status": "complete_within_scope",
+    "unknown_files": 0,
+    "unsupported_files": 0
+  },
+  "diagnostics": [],
+  "native_completeness": "not_exhaustive",
+  "assets": [
+    {
+      "id": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+      "kind": "algorithm",
+      "identity_basis": "normalized_identifier_and_reported_parameters",
+      "attributes": {
+        "identifier": "ML-KEM-768",
+        "namespace": "named",
+        "parameters": {},
+        "purpose": "reference"
+      },
+      "relations": [],
+      "uncertainty": []
+    },
+    {
+      "id": "asset-v1-cfd9a34e9ce62f0e627324f539707344622507881246688f78b8638200c1c742",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-e69e4b635760f997b8981969b8fe6d4d058de7c38ad36e21bdf1745fb4a6f2a1",
+        "local_ordinal": 0,
+        "method": "lexical_match",
+        "path": "app.txt"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-e8ad2f1db180cbf3a304f1b04cc91e293208c30f6ecbe8864201a130932050f7",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-e69e4b635760f997b8981969b8fe6d4d058de7c38ad36e21bdf1745fb4a6f2a1",
+        "local_ordinal": 1,
+        "method": "lexical_match",
+        "path": "app.txt"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "id": "OBSERVATION-0",
+      "occurrence_key": "occurrence-v1-beaf73f374b0502912a04cdf8737d69a79d38213b94bd172e04e4ed7edceeb62",
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+        "asset-v1-cfd9a34e9ce62f0e627324f539707344622507881246688f78b8638200c1c742"
+      ],
+      "target": {
+        "path": "app.txt",
+        "line": 1,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": 0,
+        "byte_end": 10,
+        "object_index": null
+      },
+      "method": "lexical_match",
+      "producer": "regex_detector",
+      "assurance": "lexical",
+      "usage": "referenced",
+      "rule_id": "TEST_NATIVE",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "OBSERVATION-1",
+      "occurrence_key": "occurrence-v1-82b196221df45425aa0be79cd15332ce6dfe5eb7c4fb92ea759216344d76e4e4",
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+        "asset-v1-e8ad2f1db180cbf3a304f1b04cc91e293208c30f6ecbe8864201a130932050f7"
+      ],
+      "target": {
+        "path": "app.txt",
+        "line": 2,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": 11,
+        "byte_end": 21,
+        "object_index": null
+      },
+      "method": "lexical_match",
+      "producer": "regex_detector",
+      "assurance": "lexical",
+      "usage": "referenced",
+      "rule_id": "TEST_NATIVE",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    }
+  ],
+  "legacy_associations": [
+    {
+      "legacy_index": 0,
+      "legacy_id": "LEGACY-0",
+      "observation_ids": [
+        "OBSERVATION-0"
+      ]
+    },
+    {
+      "legacy_index": 1,
+      "legacy_id": "LEGACY-1",
+      "observation_ids": [
+        "OBSERVATION-1"
+      ]
+    }
+  ],
+  "unassociated_observation_ids": [],
+  "legacy_loss_records": [],
+  "assessment_status": "not_evaluated",
+  "assessments": [],
+  "export_loss_notes": [
+    "raw_matches_snippets_and_arbitrary_metadata_omitted",
+    "unknown_raw_identifiers_not_guessed",
+    "legacy_snapshot_not_derived_from_inventory",
+    "legacy_ids_are_not_native_identity",
+    "legacy_dependency_version_provenance_unavailable",
+    "legacy_applicability_coverage_is_not_native_inventory_completeness",
+    "weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity",
+    "cryptographic_trust_and_policy_not_evaluated"
+  ]
+}

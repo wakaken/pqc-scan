@@ -104,9 +104,9 @@ Coverage has disjoint file terminal states and reconciles selected = read-ok +
 read-failed, and read-ok = analyzed + partial + analysis-failed + unsupported +
 not-applicable + unknown. Enumeration failures are an additional entry count;
 ignore-hidden populations are not enumerable. Complete means complete within the
-declared scope, not absence of cryptography or product security. The dependency
-detector still uses `NotReported`, so full nonempty scans generally
-have unknown completeness unless known partial inspection takes precedence.
+declared scope, not absence of cryptography or product security. Dependency inspection now distinguishes structured success, malformed records,
+partial results and unsupported versions. Lexical fallbacks remain `NotReported`;
+nondependency inputs are `NotApplicable`. See [dependency provenance](architecture/DEPENDENCY-PROVENANCE.md).
 
 CLI adds a stderr notice and opt-in `--diagnostics` (`diagnostics.json`, schema 1)
 and `--require-complete` (code 3). Existing default output and codes remain; fatal
@@ -154,6 +154,25 @@ strategy, not full semantic analysis or exhaustive private-key format support.
   - Python
   - Rust
   - Ruby
+
+### AST occurrence identity (task 024)
+
+Private candidates retain their parsed-source byte start and the real prefix
+length before any clipping ellipsis. Deduplication is per rule on absolute byte
+intervals, trimming only edge whitespace/quote wrappers so parent/child versions
+of one token share identity. Different same-line spans survive. It does not use
+line/text identity, change rule patterns or export a new span model. Legacy
+native line/column/evidence choice and the general finding-ID algorithm remain;
+AST columns still mix byte-based node starts and code-point relative offsets.
+SARIF retains its task022 conservative handling. Traversal/candidate/work/hit caps
+are unchanged; the dedup set now lives within each rule. Matches extending into
+a synthetic clipped suffix are rejected while Truncated stays visible.
+
+The JavaScript grammar remains the TypeScript/TSX parser. Syntax recovery and
+nominal API matching do not resolve aliases, local namesakes, actual execution
+or all comments inside ancestor text. Frozen corpus and grammar-subset tests
+record these limitations rather than silently expanding dependency support.
+See [the task024 evidence](quality/TASK-024-AST-OCCURRENCES.md).
 
 ### Regex detector
 
@@ -377,3 +396,13 @@ remain language-independent. No runtime translation service is used.
 - Add a new report format:
   1. implement writer module in `pqc_scan_report`
   2. register enum variant and output path mapping
+
+Task 025 adds the opt-in Cryptographic Inventory and Evidence Report beside the
+legacy pipeline. `--inventory-json` writes `scan.inventory.v1.json` and is the only
+CLI switch for that report; `--native-json` has been removed. See [INVENTORY-REPORT-V1.md](architecture/INVENTORY-REPORT-V1.md)
+for identity, assurance and export losses.
+
+Task 026 adds pure `assessment` and `policy` modules and a separate, explicitly
+selected local advisory assessment report. Existing Risk/severity/recommendation
+output and inventory-v1 semantics remain unchanged. See
+[LOCAL-ASSESSMENT-V1.md](architecture/LOCAL-ASSESSMENT-V1.md).

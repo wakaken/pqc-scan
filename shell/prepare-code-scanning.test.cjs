@@ -269,3 +269,34 @@ test('actual scanner still detects identical fixture and product inputs; only th
   assert.equal(retained[0].level, 'error');
   assert(!rawBytes.includes(Buffer.from('SYNTHETIC_CI_CANARY')));
 });
+
+test('a reviewed line-only result requires an explicit null column and exact full digest', t => {
+  const root = fixture(t), lineOnly = result();
+  delete lineOnly.locations[0].physicalLocation.region.startColumn;
+  const approved = policy();
+  approved.files[0].results[0].column = null;
+  approved.files[0].results[0].sha256 = digest(lineOnly);
+  const input = document([lineOnly]);
+  input.runs[0].columnKind = 'unicodeCodePoints';
+  assert.equal(prepare(input, approved, root).audit.expectedResults, 1);
+  assert.deepEqual(prepare(document(), approved, root).sarif, document());
+  assert.deepEqual(prepare(input, policy(), root).sarif, input);
+  for (const column of [null, 0, -1]) {
+    const malformed = structuredClone(input);
+    const r = malformed.runs[0].results[0];
+    r.locations[0].physicalLocation.region.startColumn = column;
+    const matching = structuredClone(approved);
+    matching.files[0].results[0].sha256 = digest(r);
+    assert.deepEqual(prepare(malformed, matching, root).sarif, malformed);
+  }
+  const unknownLine = structuredClone(input);
+  delete unknownLine.runs[0].results[0].locations[0].physicalLocation.region;
+  assert.deepEqual(prepare(unknownLine, approved, root).sarif, unknownLine);
+  for (const uri of ['tests/fixture%2Etxt', 'tests/%66ixture.txt', '../tests/fixture.txt']) {
+    const encoded = structuredClone(input);
+    encoded.runs[0].results[0].locations[0].physicalLocation.artifactLocation.uri = uri;
+    const matching = structuredClone(approved);
+    matching.files[0].results[0].sha256 = digest(encoded.runs[0].results[0]);
+    assert.deepEqual(prepare(encoded, matching, root).sarif, encoded);
+  }
+});

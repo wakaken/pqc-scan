@@ -199,7 +199,7 @@ EC・DSA・暗号化秘密鍵のPEMマーカーを含むファイルも、ソー
 CLIツールは以下の通り実行します。
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -227,6 +227,46 @@ pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
 # 1つのルール詳細を確認
 pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
+
+### 暗号資産・検出根拠レポート
+
+`--inventory-json` を付けると、観測方法ごとの記録、アルゴリズム・公開鍵・証明書・依存関係の
+棚卸し、従来の検出結果との対応を含む `scan.inventory.v1.json` を追加します。
+これはpqc-scan独自のJSON形式です。`--format all` だけでは追加されず、従来レポートとIDは維持します。
+`--repository-scope team/project` はこのオプションと併用し、スキャン間でソース位置を
+対応付ける弱い手掛かりを付与します。秘密情報や絶対パスは指定しないでください。
+実際の稼働、証明書の信頼性、PQC対応判定を保証するものではありません。
+詳細は[形式・識別方法・制約](docs/architecture/INVENTORY-REPORT-V1.md)を参照してください。
+
+```bash
+pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
+```
+
+このレポートのCLI指定は `--inventory-json` に統一しました。旧指定 `--native-json` は廃止したため、
+`--inventory-json` へ置き換え、読み込むファイルも `scan.native.v1.json` から
+`scan.inventory.v1.json` へ変更してください。JSONの項目・スキーマの版・ID生成は変更しません。
+
+依存関係では、`^1.2.3` のような指定条件、ロックファイルで確認できたバージョン、情報の出所を分けて記録します。
+指定条件やSBOMの申告だけから、バージョン付きpurlを生成しません。path・git・workspaceの参照先は未解決のままとし、
+依存グラフの推測やパッケージのダウンロードは行いません。従来の `dependency-sbom.json` は同じ項目の配列を維持します。
+purlと検査状況の値は、誤った断定を避けるため修正しています。従来形式で統合される出所も、棚卸しJSONでは別の記録として残します。
+
+### ローカル方針の評価
+
+`--inventory-json --policy-profile migration-review-v1` を明示すると、量子リスク・従来型の弱点・
+検出の確かさ・用途・対応候補の前提条件を分けた `scan.assessment.v1.json` を追加します。
+既存レポートと棚卸しJSONは維持し、評価によって従来の重大度や終了コードは変えません。
+この方針は移行検討用で、規制適合や実稼働の安全性を保証するものではありません。期限も設けません。
+検査不完全・情報不足は合格にせず、現在の棚卸しでは全体のPassを出しません。
+
+```bash
+pqc-scan scan . --inventory-json --policy-profile migration-review-v1 --rules-dir ./rules
+```
+
+任意の `--assessment-context ./context.json` で、用途や実行環境の対応状況を指定できます。
+例は `{"version":1,"use_case":"jwt"}` です。省略値は不明のままとし、指定値も利用者の申告として記録します。
+依存ライブラリの存在だけで、PQCを利用できるとは判定しません。
+用途・前提条件・入力項目・制約は[評価仕様](docs/architecture/LOCAL-ASSESSMENT-V1.md)を参照してください。
 
 ### 検査の完全性と診断情報
 
@@ -271,10 +311,12 @@ ASTに構文エラーがあれば取得できた検出を残し、`detector_part
 未対応コンテナーは `detector_unsupported` として通知します。
 コンテナーの検出は、内部の検査成功を意味しません。解析できてもルールに一致しない証明書は所見を出しません。
 
-**現時点の制約：** 依存関係検出器は引き続き互換アダプターを使い、
-`detector_not_reported` を返します。対象ファイルがある通常のスキャンは `unknown` のまま、
-または上限・構文エラーにより `partial` となるため、厳密モードではいずれも3を返します。
-既存レポートのスキーマと診断スキーマの版は維持し、診断値に新しい検査状況を反映します。
+依存関係の検査では、有効な空データ・対応形式の不正データ・部分成功・未対応の版・上限到達を区別します。
+対応する構造化データの範囲では完了を報告し、関係のないファイルは対象外とします。
+Ruby・Gradle・XML・requirements・Goの簡易解析では、引き続き `detector_not_reported` を返します。
+完了は対応する解析範囲内の意味で、パッケージ管理ツールと同じ検証やインストール状態の保証ではありません。
+`--require-complete` の終了コードの規約は維持しますが、検査状況の修正により実際のコードは変わり得ます。
+詳しくは[依存関係の指定と確認根拠](docs/architecture/DEPENDENCY-PROVENANCE.md)を参照してください。
 
 従来の `scanned_files` は、引き続きwalkerが選択したファイル数です。
 新しい集計では、選択・読み込み成功／失敗・解析完了・部分成功・解析失敗・未対応・対象外・不明を区別します。
@@ -357,6 +399,22 @@ JSON・SARIF・CBOM・依存関係SBOMは、言語指定によらず従来の内
 
 マニフェストとSBOMファイルから抽出した依存関係インベントリです。
 
+### SARIFの位置情報
+
+SARIFのバージョンは2.1.0を維持します。ファイルパスはUTF-8のURI参照として
+パーセント符号化します（`%`、空白、`#`、`?`も符号化）。絶対パスはfile URIにします。
+Windowsではネイティブの区切り文字を正規化し、Unixのバックスラッシュは文字として扱います。
+行が不明（既存JSONでは`0`）の場合はファイル位置だけを出力します。行が既知で列が不明なら
+`startColumn`を省略し、パスが空なら`locations`を省略します。
+列は1始まりのUnicodeコードポイント単位（`columnKind: unicodeCodePoints`）です。
+絵文字・結合文字の各コードポイント・タブはそれぞれ1列と数え、表示幅やUTF-16単位とは区別します。
+既存AST検出器の列はバイト数と文字数を混在させているため、既存のマスクされていない
+スニペットでASCIIの接頭部を確認できる場合だけ列を出力し、それ以外は行までを保持します。
+接頭部が欠落・マスク・切り詰めされている場合は列を推測しません。
+既存JSONの位置・ID、他のレポート、CLIオプション、出力ファイル名は維持します。
+不正確なSARIF位置や未符号化パスに依存する処理には、この修正による差分が生じます。
+詳細は[契約と検証記録](docs/quality/SARIF-LOCATION-CONTRACT-022.md)を参照してください。
+
 ## セキュリティ/プライバシー制御
 
 - 完全な秘密鍵情報は出力しません。
@@ -407,7 +465,7 @@ JSON・SARIF・CBOM・依存関係SBOMは、言語指定によらず従来の内
 
 このリポジトリからCode Scanningへ送るコピーに限り、
 [`SELF-SCAN-EXPECTATIONS.json`](docs/quality/SELF-SCAN-EXPECTATIONS.json) に登録された
-検証済みのテスト入力の所見を取り除きます。ファイル全体のSHA-256、所見全体のダイジェスト、
+検証済みのテスト入力と固定のルール・分類・説明用データの所見を取り除きます。ファイル全体のSHA-256、所見全体のダイジェスト、
 ルール・位置・件数がすべて一致した場合だけ適用します。
 ファイルの変更・欠落、新しい所見、想定を超えた重複、未登録の製品コードの所見は送信対象に残します。
 テストディレクトリやルールを一括で除外せず、GitHubの失敗基準も引き下げません。
@@ -417,8 +475,44 @@ JSON・SARIF・CBOM・依存関係SBOMは、言語指定によらず従来の内
 準備やアップロードが失敗しても保存を試みます。
 既存の依存関係SBOM artifactも維持します。この扱いは本リポジトリのCIに限り、
 通常のスキャンや利用者向け出力形式には影響しません。
-新しい意図的なテスト入力は、ソースと所見をレビューしてから台帳へ登録します。CIによる自動登録は行いません。
+検出ルールの定義、暗号名・OIDの一覧、翻訳や対処説明、実行しないサンプル文字列は、
+暗号処理の実行ではありませんが、利用を検出するパターンに一致する場合があります。
+これらも個別に確認した所見だけを登録します。新しいテスト入力や分類用データは、ソースと所見をレビューしてから
+台帳へ登録します。CIによる自動登録は行いません。
 詳しくは[ポリシーと更新手順](docs/quality/CI-SELF-SCAN.md)を参照してください。
+
+## ASTによる出現箇所の保持
+
+同じ行に同じ呼び出しが複数あっても、ソース上の位置が異なれば別々の所見として保持します。
+親子のASTノードが同じ一致箇所を表している場合は1件にまとめます。
+既存のルール・ファイル単位の32件上限と、作業上限に達した場合の診断は維持します。
+表示用に付けた省略記号をソースの一致として扱いません。
+CLI・出力形式・ファイル名・既存の出現箇所のIDは維持しますが、保持される所見数と
+新しい出現箇所のIDは意図した修正として増える場合があります。AST列のUnicodeに関する
+既知の制約は引き続き適用されます（上記SARIFの位置情報を参照してください）。
+
+TypeScript/TSXは引き続きJavaScript用文法で解析します。JavaScript/JSXの範囲は解析できても、
+型構文では部分解析やAPIの見逃しが生じます。別名importの見逃し、同名のローカル関数や
+表示用文字列の誤検出、祖先ノード内のコメントの扱いにも制約があります。
+専用文法・シンボル解決・データフロー解析は追加していません。
+詳細は[タスク024の測定・互換性記録](docs/quality/TASK-024-AST-OCCURRENCES.md)を参照してください。
+
+## 開発者向け品質ベースライン
+
+タスク023では、独立した正解ラベル付きの評価入力とPython標準ライブラリだけで動く
+計測ハーネスを追加しました。検出ルール・既存CLI・出力形式は変更しません。
+`cargo build --workspace --release --locked` の後、以下を実行します。
+
+```bash
+python3 -m unittest discover -s tests/quality -p 'test_*.py'
+python3 tests/quality/run.py --binary target/release/pqc-scan --build-profile release --out-dir target/quality-baseline
+```
+
+実行ごとに新しい出力ディレクトリを指定してください。入力はビルド除外ディレクトリの外に
+一時配置し、生成レポートは `target/` 以下に保存します。CIでも測定結果と全レポートを保存します。
+精度・性能の予算は未承認の提案です。小規模な合成評価入力の結果を実際の製品全体の精度と
+同一視しないでください。[評価手順](tests/quality/PROTOCOL.md)と
+[測定結果](docs/quality/TASK-023-BASELINE.md)に対象範囲と制約を記録しています。
 
 ## ライセンス
 

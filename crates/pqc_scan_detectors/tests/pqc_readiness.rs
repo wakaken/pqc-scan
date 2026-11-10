@@ -212,3 +212,20 @@ fn identifies_draft_algorithms_separately_from_final_mlkem() {
         );
     }
 }
+
+#[test]
+fn existing_same_line_baseline_fixture_retains_each_api_call() {
+    let rules = rules();
+    let path =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/quality/corpus/holdout/twice.js");
+    let file = ScannableFile::from_bytes(path.clone(), std::fs::read(path).unwrap());
+    let mut columns: Vec<_> = TreeSitterDetector
+        .detect(&file, &rules)
+        .unwrap()
+        .iter()
+        .filter(|hit| hit.rule_id == "PQC_NODE_API")
+        .map(|hit| hit.location.column)
+        .collect();
+    columns.sort();
+    assert_eq!(columns, vec![1, 36]);
+}

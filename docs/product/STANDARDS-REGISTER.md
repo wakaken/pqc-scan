@@ -47,3 +47,23 @@ The [Final report body](https://doi.org/10.6028/NIST.IR.8547), sections 2.2, 3.1
 `RecommendedAction` remains usable. Internally attach purpose (establishment/signature/hash), candidate status, applicability, prerequisite library/runtime/provider/peer support, validation steps and source IDs. Keep JOSE/JWT identifiers, encodings and verifier rollout separate from primitive choice. Certificate migration requires ecosystem and trust-store support; do not mandate an unverified hybrid-chain deployment.
 
 These classifications are design guidance for [DOMAIN-MODEL.md](../architecture/DOMAIN-MODEL.md), [probe design](../architecture/TLS-SSH-PROBE-DESIGN.md) and the rule-review tasks. They do not change existing `Risk`, rule IDs, severity or output today.
+
+## Task 026 local advisory implementation (checked 2026-11-10)
+
+The [implemented profile](../architecture/LOCAL-ASSESSMENT-V1.md) pins source
+editions, not a universal compliance deadline. The FIPS203/204/205 final pages
+were reopened to confirm KEM/signature purposes. Additional primary references:
+
+| ID | Source | Applied scope / limit |
+|---|---|---|
+| CSOR | [NIST Algorithm Registration](https://csrc.nist.gov/projects/computer-security-objects-register/algorithm-registration) | Exact pure ML-KEM (kems 1–3), ML-DSA (sigAlgs 17–19), SLH-DSA (20–31) identifiers. HashML-DSA remains a different unimplemented encoding. |
+| S131A2 | [SP800-131A Rev2, 2019](https://csrc.nist.gov/pubs/sp/800/131/a/r2/final) | Frozen local RSA2048/EC224 reference thresholds and signing-digest concerns; not a current-law or complete-parameter compliance engine. |
+| NIST-PQ-FAQ | [NIST PQC FAQs](https://csrc.nist.gov/projects/post-quantum-cryptography/faqs), reviewed 2026-11-10 | Public-key versus generic quantum-search distinctions. Practical AES guidance does not justify calling AES128 broken or blindly equating oracle queries with security bits. |
+| BHT1997 | [Brassard–Høyer–Tapp, v1, 1997](https://arxiv.org/abs/quant-ph/9705002) | Ideal black-box collision query model and space/time tradeoff; no physical attack cost estimate. |
+| R6151 | [RFC6151, 2011](https://www.rfc-editor.org/rfc/rfc6151.html) | MD5 collision concerns; not an assertion that all HMAC-MD5 uses have identical attacks. |
+| R8725 | [RFC8725, 2020](https://www.rfc-editor.org/rfc/rfc8725.html) | JWT algorithm verification/application binding. PQC primitive standardization alone does not supply JOSE identifiers, encodings or verifier rollout. |
+| R4055 | [RFC4055, 2005](https://www.rfc-editor.org/rfc/rfc4055.html), sections1.2/3 | RSASSA-PSS signature-only usage, distinct from unrestricted RSA and OAEP key transport. No PSS parameter interpretation is inferred. |
+| LOCAL026 | Repository `migration-review-v1`, version1.0.0 | Local applicability, candidate prerequisite and uncertainty decisions; no normative external compliance claim. |
+
+These are reviewed source references; runtime evaluation stays offline. Existing
+rule risk tags, IDs, legacy severity and RecommendedAction remain unchanged.

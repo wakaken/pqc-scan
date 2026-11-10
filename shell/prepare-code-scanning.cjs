@@ -42,7 +42,7 @@ function validatePolicy(policy) {
     for (const result of file.results) {
       if (!exactKeys(result, ['ruleId', 'line', 'column', 'sha256', 'count'])
         || typeof result.ruleId !== 'string' || !result.ruleId
-        || !positiveInteger(result.line) || !positiveInteger(result.column)
+        || !positiveInteger(result.line) || !(result.column === null || positiveInteger(result.column))
         || !positiveInteger(result.count) || typeof result.sha256 !== 'string' || !digestPattern.test(result.sha256)
         || hashes.has(result.sha256)) invalid();
       hashes.add(result.sha256);
@@ -77,12 +77,13 @@ function identity(run, result) {
   const artifact = physical?.artifactLocation;
   const region = physical?.region;
   if (!exactKeys(artifact, ['uri']) || !literalPath(artifact.uri)
-    || !positiveInteger(region?.startLine) || !positiveInteger(region?.startColumn)
+    || !positiveInteger(region?.startLine)
+    || (Object.hasOwn(region, 'startColumn') && !positiveInteger(region.startColumn))
     || typeof result.ruleId !== 'string' || !result.ruleId
     || (Array.isArray(location.logicalLocations) && location.logicalLocations.length)) return null;
   const hash = resultDigest(result);
   return { key: `${artifact.uri}\0${hash}`, path: artifact.uri, hash,
-    ruleId: result.ruleId, line: region.startLine, column: region.startColumn };
+    ruleId: result.ruleId, line: region.startLine, column: Object.hasOwn(region, 'startColumn') ? region.startColumn : null };
 }
 
 function prepareCodeScanning(sarif, policy, root) {
@@ -184,7 +185,7 @@ function main(args) {
   audit.rawSarifSha256 = sha256(input);
   writeJson(options.get('--output'), sarif);
   writeJson(options.get('--audit'), audit);
-  process.stdout.write(`Self-scan: ${audit.rawResults} raw, ${audit.expectedResults} reviewed test results, ${audit.retainedResults} retained.\n`);
+  process.stdout.write(`Self-scan: ${audit.rawResults} raw, ${audit.expectedResults} reviewed expected results, ${audit.retainedResults} retained.\n`);
 }
 
 module.exports = { prepareCodeScanning, resultDigest };

@@ -372,14 +372,17 @@ fn real_detector_outcomes_reach_pipeline_and_legacy_unknowns_remain_visible() {
     );
     assert_eq!(complete.legacy().findings.len(), 1);
     let defaults = scan_repository_detailed(&config, &f.rules, &default_detectors()).unwrap();
-    assert_eq!(defaults.coverage().status(), InspectionStatus::Unknown);
+    assert_eq!(
+        defaults.coverage().status(),
+        InspectionStatus::CompleteWithinScope
+    );
     assert_eq!(
         defaults
             .diagnostics()
             .iter()
             .filter(|d| d.code() == DiagnosticCode::DetectorNotReported)
             .count(),
-        1
+        0
     );
     std::fs::write(root.join("app.js"), "'RS256';\n".repeat(40)).unwrap();
     let truncated = scan_repository_detailed(&config, &f.rules, &supported).unwrap();

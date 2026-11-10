@@ -12,7 +12,13 @@ Chosen: preserve raw self-scan SARIF and prepare a separate upload-only copy usi
 
 Rejected: disabling Code Scanning failure thresholds, downgrading severity, excluding all test/source directories from detection, `continue-on-error`, changing the scanner's rules, or escaping test strings merely to evade detection. These would either weaken checking or hide evidence. SARIF suppression markers would depend on consumer-specific handling; an explicit upload projection with preserved raw evidence is directly testable.
 
-Policy `docs/quality/SELF-SCAN-EXPECTATIONS.json` uses version 1 and explicit files. Each file has a repository-relative path, complete source-file SHA-256, a reviewed reason and exact expected results (rule ID, start line/column, SHA-256 of canonical full result, allowed count). No globs, severity-wide exceptions or automatic learning in CI. Only reviewed fixture files, examples and actual inline unit-test regions are registered initially. Product/rule implementation findings remain visible.
+Policy `docs/quality/SELF-SCAN-EXPECTATIONS.json` uses version 1 and explicit files. Each file has a repository-relative path, complete source-file SHA-256, a reviewed reason and exact expected results (rule ID, start line/column, SHA-256 of canonical full result, allowed count). No globs, severity-wide exceptions or automatic learning in CI. Only reviewed fixture files, examples and actual inline unit-test regions were registered initially.
+The PR14 follow-up also permits individually reviewed fixed classification-data
+references: identifier vocabularies and assessment predicates that do not perform
+cryptographic operations. The backlog follow-up extends this individually reviewed
+scope to rule definitions, OID labels, localization/guidance text, nonexecuted code
+examples and task prose. This is an exact-result exception, not a whole-file or
+production-code baseline. Unregistered product/rule implementation findings remain visible.
 
 The Node helper `shell/prepare-code-scanning.cjs` exports `prepareCodeScanning(sarif, policy, root)` and `resultDigest(result)`, and has a CLI accepting `--input`, `--expectations`, `--root`, `--output`, `--audit`. Use built-in Node modules only. Canonical JSON sorts object keys recursively, preserves arrays and includes every SARIF result field; the current writer has no volatile result ID/timestamp to discard.
 
@@ -51,7 +57,7 @@ node --test shell/*.test.cjs
 
 The source registry lives beside this quality policy. An initial `.github/` location made the scanner detect 37 self-references in the registry itself. Keeping quality metadata under the existing `docs/` scope avoids that feedback loop without moving any inspected source/test input or changing walker exclusions. This registry is not a deployment input or an additional scan capability.
 
-Review a new expectation as a code change: establish that the exact source is an intentional test/example, inspect the raw rule/location/message, verify secret material is synthetic/public, and preserve any product findings. Compute complete source SHA-256 and `resultDigest(result)` with the exported helper. Copy explicit rule/line/column/digest/count records into the relevant file entry with a reason. Do not blanket-register a raw scan or automatically approve every current finding. The initial registration is limited to examples, integration-test fixtures and actual `cfg(test)` unit-test regions; a source file may contain both registered test results and retained product results.
+Review a new expectation as a code change: establish that the exact source is an intentional test/example or a reviewed fixed classification-data reference, inspect the raw rule/location/message, verify secret material is synthetic/public, and preserve any product findings. Compute complete source SHA-256 and `resultDigest(result)` with the exported helper. Copy explicit rule/line/column/digest/count records into the relevant file entry with a reason. Do not blanket-register a raw scan or automatically approve every current finding. The initial registration is limited to examples, integration-test fixtures and actual `cfg(test)` unit-test regions; a source file may contain both registered test results and retained product results.
 
 A changed file requires re-review of its *whole* source binding, even if the edited line is unrelated. New result fields, locations or occurrence counts also require re-review. A stale/unmatched entry never suppresses a different observation; its source status appears in the audit. Keep policy updates with the test/behavior they cover in one PR. Existing rule/catalog or product-code observations that have no reviewed test expectation remain eligible for the usual Code Scanning failure threshold.
 
@@ -75,3 +81,103 @@ Local Rust 1.93.1 offline build/fmt/clippy succeeded; 125 workspace tests and 21
 The actual workflow YAML was parsed and its scan/preparation commands executed locally, redirecting only output paths under ignored `target/task040/` and adding Cargo offline. Final partition: **746 raw = 618 reviewed omissions + 128 retained**. All 745 pre-change raw results still exist; the additional result is the new intentional shell acceptance input. The task020 synthetic private-marker result is omitted from the upload copy. Full raw evidence remains, and retained product/rule observations and metadata are unchanged.
 
 No push, PR, live alert dismissal or remote Actions/Code Scanning check was executed. Remote acceptance is pending a separately authorized publication. `actionlint` is unavailable; YAML and local command execution are recorded without claiming full hosted-workflow acceptance. Exact tested source/registry digests and logs are recorded in task 040. No performance/accuracy benchmark or renderer change is part of this task.
+
+## Task 022 location correction
+
+Expectation version 1 also accepts `column: null` to bind an explicitly reviewed
+line-only SARIF result. This matches only an absent `startColumn`, not zero,
+explicit null, or a present positive column. The positive start line, literal
+safe path, complete source/result SHA-256 and exact occurrence count remain
+mandatory. Unknown-line/artifact-only and encoded/indirect paths remain retained;
+the helper does not decode URIs. Existing positive-column registrations retain
+their meaning.
+
+Task 022 re-reviewed the 109 existing test groups affected solely by omitted
+unproven AST columns and rebound their full-result digests to explicit null
+columns. It refreshed the source binding for the appended helper test and
+registered six observations confined to the new writer-contract Unicode input
+and its lookup. No production finding was newly registered. Local partition:
+752 raw = 624 reviewed test observations + 128 retained. The retained payloads
+match the previous 128 observations, allowing only the intended omission of
+unproven columns. Raw bytes and run metadata (including columnKind) are preserved.
+See [task 022 evidence](SARIF-LOCATION-CONTRACT-022.md) for limitations and checks.
+
+## Task 023 baseline fixtures
+
+Task023 adds exactly 21 reviewed known-location observations from 15 explicit
+baseline fixture/generator sources. These are positive, negative and unsupported
+controls, not product configuration. No existing source/result allowance changes.
+The partition is 776 raw = 645 reviewed omissions + 131 retained (99 verified
+source files). All prior 128 retained results remain unchanged. Three new
+unknown-line SBOM dependency observations remain in the upload because the
+existing strict projection does not register artifact-only locations. No URI
+handling/line validation/threshold was weakened to suppress these results.
+Hosted alert-check success is unverified; these three observations remain eligible
+for it. See [the measured baseline record](TASK-023-BASELINE.md).
+
+## Task 024 source-occurrence correction
+
+Same current source bytes scanned by old/new binaries produce 776/793 raw results;
+all prior raw records survive. Fifteen added observations are reviewed existing
+fixture occurrences: seven exact-position groups and six count bindings updated
+from one to two/three for distinct same-line source matches. The readiness test's
+source hash is refreshed; no other existing source allowance changes. Final
+partition: 793 raw = 660 reviewed omissions + 133 retained, 99 verified sources.
+Two new production recommendation/catalog observations are retained, as are all
+previous 131 retained results (including the three artifact-only SBOM observations).
+No helper/URI/threshold relaxation, broad registration or raw filtering is added.
+See [the occurrence compatibility and measurement record](TASK-024-AST-OCCURRENCES.md).
+
+
+## PR14 test and classification-data follow-up
+
+The hosted Code Scanning results check reported 63 new alerts (29 errors / 34
+warnings), although Rust quality, baseline and scan jobs succeeded. Fifteen alerts
+came from two new integration-test files; 48 came from fixed identifier vocabulary
+and assessment predicates in `observation.rs` / `assessment.rs`, not cryptographic
+operations. Excluding test files alone would therefore leave 19 errors and 29
+warnings from classification data.
+
+The user explicitly chose exclusion from CI failure/alert registration while
+preserving original detection evidence. Add only these 63 reviewed exact results
+in four explicit files; keep complete source/result hashes and count/position
+checks. Do not change rule matching, severity, upload thresholds or normal scanner
+scope. New results in these same production files remain actionable; a changed
+source hash invalidates its registered allowances.
+
+[The recorded 63 results](pr14/REVIEWED-RESULTS.json) are a finite regression fixture
+for the upload preparer. They are stored under the existing docs exclusion to avoid
+self-referential fixture alerts. Three regression tests prove omission/raw
+immutability, retention of a new error at the same production position, and
+retention when a classification source binding becomes stale. This does not add
+an automatic test-directory exclusion or generic suppression capability.
+
+See [investigation, verification and hosted outcome](PR-014-SELF-SCAN-FOLLOWUP.md).
+
+
+## Existing default-branch alert backlog
+
+The default-branch alert page retained 128 older alerts from commit
+`1335033fb3ffd96632f9f39a51bf8f2a115f2ead`. They refer to 11 explicit sources:
+six rule YAML files, two report text/classification modules, a recommendation
+module, public OID labels in the certificate parser, and task017 prose. TLS names
+inside a rule regex, report routing key or advice to disable old TLS are not a
+configured live connection. No deployed TLS setting or cryptographic operation
+was found in the reviewed locations.
+
+Register the corresponding 130 current observations as 128 exact result groups;
+two same-line line-only groups each contain two real source occurrences. Preserve
+four artifact-only test findings, since the policy still requires a reviewed
+positive line. Final upload partition: **856 raw = 852 reviewed omissions + 4
+retained**; 112 source hashes are verified. Existing source/result allowances are
+retained, with two reasons expanded to distinguish inline tests and fixed data.
+
+Existing default-branch alerts and a PR's upload results are separate state. A PR
+update does not update the `develop` source. Verified historical false positives
+may be triaged individually through GitHub's official alert API with a recorded
+reason and source-review link; this does not merge the PR or alter raw evidence.
+No general rule/production-file exclusion is added. The registry fix must still
+reach develop through the normal review/merge process.
+
+[Investigation and verification](SELF-SCAN-BACKLOG-FOLLOWUP.md) and
+[independent review](SELF-SCAN-BACKLOG-REVIEW.md) document the exact finite scope.

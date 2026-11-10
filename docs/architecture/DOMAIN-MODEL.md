@@ -1,5 +1,12 @@
 # Domain model and compatible evolution
 
+Naming update: the user-facing report is now **Cryptographic Inventory and Evidence
+Report** (暗号資産・検出根拠レポート), selected by `--inventory-json` and written to
+`scan.inventory.v1.json`. Earlier native naming below is historical/internal;
+`--native-json` has been removed from the CLI. The
+[current contract](INVENTORY-REPORT-V1.md) specifies compatibility.
+
+
 Design date: 2026-11-09. Status: proposal; Rust below illustrates intended types and API contracts, not implemented or compile-tested code. The current model remains in `crates/pqc_scan_core/src/model.rs`.
 
 ## Retain existing contracts

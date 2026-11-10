@@ -1,5 +1,12 @@
 # Incremental product architecture
 
+Naming update: the user-facing report is now **Cryptographic Inventory and Evidence
+Report** (暗号資産・検出根拠レポート), selected by `--inventory-json` and written to
+`scan.inventory.v1.json`. Earlier native naming below is historical/internal;
+`--native-json` has been removed from the CLI. The
+[current contract](INVENTORY-REPORT-V1.md) specifies compatibility.
+
+
 Design date: 2026-11-09. Status: recommended design for review, not permission to implement breaking changes. Existing architecture: [../architecture.md](../architecture.md). Evidence baseline: [CURRENT-GAP-ANALYSIS.md](../quality/CURRENT-GAP-ANALYSIS.md).
 
 ## Decision

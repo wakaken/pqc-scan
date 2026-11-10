@@ -33,6 +33,23 @@ impl Detector for KeyDetector {
         Ok(self.detect_detailed(file, rules)?.into_detections())
     }
 
+    fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+        let outcome = self.detect_detailed(file, rules)?;
+        let drafts = outcome
+            .detections()
+            .iter()
+            .map(|d| {
+                pqc_scan_core::ObservationDraft::source(
+                    d,
+                    pqc_scan_core::ObservationMethod::PrivateKeyMarker,
+                    "",
+                    None,
+                )
+            })
+            .collect();
+        Ok(outcome.with_observations(drafts))
+    }
+
     fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
         let text = match file.text.as_ref() {
             Some(v) => v,

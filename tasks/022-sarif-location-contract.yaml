@@ -2,10 +2,10 @@ id: "022"
 title: "Emit valid SARIF for unknown and non-ASCII locations"
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Evaluator Agent
 phase: "0"
-description: "Emit valid SARIF for unknown and non-ASCII locations. Planning only; implementation and validation have not started."
+description: "Emit valid SARIF for unknown and non-ASCII locations. SARIF-only projection correction; native locations, IDs and other formats remain unchanged."
 plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-022"
 change_size: "Small; schema and Unicode validation"
 decision_gate: "Normal role review; preserve schema version and document corrected values."
@@ -30,3 +30,27 @@ acceptance:
 testing_requirements:
   - "Writer fixtures, official schema validation and current SARIF contract regression."
   - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+implementation_record:
+  base_head: "1335033fb3ffd96632f9f39a51bf8f2a115f2ead"
+  branch: "codex/task-022-sarif-location"
+  plan: "docs/superpowers/plans/2026-11-10-sarif-location.md"
+  verification_report: "docs/quality/SARIF-LOCATION-CONTRACT-022.md"
+  local_artifacts: "target/task022/"
+  lifecycle: ["Planner: pending -> planned", "Executor: in-progress -> review"]
+  dependency_detector: "Already preserves unknown SBOM 0:0; no detector/native/ID change required."
+  publication: "Not authorized or performed: push, PR creation, merge."
+
+  evaluation:
+    outcome: "Passed local acceptance; independent whole-change review approved with no actionable findings."
+    commands: "target/task022/command-results.json; all 9 final checks exited 0"
+    rust_tests: 145
+    node_tests: 22
+    schema_digest: "c3b4bb2d6093897483348925aaa73af03b3e3f4bd4ca38cef26dcb4212a2682e"
+    review_report: "docs/quality/SARIF-LOCATION-REVIEW-022.md"
+    compatibility: "13 findings across four actual files; native JSON/IDs and other reports stable except generation timestamp. SARIF rules/non-location payloads unchanged."
+    self_scan: "752 raw = 624 reviewed test omissions + 128 retained; 84 verified source files. Raw bytes/run metadata preserved."
+    source_bindings: "SHA-256 values in docs/quality/SARIF-LOCATION-CONTRACT-022.md"
+    unexecuted: ["Hosted CI/Code Scanning upload", "Windows runtime and platform matrix", "Performance/accuracy benchmarks"]
+    completed_by: "Evaluator Agent, after independent Reviewer approval"
+  reflection: "Preserve native IDs when correcting export coordinates; unknown or unprovable SARIF precision must be omitted. Bind line-only CI expectations with explicit null, never a wildcard."

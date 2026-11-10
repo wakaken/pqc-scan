@@ -87,3 +87,15 @@ Do not claim complete coverage of all cryptography or universal migration compli
 On 2026-11-09, an independent read-only builder/Reviewer examined the new design and task dependencies. Four material issues were corrected: explicit file-counter partitions/equalities; separation of hybrid construction from quantum assessment; ownership of internal dependency-parser parse-to-empty errors in task 027; and packaging/install evidence in 038 preceding final 1.0 evaluation in 037. A second review confirmed these corrections and reported no remaining material contradiction, planning blocker or unnecessary architectural expansion in the reviewed scope.
 
 Documentation validation parsed all 22 new YAML records, checked pending status/unique IDs, existing target paths, acyclic/resolving dependencies, document links/fences and untouched tracked files. This is design validation, not implementation verification. Rust build/test/clippy/fmt, protocol interoperability, measured precision/recall/performance and current-HEAD remote CI were not executed. No implementation task was advanced or closed; no push, PR or merge was performed.
+
+## Task 023 implementation evidence
+
+The development-only [measurement protocol](../../tests/quality/PROTOCOL.md),
+source-bound corpus and two independent label records now support baseline
+measurements through the existing CLI. [Measured results and limitations](TASK-023-BASELINE.md)
+record finite-corpus counts, actual diagnostics and repeated resource samples.
+This addition does not approve numeric regression budgets or amend the 1.0 gate.
+CI validates evaluator sanity, corpus bindings, read/terminal-state arithmetic and
+semantic repeatability; it publishes metrics without enforcing unapproved score
+or latency/RSS thresholds. Maintainers must decide the measured proposal before
+calling task 023's budget decision gate satisfied.

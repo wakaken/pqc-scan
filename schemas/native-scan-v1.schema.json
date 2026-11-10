@@ -1,0 +1,858 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:pqc-scan:native-scan:1",
+  "title": "pqc-scan Cryptographic Inventory and Evidence Report version 1",
+  "description": "Repository-owned MIT schema. Open string vocabulary supports tolerant readers; current writer emits only validated typed facts. Not CycloneDX.",
+  "definitions": {
+    "relation": {
+      "type": "object",
+      "properties": {
+        "relationship": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^[a-z_]+-v1-[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "relationship",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "algorithm": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "namespace",
+        "identifier",
+        "purpose",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    "key": {
+      "type": "object",
+      "properties": {
+        "spki_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "key_bits": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "named_curve_oid": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "spki_sha256",
+        "key_bits",
+        "named_curve_oid"
+      ],
+      "additionalProperties": false
+    },
+    "certificate": {
+      "type": "object",
+      "properties": {
+        "certificate_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "not_before_unix": {
+          "type": "integer"
+        },
+        "not_after_unix": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "certificate_sha256",
+        "not_before_unix",
+        "not_after_unix"
+      ],
+      "additionalProperties": false
+    },
+    "usage": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "local_ordinal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ambiguous": {
+          "type": "boolean"
+        },
+        "anchor": {
+          "type": "string",
+          "pattern": "^anchor-v1-[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "method",
+        "local_ordinal",
+        "ambiguous",
+        "anchor"
+      ],
+      "additionalProperties": false
+    },
+    "dependency": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ecosystem": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reported_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "declared_constraint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resolved_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version_provenance": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "name",
+        "ecosystem",
+        "reported_version",
+        "declared_constraint",
+        "resolved_version",
+        "version_provenance"
+      ],
+      "additionalProperties": false
+    },
+    "asset": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z_]+-v1-[0-9a-f]{64}$"
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identity_basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attributes": {
+          "type": "object"
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/relation"
+          }
+        },
+        "uncertainty": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "identity_basis",
+        "attributes",
+        "relations",
+        "uncertainty"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "algorithm"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attributes": {
+                "$ref": "#/definitions/algorithm"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "public_key"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attributes": {
+                "$ref": "#/definitions/key"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "certificate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attributes": {
+                "$ref": "#/definitions/certificate"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "usage"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attributes": {
+                "$ref": "#/definitions/usage"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "dependency"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "attributes": {
+                "$ref": "#/definitions/dependency"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "line": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "column": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "column_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "byte_start": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "byte_end": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "object_index": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "line",
+        "column",
+        "column_kind",
+        "byte_start",
+        "byte_end",
+        "object_index"
+      ],
+      "additionalProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z_]+-v1-[0-9a-f]{64}$"
+        },
+        "occurrence_key": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z_]+-v1-[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "identity_confidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "asset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z_]+-v1-[0-9a-f]{64}$"
+          }
+        },
+        "target": {
+          "$ref": "#/definitions/target"
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "producer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assurance": {
+          "type": "string",
+          "minLength": 1
+        },
+        "usage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "type": "object",
+          "properties": {
+            "marker_kind": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "capture_status": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "marker_kind",
+            "capture_status"
+          ],
+          "additionalProperties": false
+        },
+        "uncertainty": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "occurrence_key",
+        "identity_confidence",
+        "asset_ids",
+        "target",
+        "method",
+        "producer",
+        "assurance",
+        "usage",
+        "rule_id",
+        "evidence",
+        "uncertainty"
+      ],
+      "additionalProperties": false
+    },
+    "association": {
+      "type": "object",
+      "properties": {
+        "legacy_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "legacy_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{24}$"
+        },
+        "observation_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z_]+-v1-[0-9a-f]{64}$"
+          }
+        }
+      },
+      "required": [
+        "legacy_index",
+        "legacy_id",
+        "observation_ids"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "selected_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "read_ok_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "read_failed_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "analyzed_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "analysis_failed_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unsupported_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_applicable_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unknown_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "excluded_enumerated_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "enumeration_failed_entries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_enumerated_population": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "selected_files",
+        "read_ok_files",
+        "read_failed_files",
+        "analyzed_files",
+        "partial_files",
+        "analysis_failed_files",
+        "unsupported_files",
+        "not_applicable_files",
+        "unknown_files",
+        "excluded_enumerated_files",
+        "enumeration_failed_entries",
+        "not_enumerated_population",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "max_file_size_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "git_ignore": {
+          "type": "boolean"
+        },
+        "git_global": {
+          "type": "boolean"
+        },
+        "git_exclude": {
+          "type": "boolean"
+        },
+        "default_excludes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "markdown_excluded": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "max_file_size_bytes",
+        "git_ignore",
+        "git_global",
+        "git_exclude",
+        "default_excludes",
+        "markdown_excluded"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "disposition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detector": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "code",
+        "stage",
+        "disposition",
+        "message"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "identity_scheme": {
+      "const": "pqc-scan-length-prefixed-sha256-v1"
+    },
+    "scanner_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "catalog_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rules_digest": {
+      "type": "string",
+      "pattern": "^[a-z_]+-v1-[0-9a-f]{64}$"
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z_]+-v1-[0-9a-f]{64}$"
+        },
+        "attempt_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "attempt_id",
+        "generated_at"
+      ],
+      "additionalProperties": false
+    },
+    "repository_scope": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "scope": {
+      "$ref": "#/definitions/scope"
+    },
+    "coverage": {
+      "$ref": "#/definitions/coverage"
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/diagnostic"
+      }
+    },
+    "native_completeness": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/asset"
+      }
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/observation"
+      }
+    },
+    "legacy_associations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/association"
+      }
+    },
+    "unassociated_observation_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z_]+-v1-[0-9a-f]{64}$"
+      }
+    },
+    "assessment_status": {
+      "const": "not_evaluated"
+    },
+    "assessments": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "export_loss_notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "legacy_loss_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "observation_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "observation_id",
+          "reason",
+          "count",
+          "unit"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "identity_scheme",
+    "scanner_version",
+    "catalog_version",
+    "profile",
+    "rules_digest",
+    "run",
+    "repository_scope",
+    "scope",
+    "coverage",
+    "diagnostics",
+    "native_completeness",
+    "assets",
+    "observations",
+    "legacy_associations",
+    "unassociated_observation_ids",
+    "assessment_status",
+    "assessments",
+    "export_loss_notes",
+    "legacy_loss_records"
+  ],
+  "additionalProperties": false
+}

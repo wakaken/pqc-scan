@@ -210,7 +210,7 @@ snippet masking; this does not add new private-key detection rules or decrypt ke
 ## CLI
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -238,6 +238,52 @@ pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
 # Inspect one rule in detail
 pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
+
+### Cryptographic Inventory and Evidence Report
+
+`--inventory-json` adds `scan.inventory.v1.json` with method-specific observations,
+normalized algorithm/public-key/certificate/dependency assets, and links to legacy
+findings. This is pqc-scan's own JSON format. It is opt-in even with `--format all`;
+existing reports and IDs remain unchanged. Use `--repository-scope team/project`
+with inventory capture to enable weak cross-scan source correlation. Omit secret
+or absolute identifiers. The report does not assert active use, trust or a PQC
+assessment. See the [contract and limitations](docs/architecture/INVENTORY-REPORT-V1.md).
+
+```bash
+pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
+```
+
+`--inventory-json` is the only CLI option for this report. The former `--native-json`
+option has been removed; replace it with `--inventory-json` and read
+`scan.inventory.v1.json` instead of `scan.native.v1.json`. JSON fields, schema
+version and ID generation are unchanged.
+
+Dependency assets preserve declared constraints (for example `^1.2.3`), optional
+lock-record resolved versions and source provenance separately. A declaration or
+SBOM claim alone never creates a versioned purl. Path/git/workspace locators stay
+unresolved; no dependency graph or package download is inferred. The legacy
+`dependency-sbom.json` remains a flat array with the same fields; corrected purls
+and inspection diagnostics are intentional semantic changes. Source origins remain
+separate in inventory even when the legacy projection collapses them.
+
+### Explicit local policy assessment
+
+`--inventory-json --policy-profile migration-review-v1` adds a separate
+`scan.assessment.v1.json` with quantum/classical concerns, observation certainty,
+usage, priority and purpose-specific candidate prerequisites. Existing reports,
+inventory JSON, severity and exit codes remain unchanged. This is local advisory
+migration review, not compliance or deployed-security assurance, with no deadlines.
+Unknown/incomplete inspection cannot yield a clean pass; current inventory v1
+cannot yield aggregate Pass.
+
+```bash
+pqc-scan scan . --inventory-json --policy-profile migration-review-v1 --rules-dir ./rules
+```
+
+Optional `--assessment-context ./context.json` supplies typed local context, e.g.
+`{"version":1,"use_case":"jwt"}`. Missing support stays unknown; provided values are
+unverified operator claims. Dependency presence does not prove PQC readiness.
+See [scope, prerequisites and context fields](docs/architecture/LOCAL-ASSESSMENT-V1.md).
 
 ### Inspection diagnostics
 
@@ -289,11 +335,13 @@ Malformed or mixed/unknown-attribute certificates yield `detector_partial`; unsu
 containers yield `detector_unsupported`. A container finding does not prove that its
 contents were inspected. Unmatched but parsed certificates need not produce a finding.
 
-**Current limitation:** the dependency detector still uses the legacy adapter and
-reports `detector_not_reported`. Full nonempty scans therefore normally remain
-`unknown`, or become `partial` when a limit/parser issue is observed; strict
-mode returns 3 in either case. Existing report schemas and the diagnostics schema
-version remain unchanged; diagnostic values now reflect the additional outcomes.
+Dependency inspection now distinguishes valid empty input, malformed supported input,
+usable partial records, unsupported versions and resource limits. Supported structured
+subsets can report completion; unrelated files are not applicable. Ruby/Gradle/XML,
+requirements and Go lexical fallbacks remain `detector_not_reported`. Completion is
+within the supported subset, not package-manager validation or installed-state proof.
+`--require-complete` keeps its exit-code contract, but corrected coverage can change
+which code a scan returns. See [dependency provenance](docs/architecture/DEPENDENCY-PROVENANCE.md).
 
 The legacy `scanned_files` count still means files selected by the walker. New
 counters distinguish selected, read-ok, read-failed, analyzed, partial,
@@ -378,6 +426,22 @@ Cryptographic Bill of Materials with algorithm/location/risk/migration inventory
 
 Dependency inventory extracted from manifests and SBOM files.
 
+### SARIF locations
+
+SARIF remains version 2.1.0. File paths are percent-encoded UTF-8 URI references
+(literal `%`, spaces, `#` and `?` are encoded); absolute paths become file URIs.
+Windows native separators are normalized on Windows; Unix backslashes are literal.
+An unknown line (`0` in `report.json`) produces an artifact-only location. A known
+line with unknown column omits `startColumn`; an empty path omits `locations`.
+Columns are one-based Unicode code points (`columnKind: unicodeCodePoints`),
+including one column per emoji, combining code point or tab, rather than visual
+width or UTF-16 units. Legacy AST columns mix byte and character offsets: SARIF
+keeps a column only when the existing unmasked snippet proves an ASCII prefix;
+otherwise it retains the line only. Missing, masked or clipped prefixes cannot
+prove a column. `report.json` locations/IDs, other reports, CLI flags and filenames
+are unchanged. These corrections intentionally replace invalid/misleading SARIF
+positions and unescaped paths. See the [contract and validation record](docs/quality/SARIF-LOCATION-CONTRACT-022.md).
+
 ## Security and Privacy Controls
 
 - Full private key material is never emitted.
@@ -428,7 +492,7 @@ checks, then scans the full normal repository scope. Detection rules, severity a
 the scanner's raw `report.sarif` stay unchanged.
 
 For this repository's Code Scanning upload only, a preparation step omits exact
-reviewed synthetic/test observations listed in
+reviewed test observations and fixed rule/catalog/guidance references listed in
 [`SELF-SCAN-EXPECTATIONS.json`](docs/quality/SELF-SCAN-EXPECTATIONS.json). Each entry
 binds the complete source-file SHA-256, the full result digest, rule/location and
 exact occurrence count. Changed/missing sources, new results, excess duplicates
@@ -439,10 +503,49 @@ The `pqc-self-scan-evidence` artifact preserves raw SARIF, the separate
 `code-scanning.sarif` upload copy, `code-scanning-audit.json` and the exact expectation
 policy, even if preparation
 or upload fails. The existing dependency SBOM artifact is retained. This is CI-only
-policy; normal scans and user report formats are unaffected. New intentional test
-inputs require review of their source/result bindings before registration; CI does
+policy; normal scans and user report formats are unaffected. Rule definitions, algorithm-name vocabularies, OID labels, translated guidance and
+nonexecuted example strings can match usage patterns without performing
+cryptographic operations; only individually reviewed exact results are registered.
+New intentional test inputs or classification references require review of their
+source/result bindings before registration; CI does
 not automatically learn or accept findings. See the
 [policy and maintenance guide](docs/quality/CI-SELF-SCAN.md).
+
+## AST occurrence precision
+
+AST findings distinguish source spans per rule: repeated uses on the same line
+remain separate, while parent/child representations of the same lexical match
+produce one observation. The existing 32-hit rule/file cap and bounded-work
+truncation diagnostics remain. A display-only clipping ellipsis is never treated
+as source. CLI flags, report schemas/filenames and IDs for unchanged occurrences
+are preserved; finding counts and new occurrence IDs may increase intentionally.
+Legacy AST Unicode column limitations still apply (see SARIF locations above).
+
+TypeScript/TSX still use the pinned JavaScript grammar: plain JavaScript/JSX
+subsets may parse completely, while type syntax can produce partial inspection
+and missed API matches. Matching remains nominal and rule-based: imported aliases
+may be missed, local namesakes and display strings may be false positives, and
+comments inside matched ancestor text are not a full semantic comment analysis.
+No new grammar, symbol resolver or dataflow engine was added. See the
+[task 024 measurements and compatibility record](docs/quality/TASK-024-AST-OCCURRENCES.md).
+
+## Developer quality baseline
+
+Task 023 adds a source-labeled, offline evaluation corpus and a Python standard-
+library harness. It measures the existing CLI without changing scan rules or
+report formats. Build with `cargo build --workspace --release --locked`, then run:
+
+```bash
+python3 -m unittest discover -s tests/quality -p 'test_*.py'
+python3 tests/quality/run.py --binary target/release/pqc-scan --build-profile release --out-dir target/quality-baseline
+```
+
+Use a new output directory for each run. Fixtures are materialized into a temporary
+root outside ignored build directories; generated reports remain under `target/`.
+CI preserves the measurements and full reports. Accuracy and performance budgets
+remain unapproved proposals; the small synthetic holdout does not represent
+real-world accuracy. See the [protocol](tests/quality/PROTOCOL.md) and
+[measured baseline](docs/quality/TASK-023-BASELINE.md).
 
 ## License
 
