@@ -18,6 +18,9 @@ use pqc_scan_report::{
 use pqc_scan_rules::{RuleSet, Severity};
 mod diff_command;
 
+#[cfg(feature = "probe-transport")]
+mod probe_resolver;
+
 #[derive(Debug, Parser)]
 #[command(
     name = "pqc-scan",
@@ -31,6 +34,11 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    #[cfg(feature = "probe-transport")]
+    #[command(name = "__resolve-host", hide = true)]
+    ResolveHost {
+        host: String,
+    },
     Scan(ScanArgs),
     /// Compare compatible inventories within one explicit repository scope.
     Diff(DiffArgs),
@@ -231,6 +239,11 @@ fn run_cli<WOut: Write, WErr: Write>(
     stderr: &mut WErr,
 ) -> Result<ExitStatus> {
     match cli.command {
+        #[cfg(feature = "probe-transport")]
+        Commands::ResolveHost { host } => {
+            probe_resolver::resolve_helper(&host, stdout)?;
+            Ok(ExitStatus::Success)
+        }
         Commands::Scan(args) => scan_cmd(args, stdout, stderr),
         Commands::Diff(args) => {
             diff_command::run(

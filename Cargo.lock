@@ -930,6 +930,7 @@ dependencies = [
  "anyhow",
  "clap",
  "jsonschema",
+ "libc",
  "pqc_scan_core",
  "pqc_scan_detectors",
  "pqc_scan_report",
@@ -944,7 +945,9 @@ dependencies = [
  "anyhow",
  "chrono",
  "hex",
+ "idna",
  "ignore",
+ "libc",
  "num_cpus",
  "pqc_scan_rules",
  "rayon",
@@ -953,6 +956,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "sha2",
+ "socket2",
  "thiserror",
  "walkdir",
 ]
@@ -1258,6 +1262,16 @@ name = "smallvec"
 version = "1.16.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "149309498a5f7334b12ddae0cad8aba81ce785fe91755068867e017cf98fee46"
+
+[[package]]
+name = "socket2"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52d1cfed4120b4d927bf7c0f86d2087a4a7d6027c906d9f9d525a80573b9be51"
+dependencies = [
+ "libc",
+ "windows-sys",
+]
 
 [[package]]
 name = "stable_deref_trait"

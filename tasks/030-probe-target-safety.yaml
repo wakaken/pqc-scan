@@ -2,12 +2,23 @@ id: "030"
 title: "Implement explicit endpoint policy and bounded probe transport"
 type: feature
 priority: medium
-status: pending
+status: done
 planned_new_paths:
   - "crates/pqc_scan_core/src/target_policy.rs"
-owner: Planner Agent
+owner: Evaluator Agent
 phase: "2"
-description: "Implement explicit endpoint policy and bounded probe transport. Planning only; implementation and validation have not started."
+description: "Implement explicit endpoint policy and bounded probe transport under the maintainer-approved continuation decision."
+implementation_plan: "docs/superpowers/plans/2026-11-10-probe-target-safety.md"
+implementation_evidence: "docs/quality/TASK-030-TRANSPORT.md"
+evaluation_record:
+  baseline_head: "3c357cef879f69ae4058fefe7a03b4f074283b3f"
+  transitions:
+    - "Planner selected pending -> planned; approved A policy/caps/command shape recorded on 2026-11-10."
+    - "Executor started planned -> in-progress, then in-progress -> review after DNS/transport integration."
+    - "Reviewer accepted bounded policy, watchdog and child-reaping corrections."
+    - "Evaluator accepted review -> done: isolated policy13/transport11/resolver4; default321/feature338 workspace tests; builds/fmt/clippy/Node28/Python20 pass."
+  evidence: "docs/quality/ROADMAP-CONTINUATION-VALIDATION.md"
+  limitations: "macOS aarch64 local acceptance only; no TLS/SSH protocol command, public endpoint test, hosted CI or publication."
 plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-030"
 change_size: "Medium/high; network/platform validation"
 decision_gate: "Maintainers choose allowlist defaults, reviewed hard caps and explicit command shape."

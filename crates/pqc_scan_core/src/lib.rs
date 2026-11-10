@@ -13,6 +13,7 @@ pub mod policy;
 pub mod privacy;
 pub mod recommendation;
 pub mod risk;
+pub mod target_policy;
 pub mod walker;
 
 pub use diagnostic::{
@@ -54,3 +55,6 @@ pub trait Detector: Send + Sync {
         Ok(outcome.with_observations(drafts))
     }
 }
+
+#[cfg(feature = "probe-transport")]
+pub mod probe_transport;
