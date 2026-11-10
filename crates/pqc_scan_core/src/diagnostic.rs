@@ -312,6 +312,27 @@ pub struct InspectionScope {
     markdown_excluded: bool,
 }
 
+impl InspectionScope {
+    pub fn max_file_size_bytes(&self) -> usize {
+        self.max_file_size_bytes
+    }
+    pub fn default_excludes(&self) -> &[&'static str] {
+        &self.default_excludes
+    }
+    pub fn markdown_excluded(&self) -> bool {
+        self.markdown_excluded
+    }
+    pub fn git_ignore(&self) -> bool {
+        self.git_ignore
+    }
+    pub fn git_global(&self) -> bool {
+        self.git_global
+    }
+    pub fn git_exclude(&self) -> bool {
+        self.git_exclude
+    }
+}
+
 /// No Serialize implementation: this is not a replacement native scan schema.
 #[derive(Debug, Clone)]
 pub struct ScanDocument {
@@ -376,6 +397,10 @@ impl ScanDocument {
 
     pub fn coverage(&self) -> &CoverageSummary {
         &self.coverage
+    }
+
+    pub fn scope(&self) -> &InspectionScope {
+        &self.scope
     }
 
     pub fn diagnostics_report(&self) -> DiagnosticsReport<'_> {

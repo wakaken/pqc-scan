@@ -5,7 +5,10 @@ use pqc_scan_core::{
     policy::{AssessmentReport, Decision},
     DiagnosticCode, InspectionStatus, ScanDocument,
 };
-use std::fmt::Write;
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fmt::Write,
+};
 
 pub(crate) struct HumanContext<'a> {
     pub document: &'a ScanDocument,
@@ -56,7 +59,7 @@ fn state(value: &str, lang: ReportLanguage) -> String {
     };
     format!("{translated} ({value})")
 }
-fn diagnostic(code: DiagnosticCode, lang: ReportLanguage) -> Result<String> {
+fn diagnostic_text(code: DiagnosticCode, lang: ReportLanguage) -> &'static str {
     use DiagnosticCode::*;
     let (en, ja) = match code {
         ReadFailed => ("File could not be read", "ファイルを読み込めませんでした"),
@@ -86,11 +89,14 @@ fn diagnostic(code: DiagnosticCode, lang: ReportLanguage) -> Result<String> {
             "リポジトリ内の項目を列挙できませんでした",
         ),
     };
-    let code = serde_json::to_value(code)?;
+    text(lang, en, ja)
+}
+fn diagnostic(code: DiagnosticCode, lang: ReportLanguage) -> Result<String> {
+    let encoded = serde_json::to_value(code)?;
     Ok(format!(
         "{} ({})",
-        text(lang, en, ja),
-        code.as_str().unwrap_or("unknown")
+        diagnostic_text(code, lang),
+        encoded.as_str().unwrap_or("unknown")
     ))
 }
 struct Section {
@@ -220,24 +226,272 @@ fn sections(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<Vec<Sect
     }
     Ok(result)
 }
+/// HTML is an investigation summary, not a second inventory dump. The exact
+/// per-ID ledger remains in Markdown/inventory/assessment exports.
 pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<String> {
     let mut out = String::new();
-    for section in sections(context, lang)? {
+    let c = context.document.coverage();
+    let scope = context.document.scope();
+    let h = japanese::html;
+    let heading = text(
+        lang,
+        "Inspection scope and completion",
+        "検査範囲と完了状況",
+    );
+    let (status, advice) = match c.status() {
+        InspectionStatus::CompleteWithinScope => (
+            text(lang, "Supported inspection completed within the selected scope", "対象範囲の検査は完了しました"),
+            text(lang, "Review the findings below. Completion does not mean the project is safe.", "下の所見を確認してください。検査完了は、安全性や移行完了を意味しません。")),
+        InspectionStatus::Partial => (
+            text(lang, "Some files or inspection steps could not be checked fully", "一部のファイル・検査を確認できていません"),
+            text(lang, "Check the reasons below before relying on an absence of findings.", "下の理由を確認してください。未確認の範囲に問題がないとは判断できません。")),
+        InspectionStatus::Failed => (
+            text(lang, "Inspection failed", "検査に失敗しました"),
+            text(lang, "Resolve the read/inspection failures below, then scan again.", "下の読み込み・検査失敗の原因を解消して、再検査してください。")),
+        InspectionStatus::Unknown => (
+            text(lang, "Inspection completion could not be established", "検査を終えたか確認できません"),
+            text(lang, "Some inspection methods do not report completion. Retain their findings, but check the original files.", "完了状況を報告しない検査があります。所見を残したうえで、元のファイルも確認してください。")),
+    };
+    writeln!(out, "<section class=\"inspection-overview inspection-context\" data-inspection-status=\"{}\"><h2>{heading}</h2><p class=\"inspection-status\">{}</p><p>{}</p><div class=\"inspection-metrics\">", c.status().as_str(), h(status), h(advice))?;
+    let needs_check = c.read_failed_files()
+        + c.partial_files()
+        + c.analysis_failed_files()
+        + c.unsupported_files()
+        + c.unknown_files();
+    for (label, count) in [
+        (text(lang, "Files selected", "検査対象"), c.selected_files()),
+        (text(lang, "Files analyzed", "解析完了"), c.analyzed_files()),
+        (
+            text(lang, "Files needing follow-up", "追加確認が必要"),
+            needs_check,
+        ),
+    ] {
         writeln!(
             out,
-            "<section class=\"inspection-context\"><h2>{}</h2><p>{}</p><table><tbody>",
-            japanese::html(&section.heading),
-            japanese::html(&section.intro)
+            "<div><span>{label}</span><strong>{count}</strong></div>"
         )?;
-        for (label, value) in section.rows {
+    }
+    writeln!(out, "</div><p>{}</p><ul class=\"inspection-scope\">", text(lang, "This is a local inspection of supported files, not a live connection test. File counts are not a cryptographic coverage percentage.", "対応する形式のローカルファイルを調べた結果です。実通信や実際の利用は確認していません。ファイル件数は、暗号利用の網羅率ではありません。"))?;
+    writeln!(
+        out,
+        "<li>{}: <code>{}</code></li>",
+        text(lang, "Excluded directories", "除外するディレクトリ"),
+        h(&scope.default_excludes().join(", "))
+    )?;
+    writeln!(
+        out,
+        "<li>{}: {} bytes{}</li>",
+        text(lang, "File size limit", "1ファイルの上限"),
+        scope.max_file_size_bytes(),
+        if scope.max_file_size_bytes() == 2 * 1024 * 1024 {
+            " (2 MiB)"
+        } else {
+            ""
+        }
+    )?;
+    if scope.git_ignore() && scope.git_global() && scope.git_exclude() {
+        writeln!(
+            out,
+            "<li>{}</li>",
+            text(
+                lang,
+                "Git exclusion settings, including .gitignore, are applied.",
+                ".gitignoreなどGitの除外設定を適用しています。"
+            )
+        )?;
+    } else {
+        writeln!(
+            out,
+            "<li>.gitignore: {}; global Git ignore: {}; .git/info/exclude: {}</li>",
+            scope.git_ignore(),
+            scope.git_global(),
+            scope.git_exclude()
+        )?;
+    }
+    if scope.markdown_excluded() {
+        writeln!(
+            out,
+            "<li>{}</li>",
+            text(
+                lang,
+                "Markdown files are excluded.",
+                "Markdownファイルは対象外です。"
+            )
+        )?;
+    }
+    writeln!(
+        out,
+        "<li>{}: {}{}</li>",
+        text(
+            lang,
+            "Recorded excluded files",
+            "今回記録できた対象外ファイル"
+        ),
+        c.excluded_enumerated_files(),
+        if c.not_enumerated_population() {
+            text(
+                lang,
+                "; files omitted by ignore rules cannot be counted completely.",
+                "件。ignore設定などで列挙されなかったファイルは数え切れていません。",
+            )
+        } else {
+            text(
+                lang,
+                "; unenumerated population is recorded.",
+                "件。列挙範囲は記録済みです。",
+            )
+        }
+    )?;
+    writeln!(
+        out,
+        "</ul><div class=\"inspection-reasons\"><h3>{}</h3>",
+        text(
+            lang,
+            "Unfinished checks and reasons",
+            "未完了・対象外の内訳"
+        )
+    )?;
+    let mut any = false;
+    for (label, count) in [
+        (
+            text(lang, "Unreadable files", "読み込めないファイル"),
+            c.read_failed_files(),
+        ),
+        (
+            text(
+                lang,
+                "Partially inspected files",
+                "一部だけ検査したファイル",
+            ),
+            c.partial_files(),
+        ),
+        (
+            text(lang, "Inspection failures", "解析に失敗したファイル"),
+            c.analysis_failed_files(),
+        ),
+        (
+            text(
+                lang,
+                "Files with unsupported inspection",
+                "未対応の検査があるファイル",
+            ),
+            c.unsupported_files(),
+        ),
+        (
+            text(
+                lang,
+                "Files with unknown completion",
+                "完了を確認できないファイル",
+            ),
+            c.unknown_files(),
+        ),
+        (
+            text(
+                lang,
+                "No applicable inspection",
+                "適用する検査がないファイル",
+            ),
+            c.not_applicable_files(),
+        ),
+        (
+            text(
+                lang,
+                "Entries that could not be enumerated",
+                "列挙できない項目",
+            ),
+            c.enumeration_failed_entries(),
+        ),
+    ] {
+        if count > 0 {
+            any = true;
+            writeln!(out, "<p>{label}: {count}</p>")?;
+        }
+    }
+    if !any {
+        writeln!(
+            out,
+            "<p>{}</p>",
+            text(
+                lang,
+                "No unfinished inspection was recorded among selected files.",
+                "検査対象に選んだファイルに、未完了の記録はありません。"
+            )
+        )?;
+    }
+    if context.diagnostics {
+        let mut grouped: BTreeMap<DiagnosticCode, Vec<_>> = BTreeMap::new();
+        for d in context.document.diagnostics() {
+            grouped.entry(d.code()).or_default().push(d);
+        }
+        if !grouped.is_empty() {
             writeln!(
                 out,
-                "<tr><th scope=\"row\">{}</th><td>{}</td></tr>",
-                japanese::html(&label),
-                japanese::html(&value)
+                "<details class=\"inspection-diagnostics\"><summary>{}</summary>",
+                text(lang, "Reasons and example files", "理由とファイルの例")
             )?;
+            for (code, records) in grouped {
+                let files: BTreeSet<_> = records.iter().filter_map(|d| d.file()).collect();
+                writeln!(
+                    out,
+                    "<div class=\"inspection-reason\"><p><strong>{}</strong> — {}{}</p><ul>",
+                    h(diagnostic_text(code, lang)),
+                    records.len(),
+                    text(lang, " records", "件")
+                )?;
+                for file in files.iter().take(3) {
+                    writeln!(out, "<li><code>{}</code></li>", h(file))?;
+                }
+                if files.len() > 3 {
+                    writeln!(
+                        out,
+                        "<li>{}{}{}</li>",
+                        text(lang, "Plus ", "ほか"),
+                        files.len() - 3,
+                        text(lang, " other files", "件")
+                    )?;
+                }
+                writeln!(out, "</ul></div>")?;
+            }
+            writeln!(out,"<p>{}</p></details>",text(lang,"Only up to three example paths per reason are shown. Full diagnostic records remain in the optional diagnostics JSON and Markdown report.","理由ごとに最大3件のファイル例を示します。全件の記録は、診断JSONやMarkdownレポートで確認できます。"))?;
         }
-        writeln!(out, "</tbody></table></section>")?;
+    }
+    writeln!(out, "</div></section>")?;
+    if let Some(report) = context.assessment {
+        writeln!(out,"<section class=\"inspection-context assessment-summary\"><h2>{}</h2><p><strong>{}</strong></p><p>{}</p><ul>",text(lang,"Local advisory assessment","ローカルの参考評価"),h(&decision(report.decision(),lang)),text(lang,"This is advisory policy review, not a runtime safety or migration-completion verdict. Review the relevant findings and actual use.","評価方針に沿った参考情報です。稼働確認や移行完了を保証しません。該当する所見と実際の用途を確認してください。"))?;
+        for (value, name) in [
+            (
+                Decision::Fail,
+                text(lang, "Assets needing review", "要確認の資産"),
+            ),
+            (
+                Decision::Indeterminate,
+                text(
+                    lang,
+                    "Assets with insufficient evidence",
+                    "判断材料が不足する資産",
+                ),
+            ),
+            (
+                Decision::Pass,
+                text(
+                    lang,
+                    "Assets within policy conditions",
+                    "方針の条件内の資産",
+                ),
+            ),
+            (
+                Decision::NotApplicable,
+                text(lang, "Assets outside this policy", "この方針の対象外"),
+            ),
+        ] {
+            let count = report
+                .asset_policies()
+                .iter()
+                .filter(|p| p.decision == value)
+                .count();
+            writeln!(out, "<li>{name}: {count}</li>")?;
+        }
+        writeln!(out,"</ul><p>{}</p><details class=\"assessment-technical\"><summary>{}</summary><p>{}: <code>{}</code></p><p>{}: {}</p></details></section>",text(lang,"Per-asset IDs and classifications belong in the detailed inventory/assessment JSON or Markdown, rather than this summary.","資産ごとのIDや分類は、詳しい棚卸し・評価JSONまたはMarkdownで確認できます。"),text(lang,"Policy identifier and reason codes","評価方針と理由コード"),text(lang,"Profile","評価方針"),h(report.profile_id()),text(lang,"Reason codes","理由コード"),h(&report.evaluation().reasons.join(", ")))?;
     }
     Ok(out)
 }

@@ -21,9 +21,10 @@ After a scan, use the human report to investigate findings, then choose machine-
 
 Start with `report.html`:
 
-1. Select a rule and a file location. Read the source context and the evidence that triggered it.
-2. Check whether the reference belongs to active application code, a setting, a dependency, an example or a test. Static matching cannot settle runtime use.
-3. Review the proposed action against the actual runtime, library, protocol and peers before making a change.
+1. Check the inspection overview for selected, analyzed and follow-up file counts, exclusions and limits.
+2. Select a rule and a file location. Read the source context and the evidence that triggered it.
+3. Check whether the reference belongs to active application code, a setting, a dependency, an example or a test. Static matching cannot settle runtime use.
+4. Review the proposed action against the actual runtime, library, protocol and peers before making a change.
 
 HTML reports start with a compact, severity-sorted rule list. Search by rule or
 file, filter severity/risk, and switch between risk candidates and informational
@@ -184,11 +185,16 @@ moves; they are never merged automatically or treated as verified renames.
 
 ## Use local policy assessment
 
-CLI HTML/Markdown include inspection status and counters. `--diagnostics` adds
-safe detailed reasons; inventory capture also shows each observation's assurance
-and usage separately. Selecting a policy profile displays its overall and
-per-asset decisions with unchanged reason codes. This is local advisory analysis,
-not runtime verification, trust validation or migration-completion assurance.
+HTML starts with selected/analyzed/follow-up file counts, actual exclusion settings
+and file-size limits. Failed, incomplete and unknown checks remain distinct;
+unrecorded excluded populations are never presented as a complete total.
+With `--diagnostics`, a closed details section groups reasons and shows at most
+three example paths per reason. Per-observation IDs, assurance and usage ledgers
+are omitted from HTML; exact records remain in inventory JSON and Markdown.
+Selecting a policy displays its overall advisory result and counts of assets
+needing review, lacking evidence, within conditions or outside the policy.
+Per-asset IDs/decisions/reason codes remain in assessment JSON and Markdown.
+These summaries do not establish runtime use, verified trust or migration completion.
 
 `--inventory-json --policy-profile migration-review-v1` adds a separate
 `scan.assessment.v1.json` with quantum/classical concerns, observation certainty,

@@ -96,7 +96,11 @@ fn document_reports_localize_status_and_escape_diagnostics_without_machine_drift
             assert!(html.contains(code));
             assert!(md.contains(code));
             if lang == ReportLanguage::Ja {
-                assert!(html.contains(ja));
+                assert!(html.contains(match status {
+                    DetectorStatus::Complete => "対象範囲の検査は完了しました",
+                    DetectorStatus::Partial => "一部のファイル・検査を確認できていません",
+                    _ => "検査を終えたか確認できません",
+                }));
                 assert!(md.contains(ja));
             }
             if status == DetectorStatus::Partial {
@@ -219,8 +223,9 @@ fn failed_and_empty_inspection_preserve_scope_and_safe_diagnostics() {
     )
     .unwrap();
     let html = fs::read_to_string(out.join("report.html")).unwrap();
-    assert!(html.contains("検査に失敗しました (failed)"));
-    assert!(html.contains("detector_failed"));
+    assert!(html.contains("検査に失敗しました"));
+    assert!(html.contains("data-inspection-status=\"failed\""));
+    assert!(html.contains("検出器の処理に失敗しました"));
     assert!(!html.contains("ARBITRARY_ERROR_CANARY_036"));
     let out = fixture.0.join("without-details");
     write_document_reports(
@@ -338,6 +343,16 @@ fn assurance_usage_and_per_asset_policy_keep_exact_observation_bindings() {
             .unwrap();
         for name in ["report.html", "report.md"] {
             let body = fs::read_to_string(output.join(name)).unwrap();
+            if name == "report.html" {
+                for observation in doc.native().unwrap().observations() {
+                    assert!(!body.contains(observation.id()));
+                }
+                for asset in policy.asset_policies() {
+                    assert!(!body.contains(&asset.asset_id));
+                }
+                assert!(body.contains("assessment-summary"));
+                continue;
+            }
             for o in doc.native().unwrap().observations() {
                 assert!(body.contains(o.id()));
             }
@@ -416,7 +431,7 @@ impl Detector for MixedEvidence {
 }
 
 #[test]
-fn distinct_evidence_states_stay_on_their_own_observation_rows_in_both_languages() {
+fn exact_observation_states_stay_in_markdown_but_do_not_overload_html() {
     let fixture = Fixture::new();
     let doc = scan_repository_native(
         &ScanConfig {
@@ -463,11 +478,9 @@ fn distinct_evidence_states_stay_on_their_own_observation_rows_in_both_languages
                 other => panic!("unexpected evidence states: {other:?}"),
             };
             let expected = if lang == ReportLanguage::En { en } else { ja };
-            let html_row = html
-                .lines()
-                .find(|line| line.contains(&format!("<th scope=\"row\">{}</th>", observation.id())))
-                .expect("observation HTML row");
-            assert!(html_row.contains(expected), "{html_row}");
+            assert!(!html.contains(observation.id()));
+            assert!(!html.contains("Observation assurance and usage"));
+            assert!(!html.contains("観測の確認根拠と利用状態"));
             let markdown_row = md
                 .lines()
                 .find(|line| line.starts_with(&format!("|{}|", observation.id())))
@@ -537,4 +550,87 @@ fn document_reports_retain_unknown_custom_rule_copy_and_escape_it_in_japanese() 
     }
     let html = fs::read_to_string(output.join("report.html")).unwrap();
     assert!(html.contains("Custom &lt;vendor&gt; &amp; evidence"));
+}
+
+#[test]
+fn html_prioritizes_coverage_and_omits_internal_observation_and_asset_tables() {
+    let fixture = Fixture::new();
+    let doc = scan_repository_native(
+        &ScanConfig {
+            root: fixture.0.join("input"),
+            max_file_size_bytes: 37,
+            threads: 1,
+        },
+        &RuleSet::load_from_dir(&fixture.0.join("rules")).unwrap(),
+        &[std::sync::Arc::new(MixedEvidence)],
+        &NativeOptions::new(Some("test/project")).unwrap(),
+    )
+    .unwrap();
+    let policy = pqc_scan_core::policy::evaluate(
+        doc.native().unwrap(),
+        &Default::default(),
+        pqc_scan_core::policy::PROFILE_ID,
+    )
+    .unwrap();
+    for lang in [ReportLanguage::Ja, ReportLanguage::En] {
+        let out = fixture.0.join(if lang == ReportLanguage::Ja {
+            "readable-ja"
+        } else {
+            "readable-en"
+        });
+        write_document_reports(&doc, Some(&policy), true, &out, ReportFormat::All, lang).unwrap();
+        let html = fs::read_to_string(out.join("report.html")).unwrap();
+        let md = fs::read_to_string(out.join("report.md")).unwrap();
+        assert!(
+            html.find("<section class=\"inspection-overview").unwrap()
+                < html.find("<section data-report-controls").unwrap()
+        );
+        assert!(html.contains("37 bytes"));
+        assert!(html.contains("node_modules"));
+        assert!(html.contains(".gitignore"));
+        assert!(!html.contains("data-observation-row"));
+        for observation in doc.native().unwrap().observations() {
+            assert!(
+                !html.contains(observation.id()),
+                "internal observation ID in HTML"
+            );
+            assert!(
+                md.contains(observation.id()),
+                "exact record must remain in Markdown"
+            );
+        }
+        for asset in policy.asset_policies() {
+            assert!(!html.contains(&asset.asset_id), "internal asset ID in HTML");
+            assert!(md.contains(&asset.asset_id));
+        }
+        assert!(html.contains("inspection-reasons"));
+    }
+}
+
+#[test]
+fn html_groups_diagnostic_reasons_with_bounded_examples_and_preserves_full_markdown() {
+    let fixture = Fixture::new();
+    fs::remove_file(fixture.0.join("input/<untrusted>&.txt")).unwrap();
+    for i in 0..12 {
+        fs::write(fixture.0.join(format!("input/file-{i:02}.txt")), "fixture").unwrap();
+    }
+    let doc = fixture.document(DetectorStatus::Partial);
+    let out = fixture.0.join("grouped");
+    write_document_reports(
+        &doc,
+        None,
+        true,
+        &out,
+        ReportFormat::All,
+        ReportLanguage::Ja,
+    )
+    .unwrap();
+    let html = fs::read_to_string(out.join("report.html")).unwrap();
+    let md = fs::read_to_string(out.join("report.md")).unwrap();
+    assert_eq!(html.matches("class=\"inspection-reason\"").count(), 1);
+    assert!(html.contains("12件"));
+    assert!(html.contains("ほか9件"));
+    assert!(!html.contains("file-11.txt"));
+    assert!(md.contains("file-11.txt"));
+    assert!(html.contains("data-inspection-status=\"partial\""));
 }

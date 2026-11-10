@@ -1,7 +1,7 @@
 //! Human-readable views and unchanged-language JSON for explicit endpoint probes.
 use crate::{japanese, ReportLanguage};
 use anyhow::{anyhow, Result};
-use pqc_scan_core::probe::{ProbeProtocol, ProbeReport};
+use pqc_scan_core::probe::{ProbeDiagnostic, ProbeOutcome, ProbeProtocol, ProbeReport};
 use serde::Serialize;
 use serde_json::Value;
 use std::{
@@ -28,9 +28,11 @@ pub fn write_probe_reports<T: Serialize>(
     let rows = rows(&value);
     let html = html(
         &rows,
+        &value,
         report.protocol,
         language,
         value["redaction_applied"] == true,
+        tls_envelope_allows_verified_summary(report),
     )?;
     let markdown = markdown(
         &rows,
@@ -293,14 +295,303 @@ fn overview(rows: &[Row]) -> impl Iterator<Item = &Row> {
         ) || row.path.starts_with("/diagnostics/")
     })
 }
+// These are the only partial-result diagnostics emitted after the TLS runtime
+// completes its verified handshake. Unknown or pre-handshake diagnostics must
+// never promote generic serialized details into a verified connection claim.
+fn tls_envelope_allows_verified_summary<T>(report: &ProbeReport<T>) -> bool {
+    match report.outcome {
+        ProbeOutcome::Completed => true,
+        ProbeOutcome::Failed => false,
+        ProbeOutcome::Partial => report.diagnostics.iter().all(|diagnostic| {
+            matches!(
+                diagnostic,
+                ProbeDiagnostic::CertificateCollectionLimit
+                    | ProbeDiagnostic::CertificateParseIncomplete
+                    | ProbeDiagnostic::GroupUnavailable
+            )
+        }),
+    }
+}
+
+// Only sanitized values reach the human summary. Unknown facts stay in the full table.
+fn value_text<'a>(value: &'a Value, pointer: &str) -> Option<&'a str> {
+    value.pointer(pointer).and_then(Value::as_str)
+}
+fn paragraph(out: &mut String, content: &str) -> Result<()> {
+    writeln!(out, "<p>{}</p>", japanese::html(content))?;
+    Ok(())
+}
+fn summary_item(out: &mut String, label: &str, content: &str) -> Result<()> {
+    writeln!(
+        out,
+        "<dt>{}</dt><dd>{}</dd>",
+        japanese::html(label),
+        japanese::html(content)
+    )?;
+    Ok(())
+}
+fn protocol_summary(
+    out: &mut String,
+    value: &Value,
+    protocol: ProbeProtocol,
+    language: ReportLanguage,
+    tls_envelope_allows_verified: bool,
+) -> Result<()> {
+    let unknown = text(language, "Not confirmed", "未確認");
+    writeln!(
+        out,
+        "<section><h2>{}</h2>",
+        text(language, "What was observed", "今回わかったこと")
+    )?;
+    match protocol {
+        ProbeProtocol::Tls => {
+            let verified = tls_envelope_allows_verified
+                && value.pointer("/details/handshake_complete") == Some(&Value::Bool(true))
+                && value_text(value, "/details/verification/certificate_chain_and_name")
+                    == Some("verified")
+                && matches!(
+                    value_text(value, "/details/handshake_kind"),
+                    Some("full" | "full_with_hello_retry_request")
+                );
+            if verified {
+                paragraph(out,text(language,"A fresh TLS handshake completed with certificate-chain and name verification.","証明書チェーンと名前を検証し、新しいTLS接続を確立しました。"))?;
+                writeln!(out, "<dl>")?;
+                let version = match value
+                    .pointer("/details/negotiated/version/id")
+                    .and_then(Value::as_u64)
+                {
+                    Some(772) => "TLS 1.3",
+                    Some(771) => "TLS 1.2",
+                    _ => value_text(value, "/details/negotiated/version/name").unwrap_or(unknown),
+                };
+                summary_item(out, text(language, "TLS version", "TLSの版"), version)?;
+                summary_item(
+                    out,
+                    text(language, "Cipher suite", "暗号スイート"),
+                    value_text(value, "/details/negotiated/cipher_suite/name").unwrap_or(unknown),
+                )?;
+                summary_item(
+                    out,
+                    text(language, "Key exchange group", "鍵共有グループ"),
+                    value_text(value, "/details/negotiated/key_exchange_group/name")
+                        .unwrap_or(unknown),
+                )?;
+                writeln!(out, "</dl>")?;
+            } else {
+                paragraph(
+                    out,
+                    text(
+                        language,
+                        "No verified TLS connection result was obtained.",
+                        "検証済みの通信結果は得られていません。",
+                    ),
+                )?;
+            }
+            if let Some(name) = value_text(value, "/details/verification/verification_name") {
+                paragraph(
+                    out,
+                    &format!(
+                        "{}: {name}",
+                        text(
+                            language,
+                            "Certificate verification name",
+                            "証明書の検証対象名"
+                        )
+                    ),
+                )?;
+            }
+            let trust = match value_text(value, "/details/verification/trust_source") {
+                Some("bundled_mozilla") => text(
+                    language,
+                    "Trust source: bundled Mozilla root certificates.",
+                    "信頼元: 同梱のMozillaルート証明書。",
+                ),
+                Some("local_ca_file") => text(
+                    language,
+                    "Trust source: the specified local CA file.",
+                    "信頼元: 指定したローカルCAファイル。",
+                ),
+                _ => text(language, "Trust source: not confirmed.", "信頼元: 未確認。"),
+            };
+            paragraph(out, trust)?;
+            if value_text(value, "/details/verification/revocation") == Some("not_checked") {
+                paragraph(
+                    out,
+                    text(
+                        language,
+                        "Revocation was not checked.",
+                        "失効確認は実施していません。",
+                    ),
+                )?;
+            }
+            if let Some(count) = value
+                .pointer("/details/certificate_collection/collected_count")
+                .and_then(Value::as_u64)
+            {
+                paragraph(
+                    out,
+                    &format!(
+                        "{}: {count}",
+                        text(
+                            language,
+                            "Certificates collected for public-attribute inspection",
+                            "公開属性の検査用に収集した証明書数"
+                        )
+                    ),
+                )?;
+            }
+        }
+        ProbeProtocol::SshOffers => {
+            paragraph(out,text(language,"Server lists are unauthenticated advertisements. Key exchange and host verification were not performed.","サーバーの一覧は認証前の申告です。鍵交換・ホスト認証は実施していません。"))?;
+            if let Some(banner) = value_text(value, "/details/server_identification") {
+                paragraph(
+                    out,
+                    &format!(
+                        "{}: {banner}",
+                        text(
+                            language,
+                            "Unverified server identification",
+                            "未検証のサーバー申告"
+                        )
+                    ),
+                )?;
+            }
+            writeln!(out, "<dl>")?;
+            for (field, en, ja) in [
+                (
+                    "kex_algorithms",
+                    "Advertised key exchange list",
+                    "提示された鍵交換一覧",
+                ),
+                (
+                    "server_host_key_algorithms",
+                    "Advertised host-key list",
+                    "提示されたホスト鍵一覧",
+                ),
+            ] {
+                let content = match value
+                    .pointer(&format!("/details/offers/{field}"))
+                    .and_then(Value::as_array)
+                {
+                    Some(entries) => {
+                        let count = if entries.len() > 5 {
+                            format!(
+                                "{} {}",
+                                entries.len(),
+                                text(language, "records (first 5)", "件の記録（先頭5件）")
+                            )
+                        } else {
+                            format!(
+                                "{} {}",
+                                entries.len(),
+                                text(language, "records", "件の記録")
+                            )
+                        };
+                        // Japanese does not use a space between a count and its suffix.
+                        let count = if language == ReportLanguage::Ja {
+                            count.replace(" 件", "件")
+                        } else {
+                            count
+                        };
+                        let names = entries
+                            .iter()
+                            .take(5)
+                            .filter_map(Value::as_str)
+                            .collect::<Vec<_>>()
+                            .join(", ");
+                        format!("{count}: {names}")
+                    }
+                    None => unknown.into(),
+                };
+                summary_item(out, text(language, en, ja), &content)?;
+            }
+            writeln!(out, "</dl>")?;
+        }
+    }
+    writeln!(
+        out,
+        "</section><section><h2>{}</h2>",
+        text(
+            language,
+            "Limits and incomplete observations",
+            "確認範囲と未完了の理由"
+        )
+    )?;
+    paragraph(out,text(language,"This is one endpoint observation with one client profile. It does not enumerate every server capability or establish completed PQC migration.","1つのクライアント設定による1接続先の観測です。サーバーの全対応方式やPQC移行完了を確認するものではありません。"))?;
+    if let Some(diagnostics) = value.get("diagnostics").and_then(Value::as_array) {
+        for code in diagnostics.iter().filter_map(Value::as_str) {
+            let reason = match code {
+                "certificate_collection_limit" => text(language,"Some certificate attributes were not collected because of the certificate collection limit.","証明書の収集上限に達したため、一部の公開属性を収集できませんでした。"),
+                "certificate_parse_incomplete" => text(language,"Some collected certificate attributes could not be parsed.","収集した証明書の一部の公開属性を解析できませんでした。"),
+                "certificate_validation_failed" => text(language,"Certificate-chain or name verification failed.","証明書チェーンまたは名前の検証に失敗しました。"),
+                "deadline_exceeded" => text(language,"The observation reached its time limit.","観測の制限時間に達しました。"),
+                "address_denied" => text(language,"The destination was denied by the address policy.","接続先がアドレス許可方針の対象外でした。"),
+                "dns_failed" => text(language,"Name resolution failed.","名前解決に失敗しました。"),
+                "traffic_limit" => text(language,"The observation reached its traffic limit.","送受信量の上限に達しました。"),
+                "transport_failed" | "peer_disconnected" => text(language,"The connection failed or the peer disconnected before collection completed.","収集の完了前に接続が失敗したか、相手から切断されました。"),
+                "invalid_target" => text(language,"The requested host or port was invalid.","指定されたホストまたはポートが不正でした。"),
+                "protocol_mismatch" | "malformed_peer_data" => text(language,"The response did not match the expected protocol or could not be parsed safely.","応答が期待するプロトコルと一致しないか、安全に解析できませんでした。"),
+                "tls_alert" => text(language,"The TLS peer reported an alert before the observation completed.","TLSの相手からアラートが返され、観測を完了できませんでした。"),
+                "cancelled" => text(language,"The observation was cancelled.","観測が取り消されました。"),
+                "peer_mismatch" => text(language,"The connected peer did not match the pinned destination.","実際の接続相手が固定した接続先と一致しませんでした。"),
+                "unsupported_local" | "local_resource_limit" | "attempt_limit" => text(language,"A local capability or resource limit prevented collection.","ローカルの対応機能またはリソースの制限により収集できませんでした。"),
+                "inspection_not_completed" => text(language,"The requested observation has not completed.","要求した観測が完了していません。"),
+                "group_unavailable" => text(language,"The negotiated key exchange group was not available.","通信で決まった鍵共有グループを取得できませんでした。"),
+                _ => text(language,"An observation step could not complete; its diagnostic code is in the technical information.","完了できなかった観測処理があります。診断コードは技術情報で確認できます。"),
+            };
+            paragraph(out, reason)?;
+        }
+    }
+    writeln!(
+        out,
+        "</section><section><h2>{}</h2>",
+        text(language, "What to check next", "次に確認すること")
+    )?;
+    let next = match protocol {
+        ProbeProtocol::Tls if value_text(value,"/details/verification/certificate_chain_and_name")==Some("failed") => text(language,"Check the destination name, validity period and trusted CA. Correct the cause without disabling certificate verification.","接続先名・有効期間・信頼するCAを確認し、証明書検証を無効化せずに原因を解消してください。"),
+        ProbeProtocol::Tls => text(language,"Use certificate-management records to check revocation and any missing certificate attributes. Review other client profiles and application usage separately.","証明書管理の記録で失効状態や未収集の公開属性を確認してください。他のクライアント設定やアプリケーションでの利用は別途確認が必要です。"),
+        ProbeProtocol::SshOffers => text(language,"Check actual negotiated algorithms and the host identity with an authorized SSH client. Use server configuration to establish the full supported set.","許可されたSSHクライアントで実際に選ばれる方式とホストの本人性を確認してください。対応方式の全体はサーバー設定と照合してください。"),
+    };
+    let has = |code: &str| {
+        value
+            .get("diagnostics")
+            .and_then(Value::as_array)
+            .is_some_and(|values| values.iter().any(|value| value.as_str() == Some(code)))
+    };
+    let next = if has("dns_failed") {
+        text(
+            language,
+            "Check the requested host name and name-resolution settings before retrying.",
+            "指定したホスト名と名前解決の設定を確認してから再実行してください。",
+        )
+    } else if has("address_denied") || has("peer_mismatch") {
+        text(language,"Check the resolved addresses and approved destination policy. Explicitly authorize an internal CIDR only when that destination is intended.","名前解決結果と接続先の許可方針を確認してください。内部CIDRの明示許可は、その接続先が意図した対象の場合に限って設定してください。")
+    } else if has("invalid_target") || has("protocol_mismatch") || has("malformed_peer_data") {
+        text(
+            language,
+            "Check the host, port and selected protocol against the endpoint configuration.",
+            "ホスト・ポート・選択したプロトコルを接続先の設定と照合してください。",
+        )
+    } else if has("transport_failed") || has("peer_disconnected") || has("deadline_exceeded") {
+        text(language,"Check service availability, the network path and server logs before a separate retry. This invocation does not retry automatically.","サービスの稼働状態・通信経路・サーバーログを確認してから別途再実行してください。この実行内では自動再試行しません。")
+    } else {
+        next
+    };
+    paragraph(out, next)?;
+    writeln!(out, "</section>")?;
+    Ok(())
+}
+
 fn html(
     rows: &[Row],
+    value: &Value,
     protocol: ProbeProtocol,
     language: ReportLanguage,
     redacted: bool,
+    tls_envelope_allows_verified: bool,
 ) -> Result<String> {
     let mut out = String::new();
-    writeln!(out,"<!doctype html><html lang=\"{}\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>{}</title><style>body{{font:16px/1.6 system-ui,sans-serif;color:#15243b;background:#f5f7fb;margin:0}}main{{max-width:1100px;margin:auto;padding:24px}}dt,dd{{overflow-wrap:anywhere}}table{{width:100%;table-layout:fixed;border-collapse:collapse;background:white}}th,td{{text-align:left;vertical-align:top;padding:12px;border:1px solid #c9d2df;overflow-wrap:anywhere;word-break:break-word}}th{{width:48%}}code{{display:block;font-size:.8em;overflow-wrap:anywhere}}summary{{cursor:pointer;padding:12px;font-weight:600}}summary:focus-visible{{outline:3px solid #1c60b9;outline-offset:2px}}.loss{{border-left:4px solid #a63d00;padding:12px;background:#fff4e8}}@media(max-width:600px){{main{{padding:12px}}th,td{{padding:8px}}}}</style></head><body><main><h1>{}</h1><p>{}</p>",text(language,"en","ja"),japanese::html(title(protocol,language)),japanese::html(title(protocol,language)),japanese::html(scope(protocol,language)))?;
+    writeln!(out,"<!doctype html><html lang=\"{}\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>{}</title><style>body{{font:16px/1.6 system-ui,sans-serif;color:#15243b;background:#f5f7fb;margin:0}}main{{max-width:1100px;margin:auto;padding:24px}}dt,dd,p{{overflow-wrap:anywhere}}section{{background:white;padding:16px 20px;margin:16px 0;border-radius:8px}}dt{{font-weight:600}}dd{{margin:0 0 12px}}table{{width:100%;table-layout:fixed;border-collapse:collapse;background:white}}th,td{{text-align:left;vertical-align:top;padding:12px;border:1px solid #c9d2df;overflow-wrap:anywhere;word-break:break-word}}th{{width:48%}}code{{display:block;font-size:.8em;overflow-wrap:anywhere}}summary{{cursor:pointer;padding:12px;font-weight:600}}summary:focus-visible{{outline:3px solid #1c60b9;outline-offset:2px}}.loss{{border-left:4px solid #a63d00;padding:12px;background:#fff4e8}}@media(max-width:600px){{main{{padding:12px}}th,td{{padding:8px}}}}</style></head><body><main><h1>{}</h1><p>{}</p>",text(language,"en","ja"),japanese::html(title(protocol,language)),japanese::html(title(protocol,language)),japanese::html(text(language,"A single bounded endpoint observation. Expand technical information for every recorded field.","接続先に対する、上限を設けた1回の観測です。全記録は技術情報で確認できます。")))?;
     if redacted {
         writeln!(
             out,
@@ -313,7 +604,12 @@ fn html(
         "<section><h2>{}</h2><dl>",
         text(language, "Overview", "観測の概要")
     )?;
-    for row in overview(rows) {
+    for row in overview(rows).filter(|row| {
+        matches!(
+            row.path.as_str(),
+            "/outcome" | "/target/host" | "/target/port" | "/target/connected_peer"
+        )
+    }) {
         writeln!(
             out,
             "<dt>{}</dt><dd>{}</dd>",
@@ -322,7 +618,14 @@ fn html(
         )?;
     }
     writeln!(out, "</dl></section>")?;
-    writeln!(out,"<details open><summary>{}</summary><table><caption>{}</caption><thead><tr><th scope=\"col\">{}</th><th scope=\"col\">{}</th></tr></thead><tbody>",text(language,"Recorded fields","記録した項目"),text(language,"Facts with their original machine-field paths","元の機械項目パスと対応する事実"),text(language,"Field","項目"),text(language,"Value","内容"))?;
+    protocol_summary(
+        &mut out,
+        value,
+        protocol,
+        language,
+        tls_envelope_allows_verified,
+    )?;
+    writeln!(out,"<details id=\"technical-details\"><summary>{}</summary><table><caption>{}</caption><thead><tr><th scope=\"col\">{}</th><th scope=\"col\">{}</th></tr></thead><tbody>",text(language,"Technical information — all recorded fields","技術情報 — 記録した全項目"),text(language,"Facts with their original machine-field paths","元の機械項目パスと対応する事実"),text(language,"Field","項目"),text(language,"Value","内容"))?;
     for row in rows {
         writeln!(
             out,
@@ -333,7 +636,11 @@ fn html(
             japanese::html(&display_value(row, language))
         )?;
     }
-    writeln!(out, "</tbody></table></details></main></body></html>")?;
+    writeln!(
+        out,
+        "</tbody></table><p>{}</p></details></main></body></html>",
+        japanese::html(scope(protocol, language))
+    )?;
     Ok(out)
 }
 fn markdown(

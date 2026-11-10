@@ -369,3 +369,213 @@ fn outcome_is_visible_before_potentially_long_protocol_details() {
         assert!(body.find("(completed)").unwrap() < body.find("detail-algorithm-marker").unwrap());
     }
 }
+
+#[test]
+fn tls_initial_html_explains_verified_facts_partial_collection_and_next_checks() {
+    let root = Fixture::new();
+    let mut report = report(
+        ProbeProtocol::Tls,
+        json!({
+            "verification":{"verification_name":"example.test","certificate_chain_and_name":"verified","trust_source":"bundled_mozilla","revocation":"not_checked","root_set_sha256":"a".repeat(64)},
+            "handshake_complete":true,"handshake_kind":"full",
+            "negotiated":{"version":{"id":772,"name":"TLSv1_3"},"cipher_suite":{"id":4866,"name":"TLS13_AES_256_GCM_SHA384"},"key_exchange_group":{"id":4588,"name":"X25519MLKEM768"},"group_classification":"hybrid"},
+            "peer_certificates":[{"certificate_der_sha256":"b".repeat(64)}],
+            "certificate_collection":{"status":"partial","presented_count":17,"collected_count":1}
+        }),
+    );
+    report.set_outcome(
+        ProbeOutcome::Partial,
+        vec![ProbeDiagnostic::CertificateCollectionLimit],
+    );
+    let original = serde_json::to_value(&report).unwrap();
+    for language in [ReportLanguage::En, ReportLanguage::Ja] {
+        let dir = root.0.join(if language == ReportLanguage::En {
+            "en"
+        } else {
+            "ja"
+        });
+        write_probe_reports(&report, &dir, language).unwrap();
+        let html = fs::read_to_string(dir.join("report.html")).unwrap();
+        let (initial, technical) = html
+            .split_once("<details id=\"technical-details\">")
+            .unwrap();
+        assert!(!html.contains("<details open"));
+        assert!(initial.contains("example.test"));
+        assert!(initial.contains("TLS 1.3"));
+        assert!(initial.contains("X25519MLKEM768"));
+        assert!(initial.contains("TLS13_AES_256_GCM_SHA384"));
+        assert!(initial.contains("Mozilla"));
+        assert!(!initial.contains("/details/"));
+        assert!(!initial.contains(&"b".repeat(64)));
+        assert!(technical.contains("/details/peer_certificates/0/certificate_der_sha256"));
+        assert!(technical.contains(&"b".repeat(64)));
+        for text in if language == ReportLanguage::Ja {
+            [
+                "今回わかったこと",
+                "証明書の収集上限",
+                "失効確認は実施していません",
+                "次に確認すること",
+            ]
+        } else {
+            [
+                "What was observed",
+                "certificate collection limit",
+                "Revocation was not checked",
+                "What to check next",
+            ]
+        } {
+            assert!(initial.contains(text), "{text}");
+        }
+        let machine: Value =
+            serde_json::from_slice(&fs::read(dir.join("probe.tls.v1.json")).unwrap()).unwrap();
+        assert_eq!(machine, original);
+    }
+}
+
+#[test]
+fn failed_tls_does_not_promote_unverified_negotiation_into_initial_html() {
+    let root = Fixture::new();
+    let mut report = report(
+        ProbeProtocol::Tls,
+        json!({
+            "handshake_complete":false,"handshake_kind":null,
+            "verification":{"certificate_chain_and_name":"failed","verification_name":"wrong.test"},
+            "negotiated":{"version":{"name":"UNVERIFIED_TLS"},"key_exchange_group":{"name":"UNVERIFIED_GROUP"}}
+        }),
+    );
+    report.set_outcome(
+        ProbeOutcome::Failed,
+        vec![ProbeDiagnostic::CertificateValidationFailed],
+    );
+    write_probe_reports(&report, &root.0, ReportLanguage::Ja).unwrap();
+    let html = fs::read_to_string(root.0.join("report.html")).unwrap();
+    let (initial, technical) = html
+        .split_once("<details id=\"technical-details\">")
+        .unwrap();
+    assert!(!initial.contains("UNVERIFIED_GROUP"));
+    assert!(!initial.contains("UNVERIFIED_TLS"));
+    assert!(initial.contains("検証済みの通信結果は得られていません"));
+    assert!(initial.contains("接続先名・有効期間・信頼するCA"));
+    assert!(technical.contains("UNVERIFIED_GROUP"));
+}
+
+#[test]
+fn ssh_initial_html_summarizes_remote_offers_and_keeps_all_facts_in_closed_details() {
+    let root = Fixture::new();
+    let report = report(
+        ProbeProtocol::SshOffers,
+        json!({
+            "assurance":"unauthenticated_advertisement","server_identification":"SSH-2.0-fixture",
+            "client_profile":{"offers":{"kex_algorithms":["CLIENT_PROPOSAL_ONLY"]}},
+            "offers":{"kex_algorithms":["server-first","server-second","server-third","server-fourth","server-fifth","hidden-sixth-entry"],"server_host_key_algorithms":["ssh-ed25519"]}
+        }),
+    );
+    for language in [ReportLanguage::En, ReportLanguage::Ja] {
+        let dir = root.0.join(if language == ReportLanguage::En {
+            "en"
+        } else {
+            "ja"
+        });
+        write_probe_reports(&report, &dir, language).unwrap();
+        let html = fs::read_to_string(dir.join("report.html")).unwrap();
+        let (initial, technical) = html
+            .split_once("<details id=\"technical-details\">")
+            .unwrap();
+        assert!(initial.contains("server-first"));
+        assert!(initial.contains("ssh-ed25519"));
+        assert!(!initial.contains("CLIENT_PROPOSAL_ONLY"));
+        assert!(!initial.contains("hidden-sixth-entry"));
+        assert!(technical.contains("CLIENT_PROPOSAL_ONLY"));
+        assert!(technical.contains("hidden-sixth-entry"));
+        assert!(initial.contains(if language == ReportLanguage::Ja {
+            "6件の記録（先頭5件）"
+        } else {
+            "6 records (first 5)"
+        }));
+        assert!(initial.contains(if language == ReportLanguage::Ja {
+            "鍵交換・ホスト認証は実施していません"
+        } else {
+            "Key exchange and host verification were not performed"
+        }));
+    }
+}
+
+#[test]
+fn unavailable_ssh_lists_are_unconfirmed_and_network_failure_has_actionable_guidance() {
+    let root = Fixture::new();
+    let mut report = report(
+        ProbeProtocol::SshOffers,
+        json!({"server_identification":"<script>alert('peer')</script>","offers":null}),
+    );
+    report.set_outcome(ProbeOutcome::Failed, vec![ProbeDiagnostic::DnsFailed]);
+    write_probe_reports(&report, &root.0, ReportLanguage::Ja).unwrap();
+    let html = fs::read_to_string(root.0.join("report.html")).unwrap();
+    let (initial, _) = html
+        .split_once("<details id=\"technical-details\">")
+        .unwrap();
+    assert!(initial.contains("未確認"));
+    assert!(!initial.contains("0件の記録"));
+    assert!(!initial.contains("<script>"));
+    assert!(initial.contains("&lt;script&gt;"));
+    assert!(initial.contains("名前解決の設定"));
+}
+
+#[test]
+fn contradictory_tls_details_never_override_failed_or_fatal_envelope() {
+    let root = Fixture::new();
+    for (index, outcome, diagnostic) in [
+        (
+            0,
+            ProbeOutcome::Failed,
+            ProbeDiagnostic::CertificateValidationFailed,
+        ),
+        (
+            1,
+            ProbeOutcome::Partial,
+            ProbeDiagnostic::CertificateValidationFailed,
+        ),
+        (2, ProbeOutcome::Partial, ProbeDiagnostic::TlsAlert),
+        (
+            3,
+            ProbeOutcome::Failed,
+            ProbeDiagnostic::CertificateCollectionLimit,
+        ),
+    ] {
+        let mut report = report(
+            ProbeProtocol::Tls,
+            json!({
+                "handshake_complete":true,"handshake_kind":"full",
+                "verification":{"certificate_chain_and_name":"verified"},
+                "negotiated":{"version":{"id":772,"name":"TLSv1_3"},"key_exchange_group":{"name":"CONTRADICTORY_GROUP"}}
+            }),
+        );
+        report.set_outcome(outcome, vec![diagnostic]);
+        for language in [ReportLanguage::En, ReportLanguage::Ja] {
+            let dir = root.0.join(format!(
+                "{index}-{}",
+                if language == ReportLanguage::En {
+                    "en"
+                } else {
+                    "ja"
+                }
+            ));
+            write_probe_reports(&report, &dir, language).unwrap();
+            let html = fs::read_to_string(dir.join("report.html")).unwrap();
+            let (initial, technical) = html
+                .split_once("<details id=\"technical-details\">")
+                .unwrap();
+            assert!(!initial.contains("CONTRADICTORY_GROUP"));
+            assert!(!initial.contains("A fresh TLS handshake completed"));
+            assert!(!initial.contains("証明書チェーンと名前を検証し、新しいTLS接続を確立しました"));
+            assert!(initial.contains(if language == ReportLanguage::En {
+                "No verified TLS connection result"
+            } else {
+                "検証済みの通信結果は得られていません"
+            }));
+            assert!(technical.contains("CONTRADICTORY_GROUP"));
+            let machine: Value =
+                serde_json::from_slice(&fs::read(dir.join("probe.tls.v1.json")).unwrap()).unwrap();
+            assert_eq!(machine, serde_json::to_value(&report).unwrap());
+        }
+    }
+}
