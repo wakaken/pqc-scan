@@ -1,0 +1,508 @@
+{
+  "schema_version": 1,
+  "kind": "development_only_tls_feasibility",
+  "baseline_head": "802f2c6aa7436ce02332c2c3013c835d8c85d904",
+  "toolchain": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "platform": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2\nBuildVersion:\t\t26B123\n",
+  "clang": "Apple clang version 17.0.0 (clang-1700.6.4.2)",
+  "machine": "arm64",
+  "source_sha256": {
+    "tests/feasibility/tls/Cargo.toml": "e0151ad5c160d269f037b4d30c3e1ced73057a8d658368a05db3bf610691356b",
+    "tests/feasibility/tls/Cargo.lock": "0f5e56f8e46d49c75c2d043ff3a7e40afba9708e4e189dabe503087336675a94",
+    "tests/feasibility/tls/src/lib.rs": "6b2d2100d5d36450b73375c6df1d081f60b4c36ab989b18d7007414c08f95e1d",
+    "tests/feasibility/tls/run-isolated.py": "a847193e6ddf91ec07bbcbecd6ce5ea3e2fc5fab32638eae6ffb624a3d3bec7c",
+    "tests/feasibility/tls/README.md": "750576d53dc125d97ead34daa1213a1077d08a6a95bccb9b0a578f85a55c2834",
+    "crates/pqc_scan_core/src/target_policy.rs": "8c7b7902bc1bfcb415057199610c86f33d19a15c2d50c6b9ef05bc090b36bddc",
+    "crates/pqc_scan_core/src/probe_transport.rs": "c4ba5b36ef1b4a83b9b12cdfdb6025aec54d544da6fa4d2228c88dfc343d4158",
+    "crates/pqc_scan_core/Cargo.toml": "8731f85d791f7590ceeecf1f27429f063aa5b684524590aeddf50aed35bc7e01",
+    "Cargo.toml": "56ea9e18ec0c13b78adea77f94f36839a06f9e111060e5973f4edd5176816ab1",
+    "Cargo.lock": "f9e8240fc00c1cf52974cbfdd577c72003f8f8a0bb7211dfbc03dd3378f5d0e8",
+    "rust-toolchain.toml": "02dee3b2b81f2c5e7064c6bb118cf19e859100fcc33c220e5ec52ce4b0586b12"
+  },
+  "resolved_host_dependencies": [
+    {
+      "name": "aws-lc-rs",
+      "version": "1.18.0",
+      "rustVersion": "1.71.0",
+      "features": [
+        "alloc",
+        "aws-lc-sys",
+        "default",
+        "prebuilt-nasm",
+        "ring-io",
+        "ring-sig-verify"
+      ]
+    },
+    {
+      "name": "aws-lc-sys",
+      "version": "0.44.0",
+      "rustVersion": "1.71.0",
+      "features": [
+        "prebuilt-nasm"
+      ]
+    },
+    {
+      "name": "rcgen",
+      "version": "0.14.7",
+      "rustVersion": "1.71",
+      "features": [
+        "aws_lc_rs",
+        "crypto"
+      ]
+    },
+    {
+      "name": "rustls",
+      "version": "0.23.46",
+      "rustVersion": "1.71",
+      "features": [
+        "aws-lc-rs",
+        "aws_lc_rs",
+        "std",
+        "tls12"
+      ]
+    },
+    {
+      "name": "rustls-pki-types",
+      "version": "1.15.1",
+      "rustVersion": "1.60",
+      "features": [
+        "alloc",
+        "default",
+        "std"
+      ]
+    },
+    {
+      "name": "rustls-webpki",
+      "version": "0.103.16",
+      "rustVersion": "1.71",
+      "features": [
+        "alloc",
+        "aws-lc-rs",
+        "std"
+      ]
+    },
+    {
+      "name": "time",
+      "version": "0.3.55",
+      "rustVersion": "1.88.0",
+      "features": [
+        "alloc",
+        "default",
+        "formatting",
+        "macros",
+        "parsing",
+        "std"
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "variant": "aws-lc-tls12-tls13",
+      "buildCommand": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "/Users/waka/development/pqc/pqc-scan/tests/feasibility/tls/Cargo.toml",
+        "--target-dir",
+        "/Users/waka/development/pqc/pqc-scan/target/task-031-build",
+        "--locked",
+        "--offline",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "buildExit": 0,
+      "testCommand": [
+        "sandbox-exec",
+        "-p",
+        "(version 1) (allow default) (deny network-outbound) (allow network-outbound (remote ip \"localhost:*\"))",
+        "/Users/waka/development/pqc/pqc-scan/target/task-031-build/debug/deps/pqc_scan_tls_feasibility-2cf5d666f1f1a5a6",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "testExit": 0,
+      "totalSeconds": 1.0870057079882827,
+      "binarySha256": "2fea0a1e4a9e0db74839f6c4301d5eb458498c05933ef1c4b4f1f736067817a9",
+      "isolationProfile": "(version 1) (allow default) (deny network-outbound) (allow network-outbound (remote ip \"localhost:*\"))"
+    },
+    {
+      "variant": "aws-lc-tls13",
+      "buildCommand": [
+        "cargo",
+        "test",
+        "--manifest-path",
+        "/Users/waka/development/pqc/pqc-scan/tests/feasibility/tls/Cargo.toml",
+        "--target-dir",
+        "/Users/waka/development/pqc/pqc-scan/target/task-031-build",
+        "--locked",
+        "--offline",
+        "--no-run",
+        "--message-format=json",
+        "--no-default-features"
+      ],
+      "buildExit": 0,
+      "testCommand": [
+        "sandbox-exec",
+        "-p",
+        "(version 1) (allow default) (deny network-outbound) (allow network-outbound (remote ip \"localhost:*\"))",
+        "/Users/waka/development/pqc/pqc-scan/target/task-031-build/debug/deps/pqc_scan_tls_feasibility-23d9991860e48d5b",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "testExit": 0,
+      "totalSeconds": 2.9974712500115857,
+      "binarySha256": "17874b039fe309968190ed495a04f740b17bebe425e5bd9ddb1f4b177e9305d5",
+      "isolationProfile": "(version 1) (allow default) (deny network-outbound) (allow network-outbound (remote ip \"localhost:*\"))"
+    }
+  ],
+  "session_facts": {
+    "aws-lc-tls12-tls13": [
+      {
+        "application_plaintext_bytes": 0,
+        "certificate_bytes": 748,
+        "certificate_count": 2,
+        "client_certificate": false,
+        "group": "X25519",
+        "group_id": 29,
+        "handshake": "Full",
+        "received": 993,
+        "scenario": "verified_fresh",
+        "sent": 247,
+        "suite_id": 49196,
+        "version": "TLSv1_2",
+        "version_id": 771
+      },
+      {
+        "application_plaintext_bytes": 0,
+        "certificate_bytes": 751,
+        "certificate_count": 2,
+        "client_certificate": false,
+        "group": "X25519",
+        "group_id": 29,
+        "handshake": "Full",
+        "received": 1066,
+        "scenario": "verified_fresh",
+        "sent": 312,
+        "suite_id": 4866,
+        "version": "TLSv1_3",
+        "version_id": 772
+      },
+      {
+        "application_plaintext_bytes": 0,
+        "certificate_bytes": 749,
+        "certificate_count": 2,
+        "client_certificate": false,
+        "group": "X25519MLKEM768",
+        "group_id": 4588,
+        "handshake": "FullWithHelloRetryRequest",
+        "received": 2243,
+        "scenario": "verified_fresh",
+        "sent": 1732,
+        "suite_id": 4866,
+        "version": "TLSv1_3",
+        "version_id": 772
+      },
+      {
+        "application_plaintext_bytes": 0,
+        "certificate_bytes": 751,
+        "certificate_count": 2,
+        "client_certificate": false,
+        "group": "secp256r1MLKEM768",
+        "group_id": 4587,
+        "handshake": "Full",
+        "received": 2186,
+        "scenario": "verified_fresh",
+        "sent": 1529,
+        "suite_id": 4866,
+        "version": "TLSv1_3",
+        "version_id": 772
+      },
+      {
+        "application_plaintext_bytes": 0,
+        "certificate_bytes": 751,
+        "certificate_count": 2,
+        "client_certificate": false,
+        "group": "X25519MLKEM768",
+        "group_id": 4588,
+        "handshake": "Full",
+        "received": 2153,
+        "scenario": "verified_fresh",
+        "sent": 1496,
+        "suite_id": 4866,
+        "version": "TLSv1_3",
+        "version_id": 772
+      },
+      {
+        "handshake_complete": false,
+        "presented_chain_available": false,
+        "scenario": "failed_handshake_accessor_state",
+        "unverified_accessor_group_id": 29,
+        "verified": false
+      },
+      {
+        "outcome": "unknown_issuer",
+        "scenario": "verifier_rejection",
+        "verified": false
+      },
+      {
+        "handshake_complete": false,
+        "presented_chain_available": false,
+        "scenario": "failed_handshake_accessor_state",
+        "unverified_accessor_group_id": 29,
+        "verified": false
+      },
+      {
+        "outcome": "name_mismatch",
+        "scenario": "verifier_rejection",
+        "verified": false
+      },
+      {
+        "handshake_complete": false,
+        "presented_chain_available": false,
+        "scenario": "failed_handshake_accessor_state",
+        "unverified_accessor_group_id": 29,
+        "verified": false
+      },
+      {
+        "outcome": "expired",
+        "scenario": "verifier_rejection",
+        "verified": false
+      },
+      {
+        "certificate_verify_scheme": "no_general_accessor_tested",
+        "group_ids": [
+          29,
+          23,
+          24,
+          4588,
+          4587,
+          513,
+          514
+        ],
+        "p384_mlkem1024": "not_in_provider_group_list",
+        "scenario": "provider_capabilities"
+      },
+      {
+        "chain_elements_sent": 17,
+        "complete_inspection": false,
+        "outcome": "certificate_count_limit",
+        "scenario": "certificate_limit"
+      },
+      {
+        "chain_elements_sent": 201,
+        "complete_inspection": false,
+        "outcome": "local_tls_message_limit",
+        "scenario": "certificate_limit"
+      }
+    ],
+    "aws-lc-tls13": [
+      {
+        "application_plaintext_bytes": 0,
+        "certificate_bytes": 751,
+        "certificate_count": 2,
+        "client_certificate": false,
+        "group": "X25519",
+        "group_id": 29,
+        "handshake": "Full",
+        "received": 1066,
+        "scenario": "verified_fresh",
+        "sent": 300,
+        "suite_id": 4866,
+        "version": "TLSv1_3",
+        "version_id": 772
+      },
+      {
+        "application_plaintext_bytes": 0,
+        "certificate_bytes": 751,
+        "certificate_count": 2,
+        "client_certificate": false,
+        "group": "X25519MLKEM768",
+        "group_id": 4588,
+        "handshake": "FullWithHelloRetryRequest",
+        "received": 2247,
+        "scenario": "verified_fresh",
+        "sent": 1708,
+        "suite_id": 4866,
+        "version": "TLSv1_3",
+        "version_id": 772
+      },
+      {
+        "application_plaintext_bytes": 0,
+        "certificate_bytes": 749,
+        "certificate_count": 2,
+        "client_certificate": false,
+        "group": "secp256r1MLKEM768",
+        "group_id": 4587,
+        "handshake": "Full",
+        "received": 2183,
+        "scenario": "verified_fresh",
+        "sent": 1517,
+        "suite_id": 4866,
+        "version": "TLSv1_3",
+        "version_id": 772
+      },
+      {
+        "application_plaintext_bytes": 0,
+        "certificate_bytes": 752,
+        "certificate_count": 2,
+        "client_certificate": false,
+        "group": "X25519MLKEM768",
+        "group_id": 4588,
+        "handshake": "Full",
+        "received": 2154,
+        "scenario": "verified_fresh",
+        "sent": 1484,
+        "suite_id": 4866,
+        "version": "TLSv1_3",
+        "version_id": 772
+      },
+      {
+        "handshake_complete": false,
+        "presented_chain_available": false,
+        "scenario": "failed_handshake_accessor_state",
+        "unverified_accessor_group_id": 29,
+        "verified": false
+      },
+      {
+        "outcome": "unknown_issuer",
+        "scenario": "verifier_rejection",
+        "verified": false
+      },
+      {
+        "handshake_complete": false,
+        "presented_chain_available": false,
+        "scenario": "failed_handshake_accessor_state",
+        "unverified_accessor_group_id": 29,
+        "verified": false
+      },
+      {
+        "outcome": "name_mismatch",
+        "scenario": "verifier_rejection",
+        "verified": false
+      },
+      {
+        "handshake_complete": false,
+        "presented_chain_available": false,
+        "scenario": "failed_handshake_accessor_state",
+        "unverified_accessor_group_id": 29,
+        "verified": false
+      },
+      {
+        "outcome": "expired",
+        "scenario": "verifier_rejection",
+        "verified": false
+      },
+      {
+        "certificate_verify_scheme": "no_general_accessor_tested",
+        "group_ids": [
+          29,
+          23,
+          24,
+          4588,
+          4587,
+          513,
+          514
+        ],
+        "p384_mlkem1024": "not_in_provider_group_list",
+        "scenario": "provider_capabilities"
+      },
+      {
+        "chain_elements_sent": 17,
+        "complete_inspection": false,
+        "outcome": "certificate_count_limit",
+        "scenario": "certificate_limit"
+      },
+      {
+        "chain_elements_sent": 201,
+        "complete_inspection": false,
+        "outcome": "local_tls_message_limit",
+        "scenario": "certificate_limit"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--manifest-path",
+        "tests/feasibility/tls/Cargo.toml",
+        "--target-dir",
+        "target/task-031-build",
+        "--offline",
+        "--locked",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "log": "target/task-031/clippy-final.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--manifest-path",
+        "tests/feasibility/tls/Cargo.toml",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "target/task-031/fmt-final.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "metadata",
+        "--manifest-path",
+        "tests/feasibility/tls/Cargo.toml",
+        "--offline",
+        "--locked",
+        "--format-version",
+        "1"
+      ],
+      "exit": 101,
+      "log": "target/task-031/metadata.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "metadata",
+        "--manifest-path",
+        "tests/feasibility/tls/Cargo.toml",
+        "--offline",
+        "--locked",
+        "--filter-platform",
+        "aarch64-apple-darwin",
+        "--format-version",
+        "1"
+      ],
+      "exit": 0,
+      "log": "target/task-031/metadata-host.json"
+    }
+  ],
+  "root_default_normal_dependencies": {
+    "rustls_present": false,
+    "aws_lc_present": false,
+    "tree_sha256": "aa85e9cb535edbcc1793742b3bc68b957d5ccc1dedeb0838873c23b6072d01fe"
+  },
+  "initial_harness_build": {
+    "elapsed_seconds": 12.96,
+    "user_seconds": 47.58,
+    "system_seconds": 16.49,
+    "cache_qualification": "first dedicated-target harness build, populated registry/OS caches; not a cold-cache benchmark",
+    "log": "target/task-031/build.log"
+  },
+  "candidate_recommendation": "conditional macOS aarch64 candidate only; maintainer backend/features/platform selection required before product TLS task032",
+  "unexecuted": [
+    "Linux/Windows/other targets",
+    "alternate providers or OpenSSL oracle",
+    "PQC certificate verification",
+    "TLS1.0/TLS1.1",
+    "general CertificateVerify scheme accessor",
+    "FIPS validation",
+    "product TLS CLI/crate",
+    "hosted CI",
+    "public endpoint connections"
+  ]
+}
