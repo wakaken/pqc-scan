@@ -53,3 +53,17 @@ Documentation paths changed without updating all workflow and knowledge document
 
 Lesson:
 When doc locations change, verify every referenced path and update all agent guidance in the same patch.
+
+## Shared target directories can invalidate feature-specific protocol evidence
+
+Cause:
+An isolated optional-feature resolver test failed while default builds shared its
+CLI executable path. Concurrent replacement was suspected, but the failed CLI's
+hash was not captured, so its cause remains unconfirmed. A dedicated target-dir
+rerun succeeded.
+
+Lesson:
+Use a separate Cargo target directory for each protocol feature matrix. Bind both
+the test executable and the launched CLI binary to hashes before execution, and
+read completed logs before reporting success. Preserve failed attempts separately
+from successful reruns.

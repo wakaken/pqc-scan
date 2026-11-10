@@ -149,3 +149,18 @@ are built. A truncated preview can lose the syntax needed for later redaction;
 mask its context conservatively and test middle fragments as well as whole canaries.
 Keep legacy CBOM rows and resolve column-less collisions in favor of masking.
 See [the bounded privacy contract](architecture/EVIDENCE-PRIVACY.md).
+
+## Bind comparisons and human assessments to actual facts
+
+A run ID alone does not bind a policy report to immutable inventory content.
+Validate the assessment against the actual inventory and selected local context
+before rendering it. For heuristic moves, count ambiguous observations before
+filtering eligible candidates, and compare referenced asset facts as well as IDs.
+An ambiguous or incomplete observation set must preserve uncertainty.
+
+## Preserve standards semantics through explicit export loss
+
+Schema validation verifies shape, not the meaning of a digest, version or
+assurance claim. Keep a full-certificate DER hash in a named provenance property
+when a standard field requires a different digest input. Omit unsupported standard
+fields and record the loss. Preserve source-column units with their values.

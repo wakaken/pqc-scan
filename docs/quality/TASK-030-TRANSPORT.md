@@ -21,8 +21,9 @@ not call this helper; no TLS/SSH protocol command ships in task030.
 Under macOS `sandbox-exec` with outbound sockets denied except loopback, policy13,
 transport11 and resolver4 all passed. Exact binaries/logs are bound in
 `target/roadmap-continuation/030-isolation-results.json`. The first isolated resolver
-attempt failed because another default Cargo build replaced its shared executable;
-the successful rerun uses `target/probe-transport-build`. Both attempts are retained.
+attempt failed while default builds shared its executable path; concurrent
+replacement was suspected, but the failed CLI's hash was not captured.
+The successful rerun uses `target/probe-transport-build`. Both attempts are retained.
 Independent review accepted the fixed-deadline watchdog and direct child-reaping
 assertions. This establishes local macOS aarch64 evidence, not Linux/Windows support.
 

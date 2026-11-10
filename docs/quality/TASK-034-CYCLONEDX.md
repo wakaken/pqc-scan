@@ -126,7 +126,8 @@ The regression exercises byte column 5 and scalar column 3 on the same Unicode
 path, asserting exact value/unit pairing. Both regressions and the updated golden
 passed together with all dedicated schema/privacy/provenance checks.
 
-Task 034 remains `review`, not `done`, pending those controller-owned checks.
+At worker handoff, task034 remained `review` pending those parent-owned checks.
+The final evaluation is recorded in the parent integration acceptance below.
 # Parent integration acceptance
 
 Independent source review accepted the corrected full-DER hash property and
