@@ -2,16 +2,22 @@ id: "038"
 title: "Prepare reproducible OSS packaging and operating documentation"
 type: feature
 priority: medium
-status: pending
+status: blocked
 planned_new_paths:
   - "SECURITY.md"
   - ".github/workflows/release.yml (preparation only; publication separately authorized)"
-owner: Planner Agent
+owner: Evaluator Agent
 phase: "5"
-description: "Prepare reproducible OSS packaging and operating documentation. Planning only; implementation and validation have not started."
+description: "Prepare local macOS arm64 static/combined-probes archives and bilingual operating documentation. Preparation implemented; dependency and final acceptance gates remain open."
 preparation_evidence: "docs/quality/TASK-038-CHANNEL-INVENTORY.md"
-preparation_status: "Read-only releases/tags/reporting inventory recorded; channels/support/private reporting contact and dependencies remain undecided. No publication or settings change."
-plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-038"
+preparation_status: "Technical selection delegated: source checkout plus unpublished macOS arm64 static/combined-probes archives, latest verified development snapshot best-effort policy; both variants repeated byte-identically and clean-installed offline on a recorded dirty snapshot. Independent source review accepted after bounded-verifier/runner corrections; final revision build binding, notice gaps and dependency acceptance remain open."
+plan_reference: "docs/roadmap/TASK-038-IMPLEMENTATION.md"
+validation_evidence: "docs/quality/TASK-038-PREPARATION.md"
+blocker: "Preparation only: dependencies and final-revision acceptance remain open; static/combined inventories lack notice files for 5/9 packages. No publication authorized."
+role_transitions:
+  - "Planner: selected and planned under delegated local-preparation scope."
+  - "Executor: in-progress preparation, targeted tests and both-variant repeatability/offline clean installs."
+  - "Executor: blocked pending final builds, reviews, notices and dependencies; not done."
 change_size: "Medium/high; packaging/platform unknowns"
 decision_gate: "Choose channels/support window; external publication requires separate authorization."
 change_categories:

@@ -101,7 +101,9 @@ CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚�
 | [結果の読み方](docs/user/REPORTS.ja.md) | リスク・PQC所見の意味、棚卸しの選び方、CBOM・SBOM、ローカル評価 |
 | [対応する入力と検査範囲](docs/user/COVERAGE.ja.md) | 対象言語・ファイル、証明書、ルール集、除外範囲、秘密情報の扱い |
 | [TLS・SSH接続先の明示的な診断](docs/user/PROBING.ja.md) | 任意の機能を有効にして、許可済みの接続先を1つ調べる |
+| [インストールとローカル配布物](docs/user/DISTRIBUTION.ja.md) | ルールの配置、配布物の検証、更新方法、サポート範囲 |
 
+脆弱性の報告方法は[SECURITY.md](SECURITY.md)を参照してください。
 
 各ガイドの冒頭から英語版へ移れます。
 

@@ -97,7 +97,9 @@ inventories with the same explicit repository scope. See the [report guide](docs
 | [Understanding reports](docs/user/REPORTS.md) | Interpret risk/PQC findings, choose an inventory, understand CBOM/SBOM or use local policy assessment |
 | [Supported inputs and inspection limits](docs/user/COVERAGE.md) | Check languages, file formats, certificate handling, rule packs, exclusions and privacy boundaries |
 | [Explicit TLS/SSH diagnostics](docs/user/PROBING.md) | Inspect one authorized endpoint with optional protocol commands |
+| [Installation and local packages](docs/user/DISTRIBUTION.md) | Rule assets, package verification, updates and support scope |
 
+For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
 
 Each guide has a Japanese version linked at the top.
 
