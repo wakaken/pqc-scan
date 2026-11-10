@@ -72,6 +72,28 @@ Agents collaborate using a shared task queue as below.
 
 ---
 
+# Subagent and Token Policy
+
+- The main agent performs investigation, planning, implementation, testing and
+  documentation without delegating them to subagents.
+- After implementation is complete, use one reviewer subagent for the combined
+  change. Do not start a reviewer for every small edit or bookkeeping step.
+- Use at most one reviewer identity per user implementation request. Reuse that
+  reviewer for scoped verification of fixes; do not add parallel reviewers or a
+  separate evidence-review agent. Any additional subagent requires explicit
+  user authorization.
+- Give the reviewer concise requirements, the relevant diff and test results;
+  do not copy the whole conversation. The reviewer must not delegate further.
+- The main agent fixes findings and runs necessary tests. The reviewer relies
+  on those results unless a specific concern requires independent reproduction.
+- Explanations, research and documentation-only edits do not automatically
+  trigger a subagent review.
+- The roles above describe responsibilities, not separate agent processes.
+  Apply these limits when following project prompts, handoffs and skills; their
+  generic delegation instructions do not authorize additional subagents.
+
+---
+
 # Task Queue
 Tasks are stored in the `tasks/` directory as YAML files.
 See `tasks/README.md` for details.
