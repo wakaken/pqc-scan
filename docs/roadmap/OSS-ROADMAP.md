@@ -4,19 +4,36 @@ Design date: 2026-11-09. Baseline: `b3104f9a4193b1b21ea11ca060f06301de2e936b`. A
 
 ## Implementation checkpoint (2026-11-10)
 
-Runtime checkpoint: `1f61dfa6b3fa6050c4ec4af5f2efe9883cfbe242`. Task YAML remains authoritative; design-time statements below describe the original plan unless updated explicitly.
+Accepted continuation code checkpoint: `802f2c6aa7436ce02332c2c3013c835d8c85d904`.
+The isolated task031 study is committed separately as `48fad23`; backend adoption
+is pending. Task YAML remains authoritative; design-time statements below describe
+the original plan unless updated explicitly.
 
 | Phase | Tasks | Current task state |
 |---|---|---|
 | 0: correctness and baseline | 018–024, 028, 029 | 018–022, 024, 028, 029 `done`; 023 `review` |
 | 1: observations, inventory, assessment | 025–027 | All three `done` |
-| 2–5 and conditional future work | 030–039 | All `pending` |
+| 2: target safety and TLS | 030–032 | 030 `done`; 031 `review` awaiting backend choice; 032 `pending` |
+| 3: SSH advertised discovery | 033 | `pending` runtime contract/parser decision |
+| 4: standards, comparison and human reports | 034–036 | 034/035 `done`; 036 `blocked` on real-browser acceptance |
+| 5: packaging and final quality | 038 then 037 | Both `pending`; read-only channel inventory prepared, no publication |
+| Conditional future negotiation | 039 | `pending`; no concrete negotiated-session use case selected |
+
+See [source-bound local acceptance](../quality/ROADMAP-CONTINUATION-VALIDATION.md),
+[TLS feasibility](../quality/TASK-031-TLS-FEASIBILITY.md) and the
+[unapproved concrete runtime proposal](../architecture/RUNTIME-PROBE-IMPLEMENTATION.md).
+The current static inventory schema has not been changed to include endpoints.
 
 The task-to-phase assignments agree with the implemented scope and local acceptance records. Phase 0 is **not fully complete**: task 023's reviewed corpus/harness and measurements exist, but maintainer approval of its protocol and measured numeric budget proposal remains outstanding. Later user-requested tasks consumed the reviewed technical baseline and recorded their own comparisons; they did not close 023 or approve its budgets. Dependencies on 023 mean that baseline evidence is needed for those comparisons, while its remaining approval gate stays open. They do not authorize bypassing future probe, policy or release decisions.
 
 The user-facing task 025 artifact is now the **Cryptographic Inventory and Evidence Report** (暗号資産・検出根拠レポート): `--inventory-json` writes `scan.inventory.v1.json`. The old `--native-json` switch was explicitly removed. Internal native type/schema names and historical task plans remain for compatibility/provenance. Current built-in rule count is 119; the 117-rule design baseline predates the certificate-validity additions.
 
-The one-task/one-PR rule below is the default delivery policy. The subsequent explicit user requests to continue on the same branch and publish the accumulated changes took precedence: tasks 022–027 and CI follow-ups were delivered together through PR #14. This delivery exception does not merge task states or change phase assignments. Current feature-branch publication does not merge tasks 028/029 into develop or qualify a release.
+The one-task/one-PR rule below is the default delivery policy. Historical explicit
+requests delivered tasks022–027 and CI follow-ups together through PR#14; that
+exception does not merge task states or change phase assignments. The continuation
+handoff records PR#15 merged at `e7f32bb`, followed by the local-only `3c357ce`
+format-support correction. Current continuation commits remain local; no new
+combined PR, publication or release is authorized by that history.
 
 See the [task-by-task alignment record](../quality/PHASE-0-1-ALIGNMENT.md), [current README](../../README.md) and [Japanese README](../../README.ja.md). No task status, approved budget or future scope is changed by this documentation checkpoint.
 

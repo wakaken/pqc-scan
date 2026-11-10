@@ -1,6 +1,18 @@
 # Explicit TLS and SSH runtime diagnostics
 
-Design date: 2026-11-09. Status: proposed; no runtime probe exists in the reviewed checkout, no remote scan was performed and no library spike was compiled. See the [standards register](../product/STANDARDS-REGISTER.md) for versions, dates and sources.
+Design date: 2026-11-09. Status: original proposal; at that checkpoint no runtime
+probe, remote scan or compiled library spike existed. See the [standards register](../product/STANDARDS-REGISTER.md) for versions, dates and sources.
+
+Continuation checkpoint (2026-11-10): task030's safety foundation is implemented
+under its approved one-attempt policy; task031's
+[pinned isolated study](../quality/TASK-031-TLS-FEASIBILITY.md) has passed independent
+source review. Its backend/features/platform adoption and the
+[concrete product contract](RUNTIME-PROBE-IMPLEMENTATION.md) remain maintainer gates.
+No product TLS/SSH command or public endpoint scan is claimed. In particular,
+the study found that a group accessor may be Some after verifier failure: only
+successful verification plus a completed fresh handshake may yield verified facts.
+The original three-attempt/profile proposal below is superseded by the approved
+initial ceiling of one; it is not permission to add comparisons or retries.
 
 ## Entry points and scope
 
