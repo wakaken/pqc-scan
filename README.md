@@ -6,6 +6,10 @@
 It reads local project files, finds references to cryptographic algorithms and libraries, and reports the locations and suggested follow-up work.
 Use it to decide what to investigate before changing JWT, TLS, PKI, SSH or other cryptographic components.
 
+Scanning and report generation run entirely on your machine using local rules and parsers. No LLM or AI service is required: pqc-scan makes no outbound connections during these operations and does not send source code or scan results to external services. No AI-service API key or subscription is needed.
+
+Downloading build/install dependencies, uploading reports through CI you configure, and opening external reference links are separate network activities. Once the tool and rules are available locally, scanning works offline.
+
 ## Contents
 
 - [What can I scan?](#targets)
