@@ -7,9 +7,9 @@ Use this guide after the first scan when you need to select outputs, change CI e
 ## Contents
 
 - [Command and options](#command)
-- [Inspection diagnostics](#diagnostics)
 - [GitHub Actions](#github-actions)
 - [Running from source](#from-source)
+- [Inspection diagnostics](#diagnostics)
 
 <a id="command"></a>
 
@@ -53,73 +53,6 @@ pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
 pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 ```
 
-<a id="diagnostics"></a>
-
-## Inspection diagnostics
-
-Read failures and detector errors retain other findings and produce typed inspection
-diagnostics. The CLI prints one completeness warning to stderr when inspection is
-partial, failed or unknown. Default exit codes remain unchanged: 0 for success,
-1 for an operational error and 2 when `--fail-on` is reached. No findings does not
-prove that inspection completed.
-
-Use `--diagnostics` to additionally write `diagnostics.json` in `--out-dir`.
-This separate artifact has `schema_version: "1"`, generation time, declared scope,
-coverage counters and safe reason codes. Arbitrary detector/I/O error contents and
-file contents are not included. The six existing report filenames and machine
-schemas remain unchanged; `--format all` does not implicitly enable diagnostics.
-`--lang` continues to affect HTML/Markdown only.
-
-```bash
-pqc-scan scan . --diagnostics --require-complete --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
-```
-
-`--require-complete` returns **3** when inspection is not known to be complete,
-after writing the requested reports. Exit precedence is operational error (1),
-requested completeness failure (3), then finding threshold (2). Neither option
-requires the other. A valid empty scope can complete, but this says nothing about
-cryptography outside that scope.
-
-Regex, AST and key-marker detectors report applicability and bounded inspection
-outcomes. Accepted-hit limits remain **32 / 32 / 8 per rule and file**. Regex
-counts accepted hits after the existing comment filter, so comment-only matches
-no longer consume the accepted-hit quota. Existing language/comment policy is
-unchanged. Recovered source hits are an intentional detection correction.
-
-Exactly 32 (or 8) hits does not by itself prove truncation: the detector checks
-remaining candidates within a finite work budget. An additional eligible hit or
-an unfinished search at a work limit yields `detector_truncated`, retaining earlier
-hits and making inspection partial. No omitted-hit count is inferred. Regex/AST
-inspect at most 4096 match candidates per rule/file, plus one look-ahead. AST also
-retains at most 4096 semantic candidates and schedules at most 100000 tree nodes;
-its existing 2000-character candidate clipping now reports truncation. These are
-engineering safety bounds, not measured performance targets. AST parsing with
-error nodes retains available hits and reports `detector_partial`; initialization
-or no-tree failures are detector errors. Binary input, unsupported source
-languages and no applicable rules are outside the corresponding detector scope.
-`Complete` refers only to the supported pattern/marker strategy, not general
-symbol resolution, runtime use or discovery of every key format.
-
-Certificate detection also reports applicability and parsing/attribute completeness.
-Malformed or mixed/unknown-attribute certificates yield `detector_partial`; unsupported
-containers yield `detector_unsupported`. A container finding does not prove that its
-contents were inspected. Unmatched but parsed certificates need not produce a finding.
-
-Dependency inspection now distinguishes valid empty input, malformed supported input,
-usable partial records, unsupported versions and resource limits. Supported structured
-subsets can report completion; unrelated files are not applicable. Ruby/Gradle/XML,
-requirements and Go lexical fallbacks remain `detector_not_reported`. Completion is
-within the supported subset, not package-manager validation or installed-state proof.
-`--require-complete` keeps its exit-code contract, but corrected coverage can change
-which code a scan returns. See [dependency provenance](../architecture/DEPENDENCY-PROVENANCE.md).
-
-The legacy `scanned_files` count still means files selected by the walker. New
-counters distinguish selected, read-ok, read-failed, analyzed, partial,
-analysis-failed, unsupported, not-applicable and unknown files. Enumerated policy
-exclusions and enumeration failures are separate; ignore-filtered populations are
-not counted and are explicitly unknown. Completeness is only within declared
-scope, including the existing ignore rules, default exclusions and size limit.
-
 <a id="github-actions"></a>
 
 ## GitHub Actions
@@ -138,3 +71,82 @@ If you do not want to install yet, you can run directly from source:
 ```bash
 cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin pqc-scan -- scan /path/to/your-product --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
+
+<a id="diagnostics"></a>
+
+## Inspection diagnostics
+
+Zero findings does not mean every selected input was inspected. Read failures and detector errors retain other findings.
+When inspection is partial, failed or unknown, the CLI prints one warning to stderr.
+
+### Save diagnostics and optionally fail CI
+
+Use `--diagnostics` to investigate inspection gaps, and `--require-complete` to make incomplete inspection fail a CI job.
+Either option can be used independently.
+
+| Option | Behavior |
+|---|---|
+| `--diagnostics` | Adds `diagnostics.json` in `--out-dir`, recording scope, counters and safe reason codes |
+| `--require-complete` | Returns exit 3 if inspection is not known to be complete, after writing the requested reports |
+
+To select both:
+
+```bash
+pqc-scan scan . --diagnostics --require-complete --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+```
+
+`diagnostics.json` also contains `schema_version: "1"` and generation time. It omits file contents and arbitrary detector/I/O error text.
+`--format all` does not enable it; the six legacy filenames and machine schemas stay unchanged. `--lang` affects HTML/Markdown only.
+
+Read exit codes as follows:
+
+| Code | Meaning |
+|---|---|
+| 0 | Successful execution; not proof of complete inspection or security |
+| 1 | An operational error, such as setup or output failure |
+| 2 | The severity threshold selected by `--fail-on` was reached |
+| 3 | `--require-complete` was selected and inspection was not known to be complete |
+
+If several conditions apply, precedence is 1, then 3, then 2. Requesting diagnostics alone does not enable the completeness exit gate.
+
+### What “complete” covers
+
+Completeness applies only within the declared scope after Git ignore settings, default exclusions and the size limit.
+A valid scope with no target files can complete; this says nothing about cryptography outside that scope.
+`Complete` means the supported patterns or formats were inspected, not general symbol resolution, runtime use or discovery of every key format.
+
+Distinguish file selection from completed analysis. `scanned_files` means files selected by the walker.
+Diagnostics separately count selected, read-ok, read-failed, analyzed, partial, analysis-failed, unsupported, not-applicable and unknown files.
+Enumerated policy exclusions and enumeration failures are separate; the ignore-hidden population remains unknown.
+
+### Finding and work limits
+
+Regex, AST and key-marker detectors report applicability and limit outcomes. Accepted-hit limits are:
+
+| Method | Accepted hits per rule and file |
+|---|---|
+| Regex | 32, counted after the existing language-specific comment filter, so comment-only matches do not exhaust the quota |
+| AST | 32 |
+| Key markers | 8 |
+
+Exactly the maximum number of hits does not prove truncation. Remaining candidates are checked within finite work limits; another eligible hit or an unfinished search yields `detector_truncated`.
+Earlier findings are retained, inspection becomes partial, and no omitted-hit count is inferred.
+
+Work limits are separate: regex/AST inspect at most 4096 match candidates per rule/file, plus one look-ahead.
+AST also retains at most 4096 semantic candidates, schedules at most 100000 tree nodes and clips candidates at 2000 characters; clipping is reported.
+These are engineering bounds, not measured performance targets. The comment policy is unchanged, but avoiding comment-only quota consumption can recover previously missed findings.
+
+### Parsing errors and unsupported formats
+
+AST syntax errors retain available findings and yield `detector_partial`. Parser initialization or no-tree failures are detector errors.
+Binary inputs, unsupported source languages and absence of applicable rules are outside that detector's scope.
+
+For certificates, malformed input, unknown key attributes or mixed unsupported blocks yield `detector_partial`; unsupported containers yield `detector_unsupported`.
+Detecting a container does not prove its contents were inspected. A parsed certificate that matches no rule need not produce a finding.
+
+Dependency inspection distinguishes valid empty input, malformed supported input, partial success, unsupported versions and resource limits.
+Supported structured subsets can report completion; unrelated files are not applicable. Ruby/Gradle/XML, requirements and Go lexical fallbacks remain `detector_not_reported`.
+Completion is not full package-manager validation or proof of installation.
+
+The `--require-complete` exit-code contract is unchanged, but actual returned codes depend on parser outcomes and supported scope.
+See [dependency declarations and resolution evidence](../architecture/DEPENDENCY-PROVENANCE.md) for format-specific details.
