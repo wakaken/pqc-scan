@@ -768,3 +768,20 @@ Approved/selected decisions for CLI/output, address limits, TLS backend, runtime
 No inventory/assessment crate extraction is scheduled. A real independent consumer and an acyclic type-ownership design are prerequisites for revisiting it. Full negotiated SSH requires task 039 evidence and a new implementation decision. No platform DB, web server, queues or plugin ABI is approved.
 
 Independent design review must challenge duplicated functionality, early abstractions, hidden schema/ID changes, unsupported capability claims, dependency cycles and untestable acceptance. Unexecuted implementation checks remain unexecuted.
+
+## Local acceptance checkpoint — 2026-11-11
+
+This checkpoint supersedes earlier browser/notice blockers. Source `75b9afd` and
+source-bound evidence in [REMAINING-ROADMAP-VALIDATION.md](../quality/REMAINING-ROADMAP-VALIDATION.md)
+passed one implementation review and one separate test-adequacy review. Actual
+loopback HTTP browser checks now cover both languages and static/TLS/SSH pages;
+032,033,036 are done. 038 technical preparation is done: both local macOS arm64
+variants repeat byte-identically and clean-install offline. Static missing notice
+sets were completed; four combined-variant upstream license statements still
+require publication review and do not constitute legal clearance.
+
+037 remains blocked on approved budgets/1.0 support scope and actual current-HEAD
+hosted CI. The concrete existing-baseline proposal and measurements are in the
+validation document; no approval is inferred from silence. 039 remains conditional
+pending, without a selected completed-KEX consumer. No push, publication, signing
+or stable multi-platform support claim was made.

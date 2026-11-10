@@ -166,3 +166,20 @@ remain. Task037 does not approve task023 numeric budgets or declare 1.0 ready.
 Task039 is deliberately not selected: the current advertisement-only use case
 does not justify completed KEX or additional SSH cryptographic libraries. This
 is deferral, not feasibility success or rejection of untested candidates.
+
+## Local acceptance checkpoint — 2026-11-11
+
+This checkpoint supersedes earlier browser/notice blockers. Source `75b9afd` and
+source-bound evidence in [REMAINING-ROADMAP-VALIDATION.md](../quality/REMAINING-ROADMAP-VALIDATION.md)
+passed one implementation review and one separate test-adequacy review. Actual
+loopback HTTP browser checks now cover both languages and static/TLS/SSH pages;
+032,033,036 are done. 038 technical preparation is done: both local macOS arm64
+variants repeat byte-identically and clean-install offline. Static missing notice
+sets were completed; four combined-variant upstream license statements still
+require publication review and do not constitute legal clearance.
+
+037 remains blocked on approved budgets/1.0 support scope and actual current-HEAD
+hosted CI. The concrete existing-baseline proposal and measurements are in the
+validation document; no approval is inferred from silence. 039 remains conditional
+pending, without a selected completed-KEX consumer. No push, publication, signing
+or stable multi-platform support claim was made.

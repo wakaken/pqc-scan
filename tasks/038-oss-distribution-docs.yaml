@@ -2,18 +2,17 @@ id: "038"
 title: "Prepare reproducible OSS packaging and operating documentation"
 type: feature
 priority: medium
-status: blocked
+status: done
 planned_new_paths:
   - "SECURITY.md"
   - ".github/workflows/release.yml (preparation only; publication separately authorized)"
 owner: Evaluator Agent
 phase: "5"
-description: "Prepare local macOS arm64 static/combined-probes archives and bilingual operating documentation. Preparation implemented; dependency and final acceptance gates remain open."
+description: "Reproducible local macOS arm64 static/combined-probes packaging and operating documentation accepted as technical preparation only. Four upstream license statements still require publication review; publication is not authorized."
 preparation_evidence: "docs/quality/TASK-038-CHANNEL-INVENTORY.md"
-preparation_status: "Technical selection delegated: source checkout plus unpublished macOS arm64 static/combined-probes archives, latest verified development snapshot best-effort policy. Final clean 9201dc5 packages supersede preliminary dirty-snapshot samples: both variants byte-identical on repetition and clean-installed offline; independent source review accepted. Notice gaps and dependency/browser acceptance remain open."
+preparation_status: "Final 75b9afd clean-source packages supersede historical 9201dc5 artifacts. Both variants repeat byte-identically and pass clean offline installs. No missing notice files; four combined-variant upstream statements retain publication-review flags."
 plan_reference: "docs/roadmap/TASK-038-IMPLEMENTATION.md"
 validation_evidence: "docs/quality/TASK-038-PREPARATION.md"
-blocker: "Preparation only: dependency/browser acceptance remains open; static/combined inventories lack notice files for 5/9 packages. No publication authorized."
 role_transitions:
   - "Planner: selected and planned under delegated local-preparation scope."
   - "Executor: in-progress preparation, targeted tests and both-variant repeatability/offline clean installs."
@@ -56,8 +55,15 @@ testing_requirements:
   - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
 
 final_clean_binding:
-  head: "9201dc5022ea918e1416db7abf710db58a4bd855"
+  head: "75b9afd"
   source_dirty: false
-  evidence: "docs/quality/TASK-038-FINAL-CLEAN.json"
-  source_inputs_sha256: "fcd8f74c22d27b22fb7a7e8d7395d7e5be748ba909920dd9b42718375b36e965"
-  result: "Both variants: two packages byte-identical, internal checksums verified, offline clean-prefix rules/scan exit0. Publication/dependencies/license gaps remain blocked."
+  evidence: "docs/quality/REMAINING-ROADMAP-VALIDATION.json"
+  result: "Both variants: repeated identical archives, verified checksums and clean offline installed help/version/rules/two-finding scan. Preparation only; four publication notice review flags remain."
+
+continuation_acceptance:
+  date: "2026-11-11"
+  source_head: "75b9afd"
+  evidence: "docs/quality/REMAINING-ROADMAP-VALIDATION.md"
+  browser_evidence: "docs/quality/LOCAL-BROWSER-ACCEPTANCE.md"
+  reviews: "One implementation reviewer and one separate test reviewer accepted; no delegated implementation or additional reviewers."
+  transition: "Evaluator: blocked -> review -> done after previously missing local acceptance evidence was established."
