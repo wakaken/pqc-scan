@@ -199,7 +199,7 @@ EC・DSA・暗号化秘密鍵のPEMマーカーを含むファイルも、ソー
 CLIツールは以下の通り実行します。
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -245,6 +245,23 @@ pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./r
 このレポートのCLI指定は `--inventory-json` に統一しました。旧指定 `--native-json` は廃止したため、
 `--inventory-json` へ置き換え、読み込むファイルも `scan.native.v1.json` から
 `scan.inventory.v1.json` へ変更してください。JSONの項目・スキーマの版・ID生成は変更しません。
+
+### ローカル方針の評価
+
+`--inventory-json --policy-profile migration-review-v1` を明示すると、量子リスク・従来型の弱点・
+検出の確かさ・用途・対応候補の前提条件を分けた `scan.assessment.v1.json` を追加します。
+既存レポートと棚卸しJSONは維持し、評価によって従来の重大度や終了コードは変えません。
+この方針は移行検討用で、規制適合や実稼働の安全性を保証するものではありません。期限も設けません。
+検査不完全・情報不足は合格にせず、現在の棚卸しでは全体のPassを出しません。
+
+```bash
+pqc-scan scan . --inventory-json --policy-profile migration-review-v1 --rules-dir ./rules
+```
+
+任意の `--assessment-context ./context.json` で、用途や実行環境の対応状況を指定できます。
+例は `{"version":1,"use_case":"jwt"}` です。省略値は不明のままとし、指定値も利用者の申告として記録します。
+依存ライブラリの存在だけで、PQCを利用できるとは判定しません。
+用途・前提条件・入力項目・制約は[評価仕様](docs/architecture/LOCAL-ASSESSMENT-V1.md)を参照してください。
 
 ### 検査の完全性と診断情報
 

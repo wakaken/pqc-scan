@@ -210,7 +210,7 @@ snippet masking; this does not add new private-key detection rules or decrypt ke
 ## CLI
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 ```
@@ -257,6 +257,25 @@ pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./r
 option has been removed; replace it with `--inventory-json` and read
 `scan.inventory.v1.json` instead of `scan.native.v1.json`. JSON fields, schema
 version and ID generation are unchanged.
+
+### Explicit local policy assessment
+
+`--inventory-json --policy-profile migration-review-v1` adds a separate
+`scan.assessment.v1.json` with quantum/classical concerns, observation certainty,
+usage, priority and purpose-specific candidate prerequisites. Existing reports,
+inventory JSON, severity and exit codes remain unchanged. This is local advisory
+migration review, not compliance or deployed-security assurance, with no deadlines.
+Unknown/incomplete inspection cannot yield a clean pass; current inventory v1
+cannot yield aggregate Pass.
+
+```bash
+pqc-scan scan . --inventory-json --policy-profile migration-review-v1 --rules-dir ./rules
+```
+
+Optional `--assessment-context ./context.json` supplies typed local context, e.g.
+`{"version":1,"use_case":"jwt"}`. Missing support stays unknown; provided values are
+unverified operator claims. Dependency presence does not prove PQC readiness.
+See [scope, prerequisites and context fields](docs/architecture/LOCAL-ASSESSMENT-V1.md).
 
 ### Inspection diagnostics
 

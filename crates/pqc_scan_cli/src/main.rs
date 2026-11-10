@@ -1,6 +1,6 @@
 use std::{
     ffi::OsString,
-    io::{self, Write},
+    io::{self, Read, Write},
     path::PathBuf,
 };
 
@@ -12,8 +12,8 @@ use pqc_scan_core::{
 };
 use pqc_scan_detectors::default_detectors;
 use pqc_scan_report::{
-    write_diagnostics, write_inventory_json, write_reports_with_language, ReportFormat,
-    ReportLanguage,
+    write_assessment_json, write_diagnostics, write_inventory_json, write_reports_with_language,
+    ReportFormat, ReportLanguage,
 };
 use pqc_scan_rules::{RuleSet, Severity};
 
@@ -67,6 +67,14 @@ struct ScanArgs {
     /// Write the Cryptographic Inventory and Evidence Report to scan.inventory.v1.json.
     #[arg(long)]
     inventory_json: bool,
+
+    /// Explicit offline advisory policy; writes scan.assessment.v1.json.
+    #[arg(long, value_parser = ["migration-review-v1"], requires = "inventory_json")]
+    policy_profile: Option<String>,
+
+    /// Bounded v1 enum/boolean context JSON; support is operator-declared, not verified.
+    #[arg(long, requires = "policy_profile")]
+    assessment_context: Option<PathBuf>,
 
     /// Non-secret project identifier for inventory correspondence keys; never a remote URL.
     #[arg(long, requires = "inventory_json")]
@@ -219,6 +227,19 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     stdout: &mut WOut,
     stderr: &mut WErr,
 ) -> Result<ExitStatus> {
+    let assessment_context = if let Some(path) = &args.assessment_context {
+        let file = std::fs::File::open(path)
+            .map_err(|_| anyhow::anyhow!("failed to read assessment context"))?;
+        let mut bytes = Vec::new();
+        file.take(16385)
+            .read_to_end(&mut bytes)
+            .map_err(|_| anyhow::anyhow!("failed to read assessment context"))?;
+        let text = std::str::from_utf8(&bytes)
+            .map_err(|_| anyhow::anyhow!("invalid assessment context encoding"))?;
+        pqc_scan_core::policy::AssessmentContext::from_json(text)?
+    } else {
+        pqc_scan_core::policy::AssessmentContext::default()
+    };
     let rules = RuleSet::load_from_dir(&args.rules_dir)
         .with_context(|| format!("failed to load rules from {}", args.rules_dir.display()))?;
 
@@ -239,6 +260,17 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     } else {
         scan_repository_detailed(&config, &rules, &detectors)?
     };
+    let assessment = if let Some(profile) = &args.policy_profile {
+        Some(pqc_scan_core::policy::evaluate(
+            document
+                .native()
+                .ok_or_else(|| anyhow::anyhow!("policy requires inventory capture"))?,
+            &assessment_context,
+            profile,
+        )?)
+    } else {
+        None
+    };
     let result = document.legacy();
 
     let mut outputs =
@@ -248,6 +280,9 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     }
     if args.inventory_json {
         outputs.push(write_inventory_json(&document, &args.out_dir)?);
+    }
+    if let Some(report) = &assessment {
+        outputs.push(write_assessment_json(report, &args.out_dir)?);
     }
     for out in outputs {
         writeln!(stdout, "written {}", out.display())?;

@@ -20,6 +20,18 @@ pub fn write_diagnostics(document: &ScanDocument, out_dir: &Path) -> Result<Path
     Ok(path)
 }
 
+/// Write a separately selected local assessment without changing inventory v1.
+pub fn write_assessment_json(
+    report: &pqc_scan_core::policy::AssessmentReport,
+    out_dir: &Path,
+) -> Result<PathBuf> {
+    report.validate()?;
+    std::fs::create_dir_all(out_dir)?;
+    let path = out_dir.join("scan.assessment.v1.json");
+    std::fs::write(&path, serde_json::to_string_pretty(report)?)?;
+    Ok(path)
+}
+
 /// Write the explicitly captured Cryptographic Inventory and Evidence Report.
 /// Default legacy writer expansion remains unchanged.
 pub fn write_inventory_json(document: &ScanDocument, out_dir: &Path) -> Result<PathBuf> {

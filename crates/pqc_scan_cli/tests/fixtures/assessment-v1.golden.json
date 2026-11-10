@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "catalog_version": "local-assessment-1",
+  "profile": {
+    "id": "migration-review-v1",
+    "version": "1.0.0",
+    "scope": "local_advisory_candidate_review_not_compliance_or_deployment",
+    "source_editions": [
+      "LOCAL026:1.0.0",
+      "FIPS203:2024-08-13",
+      "FIPS204:2024-08-13",
+      "FIPS205:2024-08-13",
+      "SP800-131A:Rev2:2019",
+      "RFC8725:2020",
+      "RFC6151:2011",
+      "RFC4055:2005",
+      "NIST-PQ-FAQ:reviewed-2026-11-10",
+      "BHT1997:v1",
+      "CSOR:reviewed-2026-11-10"
+    ],
+    "effective_dates": null,
+    "deadline_policy": "no_universal_deadlines"
+  },
+  "inventory": {
+    "file": "scan.inventory.v1.json",
+    "run_id": "RUN"
+  },
+  "context": {
+    "input": {
+      "version": 1,
+      "applicability": "applicable",
+      "use_case": "unknown",
+      "support": {
+        "runtime": null,
+        "provider": null,
+        "peer": null,
+        "protocol": null,
+        "parameters": null,
+        "jose": null,
+        "verifiers": null,
+        "pki": null
+      },
+      "long_lived_confidentiality": null,
+      "hash_collision_required": null
+    },
+    "provenance": "local_profile_default_unknown_context"
+  },
+  "assessments": [
+    {
+      "id": "ASSESSMENT-0",
+      "asset_id": "asset-v1-8cb69b5f50fff51d31f5452e5c131ff2d2a917ecaafa71afb531d5e72c9d34dc",
+      "asset_kind": "algorithm",
+      "algorithm": {
+        "identifier": "ML-DSA-65",
+        "construction": "post_quantum",
+        "standardization": "nist_final",
+        "quantum": "designed_resistant",
+        "purpose": "signature",
+        "parameters_known": true,
+        "classical_concerns": [],
+        "attack_models": [],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "LOCAL026",
+          "S204"
+        ]
+      },
+      "certainty": "uncalibrated_static_evidence",
+      "observations": [
+        {
+          "id": "OBSERVATION-0",
+          "method": "lexical_match",
+          "assurance": "lexical",
+          "usage": "referenced"
+        }
+      ],
+      "limitations": [
+        "references_do_not_prove_active_use",
+        "not_a_full_classical_security_review",
+        "trust_signatures_and_implementation_not_verified"
+      ]
+    },
+    {
+      "id": "ASSESSMENT-1",
+      "asset_id": "asset-v1-f675ec772ac6510207c78b14eeb504ebc9e5419c77fa5e1022e4d75976437598",
+      "asset_kind": "usage",
+      "algorithm": {
+        "identifier": "unknown",
+        "construction": "unknown",
+        "standardization": "unknown",
+        "quantum": "unknown",
+        "purpose": "unknown",
+        "parameters_known": false,
+        "classical_concerns": [],
+        "attack_models": [],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "LOCAL026"
+        ]
+      },
+      "certainty": "uncalibrated_static_evidence",
+      "observations": [
+        {
+          "id": "OBSERVATION-0",
+          "method": "lexical_match",
+          "assurance": "lexical",
+          "usage": "referenced"
+        }
+      ],
+      "limitations": [
+        "references_do_not_prove_active_use",
+        "not_a_full_classical_security_review",
+        "trust_signatures_and_implementation_not_verified"
+      ]
+    }
+  ],
+  "asset_policies": [
+    {
+      "asset_id": "asset-v1-8cb69b5f50fff51d31f5452e5c131ff2d2a917ecaafa71afb531d5e72c9d34dc",
+      "decision": "indeterminate",
+      "reasons": [
+        "use_case_unknown_or_purpose_mismatch"
+      ],
+      "priority": "review",
+      "candidates": [
+        {
+          "identifier": "ML-DSA",
+          "purpose": "signature",
+          "status": "candidate_primitive_integration_unverified",
+          "parameter_selection": "explicit_parameter_selection_required",
+          "prerequisites": [
+            {
+              "name": "runtime_api",
+              "claimed_support": null,
+              "provenance": "not_applicable_to_declared_use_case"
+            },
+            {
+              "name": "provider_implementation",
+              "claimed_support": null,
+              "provenance": "not_applicable_to_declared_use_case"
+            },
+            {
+              "name": "parameter_agreement",
+              "claimed_support": null,
+              "provenance": "not_applicable_to_declared_use_case"
+            },
+            {
+              "name": "peer_capability",
+              "claimed_support": null,
+              "provenance": "not_applicable_to_declared_use_case"
+            },
+            {
+              "name": "protocol_binding",
+              "claimed_support": null,
+              "provenance": "not_applicable_to_declared_use_case"
+            }
+          ],
+          "validation_steps": [
+            "confirm_actual_use_and_required_purpose",
+            "verify_exact_parameters_and_protocol_encoding",
+            "test_runtime_provider_peer_and_rollout",
+            "validate_implementation_and_interoperability_separately"
+          ],
+          "source_ids": [
+            "S204",
+            "LOCAL026"
+          ]
+        }
+      ]
+    },
+    {
+      "asset_id": "asset-v1-f675ec772ac6510207c78b14eeb504ebc9e5419c77fa5e1022e4d75976437598",
+      "decision": "not_applicable",
+      "reasons": [
+        "not_a_primitive_policy_target"
+      ],
+      "priority": "review",
+      "candidates": []
+    }
+  ],
+  "evaluation": {
+    "decision": "indeterminate",
+    "reasons": [
+      "inspection_incomplete_or_unknown",
+      "inventory_not_exhaustive",
+      "no_complete_positive_policy_evidence"
+    ]
+  },
+  "inspection_status": "incomplete_or_unknown",
+  "inventory_completeness": "not_exhaustive"
+}

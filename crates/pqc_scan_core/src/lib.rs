@@ -1,3 +1,4 @@
+pub mod assessment;
 pub mod classifier;
 pub mod compat;
 pub mod diagnostic;
@@ -7,6 +8,7 @@ pub mod inventory;
 pub mod model;
 pub mod observation;
 pub mod pipeline;
+pub mod policy;
 pub mod recommendation;
 pub mod risk;
 pub mod walker;

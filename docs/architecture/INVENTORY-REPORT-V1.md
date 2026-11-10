@@ -106,3 +106,11 @@ usage. A many-method observation can contribute to the same final finding; an
 observation with some links may still have losses for other bindings. Version
 provenance is `legacy_unclassified`, or `unavailable_or_unsafe_version_omitted`;
 declared constraints and resolved versions remain unavailable until task 027.
+
+## Explicit task 026 assessment
+
+The strict v1 `not_evaluated`/empty assessment fields remain unchanged.
+`--policy-profile migration-review-v1` with inventory selection writes a separate
+`scan.assessment.v1.json`. See [local advisory assessment](LOCAL-ASSESSMENT-V1.md)
+for axes, applicability, unknown context, prerequisites and the no-aggregate-Pass
+rule. Existing report/schema/identity behavior is preserved.

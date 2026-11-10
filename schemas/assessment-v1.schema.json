@@ -1,0 +1,596 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "catalog_version": {
+      "const": "local-assessment-1"
+    },
+    "profile": {
+      "$ref": "#/definitions/profile"
+    },
+    "inventory": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "const": "scan.inventory.v1.json"
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^scan-v1-[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "file",
+        "run_id"
+      ],
+      "additionalProperties": false
+    },
+    "context": {
+      "$ref": "#/definitions/context"
+    },
+    "assessments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/assessment"
+      }
+    },
+    "asset_policies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/asset_policy"
+      }
+    },
+    "evaluation": {
+      "$ref": "#/definitions/decision"
+    },
+    "inspection_status": {
+      "enum": [
+        "complete_within_scope",
+        "incomplete_or_unknown"
+      ]
+    },
+    "inventory_completeness": {
+      "const": "not_exhaustive"
+    }
+  },
+  "required": [
+    "schema_version",
+    "catalog_version",
+    "profile",
+    "inventory",
+    "context",
+    "assessments",
+    "asset_policies",
+    "evaluation",
+    "inspection_status",
+    "inventory_completeness"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:pqc-scan:assessment:1",
+  "title": "pqc-scan local advisory assessment v1",
+  "description": "Original repository MIT schema. Separate opt-in artifact; no compliance or deployment assurance.",
+  "definitions": {
+    "decision": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "enum": [
+            "pass",
+            "fail",
+            "indeterminate",
+            "not_applicable"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "decision",
+        "reasons"
+      ],
+      "additionalProperties": false
+    },
+    "attack": {
+      "type": "object",
+      "properties": {
+        "attack": {
+          "enum": [
+            "generic_key_search",
+            "generic_preimage",
+            "generic_collision"
+          ]
+        },
+        "exponent_numerator": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "exponent_denominator": {
+          "enum": [
+            2,
+            3
+          ]
+        },
+        "assumption": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "attack",
+        "exponent_numerator",
+        "exponent_denominator",
+        "assumption"
+      ],
+      "additionalProperties": false
+    },
+    "component": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string"
+        },
+        "assessment": {
+          "$ref": "#/definitions/algorithm"
+        }
+      },
+      "required": [
+        "role",
+        "assessment"
+      ],
+      "additionalProperties": false
+    },
+    "algorithm": {
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "type": "string"
+        },
+        "construction": {
+          "type": "string"
+        },
+        "standardization": {
+          "type": "string"
+        },
+        "quantum": {
+          "enum": [
+            "vulnerable",
+            "designed_resistant",
+            "generic_search",
+            "unknown"
+          ]
+        },
+        "purpose": {
+          "enum": [
+            "key_establishment",
+            "signature",
+            "encryption",
+            "hash",
+            "unknown"
+          ]
+        },
+        "parameters_known": {
+          "type": "boolean"
+        },
+        "classical_concerns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attack_models": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/attack"
+          }
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/component"
+          }
+        },
+        "combiner_assessment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "identifier",
+        "construction",
+        "standardization",
+        "quantum",
+        "purpose",
+        "parameters_known",
+        "classical_concerns",
+        "attack_models",
+        "components",
+        "combiner_assessment",
+        "source_ids"
+      ],
+      "additionalProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^observation-v1-[0-9a-f]{64}$"
+        },
+        "method": {
+          "type": "string"
+        },
+        "assurance": {
+          "type": "string"
+        },
+        "usage": {
+          "enum": [
+            "unknown",
+            "referenced",
+            "configured"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "method",
+        "assurance",
+        "usage"
+      ],
+      "additionalProperties": false
+    },
+    "assessment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^assessment-v1-[0-9a-f]{64}$"
+        },
+        "asset_id": {
+          "type": "string",
+          "pattern": "^asset-v1-[0-9a-f]{64}$"
+        },
+        "asset_kind": {
+          "enum": [
+            "algorithm",
+            "public_key",
+            "certificate",
+            "usage",
+            "dependency",
+            "unknown"
+          ]
+        },
+        "algorithm": {
+          "$ref": "#/definitions/algorithm"
+        },
+        "certainty": {
+          "enum": [
+            "unknown",
+            "uncalibrated_static_evidence"
+          ]
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/observation"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "asset_id",
+        "asset_kind",
+        "algorithm",
+        "certainty",
+        "observations",
+        "limitations"
+      ],
+      "additionalProperties": false
+    },
+    "prerequisite": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "claimed_support": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "provenance": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "claimed_support",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
+    "candidate": {
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "key_establishment",
+            "signature",
+            "encryption",
+            "hash",
+            "unknown"
+          ]
+        },
+        "status": {
+          "const": "candidate_primitive_integration_unverified"
+        },
+        "parameter_selection": {
+          "const": "explicit_parameter_selection_required"
+        },
+        "prerequisites": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/prerequisite"
+          }
+        },
+        "validation_steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "identifier",
+        "purpose",
+        "status",
+        "parameter_selection",
+        "prerequisites",
+        "validation_steps",
+        "source_ids"
+      ],
+      "additionalProperties": false
+    },
+    "asset_policy": {
+      "type": "object",
+      "properties": {
+        "asset_id": {
+          "type": "string",
+          "pattern": "^asset-v1-[0-9a-f]{64}$"
+        },
+        "decision": {
+          "enum": [
+            "pass",
+            "fail",
+            "indeterminate",
+            "not_applicable"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "priority": {
+          "enum": [
+            "high",
+            "medium",
+            "review"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/candidate"
+          }
+        }
+      },
+      "required": [
+        "asset_id",
+        "decision",
+        "reasons",
+        "priority",
+        "candidates"
+      ],
+      "additionalProperties": false
+    },
+    "support": {
+      "type": "object",
+      "properties": {
+        "runtime": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "provider": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "peer": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "protocol": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "parameters": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "jose": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "verifiers": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "pki": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "runtime",
+        "provider",
+        "peer",
+        "protocol",
+        "parameters",
+        "jose",
+        "verifiers",
+        "pki"
+      ],
+      "additionalProperties": false
+    },
+    "context_input": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "applicability": {
+          "enum": [
+            "applicable",
+            "unknown",
+            "not_applicable"
+          ]
+        },
+        "use_case": {
+          "enum": [
+            "unknown",
+            "key_establishment",
+            "jwt",
+            "pki",
+            "signature",
+            "encryption",
+            "hashing"
+          ]
+        },
+        "support": {
+          "$ref": "#/definitions/support"
+        },
+        "long_lived_confidentiality": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "hash_collision_required": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "version",
+        "applicability",
+        "use_case",
+        "support",
+        "long_lived_confidentiality",
+        "hash_collision_required"
+      ],
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "input": {
+          "$ref": "#/definitions/context_input"
+        },
+        "provenance": {
+          "enum": [
+            "local_profile_default_unknown_context",
+            "operator_supplied_unverified"
+          ]
+        }
+      },
+      "required": [
+        "input",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "const": "migration-review-v1"
+        },
+        "version": {
+          "const": "1.0.0"
+        },
+        "scope": {
+          "const": "local_advisory_candidate_review_not_compliance_or_deployment"
+        },
+        "source_editions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "effective_dates": {
+          "type": "null"
+        },
+        "deadline_policy": {
+          "const": "no_universal_deadlines"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "scope",
+        "source_editions",
+        "effective_dates",
+        "deadline_policy"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

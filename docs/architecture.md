@@ -401,3 +401,8 @@ Task 025 adds the opt-in Cryptographic Inventory and Evidence Report beside the
 legacy pipeline. `--inventory-json` writes `scan.inventory.v1.json` and is the only
 CLI switch for that report; `--native-json` has been removed. See [INVENTORY-REPORT-V1.md](architecture/INVENTORY-REPORT-V1.md)
 for identity, assurance and export losses.
+
+Task 026 adds pure `assessment` and `policy` modules and a separate, explicitly
+selected local advisory assessment report. Existing Risk/severity/recommendation
+output and inventory-v1 semantics remain unchanged. See
+[LOCAL-ASSESSMENT-V1.md](architecture/LOCAL-ASSESSMENT-V1.md).
