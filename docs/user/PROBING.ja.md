@@ -1,4 +1,4 @@
-# TLS接続先の明示的な診断
+# TLS・SSH接続先の明示的な診断
 
 [English](PROBING.md) · [README](../../README.ja.md)
 
@@ -10,7 +10,7 @@
 既定のインストールは静的スキャン用です。固定されたRustツールチェーンで、必要な診断機能を付けてビルドします。
 
 ```bash
-cargo install --locked --path crates/pqc_scan_cli --features probe-tls
+cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh
 ```
 
 初期のプロトコル検証環境はApple SiliconのmacOSです。他のOS・アーキテクチャーの対応確認は済んでいません。
@@ -40,6 +40,19 @@ pqc-scan probe tls 127.0.0.1 --port 8443 --allow-cidr 127.0.0.1/32 --server-name
 クライアント認証の要求は未対応です。証明書の収集上限は16個・256 KiBで、TLSライブラリ内部の小さなメッセージ上限に先に達する場合もあります。
 失敗や上限到達は検査の不完全さを示し、サーバーのPQC非対応や危険性を断定するものではありません。
 
+## SSHの提示方式
+
+```bash
+pqc-scan probe ssh service.example --port 22 --out-dir /path/to/new-ssh-report
+```
+
+識別文字列とKEXINITを交換し、相手が示す10種類の名前リストと拡張マーカーを順序どおり記録して、鍵交換の実行前に接続を閉じます。
+service・userauth・channelの要求は送らず、`none` 認証も行いません。ユーザー名、agent、秘密鍵、SSH設定、システムのSSHコマンドは使いません。
+診断クライアントの提案も記録しますが、そこに並べた暗号方式を実装しているという意味ではありません。
+
+結果は**未認証の提示情報**です。選ばれた方式、検証済みホスト鍵、セッションの完了、サーバー全体の移行状況を証明しません。
+バナーの版は相手の申告で、不明な識別子は不明のまま残します。
+
 ## 接続許可・上限・出力
 
 既定では公開unicastを許可します。内部・ループバック・特殊用途のunicastには `--allow-cidr` が必要です。未指定アドレス、multicast、限定broadcastは許可できません。
@@ -52,13 +65,14 @@ proxy、redirect、設定ファイルによる展開、アドレスの再試行�
 | DNS応答 | 8件 |
 | DNS／TCP／プロトコル／全体 | 5／3／5／15秒 |
 | プロトコルソケットの受信／送信 | 512 KiB／64 KiB |
+| SSHバナー／暗号化前のフレーム全体 | 8 KiB／256 KiB |
 
 通信量はプロトコルソケットから渡されたバイト数で、OSのDNS通信やTCPの付加情報・再送は含みません。
 取消時はソケットを閉じ、名前解決の子プロセスを回収します。OSサービスがすでに始めた名前解決の処理は、そのプロセスの管理範囲外です。
 未対応・過大な入力を黙って検査完了にはしません。
 
-TLSは `probe.tls.v1.json` と `report.html`・`report.md` を出力します。
-既定の保存先は `./pqc-probe/tls` です。過去の出力との混同を避けるため、新しい保存先を指定してください。
+TLSは `probe.tls.v1.json`、SSHは `probe.ssh-offers.v1.json` と、それぞれ `report.html`・`report.md` を出力します。
+既定の保存先は `./pqc-probe/tls`・`./pqc-probe/ssh` です。過去の出力との混同を避けるため、新しい保存先を指定してください。
 `--lang ja` で変わるのは人間向け文面だけです。静的スキャンの6出力や `scan.inventory.v1.json` は置き換えません。
 既知の秘密情報らしい構文は全出力でマスクし、`redaction_applied` で元の文字列を省略したことを示します。
 

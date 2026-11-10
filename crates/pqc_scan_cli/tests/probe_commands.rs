@@ -1,4 +1,4 @@
-#[cfg(feature = "probe-tls")]
+#[cfg(any(feature = "probe-tls", feature = "probe-ssh"))]
 use serde_json::Value;
 use std::{
     fs,
@@ -23,7 +23,7 @@ impl Drop for Fixture {
     }
 }
 
-#[cfg(not(feature = "probe-tls"))]
+#[cfg(not(any(feature = "probe-tls", feature = "probe-ssh")))]
 #[test]
 fn default_binary_has_no_probe_command() {
     let f = Fixture::new();
@@ -41,7 +41,7 @@ fn default_binary_has_no_probe_command() {
     assert!(!String::from_utf8_lossy(&help.stdout).contains("probe"));
 }
 
-#[cfg(feature = "probe-tls")]
+#[cfg(any(feature = "probe-tls", feature = "probe-ssh"))]
 fn denied(protocol: &str, filename: &str) {
     let f = Fixture::new();
     for lang in ["en", "ja"] {
@@ -87,6 +87,12 @@ fn denied(protocol: &str, filename: &str) {
 fn tls_denial_writes_failed_observation_without_network_and_keeps_language_parity() {
     denied("tls", "probe.tls.v1.json");
 }
+#[cfg(feature = "probe-ssh")]
+#[test]
+fn ssh_denial_writes_failed_advertisement_scope_without_network() {
+    denied("ssh", "probe.ssh-offers.v1.json");
+}
+
 #[cfg(feature = "probe-tls")]
 #[test]
 fn tls_ca_private_block_is_rejected_without_echoing_contents() {

@@ -37,7 +37,7 @@ Point the scanner at a local repository. It inspects the following artifacts wit
 
 PKCS#12 (`.p12`/`.pfx`) supports unencrypted public-certificate extraction. Encrypted contents and private-key bags remain unsupported; no password, decryption or integrity/trust verification is performed.
 See [supported inputs and inspection limits](docs/user/COVERAGE.md) for the full file list, supported versions and parser boundaries.
-Live endpoints are inspected only through separately enabled, explicit [TLS probes](docs/user/PROBING.md).
+Live endpoints are inspected only through separately enabled, explicit [TLS/SSH probes](docs/user/PROBING.md).
 They are not repository scan targets. Arbitrary programming languages are not supported.
 
 <a id="features"></a>
@@ -96,7 +96,7 @@ inventories with the same explicit repository scope. See the [report guide](docs
 | [Scanning repositories](docs/user/SCANNING.md) | Select outputs, configure CI exit codes, inspect incomplete scans or run from source |
 | [Understanding reports](docs/user/REPORTS.md) | Interpret risk/PQC findings, choose an inventory, understand CBOM/SBOM or use local policy assessment |
 | [Supported inputs and inspection limits](docs/user/COVERAGE.md) | Check languages, file formats, certificate handling, rule packs, exclusions and privacy boundaries |
-| [Explicit TLS diagnostics](docs/user/PROBING.md) | Inspect one authorized endpoint with the optional protocol command |
+| [Explicit TLS/SSH diagnostics](docs/user/PROBING.md) | Inspect one authorized endpoint with optional protocol commands |
 
 
 Each guide has a Japanese version linked at the top.

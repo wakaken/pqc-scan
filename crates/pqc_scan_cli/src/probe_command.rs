@@ -13,6 +13,8 @@ use std::{io::Write, path::PathBuf};
 pub(crate) enum ProbeCommand {
     #[cfg(feature = "probe-tls")]
     Tls(TlsArgs),
+    #[cfg(feature = "probe-ssh")]
+    Ssh(CommonArgs),
 }
 #[derive(Debug, Args)]
 pub(crate) struct CommonArgs {
@@ -88,6 +90,25 @@ pub(crate) fn run(command: ProbeCommand, stdout: &mut impl Write) -> Result<Prob
                 Err(error) => probe.failed(unknown, &limits, ProbeDiagnostic::from(error)),
             };
             write(report, &args.common, "./pqc-probe/tls", stdout)
+        }
+        #[cfg(feature = "probe-ssh")]
+        ProbeCommand::Ssh(args) => {
+            let request = TargetRequest::new(&args.host, args.port)?;
+            let policy = TargetPolicy::new(&args.allow_cidr)?;
+            let probe = pqc_scan_probe_ssh::SshProbe::new();
+            let unknown = ProbeTarget::requested(&request);
+            let limits = ProbeLimits::default();
+            let budget = ProbeBudget::new(limits.clone(), cancellation()?)?;
+            let target = policy.resolve(
+                request,
+                &mut crate::probe_resolver::ProcessResolver::new()?,
+                &budget,
+            );
+            let report = match target {
+                Ok(target) => probe.run(target, budget),
+                Err(error) => probe.failed(unknown, &limits, ProbeDiagnostic::from(error)),
+            };
+            write(report, &args, "./pqc-probe/ssh", stdout)
         }
     }
 }
