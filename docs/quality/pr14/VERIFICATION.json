@@ -1,0 +1,70 @@
+{
+  "baseHead": "aac154fd36bf47fd4c3a361013de113afd38cca2",
+  "checkUrl": "https://github.com/wakaken/pqc-scan/pull/14/checks?check_run_id=129626912848",
+  "originalCheck": {
+    "newAlerts": 63,
+    "errors": 29,
+    "warnings": 34,
+    "testAlerts": 15,
+    "classificationDataAlerts": 48
+  },
+  "rawSarifSha256": "e3fb11ae30fcf2bb954abfe192b1057710fd3f4f1b6434caf0a7b5e1f2bf07fa",
+  "rawCurrentByteIdentical": true,
+  "before": {
+    "raw": 856,
+    "omitted": 659,
+    "retained": 197
+  },
+  "after": {
+    "raw": 856,
+    "omitted": 722,
+    "retained": 134,
+    "verifiedSources": 103
+  },
+  "newFiles": [
+    {
+      "path": "crates/pqc_scan_cli/tests/policy_report.rs",
+      "sha256": "865aa38b1cf0ccb17d76676163731ae5155a2d14f6d8920e976cc6dc6bc96194",
+      "groups": 6,
+      "reason": "Reviewed synthetic CLI policy test inputs; no deployed cryptographic operation. Raw self-scan evidence is preserved."
+    },
+    {
+      "path": "crates/pqc_scan_core/src/assessment.rs",
+      "sha256": "fb6a53100d0dd383e3f7a88b128ef6fb3c92d34545e04b7941eb5693febb8336",
+      "groups": 27,
+      "reason": "Reviewed identifier classification/comparison and public-key-size policy predicates (lines 116-382); no cryptographic operation. Only exact reviewed results are omitted; new or changed findings remain visible."
+    },
+    {
+      "path": "crates/pqc_scan_core/src/observation.rs",
+      "sha256": "d59910d905785dc9ecab19500b4001d0c535f3afc7b3e681ba23715aacb6591e",
+      "groups": 21,
+      "reason": "Reviewed fixed recognized-name vocabulary in AlgorithmSpec::recognized (lines 29-36); string classification only, not signing/key generation. Only exact reviewed results are omitted; new or changed findings remain visible."
+    },
+    {
+      "path": "crates/pqc_scan_core/tests/assessment_policy.rs",
+      "sha256": "7ca8b65cea35ea77677df19b7dde51a54b7b324dfd18e7d52f1f7cd1fd068bed",
+      "groups": 9,
+      "reason": "Reviewed synthetic assessment-policy test inputs; no deployed cryptographic operation. Raw self-scan evidence is preserved."
+    }
+  ],
+  "retainedPayload": "exactly old upload minus the 63 individually reviewed records, original order preserved",
+  "annotationBindings": "all 63 exact matches: path,line,column,message",
+  "nodeTests": {
+    "passed": 25,
+    "failed": 0
+  },
+  "files": {
+    "README.md": "697b1b9bd144b7e41a25e8696488d20d88fa3dd64b11745ecc7386d4f767e8cf",
+    "README.ja.md": "bc906c80570b6fdb38e7079a7f4b54a1a882fed33eda518fa8458df4325a8896",
+    "docs/quality/CI-SELF-SCAN.md": "712102424e6169fa36131acc06f7863d6dbf3a91b62e51ed3ceca2b79bbef900",
+    "docs/quality/SELF-SCAN-EXPECTATIONS.json": "aa4d517f84abeac25b49ad851fcb18f1525345bca321a7850b706e2b816088da",
+    "docs/quality/pr14/REVIEWED-RESULTS.json": "55ff2b934af611e84197373eb85bf7114c51f9b5713db6d3563495cf34bcb701",
+    "shell/self-scan-policy.test.cjs": "bbdd2cfa9d537521d478f3a5d9dfa782f091d0f541d51dc7900f772c3a44c098",
+    "shell/prepare-code-scanning.cjs": "677dcfdecf37edfb48d068c98d19cfac7e3adb5e1421f6a53d64e1b90e2eaea8"
+  },
+  "unexecuted": [
+    "Rust build/test/clippy rerun: Rust/Cargo/rules unchanged from validated task027 and passing hosted quality jobs",
+    "remote follow-up CI pending at commit time",
+    "merge"
+  ]
+}

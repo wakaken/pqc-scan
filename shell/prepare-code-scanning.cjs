@@ -185,7 +185,7 @@ function main(args) {
   audit.rawSarifSha256 = sha256(input);
   writeJson(options.get('--output'), sarif);
   writeJson(options.get('--audit'), audit);
-  process.stdout.write(`Self-scan: ${audit.rawResults} raw, ${audit.expectedResults} reviewed test results, ${audit.retainedResults} retained.\n`);
+  process.stdout.write(`Self-scan: ${audit.rawResults} raw, ${audit.expectedResults} reviewed expected results, ${audit.retainedResults} retained.\n`);
 }
 
 module.exports = { prepareCodeScanning, resultDigest };

@@ -12,7 +12,11 @@ Chosen: preserve raw self-scan SARIF and prepare a separate upload-only copy usi
 
 Rejected: disabling Code Scanning failure thresholds, downgrading severity, excluding all test/source directories from detection, `continue-on-error`, changing the scanner's rules, or escaping test strings merely to evade detection. These would either weaken checking or hide evidence. SARIF suppression markers would depend on consumer-specific handling; an explicit upload projection with preserved raw evidence is directly testable.
 
-Policy `docs/quality/SELF-SCAN-EXPECTATIONS.json` uses version 1 and explicit files. Each file has a repository-relative path, complete source-file SHA-256, a reviewed reason and exact expected results (rule ID, start line/column, SHA-256 of canonical full result, allowed count). No globs, severity-wide exceptions or automatic learning in CI. Only reviewed fixture files, examples and actual inline unit-test regions are registered initially. Product/rule implementation findings remain visible.
+Policy `docs/quality/SELF-SCAN-EXPECTATIONS.json` uses version 1 and explicit files. Each file has a repository-relative path, complete source-file SHA-256, a reviewed reason and exact expected results (rule ID, start line/column, SHA-256 of canonical full result, allowed count). No globs, severity-wide exceptions or automatic learning in CI. Only reviewed fixture files, examples and actual inline unit-test regions were registered initially.
+The PR14 follow-up also permits individually reviewed fixed classification-data
+references: identifier vocabularies and assessment predicates that do not perform
+cryptographic operations. This is an exact-result exception, not a whole-file or
+production-code baseline. Unregistered product/rule implementation findings remain visible.
 
 The Node helper `shell/prepare-code-scanning.cjs` exports `prepareCodeScanning(sarif, policy, root)` and `resultDigest(result)`, and has a CLI accepting `--input`, `--expectations`, `--root`, `--output`, `--audit`. Use built-in Node modules only. Canonical JSON sorts object keys recursively, preserves arrays and includes every SARIF result field; the current writer has no volatile result ID/timestamp to discard.
 
@@ -51,7 +55,7 @@ node --test shell/*.test.cjs
 
 The source registry lives beside this quality policy. An initial `.github/` location made the scanner detect 37 self-references in the registry itself. Keeping quality metadata under the existing `docs/` scope avoids that feedback loop without moving any inspected source/test input or changing walker exclusions. This registry is not a deployment input or an additional scan capability.
 
-Review a new expectation as a code change: establish that the exact source is an intentional test/example, inspect the raw rule/location/message, verify secret material is synthetic/public, and preserve any product findings. Compute complete source SHA-256 and `resultDigest(result)` with the exported helper. Copy explicit rule/line/column/digest/count records into the relevant file entry with a reason. Do not blanket-register a raw scan or automatically approve every current finding. The initial registration is limited to examples, integration-test fixtures and actual `cfg(test)` unit-test regions; a source file may contain both registered test results and retained product results.
+Review a new expectation as a code change: establish that the exact source is an intentional test/example or a reviewed fixed classification-data reference, inspect the raw rule/location/message, verify secret material is synthetic/public, and preserve any product findings. Compute complete source SHA-256 and `resultDigest(result)` with the exported helper. Copy explicit rule/line/column/digest/count records into the relevant file entry with a reason. Do not blanket-register a raw scan or automatically approve every current finding. The initial registration is limited to examples, integration-test fixtures and actual `cfg(test)` unit-test regions; a source file may contain both registered test results and retained product results.
 
 A changed file requires re-review of its *whole* source binding, even if the edited line is unrelated. New result fields, locations or occurrence counts also require re-review. A stale/unmatched entry never suppresses a different observation; its source status appears in the audit. Keep policy updates with the test/behavior they cover in one PR. Existing rule/catalog or product-code observations that have no reviewed test expectation remain eligible for the usual Code Scanning failure threshold.
 
@@ -121,3 +125,29 @@ Two new production recommendation/catalog observations are retained, as are all
 previous 131 retained results (including the three artifact-only SBOM observations).
 No helper/URI/threshold relaxation, broad registration or raw filtering is added.
 See [the occurrence compatibility and measurement record](TASK-024-AST-OCCURRENCES.md).
+
+
+## PR14 test and classification-data follow-up
+
+The hosted Code Scanning results check reported 63 new alerts (29 errors / 34
+warnings), although Rust quality, baseline and scan jobs succeeded. Fifteen alerts
+came from two new integration-test files; 48 came from fixed identifier vocabulary
+and assessment predicates in `observation.rs` / `assessment.rs`, not cryptographic
+operations. Excluding test files alone would therefore leave 19 errors and 29
+warnings from classification data.
+
+The user explicitly chose exclusion from CI failure/alert registration while
+preserving original detection evidence. Add only these 63 reviewed exact results
+in four explicit files; keep complete source/result hashes and count/position
+checks. Do not change rule matching, severity, upload thresholds or normal scanner
+scope. New results in these same production files remain actionable; a changed
+source hash invalidates its registered allowances.
+
+[The recorded 63 results](pr14/REVIEWED-RESULTS.json) are a finite regression fixture
+for the upload preparer. They are stored under the existing docs exclusion to avoid
+self-referential fixture alerts. Three regression tests prove omission/raw
+immutability, retention of a new error at the same production position, and
+retention when a classification source binding becomes stale. This does not add
+an automatic test-directory exclusion or generic suppression capability.
+
+See [investigation, verification and hosted outcome](PR-014-SELF-SCAN-FOLLOWUP.md).
