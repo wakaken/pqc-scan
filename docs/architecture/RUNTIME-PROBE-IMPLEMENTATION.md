@@ -1,10 +1,12 @@
 # Initial TLS and SSH probe implementation contract
 
-Status: **proposal awaiting maintainer approval**, 2026-11-10. Task030 safety
-policy/caps are approved and implemented. Task031 has compiled local evidence and
-independent source-review acceptance; backend adoption and the new runtime output
-contract below are separate decisions. No product protocol implementation is
-authorized by this document alone.
+Status: **selected under explicit maintainer delegation**, 2026-11-10.
+After reviewing the adoption questions, the maintainer requested that the agent
+select the approach and continue. Adopt the conditional backend, unchanged static
+contracts, separate runtimev1 envelopes, and bounded SSH discovery specified below.
+Task030 safety is approved and implemented; task031 compiled evidence and its
+independent source review support this choice. Publication and negotiated SSH
+remain outside this authorization.
 
 ## Why a separate versioned runtime envelope
 

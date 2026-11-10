@@ -148,6 +148,8 @@ the product TLS command, and it does not itself satisfy that maintainer gate.
 Independent review verified all11 bound source/lock files and both test binaries,
 the19 isolated cases and the stated constraints, with no blocking finding. Its
 wording correction distinguishes provider `ALL_KX_GROUPS` from wire advertisements.
-The maintainer backend/features/platform decision and parent Evaluator acceptance
-remain pending. No push, PR, merge, package publication or external endpoint
-connection was performed.
+The maintainer subsequently delegated selection and continuation. The agent selected
+the conditional rustls/AWS-LC candidate, explicit std/aws_lc_rs/tls12 features,
+macOS aarch64 evidence scope, pinned local Mozilla roots and explicit local-CA
+replacement; product feature isolation will be tested in032. Evaluator accepted031.
+No push, PR, merge, package publication or external endpoint connection was performed.

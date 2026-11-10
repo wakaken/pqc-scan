@@ -2,15 +2,18 @@ id: "031"
 title: "Validate TLS API and provider feasibility before selection"
 type: feature
 priority: medium
-status: review
-owner: Executor Agent
+status: done
+owner: Evaluator Agent
 independent_review:
   result: "Spec and quality source reviews accepted; no blocking finding."
   checked: "11 source/lock bindings, two isolated binary bindings, 10+9 tests, verifier/group/limits/feature qualification and unknown platforms."
-  decision: "Maintainer backend/features/platform adoption is pending; product032 not started."
+  decision: "Maintainer delegated selection; adopt pinned rustls0.23.46/AWS-LC1.18.0 with explicit std/aws_lc_rs/tls12, verified macOS aarch64 scope, bundled Mozilla roots and explicit local CA replacement. Product feature graph must be retested."
   evidence: "docs/quality/TASK-031-TLS-FEASIBILITY.md"
 phase: "2"
-description: "Validate the pinned TLS API/provider in an isolated development harness; product backend selection remains a maintainer decision."
+description: "Pinned isolated TLS study accepted; backend selected under the maintainer's explicit delegation. No custom TLS fallback or verifier bypass."
+evaluation_record:
+  outcome: "Evaluator accepted review -> done after independent source/quality acceptance, 19 isolated cases and delegated backend selection."
+  delegation: "User: ではそちらで選定して対応を継続してほしい"
 implementation_plan: "docs/superpowers/plans/2026-11-10-tls-feasibility.md"
 implementation_evidence: "docs/quality/TASK-031-TLS-FEASIBILITY.md"
 plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-031"
