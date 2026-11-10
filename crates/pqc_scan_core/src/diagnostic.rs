@@ -362,6 +362,10 @@ impl ScanDocument {
         &self.legacy
     }
 
+    pub(crate) fn legacy_mut(&mut self) -> &mut ScanResult {
+        &mut self.legacy
+    }
+
     pub fn into_legacy(self) -> ScanResult {
         self.legacy
     }

@@ -154,48 +154,7 @@ pub fn write_reports_with_language(
 }
 
 fn sanitize_scan_result(result: &mut ScanResult) {
-    for finding in &mut result.findings {
-        finding.evidence.r#match = sanitize_text_fragment(&finding.evidence.r#match);
-        finding.evidence.snippet_preview =
-            sanitize_text_fragment(&finding.evidence.snippet_preview);
-
-        if let Some(snippet) = finding.source_snippet.as_mut() {
-            for line in &mut snippet.lines {
-                line.text = sanitize_text_fragment(&line.text);
-            }
-        }
-    }
-}
-
-fn sanitize_text_fragment(input: &str) -> String {
-    if looks_like_private_key_text(input) {
-        return "[masked-private-key-material]".to_string();
-    }
-    if looks_like_base64_secret(input) {
-        return "[masked-sensitive-content]".to_string();
-    }
-    input.to_string()
-}
-
-fn looks_like_private_key_text(text: &str) -> bool {
-    let upper = text.to_ascii_uppercase();
-    upper.contains("PRIVATE KEY")
-}
-
-fn looks_like_base64_secret(text: &str) -> bool {
-    let trimmed = text.trim();
-    if trimmed.len() < 64 || trimmed.chars().any(char::is_whitespace) {
-        return false;
-    }
-
-    if !trimmed
-        .chars()
-        .all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '/' | '=' | '-' | '_'))
-    {
-        return false;
-    }
-
-    trimmed.starts_with("MII") || trimmed.ends_with('=')
+    pqc_scan_core::privacy::sanitize_scan_result(result);
 }
 
 #[cfg(test)]

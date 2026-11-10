@@ -530,3 +530,5 @@ python3 tests/quality/run.py --binary target/release/pqc-scan --build-profile re
 ## ライセンス
 
 MIT
+
+検出根拠の出力では、対応する秘密鍵・認証情報の構文をマスクし、IDと出力スキーマを維持します。対応範囲と制約は[検出根拠のプライバシー契約](docs/architecture/EVIDENCE-PRIVACY.md)を参照してください。あらゆる秘密情報を検出する機能ではありません。

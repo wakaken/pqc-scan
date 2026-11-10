@@ -414,3 +414,5 @@ Task 026 adds pure `assessment` and `policy` modules and a separate, explicitly
 selected local advisory assessment report. Existing Risk/severity/recommendation
 output and inventory-v1 semantics remain unchanged. See
 [LOCAL-ASSESSMENT-V1.md](architecture/LOCAL-ASSESSMENT-V1.md).
+
+Evidence export boundaries and bounded redaction are documented in [EVIDENCE-PRIVACY.md](architecture/EVIDENCE-PRIVACY.md).

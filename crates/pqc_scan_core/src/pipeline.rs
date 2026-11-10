@@ -105,6 +105,7 @@ where
                                 None,
                             )],
                             disposition: FileDisposition::ReadFailed,
+                            privacy: None,
                         }
                     }
                 };
@@ -117,7 +118,11 @@ where
 
     let mut detections = Vec::new();
     let mut observations = Vec::new();
+    let mut privacy_by_file = HashMap::new();
     for outcome in outcomes {
+        if let Some((path, privacy)) = outcome.privacy {
+            privacy_by_file.insert(path, privacy);
+        }
         use FileDisposition as D;
         if outcome.disposition != D::ReadFailed {
             coverage.read_ok_files += 1;
@@ -141,7 +146,7 @@ where
         recommendation::RuntimeProfile::from_repository(&config.root, &files, &dependency_sbom);
     let mut findings = normalize_findings(&config.root, detections, rules);
     recommendation::annotate_findings(&mut findings, &runtime_profile);
-    attach_source_snippets(&config.root, &mut findings);
+    attach_source_snippets(&config.root, &mut findings, &privacy_by_file);
     findings.sort_by(|a, b| {
         b.severity
             .cmp(&a.severity)
@@ -169,6 +174,38 @@ where
             .or_insert(0) += 1;
     }
 
+    let sensitive_ids = findings
+        .iter()
+        .filter(|f| {
+            privacy_by_file.get(&f.location.file).is_some_and(|p| {
+                p.sensitive_match(
+                    f.location.line,
+                    f.location.column,
+                    f.evidence.metadata.get("detector").is_none_or(|d| {
+                        !matches!(
+                            d.as_str(),
+                            "regex_detector"
+                                | "key_detector"
+                                | "certificate_detector"
+                                | "dependency_detector"
+                        )
+                    }),
+                    &f.evidence.r#match,
+                )
+            })
+        })
+        .map(|f| f.finding_id.clone())
+        .collect();
+    // A detector may truncate a surrounding preview before we see it. Once
+    // syntax is lost, protect the entire preview for files with known context.
+    for f in &mut findings {
+        if privacy_by_file
+            .get(&f.location.file)
+            .is_some_and(|p| p.protects_preview())
+        {
+            f.evidence.snippet_preview = "[masked-sensitive-content]".into();
+        }
+    }
     let legacy = ScanResult {
         generated_at: Utc::now(),
         findings,
@@ -189,6 +226,7 @@ where
         );
         document = document.with_native(native);
     }
+    crate::privacy::sanitize_with_context(document.legacy_mut(), &sensitive_ids);
     Ok(document)
 }
 
@@ -208,6 +246,7 @@ struct FileOutcome {
     observations: Vec<crate::ObservationDraft>,
     diagnostics: Vec<ScanDiagnostic>,
     disposition: FileDisposition,
+    privacy: Option<(String, crate::privacy::SourcePrivacy)>,
 }
 
 fn inspect_file(
@@ -217,6 +256,12 @@ fn inspect_file(
     detectors: &[Arc<dyn Detector>],
     native: bool,
 ) -> FileOutcome {
+    let privacy = file
+        .text
+        .as_deref()
+        .map(crate::privacy::SourcePrivacy::from_text)
+        .filter(|p| !p.is_empty())
+        .map(|p| (relative.to_string(), p));
     let mut observations = Vec::new();
     let mut detections = Vec::new();
     let mut diagnostics = Vec::new();
@@ -300,6 +345,7 @@ fn inspect_file(
         detections,
         diagnostics,
         disposition,
+        privacy,
     }
 }
 
@@ -492,7 +538,11 @@ pub fn exceeds_fail_threshold(findings: &[Finding], threshold: Severity) -> bool
     findings.iter().any(|f| f.severity >= threshold)
 }
 
-fn attach_source_snippets(root: &std::path::Path, findings: &mut [Finding]) {
+fn attach_source_snippets(
+    root: &std::path::Path,
+    findings: &mut [Finding],
+    privacy: &HashMap<String, crate::privacy::SourcePrivacy>,
+) {
     let mut text_cache: HashMap<String, CachedSnippetSource> = HashMap::new();
 
     for finding in findings {
@@ -508,9 +558,13 @@ fn attach_source_snippets(root: &std::path::Path, findings: &mut [Finding]) {
         }
 
         let rel_file = finding.location.file.clone();
-        let source = text_cache
-            .entry(rel_file.clone())
-            .or_insert_with(|| load_snippet_source(&root.join(&rel_file)));
+        let source = text_cache.entry(rel_file.clone()).or_insert_with(|| {
+            if privacy.get(&rel_file).is_some_and(|p| p.private_marker) {
+                CachedSnippetSource::MaskedSensitiveFile
+            } else {
+                load_snippet_source(&root.join(&rel_file))
+            }
+        });
 
         finding.source_snippet = match source {
             CachedSnippetSource::MaskedSensitiveFile => {
@@ -601,7 +655,7 @@ fn sanitize_source_line(line: &str) -> String {
         return "[masked-sensitive-content]".to_string();
     }
 
-    let mut out = line.replace('\r', "");
+    let mut out = crate::privacy::redact_text(line).replace('\r', "");
     if out.chars().count() > 240 {
         out = out.chars().take(240).collect::<String>();
         out.push_str("...");

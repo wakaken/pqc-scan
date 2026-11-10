@@ -565,3 +565,5 @@ real-world accuracy. See the [protocol](tests/quality/PROTOCOL.md) and
 ## License
 
 MIT
+
+Evidence exports apply bounded private-key/credential redaction while preserving IDs and report schemas. See the [evidence privacy contract](docs/architecture/EVIDENCE-PRIVACY.md) for supported syntax and limits. This is not a universal secret scanner.

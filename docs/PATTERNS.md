@@ -140,3 +140,12 @@ Pattern:
 Why it works here:
 - responsibilities stay auditable
 - unfinished work remains visible without overloading normal completion states
+
+## Export redaction after stable identity (task 029)
+
+Use source positions collected before detector callbacks to protect recognized
+private/credential context, then sanitize after legacy IDs and native associations
+are built. A truncated preview can lose the syntax needed for later redaction;
+mask its context conservatively and test middle fragments as well as whole canaries.
+Keep legacy CBOM rows and resolve column-less collisions in favor of masking.
+See [the bounded privacy contract](architecture/EVIDENCE-PRIVACY.md).

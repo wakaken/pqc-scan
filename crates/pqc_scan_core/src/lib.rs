@@ -9,6 +9,7 @@ pub mod model;
 pub mod observation;
 pub mod pipeline;
 pub mod policy;
+pub mod privacy;
 pub mod recommendation;
 pub mod risk;
 pub mod walker;
