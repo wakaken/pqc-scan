@@ -74,11 +74,13 @@ impl fmt::Display for Risk {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Rule {
+    #[serde(deserialize_with = "deserialize_rule_id")]
     pub id: String,
     pub kind: RuleKind,
     pub category: String,
     pub severity: Severity,
     pub risk: Risk,
+    #[serde(deserialize_with = "deserialize_confidence")]
     pub confidence: f32,
     pub migration_hint: String,
     pub pattern: String,
@@ -87,6 +89,31 @@ pub struct Rule {
     pub description: Option<String>,
     #[serde(skip)]
     compiled_pattern: Option<Regex>,
+}
+
+fn deserialize_rule_id<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<String, D::Error> {
+    let id = String::deserialize(deserializer)?;
+    if id.trim().is_empty() {
+        return Err(serde::de::Error::custom(
+            "rule id must not be empty or whitespace",
+        ));
+    }
+    Ok(id)
+}
+
+fn deserialize_confidence<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<f32, D::Error> {
+    // Validate the source number before narrowing to the public f32 field.
+    let confidence = f64::deserialize(deserializer)?;
+    if !confidence.is_finite() || !(0.0..=1.0).contains(&confidence) {
+        return Err(serde::de::Error::custom(
+            "confidence must be finite and within [0, 1]",
+        ));
+    }
+    Ok(confidence as f32)
 }
 
 impl Rule {
@@ -120,13 +147,18 @@ pub struct RuleSet {
 
 impl RuleSet {
     pub fn load_from_dir(dir: &Path) -> Result<Self> {
-        let mut rules = Vec::new();
+        Self::load_entries(WalkDir::new(dir))
+    }
 
-        for entry in WalkDir::new(dir)
-            .into_iter()
-            .filter_map(Result::ok)
-            .filter(|e| e.file_type().is_file())
-        {
+    fn load_entries(
+        entries: impl IntoIterator<Item = walkdir::Result<walkdir::DirEntry>>,
+    ) -> Result<Self> {
+        let mut rules = Vec::new();
+        for entry in entries {
+            let entry = entry.context("failed to traverse rules")?;
+            if !entry.file_type().is_file() {
+                continue;
+            }
             let ext = entry
                 .path()
                 .extension()
@@ -304,5 +336,22 @@ scope: code
         assert!(regex.is_match("ssl_protocols TLSv1.1;"));
         assert!(!regex.is_match("ssl_protocols TLSv1.2;"));
         assert!(!regex.is_match("ssl_protocols TLSv1.3;"));
+    }
+}
+
+#[cfg(test)]
+mod traversal_validation_tests {
+    use super::*;
+    #[test]
+    fn a_late_injected_traversal_error_does_not_return_a_partial_pack() {
+        let root = std::env::temp_dir().join(format!("pqc028-late-{}", std::process::id()));
+        std::fs::create_dir_all(&root).unwrap();
+        std::fs::write(root.join("valid.yml"), "id: VALID\nkind: regex\ncategory: custom\nseverity: low\nrisk: quantum-uncertain\nconfidence: 0.5\nmigration_hint: Review\npattern: CONTROL\nscope: code\n").unwrap();
+        let good = WalkDir::new(&root).into_iter();
+        let injected = WalkDir::new(root.join("missing")).into_iter();
+        let error =
+            RuleSet::load_entries(good.chain(injected)).expect_err("late failure must be fatal");
+        assert!(error.to_string().contains("failed to traverse rules"));
+        std::fs::remove_dir_all(root).unwrap();
     }
 }

@@ -907,7 +907,7 @@ mod tests {
 
         let (result, _stdout, _stderr) = run_cli_test(args);
         let err = result.expect_err("missing rules dir should fail");
-        assert!(err.to_string().contains("no rules found under"));
+        assert!(err.to_string().contains("failed to load rules"));
 
         fs::remove_dir_all(repo_dir).expect("cleanup repo");
     }

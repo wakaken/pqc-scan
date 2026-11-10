@@ -2,6 +2,24 @@
 
 Design date: 2026-11-09. Baseline: `b3104f9a4193b1b21ea11ca060f06301de2e936b`. At plan creation, all 22 new tasks were **pending**. Task YAML records are authoritative for current implementation and validation status. Existing tasks 001-017 remain unchanged; 014 is pending, 016 is review and 017 is done. Explicit user-requested queue creation does not enable the automatic Monitor.
 
+## Implementation checkpoint (2026-11-10)
+
+Runtime checkpoint: `1f61dfa6b3fa6050c4ec4af5f2efe9883cfbe242`. Task YAML remains authoritative; design-time statements below describe the original plan unless updated explicitly.
+
+| Phase | Tasks | Current task state |
+|---|---|---|
+| 0: correctness and baseline | 018–024, 028, 029 | 018–022, 024, 028, 029 `done`; 023 `review` |
+| 1: observations, inventory, assessment | 025–027 | All three `done` |
+| 2–5 and conditional future work | 030–039 | All `pending` |
+
+The task-to-phase assignments agree with the implemented scope and local acceptance records. Phase 0 is **not fully complete**: task 023's reviewed corpus/harness and measurements exist, but maintainer approval of its protocol and measured numeric budget proposal remains outstanding. Later user-requested tasks consumed the reviewed technical baseline and recorded their own comparisons; they did not close 023 or approve its budgets. Dependencies on 023 mean that baseline evidence is needed for those comparisons, while its remaining approval gate stays open. They do not authorize bypassing future probe, policy or release decisions.
+
+The user-facing task 025 artifact is now the **Cryptographic Inventory and Evidence Report** (暗号資産・検出根拠レポート): `--inventory-json` writes `scan.inventory.v1.json`. The old `--native-json` switch was explicitly removed. Internal native type/schema names and historical task plans remain for compatibility/provenance. Current built-in rule count is 119; the 117-rule design baseline predates the certificate-validity additions.
+
+The one-task/one-PR rule below is the default delivery policy. The subsequent explicit user requests to continue on the same branch and publish the accumulated changes took precedence: tasks 022–027 and CI follow-ups were delivered together through PR #14. This delivery exception does not merge task states or change phase assignments. Current feature-branch publication does not merge tasks 028/029 into develop or qualify a release.
+
+See the [task-by-task alignment record](../quality/PHASE-0-1-ALIGNMENT.md), [current README](../../README.md) and [Japanese README](../../README.ja.md). No task status, approved budget or future scope is changed by this documentation checkpoint.
+
 ## Principles and dependencies
 
 Retain the five workspace crates and their detectors/rules/report APIs. No existing subsystem replacement is proposed. Changes to rule meaning, storage contracts or high-risk architecture meet AGENTS.md human-review gates before implementation; this plan does not approve such changes.
@@ -145,7 +163,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Out of scope:** No automatic PQC certificate deployment or blanket severity rewrite.
 
-**Dependencies:** 020 and a reviewed certificate-only baseline before implementation. The user-requested 021 execution captures that focused baseline and old/new truth-unit comparison; the broader cross-language/performance study 023 remains related pending work, not a prerequisite for exact OID/type/time corrections. No product-wide accuracy budget is inferred.
+**Dependencies:** 020 and a reviewed certificate-only baseline before implementation. The user-requested 021 execution captures that focused baseline and old/new truth-unit comparison; the broader cross-language/performance study 023 was not yet implemented when 021 was selected and was not a prerequisite for exact OID/type/time corrections. It is now implemented and in `review` for its remaining approval gate. No product-wide accuracy budget is inferred.
 
 **Risks:** Existing classification/rule meanings change; this requires human review.
 
@@ -261,7 +279,7 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 **Target code:** `crates/pqc_scan_rules/src/lib.rs`, `rules/default/`, `docs/rules-reference.md`; README.md and README.ja.md when behavior changes.
 
-**Scope:** Report traversal failures; retain regex/duplicate-ID validation. Validate finite bounded confidence and nonempty IDs; inventory custom-scope semantics before tightening. Add companion metadata for standard edition, method limits and positive/negative fixtures. Review all 117 existing rules against a purpose/algorithm/classical/quantum matrix without silently changing detections.
+**Scope:** Report traversal failures; retain regex/duplicate-ID validation. Validate finite bounded confidence and nonempty IDs; inventory custom-scope semantics before tightening. Add companion metadata for standard edition, method limits and positive/negative fixtures. Review all 119 current rules (117 at design time, plus two certificate-validity rules) against a purpose/algorithm/classical/quantum matrix without silently changing detections.
 
 **Out of scope:** No rule DSL, breaking scope rejection or bulk rewrite.
 
@@ -313,19 +331,19 @@ Prioritize silent failures/limits, certificate and SARIF correctness, AST occurr
 
 ## Phase 1: observations, inventory and assessment
 
-Add focused core modules, versioned native output and local policy. Separate algorithm definitions, concrete assets, observations and assessments while keeping legacy projections.
+Add focused core modules, the versioned Cryptographic Inventory and Evidence Report, and local policy. Separate algorithm definitions, concrete assets, observations and assessments while keeping legacy projections.
 
 <a id="task-025"></a>
 
-### 025: Add observations, normalized inventory and opt-in native JSON
+### 025: Add observations, normalized inventory and an opt-in inventory report
 
-**Purpose:** Add observations, normalized inventory and opt-in native JSON.
+**Purpose:** Add observations, normalized inventory and the opt-in Cryptographic Inventory and Evidence Report (original task title: native JSON).
 
 **Category:** Existing implementation extension; New feature addition. No subsystem replacement.
 
 **Target code:** `crates/pqc_scan_core/src/model.rs`, `crates/pqc_scan_core/src/pipeline.rs`, `crates/pqc_scan_core/src/lib.rs`, `crates/pqc_scan_detectors/src/`, `crates/pqc_scan_report/src/json_report.rs`, `crates/pqc_scan_cli/src/main.rs`; README.md and README.ja.md when behavior changes.
 
-**Scope:** Add focused core observation/inventory/identity/compat modules with safe evidence and assurance/usage distinctions. Normalize exact algorithms, public cert/SPKI identities and separate source instances. Add versioned length-delimited IDs and legacy-index/ID multimap associations while retaining legacy normalization. Publish native schema and separately selected scan.native.v1.json with explicit loss notes.
+**Scope:** Add focused core observation/inventory/identity/compat modules with safe evidence and assurance/usage distinctions. Normalize exact algorithms, public cert/SPKI identities and separate source instances. Add versioned length-delimited IDs and legacy-index/ID multimap associations while retaining legacy normalization. Publish the v1 schema and separately selected `scan.inventory.v1.json` via `--inventory-json`, with explicit loss notes. The internal schema remains `schemas/native-scan-v1.schema.json`; the former `scan.native.v1.json` CLI artifact name is historical.
 
 **Out of scope:** No new model/inventory crate, changed default schemas or replacement legacy ID algorithm.
 

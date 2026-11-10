@@ -2,6 +2,10 @@
 
 Reviewed on 2026-11-09 against `b3104f9a4193b1b21ea11ca060f06301de2e936b`, branch `codex/japanese-reports`. Initial `git status --short` was empty. No Rust, rules, existing reports or existing task statuses were changed for this analysis.
 
+## Reading this historical snapshot
+
+The findings below describe the 2026-11-09 design baseline, not the current unresolved backlog. Tasks 018–029 subsequently implemented the Phase 0/1 work, with task 023 still in `review` for maintainer protocol/budget approval. Current rule count is 119 rather than this snapshot's 117. Use the [implementation alignment](PHASE-0-1-ALIGNMENT.md), [roadmap checkpoint](../roadmap/OSS-ROADMAP.md#implementation-checkpoint-2026-11-10) and task-specific validation records to distinguish addressed gaps from remaining limits. Original source line references and source-only evidence claims are retained as historical provenance, not newly verified runtime findings.
+
 ## Evidence limits
 
 **Source-confirmed** means a path was read, not executed. All reproductions below are instructions for future isolated tests, not results from this session. No external target was scanned. No build, workspace tests, benchmark, rule accuracy experiment, browser acceptance or current-HEAD remote CI was executed/verified here. Historical validation in tasks 015/017 is historical evidence only. Security-audit guidance requires isolation for executing reviewed target code; that complete isolation was not established in this session. Documentation validation is separate from product validation.

@@ -46,6 +46,14 @@
 12. Build CBOM from findings (`cbom.json`)
 13. Emit selected report formats
 
+## Rule validation and quality companion
+
+Rule loading rejects blank IDs, invalid source confidence and every traversal
+error before returning a RuleSet; valid custom scope semantics are unchanged.
+See [loading contract](architecture/RULE-VALIDATION.md). The [source-bound119-rule
+companion](quality/RULE-QUALITY.md) is development-only and has no runtime/report
+schema dependency. Existing matcher/Risk/severity remain authoritative.
+
 ## Rule System
 
 Rules are YAML-defined and loaded dynamically.
@@ -376,8 +384,8 @@ remain language-independent. No runtime translation service is used.
 
 ## Security Considerations
 
-- sensitive material is always masked in evidence/snippets
-- private key content is never exported
+- recognized private-key markers and credential syntax are masked in evidence/snippets
+- bounded export protection and its unsupported cases are specified in [EVIDENCE-PRIVACY.md](architecture/EVIDENCE-PRIVACY.md)
 - detector output is normalized before reporting
 - scan is read-only against repository contents
 
@@ -406,3 +414,5 @@ Task 026 adds pure `assessment` and `policy` modules and a separate, explicitly
 selected local advisory assessment report. Existing Risk/severity/recommendation
 output and inventory-v1 semantics remain unchanged. See
 [LOCAL-ASSESSMENT-V1.md](architecture/LOCAL-ASSESSMENT-V1.md).
+
+Evidence export boundaries and bounded redaction are documented in [EVIDENCE-PRIVACY.md](architecture/EVIDENCE-PRIVACY.md).
