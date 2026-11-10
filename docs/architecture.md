@@ -104,9 +104,9 @@ Coverage has disjoint file terminal states and reconciles selected = read-ok +
 read-failed, and read-ok = analyzed + partial + analysis-failed + unsupported +
 not-applicable + unknown. Enumeration failures are an additional entry count;
 ignore-hidden populations are not enumerable. Complete means complete within the
-declared scope, not absence of cryptography or product security. The dependency
-detector still uses `NotReported`, so full nonempty scans generally
-have unknown completeness unless known partial inspection takes precedence.
+declared scope, not absence of cryptography or product security. Dependency inspection now distinguishes structured success, malformed records,
+partial results and unsupported versions. Lexical fallbacks remain `NotReported`;
+nondependency inputs are `NotApplicable`. See [dependency provenance](architecture/DEPENDENCY-PROVENANCE.md).
 
 CLI adds a stderr notice and opt-in `--diagnostics` (`diagnostics.json`, schema 1)
 and `--require-complete` (code 3). Existing default output and codes remain; fatal

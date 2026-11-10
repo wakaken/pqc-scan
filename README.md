@@ -258,6 +258,14 @@ option has been removed; replace it with `--inventory-json` and read
 `scan.inventory.v1.json` instead of `scan.native.v1.json`. JSON fields, schema
 version and ID generation are unchanged.
 
+Dependency assets preserve declared constraints (for example `^1.2.3`), optional
+lock-record resolved versions and source provenance separately. A declaration or
+SBOM claim alone never creates a versioned purl. Path/git/workspace locators stay
+unresolved; no dependency graph or package download is inferred. The legacy
+`dependency-sbom.json` remains a flat array with the same fields; corrected purls
+and inspection diagnostics are intentional semantic changes. Source origins remain
+separate in inventory even when the legacy projection collapses them.
+
 ### Explicit local policy assessment
 
 `--inventory-json --policy-profile migration-review-v1` adds a separate
@@ -327,11 +335,13 @@ Malformed or mixed/unknown-attribute certificates yield `detector_partial`; unsu
 containers yield `detector_unsupported`. A container finding does not prove that its
 contents were inspected. Unmatched but parsed certificates need not produce a finding.
 
-**Current limitation:** the dependency detector still uses the legacy adapter and
-reports `detector_not_reported`. Full nonempty scans therefore normally remain
-`unknown`, or become `partial` when a limit/parser issue is observed; strict
-mode returns 3 in either case. Existing report schemas and the diagnostics schema
-version remain unchanged; diagnostic values now reflect the additional outcomes.
+Dependency inspection now distinguishes valid empty input, malformed supported input,
+usable partial records, unsupported versions and resource limits. Supported structured
+subsets can report completion; unrelated files are not applicable. Ruby/Gradle/XML,
+requirements and Go lexical fallbacks remain `detector_not_reported`. Completion is
+within the supported subset, not package-manager validation or installed-state proof.
+`--require-complete` keeps its exit-code contract, but corrected coverage can change
+which code a scan returns. See [dependency provenance](docs/architecture/DEPENDENCY-PROVENANCE.md).
 
 The legacy `scanned_files` count still means files selected by the walker. New
 counters distinguish selected, read-ok, read-failed, analyzed, partial,

@@ -297,6 +297,7 @@ fn inventory_option_is_the_only_cli_switch_and_preserves_exit_behavior() {
     std::fs::create_dir_all(&rules).unwrap();
     std::fs::write(input.join("app.txt"), "RSA\n").unwrap();
     std::fs::write(rules.join("rule.yml"),r#"[{"id":"TEST_RENAME","kind":"regex","category":"test","severity":"high","risk":"quantum-vulnerable","confidence":0.5,"migration_hint":"Review fixture.","pattern":"RSA","scope":"code"}]"#).unwrap();
+    std::fs::write(input.join("Gemfile"), "gem ENV['DYNAMIC_DEPENDENCY']\n").unwrap();
     for (i, (flags, exit)) in [
         (vec![], 0),
         (vec!["--fail-on", "high"], 2),

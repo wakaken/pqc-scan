@@ -59,7 +59,9 @@ meaning; `native_completeness=not_exhaustive` does not promise a complete invent
 ## Identity and ordering
 
 Inventory SHA-256 IDs use the full digest, a versioned domain and length-prefixed
-UTF-8 tuple components plus component count. Legacy IDs are unchanged. Algorithm
+UTF-8 tuple components plus component count. The legacy ID algorithm is unchanged;
+task027 intentionally corrects dependency positions/evidence/purl values, which can
+change those dependency finding IDs. Algorithm
 and public-object IDs describe content/normalized facts, not source placement.
 Observation IDs are scoped to a scan run and static attempt. Without an explicit
 repository scope, source usage IDs are run-local. With scope, occurrence keys use
@@ -68,8 +70,10 @@ line/column and raw evidence never enter these occurrence identities.
 
 Line insertions preserve a unique weak occurrence; moves and scope changes do
 not. All repeated anchors are ambiguous, and inserting a duplicate can renumber
-ordinals. Keys are correlation hints, not proof of cross-scan identity. Positions
-break ordering ties only. Usage attributes retain the safe typed anchor to make
+ordinals. Keys are correlation hints, not proof of cross-scan identity. For weak source-usage IDs, positions break ordering ties only. Typed dependency
+assertion IDs instead include source path, accepted ordinal and normalized facts
+with scope/run-local identity, so ordinal changes can change those asset IDs.
+See [dependency identity and compatibility](DEPENDENCY-PROVENANCE.md). Usage attributes retain the safe typed anchor to make
 asset order independent of random run IDs, including same-file/method cases.
 The semantic golden normalizes only scan/time, observation IDs and legacy IDs;
 references are rewritten together. Scoped occurrence and asset hashes stay exact.
@@ -103,9 +107,12 @@ reasons, positive counts and units (`legacy_binding` or `capture_only_observatio
 
 Counts describe unprojected bindings/capture-only observations, not missed crypto
 usage. A many-method observation can contribute to the same final finding; an
-observation with some links may still have losses for other bindings. Version
-provenance is `legacy_unclassified`, or `unavailable_or_unsafe_version_omitted`;
-declared constraints and resolved versions remain unavailable until task 027.
+observation with some links may still have losses for other bindings. Built-in dependency capture now retains declared constraints, optional resolved
+versions and a fixed source-origin vocabulary in the existing six attributes.
+Unmodified third-party/legacy adapters still use `legacy_unclassified` or
+`unavailable_or_unsafe_version_omitted`; they cannot assert resolution.
+See [dependency provenance](DEPENDENCY-PROVENANCE.md) for accepted lock evidence,
+source assertion identity, semantic corrections and unsupported subsets.
 
 ## Explicit task 026 assessment
 

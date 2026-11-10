@@ -200,6 +200,136 @@ pub struct DependencyFacts {
     pub(crate) resolved_version: Option<String>,
     pub(crate) version_provenance: String,
 }
+#[derive(Debug, Clone, Copy, Default)]
+pub enum DependencyOrigin {
+    Manifest,
+    ManifestDev,
+    ManifestPeer,
+    ManifestOptional,
+    WorkspaceDeclaration,
+    WorkspaceInherited,
+    Path,
+    Git,
+    Archive,
+    LockResolved,
+    LockUnverified,
+    SbomReported,
+    HeuristicManifest,
+    HeuristicLock,
+    #[default]
+    Unknown,
+}
+impl DependencyOrigin {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Manifest => "manifest_declared",
+            Self::ManifestDev => "manifest_dev_declared",
+            Self::ManifestPeer => "manifest_peer_declared",
+            Self::ManifestOptional => "manifest_optional_declared",
+            Self::WorkspaceDeclaration => "workspace_declaration",
+            Self::WorkspaceInherited => "workspace_inherited",
+            Self::Path => "path_dependency_unresolved",
+            Self::Git => "git_dependency_unresolved",
+            Self::Archive => "archive_dependency_unresolved",
+            Self::LockResolved => "lock_resolved",
+            Self::LockUnverified => "lock_record_unverified",
+            Self::SbomReported => "sbom_reported_unverified",
+            Self::HeuristicManifest => "heuristic_declared",
+            Self::HeuristicLock => "heuristic_lock_unverified",
+            Self::Unknown => "source_unresolved",
+        }
+    }
+}
+pub struct DependencyVersionFacts<'a> {
+    pub declared: Option<&'a str>,
+    pub resolved: Option<&'a str>,
+    pub reported: Option<&'a str>,
+    pub origin: DependencyOrigin,
+    pub ordinal: usize,
+    pub parsed: bool,
+}
+pub fn safe_dependency_version(value: &str) -> bool {
+    !value.is_empty()
+        && value.len() <= 256
+        && !value.contains([':', '/', '@', '\\'])
+        && value
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"v.*^~<>=!_,+- |".contains(&b))
+}
+pub fn exact_dependency_version(value: &str) -> bool {
+    value.len() <= 128
+        && value.starts_with(|c: char| c.is_ascii_digit())
+        && value
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"._+-".contains(&b))
+        && !value.ends_with(['+', '-', '.'])
+        && !value.contains("..")
+        && !value
+            .split(['-', '+'])
+            .next()
+            .unwrap_or("")
+            .split('.')
+            .any(|s| s.eq_ignore_ascii_case("x"))
+}
+pub fn resolved_dependency_version(ecosystem: &str, value: &str) -> bool {
+    if !exact_dependency_version(value) {
+        return false;
+    }
+    if ecosystem == "npm" || ecosystem == "cargo" {
+        let mut build = value.split('+');
+        let main = build.next().unwrap_or("");
+        let metadata = build.next();
+        if build.next().is_some() {
+            return false;
+        }
+        let mut pre = main.splitn(2, '-');
+        let numbers: Vec<_> = pre.next().unwrap_or("").split('.').collect();
+        if numbers.len() != 3
+            || numbers.iter().any(|s| {
+                s.is_empty()
+                    || !s.bytes().all(|b| b.is_ascii_digit())
+                    || (s.len() > 1 && s.starts_with('0'))
+            })
+        {
+            return false;
+        }
+        let identifiers = |s: &str, numeric_zero: bool| {
+            !s.is_empty()
+                && s.split('.').all(|p| {
+                    !p.is_empty()
+                        && p.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+                        && (!numeric_zero
+                            || !p.bytes().all(|b| b.is_ascii_digit())
+                            || p.len() == 1
+                            || !p.starts_with('0'))
+                })
+        };
+        pre.next().is_none_or(|s| identifiers(s, true))
+            && metadata.is_none_or(|s| identifiers(s, false))
+    } else if ecosystem == "maven" || ecosystem == "gem" {
+        !value.contains('+') && (ecosystem != "gem" || !value.contains(['-', '_']))
+    } else {
+        true
+    }
+}
+
+pub fn valid_dependency_name(name: &str, ecosystem: &str) -> bool {
+    if name.is_empty() || name.len() > 160 || name.contains("..") || name.contains("://") {
+        return false;
+    }
+    let segment = |s: &str| safe_token(s) && s != "." && s != "..";
+    match ecosystem {
+        "npm" => {
+            segment(name)
+                || (name.starts_with('@')
+                    && name[1..].split('/').count() == 2
+                    && name[1..].split('/').all(segment))
+        }
+        "maven" => name.split(':').count() == 2 && name.split(':').all(segment),
+        "golang" => !name.starts_with('/') && name.split('/').all(segment),
+        _ => segment(name),
+    }
+}
 impl DependencyFacts {
     pub(crate) fn from_detection(d: &Detection) -> Option<Self> {
         let m = &d.evidence.metadata;
@@ -304,6 +434,7 @@ pub struct ObservationDraft {
     pub(crate) algorithms: Vec<AlgorithmSpec>,
     pub(crate) certificate: Option<PublicCertificateFacts>,
     pub(crate) dependency: Option<DependencyFacts>,
+    pub(crate) typed_dependency: bool,
     pub(crate) evidence: SafeEvidence,
     pub(crate) bindings: Vec<LegacyBinding>,
 }
@@ -363,6 +494,7 @@ impl ObservationDraft {
             algorithms,
             certificate: None,
             dependency: None,
+            typed_dependency: false,
             evidence: SafeEvidence {
                 marker_kind: matches!(method, ObservationMethod::PrivateKeyMarker)
                     .then_some("private_marker".into()),
@@ -402,6 +534,29 @@ impl ObservationDraft {
     }
     pub fn legacy(d: &Detection) -> Self {
         Self::source(d, ObservationMethod::LegacyAdapter, "", None)
+    }
+    pub fn dependency_assertion(d: &Detection, f: DependencyVersionFacts<'_>) -> Self {
+        let mut draft = Self::dependency(d);
+        draft.typed_dependency = true;
+        draft.target.object_index = Some(f.ordinal + 1);
+        if let Some(dep) = &mut draft.dependency {
+            dep.declared_constraint = f
+                .declared
+                .filter(|s| safe_dependency_version(s))
+                .map(str::to_string);
+            dep.resolved_version = f
+                .resolved
+                .filter(|s| resolved_dependency_version(&dep.ecosystem, s))
+                .map(str::to_string);
+            dep.reported_version = f
+                .reported
+                .filter(|s| safe_dependency_version(s))
+                .map(str::to_string);
+            dep.version_provenance = f.origin.as_str().into();
+            draft.evidence.capture_status = "dependency_provenance_recorded".into();
+            draft.assurance = if f.parsed { "parsed" } else { "unknown" }.into();
+        }
+        draft
     }
     pub fn dependency(d: &Detection) -> Self {
         let mut draft = Self::source(d, ObservationMethod::Dependency, "", None);

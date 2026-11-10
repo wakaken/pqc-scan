@@ -415,7 +415,7 @@ mod tests {
     }
 
     #[test]
-    fn diagnostics_opt_in_exports_unknown_coverage_without_changing_legacy_json() {
+    fn diagnostics_opt_in_exports_complete_coverage_without_changing_legacy_json() {
         let repo = temp_dir("diagnostics-input");
         let plain = temp_dir("diagnostics-plain");
         let detailed = temp_dir("diagnostics-extra");
@@ -437,7 +437,7 @@ mod tests {
         assert_eq!(result.unwrap(), ExitStatus::Success);
         assert_eq!(stdout.matches("written ").count(), 6);
         assert!(!plain.join("diagnostics.json").exists());
-        assert!(stderr.contains("inspection completeness is unknown"));
+        assert!(stderr.is_empty(), "{stderr}");
         let mut args = arguments(&detailed);
         args.push("--diagnostics".into());
         let (result, stdout, _) = run_cli_test(args);
@@ -447,9 +447,9 @@ mod tests {
             serde_json::from_str(&fs::read_to_string(detailed.join("diagnostics.json")).unwrap())
                 .unwrap();
         assert_eq!(diagnostics["schema_version"], "1");
-        assert_eq!(diagnostics["coverage"]["status"], "unknown");
+        assert_eq!(diagnostics["coverage"]["status"], "complete_within_scope");
         assert_eq!(diagnostics["coverage"]["selected_files"], 1);
-        assert_eq!(diagnostics["coverage"]["unknown_files"], 1);
+        assert_eq!(diagnostics["coverage"]["unknown_files"], 0);
         let mut unreported: Vec<_> = diagnostics["diagnostics"]
             .as_array()
             .unwrap()
@@ -460,7 +460,7 @@ mod tests {
             })
             .collect();
         unreported.sort_unstable();
-        assert_eq!(unreported, ["dependency_detector"]);
+        assert!(unreported.is_empty());
         assert!(diagnostics.get("findings").is_none());
         let read = |out: &Path, file: &str| {
             serde_json::from_str::<serde_json::Value>(&fs::read_to_string(out.join(file)).unwrap())
@@ -484,6 +484,7 @@ mod tests {
         let repo = temp_dir("strict-input");
         let out = temp_dir("strict-output");
         write_file(&repo, "app.js", "const algorithm = 'RS256';\n");
+        write_file(&repo, "Gemfile", "gem ENV['DYNAMIC_DEPENDENCY']\n");
         let (result, _, stderr) = run_cli_test(vec![
             "pqc-scan".into(),
             "scan".into(),
@@ -587,7 +588,7 @@ mod tests {
             "ja".into(),
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert!(stderr.contains("inspection completeness is unknown"));
+        assert!(stderr.is_empty(), "{stderr}");
         let html = fs::read_to_string(out.join("report.html")).unwrap();
         assert!(html.contains("耐量子暗号への移行調査レポート"));
         assert!(html.contains("対応完了の保証ではありません"));
@@ -637,7 +638,7 @@ mod tests {
             "high".into(),
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert!(stderr.contains("inspection completeness is unknown"));
+        assert!(stderr.is_empty(), "{stderr}");
         assert_eq!(stdout.matches("written ").count(), 6);
         let report: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
@@ -696,7 +697,7 @@ mod tests {
             rules_dir().display().to_string(),
         ]);
         assert_eq!(result.expect("acceptance scan"), ExitStatus::Success);
-        assert!(stderr.contains("inspection completeness is unknown"));
+        assert!(stderr.is_empty(), "{stderr}");
         assert_eq!(stdout.matches("written ").count(), 6);
         let json: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
@@ -778,10 +779,7 @@ mod tests {
         let (result, stdout, stderr) = run_cli_test(args);
 
         assert_eq!(result.expect("scan succeeds"), ExitStatus::Success);
-        assert!(
-            stderr.contains("inspection completeness is unknown"),
-            "{stderr}"
-        );
+        assert!(stderr.is_empty(), "{stderr}");
         assert!(
             out_dir.join("report.json").exists(),
             "report.json should exist"

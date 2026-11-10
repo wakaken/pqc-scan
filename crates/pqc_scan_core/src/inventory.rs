@@ -303,24 +303,46 @@ impl NativeScan {
                 refs.extend([sig_id, key_alg_id, key_id, cert_id]);
             }
             if let Some(dep) = &draft.dependency {
-                let dep_id = native_id(
-                    "asset",
-                    &[
-                        "dependency_report",
-                        &dep.ecosystem,
-                        &dep.name,
-                        dep.reported_version.as_deref().unwrap_or(""),
-                    ],
-                );
+                let dep_id = if draft.typed_dependency {
+                    native_id(
+                        "asset",
+                        &[
+                            "dependency_assertion_v1",
+                            options.repository_scope.as_deref().unwrap_or(run),
+                            draft.target.path.as_deref().unwrap_or("unavailable"),
+                            &draft.target.object_index.unwrap_or(0).to_string(),
+                            &serde_json::to_string(dep).expect("typed dependency"),
+                        ],
+                    )
+                } else {
+                    native_id(
+                        "asset",
+                        &[
+                            "dependency_report",
+                            &dep.ecosystem,
+                            &dep.name,
+                            dep.reported_version.as_deref().unwrap_or(""),
+                        ],
+                    )
+                };
                 insert_asset(
                     &mut assets,
                     CryptoAsset {
                         id: dep_id.clone(),
                         kind: "dependency".into(),
-                        identity_basis: "reported_package_identity_not_runtime_use".into(),
+                        identity_basis: if draft.typed_dependency {
+                            "scoped_source_assertion_not_installed_package"
+                        } else {
+                            "reported_package_identity_not_runtime_use"
+                        }
+                        .into(),
                         attributes: serde_json::to_value(dep).expect("typed dependency"),
                         relations: Vec::new(),
-                        uncertainty: vec!["declared_vs_resolved_version_unavailable".into()],
+                        uncertainty: if draft.typed_dependency {
+                            vec!["source_ordinal_can_shift_no_inferred_dependency_graph".into()]
+                        } else {
+                            vec!["declared_vs_resolved_version_unavailable".into()]
+                        },
                     },
                 );
                 refs.push(dep_id);

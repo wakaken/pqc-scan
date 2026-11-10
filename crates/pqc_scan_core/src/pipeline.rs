@@ -548,7 +548,12 @@ fn load_snippet_source(path: &std::path::Path) -> CachedSnippetSource {
     }
 
     let raw = String::from_utf8_lossy(&bytes).into_owned();
-    if contains_private_key_marker(&raw) {
+    // Locator credentials can be escaped or live outside parsed dependency records.
+    // Never copy source context from these containers into any report.
+    if contains_private_key_marker(&raw)
+        || crate::classifier::is_dependency_manifest(path)
+        || crate::classifier::is_sbom_file(path)
+    {
         return CachedSnippetSource::MaskedSensitiveFile;
     }
 
