@@ -6,6 +6,16 @@ This document lists all built-in detection rules shipped in `rules/default/` and
 - Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`
 - Kind breakdown: `certificate`: 18, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 22
 
+## Validation and quality review
+
+Task028 preserves all119 executable rule definitions and detection semantics.
+The [source-bound companion](quality/RULE-QUALITY.md) reviews purpose/algorithm/
+quantum/classical axes, standard editions, method limits and target-layer positive/
+negative controls. Known disagreements and false positives are recorded, not tuned
+away. These annotations do not replace existing Risk/severity tags or certify
+accuracy. See [loader and custom-scope compatibility](architecture/RULE-VALIDATION.md)
+for blank ID/confidence/traversal errors and unchanged scope behavior.
+
 ## Severity Levels
 
 | Severity | Meaning | Typical handling |

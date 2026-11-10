@@ -46,6 +46,14 @@
 12. Build CBOM from findings (`cbom.json`)
 13. Emit selected report formats
 
+## Rule validation and quality companion
+
+Rule loading rejects blank IDs, invalid source confidence and every traversal
+error before returning a RuleSet; valid custom scope semantics are unchanged.
+See [loading contract](architecture/RULE-VALIDATION.md). The [source-bound119-rule
+companion](quality/RULE-QUALITY.md) is development-only and has no runtime/report
+schema dependency. Existing matcher/Risk/severity remain authoritative.
+
 ## Rule System
 
 Rules are YAML-defined and loaded dynamically.

@@ -95,6 +95,21 @@ In practice:
 - Use CBOM data to prioritize cryptographic migration work (JWT/TLS/PKI/SSH/etc.).
 - Use both together for end-to-end PQC migration planning.
 
+## Rule validation and provenance
+
+Rule packs reject blank IDs, non-finite/out-of-range confidence (inclusive `0..1`),
+and traversal failures instead of returning a partially loaded pack. Existing CLI
+flags/report fields and valid custom scopes remain unchanged; malformed packs use
+the existing operational error exit code1. Review invalid custom metadata before
+upgrading. Unknown scope strings remain accepted with their existing per-detector
+semantics; no new default warnings are emitted. See [loading/scope compatibility](docs/architecture/RULE-VALIDATION.md).
+
+All119 built-in rules have a [development-only quality companion](docs/quality/RULE-QUALITY.md)
+with separate purpose/algorithm/quantum/classical annotations, source editions,
+method limits and positive/negative pattern controls. It records known gaps without
+changing detection patterns, Risk/severity or report formats. These controls do not
+establish runtime use, universal accuracy or approved quality budgets.
+
 ## Detection Coverage
 
 ### Detector Modules
