@@ -40,7 +40,12 @@ HTTP registry/archive locations are conservatively unresolved. Cargo locks witho
 | poetry.lock | Lock versions 1.1/2.0/2.1; registry vs git/directory/file/URL sources |
 | pnpm-lock.yaml | Versions 5.3/5.4/6/6.0/9/9.0; package records, root/importer declarations and peer suffixes; no graph inference |
 | CycloneDX / SPDX JSON | CycloneDX 1.4–1.7 / SPDX 2.2–2.3 component/package subset; reported claims only, no trust/full-schema validation |
-| requirements.txt, go.mod, Ruby, POM, Gradle | Bounded lexical fallback, always NotReported; only recognized Gem/Gradle lock records can supply concrete versions |
+| requirements.txt | Fully consumed bounded name/version-specifier subset; directives, markers/extras and unsupported syntax retain safe lexical records and incomplete status; no include/URL fetching |
+| go.mod | Bounded module/go/require declarations; unsupported directives retain safe facts and incomplete status; no module resolution |
+| Gemfile / gems.rb | Static quoted gem declarations and supported source syntax; dynamic Ruby is never executed and stays incomplete |
+| Gemfile.lock / gems.locked | Bounded sections and records; only accepted GEM registry source records resolve, git/path/custom sources remain unverified |
+| pom.xml | Bounded XML dependency subset, DTD/external entity disabled; unknown/dynamic/property/profile constructs remain incomplete |
+| Gradle / gemspec | Existing bounded lexical fallback, NotReported |
 
 `Complete` means this supported inventory subset was inspected, including valid
 empty containers. It is not complete package-manager schema validation. Duplicate
@@ -93,7 +98,7 @@ paths/package names and findings from unrelated detectors retain their own polic
 
 ## Parser dependencies and references
 
-New runtime parser is pinned `toml=0.8.23` (parse only, MIT/Apache-2.0); locked support
+The TOML runtime parser is pinned `toml=0.8.23` (parse only, MIT/Apache-2.0); locked support
 crates are toml_datetime 0.6.11, serde_spanned 0.6.9, toml_edit 0.22.27 and winnow
 0.7.15. Existing serde/serde_json/serde_yaml are reused. Build-time package fetching
 is distinct from scanner runtime; no runtime network resolution was added.
@@ -103,3 +108,9 @@ Source semantics were checked against the official [Cargo dependency reference](
 [Python dependency specifiers](https://packaging.python.org/en/latest/specifications/dependency-specifiers/)
 and [Go module require directive](https://go.dev/ref/mod#go-mod-file-require).
 The tests/above matrix define this scanner's deliberately narrower implementation.
+
+## Added format and SBOM identity support
+
+The local XML parser is pinned roxmltree0.20.0; DTD/external entities are disabled, with input/nesting/node bounds. Other new supported declaration subsets reuse local parsing without execution or downloads. Legacy flat version display remains compatible, while declared constraints and unverified reported versions stay separate in inventory.
+
+SBOM display labels do not need to contain ecosystem namespace syntax. A validated purl can supply canonical type/namespace/name and unverified reported version; its source claim never becomes a lock resolution. Invalid or conflicting identities remain incomplete and cannot fabricate registry purls. The source SBOM display name is not rewritten on disk.

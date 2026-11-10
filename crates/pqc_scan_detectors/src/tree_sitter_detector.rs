@@ -336,7 +336,11 @@ fn resolve_language(path: &Path) -> Option<(Language, &'static str)> {
         "js" | "mjs" | "cjs" | "jsx" => {
             Some((tree_sitter_javascript::LANGUAGE.into(), "javascript"))
         }
-        "ts" | "tsx" => Some((tree_sitter_javascript::LANGUAGE.into(), "typescript")),
+        "ts" => Some((
+            tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
+            "typescript",
+        )),
+        "tsx" => Some((tree_sitter_typescript::LANGUAGE_TSX.into(), "typescript")),
         "py" => Some((tree_sitter_python::LANGUAGE.into(), "python")),
         "rs" => Some((tree_sitter_rust::LANGUAGE.into(), "rust")),
         "rb" => Some((tree_sitter_ruby::LANGUAGE.into(), "ruby")),

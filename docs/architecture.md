@@ -113,7 +113,7 @@ read-failed, and read-ok = analyzed + partial + analysis-failed + unsupported +
 not-applicable + unknown. Enumeration failures are an additional entry count;
 ignore-hidden populations are not enumerable. Complete means complete within the
 declared scope, not absence of cryptography or product security. Dependency inspection now distinguishes structured success, malformed records,
-partial results and unsupported versions. Lexical fallbacks remain `NotReported`;
+partial results and unsupported versions. Explicitly parsed Go/POM/requirements/Ruby subsets can complete; unsupported/dynamic syntax and remaining lexical fallbacks stay incomplete;
 nondependency inputs are `NotApplicable`. See [dependency provenance](architecture/DEPENDENCY-PROVENANCE.md).
 
 CLI adds a stderr notice and opt-in `--diagnostics` (`diagnostics.json`, schema 1)
@@ -176,7 +176,7 @@ SARIF retains its task022 conservative handling. Traversal/candidate/work/hit ca
 are unchanged; the dedup set now lives within each rule. Matches extending into
 a synthetic clipped suffix are rejected while Truncated stays visible.
 
-The JavaScript grammar remains the TypeScript/TSX parser. Syntax recovery and
+TypeScript and TSX use dedicated pinned grammars. Syntax recovery and
 nominal API matching do not resolve aliases, local namesakes, actual execution
 or all comments inside ancestor text. Frozen corpus and grammar-subset tests
 record these limitations rather than silently expanding dependency support.
@@ -198,7 +198,7 @@ See [the task024 evidence](quality/TASK-024-AST-OCCURRENCES.md).
 ### Certificate detector
 
 - Existing extension candidacy is preserved; PEM/DER is selected by content for
-  `.pem/.crt/.cer/.der`. PKCS#12/PFX interiors remain explicitly Unsupported.
+  `.pem/.crt/.cer/.der`. PKCS#12/PFX supports bounded unencrypted public-certificate extraction; encrypted/key/unknown contents remain explicitly unsupported and opaque.
 - `certificate_detector/attributes.rs` owns public, path/rule-independent
   `parse_certificate_der` / `parse_public_key_der` helpers. They return owned
   attributes and fixed safe errors, require one fully consumed DER object and do

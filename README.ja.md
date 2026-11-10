@@ -28,14 +28,14 @@ JWT、TLS、PKI、SSHなどの暗号処理を変更する前に、調査する�
 
 | 成果物 | 対象言語・ファイルの例 | 確認する内容 |
 |---|---|---|
-| ソースコード | Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Ruby | 暗号API、方式名、関連する利用パターン。TypeScriptはJavaScript用文法を使うため、型構文では部分解析になる場合があります |
+| ソースコード | Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Ruby | 暗号API、方式名、関連する利用パターン。TypeScript・TSXはそれぞれ専用の文法で解析します |
 | 設定ファイル | Kubernetes／Ingress、nginx、Apache httpd、Envoy、Istio、HAProxy、Traefik | TLS、暗号スイート、鍵交換グループなどの設定 |
 | 公開証明書 | `.pem`、`.crt`、`.cer`、`.der` | 署名方式と公開鍵の方式、対応する鍵長・曲線、有効期間、公開情報の指紋 |
 | 秘密鍵のマーカー | RSA、汎用PKCS#8、OpenSSHの秘密鍵ヘッダー | 対応するヘッダーの存在。復号や秘密鍵の妥当性確認は行いません |
 | 依存関係の定義・ロックファイル | `Cargo.toml`、`Cargo.lock`、`package.json`、npm／pnpmのロック、Python・Ruby・Java・Goの依存関係ファイル | 関連ライブラリ、指定されたバージョン条件、対応する解決済みレコード |
 | 既存のSBOM | CycloneDX JSON、SPDX JSON | 申告された依存コンポーネントやパッケージ。インストール状態の確認ではありません |
 
-PKCS#12（`.p12`／`.pfx`）はコンテナーの存在だけを検出し、内部を検査しません。
+PKCS#12（`.p12`／`.pfx`）では、非暗号化の公開証明書を取り出して検査できます。暗号化された内容と秘密鍵のbagは対象外で、パスワード入力・復号・完全性や信頼性の検証は行いません。
 詳しいファイル一覧、対応する版、解析の制約は[対応する入力と検査範囲](docs/user/COVERAGE.ja.md)に記載しています。
 稼働中のTLS・SSH接続先や、任意のプログラミング言語を調べる機能ではありません。
 

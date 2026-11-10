@@ -126,7 +126,7 @@ fn clipped_display_suffix_is_not_a_source_match() {
 }
 
 #[test]
-fn existing_js_grammar_distinguishes_typed_typescript_from_its_jsx_subset() {
+fn dedicated_grammars_parse_javascript_typescript_and_tsx() {
     let f = Fixture::new("TOKEN");
     for (ext, text, expected) in [
         ("js", "const key = 'TOKEN';", DetectorStatus::Complete),
@@ -134,7 +134,7 @@ fn existing_js_grammar_distinguishes_typed_typescript_from_its_jsx_subset() {
         (
             "ts",
             "const key: string = 'TOKEN';",
-            DetectorStatus::Partial,
+            DetectorStatus::Complete,
         ),
         (
             "tsx",

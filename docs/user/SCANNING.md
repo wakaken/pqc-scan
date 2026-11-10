@@ -145,7 +145,7 @@ For certificates, malformed input, unknown key attributes or mixed unsupported b
 Detecting a container does not prove its contents were inspected. A parsed certificate that matches no rule need not produce a finding.
 
 Dependency inspection distinguishes valid empty input, malformed supported input, partial success, unsupported versions and resource limits.
-Supported structured subsets can report completion; unrelated files are not applicable. Ruby/Gradle/XML, requirements and Go lexical fallbacks remain `detector_not_reported`.
+Supported structured subsets can report completion; unrelated files are not applicable. Go modules, Maven POM, requirements and Ruby declarations/locks can complete within their explicitly parsed subsets. Dynamic or unsupported declarations remain incomplete; Gradle and gemspec lexical fallbacks remain `detector_not_reported`.
 Completion is not full package-manager validation or proof of installation.
 
 The `--require-complete` exit-code contract is unchanged, but actual returned codes depend on parser outcomes and supported scope.

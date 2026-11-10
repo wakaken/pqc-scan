@@ -259,13 +259,13 @@ fn malformed_and_unsupported_containers_keep_signals_but_do_not_complete() {
         (
             "bundle.p12",
             b"unsupported".as_slice(),
-            DetectorStatus::Unsupported,
+            DetectorStatus::Partial,
             "CERT_P12_CONTAINER",
         ),
         (
             "bundle.pfx",
             b"unsupported".as_slice(),
-            DetectorStatus::Unsupported,
+            DetectorStatus::Partial,
             "CERT_P12_CONTAINER",
         ),
     ] {

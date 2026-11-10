@@ -1,11 +1,13 @@
 use super::super::DependencyItem;
 use super::*;
+use std::sync::LazyLock;
 pub(super) fn parse_gemfile(text: &str) -> Vec<DependencyItem> {
     let mut out = Vec::new();
-    let gem_re = match Regex::new(r#"(?m)^\s*gem\s+['"]([^'"]+)['"]\s*(?:,\s*['"]([^'"]+)['"])?"#) {
-        Ok(v) => v,
-        Err(_) => return out,
-    };
+    static GEM_RE: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r#"(?m)^\s*gem\s+['"]([^'"]+)['"]\s*(?:,\s*['"]([^'"]+)['"])?"#)
+            .expect("constant gem syntax")
+    });
+    let gem_re = &*GEM_RE;
 
     for caps in gem_re.captures_iter(text).take(10001) {
         let name = caps.get(1).map(|m| m.as_str()).unwrap_or("unknown");
@@ -79,11 +81,11 @@ pub(super) fn parse_gemspec(text: &str) -> Vec<DependencyItem> {
 
 pub(super) fn parse_requirements(text: &str) -> Vec<DependencyItem> {
     let mut out = Vec::new();
-    let line_re =
-        match Regex::new(r"(?i)^\s*([a-z0-9_.-]+)\s*(?:==|>=|<=|~=|>|<)?\s*([a-z0-9*_.+-]+)?") {
-            Ok(v) => v,
-            Err(_) => return out,
-        };
+    static REQUIREMENT_RE: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r"(?i)^\s*([a-z0-9_.-]+)\s*(?:==|>=|<=|~=|>|<)?\s*([a-z0-9*_.+-]+)?")
+            .expect("constant requirement syntax")
+    });
+    let line_re = &*REQUIREMENT_RE;
 
     for (idx, raw_line) in text.lines().enumerate() {
         let line = raw_line.trim();

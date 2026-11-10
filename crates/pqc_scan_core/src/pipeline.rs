@@ -592,6 +592,13 @@ enum CachedSnippetSource {
 }
 
 fn load_snippet_source(path: &std::path::Path) -> CachedSnippetSource {
+    if path
+        .extension()
+        .and_then(|e| e.to_str())
+        .is_some_and(|e| e.eq_ignore_ascii_case("p12") || e.eq_ignore_ascii_case("pfx"))
+    {
+        return CachedSnippetSource::Unavailable;
+    }
     let bytes = match fs::read(path) {
         Ok(v) => v,
         Err(_) => return CachedSnippetSource::Unavailable,
@@ -1124,5 +1131,24 @@ mod tests {
             CachedSnippetSource::TextLines(_) => "TextLines",
             CachedSnippetSource::Unavailable => "Unavailable",
         }
+    }
+}
+
+#[cfg(test)]
+mod opaque_container_snippet_tests {
+    use super::*;
+    #[test]
+    fn pkcs12_payloads_are_never_reread_as_source_snippets() {
+        let root = std::env::temp_dir().join(format!("pqc-opaque-{}", std::process::id()));
+        fs::create_dir_all(&root).unwrap();
+        for ext in ["p12", "pfx", "P12", "PFX"] {
+            let path = root.join(format!("container.{ext}"));
+            fs::write(&path, b"opaque synthetic container payload without NUL").unwrap();
+            assert!(matches!(
+                load_snippet_source(&path),
+                CachedSnippetSource::Unavailable
+            ));
+        }
+        fs::remove_dir_all(root).unwrap();
     }
 }

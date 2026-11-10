@@ -34,3 +34,16 @@ cargo run --bin pqc-scan -- scan ./examples --format all --out-dir ./pqc-report-
 - Dependency detections from Maven/npm/Go/Python/Cargo/Gem manifests and SBOM files
 - Middleware-specific TLS policy findings in k8s/nginx/httpd/envoy/istio/haproxy/traefik
 - Key material findings from private key headers (masked in output)
+
+## Public-certificate examples
+
+`pki/certs/legacy.pem` and `legacy.p12` contain the public RSA-2048 test certificate
+from `crates/pqc_scan_detectors/tests/fixtures/certificates/rsa2048.der`.
+The PFX is a certificate-only, unencrypted DER PFX v3 with no private key and no
+MAC. It demonstrates structural/certificate inspection, not integrity or trust
+verification. Encrypted/private-key/unknown-bag and malformed cases are kept in
+detector regression tests and must remain incomplete rather than silently pass.
+
+The SPDX example intentionally keeps the display label `bouncycastle` alongside
+its Maven purl: a display label and a validated canonical package identity are not
+the same field. SBOM versions remain source claims, not installed resolutions.
