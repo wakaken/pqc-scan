@@ -4,24 +4,25 @@ Design date: 2026-11-09. Baseline: `b3104f9a4193b1b21ea11ca060f06301de2e936b`. A
 
 ## Implementation checkpoint (2026-11-10)
 
-Accepted continuation code checkpoint: `802f2c6aa7436ce02332c2c3013c835d8c85d904`.
-The isolated task031 study is committed separately as `48fad23`; backend adoption
-is pending. Task YAML remains authoritative; design-time statements below describe
+Latest local code checkpoint: `9201dc5022ea918e1416db7abf710db58a4bd855`.
+The isolated task031 study `48fad23` was adopted under explicit delegated
+selection in `cae2730`. Runtime TLS/SSH and local packaging are committed separately. Task YAML remains authoritative; design-time statements below describe
 the original plan unless updated explicitly.
 
 | Phase | Tasks | Current task state |
 |---|---|---|
 | 0: correctness and baseline | 018–024, 028, 029 | 018–022, 024, 028, 029 `done`; 023 `review` |
 | 1: observations, inventory, assessment | 025–027 | All three `done` |
-| 2: target safety and TLS | 030–032 | 030 `done`; 031 `review` awaiting backend choice; 032 `pending` |
-| 3: SSH advertised discovery | 033 | `pending` runtime contract/parser decision |
+| 2: target safety and TLS | 030–032 | 030/031 `done`; 032 `blocked` only on human-report browser acceptance |
+| 3: SSH advertised discovery | 033 | `blocked` on human-report browser acceptance; source/protocol review accepted |
 | 4: standards, comparison and human reports | 034–036 | 034/035 `done`; 036 `blocked` on real-browser acceptance |
-| 5: packaging and final quality | 038 then 037 | Both `pending`; read-only channel inventory prepared, no publication |
+| 5: packaging and final quality | 038 then 037 | 038 `blocked` on notice/dependency acceptance after clean local installs; 037 `blocked` on final quality gates, no publication |
 | Conditional future negotiation | 039 | `pending`; no concrete negotiated-session use case selected |
 
-See [source-bound local acceptance](../quality/ROADMAP-CONTINUATION-VALIDATION.md),
+See [runtime integration validation](../quality/RUNTIME-INTEGRATION-VALIDATION.md),
+[earlier static/transport acceptance](../quality/ROADMAP-CONTINUATION-VALIDATION.md),
 [TLS feasibility](../quality/TASK-031-TLS-FEASIBILITY.md) and the
-[unapproved concrete runtime proposal](../architecture/RUNTIME-PROBE-IMPLEMENTATION.md).
+[selected runtime contract](../architecture/RUNTIME-PROBE-IMPLEMENTATION.md).
 The current static inventory schema has not been changed to include endpoints.
 
 The task-to-phase assignments agree with the implemented scope and local acceptance records. Phase 0 is **not fully complete**: task 023's reviewed corpus/harness and measurements exist, but maintainer approval of its protocol and measured numeric budget proposal remains outstanding. Later user-requested tasks consumed the reviewed technical baseline and recorded their own comparisons; they did not close 023 or approve its budgets. Dependencies on 023 mean that baseline evidence is needed for those comparisons, while its remaining approval gate stays open. They do not authorize bypassing future probe, policy or release decisions.
@@ -762,7 +763,7 @@ Do not prebuild platform infrastructure. Enterprise aggregation, ownership, RBAC
 
 ## Decisions and remaining uncertainty
 
-Maintainers must decide additive CLI/artifact names and opt-in completeness exit policy; approved cryptographic classification/result deltas; probe address defaults/budgets; backend/features/platforms after the spike; repository identity scope and uncertain move correspondence; measured regression budgets and 1.0 support/release channels.
+Approved/selected decisions for CLI/output, address limits, TLS backend, runtime scope and local distribution are recorded in [CONTINUATION-DECISIONS.md](CONTINUATION-DECISIONS.md). Measured 1.0 regression budgets, final release acceptance and any external publication remain unapproved; untested platform/support claims are not added.
 
 No inventory/assessment crate extraction is scheduled. A real independent consumer and an acyclic type-ownership design are prerequisites for revisiting it. Full negotiated SSH requires task 039 evidence and a new implementation decision. No platform DB, web server, queues or plugin ABI is approved.
 

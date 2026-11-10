@@ -2,8 +2,11 @@
 
 Status: **030 option A and 034/035 contracts approved by maintainer**, 2026-11-10.
 The maintainer selected both recommendations in the continuation conversation.
-Other decisions remain pending. This record does not declare tasks complete or
-authorize publication.
+This initial approval record is historical. The user subsequently delegated
+technical selection and continuation; see the selected
+[runtime contract](../architecture/RUNTIME-PROBE-IMPLEMENTATION.md) and
+[local validation](../quality/RUNTIME-INTEGRATION-VALIDATION.md). Neither this
+record nor that delegation authorizes publication or declares all tasks complete.
 Continuation baseline: `3c357cef879f69ae4058fefe7a03b4f074283b3f`, branch
 `codex/inspection-format-support`, clean worktree at entry. Preserve that local
 commit. No push, PR, merge, package publication or signing setup is authorized.
@@ -145,3 +148,21 @@ parity, then actual offline browser/keyboard behavior.
 The presence of tasks is not approval of their decision gates. Keep statuses
 truthful and task-local commits separate. Existing measured results are historical
 evidence, not validation of this continuation or of hosted CI.
+
+## Subsequent delegated selection and actual checkpoint
+
+The maintainer requested agent selection and continued implementation after the
+backend questions. The tested rustls/AWS-LC backend, bundled roots with explicit
+custom-CA replacement, separate runtime-v1 JSON and bounded SSH discovery were
+selected and implemented. New runtime storage is separate from unchanged static
+inventory/legacy outputs. The local distribution scope is source installation
+and unpublished macOS arm64 static/combined archives, with best-effort support
+for the latest verified development snapshot; no stable 1.0/SLA/backport promise.
+
+Task031 is done. Task032/033 source/protocol and common integration reviews are
+accepted, but new human reports still require actual browser acceptance. Task038
+clean-source repeatability/offline installs passed; notice and dependency gates
+remain. Task037 does not approve task023 numeric budgets or declare 1.0 ready.
+Task039 is deliberately not selected: the current advertisement-only use case
+does not justify completed KEX or additional SSH cryptographic libraries. This
+is deferral, not feasibility success or rejection of untested candidates.
