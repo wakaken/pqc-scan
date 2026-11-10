@@ -30,6 +30,9 @@ pqc-scan rules show <rule-id> [--rules-dir ./rules]
 `--repository-scope` と `--policy-profile` には `--inventory-json` が必要です。
 `--assessment-context` は評価方針を指定したときだけ使えます。全オプションは `pqc-scan scan --help` で確認できます。
 
+別ファイルのCycloneDX 1.7棚卸しには `--cyclonedx-17` を付けます。
+用途と制約は[形式の説明](REPORTS.ja.md#cyclonedx)を参照してください。
+
 ### プロダクトリポジトリでの推奨実行方法
 
 `pqc-scan` を自分のプロダクトリポジトリ内（`pqc-scan` リポジトリ外）で実行する場合は、`--rules-dir` に **絶対パス** を指定してください。

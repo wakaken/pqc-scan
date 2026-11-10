@@ -25,6 +25,9 @@ Defaults are `--format all`, `--lang en`, `--out-dir ./pqc-report`, `--rules-dir
 
 `--repository-scope` requires `--inventory-json`; `--policy-profile` also requires it. `--assessment-context` requires an explicit policy profile. Use `pqc-scan scan --help` for the complete option list.
 
+Add `--cyclonedx-17` to write separate CycloneDX 1.7 inventories.
+The [report guide](REPORTS.md#cyclonedx) explains these documents.
+
 ### Recommended usage from your product repository
 
 When running `pqc-scan` inside your own product repository (not inside the `pqc-scan` repo), use an **absolute path** for `--rules-dir`.

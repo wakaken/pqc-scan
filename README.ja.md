@@ -87,6 +87,8 @@ HTML・Markdownを日本語にするには `--lang ja` を加えます。[イン
 最後の2つは、それぞれ暗号利用の所見とソフトウェアの依存関係の一覧です。
 用途や関係は[用途に合うレポートを選ぶ](docs/user/REPORTS.ja.md#choose-report)で説明しています。
 詳しい棚卸し、評価、診断情報を加えるには、それぞれのオプションが必要です。
+CycloneDX 1.7形式には `--cyclonedx-17` を使います。
+指定方法と制約は[結果の読み方](docs/user/REPORTS.ja.md)を参照してください。
 
 <a id="guides"></a>
 

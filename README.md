@@ -83,6 +83,8 @@ Both show inspection status; selecting a local assessment also adds its advisory
 `--format all` writes six files: `report.html`, `report.md`, `report.json`, `report.sarif`, `cbom.json` and `dependency-sbom.json`.
 The last two list cryptographic findings and software dependencies respectively. Their purpose and relationship are explained in [choosing a report](docs/user/REPORTS.md#choose-report).
 Additional inventory, assessment and diagnostic files require explicit options.
+Use `--cyclonedx-17` for separate CycloneDX 1.7 exports.
+See the [report guide](docs/user/REPORTS.md).
 
 <a id="guides"></a>
 

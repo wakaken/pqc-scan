@@ -12,8 +12,8 @@ use pqc_scan_core::{
 };
 use pqc_scan_detectors::default_detectors;
 use pqc_scan_report::{
-    write_assessment_json, write_diagnostics, write_document_reports, write_inventory_json,
-    ReportFormat, ReportLanguage,
+    write_assessment_json, write_cyclonedx_17, write_diagnostics, write_document_reports,
+    write_inventory_json, ReportFormat, ReportLanguage,
 };
 use pqc_scan_rules::{RuleSet, Severity};
 
@@ -47,6 +47,10 @@ struct ScanArgs {
     /// Language of HTML and Markdown reports; machine outputs remain unchanged.
     #[arg(long, value_enum, default_value_t = LanguageArg::En)]
     lang: LanguageArg,
+
+    /// Add separate CycloneDX 1.7 CBOM and dependency SBOM files.
+    #[arg(long)]
+    cyclonedx_17: bool,
 
     #[arg(long, default_value = "./pqc-report")]
     out_dir: PathBuf,
@@ -254,7 +258,7 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     };
 
     let detectors = default_detectors();
-    let document = if args.inventory_json {
+    let document = if args.inventory_json || args.cyclonedx_17 {
         let options = NativeOptions::new(args.repository_scope.as_deref())?;
         scan_repository_native(&config, &rules, &detectors, &options)?
     } else {
@@ -281,6 +285,9 @@ fn scan_cmd<WOut: Write, WErr: Write>(
         args.format.into(),
         args.lang.into(),
     )?;
+    if args.cyclonedx_17 {
+        outputs.extend(write_cyclonedx_17(&document, &args.out_dir)?);
+    }
     if args.diagnostics {
         outputs.push(write_diagnostics(&document, &args.out_dir)?);
     }

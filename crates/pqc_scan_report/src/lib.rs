@@ -1,4 +1,6 @@
 mod compact;
+pub mod cyclonedx;
+pub use cyclonedx::write_cyclonedx_17;
 mod grouping;
 mod html_report;
 mod inspection;

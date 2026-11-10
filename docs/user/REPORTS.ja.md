@@ -11,6 +11,7 @@
 - [リスクとPQCの所見を読み分ける](#pqc-findings)
 - [用途に合うレポートを選ぶ：CBOM・SBOMを含む](#choose-report)
 - [詳しい暗号資産の棚卸しを追加する](#inventory)
+- [CycloneDX 1.7形式で出力する](#cyclonedx)
 - [ローカル方針で評価する](#assessment)
 - [SARIFの位置情報を読む](#sarif-locations)
 
@@ -102,8 +103,9 @@ JWT署名を変更する際は、JOSE形式・ライブラリ・検証側の互�
 | `scan.inventory.v1.json` | `--inventory-json` | 観測記録、暗号資産、従来の所見との対応を残す |
 | `scan.assessment.v1.json` | 棚卸しに加え `--policy-profile migration-review-v1` | 別ファイルのローカル評価を確認する |
 | `diagnostics.json` | `--diagnostics` | 検査範囲、集計、安全な理由コードを確認する |
+| `cbom.cdx-1.7.json`、`dependency-sbom.cdx-1.7.json` | `--cyclonedx-17` | CycloneDX 1.7を扱うツールへ、暗号資産とソフトウェアの棚卸しを別々に渡す |
 
-`--format all` は従来の6ファイルを選ぶ指定で、任意の3ファイルは含みません。単一のレポート形式を選んでも、2種類の一覧は出力します。
+`--format all` は従来の6ファイルを選ぶ指定です。追加の成果物にはそれぞれのオプションが必要です。単一のレポート形式を選んでも、2種類の一覧は出力します。
 `--lang en|ja` の対象はHTML・Markdownだけです。比較には新しい出力先を使ってください。過去のファイルは自動削除されません。
 
 ### このツールでいうCBOMとSBOM
@@ -114,7 +116,7 @@ CBOM（Cryptographic Bill of Materials）は、暗号方式やその利用箇所
 両方を使ってライブラリの調査とコード・設定の確認を結び付けます。どちらも、実際の稼働を証明するものではありません。
 
 `dependency-sbom.json` と `cbom.json` はpqc-scan独自の項目を持つJSONの一覧で、CycloneDX・SPDX形式ではありません。実行時の全情報を網羅する一覧でもありません。
-既存のCycloneDX・SPDXを読み込む機能はありますが、規格に準拠したCycloneDX形式のCBOM出力は未実装です。
+既存のCycloneDX・SPDXを読み込む機能に加え、明示した場合だけ別ファイルへCycloneDX形式で出力できます。
 従来の所見に加えて詳しい観測記録や情報の出所を残す場合は、`scan.inventory.v1.json` を使います。
 
 <a id="inventory"></a>
@@ -140,6 +142,23 @@ pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./r
 指定条件やSBOMの申告だけから、バージョン付きpurlを生成しません。path・git・workspaceの参照先は未解決のままとし、
 依存グラフの推測やパッケージのダウンロードは行いません。従来の `dependency-sbom.json` は同じ項目の配列を維持します。
 purlと検査状況の値は、誤った断定を避けるため修正しています。従来形式で統合される出所も、棚卸しJSONでは別の記録として残します。
+
+<a id="cyclonedx"></a>
+## CycloneDX 1.7形式で出力する
+
+CycloneDX 1.7を扱うツールと棚卸しを交換する場合は、`--cyclonedx-17` を付けます。
+
+```bash
+pqc-scan scan . --cyclonedx-17 --rules-dir /path/to/pqc-scan/rules --out-dir /path/to/new-output
+```
+
+`cbom.cdx-1.7.json` に観測した暗号方式・公開鍵・証明書、`dependency-sbom.cdx-1.7.json` に依存関係の申告情報を出力します。
+内部では詳しい観測記録を収集しますが、`scan.inventory.v1.json` の保存には引き続き `--inventory-json` が必要です。
+`--format all` や入力SBOMの検出だけでは、この2ファイルは追加しません。従来の一覧の名前や形式も維持します。
+
+標準の項目と併せて、`pqc-scan` の追加プロパティと変換時に失われた情報を確認してください。
+指定した版の条件や入力SBOMが申告する版は、インストールの証明ではありません。
+静的な方式名の参照を実通信の観測として扱わず、不明な事実、信頼検証、暗号強度、認証取得を推測して埋めることもありません。
 
 <a id="assessment"></a>
 
