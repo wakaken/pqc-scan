@@ -191,10 +191,9 @@ unrecorded excluded populations are never presented as a complete total.
 With `--diagnostics`, a closed details section groups reasons and shows at most
 three example paths per reason. Per-observation IDs, assurance and usage ledgers
 are omitted from HTML; exact records remain in inventory JSON and Markdown.
-Selecting a policy displays its overall advisory result and counts of assets
-needing review, lacking evidence, within conditions or outside the policy.
-Per-asset IDs/decisions/reason codes remain in assessment JSON and Markdown.
-These summaries do not establish runtime use, verified trust or migration completion.
+HTML does not display advisory policy decisions. It focuses on inspection
+status, finding locations, checks and next steps. Explicitly requested policy
+results and reasons remain in assessment JSON and Markdown.
 
 `--inventory-json --policy-profile migration-review-v1` adds a separate
 `scan.assessment.v1.json` with quantum/classical concerns, observation certainty,

@@ -456,43 +456,6 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
         }
     }
     writeln!(out, "</div></section>")?;
-    if let Some(report) = context.assessment {
-        writeln!(out,"<section class=\"inspection-context assessment-summary\"><h2>{}</h2><p><strong>{}</strong></p><p>{}</p><ul>",text(lang,"Local advisory assessment","ローカルの参考評価"),h(&decision(report.decision(),lang)),text(lang,"This is advisory policy review, not a runtime safety or migration-completion verdict. Review the relevant findings and actual use.","評価方針に沿った参考情報です。稼働確認や移行完了を保証しません。該当する所見と実際の用途を確認してください。"))?;
-        for (value, name) in [
-            (
-                Decision::Fail,
-                text(lang, "Assets needing review", "要確認の資産"),
-            ),
-            (
-                Decision::Indeterminate,
-                text(
-                    lang,
-                    "Assets with insufficient evidence",
-                    "判断材料が不足する資産",
-                ),
-            ),
-            (
-                Decision::Pass,
-                text(
-                    lang,
-                    "Assets within policy conditions",
-                    "方針の条件内の資産",
-                ),
-            ),
-            (
-                Decision::NotApplicable,
-                text(lang, "Assets outside this policy", "この方針の対象外"),
-            ),
-        ] {
-            let count = report
-                .asset_policies()
-                .iter()
-                .filter(|p| p.decision == value)
-                .count();
-            writeln!(out, "<li>{name}: {count}</li>")?;
-        }
-        writeln!(out,"</ul><p>{}</p><details class=\"assessment-technical\"><summary>{}</summary><p>{}: <code>{}</code></p><p>{}: {}</p></details></section>",text(lang,"Per-asset IDs and classifications belong in the detailed inventory/assessment JSON or Markdown, rather than this summary.","資産ごとのIDや分類は、詳しい棚卸し・評価JSONまたはMarkdownで確認できます。"),text(lang,"Policy identifier and reason codes","評価方針と理由コード"),text(lang,"Profile","評価方針"),h(report.profile_id()),text(lang,"Reason codes","理由コード"),h(&report.evaluation().reasons.join(", ")))?;
-    }
     Ok(out)
 }
 pub(crate) fn markdown(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<String> {

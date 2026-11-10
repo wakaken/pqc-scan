@@ -139,7 +139,7 @@ fn document_reports_localize_status_and_escape_diagnostics_without_machine_drift
 }
 
 #[test]
-fn advisory_policy_is_optional_and_never_becomes_deployment_assurance() {
+fn explicit_policy_stays_in_markdown_and_never_changes_ordinary_html() {
     let fixture = Fixture::new();
     let doc = fixture.document(DetectorStatus::Complete);
     let policy = pqc_scan_core::policy::evaluate(
@@ -148,35 +148,51 @@ fn advisory_policy_is_optional_and_never_becomes_deployment_assurance() {
         pqc_scan_core::policy::PROFILE_ID,
     )
     .unwrap();
-    let plain = fixture.0.join("plain");
-    let assessed = fixture.0.join("assessed");
-    write_document_reports(
-        &doc,
-        None,
-        false,
-        &plain,
-        ReportFormat::All,
-        ReportLanguage::Ja,
-    )
-    .unwrap();
-    write_document_reports(
-        &doc,
-        Some(&policy),
-        false,
-        &assessed,
-        ReportFormat::All,
-        ReportLanguage::Ja,
-    )
-    .unwrap();
-    let a = fs::read_to_string(plain.join("report.html")).unwrap();
-    let b = fs::read_to_string(assessed.join("report.html")).unwrap();
-    assert!(!a.contains("migration-review-v1"));
-    assert!(b.contains("migration-review-v1"));
-    assert!(b.contains("indeterminate"));
-    assert!(b.contains("判定保留"));
-    assert!(b.contains("稼働確認や移行完了を保証しません"));
-    for reason in &policy.evaluation().reasons {
-        assert!(b.contains(reason));
+    for lang in [ReportLanguage::Ja, ReportLanguage::En] {
+        let locale = if lang == ReportLanguage::Ja {
+            "ja"
+        } else {
+            "en"
+        };
+        let plain = fixture.0.join(format!("plain-{locale}"));
+        let assessed = fixture.0.join(format!("assessed-{locale}"));
+        write_document_reports(&doc, None, false, &plain, ReportFormat::All, lang).unwrap();
+        write_document_reports(
+            &doc,
+            Some(&policy),
+            false,
+            &assessed,
+            ReportFormat::All,
+            lang,
+        )
+        .unwrap();
+        let html = fs::read_to_string(assessed.join("report.html")).unwrap();
+        assert_eq!(fs::read_to_string(plain.join("report.html")).unwrap(), html);
+        for hidden in [
+            "migration-review-v1",
+            "ローカルの参考評価",
+            "Local advisory assessment",
+            "assessment-summary",
+        ] {
+            assert!(!html.contains(hidden));
+        }
+        let md = fs::read_to_string(assessed.join("report.md")).unwrap();
+        assert!(md.contains("migration-review-v1"));
+        assert!(md.contains("indeterminate"));
+        for reason in &policy.evaluation().reasons {
+            assert!(md.contains(reason));
+        }
+        for name in [
+            "report.json",
+            "report.sarif",
+            "cbom.json",
+            "dependency-sbom.json",
+        ] {
+            assert_eq!(
+                fs::read(plain.join(name)).unwrap(),
+                fs::read(assessed.join(name)).unwrap()
+            );
+        }
     }
     let other = fixture.document(DetectorStatus::Complete);
     assert!(write_document_reports(
@@ -350,7 +366,7 @@ fn assurance_usage_and_per_asset_policy_keep_exact_observation_bindings() {
                 for asset in policy.asset_policies() {
                     assert!(!body.contains(&asset.asset_id));
                 }
-                assert!(body.contains("assessment-summary"));
+                assert!(!body.contains("assessment-summary"));
                 continue;
             }
             for o in doc.native().unwrap().observations() {

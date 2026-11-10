@@ -78,6 +78,7 @@ To produce Japanese HTML/Markdown, add `--lang ja`. [Running from source](docs/u
 ## Read the results
 
 HTML starts with inspection scope and unfinished checks; detailed observation and asset ledgers remain in JSON/Markdown.
+Advisory policy decisions are kept in explicitly requested JSON/Markdown exports.
 
 Open `report.html` first. Review a finding's file location, source context and suggested checks before deciding on a change.
 Search and filters help you work through repeated findings; `report.md` provides a portable text version.
