@@ -93,8 +93,20 @@
     {
       "path": "crates/pqc_scan_core/src/recommendation.rs",
       "sha256": "3201017c23fd6a432be611da52b1474c21c9aa1850efefe5d25dd95ba905d233",
-      "reason": "Reviewed inline unit-test input under the cfg(test) module; production observations are not registered.",
+      "reason": "Reviewed cfg(test) inputs plus fixed guidance and before/after example Strings at lines 471-472 and 720; these examples are rendered, never executed here. Only exact reviewed results are omitted.",
       "results": [
+        {"ruleId":"API_JOSE_RSA_ALG","line":471,"column":128,"sha256":"32d8fedc44c019d6a898cab85c2a97e6fac66fcce0eccfb0a2286bbeb015afa0","count":1},
+        {"ruleId":"JWT_RS256","line":471,"column":128,"sha256":"2c6fe91d22b3625c64d7d866b0f97fce0710fbba745ffe44e5ae64f39b217d82","count":1},
+        {"ruleId":"TS_JWT_RSA_ALGS","line":471,"column":128,"sha256":"04d1a47d8fedf3ad6028dfeefe77262f1ae23dceb5f0c3ef801e7caf8c613ce3","count":1},
+        {"ruleId":"TS_RUST_RSA_USAGE","line":471,"column":128,"sha256":"1b012ba0c4c50b4e8a4f24b959bfb0213b5d773c8d050553e77926be78396f8c","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":472,"column":44,"sha256":"30667d79d5e3e172d7e9f86d8922374b0d0228033a44a122341a0d76372d9c1a","count":1},
+        {"ruleId":"JWT_RS256","line":472,"column":44,"sha256":"41ab76537bd9cdc15a50d1451b2d7742719801a5fdfa24f665ca6e849aa3dc45","count":1},
+        {"ruleId":"TS_JWT_RSA_ALGS","line":472,"column":44,"sha256":"24a8722770bcd4b66f39a4122ac40e7673e70edd7c6f20771cd4fc3bdbb99264","count":1},
+        {"ruleId":"TS_RUST_RSA_USAGE","line":472,"column":44,"sha256":"b31e3ff56515151282346b9a20f700f9fe7ef6943c24c6432ba96c1ff6683dd7","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":720,"column":59,"sha256":"dfa619cbb81e219ba61c3a439c21e6396b60f769b4c4d4b0883c459e1bb76974","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":720,"column":59,"sha256":"90e5dc215321e2807f6bab373dff8e68d09dc26a2648130c72f76293a9d9475e","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":720,"column":73,"sha256":"b58ccb5d6eac7c12853a1a64679931358752f66c9acf52dd924842bd831f7e0e","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":720,"column":73,"sha256":"af346c06e2decd156dd0c2d918f1646ac5346fe48e4c25df448f8afa6df6e856","count":1},
         {"ruleId":"TLS_RSA_KEY_EXCHANGE","line":1058,"column":38,"sha256":"1eda6e080ee735f8bd5f6fb2187d3d6b8fa6b0ac4d78a476fe9c70b197c45d90","count":1},
         {"ruleId":"TS_RUST_RSA_USAGE","line":1087,"column":8,"sha256":"923154601fb6d96ba4804305555bdee4096aaa07ddd4357fce4d12073b9e3b83","count":1},
         {"ruleId":"TS_TLS_RSA_CIPHER_LITERAL","line":1087,"column":8,"sha256":"735956d3878da65492a7df95f6560216085b9932d52256887bec49316b8b6065","count":1},
@@ -122,8 +134,14 @@
     {
       "path": "crates/pqc_scan_detectors/src/certificate_detector.rs",
       "sha256": "9535aa413698527f867dd11170a34bdb1ddec08df25f1892d40ffb30db8ea729",
-      "reason": "Reviewed inline unit-test input under the cfg(test) module; production observations are not registered.",
+      "reason": "Reviewed cfg(test) inputs plus fixed public OID-to-signature-name labels in signature_name at lines 521-526; the mapping performs no signing. Only exact reviewed results are omitted.",
       "results": [
+        {"ruleId":"TS_CERT_SIGALG_LITERAL","line":521,"column":37,"sha256":"3bc56e8da9fb3c7c91fb8a0ab460fb2e087f15008dc990c988b092e54097a80d","count":1},
+        {"ruleId":"TS_CERT_SIGALG_LITERAL","line":522,"column":37,"sha256":"0f46a4adb183624a128bbedba37c1c497d82f69ca08fc11856894032f526d088","count":1},
+        {"ruleId":"TS_CERT_SIGALG_LITERAL","line":523,"column":37,"sha256":"a9b557a38d1e0164fd05eb4a551d948e0408f5e237b921ea46aca94036216b73","count":1},
+        {"ruleId":"TS_CERT_SIGALG_LITERAL","line":524,"column":35,"sha256":"1e165e9237d1cb6d7148f63330f814e0209bc00fc09957f23c6dfa1dbbe988ae","count":1},
+        {"ruleId":"TS_CERT_SIGALG_LITERAL","line":525,"column":35,"sha256":"1207ed37536902e71491ba36750b86bd909d1ec91420bf0bd5850e9b470adb78","count":1},
+        {"ruleId":"TS_CERT_SIGALG_LITERAL","line":526,"column":35,"sha256":"9ee695d842be2a49ee3d799d4edb148ecea3b0ec2f0130ebabf5526a0ec1e86b","count":1},
         {"ruleId":"TS_CERT_SIGALG_LITERAL","line":689,"column":28,"sha256":"5d46784e185a994d46880672b2b5a970a3134eaa8539635bedda746f73ac04e6","count":1}
       ]
     },
@@ -1434,6 +1452,179 @@
         {"ruleId":"TS_JWT_RSA_ALGS","line":86,"column":43,"sha256":"0fc0da5feb4ba0999a97f95703f118ddd63e8ae9e3e85bf8e73825dd812cc47b","count":1},
         {"ruleId":"TS_RUST_RSA_USAGE","line":86,"column":43,"sha256":"05d4012d41b551ee26da462cbd1b0171741c122dcbf7b82402c97a08b8661f50","count":1},
         {"ruleId":"TS_RSA_KEY_SIZE_LITERAL","line":213,"column":21,"sha256":"ff9cbdea04fc9ff1bd02dcabd59bc3e2f8a07ce76c2f97ad657b60260abefd13","count":1}
+      ]
+    },
+    {
+      "path": "crates/pqc_scan_report/src/japanese.rs",
+      "sha256": "80bbe70a64a1a07d10b117cd2c52425feae4342c59962ba43b808c942f25fa7d",
+      "reason": "Reviewed fixed localization keys and explanatory guidance; algorithm/TLS names describe findings and advice rather than cryptographic operations. Only exact reviewed results are omitted.",
+      "results": [
+        {"ruleId":"TLS_RSA_KEY_EXCHANGE","line":20,"column":55,"sha256":"dc77929c54f57533694ee8eefb9d3d29ba25d790825142d0234bf6e1ade062c2","count":1},
+        {"ruleId":"API_EVP_PKEY_RSA","line":27,"column":14,"sha256":"e765658a8985145b335be6cb37bf128493357b75e987668d7623c0c518411d4b","count":1},
+        {"ruleId":"TLS_RSA_KEY_EXCHANGE","line":29,"column":10,"sha256":"abd18f96091149c84167a6cc03a476da67b4ed564bd4108bf5d52344122cf6bd","count":1},
+        {"ruleId":"TS_TLS_RSA_CIPHER_LITERAL","line":29,"column":10,"sha256":"a4879c5cab9b63ff9f2a355deeefa1172259ff815600328a06d70b789cbdca5f","count":1},
+        {"ruleId":"TLS_RSA_KEY_EXCHANGE","line":29,"column":35,"sha256":"962c7eaa7360c18e989468c53b0279e048e20ae6a91ec47eb417301b7cd23586","count":1},
+        {"ruleId":"TS_TLS_RSA_CIPHER_LITERAL","line":29,"column":35,"sha256":"cde275f011d79fae55092c5bb180144b6bfc48e26b5cf1bc5417e8e3a30f04c9","count":1},
+        {"ruleId":"TLS_RSA_KEY_EXCHANGE","line":29,"column":63,"sha256":"6e747052df923ade32b166f929d2e0da876992aa50d10f0652e31d44a9ceaae0","count":1},
+        {"ruleId":"TLS_ECDHE_RSA","line":30,"column":10,"sha256":"0aa7e5c75ac334d26c68a8de15fe6c34c14f1341579edbf637242083e82e30f4","count":1},
+        {"ruleId":"TS_TLS_RSA_CIPHER_LITERAL","line":30,"column":10,"sha256":"9738c58e091e8c440f25635ba861453eab8446d751cb21fdc500cb5b9e3309a2","count":1},
+        {"ruleId":"TS_TLS_RSA_CIPHER_LITERAL","line":34,"column":10,"sha256":"69e87cf9d16496d9096be39692ecb03f746f97f7e40bbe6f1386702e583c52b2","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":76,"column":61,"sha256":"86f99827cbf1e38cd65e6f35a21d55f8758ee034f321b3153ea889f3cd5eba23","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":85,"column":null,"sha256":"137f83a350b93b97d5f68af57173c5988d54aed9d08caf1131b3ab49a165a4df","count":2},
+        {"ruleId":"TLS_VERSION_1_0","line":85,"column":106,"sha256":"27e8953b263daeeaef123966aebcc44b7c02535191b8565d3a7c49b07ac5476c","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":85,"column":123,"sha256":"09834a63f587a2f024177780d0733ff3ac7d792e30c17fa6aca5a1d74bf944e5","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":89,"column":31,"sha256":"d636b823943211a0ea0ff58d335e363d6e0e10a5bc5664b823b252f1b51ff692","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":89,"column":55,"sha256":"7286e1416ab3f11264138daaf08e0dbd6bf48c380672d6ed156bfb901619a07c","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":91,"column":22,"sha256":"ff505c902d1d6883a4405ef57b57b6e51de6911044861b542b965b14b165738b","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":157,"column":null,"sha256":"ca100b38286dc0be624a514b9a8e6119ab804c9b2d631f94354d13f65b0894a8","count":2},
+        {"ruleId":"TLS_VERSION_1_0","line":157,"column":117,"sha256":"a7db0b3070b3c375219c15d79397c4c8b09a359058cc7d7a5edfba67a8834142","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":157,"column":129,"sha256":"67dbfbc2e18b55865b5135db81e9c1e14980298eb063c985a8cd315fbd50e360","count":1}
+      ]
+    },
+    {
+      "path": "rules/default/crypto_api.yml",
+      "sha256": "8020d85ef00fae35571427521f975b022b9b9e72cdcbb6f0687925cf5c40865e",
+      "reason": "Reviewed detection-rule IDs, patterns, descriptions and migration guidance; rule data is not a configured protocol or executed cryptographic operation. Only exact reviewed results are omitted.",
+      "results": [
+        {"ruleId":"OPENSSL_RSA_API","line":41,"column":30,"sha256":"252382fbbd649f14590ab1e768ca61ee42af562578808c0ef11d8e23005f0c01","count":1},
+        {"ruleId":"API_EVP_PKEY_RSA","line":45,"column":11,"sha256":"ce257c653455b826018f292cb2a6e377fdb99fa65340bfaa71250d50c308246c","count":1},
+        {"ruleId":"API_GO_CRYPTO_RSA","line":65,"column":19,"sha256":"43ba7e8f227323153cba711b015d8337a118ca1a195dc0ba49aad217e0e50804","count":1},
+        {"ruleId":"GO_TLS_RSA_IMPORT","line":65,"column":19,"sha256":"de833db0513744705aedac991ac5ae3f7fe34c4b01a71eeecf47e2b256a73143","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":96,"column":17,"sha256":"94be7e58ace4d7fdaac83aa68e36bf6e28dddc9da26bb9a0c026dbde3e6fe74d","count":1},
+        {"ruleId":"JWT_RS256","line":96,"column":17,"sha256":"7c43ce4893d8fa7e57e909c3a081a98eca82586d40b1fb8f66575e4f363ec91b","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":96,"column":23,"sha256":"2d0264b6262263c8cb6efc3cc8a4074c91c547b6df0fb00d776ef52d074b91f8","count":1},
+        {"ruleId":"JWT_RS384","line":96,"column":23,"sha256":"95908391d8a4c2b40c3e04ad895b8bc18c0990367911b3ffabb961675aeb89f4","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":96,"column":29,"sha256":"f8737297cc4dcd14c82cfc39ae934f8fd4d6ccb3b0013fef9f6de6bb2b5f31ad","count":1},
+        {"ruleId":"JWT_RS512","line":96,"column":29,"sha256":"4ecdb5e3409dc463eb1195491d907178a797320ac430a19402fc107b3bc3e83a","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":96,"column":35,"sha256":"fee79b86182c256ace5eaab356a5bb68d2e656f3beaea6446f13b959eb037978","count":1},
+        {"ruleId":"JWT_PS256","line":96,"column":35,"sha256":"8e3a0de4ffe9656f04ae1d553161a5d69f880c82eabe69f35efd0abc7f7db274","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":96,"column":41,"sha256":"762b411e6597428308c34ca3f183dc57f3ec445979cd02e029e839181bc64d75","count":1},
+        {"ruleId":"JWT_PS384","line":96,"column":41,"sha256":"4f054650bf3958a62b5e56054239ba1956d1ebaad8a1a48e1e7e84b432c3d586","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":96,"column":47,"sha256":"e5b88c53f004e767ae6536d47c0ef6038b034c70e0dbc1c0518e177391b9afdf","count":1},
+        {"ruleId":"JWT_PS512","line":96,"column":47,"sha256":"8b5b96ed709ed69d55971d5e7b0837a4270c07bde01675c6c0b4d7cdf94f0ee7","count":1}
+      ]
+    },
+    {
+      "path": "rules/default/jwt.yml",
+      "sha256": "8d79f81a4b90c64b68301d19fc5a2255deef9e47e1871aed1181f498883866ae",
+      "reason": "Reviewed detection-rule IDs, patterns, descriptions and migration guidance; rule data is not a configured protocol or executed cryptographic operation. Only exact reviewed results are omitted.",
+      "results": [
+        {"ruleId":"API_JOSE_RSA_ALG","line":10,"column":16,"sha256":"6a0e63afaa3dabc4bac820a6577ec595426f77d95a3db0f249bd1d88f69e7009","count":1},
+        {"ruleId":"JWT_RS256","line":10,"column":16,"sha256":"0f7abbbace9e5c64d43c5720f6e946b7682654fd887ec53ade2176b631b638c7","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":21,"column":16,"sha256":"c2acf84c39387f183a94090248afdbd83ea7fa9a54514fc06c18b4fb5284dce1","count":1},
+        {"ruleId":"JWT_RS384","line":21,"column":16,"sha256":"a22e650d061b3ad8d1bb27be095637ece3352d571f0727c02f79edcaf347744e","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":32,"column":16,"sha256":"d2cca0b264d1fee6d8d89dcc7319c82681e0e3197f7252d942c3fcd151ec5ab7","count":1},
+        {"ruleId":"JWT_RS512","line":32,"column":16,"sha256":"a6db35c483f4e0b6117282f2563e0ec94e1371d7ba277af917d2234fb7ca685f","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":43,"column":16,"sha256":"8a7938f332973e4250717f986c05ac6ee9b89c481631dcb8a9c510f25cc0602d","count":1},
+        {"ruleId":"JWT_PS256","line":43,"column":16,"sha256":"7fdcf531930da9d2baa1015afa6a9b9e319fdf604f64e81dc895223e35a77c22","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":54,"column":16,"sha256":"cf6d3eff4dbec3891d0550c3c53a223b3c93cd62783530ab17ae4a14d0aa28ef","count":1},
+        {"ruleId":"JWT_PS384","line":54,"column":16,"sha256":"5a79ead4565ba64db8b9e2c84fb493c5e177e23f95125a40dcf7e22ab1b22e45","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":65,"column":16,"sha256":"1ef0d8abd9c2c496d2fab5a3166956ca9ee8dada7ced0e28d44b1dd4d40ea2b3","count":1},
+        {"ruleId":"JWT_PS512","line":65,"column":16,"sha256":"f56ef6bc946267c4ba6377b2dfbb726e45b15d869ca27677ce37610e4f5fc4b3","count":1},
+        {"ruleId":"JWT_ES256","line":76,"column":16,"sha256":"9158005fb81a3b5ad2c944871a1262ad300448bc8295b5ac7b26d706f65f2754","count":1},
+        {"ruleId":"OIDC_ID_TOKEN_SIGALG","line":140,"column":13,"sha256":"c765534aa408199c122da360860fa4f1b9e6feea92dca18f85da421355c6effe","count":1}
+      ]
+    },
+    {
+      "path": "rules/default/ssh.yml",
+      "sha256": "2508cfbb33e200e57603a4bb0ed34c3e37c0a592f4ee4d03259310357d1cf004",
+      "reason": "Reviewed detection-rule IDs, patterns, descriptions and migration guidance; rule data is not a configured protocol or executed cryptographic operation. Only exact reviewed results are omitted.",
+      "results": [
+        {"ruleId":"SSH_RSA_ALGO","line":10,"column":16,"sha256":"15d49e9a8e52a5fb1908da28e318f91de3d52219dcd6b3e74f76e2639c0240d3","count":1},
+        {"ruleId":"SSH_DSS_SIGALG","line":29,"column":27,"sha256":"bb05b079a8599a85a5b63df4ebee5e76b80875fd97598002807054b10e7ebd75","count":1},
+        {"ruleId":"SSH_DSS_SIGALG","line":32,"column":27,"sha256":"b76080828daec1c40276ef8a7e43f50229f006a2b747456bc56903c5e59dd0e0","count":1},
+        {"ruleId":"SSH_DH_GROUP1","line":41,"column":13,"sha256":"ed572e72d45800a7924362d32b664412b0cc4c4c3ccea5debe79545920822f88","count":1},
+        {"ruleId":"SSH_DH_GROUP14_SHA1","line":52,"column":13,"sha256":"de1e0bf618a77ee5e647433b4279d2180ea32a5f22b783001ebb2967b984281d","count":1},
+        {"ruleId":"SSH_RSA_ALGO","line":74,"column":18,"sha256":"576fa59a7da823634f9da9b35a0b47db5ac35991f3fe4fc25df37a10bc9d9e3c","count":1},
+        {"ruleId":"PRIVATE_KEY_RSA_HEADER","line":85,"column":13,"sha256":"72561216d6c54048e1e3e9a25c8ffcf92c7f8da1cc192e3df06ef6e9243372c1","count":1},
+        {"ruleId":"PRIVATE_KEY_PKCS8_HEADER","line":96,"column":13,"sha256":"1ad64b8526efdb0910e20be33311582e2c30edd8088b9a2391c0964c154b456b","count":1},
+        {"ruleId":"PRIVATE_KEY_OPENSSH_HEADER","line":107,"column":13,"sha256":"403e3c20cc51f8a36c2e6bd90cb22a569b5a781ac2bd311420cf0a10ed5aef1b","count":1}
+      ]
+    },
+    {
+      "path": "rules/default/tls.yml",
+      "sha256": "9c4a18c98005d4ca581c0eb0f3595ee7e762dc2a626e4166d8eb9b0be0ccbe0a",
+      "reason": "Reviewed detection-rule IDs, patterns, descriptions and migration guidance; rule data is not a configured protocol or executed cryptographic operation. Only exact reviewed results are omitted.",
+      "results": [
+        {"ruleId":"TLS_RSA_KEY_EXCHANGE","line":1,"column":7,"sha256":"108f8528371526d5633f48c0c176fad86fd0225232746e20dd9aee7583c5552f","count":1},
+        {"ruleId":"TLS_RSA_KEY_EXCHANGE","line":8,"column":13,"sha256":"212d5c9e24df1ba633e9bf341c5fd0a66250f15defd7f09695d5ee91ae05eaf7","count":1},
+        {"ruleId":"TLS_ECDHE_RSA","line":12,"column":7,"sha256":"e348318d4fb84f9f852b80b6d390b865e53512c6d79cdddfc72abff5ac021103","count":1},
+        {"ruleId":"TLS_ECDHE_RSA","line":19,"column":13,"sha256":"4c102b10f4aedf97f61a2a6c0b47e555de76fa0db51fb4a1d37184d693d764ff","count":1},
+        {"ruleId":"TLS_ECDHE_RSA","line":21,"column":16,"sha256":"2c3d9431c7ee26d5729493e6fa6f56fa4be44a8bc04cfb34d39de809783e8eeb","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":30,"column":30,"sha256":"75b576e3aca60a5f9b082bf9bd98b4bdfff3ded076e814f9a16302b44a824ab7","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":41,"column":12,"sha256":"2783b423ee5418ab7fdbf4b8a8b3cbb23bc4510bd6b872126bdc1431eb128ae6","count":1},
+        {"ruleId":"TLS_RSA_KEY_EXCHANGE","line":45,"column":7,"sha256":"3e67169b3e7a555e11912a974e0511b1412e9b993d3619a9fdabeb002ef17f29","count":1},
+        {"ruleId":"TLS_RSA_KEY_EXCHANGE","line":67,"column":10,"sha256":"84c6a3107a2761ce7615511bcdcc0ebd35e3c79d6b3d5c1319e88238d16319cb","count":1},
+        {"ruleId":"API_GO_CRYPTO_RSA","line":76,"column":19,"sha256":"9c724ede0f2eb3290bfb9e82b493be963edbb3484b840b7914d8cd1e601dae4b","count":1},
+        {"ruleId":"GO_TLS_RSA_IMPORT","line":76,"column":19,"sha256":"988ac668131e50041d8772636f282e98ee19a451c1a3023c67b825284ffd109b","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":96,"column":36,"sha256":"137bc6ab4947fe6fc01fdcc9a4f794e434c798b253ef848f06d2a72c887c2ff6","count":1},
+        {"ruleId":"TLS_CERT_PIN_RSA","line":140,"column":13,"sha256":"6bec286d1c65b09d7acba6e1b11dd8f4614c5c5d8f2cb1165e84d32940ad03e2","count":1}
+      ]
+    },
+    {
+      "path": "rules/default/tree_sitter.yml",
+      "sha256": "34ae0e842ce9e36cff90da2d188d8eb842fa00755af7b2eac8e90a09a7cde69b",
+      "reason": "Reviewed detection-rule IDs, patterns, descriptions and migration guidance; rule data is not a configured protocol or executed cryptographic operation. Only exact reviewed results are omitted.",
+      "results": [
+        {"ruleId":"API_JOSE_RSA_ALG","line":8,"column":21,"sha256":"a885e04d9269be398fddfb3147cf700a8185a639bc288b661aa05ec09b0c244c","count":1},
+        {"ruleId":"JWT_RS256","line":8,"column":21,"sha256":"5fd990c77a33517cf2b5fb29af51b8e7418e223077bc1734a709643fdf0c2b34","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":8,"column":27,"sha256":"9bbafa64d48c3bcbf5d4a394ead9ec6f55ccd2a541d467fb9ced085231cb2be2","count":1},
+        {"ruleId":"JWT_RS384","line":8,"column":27,"sha256":"64796763bf2642fb964a43f56b14886614827ff3f81cd13e04d6343eccebc3c4","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":8,"column":33,"sha256":"ac3bd25d2323bcc2dcd48441de4f7aa780760d1de26c3b8c852abb233871323a","count":1},
+        {"ruleId":"JWT_RS512","line":8,"column":33,"sha256":"ed79a0607fac9c7f4e79fcd70cc28d1e5d4e2d4e2b1e92fb6e971001b0d1d6f0","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":8,"column":39,"sha256":"2de9ff5d850ad7bdef8ea09c4307eced5fa9fbd87ddef80d7f1b7320171fffb7","count":1},
+        {"ruleId":"JWT_PS256","line":8,"column":39,"sha256":"141195a7502747555223114a301e945e231a358fd56f63ba7c2fa882b7099d5e","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":8,"column":45,"sha256":"6f49ddb63afc86279e2d3e6efe24223b08cd4c033b7815489d77c42772e41932","count":1},
+        {"ruleId":"JWT_PS384","line":8,"column":45,"sha256":"148d9e6a990b78c0d90cb47cfc3b029c1dbc76d66b47fa46a58a52abbe67be83","count":1},
+        {"ruleId":"API_JOSE_RSA_ALG","line":8,"column":51,"sha256":"2e970c23f47da967c06078ec36c5b0e32dbc6bddb35e12df1e46c53416249e0e","count":1},
+        {"ruleId":"JWT_PS512","line":8,"column":51,"sha256":"02e20c20b51129efdf908dc19fdb78e934908ebec87e004529134632b9ecc0b6","count":1},
+        {"ruleId":"JWT_ES256","line":19,"column":21,"sha256":"1a06502d6183f56b6f45bc3abf300ea7904d8872b4f3fe95ec467255fe7f1cf0","count":1},
+        {"ruleId":"API_GO_CRYPTO_RSA","line":40,"column":30,"sha256":"510169eb53970700eafbbf8c4705186b5f4f7bdb4c134b56107d41ccadd48394","count":1},
+        {"ruleId":"GO_TLS_RSA_IMPORT","line":40,"column":30,"sha256":"8710353fbffab1bcc1ceba7d218bd826391356fc3a47964a28a3fdca635dc083","count":1},
+        {"ruleId":"SSH_RSA_ALGO","line":106,"column":45,"sha256":"ca997dcf46f0fc75d2272d906f95d34bb154deded137456ef69b8e1ae378d678","count":1},
+        {"ruleId":"SSH_RSA_ALGO","line":107,"column":17,"sha256":"3122326c908d110c3e3c9e03331c7646899087ff6bbef7adeb6b91c2b22ce721","count":1},
+        {"ruleId":"TLS_RSA_KEY_EXCHANGE","line":111,"column":10,"sha256":"a0f14aee3aac0c8420f6d6e308914f20b589215c1926f246cfee502846f2da93","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":129,"column":34,"sha256":"67b64827519be1304c165b37735951a295dc134950fcec5943c716d9a66ade56","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":129,"column":67,"sha256":"88cd2f1c28b4c7942b5829d3711cf22c4932d38e1a3a4cf213028abd53f783c2","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":129,"column":75,"sha256":"87c51f642829afaf11585258773fcfe546969e8cf88542b81ff54ffeea7e9a5b","count":1}
+      ]
+    },
+    {
+      "path": "tasks/017-actionable-compact-reports.yaml",
+      "sha256": "e2301ee39fef6fa71ea03baaebf6e03aada47b9faf414fdf3784e2eab16f77a1",
+      "reason": "Reviewed task acceptance/security prose specifying safe report guidance; no executable cryptographic use. Only exact reviewed results are omitted.",
+      "results": [
+        {"ruleId":"API_JOSE_RSA_ALG","line":110,"column":30,"sha256":"c7231bf9178c80931c66d33975ff7cbd011e9cf913a7bf88ad424c17d6c69100","count":1},
+        {"ruleId":"JWT_RS256","line":110,"column":30,"sha256":"e32dc7a7f4f2a442ecc32b5fadbc27afef770dab269f9dee7132febab99634e1","count":1}
+      ]
+    },
+    {
+      "path": "crates/pqc_scan_report/src/compact.rs",
+      "sha256": "2a486ef77a5c7b493b88d325dbb039372f8ade4a11c3e56ddd7816f6e837d3d6",
+      "reason": "Reviewed fixed rule-ID classification in protocol_rule; names are presentation routing keys, not TLS configuration. Only exact reviewed results are omitted.",
+      "results": [
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":57,"column":30,"sha256":"fd08f17f64ba88ce04876c8187b5693adf49b233389d24b71e8fa0ed4d46d677","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":63,"column":37,"sha256":"aa11ae1f4effd3f8d64a6b246fb85cd8e060d00cbb793e1ebef66afdd1b096dc","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":64,"column":29,"sha256":"bf0518ea5198f59f642f4ad4f9dbc6fb9ba1b7eae5aed401ec1324b080b95ea4","count":1},
+        {"ruleId":"TS_TLS_LEGACY_VERSION_LITERAL","line":65,"column":28,"sha256":"06db91698d692a719284fb99b68489529fc989807d3a45c96b45f0415e3c0e0d","count":1}
+      ]
+    },
+    {
+      "path": "rules/default/middleware.yml",
+      "sha256": "58cca7b8dd25144a1f40a306d46ec5619fbf7da4504140b2607af7b34404b145",
+      "reason": "Reviewed detection-rule IDs, patterns, descriptions and migration guidance; rule data is not a configured protocol or executed cryptographic operation. Only exact reviewed results are omitted.",
+      "results": [
+        {"ruleId":"TLS_VERSION_1_0","line":8,"column":83,"sha256":"defec0e5b09e3af60242d14bd0d97fa2f65e07218e1d86074b302fbe340f02de","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":30,"column":31,"sha256":"17d4b1f4c5fa9f1792e89ae5996807f21f0e3baeca6ce91ff6309869563280f9","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":41,"column":44,"sha256":"eac91b6ae55e541f19f5a2d841828e79a22e918fd30fb88d4fa35a873ccc4e22","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":74,"column":50,"sha256":"e093b80260922ce1a695934ebb117c29b5a260fb7de294d8a964da6ebce928b4","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":85,"column":39,"sha256":"9bded05bfd26dbc5d154736e614af6ca85173920e9b08a2c6e2e0f87e3533735","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":118,"column":49,"sha256":"65e7c7fc8a52cff5e825211f4e5517fc0146078d256d9375d1db5afca244d79a","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":120,"column":42,"sha256":"2cf50a87e506e5665785b97d0068082d74e5d4e4b4e5ee3cf2d6bc263ec9c472","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":129,"column":49,"sha256":"18b85fc9b143833dce234863a297d6c40c81315f194a36b1293faff8debd5d66","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":164,"column":43,"sha256":"f29a287c397070b3a4331b2482a83a9bae4b1248268eb84e68a0e0a6504c159f","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":186,"column":15,"sha256":"5bd8befed6beb846894ab16528becf7eeee55f999f549ef9cabf7c4e10e78d90","count":1},
+        {"ruleId":"TLS_VERSION_1_0","line":197,"column":56,"sha256":"44ff4088d778d88afcbb6dc9eea43e4f0d05b5e09556a0dd4ffa2d3c57896773","count":1}
       ]
     }
   ]

@@ -492,7 +492,7 @@ checks, then scans the full normal repository scope. Detection rules, severity a
 the scanner's raw `report.sarif` stay unchanged.
 
 For this repository's Code Scanning upload only, a preparation step omits exact
-reviewed test observations and fixed classification-data references listed in
+reviewed test observations and fixed rule/catalog/guidance references listed in
 [`SELF-SCAN-EXPECTATIONS.json`](docs/quality/SELF-SCAN-EXPECTATIONS.json). Each entry
 binds the complete source-file SHA-256, the full result digest, rule/location and
 exact occurrence count. Changed/missing sources, new results, excess duplicates
@@ -503,8 +503,8 @@ The `pqc-self-scan-evidence` artifact preserves raw SARIF, the separate
 `code-scanning.sarif` upload copy, `code-scanning-audit.json` and the exact expectation
 policy, even if preparation
 or upload fails. The existing dependency SBOM artifact is retained. This is CI-only
-policy; normal scans and user report formats are unaffected. Fixed algorithm-name
-vocabularies and assessment predicates can match usage patterns without performing
+policy; normal scans and user report formats are unaffected. Rule definitions, algorithm-name vocabularies, OID labels, translated guidance and
+nonexecuted example strings can match usage patterns without performing
 cryptographic operations; only individually reviewed exact results are registered.
 New intentional test inputs or classification references require review of their
 source/result bindings before registration; CI does

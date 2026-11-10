@@ -15,7 +15,9 @@ Rejected: disabling Code Scanning failure thresholds, downgrading severity, excl
 Policy `docs/quality/SELF-SCAN-EXPECTATIONS.json` uses version 1 and explicit files. Each file has a repository-relative path, complete source-file SHA-256, a reviewed reason and exact expected results (rule ID, start line/column, SHA-256 of canonical full result, allowed count). No globs, severity-wide exceptions or automatic learning in CI. Only reviewed fixture files, examples and actual inline unit-test regions were registered initially.
 The PR14 follow-up also permits individually reviewed fixed classification-data
 references: identifier vocabularies and assessment predicates that do not perform
-cryptographic operations. This is an exact-result exception, not a whole-file or
+cryptographic operations. The backlog follow-up extends this individually reviewed
+scope to rule definitions, OID labels, localization/guidance text, nonexecuted code
+examples and task prose. This is an exact-result exception, not a whole-file or
 production-code baseline. Unregistered product/rule implementation findings remain visible.
 
 The Node helper `shell/prepare-code-scanning.cjs` exports `prepareCodeScanning(sarif, policy, root)` and `resultDigest(result)`, and has a CLI accepting `--input`, `--expectations`, `--root`, `--output`, `--audit`. Use built-in Node modules only. Canonical JSON sorts object keys recursively, preserves arrays and includes every SARIF result field; the current writer has no volatile result ID/timestamp to discard.
@@ -151,3 +153,31 @@ retention when a classification source binding becomes stale. This does not add
 an automatic test-directory exclusion or generic suppression capability.
 
 See [investigation, verification and hosted outcome](PR-014-SELF-SCAN-FOLLOWUP.md).
+
+
+## Existing default-branch alert backlog
+
+The default-branch alert page retained 128 older alerts from commit
+`1335033fb3ffd96632f9f39a51bf8f2a115f2ead`. They refer to 11 explicit sources:
+six rule YAML files, two report text/classification modules, a recommendation
+module, public OID labels in the certificate parser, and task017 prose. TLS names
+inside a rule regex, report routing key or advice to disable old TLS are not a
+configured live connection. No deployed TLS setting or cryptographic operation
+was found in the reviewed locations.
+
+Register the corresponding 130 current observations as 128 exact result groups;
+two same-line line-only groups each contain two real source occurrences. Preserve
+four artifact-only test findings, since the policy still requires a reviewed
+positive line. Final upload partition: **856 raw = 852 reviewed omissions + 4
+retained**; 112 source hashes are verified. Existing source/result allowances are
+retained, with two reasons expanded to distinguish inline tests and fixed data.
+
+Existing default-branch alerts and a PR's upload results are separate state. A PR
+update does not update the `develop` source. Verified historical false positives
+may be triaged individually through GitHub's official alert API with a recorded
+reason and source-review link; this does not merge the PR or alter raw evidence.
+No general rule/production-file exclusion is added. The registry fix must still
+reach develop through the normal review/merge process.
+
+[Investigation and verification](SELF-SCAN-BACKLOG-FOLLOWUP.md) and
+[independent review](SELF-SCAN-BACKLOG-REVIEW.md) document the exact finite scope.
