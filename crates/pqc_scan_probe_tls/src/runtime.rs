@@ -164,37 +164,16 @@ impl TlsProbe {
                 ) {
                     return Err(ProbeDiagnostic::UnsupportedLocal);
                 }
-                report.details.handshake_complete = true;
-                report.details.handshake_kind = connection.handshake_kind().map(|h| {
-                    match h {
-                        HandshakeKind::Full => "full",
-                        HandshakeKind::FullWithHelloRetryRequest => "full_with_hello_retry_request",
-                        _ => "unsupported",
-                    }
-                    .into()
-                });
-                report.details.verification.certificate_chain_and_name = "verified".into();
-                let version = connection
-                    .protocol_version()
-                    .ok_or(ProbeDiagnostic::ProtocolMismatch)?;
-                let suite = connection
-                    .negotiated_cipher_suite()
-                    .ok_or(ProbeDiagnostic::ProtocolMismatch)?
-                    .suite();
                 let group = connection
                     .negotiated_key_exchange_group()
                     .map(|g| identifier(u16::from(g.name()), &format!("{:?}", g.name())));
-                let classification = match group.as_ref().map(|g| g.id) {
-                    Some(4587..=4589) => "hybrid",
-                    Some(23 | 24 | 29) => "classical",
-                    _ => "unknown",
-                };
-                report.details.negotiated = Some(NegotiatedTls {
-                    version: identifier(u16::from(version), &format!("{version:?}")),
-                    cipher_suite: identifier(u16::from(suite), &format!("{suite:?}")),
-                    key_exchange_group: group.clone(),
-                    group_classification: classification.into(),
-                });
+                set_verified_negotiation(
+                    &mut report.details,
+                    connection.handshake_kind(),
+                    connection.protocol_version(),
+                    connection.negotiated_cipher_suite().map(|s| s.suite()),
+                    group.clone(),
+                )?;
                 let mut diagnostics = vec![];
                 if group.is_none() {
                     diagnostics.push(ProbeDiagnostic::GroupUnavailable);
@@ -222,6 +201,38 @@ impl TlsProbe {
         report
     }
 }
+// Validate fallible post-handshake accessors before publishing any success facts.
+fn set_verified_negotiation(
+    details: &mut TlsObservation,
+    kind: Option<HandshakeKind>,
+    version: Option<rustls::ProtocolVersion>,
+    suite: Option<rustls::CipherSuite>,
+    group: Option<RegistryIdentifier>,
+) -> Result<(), ProbeDiagnostic> {
+    let version = version.ok_or(ProbeDiagnostic::ProtocolMismatch)?;
+    let suite = suite.ok_or(ProbeDiagnostic::ProtocolMismatch)?;
+    let kind = match kind {
+        Some(HandshakeKind::Full) => "full",
+        Some(HandshakeKind::FullWithHelloRetryRequest) => "full_with_hello_retry_request",
+        _ => return Err(ProbeDiagnostic::UnsupportedLocal),
+    };
+    let classification = match group.as_ref().map(|g| g.id) {
+        Some(4587..=4589) => "hybrid",
+        Some(23 | 24 | 29) => "classical",
+        _ => "unknown",
+    };
+    details.negotiated = Some(NegotiatedTls {
+        version: identifier(u16::from(version), &format!("{version:?}")),
+        cipher_suite: identifier(u16::from(suite), &format!("{suite:?}")),
+        key_exchange_group: group,
+        group_classification: classification.into(),
+    });
+    details.handshake_complete = true;
+    details.handshake_kind = Some(kind.into());
+    details.verification.certificate_chain_and_name = "verified".into();
+    Ok(())
+}
+
 fn identifier(id: u16, name: &str) -> RegistryIdentifier {
     RegistryIdentifier {
         id,
@@ -417,6 +428,38 @@ fn root_digest(roots: &RootCertStore) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn missing_post_handshake_parameters_do_not_publish_verified_details() {
+        for (version, suite) in [
+            (None, Some(rustls::CipherSuite::TLS13_AES_128_GCM_SHA256)),
+            (Some(rustls::ProtocolVersion::TLSv1_3), None),
+        ] {
+            let mut details = TlsProbe::new(&TlsOptions {
+                verification_name: "localhost".into(),
+                ca_file: None,
+            })
+            .unwrap()
+            .initial;
+            assert_eq!(
+                set_verified_negotiation(
+                    &mut details,
+                    Some(HandshakeKind::Full),
+                    version,
+                    suite,
+                    None
+                ),
+                Err(ProbeDiagnostic::ProtocolMismatch)
+            );
+            assert!(!details.handshake_complete);
+            assert_eq!(
+                details.verification.certificate_chain_and_name,
+                "not_completed"
+            );
+            assert!(details.negotiated.is_none());
+            assert!(details.handshake_kind.is_none());
+        }
+    }
+
     #[test]
     fn unsupported_certificate_signature_is_a_local_limitation() {
         let error = rustls::Error::InvalidCertificate(
