@@ -1,4 +1,5 @@
 //! Dependency assertions and a compatible flat projection; no package resolution.
+mod bounded;
 mod decode;
 mod parse;
 use anyhow::Result;

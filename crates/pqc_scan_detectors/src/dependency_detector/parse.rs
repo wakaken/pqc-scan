@@ -1,29 +1,29 @@
 //! Provenance capture over supported structured subsets; lexical fallbacks never Complete.
 #[path = "lexical.rs"]
 mod lexical;
-use super::{
+pub(super) use super::{
     decode::{self, Failure, Format},
     DependencyItem,
 };
-use pqc_scan_core::model::line_col_for_offset;
-use pqc_scan_core::observation::{
+pub(super) use pqc_scan_core::model::line_col_for_offset;
+pub(super) use pqc_scan_core::observation::{
     exact_dependency_version, resolved_dependency_version, safe_dependency_version,
     valid_dependency_name, DependencyOrigin as Origin,
 };
-use pqc_scan_core::{classifier, DetectorStatus, ScannableFile};
-use regex::Regex;
+pub(super) use pqc_scan_core::{classifier, DetectorStatus, ScannableFile};
+pub(super) use regex::Regex;
 use serde_json::Value;
 pub(super) struct Parsed {
     pub items: Vec<DependencyItem>,
     pub status: DetectorStatus,
 }
-struct Build {
-    items: Vec<DependencyItem>,
+pub(super) struct Build {
+    pub(super) items: Vec<DependencyItem>,
     bad: usize,
-    status: DetectorStatus,
+    pub(super) status: DetectorStatus,
 }
 impl Build {
-    fn new(status: DetectorStatus) -> Self {
+    pub(super) fn new(status: DetectorStatus) -> Self {
         Self {
             items: vec![],
             bad: 0,
@@ -31,7 +31,7 @@ impl Build {
         }
     }
     #[allow(clippy::too_many_arguments)]
-    fn add(
+    pub(super) fn add(
         &mut self,
         ecosystem: &str,
         name: &str,
@@ -107,7 +107,7 @@ impl Build {
             parsed: true,
         });
     }
-    fn finish(self) -> anyhow::Result<Parsed> {
+    pub(super) fn finish(self) -> anyhow::Result<Parsed> {
         let status = if self.status == DetectorStatus::Truncated {
             DetectorStatus::Truncated
         } else if self.bad > 0 {
@@ -124,7 +124,7 @@ impl Build {
         })
     }
 }
-fn failure(f: Failure) -> anyhow::Result<Parsed> {
+pub(super) fn failure(f: Failure) -> anyhow::Result<Parsed> {
     match f {
         Failure::Malformed => anyhow::bail!("invalid dependency document"),
         Failure::Limit => Ok(Parsed {
@@ -297,6 +297,8 @@ pub(super) fn inspect(file: &ScannableFile) -> anyhow::Result<Parsed> {
             "pnpm-lock.yaml" => pnpm(&value, text),
             _ => sbom(&value, text),
         }
+    } else if let Some(result) = super::bounded::inspect(name, text) {
+        result
     } else {
         heuristic(name, text)
     }
@@ -913,35 +915,40 @@ fn sbom(value: &Value, text: &str) -> anyhow::Result<Parsed> {
     if let Some(v) = value.get("packages") {
         if let Some(packages) = v.as_array() {
             for p in packages {
-                if p.get("versionInfo").is_some_and(|v| !v.is_string()) {
+                if p.get("versionInfo").is_some_and(|v| !v.is_string())
+                    || p.get("externalRefs").is_some_and(|v| !v.is_array())
+                {
                     b.bad += 1;
                 }
                 let Some(name) = p["name"].as_str() else {
                     b.bad += 1;
                     continue;
                 };
-                let provided = p["externalRefs"]
+                let provided_refs: Vec<_> = p["externalRefs"]
                     .as_array()
-                    .and_then(|refs| refs.iter().find(|r| r["referenceType"] == "purl"))
-                    .and_then(|r| r["referenceLocator"].as_str())
-                    .unwrap_or("");
-                let mut ecosystem = ecosystem(provided);
-                // A purl namespace cannot be attached to an unrelated display label.
-                // Keep the safe reported label rather than discard it or guess identity.
-                if !valid_dependency_name(name, ecosystem) && valid_dependency_name(name, "unknown")
+                    .into_iter()
+                    .flatten()
+                    .filter(|r| r["referenceType"] == "purl")
+                    .collect();
+                let provided = if provided_refs.len() == 1 {
+                    provided_refs[0]["referenceLocator"].as_str().unwrap_or("")
+                } else {
+                    ""
+                };
+                if provided_refs.len() > 1
+                    || provided_refs
+                        .first()
+                        .is_some_and(|r| !r["referenceLocator"].is_string())
                 {
-                    ecosystem = "unknown";
                     b.bad += 1;
                 }
-                b.add(
-                    ecosystem,
+                sbom_add(
+                    &mut b,
                     name,
+                    None,
                     p["versionInfo"].as_str(),
-                    None,
-                    None,
-                    Origin::SbomReported,
+                    provided,
                     located(text, name),
-                    true,
                 );
             }
         } else {
@@ -953,16 +960,156 @@ fn sbom(value: &Value, text: &str) -> anyhow::Result<Parsed> {
     }
     b.finish()
 }
-fn ecosystem(purl: &str) -> &str {
-    match purl.strip_prefix("pkg:").and_then(|v| v.split('/').next()) {
-        Some("cargo") => "cargo",
-        Some("npm") => "npm",
-        Some("pypi") => "pypi",
-        Some("gem") => "gem",
-        Some("maven") => "maven",
-        Some("golang") => "golang",
-        Some("generic") => "generic",
-        _ => "unknown",
+// Purls are identity claims, never locators to fetch or evidence of installation.
+fn purl_identity(provided: &str) -> Option<(&str, String, Option<String>)> {
+    if provided.len() > 4096 || provided.contains(['?', '#', '\\']) {
+        return None;
+    }
+    let value = provided.strip_prefix("pkg:")?;
+    let (ecosystem, path) = value.split_once('/')?;
+    if !["cargo", "npm", "pypi", "gem", "maven", "golang", "generic"].contains(&ecosystem) {
+        return None;
+    }
+    // A raw npm scope @ precedes a slash and is not a version separator.
+    let separator = path
+        .rfind('@')
+        .filter(|at| path.rfind('/').is_none_or(|slash| *at > slash));
+    let (path, version) = match separator {
+        Some(at) => (&path[..at], Some(decode_component(&path[at + 1..])?)),
+        None => (path, None),
+    };
+    if version.as_deref().is_some_and(|v| {
+        !safe_dependency_version(v)
+            || if ecosystem == "golang" {
+                !v.strip_prefix('v')
+                    .is_some_and(|v| resolved_dependency_version("npm", v))
+            } else {
+                !exact_dependency_version(v)
+            }
+    }) {
+        return None;
+    }
+    let parts = path
+        .split('/')
+        .map(decode_component)
+        .collect::<Option<Vec<_>>>()?;
+    if parts
+        .iter()
+        .any(|s| s.is_empty() || s == "." || s == ".." || s.contains(['/', ':', '@']))
+    {
+        // npm scope is the sole allowed embedded @ component.
+        if ecosystem != "npm"
+            || parts.len() != 2
+            || !parts[0].starts_with('@')
+            || parts[0][1..].contains(['/', ':', '@'])
+            || parts[1].contains(['/', ':', '@'])
+        {
+            return None;
+        }
+    }
+    let name = if ecosystem == "maven" {
+        if parts.len() != 2 {
+            return None;
+        }
+        format!("{}:{}", parts[0], parts[1])
+    } else {
+        if matches!(ecosystem, "cargo" | "pypi" | "gem") && parts.len() != 1 {
+            return None;
+        }
+        parts.join("/")
+    };
+    valid_dependency_name(&name, ecosystem).then_some((ecosystem, name, version))
+}
+fn decode_component(value: &str) -> Option<String> {
+    let bytes = value.as_bytes();
+    let mut decoded = Vec::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' {
+            let pair = bytes.get(i + 1..i + 3)?;
+            let hex = std::str::from_utf8(pair).ok()?;
+            decoded.push(u8::from_str_radix(hex, 16).ok()?);
+            i += 3;
+        } else {
+            decoded.push(bytes[i]);
+            i += 1;
+        }
+    }
+    let value = String::from_utf8(decoded).ok()?;
+    if value
+        .bytes()
+        .any(|c| c.is_ascii_control() || c.is_ascii_whitespace())
+    {
+        None
+    } else {
+        Some(value)
+    }
+}
+fn sbom_add(
+    b: &mut Build,
+    label: &str,
+    group: Option<&str>,
+    reported: Option<&str>,
+    provided: &str,
+    line: usize,
+) {
+    let identity = purl_identity(provided).filter(|(ecosystem, name, version)| {
+        let matching_name = if *ecosystem == "maven" {
+            // Without group, an SBOM name may be a product/display label.
+            group.map_or(!label.contains(':') || label == name, |g| {
+                format!("{g}:{label}") == *name
+            })
+        } else if *ecosystem == "npm" {
+            let declared = group.map_or_else(|| label.to_string(), |g| format!("{g}/{label}"));
+            declared == *name
+        } else {
+            label == name
+        };
+        matching_name && version.as_deref().zip(reported).is_none_or(|(a, b)| a == b)
+    });
+    if let Some((ecosystem, name, version)) = identity {
+        b.add(
+            ecosystem,
+            &name,
+            reported.or(version.as_deref()),
+            None,
+            None,
+            Origin::SbomReported,
+            line,
+            true,
+        );
+    } else {
+        if !provided.is_empty() {
+            b.bad += 1;
+        }
+        // A malformed identity claim must not discard an independently safe
+        // namespaced source label, or turn that label into a verified purl.
+        let ecosystem = provided
+            .strip_prefix("pkg:")
+            .and_then(|p| p.split_once('/'))
+            .map(|(e, _)| e)
+            .filter(|e| ["cargo", "npm", "pypi", "gem", "maven", "golang", "generic"].contains(e))
+            .filter(|e| valid_dependency_name(label, e))
+            .unwrap_or("unknown");
+        let ecosystem = if valid_dependency_name(label, "unknown") {
+            "unknown"
+        } else {
+            ecosystem
+        };
+        let count = b.items.len();
+        b.add(
+            ecosystem,
+            label,
+            reported,
+            None,
+            None,
+            Origin::SbomReported,
+            line,
+            true,
+        );
+        if b.items.len() > count {
+            b.items.last_mut().unwrap().purl.clear();
+        }
     }
 }
 fn sbom_components(value: &Value, text: &str, b: &mut Build) {
@@ -971,49 +1118,30 @@ fn sbom_components(value: &Value, text: &str, b: &mut Build) {
         return;
     };
     for c in components {
-        if c.get("version").is_some_and(|v| !v.is_string()) {
+        if ["version", "group", "purl"]
+            .iter()
+            .any(|key| c.get(*key).is_some_and(|v| !v.is_string()))
+        {
             b.bad += 1;
         }
         let Some(name) = c["name"].as_str() else {
             b.bad += 1;
             continue;
         };
-        let ecosystem = ecosystem(c["purl"].as_str().unwrap_or(""));
-        let name = if let Some(group) = c["group"].as_str() {
-            if ecosystem == "maven" {
-                format!("{group}:{name}")
-            } else if ecosystem == "npm" {
-                format!("{group}/{name}")
-            } else {
-                name.into()
-            }
-        } else {
-            name.into()
-        };
-        let ecosystem = if !valid_dependency_name(&name, ecosystem)
-            && valid_dependency_name(&name, "unknown")
-        {
-            b.bad += 1;
-            "unknown"
-        } else {
-            ecosystem
-        };
-        b.add(
-            ecosystem,
-            &name,
+        sbom_add(
+            b,
+            name,
+            c["group"].as_str(),
             c["version"].as_str(),
-            None,
-            None,
-            Origin::SbomReported,
-            located(text, &name),
-            true,
+            c["purl"].as_str().unwrap_or(""),
+            located(text, name),
         );
         if let Some(child) = c.get("components") {
             sbom_components(child, text, b);
         }
     }
 }
-fn heuristic(name: &str, text: &str) -> anyhow::Result<Parsed> {
+pub(super) fn heuristic(name: &str, text: &str) -> anyhow::Result<Parsed> {
     if text.len() > 2 * 1024 * 1024 {
         return failure(Failure::Limit);
     }

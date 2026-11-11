@@ -122,6 +122,15 @@ fn next(f: &Finding, group: &RuleGroup<'_>, lang: ReportLanguage) -> String {
 }
 
 pub(crate) fn html_report(result: &ScanResult, path: &Path, lang: ReportLanguage) -> Result<()> {
+    html_report_with_context(result, path, lang, None)
+}
+
+pub(crate) fn html_report_with_context(
+    result: &ScanResult,
+    path: &Path,
+    lang: ReportLanguage,
+    context: Option<&crate::inspection::HumanContext<'_>>,
+) -> Result<()> {
     let groups = groups(result);
     let title = label(
         lang,
@@ -133,30 +142,33 @@ pub(crate) fn html_report(result: &ScanResult, path: &Path, lang: ReportLanguage
     writeln!(out,"<header class=\"top\"><h1>{title}</h1><p class=\"meta\">{}: {}</p><p>{}</p></header>",label(lang,"Generated","作成日時"),result.generated_at,label(lang,"Static evidence, not a runtime or migration-completion guarantee. Expand a rule, then a location, to inspect its next steps.","コードや設定の手掛かりをまとめた調査結果です。PQCへの対応完了を保証するものではありません。ルール、検出箇所の順に開くと、その箇所の対応を確認できます。"))?;
     let inv = result.findings.iter().filter(|f| inventory(f)).count();
     writeln!(out, "<section class=\"summary\">")?;
-    for (name, count) in [
+    let mut metrics = vec![
         (
             label(lang, "Risk candidates", "対応を確認する候補"),
             result.findings.len() - inv,
         ),
         (label(lang, "Inventory findings", "参考情報"), inv),
-        (
+    ];
+    if context.is_none() {
+        metrics.push((
             label(lang, "Scanned Files", "調査したファイル"),
             result.summary.scanned_files,
-        ),
-        (
+        ));
+        metrics.push((
             label(lang, "Skipped Files", "対象外のファイル"),
             result.summary.skipped_files,
-        ),
-        (
-            label(lang, "Affected files", "該当ファイル"),
-            result
-                .findings
-                .iter()
-                .map(|f| &f.location.file)
-                .collect::<BTreeSet<_>>()
-                .len(),
-        ),
-    ] {
+        ));
+    }
+    metrics.push((
+        label(lang, "Affected files", "該当ファイル"),
+        result
+            .findings
+            .iter()
+            .map(|f| &f.location.file)
+            .collect::<BTreeSet<_>>()
+            .len(),
+    ));
+    for (name, count) in metrics {
         writeln!(out,"<div class=\"metric\"><div class=\"metric-label\">{name}</div><div class=\"metric-value\">{count}</div></div>")?;
     }
     writeln!(
@@ -176,7 +188,15 @@ pub(crate) fn html_report(result: &ScanResult, path: &Path, lang: ReportLanguage
             h(severity(lang, s))
         )?;
     }
-    writeln!(out,"</p><section data-report-controls hidden aria-label=\"{}\"><label>{}<select data-mode><option value=\"candidate\">{}</option><option value=\"inventory\">{}</option><option value=\"all\">{}</option></select></label><label>{}<input data-search type=\"search\" placeholder=\"{}\"></label><label>{}<select data-severity><option value=\"\">{}</option>",label(lang,"Report filters","表示の絞り込み"),label(lang,"View","表示対象"),label(lang,"Risk candidates","対応候補"),label(lang,"Inventory","参考情報"),label(lang,"All","すべて"),label(lang,"Search","検索"),label(lang,"Rule, title or file","ルール・説明・ファイル名"),label(lang,"Severity","重大度"),label(lang,"All severities","すべて"))?;
+    writeln!(
+        out,
+        "</p>{}",
+        context
+            .map(|c| crate::inspection::html(c, lang))
+            .transpose()?
+            .unwrap_or_default()
+    )?;
+    writeln!(out,"<section data-report-controls hidden aria-label=\"{}\"><label>{}<select data-mode><option value=\"candidate\">{}</option><option value=\"inventory\">{}</option><option value=\"all\">{}</option></select></label><label>{}<input data-search type=\"search\" placeholder=\"{}\"></label><label>{}<select data-severity><option value=\"\">{}</option>",label(lang,"Report filters","表示の絞り込み"),label(lang,"View","表示対象"),label(lang,"Risk candidates","対応候補"),label(lang,"Inventory","参考情報"),label(lang,"All","すべて"),label(lang,"Search","検索"),label(lang,"Rule, title or file","ルール・説明・ファイル名"),label(lang,"Severity","重大度"),label(lang,"All severities","すべて"))?;
     for s in ["critical", "high", "medium", "low", "info"] {
         writeln!(out, "<option value=\"{s}\">{}</option>", severity(lang, s))?;
     }
@@ -392,6 +412,15 @@ pub(crate) fn markdown_report(
     result: &ScanResult,
     path: &Path,
     lang: ReportLanguage,
+) -> Result<()> {
+    markdown_report_with_context(result, path, lang, None)
+}
+
+pub(crate) fn markdown_report_with_context(
+    result: &ScanResult,
+    path: &Path,
+    lang: ReportLanguage,
+    context: Option<&crate::inspection::HumanContext<'_>>,
 ) -> Result<()> {
     let groups = groups(result);
     let mut out = String::new();
@@ -613,6 +642,9 @@ pub(crate) fn markdown_report(
         result.cbom.len(),
         result.dependency_sbom.len()
     )?;
+    if let Some(context) = context {
+        out.push_str(&crate::inspection::markdown(context, lang)?);
+    }
     std::fs::write(path, out)?;
     Ok(())
 }

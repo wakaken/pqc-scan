@@ -1,0 +1,729 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "scanner_version": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "protocol": {
+      "const": "tls"
+    },
+    "attempt_id": {
+      "const": 1
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "host": {
+          "type": "string",
+          "maxLength": 253
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "resolved_addresses": {
+          "anyOf": [
+            {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": {
+                "type": "string",
+                "maxLength": 64
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pinned_address": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "connected_peer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "host",
+        "port",
+        "resolved_addresses",
+        "pinned_address",
+        "connected_peer"
+      ]
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_dns_answers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "max_received_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 524288
+        },
+        "max_sent_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        },
+        "dns_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5000000000
+        },
+        "tcp_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3000000000
+        },
+        "protocol_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5000000000
+        },
+        "overall_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15000000000
+        }
+      },
+      "required": [
+        "max_dns_answers",
+        "dns_timeout_ns",
+        "tcp_timeout_ns",
+        "protocol_timeout_ns",
+        "overall_timeout_ns",
+        "max_received_bytes",
+        "max_sent_bytes"
+      ]
+    },
+    "traffic": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "received_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 524288
+        },
+        "sent_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65536
+        }
+      },
+      "required": [
+        "received_bytes",
+        "sent_bytes"
+      ]
+    },
+    "outcome": {
+      "enum": [
+        "completed",
+        "partial",
+        "failed"
+      ]
+    },
+    "diagnostics": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "enum": [
+          "inspection_not_completed",
+          "invalid_target",
+          "address_denied",
+          "dns_failed",
+          "deadline_exceeded",
+          "cancelled",
+          "traffic_limit",
+          "attempt_limit",
+          "peer_mismatch",
+          "transport_failed",
+          "unsupported_local",
+          "protocol_mismatch",
+          "malformed_peer_data",
+          "peer_disconnected",
+          "certificate_validation_failed",
+          "tls_alert",
+          "local_resource_limit",
+          "certificate_collection_limit",
+          "certificate_parse_incomplete",
+          "group_unavailable"
+        ]
+      }
+    },
+    "redaction_applied": {
+      "type": "boolean"
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "client_profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "const": "default_secure_fresh"
+            },
+            "provider": {
+              "const": "aws_lc_rs"
+            },
+            "provider_version": {
+              "const": "1.18.0"
+            },
+            "rustls_version": {
+              "const": "0.23.46"
+            },
+            "protocol_versions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "id",
+                  "name"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 2
+            },
+            "cipher_suites": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "id",
+                  "name"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 256
+            },
+            "key_exchange_groups": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 65535
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "id",
+                  "name"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 64
+            }
+          },
+          "required": [
+            "name",
+            "provider",
+            "provider_version",
+            "rustls_version",
+            "protocol_versions",
+            "cipher_suites",
+            "key_exchange_groups"
+          ]
+        },
+        "verification": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "verification_name": {
+              "type": "string",
+              "maxLength": 253
+            },
+            "sent_sni": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 253
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "trust_source": {
+              "enum": [
+                "bundled_mozilla",
+                "local_ca_file"
+              ]
+            },
+            "root_set_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "root_set_digest_basis": {
+              "const": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1"
+            },
+            "certificate_chain_and_name": {
+              "enum": [
+                "not_completed",
+                "verified",
+                "failed"
+              ]
+            },
+            "revocation": {
+              "const": "not_checked"
+            },
+            "trust_bundle_version": {
+              "anyOf": [
+                {
+                  "const": "1.0.11"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "verification_name",
+            "sent_sni",
+            "trust_source",
+            "root_set_sha256",
+            "root_set_digest_basis",
+            "certificate_chain_and_name",
+            "revocation",
+            "trust_bundle_version"
+          ]
+        },
+        "handshake_complete": {
+          "type": "boolean"
+        },
+        "handshake_kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "full",
+                "full_with_hello_retry_request"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "negotiated": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "version": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 65535
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 128
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "cipher_suite": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 65535
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 128
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                },
+                "key_exchange_group": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 65535
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 128
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name"
+                      ]
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "group_classification": {
+                  "enum": [
+                    "classical",
+                    "hybrid",
+                    "unknown"
+                  ]
+                }
+              },
+              "required": [
+                "version",
+                "cipher_suite",
+                "key_exchange_group",
+                "group_classification"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "peer_certificates": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "certificate_der_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "spki_sha256": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "signature_oid": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 262144
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "public_key_oid": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 262144
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "key_bits": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "named_curve_oid": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 262144
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "not_before_unix": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "not_after_unix": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "attribute_status": {
+                "enum": [
+                  "complete",
+                  "partial",
+                  "unsupported_or_malformed"
+                ]
+              }
+            },
+            "required": [
+              "certificate_der_sha256",
+              "spki_sha256",
+              "signature_oid",
+              "public_key_oid",
+              "key_bits",
+              "named_curve_oid",
+              "not_before_unix",
+              "not_after_unix",
+              "attribute_status"
+            ]
+          }
+        },
+        "certificate_collection": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "not_available",
+                "complete",
+                "partial"
+              ]
+            },
+            "presented_count": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "presented_bytes": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "collected_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 16
+            }
+          },
+          "required": [
+            "status",
+            "presented_count",
+            "presented_bytes",
+            "collected_count"
+          ]
+        }
+      },
+      "required": [
+        "client_profile",
+        "verification",
+        "handshake_complete",
+        "handshake_kind",
+        "negotiated",
+        "peer_certificates",
+        "certificate_collection"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "scanner_version",
+    "generated_at",
+    "protocol",
+    "attempt_id",
+    "target",
+    "limits",
+    "traffic",
+    "outcome",
+    "diagnostics",
+    "redaction_applied",
+    "details"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pqc-scan.local/schemas/probe-tls-v1.schema.json",
+  "title": "Explicit TLS session observation v1",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "maxItems": 0
+          },
+          "target": {
+            "properties": {
+              "connected_peer": {
+                "type": "string"
+              }
+            }
+          },
+          "details": {
+            "properties": {
+              "handshake_complete": {
+                "const": true
+              },
+              "negotiated": {
+                "type": "object",
+                "properties": {
+                  "key_exchange_group": {
+                    "type": "object"
+                  }
+                }
+              },
+              "verification": {
+                "properties": {
+                  "certificate_chain_and_name": {
+                    "const": "verified"
+                  }
+                }
+              },
+              "certificate_collection": {
+                "properties": {
+                  "status": {
+                    "const": "complete"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "diagnostics": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "failed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "details": {
+            "properties": {
+              "handshake_complete": {
+                "const": false
+              },
+              "negotiated": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

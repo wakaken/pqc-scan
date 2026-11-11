@@ -66,7 +66,7 @@ impl Detector for OldConsumer {
     }
 }
 #[test]
-fn old_consumer_runs_once_and_native_preserves_real_legacy_hash_collision_indices() {
+fn old_consumer_runs_once_and_distinct_finding_ids_keep_native_associations() {
     let fixture = Fixture::new("adapter");
     let count = Arc::new(AtomicUsize::new(0));
     let detectors: Vec<Arc<dyn Detector>> = vec![Arc::new(OldConsumer(count.clone()))];
@@ -88,7 +88,10 @@ fn old_consumer_runs_once_and_native_preserves_real_legacy_hash_collision_indice
     assert_eq!(a, b);
     let findings = &doc.legacy().findings;
     assert_eq!(findings.len(), 2);
-    assert_eq!(findings[0].finding_id, findings[1].finding_id);
+    assert_ne!(findings[0].finding_id, findings[1].finding_id);
+    assert!(findings
+        .iter()
+        .all(|f| f.finding_id.starts_with("finding-v1-") && f.finding_id.len() == 75));
     let n = serde_json::to_value(doc.native().unwrap()).unwrap();
     assert_eq!(n["observations"].as_array().unwrap().len(), 2);
     for o in n["observations"].as_array().unwrap() {
@@ -103,6 +106,7 @@ fn old_consumer_runs_once_and_native_preserves_real_legacy_hash_collision_indice
         .enumerate()
     {
         assert_eq!(association["legacy_index"], i);
+        assert_eq!(association["legacy_id"], findings[i].finding_id);
         assert_eq!(association["observation_ids"].as_array().unwrap().len(), 1);
     }
     let raw = serde_json::to_string(doc.native().unwrap()).unwrap();
@@ -187,7 +191,7 @@ impl Detector for Lossy {
     }
 }
 #[test]
-fn native_loss_ledger_separates_unknown_rule_inventory_and_legacy_delimiter_collapse() {
+fn native_loss_ledger_keeps_distinct_delimited_tuples_and_only_reports_actual_losses() {
     let f = Fixture::new("losses");
     let doc = scan_repository_native(
         &f.config(),
@@ -196,7 +200,7 @@ fn native_loss_ledger_separates_unknown_rule_inventory_and_legacy_delimiter_coll
         &NativeOptions::default(),
     )
     .unwrap();
-    assert_eq!(doc.legacy().findings.len(), 1);
+    assert_eq!(doc.legacy().findings.len(), 2);
     let n = serde_json::to_value(doc.native().unwrap()).unwrap();
     let reasons: Vec<_> = n["legacy_loss_records"]
         .as_array()
@@ -204,11 +208,10 @@ fn native_loss_ledger_separates_unknown_rule_inventory_and_legacy_delimiter_coll
         .iter()
         .map(|l| l["reason"].as_str().unwrap())
         .collect();
-    assert_eq!(reasons.len(), 3);
+    assert_eq!(reasons.len(), 2);
     for reason in [
         "unknown_rule_dropped_by_legacy_normalization",
         "dependency_inventory_not_a_legacy_finding",
-        "legacy_normalization_collapsed_distinct_binding",
     ] {
         assert!(reasons.contains(&reason));
     }

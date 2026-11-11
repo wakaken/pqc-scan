@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+"""Actual product CLI, independently implemented OpenSSH peer, no external runtime network."""
+import argparse
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import platform
+import re
+import subprocess
+import tempfile
+import threading
+ROOT=Path(__file__).resolve().parents[2]
+STUDY=ROOT/'tests/feasibility/ssh-kex'
+URL='https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.2p1.tar.gz'
+SHA='ccc42c0419937959263fa1dbd16dafc18c56b984c03562d2937ce56a60f798b2'
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def inside(out, binary=None):
+    assert platform.system()=='Linux' and len(Path('/proc/net/route').read_text().splitlines())==1
+    spec=importlib.util.spec_from_file_location('fixture_helpers',STUDY/'run-isolated.py');h=importlib.util.module_from_spec(spec);spec.loader.exec_module(h)
+    binary=Path(binary) if binary else ROOT/'target/debug/pqc-scan'; binary_sha=sha(binary);out.mkdir(parents=True,exist_ok=False);records=[]
+    with tempfile.TemporaryDirectory(prefix='pqc-kex-product-') as tmp:
+        tmp=Path(tmp)
+        for key in ['host','wrong']:
+            subprocess.run([h.KEYGEN,'-q','-t','ed25519','-N','','-f',str(tmp/key)],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=10)
+        for name,lang,trust,kex,tamper in [('success-ja','ja','host','mlkem768x25519-sha256',False),('success-en','en','host','mlkem768x25519-sha256',False),('wrong-pin','ja','wrong','mlkem768x25519-sha256',False),('tampered-signature','en','host','mlkem768x25519-sha256',True),('no-overlap','ja','host','curve25519-sha256',False)]:
+            port=h.free_port();cfg=tmp/'sshd_config';cfg.write_text(f'Port {port}\nListenAddress 127.0.0.1\nHostKey {tmp}/host\nPidFile {tmp}/pid\nUsePAM no\nPasswordAuthentication no\nPubkeyAuthentication no\nKbdInteractiveAuthentication no\nUseDNS no\nKexAlgorithms {kex}\nLogLevel DEBUG3\n')
+            server=subprocess.Popen([str(h.SSHD),'-D','-e','-ddd','-f',str(cfg)],stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,start_new_session=True)
+            received=[];sent=[]
+            def consume():
+                for line in server.stderr:
+                    for direction,target in [(b'receive',received),(b'send',sent)]:
+                        m=re.search(direction+rb' packet: type (\d+)',line)
+                        if m:target.append(int(m[1]))
+            reader=threading.Thread(target=consume);reader.start();proxy=None;proxy_facts={'server_plaintext_types':[],'signature_bytes_flipped':0}
+            try:
+                h.ready(server,port)
+                if tamper:
+                    import socket
+                    listener=socket.socket();listener.bind(('127.0.0.1',0));listener.listen(1);listener.settimeout(6)
+                    proxy=threading.Thread(target=h.proxy,args=(listener,port,proxy_facts));proxy.start();port=listener.getsockname()[1]
+                cmd=[str(binary),'probe','ssh-kex','127.0.0.1','--port',str(port),'--allow-cidr','127.0.0.1/32','--host-key-file',str(tmp/(trust+'.pub')),'--lang',lang,'--out-dir',str(out/name)]
+                result=subprocess.run(cmd,capture_output=True,text=True,timeout=8)
+                record=json.loads((out/name/'probe.ssh-kex.v1.json').read_text())
+                assert not result.stderr,'Unexpected stderr, not retained'
+            finally:
+                h.stop(server);reader.join(timeout=2);server.stderr.close()
+                if proxy:proxy.join(timeout=7);assert not proxy.is_alive()
+            assert not reader.is_alive() and 20 in received
+            assert not any(t==5 or t>=50 for t in received),(name,received)
+            good=name.startswith('success')
+            assert result.returncode==(0 if good else 3),(name,record)
+            assert record['details']['host_identity_verified']==good
+            assert record['details']['handshake_complete']==good
+            assert record['details']['user_authentication_attempted'] is False
+            if good:
+                assert record['outcome']=='completed' and record['details']['negotiated_kex']=='mlkem768x25519-sha256'
+                assert 21 in received and 21 in sent and 1 in received
+            else:
+                assert record['details']['negotiated_kex'] is None and record['details']['host_signature'] is None
+                assert record['diagnostics']==[{'wrong-pin':'host_key_untrusted','tampered-signature':'host_signature_invalid','no-overlap':'no_common_algorithm'}[name]],record
+            assert record['target']['connected_peer']==f'127.0.0.1:{port}'
+            assert 0<record['traffic']['sent_bytes']<=65536 and 0<record['traffic']['received_bytes']<=524288
+            if tamper:assert proxy_facts['signature_bytes_flipped']==1 and proxy_facts['upload_thread_stopped']
+            records.append({'case':name,'exit':result.returncode,'server_received_types':received,'server_sent_types':sent,'proxy':proxy_facts,'files':{p.name:sha(p) for p in (out/name).iterdir()},'cleanup':True})
+    assert not tmp.exists() and sha(binary)==binary_sha
+    (out/'RESULTS.json').write_text(json.dumps({'binary_sha256':binary_sha,'cases':records,'fixture_keys_removed':True,'binary_before_after_match':True,'sshd_version':subprocess.run([str(h.SSHD),'-V'],capture_output=True,text=True).stderr.strip()},indent=2)+'\n')
+    print('Five actual product CLI cases passed with no authentication/service/channel requests.')
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--out-dir',type=Path,required=True)
+    parser.add_argument('--inside',action='store_true');parser.add_argument('--binary',type=Path)
+    parser.add_argument('--image-file',type=Path,default=Path('target/protocol-image/IMAGE.json'))
+    args=parser.parse_args()
+    if args.inside:
+        inside(args.out_dir.resolve(), args.binary)
+    else:
+        from container_runner import execute, image_id
+        execute(image_id(args.image_file), args.out_dir, ssh_kex=True)
+
+if __name__=='__main__':main()

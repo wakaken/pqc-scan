@@ -19,11 +19,15 @@ Use this guide after the first scan when you need to select outputs, change CI e
 pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
+pqc-scan diff <before-inventory> <after-inventory> --repository-scope ID --out-dir DIR
 ```
 
 Defaults are `--format all`, `--lang en`, `--out-dir ./pqc-report`, `--rules-dir ./rules` and `--threads 0` (automatic thread selection). No finding threshold or completeness gate is enabled by default. Paths are resolved from the current working directory.
 
 `--repository-scope` requires `--inventory-json`; `--policy-profile` also requires it. `--assessment-context` requires an explicit policy profile. Use `pqc-scan scan --help` for the complete option list.
+
+Add `--cyclonedx-17` to write separate CycloneDX 1.7 inventories. The [report guide](REPORTS.md#cyclonedx)
+explains these documents and the completeness limits of [inventory comparison](REPORTS.md#diff).
 
 ### Recommended usage from your product repository
 
@@ -78,6 +82,8 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 
 Zero findings does not mean every selected input was inspected. Read failures and detector errors retain other findings.
 When inspection is partial, failed or unknown, the CLI prints one warning to stderr.
+CLI HTML/Markdown also display inspection status and counters. Detailed safe
+reasons appear with `--diagnostics`; language selection changes human copy only.
 
 ### Save diagnostics and optionally fail CI
 
@@ -145,7 +151,7 @@ For certificates, malformed input, unknown key attributes or mixed unsupported b
 Detecting a container does not prove its contents were inspected. A parsed certificate that matches no rule need not produce a finding.
 
 Dependency inspection distinguishes valid empty input, malformed supported input, partial success, unsupported versions and resource limits.
-Supported structured subsets can report completion; unrelated files are not applicable. Ruby/Gradle/XML, requirements and Go lexical fallbacks remain `detector_not_reported`.
+Supported structured subsets can report completion; unrelated files are not applicable. Go modules, Maven POM, requirements and Ruby declarations/locks can complete within their explicitly parsed subsets. Dynamic or unsupported declarations remain incomplete; Gradle and gemspec lexical fallbacks remain `detector_not_reported`.
 Completion is not full package-manager validation or proof of installation.
 
 The `--require-complete` exit-code contract is unchanged, but actual returned codes depend on parser outcomes and supported scope.

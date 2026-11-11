@@ -2,10 +2,18 @@ id: "036"
 title: "Extend existing bilingual reports for diagnostics and assessments"
 type: feature
 priority: medium
-status: pending
-owner: Planner Agent
+status: done
+owner: Evaluator Agent
 phase: "4"
-description: "Extend existing bilingual reports for diagnostics and assessments. Planning only; implementation and validation have not started."
+description: "Bilingual HTML diagnostics and simplified coverage accepted in actual HTTP browser checks; advisory assessments and observation-ID ledgers remain absent from HTML per maintainer request. Explicit machine/Markdown records are retained."
+execution_plan: "docs/superpowers/plans/2026-11-10-diagnostic-localization.md"
+lifecycle_record:
+  - "Planner selected pending -> planned: existing-report scope and implementation plan recorded on 2026-11-10."
+  - "Executor started planned -> in-progress on 2026-11-10."
+  - "Executor completed in-progress -> review after CLI/bilingual docs integration and six fact-binding/privacy regressions."
+  - "Independent Reviewer accepted inventory-bound assessment rendering, per-ID assurance/usage rows and wrapping correction."
+  - "Evaluator set review -> blocked: automated Chrome file URL display denied by browser URL policy; user manual desktop/mobile/keyboard/offline acceptance is pending."
+evaluation_evidence: "docs/quality/RUNTIME-INTEGRATION-VALIDATION.md"
 plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-036"
 change_size: "Small/medium; language/browser review"
 decision_gate: "No runtime LLM; add optional runtime sections only after their feature exists."
@@ -36,3 +44,20 @@ acceptance:
 testing_requirements:
   - "Machine parity, localized fact binding, escaping and real-browser/keyboard/offline acceptance."
   - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+report_usability_followup:
+  code_commit: "6945a03176623b5fdf51f0bec7f32fbe3d44f7ed"
+  evidence: "docs/quality/REPORT-USABILITY-VALIDATION.md"
+  result: "Human HTML simplified and independently source-reviewed; actual browser capture/acceptance remains blocked by URL policy. Status is not advanced to done."
+
+html_assessment_followup:
+  evidence: "docs/quality/HTML-ASSESSMENT-REMOVAL.md"
+  result: "Per user request, HTML omits advisory decisions entirely; explicit JSON/Markdown policy records remain. Source review accepted; actual browser acceptance stays blocked."
+
+continuation_acceptance:
+  date: "2026-11-11"
+  source_head: "75b9afd"
+  evidence: "docs/quality/REMAINING-ROADMAP-VALIDATION.md"
+  browser_evidence: "docs/quality/LOCAL-BROWSER-ACCEPTANCE.md"
+  reviews: "One implementation reviewer and one separate test reviewer accepted; no delegated implementation or additional reviewers."
+  transition: "Evaluator: blocked -> review -> done after previously missing local acceptance evidence was established."

@@ -12,6 +12,7 @@ Agents collaborate through the task queue by updating task statuses according to
 
 - An optional state may also be used when progress cannot continue:
   - blocked
+  - cancelled
 
 ---
 
@@ -83,3 +84,12 @@ Typical reasons:
 Ownership: Any agent may set a task to blocked.  
 
 Human review is required before work continues.
+
+## cancelled (optional)
+
+The maintainer explicitly decided that no further action is required. Planner
+records that decision, its date and reason, and excludes the task from the active
+queue. This is distinct from done: it asserts neither completed implementation
+nor newly passed validation. Historical work/evidence and existing functionality
+are preserved. Only an explicit new maintainer request may reopen the task; the
+Planner records the resumption decision before work starts.

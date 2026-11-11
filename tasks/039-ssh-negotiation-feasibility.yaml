@@ -1,13 +1,14 @@
 id: "039"
-title: "Evaluate completed SSH KEX without authentication as a future option"
+title: "Evaluate and integrate trusted hybrid SSH KEX without user authentication"
 type: feature
 priority: low
-status: pending
-owner: Planner Agent
-phase: "future"
-description: "Evaluate completed SSH KEX without authentication as a future option. Planning only; implementation and validation have not started."
+status: done
+owner: Evaluator Agent
+phase: "3"
+description: "Standalone study selected russh; subsequent explicit maintainer request implemented optional trusted hybrid SSH KEX without user authentication/login, with separate reports and existing safety caps. Product source/test/browser reviews accepted."
+selection_record: "docs/roadmap/CONTINUATION-DECISIONS.md#subsequent-delegated-selection-and-actual-checkpoint"
 plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-039"
-change_size: "Unknown until selected; deliberately deferred"
+change_size: "Medium/high; optional protocol integration, trust and resource-bound validation"
 decision_gate: "No Phase 3 dependency; maintainers must justify negotiated-session use case first."
 change_categories:
   - "New feature addition"
@@ -21,7 +22,7 @@ implementation_steps:
   - "Prove completed KEX, verified host signature with trusted pins/known-host input and zero service/userauth/channel requests."
   - "Record public API/algorithm/provider/build limits; propose separate implementation if justified."
 out_of_scope:
-  - "No shipped negotiated mode, credentials or homegrown cryptography."
+  - "No user authentication/login, credentials, remote commands, implicit trust or homegrown cryptography."
 risks:
   - "Libraries may hide offers or automatically send auth-related service requests."
 acceptance:
@@ -29,3 +30,29 @@ acceptance:
 testing_requirements:
   - "Sanitized message-type record, local trusted-host positive/negative cases and source/API review."
   - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+execution_plan: "docs/superpowers/plans/2026-11-11-ssh-kex-feasibility.md"
+lifecycle_record:
+  - "Planner: pending -> planned after explicit maintainer selection of the completed-KEX use case."
+  - "Executor: planned -> in-progress; standalone isolated study, no product integration."
+  - "Executor: in-progress -> review after pinned isolated eight-case study and unchanged-product regressions."
+feasibility_evidence: "docs/quality/TASK-039-SSH-KEX-FEASIBILITY.md"
+feasibility_result: "Conditionally select russh0.65.1/AWS-LC with explicit prior host public-key pins. Hybrid KEX/trust/no-userauth proven in isolated Linux arm64 fixtures. ssh2 automatic service request rejects that backend; no shipped negotiated mode."
+feasibility_acceptance_record:
+  date: "2026-11-11"
+  study_head: "ec4df5c5d8734b7dde7c7fec542976793840830d"
+  implementation_review: "ssh039_impl_review accepted; no blocking findings."
+  test_review: "ssh039_test_review accepted; no blocking findings; final image source/binary hashes independently verified."
+  checks: "Eight isolated cases; macOS arm64 build/clippy; format;346 unchanged-workspace tests;28 Node tests."
+  transition: "Reviewer accepted; Evaluator review -> done for feasibility scope only."
+  unimplemented_at_study_checkpoint: "Product mode/schema, full known_hosts/host certificate support,030 limits/cancellation integration and adversarial/rekey/platform hardening."
+
+product_integration_request:
+  date: "2026-11-11"
+  scope: "Maintainer explicitly requested implementation of selected no-userauth trusted hybrid SSH KEX; existing feasibility acceptance remains historical."
+  plan: "docs/superpowers/plans/2026-11-11-ssh-kex-product.md"
+  transition: "Planner planned extension; Executor began product integration."
+  evidence: "docs/quality/SSH-KEX-PRODUCT-VALIDATION.md"
+  review_status: "Implementation and separate test-adequacy reviews accepted; final frozen-source, real protocol and HTTP browser gates passed."
+  code_commit: "b0d70efbc5eb6f7c92efed656dda572b8642105b"
+  result: "Evaluator review -> done: experimental product mode accepted;347 default/397 all-feature tests,5 real CLI cases and bilingual browser checks. No hosted CI or new distribution archive claim."

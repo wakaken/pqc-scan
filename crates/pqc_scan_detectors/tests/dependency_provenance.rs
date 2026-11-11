@@ -276,13 +276,13 @@ fn ecosystem_matrix_preserves_declarations_and_only_lock_records_resolve() {
  ("package.json",r#"{"dependencies":{"alias":"npm:openssl@^1.2.3"}}"#,false,DetectorStatus::Complete),
  ("Pipfile.lock",r#"{"_meta":{"pipfile-spec":6},"default":{"openssl":{"version":"==1.2.3"}}}"#,true,DetectorStatus::Complete),
  ("poetry.lock","[[package]]\nname = 'openssl'\nversion = '1.2.3'\n[metadata]\nlock-version = '2.1'\n",true,DetectorStatus::Complete),
- ("requirements.txt","openssl>=1.2.3\n",false,DetectorStatus::NotReported),
- ("go.mod","module example.invalid/app\nrequire example.invalid/openssl v1.2.3\n",false,DetectorStatus::NotReported),
- ("Gemfile","gem 'openssl', '~> 1.2'\n",false,DetectorStatus::NotReported),
- ("Gemfile.lock","GEM\n  specs:\n    openssl (1.2.3)\n",true,DetectorStatus::NotReported),
- ("Gemfile.lock","GIT\n  remote: https://private.invalid/repo\n  specs:\n    openssl (1.2.3)\n",false,DetectorStatus::NotReported),
+ ("requirements.txt","openssl>=1.2.3\n",false,DetectorStatus::Complete),
+ ("go.mod","module example.invalid/app\nrequire example.invalid/openssl v1.2.3\n",false,DetectorStatus::Complete),
+ ("Gemfile","gem 'openssl', '~> 1.2'\n",false,DetectorStatus::Complete),
+ ("Gemfile.lock","GEM\n  remote: https://rubygems.org/\n  specs:\n    openssl (1.2.3)\n",true,DetectorStatus::Complete),
+ ("Gemfile.lock","GIT\n  remote: https://private.invalid/repo\n  specs:\n    openssl (1.2.3)\n",false,DetectorStatus::Partial),
  ("gradle.lockfile","org.example:openssl:1.2.3=compileClasspath\n",true,DetectorStatus::NotReported),
- ("pom.xml","<project><dependencies><dependency><groupId>org.example</groupId><artifactId>openssl</artifactId><version>1.2.3</version></dependency></dependencies></project>",false,DetectorStatus::NotReported),
+ ("pom.xml","<project><dependencies><dependency><groupId>org.example</groupId><artifactId>openssl</artifactId><version>1.2.3</version></dependency></dependencies></project>",false,DetectorStatus::Complete),
  ("bom.json",r#"{"bomFormat":"CycloneDX","specVersion":"1.7","components":[{"name":"openssl","version":"1.2.3","purl":"pkg:npm/openssl@1.2.3"}]}"#,false,DetectorStatus::Complete),
  ("sbom.json",r#"{"spdxVersion":"SPDX-2.3","packages":[{"name":"openssl","versionInfo":"1.2.3","externalRefs":[{"referenceType":"purl","referenceLocator":"pkg:npm/openssl@1.2.3"}]}]}"#,false,DetectorStatus::Complete)
  ];
@@ -359,13 +359,16 @@ fn malformed_known_record_fields_and_node_limits_cannot_be_complete() {
 }
 
 #[test]
-fn sbom_label_without_maven_namespace_survives_without_guessed_identity() {
+fn sbom_display_label_uses_validated_maven_identity_without_resolution_claim() {
     let f = Fixture::new("sbom-label");
     let text = r#"{"spdxVersion":"SPDX-2.3","packages":[{"name":"bouncycastle","versionInfo":"1.78","externalRefs":[{"referenceType":"purl","referenceLocator":"pkg:maven/org.bouncycastle/bcprov@1.78"}]}]}"#;
     let outcome = f.inspect("sbom.spdx.json", text);
-    assert_eq!(outcome.status(), DetectorStatus::Partial);
+    assert_eq!(outcome.status(), DetectorStatus::Complete);
     let d = &outcome.detections()[0];
-    assert_eq!(d.evidence.metadata["dep_name"], "bouncycastle");
-    assert_eq!(d.evidence.metadata["dep_ecosystem"], "unknown");
-    assert!(d.evidence.metadata["dep_purl"].is_empty());
+    assert_eq!(d.evidence.metadata["dep_name"], "org.bouncycastle:bcprov");
+    assert_eq!(d.evidence.metadata["dep_ecosystem"], "maven");
+    assert_eq!(
+        d.evidence.metadata["dep_purl"],
+        "pkg:maven/org.bouncycastle/bcprov"
+    );
 }

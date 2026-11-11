@@ -2,11 +2,16 @@ id: "037"
 title: "Demonstrate supported-scope OSS 1.0 quality"
 type: feature
 priority: medium
-status: pending
+status: blocked
 owner: Planner Agent
 phase: "5"
-description: "Demonstrate supported-scope OSS 1.0 quality. Planning only; implementation and validation have not started."
-plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-037"
+description: "Local integration, browser and packaging dependency acceptance completed. Maintainer approved the measured regression signals and 1.0 scope on 2026-11-11; final acceptance remains blocked on actual current-HEAD hosted CI."
+plan_reference: "docs/superpowers/plans/2026-11-10-quality-preflight.md"
+preflight_evidence: "docs/quality/RUNTIME-INTEGRATION-VALIDATION.md"
+blocker: "Actual current-HEAD hosted CI remains unverified. Four combined-probes publication notice reviews remain separate publication prerequisites; approval of acceptance criteria does not authorize push or publication."
+lifecycle_record:
+  - "Planner selected limited local preflight from existing source-bound integration evidence."
+  - "Planner set blocked before final acceptance: dependency and release-quality gates remain unmet; no done transition."
 change_size: "High validation load; integration, not redesign"
 decision_gate: "Maintainers approve baseline-derived budgets and release scope."
 change_categories:
@@ -46,3 +51,14 @@ acceptance:
 testing_requirements:
   - "Pinned build/fmt/test/clippy, Node/browser, offline schemas, corpus, isolated protocols, clean platforms and independent evaluation."
   - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+continuation_evidence: "docs/quality/REMAINING-ROADMAP-VALIDATION.md"
+
+maintainer_acceptance_decision:
+  date: "2026-11-11"
+  approval: "Explicit maintainer reply approving the proposed criteria and support scope."
+  accuracy: "On unchanged eligible truth, per split/family TP must not decrease and FP/FN must not increase."
+  performance: "Same host/profile/config/input: wall time or peak RSS above twice the previous observed warm maximum requires investigation; not a universal performance guarantee."
+  scope: "Static scanning is the formal 1.0 target; TLS/SSH probes remain experimental; local distribution validation is macOS arm64."
+  evidence: "docs/quality/REMAINING-ROADMAP-VALIDATION.md"
+  ci: "Unverified; no done transition until actual target-commit hosted CI succeeds."

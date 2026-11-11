@@ -1,6 +1,18 @@
 # Explicit TLS and SSH runtime diagnostics
 
-Design date: 2026-11-09. Status: proposed; no runtime probe exists in the reviewed checkout, no remote scan was performed and no library spike was compiled. See the [standards register](../product/STANDARDS-REGISTER.md) for versions, dates and sources.
+Design date: 2026-11-09. Status: original proposal; at that checkpoint no runtime
+probe, remote scan or compiled library spike existed. See the [standards register](../product/STANDARDS-REGISTER.md) for versions, dates and sources.
+
+Continuation checkpoint (2026-11-10): task030's safety foundation is implemented
+under its approved one-attempt policy; task031's
+[pinned isolated study](../quality/TASK-031-TLS-FEASIBILITY.md) has passed independent
+source review. Its backend/features/platform adoption and the
+[concrete product contract](RUNTIME-PROBE-IMPLEMENTATION.md) remain maintainer gates.
+No product TLS/SSH command or public endpoint scan is claimed. In particular,
+the study found that a group accessor may be Some after verifier failure: only
+successful verification plus a completed fresh handshake may yield verified facts.
+The original three-attempt/profile proposal below is superseded by the approved
+initial ceiling of one; it is not permission to add comparisons or retries.
 
 ## Entry points and scope
 
@@ -109,3 +121,42 @@ Use a network-isolated test environment with synthetic public certificates, loca
 - Determinism: compare semantic facts after excluding run time/IDs/ephemeral handshake bytes. Server randomness is not an inventory difference. Failure reproducibility means classified outcomes within bounded conditions, not byte-identical wire exchanges.
 
 All defaults, capability claims and no-auth guarantees require evidence in [QUALITY-GATES.md](../quality/QUALITY-GATES.md). The [roadmap](../roadmap/OSS-ROADMAP.md) schedules safety before protocol release. No enterprise management service is part of this design.
+
+## Task039 selected use case and feasibility — 2026-11-11
+
+The maintainer explicitly selected verification of actual hybrid KEX and prior-trust
+host authentication without user authentication/login. The completed standalone
+[task039 study](../quality/TASK-039-SSH-KEX-FEASIBILITY.md) selects russh0.65.1/AWS-LC
+conditionally for a future negotiated mode. In isolated OpenSSH10.2p1 fixtures,
+ML-KEM768+X25519 KEX completes with an exact pre-provisioned Ed25519 host-key pin;
+wrong/unknown pins and signature tampering fail. The server decodes NEWKEYS then
+DISCONNECT, with no service/userauth/channel request. ssh2's public handshake
+sends a service request automatically and is unsuitable for the strict contract.
+
+Initial future trust shape: an explicit public-key pin for the requested endpoint,
+provided over a separate trusted channel. Do not fetch-and-trust a scanned key,
+accept host certificates by embedded-key match, read ambient SSH state, or silently
+fall back from requested hybrid KEX. Host-key authentication remains classical in
+this study. Full known_hosts/CA validation,030 budget/cancellation integration and
+adversarial/rekey/platform tests remain implementation prerequisites. This finding
+does not add a product command or change current advertisement-only probe results.
+
+## Explicit product integration — 2026-11-11
+
+The maintainer subsequently requested product implementation. Experimental feature
+`probe-ssh-kex` now exposes `probe ssh-kex HOST --port PORT --host-key-file FILE`.
+The prior public Ed25519 key is validated before DNS and bound to that explicit
+invocation's endpoint. Fixed ML-KEM768+X25519 KEX has no classical fallback; host
+signature verification and prior pin agreement precede verified output. The
+connection ends without user authentication/login. Known-host patterns, host
+certificates and PQ signatures remain unsupported; no ambient trust/config is read.
+
+The async backend uses metered nonblocking BoundedTcpStream operations, not a raw
+socket escape hatch. Existing030 one-attempt, target policy, time/traffic and
+cancellation budgets remain enforced. The runtime and socket are stopped before
+return. Separate `probe.ssh-kex.v1.json` plus guarded bilingual human reports do
+not alter existing TLS/SSH-offer contracts or make static scans access the network.
+See [product validation](../quality/SSH-KEX-PRODUCT-VALIDATION.md) and bilingual
+[usage](../user/PROBING.md). This supersedes the earlier study-only limitation for
+the specifically authorized integration; it does not claim stable/hosted-CI or
+all-platform release acceptance.

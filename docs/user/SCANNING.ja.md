@@ -22,6 +22,7 @@ CLIツールは以下の通り実行します。
 pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
+pqc-scan diff <before-inventory> <after-inventory> --repository-scope ID --out-dir DIR
 ```
 
 既定値は `--format all`、`--lang en`、`--out-dir ./pqc-report`、`--rules-dir ./rules`、`--threads 0`（自動選択）です。
@@ -29,6 +30,9 @@ pqc-scan rules show <rule-id> [--rules-dir ./rules]
 
 `--repository-scope` と `--policy-profile` には `--inventory-json` が必要です。
 `--assessment-context` は評価方針を指定したときだけ使えます。全オプションは `pqc-scan scan --help` で確認できます。
+
+別ファイルのCycloneDX 1.7棚卸しには `--cyclonedx-17` を付けます。
+用途と制約は[形式の説明](REPORTS.ja.md#cyclonedx)と[棚卸しの比較](REPORTS.ja.md#diff)を参照してください。
 
 ### プロダクトリポジトリでの推奨実行方法
 
@@ -86,6 +90,8 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 
 検出がゼロでも、すべての対象を検査できたとは限りません。読み込みや解析に失敗した場合も、ほかの検出結果は保持します。
 検査が部分成功・失敗・不明の場合は、標準エラーに警告を1回表示します。
+CLIが生成するHTML・Markdownにも検査状態と件数を表示します。
+`--diagnostics` を付けると安全な理由情報も確認できます。言語指定で変わるのは人間向けの文面だけです。
 
 ### 診断情報を保存し、必要に応じてCIを止める
 
@@ -153,7 +159,7 @@ ASTに構文エラーがあれば、取得できた検出を残して `detector_
 コンテナーを検出しても、内部を検査できたとは限りません。解析できてもルールに一致しない証明書は所見を出しません。
 
 依存関係では、有効な空データ、不正な対応形式、部分成功、未対応の版、上限到達を区別します。
-対応する構造化データの範囲では完了を報告し、関係のないファイルは対象外です。Ruby・Gradle・XML・requirements・Goの簡易解析は `detector_not_reported` のままです。
+対応する構造化データの範囲では完了を報告し、関係のないファイルは対象外です。Go・Maven POM・requirements・Rubyの定義とロックは、対応する構文を解析できた範囲で完了を報告します。動的・未対応の記述は不完全のままとし、Gradle・gemspecの簡易解析は `detector_not_reported` を維持します。
 完了はパッケージ管理ツールと同じ検証やインストール状態の保証ではありません。
 
 `--require-complete` の終了コードの規約は変わりませんが、解析結果や対応範囲によって、実際に返るコードは変わり得ます。

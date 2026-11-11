@@ -1,0 +1,344 @@
+{
+  "cargo": "cargo 1.93.1 (083ac5135 2025-12-15)",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "scripts/package-release.py",
+        "--binary",
+        "target/release/pqc-scan",
+        "--variant",
+        "static",
+        "--out-dir",
+        "target/task-038/final-static-first"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-static-first.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/package-release.py",
+        "--binary",
+        "target/release/pqc-scan",
+        "--variant",
+        "static",
+        "--out-dir",
+        "target/task-038/final-static-second"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-static-second.log"
+    },
+    {
+      "argv": [
+        "cmp",
+        "target/task-038/final-static-first/pqc-scan-0.1.0-aarch64-apple-darwin-static.tar.gz",
+        "target/task-038/final-static-second/pqc-scan-0.1.0-aarch64-apple-darwin-static.tar.gz"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-static-cmp.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/package-release.py",
+        "--verify",
+        "target/task-038/final-static-first/pqc-scan-0.1.0-aarch64-apple-darwin-static.tar.gz"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-static-first-verify.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/package-release.py",
+        "--verify",
+        "target/task-038/final-static-second/pqc-scan-0.1.0-aarch64-apple-darwin-static.tar.gz"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-static-second-verify.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/distribution/check-install.py",
+        "target/task-038/final-static-first/pqc-scan-0.1.0-aarch64-apple-darwin-static.tar.gz",
+        "--out-dir",
+        "target/task-038/final-static-install"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-static-install.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/package-release.py",
+        "--binary",
+        "target/probe-release-build/release/pqc-scan",
+        "--variant",
+        "combined-probes",
+        "--out-dir",
+        "target/task-038/final-combined-first"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-combined-first.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/package-release.py",
+        "--binary",
+        "target/probe-release-build/release/pqc-scan",
+        "--variant",
+        "combined-probes",
+        "--out-dir",
+        "target/task-038/final-combined-second"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-combined-second.log"
+    },
+    {
+      "argv": [
+        "cmp",
+        "target/task-038/final-combined-first/pqc-scan-0.1.0-aarch64-apple-darwin-combined-probes.tar.gz",
+        "target/task-038/final-combined-second/pqc-scan-0.1.0-aarch64-apple-darwin-combined-probes.tar.gz"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-combined-cmp.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/package-release.py",
+        "--verify",
+        "target/task-038/final-combined-first/pqc-scan-0.1.0-aarch64-apple-darwin-combined-probes.tar.gz"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-combined-first-verify.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "scripts/package-release.py",
+        "--verify",
+        "target/task-038/final-combined-second/pqc-scan-0.1.0-aarch64-apple-darwin-combined-probes.tar.gz"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-combined-second-verify.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/distribution/check-install.py",
+        "target/task-038/final-combined-first/pqc-scan-0.1.0-aarch64-apple-darwin-combined-probes.tar.gz",
+        "--out-dir",
+        "target/task-038/final-combined-install"
+      ],
+      "exit": 0,
+      "log": "target/task-038/final-combined-install.log"
+    }
+  ],
+  "environment": "macOS-27.2-arm64-arm-64bit",
+  "head": "9201dc5022ea918e1416db7abf710db58a4bd855",
+  "raw_results": "target/task-038/FINAL-CLEAN-RESULTS.json",
+  "remaining_gates": [
+    "License notice gaps: static5/combined9",
+    "Dependency acceptance, including actual-browser036",
+    "Remote CI/manual workflow unexecuted",
+    "External publication/signature verification not authorized/executed"
+  ],
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)",
+  "scope": "Local unpublished archive preparation. Product build-source binding is separate parent evidence. No release or binary rebuild reproducibility claim.",
+  "source_clean_after": true,
+  "source_clean_before": true,
+  "source_inputs": {
+    "Cargo.lock": "cbfd2f22b88ee33e3bb549956bb60e4d00591b31ca6cbf2599735b495ec39d33",
+    "Cargo.toml": "ec1879599a9755e88a9ee9a8e6707b919fe292f0d77d197303567a8390f711dd",
+    "LICENSE": "21d7476781e7941e3b4ac3d2053aa90fd55c8b0f568fab4c1adbd69f95109deb",
+    "SECURITY.md": "e6969d22ab0a3e008ae320f184e8d4b1286baeaa35767c9827216d0546b9b0a9",
+    "crates/pqc_scan_cli/Cargo.toml": "55b038c3bcd9ed2ae95c9a244980dde6d53db04bf41a90739d6b714609fd3fa8",
+    "crates/pqc_scan_cli/src/diff_command.rs": "74770abe36de4ba86b150d213163be4788aa23b744ead25a7ae16d1faebcf380",
+    "crates/pqc_scan_cli/src/main.rs": "a846ea7d863fefad1bb687a0224c36cf74b3e4b1d654f568f41ed605690c3bad",
+    "crates/pqc_scan_cli/src/probe_command.rs": "cd3451f6ec00e50eff3fe52d9c417974761e768a8b5af57fcfb4c6e261262c7e",
+    "crates/pqc_scan_cli/src/probe_resolver.rs": "c9bdcea0b5e357a356a8ec78f779c9e389beac33d9ecffdf84516a9cf9517158",
+    "crates/pqc_scan_cli/tests/ast_occurrences.rs": "5a50cb26c7c529d459a7de5491248e3a340cf74eb2dab31f2a92622c369319e5",
+    "crates/pqc_scan_cli/tests/cyclonedx_export.rs": "faf93b40e5890e382f893a35e7c8c14779e69025e49abc791a864d37970641b5",
+    "crates/pqc_scan_cli/tests/dependency_privacy.rs": "ed75fe2e3f29ec23404dc5dae43807f643f4cef6de746337c527fbc2bb94a709",
+    "crates/pqc_scan_cli/tests/evidence_privacy.rs": "b6c184e0f1fe916f5840ad882f201506f1aace017b98bf5461ad1e19d218a6d5",
+    "crates/pqc_scan_cli/tests/example_inspection.rs": "a568cdd1e96bd7e355415f8ff327be857ec964f67fb913ea5e08e0f9a10e7736",
+    "crates/pqc_scan_cli/tests/inventory_diff.rs": "459bf7eb5de1a1144771d9ddc1d866fb782f230a94c41b6b47c1ec7daf347f01",
+    "crates/pqc_scan_cli/tests/native_json.rs": "c75744bcaf2e0f22b6f48a65d9e18a0a486202d4fb01ba1b558661717acb928c",
+    "crates/pqc_scan_cli/tests/policy_report.rs": "865aa38b1cf0ccb17d76676163731ae5155a2d14f6d8920e976cc6dc6bc96194",
+    "crates/pqc_scan_cli/tests/probe_commands.rs": "999f93610d689364065385da751599f6d2d2aed1a2ac208fa99e1c1640827c3e",
+    "crates/pqc_scan_cli/tests/probe_resolver.rs": "99c87bb89d6c19611c9b4f8ea42dbbea7ecd195f84ff9019bbb5fcb4570e1e8d",
+    "crates/pqc_scan_cli/tests/rule_validation.rs": "47140611e7bb6d7e5de9f26d45386bfa827c75ae9e6eda063136616ae904cd9c",
+    "crates/pqc_scan_cli/tests/sarif_locations.rs": "240337072dce8fa9e830ce2de7acf673db4ba52c95dfe6112e1b1492ccdb95da",
+    "crates/pqc_scan_core/Cargo.toml": "8731f85d791f7590ceeecf1f27429f063aa5b684524590aeddf50aed35bc7e01",
+    "crates/pqc_scan_core/src/assessment.rs": "fb6a53100d0dd383e3f7a88b128ef6fb3c92d34545e04b7941eb5693febb8336",
+    "crates/pqc_scan_core/src/classifier.rs": "d225b96684e8a8a80fe6f9b09fb9da54a0c8b7f7be193291e1e8737b57f80fd2",
+    "crates/pqc_scan_core/src/compat.rs": "a7aff4aed22f293fbbd8cd845616e51049aade5d4bdcad7c6cd06337020517c7",
+    "crates/pqc_scan_core/src/diagnostic.rs": "14e97027cbaa0cd67a83b51248738de286b2d342664d55afe4eb09200145b162",
+    "crates/pqc_scan_core/src/diff.rs": "9bccb6185e5d185239336f50b1a4eba141f8b633a3c12206741139f9b2f6b07d",
+    "crates/pqc_scan_core/src/error.rs": "9a891ee40697705d3d3642aae5fd633acf291c5abc66a118ed7b0e9321d1e898",
+    "crates/pqc_scan_core/src/identity.rs": "46cf39a8ee49fc480fef948165c138d3a3bb87650b847a922ac3de9a0996fda3",
+    "crates/pqc_scan_core/src/inventory.rs": "09cb43c5c2bf62b23ba41418928cc98ecaeec45ca167b6c8ab6b8f3561250cf5",
+    "crates/pqc_scan_core/src/lib.rs": "8170a3b2616296097a724624974b13a102ca77e41ceeaf100c4fc803f6da8c80",
+    "crates/pqc_scan_core/src/model.rs": "2ea67e15ea171e7eff925396fb6d7ebf9f7bc8fe1ecacff4523b4631a0cf326a",
+    "crates/pqc_scan_core/src/observation.rs": "f3e651893d32df85f9a84f0daaeb60729e39d569b47b41174b779f4ba4f1038e",
+    "crates/pqc_scan_core/src/pipeline.rs": "0245aa2259384da0f89e875f5106791a758ffcd47fe49a61418a88be521d4d5c",
+    "crates/pqc_scan_core/src/policy.rs": "9c547c7864067577207382922a598a2d5e6716f6ed7612af312dd615794db790",
+    "crates/pqc_scan_core/src/privacy.rs": "5505c9ab854b1038d13d4c492f32b2234efa1edde07cfcf179af1348d27a49e8",
+    "crates/pqc_scan_core/src/probe.rs": "aca0a202cb3303fc881a79ca14812a2164a63b5a9385626882610dce0b6e6bdc",
+    "crates/pqc_scan_core/src/probe_transport.rs": "c4ba5b36ef1b4a83b9b12cdfdb6025aec54d544da6fa4d2228c88dfc343d4158",
+    "crates/pqc_scan_core/src/recommendation.rs": "3201017c23fd6a432be611da52b1474c21c9aa1850efefe5d25dd95ba905d233",
+    "crates/pqc_scan_core/src/risk.rs": "74672b217077909b68a35ced37a41de16bedac6a8340e2cbf9ecb35ba62cdefa",
+    "crates/pqc_scan_core/src/target_policy.rs": "8c7b7902bc1bfcb415057199610c86f33d19a15c2d50c6b9ef05bc090b36bddc",
+    "crates/pqc_scan_core/src/walker.rs": "7f154d2598cae17f1966eed28cd2711b5f4d9a771f60bfedf7a45c959212bf9a",
+    "crates/pqc_scan_core/tests/assessment_policy.rs": "7ca8b65cea35ea77677df19b7dde51a54b7b324dfd18e7d52f1f7cd1fd068bed",
+    "crates/pqc_scan_core/tests/evidence_privacy.rs": "e7cb1c98fb092018d7afa703f8127dc96c86dc4c4cc176f5d9d1f86d5e050e9b",
+    "crates/pqc_scan_core/tests/inventory_diff.rs": "ae0438a28f6d1f4720f7ea7d2a2a7d2e424c871854a09405c5efe0cf903c739c",
+    "crates/pqc_scan_core/tests/native_capture.rs": "36bf7928558620c2b27194bd7f61277bd6bc7412180c0e236324a7dbcbb93984",
+    "crates/pqc_scan_core/tests/probe_report.rs": "fd161c7e44952f19bd66e2b1a38d776dad3850a31cbf0e26a70ef1e813366ce4",
+    "crates/pqc_scan_core/tests/probe_transport.rs": "c1388f8060286f3479062418b689ad352d7d7fee4c2b5d936413e920a8cc9279",
+    "crates/pqc_scan_core/tests/target_policy.rs": "a2dc124551bf52d9e1482280c3e1d1a38975b13a4a4066ee2a4c4e875c606208",
+    "crates/pqc_scan_detectors/Cargo.toml": "55c9b7fc14c2ad04ab6c70406aad7873dea3d71d3fe259bb403cab9be3b57102",
+    "crates/pqc_scan_detectors/src/certificate_detector.rs": "330c5293ef9aabb7818c419280dc1fcc3c4d79930e5fde6f6c983c11d0973c5d",
+    "crates/pqc_scan_detectors/src/certificate_detector/attributes.rs": "b3e7d5c34a6aaf29f29c82cc074b15b259e235aa637008902db0501c658add3b",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+    "crates/pqc_scan_detectors/src/comment_filter.rs": "14e3cc6956382edeb2732547e625a17eac4104faabe77cc537cc64f1d6d1a432",
+    "crates/pqc_scan_detectors/src/dependency_detector.rs": "e0b1cd827a02ab75ae31615648f41b88f7c3c8e67f8dd5a687c6d5029add66bd",
+    "crates/pqc_scan_detectors/src/dependency_detector/bounded.rs": "8ad037acf3369ff7af7b82e3ae4f830b7ca09a160d870dc586431fddf8461411",
+    "crates/pqc_scan_detectors/src/dependency_detector/decode.rs": "65ae5ff08d9fcfe9b4155906aa116ba1e32832cb3db32388dd08149c21e51559",
+    "crates/pqc_scan_detectors/src/dependency_detector/lexical.rs": "1fe116a2de1f99a7d58f6e86351376472156d9020adc39b7e295d8855707d6fb",
+    "crates/pqc_scan_detectors/src/dependency_detector/parse.rs": "2060798ecb245bad252ec44b441e1c268a66d6a9dfdd0df8b82b057fc9ce6db7",
+    "crates/pqc_scan_detectors/src/key_detector.rs": "9db512320790b5d5ce93a6d0881dd84c24b3e9701dbcb69063425f82e6843c6d",
+    "crates/pqc_scan_detectors/src/lib.rs": "8acd88271779ca2dd903497345a4f91f27ba1497a435645253ada357bd87b18f",
+    "crates/pqc_scan_detectors/src/regex_detector.rs": "5abc8836b7fb9db5457ea91ce1279060798131ff05f47cfaafa9d2fc1a9e9a61",
+    "crates/pqc_scan_detectors/src/tree_sitter_detector.rs": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677",
+    "crates/pqc_scan_detectors/tests/ast_occurrences.rs": "05f75e429abc419031f3e07658c02b32d4580d461d436431ae7def32d5387ff1",
+    "crates/pqc_scan_detectors/tests/bounded_outcomes.rs": "b73dd6425464aba8d26e2febfbaee39a35f6ecbb32bbc187478e7db70bb8977f",
+    "crates/pqc_scan_detectors/tests/certificate_attributes.rs": "8697898e7987698058861b7d82a07f98cb3069cf72b7d276b4fafb5494d2762e",
+    "crates/pqc_scan_detectors/tests/certificate_policy.rs": "a1394888c8f45b7b615b3a7d731342d411bb9564b3bb22e5c0b917e3d3dfdd30",
+    "crates/pqc_scan_detectors/tests/dependency_provenance.rs": "a01c14299b06b6f1c62e74970bf56981c725cf79f773450bfacc8596c7c0019a",
+    "crates/pqc_scan_detectors/tests/fixtures/certificates/ed25519-rule.yml": "337a05b5266d481bc69aabc7f0596dac8773361c3bb54878aa7413c6d0b409e4",
+    "crates/pqc_scan_detectors/tests/format_dependency_support.rs": "adcd8e58b682ecae2ada0edc119fc0d880bc956288983ed2f2e7ec4946cf5447",
+    "crates/pqc_scan_detectors/tests/native_inventory.rs": "b7ccf112ce05ee590a7ff5f78a4224b9bf21b3864c8246194a4b977006fd79b8",
+    "crates/pqc_scan_detectors/tests/pkcs12_certificates.rs": "ae54f8e346cd41a2b27681227212ea461dedc590703c9a3c3def40d04d11f658",
+    "crates/pqc_scan_detectors/tests/pqc_readiness.rs": "769c0d8e96df10d618aff6e7f90fefde878bb701662cb40a2be4df4755693be2",
+    "crates/pqc_scan_detectors/tests/rule_scope_compatibility.rs": "fd11083cec517622ed4648f5bf06759b69d6bab744ab0eaba837612e2dc2ff26",
+    "crates/pqc_scan_detectors/tests/typescript_grammar.rs": "9ee80ef664b71506375a59c5d0c6f31cccc011f607598fb7f1001d6390ac6c14",
+    "crates/pqc_scan_probe_ssh/Cargo.toml": "5635b2191ab2aea787cd23b12a5b4f42c2314a42e48fa91869cda6c5054fa4cf",
+    "crates/pqc_scan_probe_ssh/src/lib.rs": "80e77da4a4befa7776f7ef2624b5204363a473dcc9afb6621cb1fe8d518446bc",
+    "crates/pqc_scan_probe_ssh/src/model.rs": "495435f7e29924d76df14d11f0a8ee950941c0cf3d29387b029006885ef95f0e",
+    "crates/pqc_scan_probe_ssh/src/parser.rs": "97a61fd4f57740a1603e2173784d1c5517c69f3bd1d66fc451209253db8c5a91",
+    "crates/pqc_scan_probe_ssh/src/runtime.rs": "fe2da4c6b68a70196d99c281801c3311151f7cc9047668bfebb6c25dd79b3681",
+    "crates/pqc_scan_probe_ssh/tests/openssh.rs": "6dfcf70a1a5be478ea7985e1726b315cb0845d53281db6f55edcf690b5b03d1b",
+    "crates/pqc_scan_probe_ssh/tests/parser.rs": "84e3a3b54fd855a8501a5d626feb93a219b0e663bb027a8bd9ee2472f39f0185",
+    "crates/pqc_scan_probe_ssh/tests/runtime.rs": "7fae0b99be06c7b7443bde9177683d0c9ad03ffc9fd65332a3da9cf024b2d804",
+    "crates/pqc_scan_probe_ssh/tests/schema.rs": "fb20c266ccbc9d19ffb0a89d99943855d71040d1b3295c4a21e1670aecb2e23d",
+    "crates/pqc_scan_probe_tls/Cargo.toml": "b7737dfa505fd24b2808f15415a0ff1de2428f547856c5c2069edcc399218c1a",
+    "crates/pqc_scan_probe_tls/src/lib.rs": "2469dfb7c002a8650b7e06dcd1c19b1c4520b93a8906e43e40807b94b0661820",
+    "crates/pqc_scan_probe_tls/src/runtime.rs": "afb2c6951457227df1a29770d8acdbbefe0eb3d1597c1faadc029a18224b98c5",
+    "crates/pqc_scan_probe_tls/tests/runtime.rs": "f71094f8aa40bf1daa44be8fc3024e018ffdf1de4dbe32feddf017b0cb70399e",
+    "crates/pqc_scan_report/Cargo.toml": "0acfe6d763039bb03930e487fc18dbece907dafb078f34902e69ee90108c28a4",
+    "crates/pqc_scan_report/src/compact.rs": "f476efa0dcde090f0d7873b2014273eed0c4f4c53b451227b2eee06f3e6aeb3f",
+    "crates/pqc_scan_report/src/cyclonedx.rs": "05b704f9bc886ed6e46157bd576419bf8ea45b60fdba10cd01db545524efaee4",
+    "crates/pqc_scan_report/src/grouping.rs": "4ab4ead81459d5a1cac823f43be718f578e2c93321979047615e080bd9e30ae1",
+    "crates/pqc_scan_report/src/html_report.rs": "364769e90d9d79a1703bfd651c942a10db7b7dd38aa0ca0d8f0ec1390a201fbe",
+    "crates/pqc_scan_report/src/inspection.rs": "0de05215e47cebe80422aa52d71c7a5161083b110b61dc830293c9674a4c61b0",
+    "crates/pqc_scan_report/src/japanese.rs": "80bbe70a64a1a07d10b117cd2c52425feae4342c59962ba43b808c942f25fa7d",
+    "crates/pqc_scan_report/src/json_report.rs": "f43009f3a10100e85abb6683e9a83935d7ea6c8a866ed5b08830b11e671fff89",
+    "crates/pqc_scan_report/src/lib.rs": "3f54b4976669e7df8c68819ae9e85e9d3c37b3b3eb15d3b17d29258177769358",
+    "crates/pqc_scan_report/src/markdown_report.rs": "5da35a29a47521e1038c729f4fc50a97d61b3d03cb662aabb1df6aa8487d5989",
+    "crates/pqc_scan_report/src/probe_report.rs": "9b586993cdb58c552c7daccdb926ac1c30aa43cda446fe0f398e37db9a5075bf",
+    "crates/pqc_scan_report/src/sarif_report.rs": "07165114d1af5a250b3824fca2e583071c701e5ded93bd986ea749c1517e732c",
+    "crates/pqc_scan_report/tests/compact.rs": "2746b409b56e41c4da65a7139c336bf67411f839fa7766b7af286ade7b0f032d",
+    "crates/pqc_scan_report/tests/cyclonedx_17.rs": "a16d03ffb09d5886a6c6763471257d07cafe15b8faacf0c0fc51e59b281d26d9",
+    "crates/pqc_scan_report/tests/evidence_privacy.rs": "7dc4ddb747738231ae6656e8b10f5affe66bec36cfe4d8a5cb15cb264da88042",
+    "crates/pqc_scan_report/tests/inspection.rs": "067f3c84b9c2b262d09d9ae673d2377ed56e76df5aeb3845cae8c1b639e3444b",
+    "crates/pqc_scan_report/tests/japanese.rs": "a67a2be940715b94863f76388e2098e1aece07a741111c469c7b543140caff49",
+    "crates/pqc_scan_report/tests/probe_reports.rs": "ba76e7b9261328ca889f0abb311216935979bffe878605d519108b9fa1c6dad7",
+    "crates/pqc_scan_report/tests/sarif_contract.rs": "6793d90098a2c1e5451d772618d74272c00a486850d92aeda24a96ece8d76c8a",
+    "crates/pqc_scan_rules/Cargo.toml": "5e9739d02894e4485ed7821fede5eaa35f8a61dd3a764c361a9ec81e728ee398",
+    "crates/pqc_scan_rules/src/lib.rs": "72fadf810426a2df9c83d64761778768095fdac2f629b881a8b35288a9ad476a",
+    "crates/pqc_scan_rules/tests/quality_metadata.rs": "af8e390bc7a2edab4f464d200c44f2d42fbb8febaf3c2aea88fec12c8518c305",
+    "crates/pqc_scan_rules/tests/validation.rs": "f4cc949ee995cb65b902d62be550cbf68fc62e0c86de53b4113a1eb1e0358d29",
+    "docs/user/DISTRIBUTION.ja.md": "48df126a494a5f765f5f37746eeaa8f14c69ad3c0bca31c4e0d8869ac38e50fc",
+    "docs/user/DISTRIBUTION.md": "f7ece29d7711cfb19db2b9b53926fcbb22624284b6e30e948dc8d658f82cbda7",
+    "docs/user/PROBING.ja.md": "9b81125be1b499b9d23f08be73711eba1d867b55ce168d064570bce5053d86c0",
+    "docs/user/PROBING.md": "96b3e0f20af127a8bb877e3ed2f88ca0b48ecd402ba3ca9a74b2c18fa2963117",
+    "rules/default/cert.yml": "97b333ea8cab9269a18b91cd12aad58e7258d5ed6b0ce27157b372f511b052aa",
+    "rules/default/crypto_api.yml": "8020d85ef00fae35571427521f975b022b9b9e72cdcbb6f0687925cf5c40865e",
+    "rules/default/jwt.yml": "8d79f81a4b90c64b68301d19fc5a2255deef9e47e1871aed1181f498883866ae",
+    "rules/default/middleware.yml": "58cca7b8dd25144a1f40a306d46ec5619fbf7da4504140b2607af7b34404b145",
+    "rules/default/pqc.yml": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a",
+    "rules/default/ssh.yml": "2508cfbb33e200e57603a4bb0ed34c3e37c0a592f4ee4d03259310357d1cf004",
+    "rules/default/tls.yml": "9c4a18c98005d4ca581c0eb0f3595ee7e762dc2a626e4166d8eb9b0be0ccbe0a",
+    "rules/default/tree_sitter.yml": "34ae0e842ce9e36cff90da2d188d8eb842fa00755af7b2eac8e90a09a7cde69b",
+    "rust-toolchain.toml": "02dee3b2b81f2c5e7064c6bb118cf19e859100fcc33c220e5ec52ce4b0586b12",
+    "scripts/package-release.py": "8a97d097392503212479fc2178214fa4bea11f08d346232b431865983f0ccde5"
+  },
+  "source_inputs_sha256": "fcd8f74c22d27b22fb7a7e8d7395d7e5be748ba909920dd9b42718375b36e965",
+  "tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "variants": {
+    "combined-probes": {
+      "archive": "target/task-038/final-combined-first/pqc-scan-0.1.0-aarch64-apple-darwin-combined-probes.tar.gz",
+      "archive_sha256": "4828e5c3a48e19edca474fd41bf77b40efd845e3af2dc5a34c9f0efd6d606f01",
+      "binary_sha256": "7cebb433c007c174affe3946b15030837ef0a46c8c9d1d28451e0493240d86fe",
+      "features": [
+        "probe-tls",
+        "probe-ssh"
+      ],
+      "findings": 2,
+      "fixture_sha256": "0367002dc310edee63f28dda54ea17fa290a9817da5e2ca92af1652b12dffb44",
+      "install_command_exits": {
+        "rules": 0,
+        "scan": 0
+      },
+      "install_results": "target/task-038/final-combined-install/INSTALL-RESULTS.json",
+      "license_packages": 168,
+      "missing_notice_packages": [
+        "asn1-rs-impl",
+        "block2",
+        "dispatch2",
+        "objc2-encode",
+        "objc2",
+        "tree-sitter-java",
+        "tree-sitter-ruby",
+        "tree-sitter-rust",
+        "tree-sitter-typescript"
+      ],
+      "network_policy": "macOS sandbox-exec deny network*",
+      "repeated_archive_sha256": "4828e5c3a48e19edca474fd41bf77b40efd845e3af2dc5a34c9f0efd6d606f01",
+      "source_dirty": false,
+      "source_head": "9201dc5022ea918e1416db7abf710db58a4bd855",
+      "target": "aarch64-apple-darwin"
+    },
+    "static": {
+      "archive": "target/task-038/final-static-first/pqc-scan-0.1.0-aarch64-apple-darwin-static.tar.gz",
+      "archive_sha256": "ef60fab5c8807796e99eafe9327d5ab275c3149391e3cc44149c49798b67dc7e",
+      "binary_sha256": "48e4096216794cc85e0dcf9b7585ed605a1e1dd902ac65e7779d447464574fb2",
+      "features": [],
+      "findings": 2,
+      "fixture_sha256": "0367002dc310edee63f28dda54ea17fa290a9817da5e2ca92af1652b12dffb44",
+      "install_command_exits": {
+        "rules": 0,
+        "scan": 0
+      },
+      "install_results": "target/task-038/final-static-install/INSTALL-RESULTS.json",
+      "license_packages": 139,
+      "missing_notice_packages": [
+        "asn1-rs-impl",
+        "tree-sitter-java",
+        "tree-sitter-ruby",
+        "tree-sitter-rust",
+        "tree-sitter-typescript"
+      ],
+      "network_policy": "macOS sandbox-exec deny network*",
+      "repeated_archive_sha256": "ef60fab5c8807796e99eafe9327d5ab275c3149391e3cc44149c49798b67dc7e",
+      "source_dirty": false,
+      "source_head": "9201dc5022ea918e1416db7abf710db58a4bd855",
+      "target": "aarch64-apple-darwin"
+    }
+  }
+}

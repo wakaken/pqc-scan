@@ -1,4 +1,5 @@
 mod attributes;
+mod pkcs12;
 
 pub use attributes::{
     parse_certificate_der, parse_public_key_der, CertificateAttributes, PublicDerParseError,
@@ -27,6 +28,7 @@ struct LocatedCertificate {
     column: usize,
     object_index: usize,
     byte_offset: usize,
+    pkcs12: bool,
 }
 
 impl Detector for CertificateDetector {
@@ -80,8 +82,10 @@ impl CertificateDetector {
             ));
         }
         let ext = file.ext().unwrap_or_default().to_ascii_lowercase();
-        let (objects, mut status) = if matches!(ext.as_str(), "p12" | "pfx") {
-            (Vec::new(), DetectorStatus::Unsupported)
+        let p12 = matches!(ext.as_str(), "p12" | "pfx").then(|| pkcs12::inspect(&file.bytes));
+        let p12_reason = p12.as_ref().map(|p| p.reason);
+        let (objects, mut status) = if let Some(p12) = p12 {
+            (p12.objects, p12.status)
         } else {
             // A DER name/extension may itself contain PEM-looking text. Prefer
             // actual DER parsing rather than a substring-based format guess.
@@ -93,7 +97,8 @@ impl CertificateDetector {
             }
         };
         let file_path = file.path.to_string_lossy().into_owned();
-        if objects.is_empty() {
+        let mut container_detections = Vec::new();
+        if objects.is_empty() || p12_reason.is_some() {
             // Compatibility: a filename/container signal is not a parsed certificate.
             let mut out = Vec::new();
             for rule in rules.by_kind(RuleKind::Certificate) {
@@ -130,36 +135,51 @@ impl CertificateDetector {
                     });
                 }
             }
-            let mut drafts = Vec::new();
-            if observe {
-                drafts.push(pqc_scan_core::ObservationDraft::container(
-                    &file_path, status, &out,
-                ));
+            if let Some(reason) = p12_reason {
+                for hit in &mut out {
+                    hit.evidence
+                        .metadata
+                        .insert("container_inspection".into(), reason.into());
+                    hit.evidence
+                        .metadata
+                        .insert("mac_verification".into(), "not_performed".into());
+                    hit.evidence
+                        .metadata
+                        .insert("trust_verification".into(), "not_performed".into());
+                }
             }
-            return Ok(DetectorOutcome::new(
-                out,
-                if applicable {
-                    status
-                } else {
-                    DetectorStatus::NotApplicable
-                },
-            )
-            .with_observations(drafts));
+            if !objects.is_empty() {
+                container_detections = out;
+            } else {
+                let mut drafts = Vec::new();
+                if observe {
+                    drafts.push(pqc_scan_core::ObservationDraft::container(
+                        &file_path, status, &out,
+                    ));
+                }
+                return Ok(DetectorOutcome::new(
+                    out,
+                    if applicable {
+                        status
+                    } else {
+                        DetectorStatus::NotApplicable
+                    },
+                )
+                .with_observations(drafts));
+            }
         }
-        let mut out = Vec::new();
+        let mut out = container_detections;
         let mut observations = Vec::new();
-        if observe && status != DetectorStatus::Complete {
+        if observe && (status != DetectorStatus::Complete || p12_reason.is_some()) {
             observations.push(pqc_scan_core::ObservationDraft::container(
-                &file_path,
-                status,
-                &[],
+                &file_path, status, &out,
             ));
         }
         for object in objects {
             let start = out.len();
             let info = &object.attributes;
             if info.status != DetectorStatus::Complete {
-                status = DetectorStatus::Partial;
+                mark_partial(&mut status);
             }
             let interval_valid = info.not_before_unix <= info.not_after_unix;
             let validity = assessment_time.filter(|_| interval_valid).map(|now| {
@@ -177,7 +197,7 @@ impl CertificateDetector {
                         .by_kind(RuleKind::Certificate)
                         .any(|r| r.scope == "certificate_validity"))
             {
-                status = DetectorStatus::Partial;
+                mark_partial(&mut status);
             }
             // Preserve composite input for legacy/custom scopes only.
             let legacy_signature = if info.signature_algorithm.starts_with("ML-DSA")
@@ -197,8 +217,11 @@ impl CertificateDetector {
                 file_path, legacy_signature, info.signature_oid, key_bits, info.expires_at
             );
             for rule in rules.by_kind(RuleKind::Certificate) {
+                if object.pkcs12 && rule.id == "CERT_P12_CONTAINER" {
+                    continue;
+                }
                 let Some(regex) = rule.compiled_pattern() else {
-                    status = DetectorStatus::Partial;
+                    mark_partial(&mut status);
                     continue;
                 };
                 let typed_target;
@@ -292,8 +315,8 @@ impl CertificateDetector {
                 ) {
                     observations.push(pqc_scan_core::ObservationDraft::certificate(
                         &file_path,
-                        object.line,
-                        object.column,
+                        if object.pkcs12 { 0 } else { object.line },
+                        if object.pkcs12 { 0 } else { object.column },
                         object.object_index,
                         facts,
                         info.status,
@@ -360,6 +383,13 @@ fn unix_seconds(now: SystemTime) -> Option<i64> {
     }
 }
 
+// Limit exhaustion remains visible even when retained public facts are partial.
+fn mark_partial(status: &mut DetectorStatus) {
+    if *status != DetectorStatus::Truncated {
+        *status = DetectorStatus::Partial;
+    }
+}
+
 fn object_metadata(object: &LocatedCertificate) -> BTreeMap<String, String> {
     let info = &object.attributes;
     let key = &info.public_key;
@@ -391,6 +421,12 @@ fn object_metadata(object: &LocatedCertificate) -> BTreeMap<String, String> {
         ("not_before_unix".into(), info.not_before_unix.to_string()),
         ("not_after_unix".into(), info.not_after_unix.to_string()),
     ]);
+    if object.pkcs12 {
+        m.insert("source_format".into(), "pkcs12".into());
+        m.insert("location_kind".into(), "binary_offset".into());
+        m.insert("mac_verification".into(), "not_performed".into());
+        m.insert("trust_verification".into(), "not_performed".into());
+    }
     for (name, value) in [
         ("key_bits", key.key_bits.map(|n| n.to_string())),
         ("named_curve_oid", key.named_curve_oid.clone()),
@@ -428,6 +464,7 @@ fn parse_der_object(bytes: &[u8]) -> (Vec<LocatedCertificate>, DetectorStatus) {
             column: 1,
             object_index: 1,
             byte_offset: 0,
+            pkcs12: false,
         }],
         status,
     )
@@ -480,6 +517,7 @@ fn parse_pem_objects(bytes: &[u8]) -> (Vec<LocatedCertificate>, DetectorStatus) 
                                 column: b.column,
                                 object_index: b.index,
                                 byte_offset: b.byte_offset,
+                                pkcs12: false,
                             }),
                             Err(_) => malformed = true,
                         }

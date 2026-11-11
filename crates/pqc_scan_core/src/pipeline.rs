@@ -1,5 +1,4 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
-use std::fs;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -30,7 +29,9 @@ pub fn scan_repository_detailed(
     rules: &RuleSet,
     detectors: &[Arc<dyn Detector>],
 ) -> Result<ScanDocument> {
-    scan_with_reader(config, rules, detectors, &|path| fs::read(path))
+    scan_with_reader(config, rules, detectors, &|path| {
+        crate::safe_read::read(&config.root, path, config.max_file_size_bytes)
+    })
 }
 
 /// Capture native and legacy views during one detector execution, without changing defaults.
@@ -44,7 +45,7 @@ pub fn scan_repository_native(
         config,
         rules,
         detectors,
-        &|path| fs::read(path),
+        &|path| crate::safe_read::read(&config.root, path, config.max_file_size_bytes),
         Some(options),
     )
 }
@@ -142,11 +143,20 @@ where
     }
 
     let dependency_sbom = build_dependency_sbom(&config.root, &detections);
-    let runtime_profile =
-        recommendation::RuntimeProfile::from_repository(&config.root, &files, &dependency_sbom);
+    let runtime_profile = recommendation::RuntimeProfile::from_repository_limited(
+        &config.root,
+        &files,
+        &dependency_sbom,
+        config.max_file_size_bytes,
+    );
     let mut findings = normalize_findings(&config.root, detections, rules);
     recommendation::annotate_findings(&mut findings, &runtime_profile);
-    attach_source_snippets(&config.root, &mut findings, &privacy_by_file);
+    attach_source_snippets(
+        &config.root,
+        config.max_file_size_bytes,
+        &mut findings,
+        &privacy_by_file,
+    );
     findings.sort_by(|a, b| {
         b.severity
             .cmp(&a.severity)
@@ -363,26 +373,18 @@ fn normalize_findings(
             None => continue,
         };
 
-        let dedup_key = format!(
-            "{}:{}:{}:{}:{}",
-            rule.id,
-            detection.location.file,
-            detection.location.line,
-            detection.location.column,
-            detection.evidence.r#match
-        );
-        if !dedup.insert(dedup_key) {
-            continue;
-        }
-
-        let severity = risk::adjusted_severity(rule, &detection);
+        let relative_file = relativize_path(root, &detection.location.file);
         let finding_id = make_finding_id(
             &rule.id,
-            &detection.location.file,
+            &relative_file,
             detection.location.line,
             detection.location.column,
             &detection.evidence.r#match,
         );
+        if !dedup.insert(finding_id.clone()) {
+            continue;
+        }
+        let severity = risk::adjusted_severity(rule, &detection);
 
         let description = rule
             .description
@@ -399,7 +401,7 @@ fn normalize_findings(
             description,
             migration_hint: rule.migration_hint.clone(),
             location: crate::model::Location {
-                file: relativize_path(root, &detection.location.file),
+                file: relative_file,
                 line: detection.location.line,
                 column: detection.location.column,
             },
@@ -419,16 +421,16 @@ fn make_finding_id(
     column: usize,
     evidence: &str,
 ) -> String {
-    use sha2::{Digest, Sha256};
-
-    let mut hasher = Sha256::new();
-    hasher.update(rule_id.as_bytes());
-    hasher.update(file.as_bytes());
-    hasher.update(line.to_string().as_bytes());
-    hasher.update(column.to_string().as_bytes());
-    hasher.update(evidence.as_bytes());
-    let digest = hasher.finalize();
-    hex::encode(&digest[..12])
+    crate::identity::native_id(
+        "finding",
+        &[
+            rule_id,
+            file,
+            &line.to_string(),
+            &column.to_string(),
+            evidence,
+        ],
+    )
 }
 
 fn relativize_path(root: &std::path::Path, path: &str) -> String {
@@ -540,6 +542,7 @@ pub fn exceeds_fail_threshold(findings: &[Finding], threshold: Severity) -> bool
 
 fn attach_source_snippets(
     root: &std::path::Path,
+    max_bytes: usize,
     findings: &mut [Finding],
     privacy: &HashMap<String, crate::privacy::SourcePrivacy>,
 ) {
@@ -562,7 +565,7 @@ fn attach_source_snippets(
             if privacy.get(&rel_file).is_some_and(|p| p.private_marker) {
                 CachedSnippetSource::MaskedSensitiveFile
             } else {
-                load_snippet_source(&root.join(&rel_file))
+                load_snippet_source(root, &root.join(&rel_file), max_bytes)
             }
         });
 
@@ -591,8 +594,19 @@ enum CachedSnippetSource {
     Unavailable,
 }
 
-fn load_snippet_source(path: &std::path::Path) -> CachedSnippetSource {
-    let bytes = match fs::read(path) {
+fn load_snippet_source(
+    root: &std::path::Path,
+    path: &std::path::Path,
+    max_bytes: usize,
+) -> CachedSnippetSource {
+    if path
+        .extension()
+        .and_then(|e| e.to_str())
+        .is_some_and(|e| e.eq_ignore_ascii_case("p12") || e.eq_ignore_ascii_case("pfx"))
+    {
+        return CachedSnippetSource::Unavailable;
+    }
+    let bytes = match crate::safe_read::read(root, path, max_bytes) {
         Ok(v) => v,
         Err(_) => return CachedSnippetSource::Unavailable,
     };
@@ -747,6 +761,63 @@ mod tests {
         dir.push(format!("pqc-scan-{prefix}-{}-{nanos}", std::process::id()));
         fs::create_dir_all(&dir).expect("create temp dir");
         dir
+    }
+
+    #[test]
+    fn finding_identity_frames_every_boundary_and_uses_full_versioned_digest() {
+        assert_ne!(
+            make_finding_id("R", "p", 1, 23, "x"),
+            make_finding_id("R", "p", 12, 3, "x")
+        );
+        assert_ne!(
+            make_finding_id("AB", "C", 1, 1, "x"),
+            make_finding_id("A", "BC", 1, 1, "x")
+        );
+        assert_ne!(
+            make_finding_id("R", "p", 1, 2, "3x"),
+            make_finding_id("R", "p", 1, 23, "x")
+        );
+        assert_ne!(
+            make_finding_id("R", "日本😀.js", 1, 1, ""),
+            make_finding_id("R", "日本😀.js", 1, 1, "x")
+        );
+        assert_eq!(
+            make_finding_id("JWT_RS256", "app.js", 1, 1, "RS256"),
+            "finding-v1-1abe60eccc9ffe7713d06b2900e64abb83ba7aac0b3a5724a35292c969dd1cd8"
+        );
+    }
+
+    #[test]
+    fn finding_identity_is_checkout_independent_and_deduplicates_exact_tuples() {
+        let left = temp_dir("finding-left");
+        let right = temp_dir("finding-right");
+        let rules = test_rules();
+        let mut ids = Vec::new();
+        for root in [&left, &right] {
+            fs::write(root.join("app.js"), "RS256").unwrap();
+            let doc = scan_repository_detailed(
+                &test_config(root.clone()),
+                &rules,
+                &[Arc::new(CompleteDetector)],
+            )
+            .unwrap();
+            assert_eq!(doc.legacy().findings.len(), 1);
+            assert_eq!(doc.legacy().findings[0].location.file, "app.js");
+            ids.push(doc.legacy().findings[0].finding_id.clone());
+            let file = ScannableFile::from_bytes(root.join("app.js"), b"RS256".to_vec());
+            let detection = CompleteDetector.detect(&file, &rules).unwrap().remove(0);
+            assert_eq!(
+                normalize_findings(root, vec![detection.clone(), detection], &rules).len(),
+                1
+            );
+        }
+        assert_eq!(ids[0], ids[1]);
+        assert_eq!(
+            ids[0],
+            "finding-v1-1abe60eccc9ffe7713d06b2900e64abb83ba7aac0b3a5724a35292c969dd1cd8"
+        );
+        fs::remove_dir_all(left).unwrap();
+        fs::remove_dir_all(right).unwrap();
     }
 
     struct CompleteDetector;
@@ -1109,7 +1180,7 @@ mod tests {
         )
         .expect("write file");
 
-        match load_snippet_source(&file) {
+        match load_snippet_source(&root, &file, 2 * 1024 * 1024) {
             CachedSnippetSource::MaskedSensitiveFile => {}
             other => panic!(
                 "expected masked sensitive file, got {:?}",
@@ -1124,5 +1195,25 @@ mod tests {
             CachedSnippetSource::TextLines(_) => "TextLines",
             CachedSnippetSource::Unavailable => "Unavailable",
         }
+    }
+}
+
+#[cfg(test)]
+mod opaque_container_snippet_tests {
+    use super::*;
+    use std::fs;
+    #[test]
+    fn pkcs12_payloads_are_never_reread_as_source_snippets() {
+        let root = std::env::temp_dir().join(format!("pqc-opaque-{}", std::process::id()));
+        fs::create_dir_all(&root).unwrap();
+        for ext in ["p12", "pfx", "P12", "PFX"] {
+            let path = root.join(format!("container.{ext}"));
+            fs::write(&path, b"opaque synthetic container payload without NUL").unwrap();
+            assert!(matches!(
+                load_snippet_source(&root, &path, 2 * 1024 * 1024),
+                CachedSnippetSource::Unavailable
+            ));
+        }
+        fs::remove_dir_all(root).unwrap();
     }
 }

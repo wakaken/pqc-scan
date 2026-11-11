@@ -2,6 +2,7 @@ pub mod assessment;
 pub mod classifier;
 pub mod compat;
 pub mod diagnostic;
+pub mod diff;
 pub mod error;
 pub mod identity;
 pub mod inventory;
@@ -10,8 +11,11 @@ pub mod observation;
 pub mod pipeline;
 pub mod policy;
 pub mod privacy;
+pub mod probe;
 pub mod recommendation;
 pub mod risk;
+mod safe_read;
+pub mod target_policy;
 pub mod walker;
 
 pub use diagnostic::{
@@ -53,3 +57,6 @@ pub trait Detector: Send + Sync {
         Ok(outcome.with_observations(drafts))
     }
 }
+
+#[cfg(feature = "probe-transport")]
+pub mod probe_transport;

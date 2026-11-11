@@ -1,0 +1,534 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pqc-scan.local/schemas/probe-ssh-offers-v1.schema.json",
+  "title": "Unauthenticated SSH advertised offers v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scanner_version",
+    "generated_at",
+    "protocol",
+    "attempt_id",
+    "target",
+    "limits",
+    "traffic",
+    "outcome",
+    "diagnostics",
+    "details",
+    "redaction_applied"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "scanner_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "protocol": {
+      "const": "ssh_offers"
+    },
+    "attempt_id": {
+      "const": 1
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host",
+        "port",
+        "resolved_addresses",
+        "pinned_address",
+        "connected_peer"
+      ],
+      "properties": {
+        "host": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 253
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "resolved_addresses": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 45
+              },
+              "minItems": 1,
+              "maxItems": 8
+            }
+          ]
+        },
+        "pinned_address": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 54
+            }
+          ]
+        },
+        "connected_peer": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 54
+            }
+          ]
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_dns_answers",
+        "dns_timeout_ns",
+        "tcp_timeout_ns",
+        "protocol_timeout_ns",
+        "overall_timeout_ns",
+        "max_received_bytes",
+        "max_sent_bytes"
+      ],
+      "properties": {
+        "max_dns_answers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "max_received_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 524288
+        },
+        "max_sent_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        },
+        "dns_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5000000000
+        },
+        "tcp_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3000000000
+        },
+        "protocol_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5000000000
+        },
+        "overall_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15000000000
+        }
+      }
+    },
+    "traffic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "received_bytes",
+        "sent_bytes"
+      ],
+      "properties": {
+        "received_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 524288
+        },
+        "sent_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65536
+        }
+      }
+    },
+    "outcome": {
+      "enum": [
+        "completed",
+        "partial",
+        "failed"
+      ]
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "maxItems": 32
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "client_profile",
+        "assurance",
+        "server_identification",
+        "offers",
+        "first_kex_packet_follows",
+        "kex_candidates",
+        "host_key_candidates",
+        "extension_markers",
+        "pre_identification_lines",
+        "early_messages"
+      ],
+      "properties": {
+        "client_profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "identification",
+            "purpose",
+            "offers",
+            "first_kex_packet_follows",
+            "reserved"
+          ],
+          "properties": {
+            "identification": {
+              "type": "string",
+              "pattern": "^SSH-2\\.0-pqc_scan_[!-~]+$",
+              "maxLength": 253
+            },
+            "purpose": {
+              "const": "diagnostic_proposal_only"
+            },
+            "offers": {
+              "$ref": "#/$defs/offers"
+            },
+            "first_kex_packet_follows": {
+              "const": false
+            },
+            "reserved": {
+              "const": 0
+            }
+          }
+        },
+        "assurance": {
+          "enum": [
+            "not_observed",
+            "peer_claim_only",
+            "unauthenticated_advertisement"
+          ]
+        },
+        "server_identification": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "maxLength": 254
+            }
+          ]
+        },
+        "offers": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/offers"
+            }
+          ]
+        },
+        "first_kex_packet_follows": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
+        "kex_candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/candidate"
+          },
+          "maxItems": 256
+        },
+        "host_key_candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/candidate"
+          },
+          "maxItems": 256
+        },
+        "extension_markers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256
+        },
+        "pre_identification_lines": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        },
+        "early_messages": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
+        }
+      }
+    },
+    "redaction_applied": {
+      "type": "boolean"
+    }
+  },
+  "$defs": {
+    "offers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kex_algorithms",
+        "server_host_key_algorithms",
+        "encryption_algorithms_client_to_server",
+        "encryption_algorithms_server_to_client",
+        "mac_algorithms_client_to_server",
+        "mac_algorithms_server_to_client",
+        "compression_algorithms_client_to_server",
+        "compression_algorithms_server_to_client",
+        "languages_client_to_server",
+        "languages_server_to_client"
+      ],
+      "properties": {
+        "kex_algorithms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256,
+          "minItems": 1
+        },
+        "server_host_key_algorithms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256,
+          "minItems": 1
+        },
+        "encryption_algorithms_client_to_server": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256,
+          "minItems": 1
+        },
+        "encryption_algorithms_server_to_client": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256,
+          "minItems": 1
+        },
+        "mac_algorithms_client_to_server": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256,
+          "minItems": 1
+        },
+        "mac_algorithms_server_to_client": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256,
+          "minItems": 1
+        },
+        "compression_algorithms_client_to_server": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256,
+          "minItems": 1
+        },
+        "compression_algorithms_server_to_client": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256,
+          "minItems": 1
+        },
+        "languages_client_to_server": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256
+        },
+        "languages_server_to_client": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[!-~]+$"
+          },
+          "maxItems": 256
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "construction",
+        "namespace",
+        "provenance",
+        "reference"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[!-~]+$"
+        },
+        "construction": {
+          "enum": [
+            "classical",
+            "hybrid",
+            "unknown"
+          ]
+        },
+        "namespace": {
+          "enum": [
+            "vendor_namespaced",
+            "unqualified"
+          ]
+        },
+        "provenance": {
+          "enum": [
+            "rfc_defined",
+            "rfc_informational",
+            "openssh_defined",
+            "vendor_defined",
+            "unknown"
+          ]
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uri",
+              "maxLength": 120
+            }
+          ]
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "maxItems": 0
+          },
+          "details": {
+            "properties": {
+              "assurance": {
+                "const": "unauthenticated_advertisement"
+              },
+              "offers": {
+                "$ref": "#/$defs/offers"
+              },
+              "server_identification": {
+                "type": "string"
+              },
+              "first_kex_packet_follows": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "diagnostics": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

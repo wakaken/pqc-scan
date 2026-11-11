@@ -367,6 +367,34 @@ pub struct AssessmentReport {
     inventory_completeness: String,
 }
 impl AssessmentReport {
+    /// Bind advisory decisions to the actual inventory facts, not only its run ID.
+    pub fn validate_for_inventory(
+        &self,
+        native: &crate::inventory::NativeScan,
+    ) -> anyhow::Result<()> {
+        self.validate()?;
+        let expected = evaluate(native, &self.context, &self.profile.id)?;
+        anyhow::ensure!(
+            serde_json::to_value(self)? == serde_json::to_value(expected)?,
+            "assessment does not match inventory facts"
+        );
+        Ok(())
+    }
+    pub fn profile_id(&self) -> &str {
+        &self.profile.id
+    }
+    pub fn inventory_run_id(&self) -> &str {
+        &self.inventory.run_id
+    }
+    pub fn evaluation(&self) -> &DecisionRecord {
+        &self.evaluation
+    }
+    pub fn assessments(&self) -> &[crate::assessment::AssetAssessment] {
+        &self.assessments
+    }
+    pub fn asset_policies(&self) -> &[AssetPolicy] {
+        &self.asset_policies
+    }
     pub fn decision(&self) -> Decision {
         self.evaluation.decision
     }

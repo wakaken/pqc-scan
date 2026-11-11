@@ -12,10 +12,20 @@ use pqc_scan_core::{
 };
 use pqc_scan_detectors::default_detectors;
 use pqc_scan_report::{
-    write_assessment_json, write_diagnostics, write_inventory_json, write_reports_with_language,
-    ReportFormat, ReportLanguage,
+    write_assessment_json, write_cyclonedx_17, write_diagnostics, write_document_reports,
+    write_inventory_json, ReportFormat, ReportLanguage,
 };
 use pqc_scan_rules::{RuleSet, Severity};
+mod diff_command;
+#[cfg(any(
+    feature = "probe-tls",
+    feature = "probe-ssh",
+    feature = "probe-ssh-kex"
+))]
+mod probe_command;
+
+#[cfg(feature = "probe-transport")]
+mod probe_resolver;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -30,11 +40,37 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    #[cfg(any(
+        feature = "probe-tls",
+        feature = "probe-ssh",
+        feature = "probe-ssh-kex"
+    ))]
+    Probe {
+        #[command(subcommand)]
+        command: probe_command::ProbeCommand,
+    },
+    #[cfg(feature = "probe-transport")]
+    #[command(name = "__resolve-host", hide = true)]
+    ResolveHost {
+        host: String,
+    },
     Scan(ScanArgs),
+    /// Compare compatible inventories within one explicit repository scope.
+    Diff(DiffArgs),
     Rules {
         #[command(subcommand)]
         command: RulesCommand,
     },
+}
+
+#[derive(Debug, Parser)]
+struct DiffArgs {
+    before: PathBuf,
+    after: PathBuf,
+    #[arg(long)]
+    repository_scope: String,
+    #[arg(long)]
+    out_dir: PathBuf,
 }
 
 #[derive(Debug, Parser)]
@@ -47,6 +83,10 @@ struct ScanArgs {
     /// Language of HTML and Markdown reports; machine outputs remain unchanged.
     #[arg(long, value_enum, default_value_t = LanguageArg::En)]
     lang: LanguageArg,
+
+    /// Add separate CycloneDX 1.7 CBOM and dependency SBOM files.
+    #[arg(long)]
+    cyclonedx_17: bool,
 
     #[arg(long, default_value = "./pqc-report")]
     out_dir: PathBuf,
@@ -204,7 +244,19 @@ where
     WOut: Write,
     WErr: Write,
 {
-    let cli = Cli::try_parse_from(args)?;
+    let cli = match Cli::try_parse_from(args) {
+        Ok(cli) => cli,
+        Err(error)
+            if matches!(
+                error.kind(),
+                clap::error::ErrorKind::DisplayHelp | clap::error::ErrorKind::DisplayVersion
+            ) =>
+        {
+            write!(stdout, "{error}")?;
+            return Ok(ExitStatus::Success);
+        }
+        Err(error) => return Err(error.into()),
+    };
     run_cli(cli, stdout, stderr)
 }
 
@@ -214,7 +266,35 @@ fn run_cli<WOut: Write, WErr: Write>(
     stderr: &mut WErr,
 ) -> Result<ExitStatus> {
     match cli.command {
+        #[cfg(any(
+            feature = "probe-tls",
+            feature = "probe-ssh",
+            feature = "probe-ssh-kex"
+        ))]
+        Commands::Probe { command } => Ok(
+            if probe_command::run(command, stdout)? == pqc_scan_core::probe::ProbeOutcome::Completed
+            {
+                ExitStatus::Success
+            } else {
+                ExitStatus::IncompleteInspection
+            },
+        ),
+        #[cfg(feature = "probe-transport")]
+        Commands::ResolveHost { host } => {
+            probe_resolver::resolve_helper(&host, stdout)?;
+            Ok(ExitStatus::Success)
+        }
         Commands::Scan(args) => scan_cmd(args, stdout, stderr),
+        Commands::Diff(args) => {
+            diff_command::run(
+                &args.before,
+                &args.after,
+                &args.repository_scope,
+                &args.out_dir,
+                stdout,
+            )?;
+            Ok(ExitStatus::Success)
+        }
         Commands::Rules { command } => match command {
             RulesCommand::List(args) => list_rules_cmd(args, stdout),
             RulesCommand::Show(args) => show_rule_cmd(args, stdout),
@@ -254,7 +334,7 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     };
 
     let detectors = default_detectors();
-    let document = if args.inventory_json {
+    let document = if args.inventory_json || args.cyclonedx_17 {
         let options = NativeOptions::new(args.repository_scope.as_deref())?;
         scan_repository_native(&config, &rules, &detectors, &options)?
     } else {
@@ -273,8 +353,17 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     };
     let result = document.legacy();
 
-    let mut outputs =
-        write_reports_with_language(result, &args.out_dir, args.format.into(), args.lang.into())?;
+    let mut outputs = write_document_reports(
+        &document,
+        assessment.as_ref(),
+        args.diagnostics,
+        &args.out_dir,
+        args.format.into(),
+        args.lang.into(),
+    )?;
+    if args.cyclonedx_17 {
+        outputs.extend(write_cyclonedx_17(&document, &args.out_dir)?);
+    }
     if args.diagnostics {
         outputs.push(write_diagnostics(&document, &args.out_dir)?);
     }
@@ -291,6 +380,8 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     writeln!(stdout, "total findings: {}", result.summary.total_findings)?;
     writeln!(stdout, "scanned files: {}", result.summary.scanned_files)?;
     writeln!(stdout, "skipped files: {}", result.summary.skipped_files)?;
+
+    write_scope_note(document.coverage().not_enumerated_population(), stderr)?;
 
     if !document.coverage().is_complete() {
         writeln!(stderr,
@@ -315,6 +406,13 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     }
 
     Ok(ExitStatus::Success)
+}
+
+fn write_scope_note<W: Write>(not_enumerated: bool, stderr: &mut W) -> std::io::Result<()> {
+    if not_enumerated {
+        writeln!(stderr, "note: ignore and traversal policies may leave files unenumerated; inspection completeness applies within scope. Zero findings does not establish repository-wide safety.")?;
+    }
+    Ok(())
 }
 
 fn list_rules_cmd<WOut: Write>(args: RulesListArgs, stdout: &mut WOut) -> Result<ExitStatus> {
@@ -415,6 +513,67 @@ mod tests {
     }
 
     #[test]
+    fn explicit_regular_file_scan_retains_findings_and_strict_success() {
+        let repo = temp_dir("single-file");
+        let out = temp_dir("single-file-output");
+        write_file(&repo, "input.js", "const algorithm = 'RS256';\n");
+        let (result, stdout, stderr) = run_cli_test(vec![
+            "pqc-scan".into(),
+            "scan".into(),
+            repo.join("input.js").display().to_string(),
+            "--rules-dir".into(),
+            rules_dir().display().to_string(),
+            "--out-dir".into(),
+            out.display().to_string(),
+            "--require-complete".into(),
+        ]);
+        assert_eq!(result.unwrap().code(), 0);
+        let report: serde_json::Value =
+            serde_json::from_slice(&fs::read(out.join("report.json")).unwrap()).unwrap();
+        assert!(report["findings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|f| f["rule_id"] == "JWT_RS256"));
+        assert!(stdout.contains("scanned files: 1"));
+        assert!(!stderr.contains("require-complete:"));
+        fs::remove_dir_all(repo).unwrap();
+        fs::remove_dir_all(out).unwrap();
+    }
+
+    #[test]
+    fn no_scope_note_when_population_is_enumerated() {
+        let mut stderr = Vec::new();
+        write_scope_note(false, &mut stderr).unwrap();
+        assert!(stderr.is_empty());
+    }
+
+    #[test]
+    fn ignored_crypto_warns_about_scope_without_changing_strict_exit() {
+        let repo = temp_dir("scope-note");
+        let out = temp_dir("scope-note-output");
+        write_file(&repo, ".gitignore", "hidden.js\n");
+        write_file(&repo, "hidden.js", "const algorithm = 'RS256';\n");
+        let (result, stdout, stderr) = run_cli_test(vec![
+            "pqc-scan".into(),
+            "scan".into(),
+            repo.display().to_string(),
+            "--rules-dir".into(),
+            rules_dir().display().to_string(),
+            "--out-dir".into(),
+            out.display().to_string(),
+            "--require-complete".into(),
+        ]);
+        assert_eq!(result.unwrap().code(), 0);
+        assert!(stdout.contains("total findings: 0"));
+        assert!(stderr.contains("unenumerated"));
+        assert!(stderr.contains("repository-wide safety"));
+        assert!(!stderr.contains("require-complete:"));
+        fs::remove_dir_all(repo).unwrap();
+        fs::remove_dir_all(out).unwrap();
+    }
+
+    #[test]
     fn diagnostics_opt_in_exports_complete_coverage_without_changing_legacy_json() {
         let repo = temp_dir("diagnostics-input");
         let plain = temp_dir("diagnostics-plain");
@@ -437,7 +596,7 @@ mod tests {
         assert_eq!(result.unwrap(), ExitStatus::Success);
         assert_eq!(stdout.matches("written ").count(), 6);
         assert!(!plain.join("diagnostics.json").exists());
-        assert!(stderr.is_empty(), "{stderr}");
+        assert!(stderr.contains("unenumerated"), "{stderr}");
         let mut args = arguments(&detailed);
         args.push("--diagnostics".into());
         let (result, stdout, _) = run_cli_test(args);
@@ -526,7 +685,7 @@ mod tests {
         };
         let (result, _, stderr) = run_cli_test(args(&repo, &out));
         assert_eq!(result.unwrap().code(), 0);
-        assert!(stderr.is_empty());
+        assert!(stderr.contains("unenumerated"));
         let (result, _, _) = run_cli_test(args(&repo.join("missing"), &out));
         assert!(result.is_err());
         let blocked = out.join("ordinary-file");
@@ -588,7 +747,7 @@ mod tests {
             "ja".into(),
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert!(stderr.is_empty(), "{stderr}");
+        assert!(stderr.contains("unenumerated"), "{stderr}");
         let html = fs::read_to_string(out.join("report.html")).unwrap();
         assert!(html.contains("耐量子暗号への移行調査レポート"));
         assert!(html.contains("対応完了の保証ではありません"));
@@ -638,7 +797,7 @@ mod tests {
             "high".into(),
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert!(stderr.is_empty(), "{stderr}");
+        assert!(stderr.contains("unenumerated"), "{stderr}");
         assert_eq!(stdout.matches("written ").count(), 6);
         let report: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
@@ -697,7 +856,7 @@ mod tests {
             rules_dir().display().to_string(),
         ]);
         assert_eq!(result.expect("acceptance scan"), ExitStatus::Success);
-        assert!(stderr.is_empty(), "{stderr}");
+        assert!(stderr.contains("unenumerated"), "{stderr}");
         assert_eq!(stdout.matches("written ").count(), 6);
         let json: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
@@ -779,7 +938,7 @@ mod tests {
         let (result, stdout, stderr) = run_cli_test(args);
 
         assert_eq!(result.expect("scan succeeds"), ExitStatus::Success);
-        assert!(stderr.is_empty(), "{stderr}");
+        assert!(stderr.contains("unenumerated"), "{stderr}");
         assert!(
             out_dir.join("report.json").exists(),
             "report.json should exist"

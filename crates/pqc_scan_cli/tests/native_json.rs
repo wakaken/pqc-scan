@@ -72,6 +72,15 @@ fn inventory_is_explicit_and_legacy_outputs_are_a_shadow_not_a_replacement() {
         "{:?}",
         validator.iter_errors(&native).collect::<Vec<_>>()
     );
+    for invalid_id in [
+        "a".repeat(24),
+        format!("finding-v0-{}", "a".repeat(64)),
+        "finding-v1-short".into(),
+    ] {
+        let mut invalid = native.clone();
+        invalid["legacy_associations"][0]["legacy_id"] = Value::String(invalid_id);
+        assert!(!validator.is_valid(&invalid));
+    }
     let mut semantic = native.clone();
     let mut replacements = std::collections::BTreeMap::new();
     replacements.insert(
@@ -124,7 +133,7 @@ fn inventory_is_explicit_and_legacy_outputs_are_a_shadow_not_a_replacement() {
     normalize(&mut semantic, &replacements);
     let golden: Value =
         serde_json::from_str(include_str!("fixtures/native-v1.golden.json")).unwrap();
-    assert_eq!(semantic,golden,"reviewed semantic golden; only run/time and legacy root-sensitive IDs normalized, references preserved");
+    assert_eq!(semantic,golden,"reviewed semantic golden; only run/time and observation/finding IDs normalized, references preserved");
     assert_eq!(native["schema_version"], 1);
     assert_eq!(native["observations"].as_array().unwrap().len(), 2);
     assert_eq!(native["repository_scope"], "test/project");
@@ -142,6 +151,21 @@ fn inventory_is_explicit_and_legacy_outputs_are_a_shadow_not_a_replacement() {
             b.as_object_mut().unwrap().remove("generated_at");
         }
         assert_eq!(a, b, "{file}");
+    }
+    let report: Value =
+        serde_json::from_slice(&std::fs::read(new.join("report.json")).unwrap()).unwrap();
+    for (finding, association) in report["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .zip(native["legacy_associations"].as_array().unwrap())
+    {
+        let id = finding["finding_id"].as_str().unwrap();
+        assert!(id.starts_with("finding-v1-") && id.len() == 75);
+        assert!(id[11..].bytes().all(|b| b.is_ascii_hexdigit()));
+        assert_eq!(association["legacy_id"], id);
+        let html = std::fs::read_to_string(new.join("report.html")).unwrap();
+        assert!(html.contains(&format!("data-finding-id=\"{id}\"")));
     }
     let no_scope = cli(
         &input,

@@ -4,19 +4,37 @@ Design date: 2026-11-09. Baseline: `b3104f9a4193b1b21ea11ca060f06301de2e936b`. A
 
 ## Implementation checkpoint (2026-11-10)
 
-Runtime checkpoint: `1f61dfa6b3fa6050c4ec4af5f2efe9883cfbe242`. Task YAML remains authoritative; design-time statements below describe the original plan unless updated explicitly.
+Latest local code checkpoint: `9201dc5022ea918e1416db7abf710db58a4bd855`.
+The isolated task031 study `48fad23` was adopted under explicit delegated
+selection in `cae2730`. Runtime TLS/SSH and local packaging are committed separately. Task YAML remains authoritative; design-time statements below describe
+the original plan unless updated explicitly.
 
 | Phase | Tasks | Current task state |
 |---|---|---|
 | 0: correctness and baseline | 018–024, 028, 029 | 018–022, 024, 028, 029 `done`; 023 `review` |
 | 1: observations, inventory, assessment | 025–027 | All three `done` |
-| 2–5 and conditional future work | 030–039 | All `pending` |
+| 2: target safety and TLS | 030–032 | 030/031 `done`; 032 `blocked` only on human-report browser acceptance |
+| 3: SSH advertised discovery | 033 | `blocked` on human-report browser acceptance; source/protocol review accepted |
+| 4: standards, comparison and human reports | 034–036 | 034/035 `done`; 036 `blocked` on real-browser acceptance |
+| 5: packaging and final quality | 038 then 037 | 038 `blocked` on notice/dependency acceptance after clean local installs; 037 `blocked` on final quality gates, no publication |
+| Conditional future negotiation | 039 | `pending`; no concrete negotiated-session use case selected |
+
+See [runtime integration validation](../quality/RUNTIME-INTEGRATION-VALIDATION.md),
+[earlier static/transport acceptance](../quality/ROADMAP-CONTINUATION-VALIDATION.md),
+[TLS feasibility](../quality/TASK-031-TLS-FEASIBILITY.md) and the
+[selected runtime contract](../architecture/RUNTIME-PROBE-IMPLEMENTATION.md).
+The current static inventory schema has not been changed to include endpoints.
 
 The task-to-phase assignments agree with the implemented scope and local acceptance records. Phase 0 is **not fully complete**: task 023's reviewed corpus/harness and measurements exist, but maintainer approval of its protocol and measured numeric budget proposal remains outstanding. Later user-requested tasks consumed the reviewed technical baseline and recorded their own comparisons; they did not close 023 or approve its budgets. Dependencies on 023 mean that baseline evidence is needed for those comparisons, while its remaining approval gate stays open. They do not authorize bypassing future probe, policy or release decisions.
 
 The user-facing task 025 artifact is now the **Cryptographic Inventory and Evidence Report** (暗号資産・検出根拠レポート): `--inventory-json` writes `scan.inventory.v1.json`. The old `--native-json` switch was explicitly removed. Internal native type/schema names and historical task plans remain for compatibility/provenance. Current built-in rule count is 119; the 117-rule design baseline predates the certificate-validity additions.
 
-The one-task/one-PR rule below is the default delivery policy. The subsequent explicit user requests to continue on the same branch and publish the accumulated changes took precedence: tasks 022–027 and CI follow-ups were delivered together through PR #14. This delivery exception does not merge task states or change phase assignments. Current feature-branch publication does not merge tasks 028/029 into develop or qualify a release.
+The one-task/one-PR rule below is the default delivery policy. Historical explicit
+requests delivered tasks022–027 and CI follow-ups together through PR#14; that
+exception does not merge task states or change phase assignments. The continuation
+handoff records PR#15 merged at `e7f32bb`, followed by the local-only `3c357ce`
+format-support correction. Current continuation commits remain local; no new
+combined PR, publication or release is authorized by that history.
 
 See the [task-by-task alignment record](../quality/PHASE-0-1-ALIGNMENT.md), [current README](../../README.md) and [Japanese README](../../README.ja.md). No task status, approved budget or future scope is changed by this documentation checkpoint.
 
@@ -745,8 +763,74 @@ Do not prebuild platform infrastructure. Enterprise aggregation, ownership, RBAC
 
 ## Decisions and remaining uncertainty
 
-Maintainers must decide additive CLI/artifact names and opt-in completeness exit policy; approved cryptographic classification/result deltas; probe address defaults/budgets; backend/features/platforms after the spike; repository identity scope and uncertain move correspondence; measured regression budgets and 1.0 support/release channels.
+Approved/selected decisions for CLI/output, address limits, TLS backend, runtime scope and local distribution are recorded in [CONTINUATION-DECISIONS.md](CONTINUATION-DECISIONS.md). Local same-truth nonregression and same-environment 2x time/RSS investigation signals are approved; task 023 is done within its development-baseline scope. Final-source hosted CI, final release acceptance and external publication remain separate. Untested platform/support claims are not added.
 
-No inventory/assessment crate extraction is scheduled. A real independent consumer and an acyclic type-ownership design are prerequisites for revisiting it. Full negotiated SSH requires task 039 evidence and a new implementation decision. No platform DB, web server, queues or plugin ABI is approved.
+No inventory/assessment crate extraction is scheduled. A real independent consumer and an acyclic type-ownership design are prerequisites for revisiting it. Experimental negotiated SSH was approved and integrated with task 039 evidence. No platform DB, web server, queues or plugin ABI is approved.
 
 Independent design review must challenge duplicated functionality, early abstractions, hidden schema/ID changes, unsupported capability claims, dependency cycles and untestable acceptance. Unexecuted implementation checks remain unexecuted.
+
+## Local acceptance checkpoint — 2026-11-11
+
+This checkpoint supersedes earlier browser/notice blockers. Source `75b9afd` and
+source-bound evidence in [REMAINING-ROADMAP-VALIDATION.md](../quality/REMAINING-ROADMAP-VALIDATION.md)
+passed one implementation review and one separate test-adequacy review. Actual
+loopback HTTP browser checks now cover both languages and static/TLS/SSH pages;
+032,033,036 are done. 038 technical preparation is done: both local macOS arm64
+variants repeat byte-identically and clean-install offline. Static missing notice
+sets were completed; four combined-variant upstream license statements still
+require publication review and do not constitute legal clearance.
+
+037 remains blocked on approved budgets/1.0 support scope and actual current-HEAD
+hosted CI. The concrete existing-baseline proposal and measurements are in the
+validation document; no approval is inferred from silence. 039 remains conditional
+pending, without a selected completed-KEX consumer. No push, publication, signing
+or stable multi-platform support claim was made.
+
+## Maintainer acceptance decision — 2026-11-11
+
+The maintainer explicitly approved the proposed regression signals and 1.0 scope.
+For unchanged eligible truth, per split/family TP must not decrease and FP/FN must
+not increase. On the same host/profile/config/input, wall time or peak RSS above
+twice the previous observed warm maximum requires investigation. Existing local
+measurements are within these signals; this does not establish a universal accuracy
+or performance guarantee or silently enable threshold enforcement in CI.
+
+Approved scope: static scanning is the formal 1.0 target; TLS/SSH probes remain
+experimental; local distribution validation covers macOS arm64. This approval
+supersedes the earlier pending-budget/scope statements, without declaring 1.0
+released or promising other platforms. 037 remains blocked on successful hosted
+CI for the actual target commit. Four combined-probes notice reviews remain
+publication prerequisites. Push, publication and signing were not authorized.
+
+## Task039 feasibility checkpoint — 2026-11-11
+
+The maintainer selected actual hybrid KEX plus trusted-host verification without
+user authentication/login. The previous conditional-use-case deferral is
+superseded by the [task039 study](../quality/TASK-039-SSH-KEX-FEASIBILITY.md).
+russh0.65.1/AWS-LC with a separately provisioned public host-key pin is the selected
+future backend shape, based on isolated positive/negative cases. This is a study
+outcome, not a shipped negotiated SSH feature; the current probe still reports
+unauthenticated advertisements. Host certificate/known-host rules, safety-budget
+integration and platform/adversarial coverage remain future implementation work.
+
+## Task039 product follow-up — 2026-11-11
+
+Explicit maintainer authorization extended039 from feasibility to product integration.
+Experimental `probe ssh-kex` now verifies fixed hybrid KEX against an explicit
+trusted Ed25519 public host-key pin, with no user authentication/login. The new
+mode is optional and its reports are separate; existing SSH offer collection and
+static scans retain their behavior. Both required independent reviews and local
+protocol/browser gates passed. See [product validation](../quality/SSH-KEX-PRODUCT-VALIDATION.md).
+037's actual target-commit hosted-CI gate remains unfulfilled; the prior1.0 scope
+keeps probes experimental. Existing distribution artifacts predate the new mode.
+
+## Task023 local baseline acceptance — 2026-11-11
+
+The previously pending maintainer criterion decision is satisfied by the explicit
+2026-11-11 approval. Existing independent technical acceptance, unchanged frozen
+corpus/harness bindings and20 fresh evaluator sanity tests close023 for its
+development-only baseline capability. [Acceptance evidence](../quality/TASK-023-ACCEPTANCE.md)
+preserves the historical machine baseline and distinguishes saved measurements
+from a new measurement of the current product. Target-commit hosted CI, final
+product/release acceptance and ongoing Cursor audit remediation remain001/037
+or subsequent authorized fixes;023 done is not OSS1.0 approval.

@@ -1,4 +1,4 @@
-id: 001
+id: "001"
 title: Align CI with declared Rust toolchain and enforce quality gates
 type: quality
 priority: high
@@ -75,7 +75,8 @@ restart_record:
     action: Restored missing executable from verified official archive, then removed and added component using rustup
     report_directory: target/restart-baseline
   next_action: >
-    Have the user inspect target/restart-baseline/report.html in their browser and
-    confirm that file expansion, source snippets, and recommended actions work.
-    Obtain the real product repository path for acceptance.
-    Resume task 014 only after the baseline gate is satisfied. Do not mark done yet.
+    Keep blocked until hosted CI and scan artifacts for the final source revision
+    are verified, along with final product acceptance. The historical task 014
+    restart instructions above are superseded by the maintainer's 2026-11-11
+    cancellation; do not resume 014 or 016. Current validation and remaining
+    audit work are tracked in docs/quality/CURSOR-AUDIT-FOLLOWUP-2026-11-11.md.

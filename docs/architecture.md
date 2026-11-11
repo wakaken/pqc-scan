@@ -6,7 +6,7 @@
 
 - `pqc_scan_cli`
   - CLI parsing (`clap`)
-  - command dispatch (`scan`, `rules list`)
+  - command dispatch (`scan`, `diff`, `rules list`, `rules show`, optional `probe`)
   - fail-on threshold behavior (`high`, `critical`)
 - `pqc_scan_core`
   - repository walking
@@ -99,8 +99,8 @@ All detectors implement the shared `Detector` trait:
 `scan_repository_detailed` returns a private-field `ScanDocument` with the legacy
 `ScanResult`, diagnostics and coverage. `scan_repository` remains a wrapper over
 the same execution and returns the existing result; detectors are not run twice.
-Normalization, finding IDs, severity, recommendations and existing report schemas
-are unchanged. Per-file read/detector failures retain other results. Root/setup
+Finding IDs use the shared length-prefixed identity encoder described below.
+Severity, recommendations and existing report schemas are unchanged. Per-file read/detector failures retain other results. Root/setup
 and report-write failures remain fatal. The detailed walker accounts for policy
 exclusions, metadata failures and soft ignore-policy errors separately from selected files.
 Iterator-level traversal failures, including root enumeration failures after
@@ -113,7 +113,7 @@ read-failed, and read-ok = analyzed + partial + analysis-failed + unsupported +
 not-applicable + unknown. Enumeration failures are an additional entry count;
 ignore-hidden populations are not enumerable. Complete means complete within the
 declared scope, not absence of cryptography or product security. Dependency inspection now distinguishes structured success, malformed records,
-partial results and unsupported versions. Lexical fallbacks remain `NotReported`;
+partial results and unsupported versions. Explicitly parsed Go/POM/requirements/Ruby subsets can complete; unsupported/dynamic syntax and remaining lexical fallbacks stay incomplete;
 nondependency inputs are `NotApplicable`. See [dependency provenance](architecture/DEPENDENCY-PROVENANCE.md).
 
 CLI adds a stderr notice and opt-in `--diagnostics` (`diagnostics.json`, schema 1)
@@ -176,7 +176,7 @@ SARIF retains its task022 conservative handling. Traversal/candidate/work/hit ca
 are unchanged; the dedup set now lives within each rule. Matches extending into
 a synthetic clipped suffix are rejected while Truncated stays visible.
 
-The JavaScript grammar remains the TypeScript/TSX parser. Syntax recovery and
+TypeScript and TSX use dedicated pinned grammars. Syntax recovery and
 nominal API matching do not resolve aliases, local namesakes, actual execution
 or all comments inside ancestor text. Frozen corpus and grammar-subset tests
 record these limitations rather than silently expanding dependency support.
@@ -198,7 +198,7 @@ See [the task024 evidence](quality/TASK-024-AST-OCCURRENCES.md).
 ### Certificate detector
 
 - Existing extension candidacy is preserved; PEM/DER is selected by content for
-  `.pem/.crt/.cer/.der`. PKCS#12/PFX interiors remain explicitly Unsupported.
+  `.pem/.crt/.cer/.der`. PKCS#12/PFX supports bounded unencrypted public-certificate extraction; encrypted/key/unknown contents remain explicitly unsupported and opaque.
 - `certificate_detector/attributes.rs` owns public, path/rule-independent
   `parse_certificate_der` / `parse_public_key_der` helpers. They return owned
   attributes and fixed safe errors, require one fully consumed DER object and do
@@ -416,3 +416,28 @@ output and inventory-v1 semantics remain unchanged. See
 [LOCAL-ASSESSMENT-V1.md](architecture/LOCAL-ASSESSMENT-V1.md).
 
 Evidence export boundaries and bounded redaction are documented in [EVIDENCE-PRIVACY.md](architecture/EVIDENCE-PRIVACY.md).
+
+### Repository read boundary (Cursor audit follow-up)
+
+Only regular files are selected. In-tree symlinks and special files are skipped
+with ReadFailed diagnostics and enumeration-failure accounting. Reads are bounded
+at the opened file (limit + one byte), including snippet/runtime hint rereads.
+Unix uses held parent descriptors with openat/O_NOFOLLOW/O_NONBLOCK for every
+relative component, preventing parent-link replacement and FIFO blocking.
+The explicitly selected root may itself be a symlink. Windows validates the opened
+handle's final path against the canonical root; Windows execution remains unverified
+in this macOS-only follow-up. Hard links and concurrent modification of regular
+file contents are not immutable-snapshot guarantees.
+Scope completeness and the unenumerated population remain separate; CLI notes do
+not turn ignored files into a new strict-exit failure.
+
+### Finding identity
+
+All generated `finding_id` values use `identity::native_id("finding", parts)`:
+`finding-v1-` followed by the full SHA-256 digest. The shared encoder frames
+`pqc-scan-native`, version `1`, domain `finding`, component count and each UTF-8
+component length. Parts are rule ID, repository-relative file path, decimal line,
+decimal column and the original evidence match. IDs are computed before evidence
+redaction; downstream references reuse the same value. The same ID is used for
+exact finding deduplication, so field delimiters cannot discard distinct tuples.
+Assets and observations retain their own identity domains and meanings.

@@ -67,6 +67,9 @@ pub struct NativeScan {
     pub(crate) export_loss_notes: Vec<String>,
 }
 impl NativeScan {
+    pub fn run_id(&self) -> &str {
+        &self.run.id
+    }
     /// Validate v1 reference integrity while allowing future string vocabulary and fields.
     pub fn validate(&self) -> anyhow::Result<()> {
         anyhow::ensure!(
@@ -528,7 +531,7 @@ mod tests {
     }
     fn finding(d: &Detection) -> Finding {
         Finding {
-            finding_id: "a".repeat(24),
+            finding_id: format!("finding-v1-{}", "a".repeat(64)),
             rule_id: d.rule_id.clone(),
             category: "test".into(),
             risk: Risk::QuantumUncertain,
@@ -627,7 +630,7 @@ mod tests {
         assert_eq!(scan.legacy_associations.len(), 2);
         for (i, a) in scan.legacy_associations.iter().enumerate() {
             assert_eq!(a.legacy_index, i);
-            assert_eq!(a.legacy_id, "a".repeat(24));
+            assert_eq!(a.legacy_id, format!("finding-v1-{}", "a".repeat(64)));
             assert_eq!(a.observation_ids.len(), 2);
         }
     }

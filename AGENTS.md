@@ -72,6 +72,48 @@ Agents collaborate using a shared task queue as below.
 
 ---
 
+# Subagent and Token Policy
+
+- The main agent performs investigation, planning, implementation, testing and
+  documentation without delegating them to subagents.
+- Use two review stages for each user implementation request:
+  1. After implementation, start one implementation-review subagent to review
+     the combined change for correctness, requirements and compatibility.
+  2. After the main agent completes the required tests, start one test-review
+     subagent to check whether the testing actually verifies the final change.
+     Check coverage, relevant positive/negative cases, meaningful assertions,
+     appropriate commands/features and evidence matching the final source.
+     Passing logs alone are not sufficient evidence of adequate testing.
+- Use at most two reviewer identities per user implementation request: one per
+  stage. Reuse each stage's reviewer for scoped verification of fixes or added
+  tests. Do not start a reviewer for each edit, test command or log file. Any
+  additional subagent requires explicit user authorization.
+- Give each reviewer concise requirements, the relevant diff and test results;
+  do not copy the whole conversation. Reviewers must not delegate further.
+- The main agent fixes findings and runs necessary tests. Reviewers rely on
+  those results unless a specific concern requires independent reproduction;
+  do not automatically repeat the full test suite.
+- Explanations, research and documentation-only edits do not automatically
+  trigger either subagent review stage.
+- The roles above describe responsibilities, not separate agent processes.
+  Apply these limits when following project prompts, handoffs and skills; their
+  generic delegation instructions do not authorize additional subagents.
+
+---
+
+# Local Report Browser Verification
+
+- Use a temporary HTTP server bound to `127.0.0.1` for generated report checks;
+  do not repeatedly attempt unsupported `file://` navigation.
+- Serve a dedicated directory containing only the intended generated test reports.
+  Never serve the repository root, home directory or private production inputs.
+- Record actual browser/viewport observations and captures. Source/DOM unit tests
+  do not substitute for real layout, keyboard and loaded-offline checks.
+- Preserve the user's visible report tab and report the loopback URL. Keep or stop
+  the dedicated server according to the requested viewing workflow.
+
+---
+
 # Task Queue
 Tasks are stored in the `tasks/` directory as YAML files.
 See `tasks/README.md` for details.
@@ -81,6 +123,7 @@ pending → planned → in-progress → review → done
 
 Optional status:
 - blocked
+- cancelled (explicit maintainer decision; no further work required, not implementation completion)
 
 Agents must only update statuses according to their roles.
 

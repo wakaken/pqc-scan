@@ -84,6 +84,17 @@ fn collect_entries(
             continue;
         }
 
+        if !entry.file_type().is_some_and(|t| t.is_file()) {
+            stats.skipped += 1;
+            failed_entries += 1;
+            diagnostics.push(ScanDiagnostic::new(
+                DiagnosticCode::ReadFailed,
+                Some(relative_path(root, path)),
+                None,
+            ));
+            continue;
+        }
+
         let meta = match entry.metadata() {
             Ok(m) => m,
             Err(_) => {
@@ -161,6 +172,38 @@ mod tests {
         dir.push(format!("pqc-scan-{prefix}-{}-{nanos}", std::process::id()));
         fs::create_dir_all(&dir).expect("create temp dir");
         dir
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn special_entries_are_failed_without_selecting_or_following_them() {
+        use std::os::unix::fs::symlink;
+        let root = temp_dir("walker-special");
+        let outside = temp_dir("walker-outside");
+        fs::write(outside.join("large.txt"), vec![b'x'; 4096]).unwrap();
+        symlink(outside.join("large.txt"), root.join("link.txt")).unwrap();
+        symlink(outside.join("missing"), root.join("broken.txt")).unwrap();
+        let fifo = root.join("pipe");
+        assert!(std::process::Command::new("mkfifo")
+            .arg(&fifo)
+            .status()
+            .unwrap()
+            .success());
+        fs::write(root.join("ok.txt"), "ok").unwrap();
+        let result = walk_repository_detailed(&root, 128).unwrap();
+        assert_eq!(result.files, vec![root.join("ok.txt")]);
+        assert_eq!(result.failed_entries, 3);
+        assert_eq!(result.stats.skipped, 3);
+        assert_eq!(
+            result
+                .diagnostics
+                .iter()
+                .filter(|d| d.code() == DiagnosticCode::ReadFailed)
+                .count(),
+            3
+        );
+        fs::remove_dir_all(root).unwrap();
+        fs::remove_dir_all(outside).unwrap();
     }
 
     #[test]

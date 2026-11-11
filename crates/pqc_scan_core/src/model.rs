@@ -144,7 +144,13 @@ pub struct ScannableFile {
 
 impl ScannableFile {
     pub fn from_bytes(path: PathBuf, bytes: Vec<u8>) -> Self {
-        let text = if is_probably_binary(&bytes) {
+        // PKCS#12 is an opaque container even when hostile or malformed bytes
+        // happen to look like text; never feed key-bag contents to text detectors.
+        let opaque = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|e| e.eq_ignore_ascii_case("p12") || e.eq_ignore_ascii_case("pfx"));
+        let text = if opaque || is_probably_binary(&bytes) {
             None
         } else {
             Some(String::from_utf8_lossy(&bytes).into_owned())
@@ -291,5 +297,20 @@ mod tests {
             file.as_relative_path(std::path::Path::new("/repo")),
             "src/app.bin"
         );
+    }
+}
+
+#[cfg(test)]
+mod opaque_container_tests {
+    use super::*;
+    #[test]
+    fn pkcs12_payloads_are_never_exposed_as_source_text() {
+        for ext in ["p12", "pfx", "P12", "PFX"] {
+            let file = ScannableFile::from_bytes(
+                PathBuf::from(format!("container.{ext}")),
+                b"opaque synthetic container payload without NUL".to_vec(),
+            );
+            assert!(file.text.is_none());
+        }
     }
 }

@@ -2,10 +2,10 @@ id: "023"
 title: "Establish labeled accuracy and reproducibility baselines"
 type: improvement
 priority: high
-status: review
+status: done
 planned_new_paths:
   - "tests/quality/ (reviewed corpus and evaluation harness; final layout selected by Planner)"
-owner: Executor Agent
+owner: Evaluator Agent
 phase: "0"
 description: "Establish labeled accuracy and reproducibility baselines. Development-only corpus/evaluator baseline; production CLI and formats remain unchanged."
 plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-023"
@@ -56,11 +56,22 @@ implementation_record:
   compatibility: "Production crates/rules/dependencies/CLI/report formats and projection helper are unchanged from task022; existing regressions run unchanged."
   self_scan: "776 raw = 645 reviewed omissions + 131 retained; all previous 128 retained unchanged, three new artifact-only SBOM results remain eligible for Code Scanning."
   budgets:
-    status: "UNAPPROVED; no numeric accuracy/performance gate enforced"
+    status: "APPROVED by maintainer on2026-11-11 as local review criteria; no numeric accuracy/performance gate automatically enforced by CI"
     proposal: "Corpus-specific TP/FP/FN nonregression plus provisional 2x observed warm wall/RSS maximum review signals, subject to same environment and corroboration."
-    decision_gate: "Await maintainer review of concrete protocol and measured proposal; do not mark done before that decision."
-  unexecuted: ["Hosted Actions/Code Scanning", "Linux/Windows execution", "True OS cold cache", "Multi-host/real-product performance and accuracy", "Maintainer budget approval"]
+    decision_gate: "Satisfied by explicit maintainer approval recorded in4291ae7 and TASK-023-ACCEPTANCE.md; immutable historical measurements retained."
+  unexecuted: ["Hosted Actions/Code Scanning", "Linux/Windows execution", "True OS cold cache", "Multi-host/real-product performance and accuracy"]
   reflection: "Source-only lineage audit is necessary even for hand-authored adversarial tests; metadata names alone cannot prove independent holdout. Keep exploratory history, freeze new source-only labels before measuring, and retain null denominators and unsupported populations."
 
   review_outcome: "Independent review023 final technical approval, no unresolved material findings; 20 Python tests independently passed and final source/measurement bindings verified."
-  evaluation_outcome: "Local technical acceptance passed. Keep review until maintainer protocol/measured-budget approval; no premature done status."
+  evaluation_outcome: "Evaluator accepted development-only baseline scope: existing independent technical approval, unchanged corpus/harness integrity,20 fresh sanity tests and explicit maintainer criterion approval. Hosted CI/final release acceptance remain001/037."
+
+closure_decision:
+  date: "2026-11-11"
+  authority: "Explicit maintainer approval of criteria/support scope, followed by request to reconcile023 and close where possible."
+  evidence: "docs/quality/TASK-023-ACCEPTANCE.md"
+  machine_evidence: "docs/quality/TASK-023-ACCEPTANCE.json"
+  transition: "Evaluator: review -> done for development-only baseline capability."
+  acceptance_scope: "Frozen labeled corpus, evaluator/harness, historical measurements and approved local review criteria; not final OSS1.0 acceptance."
+  historical_records_preserved: true
+  numeric_ci_enforcement: false
+  remaining_release_gate: "Task037: actual target-commit hosted CI and final product acceptance; Cursor audit still ongoing."

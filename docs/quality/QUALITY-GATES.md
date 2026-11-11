@@ -21,7 +21,12 @@ Source review, local execution, independent review, browser acceptance and remot
 5. Benchmark fixed small/medium/large and pathological fixtures with input digests, hardware/OS/toolchain/provider/features, cold/warm conditions, repeated runs and peak RSS/wall/CPU/bytes/target counts. Report distributions and noise, not one unlabeled duration. Do not scan an external product without explicit authorization.
 6. Set precision/recall and performance budgets only after this baseline and maintainer review. Preserve holdout data to evaluate subsequent changes. Record environment limits and unsupported populations alongside results.
 
-No numeric precision/recall/latency/RSS target has yet been measured or approved. Probe limits are safety limits, not quality benchmarks.
+The measured development baseline and maintainer-approved local regression signals
+are recorded in [TASK-023-ACCEPTANCE.md](TASK-023-ACCEPTANCE.md). On the same eligible
+truth, TP must not decrease and FP/FN must not increase. On the same environment,
+wall time or peak RSS above 2x the preceding warm maximum requires investigation.
+These are local comparison signals, not universal targets or automatic numeric CI
+failure thresholds. Probe limits are safety limits, not quality benchmarks.
 
 ## Required measurements
 
@@ -74,7 +79,7 @@ HTML changes require offline desktop/mobile/keyboard acceptance plus automated b
 
 Use local versioned test servers and CAs inside a network-isolated environment. Pin server configs/images/digests, run on loopback with explicit allowed CIDR, use ephemeral test keys, bound resources and clean up listeners/processes. Tests can observe message types/counts but must not retain secret keys or TLS session secrets. No public TLS/SSH host is a test dependency.
 
-TLS matrix: TLS 1.2/1.3, supported hybrid/classical KX, HRR, unknown/unavailable group, certificate/name/trust/expiry errors, mTLS-required failure without credentials, alerts, timeout and oversized input. SSH matrix: classical/hybrid offers, unknown names/extension markers, KEXINIT-wait behavior, fragmentation, malformed framing and limits; verify zero userauth/service/channel requests. Future completed SSH KEX needs a separate trusted-host/no-auth feasibility gate.
+TLS matrix: TLS 1.2/1.3, supported hybrid/classical KX, HRR, unknown/unavailable group, certificate/name/trust/expiry errors, mTLS-required failure without credentials, alerts, timeout and oversized input. SSH matrix: classical/hybrid offers, unknown names/extension markers, KEXINIT-wait behavior, fragmentation, malformed framing and limits; verify zero userauth/service/channel requests. Completed SSH KEX uses explicit public-key pinning and a separate no-auth packet-type assertion.
 
 ## 1.0 release gate
 
@@ -94,8 +99,45 @@ The development-only [measurement protocol](../../tests/quality/PROTOCOL.md),
 source-bound corpus and two independent label records now support baseline
 measurements through the existing CLI. [Measured results and limitations](TASK-023-BASELINE.md)
 record finite-corpus counts, actual diagnostics and repeated resource samples.
-This addition does not approve numeric regression budgets or amend the 1.0 gate.
-CI validates evaluator sanity, corpus bindings, read/terminal-state arithmetic and
-semantic repeatability; it publishes metrics without enforcing unapproved score
-or latency/RSS thresholds. Maintainers must decide the measured proposal before
-calling task 023's budget decision gate satisfied.
+The baseline implementation and the maintainer-approved local criteria satisfy
+task 023's development-only decision gate; task 023 is done. CI validates evaluator
+sanity, corpus bindings, read/terminal-state arithmetic and semantic repeatability.
+It publishes metrics without enforcing numeric score or latency/RSS thresholds.
+Task 037, final-source hosted CI and release acceptance remain separate gates.
+
+## Task023 criterion approval and local acceptance — 2026-11-11
+
+The maintainer explicitly approved frozen-truth TP/FP/FN nonregression and the
+same-environment2x prior warm maximum time/RSS investigation signals. The earlier
+2026-11-09 design checkpoint is historical; current criteria are stated above. Existing independent technical
+approval, fresh corpus/harness integrity checks and20 evaluator sanity tests allow
+023 to close for its development-only baseline scope; see
+[TASK-023-ACCEPTANCE.md](TASK-023-ACCEPTANCE.md). No numeric CI enforcement is
+claimed. This does not close037, imply current-HEAD hosted CI, replace the ongoing
+Cursor audit, change truth/labels or promise multi-platform/global accuracy.
+
+## Protocol execution boundary
+
+`tests/protocol/prepare-image.py` prepares an immutable tool/cache image. This
+network-capable phase receives Cargo manifests and empty stubs, and performs only
+locked dependency fetching and trusted tool preparation; it does not build or run
+repository target code. The image ID and input lock/tool digests are recorded.
+
+`tests/protocol/run-isolated.py` then builds and executes target code with no
+external network, a nonroot UID, read-only root/source/cache, no host HOME,
+credentials, SSH agent or Docker socket, and an explicit environment. Docker
+cgroup v2 bounds the entire process tree: 6 GiB memory with no additional swap,
+2 CPU quota and 128 PIDs. A 4 GiB tmpfs contains all build outputs, HOME, temporary
+files and evidence; the only additional data-writable mount is 1 MiB shared
+memory. The host enforces a 1200-second deadline and removes the container on
+success, failure and timeout. Incremental caches and debug symbols are disabled
+for this bounded test build; test/debug assertions remain enabled. Evidence extraction rejects links, traversal,
+special files and aggregate output above 64 MiB.
+
+The same boundary covers synthetic report previews and the product OpenSSH
+fixture. Resource tests independently trigger cgroup memory OOM, aggregate
+multi-file ENOSPC and descendant PID exhaustion, as well as read-only source/root,
+loopback-only communication, empty environment and deadline cleanup. Run them
+with `PQC_RUN_CONTAINER_TESTS=1` and `PQC_PROTOCOL_IMAGE_FILE` set to the prepared
+image record. The legacy native macOS smoke runner is explicitly weaker and is
+not the CI confinement gate. No hosted-CI success is inferred from local runs.

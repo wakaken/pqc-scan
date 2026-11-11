@@ -28,7 +28,7 @@ unresolved references. The report is not CycloneDX or an assessed PQC verdict.
 ## Collection and meaning
 
 `scan_repository_native` adds capture alongside the existing pipeline. Existing
-entrypoints, public legacy structs, default filenames, IDs, normalization and
+entrypoints, public legacy structs, default filenames and
 report writers remain usable. `Detector::detect_observed` is optional: the default
 adapter runs an existing detector once and emits Unknown assurance/usage. It does
 not interpret arbitrary evidence metadata as parsed facts. Built-in detectors
@@ -59,10 +59,10 @@ meaning; `native_completeness=not_exhaustive` does not promise a complete invent
 ## Identity and ordering
 
 Inventory SHA-256 IDs use the full digest, a versioned domain and length-prefixed
-UTF-8 tuple components plus component count. The legacy ID algorithm is unchanged;
-task027 intentionally corrects dependency positions/evidence/purl values, which can
-change those dependency finding IDs. Algorithm
-and public-object IDs describe content/normalized facts, not source placement.
+UTF-8 tuple components plus component count. Finding IDs use the same encoder
+with the `finding` domain and repository-relative path, rule ID, line, column and
+evidence match. Algorithm and public-object IDs describe content/normalized facts,
+not source placement.
 Observation IDs are scoped to a scan run and static attempt. Without an explicit
 repository scope, source usage IDs are run-local. With scope, occurrence keys use
 relative path, a typed weak anchor and local duplicate ordinal. Checkout root,
@@ -75,7 +75,7 @@ assertion IDs instead include source path, accepted ordinal and normalized facts
 with scope/run-local identity, so ordinal changes can change those asset IDs.
 See [dependency identity and compatibility](DEPENDENCY-PROVENANCE.md). Usage attributes retain the safe typed anchor to make
 asset order independent of random run IDs, including same-file/method cases.
-The semantic golden normalizes only scan/time, observation IDs and legacy IDs;
+The semantic golden normalizes only scan/time, observation IDs and finding IDs;
 references are rewritten together. Scoped occurrence and asset hashes stay exact.
 
 ## Privacy and compatibility losses
@@ -92,8 +92,8 @@ this validation is not a general secret detector. Legacy outputs retain their
 existing masking policy and are not derived from inventory.
 
 Every final legacy finding has a `legacy_associations` entry with its final index,
-legacy ID and all contributing observation IDs. Index is authoritative even if
-legacy hashes collide. Exact transient legacy tuples link observations; raw tuple
+finding ID and all contributing observation IDs. Index remains authoritative for
+caller-constructed snapshots with repeated IDs. Exact transient tuples link observations; raw tuple
 material is never serialized or used in native IDs. `unassociated_observation_ids`
 provides a convenient list. `legacy_loss_records` adds per-observation fixed
 reasons, positive counts and units (`legacy_binding` or `capture_only_observation`):

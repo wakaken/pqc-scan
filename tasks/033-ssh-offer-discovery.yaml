@@ -2,13 +2,19 @@ id: "033"
 title: "Add bounded unauthenticated SSH algorithm discovery"
 type: feature
 priority: medium
-status: pending
+status: done
 planned_new_paths:
   - "crates/pqc_scan_probe_ssh/Cargo.toml"
   - "crates/pqc_scan_probe_ssh/src/lib.rs"
-owner: Planner Agent
+owner: Evaluator Agent
 phase: "3"
-description: "Add bounded unauthenticated SSH algorithm discovery. Planning only; implementation and validation have not started."
+description: "Bounded unauthenticated SSH advertisement discovery accepted after protocol tests and actual bilingual HTTP browser acceptance; no completed KEX or authentication is claimed."
+implementation_plan: "docs/superpowers/plans/2026-11-10-ssh-discovery.md"
+lifecycle_record:
+  - "Planner selected pending -> planned with the delegated runtime contract and dedicated plan."
+  - "Executor started planned -> in-progress with failing parser and local-peer tests."
+  - "Executor froze bounded implementation and requested independent review; evaluation evidence is in docs/quality/TASK-033-SSH-DISCOVERY.md."
+evaluation_evidence: "docs/quality/RUNTIME-INTEGRATION-VALIDATION.md"
 plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-033"
 change_size: "Medium/high; bounded protocol parser review"
 decision_gate: "Review parser scope/caps; full library needs separately justified decision."
@@ -37,3 +43,11 @@ acceptance:
 testing_requirements:
   - "Parser/fuzz fixtures, local classical/hybrid OpenSSH offers and message-type/resource assertions."
   - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+continuation_acceptance:
+  date: "2026-11-11"
+  source_head: "75b9afd"
+  evidence: "docs/quality/REMAINING-ROADMAP-VALIDATION.md"
+  browser_evidence: "docs/quality/LOCAL-BROWSER-ACCEPTANCE.md"
+  reviews: "One implementation reviewer and one separate test reviewer accepted; no delegated implementation or additional reviewers."
+  transition: "Evaluator: blocked -> review -> done after previously missing local acceptance evidence was established."

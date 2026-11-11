@@ -1,4 +1,4 @@
-//! Versioned identities for the additive native model, never legacy finding IDs.
+//! Versioned, domain-separated identities for findings and the native model.
 use sha2::{Digest, Sha256};
 
 /// Domain/version and component count are framed along with every tuple member.

@@ -28,16 +28,17 @@ Point the scanner at a local repository. It inspects the following artifacts wit
 
 | Artifact | Languages or file examples | What the scanner looks for |
 |---|---|---|
-| Source code | Java, Go, JavaScript, TypeScript/TSX, Python, Rust, Ruby | Cryptographic APIs, algorithm names and related usage patterns. TypeScript uses a JavaScript grammar, so type syntax can cause partial inspection |
+| Source code | Java, Go, JavaScript, TypeScript/TSX, Python, Rust, Ruby | Cryptographic APIs, algorithm names and related usage patterns, with dedicated TypeScript and TSX grammars |
 | Configuration files | Kubernetes/Ingress, nginx, Apache httpd, Envoy, Istio, HAProxy, Traefik | TLS/cipher/group settings and other cryptographic configuration signals |
 | Public certificates | `.pem`, `.crt`, `.cer`, `.der` | Signature and subject-key algorithms, supported key sizes/curves, validity periods and public fingerprints |
 | Private-key markers | RSA, generic PKCS#8 and OpenSSH private-key headers | The presence of supported headers; no decryption or private-key validation |
 | Dependency manifests and locks | `Cargo.toml`, `Cargo.lock`, `package.json`, npm/pnpm locks, Python/Ruby/Java/Go dependency files | Relevant libraries, declared version constraints and supported resolution records |
 | Existing SBOM files | CycloneDX JSON and SPDX JSON | Reported dependency components/packages; not proof of installation |
 
-PKCS#12 (`.p12`/`.pfx`) produces a container signal only; its contents are not inspected.
+PKCS#12 (`.p12`/`.pfx`) supports unencrypted public-certificate extraction. Encrypted contents and private-key bags remain unsupported; no password, decryption or integrity/trust verification is performed.
 See [supported inputs and inspection limits](docs/user/COVERAGE.md) for the full file list, supported versions and parser boundaries.
-Live TLS/SSH endpoints and arbitrary programming languages are not scan targets.
+Live endpoints are inspected only through separately enabled, explicit [TLS/SSH probes](docs/user/PROBING.md).
+They are not repository scan targets. Arbitrary programming languages are not supported.
 
 <a id="features"></a>
 
@@ -64,6 +65,7 @@ cargo install --locked --path crates/pqc_scan_cli
 
 Keep the checkout's `rules` directory available after installation. The binary does not bundle that directory; use an absolute `--rules-dir` path when scanning another project.
 If the command is not found, check that `~/.cargo/bin` is in `PATH`.
+Use `pqc-scan --help` or `pqc-scan --version` to check the installed command; both exit successfully without scanning or networking.
 
 ```bash
 pqc-scan scan /path/to/your-product --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
@@ -76,12 +78,20 @@ To produce Japanese HTML/Markdown, add `--lang ja`. [Running from source](docs/u
 
 ## Read the results
 
+HTML starts with inspection scope and unfinished checks; detailed observation and asset ledgers remain in JSON/Markdown.
+Advisory policy decisions are kept in explicitly requested JSON/Markdown exports.
+
 Open `report.html` first. Review a finding's file location, source context and suggested checks before deciding on a change.
 Search and filters help you work through repeated findings; `report.md` provides a portable text version.
+Both show inspection status. Local assessment decisions appear only in Markdown and explicitly requested JSON; HTML does not display them.
 
 `--format all` writes six files: `report.html`, `report.md`, `report.json`, `report.sarif`, `cbom.json` and `dependency-sbom.json`.
 The last two list cryptographic findings and software dependencies respectively. Their purpose and relationship are explained in [choosing a report](docs/user/REPORTS.md#choose-report).
 Additional inventory, assessment and diagnostic files require explicit options.
+Use `--cyclonedx-17` for separate CycloneDX 1.7 exports, or `diff` to compare
+inventories with the same explicit repository scope. See the [report guide](docs/user/REPORTS.md).
+
+Finding IDs use `finding-v1-<SHA-256>` with length-prefixed fields and repository-relative paths. Identical findings keep the same ID across checkout locations.
 
 <a id="guides"></a>
 
@@ -92,6 +102,10 @@ Additional inventory, assessment and diagnostic files require explicit options.
 | [Scanning repositories](docs/user/SCANNING.md) | Select outputs, configure CI exit codes, inspect incomplete scans or run from source |
 | [Understanding reports](docs/user/REPORTS.md) | Interpret risk/PQC findings, choose an inventory, understand CBOM/SBOM or use local policy assessment |
 | [Supported inputs and inspection limits](docs/user/COVERAGE.md) | Check languages, file formats, certificate handling, rule packs, exclusions and privacy boundaries |
+| [Explicit TLS/SSH diagnostics](docs/user/PROBING.md) | Inspect one authorized endpoint with optional protocol commands |
+| [Installation and local packages](docs/user/DISTRIBUTION.md) | Rule assets, package verification, updates and support scope |
+
+For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
 
 Each guide has a Japanese version linked at the top.
 
@@ -100,7 +114,11 @@ Each guide has a Japanese version linked at the top.
 ## Limits and privacy
 
 This is static, advisory analysis. False positives and missed references are possible; a finding does not prove runtime use, and zero findings does not prove complete inspection or safety.
-The scanner does not contact endpoints, validate certificate trust chains, install dependencies or certify PQC migration completion.
+Repository scans do not contact endpoints, validate certificate trust chains, install dependencies or certify PQC migration completion.
+Optional experimental `probe ssh-kex` (`probe-ssh-kex` feature) verifies hybrid ML-KEM768+X25519 key exchange against an explicitly supplied trusted Ed25519 public host key, then disconnects without user authentication/login. It writes separate `probe.ssh-kex.v1.json` and bilingual HTML/Markdown; existing outputs remain unchanged. See the [probe guide](docs/user/PROBING.md).
+
+Optional `probe` commands contact only the explicitly selected endpoint; TLS uses
+ordinary certificate/name validation, while `probe ssh` collects unauthenticated offers.
 
 Recognized private-key/credential syntax is masked, with deliberately conservative previews. This is not universal secret detection: unknown/obfuscated content and secrets placed in paths or identifiers can remain outside the policy.
 Review the [privacy and scan-scope limits](docs/user/COVERAGE.md#privacy) before sharing reports.
@@ -110,3 +128,9 @@ Review the [privacy and scan-scope limits](docs/user/COVERAGE.md#privacy) before
 ## License
 
 MIT
+
+The scanner reads regular files only; in-tree symbolic links and special files are
+reported as read failures. Reads, including source context and runtime hints, are
+bounded by the configured file-size limit. CLI scope notes explain that ignore
+and traversal policies may leave files unenumerated. This does not change exit
+codes or the scope-based meaning of `--require-complete`.

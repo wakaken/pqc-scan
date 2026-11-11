@@ -38,7 +38,7 @@ These are bounded component/package subsets: CycloneDX 1.4–1.7 and SPDX 2.2–
 ## Certificates and key markers
 
 - Certificate candidates: `.pem`, `.crt`, `.cer`, `.der` (PEM or DER selected by
-  content). `.p12`/`.pfx` produce container signals only; their contents are unsupported.
+  content). `.p12`/`.pfx` additionally inspect unencrypted public certificates inside supported PKCS#12 containers.
 - Private key markers:
   - `BEGIN RSA PRIVATE KEY`
   - `BEGIN PRIVATE KEY`
@@ -93,6 +93,14 @@ and [focused baseline](../quality/CERTIFICATE-BASELINE-021.md).
 Files containing EC/DSA/encrypted private-key PEM markers also receive file-wide source
 snippet masking; this does not add new private-key detection rules or decrypt keys.
 
+### PKCS#12 support and limits
+
+The parser reads the DER definite-length subset of PFX v3 Data/AuthenticatedSafe/SafeContents and X.509 certificate bags. Public certificates pass through the same attribute extraction as PEM/DER. Nested safe contents are bounded; BER indefinite encodings and constructed octet strings are outside this subset.
+
+Encrypted content, private-key bags and unknown bag/content types remain opaque and unsupported. If readable public certificates coexist with them, those certificates are retained and inspection is partial. Encrypted-only input is unsupported, malformed input is partial, and a resource limit reports truncation. The container finding records a fixed reason and explicitly records MAC and trust verification as not performed. A completed structural inspection is not an integrity/trust verdict.
+
+Limits are 2 MiB, 256 bags, 256 content entries, nesting depth 8 and 4096 attribute values. Source previews/snippets are never read from P12/PFX, even when malformed bytes look like text. Legacy binary locations retain 1:1 and actual byte offsets; inventory locations are unknown with object indices.
+
 <a id="configuration"></a>
 
 ## Configuration files
@@ -125,13 +133,7 @@ as source. CLI flags, report schemas/filenames and IDs for unchanged occurrences
 are preserved; finding counts and new occurrence IDs may increase intentionally.
 Legacy AST Unicode column limitations still apply (see [SARIF locations](REPORTS.md#sarif-locations)).
 
-TypeScript/TSX still use the pinned JavaScript grammar: plain JavaScript/JSX
-subsets may parse completely, while type syntax can produce partial inspection
-and missed API matches. Matching remains nominal and rule-based: imported aliases
-may be missed, local namesakes and display strings may be false positives, and
-comments inside matched ancestor text are not a full semantic comment analysis.
-No new grammar, symbol resolver or dataflow engine was added. See the
-[task 024 measurements and compatibility record](../quality/TASK-024-AST-OCCURRENCES.md).
+TypeScript and TSX use their dedicated pinned grammars. Valid type syntax no longer becomes partial merely because it is not JavaScript. Syntax errors still retain available findings and report partial inspection. Matching remains nominal: imported aliases can be missed, namesakes/display strings can be false positives, and comments inside ancestor text are not full semantic analysis. No symbol resolver or dataflow engine is implied.
 
 <a id="privacy"></a>
 

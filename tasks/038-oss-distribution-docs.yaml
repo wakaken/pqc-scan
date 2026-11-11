@@ -2,14 +2,22 @@ id: "038"
 title: "Prepare reproducible OSS packaging and operating documentation"
 type: feature
 priority: medium
-status: pending
+status: done
 planned_new_paths:
   - "SECURITY.md"
   - ".github/workflows/release.yml (preparation only; publication separately authorized)"
-owner: Planner Agent
+owner: Evaluator Agent
 phase: "5"
-description: "Prepare reproducible OSS packaging and operating documentation. Planning only; implementation and validation have not started."
-plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-038"
+description: "Reproducible local macOS arm64 static/combined-probes packaging and operating documentation accepted as technical preparation only. Four upstream license statements still require publication review; publication is not authorized."
+preparation_evidence: "docs/quality/TASK-038-CHANNEL-INVENTORY.md"
+preparation_status: "Final 75b9afd clean-source packages supersede historical 9201dc5 artifacts. Both variants repeat byte-identically and pass clean offline installs. No missing notice files; four combined-variant upstream statements retain publication-review flags."
+plan_reference: "docs/roadmap/TASK-038-IMPLEMENTATION.md"
+validation_evidence: "docs/quality/TASK-038-PREPARATION.md"
+role_transitions:
+  - "Planner: selected and planned under delegated local-preparation scope."
+  - "Executor: in-progress preparation, targeted tests and both-variant repeatability/offline clean installs."
+  - "Executor: blocked pending final builds, reviews, notices and dependencies; not done."
+  - "Evaluator: clean-source final package/build bindings and independent review verified; blocked remains for notices and dependency/browser acceptance."
 change_size: "Medium/high; packaging/platform unknowns"
 decision_gate: "Choose channels/support window; external publication requires separate authorization."
 change_categories:
@@ -45,3 +53,17 @@ acceptance:
 testing_requirements:
   - "Clean installs/rule discovery on declared platforms; license/hash/build checks and bilingual doc acceptance."
   - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+final_clean_binding:
+  head: "75b9afd"
+  source_dirty: false
+  evidence: "docs/quality/REMAINING-ROADMAP-VALIDATION.json"
+  result: "Both variants: repeated identical archives, verified checksums and clean offline installed help/version/rules/two-finding scan. Preparation only; four publication notice review flags remain."
+
+continuation_acceptance:
+  date: "2026-11-11"
+  source_head: "75b9afd"
+  evidence: "docs/quality/REMAINING-ROADMAP-VALIDATION.md"
+  browser_evidence: "docs/quality/LOCAL-BROWSER-ACCEPTANCE.md"
+  reviews: "One implementation reviewer and one separate test reviewer accepted; no delegated implementation or additional reviewers."
+  transition: "Evaluator: blocked -> review -> done after previously missing local acceptance evidence was established."
