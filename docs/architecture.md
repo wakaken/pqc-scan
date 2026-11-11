@@ -99,8 +99,8 @@ All detectors implement the shared `Detector` trait:
 `scan_repository_detailed` returns a private-field `ScanDocument` with the legacy
 `ScanResult`, diagnostics and coverage. `scan_repository` remains a wrapper over
 the same execution and returns the existing result; detectors are not run twice.
-Normalization, finding IDs, severity, recommendations and existing report schemas
-are unchanged. Per-file read/detector failures retain other results. Root/setup
+Finding IDs use the shared length-prefixed identity encoder described below.
+Severity, recommendations and existing report schemas are unchanged. Per-file read/detector failures retain other results. Root/setup
 and report-write failures remain fatal. The detailed walker accounts for policy
 exclusions, metadata failures and soft ignore-policy errors separately from selected files.
 Iterator-level traversal failures, including root enumeration failures after
@@ -430,3 +430,14 @@ in this macOS-only follow-up. Hard links and concurrent modification of regular
 file contents are not immutable-snapshot guarantees.
 Scope completeness and the unenumerated population remain separate; CLI notes do
 not turn ignored files into a new strict-exit failure.
+
+### Finding identity
+
+All generated `finding_id` values use `identity::native_id("finding", parts)`:
+`finding-v1-` followed by the full SHA-256 digest. The shared encoder frames
+`pqc-scan-native`, version `1`, domain `finding`, component count and each UTF-8
+component length. Parts are rule ID, repository-relative file path, decimal line,
+decimal column and the original evidence match. IDs are computed before evidence
+redaction; downstream references reuse the same value. The same ID is used for
+exact finding deduplication, so field delimiters cannot discard distinct tuples.
+Assets and observations retain their own identity domains and meanings.

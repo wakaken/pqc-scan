@@ -213,7 +213,7 @@ Keep `scan_repository -> Result<ScanResult>` as a compatibility wrapper around t
 3. Normalize precise identifiers using a small versioned registry. Preserve unknown identifiers, original namespace and draft names; never guess parameters.
 4. Inventory merges only strong identities; source instances retain path/span anchors. Dependency presence and configuration are observations, not proof of active crypto.
 5. Existing risk/recommendation stages produce the same legacy result. New pure assessment functions consume observations plus optional explicit local context and policy. No report writer performs assessment.
-6. Store associations between native observations and legacy finding indices plus IDs. An ID alone is not unique in the existing implementation; preserve a multimap/index rather than dropping colliding records.
+6. Store associations between native observations and legacy finding indices plus IDs. Generated finding IDs use framed tuples; retain the multimap/index for caller-constructed records that reuse IDs.
 7. Redact before serialization; export through current writers or explicit new exporters.
 
 Proposed module APIs: `inventory::build(&[ObservationDraft]) -> InventoryBuild`, `assessment::evaluate(&Inventory, &[Observation], &AssessmentContext) -> Vec<Assessment>`, `policy::evaluate(&[Assessment], &PolicyProfile) -> PolicyEvaluation`. These are concrete local functions, not generic plugin registries. Core imports no TLS/SSH library. Probe modules return observation batches using core types; the CLI composes them. Local context values include provenance (`operator_supplied` vs inferred); absence remains unknown.
@@ -225,7 +225,7 @@ Use full SHA-256 with a domain tag, identity version and canonical length-prefix
 - `AssetId`: exact algorithm definition (including purpose/parameters), certificate DER or public SPKI identity. Private-key bytes are never hashed/exported to establish identity. A marker-only private-key usage has only a source occurrence identity.
 - `ObservationId`: run + attempt + target/object + method + local occurrence discriminator; unique records, not a promise of stability between scans. Timestamps are provenance, not asset identity.
 - `OccurrenceKey`: versioned repository scope + relative path + detector/method + safe structural anchor + local disambiguator. Exclude line numbers where a structural anchor exists, but duplicate identical statements can still be ambiguous. Do not fingerprint literal secrets; use a redacted structural representation.
-- Legacy `finding_id`: unchanged, including its limitations. Do not claim it supports stable diffing.
+- `finding_id`: `finding-v1-<SHA-256>` over the framed rule ID, relative path, line, column and evidence match. Exact duplicates share an ID. Asset/occurrence keys provide the separate inventory diff semantics.
 
 Diffing first matches exact asset/occurrence keys with the same identity scheme and scope. Then optional file-move mappings or bounded structural similarity produce explicit candidate correspondences with a reason; they never silently establish identity. Line insertions may preserve anchors, file moves change path-based keys, duplicate identical calls may remain unmatched. Show added/removed/changed/unresolved, never mark a previous finding resolved when the new scan skipped/failed that target. Compare scope, rules/catalog/profile and completeness before reporting progress.
 

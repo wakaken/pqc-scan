@@ -91,6 +91,8 @@ Additional inventory, assessment and diagnostic files require explicit options.
 Use `--cyclonedx-17` for separate CycloneDX 1.7 exports, or `diff` to compare
 inventories with the same explicit repository scope. See the [report guide](docs/user/REPORTS.md).
 
+Finding IDs use `finding-v1-<SHA-256>` with length-prefixed fields and repository-relative paths. Identical findings keep the same ID across checkout locations.
+
 <a id="guides"></a>
 
 ## User guides

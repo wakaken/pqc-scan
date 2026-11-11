@@ -75,14 +75,15 @@ line 0 (unknown), never the first unrelated record. The ordinal remains availabl
 Existing CLI flags, filenames, public legacy struct shapes and flat dependency
 SBOM fields are unchanged. Legacy `version` still uses its existing display
 normalization, and locks still project to the historical `source_type: manifest`.
-Legacy deduplication can collapse origins. The richer inventory preserves them;
+Finding deduplication merges identical rule/path/position/match tuples.
+The richer inventory preserves parsed origins;
 third-party Detector default adapters still cannot assert parsed provenance.
 
 Intentional semantic corrections: purls no longer claim manifest/SBOM versions;
 invalid/source-specific records no longer fabricate registry identity; coverage
 and strict-mode results reflect actual outcomes; source lines may change or become
 unknown. These can affect custom dependency regexes targeting purl text and legacy
-IDs whose existing hash includes position/evidence. The ID algorithm is unchanged.
+finding IDs, whose framed inputs include relative path and position/evidence.
 They are not a promise of byte-identical findings under corrected semantics.
 Nondependency rule matching and finding IDs remain unchanged for unchanged inputs;
 snippets/previews inside dependency/SBOM containers are intentionally masked.
