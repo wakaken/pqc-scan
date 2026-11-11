@@ -83,7 +83,7 @@ Advisory policy decisions are kept in explicitly requested JSON/Markdown exports
 
 Open `report.html` first. Review a finding's file location, source context and suggested checks before deciding on a change.
 Search and filters help you work through repeated findings; `report.md` provides a portable text version.
-Both show inspection status; selecting a local assessment also adds its advisory decisions.
+Both show inspection status. Local assessment decisions appear only in Markdown and explicitly requested JSON; HTML does not display them.
 
 `--format all` writes six files: `report.html`, `report.md`, `report.json`, `report.sarif`, `cbom.json` and `dependency-sbom.json`.
 The last two list cryptographic findings and software dependencies respectively. Their purpose and relationship are explained in [choosing a report](docs/user/REPORTS.md#choose-report).
@@ -126,3 +126,9 @@ Review the [privacy and scan-scope limits](docs/user/COVERAGE.md#privacy) before
 ## License
 
 MIT
+
+The scanner reads regular files only; in-tree symbolic links and special files are
+reported as read failures. Reads, including source context and runtime hints, are
+bounded by the configured file-size limit. CLI scope notes explain that ignore
+and traversal policies may leave files unenumerated. This does not change exit
+codes or the scope-based meaning of `--require-complete`.

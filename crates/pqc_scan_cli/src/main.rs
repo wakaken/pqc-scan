@@ -381,6 +381,8 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     writeln!(stdout, "scanned files: {}", result.summary.scanned_files)?;
     writeln!(stdout, "skipped files: {}", result.summary.skipped_files)?;
 
+    write_scope_note(document.coverage().not_enumerated_population(), stderr)?;
+
     if !document.coverage().is_complete() {
         writeln!(stderr,
             "warning: inspection completeness is {}; use --diagnostics for details. No findings does not imply complete inspection.",
@@ -404,6 +406,13 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     }
 
     Ok(ExitStatus::Success)
+}
+
+fn write_scope_note<W: Write>(not_enumerated: bool, stderr: &mut W) -> std::io::Result<()> {
+    if not_enumerated {
+        writeln!(stderr, "note: ignore and traversal policies may leave files unenumerated; inspection completeness applies within scope. Zero findings does not establish repository-wide safety.")?;
+    }
+    Ok(())
 }
 
 fn list_rules_cmd<WOut: Write>(args: RulesListArgs, stdout: &mut WOut) -> Result<ExitStatus> {
@@ -504,6 +513,67 @@ mod tests {
     }
 
     #[test]
+    fn explicit_regular_file_scan_retains_findings_and_strict_success() {
+        let repo = temp_dir("single-file");
+        let out = temp_dir("single-file-output");
+        write_file(&repo, "input.js", "const algorithm = 'RS256';\n");
+        let (result, stdout, stderr) = run_cli_test(vec![
+            "pqc-scan".into(),
+            "scan".into(),
+            repo.join("input.js").display().to_string(),
+            "--rules-dir".into(),
+            rules_dir().display().to_string(),
+            "--out-dir".into(),
+            out.display().to_string(),
+            "--require-complete".into(),
+        ]);
+        assert_eq!(result.unwrap().code(), 0);
+        let report: serde_json::Value =
+            serde_json::from_slice(&fs::read(out.join("report.json")).unwrap()).unwrap();
+        assert!(report["findings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|f| f["rule_id"] == "JWT_RS256"));
+        assert!(stdout.contains("scanned files: 1"));
+        assert!(!stderr.contains("require-complete:"));
+        fs::remove_dir_all(repo).unwrap();
+        fs::remove_dir_all(out).unwrap();
+    }
+
+    #[test]
+    fn no_scope_note_when_population_is_enumerated() {
+        let mut stderr = Vec::new();
+        write_scope_note(false, &mut stderr).unwrap();
+        assert!(stderr.is_empty());
+    }
+
+    #[test]
+    fn ignored_crypto_warns_about_scope_without_changing_strict_exit() {
+        let repo = temp_dir("scope-note");
+        let out = temp_dir("scope-note-output");
+        write_file(&repo, ".gitignore", "hidden.js\n");
+        write_file(&repo, "hidden.js", "const algorithm = 'RS256';\n");
+        let (result, stdout, stderr) = run_cli_test(vec![
+            "pqc-scan".into(),
+            "scan".into(),
+            repo.display().to_string(),
+            "--rules-dir".into(),
+            rules_dir().display().to_string(),
+            "--out-dir".into(),
+            out.display().to_string(),
+            "--require-complete".into(),
+        ]);
+        assert_eq!(result.unwrap().code(), 0);
+        assert!(stdout.contains("total findings: 0"));
+        assert!(stderr.contains("unenumerated"));
+        assert!(stderr.contains("repository-wide safety"));
+        assert!(!stderr.contains("require-complete:"));
+        fs::remove_dir_all(repo).unwrap();
+        fs::remove_dir_all(out).unwrap();
+    }
+
+    #[test]
     fn diagnostics_opt_in_exports_complete_coverage_without_changing_legacy_json() {
         let repo = temp_dir("diagnostics-input");
         let plain = temp_dir("diagnostics-plain");
@@ -526,7 +596,7 @@ mod tests {
         assert_eq!(result.unwrap(), ExitStatus::Success);
         assert_eq!(stdout.matches("written ").count(), 6);
         assert!(!plain.join("diagnostics.json").exists());
-        assert!(stderr.is_empty(), "{stderr}");
+        assert!(stderr.contains("unenumerated"), "{stderr}");
         let mut args = arguments(&detailed);
         args.push("--diagnostics".into());
         let (result, stdout, _) = run_cli_test(args);
@@ -615,7 +685,7 @@ mod tests {
         };
         let (result, _, stderr) = run_cli_test(args(&repo, &out));
         assert_eq!(result.unwrap().code(), 0);
-        assert!(stderr.is_empty());
+        assert!(stderr.contains("unenumerated"));
         let (result, _, _) = run_cli_test(args(&repo.join("missing"), &out));
         assert!(result.is_err());
         let blocked = out.join("ordinary-file");
@@ -677,7 +747,7 @@ mod tests {
             "ja".into(),
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert!(stderr.is_empty(), "{stderr}");
+        assert!(stderr.contains("unenumerated"), "{stderr}");
         let html = fs::read_to_string(out.join("report.html")).unwrap();
         assert!(html.contains("耐量子暗号への移行調査レポート"));
         assert!(html.contains("対応完了の保証ではありません"));
@@ -727,7 +797,7 @@ mod tests {
             "high".into(),
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert!(stderr.is_empty(), "{stderr}");
+        assert!(stderr.contains("unenumerated"), "{stderr}");
         assert_eq!(stdout.matches("written ").count(), 6);
         let report: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
@@ -786,7 +856,7 @@ mod tests {
             rules_dir().display().to_string(),
         ]);
         assert_eq!(result.expect("acceptance scan"), ExitStatus::Success);
-        assert!(stderr.is_empty(), "{stderr}");
+        assert!(stderr.contains("unenumerated"), "{stderr}");
         assert_eq!(stdout.matches("written ").count(), 6);
         let json: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
@@ -868,7 +938,7 @@ mod tests {
         let (result, stdout, stderr) = run_cli_test(args);
 
         assert_eq!(result.expect("scan succeeds"), ExitStatus::Success);
-        assert!(stderr.is_empty(), "{stderr}");
+        assert!(stderr.contains("unenumerated"), "{stderr}");
         assert!(
             out_dir.join("report.json").exists(),
             "report.json should exist"

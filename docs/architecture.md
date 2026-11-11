@@ -6,7 +6,7 @@
 
 - `pqc_scan_cli`
   - CLI parsing (`clap`)
-  - command dispatch (`scan`, `rules list`)
+  - command dispatch (`scan`, `diff`, `rules list`, `rules show`, optional `probe`)
   - fail-on threshold behavior (`high`, `critical`)
 - `pqc_scan_core`
   - repository walking
@@ -416,3 +416,17 @@ output and inventory-v1 semantics remain unchanged. See
 [LOCAL-ASSESSMENT-V1.md](architecture/LOCAL-ASSESSMENT-V1.md).
 
 Evidence export boundaries and bounded redaction are documented in [EVIDENCE-PRIVACY.md](architecture/EVIDENCE-PRIVACY.md).
+
+### Repository read boundary (Cursor audit follow-up)
+
+Only regular files are selected. In-tree symlinks and special files are skipped
+with ReadFailed diagnostics and enumeration-failure accounting. Reads are bounded
+at the opened file (limit + one byte), including snippet/runtime hint rereads.
+Unix uses held parent descriptors with openat/O_NOFOLLOW/O_NONBLOCK for every
+relative component, preventing parent-link replacement and FIFO blocking.
+The explicitly selected root may itself be a symlink. Windows validates the opened
+handle's final path against the canonical root; Windows execution remains unverified
+in this macOS-only follow-up. Hard links and concurrent modification of regular
+file contents are not immutable-snapshot guarantees.
+Scope completeness and the unenumerated population remain separate; CLI notes do
+not turn ignored files into a new strict-exit failure.

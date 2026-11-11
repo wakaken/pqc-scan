@@ -1,5 +1,4 @@
 use std::collections::BTreeSet;
-use std::fs;
 use std::path::{Path, PathBuf};
 
 use serde_json::Value as JsonValue;
@@ -23,6 +22,15 @@ impl RuntimeProfile {
         root: &Path,
         files: &[PathBuf],
         dependency_sbom: &[DependencySbomEntry],
+    ) -> Self {
+        Self::from_repository_limited(root, files, dependency_sbom, usize::MAX)
+    }
+
+    pub(crate) fn from_repository_limited(
+        root: &Path,
+        files: &[PathBuf],
+        dependency_sbom: &[DependencySbomEntry],
+        max_bytes: usize,
     ) -> Self {
         let mut profile = Self::default();
 
@@ -61,47 +69,47 @@ impl RuntimeProfile {
 
             match file_name {
                 "pom.xml" if profile.java_version.is_none() => {
-                    if let Some(text) = read_text_limited(path, 256 * 1024) {
+                    if let Some(text) = read_text_limited(root, path, max_bytes.min(256 * 1024)) {
                         profile.java_version = parse_java_version_from_pom(&text);
                     }
                 }
                 "build.gradle" | "build.gradle.kts" if profile.java_version.is_none() => {
-                    if let Some(text) = read_text_limited(path, 256 * 1024) {
+                    if let Some(text) = read_text_limited(root, path, max_bytes.min(256 * 1024)) {
                         profile.java_version = parse_java_version_from_gradle(&text);
                     }
                 }
                 "package.json" if profile.node_version.is_none() => {
-                    if let Some(text) = read_text_limited(path, 512 * 1024) {
+                    if let Some(text) = read_text_limited(root, path, max_bytes.min(512 * 1024)) {
                         profile.node_version = parse_node_version_from_package_json(&text);
                     }
                 }
                 "go.mod" if profile.go_version.is_none() => {
-                    if let Some(text) = read_text_limited(path, 128 * 1024) {
+                    if let Some(text) = read_text_limited(root, path, max_bytes.min(128 * 1024)) {
                         profile.go_version = parse_go_version_from_go_mod(&text);
                     }
                 }
                 "Cargo.toml" if profile.rust_version.is_none() => {
-                    if let Some(text) = read_text_limited(path, 256 * 1024) {
+                    if let Some(text) = read_text_limited(root, path, max_bytes.min(256 * 1024)) {
                         profile.rust_version = parse_rust_version_from_cargo_toml(&text);
                     }
                 }
                 "Gemfile" if profile.ruby_version.is_none() => {
-                    if let Some(text) = read_text_limited(path, 128 * 1024) {
+                    if let Some(text) = read_text_limited(root, path, max_bytes.min(128 * 1024)) {
                         profile.ruby_version = parse_ruby_version_from_gemfile(&text);
                     }
                 }
                 ".ruby-version" if profile.ruby_version.is_none() => {
-                    if let Some(text) = read_text_limited(path, 16 * 1024) {
+                    if let Some(text) = read_text_limited(root, path, max_bytes.min(16 * 1024)) {
                         profile.ruby_version = parse_ruby_version_file(&text);
                     }
                 }
                 "pyproject.toml" if profile.python_version.is_none() => {
-                    if let Some(text) = read_text_limited(path, 256 * 1024) {
+                    if let Some(text) = read_text_limited(root, path, max_bytes.min(256 * 1024)) {
                         profile.python_version = parse_python_version_from_pyproject(&text);
                     }
                 }
                 "runtime.txt" if profile.python_version.is_none() => {
-                    if let Some(text) = read_text_limited(path, 32 * 1024) {
+                    if let Some(text) = read_text_limited(root, path, max_bytes.min(32 * 1024)) {
                         profile.python_version = parse_python_version_from_runtime_txt(&text);
                     }
                 }
@@ -861,12 +869,8 @@ fn push_action(actions: &mut Vec<RecommendedAction>, action: RecommendedAction) 
     actions.push(action);
 }
 
-fn read_text_limited(path: &Path, max_bytes: usize) -> Option<String> {
-    let meta = fs::metadata(path).ok()?;
-    if meta.len() as usize > max_bytes {
-        return None;
-    }
-    fs::read_to_string(path).ok()
+fn read_text_limited(root: &Path, path: &Path, max_bytes: usize) -> Option<String> {
+    String::from_utf8(crate::safe_read::read(root, path, max_bytes).ok()?).ok()
 }
 
 fn parse_java_version_from_pom(text: &str) -> Option<String> {
