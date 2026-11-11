@@ -3,8 +3,8 @@
   "implementationHead": "31e7952a47afa6b7ee49ea7689b76619892d3386",
   "sourceBindings": {
     ".gitattributes": "1625b8f36b8b85a9d54f4fe629cd5d94274a18ee94defb734939d54d57113f45",
-    ".github/workflows/pqc-scan.yml": "fdb5930e025a487ebaba6d9dc9ab00668cc7a532c1f280f51a5d540a145bad41",
-    ".github/workflows/release.yml": "256069760bc926093ed208cd0c2d8ab2a80d1d54fd9953ad13f880ddc69fd221",
+    ".github/workflows/pqc-scan.yml": "300f6b988c5c14030be4a6bebaa5a5bed8192119ed55e37b7f21ab4a04893848",
+    ".github/workflows/release.yml": "63c22c77a6090c84426bf600780ee309914f46e5d138daf49b46b90e5f5fed07",
     ".gitignore": "a22343396d661aad0d4f3e646329d944e2711d36bb75c15a5965812f40ec17ad",
     "AGENTS.md": "f4c0f0d320e7d4e6f80b45c4acf0001ee63a53421bedc64ac6e237d0323a8c18",
     "Cargo.lock": "e0a0dbe8be7901d7db50bddfc5aa2aa0690e96a476b409f089af851677c1a66c",
@@ -2038,7 +2038,7 @@
     }
   },
   "browser": "No renderer/HTML/JS interaction change in this request. Existing actual browser acceptance is historical; unchanged renderer sources and current schema/privacy/Node/protocol-preview tests are checked. No fresh browser execution is claimed.",
-  "publication": "Not performed. Static review flags0; combined4 original objc-family; all-probes5 including russh-util dirty VCS provenance. Signing and Action SHA pinning remain separate hardening/publication work.",
+  "publication": "Not performed. Static review flags0; combined4 original objc-family; all-probes5 including russh-util dirty VCS provenance. Signing remains publication work; Actions are pinned to verified upstream commit SHAs.",
   "evidenceBindings": {
     "target/final-gaps/CI-31e7952.json": "8ff937a112fb0c3f0ede271daf2f5a4b4066c55753d1359b1ff5e8d0d36903eb",
     "target/final-gaps/PACKAGES.json": "7be8ac812feacb54544a59c76a69aeb30480fa1afb41de80455c535049f3168a",
@@ -2190,8 +2190,7 @@
   "remainingPublication": [
     "original four objc-family notice reviews",
     "russh-util dirty-VCS upstream-source review for all-probes",
-    "signing and trusted release verification",
-    "Action commit-SHA pinning"
+    "signing and trusted release verification"
   ],
   "negativeInstalls": [
     {
@@ -2223,5 +2222,13 @@
     "fix": "Explicit cargo fetch --locked before offline packaging; no target execution in cache preparation.",
     "implementationReview": "final_gaps_implementation_review approved scoped workflow fix; same test reviewer checks corrected hosted run.",
     "source": ".github/workflows/release.yml"
-  }
+  },
+  "actionPins": {
+    "actions/checkout@v4": "actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4",
+    "actions/setup-python@v5": "actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5",
+    "actions/upload-artifact@v4": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4",
+    "github/codeql-action/upload-sarif@v3": "github/codeql-action/upload-sarif@9418214df1f2c4b8128c770156c409013b07d6b9 # v3",
+    "dtolnay/rust-toolchain@stable": "dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable (explicit toolchain below)"
+  },
+  "actionPinScope": "Official upstream Git refs resolved2026-11-11; CodeQL annotated tag dereferenced to commit. Same versions/content; no component upgrade."
 }

@@ -72,7 +72,7 @@ reject missing SSH KEX,extra SSH KEX and a probe command in the static variant.
 
 Evaluator closes001 and037 for technical acceptance on the evidence above.
 The product remains beta0.1.0; the formal scope is static scanning with experimental
-probes. Publication/signing,Action SHA pinning and notice clearance remain separate.
+probes. Publication/signing and notice clearance remain separate. Action refs are now pinned to their verified upstream commit SHAs.
 014/016 remain cancelled and023 done. There are38 done tasks and2 cancelled.
 Final source hashes and metadata-only follow-up checks are in the JSON record.
 
@@ -85,3 +85,12 @@ all offline packaging. This trusted dependency preparation executes no target co
 packaging/install tests retain their offline boundaries. The failed attempt remains
 recorded at target/final-gaps/distribution-hosted-failed.log; it is not a pass.
 The corrected workflow is checked by the same two reviewers and rerun on GitHub.
+
+## Action immutability
+
+All workflow uses now pin the same upstream commit previously selected by the
+existing version/tag(or stable branch),with a human-readable ref comment.
+Official GitHub Git-ref APIs were queried on2026-11-11;the annotated CodeQLv3 tag
+was dereferenced to its commit. No action version or Rust toolchain was changed.
+Pins and reference identities are in FINAL-GAPS-VALIDATION.json. Both reviewers
+reuse their existing identities for this final scoped hardening check.
