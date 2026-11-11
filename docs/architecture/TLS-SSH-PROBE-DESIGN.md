@@ -121,3 +121,22 @@ Use a network-isolated test environment with synthetic public certificates, loca
 - Determinism: compare semantic facts after excluding run time/IDs/ephemeral handshake bytes. Server randomness is not an inventory difference. Failure reproducibility means classified outcomes within bounded conditions, not byte-identical wire exchanges.
 
 All defaults, capability claims and no-auth guarantees require evidence in [QUALITY-GATES.md](../quality/QUALITY-GATES.md). The [roadmap](../roadmap/OSS-ROADMAP.md) schedules safety before protocol release. No enterprise management service is part of this design.
+
+## Task039 selected use case and feasibility — 2026-11-11
+
+The maintainer explicitly selected verification of actual hybrid KEX and prior-trust
+host authentication without user authentication/login. The completed standalone
+[task039 study](../quality/TASK-039-SSH-KEX-FEASIBILITY.md) selects russh0.65.1/AWS-LC
+conditionally for a future negotiated mode. In isolated OpenSSH10.2p1 fixtures,
+ML-KEM768+X25519 KEX completes with an exact pre-provisioned Ed25519 host-key pin;
+wrong/unknown pins and signature tampering fail. The server decodes NEWKEYS then
+DISCONNECT, with no service/userauth/channel request. ssh2's public handshake
+sends a service request automatically and is unsuitable for the strict contract.
+
+Initial future trust shape: an explicit public-key pin for the requested endpoint,
+provided over a separate trusted channel. Do not fetch-and-trust a scanned key,
+accept host certificates by embedded-key match, read ambient SSH state, or silently
+fall back from requested hybrid KEX. Host-key authentication remains classical in
+this study. Full known_hosts/CA validation,030 budget/cancellation integration and
+adversarial/rekey/platform tests remain implementation prerequisites. This finding
+does not add a product command or change current advertisement-only probe results.

@@ -199,3 +199,13 @@ supersedes the earlier pending-budget/scope statements, without declaring 1.0
 released or promising other platforms. 037 remains blocked on successful hosted
 CI for the actual target commit. Four combined-probes notice reviews remain
 publication prerequisites. Push, publication and signing were not authorized.
+
+## Task039 explicit selection — 2026-11-11
+
+The maintainer selected the completed-KEX use case: verify PQ/hybrid key exchange
+and a pretrusted peer, with no user authentication/login. This supersedes039's
+previous no-use-case deferral. The [standalone feasibility study](../quality/TASK-039-SSH-KEX-FEASIBILITY.md)
+conditionally selects russh0.65.1/AWS-LC with explicit prior public-key pinning;
+ssh2/libssh2's automatic authentication-service request fails this contract.
+No product negotiated mode, schema change, root dependency update or release is
+implied. Production integration requires a separately reviewed implementation plan.

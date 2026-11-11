@@ -2,10 +2,10 @@ id: "039"
 title: "Evaluate completed SSH KEX without authentication as a future option"
 type: feature
 priority: low
-status: pending
-owner: Planner Agent
+status: done
+owner: Evaluator Agent
 phase: "future"
-description: "Evaluate completed SSH KEX without authentication as a future option. Deferred after delegated technical selection: unauthenticated advertisements meet the current use case; no concrete completed-KEX consumer was selected. No candidate evaluation or product mode was implemented."
+description: "Evaluate completed SSH KEX without authentication as a future option. Selected explicitly by the maintainer on 2026-11-11: establish PQC/hybrid KEX and verify a pretrusted host without user authentication/login. Standalone feasibility study only; no product mode authorized."
 selection_record: "docs/roadmap/CONTINUATION-DECISIONS.md#subsequent-delegated-selection-and-actual-checkpoint"
 plan_reference: "docs/roadmap/OSS-ROADMAP.md#task-039"
 change_size: "Unknown until selected; deliberately deferred"
@@ -30,3 +30,19 @@ acceptance:
 testing_requirements:
   - "Sanitized message-type record, local trusted-host positive/negative cases and source/API review."
   - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+execution_plan: "docs/superpowers/plans/2026-11-11-ssh-kex-feasibility.md"
+lifecycle_record:
+  - "Planner: pending -> planned after explicit maintainer selection of the completed-KEX use case."
+  - "Executor: planned -> in-progress; standalone isolated study, no product integration."
+  - "Executor: in-progress -> review after pinned isolated eight-case study and unchanged-product regressions."
+feasibility_evidence: "docs/quality/TASK-039-SSH-KEX-FEASIBILITY.md"
+feasibility_result: "Conditionally select russh0.65.1/AWS-LC with explicit prior host public-key pins. Hybrid KEX/trust/no-userauth proven in isolated Linux arm64 fixtures. ssh2 automatic service request rejects that backend; no shipped negotiated mode."
+acceptance_record:
+  date: "2026-11-11"
+  study_head: "ec4df5c5d8734b7dde7c7fec542976793840830d"
+  implementation_review: "ssh039_impl_review accepted; no blocking findings."
+  test_review: "ssh039_test_review accepted; no blocking findings; final image source/binary hashes independently verified."
+  checks: "Eight isolated cases; macOS arm64 build/clippy; format;346 unchanged-workspace tests;28 Node tests."
+  transition: "Reviewer accepted; Evaluator review -> done for feasibility scope only."
+  unimplemented: "Product mode/schema, full known_hosts/host certificate support,030 limits/cancellation integration and adversarial/rekey/platform hardening."

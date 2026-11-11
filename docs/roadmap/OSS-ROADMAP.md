@@ -801,3 +801,14 @@ supersedes the earlier pending-budget/scope statements, without declaring 1.0
 released or promising other platforms. 037 remains blocked on successful hosted
 CI for the actual target commit. Four combined-probes notice reviews remain
 publication prerequisites. Push, publication and signing were not authorized.
+
+## Task039 feasibility checkpoint — 2026-11-11
+
+The maintainer selected actual hybrid KEX plus trusted-host verification without
+user authentication/login. The previous conditional-use-case deferral is
+superseded by the [task039 study](../quality/TASK-039-SSH-KEX-FEASIBILITY.md).
+russh0.65.1/AWS-LC with a separately provisioned public host-key pin is the selected
+future backend shape, based on isolated positive/negative cases. This is a study
+outcome, not a shipped negotiated SSH feature; the current probe still reports
+unauthenticated advertisements. Host certificate/known-host rules, safety-budget
+integration and platform/adversarial coverage remain future implementation work.
