@@ -2,13 +2,13 @@ id: "037"
 title: "Demonstrate supported-scope OSS 1.0 quality"
 type: feature
 priority: medium
-status: blocked
-owner: Planner Agent
+status: done
+owner: Evaluator Agent
 phase: "5"
-description: "Local integration, browser and packaging dependency acceptance completed. Maintainer approved the measured regression signals and 1.0 scope on 2026-11-11; final acceptance remains blocked on actual current-HEAD hosted CI."
+description: "Local integration, browser and packaging dependency acceptance completed. Maintainer approved the measured regression signals and 1.0 scope on 2026-11-11; Final technical acceptance completed after source-bound CI, regression, packaging and two independent review stages. The product remains a development beta; publication is separate."
 plan_reference: "docs/superpowers/plans/2026-11-10-quality-preflight.md"
 preflight_evidence: "docs/quality/RUNTIME-INTEGRATION-VALIDATION.md"
-blocker: "Actual current-HEAD hosted CI remains unverified. Four combined-probes publication notice reviews remain separate publication prerequisites; approval of acceptance criteria does not authorize push or publication."
+resolved_blocker: "Hosted CI31e7952, final source/evidence checks, three clean archives/installs and both review stages accepted. Publication/signing and notice review remain separate."
 lifecycle_record:
   - "Planner selected limited local preflight from existing source-bound integration evidence."
   - "Planner set blocked before final acceptance: dependency and release-quality gates remain unmet; no done transition."
@@ -61,4 +61,20 @@ maintainer_acceptance_decision:
   performance: "Same host/profile/config/input: wall time or peak RSS above twice the previous observed warm maximum requires investigation; not a universal performance guarantee."
   scope: "Static scanning is the formal 1.0 target; TLS/SSH probes remain experimental; local distribution validation is macOS arm64."
   evidence: "docs/quality/REMAINING-ROADMAP-VALIDATION.md"
-  ci: "Unverified; no done transition until actual target-commit hosted CI succeeds."
+  ci: "Final implementation31e7952 hosted CI passed all four jobs; source-bound follow-up is in FINAL-GAPS-VALIDATION.md."
+
+final_acceptance:
+  date: '2026-11-11'
+  source_head: 31e7952a47afa6b7ee49ea7689b76619892d3386
+  ci: https://github.com/wakaken/pqc-scan/actions/runs/42971971441
+  scope: 'technical acceptance only; no publication or signing'
+  reviewers:
+    - final_gaps_implementation_review
+    - final_gaps_test_review
+  evidence: docs/quality/FINAL-GAPS-VALIDATION.md
+  source_evidence: docs/quality/FINAL-GAPS-VALIDATION.json
+  decision: >
+    Evaluator accepted final source-bound checks, retained individual dependency
+    observations, all three reproducible offline-installed variants and the
+    completed performance investigation. Frozen corpus/truth and prior maintainer
+    criteria are unchanged. Product version remains beta0.1.0.

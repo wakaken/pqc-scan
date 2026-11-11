@@ -12,11 +12,13 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
       - name: Verify declared native target
         run: test "$(uname -m)" = arm64
+      - name: Fetch locked workspace dependencies before offline packaging
+        run: cargo fetch --locked
       - name: Test packaging safety
         run: python3 -m unittest discover -s tests/distribution -v
       - name: Build and prepare static snapshot
@@ -33,8 +35,15 @@ jobs:
           python3 scripts/package-release.py --binary target/probe-release-build/release/pqc-scan --variant combined-probes --out-dir target/task-038/combined-second
           cmp target/task-038/combined-first/*.tar.gz target/task-038/combined-second/*.tar.gz
           python3 tests/distribution/check-install.py target/task-038/combined-first/*.tar.gz --out-dir target/task-038/combined-install
+      - name: Build and prepare all probes including SSH KEX
+        run: |
+          cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/all-probes-release-build
+          python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all-first
+          python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all-second
+          cmp target/task-038/all-first/*.tar.gz target/task-038/all-second/*.tar.gz
+          python3 tests/distribution/check-install.py target/task-038/all-first/*.tar.gz --out-dir target/task-038/all-install
       - name: Retain preparation artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: unpublished-macos-arm64-preparation
           path: |

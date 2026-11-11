@@ -24,3 +24,10 @@ Prepared binary archives store the selected notice bytes under `licenses/` and
 map source paths to archive members in `DEPENDENCY-LICENSES.json`. The source
 manifest is retained for provenance; the original `texts/` tree is not duplicated
 inside the binary archive.
+
+The all-probes variant additionally includes exact-version upstream license texts
+for russh0.65.1,russh-util0.52.0,russh-cryptovec0.62.0 and delegate0.13.5.
+Registry checksums, recorded VCS revisions and file hashes bind each fallback.
+russh-util retains a publication-review flag because its archive VCS record is
+dirty=true; the pinned revision identifies the license source, not an identical
+archive source tree. Existing four objc-family review flags are unchanged.

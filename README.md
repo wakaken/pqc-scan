@@ -134,3 +134,7 @@ reported as read failures. Reads, including source context and runtime hints, ar
 bounded by the configured file-size limit. CLI scope notes explain that ignore
 and traversal policies may leave files unenumerated. This does not change exit
 codes or the scope-based meaning of `--require-complete`.
+
+Distribution preparation now supports three macOS arm64 variants: `static`,
+`combined-probes` (TLS and SSH offers), and `all-probes` (also trusted SSH KEX).
+All probe modes remain experimental. See [distribution preparation](docs/user/DISTRIBUTION.md).

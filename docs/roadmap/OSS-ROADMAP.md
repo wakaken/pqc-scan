@@ -2,6 +2,31 @@
 
 Design date: 2026-11-09. Baseline: `b3104f9a4193b1b21ea11ca060f06301de2e936b`. At plan creation, all 22 new tasks were **pending**. Task YAML records are authoritative for current implementation and validation status. Existing tasks 001-017 remain unchanged; 014 is pending, 016 is review and 017 is done. Explicit user-requested queue creation does not enable the automatic Monitor.
 
+## Current checkpoint — 2026-11-11
+
+PR#16 merged at `6e098de95c968524ab5b7986f2e783323cf9d040`.
+[Hosted CI](https://github.com/wakaken/pqc-scan/actions/runs/42969878288) passed
+quality,scan,baseline,protocols for that exact commit. The earlier checkpoints below
+are historical. Current task YAML remains authoritative.
+
+| Phase | Current state |
+|---|---|
+| 0:018–024,028,029 | All done;023 is the accepted development baseline |
+| 1:025–027 | All done |
+| 2:030–032 | All done |
+| 3:033 | Done |
+| 4:034–036 | All done |
+| 5:038 then037 | 038 preparation and037 technical evaluation done; publication separate |
+| SSH KEX039 | Done, including authorized experimental product integration |
+
+014/016 remain cancelled. Finding IDs use the approved framed SHA-256 scheme;
+old-ID retention in original design sections is superseded. Current follow-up
+adds all-probes distribution beside static/combined-probes and records individual
+self-scan triage.001/037 are done after source-bound implementation31e7952 CI,
+final local validation and both independent review stages. The performance2x
+investigation is retained with its controlled comparison; no criterion changed.
+Publication/signing and notice review remain separate. See [final gap acceptance](../quality/FINAL-GAPS-VALIDATION.md).
+
 ## Implementation checkpoint (2026-11-10)
 
 Latest local code checkpoint: `9201dc5022ea918e1416db7abf710db58a4bd855`.
@@ -9,7 +34,7 @@ The isolated task031 study `48fad23` was adopted under explicit delegated
 selection in `cae2730`. Runtime TLS/SSH and local packaging are committed separately. Task YAML remains authoritative; design-time statements below describe
 the original plan unless updated explicitly.
 
-| Phase | Tasks | Current task state |
+| Phase | Tasks | State at this historical checkpoint |
 |---|---|---|
 | 0: correctness and baseline | 018–024, 028, 029 | 018–022, 024, 028, 029 `done`; 023 `review` |
 | 1: observations, inventory, assessment | 025–027 | All three `done` |

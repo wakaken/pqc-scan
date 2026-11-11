@@ -15,7 +15,7 @@ The current baseline is commit `b3104f9a4193b1b21ea11ca060f06301de2e936b` on `co
 - No findings does not mean no cryptography, successful inspection, secure software or completed migration.
 - Algorithm vulnerability, classical weaknesses, observation certainty, usage, impact, priority and policy decisions are separate claims.
 - OSS retains full detection, local assessment, policy and export capabilities. Commercial products must not drive artificial accuracy limits.
-- `scan`, `rules list`, `rules show`, existing options, legacy IDs and machine output contracts remain available.
+- `scan`, `rules list`, `rules show`, documented options and machine output contracts remain available; current finding IDs use the maintainer-approved framed SHA-256 scheme.
 - Normal repository scanning never initiates network connections. Probes require an explicit command and explicit targets.
 
 ## Users and decisions

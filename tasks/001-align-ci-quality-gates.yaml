@@ -2,13 +2,15 @@ id: "001"
 title: Align CI with declared Rust toolchain and enforce quality gates
 type: quality
 priority: high
-status: blocked
+status: done
 owner: Evaluator Agent
 description: >
   CI already enforces formatting, tests, and clippy with Rust 1.93.1, matching
   rust-toolchain.toml. Local clippy was restored on 2026-11-09 after finding its
   cargo-clippy executable missing. Confirm scan artifacts and HTML interaction before
   closing this task; do not bypass the failed gate or change scan output behavior.
+  Those original restart records are historical; current final_acceptance closes
+  the CI alignment task after the final gap validation and two review stages.
 implementation_steps:
   - Review `rust-toolchain.toml` and `.github/workflows/pqc-scan.yml` and decide how CI should honor the declared toolchain.
   - Update the workflow to run formatting, tests, and clippy before the scan job or as separate jobs.
@@ -80,3 +82,27 @@ restart_record:
     restart instructions above are superseded by the maintainer's 2026-11-11
     cancellation; do not resume 014 or 016. Current validation and remaining
     audit work are tracked in docs/quality/CURSOR-AUDIT-FOLLOWUP-2026-11-11.md.
+
+final_gap_followup:
+  date: '2026-11-11'
+  merged_head: 6e098de95c968524ab5b7986f2e783323cf9d040
+  ci: https://github.com/wakaken/pqc-scan/actions/runs/42969878288
+  result: All four jobs passed; historical CI-unverified statements describe earlier snapshots.
+  remaining: Bind subsequent self-scan and distribution changes to their own final validation; do not reopen cancelled014/016.
+  evidence: docs/quality/FINAL-GAPS-VALIDATION.md
+
+final_acceptance:
+  date: '2026-11-11'
+  source_head: 31e7952a47afa6b7ee49ea7689b76619892d3386
+  ci: https://github.com/wakaken/pqc-scan/actions/runs/42971971441
+  scope: 'technical acceptance only; no publication or signing'
+  reviewers:
+    - final_gaps_implementation_review
+    - final_gaps_test_review
+  evidence: docs/quality/FINAL-GAPS-VALIDATION.md
+  source_evidence: docs/quality/FINAL-GAPS-VALIDATION.json
+  decision: >
+    Evaluator accepted final source-bound checks, retained individual dependency
+    observations, all three reproducible offline-installed variants and the
+    completed performance investigation. Frozen corpus/truth and prior maintainer
+    criteria are unchanged. Product version remains beta0.1.0.
