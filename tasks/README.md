@@ -9,6 +9,7 @@ pending → planned → in-progress → review → done
 Optional status:
 
 - blocked
+- cancelled
 
 Example:
 
@@ -32,6 +33,7 @@ Fields:
 - `review`: Executor finished implementation and the task is ready for Reviewer assessment
 - `done`: Evaluator validated the completed work
 - `blocked`: progress cannot continue without human input or unavailable validation
+- `cancelled`: the maintainer explicitly ended further work; record the reason and preserve implementation history. This does not assert implementation or validation completion.
 
 ## Ownership
 
@@ -41,6 +43,7 @@ Fields:
 - `review`: Executor
 - `done`: Evaluator
 - `blocked`: any agent
+- `cancelled`: Planner, only after an explicit maintainer decision
 
 ## Notes
 
@@ -54,3 +57,7 @@ Fields:
 - Keep a prerequisite feasibility study separate when its result determines whether or how to implement the dependent feature. The study and implementation remain distinct tasks, each normally delivered in one PR.
 - Do not preassign A/B/C PRs or split tests and documentation away from the behavior they validate. If actual scope requires a different task boundary, Planner records the reason and dependencies before proceeding.
 - Conditional steps do not automatically require a follow-up PR. Record why a step applies or is omitted without weakening the task's acceptance criteria.
+
+Cancelled tasks are excluded from the active queue. Existing functionality is not
+removed by cancellation. Reopening requires an explicit new maintainer request
+and a recorded Planner decision; agents must not resume them automatically.

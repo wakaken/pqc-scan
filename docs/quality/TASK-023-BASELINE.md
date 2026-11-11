@@ -5,8 +5,11 @@ Date: 2026-11-10 (Asia/Tokyo). Base/validation HEAD:
 Branch: `codex/task-022-sarif-location`, retained at the user's explicit request.
 This is one task-specific local commit on the existing branch; no push/PR/merge.
 
-Implementation and local validation are complete; numeric/protocol budget approval
-remains a maintainer decision. Task status therefore remains **review**, not done.
+Current acceptance update (2026-11-11): the maintainer approved the measured
+review criteria and support scope. Task023 is **done** for its development-only
+baseline scope; see [acceptance](TASK-023-ACCEPTANCE.md). Historical execution
+records and their then-pending proposals below remain unchanged; they are not
+current-product or final1.0 acceptance.
 The [machine-readable measured record](task023/BASELINE.json) binds the exact
 uncommitted harness/source/corpus/label/rule/catalog/binary bytes tested, commands,
 raw samples and environment. Final commit identity is assigned after review.
@@ -139,7 +142,7 @@ detector_truncated diagnostics rather than claiming complete inspection.
 No true cold-cache, multi-host, Windows, optional feature, CPU architecture or
 real-product performance acceptance was executed.
 
-## Measured budget proposal — UNAPPROVED
+## Original measured budget proposal — historical checkpoint
 
 Propose a corpus-specific review signal: for the unchanged eligible truth set,
 per split/family TP may not decrease and FP/FN may not increase. Improvements are
@@ -153,8 +156,10 @@ headroom chosen after measurement, not a statistically justified confidence
 bound. Compare only the same host/profile/config/bytes and corroborate with
 repeat runs. Maintainers should review whether to use these signals or require a
 larger independent corpus and multi-session noise study first. No new global
-accuracy/latency/RSS guarantee is proposed. **No numeric budget is approved or
-enforced by CI.** Maintainer protocol/budget review is the remaining task023 gate.
+accuracy/latency/RSS guarantee is proposed. **At this original checkpoint no numeric budget was approved or enforced by
+CI.** The subsequent maintainer approval and023 closure are recorded in
+[TASK-023-ACCEPTANCE.md](TASK-023-ACCEPTANCE.md). Numeric CI enforcement remains
+disabled; approval does not rewrite the historical machine record.
 
 ## CI, compatibility and self-scan policy
 

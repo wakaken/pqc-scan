@@ -99,3 +99,14 @@ CI validates evaluator sanity, corpus bindings, read/terminal-state arithmetic a
 semantic repeatability; it publishes metrics without enforcing unapproved score
 or latency/RSS thresholds. Maintainers must decide the measured proposal before
 calling task 023's budget decision gate satisfied.
+
+## Task023 criterion approval and local acceptance — 2026-11-11
+
+The maintainer explicitly approved frozen-truth TP/FP/FN nonregression and the
+same-environment2x prior warm maximum time/RSS investigation signals. The earlier
+023 pending-budget statements above are historical. Existing independent technical
+approval, fresh corpus/harness integrity checks and20 evaluator sanity tests allow
+023 to close for its development-only baseline scope; see
+[TASK-023-ACCEPTANCE.md](TASK-023-ACCEPTANCE.md). No numeric CI enforcement is
+claimed. This does not close037, imply current-HEAD hosted CI, replace the ongoing
+Cursor audit, change truth/labels or promise multi-platform/global accuracy.

@@ -1,0 +1,299 @@
+{
+  "date": "2026-11-11",
+  "observedHead": "5135eb71f94d51e6918697614cfa771c1f81af1b",
+  "branch": "codex/scanner-quality-improvements",
+  "taskScope": "Development-only baseline capability and approved local criteria; not OSS1.0 or current-source performance acceptance",
+  "maintainerApprovalCommit": "4291ae7a220cc4e76073e5af4a084a5e7231ef5e",
+  "decision": "Frozen eligible truth TP nondecrease, FP/FN nonincrease; same-environment wall/RSS above2x prior warm max requires investigation; no universal guarantee or implicit numeric CI enforcement",
+  "existingIndependentTechnicalReview": "docs/quality/TASK-023-REVIEW.md#final-approval-after-source-binding-correction",
+  "corpus": {
+    "version": "023-v2",
+    "files": 41,
+    "units": 57,
+    "labels": {
+      "positive": 30,
+      "negative": 20,
+      "ambiguous": 2,
+      "unsupported": 5
+    }
+  },
+  "harnessBindings": {
+    "tests/quality/.gitignore": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b",
+    "tests/quality/LABELING.md": "9d28e647e76fd9d60b357a975d8927fdc38f6a0aa0deb5869d4ab4a4e3d2f345",
+    "tests/quality/PROTOCOL.md": "28d37934f6a584294fd8093b2f343b936b3f492dae023d8f57664fdc35b2a018",
+    "tests/quality/README.md": "5be55eaaf5527d79d7dc543e445e3d8b7f614c052182eb5d9ca187b505a6f818",
+    "tests/quality/corpus/holdout/alias.js": "7d58c51df7e31549f82cfa19bb4356c204f72491761757e629b598025ecf3cb0",
+    "tests/quality/corpus/holdout/alias.py": "4c6075a16eab63415181bb215246c953ed9014f9c645f54b5ea048588aae4159",
+    "tests/quality/corpus/holdout/broken-sbom.json": "da17634a7a07be65c4857bda1acf025405f17beb209cbf147bb282b6d5537b38",
+    "tests/quality/corpus/holdout/broken.py": "8b84d8321ea29c29752a7c387a709f18476c7f0586cd0240b4c5ac704dd93911",
+    "tests/quality/corpus/holdout/comments.go": "bce8357f907519427a605ffa3c3affe089aca72d87b088d7d3a6affe7620eec6",
+    "tests/quality/corpus/holdout/dead.java": "3b81457219b6040d461b3fd92359abad3a2b4b0328a2928a2272ff724f4ee22a",
+    "tests/quality/corpus/holdout/display.rb": "5868bd512f68b57d668cb048edf083559469cb6c8ac4c80fc7de40f862fd5514",
+    "tests/quality/corpus/holdout/draft.js": "30bfc2ac3fbc6f274253ec31758185c38364f0eee54d156d55668e17e8407f82",
+    "tests/quality/corpus/holdout/dynamic.js": "405e66636d85c4ea745f1ee8095cffc7d9c2ac45de0db35421d07bc1fccfd0fb",
+    "tests/quality/corpus/holdout/ec.pem": "fc937a852095fec66cf8c4ca0ef3a127080f76349251314bd5efdbf2722c48bf",
+    "tests/quality/corpus/holdout/hybrid.conf": "7fe8f5a8967a374a96f08ea742b0ce32190a22831f697c6dd1f8074367a22715",
+    "tests/quality/corpus/holdout/misleading-rsa1024.der": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a",
+    "tests/quality/corpus/holdout/package.json": "c44c3ab7ac8b389084906401974e14fb18332a2bfdf30fa1e11c9ae24375d636",
+    "tests/quality/corpus/holdout/sbom.json": "bff788222cc36ba2c036cf01572934e8a869977b0f93c52677bcdfdc73354209",
+    "tests/quality/corpus/holdout/shadow.js": "321acad5b8bf7bbaf493969960c4486f5e0bd80426ec01aa5ef22b398a46495b",
+    "tests/quality/corpus/holdout/shadow.rs": "bfbb3506bb6d436d59e7376c64345036d37fc6cf76353711a0a5eebc6d3611d7",
+    "tests/quality/corpus/holdout/twice.js": "215041df173a998413b343af4587f6ae37dbd7f9818b02acbf6db9beb5a4c458",
+    "tests/quality/corpus/holdout/typed.ts": "2893a1e31de8eb6d148545207a3744f0fd4fe37ef91001948708d98f6a8372af",
+    "tests/quality/corpus/holdout/unsupported.p12": "21d5532eb4d67a8300d83517252fa2346856f545102b2871cb1d84dfbcfcd879",
+    "tests/quality/corpus/holdout/unsupported.swift": "1740448ee9942425ae418d0597d32fec01231f0e789ff29bffec673e3cda1847",
+    "tests/quality/corpus/independent-holdout/ApprovalEnvelope.java": "784e1c3fe210d4d478b6533803ce3b8d61fe404abe561466f3888a8a98fbf085",
+    "tests/quality/corpus/independent-holdout/Cargo.toml": "9d5c95d2039b358198ded7e3adbde2df71a2d0f05037b93257273895300e4e1d",
+    "tests/quality/corpus/independent-holdout/approval_backend.py": "d2a6c4e718070019c0ddde6c6f8c89e8b38bd3003f929987517dbcad6e71da8b",
+    "tests/quality/corpus/independent-holdout/archive-policy.xml": "9b36fc1f8fa21dcacc48759ecd0f8a6888f27da23a53defaac5da88ef1700454",
+    "tests/quality/corpus/independent-holdout/rotation-policy.xml": "99d7fb3cb222db8615740e6c6c1c0aa2ee87ddd44af8b8e846dcaae7a7edffcb",
+    "tests/quality/corpus/independent-holdout/rotation_queue.js": "192403855215249f848024c95c0714d6ec8536209b792e1264118abd6bc3ce37",
+    "tests/quality/corpus/tuning/Cargo.toml": "453861245a2ca426485b73170599f7dbbbf579ece670486a2937ee89eb1ec34f",
+    "tests/quality/corpus/tuning/marker.pem": "01943b633a3356101a5d40a441aea4ef094b81e10e5c8fe7cb0e4830cb89d244",
+    "tests/quality/corpus/tuning/public.pem": "ff0bb17cd98606195d979b4aaf179c54430a8ca74254b23a7642d1fd5a813661",
+    "tests/quality/corpus-initial.json": "285d9610cc9cd6dea9e4e0752f7501a9535fc62c7cfbe7df2dc0743c05963708",
+    "tests/quality/corpus.json": "d6fa706b8f2c2c1267e9e1f0383d6318f4c11b2761f8785b6d7865797ee2afb6",
+    "tests/quality/evaluate.py": "70e1588016dc950980a1ea49b1de6c5a7bd00344f452ce0710e0488c508a5c71",
+    "tests/quality/holdout-additions.json": "bff463e78fff68c58a3574d8c74a865d74cecff43e79be5cada08d983dccde0f",
+    "tests/quality/labels-a.json": "94026685243b2652f437b8530e902f0cccd1e094e99a3c3a7ff5ecdc2276c9c9",
+    "tests/quality/labels-b.json": "48f482cd204c566484b8144a0dd6c980e4342ca1c2200db288cb84d8bf51004a",
+    "tests/quality/labels-final-a.json": "308c9eea4f4e479517cf780a9a9c780053b0f6205d696d674b1eb074c65a33b9",
+    "tests/quality/labels-final-c.json": "e66a440e0600b82e6dea3986c694add4f11b1a5fd312c99412fe8d243b9f28b3",
+    "tests/quality/run.py": "75169ed3691d77c64471189e62497fdd0fe3185a7e3188d170be7c9cf9a8be34",
+    "tests/quality/test_evaluate.py": "9adc0ffe7dbf0c7bdd1c3fd91ab1b0b2006ad061851ce2673241fb5b41a1c30e",
+    "tests/quality/test_run.py": "72bef03f2de663ae6b908060f448ebb5c5bc02d13a79c2166b51471b09afd616",
+    "tests/quality/truth.json": "9604ed3298d2b120d0337b013f9a13273b666253f29a8cb700807b39dbb9579c"
+  },
+  "checks": {
+    "historicalCommittedSummaryEquivalent": true,
+    "frozenCorpusAndLabelsVerified": true,
+    "changedHarnessInputsBeforeDocumentationUpdate": [],
+    "accuracyGroups": {
+      "holdout/source_api": {
+        "original": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 1
+        },
+        "later": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 1
+        },
+        "nonRegression": true
+      },
+      "holdout/draft": {
+        "original": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "later": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "nonRegression": true
+      },
+      "holdout/config": {
+        "original": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        "later": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 1
+        },
+        "nonRegression": true
+      },
+      "holdout/dependency": {
+        "original": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 1
+        },
+        "later": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 0
+        },
+        "nonRegression": true
+      },
+      "holdout/certificate": {
+        "original": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "later": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "nonRegression": true
+      },
+      "holdout/key": {
+        "original": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "later": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "nonRegression": true
+      },
+      "tuning/source_api": {
+        "original": {
+          "tp": 9,
+          "fp": 3,
+          "fn": 5
+        },
+        "later": {
+          "tp": 11,
+          "fp": 3,
+          "fn": 3
+        },
+        "nonRegression": true
+      },
+      "tuning/draft": {
+        "original": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "later": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "nonRegression": true
+      },
+      "tuning/config": {
+        "original": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 0
+        },
+        "later": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 0
+        },
+        "nonRegression": true
+      },
+      "tuning/dependency": {
+        "original": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "later": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "nonRegression": true
+      },
+      "tuning/certificate": {
+        "original": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 0
+        },
+        "later": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 0
+        },
+        "nonRegression": true
+      },
+      "tuning/key": {
+        "original": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "later": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0
+        },
+        "nonRegression": true
+      }
+    },
+    "savedLaterMeasurementsWithinOriginalProposedResourceSignals": {
+      "small": {
+        "wallSeconds": 0.03189512499375269,
+        "originalWallSignal": 0.04830316599691287,
+        "peakRssBytes": 19038208,
+        "originalRssSignal": 34177024
+      },
+      "medium": {
+        "wallSeconds": 0.06840054201893508,
+        "originalWallSignal": 0.12484224999207072,
+        "peakRssBytes": 21856256,
+        "originalRssSignal": 39845888
+      },
+      "large": {
+        "wallSeconds": 0.15842854202492163,
+        "originalWallSignal": 0.35152783402008936,
+        "peakRssBytes": 35553280,
+        "originalRssSignal": 69042176
+      },
+      "pathological": {
+        "wallSeconds": 0.0246505840041209,
+        "originalWallSignal": 0.04252449999330565,
+        "peakRssBytes": 16809984,
+        "originalRssSignal": 29786112
+      }
+    },
+    "scope": "Saved historical and later measurements only; not a new measurement of HEAD5135eb7 or a release acceptance"
+  },
+  "freshSanityTest": {
+    "command": [
+      "/usr/bin/sandbox-exec",
+      "-p",
+      "(version 1)(allow default)(deny network*)",
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/quality",
+      "-p",
+      "test_*.py",
+      "-v"
+    ],
+    "exit": 0,
+    "passed": 20
+  },
+  "evidenceHashes": {
+    "docs/quality/task023/BASELINE.json": "e2aacb006540e483353da2873418b942b063435a1de65c25d1db782886e9b74d",
+    "docs/quality/TASK-023-REVIEW.md": "cd1fc4e8c0baff1d2fad4df94e9ac22f55817859290cdd471cfcbb108f61c6f4",
+    "target/task023/baseline-complete/summary.json": "16b4e884ea321b7b62ce2a99a93d5d5fe236e2fe047dd4b38354789b0a52e376",
+    "target/continuation-20261111/baseline-final/summary.json": "0d32eabe3d9f64cb86f1e7a977e235fd0c41918dab19fbdf9858c1dfab36e4b7",
+    "target/continuation-20261111/BASELINE-COMPARISON.json": "74245e04c4a64e9d07ea9b461eff845d3b1f9d8fa612c60202435678330d860c",
+    "docs/quality/REMAINING-ROADMAP-VALIDATION.json": "e68de717bb714a7cac183ed4318d896d7a46880b1bcf899f2bfc9c6b2a6c532d",
+    "target/task-023-closure/evaluator-tests.log": "5600da9e057e8514f36d5a5a6dd7d82a332e47d7e783b6260a9e8ac525906c10",
+    "target/task-023-closure/INTEGRITY-CHECKS.json": "dc90b5aa2974a7faddc2ce9ae060c47f04bacfc711b7c3059c92259eced40745"
+  },
+  "historicalMachineBaselineUnchanged": true,
+  "newPerformanceMeasurement": false,
+  "additionalReviewSubagents": 0,
+  "releaseConditionsStillOpen": [
+    "Target-commit hosted CI/Code Scanning",
+    "Current final-source product/platform acceptance and any required regression measurements under037",
+    "Ongoing Cursor audit and finding remediation"
+  ],
+  "notClaimed": [
+    "True OS cold cache",
+    "Multi-host/real-product generalization",
+    "Universal accuracy/performance",
+    "Publication/signing"
+  ]
+}

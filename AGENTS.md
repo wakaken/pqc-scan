@@ -123,6 +123,7 @@ pending → planned → in-progress → review → done
 
 Optional status:
 - blocked
+- cancelled (explicit maintainer decision; no further work required, not implementation completion)
 
 Agents must only update statuses according to their roles.
 

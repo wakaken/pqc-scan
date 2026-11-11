@@ -823,3 +823,14 @@ static scans retain their behavior. Both required independent reviews and local
 protocol/browser gates passed. See [product validation](../quality/SSH-KEX-PRODUCT-VALIDATION.md).
 037's actual target-commit hosted-CI gate remains unfulfilled; the prior1.0 scope
 keeps probes experimental. Existing distribution artifacts predate the new mode.
+
+## Task023 local baseline acceptance — 2026-11-11
+
+The previously pending maintainer criterion decision is satisfied by the explicit
+2026-11-11 approval. Existing independent technical acceptance, unchanged frozen
+corpus/harness bindings and20 fresh evaluator sanity tests close023 for its
+development-only baseline capability. [Acceptance evidence](../quality/TASK-023-ACCEPTANCE.md)
+preserves the historical machine baseline and distinguishes saved measurements
+from a new measurement of the current product. Target-commit hosted CI, final
+product/release acceptance and ongoing Cursor audit remediation remain001/037
+or subsequent authorized fixes;023 done is not OSS1.0 approval.
