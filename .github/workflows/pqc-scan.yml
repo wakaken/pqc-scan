@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   quality:
     runs-on: ubuntu-latest
@@ -21,10 +24,10 @@ jobs:
         run: cargo fmt --all --check
 
       - name: Run tests
-        run: cargo test --workspace
+        run: cargo test --workspace --locked
 
       - name: Run clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
       - name: Test report navigation and self-scan preparation
         run: node --test shell/*.test.cjs
@@ -33,7 +36,7 @@ jobs:
         run: python3 -m unittest discover -s tests/quality -p 'test_*.py'
 
   protocols:
-    runs-on: macos-15
+    runs-on: ubuntu-latest
     needs: quality
     timeout-minutes: 25
     permissions:
@@ -49,14 +52,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Test optional feature union with loopback-only egress
-        run: python3 tests/protocol/run-isolated.py --out-dir target/protocol-ci --target-dir target/probe-runtime-build
-      - name: Check all optional-feature targets
-        run: cargo clippy --workspace --all-targets --all-features --locked --target-dir target/probe-runtime-build -- -D warnings
-      - name: Generate real local protocol report fixtures
+      - name: Prepare pinned protocol tools and dependency cache
+        run: python3 tests/protocol/prepare-image.py --out-dir target/protocol-image
+      - name: Verify kernel resource and filesystem boundaries
+        env:
+          PQC_RUN_CONTAINER_TESTS: '1'
+          PQC_PROTOCOL_IMAGE_FILE: target/protocol-image/IMAGE.json
+        run: python3 -m unittest discover -s tests/protocol -p 'test_*.py' -v
+      - name: Build and test all features, previews and OpenSSH under the same confinement
         run: >-
-          sandbox-exec -p '(version 1)(allow default)(deny network-outbound)(allow network-outbound (remote ip "localhost:*"))'
-          python3 tests/protocol/report-previews.py --binary target/probe-runtime-build/debug/pqc-scan --out-dir target/protocol-previews
+          python3 tests/protocol/run-isolated.py --out-dir target/protocol-ci
+          --image-file target/protocol-image/IMAGE.json --previews --ssh-kex
       - name: Test packaging bounds and exact-version notices
         run: python3 -m unittest discover -s tests/distribution -v
       - name: Preserve protocol evidence and synthetic reports
@@ -67,30 +73,8 @@ jobs:
           if-no-files-found: error
           path: |
             target/protocol-ci/
-            target/protocol-previews/
-
-  ssh-kex-interop:
-    runs-on: ubuntu-latest
-    needs: quality
-    timeout-minutes: 25
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Verify product hybrid SSH KEX without authentication
-        run: python3 tests/protocol/ssh-kex-product.py --out-dir target/ssh-kex-ci
-      - name: Preserve synthetic product protocol evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pqc-ssh-kex-product-evidence
-          if-no-files-found: error
-          path: target/ssh-kex-ci/
+            target/protocol-image/IMAGE.json
+            target/protocol-image/prepare.log
 
   baseline:
     runs-on: ubuntu-latest
@@ -109,7 +93,7 @@ jobs:
           python-version: '3.12'
       - name: Build baseline scanner
         run: cargo build --workspace --release --locked
-      - name: Measure reviewed baseline without enforcing unapproved budgets
+      - name: Measure reviewed baseline without enforcing local signals
         run: >-
           python3 tests/quality/run.py
           --binary target/release/pqc-scan --build-profile release
@@ -138,10 +122,10 @@ jobs:
           toolchain: 1.93.1
 
       - name: Build
-        run: cargo build --workspace --release
+        run: cargo build --workspace --release --locked
 
       - name: Run pqc-scan
-        run: cargo run --bin pqc-scan -- scan . --format sarif --out-dir ./pqc-report --rules-dir ./rules
+        run: cargo run --locked --bin pqc-scan -- scan . --format sarif --out-dir ./pqc-report --rules-dir ./rules
 
       - name: Prepare actionable Code Scanning results
         run: >-

@@ -1,5 +1,12 @@
 # Roadmap continuation: local implementation acceptance
 
+This is a historical source-bound checkpoint. Its pending/unapproved statements
+describe that checkpoint. Current task 023 acceptance and local criteria are in
+[TASK-023-ACCEPTANCE.md](TASK-023-ACCEPTANCE.md) and
+[QUALITY-GATES.md](QUALITY-GATES.md); current task decisions are in
+[STATUS-2026-11-11.md](STATUS-2026-11-11.md). Saved measurements and reviewer
+judgments below are preserved.
+
 Date: 2026-11-10. Baseline:
 `3c357cef879f69ae4058fefe7a03b4f074283b3f`.
 Accepted integration code HEAD:

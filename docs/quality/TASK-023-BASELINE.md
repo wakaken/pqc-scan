@@ -168,7 +168,7 @@ harness with Python 3.12 and preserves measurements/full reports even on failure
 Quality also runs evaluator sanity tests. CI enforces manifest/label bindings,
 lineage split integrity, actual file reads, coverage arithmetic, canary absence,
 timeouts and semantic/diagnostic/score stability. It never auto-updates truth or
-enforces unapproved numeric scores/timing. Existing Code Scanning failure severity
+enforces numeric score/timing thresholds. Existing Code Scanning failure severity
 and raw-SARIF upload projection policy remain unchanged.
 
 Production crates, rules, Cargo dependencies, CLI, report schemas/names and shell

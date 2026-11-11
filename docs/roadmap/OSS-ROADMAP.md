@@ -763,9 +763,9 @@ Do not prebuild platform infrastructure. Enterprise aggregation, ownership, RBAC
 
 ## Decisions and remaining uncertainty
 
-Approved/selected decisions for CLI/output, address limits, TLS backend, runtime scope and local distribution are recorded in [CONTINUATION-DECISIONS.md](CONTINUATION-DECISIONS.md). Measured 1.0 regression budgets, final release acceptance and any external publication remain unapproved; untested platform/support claims are not added.
+Approved/selected decisions for CLI/output, address limits, TLS backend, runtime scope and local distribution are recorded in [CONTINUATION-DECISIONS.md](CONTINUATION-DECISIONS.md). Local same-truth nonregression and same-environment 2x time/RSS investigation signals are approved; task 023 is done within its development-baseline scope. Final-source hosted CI, final release acceptance and external publication remain separate. Untested platform/support claims are not added.
 
-No inventory/assessment crate extraction is scheduled. A real independent consumer and an acyclic type-ownership design are prerequisites for revisiting it. Full negotiated SSH requires task 039 evidence and a new implementation decision. No platform DB, web server, queues or plugin ABI is approved.
+No inventory/assessment crate extraction is scheduled. A real independent consumer and an acyclic type-ownership design are prerequisites for revisiting it. Experimental negotiated SSH was approved and integrated with task 039 evidence. No platform DB, web server, queues or plugin ABI is approved.
 
 Independent design review must challenge duplicated functionality, early abstractions, hidden schema/ID changes, unsupported capability claims, dependency cycles and untestable acceptance. Unexecuted implementation checks remain unexecuted.
 

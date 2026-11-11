@@ -1,5 +1,12 @@
 # Independent task 023 review
 
+This is a historical source-bound checkpoint. Its pending/unapproved statements
+describe that checkpoint. Current task 023 acceptance and local criteria are in
+[TASK-023-ACCEPTANCE.md](TASK-023-ACCEPTANCE.md) and
+[QUALITY-GATES.md](QUALITY-GATES.md); current task decisions are in
+[STATUS-2026-11-11.md](STATUS-2026-11-11.md). Saved measurements and reviewer
+judgments below are preserved.
+
 Reviewer: separate whole-change review agent, 2026-11-10.
 Base: 35d988e03629cb15b17a94af81b1e74266a344ff.
 Status: initial review; final CI/documentation/measurement changes pending.

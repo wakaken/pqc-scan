@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Produce synthetic TLS/SSH success and denial reports for real-browser acceptance.
-Invoke through sandbox-exec with outbound traffic allowed only to localhost.
+Invoke through run-isolated.py --previews inside the bounded offline container.
 Private test keys exist only in an OS temporary directory, never in the outputs.
 """
 import argparse
@@ -95,17 +95,35 @@ def run_cli(binary, out, args, expected):
     return {'command':command,'exit':result.returncode,'files':{p.name:sha(p) for p in out.iterdir()}}
 
 
+def linux_listener_ready(pid, port, proc=Path('/proc')):
+    try:
+        descriptors = list((proc/str(pid)/'fd').iterdir())
+    except FileNotFoundError:
+        return False
+    owned = set()
+    for descriptor in descriptors:
+        try:
+            owned.add(os.readlink(descriptor))
+        except FileNotFoundError:
+            # OpenSSL may close a setup/config descriptor between listing and
+            # readlink. Only a currently owned listening socket establishes readiness.
+            continue
+    rows = (proc/'net/tcp').read_text().splitlines()[1:]
+    return any(int(row.split()[1].split(':')[1],16)==port and row.split()[3]=='0A'
+               and f'socket:[{row.split()[9]}]' in owned for row in rows)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--binary',type=Path,required=True)
     parser.add_argument('--out-dir',type=Path,required=True)
     args = parser.parse_args()
-    if sys.platform != 'darwin':
-        raise RuntimeError('This fixture runner is qualified only under macOS sandbox-exec')
+    if sys.platform not in {'darwin','linux'}:
+        raise RuntimeError('unsupported fixture platform')
     binary = args.binary.resolve(strict=True)
     args.out_dir.mkdir(parents=True,exist_ok=False)
     result = {'scope':'Synthetic local protocol observations for browser acceptance, not public endpoints',
-              'isolation':'Interpret with the recorded invoking sandbox-exec command; this runner does not establish its own sandbox',
+              'isolation':'Use the accompanying HOST-RESULTS.json for enforced container limits; this fixture does not establish its own sandbox',
               'binary_sha256':sha(binary),'openssl':subprocess.check_output(['openssl','version'],text=True).strip(),'runs':[]}
     with tempfile.TemporaryDirectory(prefix='pqc-preview-pki-') as temporary:
         tmp = Path(temporary)
@@ -125,7 +143,10 @@ def main():
                 while True:
                     if server.poll() is not None:
                         raise RuntimeError('TLS fixture server exited before listening')
-                    ready=subprocess.run(['lsof','-n','-a','-p',str(server.pid),f'-iTCP:{port}','-sTCP:LISTEN'],capture_output=True).returncode==0
+                    if sys.platform == 'linux':
+                        ready = linux_listener_ready(server.pid,port)
+                    else:
+                        ready=subprocess.run(['lsof','-n','-a','-p',str(server.pid),f'-iTCP:{port}','-sTCP:LISTEN'],capture_output=True).returncode==0
                     if ready:
                         break
                     if time.monotonic()>deadline:

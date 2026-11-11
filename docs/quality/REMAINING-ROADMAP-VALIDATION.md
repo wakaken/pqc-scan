@@ -1,5 +1,12 @@
 # Remaining roadmap local validation — 2026-11-11
 
+This is a historical source-bound checkpoint. Its pending/unapproved statements
+describe that checkpoint. Current task 023 acceptance and local criteria are in
+[TASK-023-ACCEPTANCE.md](TASK-023-ACCEPTANCE.md) and
+[QUALITY-GATES.md](QUALITY-GATES.md); current task decisions are in
+[STATUS-2026-11-11.md](STATUS-2026-11-11.md). Saved measurements and reviewer
+judgments below are preserved.
+
 Implementation source: `75b9afd`, reviewed against `2826c75`. Source hashes,
 commands, raw evidence hashes and package bindings are recorded in
 `REMAINING-ROADMAP-VALIDATION.json`; local artifacts remain in

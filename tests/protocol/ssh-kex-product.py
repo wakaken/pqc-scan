@@ -8,20 +8,18 @@ import os
 from pathlib import Path
 import platform
 import re
-import shutil
 import subprocess
 import tempfile
 import threading
-import urllib.request
 ROOT=Path(__file__).resolve().parents[2]
 STUDY=ROOT/'tests/feasibility/ssh-kex'
 URL='https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.2p1.tar.gz'
 SHA='ccc42c0419937959263fa1dbd16dafc18c56b984c03562d2937ce56a60f798b2'
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
-def inside(out):
+def inside(out, binary=None):
     assert platform.system()=='Linux' and len(Path('/proc/net/route').read_text().splitlines())==1
     spec=importlib.util.spec_from_file_location('fixture_helpers',STUDY/'run-isolated.py');h=importlib.util.module_from_spec(spec);spec.loader.exec_module(h)
-    binary=ROOT/'target/debug/pqc-scan'; binary_sha=sha(binary);out.mkdir(parents=True,exist_ok=False);records=[]
+    binary=Path(binary) if binary else ROOT/'target/debug/pqc-scan'; binary_sha=sha(binary);out.mkdir(parents=True,exist_ok=False);records=[]
     with tempfile.TemporaryDirectory(prefix='pqc-kex-product-') as tmp:
         tmp=Path(tmp)
         for key in ['host','wrong']:
@@ -70,34 +68,14 @@ def inside(out):
     (out/'RESULTS.json').write_text(json.dumps({'binary_sha256':binary_sha,'cases':records,'fixture_keys_removed':True,'binary_before_after_match':True,'sshd_version':subprocess.run([str(h.SSHD),'-V'],capture_output=True,text=True).stderr.strip()},indent=2)+'\n')
     print('Five actual product CLI cases passed with no authentication/service/channel requests.')
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--out-dir',type=Path,required=True);parser.add_argument('--inside',action='store_true');args=parser.parse_args();out=args.out_dir.resolve()
-    if args.inside:inside(out);return
-    out.mkdir(parents=True,exist_ok=False)
-    selected={}
-    names=['Cargo.toml','Cargo.lock','rust-toolchain.toml','tests/protocol/ssh-kex-product.py','tests/feasibility/ssh-kex/run-isolated.py','tests/fixtures/ssh-kex-host.pub']
-    for folder in ['crates','rules','schemas']:
-        names.extend(str(p.relative_to(ROOT)) for p in (ROOT/folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
-    with tempfile.TemporaryDirectory(prefix='pqc-kex-product-build-') as temp:
-        context=Path(temp)
-        for name in sorted(names):
-            src=ROOT/name
-            if src.is_symlink() or any(x in ['target','.git'] or x.startswith('.env') for x in src.relative_to(ROOT).parts):raise RuntimeError('unsafe build input')
-            dst=context/name;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dst);selected[name]=sha(src)
-        data=urllib.request.urlopen(URL,timeout=30).read(4*1024*1024+1);assert hashlib.sha256(data).hexdigest()==SHA
-        (context/'openssh-10.2p1.tar.gz').write_bytes(data)
-        prefix=(STUDY/'Dockerfile').read_text().split('WORKDIR /work')[0]
-        (context/'Dockerfile').write_text(prefix+'WORKDIR /work\nCOPY . .\nRUN cargo build -p pqc_scan_cli --features probe-ssh-kex --locked > /tmp/product-build.log 2>&1\nCMD ["python3","tests/protocol/ssh-kex-product.py","--inside","--out-dir","target/product-results"]\n')
-        with (out/'build.log').open('w') as log:subprocess.run(['docker','build','--iidfile',str(out/'image-id'),str(context)],stdout=log,stderr=subprocess.STDOUT,check=True,timeout=900)
-    image=(out/'image-id').read_text().strip();container=subprocess.check_output(['docker','create','--network','none','--security-opt','no-new-privileges','--cap-drop','NET_RAW','--memory','1g','--cpus','2','--pids-limit','128',image],text=True).strip()
-    meta={'source_bindings':selected,'image':image,'openssh_sha256':SHA}
-    try:
-        inspect=json.loads(subprocess.check_output(['docker','inspect',container]))[0];host=inspect['HostConfig'];assert host['NetworkMode']=='none' and not host['Privileged'] and not host['Binds'];meta['isolation']={k:host[k] for k in ['NetworkMode','Privileged','Binds','SecurityOpt','CapDrop','Memory','NanoCpus','PidsLimit']}
-        with (out/'run.log').open('w') as log:r=subprocess.run(['docker','start','-a',container],stdout=log,stderr=subprocess.STDOUT,timeout=90)
-        meta['exit']=r.returncode
-        subprocess.run(['docker','cp',container+':/work/target/product-results',str(out/'reports')],check=True)
-        assert all(sha(ROOT/p)==v for p,v in selected.items()),'source changed during run'
-        assert r.returncode==0,'product interop failed; inspect run.log'
-    finally:
-        subprocess.run(['docker','rm','-f',container],check=True,stdout=subprocess.DEVNULL);meta['container_removed']=True;(out/'DOCKER-RESULTS.json').write_text(json.dumps(meta,indent=2)+'\n')
-    print((out/'run.log').read_text().strip())
+    parser=argparse.ArgumentParser();parser.add_argument('--out-dir',type=Path,required=True)
+    parser.add_argument('--inside',action='store_true');parser.add_argument('--binary',type=Path)
+    parser.add_argument('--image-file',type=Path,default=Path('target/protocol-image/IMAGE.json'))
+    args=parser.parse_args()
+    if args.inside:
+        inside(args.out_dir.resolve(), args.binary)
+    else:
+        from container_runner import execute, image_id
+        execute(image_id(args.image_file), args.out_dir, ssh_kex=True)
+
 if __name__=='__main__':main()
