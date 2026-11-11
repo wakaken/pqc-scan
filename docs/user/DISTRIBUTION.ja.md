@@ -77,3 +77,15 @@ featureとツールの版を記録します。記録したソースからその�
 レジストリーの配布物に通知文がない場合は、Cargo.lockのchecksumと配布物のVCS版に一致する、事前取得済みの上流資料を使います。梱包時の取得通信は行わず、版・SHA・出所が一致しなければ停止します。
 静的版で不足していた5組は、元の著作権表示を含む上流のライセンス全文を同梱します。
 objc2系4組の上流資料は、ライセンス本文へのリンクとApple SDK由来部分の注意書きです。本文や公開許諾を確認したことにはならないため、`review_required` を残します。[版を固定した資料一覧](../../third_party/notices/README.md)を参照してください。
+
+## SSH KEXを含む構成
+
+`all-probes`は`probe-tls,probe-ssh,probe-ssh-kex`を有効にします。既存の2構成は維持します。
+
+```sh
+cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/all-probes-release-build
+python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all
+python3 tests/distribution/check-install.py target/task-038/all/*.tar.gz --out-dir target/task-038/all-install
+```
+
+依存noticeとprovenanceも同じfeature構成から生成します。インストール検証は`tls`・`ssh`・`ssh-kex`の過不足と公開鍵pinオプションを確認します。既存のobjc2系4件に加え、この構成ではrussh-utilのCargo VCS記録がdirty=trueのため、上流リビジョンと配布ソースの差の公開前確認を残します。固定リビジョンのライセンス原文は同梱します。これは未署名・未公開の技術的な配布準備です。

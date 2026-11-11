@@ -181,3 +181,22 @@ reach develop through the normal review/merge process.
 
 [Investigation and verification](SELF-SCAN-BACKLOG-FOLLOWUP.md) and
 [independent review](SELF-SCAN-BACKLOG-REVIEW.md) document the exact finite scope.
+
+## Final-gap triage — 2026-11-11
+
+All109 retained observations at merged6e098de were individually reviewed,
+including the105 PR annotations. FINAL-GAPS-SELF-SCAN-REVIEW.json records every
+full result, disposition and rationale.81 exact observations are synthetic tests,
+official schema literals or reviewed diagnostic identifier/proposal tables.
+The TLS profile is explicitly TLS1.2/1.3; lexical legacy-version matches do not
+prove TLS1.0 enablement. The experimental SSH diagnostic intentionally lists
+classical host signatures separately from hybrid KEX, within its approved scope.
+
+The existing source/full-result/location/count matching mechanism is unchanged.
+No generic dependency baseline, directory exclusion, severity/threshold change,
+automatic learning or live alert dismissal is added.28 real dependency inventory
+observations remain in the upload (14 warning,14 note); raw1113 results are retained.
+The exact classification is not a claim that a dependency enables PQC or is free
+of vulnerabilities. New/changed/duplicate observations continue to fail closed.
+Current actual-scanner evidence is under target/final-gaps/self-scan and the
+final acceptance record; the earlier task040 measurement remains historical.

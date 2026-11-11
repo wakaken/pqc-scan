@@ -81,3 +81,22 @@ absolute paths so the binary and rules belong to the same snapshot. Roll back by
 using the previous bundle path; do not overlay rule packs or silently replace
 custom rules. Keep your scan configuration and reports for comparison. Remote
 publication, signing, automatic updates and credential setup require separate work.
+
+## Variant including SSH KEX
+
+`all-probes` enables `probe-tls,probe-ssh,probe-ssh-kex`. The existing two variants
+retain their command surfaces.
+
+```sh
+cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/all-probes-release-build
+python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all
+python3 tests/distribution/check-install.py target/task-038/all/*.tar.gz --out-dir target/task-038/all-install
+```
+
+Dependency notices and provenance use the same feature set. Installation validation
+checks exact TLS/SSH/SSH KEX command availability and the public host-key pin option.
+The four existing objc2-family review flags remain. This variant also flags
+russh-util: its Cargo archive VCS metadata records dirty=true, so the difference
+from its recorded upstream revision needs publication review. Full license text
+from that fixed revision is bundled. This remains unsigned, unpublished technical
+preparation.

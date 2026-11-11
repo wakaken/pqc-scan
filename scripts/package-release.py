@@ -224,14 +224,26 @@ def json_bytes(value):
     return (json.dumps(value, sort_keys=True, indent=2, ensure_ascii=False)+'\n').encode()
 
 
+def validate_command_surface(variant, top_help, probe_help):
+    def names(text):
+        return {line.split()[0] for line in text.splitlines() if line.startswith('  ') and line.split()}
+    expected = {'static': set(), 'combined-probes': {'tls', 'ssh'},
+                'all-probes': {'tls', 'ssh', 'ssh-kex'}}[variant]
+    if ('probe' in names(top_help)) != bool(expected):
+        raise ValueError('binary command surface differs from declared package variant')
+    if names(probe_help) & {'tls', 'ssh', 'ssh-kex'} != expected:
+        raise ValueError('package protocol commands differ from declared variant')
+
+
 def prepare(args):
     root = args.source_root.resolve()
     binary = args.binary.resolve(strict=True)
     target = args.target
-    features = [] if args.variant == 'static' else ['probe-tls', 'probe-ssh']
+    features = {'static': [], 'combined-probes': ['probe-tls', 'probe-ssh'],
+                'all-probes': ['probe-tls', 'probe-ssh', 'probe-ssh-kex']}[args.variant]
     metadata_command = ['cargo', 'metadata', '--locked', '--offline', '--format-version', '1', '--filter-platform', target]
     if features:
-        metadata_command += ['--features', 'pqc_scan_cli/probe-tls,pqc_scan_cli/probe-ssh']
+        metadata_command += ['--features', ','.join('pqc_scan_cli/'+f for f in features)]
     metadata = json.loads(run(root, *metadata_command))
     packages = {p['id']: p for p in metadata['packages']}
     nodes = {n['id']: n for n in metadata['resolve']['nodes']}
@@ -307,7 +319,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--verify', type=Path)
     parser.add_argument('--binary', type=Path)
-    parser.add_argument('--variant', choices=['static', 'combined-probes'])
+    parser.add_argument('--variant', choices=['static', 'combined-probes', 'all-probes'])
     parser.add_argument('--target', default='aarch64-apple-darwin', choices=['aarch64-apple-darwin'])
     parser.add_argument('--source-root', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--out-dir', type=Path)

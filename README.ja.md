@@ -137,3 +137,5 @@ MIT
 読み取り失敗として記録します。ソースの抜粋や実行環境の推奨情報も、指定したファイルサイズ上限内で読み取ります。
 CLIには、ignoreや走査方針によって列挙していないファイルがあり得る旨を表示します。
 終了コードと、検査範囲内の完了を求める `--require-complete` の意味は変わりません。
+
+macOS arm64の配布準備は、`static`、TLS/SSH提示の`combined-probes`、信頼済みSSH KEXも含む`all-probes`の3構成に対応します。probeは引き続き実験的機能です。[配布準備](docs/user/DISTRIBUTION.ja.md)を参照してください。
