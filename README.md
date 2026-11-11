@@ -113,8 +113,10 @@ Each guide has a Japanese version linked at the top.
 
 This is static, advisory analysis. False positives and missed references are possible; a finding does not prove runtime use, and zero findings does not prove complete inspection or safety.
 Repository scans do not contact endpoints, validate certificate trust chains, install dependencies or certify PQC migration completion.
+Optional experimental `probe ssh-kex` (`probe-ssh-kex` feature) verifies hybrid ML-KEM768+X25519 key exchange against an explicitly supplied trusted Ed25519 public host key, then disconnects without user authentication/login. It writes separate `probe.ssh-kex.v1.json` and bilingual HTML/Markdown; existing outputs remain unchanged. See the [probe guide](docs/user/PROBING.md).
+
 Optional `probe` commands contact only the explicitly selected endpoint; TLS uses
-ordinary certificate/name validation, while SSH collects unauthenticated offers.
+ordinary certificate/name validation, while `probe ssh` collects unauthenticated offers.
 
 Recognized private-key/credential syntax is masked, with deliberately conservative previews. This is not universal secret detection: unknown/obfuscated content and secrets placed in paths or identifiers can remain outside the policy.
 Review the [privacy and scan-scope limits](docs/user/COVERAGE.md#privacy) before sharing reports.

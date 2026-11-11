@@ -17,7 +17,11 @@ use pqc_scan_report::{
 };
 use pqc_scan_rules::{RuleSet, Severity};
 mod diff_command;
-#[cfg(any(feature = "probe-tls", feature = "probe-ssh"))]
+#[cfg(any(
+    feature = "probe-tls",
+    feature = "probe-ssh",
+    feature = "probe-ssh-kex"
+))]
 mod probe_command;
 
 #[cfg(feature = "probe-transport")]
@@ -36,7 +40,11 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    #[cfg(any(feature = "probe-tls", feature = "probe-ssh"))]
+    #[cfg(any(
+        feature = "probe-tls",
+        feature = "probe-ssh",
+        feature = "probe-ssh-kex"
+    ))]
     Probe {
         #[command(subcommand)]
         command: probe_command::ProbeCommand,
@@ -258,7 +266,11 @@ fn run_cli<WOut: Write, WErr: Write>(
     stderr: &mut WErr,
 ) -> Result<ExitStatus> {
     match cli.command {
-        #[cfg(any(feature = "probe-tls", feature = "probe-ssh"))]
+        #[cfg(any(
+            feature = "probe-tls",
+            feature = "probe-ssh",
+            feature = "probe-ssh-kex"
+        ))]
         Commands::Probe { command } => Ok(
             if probe_command::run(command, stdout)? == pqc_scan_core::probe::ProbeOutcome::Completed
             {

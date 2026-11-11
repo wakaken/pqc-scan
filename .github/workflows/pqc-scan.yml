@@ -69,6 +69,29 @@ jobs:
             target/protocol-ci/
             target/protocol-previews/
 
+  ssh-kex-interop:
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify product hybrid SSH KEX without authentication
+        run: python3 tests/protocol/ssh-kex-product.py --out-dir target/ssh-kex-ci
+      - name: Preserve synthetic product protocol evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pqc-ssh-kex-product-evidence
+          if-no-files-found: error
+          path: target/ssh-kex-ci/
+
   baseline:
     runs-on: ubuntu-latest
     needs: quality

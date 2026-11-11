@@ -15,7 +15,7 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 def sources():
-    names = subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','--','crates','schemas','Cargo.toml','Cargo.lock','rust-toolchain.toml'],cwd=ROOT,text=True).splitlines()
+    names = subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','--','crates','schemas','Cargo.toml','Cargo.lock','rust-toolchain.toml','tests/fixtures/ssh-kex-host.pub'],cwd=ROOT,text=True).splitlines()
     return {name:digest(ROOT/name) for name in sorted(set(names)) if (ROOT/name).is_file()}
 
 def main():

@@ -43,6 +43,7 @@ pub fn write_probe_reports<T: Serialize>(
     let filename = match report.protocol {
         ProbeProtocol::Tls => "probe.tls.v1.json",
         ProbeProtocol::SshOffers => "probe.ssh-offers.v1.json",
+        ProbeProtocol::SshKex => "probe.ssh-kex.v1.json",
     };
     std::fs::create_dir_all(out_dir)?;
     let mut outputs = Vec::new();
@@ -119,6 +120,11 @@ fn text<'a>(language: ReportLanguage, en: &'a str, ja: &'a str) -> &'a str {
 fn title(protocol: ProbeProtocol, language: ReportLanguage) -> &'static str {
     match protocol {
         ProbeProtocol::Tls => text(language, "TLS endpoint observation", "TLS接続先の観測結果"),
+        ProbeProtocol::SshKex => text(
+            language,
+            "SSH hybrid key exchange verification",
+            "SSHハイブリッド鍵交換の確認結果",
+        ),
         ProbeProtocol::SshOffers => text(
             language,
             "SSH advertised algorithm observation",
@@ -128,6 +134,7 @@ fn title(protocol: ProbeProtocol, language: ReportLanguage) -> &'static str {
 }
 fn scope(protocol: ProbeProtocol, language: ReportLanguage) -> &'static str {
     match protocol {
+        ProbeProtocol::SshKex=>text(language,"An explicit prior public host-key pin and the server signature are required. This profile tests hybrid ML-KEM768+X25519 with classical Ed25519 host authentication, without user authentication or login. A failure does not establish global server non-support.","事前に信頼したホスト公開鍵との照合と、サーバー署名の検証を行います。ML-KEM768とX25519のハイブリッド鍵交換を調べ、ホスト認証には従来方式のEd25519を使います。ユーザー認証・ログインは行いません。失敗だけでサーバー全体の非対応を断定することはできません。"),
         ProbeProtocol::Tls=>text(language,"Verification state and any negotiated facts describe this single endpoint and client profile. Inspection limits and diagnostics qualify the result. This observation does not establish exhaustive server capabilities or completed PQC migration.","検証状態と通信で決まった事実は、この接続先とクライアント設定に対する1回の観測を示します。収集上限と診断情報を併せて確認してください。サーバーの全能力やPQC移行完了を保証する結果ではありません。"),
         ProbeProtocol::SshOffers=>text(language,"Unauthenticated advertisements describe the server's claims when lists are available. Lists retain their original order. Client lists are diagnostic proposals, not implemented cryptographic capabilities. Key exchange, host identity verification and authentication were not performed.","収集できた提示一覧は、サーバーによる認証前の申告として元の順に記録します。クライアント側の一覧は診断用の提案で、暗号方式の実装対応を示すものではありません。鍵交換・ホストの検証・認証は実施していません。"),
     }
@@ -137,6 +144,20 @@ fn loss(language: ReportLanguage) -> &'static str {
 }
 fn label(key: &str, language: ReportLanguage) -> &str {
     let labels = match key {
+        "host_identity_verified" => (
+            "Trusted host key and signature verified",
+            "信頼済みホスト鍵と署名の検証",
+        ),
+        "negotiated_kex" => ("Verified selected key exchange", "検証済みの鍵交換方式"),
+        "host_signature" => (
+            "Verified host signature algorithm",
+            "検証済みホスト署名方式",
+        ),
+        "host_authentication_pqc" => ("Post-quantum host authentication", "ホスト認証のPQC対応"),
+        "user_authentication_attempted" => ("User authentication attempted", "ユーザー認証の実施"),
+        "offered_kex" => ("Fixed offered key exchange", "提示した固定の鍵交換方式"),
+        "offered_host_key" => ("Fixed offered host-key type", "提示した固定のホスト鍵方式"),
+        "russh_version" => ("russh version", "russhの版"),
         "schema_version" => ("Schema version", "スキーマの版"),
         "scanner_version" => ("Scanner version", "スキャナーの版"),
         "generated_at" => ("Generated at", "作成日時"),
@@ -441,6 +462,50 @@ fn protocol_summary(
                 )?;
             }
         }
+        ProbeProtocol::SshKex => {
+            let verified = value_text(value, "/outcome") == Some("completed")
+                && value
+                    .pointer("/details/handshake_complete")
+                    .and_then(Value::as_bool)
+                    == Some(true)
+                && value
+                    .pointer("/details/host_identity_verified")
+                    .and_then(Value::as_bool)
+                    == Some(true)
+                && value
+                    .pointer("/details/user_authentication_attempted")
+                    .and_then(Value::as_bool)
+                    == Some(false)
+                && value_text(value, "/details/negotiated_kex") == Some("mlkem768x25519-sha256")
+                && value_text(value, "/details/host_signature") == Some("ssh-ed25519");
+            paragraph(
+                out,
+                if verified {
+                    text(language,"Hybrid key exchange completed and the peer matched the trusted host key. No user authentication or login was attempted.","ハイブリッド鍵交換が成立し、接続先が信頼済みホスト鍵と一致しました。ユーザー認証・ログインは行っていません。")
+                } else {
+                    text(language,"Verified hybrid key exchange could not be established. Check the reason below; this does not prove global server non-support.","ハイブリッド鍵交換と接続先の検証を完了できませんでした。下の理由を確認してください。この結果だけでサーバー全体の非対応を示すものではありません。")
+                },
+            )?;
+            if verified {
+                writeln!(out, "<dl>")?;
+                summary_item(
+                    out,
+                    text(language, "Key exchange", "成立した鍵交換"),
+                    "ML-KEM768 + X25519 (mlkem768x25519-sha256)",
+                )?;
+                summary_item(
+                    out,
+                    text(language, "Host verification", "接続先の確認"),
+                    text(
+                        language,
+                        "Signature verified; matches the separately provisioned public key",
+                        "署名を検証し、別経路で入手した公開鍵との一致を確認",
+                    ),
+                )?;
+                writeln!(out, "</dl>")?;
+            }
+            paragraph(out,text(language,"Host authentication uses classical Ed25519; hybrid key exchange does not make the host signature post-quantum.","ホスト認証は従来方式のEd25519です。ハイブリッド鍵交換の成立は、ホスト署名のPQC対応を意味しません。"))?;
+        }
         ProbeProtocol::SshOffers => {
             paragraph(out,text(language,"Server lists are unauthenticated advertisements. Key exchange and host verification were not performed.","サーバーの一覧は認証前の申告です。鍵交換・ホスト認証は実施していません。"))?;
             if let Some(banner) = value_text(value, "/details/server_identification") {
@@ -522,6 +587,10 @@ fn protocol_summary(
         for code in diagnostics.iter().filter_map(Value::as_str) {
             let reason = match code {
                 "certificate_collection_limit" => text(language,"Some certificate attributes were not collected because of the certificate collection limit.","証明書の収集上限に達したため、一部の公開属性を収集できませんでした。"),
+                "host_key_untrusted" => text(language,"The peer did not match the trusted public host key.","接続先のホスト鍵が、指定した信頼済み公開鍵と一致しませんでした。"),
+                "host_signature_invalid" => text(language,"The server's key exchange signature was invalid.","サーバーの鍵交換署名を検証できませんでした。"),
+                "no_common_algorithm" => text(language,"The fixed hybrid/host-key profile had no compatible algorithm with the peer. No classical fallback was attempted.","固定したハイブリッド方式・ホスト鍵方式で互換性がありませんでした。従来方式への切り替えは行っていません。"),
+                "rekey_rejected" => text(language,"Additional key exchange was rejected; this probe accepts one initial exchange only.","追加の鍵交換を拒否しました。この検査は初回の鍵交換だけを対象とします。"),
                 "certificate_parse_incomplete" => text(language,"Some collected certificate attributes could not be parsed.","収集した証明書の一部の公開属性を解析できませんでした。"),
                 "certificate_validation_failed" => text(language,"Certificate-chain or name verification failed.","証明書チェーンまたは名前の検証に失敗しました。"),
                 "deadline_exceeded" => text(language,"The observation reached its time limit.","観測の制限時間に達しました。"),
@@ -548,6 +617,7 @@ fn protocol_summary(
         text(language, "What to check next", "次に確認すること")
     )?;
     let next = match protocol {
+        ProbeProtocol::SshKex => text(language,"Check the independently provisioned public key and the server's ML-KEM768+X25519/Ed25519 configuration. Do not accept an unknown key or disable verification to make the test pass.","別経路で入手した公開鍵と、サーバーのML-KEM768＋X25519／Ed25519設定を確認してください。成功させるために未知の鍵を受け入れたり、検証を無効化したりしないでください。"),
         ProbeProtocol::Tls if value_text(value,"/details/verification/certificate_chain_and_name")==Some("failed") => text(language,"Check the destination name, validity period and trusted CA. Correct the cause without disabling certificate verification.","接続先名・有効期間・信頼するCAを確認し、証明書検証を無効化せずに原因を解消してください。"),
         ProbeProtocol::Tls => text(language,"Use certificate-management records to check revocation and any missing certificate attributes. Review other client profiles and application usage separately.","証明書管理の記録で失効状態や未収集の公開属性を確認してください。他のクライアント設定やアプリケーションでの利用は別途確認が必要です。"),
         ProbeProtocol::SshOffers => text(language,"Check actual negotiated algorithms and the host identity with an authorized SSH client. Use server configuration to establish the full supported set.","許可されたSSHクライアントで実際に選ばれる方式とホストの本人性を確認してください。対応方式の全体はサーバー設定と照合してください。"),

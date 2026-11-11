@@ -96,3 +96,41 @@ changes human copy only. These outputs do not replace the six static reports or
 Exit0 means the requested observation completed, not that the endpoint is safe.
 Exit1 is setup/output failure; exit3 is denied/failed/partial/cancelled/unsupported
 inspection. Existing scan exit0/1/2/3 behavior is unchanged.
+
+## Verified hybrid SSH key exchange (experimental)
+
+Enable this separate optional feature when installing:
+
+```sh
+cargo install --locked --path crates/pqc_scan_cli --features probe-ssh-kex
+pqc-scan probe ssh-kex service.example --port 22 --host-key-file /path/to/trusted-host.pub --out-dir /path/to/new-ssh-kex-report
+```
+
+The file must contain one OpenSSH Ed25519 **public host key**, obtained from a
+trusted administrator or another independent trusted channel. It is the pin for
+this explicitly requested endpoint. Do not fetch a key from the untrusted server
+and treat it as trusted. Private keys, host certificates, known_hosts files and
+ambient SSH config/agents are not used. Input is limited to4096 bytes and checked
+before DNS or connections; Unix symlinks/nonregular files are rejected.
+
+The fixed profile offers only `mlkem768x25519-sha256` (ML-KEM768+X25519 hybrid)
+and `ssh-ed25519` host signatures. No fallback to classical-only key exchange.
+The library verifies the exchange signature; the peer key must match the supplied
+pin and the initial exchange must complete. The connection is then closed without
+an authentication service request, username, password, `none` authentication,
+login, channel or remote command. Ed25519 authentication is classical: this does
+not establish PQ host signatures or complete PQC migration.
+
+One attempt, pinned peer, address allowlist, DNS/time/traffic/cancellation caps
+above also apply. This mode is explicit network activity and may be logged by the
+server. Failure/no overlap means this exact profile could not be verified; it does
+not enumerate every server capability. Unknown or mismatched keys fail closed.
+
+Separate outputs: `probe.ssh-kex.v1.json`, `report.html`, `report.md`; default
+folder `./pqc-probe/ssh-kex`. JSON contract:
+`schemas/probe-ssh-kex-v1.schema.json`. Verified selection fields remain null on
+failed/partial observations. HTML presents the result/reason first, with technical
+details closed. Existing `probe ssh` remains advertisement-only; no existing
+static/TLS/SSH-offer output format changes. Enable `probe-tls,probe-ssh,probe-ssh-kex`
+for all three commands. Existing prepared static/combined-probes archives do not
+include the new feature until separately rebuilt and validated for it.

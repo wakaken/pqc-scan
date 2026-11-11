@@ -69,6 +69,81 @@ impl BoundedTcpStream {
     pub fn budget(&self) -> &ProbeBudget {
         &self.budget
     }
+    /// A nonblocking, still metered operation for async protocol adapters.
+    /// None means not ready; callers must arrange a wakeup before polling again.
+    pub fn try_read_probe(&mut self, buffer: &mut [u8]) -> Result<Option<usize>, ProbeError> {
+        let result = (|| {
+            self.check()?;
+            if buffer.is_empty() {
+                return Ok(Some(0));
+            }
+            let len = buffer.len().min(self.budget.read_remaining() as usize);
+            if len == 0 {
+                return Err(ProbeError::TrafficLimit);
+            }
+            match (&*self.socket).read(&mut buffer[..len]) {
+                Ok(n) => {
+                    self.budget.debit_read(n);
+                    self.check()?;
+                    Ok(Some(n))
+                }
+                Err(e)
+                    if matches!(
+                        e.kind(),
+                        io::ErrorKind::WouldBlock | io::ErrorKind::Interrupted
+                    ) =>
+                {
+                    Ok(None)
+                }
+                Err(_) => {
+                    self.check()?;
+                    Err(ProbeError::Io)
+                }
+            }
+        })();
+        if result.is_err() {
+            self.close();
+        }
+        result
+    }
+    pub fn try_write_probe(&mut self, buffer: &[u8]) -> Result<Option<usize>, ProbeError> {
+        let result = (|| {
+            self.check()?;
+            if buffer.is_empty() {
+                return Ok(Some(0));
+            }
+            let len = buffer.len().min(self.budget.write_remaining() as usize);
+            if len == 0 {
+                return Err(ProbeError::TrafficLimit);
+            }
+            match (&*self.socket).write(&buffer[..len]) {
+                Ok(n) => {
+                    self.budget.debit_write(n);
+                    self.check()?;
+                    Ok(Some(n))
+                }
+                Err(e)
+                    if matches!(
+                        e.kind(),
+                        io::ErrorKind::WouldBlock | io::ErrorKind::Interrupted
+                    ) =>
+                {
+                    Ok(None)
+                }
+                Err(_) => {
+                    self.check()?;
+                    Err(ProbeError::Io)
+                }
+            }
+        })();
+        if result.is_err() {
+            self.close();
+        }
+        result
+    }
+    pub fn remaining_time(&self) -> Result<Duration, ProbeError> {
+        self.budget.remaining(self.protocol_deadline)
+    }
     pub fn read_probe(&mut self, buffer: &mut [u8]) -> Result<usize, ProbeError> {
         let result = self.read_inner(buffer);
         if result.is_err() {

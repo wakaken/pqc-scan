@@ -4,7 +4,7 @@ use clap::{Args, Subcommand};
 #[cfg(feature = "probe-tls")]
 use pqc_scan_core::probe::host_name;
 use pqc_scan_core::{
-    probe::{ProbeDiagnostic, ProbeOutcome, ProbeReport, ProbeTarget},
+    probe::{ProbeOutcome, ProbeReport, ProbeTarget},
     target_policy::{Cancellation, ProbeBudget, ProbeLimits, TargetPolicy, TargetRequest},
 };
 use std::{io::Write, path::PathBuf};
@@ -15,6 +15,8 @@ pub(crate) enum ProbeCommand {
     Tls(TlsArgs),
     #[cfg(feature = "probe-ssh")]
     Ssh(CommonArgs),
+    #[cfg(feature = "probe-ssh-kex")]
+    SshKex(SshKexArgs),
 }
 #[derive(Debug, Args)]
 pub(crate) struct CommonArgs {
@@ -37,6 +39,15 @@ pub(crate) struct TlsArgs {
     server_name: Option<String>,
     #[arg(long)]
     ca_file: Option<PathBuf>,
+}
+#[cfg(feature = "probe-ssh-kex")]
+#[derive(Debug, Args)]
+pub(crate) struct SshKexArgs {
+    #[command(flatten)]
+    common: CommonArgs,
+    /// Separately provisioned trusted OpenSSH Ed25519 PUBLIC host key for this endpoint.
+    #[arg(long)]
+    host_key_file: PathBuf,
 }
 fn cancellation() -> Result<Cancellation> {
     let cancellation = Cancellation::new();
@@ -87,9 +98,28 @@ pub(crate) fn run(command: ProbeCommand, stdout: &mut impl Write) -> Result<Prob
             );
             let report = match target {
                 Ok(target) => probe.run(target, budget),
-                Err(error) => probe.failed(unknown, &limits, ProbeDiagnostic::from(error)),
+                Err(error) => probe.failed(unknown, &limits, error.into()),
             };
             write(report, &args.common, "./pqc-probe/tls", stdout)
+        }
+        #[cfg(feature = "probe-ssh-kex")]
+        ProbeCommand::SshKex(args) => {
+            let request = TargetRequest::new(&args.common.host, args.common.port)?;
+            let policy = TargetPolicy::new(&args.common.allow_cidr)?;
+            let probe = pqc_scan_probe_ssh::SshKexProbe::new(&args.host_key_file)?;
+            let unknown = ProbeTarget::requested(&request);
+            let limits = ProbeLimits::default();
+            let budget = ProbeBudget::new(limits.clone(), cancellation()?)?;
+            let target = policy.resolve(
+                request,
+                &mut crate::probe_resolver::ProcessResolver::new()?,
+                &budget,
+            );
+            let report = match target {
+                Ok(target) => probe.run(target, budget),
+                Err(error) => probe.failed(unknown, &limits, error.into()),
+            };
+            write(report, &args.common, "./pqc-probe/ssh-kex", stdout)
         }
         #[cfg(feature = "probe-ssh")]
         ProbeCommand::Ssh(args) => {
@@ -106,7 +136,7 @@ pub(crate) fn run(command: ProbeCommand, stdout: &mut impl Write) -> Result<Prob
             );
             let report = match target {
                 Ok(target) => probe.run(target, budget),
-                Err(error) => probe.failed(unknown, &limits, ProbeDiagnostic::from(error)),
+                Err(error) => probe.failed(unknown, &limits, error.into()),
             };
             write(report, &args, "./pqc-probe/ssh", stdout)
         }

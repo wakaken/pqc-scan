@@ -15,3 +15,8 @@ pub const MAX_PRE_IDENTIFICATION_LINES: usize = 64;
 pub const MAX_EARLY_MESSAGES: usize = 64;
 pub const MAX_NAMES_PER_LIST: usize = 256;
 pub const MAX_NAME_BYTES: usize = 64;
+
+#[cfg(feature = "negotiated")]
+mod negotiated;
+#[cfg(feature = "negotiated")]
+pub use negotiated::{SshKexObservation, SshKexProbe};

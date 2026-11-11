@@ -7,9 +7,15 @@ authors.workspace = true
 
 [features]
 default = []
+negotiated = ["runtime", "dep:russh", "dep:tokio", "dep:anyhow", "dep:aws-lc-rs", "dep:libc"]
 runtime = ["pqc_scan_core/probe-transport", "dep:getrandom"]
 
 [dependencies]
+libc = { version = "0.2", optional = true }
+aws-lc-rs = { version = "=1.18.0", default-features = false, features = ["aws-lc-sys", "prebuilt-nasm"], optional = true }
+russh = { version = "=0.65.1", default-features = false, features = ["aws-lc-rs"], optional = true }
+tokio = { version = "=1.49.0", features = ["rt", "time", "io-util"], optional = true }
+anyhow = { workspace = true, optional = true }
 serde.workspace = true
 pqc_scan_core = { path = "../pqc_scan_core" }
 getrandom = { version = "=0.3.4", optional = true }

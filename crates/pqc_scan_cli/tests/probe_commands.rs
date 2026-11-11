@@ -23,7 +23,11 @@ impl Drop for Fixture {
     }
 }
 
-#[cfg(not(any(feature = "probe-tls", feature = "probe-ssh")))]
+#[cfg(not(any(
+    feature = "probe-tls",
+    feature = "probe-ssh",
+    feature = "probe-ssh-kex"
+)))]
 #[test]
 fn default_binary_has_no_probe_command() {
     let f = Fixture::new();

@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pqc-scan.local/schemas/probe-ssh-kex-v1.schema.json",
+  "title": "Verified hybrid SSH key exchange with prior public host-key pin v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scanner_version",
+    "generated_at",
+    "protocol",
+    "attempt_id",
+    "target",
+    "limits",
+    "traffic",
+    "outcome",
+    "diagnostics",
+    "details",
+    "redaction_applied"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "scanner_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "protocol": {
+      "const": "ssh_kex"
+    },
+    "attempt_id": {
+      "const": 1
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host",
+        "port",
+        "resolved_addresses",
+        "pinned_address",
+        "connected_peer"
+      ],
+      "properties": {
+        "host": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 253
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "resolved_addresses": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 45
+              },
+              "minItems": 1,
+              "maxItems": 8
+            }
+          ]
+        },
+        "pinned_address": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 54
+            }
+          ]
+        },
+        "connected_peer": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 54
+            }
+          ]
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_dns_answers",
+        "dns_timeout_ns",
+        "tcp_timeout_ns",
+        "protocol_timeout_ns",
+        "overall_timeout_ns",
+        "max_received_bytes",
+        "max_sent_bytes"
+      ],
+      "properties": {
+        "max_dns_answers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "max_received_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 524288
+        },
+        "max_sent_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        },
+        "dns_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5000000000
+        },
+        "tcp_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3000000000
+        },
+        "protocol_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5000000000
+        },
+        "overall_timeout_ns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15000000000
+        }
+      }
+    },
+    "traffic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "received_bytes",
+        "sent_bytes"
+      ],
+      "properties": {
+        "received_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 524288
+        },
+        "sent_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65536
+        }
+      }
+    },
+    "outcome": {
+      "enum": [
+        "completed",
+        "partial",
+        "failed"
+      ]
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "maxItems": 32
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "russh_version",
+        "provider_version",
+        "offered_kex",
+        "offered_host_key",
+        "trust_source",
+        "host_authentication_pqc",
+        "user_authentication_attempted",
+        "host_identity_verified",
+        "handshake_complete",
+        "negotiated_kex",
+        "host_signature"
+      ],
+      "properties": {
+        "russh_version": {
+          "const": "0.65.1"
+        },
+        "provider_version": {
+          "const": "1.18.0"
+        },
+        "offered_kex": {
+          "const": "mlkem768x25519-sha256"
+        },
+        "offered_host_key": {
+          "const": "ssh-ed25519"
+        },
+        "trust_source": {
+          "const": "explicit_endpoint_public_key"
+        },
+        "host_authentication_pqc": {
+          "const": false
+        },
+        "user_authentication_attempted": {
+          "const": false
+        },
+        "host_identity_verified": {
+          "type": "boolean"
+        },
+        "handshake_complete": {
+          "type": "boolean"
+        },
+        "negotiated_kex": {
+          "enum": [
+            null,
+            "mlkem768x25519-sha256"
+          ]
+        },
+        "host_signature": {
+          "enum": [
+            null,
+            "ssh-ed25519"
+          ]
+        }
+      }
+    },
+    "redaction_applied": {
+      "type": "boolean"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "maxItems": 0
+          },
+          "target": {
+            "properties": {
+              "connected_peer": {
+                "type": "string"
+              }
+            }
+          },
+          "details": {
+            "properties": {
+              "host_identity_verified": {
+                "const": true
+              },
+              "handshake_complete": {
+                "const": true
+              },
+              "negotiated_kex": {
+                "const": "mlkem768x25519-sha256"
+              },
+              "host_signature": {
+                "const": "ssh-ed25519"
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "diagnostics": {
+            "minItems": 1
+          },
+          "details": {
+            "properties": {
+              "host_identity_verified": {
+                "const": false
+              },
+              "handshake_complete": {
+                "const": false
+              },
+              "negotiated_kex": {
+                "type": "null"
+              },
+              "host_signature": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

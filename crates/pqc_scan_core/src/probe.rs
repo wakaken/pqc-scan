@@ -10,6 +10,7 @@ use std::net::{IpAddr, SocketAddr};
 pub enum ProbeProtocol {
     Tls,
     SshOffers,
+    SshKex,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -41,6 +42,10 @@ pub enum ProbeDiagnostic {
     CertificateCollectionLimit,
     CertificateParseIncomplete,
     GroupUnavailable,
+    HostKeyUntrusted,
+    HostSignatureInvalid,
+    NoCommonAlgorithm,
+    RekeyRejected,
 }
 impl From<ProbeError> for ProbeDiagnostic {
     fn from(value: ProbeError) -> Self {

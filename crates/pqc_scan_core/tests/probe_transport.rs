@@ -253,3 +253,31 @@ fn dropping_stream_wakes_and_joins_deadline_watchdog_promptly() {
     drop(stream);
     assert!(start.elapsed() < Duration::from_millis(300));
 }
+
+#[test]
+fn try_io_is_nonblocking_metered_and_cancellable() {
+    let cancel = Cancellation::new();
+    let (listener, target, budget) = setup(
+        ProbeLimits {
+            max_sent_bytes: 3,
+            ..ProbeLimits::default()
+        },
+        cancel.clone(),
+    );
+    let mut stream = BoundedTcpStream::connect(target, budget).unwrap();
+    let (mut peer, _) = listener.accept().unwrap();
+    let start = std::time::Instant::now();
+    assert_eq!(stream.try_read_probe(&mut [0; 8]).unwrap(), None);
+    assert!(start.elapsed() < Duration::from_millis(100));
+    assert_eq!(stream.try_write_probe(b"abcdef").unwrap(), Some(3));
+    assert_eq!(stream.budget().sent_bytes(), 3);
+    let mut bytes = [0; 3];
+    peer.read_exact(&mut bytes).unwrap();
+    assert_eq!(&bytes, b"abc");
+    assert_eq!(stream.try_write_probe(b"d"), Err(ProbeError::TrafficLimit));
+    cancel.cancel();
+    assert_eq!(
+        stream.try_read_probe(&mut bytes),
+        Err(ProbeError::Cancelled)
+    );
+}

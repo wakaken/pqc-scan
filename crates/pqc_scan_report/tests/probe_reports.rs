@@ -579,3 +579,31 @@ fn contradictory_tls_details_never_override_failed_or_fatal_envelope() {
         }
     }
 }
+
+#[test]
+fn ssh_kex_summary_requires_completed_trusted_hybrid_and_never_promotes_failure() {
+    let f = Fixture::new();
+    let details = json!({"host_identity_verified":true,"handshake_complete":true,"user_authentication_attempted":false,"negotiated_kex":"mlkem768x25519-sha256","host_signature":"ssh-ed25519"});
+    for lang in [ReportLanguage::En, ReportLanguage::Ja] {
+        let out = f.0.join(format!("{lang:?}"));
+        for bad in [false, true] {
+            let mut r = report(ProbeProtocol::SshKex, details.clone());
+            if bad {
+                r.set_outcome(
+                    ProbeOutcome::Failed,
+                    vec![ProbeDiagnostic::HostKeyUntrusted],
+                );
+            }
+            write_probe_reports(&r, &out, lang).unwrap();
+            let html = fs::read_to_string(out.join("report.html")).unwrap();
+            let claim = if lang == ReportLanguage::Ja {
+                "ハイブリッド鍵交換が成立し"
+            } else {
+                "Hybrid key exchange completed and the peer matched"
+            };
+            assert_eq!(html.contains(claim), !bad);
+            assert!(html.contains("<details id=\"technical-details\""));
+            assert!(!html.contains("<details id=\"technical-details\" open"));
+        }
+    }
+}
