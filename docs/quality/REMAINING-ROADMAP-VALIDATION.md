@@ -73,3 +73,19 @@ current-HEAD hosted CI. Local best-effort macOS arm64 preparation does not promi
 other platforms or authorize a 1.0 release. 039 remains conditional/pending: no
 consumer requiring completed SSH KEX was selected, so the current advertisement
 mode remains sufficient and no negotiated mode was invented.
+
+## Maintainer acceptance decision — 2026-11-11
+
+The maintainer explicitly approved the proposed regression signals and 1.0 scope.
+For unchanged eligible truth, per split/family TP must not decrease and FP/FN must
+not increase. On the same host/profile/config/input, wall time or peak RSS above
+twice the previous observed warm maximum requires investigation. Existing local
+measurements are within these signals; this does not establish a universal accuracy
+or performance guarantee or silently enable threshold enforcement in CI.
+
+Approved scope: static scanning is the formal 1.0 target; TLS/SSH probes remain
+experimental; local distribution validation covers macOS arm64. This approval
+supersedes the earlier pending-budget/scope statements, without declaring 1.0
+released or promising other platforms. 037 remains blocked on successful hosted
+CI for the actual target commit. Four combined-probes notice reviews remain
+publication prerequisites. Push, publication and signing were not authorized.

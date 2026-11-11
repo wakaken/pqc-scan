@@ -183,3 +183,19 @@ hosted CI. The concrete existing-baseline proposal and measurements are in the
 validation document; no approval is inferred from silence. 039 remains conditional
 pending, without a selected completed-KEX consumer. No push, publication, signing
 or stable multi-platform support claim was made.
+
+## Maintainer acceptance decision — 2026-11-11
+
+The maintainer explicitly approved the proposed regression signals and 1.0 scope.
+For unchanged eligible truth, per split/family TP must not decrease and FP/FN must
+not increase. On the same host/profile/config/input, wall time or peak RSS above
+twice the previous observed warm maximum requires investigation. Existing local
+measurements are within these signals; this does not establish a universal accuracy
+or performance guarantee or silently enable threshold enforcement in CI.
+
+Approved scope: static scanning is the formal 1.0 target; TLS/SSH probes remain
+experimental; local distribution validation covers macOS arm64. This approval
+supersedes the earlier pending-budget/scope statements, without declaring 1.0
+released or promising other platforms. 037 remains blocked on successful hosted
+CI for the actual target commit. Four combined-probes notice reviews remain
+publication prerequisites. Push, publication and signing were not authorized.
