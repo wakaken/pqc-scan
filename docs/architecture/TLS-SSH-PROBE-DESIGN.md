@@ -140,3 +140,23 @@ fall back from requested hybrid KEX. Host-key authentication remains classical i
 this study. Full known_hosts/CA validation,030 budget/cancellation integration and
 adversarial/rekey/platform tests remain implementation prerequisites. This finding
 does not add a product command or change current advertisement-only probe results.
+
+## Explicit product integration — 2026-11-11
+
+The maintainer subsequently requested product implementation. Experimental feature
+`probe-ssh-kex` now exposes `probe ssh-kex HOST --port PORT --host-key-file FILE`.
+The prior public Ed25519 key is validated before DNS and bound to that explicit
+invocation's endpoint. Fixed ML-KEM768+X25519 KEX has no classical fallback; host
+signature verification and prior pin agreement precede verified output. The
+connection ends without user authentication/login. Known-host patterns, host
+certificates and PQ signatures remain unsupported; no ambient trust/config is read.
+
+The async backend uses metered nonblocking BoundedTcpStream operations, not a raw
+socket escape hatch. Existing030 one-attempt, target policy, time/traffic and
+cancellation budgets remain enforced. The runtime and socket are stopped before
+return. Separate `probe.ssh-kex.v1.json` plus guarded bilingual human reports do
+not alter existing TLS/SSH-offer contracts or make static scans access the network.
+See [product validation](../quality/SSH-KEX-PRODUCT-VALIDATION.md) and bilingual
+[usage](../user/PROBING.md). This supersedes the earlier study-only limitation for
+the specifically authorized integration; it does not claim stable/hosted-CI or
+all-platform release acceptance.

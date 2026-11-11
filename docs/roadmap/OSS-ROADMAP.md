@@ -812,3 +812,14 @@ future backend shape, based on isolated positive/negative cases. This is a study
 outcome, not a shipped negotiated SSH feature; the current probe still reports
 unauthenticated advertisements. Host certificate/known-host rules, safety-budget
 integration and platform/adversarial coverage remain future implementation work.
+
+## Task039 product follow-up — 2026-11-11
+
+Explicit maintainer authorization extended039 from feasibility to product integration.
+Experimental `probe ssh-kex` now verifies fixed hybrid KEX against an explicit
+trusted Ed25519 public host-key pin, with no user authentication/login. The new
+mode is optional and its reports are separate; existing SSH offer collection and
+static scans retain their behavior. Both required independent reviews and local
+protocol/browser gates passed. See [product validation](../quality/SSH-KEX-PRODUCT-VALIDATION.md).
+037's actual target-commit hosted-CI gate remains unfulfilled; the prior1.0 scope
+keeps probes experimental. Existing distribution artifacts predate the new mode.

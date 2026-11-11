@@ -209,3 +209,13 @@ conditionally selects russh0.65.1/AWS-LC with explicit prior public-key pinning;
 ssh2/libssh2's automatic authentication-service request fails this contract.
 No product negotiated mode, schema change, root dependency update or release is
 implied. Production integration requires a separately reviewed implementation plan.
+
+## Task039 product authorization and acceptance — 2026-11-11
+
+After feasibility selection the maintainer explicitly requested product integration.
+The optional `probe-ssh-kex` mode is implemented and accepted with separate
+implementation/test reviews, actual isolated CLI/OpenSSH tests and HTTP browser
+checks. [Product evidence](../quality/SSH-KEX-PRODUCT-VALIDATION.md) records the exact
+scope/hashes. Default/static behavior and existing runtime formats stay stable.
+Earlier study-only statements describe that earlier checkpoint. No push, hosted
+CI success or new distribution artifact is implied by local acceptance.
