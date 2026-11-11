@@ -4,7 +4,7 @@
   "sourceBindings": {
     ".gitattributes": "1625b8f36b8b85a9d54f4fe629cd5d94274a18ee94defb734939d54d57113f45",
     ".github/workflows/pqc-scan.yml": "fdb5930e025a487ebaba6d9dc9ab00668cc7a532c1f280f51a5d540a145bad41",
-    ".github/workflows/release.yml": "5ee111393593bd8eddd527fd83d8fb56e5216fac8eb7b69a30cd2d8190909c9a",
+    ".github/workflows/release.yml": "256069760bc926093ed208cd0c2d8ab2a80d1d54fd9953ad13f880ddc69fd221",
     ".gitignore": "a22343396d661aad0d4f3e646329d944e2711d36bb75c15a5965812f40ec17ad",
     "AGENTS.md": "f4c0f0d320e7d4e6f80b45c4acf0001ee63a53421bedc64ac6e237d0323a8c18",
     "Cargo.lock": "e0a0dbe8be7901d7db50bddfc5aa2aa0690e96a476b409f089af851677c1a66c",
@@ -2180,7 +2180,8 @@
     "target/final-gaps/self-scan-final/report.sarif": "915a98194446f1236ec94bc1a13998bf92b345a5d9422b623984b9c24919ced5",
     "target/final-gaps/wrong-all-probes/rejection.log": "83af956d44295906f6497a8f7e66544b6d12d0db34ee5aa64e8ed81ba403db22",
     "target/final-gaps/wrong-combined-probes/rejection.log": "83af956d44295906f6497a8f7e66544b6d12d0db34ee5aa64e8ed81ba403db22",
-    "target/final-gaps/wrong-static/rejection.log": "e232ca3e5e48469c02fc82fc59322864b24ac33706dee64a2c02e2298a864a36"
+    "target/final-gaps/wrong-static/rejection.log": "e232ca3e5e48469c02fc82fc59322864b24ac33706dee64a2c02e2298a864a36",
+    "target/final-gaps/distribution-hosted-failed.log": "1bcf0eb16390cd6a9ebfe14ccd9d34334f77823c45431eeca71eb8d0e8d9cf86"
   },
   "technicalAcceptedTasks": [
     "001",
@@ -2215,5 +2216,12 @@
       "log": "target/final-gaps/wrong-static/rejection.log"
     }
   ],
-  "metadataFollowup": "Source31e7952 CI validates implementation. Subsequent docs/tasks and lifecycle-test acceptance logic have fresh native21-test execution; all runtime/package source inputs remain identical. Final metadata commit CI will be checked separately."
+  "metadataFollowup": "Source31e7952 CI validates implementation. Subsequent docs/tasks and lifecycle-test acceptance logic have fresh native21-test execution; all runtime/package source inputs remain identical. Final metadata commit CI will be checked separately.",
+  "hostedDistributionBootstrap": {
+    "failedRun": "https://github.com/wakaken/pqc-scan/actions/runs/42973704296",
+    "failure": "Static build succeeded; offline metadata required uncached ahash0.8.12 on fresh runner.",
+    "fix": "Explicit cargo fetch --locked before offline packaging; no target execution in cache preparation.",
+    "implementationReview": "final_gaps_implementation_review approved scoped workflow fix; same test reviewer checks corrected hosted run.",
+    "source": ".github/workflows/release.yml"
+  }
 }

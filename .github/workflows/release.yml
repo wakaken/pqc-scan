@@ -17,6 +17,8 @@ jobs:
           persist-credentials: false
       - name: Verify declared native target
         run: test "$(uname -m)" = arm64
+      - name: Fetch locked workspace dependencies before offline packaging
+        run: cargo fetch --locked
       - name: Test packaging safety
         run: python3 -m unittest discover -s tests/distribution -v
       - name: Build and prepare static snapshot

@@ -75,3 +75,13 @@ The product remains beta0.1.0; the formal scope is static scanning with experime
 probes. Publication/signing,Action SHA pinning and notice clearance remain separate.
 014/016 remain cancelled and023 done. There are38 done tasks and2 cancelled.
 Final source hashes and metadata-only follow-up checks are in the JSON record.
+
+## Fresh hosted distribution preparation
+
+The first manual hosted attempt42973704296 exposed a fresh-cache prerequisite:
+static compilation succeeded,but offline workspace metadata required an uncached
+crate(ahash0.8.12). The workflow now explicitly runs `cargo fetch --locked` before
+all offline packaging. This trusted dependency preparation executes no target code;
+packaging/install tests retain their offline boundaries. The failed attempt remains
+recorded at target/final-gaps/distribution-hosted-failed.log; it is not a pass.
+The corrected workflow is checked by the same two reviewers and rerun on GitHub.
