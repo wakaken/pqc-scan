@@ -29,8 +29,16 @@ class TaskQueueTests(unittest.TestCase):
         self.assertEqual(tasks['014']['status'], 'cancelled')
         self.assertEqual(tasks['016']['status'], 'cancelled')
         self.assertEqual(tasks['023']['status'], 'done')
-        self.assertEqual(tasks['001']['status'], 'blocked')
-        self.assertEqual(tasks['037']['status'], 'blocked')
+        for identifier in ['001', '037']:
+            task = tasks[identifier]
+            self.assertIn(task['status'], ['blocked', 'done'])
+            if task['status'] == 'done':
+                acceptance = task['final_acceptance']
+                self.assertRegex(acceptance['source_head'], r'^[0-9a-f]{40}$')
+                self.assertTrue(acceptance['ci'].startswith('https://github.com/wakaken/pqc-scan/actions/runs/'))
+                self.assertEqual(acceptance['scope'], 'technical acceptance only; no publication or signing')
+                self.assertEqual(len(set(acceptance['reviewers'])), 2)
+                self.assertTrue(all(acceptance['reviewers']))
 
 if __name__ == '__main__':
     unittest.main()

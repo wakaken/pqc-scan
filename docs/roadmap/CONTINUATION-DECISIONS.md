@@ -219,3 +219,13 @@ checks. [Product evidence](../quality/SSH-KEX-PRODUCT-VALIDATION.md) records the
 scope/hashes. Default/static behavior and existing runtime formats stay stable.
 Earlier study-only statements describe that earlier checkpoint. No push, hosted
 CI success or new distribution artifact is implied by local acceptance.
+
+## Final gap technical acceptance — 2026-11-11
+
+001/037 technical evaluation is done after final implementation31e7952 CI,source-bound
+local tests,three repeated/offline-installed archives and the two review stages.
+Static scope and experimental probes are unchanged. The >2x historical large-workload
+signal was investigated and retained; controlled6e098de/current measurements and
+sampling identify the existing bounded-read safety cost. No criterion was revised.
+All-probes includes SSH KEX. Product remains beta0.1.0. Publication/signing and notice
+review are separate. Current evidence: FINAL-GAPS-VALIDATION.md/.json.

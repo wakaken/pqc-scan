@@ -16,15 +16,16 @@ are historical. Current task YAML remains authoritative.
 | 2:030–032 | All done |
 | 3:033 | Done |
 | 4:034–036 | All done |
-| 5:038 then037 | 038 technical preparation done;037 final acceptance tracked separately |
+| 5:038 then037 | 038 preparation and037 technical evaluation done; publication separate |
 | SSH KEX039 | Done, including authorized experimental product integration |
 
 014/016 remain cancelled. Finding IDs use the approved framed SHA-256 scheme;
 old-ID retention in original design sections is superseded. Current follow-up
 adds all-probes distribution beside static/combined-probes and records individual
-self-scan triage.001/037 require evidence for the changed final source, rather than
-reusing6e098de CI as proof of subsequent changes. Publication/signing and notice
-review remain separate. See [final gap acceptance](../quality/FINAL-GAPS-VALIDATION.md).
+self-scan triage.001/037 are done after source-bound implementation31e7952 CI,
+final local validation and both independent review stages. The performance2x
+investigation is retained with its controlled comparison; no criterion changed.
+Publication/signing and notice review remain separate. See [final gap acceptance](../quality/FINAL-GAPS-VALIDATION.md).
 
 ## Implementation checkpoint (2026-11-10)
 
