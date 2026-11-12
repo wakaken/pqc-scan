@@ -144,6 +144,11 @@ and JSON data under `docs/`, still run CI. The exact list is maintained in
 [the workflow](.github/workflows/pqc-scan.yml). Run it manually from GitHub Actions
 when validation is needed for an otherwise skipped change.
 
+During development, the `protocols` job is temporarily disabled for all triggers,
+including manual runs. Its protocol, isolation and packaging checks do not run;
+`quality`, `baseline` and `scan` remain enabled. Remove the job's `if: ${{ false }}`
+condition in the workflow to restore those checks.
+
 Tag pushes still run CI. GitHub limits the number of changed files considered
 by path filtering; for large changes, manually run CI if it was omitted.
 
