@@ -175,7 +175,7 @@
     "rules/default/tls.yml": "49b1a3fbc0d4be718f49378a0716cf1fa515c9c9e31589b1bd40995f1401d1f2",
     "rules/default/tree_sitter.yml": "32b947684ae1ced57552285187d416dd27a6e7f9276b4223dbc1b73b2ef09f5c",
     "rust-toolchain.toml": "02dee3b2b81f2c5e7064c6bb118cf19e859100fcc33c220e5ec52ce4b0586b12",
-    "scripts/package-release.py": "332f3d444d472b3c841306f311969060a4f3fda7103df9e8d6a7a4472da45b20",
+    "scripts/package-release.py": "d42888f4062e2169bbf0c94046a32540ca2c5ff0688f11b1c4ca94ec1a1c8cd2",
     "shell/compact-report.test.cjs": "6cd37c283547d34b208b6ed54eae9a26b67095aedd18d9864fb10a40c8af41db",
     "shell/final-gap-self-scan.test.cjs": "138c745d302b0d214f5b439c06527ae5d63ba3f3927abde16660d4d08cafeb95",
     "shell/prepare-code-scanning.cjs": "677dcfdecf37edfb48d068c98d19cfac7e3adb5e1421f6a53d64e1b90e2eaea8",
@@ -187,7 +187,7 @@
     "shell/v02-self-scan.test.cjs": "58e9455b94872c308bce902c35b6dced330fd79fc153aa8ecb1be7500f38097d",
     "tests/distribution/check-install.py": "1f66eeb91859cecae8e15c564b623d2bd0419dc30b143867559d45e35738f4ce",
     "tests/distribution/test_notices.py": "7b1963d95a53e8f636370cd751dd9b746cebcd58b9222cdac3f2991eaf3448d2",
-    "tests/distribution/test_package.py": "e1f2cf5bec04a44c80514d68be946695d4acd5bcaa26597b6f4e68f694d2fe7d",
+    "tests/distribution/test_package.py": "42399409590c00e299f5edcd3378511d3840fe1e2c1ec4b150a8399003cd5b61",
     "tests/feasibility/ssh-kex/Cargo.lock": "75aa95fb7e13e24e518e82db32d28c821a4b79f313a9178f815cfc46f826b833",
     "tests/feasibility/ssh-kex/Cargo.toml": "2f9e78430139471f1b3825103d4474ce558a6024ff447e9c6a11e9162d3ac4df",
     "tests/feasibility/ssh-kex/Dockerfile": "dc847fff370d145fff0961369bd406921fc71b2d67444ab1b9d4efda501d4223",
@@ -519,5 +519,25 @@
     "build.log": "b12c4bbf6190a5f67f5ca22c5c3fff50138ad9f452ad7e8c0aefa6109a5ecc1d"
   },
   "hostedCIAndProvenance": "Post-push gates; exact links recorded in the PR and final report. Local success does not imply hosted success.",
-  "publication": "No tag/Release upload; static release candidate only. Experimental notices remain."
+  "publication": "No tag/Release upload; static release candidate only. Experimental notices remain.",
+  "postSuiteAssetFollowup": {
+    "scope": "Bundle release-note Markdown assets referenced by the distribution guide; no Rust, rule, CLI or protocol behavior changed.",
+    "sourceChanges": {
+      "scripts/package-release.py": {
+        "before": "332f3d444d472b3c841306f311969060a4f3fda7103df9e8d6a7a4472da45b20",
+        "after": "d42888f4062e2169bbf0c94046a32540ca2c5ff0688f11b1c4ca94ec1a1c8cd2"
+      },
+      "tests/distribution/test_package.py": {
+        "before": "e1f2cf5bec04a44c80514d68be946695d4acd5bcaa26597b6f4e68f694d2fe7d",
+        "after": "42399409590c00e299f5edcd3378511d3840fe1e2c1ec4b150a8399003cd5b61"
+      }
+    },
+    "tests": "distribution11 pass, actual static repeat-identical archive and offline install3 findings; both language note members checked",
+    "redLogSha256": "2b981c237440f39faba18e1aa32d5633778b7947c46ea7cf0ebd14bef6cfc2e9",
+    "greenLogSha256": "08d0b592b8627abba9462bb3418de781ab0ed14ca721e44a82c71dcd50070247"
+  },
+  "preAssetFollowupSourceBindings": {
+    "scripts/package-release.py": "332f3d444d472b3c841306f311969060a4f3fda7103df9e8d6a7a4472da45b20",
+    "tests/distribution/test_package.py": "e1f2cf5bec04a44c80514d68be946695d4acd5bcaa26597b6f4e68f694d2fe7d"
+  }
 }

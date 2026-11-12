@@ -55,7 +55,7 @@ class PackageTests(unittest.TestCase):
             root = pathlib.Path(tmp)
             required = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md',
                         'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md',
-                        'docs/user/PROBING.ja.md', 'Cargo.lock', 'rust-toolchain.toml',
+                        'docs/user/PROBING.ja.md', 'docs/releases/v0.2.0.md', 'docs/releases/v0.2.0.ja.md', 'Cargo.lock', 'rust-toolchain.toml',
                         'third_party/notices/manifest.json', 'third_party/notices/README.md']
             for name in required:
                 path = root/name
@@ -88,6 +88,9 @@ class PackageTests(unittest.TestCase):
             archive, = (root/'output').glob('*.tar.gz')
             self.mod.verify_archive(archive)
             with tarfile.open(archive, 'r:gz') as tar:
+                names = tar.getnames()
+                self.assertTrue(any(n.endswith('/docs/releases/v0.2.0.md') for n in names))
+                self.assertTrue(any(n.endswith('/docs/releases/v0.2.0.ja.md') for n in names))
                 prefix = archive.name.removesuffix('.tar.gz')
                 provenance = json.load(tar.extractfile(prefix+'/PROVENANCE.json'))
                 notices = json.load(tar.extractfile(prefix+'/DEPENDENCY-LICENSES.json'))

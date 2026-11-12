@@ -22,3 +22,11 @@
 main提供のtarget/v02-closeout/distribution-unit.log（11件成功）、node-early.log（34件成功）、install-red.log→install-green.log（新validator欠落で失敗後成功）を読みました。これらは事前/局所テストの証拠であり、最終source全体の受入結果とは混同していません。レビュー担当はフルsuiteを重複実行していません。レビュー中にRust/Python/Node本体や公開文書を変更していません。
 
 mainが進行中の最終検証、実archiveのoffline clean-install、基準/性能比較、別identityのテストレビュー、正確な最終コミットのCI/配布workflow成功および公開文書への結果追記が完了してから全体をcloseしてください。
+
+## 限定追加レビュー：配布アーカイブのrelease notes同梱
+
+2026-11-12、同じ実装レビュー担当で4ファイル（scripts/package-release.py、tests/distribution/test_package.py、docs/releases/v0.2.0.md、docs/releases/v0.2.0.ja.md）だけを追加確認しました。承認、修正必須指摘はありません。
+
+release notesを汎用のdocs/releases/*.md列挙へ追加し、既存のsource-asset安全検査、source hash記録、SHA256SUMS生成と同じ経路を通します。DISTRIBUTIONの../releases/リンク先が両言語とも実アーカイブ内に存在し、release notesから開発用検証記録へのリンクはsource repository URLを使うため未同梱パスを要求しません。developリンクは最新開発記録への案内であり、固定コミットの署名検証を代替しません。
+
+release-notes-red.logでmember assertionの実際の失敗、release-notes-green.logでdistribution 11件成功を確認。notes-static-first/secondの実tar memberを確認し、両方のrelease notesを含みます。両archiveのSHA-256は45fc0ad4f98555520b22fc698e8362aa40069615cbfeb32728c2ab2915e8e540で一致し、notes-static-install.logはoffline clean-prefix成功を記録しています。フルsuiteは再実行していません。この限定追加変更を含む最新コミットのCI/配布workflowと後続テストレビューはmainのゲートとして維持します。

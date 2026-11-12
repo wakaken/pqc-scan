@@ -91,3 +91,7 @@ these future hosted gates have already passed.
 ## Independent local reviews
 
 One implementation reviewer approved the combined closeout with no required fixes; a different final-test reviewer approved local adequacy after source, log, projection, baseline, kernel and actual installation checks. See [implementation review](v02/IMPLEMENTATION-REVIEW.md) and [test review](v02/TEST-REVIEW.md). The same test reviewer checks hosted CI/distribution/attestation and merge CI in a scoped follow-up; actual run links are recorded in the PR and final report.
+
+## Archive documentation follow-up
+
+Final archive checks found that newly linked release notes needed bundling. The asset collector now includes release-note Markdown through existing no-link/root-bound validation; tests verify both language tar members. RED/GREEN, all11 distribution tests, repeated-identical static archives and actual offline install passed. Only packaging Python/tests and note links changed; Rust/rules/protocol logic is unchanged from full tests. The same two reviewer identities verify this follow-up. Hosted validation targets the subsequent committed candidate, not the superseded first push.

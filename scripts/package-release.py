@@ -270,7 +270,8 @@ def prepare(args):
         raise ValueError('expected thin Mach-O aarch64 binary for declared target')
     entries = {'bin/pqc-scan': (binary_data, 0o755)}
     explicit = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md', 'docs/user/PROBING.ja.md', 'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json', 'third_party/notices/README.md']
-    paths = [root/p for p in explicit] + sorted((root/'rules/default').glob('*.yml'))
+    paths = ([root/p for p in explicit] + sorted((root/'rules/default').glob('*.yml'))
+             + sorted((root/'docs/releases').glob('*.md')))
     source_hashes = {}
     for path in paths:
         if path.is_symlink() or not path.resolve().is_relative_to(root):
