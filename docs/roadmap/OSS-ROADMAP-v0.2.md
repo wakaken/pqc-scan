@@ -1,4 +1,23 @@
-# OSS evolution roadmap
+# OSS v0.2 evolution roadmap
+
+## Current release target — 2026-11-12
+
+The maintainer retargeted this roadmap from the originally planned v1.0 to **v0.2.0**.
+The approved functional scope and measured regression criteria are unchanged:
+static scanning is the formal target; TLS/SSH/SSH KEX remain experimental;
+validated binary distribution is macOS arm64. Historical references to 1.0 below
+record the original target and do not declare a stable 1.0 release.
+The current source-bound rule companion covers122 built-in rules. Earlier119-rule
+counts describe historical checkpoints.
+
+Report schema versions (inventory v1, SARIF 2.1.0, CycloneDX 1.7) are independent
+of the product version and remain unchanged. Tasks014/016 remain cancelled.
+
+The latest inspection fixes require candidate-specific self-scan triage, clean
+installation, regression/performance evaluation and exact-commit hosted CI.
+The v0.2 closeout record will bind those results; historical done records do not
+substitute for validation of changed code. Public tagging and GitHub Release
+publication are separate from merging the release candidate to develop.
 
 Design date: 2026-11-09. Baseline: `b3104f9a4193b1b21ea11ca060f06301de2e936b`. At plan creation, all 22 new tasks were **pending**. Task YAML records are authoritative for current implementation and validation status. Existing tasks 001-017 remain unchanged; 014 is pending, 016 is review and 017 is done. Explicit user-requested queue creation does not enable the automatic Monitor.
 
@@ -87,7 +106,7 @@ flowchart LR
   T2 --> D5[Phase 5: packaging and installation evidence]
   H3 --> D5
   E4 --> D5
-  D5 --> R5[Final 1.0 quality evaluation]
+  D5 --> R5[Final v0.2 quality evaluation]
 ```
 
 Tasks 018, 022 and 023 may start independently. Corrections need not wait for a new inventory model. Phase 1 follows its task prerequisites rather than an indivisible phase barrier. SSH discovery need not wait for TLS implementation. CycloneDX mapping research can start early, while emission depends on normalized provenance. English/Japanese reports already exist; Phase 4 extends them. Completed SSH negotiation is a conditional future study, not a Phase 3 deliverable.
@@ -688,15 +707,15 @@ Add separate standard documents, completeness-aware comparison and new diagnosti
 
 **Queue:** [036-diagnostic-localization.yaml](../../tasks/036-diagnostic-localization.yaml).
 
-## Phase 5: OSS 1.0 evidence and distribution preparation
+## Phase 5: OSS v0.2 evidence and distribution preparation
 
-Prepare packaging/security/upgrade and clean-install evidence in 038 before final supported-scope 1.0 evaluation in 037. Numbering does not imply execution order. External publication remains separately authorized.
+Prepare packaging/security/upgrade and clean-install evidence in 038 before final supported-scope v0.2 evaluation in 037. Numbering does not imply execution order. External publication remains separately authorized.
 
 <a id="task-037"></a>
 
-### 037: Demonstrate supported-scope OSS 1.0 quality
+### 037: Demonstrate supported-scope OSS v0.2 quality
 
-**Purpose:** Demonstrate supported-scope OSS 1.0 quality.
+**Purpose:** Demonstrate supported-scope OSS v0.2 quality.
 
 **Category:** Existing implementation extension. No subsystem replacement.
 
@@ -764,7 +783,7 @@ Do not prebuild platform infrastructure. Enterprise aggregation, ownership, RBAC
 
 **Category:** New feature addition. No subsystem replacement.
 
-**Target code:** `docs/architecture/TLS-SSH-PROBE-DESIGN.md`, `docs/roadmap/OSS-ROADMAP.md`.
+**Target code:** `docs/architecture/TLS-SSH-PROBE-DESIGN.md`, `docs/roadmap/OSS-ROADMAP-v0.2.md`.
 
 **Scope:** Only if a concrete use case is selected, compare russh/ssh2 in isolated local harnesses. Prove completed KEX, verified host signature with trusted pins/known-host input and zero service/userauth/channel requests. Record public API/algorithm/provider/build limits; propose separate implementation if justified.
 
