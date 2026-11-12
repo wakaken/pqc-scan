@@ -2,7 +2,7 @@
 
 [日本語](SCANNING.ja.md) · [README](../../README.md)
 
-Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
+This guide describes v0.2.0 static scanning. Use it after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
 
 ## Contents
 
@@ -16,7 +16,7 @@ Use this guide after the first scan when you need to select outputs, change CI e
 ## Command and options
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--include-non-scannable] [--cyclonedx-17] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 pqc-scan diff <before-inventory> <after-inventory> --repository-scope ID --out-dir DIR
@@ -34,7 +34,7 @@ explains these documents and the completeness limits of [inventory comparison](R
 When running `pqc-scan` inside your own product repository (not inside the `pqc-scan` repo), use an **absolute path** for `--rules-dir`.
 
 ```bash
-pqc-scan scan . --format all --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
 ### Common Commands
@@ -42,15 +42,15 @@ pqc-scan scan . --format all --out-dir ./pqc-report --rules-dir /path/to/pqc-sca
 ```bash
 # Full report set
 
-pqc-scan scan . --format all --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 
 # SARIF format (for GitHub Code Scanning)
 
-pqc-scan scan . --format sarif --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --format sarif --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 
 # CI failure gate
 
-pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --fail-on high --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 
 # Inspect one rule in detail
 
@@ -81,7 +81,7 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 ## Inspection diagnostics
 
 Zero findings does not mean every selected input was inspected. Read failures and detector errors retain other findings.
-When inspection is partial, failed or unknown, the CLI prints one warning to stderr.
+When inspection is partial, failed or unknown, the CLI prints a warning to stderr. A separate scope note explains that ignored or otherwise unenumerated files may exist; it is not itself an inspection failure.
 CLI HTML/Markdown also display inspection status and counters. Detailed safe
 reasons appear with `--diagnostics`; language selection changes human copy only.
 
@@ -98,7 +98,7 @@ Either option can be used independently.
 To select both:
 
 ```bash
-pqc-scan scan . --diagnostics --require-complete --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --diagnostics --require-complete --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
 `diagnostics.json` also contains `schema_version: "1"` and generation time. It omits file contents and arbitrary detector/I/O error text.
@@ -127,20 +127,18 @@ Enumerated policy exclusions and enumeration failures are separate; the ignore-h
 
 ### Finding and work limits
 
-Regex, AST and key-marker detectors report applicability and limit outcomes. Accepted-hit limits are:
+Default accepted-hit limits are 4,096 per rule/file for regex and AST inspection,
+and 8 for private-key markers. Regex counts hits after its language-specific
+comment filter. Exactly reaching the cap does not prove truncation: an additional
+eligible hit or unfinished search reports `detector_truncated`. Earlier findings
+remain available, and omitted counts are not inferred.
 
-| Method | Accepted hits per rule and file |
-|---|---|
-| Regex | 32, counted after the existing language-specific comment filter, so comment-only matches do not exhaust the quota |
-| AST | 32 |
-| Key markers | 8 |
-
-Exactly the maximum number of hits does not prove truncation. Remaining candidates are checked within finite work limits; another eligible hit or an unfinished search yields `detector_truncated`.
-Earlier findings are retained, inspection becomes partial, and no omitted-hit count is inferred.
-
-Work limits are separate: regex/AST inspect at most 4096 match candidates per rule/file, plus one look-ahead.
-AST also retains at most 4096 semantic candidates, schedules at most 100000 tree nodes and clips candidates at 2000 characters; clipping is reported.
-These are engineering bounds, not measured performance targets. The comment policy is unchanged, but avoiding comment-only quota consumption can recover previously missed findings.
+Regex and AST each examine at most 65,536 match candidates per rule/file. AST also
+limits semantic candidates to 262,144, scheduled tree nodes to 2,000,000 and
+cumulative candidate text examined across rules to 256 MiB per file. Matching uses
+full candidate text; clipping a displayed preview does not limit inspection.
+These are finite resource bounds, not performance guarantees. See the
+[coverage guide](COVERAGE.md#source-limits) for syntax and encoding limits.
 
 ### Parsing errors and unsupported formats
 
@@ -151,7 +149,7 @@ For certificates, malformed input, unknown key attributes or mixed unsupported b
 Detecting a container does not prove its contents were inspected. A parsed certificate that matches no rule need not produce a finding.
 
 Dependency inspection distinguishes valid empty input, malformed supported input, partial success, unsupported versions and resource limits.
-Supported structured subsets can report completion; unrelated files are not applicable. Go modules, Maven POM, requirements and Ruby declarations/locks can complete within their explicitly parsed subsets. Dynamic or unsupported declarations remain incomplete; Gradle and gemspec lexical fallbacks remain `detector_not_reported`.
+Supported structured subsets can report completion; unrelated files are not applicable. Go modules, Maven POM, requirements and Ruby declarations/locks can complete within their explicitly parsed subsets. Literal Gemfile/gemspec dependency calls use bounded Ruby syntax inspection, including selected local gemspec references. Dynamic or unsupported declarations remain incomplete; Gradle lexical fallbacks remain `detector_not_reported`.
 Completion is not full package-manager validation or proof of installation.
 
 The `--require-complete` exit-code contract is unchanged, but actual returned codes depend on parser outcomes and supported scope.

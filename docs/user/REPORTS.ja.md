@@ -42,7 +42,7 @@ PQCの上書き設定にはその設定の確認手順を示し、RSA利用を�
 既定は英語で、`--lang en` でも指定できます。
 
 ```bash
-pqc-scan scan . --lang ja --format all --out-dir ./pqc-report-ja --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --lang ja --format all --out-dir /path/to/reports/product-scan-ja --rules-dir /path/to/pqc-scan/rules
 ```
 
 見出し、組み込みルールの説明、確認事項、推奨アクションを日本語で記載します。
@@ -110,6 +110,14 @@ JWT署名を変更する際は、JOSE形式・ライブラリ・検証側の互�
 `--format all` は従来の6ファイルを選ぶ指定です。追加の成果物にはそれぞれのオプションが必要です。単一のレポート形式を選んでも、2種類の一覧は出力します。
 `--lang en|ja` の対象はHTML・Markdownだけです。比較には新しい出力先を使ってください。過去のファイルは自動削除されません。
 
+標準の6ファイルに、棚卸し・診断情報・2種類のCycloneDX出力を加え、計10ファイルを保存する例です。
+
+```bash
+pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang ja --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
+```
+
+ローカル方針による評価を加える場合は、別途指定が必要です。製品バージョンは0.2.0ですが、出力形式の版はInventory v1、SARIF 2.1.0、CycloneDX 1.7のままです。probeの独立した出力は[診断ガイド](PROBING.ja.md)を参照してください。
+
 ### このツールでいうCBOMとSBOM
 
 SBOM（Software Bill of Materials）は、ソフトウェアの構成要素や依存関係の一覧です。
@@ -135,10 +143,6 @@ CBOM（Cryptographic Bill of Materials）は、暗号方式やその利用箇所
 ```bash
 pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
 ```
-
-このレポートのCLI指定は `--inventory-json` です。旧指定 `--native-json` は廃止したため、
-`--inventory-json` へ置き換え、読み込むファイルも `scan.native.v1.json` から
-`scan.inventory.v1.json` へ変更してください。JSONの項目・スキーマの版・ID生成は変更しません。
 
 依存関係では、`^1.2.3` のような指定条件、ロックファイルで確認できたバージョン、情報の出所を分けて記録します。
 指定条件やSBOMの申告だけから、バージョン付きpurlを生成しません。path・git・workspaceの参照先は未解決のままとし、

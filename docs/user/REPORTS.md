@@ -46,7 +46,7 @@ are never translated. Japanese reports explain the findings and next steps using
 a built-in catalog; no repository data is sent to a translation service.
 
 ```bash
-pqc-scan scan . --lang ja --format all --out-dir ./pqc-report-ja --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --lang ja --format all --out-dir /path/to/reports/product-scan-ja --rules-dir /path/to/pqc-scan/rules
 ```
 
 Built-in rule descriptions and recommended actions have Japanese copy. Custom
@@ -107,6 +107,17 @@ See [static examples and references](../../examples/pqc-readiness/README.md) for
 `--format all` selects the six legacy files; additional artifacts require their own options. A single selected report format still writes both flat inventory files. `--lang en|ja` changes HTML/Markdown only.
 Use a fresh output directory for comparisons; files from previous runs are not automatically removed.
 
+To request the six default files plus inventory, diagnostics and both CycloneDX
+exports (ten files in total):
+
+```bash
+pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang en --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
+```
+
+A policy assessment is an additional, separate opt-in. Product version 0.2.0 does
+not change the inventory v1, SARIF 2.1.0 or CycloneDX 1.7 schema versions. Separate
+probe reports are described in the [probe guide](PROBING.md).
+
 ### What CBOM and SBOM mean here
 
 An SBOM (Software Bill of Materials) lists software components and dependencies. A CBOM (Cryptographic Bill of Materials) lists cryptographic algorithms and usages.
@@ -129,11 +140,6 @@ assessment. See the [contract and limitations](../architecture/INVENTORY-REPORT-
 ```bash
 pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
 ```
-
-`--inventory-json` is the only CLI option for this report. The former `--native-json`
-option has been removed; replace it with `--inventory-json` and read
-`scan.inventory.v1.json` instead of `scan.native.v1.json`. JSON fields, schema
-version and ID generation are unchanged.
 
 Dependency assets preserve declared constraints (for example `^1.2.3`), optional
 lock-record resolved versions and source provenance separately. A declaration or
