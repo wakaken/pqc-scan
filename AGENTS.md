@@ -252,6 +252,44 @@ Avoid duplicate knowledge.
 
 # Completion Checklist
 
+## Task completion and Partial results
+
+- Mark a task `done` only after every original acceptance criterion and required
+  deliverable has been implemented and verified with evidence matching the final
+  source. An artifact list, passing tests, or a limited review does not establish
+  completion of requirements outside its scope.
+- Do not mark a task done while required work is Partial, Unknown, Not Tested,
+  failed, or deferred. Recording a limitation or transferring work to another task
+  does not satisfy the original criterion. Do not narrow acceptance criteria or
+  reinterpret the task scope without the user's explicit agreement.
+- Distinguish task completion from measured product quality. Detecting a product
+  failure can be a valid completed evaluation, provided the evaluation itself is
+  complete and valid for every required criterion. Incomplete truth, missing
+  measurements, unresolved required reviews, and unverified assessment validity
+  remain unfinished work.
+- Continue work on resolvable issues. If an actual blocker prevents completion,
+  keep the task unfinished (`blocked` when user input or unavailable validation
+  prevents progress), report the result as Partial, and explain plainly what is
+  blocked, why the blocker arose, what was attempted, which acceptance criteria
+  remain unmet, and the concrete action or decision needed to proceed. Do not
+  describe the task as complete or say there is no remaining work.
+- When reopening an incorrectly closed task, preserve historical evidence and
+  record why the prior completion decision is superseded. Reconcile its current
+  status in the task queue and roadmap without rewriting old measurements.
+
+## Reports to the user
+
+- Explain in clear, polite Japanese what was done and why it was necessary.
+- Describe the resulting behavior or capability, the actual verification and its
+  outcome, and remaining work or blockers. Separate implemented changes, measured
+  facts, proposals, and unexecuted checks.
+- For changes and measurements, give the relevant source version, commands and
+  exit results, and links to reviewable artifacts. A list of test counts or file
+  paths alone is not an adequate explanation.
+- State completion only against the original acceptance criteria. If the result
+  is Partial, lead with the fact that the task is unfinished and explain the
+  reason; do not bury the qualification after a completion statement.
+
 Before marking a task complete:
 
 1. `cargo fmt --all`
