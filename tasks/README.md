@@ -25,17 +25,29 @@ Fields:
 - owner
 - description
 
+## Working Rules
+
+Follow `AGENTS.md` for authorization, verification and completion gates and
+`docs/TASK-LIFECYCLE.md` for state definitions. The main agent performs planning,
+implementation and evaluation. Role names in task records are responsibility
+labels, not separate agents. `prompts/REVIEWER.md` is the only review template.
+Do not create unrelated tasks or automatically generate tasks from an empty queue,
+reflection or monitoring without authorization.
+
 ## Status Meanings
 
 - `pending`: task exists but has not been selected yet
-- `planned`: Planner selected the task and prepared an execution plan
-- `in-progress`: Executor started implementation
-- `review`: Executor finished implementation and the task is ready for Reviewer assessment
-- `done`: Evaluator validated the completed work
+- `planned`: the main agent established scope, acceptance criteria and implementation steps
+- `in-progress`: the main agent started implementation or corrections
+- `review`: the change is ready for assessment; required reviews and validation may still be unfinished
+- `done`: the main agent verified all original criteria and deliverables against the final source, including required reviews
 - `blocked`: progress cannot continue without human input or unavailable validation
 - `cancelled`: the maintainer explicitly ended further work; record the reason and preserve implementation history. This does not assert implementation or validation completion.
 
 ## Ownership
+
+The main agent applies the following responsibility labels; these do not
+require separate processes. Existing owner fields remain valid historical data.
 
 - `pending`: Planner / Reflection / Monitor
 - `planned`: Planner
@@ -44,6 +56,18 @@ Fields:
 - `done`: Evaluator
 - `blocked`: any agent
 - `cancelled`: Planner, only after an explicit maintainer decision
+
+## Corrections and Resumption
+
+- Correct resolvable failures in `in-progress`, then return to `review`; do not
+  automatically reset tasks to `pending`.
+- Replan when assumptions or dependencies change, preserving evidence and
+  obtaining agreement before changing scope or acceptance criteria.
+- For blocked work, record the dependency, attempts, unmet criteria and next
+  action. Resume at the appropriate state once the dependency is resolved and
+  any required human decision is obtained.
+- The restart baseline and task 014 retain the applicable special transitions,
+  retry limits and gates in `docs/RESTART-LOOP.md`, as scoped by AGENTS.md.
 
 ## Notes
 
@@ -61,3 +85,7 @@ Fields:
 Cancelled tasks are excluded from the active queue. Existing functionality is not
 removed by cancellation. Reopening requires an explicit new maintainer request
 and a recorded Planner decision; agents must not resume them automatically.
+
+Preserve completed task records and past review artifacts when reorganizing
+current guidance. Removed prompt paths and former role names in those records
+remain historical evidence, not current operational dependencies.
