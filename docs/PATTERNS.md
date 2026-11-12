@@ -117,7 +117,9 @@ Current example:
 
 Pattern:
 - when renaming docs or changing workflow terms, update all agent-facing references in the same patch
-- keep task lifecycle terminology aligned across `AGENTS.md`, `docs/TASK-LIFECYCLE.md`, prompts, and task files
+- keep working rules in `AGENTS.md` and the shared review request template in `prompts/REVIEWER.md`
+- keep current lifecycle definitions aligned across `AGENTS.md`, `docs/TASK-LIFECYCLE.md` and `tasks/README.md`
+- preserve completed task records and past review evidence, including historical prompt paths
 
 Why it works here:
 - agents depend on these files as operational inputs
@@ -126,14 +128,14 @@ Why it works here:
 Current example:
 - `AGENTS.md`
 - `docs/TASK-LIFECYCLE.md`
-- `prompts/EVALUATOR.md`
+- `prompts/REVIEWER.md`
 
 ---
 
 ## Task Queue Pattern
 
 Pattern:
-- keep tasks small and role-driven
+- keep tasks small; responsibility labels describe work performed by the main agent
 - let Planner move tasks to `planned`, Executor to `in-progress`, Reviewer review the implementation, and Evaluator close the loop with `done`
 - use `blocked` when progress depends on unavailable validation or human decisions
 
