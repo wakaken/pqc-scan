@@ -1,0 +1,65 @@
+id: 049
+title: 隔離TLS/SSH診断の観測・認証・失敗を検証する
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: '4'
+description: 既存local peersと隔離runnerで要件と試験の対応を埋める。probeは実験的のまま扱う。
+quality_alias: QAM-07
+plan_reference: docs/quality/QUALITY-ROADMAP.md
+requirements_reference: docs/quality/QUALITY-REQUIREMENTS.md
+quality_requirements:
+- Q3-06
+- Q4-08
+- Q4-09
+- Q4-10
+- Q4-11
+- Q4-12
+depends_on:
+- 048
+- '057'
+target_components:
+- tests/protocol/
+existing_assets:
+- EP
+problem:
+- 観測状態と判断の対応表
+- client profile/provider/RFC9846差分の網羅表
+- trust/name/expiry/mTLS/HRR/refused/timeout/巨大messageの対応
+- peer設定と観測・認証状態の対応
+- 送信packet種別と全失敗経路の対応
+- fragment/巨大/途中切断・接続拒否を含む全対応
+acceptance:
+- 'Q3-06: 未認証offerを実交渉や認証成功へ昇格させない'
+- 'Q4-08: 実交渉groupを確認し、cipherや設定名から推測しない。未知groupは不明のまま保持'
+- 'Q4-09: 検証失敗で成功済み暗号事実を捏造せず、各状態と限界を記録'
+- 'Q4-10: pin不一致・unknown/古典/hybridを分け、未認証情報と検証済み事実を区別'
+- 'Q4-11: service/userauth/channel/commandを送らず切断することを実peerで確認'
+- 'Q4-12: 割当て前の長さ検査、有限の通信/時間/接続数、中止と後始末を検証'
+deliverables:
+- target/quality-task-049/protocol-assurance.json
+- target/quality-task-049/ssh-failures.json
+- target/quality-task-049/ssh-matrix.json
+- target/quality-task-049/ssh-no-auth.json
+- target/quality-task-049/tls-failures.json
+- target/quality-task-049/tls-matrix.json
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- 提示方式を実交渉済みと誤認したり、試験時に認証・外部接続へ進んだりする危険がある。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。

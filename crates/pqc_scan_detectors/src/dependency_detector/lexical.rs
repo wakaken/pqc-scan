@@ -52,19 +52,77 @@ pub(super) fn parse_gemfile_lock(text: &str) -> Vec<DependencyItem> {
     out
 }
 
-pub(super) fn parse_gemspec(text: &str) -> Vec<DependencyItem> {
+pub(super) fn parse_gemspec(text: &str, truncated: &mut bool) -> Vec<DependencyItem> {
     let mut out = Vec::new();
-    let re = match Regex::new(
-        r#"(?m)^\s*spec\.(?:add_dependency|add_runtime_dependency|add_development_dependency)\s+['"]([^'"]+)['"](?:\s*,\s*['"]([^'"]+)['"])?"#,
-    ) {
-        Ok(v) => v,
-        Err(_) => return out,
+    let mut parser = tree_sitter::Parser::new();
+    if parser
+        .set_language(&tree_sitter_ruby::LANGUAGE.into())
+        .is_err()
+    {
+        return out;
+    }
+    let Some(tree) = parser.parse(text, None) else {
+        return out;
     };
-
-    for caps in re.captures_iter(text).take(10001) {
-        let name = caps.get(1).map(|m| m.as_str()).unwrap_or("unknown");
-        let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
-        let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
+    // Static receiver scopes only. Never execute a gemspec or infer a receiver
+    // from a quoted block header, a different block or a reassigned variable.
+    let mut writes = std::collections::HashMap::<(usize, String), usize>::new();
+    let mut stack = vec![tree.root_node()];
+    let mut visited = 0;
+    while let Some(node) = stack.pop() {
+        visited += 1;
+        if visited > 100_000 || node.named_child_count() > 4096 {
+            *truncated = true;
+            return out;
+        }
+        if node.kind() == "assignment" {
+            if let Some(left) = node
+                .child_by_field_name("left")
+                .filter(|n| n.kind() == "identifier")
+            {
+                let name = &text[left.start_byte()..left.end_byte()];
+                if let Some((block, _)) = ruby_receiver_scope(node, name, text, truncated) {
+                    writes
+                        .entry((block.id(), name.into()))
+                        .and_modify(|at| *at = (*at).min(node.start_byte()))
+                        .or_insert(node.start_byte());
+                }
+            }
+        }
+        let mut cursor = node.walk();
+        stack.extend(node.named_children(&mut cursor));
+    }
+    for call in static_declarations(text, true) {
+        let Some((receiver, method)) = call.name.split_once('.') else {
+            continue;
+        };
+        if !matches!(
+            method,
+            "add_dependency" | "add_runtime_dependency" | "add_development_dependency"
+        ) {
+            continue;
+        }
+        let Some(node) = tree
+            .root_node()
+            .descendant_for_byte_range(call.start, call.start + 1)
+        else {
+            continue;
+        };
+        let Some((block, trusted)) = ruby_receiver_scope(node, receiver, text, truncated) else {
+            continue;
+        };
+        if !trusted
+            || writes
+                .get(&(block.id(), receiver.into()))
+                .is_some_and(|at| *at < call.start)
+        {
+            continue;
+        }
+        let Some(name) = call.args.first() else {
+            continue;
+        };
+        let version = call.args.get(1).map_or("unknown", String::as_str);
+        let line = line_col_for_offset(text, call.start).0;
         out.push(DependencyItem {
             name: name.to_string(),
             version: sanitize_version(version),
@@ -77,6 +135,46 @@ pub(super) fn parse_gemspec(text: &str) -> Vec<DependencyItem> {
     }
 
     out
+}
+
+fn ruby_receiver_scope<'a>(
+    mut node: tree_sitter::Node<'a>,
+    receiver: &str,
+    text: &str,
+    truncated: &mut bool,
+) -> Option<(tree_sitter::Node<'a>, bool)> {
+    for _ in 0..64 {
+        if matches!(
+            node.kind(),
+            "method" | "singleton_method" | "class" | "module"
+        ) {
+            return None;
+        }
+        if matches!(node.kind(), "do_block" | "block") {
+            if let Some(parameters) = node.child_by_field_name("parameters") {
+                let mut cursor = parameters.walk();
+                if parameters
+                    .named_children(&mut cursor)
+                    .any(|p| &text[p.start_byte()..p.end_byte()] == receiver)
+                {
+                    let trusted =
+                        node.parent()
+                            .filter(|n| n.kind() == "call")
+                            .is_some_and(|call| {
+                                call.child_by_field_name("receiver").is_some_and(|r| {
+                                    &text[r.start_byte()..r.end_byte()] == "Gem::Specification"
+                                }) && call
+                                    .child_by_field_name("method")
+                                    .is_some_and(|m| &text[m.start_byte()..m.end_byte()] == "new")
+                            });
+                    return Some((node, trusted));
+                }
+            }
+        }
+        node = node.parent()?;
+    }
+    *truncated = true;
+    None
 }
 
 pub(super) fn parse_requirements(text: &str) -> Vec<DependencyItem> {
@@ -188,19 +286,26 @@ pub(super) fn parse_pom_xml(text: &str) -> Vec<DependencyItem> {
 
 pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
     let mut out = Vec::new();
-    let re = match Regex::new(
-        r#"(?m)^\s*(implementation|api|compileOnly|runtimeOnly|testImplementation|testRuntimeOnly)\s+['"]([^:'"]+):([^:'"]+):([^'"]+)['"]"#,
-    ) {
-        Ok(v) => v,
-        Err(_) => return out,
-    };
-
-    for caps in re.captures_iter(text).take(10001) {
-        let group = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
-        let artifact = caps.get(3).map(|m| m.as_str()).unwrap_or("unknown");
-        let version = caps.get(4).map(|m| m.as_str()).unwrap_or("unknown");
+    for call in static_declarations(text, false) {
+        if !matches!(
+            call.name,
+            "implementation"
+                | "api"
+                | "compileOnly"
+                | "runtimeOnly"
+                | "testImplementation"
+                | "testRuntimeOnly"
+        ) || call.args.len() != 1
+        {
+            continue;
+        }
+        let parts: Vec<_> = call.args[0].split(':').collect();
+        if parts.len() != 3 {
+            continue;
+        }
+        let (group, artifact, version) = (parts[0], parts[1], parts[2]);
         let name = format!("{}:{}", group, artifact);
-        let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
+        let line = line_col_for_offset(text, call.start).0;
 
         out.push(DependencyItem {
             name: name.clone(),
@@ -214,6 +319,122 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
     }
 
     out
+}
+
+struct StaticDeclaration<'a> {
+    name: &'a str,
+    args: Vec<String>,
+    start: usize,
+}
+
+// A lexical subset only: skip comments/strings and accept literal-only calls at
+// statement boundaries. Unknown DSL expressions never become resolved versions.
+fn static_declarations(text: &str, hash_comments: bool) -> Vec<StaticDeclaration<'_>> {
+    let bytes = text.as_bytes();
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < bytes.len() && out.len() < 10001 {
+        if bytes[i..].starts_with(b"//") || (hash_comments && bytes[i] == b'#') {
+            i = text[i..].find('\n').map_or(bytes.len(), |n| i + n + 1);
+            continue;
+        }
+        if bytes[i..].starts_with(b"/*") {
+            i = text[i + 2..].find("*/").map_or(bytes.len(), |n| i + n + 4);
+            continue;
+        }
+        if matches!(bytes[i], b'\'' | b'"') {
+            i = quoted_literal(text, i).map_or(bytes.len(), |(_, end)| end);
+            continue;
+        }
+        if !bytes[i].is_ascii_alphabetic() && bytes[i] != b'_' {
+            i += 1;
+            continue;
+        }
+        let start = i;
+        while i < bytes.len()
+            && (bytes[i].is_ascii_alphanumeric() || matches!(bytes[i], b'_' | b'.'))
+        {
+            i += 1;
+        }
+        let name = &text[start..i];
+        let previous = text[..start]
+            .chars()
+            .rev()
+            .find(|c| !matches!(c, ' ' | '\t' | '\r'));
+        if previous.is_some_and(|c| !matches!(c, '\n' | '{' | ';')) {
+            continue;
+        }
+        let mut cursor = i;
+        while bytes.get(cursor).is_some_and(u8::is_ascii_whitespace) {
+            cursor += 1;
+        }
+        let parenthesized = bytes.get(cursor) == Some(&b'(');
+        if parenthesized {
+            cursor += 1;
+        }
+        let mut args = Vec::new();
+        loop {
+            while bytes.get(cursor).is_some_and(u8::is_ascii_whitespace) {
+                cursor += 1;
+            }
+            let Some((value, end)) = quoted_literal(text, cursor) else {
+                args.clear();
+                break;
+            };
+            if value.contains(['$', '\\']) || value.contains("#{") {
+                args.clear();
+                break;
+            }
+            args.push(value.to_string());
+            cursor = end;
+            while bytes
+                .get(cursor)
+                .is_some_and(|b| matches!(b, b' ' | b'\t' | b'\r'))
+            {
+                cursor += 1;
+            }
+            if bytes.get(cursor) == Some(&b',') && args.len() < 16 {
+                cursor += 1;
+                continue;
+            }
+            if (parenthesized && bytes.get(cursor) != Some(&b')'))
+                || (!parenthesized
+                    && bytes
+                        .get(cursor)
+                        .is_some_and(|b| !matches!(b, b'\n' | b'}' | b';' | b'#'))
+                    && !bytes[cursor..].starts_with(b"//"))
+            {
+                args.clear();
+            }
+            break;
+        }
+        if !args.is_empty() {
+            out.push(StaticDeclaration { name, args, start });
+        }
+    }
+    out
+}
+
+fn quoted_literal(text: &str, start: usize) -> Option<(&str, usize)> {
+    let bytes = text.as_bytes();
+    let quote = *bytes.get(start)?;
+    if !matches!(quote, b'\'' | b'"') {
+        return None;
+    }
+    let mut i = start + 1;
+    while i < bytes.len() {
+        if bytes[i] == quote {
+            return Some((&text[start + 1..i], i + 1));
+        }
+        if bytes[i] == b'\\' {
+            i += 1;
+        }
+        if bytes.get(i) == Some(&b'\n') {
+            return None;
+        }
+        i += 1;
+    }
+    None
 }
 
 pub(super) fn parse_gradle_lockfile(text: &str) -> Vec<DependencyItem> {

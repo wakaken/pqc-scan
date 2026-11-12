@@ -1,0 +1,58 @@
+id: 048
+title: 標準Schemaと全出力形式の意味・表示・秘匿を検証する
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: '4'
+description: 既存Schema検証を再利用し、実体・位置・版・根拠・欠落/重複と表示の正しさを確認する。
+quality_alias: QAM-06
+plan_reference: docs/quality/QUALITY-ROADMAP.md
+requirements_reference: docs/quality/QUALITY-REQUIREMENTS.md
+quality_requirements:
+- Q3-11
+- Q3-12
+- Q4-05
+depends_on:
+- '041'
+- '042'
+- '055'
+target_components:
+- crates/pqc_scan_report/
+existing_assets:
+- E29
+- E34
+- EN
+- EP
+- ES
+problem:
+- 全出力と全probe結果Schemaの正負試験の一覧
+- HTML/Markdown/JSON/SARIF/CBOMの横断集約
+- 実ブラウザーと悪意ある入力の横断確認
+acceptance:
+- 'Q3-11: 公式Schemaの版・license・hash・参照先を固定し、外部取得なしで実出力を検証。不正例も拒否し、legacy bare-array CBOMをCycloneDXと呼ばない'
+- 'Q3-12: algorithm/certificate/key/usageを区別し、位置・ID安定性・欠落/重複・証拠来歴・unknown・宣言/解決版・export lossを形式間で照合'
+- 'Q4-05: HTML/Markdown/JSON/SARIFで構造を壊さず、実ブラウザー上で文字列が実行されない'
+deliverables:
+- target/quality-task-048/output-semantics.json
+- target/quality-task-048/render-security.md
+- target/quality-task-048/schema-results.json
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- Schemaに合っていても、暗号・鍵・証明書の実体、場所、版、信頼性が正しいとは限らない。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。

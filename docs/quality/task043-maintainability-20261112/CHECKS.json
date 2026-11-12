@@ -1,0 +1,128 @@
+[
+  {
+    "name": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 0.2849284999538213,
+    "log": "target/quality-task-043-maintainability-20261112/check-fmt.log",
+    "timestampUtc": "2026-11-12T03:06:54.611872+00:00"
+  },
+  {
+    "name": "workspace",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--offline",
+      "--locked"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 125.06739849998849,
+    "log": "target/quality-task-043-maintainability-20261112/check-workspace.log",
+    "timestampUtc": "2026-11-12T03:08:59.680011+00:00"
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--offline",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 9.817768792039715,
+    "log": "target/quality-task-043-maintainability-20261112/check-clippy.log",
+    "timestampUtc": "2026-11-12T03:09:09.498214+00:00"
+  },
+  {
+    "name": "build",
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--release",
+      "--offline",
+      "--locked"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 3.2367643330362625,
+    "log": "target/quality-task-043-maintainability-20261112/check-build.log",
+    "timestampUtc": "2026-11-12T03:09:12.735349+00:00"
+  },
+  {
+    "name": "quality",
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/quality",
+      "-p",
+      "test_*.py"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 3.0085367500432767,
+    "log": "target/quality-task-043-maintainability-20261112/check-quality.log",
+    "timestampUtc": "2026-11-12T03:09:15.744307+00:00"
+  },
+  {
+    "name": "protocol",
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/protocol",
+      "-p",
+      "test_*.py"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 1.7983254580176435,
+    "log": "target/quality-task-043-maintainability-20261112/check-protocol.log",
+    "timestampUtc": "2026-11-12T03:09:17.542990+00:00"
+  },
+  {
+    "name": "distribution",
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/distribution"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 0.167275250016246,
+    "log": "target/quality-task-043-maintainability-20261112/check-distribution.log",
+    "timestampUtc": "2026-11-12T03:09:17.710885+00:00"
+  },
+  {
+    "name": "node",
+    "command": [
+      "node",
+      "--test",
+      "shell/compact-report.test.cjs",
+      "shell/final-gap-self-scan.test.cjs",
+      "shell/prepare-code-scanning.test.cjs",
+      "shell/self-scan-backlog.test.cjs",
+      "shell/self-scan-policy.test.cjs"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 3.0268203750019893,
+    "log": "target/quality-task-043-maintainability-20261112/check-node.log",
+    "timestampUtc": "2026-11-12T03:09:20.738041+00:00"
+  }
+]

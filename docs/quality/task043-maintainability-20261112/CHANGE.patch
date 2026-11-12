@@ -1,0 +1,562 @@
+--- a/crates/pqc_scan_cli/tests/task043_source_facts.rs
++++ b/crates/pqc_scan_cli/tests/task043_source_facts.rs
+@@ -111,3 +111,53 @@
+         assert!(!text[start..end].contains("LEAK043"));
+     }
+ }
++
++#[test]
++fn compiled_default_bindings_work_with_copied_rules_outside_the_checkout() {
++    let root = std::env::temp_dir().join(format!("pqc043-portable-{}", std::process::id()));
++    for name in ["input", "rules", "cwd"] {
++        fs::create_dir_all(root.join(name)).unwrap();
++    }
++    let repository = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
++    for name in ["pqc.yml", "tree_sitter.yml", "crypto_api.yml"] {
++        fs::copy(
++            repository.join("rules/default").join(name),
++            root.join("rules").join(name),
++        )
++        .unwrap();
++    }
++    fs::write(
++        root.join("input/app.js"),
++        "import {generateKeyPairSync as build} from 'node:crypto'; build('ml-kem-768');\n",
++    )
++    .unwrap();
++    fs::write(root.join("input/app.py"),"from cryptography.hazmat.primitives.asymmetric.mlkem import MLKEM768PrivateKey as Key\nkey = Key.generate()\n").unwrap();
++    let output = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++        .current_dir(root.join("cwd"))
++        .arg("scan")
++        .arg(root.join("input"))
++        .args(["--format", "json", "--rules-dir"])
++        .arg(root.join("rules"))
++        .arg("--out-dir")
++        .arg(root.join("output"))
++        .output()
++        .unwrap();
++    assert!(output.status.success());
++    let result: Value =
++        serde_json::from_slice(&fs::read(root.join("output/report.json")).unwrap()).unwrap();
++    let findings = result["findings"].as_array().unwrap();
++    assert_eq!(
++        findings
++            .iter()
++            .filter(|f| f["rule_id"] == "PQC_NODE_API")
++            .count(),
++        1
++    );
++    assert_eq!(
++        findings
++            .iter()
++            .filter(|f| f["rule_id"] == "PQC_PYTHON_API")
++            .count(),
++        2
++    );
++}
+--- a/crates/pqc_scan_detectors/src/source_facts/bindings.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/bindings.rs
+@@ -0,0 +1,113 @@
++//! YAML owns rule definitions; this registry owns only implemented analysis handlers.
++use pqc_scan_rules::Rule;
++use std::{collections::BTreeMap, sync::LazyLock};
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(super) enum Handler {
++    JavaPqc,
++    NodePqc,
++    PythonPqc,
++    RustPqc,
++    NodeRsa,
++    NodeRsaSign,
++}
++impl Handler {
++    pub const ALL: [Self; 6] = [
++        Self::JavaPqc,
++        Self::NodePqc,
++        Self::PythonPqc,
++        Self::RustPqc,
++        Self::NodeRsa,
++        Self::NodeRsaSign,
++    ];
++    pub fn id(self) -> &'static str {
++        match self {
++            Self::JavaPqc => "PQC_JAVA_API",
++            Self::NodePqc => "PQC_NODE_API",
++            Self::PythonPqc => "PQC_PYTHON_API",
++            Self::RustPqc => "PQC_RUST_API",
++            Self::NodeRsa => "TS_NODE_RSA_USAGE",
++            Self::NodeRsaSign => "API_NODE_CRYPTO_SIGN_RSA",
++        }
++    }
++    pub fn handles(self, language: &str) -> bool {
++        match self {
++            Self::JavaPqc => language == "java",
++            Self::PythonPqc => language == "python",
++            Self::RustPqc => language == "rust",
++            Self::NodePqc | Self::NodeRsa | Self::NodeRsaSign => {
++                matches!(language, "javascript" | "typescript")
++            }
++        }
++    }
++    pub fn replaces_generic(self) -> bool {
++        !matches!(self, Self::NodeRsa | Self::NodeRsaSign)
++    }
++}
++
++// Build inputs, not a runtime read of mutable repository paths. A YAML edit
++// recompiles this crate; no copied pattern/scope/kind literals need updating.
++const SOURCES: [&str; 3] = [
++    include_str!("../../../../rules/default/pqc.yml"),
++    include_str!("../../../../rules/default/tree_sitter.yml"),
++    include_str!("../../../../rules/default/crypto_api.yml"),
++];
++static DEFAULTS: LazyLock<BTreeMap<String, Rule>> = LazyLock::new(|| {
++    let mut rules = BTreeMap::new();
++    for yaml in SOURCES {
++        let parsed: Vec<Rule> =
++            serde_yaml::from_str(yaml).expect("valid compiled-in default rule YAML");
++        for rule in parsed {
++            if Handler::ALL.iter().any(|h| h.id() == rule.id) {
++                assert!(
++                    rules.insert(rule.id.clone(), rule).is_none(),
++                    "unique compiled-in source rule"
++                );
++            }
++        }
++    }
++    rules
++});
++fn same_definition(rule: &Rule, reference: &Rule) -> bool {
++    rule.id == reference.id
++        && rule.pattern == reference.pattern
++        && rule.scope == reference.scope
++        && rule.kind == reference.kind
++}
++pub(super) fn handler(rule: &Rule) -> Option<Handler> {
++    let kind = Handler::ALL.into_iter().find(|h| h.id() == rule.id)?;
++    same_definition(rule, DEFAULTS.get(&rule.id)?).then_some(kind)
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn installed_rule_copies_bind_but_modified_semantics_do_not() {
++        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules/default");
++        let rules = pqc_scan_rules::RuleSet::load_from_dir(&root).unwrap();
++        for expected in Handler::ALL {
++            let original = rules.get(expected.id()).unwrap();
++            assert_eq!(handler(original), Some(expected));
++            for field in ["pattern", "scope", "kind", "id"] {
++                let mut custom = original.clone();
++                match field {
++                    "pattern" => custom.pattern = "CONTROL".into(),
++                    "scope" => custom.scope = "custom".into(),
++                    "kind" => {
++                        custom.kind = if original.kind == pqc_scan_rules::RuleKind::Regex {
++                            pqc_scan_rules::RuleKind::TreeSitter
++                        } else {
++                            pqc_scan_rules::RuleKind::Regex
++                        }
++                    }
++                    _ => custom.id = "CUSTOM".into(),
++                }
++                assert_eq!(handler(&custom), None, "{} {field}", original.id);
++            }
++            let mut presentation = original.clone();
++            presentation.description = Some("Local wording".into());
++            assert_eq!(handler(&presentation), Some(expected));
++        }
++    }
++}
+--- a/crates/pqc_scan_detectors/src/source_facts/javascript.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/javascript.rs
+@@ -188,20 +188,13 @@
+     }
+     Some(result)
+ }
+-fn standard(value: &str) -> bool {
+-    if let Some(v) = value.strip_prefix("ml-kem-") {
+-        return matches!(v, "512" | "768" | "1024");
+-    }
+-    if let Some(v) = value.strip_prefix("ml-dsa-") {
+-        return matches!(v, "44" | "65" | "87");
+-    }
+-    let Some(v) = value.strip_prefix("slh-dsa-") else {
+-        return false;
+-    };
+-    let Some(v) = v.strip_prefix("sha2-").or_else(|| v.strip_prefix("shake-")) else {
+-        return false;
+-    };
+-    matches!(v, "128s" | "128f" | "192s" | "192f" | "256s" | "256f")
++fn selected_argument(rule: Option<&pqc_scan_rules::Rule>, callee: &str, value: &str) -> bool {
++    let Some(pattern) = rule.and_then(|r| r.compiled_pattern()) else {
++        return false;
++    };
++    ['\'', '"']
++        .into_iter()
++        .any(|quote| super::exact_match(pattern, &format!("{callee}({quote}{value}{quote}")))
+ }
+ fn arguments(node: Node<'_>) -> Vec<Node<'_>> {
+     node.child_by_field_name("arguments")
+@@ -300,7 +293,11 @@
+     ((method == "sign" && name == "createSign") || (method == "verify" && name == "createVerify"))
+         .then_some(value)
+ }
+-pub(super) fn inspect<'a>(ctx: &mut Context<'a, '_>, facts: &mut Facts) {
++pub(super) fn inspect<'a>(
++    ctx: &mut Context<'a, '_>,
++    facts: &mut Facts,
++    rules: &pqc_scan_rules::RuleSet,
++) {
+     let nodes = ctx.nodes.clone();
+     for node in &nodes {
+         let scope = ctx.scope(*node);
+@@ -477,7 +474,10 @@
+             let args = arguments(*node);
+             if matches!(name.as_str(), "generateKeyPair" | "generateKeyPairSync") {
+                 if let Some(values) = args.first().and_then(|n| scalar_values(ctx, *n, 0)) {
+-                    if values.iter().any(|v| standard(v)) {
++                    if values
++                        .iter()
++                        .any(|v| selected_argument(rules.get("PQC_NODE_API"), &name, v))
++                    {
+                         facts.call(
+                             "PQC_NODE_API",
+                             *node,
+--- a/crates/pqc_scan_detectors/src/source_facts/python.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/python.rs
+@@ -31,21 +31,20 @@
+     }
+     Some(name.into())
+ }
+-fn generation(name: &str) -> bool {
+-    let name = name
+-        .strip_prefix("mlkem.")
+-        .or_else(|| name.strip_prefix("mldsa."))
+-        .unwrap_or(name);
+-    matches!(
+-        name,
+-        "MLKEM768PrivateKey.generate"
+-            | "MLKEM1024PrivateKey.generate"
+-            | "MLDSA44PrivateKey.generate"
+-            | "MLDSA65PrivateKey.generate"
+-            | "MLDSA87PrivateKey.generate"
+-    )
++fn generation(name: &str, pattern: &regex::Regex) -> bool {
++    super::exact_match(pattern, &format!("{name}("))
+ }
+-pub(super) fn inspect<'a>(ctx: &mut Context<'a, '_>, facts: &mut Facts) {
++pub(super) fn inspect<'a>(
++    ctx: &mut Context<'a, '_>,
++    facts: &mut Facts,
++    rules: &pqc_scan_rules::RuleSet,
++) {
++    let Some(pattern) = rules
++        .get("PQC_PYTHON_API")
++        .and_then(|r| r.compiled_pattern())
++    else {
++        return;
++    };
+     let nodes = ctx.nodes.clone();
+     for node in &nodes {
+         let scope = ctx.scope(*node);
+@@ -83,7 +82,7 @@
+                     };
+                     let known = trusted
+                         && (matches!(canonical.as_str(), "mlkem" | "mldsa")
+-                            || generation(&format!("{canonical}.generate")));
++                            || generation(&format!("{canonical}.generate"), pattern));
+                     recognized |= known;
+                     ctx.add(
+                         scope,
+@@ -160,7 +159,6 @@
+             _ => {}
+         }
+     }
+-    let recovery = regex::Regex::new(super::PQC_PYTHON_API).expect("bound built-in Python pattern");
+     let mut examined = 0;
+     for node in nodes {
+         if !matches!(node.kind(), "call" | "ERROR") {
+@@ -178,7 +176,7 @@
+             if node
+                 .child_by_field_name("function")
+                 .and_then(|n| canonical(ctx, n, 0))
+-                .is_some_and(|name| generation(&name))
++                .is_some_and(|name| generation(&name, pattern))
+             {
+                 facts.node(
+                     "PQC_PYTHON_API",
+@@ -190,7 +188,7 @@
+             let raw = ctx.source(node);
+             let boundary = raw.char_indices().nth(2000).map_or(raw.len(), |(i, _)| i);
+             facts.truncated |= boundary < raw.len();
+-            for hit in recovery.find_iter(&raw[..boundary]).take(4096) {
++            for hit in pattern.find_iter(&raw[..boundary]).take(4096) {
+                 let start = node.start_byte() + hit.start();
+                 let root = hit.as_str().split('.').next().unwrap_or("");
+                 let shadowed = ctx.lookup(node, root).is_some_and(|b| b.imported.is_none());
+--- a/crates/pqc_scan_detectors/src/source_facts/rust.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/rust.rs
+@@ -4,6 +4,10 @@
+ };
+ use tree_sitter::Node;
+ const CRATES: [&str; 3] = ["ml_kem", "ml_dsa", "slh_dsa"];
++static INCOMPLETE_USE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
++    let crates = CRATES.map(regex::escape).join("|");
++    regex::Regex::new(&format!(r"^\s*use\s+({crates})::\s*$")).expect("known Rust crate names")
++});
+ fn root_name(ctx: &Context<'_, '_>, mut node: Node<'_>) -> String {
+     for _ in 0..MAX_DEPTH {
+         if let Some(path) = node.child_by_field_name("path") {
+@@ -222,8 +226,7 @@
+             }
+         }
+     }
+-    let incomplete = regex::Regex::new(r"^\s*use\s+(ml_kem|ml_dsa|slh_dsa)::\s*$")
+-        .expect("constant recovery prefix");
++    let incomplete = &*INCOMPLETE_USE;
+     let mut examined = 0;
+     for node in nodes {
+         if examined == 4096 {
+@@ -234,7 +237,7 @@
+             "call_expression" => {
+                 examined += 1;
+                 if generation(ctx, node).is_some() {
+-                    facts.call("PQC_RUST_API", node, "locally_imported_rust_type");
++                    facts.callee("PQC_RUST_API", node, "locally_imported_rust_type");
+                     continue;
+                 }
+                 let Some(function) = node.child_by_field_name("function") else {
+@@ -252,7 +255,7 @@
+                     if (method == "encapsulate" && role == Some(1))
+                         || (method == "decapsulate" && role == Some(0))
+                     {
+-                        facts.call("PQC_RUST_API", node, "local_ml_kem_receiver_provenance");
++                        facts.callee("PQC_RUST_API", node, "local_ml_kem_receiver_provenance");
+                     }
+                 }
+             }
+--- a/crates/pqc_scan_detectors/src/source_facts/selectors_tests.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/selectors_tests.rs
+@@ -0,0 +1,80 @@
++//! Changed YAML selectors, not copied implementation lists, define allowed references.
++use super::{context::Context, javascript, python, Facts};
++use pqc_scan_rules::RuleSet;
++use std::sync::atomic::{AtomicU64, Ordering};
++fn inspect(language: &str, pattern: &str, text: &str) -> Facts {
++    static NEXT: AtomicU64 = AtomicU64::new(0);
++    let root = std::env::temp_dir().join(format!(
++        "pqc043-selector-{}-{}",
++        std::process::id(),
++        NEXT.fetch_add(1, Ordering::Relaxed)
++    ));
++    std::fs::create_dir_all(&root).unwrap();
++    let id = if language == "python" {
++        "PQC_PYTHON_API"
++    } else {
++        "PQC_NODE_API"
++    };
++    let raw = serde_json::json!([{"id":id,"kind":"tree_sitter","category":"test","severity":"info","risk":"quantum-uncertain","confidence":0.5,"migration_hint":"Synthetic selector control, not a supported real algorithm","pattern":pattern,"scope":language}]);
++    std::fs::write(root.join("test.yml"), raw.to_string()).unwrap();
++    let rules = RuleSet::load_from_dir(&root).unwrap();
++    std::fs::remove_dir_all(&root).unwrap();
++    let mut parser = tree_sitter::Parser::new();
++    let grammar = if language == "python" {
++        tree_sitter_python::LANGUAGE
++    } else {
++        tree_sitter_javascript::LANGUAGE
++    };
++    parser.set_language(&grammar.into()).unwrap();
++    let tree = parser.parse(text, None).unwrap();
++    let mut ctx = Context::new(tree.root_node(), text, language);
++    let mut facts = Facts {
++        partial: tree.root_node().has_error(),
++        ..Facts::default()
++    };
++    if language == "python" {
++        python::inspect(&mut ctx, &mut facts, &rules);
++    } else {
++        javascript::inspect(&mut ctx, &mut facts, &rules);
++    }
++    facts
++}
++fn count(facts: &Facts, id: &str) -> usize {
++    facts.hits.get(id).map_or(0, Vec::len)
++}
++#[test]
++fn node_alias_and_literal_loop_follow_the_supplied_selector() {
++    // This hypothetical name deliberately appears only in the test YAML.
++    let pattern = r#"\bgenerateKeyPairSync\(\s*['"]future-kem['"]"#;
++    let facts=inspect("javascript",pattern,"import {generateKeyPairSync as build} from 'node:crypto'; build('future-kem'); for(const choice of ['future-kem','ordinary']) { build(choice); }");
++    assert_eq!(count(&facts, "PQC_NODE_API"), 2);
++    assert_eq!(
++        count(
++            &inspect("javascript", pattern, "generateKeyPairSync('ml-kem-768');"),
++            "PQC_NODE_API"
++        ),
++        0
++    );
++}
++#[test]
++fn python_import_alias_and_recovery_follow_the_supplied_selector() {
++    let pattern = r"\b(?:mlkem\.)?FuturePrivateKey\.generate\(";
++    for text in ["from cryptography.hazmat.primitives.asymmetric.mlkem import FuturePrivateKey as Key\nk = Key.generate()\n", "from cryptography.hazmat.primitives.asymmetric.mlkem import FuturePrivateKey\nk = FuturePrivateKey.generate(\n"] {
++        assert_eq!(count(&inspect("python",pattern,text),"PQC_PYTHON_API"),2);
++    }
++    assert_eq!(count(&inspect("python",pattern,"from cryptography.hazmat.primitives.asymmetric.mlkem import MLKEM768PrivateKey\nk = MLKEM768PrivateKey.generate()\n"),"PQC_PYTHON_API"),0);
++}
++#[test]
++fn quoting_and_partial_algorithm_names_do_not_forge_a_selected_argument() {
++    let pattern = r#"\bgenerateKeyPairSync\(\s*['"]ml-kem-768['"]"#;
++    for text in [
++        r#"generateKeyPairSync("ml-kem-768' + unknown");"#,
++        r#"generateKeyPairSync('ml-kem-768" + unknown');"#,
++        "generateKeyPairSync('ml-kem-768-extra');",
++    ] {
++        assert_eq!(
++            count(&inspect("javascript", pattern, text), "PQC_NODE_API"),
++            0
++        );
++    }
++}
+--- a/crates/pqc_scan_detectors/src/source_facts.rs
++++ b/crates/pqc_scan_detectors/src/source_facts.rs
+@@ -1,9 +1,13 @@
+ //! Local source facts for the explicitly supported built-in reference rules.
+ //! Unrelated/custom patterns retain the generic matching path.
++mod bindings;
+ mod context;
+ mod javascript;
+ mod python;
+ mod rust;
++#[cfg(test)]
++mod selectors_tests;
++use bindings::{handler, Handler};
+ use context::Context;
+ use pqc_scan_core::{DetectorStatus, ScannableFile};
+ use pqc_scan_rules::{Rule, RuleSet};
+@@ -40,17 +44,19 @@
+     fn node(&mut self, id: &'static str, node: Node<'_>, reason: &'static str) {
+         self.push(id, node.start_byte(), node.end_byte(), reason);
+     }
++    fn callee(&mut self, id: &'static str, node: Node<'_>, reason: &'static str) {
++        if let Some(function) = node.child_by_field_name("function") {
++            self.push(id, node.start_byte(), function.end_byte(), reason);
++        }
++    }
+     fn call(&mut self, id: &'static str, node: Node<'_>, reason: &'static str) {
+         let Some(function) = node.child_by_field_name("function") else {
+             return;
+         };
+-        let end = if id == "PQC_RUST_API" {
+-            function.end_byte()
+-        } else {
+-            node.child_by_field_name("arguments")
+-                .and_then(|args| context::children(args).first().copied())
+-                .map_or(function.end_byte(), |arg| arg.end_byte())
+-        };
++        let end = node
++            .child_by_field_name("arguments")
++            .and_then(|args| context::children(args).first().copied())
++            .map_or(function.end_byte(), |arg| arg.end_byte());
+         self.push(id, node.start_byte(), end, reason);
+     }
+     pub fn rule_matches(&self, rule: &Rule) -> &[SourceMatch] {
+@@ -60,12 +66,9 @@
+         self.hits.get(rule.id.as_str()).map_or(&[], Vec::as_slice)
+     }
+     pub fn replaces(&self, rule: &Rule) -> bool {
+-        builtin(rule)
+-            && matches!(
+-                rule.id.as_str(),
+-                "PQC_NODE_API" | "PQC_PYTHON_API" | "PQC_RUST_API" | "PQC_JAVA_API"
+-            )
++        handler(rule).is_some_and(Handler::replaces_generic)
+     }
++
+     pub fn status(&self) -> DetectorStatus {
+         if self.truncated {
+             DetectorStatus::Truncated
+@@ -77,55 +80,27 @@
+     }
+ }
+ 
+-// Exact source fingerprints bind enhanced semantics to these default patterns.
+-// Changing a custom rule's pattern never silently invokes a built-in predicate.
+-const PQC_JAVA_API: &str = r###"\b(?:KEM|Signature|KeyPairGenerator)\s*\.\s*getInstance\(\s*"(?:ML-KEM(?:-(?:512|768|1024))?|ML-DSA(?:-(?:44|65|87))?|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf])""###;
+-const PQC_NODE_API: &str = r###"\bgenerateKeyPair(?:Sync)?\(\s*['"](?:ml-kem-(?:512|768|1024)|ml-dsa-(?:44|65|87)|slh-dsa-(?:sha2|shake)-(?:128|192|256)[sf])['"]"###;
+-const PQC_PYTHON_API: &str = r###"\b(?:mlkem\.)?MLKEM(?:768|1024)PrivateKey\.generate\(|\b(?:mldsa\.)?MLDSA(?:44|65|87)PrivateKey\.generate\("###;
+-const PQC_RUST_API: &str = r###"\b(?:ml_kem|ml_dsa|slh_dsa)::[A-Za-z][A-Za-z0-9_]*"###;
+-const TS_NODE_RSA_USAGE: &str = r###"(?i)(\b(createSign|createVerify)\s*\(\s*['"]RSA|\b(privateEncrypt|publicDecrypt)\s*\(|\b(RS|PS)(256|384|512)\b)"###;
+-const API_NODE_CRYPTO_SIGN_RSA: &str = r###"create(Sign|Verify)\(\s*['"]RSA"###;
+ pub(crate) fn builtin(rule: &Rule) -> bool {
+-    let pattern = match rule.id.as_str() {
+-        "PQC_NODE_API" => PQC_NODE_API,
+-        "PQC_JAVA_API" => PQC_JAVA_API,
+-        "PQC_PYTHON_API" => PQC_PYTHON_API,
+-        "PQC_RUST_API" => PQC_RUST_API,
+-        "TS_NODE_RSA_USAGE" => TS_NODE_RSA_USAGE,
+-        "API_NODE_CRYPTO_SIGN_RSA" => API_NODE_CRYPTO_SIGN_RSA,
+-        _ => return false,
+-    };
+-    let scope = match rule.id.as_str() {
+-        "PQC_JAVA_API" => "java",
+-        "PQC_PYTHON_API" => "python",
+-        "PQC_RUST_API" => "rust",
+-        "API_NODE_CRYPTO_SIGN_RSA" => "code",
+-        _ => "javascript,typescript",
+-    };
+-    let kind = if rule.id == "API_NODE_CRYPTO_SIGN_RSA" {
+-        pqc_scan_rules::RuleKind::Regex
+-    } else {
+-        pqc_scan_rules::RuleKind::TreeSitter
+-    };
+-    rule.pattern == pattern && rule.scope == scope && rule.kind == kind
++    handler(rule).is_some()
++}
++
++// Require the complete canonical request prefix: an embedded quote or an
++// algorithm-name prefix must not turn an unrelated value into a selected API.
++fn exact_match(pattern: &regex::Regex, target: &str) -> bool {
++    pattern
++        .find(target)
++        .is_some_and(|m| m.start() == 0 && m.end() == target.len())
+ }
+ pub(crate) fn inspect(root: Node<'_>, text: &str, language: &str, rules: &RuleSet) -> Facts {
+     let mut facts = Facts {
+         partial: root.has_error(),
+         ..Facts::default()
+     };
+-    let relevant: &[&str] = match language {
+-        "javascript" | "typescript" => &[
+-            "PQC_NODE_API",
+-            "TS_NODE_RSA_USAGE",
+-            "API_NODE_CRYPTO_SIGN_RSA",
+-        ],
+-        "python" => &["PQC_PYTHON_API"],
+-        "rust" => &["PQC_RUST_API"],
+-        "java" => &["PQC_JAVA_API"],
+-        _ => &[],
+-    };
+-    if !relevant.iter().any(|id| rules.get(id).is_some_and(builtin)) {
++    if !Handler::ALL
++        .into_iter()
++        .filter(|h| h.handles(language))
++        .any(|h| rules.get(h.id()).is_some_and(builtin))
++    {
+         return facts;
+     }
+     let mut context = Context::new(root, text, language);
+@@ -134,8 +109,8 @@
+         return facts;
+     }
+     match language {
+-        "javascript" | "typescript" => javascript::inspect(&mut context, &mut facts),
+-        "python" => python::inspect(&mut context, &mut facts),
++        "javascript" | "typescript" => javascript::inspect(&mut context, &mut facts, rules),
++        "python" => python::inspect(&mut context, &mut facts, rules),
+         "rust" => rust::inspect(&mut context, &mut facts),
+         "java" => {
+             if let Some(rule) = rules.get("PQC_JAVA_API").filter(|r| builtin(r)) {

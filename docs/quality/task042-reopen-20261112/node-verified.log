@@ -1,0 +1,196 @@
+TAP version 13
+# Subtest: default is compact and occurrence/group pagination preserves every record
+ok 1 - default is compact and occurrence/group pagination preserves every record
+  ---
+  duration_ms: 14.624042
+  type: 'test'
+  ...
+# Subtest: inventory, search, empty filters and resetting report correct counts
+ok 2 - inventory, search, empty filters and resetting report correct counts
+  ---
+  duration_ms: 14.830959
+  type: 'test'
+  ...
+# Subtest: deep links reveal inventory findings outside both pagers
+ok 3 - deep links reveal inventory findings outside both pagers
+  ---
+  duration_ms: 7.392792
+  type: 'test'
+  ...
+# Subtest: reviewed final-gap results omit only the finite 81 matches and retain inventory
+ok 4 - reviewed final-gap results omit only the finite 81 matches and retain inventory
+  ---
+  duration_ms: 42.008667
+  type: 'test'
+  ...
+# Subtest: a new error at a reviewed diagnostic location remains actionable
+ok 5 - a new error at a reviewed diagnostic location remains actionable
+  ---
+  duration_ms: 33.1565
+  type: 'test'
+  ...
+# Subtest: stale source binding and excess identical occurrences invalidate finite allowances
+ok 6 - stale source binding and excess identical occurrences invalidate finite allowances
+  ---
+  duration_ms: 39.364083
+  type: 'test'
+  ...
+# Subtest: only the exact reviewed result is omitted; native input and run metadata stay intact
+ok 7 - only the exact reviewed result is omitted; native input and run metadata stay intact
+  ---
+  duration_ms: 4.291042
+  type: 'test'
+  ...
+# Subtest: canonical digest is independent of object key ordering and includes nested properties
+ok 8 - canonical digest is independent of object key ordering and includes nested properties
+  ---
+  duration_ms: 0.154125
+  type: 'test'
+  ...
+# Subtest: a new result in the same fixture file remains actionable
+ok 9 - a new result in the same fixture file remains actionable
+  ---
+  duration_ms: 3.13375
+  type: 'test'
+  ...
+# Subtest: changed message, rule, level or properties are never covered by a previous allowance
+ok 10 - changed message, rule, level or properties are never covered by a previous allowance
+  ---
+  duration_ms: 3.049625
+  type: 'test'
+  ...
+# Subtest: changing even the body of a reviewed source file keeps its result
+ok 11 - changing even the body of a reviewed source file keeps its result
+  ---
+  duration_ms: 2.19225
+  type: 'test'
+  ...
+# Subtest: missing or symlinked sources do not borrow a reviewed source identity
+ok 12 - missing or symlinked sources do not borrow a reviewed source identity
+  ---
+  duration_ms: 2.172334
+  type: 'test'
+  ...
+# Subtest: an excess duplicate keeps the entire group rather than consuming a prefix allowance
+ok 13 - an excess duplicate keeps the entire group rather than consuming a prefix allowance
+  ---
+  duration_ms: 2.218084
+  type: 'test'
+  ...
+# Subtest: allowance counts cover the whole SARIF, including repeated runs
+ok 14 - allowance counts cover the whole SARIF, including repeated runs
+  ---
+  duration_ms: 1.960542
+  type: 'test'
+  ...
+# Subtest: other tools and multi-location or related/code-flow results stay unchanged
+ok 15 - other tools and multi-location or related/code-flow results stay unchanged
+  ---
+  duration_ms: 2.687708
+  type: 'test'
+  ...
+# Subtest: indirect URI resolution is ineligible even with a matching result digest
+ok 16 - indirect URI resolution is ineligible even with a matching result digest
+  ---
+  duration_ms: 2.733666
+  type: 'test'
+  ...
+# Subtest: unregistered product locations and missing regions are retained
+ok 17 - unregistered product locations and missing regions are retained
+  ---
+  duration_ms: 1.841583
+  type: 'test'
+  ...
+# Subtest: unsafe or nonliteral expectation paths and duplicate policies are rejected
+ok 18 - unsafe or nonliteral expectation paths and duplicate policies are rejected
+  ---
+  duration_ms: 1.256584
+  type: 'test'
+  ...
+# Subtest: empty or malformed SARIF cannot become a successful empty upload
+ok 19 - empty or malformed SARIF cannot become a successful empty upload
+  ---
+  duration_ms: 1.337084
+  type: 'test'
+  ...
+# Subtest: audit contains identities and reasons without copying message/source payloads
+ok 20 - audit contains identities and reasons without copying message/source payloads
+  ---
+  duration_ms: 1.096708
+  type: 'test'
+  ...
+# Subtest: CLI writes a separate upload and audit, preserving the raw SARIF bytes
+ok 21 - CLI writes a separate upload and audit, preserving the raw SARIF bytes
+  ---
+  duration_ms: 37.616334
+  type: 'test'
+  ...
+# Subtest: CLI refuses output aliases and reports malformed input without echoing a canary
+ok 22 - CLI refuses output aliases and reports malformed input without echoing a canary
+  ---
+  duration_ms: 57.192875
+  type: 'test'
+  ...
+# Subtest: CLI also protects raw input through hard-link and symlink output aliases
+ok 23 - CLI also protects raw input through hard-link and symlink output aliases
+  ---
+  duration_ms: 53.110208
+  type: 'test'
+  ...
+# Subtest: actual scanner still detects identical fixture and product inputs; only the reviewed fixture is omitted
+ok 24 - actual scanner still detects identical fixture and product inputs; only the reviewed fixture is omitted
+  ---
+  duration_ms: 1473.751625
+  type: 'test'
+  ...
+# Subtest: a reviewed line-only result requires an explicit null column and exact full digest
+ok 25 - a reviewed line-only result requires an explicit null column and exact full digest
+  ---
+  duration_ms: 2.808333
+  type: 'test'
+  ...
+# Subtest: reviewed rule definitions, guidance, identifiers and OID labels are upload-only exceptions
+ok 26 - reviewed rule definitions, guidance, identifiers and OID labels are upload-only exceptions
+  ---
+  duration_ms: 48.958
+  type: 'test'
+  ...
+# Subtest: an unreviewed result in a registered rule-definition file remains visible
+ok 27 - an unreviewed result in a registered rule-definition file remains visible
+  ---
+  duration_ms: 32.346791
+  type: 'test'
+  ...
+# Subtest: artifact-only test findings remain visible without a reviewed positive line
+ok 28 - artifact-only test findings remain visible without a reviewed positive line
+  ---
+  duration_ms: 21.20775
+  type: 'test'
+  ...
+# Subtest: PR14 reviewed test inputs and classification data are omitted only from the upload copy
+ok 29 - PR14 reviewed test inputs and classification data are omitted only from the upload copy
+  ---
+  duration_ms: 46.205541
+  type: 'test'
+  ...
+# Subtest: new error at the same reviewed production source position remains actionable
+ok 30 - new error at the same reviewed production source position remains actionable
+  ---
+  duration_ms: 33.364292
+  type: 'test'
+  ...
+# Subtest: stale classification-source binding retains every finding from that file
+ok 31 - stale classification-source binding retains every finding from that file
+  ---
+  duration_ms: 22.551292
+  type: 'test'
+  ...
+1..31
+# tests 31
+# suites 0
+# pass 31
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1696.486333

@@ -5,7 +5,7 @@
   risk: quantum-safe
   confidence: 0.80
   migration_hint: JDK 24+ provides ML-KEM and ML-DSA; verify provider and protocol support independently.
-  pattern: '(?:KEM|Signature|KeyPairGenerator)\s*\.\s*getInstance\(\s*"ML-(?:KEM|DSA)(?:-(?:512|768|1024|44|65|87))?"'
+  pattern: '\b(?:KEM|Signature|KeyPairGenerator)\s*\.\s*getInstance\(\s*"(?:ML-KEM(?:-(?:512|768|1024))?|ML-DSA(?:-(?:44|65|87))?|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf])"'
   scope: java
   description: Standard PQC algorithm requested through Java APIs; runtime success is not established.
 
@@ -71,7 +71,7 @@
   risk: quantum-safe
   confidence: 0.65
   migration_hint: Verify openssl gem and linked OpenSSL/provider capabilities, not Ruby version alone.
-  pattern: '[''"]ML-(?:KEM-(?:512|768|1024)|DSA-(?:44|65|87))[''"]'
+  pattern: '[''"](?:ML-(?:KEM-(?:512|768|1024)|DSA-(?:44|65|87))|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf])[''"]'
   scope: ruby
   description: Ruby PQC algorithm literal referenced; key generation or signing success is not established.
 
@@ -93,9 +93,9 @@
   risk: quantum-uncertain
   confidence: 0.80
   migration_hint: Review explicit group restrictions against the deployed JSSE version and peer support.
-  pattern: '(?im)^\s*jdk\.tls\.namedGroups\s*=\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\s*,\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*\s*$'
+  pattern: '(?im)^\s*(?:jdk\.tls\.namedGroups\s*=\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\s*,\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*|System\.setProperty\(\s*"jdk\.tls\.namedGroups"\s*,\s*"(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\s*,\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*"\s*\)\s*;?|<entry\s+key="jdk\.tls\.namedGroups"\s*>\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\s*,\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*\s*</entry>)\s*$'
   scope: config
-  description: Java property explicitly lists only recognized classical TLS groups.
+  description: Explicit classical-only Java property intent in assignment, XML entry or static System.setProperty; effective loading is not established.
 
 - id: PQC_RUBY_CLASSICAL_GROUPS
   kind: regex
@@ -115,7 +115,7 @@
   risk: quantum-uncertain
   confidence: 0.60
   migration_hint: Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection.
-  pattern: '^(?:(?:rustls|aws-lc-rs|ml-kem|ml-dsa|slh-dsa|openssl)\s+\S+\s+cargo\b|@noble/post-quantum\s+\S+\s+npm\b|cryptography\s+\S+\s+pypi\b|openssl\s+\S+\s+gem\b|org\.bouncycastle:bcprov-jdk18on\s+\S+\s+maven\b)'
+  pattern: '^(?:(?:rustls|aws-lc-rs|ml-kem|ml-dsa|slh-dsa|openssl)\s+\S+\s+cargo\b|@noble/post-quantum\s+\S+\s+npm\b|cryptography\s+\S+\s+pypi\b|openssl\s+\S+\s+(?:gem|generic|unknown)\b|org\.bouncycastle:bcprov-jdk18on\s+\S+\s+maven\b|github\.com/cloudflare/circl\s+\S+\s+golang\b)'
   scope: dependency
   description: Library with version-dependent PQC capabilities inventoried; capability is not an enabled-state finding.
 
@@ -126,7 +126,7 @@
   risk: quantum-uncertain
   confidence: 0.75
   migration_hint: Identify the exact implementation and wire format; draft Kyber/Dilithium names are not evidence of final ML-KEM/ML-DSA conformance.
-  pattern: '\b(?:X25519Kyber768Draft00|Kyber(?:512|768|1024)|Dilithium[235])\b'
+  pattern: '(?i)\b(?:X25519Kyber768Draft00|Kyber(?:512|768|1024)|Dilithium[235])\b'
   scope: java,go,javascript,typescript,python,rust,ruby
   description: Pre-standard PQC algorithm name referenced; check compatibility before replacing it.
 

@@ -1145,10 +1145,11 @@ pub(super) fn heuristic(name: &str, text: &str) -> anyhow::Result<Parsed> {
     if text.len() > 2 * 1024 * 1024 {
         return failure(Failure::Limit);
     }
+    let mut lexical_truncated = false;
     let mut items = match name {
         "Gemfile" | "gems.rb" => lexical::parse_gemfile(text),
         "Gemfile.lock" | "gems.locked" => lexical::parse_gemfile_lock(text),
-        v if v.ends_with(".gemspec") => lexical::parse_gemspec(text),
+        v if v.ends_with(".gemspec") => lexical::parse_gemspec(text, &mut lexical_truncated),
         "requirements.txt" => lexical::parse_requirements(text),
         "go.mod" => lexical::parse_go_mod(text),
         "pom.xml" => lexical::parse_pom_xml(text),
@@ -1156,7 +1157,11 @@ pub(super) fn heuristic(name: &str, text: &str) -> anyhow::Result<Parsed> {
         "gradle.lockfile" => lexical::parse_gradle_lockfile(text),
         _ => vec![],
     };
-    let mut b = Build::new(DetectorStatus::NotReported);
+    let mut b = Build::new(if lexical_truncated {
+        DetectorStatus::Truncated
+    } else {
+        DetectorStatus::NotReported
+    });
     for item in items.drain(..) {
         let raw = text.lines().nth(item.line.saturating_sub(1)).unwrap_or("");
         let compact: String = raw.chars().filter(|c| !c.is_whitespace()).collect();

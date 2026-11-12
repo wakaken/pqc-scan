@@ -77,6 +77,7 @@ def load_truth(directory):
     if len(truth["labelSources"]) != 2:
         raise ValueError("Two independent label records are required")
     reviewers = set()
+    records = []
     for name, expected in truth["labelSources"].items():
         path = directory / safe_relative(name)
         reviewer = json.loads(path.read_text())
@@ -86,8 +87,14 @@ def load_truth(directory):
             raise ValueError("Independent reviewer identities must be distinct")
         reviewers.add(reviewer["reviewer"])
         validate_labels(data, label_map(reviewer["labels"]))
+        records.append(reviewer)
     labels = label_map(truth["labels"])
     validate_labels(data, labels)
+    if 'annotationVersion' in data:
+        if data['annotationVersion'] != 1:
+            raise ValueError('Unsupported annotation version')
+        from taxonomy import validate_freeze
+        validate_freeze(directory, data, truth, records)
     return data, labels
 
 

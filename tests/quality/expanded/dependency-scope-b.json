@@ -1,0 +1,67 @@
+{
+  "reviewer": "task042_test_review",
+  "timestampUtc": "2026-11-11T10:02:33.349490Z",
+  "sourceOnly": true,
+  "otherLabelsSeen": false,
+  "newCorpusScannerResultsSeen": false,
+  "originalLabelRecordUnchanged": true,
+  "originalLabelsSha256": "a90ad40e58089d5dcacfbdfa769f3d6e58414dee4d417bc316a0fe80939c19c7",
+  "scope": "追加測定前に公式v6.0.0/v1.6.1ソースから依存の存在とPQC能力の前提を区別する補足監査。既存protocol/labelsは変更しない。",
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/panva/jose/v6.0.0/README.md",
+      "sha256": "09a3764a2203a8f3030884583f00c43ca2a12407b73a49e8226644ec9724569a",
+      "bytes": 9450
+    },
+    {
+      "url": "https://raw.githubusercontent.com/panva/jose/v6.0.0/src/key/generate_key_pair.ts",
+      "sha256": "d213a7850446e70099c0d72b65612f7239f116093a6b0ffb1dfb5c20fa625e61",
+      "bytes": 5140
+    },
+    {
+      "url": "https://raw.githubusercontent.com/cloudflare/circl/v1.6.1/README.md",
+      "sha256": "cb04a8e42cdb85f12f9473c64aa2f8c888df8cb50579bd84c1775917549107d3",
+      "bytes": 8134
+    }
+  ],
+  "observations": [
+    {
+      "subject": "jose@6.0.0",
+      "fact": "公式READMEはJOSE/JWT/JWS/JWE/JWK機能とRFC7518・RFC8037等を記載し、標準PQCアルゴリズムの対応を明示していない。generate_key_pair.tsの閉じたswitchはRSA、ECDSA、Ed25519、ECDH/X25519の組み合わせを処理し、他のalgは例外にする。",
+      "inference": "この宣言の存在は確認できるが、jose@6.0.0を標準PQC対応ライブラリとする根拠にはならない。READMEの非記載だけから全APIの絶対的な非対応を証明したとは扱わない。",
+      "declarationPresence": "established",
+      "standardPqcCapability": "not_established",
+      "affectedUnits": [
+        "x057",
+        "x060",
+        "x063"
+      ],
+      "recommendedLabel": "ambiguous",
+      "recommendedAlgorithms": [
+        "unknown"
+      ],
+      "recommendedUsage": "dependency_presence",
+      "reason": "PQC-capable候補という事実的な問いなら、宣言は存在するが能力前提は未確立であり、positiveにも安全なnegativeにもして精度の分母へ入れない。"
+    },
+    {
+      "subject": "github.com/cloudflare/circl@v1.6.1",
+      "fact": "固定版の公式READMEはPQCの項目にML-KEMとML-DSAの対応を明示する。",
+      "inference": "このライブラリ宣言をPQCアルゴリズムを提供するライブラリの存在としてpositiveにする根拠はある。対象プロジェクトがこれらのAPIを実行・有効化したとは分からない。",
+      "declarationPresence": "established",
+      "standardPqcCapability": "documented_library_capability_only",
+      "affectedUnits": [
+        "x066"
+      ],
+      "recommendedLabel": "positive",
+      "recommendedAlgorithms": [
+        "unknown"
+      ],
+      "recommendedUsage": "dependency_presence"
+    }
+  ],
+  "protocolInterpretation": {
+    "originalRecord": "元のlabels-bはprotocolのrecognized集合にjoseが明示列挙され、版依存能力にかかわらずpresenceを問うと定義されていたため、存在をpositiveにした。元の記録はその定義に対して一貫しており、能力の主張は含まない。",
+    "ambiguity": "recognized集合の構文的な所属と、実際にPQC機能を提供するライブラリの集合は同じとは限らない。PQC-capableという名称と例示の事実前提がずれている。",
+    "recommendedAdjudication": "元の独立記録は保存し、このsource fact補足をhashで裁定に結び、joseの能力前提未確立を理由に対象3単位をambiguousへ裁定する。closed recognized-setのpresenceを残す場合は、その評価がPQC能力を一切検証していないことを独立の限定として明記する。スキャナ結果やパターンを根拠に選択しない。"
+  }
+}

@@ -1,0 +1,907 @@
+{
+  "scope": "Phase 0/1 development assessment accepted; no product-wide or publication acceptance",
+  "baseHead": "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf",
+  "initialWorktree": "clean",
+  "branch": "codex/quality-assessment-model",
+  "initialCommands": [
+    {
+      "name": "release-build",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--release",
+        "--locked",
+        "--offline"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:12:52.165151+00:00",
+      "exitCode": 0,
+      "seconds": 1.477346542000305,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/release-build.log"
+    },
+    {
+      "name": "entry-fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:12:53.643209+00:00",
+      "exitCode": 0,
+      "seconds": 0.3932146250153892,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/entry-fmt.log"
+    },
+    {
+      "name": "entry-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--offline"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:12:54.036957+00:00",
+      "exitCode": 0,
+      "seconds": 26.928362042002846,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/entry-tests.log"
+    },
+    {
+      "name": "entry-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:13:20.965947+00:00",
+      "exitCode": 0,
+      "seconds": 0.9424983340140898,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/entry-clippy.log"
+    },
+    {
+      "name": "entry-quality",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:13:21.909190+00:00",
+      "exitCode": 0,
+      "seconds": 0.7927510830049869,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/entry-quality.log"
+    },
+    {
+      "name": "entry-node",
+      "command": [
+        "node",
+        "--test",
+        "shell/compact-report.test.cjs",
+        "shell/final-gap-self-scan.test.cjs",
+        "shell/prepare-code-scanning.test.cjs",
+        "shell/self-scan-backlog.test.cjs",
+        "shell/self-scan-policy.test.cjs"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:13:22.702418+00:00",
+      "exitCode": 0,
+      "seconds": 1.6029167090018746,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/entry-node.log"
+    },
+    {
+      "name": "entry-distribution",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/distribution",
+        "-v"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:13:24.306007+00:00",
+      "exitCode": 0,
+      "seconds": 0.46297537500504404,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/entry-distribution.log"
+    },
+    {
+      "name": "entry-baseline",
+      "command": [
+        "python3",
+        "tests/quality/run.py",
+        "--binary",
+        "target/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--out-dir",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/baseline",
+        "--repeats",
+        "3",
+        "--warm-samples",
+        "3"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:13:24.769482+00:00",
+      "exitCode": 0,
+      "seconds": 4.555949332978344,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/entry-baseline.log"
+    }
+  ],
+  "historicalBindings": {
+    "sourceBindings": {
+      "count": 547,
+      "mismatches": []
+    },
+    "protocolSourceBindings": {
+      "count": 348,
+      "mismatches": [
+        "tasks/001-align-ci-quality-gates.yaml",
+        "tasks/037-oss-10-quality.yaml",
+        "tests/quality/test_task_queue.py"
+      ]
+    }
+  },
+  "github": {
+    "observedAt": "2026-11-11",
+    "head": "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf",
+    "queries": [
+      {
+        "url": "https://api.github.com/repos/wakaken/pqc-scan/actions/runs?head_sha=0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf&per_page=100",
+        "isError": false,
+        "data": {
+          "total_count": 1,
+          "workflow_runs": [
+            {
+              "id": 42976768811,
+              "headSha": "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf",
+              "status": "completed",
+              "conclusion": "success",
+              "url": "https://github.com/wakaken/pqc-scan/actions/runs/42976768811",
+              "createdAt": "2026-11-11T07:03:55Z"
+            }
+          ]
+        }
+      },
+      {
+        "url": "https://api.github.com/repos/wakaken/pqc-scan/branches/develop/protection",
+        "isError": true,
+        "data": {
+          "error": "GitHub API error 403: {\"message\":\"Resource not accessible by integration\",\"documentation_url\":\"https://docs.github.com/rest/branches/branch-protection#get-branch-protection\",\"status\":\"403\"}",
+          "error_code": "FORBIDDEN",
+          "error_data": {
+            "message": "Resource not accessible by integration",
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "status": "403"
+          }
+        }
+      },
+      {
+        "url": "https://api.github.com/repos/wakaken/pqc-scan/rulesets",
+        "isError": false,
+        "data": []
+      },
+      {
+        "url": "https://api.github.com/repos/wakaken/pqc-scan/releases?per_page=10",
+        "isError": false,
+        "data": []
+      }
+    ],
+    "jobs": [
+      {
+        "name": "quality",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/wakaken/pqc-scan/actions/runs/42976768811/job/130377557621"
+      },
+      {
+        "name": "scan",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/wakaken/pqc-scan/actions/runs/42976768811/job/130378435463"
+      },
+      {
+        "name": "protocols",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/wakaken/pqc-scan/actions/runs/42976768811/job/130378435489"
+      },
+      {
+        "name": "baseline",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/wakaken/pqc-scan/actions/runs/42976768811/job/130378435584"
+      }
+    ]
+  },
+  "tools": {
+    "cargo-llvm-cov": null,
+    "cargo-mutants": null,
+    "cargo-fuzz": null,
+    "cargo-audit": null,
+    "cargo-deny": null,
+    "scorecard": null,
+    "rustupComponents": "cargo-aarch64-apple-darwin\nclippy-aarch64-apple-darwin\nrust-analyzer-aarch64-apple-darwin\nrust-docs-aarch64-apple-darwin\nrust-src\nrust-std-aarch64-apple-darwin\nrustc-aarch64-apple-darwin\nrustfmt-aarch64-apple-darwin\n",
+    "fuzzFiles": [],
+    "proptestInLock": false,
+    "publicScorecard": {
+      "url": "https://api.securityscorecards.dev/projects/github.com/wakaken/pqc-scan",
+      "status": 404,
+      "body": ""
+    }
+  },
+  "reviews": {
+    "implementation": {
+      "agent": "quality_implementation_review",
+      "status": "approved after corrections and scoped self-scan review",
+      "record": "docs/quality/assessment-20261111/IMPLEMENTATION-REVIEW.md"
+    },
+    "testAdequacy": {
+      "agent": "quality_test_review",
+      "status": "approved; no required fixes; 84 strata independently recounted",
+      "record": "docs/quality/assessment-20261111/TEST-REVIEW.md"
+    }
+  },
+  "rawBaseline": "target/quality-assessment-20261111/baseline-final/summary.json",
+  "generatedReport": "target/quality-assessment-20261111/report-accepted",
+  "initialBaseline": "target/quality-assessment-20261111/baseline/summary.json",
+  "unexecuted": [
+    "Coverage line/region/branch",
+    "Mutation",
+    "cargo-fuzz/libFuzzer",
+    "proptest",
+    "Miri",
+    "Current RustSec audit/deny",
+    "Scorecard CLI",
+    "New independent algorithm/purpose truth",
+    "Real-product/multi-host/true cold-cache/failed-scan benchmarks",
+    "Browser check for this request (no HTML changes)",
+    "Hosted CI for unpushed changes"
+  ],
+  "finalCommands": [
+    {
+      "name": "verified-build",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--locked",
+        "--offline"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:31:58.018245+00:00",
+      "exitCode": 0,
+      "seconds": 0.3202911669795867,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/verified-build.log"
+    },
+    {
+      "name": "verified-fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:31:58.339074+00:00",
+      "exitCode": 0,
+      "seconds": 0.328379209007835,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/verified-fmt.log"
+    },
+    {
+      "name": "verified-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--offline"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:31:58.667975+00:00",
+      "exitCode": 0,
+      "seconds": 16.44176874999539,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/verified-tests.log"
+    },
+    {
+      "name": "verified-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:32:15.110349+00:00",
+      "exitCode": 0,
+      "seconds": 0.9639115000027232,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/verified-clippy.log"
+    },
+    {
+      "name": "verified-quality",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:32:16.074699+00:00",
+      "exitCode": 0,
+      "seconds": 0.7991476669849362,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/verified-quality.log"
+    },
+    {
+      "name": "verified-node",
+      "command": [
+        "node",
+        "--test",
+        "shell/compact-report.test.cjs",
+        "shell/final-gap-self-scan.test.cjs",
+        "shell/prepare-code-scanning.test.cjs",
+        "shell/self-scan-backlog.test.cjs",
+        "shell/self-scan-policy.test.cjs"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:32:16.874268+00:00",
+      "exitCode": 0,
+      "seconds": 1.4572498750058003,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/verified-node.log"
+    },
+    {
+      "name": "verified-distribution",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/distribution",
+        "-v"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:32:18.332000+00:00",
+      "exitCode": 0,
+      "seconds": 0.1507367919839453,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/verified-distribution.log"
+    },
+    {
+      "name": "verified-baseline",
+      "command": [
+        "python3",
+        "tests/quality/run.py",
+        "--binary",
+        "target/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--out-dir",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/baseline-final",
+        "--repeats",
+        "3",
+        "--warm-samples",
+        "3"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:32:18.483145+00:00",
+      "exitCode": 0,
+      "seconds": 5.0318943329912145,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/verified-baseline.log"
+    },
+    {
+      "name": "verified-report",
+      "command": [
+        "python3",
+        "tests/quality/report.py",
+        "--baseline",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/baseline-final",
+        "--reference",
+        "docs/quality/task023/BASELINE.json",
+        "--out-dir",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/report-final"
+      ],
+      "boundary": "sandbox-exec deny network",
+      "startedAt": "2026-11-11T07:32:23.515459+00:00",
+      "exitCode": 0,
+      "seconds": 0.09111270899302326,
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/verified-report.log"
+    }
+  ],
+  "reportingCommands": [
+    {
+      "name": "accepted-quality",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "seconds": 0.8556888340099249,
+      "startedAt": "2026-11-11T07:36:12.223505+00:00",
+      "boundary": "sandbox-exec deny network",
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/accepted-quality.log"
+    },
+    {
+      "name": "accepted-report",
+      "command": [
+        "python3",
+        "tests/quality/report.py",
+        "--baseline",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/baseline-final",
+        "--reference",
+        "docs/quality/task023/BASELINE.json",
+        "--out-dir",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/report-accepted"
+      ],
+      "exitCode": 0,
+      "seconds": 0.15112533298088238,
+      "startedAt": "2026-11-11T07:36:13.079641+00:00",
+      "boundary": "sandbox-exec deny network",
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/accepted-report.log"
+    },
+    {
+      "name": "accuracy-only",
+      "command": [
+        "python3",
+        "tests/quality/run.py",
+        "--binary",
+        "target/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--out-dir",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/baseline-accuracy-only",
+        "--skip-benchmarks"
+      ],
+      "exitCode": 0,
+      "seconds": 0.3826699579949491,
+      "startedAt": "2026-11-11T07:36:13.231130+00:00",
+      "boundary": "sandbox-exec deny network",
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/accuracy-only.log"
+    },
+    {
+      "name": "accuracy-only-report",
+      "command": [
+        "python3",
+        "tests/quality/report.py",
+        "--baseline",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/baseline-accuracy-only",
+        "--out-dir",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/report-accuracy-only"
+      ],
+      "exitCode": 0,
+      "seconds": 0.1506236249988433,
+      "startedAt": "2026-11-11T07:36:13.614183+00:00",
+      "boundary": "sandbox-exec deny network",
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/accuracy-only-report.log"
+    },
+    {
+      "name": "self-scan",
+      "command": [
+        "target/release/pqc-scan",
+        "scan",
+        ".",
+        "--format",
+        "sarif",
+        "--out-dir",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/self-scan",
+        "--rules-dir",
+        "rules"
+      ],
+      "exitCode": 0,
+      "seconds": 0.26579008300905116,
+      "startedAt": "2026-11-11T07:36:13.765228+00:00",
+      "boundary": "sandbox-exec deny network",
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/self-scan.log"
+    },
+    {
+      "name": "self-scan-projection",
+      "command": [
+        "node",
+        "shell/prepare-code-scanning.cjs",
+        "--input",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/self-scan/report.sarif",
+        "--expectations",
+        "docs/quality/SELF-SCAN-EXPECTATIONS.json",
+        "--root",
+        ".",
+        "--output",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/self-scan/code-scanning.sarif",
+        "--audit",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/self-scan/audit.json"
+      ],
+      "exitCode": 0,
+      "seconds": 0.1434843750030268,
+      "startedAt": "2026-11-11T07:36:14.031429+00:00",
+      "boundary": "sandbox-exec deny network",
+      "log": "/Users/waka/development/pqc/pqc-scan/target/quality-assessment-20261111/self-scan-projection.log"
+    }
+  ],
+  "postReviewCommands": [
+    {
+      "name": "post-review-quality",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-11T07:38:53.076505+00:00",
+      "seconds": 0.9716399160097353,
+      "log": "target/quality-assessment-20261111/post-review-quality.log",
+      "boundary": "sandbox-exec deny network"
+    },
+    {
+      "name": "post-review-node",
+      "command": [
+        "node",
+        "--test",
+        "shell/compact-report.test.cjs",
+        "shell/final-gap-self-scan.test.cjs",
+        "shell/prepare-code-scanning.test.cjs",
+        "shell/self-scan-backlog.test.cjs",
+        "shell/self-scan-policy.test.cjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-11T07:38:54.048447+00:00",
+      "seconds": 1.4191551250114571,
+      "log": "target/quality-assessment-20261111/post-review-node.log",
+      "boundary": "sandbox-exec deny network"
+    },
+    {
+      "name": "post-review-fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-11T07:38:55.467708+00:00",
+      "seconds": 0.31705033298931085,
+      "log": "target/quality-assessment-20261111/post-review-fmt.log",
+      "boundary": "sandbox-exec deny network"
+    },
+    {
+      "name": "post-review-diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-11T07:38:55.784893+00:00",
+      "seconds": 0.02492262498708442,
+      "log": "target/quality-assessment-20261111/post-review-diff.log",
+      "boundary": "sandbox-exec deny network"
+    }
+  ],
+  "failedAttempts": [
+    {
+      "command": "cargo test --workspace --locked --offline",
+      "exitCode": 101,
+      "reason": "New task ID040 collided with existing040; corrected to041 and rerun",
+      "log": "target/quality-assessment-20261111/final-tests.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/quality -p test_report.py -v",
+      "exitCode": 1,
+      "reason": "Pre-implementation red tests; macOS temporary-root symlink fixture corrected; review reproduction red tests",
+      "logs": [
+        "target/quality-assessment-20261111/report-red.log",
+        "target/quality-assessment-20261111/report-green.log",
+        "target/quality-assessment-20261111/review-fix-red.log",
+        "target/quality-assessment-20261111/performance-copy-red.log"
+      ]
+    }
+  ],
+  "accuracyOnlyEvidence": "target/quality-assessment-20261111/report-accuracy-only/quality.json",
+  "comparison": {
+    "current": "target/quality-assessment-20261111/baseline-final/summary.json",
+    "previous": "target/final-gaps/baseline/summary.json",
+    "original": "docs/quality/task023/BASELINE.json",
+    "sameEnvironment": {
+      "rust": true,
+      "cargo": true,
+      "platform": true,
+      "machine": true,
+      "hardware": true,
+      "buildProfile": true,
+      "features": true
+    },
+    "sameCorpus": true,
+    "sameTruth": true,
+    "sameInput": true,
+    "groupsSameAsPrevious": true,
+    "sameBinaryAsPrevious": true,
+    "benchmarks": {
+      "small": {
+        "wallSeconds": {
+          "previousMax": 0.031756665994180366,
+          "currentMax": 0.031672292010625824,
+          "investigateAbove": 0.06351333198836073,
+          "trigger": false
+        },
+        "peakRssBytes": {
+          "previousMax": 19120128,
+          "currentMax": 19087360,
+          "investigateAbove": 38240256,
+          "trigger": false
+        }
+      },
+      "medium": {
+        "wallSeconds": {
+          "previousMax": 0.10261729202466086,
+          "currentMax": 0.09944070799974725,
+          "investigateAbove": 0.2052345840493217,
+          "trigger": false
+        },
+        "peakRssBytes": {
+          "previousMax": 22134784,
+          "currentMax": 22069248,
+          "investigateAbove": 44269568,
+          "trigger": false
+        }
+      },
+      "large": {
+        "wallSeconds": {
+          "previousMax": 0.3546679159917403,
+          "currentMax": 0.33209725000779144,
+          "investigateAbove": 0.7093358319834806,
+          "trigger": false
+        },
+        "peakRssBytes": {
+          "previousMax": 36241408,
+          "currentMax": 35569664,
+          "investigateAbove": 72482816,
+          "trigger": false
+        }
+      },
+      "pathological": {
+        "wallSeconds": {
+          "previousMax": 0.0244427919969894,
+          "currentMax": 0.024368790996959433,
+          "investigateAbove": 0.0488855839939788,
+          "trigger": false
+        },
+        "peakRssBytes": {
+          "previousMax": 16973824,
+          "currentMax": 17006592,
+          "investigateAbove": 33947648,
+          "trigger": false
+        }
+      }
+    },
+    "limits": "same-host local investigation signal only; prior continuation 2x trigger and safety-read investigation retained in FINAL-GAPS-VALIDATION.md; host noise uncharacterized"
+  },
+  "selfScan": {
+    "raw": 1116,
+    "reviewedOmissions": 1088,
+    "retained": 28,
+    "priorRetainedUnchanged": true,
+    "newlyReviewed": 3,
+    "policySha256": "ce96831d3a82c431115deba5a2938045d5da28f41d0f647a7ec486b633598438",
+    "finalProjection": {
+      "command": "node shell/prepare-code-scanning.cjs --input target/quality-assessment-20261111/self-scan/report.sarif --expectations docs/quality/SELF-SCAN-EXPECTATIONS.json --root . --output target/quality-assessment-20261111/self-scan/code-scanning-final.sarif --audit target/quality-assessment-20261111/self-scan/audit-final.json",
+      "exitCode": 0
+    }
+  },
+  "protocolHarness": {
+    "command": "python3 -m unittest discover -s tests/protocol -p 'test_*.py' -v",
+    "exitCode": 0,
+    "tests": 11,
+    "passed": 5,
+    "skipped": 6,
+    "log": "target/quality-assessment-20261111/protocol-harness.log",
+    "limits": "Strict cgroup container resource tests not rerun locally; exact-base-HEAD hosted protocols job succeeded"
+  },
+  "counts": {
+    "workspaceRustPassed": 356,
+    "qualityPythonPassed": 31,
+    "newReportTests": 10,
+    "nodePassed": 31,
+    "distributionPassed": 10
+  },
+  "productCompatibility": {
+    "productionRustChanged": false,
+    "rulesChanged": false,
+    "lockChanged": false,
+    "schemasChanged": false,
+    "truthAndLabelsChanged": false,
+    "binarySameAsPreviousAccepted": true,
+    "numericCIEnforcementAdded": false
+  },
+  "sourceBindings": {
+    ".github/workflows/pqc-scan.yml": "0c84676b0002cc0d1b8ac9a1b2556c751394d1d896b24b4f86a48520b829dcca",
+    "README.ja.md": "955ee49e410f3b8d6ba8b850f668d2aed8bd2a2db2d67cfbd4f6db86370f5470",
+    "README.md": "7605616b3dde7d58a4fd07cf6c9953b32e788915b6852783df140d054417a60b",
+    "crates/pqc_scan_core/tests/task_ids.rs": "5fc7c2ae6558319f95fb6283b670190bb4be0f041a6d341e680f6dd208dc4691",
+    "docs/quality/QUALITY-ASSESSMENT.md": "5bbb52d4d797c107cab4c5fd24e5574984876bcb633bbdc3b221ed0fe90a79e7",
+    "docs/quality/QUALITY-BASELINE.md": "c920d29be23515125637c5baa392a0c74f95ab43d5c2c99c3ba63e4f81caa822",
+    "docs/quality/QUALITY-GATES.md": "e164999ac79a0b48228ecfb1e3a8625d44c9a867be0255ce24fe950b684cc4c2",
+    "docs/quality/QUALITY-IMPLEMENTATION-PLAN.md": "7ce9e74b8ddb33470ab10b3b49648c28ef9cbcd2c48fb2e86ef6096d1da4afda",
+    "docs/quality/QUALITY-METRICS.md": "c3857094038ae7ad5f2da57b2128b069fcbd017d83c1f7ace8fbe183f216ccec",
+    "docs/quality/QUALITY-MODEL.md": "e571296bfdaab7205c84c5862069a87c2ed14f729ce28e80d770dcbc0a6d5a5b",
+    "docs/quality/QUALITY-REFERENCES.md": "cdc0f95a9cb74b80be24dfc9752d2aca7a38c6a1c6a37aae9c4805b8d77a42b8",
+    "docs/quality/QUALITY-ROADMAP.md": "ac308a8b6e81649f2b42d23ad473b2050a1066f099be79bc4c19951585a4255c",
+    "docs/quality/SELF-SCAN-EXPECTATIONS.json": "ce96831d3a82c431115deba5a2938045d5da28f41d0f647a7ec486b633598438",
+    "tests/quality/README.md": "e247ab4c0485ed8813e93a3296ad70927940a717aa2a677b25a3e4443c507164",
+    "tests/quality/report.py": "63b798a59a7b51417b8282487a09f5dbe0f3f8a6bd75776e77300fd66f08e0f4",
+    "tests/quality/test_report.py": "174b8a72e072e9666681500dac8ec1d069cd04d664246c8cb3af58117e6e9173",
+    "tests/quality/test_task_queue.py": "792d7af4e8517bb19626bc1a1f906c0289a06318123ed8badc871932fe6c3628",
+    "tasks/041-quality-assessment-model.yaml": "21a53f4d5fc4f27a73cc774508605cb99005cba0968f612ff7e65d17319974cd"
+  },
+  "evidenceBindings": {
+    "target/quality-assessment-20261111/ENTRY.json": "f0cd8584ae0212fd6dd79993a9707c148c896f80b63a0541721748596d9ebe7e",
+    "target/quality-assessment-20261111/accepted-commands.json": "50025069d0db6c032e0ccb7d1a8e3c28096b003190ff00d5d122fdd610b92378",
+    "target/quality-assessment-20261111/accepted-quality.log": "28e345edfea0c109b87aa538133fd29350d9f63f0b5ed2b4c3e86b46fe3a3690",
+    "target/quality-assessment-20261111/accepted-report.log": "31df5672a3d019e1fec6bfb86a81b106c570c7a02488908c64aec0cd118ef58a",
+    "target/quality-assessment-20261111/accuracy-only-report.log": "ded20938fb70cbb11238d37e6cff4e0cee1d3c90be84e35da881ba46f1a2d11c",
+    "target/quality-assessment-20261111/accuracy-only.log": "4b1070199869648981864c236e204edd42ebbec841c16154ebc5b73618df8ff3",
+    "target/quality-assessment-20261111/baseline/summary.json": "05ed59eba9f1bbca6fb2c29e01e89f9171bea935dc9e93e5701a364fa9d1d9cc",
+    "target/quality-assessment-20261111/baseline-final/summary.json": "814d7b765d219430e89b381c293821b7715eae9b81ee0e517a464aeb8ec7f6e8",
+    "target/quality-assessment-20261111/candidate-baseline.log": "2e010649685d1f31906c49edb41a7ed2108a5de20ae4e8006f79bf60efdf3dfc",
+    "target/quality-assessment-20261111/entry-baseline.log": "2e010649685d1f31906c49edb41a7ed2108a5de20ae4e8006f79bf60efdf3dfc",
+    "target/quality-assessment-20261111/entry-clippy.log": "182e0273ab1d85020feb801d5e48b162fe456a7158fff856876f75864df8bcb0",
+    "target/quality-assessment-20261111/entry-commands.json": "e77ce67c1a62b0bb8ef9d361a60f25f17e25557cff54d34c06f82157ba68e981",
+    "target/quality-assessment-20261111/entry-distribution.log": "6e4336893d8672e5eb1244a8c9439cdc29378d68a0695843210ea6549bdc1e15",
+    "target/quality-assessment-20261111/entry-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "target/quality-assessment-20261111/entry-node.log": "4a41d933a038a7c346d26fd7491f24e16e3dd9a1605b66c21b65d524758baaf1",
+    "target/quality-assessment-20261111/entry-quality.log": "49d3846657432318342373aaae2d1011f166c1b09ccb82a2f0af1160d8b7a15d",
+    "target/quality-assessment-20261111/entry-tests.log": "1b58596a1da6e43fb6773354c995b92141234ff9cf0c45dae4cea64ee0dcaa18",
+    "target/quality-assessment-20261111/final-build.log": "92bec25ad54c650450560360480d5f94d3d8ad203f81a2c724e0c641b330bbfb",
+    "target/quality-assessment-20261111/final-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "target/quality-assessment-20261111/final-tests.log": "2e38d206fc5db7d92578a217127bc3083d2fff3d0cac9764f2db8520350ebc78",
+    "target/quality-assessment-20261111/performance-copy-green.log": "42e6f4bfff41968f22307b54dfb74492a55f984698ccb30832a7a40097e3997a",
+    "target/quality-assessment-20261111/performance-copy-red.log": "aae252e7b420edfdb7ea36a43ed168eb946c285d9fa9ab0f3c0b27b17ea485ff",
+    "target/quality-assessment-20261111/post-review-commands.json": "c9709eb30a195aacbab0250702be578dea473336bcc3ac57da5bf13cda70c757",
+    "target/quality-assessment-20261111/post-review-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "target/quality-assessment-20261111/post-review-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "target/quality-assessment-20261111/post-review-node.log": "74969e528da8d0e6ede9a51eeeb2d26490517c2e981c8aa491ec2d2257059197",
+    "target/quality-assessment-20261111/post-review-quality.log": "cc2ddad3072b37540d9ff4a77d445e16ec5e8e6c8c898c5acd484cea2671548b",
+    "target/quality-assessment-20261111/protocol-harness.log": "b2472d19730e7e76f505f959cd56c339e5fdc34f5af2e33b7ec0e48f2c0d8bf9",
+    "target/quality-assessment-20261111/release-build.log": "c15d1384231a0f6b15799c4c549101ff62c422c4464fd2f2b38d810160e7ce29",
+    "target/quality-assessment-20261111/report-accepted/quality.json": "7c5596dfc6fba9a5615308937ba4ea2abfe1c316bc8f7017d2f190314c4cab8b",
+    "target/quality-assessment-20261111/report-accepted/quality.md": "9e13cb0c654331705c5bd2c4cfd073777dad8f2b0cef16a829ca56b246b11257",
+    "target/quality-assessment-20261111/report-accuracy-only/quality.json": "ae12b619c92b29bae327c47df747a46544866da5e4e562c562dcc8d5540e4b19",
+    "target/quality-assessment-20261111/report-green-2.log": "9f361d9d9eae4315d3b035317951035b8f2b9723684d5941704ce3812b09e8e2",
+    "target/quality-assessment-20261111/report-green-3.log": "0793d630fd5e8983f51f147af706fa14b1bdf1948e84382ab2092fdec931c040",
+    "target/quality-assessment-20261111/report-green.log": "f4dd714ff55c2e37ac6b2a97ea9f7b7ca7e8afc771b0982d344fbc9d7fdbcc94",
+    "target/quality-assessment-20261111/report-red.log": "efaecf3f3b087f725a77fa6092710f2a19206679e6b0bc4ad709c4b1962a440f",
+    "target/quality-assessment-20261111/report-review.log": "6496b3d358d9261d3c97ef38194f75df430b07e8de03b599e8ab623f9fa57648",
+    "target/quality-assessment-20261111/report-revised.log": "8b2734a19f0514b5b5556c5d3460a7bbb768d70037324835b4625cdb9a1f5699",
+    "target/quality-assessment-20261111/review-fix-final-tests.log": "6b67bafb7ebc010be79049eab19f0e0bccbba50efa31fc253b5beed565c72fab",
+    "target/quality-assessment-20261111/review-fix-green.log": "4a32401e01df26707b99f78d65cee1878c2577f11d6da778088fc1a4d996f643",
+    "target/quality-assessment-20261111/review-fix-red.log": "56d6964011b38ddd282a8bab2f652b56af38a2d90ad052fbb3bdb8b762f83ef8",
+    "target/quality-assessment-20261111/self-scan/audit-final.json": "1e301af99e046417282e3fae00a22ec2f5b493316b689812d4135abb09d4e976",
+    "target/quality-assessment-20261111/self-scan/code-scanning-final.sarif": "1903267ef0acb3b4ea30ff2ebe9d4dde494018ab1222a411936ff3715a2acb1a",
+    "target/quality-assessment-20261111/self-scan/report.sarif": "7df67d9a776aad07706968e38aed0664316d47b4ed092af258eaef0db026c69e",
+    "target/quality-assessment-20261111/self-scan-duplicate-result.json": "5728163cbd56c94fc68490f1784794b235b16c3ddca0a1ba2921c53942376771",
+    "target/quality-assessment-20261111/self-scan-final-projection.log": "71eac1665fabab425331019b62e045b3a8ba51841758fc3b8e585ddd5457957c",
+    "target/quality-assessment-20261111/self-scan-negative-result.json": "b56c4e8f4adfef303fed286123d614760371940a3ad7ca576d7851710476a4b9",
+    "target/quality-assessment-20261111/self-scan-projection.log": "3cf8ec8e68d79d5c802aea0f7c175a5c730483f7e671fb31250d5df4a8e1b84f",
+    "target/quality-assessment-20261111/self-scan-reviewed.log": "71eac1665fabab425331019b62e045b3a8ba51841758fc3b8e585ddd5457957c",
+    "target/quality-assessment-20261111/self-scan.log": "62ac2583be4ae6c16612c9a6f5c3de58be1dc93cddde7decbd339554dcb1d7f7",
+    "target/quality-assessment-20261111/task-id-correction.log": "32f88f0db604670b9631740f039727278810399f32c11b96f683bd65caef84be",
+    "target/quality-assessment-20261111/verified-baseline.log": "2e010649685d1f31906c49edb41a7ed2108a5de20ae4e8006f79bf60efdf3dfc",
+    "target/quality-assessment-20261111/verified-build.log": "5604fc8f0c276397a55db4bd7008236712075c0ad37d3b3a0f1fe362b1b85a36",
+    "target/quality-assessment-20261111/verified-clippy.log": "ef8406de9082a046107d2d655343d8547f7737effc2c6212f8dbfedc243611cd",
+    "target/quality-assessment-20261111/verified-commands.json": "16933cf0032c2531fdc6ded3c265de3fe90f316771561a0431f790f67de152bc",
+    "target/quality-assessment-20261111/verified-distribution.log": "deb4599d980c99da41e652f8efc8af049cfff21b238615dea0b5f1efa878676d",
+    "target/quality-assessment-20261111/verified-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "target/quality-assessment-20261111/verified-node.log": "e78029eac5269238c2e00d55a2db9f9b011a316b049a85bbe7d5dffc6169dfa2",
+    "target/quality-assessment-20261111/verified-quality.log": "d800d36cbc7e4264286bbd4c145521f4c199d20efd49e248e04180ce98a52bcd",
+    "target/quality-assessment-20261111/verified-report.log": "2cb1cc4240e21be2fe982ebf88a54614038dae19c992f29d64f6ed633bb3bf10",
+    "target/quality-assessment-20261111/verified-tests.log": "8f32027ea72bbd9a32cd4080c99588b63bb9d498ccb133b8e0f052eade9a0178",
+    "target/quality-assessment-20261111/DOC-VALIDATION.json": "2fb01ac985b6b0a8e628830c4354b2dbe54a217c501e06d6b05ff3ecfece9853",
+    "docs/quality/assessment-20261111/QUALITY.json": "7c5596dfc6fba9a5615308937ba4ea2abfe1c316bc8f7017d2f190314c4cab8b",
+    "docs/quality/assessment-20261111/IMPLEMENTATION-REVIEW.md": "0c84bc9461f32c9cf8754c6a3a380b794d10329753f3f1f4f635bb5c35441649",
+    "docs/quality/assessment-20261111/TEST-REVIEW.md": "6a9e0d2b7efbb924029a1855b62028d69150baa17e4e3f3353407edc56263c7f",
+    "target/quality-assessment-20261111/implementation-review.md": "0c84bc9461f32c9cf8754c6a3a380b794d10329753f3f1f4f635bb5c35441649",
+    "target/quality-assessment-20261111/test-review.md": "6a9e0d2b7efbb924029a1855b62028d69150baa17e4e3f3353407edc56263c7f"
+  },
+  "documentationValidation": {
+    "markdownLocalLinkIssues": [],
+    "taskCount": 41,
+    "taskDagAcyclic": true,
+    "preservedCancelled": [
+      "014",
+      "016"
+    ],
+    "preservedAccepted": [
+      "023",
+      "037"
+    ],
+    "productRuleSchemaTruthEvaluatorRunnerUnchanged": true,
+    "workflowYamlParsed": true
+  },
+  "metadataFollowup": {
+    "changes": [
+      "Task041 review -> done for development-only scope",
+      "Plan completed checkboxes",
+      "Assessment links and final review/test summary",
+      "Review record snapshots and evidence metadata"
+    ],
+    "runtimeAndReportingImplementationChanged": false,
+    "hostedCiForUnpushedChanges": "Not Tested"
+  },
+  "completionChecks": [
+    {
+      "name": "lifecycle",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_task_queue.py",
+        "-v"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "format",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "finalIntegrityCheck": {
+    "sourceBindings": 18,
+    "evidenceBindings": 67,
+    "allMatch": true,
+    "generatedSnapshotUnmodified": true,
+    "localMarkdownLinksResolve": true,
+    "task041": "done (development-only)"
+  }
+}

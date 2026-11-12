@@ -1,0 +1,3445 @@
+{
+  "reviewer": "implementation-reviewer-a / q42_reopen_implementation_review",
+  "timestampUtc": "2026-11-11T22:20:51.070470Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "protocolSha256": "300313c7a8e6867a4f7283a06c2ec0546ae38f6d987c4300575d98d39bf65dd9",
+  "sourceOnly": true,
+  "otherLabelsSeen": false,
+  "scannerResultsSeen": false,
+  "labels": [
+    {
+      "id": "x001",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ML-DSA-44"
+      ],
+      "reason": "Signature.getInstance が ML-DSA-44 を明示している。",
+      "artifact": "source"
+    },
+    {
+      "id": "x002",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "kem",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ML-KEM-1024"
+      ],
+      "reason": "KEM.getInstance が ML-KEM-1024 を明示している。",
+      "artifact": "source"
+    },
+    {
+      "id": "x003",
+      "label": "positive",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SLH-DSA-SHAKE-256s"
+      ],
+      "reason": "Signature.getInstance が SLH-DSA の変種を明示している。",
+      "artifact": "source"
+    },
+    {
+      "id": "x004",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256withRSA"
+      ],
+      "reason": "要求は SHA256withRSA であり、標準PQC署名ではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x005",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "signature",
+      "caseKind": "malformed",
+      "parameters": [
+        "ML-DSA-65"
+      ],
+      "reason": "閉じ括弧はないが Signature.getInstance と完全な ML-DSA-65 文字列は識別できる。",
+      "artifact": "source"
+    },
+    {
+      "id": "x006",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "Go import の crypto/mlkem は ML-KEM パッケージを明示している。",
+      "artifact": "source"
+    },
+    {
+      "id": "x007",
+      "label": "negative",
+      "algorithms": [
+        "not_applicable"
+      ],
+      "usage": "not_applicable",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "import は fmt のみであり、PQC API参照ではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x008",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "unknown",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "import の引用符直後で切れており、対象パッケージを確定できない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x009",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "MLKEM768PrivateKey"
+      ],
+      "reason": "前行で明示した mlkem の MLKEM768PrivateKey.generate 呼出しである。",
+      "artifact": "source"
+    },
+    {
+      "id": "x010",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "string",
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "print は標準名を文字列として出力するだけで、PQC API呼出しではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x011",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "malformed",
+      "parameters": [
+        "MLKEM768PrivateKey"
+      ],
+      "reason": "構文は未完だが mlkem.MLKEM768PrivateKey.generate という名目的参照を識別できる。",
+      "artifact": "source"
+    },
+    {
+      "id": "x012",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "ordinary",
+      "parameters": [
+        "MlKem768"
+      ],
+      "reason": "use ml_kem::MlKem768 はML-KEMの明示的なシンボル参照である。",
+      "artifact": "source"
+    },
+    {
+      "id": "x013",
+      "label": "negative",
+      "algorithms": [
+        "not_applicable"
+      ],
+      "usage": "not_applicable",
+      "caseKind": "namesake",
+      "parameters": [],
+      "reason": "ml_kem はローカルに定義された空関数であり、暗号クレートの参照ではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x014",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "末尾のシンボルはないが use ml_kem:: はクレートの名目的参照を保持する。",
+      "artifact": "source"
+    },
+    {
+      "id": "x015",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ML-DSA-87"
+      ],
+      "reason": "OpenSSL::PKey.generate_key に ML-DSA-87 が明示されている。",
+      "artifact": "source"
+    },
+    {
+      "id": "x016",
+      "label": "positive",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "string",
+      "parameters": [
+        "SLH-DSA-SHA2-128s"
+      ],
+      "reason": "v2のRuby定義はAPI実行でなく標準名リテラルの参照を評価するため、puts 内の完全な標準名は陽性である。",
+      "artifact": "source"
+    },
+    {
+      "id": "x017",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_generation",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "generate_key の文字列が空のまま切れており、アルゴリズムは確定できない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x018",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "crypto.subtle.generateKey の name が ML-KEM-768 を明示している。要求された操作は鍵生成である。",
+      "artifact": "source"
+    },
+    {
+      "id": "x019",
+      "label": "negative",
+      "algorithms": [
+        "AES"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "AES-GCM"
+      ],
+      "reason": "generateKey の対象は AES-GCM であり、標準PQCアルゴリズムではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x020",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_generation",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "name の値が欠けており、対象アルゴリズムを決定できない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x021",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-kem-512"
+      ],
+      "reason": "generateKeyPairSync の文字列引数が標準 ML-KEM 型を指定している。",
+      "artifact": "source"
+    },
+    {
+      "id": "x022",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "comment",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "呼出し全体は行コメント内にあり、名目的API呼出しではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x023",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "string",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "呼出しに見えるテキスト全体は help の文字列内容である。",
+      "artifact": "source"
+    },
+    {
+      "id": "x024",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "namesake",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "直前のローカル関数定義は値を返すだけであり、暗号APIではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x025",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "alias",
+      "parameters": [
+        "ml-dsa-65"
+      ],
+      "reason": "make は node:crypto の generateKeyPairSync の明示的な別名である。",
+      "artifact": "source"
+    },
+    {
+      "id": "x026",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "shadowing",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "関数引数 generateKeyPairSync が import を隠しており、この呼出しは暗号APIと確定できない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x027",
+      "label": "ambiguous",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_generation",
+      "caseKind": "dynamic",
+      "parameters": [],
+      "reason": "request.algorithm は外部から制約されない値であり、標準PQCか決められない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x028",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "dead_code",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "if(false) は実行を防ぐが、完全なML-KEM鍵生成の静的参照は残る。",
+      "artifact": "source"
+    },
+    {
+      "id": "x029",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "mixed",
+      "parameters": [
+        "rsa"
+      ],
+      "reason": "同じ行の最初の呼出しはRSA鍵生成であり、PQC生成ではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x030",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "mixed",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "同じ行の二番目の呼出しはML-KEM鍵生成を明示している。",
+      "artifact": "source"
+    },
+    {
+      "id": "x031",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "same_line",
+      "parameters": [
+        "ml-kem-512"
+      ],
+      "reason": "同一行の最初の独立した標準PQC鍵生成呼出しである。",
+      "artifact": "source"
+    },
+    {
+      "id": "x032",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "same_line",
+      "parameters": [
+        "ml-kem-1024"
+      ],
+      "reason": "同一行の二番目の独立した標準PQC鍵生成呼出しである。",
+      "artifact": "source"
+    },
+    {
+      "id": "x033",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "typed",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "Nodeのkey-type引数位置は文字列を要求するが、ここではnameオブジェクトを渡している。",
+      "artifact": "source"
+    },
+    {
+      "id": "x034",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "future-quantum-safe-v9"
+      ],
+      "reason": "名前は明示されているが、識別済みの標準PQCアルゴリズムではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x035",
+      "label": "negative",
+      "algorithms": [
+        "EdDSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ed25519"
+      ],
+      "reason": "ed25519 は古典的EdDSAであり、標準PQC鍵生成ではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x036",
+      "label": "positive",
+      "algorithms": [
+        "pre_standard"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "kyber768"
+      ],
+      "reason": "明示した kyber768 は標準化前の名前であり、最終標準ML-KEMと同一視しない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x037",
+      "label": "negative",
+      "algorithms": [
+        "Hybrid"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "string",
+      "parameters": [
+        "X25519MLKEM768"
+      ],
+      "reason": "group の文字列はハイブリッド名の広告であり、Node鍵生成API呼出しではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x038",
+      "label": "unsupported",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "unsupported",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "Swift はこのコーパスの当該ソースAPI対応範囲外である。",
+      "artifact": "source"
+    },
+    {
+      "id": "x039",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "RS256"
+      ],
+      "reason": "sign のalgorithmオプションはJWT RSA署名のRS256を選択している。",
+      "artifact": "source"
+    },
+    {
+      "id": "x040",
+      "label": "negative",
+      "algorithms": [
+        "HMAC"
+      ],
+      "usage": "signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "HS256"
+      ],
+      "reason": "algorithm はHS256であり、JWT RSA署名ではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x041",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "signature",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "algorithm の値がなく、署名方式を確定できない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x042",
+      "label": "positive",
+      "algorithms": [
+        "ECDH"
+      ],
+      "usage": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "secp256r1",
+        "secp384r1"
+      ],
+      "reason": "表現された明示的なグループ制限は古典的な二つのECグループだけである。ロードや実行は主張しない。",
+      "artifact": "configuration"
+    },
+    {
+      "id": "x043",
+      "label": "negative",
+      "algorithms": [
+        "Hybrid",
+        "ECDH"
+      ],
+      "usage": "configuration",
+      "caseKind": "mixed",
+      "parameters": [
+        "X25519MLKEM768",
+        "secp256r1"
+      ],
+      "reason": "明示したリストにハイブリッド群が含まれ、古典群だけの制限ではない。",
+      "artifact": "configuration"
+    },
+    {
+      "id": "x044",
+      "label": "negative",
+      "algorithms": [
+        "ECDH"
+      ],
+      "usage": "configuration",
+      "caseKind": "disabled",
+      "parameters": [
+        "secp256r1"
+      ],
+      "reason": "設定表現全体が # コメントで無効化されている。",
+      "artifact": "configuration"
+    },
+    {
+      "id": "x045",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "グループ文字列が未完であり、明示的なリストを判定できない。",
+      "artifact": "configuration"
+    },
+    {
+      "id": "x046",
+      "label": "positive",
+      "algorithms": [
+        "DSA"
+      ],
+      "usage": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ssh-dss"
+      ],
+      "reason": "HostKeyAlgorithms が完全な ssh-dss を指定する。",
+      "artifact": "configuration"
+    },
+    {
+      "id": "x047",
+      "label": "negative",
+      "algorithms": [
+        "EdDSA"
+      ],
+      "usage": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ssh-ed25519"
+      ],
+      "reason": "指定は ssh-ed25519 であり、ssh-dssではない。",
+      "artifact": "configuration"
+    },
+    {
+      "id": "x048",
+      "label": "positive",
+      "algorithms": [
+        "DH"
+      ],
+      "usage": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "diffie-hellman-group14-sha1"
+      ],
+      "reason": "KexAlgorithms が正確に group14/SHA1 の古典DHを指定する。",
+      "artifact": "configuration"
+    },
+    {
+      "id": "x049",
+      "label": "negative",
+      "algorithms": [
+        "Hybrid"
+      ],
+      "usage": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "mlkem768x25519-sha256"
+      ],
+      "reason": "指定はML-KEM/X25519のハイブリッドであり、group14/SHA1ではない。",
+      "artifact": "configuration"
+    },
+    {
+      "id": "x050",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "KexAlgorithms に値がなく、アルゴリズムを決定できない。",
+      "artifact": "configuration"
+    },
+    {
+      "id": "x051",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "0.10.75"
+      ],
+      "reason": "宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x052",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "0.10.75"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x053",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x054",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "0.10.75"
+      ],
+      "reason": "宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x055",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "0.10.75"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x056",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x057",
+      "label": "ambiguous",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "依存宣言はjose 6.0.0の存在を示す。公式v6.0.0 READMEはJOSE機能を記述し、generate_key_pair.tsの有限分岐はRSA/EC/EdDSA/ECDH等を列挙するが、標準PQC対応の根拠にはならない。存在を能力と同一視せず、全機能の非対応を証明する陰性保証にも広げない。参照: https://raw.githubusercontent.com/panva/jose/v6.0.0/README.md, https://raw.githubusercontent.com/panva/jose/v6.0.0/src/key/generate_key_pair.ts",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x058",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x059",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x060",
+      "label": "ambiguous",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "依存宣言はjose 6.0.0の存在を示す。公式v6.0.0 READMEはJOSE機能を記述し、generate_key_pair.tsの有限分岐はRSA/EC/EdDSA/ECDH等を列挙するが、標準PQC対応の根拠にはならない。存在を能力と同一視せず、全機能の非対応を証明する陰性保証にも広げない。参照: https://raw.githubusercontent.com/panva/jose/v6.0.0/README.md, https://raw.githubusercontent.com/panva/jose/v6.0.0/src/key/generate_key_pair.ts",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x061",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x062",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x063",
+      "label": "ambiguous",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "依存宣言はjose 6.0.0の存在を示す。公式v6.0.0 READMEはJOSE機能を記述し、generate_key_pair.tsの有限分岐はRSA/EC/EdDSA/ECDH等を列挙するが、標準PQC対応の根拠にはならない。存在を能力と同一視せず、全機能の非対応を証明する陰性保証にも広げない。参照: https://raw.githubusercontent.com/panva/jose/v6.0.0/README.md, https://raw.githubusercontent.com/panva/jose/v6.0.0/src/key/generate_key_pair.ts",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x064",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x065",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x066",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "v1.6.1"
+      ],
+      "reason": "宣言には認識対象の github.com/cloudflare/circl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x067",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "v1.6.1"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x068",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x069",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "宣言には認識対象の org.bouncycastle:bcprov-jdk18on と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x070",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x071",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x072",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "宣言には認識対象の org.bouncycastle:bcprov-jdk18on と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x073",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x074",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x075",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "宣言には認識対象の org.bouncycastle:bcprov-jdk18on と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x076",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x077",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x078",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "宣言には認識対象の org.bouncycastle:bcprov-jdk18on と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x079",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x080",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x081",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "48.0.0"
+      ],
+      "reason": "宣言には認識対象の cryptography と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x082",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "48.0.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x083",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x084",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "==48.0.0"
+      ],
+      "reason": "宣言には認識対象の cryptography と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x085",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "==48.0.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x086",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x087",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "48.0.0"
+      ],
+      "reason": "宣言には認識対象の cryptography と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x088",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "48.0.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x089",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x090",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x091",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x092",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x093",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x094",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x095",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x096",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x097",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x098",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x099",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x100",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x101",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x102",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x103",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x104",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{ = \"' から依存宣言を確定できない。",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "id": "x105",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "sbom"
+    },
+    {
+      "id": "x106",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "sbom"
+    },
+    {
+      "id": "x107",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{broken' から依存宣言を確定できない。",
+      "artifact": "sbom"
+    },
+    {
+      "id": "x108",
+      "label": "unsupported",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "unsupported",
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "暗号資産のみのCBOMであり、ライブラリ依存取込みの対応範囲外である。",
+      "artifact": "sbom"
+    },
+    {
+      "id": "x109",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。",
+      "artifact": "sbom"
+    },
+    {
+      "id": "x110",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。",
+      "artifact": "sbom"
+    },
+    {
+      "id": "x111",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "不完全な文書 '{broken' から依存宣言を確定できない。",
+      "artifact": "sbom"
+    },
+    {
+      "id": "x113",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [
+        "RSA"
+      ],
+      "reason": "完全なBEGINマーカーがある。本文は意図的な無効カナリアであり、実鍵の存在は主張しない。",
+      "artifact": "key_marker"
+    },
+    {
+      "id": "x114",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "PUBLIC DOCUMENT のみであり、認識対象BEGINマーカーは存在しない。",
+      "artifact": "key_marker"
+    },
+    {
+      "id": "x115",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_marker",
+      "caseKind": "malformed",
+      "parameters": [
+        "RSA"
+      ],
+      "reason": "BEGIN記号は不完全であり、完全な認識対象マーカーは存在しない。",
+      "artifact": "key_marker"
+    },
+    {
+      "id": "x116",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [
+        "PKCS8"
+      ],
+      "reason": "完全なBEGINマーカーがある。本文は意図的な無効カナリアであり、実鍵の存在は主張しない。",
+      "artifact": "key_marker"
+    },
+    {
+      "id": "x117",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "PUBLIC DOCUMENT のみであり、認識対象BEGINマーカーは存在しない。",
+      "artifact": "key_marker"
+    },
+    {
+      "id": "x118",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "caseKind": "malformed",
+      "parameters": [
+        "PKCS8"
+      ],
+      "reason": "BEGIN記号は不完全であり、完全な認識対象マーカーは存在しない。",
+      "artifact": "key_marker"
+    },
+    {
+      "id": "x119",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [
+        "OpenSSH"
+      ],
+      "reason": "完全なBEGINマーカーがある。本文は意図的な無効カナリアであり、実鍵の存在は主張しない。",
+      "artifact": "key_marker"
+    },
+    {
+      "id": "x120",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "PUBLIC DOCUMENT のみであり、認識対象BEGINマーカーは存在しない。",
+      "artifact": "key_marker"
+    },
+    {
+      "id": "x121",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "caseKind": "malformed",
+      "parameters": [
+        "OpenSSH"
+      ],
+      "reason": "BEGIN記号は不完全であり、完全な認識対象マーカーは存在しない。",
+      "artifact": "key_marker"
+    },
+    {
+      "id": "x122",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "DERハッシュは公開マニフェストのrsa3072.derと一致し、SPKIがRSA 3072ビットと記録されている。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x123",
+      "label": "negative",
+      "algorithms": [
+        "EdDSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ED25519"
+      ],
+      "reason": "公開マニフェストに対応する署名属性はED25519であり、RSAではない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x124",
+      "label": "positive",
+      "algorithms": [
+        "ECDSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ecdsa-with-SHA256"
+      ],
+      "reason": "DERハッシュが公開p256.derと一致し、署名属性はecdsa-with-SHA256である。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x125",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "実バイトは not a certificate のみであり、署名属性を確定できない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x126",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "実バイトは not a certificate のみであり、署名属性を確定できない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x127",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "実バイトは not a certificate のみであり、署名属性を確定できない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x128",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "実バイトは not a certificate のみであり、署名属性を確定できない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x129",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "実バイトは not a certificate のみであり、署名属性を確定できない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x130",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "実バイトは not a certificate のみであり、署名属性を確定できない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x131",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-kem-512",
+        "ml-kem-768",
+        "ml-kem-1024"
+      ],
+      "reason": "crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x132",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-kem-512",
+        "ml-kem-768",
+        "ml-kem-1024"
+      ],
+      "reason": "crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x133",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-kem-512",
+        "ml-kem-768",
+        "ml-kem-1024"
+      ],
+      "reason": "crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x134",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-dsa-44",
+        "ml-dsa-65",
+        "ml-dsa-87"
+      ],
+      "reason": "crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x135",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-dsa-44",
+        "ml-dsa-65",
+        "ml-dsa-87"
+      ],
+      "reason": "crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x136",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-dsa-44",
+        "ml-dsa-65",
+        "ml-dsa-87"
+      ],
+      "reason": "crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x137",
+      "label": "positive",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "slh-dsa-sha2-128f",
+        "slh-dsa-sha2-128s",
+        "slh-dsa-sha2-192f",
+        "slh-dsa-sha2-192s",
+        "slh-dsa-sha2-256f",
+        "slh-dsa-sha2-256s",
+        "slh-dsa-shake-128f",
+        "slh-dsa-shake-128s",
+        "slh-dsa-shake-192f",
+        "slh-dsa-shake-192s",
+        "slh-dsa-shake-256f",
+        "slh-dsa-shake-256s"
+      ],
+      "reason": "crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x138",
+      "label": "positive",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "slh-dsa-sha2-128f",
+        "slh-dsa-sha2-128s",
+        "slh-dsa-sha2-192f",
+        "slh-dsa-sha2-192s",
+        "slh-dsa-sha2-256f",
+        "slh-dsa-sha2-256s",
+        "slh-dsa-shake-128f",
+        "slh-dsa-shake-128s",
+        "slh-dsa-shake-192f",
+        "slh-dsa-shake-192s",
+        "slh-dsa-shake-256f",
+        "slh-dsa-shake-256s"
+      ],
+      "reason": "crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x139",
+      "label": "positive",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "slh-dsa-sha2-128f",
+        "slh-dsa-sha2-128s",
+        "slh-dsa-sha2-192f",
+        "slh-dsa-sha2-192s",
+        "slh-dsa-sha2-256f",
+        "slh-dsa-sha2-256s",
+        "slh-dsa-shake-128f",
+        "slh-dsa-shake-128s",
+        "slh-dsa-shake-192f",
+        "slh-dsa-shake-192s",
+        "slh-dsa-shake-256f",
+        "slh-dsa-shake-256s"
+      ],
+      "reason": "crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x140",
+      "label": "negative",
+      "algorithms": [
+        "DH"
+      ],
+      "usage": "key_exchange",
+      "caseKind": "ordinary",
+      "parameters": [
+        "2048"
+      ],
+      "reason": "createDiffieHellman と後続の共有秘密計算は古典DHであり、標準PQC鍵生成ではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "x141",
+      "label": "negative",
+      "algorithms": [
+        "DH"
+      ],
+      "usage": "key_exchange",
+      "caseKind": "ordinary",
+      "parameters": [
+        "modp16"
+      ],
+      "reason": "createDiffieHellmanGroup が古典modp16群を指定している。",
+      "artifact": "source"
+    },
+    {
+      "id": "x142",
+      "label": "negative",
+      "algorithms": [
+        "ECDH"
+      ],
+      "usage": "key_exchange",
+      "caseKind": "ordinary",
+      "parameters": [
+        "secp521r1"
+      ],
+      "reason": "createECDH と後続の共有秘密計算は古典ECDHである。",
+      "artifact": "source"
+    },
+    {
+      "id": "x143",
+      "label": "negative",
+      "algorithms": [
+        "ECDH"
+      ],
+      "usage": "key_exchange",
+      "caseKind": "ordinary",
+      "parameters": [
+        "secp256k1"
+      ],
+      "reason": "createECDH は古典secp256k1群を指定する。",
+      "artifact": "source"
+    },
+    {
+      "id": "x144",
+      "label": "negative",
+      "algorithms": [
+        "ECDSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ec",
+        "sect239k1"
+      ],
+      "reason": "generateKeyPairSync は古典EC鍵を生成し、後続の署名処理に渡している。",
+      "artifact": "source"
+    },
+    {
+      "id": "x145",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_generation",
+      "caseKind": "ordinary",
+      "parameters": [
+        "rsa",
+        "2048"
+      ],
+      "reason": "node:crypto 由来の generateKeyPairSync が rsa とmodulusLength 2048を明示する。",
+      "artifact": "source"
+    },
+    {
+      "id": "x146",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256",
+        "2048"
+      ],
+      "reason": "SHA256だけではRSAを示さないが、同一ソースで生成したRSA privateKeyを後続sign.signに渡すため、RSA署名参照を確定できる。",
+      "artifact": "source"
+    },
+    {
+      "id": "x147",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "公開rsa3072.derと同じバイト、または同一DERに復号されるPEMであり、SPKIはRSA 3072ビットである。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x148",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "公開マニフェストと変換来歴が結び付ける同一証明書の署名はRSAであり、ECDSAではない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x149",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "公開rsa3072.derと同じバイト、または同一DERに復号されるPEMであり、SPKIはRSA 3072ビットである。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x150",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "公開マニフェストと変換来歴が結び付ける同一証明書の署名はRSAであり、ECDSAではない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x151",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "公開rsa3072.derと同じバイト、または同一DERに復号されるPEMであり、SPKIはRSA 3072ビットである。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x152",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "公開マニフェストと変換来歴が結び付ける同一証明書の署名はRSAであり、ECDSAではない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x153",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "unknown",
+      "caseKind": "ordinary",
+      "parameters": [
+        ".p12"
+      ],
+      "reason": "拡張子はPKCS12/PFX容器の既存シグナルである。来歴には証明書のみの変換があり、秘密鍵の存在や任意容器の復号能力は主張しない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x154",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "公開マニフェストと変換来歴が結び付ける同一証明書の署名はRSAであり、ECDSAではない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x155",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "unknown",
+      "caseKind": "ordinary",
+      "parameters": [
+        ".pfx"
+      ],
+      "reason": "拡張子はPKCS12/PFX容器の既存シグナルである。来歴には証明書のみの変換があり、秘密鍵の存在や任意容器の復号能力は主張しない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x156",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "公開マニフェストと変換来歴が結び付ける同一証明書の署名はRSAであり、ECDSAではない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "x157",
+      "label": "negative",
+      "algorithms": [
+        "EdDSA"
+      ],
+      "usage": "public_key",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ED25519"
+      ],
+      "reason": "公開ed25519.derのSPKIはED25519であり、RSA 3072ビットではない。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "v2-a0",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "RS256"
+      ],
+      "reason": "RSA方式RS256をsignのalgorithmとして明示的に選択しており、名目的RSA署名参照である。",
+      "artifact": "source"
+    },
+    {
+      "id": "v2-a1",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "unknown",
+      "caseKind": "malformed",
+      "parameters": [
+        ".p12"
+      ],
+      "reason": "v2は妥当性でなく拡張子シグナルを測る。内容は不正でも .p12 名のシグナルは存在する。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "v2-a2",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "unknown",
+      "caseKind": "malformed",
+      "parameters": [
+        ".pfx"
+      ],
+      "reason": "v2は妥当性でなく拡張子シグナルを測る。内容は不正でも .pfx 名のシグナルは存在する。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "v2-a3",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "公開rsa3072.derと一致する証明書の署名属性はsha256WithRSAEncryptionである。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "v2-a4",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "公開rsa3072.derと一致する証明書の署名属性はsha256WithRSAEncryptionである。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "v2-a5",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "公開rsa3072.derと一致する証明書の署名属性はsha256WithRSAEncryptionである。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "v2-a6",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "公開rsa3072.derと一致する証明書の署名属性はsha256WithRSAEncryptionである。",
+      "artifact": "certificate"
+    },
+    {
+      "id": "v2-Encrypt.java",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "encryption",
+      "caseKind": "ordinary",
+      "parameters": [
+        "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"
+      ],
+      "reason": "Cipher.getInstance の完全な変換文字列がRSA暗号化を選択する。",
+      "artifact": "source"
+    },
+    {
+      "id": "v2-Symmetric.java",
+      "label": "negative",
+      "algorithms": [
+        "AES"
+      ],
+      "usage": "encryption",
+      "caseKind": "ordinary",
+      "parameters": [
+        "AES/GCM/NoPadding"
+      ],
+      "reason": "Cipher.getInstance はAES/GCMであり、RSA暗号化ではない。",
+      "artifact": "source"
+    },
+    {
+      "id": "v2-BrokenCipher.java",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "encryption",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "Cipher.getInstance の文字列が空のまま切れており、暗号方式を決定できない。",
+      "artifact": "source"
+    },
+    {
+      "id": "v2-independent-import",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "use ml_kem::* は公開ML-KEMクレートの明示的なワイルドカード参照である。",
+      "artifact": "source"
+    },
+    {
+      "id": "v2-audit0",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "cryptography の asymmetric から mlkem を明示的にimportする。生成呼出しとは異なる標準ML-KEMの名目的参照である。"
+    },
+    {
+      "id": "v2-audit1",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "mixed",
+      "parameters": [
+        "rsa"
+      ],
+      "reason": "同一行の第一呼出しは generateKeyPairSync に rsa を明示する。"
+    },
+    {
+      "id": "v2-audit2",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "rsa",
+        "2048"
+      ],
+      "reason": "node:cryptoの生成呼出しはRSA 2048ビットを指定し、標準PQC生成ではない。"
+    },
+    {
+      "id": "v2-audit3",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256",
+        "2048"
+      ],
+      "reason": "同一ソースでRSA生成に結び付いた privateKey を sign.sign に渡す。SHA256の文字列だけから推測していない。"
+    },
+    {
+      "id": "v2-audit4",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "public-only.p12の変換来歴は公開RSA3072 DERに結び付き、既知証明書のSPKI属性を確定する。"
+    },
+    {
+      "id": "v2-audit5",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "public-only.p12の来歴に結び付く既知公開証明書の署名はsha256WithRSAEncryptionである。"
+    },
+    {
+      "id": "v2-audit6",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "public-only.pfxの変換来歴は公開RSA3072 DERに結び付き、既知証明書のSPKI属性を確定する。"
+    },
+    {
+      "id": "v2-audit7",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "public-only.pfxの来歴に結び付く既知公開証明書の署名はsha256WithRSAEncryptionである。"
+    },
+    {
+      "id": "v2-audit8",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "MlKem768"
+      ],
+      "reason": "ml_kemのワイルドカードimportに由来する MlKem768::generate の独立した鍵生成呼出しである。"
+    },
+    {
+      "id": "v2-audit9",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "kem",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "MlKem768"
+      ],
+      "reason": "直前の MlKem768::generate から得たekに encapsulate を呼ぶため、ML-KEMの名目的API参照である。"
+    },
+    {
+      "id": "v2-audit10",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "kem",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "MlKem768"
+      ],
+      "reason": "MlKem768::generate から得たdkに decapsulate を呼ぶため、ML-KEMの名目的API参照である。"
+    },
+    {
+      "id": "v2-rsa-11",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256",
+        "2048"
+      ],
+      "reason": "createSignが作る署名オブジェクトに、14行目で明示的RSA生成由来の秘密鍵を渡す。ダイジェスト単独ではなくローカル鍵来歴に基づくRSA factory参照である。"
+    },
+    {
+      "id": "v2-rsa-14",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256",
+        "2048"
+      ],
+      "reason": "sign.sign(privateKey)のprivateKeyは7行目のRSA鍵生成から得るため、独立したRSA署名利用である。"
+    },
+    {
+      "id": "v2-rsa-16",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256",
+        "2048"
+      ],
+      "reason": "createVerifyが作る検証オブジェクトに、19行目で明示的RSA生成由来の公開鍵を渡す。ローカル鍵来歴に基づくRSA factory参照である。"
+    },
+    {
+      "id": "v2-rsa-19",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256",
+        "2048"
+      ],
+      "reason": "verify.verify(publicKey, signature)のpublicKeyは7行目のRSA鍵生成に結び付くため、独立したRSA検証利用である。"
+    },
+    {
+      "id": "w182",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "対応するSBOMのlibrary/package要素がopenssl 3.5.0を明示する。依存存在を示すだけで、特定アルゴリズムの有効化を主張しない。"
+    },
+    {
+      "id": "w183",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [
+        "1.0"
+      ],
+      "reason": "SBOMに列挙されているのはordinary-packageだけであり、認識対象のPQC能力ライブラリ宣言はない。"
+    },
+    {
+      "id": "w184",
+      "artifact": "sbom",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [],
+      "reason": "SBOMの版識別子は見えるが、配列と文書が途中で切れており、依存内容を決定できない。非検出や安全の陰性にはしない。"
+    },
+    {
+      "id": "w185",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "対応するSBOMのlibrary/package要素がopenssl 3.5.0を明示する。依存存在を示すだけで、特定アルゴリズムの有効化を主張しない。"
+    },
+    {
+      "id": "w186",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [
+        "1.0"
+      ],
+      "reason": "SBOMに列挙されているのはordinary-packageだけであり、認識対象のPQC能力ライブラリ宣言はない。"
+    },
+    {
+      "id": "w187",
+      "artifact": "sbom",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [],
+      "reason": "SBOMの版識別子は見えるが、配列と文書が途中で切れており、依存内容を決定できない。非検出や安全の陰性にはしない。"
+    },
+    {
+      "id": "w188",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "対応するSBOMのlibrary/package要素がopenssl 3.5.0を明示する。依存存在を示すだけで、特定アルゴリズムの有効化を主張しない。"
+    },
+    {
+      "id": "w189",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [
+        "1.0"
+      ],
+      "reason": "SBOMに列挙されているのはordinary-packageだけであり、認識対象のPQC能力ライブラリ宣言はない。"
+    },
+    {
+      "id": "w190",
+      "artifact": "sbom",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [],
+      "reason": "SBOMの版識別子は見えるが、配列と文書が途中で切れており、依存内容を決定できない。非検出や安全の陰性にはしない。"
+    },
+    {
+      "id": "w191",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "対応するSBOMのlibrary/package要素がopenssl 3.5.0を明示する。依存存在を示すだけで、特定アルゴリズムの有効化を主張しない。"
+    },
+    {
+      "id": "w192",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "SBOMに列挙されているのはordinary-packageだけであり、認識対象のPQC能力ライブラリ宣言はない。"
+    },
+    {
+      "id": "w193",
+      "artifact": "sbom",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "parameters": [],
+      "reason": "SBOMの版識別子は見えるが、配列と文書が途中で切れており、依存内容を決定できない。非検出や安全の陰性にはしない。"
+    },
+    {
+      "id": "w194",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "TSXの型注釈とは別のgenerateKey呼出しが、nameにML-KEM-768を明示する。実行成功や鍵用途の妥当性は主張しない。"
+    },
+    {
+      "id": "w195",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "AES"
+      ],
+      "usage": "key_generation",
+      "parameters": [
+        "AES-GCM"
+      ],
+      "reason": "対応TSXのgenerateKeyで選択される方式はAES-GCMであり、標準PQCではない。"
+    },
+    {
+      "id": "w196",
+      "artifact": "source",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_generation",
+      "parameters": [],
+      "reason": "TSX自体は対応文法だが、generateKeyのname値が欠けており、対象方式を決定できない。"
+    },
+    {
+      "id": "w197",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "RSA"
+      ],
+      "reason": "directiveが名前付きRSA operandを明示する。静的な設定意図でありデプロイ/交渉を主張しない。"
+    },
+    {
+      "id": "w198",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "AES"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "AESGCM"
+      ],
+      "reason": "directiveのoperandはAESGCMであり、名前付きRSA operandを含まない。cipher展開後の安全性を主張しない。"
+    },
+    {
+      "id": "w199",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [],
+      "reason": "対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+    },
+    {
+      "id": "w200",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "TLSv1.0"
+      ],
+      "reason": "directiveはTLS 1.0というlegacy版の選択を明示する。完全な配置済み設定や実行は主張しない。"
+    },
+    {
+      "id": "w201",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "TLSv1.3"
+      ],
+      "reason": "directiveの明示値はTLS 1.3であり、legacy版の選択ではない。"
+    },
+    {
+      "id": "w202",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [],
+      "reason": "対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+    },
+    {
+      "id": "w203",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "TLSv1_0"
+      ],
+      "reason": "directiveはTLS 1.0というlegacy版の選択を明示する。完全な配置済み設定や実行は主張しない。"
+    },
+    {
+      "id": "w204",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "TLSv1_3"
+      ],
+      "reason": "directiveの明示値はTLS 1.3であり、legacy版の選択ではない。"
+    },
+    {
+      "id": "w205",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [],
+      "reason": "対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+    },
+    {
+      "id": "w206",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "TLSV1_0"
+      ],
+      "reason": "directiveはTLS 1.0というlegacy版の選択を明示する。完全な配置済み設定や実行は主張しない。"
+    },
+    {
+      "id": "w207",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "TLSV1_3"
+      ],
+      "reason": "directiveの明示値はTLS 1.3であり、legacy版の選択ではない。"
+    },
+    {
+      "id": "w208",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [],
+      "reason": "対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+    },
+    {
+      "id": "w209",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "force-tlsv10"
+      ],
+      "reason": "directiveはTLS 1.0というlegacy版の選択を明示する。完全な配置済み設定や実行は主張しない。"
+    },
+    {
+      "id": "w210",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "force-tlsv13"
+      ],
+      "reason": "directiveの明示値はTLS 1.3であり、legacy版の選択ではない。"
+    },
+    {
+      "id": "w211",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [],
+      "reason": "対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+    },
+    {
+      "id": "w212",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "VersionTLS10"
+      ],
+      "reason": "directiveはTLS 1.0というlegacy版の選択を明示する。完全な配置済み設定や実行は主張しない。"
+    },
+    {
+      "id": "w213",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "VersionTLS13"
+      ],
+      "reason": "directiveの明示値はTLS 1.3であり、legacy版の選択ではない。"
+    },
+    {
+      "id": "w214",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [],
+      "reason": "対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+    },
+    {
+      "id": "w215",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "RSA"
+      ],
+      "reason": "directiveが名前付きRSA operandを明示する。静的な設定意図でありデプロイ/交渉を主張しない。"
+    },
+    {
+      "id": "w216",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "AES"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "AESGCM"
+      ],
+      "reason": "directiveのoperandはAESGCMであり、名前付きRSA operandを含まない。cipher展開後の安全性を主張しない。"
+    },
+    {
+      "id": "w217",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "parameters": [],
+      "reason": "対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+    },
+    {
+      "id": "w218",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "ml-kem-512"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w219",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w220",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "ml-kem-1024"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w221",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "ml-dsa-44"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w222",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "ml-dsa-65"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w223",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "ml-dsa-87"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w224",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-sha2-128s"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w225",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-sha2-128f"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w226",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-sha2-192s"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w227",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-sha2-192f"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w228",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-sha2-256s"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w229",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-sha2-256f"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w230",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-shake-128s"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w231",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-shake-128f"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w232",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-shake-192s"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w233",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-shake-192f"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w234",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-shake-256s"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w235",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "slh-dsa-shake-256f"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "w236",
+      "artifact": "configuration",
+      "caseKind": "disabled",
+      "label": "negative",
+      "algorithms": [
+        "DSA"
+      ],
+      "usage": "configuration",
+      "parameters": [
+        "ssh-dss"
+      ],
+      "reason": "#でコメント化されたHostKeyAlgorithmsはDSA名を示すが、有効なDSA選択ではない。"
+    },
+    {
+      "id": "w237",
+      "artifact": "source",
+      "caseKind": "comment",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "parameters": [
+        "SLH-DSA-SHAKE-256s"
+      ],
+      "reason": "標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+    },
+    {
+      "id": "public-p12-CERT_P12_CONTAINER",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "unknown",
+      "parameters": [
+        ".p12"
+      ],
+      "reason": "認識対象拡張子の容器シグナルがある。原バイトには公開RSA3072 DERが1回含まれ、来歴の-nokeys/-certpbe NONE/-nomacと整合するが、秘密鍵やMAC/信頼検証を主張しない。"
+    },
+    {
+      "id": "public-p12-CERT_RSA_3072",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "容器原バイトに、公開属性マニフェストがRSA3072 SPKIとする同一DERが1回含まれる。SPKIサイズを署名方式と混同しない。"
+    },
+    {
+      "id": "public-p12-CERT_RSA_SIGNATURE",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "容器原バイトに含まれる既知公開DERの署名属性は、マニフェスト上sha256WithRSAEncryptionである。"
+    },
+    {
+      "id": "public-p12-CERT_ECDSA_SIGNATURE",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "同じ公開RSA3072証明書の署名はRSAであり、ECDSA署名ではない。"
+    },
+    {
+      "id": "public-pfx-CERT_P12_CONTAINER",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "unknown",
+      "parameters": [
+        ".pfx"
+      ],
+      "reason": "認識対象拡張子の容器シグナルがある。原バイトには公開RSA3072 DERが1回含まれ、来歴の-nokeys/-certpbe NONE/-nomacと整合するが、秘密鍵やMAC/信頼検証を主張しない。"
+    },
+    {
+      "id": "public-pfx-CERT_RSA_3072",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "容器原バイトに、公開属性マニフェストがRSA3072 SPKIとする同一DERが1回含まれる。SPKIサイズを署名方式と混同しない。"
+    },
+    {
+      "id": "public-pfx-CERT_RSA_SIGNATURE",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "容器原バイトに含まれる既知公開DERの署名属性は、マニフェスト上sha256WithRSAEncryptionである。"
+    },
+    {
+      "id": "public-pfx-CERT_ECDSA_SIGNATURE",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "同じ公開RSA3072証明書の署名はRSAであり、ECDSA署名ではない。"
+    }
+  ],
+  "coverageAudit": {
+    "status": "Verified",
+    "scope": "all_nominated_rules_all_files",
+    "fileCount": 203,
+    "nominatedRuleCount": 30,
+    "reviewedFileRulePairs": 6090,
+    "missingFacts": [],
+    "unresolvedDefinitions": [],
+    "protocolSha256": "300313c7a8e6867a4f7283a06c2ec0546ae38f6d987c4300575d98d39bf65dd9",
+    "reason": "既存145ファイルに加えて58追加ファイルの原文/原バイトを読み、全203ファイル×全30対象規則の6090組を、対応形式・directive名・名目的なAPI/設定/依存/属性参照と照合した。追加7規則について旧ファイルの設定・ソースにも正の漏れがないことを確認した。全203バイトハッシュはmanifest/provenanceと一致する。追加SBOMは版別のlibrary/ordinary/broken、TSXは標準/AES/未完、7設定形式は指定/代替/未完、各PQC変種は非実行コメント、DSAは無効設定である。新PKCS12/PFXは公開RSA3072 DERを原バイト中に1回含むため、公開マニフェストのSPKI/署名属性と結び付く。新たな正当な陽性事実の区間欠落、判定不能な定義は見つからなかった。joseの能力不明は3単位をambiguousとして残し、未知の事実を正負へ強制していない。これは有限コーパス内の注釈完全性だけの確認であり、全受入要求・母集団・製品能力・runtime成功のVerifiedではない。規則pattern、スキャナー、検体、新出力、他者ラベルは使っていない。"
+  },
+  "previousRecordSha256": "0d5809b8515d06a870f6f1155a3df23f6a277442834099eb43262f3f65dfe1f2",
+  "annotationContext": {
+    "earlierQuestionExposure": true,
+    "earlierQuestionExposureDetail": "初回167単位の候補質問と、候補2の追加11単位に転記された自身のsource-only missingFacts根拠を参照した。その後、全182質問が中立化された現在のmanifestをハッシュで確認した。追加4 RSA単位も自身の原ソース監査に基づく。質問の中立化を、過去の質問文を知らない新規レビューであるかのようには扱わない。",
+    "otherReviewerLabelsSeen": false,
+    "v1LabelsSeen": true,
+    "scannerResultsSeen": false,
+    "priorSourceAuditRecordSha256": "88885bfcea4d92bc8ae0608040b47fff67b2ced6722fa554922cc497c6ee6912",
+    "priorSourceAuditRecordFile": "labels-a-final-before-context-note.json",
+    "independenceScope": "同一レビュー担当の独立ソース注釈と再監査。候補改訂間に新しい独立レビュアーを装わない。",
+    "currentRevision": "候補4。過去のA記録を保持し、旧182単位と追加64単位を原ソースで再確認した。joseについてのみ公式tag付き一次資料を追加参照し、旧positive3件をambiguousへ変更した。他者Bラベル、旧v1ラベル、新コーパス結果は見ていない。これまでの候補質問文への参照履歴を保持する。",
+    "externalPrimaryReferences": [
+      "https://raw.githubusercontent.com/panva/jose/v6.0.0/README.md",
+      "https://raw.githubusercontent.com/panva/jose/v6.0.0/src/key/generate_key_pair.ts"
+    ],
+    "historicalTuningSummaryExposure": {
+      "afterInitial182LabelFreeze": true,
+      "rawV1LabelFilesOpened": false,
+      "historicalReviewProseRead": true,
+      "historicalScannerAggregateResultsSeen": true,
+      "detail": "実装レビュー段階でdocs/quality/TASK-043-ERROR-TRIAGE.mdとdocs/quality/task042の過去レビュー文章を読んだ。v1の集計値とjose旧判断の要約を含む。現在v2の他者Bラベル記録・スキャン結果は読んでいない。これを知らない新規レビュー担当とは主張しない。joseの今回の判断は明示した公式v6.0.0一次資料と能力の不確実性に基づく。"
+    }
+  },
+  "splitContext": {
+    "allV1DerivedFiles": "tuning; includes Node files retaining holdout/ path names",
+    "freshHoldoutLineage": "rustcrypto-kems-2024",
+    "freshHoldoutPath": "holdout/rustcrypto-usage.rs",
+    "holdoutSelection": "規則を知るコーディネータが選んだ公開由来の独立著作系統であり、母集団からの無作為抽出や秘密ベンチマークではない。",
+    "firstV2ScannerOutputSeen": false,
+    "addedWidthControls": "全てtuning。規則と既存結果を知るコーディネータのdirective/形式/変種対照例であり、独立著作holdoutではない。"
+  },
+  "attestationScope": "sourceOnly/otherLabelsSeen/scannerResultsSeen refer to deriving this v2 truth from source without seeing other current-v2 label records or current-v2 scanner outputs. Historical v1 tuning-summary exposure is disclosed separately."
+}

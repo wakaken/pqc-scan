@@ -16,6 +16,7 @@ import time
 
 from evaluate import (bytes_digest, canonical, check_coverage, digest, load_truth,
                       order_digest, safe_relative, score, semantic_digest, validate_corpus)
+from taxonomy import select_corpus
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 
@@ -160,13 +161,21 @@ def run(args):
     if out.exists() and any(out.iterdir()):
         raise ValueError("Refusing to overwrite prior evidence")
     out.mkdir(parents=True, exist_ok=True)
-    data, labels = load_truth(REPO / "tests/quality")
+    corpus_dir = select_corpus(REPO, getattr(args, 'corpus_dir', None))
+    data, labels = load_truth(corpus_dir)
     validate_corpus(data, REPO)
     result = dict(version=1, environment=environment(binary),
-                  corpusVersion=data["corpusVersion"], corpusSha256=bytes_digest(REPO / "tests/quality/corpus.json"),
-                  truthSha256=bytes_digest(REPO / "tests/quality/truth.json"),
+                  corpusVersion=data["corpusVersion"], corpusSha256=bytes_digest(corpus_dir / "corpus.json"),
+                  truthSha256=bytes_digest(corpus_dir / "truth.json"),
                   budgets=dict(status="unapproved; descriptive baseline only", enforced=False))
     result["environment"]["buildProfile"] = args.build_profile
+    if data.get('annotationVersion'):
+        from taxonomy import utc_time
+        truth = json.loads((corpus_dir/'truth.json').read_text())
+        if utc_time(result['environment']['clockUtc']) < utc_time(truth['freeze']['timestampUtc']):
+            raise ValueError('Measurement timestamp precedes truth freeze')
+    if corpus_dir != REPO/'tests/quality':
+        result['corpusDirectory'] = str(corpus_dir.relative_to(REPO))
     write_json(out / "environment.json", result["environment"])
     with tempfile.TemporaryDirectory(prefix="pqc023-input-") as tmp:
         root = pathlib.Path(tmp)
@@ -222,6 +231,7 @@ def main():
     parser.add_argument("--timeout", type=float, default=60)
     parser.add_argument("--build-profile", choices=["release", "debug", "unspecified"], default="unspecified")
     parser.add_argument("--skip-benchmarks", action="store_true")
+    parser.add_argument("--corpus-dir", type=pathlib.Path, help="Optional frozen corpus under tests/quality; default is TASK-023")
     args = parser.parse_args()
     if args.repeats < 2 or args.warm_samples < 3 or not 0 < args.timeout <= 60:
         parser.error("Need >=2 accuracy repeats, >=3 warm samples and 0 < timeout <=60 seconds")

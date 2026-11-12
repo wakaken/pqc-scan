@@ -94,6 +94,10 @@ impl TreeSitterDetector {
         if tree.root_node().has_error() && status != DetectorStatus::Truncated {
             status = DetectorStatus::Partial;
         }
+        let facts = crate::source_facts::inspect(tree.root_node(), text, language_name, rules);
+        if facts.truncated {
+            status = DetectorStatus::Truncated;
+        }
 
         let mut observations = Vec::new();
         let mut out = Vec::new();
@@ -118,6 +122,9 @@ impl TreeSitterDetector {
             let mut rule_hits = 0usize;
             let mut examined = 0usize;
             'candidates: for candidate in &candidates {
+                if facts.replaces(rule) {
+                    break;
+                }
                 // Python/Ruby call nodes are enabled only for the new PQC inventory.
                 if candidate.kind == "call" && !rule.id.starts_with("PQC_") {
                     continue;
@@ -202,6 +209,56 @@ impl TreeSitterDetector {
                     }
                     rule_hits += 1;
                 }
+            }
+            for found in facts.rule_matches(rule) {
+                if dedup
+                    .iter()
+                    .any(|&(start, end)| found.start <= start && end <= found.end)
+                {
+                    continue;
+                }
+                if rule_hits == 32 {
+                    status = DetectorStatus::Truncated;
+                    break;
+                }
+                let (line, column) = pqc_scan_core::model::line_col_for_offset(text, found.start);
+                let raw = &text[found.start..found.end];
+                let detection = Detection {
+                    rule_id: rule.id.clone(),
+                    location: Location {
+                        file: file_path.clone(),
+                        line,
+                        column,
+                    },
+                    evidence: Evidence {
+                        r#type: "tree_sitter_match".into(),
+                        r#match: mask_preview(raw),
+                        snippet_preview: pqc_scan_core::model::snippet_around(
+                            text,
+                            found.start,
+                            found.end,
+                            64,
+                        ),
+                        metadata: BTreeMap::from([
+                            ("detector".into(), self.name().into()),
+                            ("language".into(), language_name.into()),
+                            ("node_kind".into(), "bounded_source_fact".into()),
+                            ("scope".into(), rule.scope.clone()),
+                            ("source_resolution".into(), found.reason.into()),
+                        ]),
+                    },
+                };
+                if observe {
+                    observations.push(pqc_scan_core::ObservationDraft::source(
+                        &detection,
+                        pqc_scan_core::ObservationMethod::AstPattern,
+                        raw,
+                        Some((found.start, found.end)),
+                    ));
+                }
+                dedup.insert((found.start, found.end));
+                out.push(detection);
+                rule_hits += 1;
             }
         }
 
@@ -323,7 +380,7 @@ fn scope_matches(scope: &str, language: &str) -> bool {
     false
 }
 
-fn resolve_language(path: &Path) -> Option<(Language, &'static str)> {
+pub(crate) fn resolve_language(path: &Path) -> Option<(Language, &'static str)> {
     let ext = path
         .extension()
         .and_then(|v| v.to_str())

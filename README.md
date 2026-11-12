@@ -107,6 +107,13 @@ Finding IDs use `finding-v1-<SHA-256>` with length-prefixed fields and repositor
 
 For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
 
+For developer measurements and their limits, see the [PQS-QAM quality assessment](docs/quality/QUALITY-ASSESSMENT.md).
+The existing offline benchmark also supports a separate [JSON/Markdown quality report](tests/quality/README.md).
+The [reopened TASK-042 evaluation](docs/quality/TASK-042-REOPEN-RESULTS.md) preserves earlier measurements and separates source-audited tuning from fresh upstream data.
+Its optional reviewed corpus adds algorithm/use and format coverage without changing scanner behavior.
+
+Built-in Node, Python and Rust PQC reference checks now follow explicit imports, aliases and bounded local bindings; Node also follows literal finite `for...of` algorithm lists and locally generated RSA keys into signing/verification. Shadowed names and help strings are excluded. Java/Ruby SLH variants, case-insensitive pre-standard names, explicit Java classical-group settings, commented SSH settings and static Gradle/gemspec/SBOM dependency declarations have regression fixes. These references do not prove execution or enabled PQC support. Custom patterns retain their generic matcher. Built-in source-analysis bindings and supported Node/Python selectors now use the default YAML compiled into the scanner; modified custom pattern/scope/kind still use the generic path. See [the detection contract](docs/quality/TASK-043-FIXES-CONTRACT.md) for bounds and changes to findings.
+
 Each guide has a Japanese version linked at the top.
 
 <a id="limits"></a>

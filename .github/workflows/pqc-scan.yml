@@ -98,13 +98,67 @@ jobs:
           python3 tests/quality/run.py
           --binary target/release/pqc-scan --build-profile release
           --out-dir target/quality-baseline --repeats 3 --warm-samples 3
+      - name: Summarize source-bound quality evidence
+        run: >-
+          python3 tests/quality/report.py --baseline target/quality-baseline
+          --reference docs/quality/task023/BASELINE.json
+          --out-dir target/quality-assessment
+      - name: Measure independently reviewed additional corpus
+        run: >-
+          python3 tests/quality/run.py --corpus-dir tests/quality/expanded
+          --binary target/release/pqc-scan --build-profile release
+          --out-dir target/quality-expanded --repeats 3 --skip-benchmarks
+      - name: Summarize additional nominal detection evidence
+        run: >-
+          python3 tests/quality/report.py --corpus-dir tests/quality/expanded
+          --baseline target/quality-expanded --out-dir target/quality-expanded-assessment
+      - name: Measure source-audited corrected corpus
+        run: >-
+          python3 tests/quality/run.py --corpus-dir tests/quality/expanded-v2
+          --binary target/release/pqc-scan --build-profile release
+          --out-dir target/quality-expanded-v2 --repeats 3 --skip-benchmarks
+      - name: Summarize corrected data separately from v1
+        run: >-
+          python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2
+          --baseline target/quality-expanded-v2
+          --applicability tests/quality/applicability-042-v2/assessment.json
+          --out-dir target/quality-expanded-v2-assessment
+      - name: Measure missing lock-format controls
+        run: >-
+          python3 tests/quality/run.py --corpus-dir tests/quality/expanded-v2-lock-controls
+          --binary target/release/pqc-scan --build-profile release
+          --out-dir target/quality-lock-controls --repeats 3 --skip-benchmarks
+      - name: Summarize lock-format controls
+        run: >-
+          python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2-lock-controls
+          --baseline target/quality-lock-controls
+          --out-dir target/quality-lock-controls-assessment
+      - name: Measure TASK-043 fixes and fresh upstream controls
+        run: >-
+          python3 tests/quality/run.py --corpus-dir tests/quality/task043-corpus-v2
+          --binary target/release/pqc-scan --build-profile release
+          --out-dir target/quality-task043 --repeats 3 --skip-benchmarks
+      - name: Summarize TASK-043 without changing numeric gates
+        run: >-
+          python3 tests/quality/report.py --corpus-dir tests/quality/task043-corpus-v2
+          --baseline target/quality-task043 --out-dir target/quality-task043-assessment
       - name: Preserve baseline reports and measurements
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: pqc-quality-baseline
           if-no-files-found: error
-          path: target/quality-baseline/
+          path: |
+            target/quality-baseline/
+            target/quality-assessment/
+            target/quality-expanded/
+            target/quality-expanded-assessment/
+            target/quality-expanded-v2/
+            target/quality-expanded-v2-assessment/
+            target/quality-lock-controls/
+            target/quality-lock-controls-assessment/
+            target/quality-task043/
+            target/quality-task043-assessment/
 
   scan:
     runs-on: ubuntu-latest

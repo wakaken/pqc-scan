@@ -1,0 +1,113 @@
+{
+  "task": "043",
+  "status": "done",
+  "decision": "Passed",
+  "evaluator": "Main agent acting as Evaluator; two independent reviewer identities",
+  "timestampUtc": "2026-11-12T02:25:42.935716+00:00",
+  "baseCommit": "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf",
+  "branch": "codex/quality-assessment-model",
+  "worktree": "Uncommitted current changes; earlier work preserved",
+  "mandatoryRequirements": [
+    {
+      "id": "all-original-errors",
+      "status": "Passed",
+      "evidence": "REPAIRS.json",
+      "fpFixed": 4,
+      "fnFixed": 40,
+      "remaining": 0
+    },
+    {
+      "id": "frozen-oracle-and-history",
+      "status": "Verified",
+      "evidence": "FROZEN-EVIDENCE.json",
+      "unchangedFiles": 343
+    },
+    {
+      "id": "same-input-before-after",
+      "status": "Verified",
+      "evidence": [
+        "METRICS.json",
+        "BEFORE-BASELINE-MATCH.json",
+        "FINAL-SOURCE-MATCH.json"
+      ]
+    },
+    {
+      "id": "independent-source-and-new-controls",
+      "status": "Verified",
+      "evidence": [
+        "FINAL-quality.json",
+        "UPSTREAM-HASH-VERIFICATION.json"
+      ],
+      "scope": "Original independent freeze preserved; metadata-only replay is not a new independent trial"
+    },
+    {
+      "id": "positive-negative-boundary-security-compatibility",
+      "status": "Passed",
+      "evidence": "VALIDATION.json"
+    },
+    {
+      "id": "implementation-review",
+      "status": "Passed",
+      "evidence": "IMPLEMENTATION-REVIEW-COMBINED-APPROVAL.json",
+      "unresolved": []
+    },
+    {
+      "id": "test-adequacy-review",
+      "status": "Passed",
+      "evidence": "TEST-REVIEW.md",
+      "unresolved": []
+    }
+  ],
+  "historicalMetricSignals": {
+    "original57": "Failed retained; independent source attribution of interval/unannotated/literal definition differences; no new product defect established",
+    "original042v2": "Raw unannotated verification facts retained as FP2; supplemented only in a distinct audited corpus",
+    "releaseDecision": "Unknown; no gate waiver/publication/release requested or performed"
+  },
+  "requiredWorkOutstanding": [],
+  "deferredOriginalP1P2Fixes": [],
+  "reviews": [
+    {
+      "path": "docs/quality/task043-fixes-20261112/IMPLEMENTATION-REVIEW-COMBINED-APPROVAL.json",
+      "sha256": "6916b8c3cc35cbe545eda30b9331fbfad1d54a3a6830bc272f2171e831ce0cb9"
+    },
+    {
+      "path": "docs/quality/task043-fixes-20261112/IMPLEMENTATION-REVIEW-FINAL.json",
+      "sha256": "57960875cd36dc41943a9e8e570309399488c4f7016916a6b43ae135c6c45299"
+    },
+    {
+      "path": "docs/quality/task043-fixes-20261112/IMPLEMENTATION-REVIEW-HARNESS-R4.json",
+      "sha256": "e41b76350509e0c992d911b2e49a0a543e162b914db0dbbdaebeee03fc7f9135"
+    },
+    {
+      "path": "docs/quality/task043-fixes-20261112/IMPLEMENTATION-REVIEW-SOURCE-R3.json",
+      "sha256": "77505b7a95d18267ae41b61df0193437fb6629240f94876970addfa4d56de4ed"
+    },
+    {
+      "path": "docs/quality/task043-fixes-20261112/IMPLEMENTATION-REVIEW-SOURCE.json",
+      "sha256": "c47a405f13a0e2282249a970cc3eb353f0f22309f353ffc25634cd1eb16e1c41"
+    },
+    {
+      "path": "docs/quality/task043-fixes-20261112/IMPLEMENTATION-REVIEW.md",
+      "sha256": "82b44dec4cde8f1729bea2debda118ab211c024f2c14f0f03af3f63d4ba935ea"
+    },
+    {
+      "path": "docs/quality/task043-fixes-20261112/TEST-REVIEW-FINAL-SOURCE.json",
+      "sha256": "2016726a8cc2dee2e6616f28db408b0f8116e9472497bf11141ed7aeb2272716"
+    },
+    {
+      "path": "docs/quality/task043-fixes-20261112/TEST-REVIEW-FINAL-VERIFICATION.json",
+      "sha256": "8e7e4d9ef5912f6bbc1912f7a1bc285f83cec449a1a87d36bea4220b11752995"
+    },
+    {
+      "path": "docs/quality/task043-fixes-20261112/TEST-REVIEW.md",
+      "sha256": "a46a5028b1b3b9bf98b81bcbba2d5c16decb1e7a18905914f1e6f78c81684840"
+    }
+  ],
+  "historicalReviewerIndex": {
+    "path": "reviewed-snapshot/EVIDENCE-INDEX.json",
+    "sha256": "d83721bbe7661b6ff869215646cc7adb02744e00c218535bb8650f9724539364",
+    "note": "Review-time snapshot; original versions of two later-binding addenda retained alongside. Final packet manifest regenerated separately."
+  },
+  "publication": "No commit/push/PR/merge/tag/release",
+  "scope": "Completion of approved FP4/FN40 repairs within043; no claim of all Q1-Q6 or universal detection correctness"
+}

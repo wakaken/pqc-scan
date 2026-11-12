@@ -196,3 +196,28 @@ identifiers are not exhaustively assessed. See the
 | `TS_SSH_RSA_STRING` | `tree_sitter` | SSH | `high` | `quantum-vulnerable` | 0.70 | `java,javascript,typescript,python,go,rust,ruby` | `tree_sitter.yml` | SSH RSA-family algorithm strings detected in AST nodes. | Plan phased retirement of ssh-rsa with hybrid key operations. | `(?i)ssh-rsa\|rsa-sha2-(256\|512)` |
 | `TS_TLS_LEGACY_VERSION_LITERAL` | `tree_sitter` | TLS | `high` | `non-quantum-risk` | 0.75 | `java,javascript,typescript,python,go,rust,ruby` | `tree_sitter.yml` | Legacy TLS version literals detected in AST nodes. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `(?i)(?:^\|[^A-Za-z0-9])TLSv1(?:\.0\|\.1)?(?:$\|[^0-9.])\|TLSv1_0\|TLSv1_1` |
 | `TS_TLS_RSA_CIPHER_LITERAL` | `tree_sitter` | TLS | `high` | `quantum-vulnerable` | 0.66 | `java,javascript,typescript,python,go,rust,ruby` | `tree_sitter.yml` | RSA-family TLS cipher suite literals detected in AST nodes. | Update TLS suites containing RSA key exchange to PQC-hybrid suites. | `(?i)TLS_[A-Z0-9_]*RSA[A-Z0-9_]*` |
+
+## TASK-043 bounded source references
+
+The default fingerprints for `PQC_NODE_API`, `PQC_PYTHON_API`, `PQC_RUST_API` and `PQC_JAVA_API` use parsed source facts instead of matching arbitrary node text. `TS_NODE_RSA_USAGE` retains generic matches and adds locally established RSA generation/factory/use references. `API_NODE_CRYPTO_SIGN_RSA` keeps its regex rule kind while using source facts for JavaScript/TypeScript signing **and verification**; its original `create(Sign|Verify)` purpose includes both. Pattern/scope/kind modifications in custom rules retain generic behavior. IDs and cryptographic classifications are unchanged.
+
+Java recognizes KEM 512/768/1024, DSA 44/65/87 and explicit SLH SHA2/SHAKE 128/192/256 s/f parameter names without interchanging families. Ruby adds those SLH literals. Pre-standard Kyber/Dilithium references are case-insensitive and retain draft classification. Java classical-only groups accept explicit property assignments, XML entry values and static `System.setProperty`; loaded/effective configuration is not proved. SSH hash-comments are ignored. CIRCL/golang and OpenSSL generic/unknown SBOM presence are recognized; dependency presence does not establish enabled capability. Static Gradle coordinates and gemspec declarations do not execute DSL code or resolve package versions.
+
+See [the full contract and limits](quality/TASK-043-FIXES-CONTRACT.md). The source-bound metadata fixtures test compiled patterns only, not the completeness of these detector predicates.
+
+## TASK-043 maintenance follow-up
+
+Default source-analysis bindings derive pattern/scope/kind from the canonical
+`pqc.yml`, `tree_sitter.yml` and `crypto_api.yml` compiled into the binary. Rust
+keeps the six analysis-handler identities and language/API semantics; it does not
+keep a second copy of those selectors. YAML edits are Cargo include dependencies
+and take effect when rebuilding from this repository. Runtime rule selection
+remains explicit and offline. A changed custom selector/scope/kind retains the
+generic matcher.
+
+Node argument selection and Python generation-symbol selection/recovery use the
+loaded compiled pattern. Canonical request prefixes must match in full, so an
+embedded quote or partial name cannot create a supported algorithm reference.
+Language scope rules and library module/type/return-value knowledge remain
+explicit in the adapters. This does not make arbitrary APIs or new language
+constructs automatically supported. See the [maintenance plan](quality/TASK-043-MAINTAINABILITY-PLAN.md).

@@ -1,0 +1,124 @@
+id: '043'
+title: 既知のFP4件・FN40件を043内で修正・検証する
+type: improvement
+priority: high
+status: done
+owner: Evaluator Agent
+phase: '2'
+description: 既知の失敗例と過去の証拠を保持し、追加承認されたP1/P2の全44観測を修正する。同一データの回帰比較、独立データ、互換性試験、二段階レビューまで043内で完遂する。
+quality_alias: QAM-02の検出改善部分
+plan_reference: docs/quality/TASK-043-FIXES-PLAN.md
+requirements_reference: docs/quality/QUALITY-REQUIREMENTS.md
+quality_requirements:
+- Q1-08
+depends_on:
+- '042'
+target_components:
+- crates/pqc_scan_detectors/
+existing_assets:
+- E23
+- E28
+- E42
+- E43
+problem:
+- 対応範囲内のFP4件・FN40件を、原因整理だけで終えず全件修正する。
+- 修正が新しい誤報、参照の欠落、検査上限の隠蔽、出力の不整合を生まないことを確認する。
+acceptance:
+- 'Q1-08: 元の失敗例を削除せず、仕様・影響・正負境界試験と承認を示し、FP4件・FN40件を全件解消する'
+- 固定データ・固定正解の変更前後比較と、二者が事前に注釈を固定した新しい第三者由来データの評価を区別して保存する。
+- 公開形式・分類・カスタム規則の互換性、資源制限、秘匿処理を検証し、必須チェックと二段階レビューの未解消事項を残さない。
+deliverables:
+- target/quality-task-043/error-triage.md # 過去の調査は保持
+- docs/quality/TASK-043-FIXES-CONTRACT.md
+- docs/quality/TASK-043-FIXES-RESULTS.md
+- docs/quality/task043-fixes-20261112/REPAIRS.json
+- docs/quality/task043-fixes-20261112/VALIDATION.json
+- docs/quality/task043-fixes-20261112/EVIDENCE-INDEX.json
+- tests/quality/task043-corpus-v2/
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- 誤検出と考えた事例を規則の意図と照合せず直すと、既存検出やリスクの意味が変わる。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+execution_record:
+  date: '2026-11-11'
+  branch: codex/quality-assessment-model
+  head: 0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf
+  scope: 調査・文書・候補仕様の整理のみ。製品・規則・評価器・正解・既存証拠は不変。
+  report: docs/quality/TASK-043-ERROR-TRIAGE.md
+  observation_ledger: docs/quality/task043/TRIAGE.json
+  validation: docs/quality/task043/VALIDATION.json
+  actual_deliverable: target/quality-task-043/error-triage.md
+  observations: 旧データ8件・追加データ34件・既存pattern対照8件の計50件、20原因群。
+  acceptance_scope: 各候補に仕様案・影響・正負/境界試験案・承認要否を付す。修正済みとは扱わない。
+  quality_outcome: Partial
+  review: 文書・調査だけのためAGENTS.mdの実装用二段階サブエージェントは非適用。独立した新正解レビューも未実施。
+  next_product_fix_candidate: C18のTLSバージョン境界。規則変更の仕様・影響確認と承認後に個別タスクで実施。
+  not_run:
+  - 修正案の実装・改善効果測定
+  - 独立した新holdout
+  - hosted CI・全workspace再試験・Clippy再実行
+  - 性能ベンチマーク・ネットワークprobe
+  publication: commit/push/PR/merge/tag/releaseは未実施。
+  completion_scope: 全50観測の原記録・原因群・仕様案・影響・正負/境界試験案・承認要否を照合して受入。原因の詳細1群はPartialと明示し、修正や独立精度保証を完了とはしない。
+  completion_evidence: docs/quality/task043/ACCEPTANCE.json
+reopening_record:
+  date: '2026-11-12'
+  authorization: ユーザーがFP4件・FN40件に関するP1/P2の全修正を043で完遂するよう明示指示。別タスクへの延期は禁止。
+  previous_scope: 初回は原因整理のみ。過去の調査・測定は不変保持。
+  current_scope: 全44観測の修正・互換性確認・同一データ回帰・独立データ評価・二段階レビューまで実施。
+  implementation_plan: docs/quality/TASK-043-FIXES-PLAN.md
+  entry: target/quality-task-043-fixes-20261112/ENTRY.json
+  completion_criteria:
+  - 元のFP4/FN40を全件追跡し、固定正解・適用範囲を変更せず解消する。
+  - 各修正に正負・境界・上限の意味ある試験を付け、既存の検出/出力互換性の退行を調べる。
+  - 対応箇所のsource-bound metadata、規則参照、日英READMEとロードマップを更新する。
+  - 必須検証と二段階レビューを終えてからdoneにし、必須未確認を記録しただけでは完了としない。
+fixes_execution_record:
+  date: '2026-11-12'
+  status: done
+  base_commit: 0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf
+  branch: codex/quality-assessment-model
+  scope: 追加承認されたP1/P2の元FP4件・FN40件を全件修正。別タスクへの延期なし。
+  report: docs/quality/TASK-043-FIXES-RESULTS.md
+  acceptance: docs/quality/task043-fixes-20261112/ACCEPTANCE.json
+  validation: docs/quality/task043-fixes-20261112/VALIDATION.json
+  repairs: docs/quality/task043-fixes-20261112/REPAIRS.json
+  source: docs/quality/task043-fixes-20261112/FINAL-SOURCE-MATCH.json
+  reviews: 実装と試験妥当性の各1名が承認。IR1〜4/TR1〜4未解消なし。
+  original_targets_remaining: 0
+  observed_corpus: 206ファイル255単位。適格197単位でTP103/FP0/FN0/TN94、Unsupported53/Ambiguous5を保持。
+  old_metric_signal: 旧57単位のFailedと旧042-v2の未注釈FP2は履歴を保持。独立にソース帰属を確認し、品質ゲートは緩和しない。
+  privacy_and_limits: 新経路の上限・Unicode位置・byte span・8成果物の合成credential秘匿を検証。
+  publication: commit/push/PR/merge/tag/releaseは未実施。
+maintainability_followup:
+  date: '2026-11-12'
+  authorization: ユーザーが不要な個別対応・YAMLとRustの二重管理を調査し、必要な言語/API処理を残して改善するよう指示。
+  plan: docs/quality/TASK-043-MAINTAINABILITY-PLAN.md
+  evidence: target/quality-task-043-maintainability-20261112/
+  status: done
+  previous_acceptance: docs/quality/task043-fixes-20261112/ACCEPTANCE.json
+  acceptance:
+  - 規則pattern/scope/kindとNode/Pythonの方式/API選択をYAMLを正として一元化する。
+  - カスタム規則・所見・診断・秘匿・資源上限の挙動を保持し、固定データで前後比較する。
+  - 必要試験と独立二段階レビューを完了し、新しい証拠を保存する。
+  report: docs/quality/TASK-043-MAINTAINABILITY-RESULTS.md
+  completion_evidence: docs/quality/task043-maintainability-20261112/ACCEPTANCE.json
+  outcome: 既定6規則の重複定義とNode/Pythonの再列挙を解消。必要な言語/API解釈は保持。5コーパスの前後結果が完全同値。
+  reviews: 実装・試験妥当性の各1名が承認。必須未解消なし。
+  validation: Rust390・品質Python54・配布10・Node31成功。protocol5成功/6skipを明示。fmt/Clippy/release成功。
+  publication: commit/push/PR/merge/tag/releaseは未実施。

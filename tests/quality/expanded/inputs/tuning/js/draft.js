@@ -1,0 +1,1 @@
+generateKeyPairSync("kyber768");

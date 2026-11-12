@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "annotationVersion": 1,
+  "corpusVersion": "042-v2-lock-controls",
+  "license": "MIT",
+  "families": {
+    "source_api": [
+      "PQC_JAVA_API",
+      "PQC_GO_API",
+      "PQC_PYTHON_API",
+      "PQC_RUST_API",
+      "PQC_RUBY_API",
+      "PQC_WEBCRYPTO_API",
+      "PQC_NODE_API",
+      "JWT_RS256",
+      "TS_NODE_RSA_USAGE",
+      "API_NODE_CRYPTO_SIGN_RSA",
+      "API_CIPHER_RSA"
+    ],
+    "draft": [
+      "PQC_DRAFT_ALGORITHM"
+    ],
+    "config": [
+      "PQC_JAVA_CLASSICAL_GROUPS",
+      "SSH_DSS_SIGALG",
+      "SSH_DH_GROUP14_SHA1",
+      "NGINX_SSL_CIPHERS_RSA",
+      "HTTPD_SSLPROTOCOL_LEGACY",
+      "ENVOY_TLS_MIN_VERSION_LEGACY",
+      "ISTIO_GATEWAY_TLSV1",
+      "HAPROXY_BIND_TLSV1",
+      "TRAEFIK_TLS_OPTIONS_LEGACY",
+      "K8S_INGRESS_RSA_CIPHERS"
+    ],
+    "dependency": [
+      "DEP_PQC_CAPABLE_LIBRARY"
+    ],
+    "key": [
+      "PRIVATE_KEY_RSA_HEADER",
+      "PRIVATE_KEY_PKCS8_HEADER",
+      "PRIVATE_KEY_OPENSSH_HEADER"
+    ],
+    "certificate": [
+      "CERT_RSA_3072",
+      "CERT_RSA_SIGNATURE",
+      "CERT_ECDSA_SIGNATURE",
+      "CERT_P12_CONTAINER"
+    ]
+  },
+  "files": [
+    {
+      "path": "tuning/package-lock.json",
+      "source": "tests/quality/expanded-v2-lock-controls/inputs/package-lock.json",
+      "split": "tuning",
+      "lineage": "qam042-authored-lock-controls",
+      "license": "MIT",
+      "sha256": "7781203651a4673c90d0a3ebc7d88f33eff43135310c08b9d2bbf7d008ccaf03",
+      "inputFormat": "package-lock.json",
+      "artifact": "dependency_manifest"
+    },
+    {
+      "path": "tuning/pnpm-lock.yaml",
+      "source": "tests/quality/expanded-v2-lock-controls/inputs/pnpm-lock.yaml",
+      "split": "tuning",
+      "lineage": "qam042-authored-lock-controls",
+      "license": "MIT",
+      "sha256": "cf7d3e25b822c345766292cfdfdc1af7e73ef1961f293e9619ca0d36c76c3fc4",
+      "inputFormat": "pnpm-lock.yaml",
+      "artifact": "dependency_manifest"
+    }
+  ],
+  "units": [
+    {
+      "id": "lock-0",
+      "path": "tuning/package-lock.json",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "line": 1,
+      "startColumn": 1,
+      "endColumn": 90,
+      "dependencyName": "@noble/post-quantum",
+      "question": "Assess the nominated dependency reference from source and documented property. No desired label is supplied."
+    },
+    {
+      "id": "lock-1",
+      "path": "tuning/pnpm-lock.yaml",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "line": 3,
+      "startColumn": 1,
+      "endColumn": 34,
+      "dependencyName": "@noble/post-quantum",
+      "question": "Assess the nominated dependency reference from source and documented property. No desired label is supplied."
+    }
+  ],
+  "canaries": [],
+  "annotationAuditRequired": true
+}

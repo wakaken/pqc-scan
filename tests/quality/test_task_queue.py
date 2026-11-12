@@ -20,7 +20,7 @@ class TaskQueueTests(unittest.TestCase):
                 self.assertEqual(identifier, path.name.split('-')[0])
                 self.assertNotIn(identifier, tasks)
                 tasks[identifier] = task
-        self.assertEqual(len(tasks), 40)
+        self.assertTrue({f'{n:03}' for n in range(1, 41)} <= tasks.keys())
         for identifier, task in tasks.items():
             for dependency in task.get('depends_on', []):
                 self.assertIsInstance(dependency, str)

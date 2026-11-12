@@ -111,6 +111,13 @@ CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚�
 
 脆弱性の報告方法は[SECURITY.md](SECURITY.md)を参照してください。
 
+開発用の測定結果と限界は[PQS-QAM品質評価](docs/quality/QUALITY-ASSESSMENT.md)に記載しています。
+追加の正解データを指定すると、方式・用途・入力形式ごとの検出成績と未評価範囲も確認できます。
+既存のオフラインベンチマークから、別途[JSON／Markdownの品質報告](tests/quality/README.md)も生成できます。
+[TASK-042の再評価](docs/quality/TASK-042-REOPEN-RESULTS.md)では過去の測定を保持し、注釈を確認し直した調整用データと新しい第三者由来データを分けています。
+
+組込のNode・Python・RustのPQC検出で、明示import、別名、ファイル内の限定した参照関係を確認するようにしました。Nodeでは固定配列の`for...of`と、局所的に生成したRSA鍵を使う署名・検証も追跡します。同名の別関数や説明文字列は除外します。Java・RubyのSLH変種、旧称の大小文字、Javaの古典方式限定設定、SSHの無効コメント、Gradle・gemspec・SBOMの依存宣言も修正対象です。参照の検出は、実行やPQC機能の有効化の証明ではありません。制限と所見の変更は[検出仕様](docs/quality/TASK-043-FIXES-CONTRACT.md)を参照してください。 組込解析の規則照合とNode/Pythonの方式・生成API選択は、ビルド時に取り込む既定YAMLへ集約しています。カスタム規則のpattern・scope・kindを変えた場合は、従来の汎用matcherを使います。
+
 各ガイドの冒頭から英語版へ移れます。
 
 <a id="limits"></a>

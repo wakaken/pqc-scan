@@ -1,0 +1,131 @@
+{
+  "reviewer": "task042_implementation_review",
+  "timestampUtc": "2026-11-11T10:02:46.240108+00:00",
+  "sourceOnly": true,
+  "otherLabelsSeen": false,
+  "otherSupplementSeen": false,
+  "scannerResultsSeen": false,
+  "corpusSha256": "defcedb55fd4965d78e56bbcee8ee8c7ee5dccd83cf7d824d62f91060901b92b",
+  "protocolSha256": "f93c8b12693bd20e0ec45fda61ff1004f1e62250e2057ca5137a98590059b6a3",
+  "originalLabelRecord": {
+    "path": "labels-a.json",
+    "sha256": "097bc595eb4c092d24a77f1040b9d03c330e79ed7f9e9adfdcafaac578c2e143",
+    "unchanged": true
+  },
+  "scope": "npm jose 6.0.0 と CIRCL v1.6.1 の宣言を、PQC対応候補ライブラリの存在としてpositiveにできる根拠の独立確認。スキャナや規則、他者ラベル・補足、測定結果は未参照。",
+  "sources": [
+    {
+      "id": "jose-readme",
+      "url": "https://raw.githubusercontent.com/panva/jose/v6.0.0/README.md",
+      "sha256": "09a3764a2203a8f3030884583f00c43ca2a12407b73a49e8226644ec9724569a",
+      "version": "v6.0.0",
+      "retrieval": "Official upstream tagged source, read as text only"
+    },
+    {
+      "id": "jose-key-generation",
+      "url": "https://raw.githubusercontent.com/panva/jose/v6.0.0/src/key/generate_key_pair.ts",
+      "sha256": "d213a7850446e70099c0d72b65612f7239f116093a6b0ffb1dfb5c20fa625e61",
+      "version": "v6.0.0",
+      "retrieval": "Official upstream tagged source, read as text only"
+    },
+    {
+      "id": "jose-signatures",
+      "url": "https://raw.githubusercontent.com/panva/jose/v6.0.0/src/lib/subtle_dsa.ts",
+      "sha256": "984944218e4664c3103b70036f71a2bc2285eefe07fef6897a234eff5fec3f33",
+      "version": "v6.0.0",
+      "retrieval": "Official upstream tagged source, read as text only"
+    },
+    {
+      "id": "jose-ecdh",
+      "url": "https://raw.githubusercontent.com/panva/jose/v6.0.0/src/lib/ecdhes.ts",
+      "sha256": "f23c40bddc53feabf7f5b050951056ad21b0b63ffed0c0a0a83d0e6ce58731b4",
+      "version": "v6.0.0",
+      "retrieval": "Official upstream tagged source, read as text only"
+    },
+    {
+      "id": "circl-readme",
+      "url": "https://raw.githubusercontent.com/cloudflare/circl/v1.6.1/README.md",
+      "sha256": "cb04a8e42cdb85f12f9473c64aa2f8c888df8cb50579bd84c1775917549107d3",
+      "version": "v1.6.1",
+      "retrieval": "Official upstream tagged source, read as text only"
+    }
+  ],
+  "findings": [
+    {
+      "library": "jose",
+      "version": "6.0.0",
+      "declarationPresence": "established",
+      "pqcCandidatePresence": "not_established",
+      "evidence": [
+        "jose-readme",
+        "jose-key-generation",
+        "jose-signatures",
+        "jose-ecdh"
+      ],
+      "reason": "READMEはJOSE/JWT/JWS/JWEとRFC7518/8037等を説明し、PQCの記載はない。READMEの不記載だけで不存在とは断定しないが、同版の鍵生成switchはRSA/ECDSA/Ed25519/ECDHの対応値を列挙し未知algを拒否する。署名変換もHMAC/RSA/ECDSA/Ed25519だけを列挙し未知algを拒否し、ECDHは指定EC曲線/X25519に制限する。これらはJOSEライブラリの存在を裏付ける一方、jose 6.0.0をPQC対応候補とする根拠にはならない。"
+    },
+    {
+      "library": "github.com/cloudflare/circl",
+      "version": "v1.6.1",
+      "declarationPresence": "established",
+      "pqcCandidatePresence": "established",
+      "evidence": [
+        "circl-readme"
+      ],
+      "reason": "同版READMEはPost-Quantum Cryptographyの項でML-KEM 512/768/1024とML-DSA 44/65/87を明示する。宣言はこの機能を含むライブラリ候補の存在を裏付ける。インストール済み・実行・機能有効化・実際の暗号方式利用は宣言だけでは証明しない。"
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "x057",
+      "path": "tuning/manifests/package.json/declared/package.json",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "proposedLabel": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "reason": "jose 6.0.0の宣言は明確だが、公式同版資料と対応アルゴリズム実装はPQC対応候補の根拠を示さない。単なる暗号ライブラリ存在との混同を避け、この限定した性質についてnegativeとするのが妥当。"
+    },
+    {
+      "id": "x060",
+      "path": "tuning/manifests/package-lock.json/declared/package-lock.json",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "proposedLabel": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "reason": "jose 6.0.0の宣言は明確だが、公式同版資料と対応アルゴリズム実装はPQC対応候補の根拠を示さない。単なる暗号ライブラリ存在との混同を避け、この限定した性質についてnegativeとするのが妥当。"
+    },
+    {
+      "id": "x063",
+      "path": "tuning/manifests/pnpm-lock.yaml/declared/pnpm-lock.yaml",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "proposedLabel": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "reason": "jose 6.0.0の宣言は明確だが、公式同版資料と対応アルゴリズム実装はPQC対応候補の根拠を示さない。単なる暗号ライブラリ存在との混同を避け、この限定した性質についてnegativeとするのが妥当。"
+    },
+    {
+      "id": "x066",
+      "path": "tuning/manifests/go.mod/declared/go.mod",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "proposedLabel": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "reason": "CIRCL v1.6.1の宣言があり、公式同版READMEが標準ML-KEM/ML-DSA機能を明示するためPQC対応候補の存在としてpositiveを維持する。"
+    }
+  ],
+  "protocolIssue": "既存PROTOCOLがjoseをrecognized PQC-capableとして明示したため、元labels-aのpositiveはその操作的定義に従った記録である。ただし外部事実としてのPQC対応候補は裏付け不足である。元記録/PROTOCOLを変更せず、この補足と最終裁定の両方をfreezeのhashに結び、基準の訂正理由を明示することを推奨する。",
+  "limits": [
+    "全ライブラリの網羅的能力監査ではない。openssl、cryptography、BouncyCastleのpositiveの外部根拠はこの補足では追加検証していない。",
+    "将来のjose版、外部改造、任意runtimeのPQC能力を一般化しない。",
+    "negativeはDEP_PQC_CAPABLE_LIBRARYという限定した候補存在の問いに対するもので、安全性や暗号未使用の認定ではない。",
+    "PQC候補ライブラリの存在をpositiveとしても、algorithmsはunknownのままで特定方式の有効化や実利用を推論しない。"
+  ]
+}

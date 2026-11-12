@@ -1,0 +1,545 @@
+{
+  "version": 1,
+  "task": "043",
+  "dateUtc": "2026-11-11T12:33:24.436691+00:00",
+  "head": "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf",
+  "branch": "codex/quality-assessment-model",
+  "worktree": "041/042/planning uncommitted changes preserved",
+  "decision": "Passed",
+  "scope": "Traceable post-observation analysis and repair proposals; not product corrections or precision acceptance",
+  "requirements": [
+    "Q1-08"
+  ],
+  "observationCount": 50,
+  "groupCount": 20,
+  "sourceScopes": {
+    "legacy": 8,
+    "expanded": 34,
+    "pattern_control": 8
+  },
+  "rootCauseStatuses": {
+    "Verified": 19,
+    "Partial": 1
+  },
+  "proposedFixesAreNotImplemented": true,
+  "priorities": {
+    "P1": 10,
+    "P2": 10
+  },
+  "comparisons": {
+    "legacy": {
+      "status": "Passed",
+      "deltas": {
+        "holdout/source_api": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "holdout/draft": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "holdout/config": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "holdout/dependency": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "holdout/certificate": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "holdout/key": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/source_api": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/draft": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/config": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/dependency": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/certificate": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/key": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "regressedGroups": [],
+      "policy": "TASK-023 approved split/family nonregression; descriptive report, no numeric CI enforcement"
+    },
+    "expanded": {
+      "status": "Passed",
+      "deltas": {
+        "holdout/source_api": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "holdout/draft": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "holdout/config": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "holdout/dependency": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "holdout/key": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "holdout/certificate": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/source_api": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/draft": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/config": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/dependency": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/key": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "tuning/certificate": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "regressedGroups": [],
+      "policy": "TASK-023 approved split/family nonregression; descriptive report, no numeric CI enforcement"
+    }
+  },
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_*.py"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.4772156250255648,
+      "log": "target/quality-task-043/command-00.log",
+      "logSha256": "791bf705269cda9ece86f98bb3b847ede7898bc1cbc0af67dea31fd11f2c75c4"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.8947127500141505,
+      "log": "target/quality-task-043/command-01.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "pqc_scan_rules",
+        "--test",
+        "quality_metadata",
+        "--locked",
+        "--offline"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 7.266180667007575,
+      "log": "target/quality-task-043/command-02.log",
+      "logSha256": "898d677206cd16e99c9604bac08eab68ec92e7a95a774404e63698064e9ea904"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "pqc_scan_detectors",
+        "--test",
+        "pqc_readiness",
+        "--test",
+        "ast_occurrences",
+        "--test",
+        "format_dependency_support",
+        "--test",
+        "pkcs12_certificates",
+        "--locked",
+        "--offline"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 24.314723125018645,
+      "log": "target/quality-task-043/command-03.log",
+      "logSha256": "6876b0d3753f2833a3e952bef32206f1455a54b751480893d1c4e88fb8876b9a"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/quality/run.py",
+        "--binary",
+        "target/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--out-dir",
+        "target/quality-task-043/legacy",
+        "--repeats",
+        "3",
+        "--skip-benchmarks"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.43491666699992493,
+      "log": "target/quality-task-043/command-04.log",
+      "logSha256": "4b1070199869648981864c236e204edd42ebbec841c16154ebc5b73618df8ff3"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/quality/report.py",
+        "--baseline",
+        "target/quality-task-043/legacy",
+        "--reference",
+        "target/quality-task-042/legacy-regression-02/summary.json",
+        "--out-dir",
+        "target/quality-task-043/legacy-report"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.1448424169793725,
+      "log": "target/quality-task-043/command-05.log",
+      "logSha256": "ea02b57a76011cdab408adae6843c760ad4de7058f469c7151836987bba3db0b"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/quality/run.py",
+        "--corpus-dir",
+        "tests/quality/expanded",
+        "--binary",
+        "target/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--out-dir",
+        "target/quality-task-043/expanded",
+        "--repeats",
+        "3",
+        "--skip-benchmarks"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.6061041250068229,
+      "log": "target/quality-task-043/command-06.log",
+      "logSha256": "4b1070199869648981864c236e204edd42ebbec841c16154ebc5b73618df8ff3"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/quality/report.py",
+        "--corpus-dir",
+        "tests/quality/expanded",
+        "--baseline",
+        "target/quality-task-043/expanded",
+        "--reference",
+        "target/quality-task-042/expanded-accepted/summary.json",
+        "--out-dir",
+        "target/quality-task-043/expanded-report"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.14780512498691678,
+      "log": "target/quality-task-043/command-07.log",
+      "logSha256": "9dc14c4545392e692276be1f6e009737ef785864c517a15bfbb449d47284445d"
+    }
+  ],
+  "extraCommands": [
+    {
+      "command": [
+        "python3",
+        "target/quality-task-043/check-controls.py"
+      ],
+      "exitCode": 0,
+      "log": "target/quality-task-043/control-check.log"
+    },
+    {
+      "command": [
+        "python3",
+        "target/quality-task-043/validate-triage.py"
+      ],
+      "exitCode": 0,
+      "scope": "All observations mapped once, required fields/source hashes/replay groups/links/protected files checked"
+    }
+  ],
+  "diagnosticControls": {
+    "exactPatternTargets": 8,
+    "exactNativeNominatedMatches": 6,
+    "postObservationStringContexts": 2,
+    "postObservationStringNativeMatches": 2,
+    "independentAccuracyUnitsAdded": 0
+  },
+  "testCounts": {
+    "python": 44,
+    "ruleMetadataTests": 1,
+    "ruleMetadataRules": 119,
+    "ruleMetadataControls": 244,
+    "detectorTests": 42
+  },
+  "immutability": {
+    "entryBindings": 549,
+    "unchanged": 546,
+    "changedEntryFiles": [
+      "docs/quality/QUALITY-REQUIREMENTS.md",
+      "docs/quality/QUALITY-ROADMAP.md",
+      "tasks/043-quality-detection-triage.yaml"
+    ],
+    "allOldProductRulesSchemasCorporaScorerAndTask042EvidenceUnchanged": true
+  },
+  "artifactBindings": {
+    "docs/quality/TASK-043-ERROR-TRIAGE.md": "b2cd495801df0610c4b885543f9fc051050f1c1b9ee95ae3f0ece99716367b22",
+    "docs/quality/TASK-043-PLAN.md": "a6a00aeb2e22c50fc4ccfbf0ba33ef24314e57d3d902e3ebc7da40e3d99934a9",
+    "docs/quality/task043/TRIAGE.json": "d4748b464324655c5c706be548193093094818536823d31a57f1dee31d720d64",
+    "target/quality-task-043/AST-INSPECTION.json": "88342b5baa27053de4d8cf28c78c28847ab9c58f38e28b542f777f38dc8d2ded",
+    "target/quality-task-043/COMMANDS.json": "08a89da9ba010f42f831e17acfad7441a76c612d648c63f732552676e5354036",
+    "target/quality-task-043/CONTROL-OBSERVATIONS.json": "584d0115b3ce01ebd5a86603bf57908e4e96fb1486c04314cc9b37b50acd77a9",
+    "target/quality-task-043/ENTRY.json": "18eb4e2f7d1361aa392b9ecea752b1d926889e089a7867544301b858291ffd95",
+    "target/quality-task-043/ast-compile.log": "b8a06979680c909cfcfb5367746df59a558bf95e287e0a92243a7e1c4b90d620",
+    "target/quality-task-043/ast-inspect.c": "5b41d52e57f2bfde72546d9af120f3a7de8a1881760797bfc5d933d53eb386e6",
+    "target/quality-task-043/ast-system-compile.log": "b8a06979680c909cfcfb5367746df59a558bf95e287e0a92243a7e1c4b90d620",
+    "target/quality-task-043/control-check.log": "8464e46d902735c079064d2608e2fd70aca965cec26bd1d1e8dd25de97230e4f",
+    "target/quality-task-043/control-inputs/HTTPD_SSLCIPHERSUITE_RSA.conf": "3abcffb54ec1338c321e6a5e9edf35dc3e14dc25df63e4eaf496cedf77837fec",
+    "target/quality-task-043/control-inputs/HTTPD_SSLPROTOCOL_LEGACY.conf": "497f74499bfa05ebd630560b90600f78bd9b44df01575c544ea9e10c815e7669",
+    "target/quality-task-043/control-inputs/K8S_INGRESS_RSA_CIPHERS.conf": "69abc7e32f190d0191782cf577290094dfc9e7edd79312347a1753a4eecaa823",
+    "target/quality-task-043/control-inputs/NGINX_SSL_CIPHERS_RSA.conf": "49267ed039865e917f99d6eaf46ea99665d21a1f531fc3adcf2cce67d581a014",
+    "target/quality-task-043/control-inputs/NODE_TLS_MIN_VERSION.js": "27f69b36589391ad94862f5fec8c2f48f6ff792661c281978939b6fdf9a22161",
+    "target/quality-task-043/control-inputs/TLS_VERSION_1_0.js": "ef53277454fc97944021bfa0c159a3b44fb27e7637b0d4fd46eeefb10a07d983",
+    "target/quality-task-043/control-inputs/TS_RUBY_RSA_USAGE-string.rb": "dc692b5252e3b374eb55884436d52a8019b325976b76d34eafa1d348d01577cb",
+    "target/quality-task-043/control-inputs/TS_RUBY_RSA_USAGE.rb": "393c99e85ad8e4217fcde12f9a59bfb681775e4750b964d04593bf50e6152f9b",
+    "target/quality-task-043/control-inputs/TS_TLS_LEGACY_VERSION_LITERAL-string.js": "6c9ab034c6ff071c948c75e1a070946445373f330960e8e2e933cd2557a0ddbb",
+    "target/quality-task-043/control-inputs/TS_TLS_LEGACY_VERSION_LITERAL.js": "ef53277454fc97944021bfa0c159a3b44fb27e7637b0d4fd46eeefb10a07d983",
+    "target/quality-task-043/controls-observed/cbom.json": "8abaf24ad9e0e08826ea03a735ca3e242e61edc3c887a3399c4c1a46f5bc6593",
+    "target/quality-task-043/controls-observed/dependency-sbom.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "target/quality-task-043/controls-observed/diagnostics.json": "4bf45c382790a9ee7434a4d7343ddddcb82d7f14803ea81297a85616d27970d4",
+    "target/quality-task-043/controls-observed/measurement.json": "c586a65c339eeda24fee45f2e477e869caa746374d8c8e36bde1d379e8d4efdb",
+    "target/quality-task-043/controls-observed/report.html": "8e9b6902836a0b62698608af41ec8305969165a3c0aca6fc0572cd0e9359ce02",
+    "target/quality-task-043/controls-observed/report.json": "32fe4620a00df8e33133491ce667fbb7a37deb4bd50669bdf93dfaa34aab6f48",
+    "target/quality-task-043/controls-observed/report.md": "cbeb262987547fc6daf63fa452a0c2f696d1d685f7627aa405c9f36af0eab2a6",
+    "target/quality-task-043/controls-observed/report.sarif": "8d8ae42ce936637df4d11c02dcfa397e2b4a633d5df8c526e46490c4e601b982",
+    "target/quality-task-043/controls-observed/stderr.log": "c5f98a1a58dfadbca20703cdd664ab49393ad42e3ce80227ed531f34af59e53c",
+    "target/quality-task-043/controls-observed/stdout.log": "e6dc33992ee2ed60911a148064cb583db521e1c744feed29a4d4d37a23f2c7c1",
+    "target/quality-task-043/error-triage.md": "b2cd495801df0610c4b885543f9fc051050f1c1b9ee95ae3f0ece99716367b22",
+    "target/quality-task-043/expanded-report/adversarial-cases.json": "faee3080bd24d6c23c3a0f7a3692b014b7c87ab300fefd6b5138a265644bea45",
+    "target/quality-task-043/expanded-report/algorithm-truth.json": "2ae66b960c2f5cf2001ce2b43eeb2cce74931240a87169191d89dc155d02e980",
+    "target/quality-task-043/expanded-report/artifact-metrics.json": "33e71eba95074ff5c473a439590087bfb1b5d5bc2ccf3cbfcf0e2d58f87d9b0f",
+    "target/quality-task-043/expanded-report/case-coverage.json": "5c4b45efd1e257d9a9446c7ba2167d74315748f104c1327f22885ac41403490e",
+    "target/quality-task-043/expanded-report/comparison.json": "455f8cd3799697457395b32a11c4f5bcb25f74fc73ad3b5e32cfac43618effa0",
+    "target/quality-task-043/expanded-report/metrics.json": "5eb753501b63a3d49fdbb305ee22c91a90aea639bddc0b9d1f8d8f38618f8db0",
+    "target/quality-task-043/expanded-report/quality.json": "89efc892c68795a8cfd13d6c609405ce54dd887c6710bea0e63a0a6cdf416499",
+    "target/quality-task-043/expanded-report/quality.md": "f0834d6ed568f44bd9e9727735930ff91349ac70c47d07d86d0b5608cbc6bf0f",
+    "target/quality-task-043/expanded-report/usage-truth.json": "3c5607b25e17daa1c31adbfdeda4b05153dcacc1c966b3e750aeeeee2877f017",
+    "target/quality-task-043/expanded/accuracy-0/cbom.json": "8d945ab06eb5bdfb35503fcd0adc082dfd86df5216c808f6645d0b86330df0bf",
+    "target/quality-task-043/expanded/accuracy-0/dependency-sbom.json": "e30cab10578b2e6af1a69956591490c983b47dce14f4f85ab779420ee29a8793",
+    "target/quality-task-043/expanded/accuracy-0/diagnostics.json": "c09d3d417c72ac0c744242209b39d768a499bbb1ff530293963e4e3f4d9389dd",
+    "target/quality-task-043/expanded/accuracy-0/measurement.json": "4af238f0286e010ad08c6b180026dfb648e309ea2cbe3785949f730fdc057a2a",
+    "target/quality-task-043/expanded/accuracy-0/report.html": "141ac88b19c755101b91f48c840fb254d5904381916d432c42d0c483faabb386",
+    "target/quality-task-043/expanded/accuracy-0/report.json": "b1d33ccacb2a294261acfcbd6b4c119526a3bf07a314e4628c474362aa5d579d",
+    "target/quality-task-043/expanded/accuracy-0/report.md": "21f44d15e87a225a20e7b4da4f5e48ee7abe4480353b963350fd0f9d96469e68",
+    "target/quality-task-043/expanded/accuracy-0/report.sarif": "718842153d86961e9249d119eeba48018d619c32ae03ec4b84326dd70ea65771",
+    "target/quality-task-043/expanded/accuracy-0/stderr.log": "e63bde598160f3f19990b33103043c6c8c4ae6489e76f45358aa4aa8973f4982",
+    "target/quality-task-043/expanded/accuracy-0/stdout.log": "487c7864fd0d97be9f01925c97557cdc1f1fe08d6bf07b0a3a2f68a6b5009902",
+    "target/quality-task-043/expanded/accuracy-1/cbom.json": "8d945ab06eb5bdfb35503fcd0adc082dfd86df5216c808f6645d0b86330df0bf",
+    "target/quality-task-043/expanded/accuracy-1/dependency-sbom.json": "e30cab10578b2e6af1a69956591490c983b47dce14f4f85ab779420ee29a8793",
+    "target/quality-task-043/expanded/accuracy-1/diagnostics.json": "139139f604157565b485731c8c36f990b6654b312b78554ec48b33b5508d5010",
+    "target/quality-task-043/expanded/accuracy-1/measurement.json": "4cc4aa2baf3572db2ab58414c315e6c18e62d58ea55ac61d2fa63ed08f991ab4",
+    "target/quality-task-043/expanded/accuracy-1/report.html": "8fc3182a63a9f071df4668946da87df32766e028768d61e69959dd7d11b95645",
+    "target/quality-task-043/expanded/accuracy-1/report.json": "1dffad7f01fadc5572667afdb2533f395112b0c2ad396c804625e5b9bf3d5c4d",
+    "target/quality-task-043/expanded/accuracy-1/report.md": "cc3e394040571c1fa564a48ce848a3ed304eb635d385f6cad36c8d7ba1175f10",
+    "target/quality-task-043/expanded/accuracy-1/report.sarif": "718842153d86961e9249d119eeba48018d619c32ae03ec4b84326dd70ea65771",
+    "target/quality-task-043/expanded/accuracy-1/stderr.log": "e63bde598160f3f19990b33103043c6c8c4ae6489e76f45358aa4aa8973f4982",
+    "target/quality-task-043/expanded/accuracy-1/stdout.log": "d682a9b2f4516551e6158d0d298ed624f493295c92eac7a2436d2c05999219ef",
+    "target/quality-task-043/expanded/accuracy-2/cbom.json": "8d945ab06eb5bdfb35503fcd0adc082dfd86df5216c808f6645d0b86330df0bf",
+    "target/quality-task-043/expanded/accuracy-2/dependency-sbom.json": "e30cab10578b2e6af1a69956591490c983b47dce14f4f85ab779420ee29a8793",
+    "target/quality-task-043/expanded/accuracy-2/diagnostics.json": "227bff5bfc1f78059dfaa707ddcf8676e354b906b16fb195f04b0b7c8b5fadfc",
+    "target/quality-task-043/expanded/accuracy-2/measurement.json": "8165d287f2bc38568f299889ee9d6d59c1718af3638f8c8a1057c789f5447c0b",
+    "target/quality-task-043/expanded/accuracy-2/report.html": "ddffefea52cf8c9eb663e6e0b8365f7ed3a8d9a35738d9a032305aee8b970031",
+    "target/quality-task-043/expanded/accuracy-2/report.json": "b26ba6083b0282aece66b30abb4b46aa5014b21eeedd1a0c89db0bf0e40e17c2",
+    "target/quality-task-043/expanded/accuracy-2/report.md": "4b567bc3cea3675035e75b7606c54c1aac370d04b8aafce9c14f3c9cd12b3d99",
+    "target/quality-task-043/expanded/accuracy-2/report.sarif": "718842153d86961e9249d119eeba48018d619c32ae03ec4b84326dd70ea65771",
+    "target/quality-task-043/expanded/accuracy-2/stderr.log": "e63bde598160f3f19990b33103043c6c8c4ae6489e76f45358aa4aa8973f4982",
+    "target/quality-task-043/expanded/accuracy-2/stdout.log": "40a39afc7707f5c7e6dbfc31a90f2ce05da261f87dad101bfcedefbc5f1548fb",
+    "target/quality-task-043/expanded/environment.json": "d304004432f8a977672d00f5c441d8a2ef45b54d439c8f461d1aa45e13ba105a",
+    "target/quality-task-043/expanded/summary.json": "e42b29f7a5536be07e72c32a4dbec36cd57715c8669ebae3d0460174d036392b",
+    "target/quality-task-043/legacy-report/quality.json": "caf5dbba0a1aba01b5e194811198f7222a701e0be58408c27e238211752e1386",
+    "target/quality-task-043/legacy-report/quality.md": "b602ddf4163e285c60b5db17685526bd67052564050387f9cb92d24fd248981f",
+    "target/quality-task-043/legacy/accuracy-0/cbom.json": "bbe7a99e4a07f776ea868a6648e61d3b5b9934cdf53b1e979efeab89ba149f75",
+    "target/quality-task-043/legacy/accuracy-0/dependency-sbom.json": "840756cfd3947d0610dea69d73cc7737a0e2daa44cecf98c0a34ee839a940c20",
+    "target/quality-task-043/legacy/accuracy-0/diagnostics.json": "704f7b7e0e9f9041f15332b62dd8d311ff652c0f69713674389bc539afae5d99",
+    "target/quality-task-043/legacy/accuracy-0/measurement.json": "866e80def29dedd0859714704c0dc681cde283e1730cfe779c5eb23581f05c48",
+    "target/quality-task-043/legacy/accuracy-0/report.html": "eb8d8640fee55686c30affe849c9587ab02773ec1f22bf324f96366040b1a2ec",
+    "target/quality-task-043/legacy/accuracy-0/report.json": "2742ee22d3a8731b1b100202071bcbdffb52b7cd7ea2bd96de293e7c1f59d085",
+    "target/quality-task-043/legacy/accuracy-0/report.md": "a522c685fc418fb1b61b2777e0dd71abf040eeb7eb8dd9bae90c1e9b8671941a",
+    "target/quality-task-043/legacy/accuracy-0/report.sarif": "dc53ab1a74c7615330feab10bb469708133fbd33fe69e73da1c8712a2035e96e",
+    "target/quality-task-043/legacy/accuracy-0/stderr.log": "e63bde598160f3f19990b33103043c6c8c4ae6489e76f45358aa4aa8973f4982",
+    "target/quality-task-043/legacy/accuracy-0/stdout.log": "6f710c5217050cbcaf9fa28fd44e9e752f6ff4b0aecbc092faa44a7b3fa1ccd7",
+    "target/quality-task-043/legacy/accuracy-1/cbom.json": "bbe7a99e4a07f776ea868a6648e61d3b5b9934cdf53b1e979efeab89ba149f75",
+    "target/quality-task-043/legacy/accuracy-1/dependency-sbom.json": "840756cfd3947d0610dea69d73cc7737a0e2daa44cecf98c0a34ee839a940c20",
+    "target/quality-task-043/legacy/accuracy-1/diagnostics.json": "183e44e5e91a1c54cbc2826db878664aed536feac363b726a8128b0d3df9be79",
+    "target/quality-task-043/legacy/accuracy-1/measurement.json": "906123fcceb66bc87e2454f9d0b531e83faf0b7f0c3b14b42f3b466a6e5b8530",
+    "target/quality-task-043/legacy/accuracy-1/report.html": "61b2abc5e29e9ebd4c4a13ddcbea1daf1de94b1d249eba431c338ccc18e5ed66",
+    "target/quality-task-043/legacy/accuracy-1/report.json": "ee57af51805f64e1091de490d84ee82cd2b67db2799892d01df5ef55a7785b26",
+    "target/quality-task-043/legacy/accuracy-1/report.md": "66b459ebfe168ea05f20d23a70c2d933b74340710d6d092cd5e80652975ffdac",
+    "target/quality-task-043/legacy/accuracy-1/report.sarif": "dc53ab1a74c7615330feab10bb469708133fbd33fe69e73da1c8712a2035e96e",
+    "target/quality-task-043/legacy/accuracy-1/stderr.log": "e63bde598160f3f19990b33103043c6c8c4ae6489e76f45358aa4aa8973f4982",
+    "target/quality-task-043/legacy/accuracy-1/stdout.log": "c8e1c9a33302b4c59da37d830605b34b5f418b151aa1c045c5cddd4d6bd05e65",
+    "target/quality-task-043/legacy/accuracy-2/cbom.json": "bbe7a99e4a07f776ea868a6648e61d3b5b9934cdf53b1e979efeab89ba149f75",
+    "target/quality-task-043/legacy/accuracy-2/dependency-sbom.json": "840756cfd3947d0610dea69d73cc7737a0e2daa44cecf98c0a34ee839a940c20",
+    "target/quality-task-043/legacy/accuracy-2/diagnostics.json": "fe2cd17910cec153220e1a93ff9a3264568f1ecff5031d999fb0e592c7d620b9",
+    "target/quality-task-043/legacy/accuracy-2/measurement.json": "614071798d225c8b4882f769087aa0f29800d4315889be12fa63ee318af4431d",
+    "target/quality-task-043/legacy/accuracy-2/report.html": "0ed2cab26f7c48f946d33f07e928e07334baaee9f2cd239b38ade98003a4a8e2",
+    "target/quality-task-043/legacy/accuracy-2/report.json": "465a347e9aaa294d1edd3c765ce3975293272c5a3d03366ffe104d5084571760",
+    "target/quality-task-043/legacy/accuracy-2/report.md": "ba28b9176e5f76ed5cf90209ad338137c1a1242c629edcfc6232f10c8378784f",
+    "target/quality-task-043/legacy/accuracy-2/report.sarif": "dc53ab1a74c7615330feab10bb469708133fbd33fe69e73da1c8712a2035e96e",
+    "target/quality-task-043/legacy/accuracy-2/stderr.log": "e63bde598160f3f19990b33103043c6c8c4ae6489e76f45358aa4aa8973f4982",
+    "target/quality-task-043/legacy/accuracy-2/stdout.log": "38029f97accb69653e2e2fb2db22d25988b939d565fd0b24e697c702c433139c",
+    "target/quality-task-043/legacy/environment.json": "a0c418046828e0fae8cdae2ad7bfd9a06946275c94ff7b77255c7485461b0935",
+    "target/quality-task-043/legacy/summary.json": "8131e9e8c0dd4286d720013b7d9ccac5cf765c30daefd5948f4d5b4cfd6fbac1"
+  },
+  "sourceBindings": {
+    "crates/pqc_scan_detectors/src/tree_sitter_detector.rs": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677",
+    "rules/default/pqc.yml": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a",
+    "tests/quality/PROTOCOL.md": "28d37934f6a584294fd8093b2f343b936b3f492dae023d8f57664fdc35b2a018",
+    "tests/quality/corpus/independent-holdout/approval_backend.py": "d2a6c4e718070019c0ddde6c6f8c89e8b38bd3003f929987517dbcad6e71da8b",
+    "tests/quality/corpus/independent-holdout/archive-policy.xml": "9b36fc1f8fa21dcacc48759ecd0f8a6888f27da23a53defaac5da88ef1700454",
+    "rules/default/tree_sitter.yml": "34ae0e842ce9e36cff90da2d188d8eb842fa00755af7b2eac8e90a09a7cde69b",
+    "rules/default/crypto_api.yml": "8020d85ef00fae35571427521f975b022b9b9e72cdcbb6f0687925cf5c40865e",
+    "crates/pqc_scan_detectors/src/dependency_detector/lexical.rs": "1fe116a2de1f99a7d58f6e86351376472156d9020adc39b7e295d8855707d6fb",
+    "crates/pqc_scan_detectors/src/dependency_detector/parse.rs": "2060798ecb245bad252ec44b441e1c268a66d6a9dfdd0df8b82b057fc9ce6db7",
+    "crates/pqc_scan_detectors/src/dependency_detector.rs": "e0b1cd827a02ab75ae31615648f41b88f7c3c8e67f8dd5a687c6d5029add66bd",
+    "tests/quality/evaluate.py": "4b341b0d4c8374615198d18a8ccf449de326f1df197ebc98a9994ddc8333351c",
+    "crates/pqc_scan_detectors/tests/fixtures/certificates/manifest.json": "a3dd30971583ef3fbf6769465008070d521f4c0733bc768ddd4229fc05e29fed",
+    "crates/pqc_scan_detectors/src/certificate_detector.rs": "330c5293ef9aabb7818c419280dc1fcc3c4d79930e5fde6f6c983c11d0973c5d",
+    "crates/pqc_scan_detectors/tests/pkcs12_certificates.rs": "ae54f8e346cd41a2b27681227212ea461dedc590703c9a3c3def40d04d11f658",
+    "rules/default/tls.yml": "9c4a18c98005d4ca581c0eb0f3595ee7e762dc2a626e4166d8eb9b0be0ccbe0a",
+    "rules/default/middleware.yml": "58cca7b8dd25144a1f40a306d46ec5619fbf7da4504140b2607af7b34404b145"
+  },
+  "review": {
+    "mode": "Main-agent source/observation audit and reconciliation",
+    "independentReview": "Not Tested",
+    "reason": "Documentation/research-only; AGENTS.md does not automatically require implementation/test subagents. No new truth labels or executable product changes."
+  },
+  "recoveryTreeInspection": {
+    "status": "Not Tested",
+    "scope": "Attempted deeper recovery-tree dump for C07; no AST executable produced and no fixture executed",
+    "compiler": "/usr/bin/clang (Apple clang 17.0.0)",
+    "attempts": [
+      {
+        "exitCode": 1,
+        "log": "target/quality-task-043/ast-compile.log",
+        "sha256": "b8a06979680c909cfcfb5367746df59a558bf95e287e0a92243a7e1c4b90d620"
+      },
+      {
+        "exitCode": 1,
+        "log": "target/quality-task-043/ast-system-compile.log",
+        "sha256": "b8a06979680c909cfcfb5367746df59a558bf95e287e0a92243a7e1c4b90d620"
+      }
+    ],
+    "reason": "Native diagnostic link failed because installed SDK libSystem.tbd contains arm64e.x1 architecture unsupported by the selected linker. Existing Rust tests passed; this is not recorded as a scanner failure.",
+    "environmentChanges": false,
+    "toolSource": "target/quality-task-043/ast-inspect.c",
+    "toolSourceSha256": "5b41d52e57f2bfde72546d9af120f3a7de8a1881760797bfc5d933d53eb386e6"
+  },
+  "qualityOutcome": "Partial",
+  "releaseDecision": "Unknown",
+  "unexecuted": [
+    "Product/rule/ground-truth/evaluator changes and improvement measurement",
+    "New independent holdout",
+    "Hosted CI",
+    "Full workspace tests/Clippy rerun",
+    "Performance benchmarks and network probes"
+  ],
+  "externalSources": [
+    {
+      "url": "https://httpd.apache.org/docs/2.4/mod/mod_ssl.html#sslprotocol",
+      "checked": "2026-11-11",
+      "scope": "Apache SSLProtocol +/- syntax"
+    },
+    {
+      "url": "https://docs.openssl.org/3.5/man1/openssl-ciphers/",
+      "checked": "2026-11-11",
+      "scope": "Cipher list ! exclusions, not all quantum risk"
+    },
+    {
+      "url": "https://docs.gradle.org/current/userguide/declaring_dependencies_basics.html",
+      "checked": "2026-11-11",
+      "scope": "Observed Gradle 9.9.1 dependency declarations, not complete DSL execution"
+    },
+    {
+      "url": "https://guides.rubygems.org/specification-reference/#add_dependency",
+      "checked": "2026-11-11",
+      "scope": "RubyGems declaration method"
+    },
+    {
+      "url": "https://docs.oracle.com/en/java/javase/25/security/java-secure-socket-extension-jsse-reference-guide.html",
+      "checked": "2026-11-11",
+      "scope": "Named group property meaning, not fixture loading"
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+      "checked": "2026-11-11",
+      "scope": "TLS 1.3 designation, not a PQC assurance claim"
+    }
+  ],
+  "localArtifactsNote": "target raw outputs/logs are local; hashes retained here. Report and triage are prepared repository files, hosted CI not executed."
+}

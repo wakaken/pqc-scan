@@ -1,0 +1,73 @@
+id: '053'
+title: 全軸の証拠集約と費用に応じたCI測定を統合する
+type: improvement
+priority: medium
+status: pending
+owner: Planner Agent
+phase: '5'
+description: 既存CIとreport.pyを再利用し、全要求の状態・証拠を継続的に確認できるようにする。
+quality_alias: QAM-10
+plan_reference: docs/quality/QUALITY-ROADMAP.md
+requirements_reference: docs/quality/QUALITY-REQUIREMENTS.md
+quality_requirements:
+- Q6-01
+- Q6-02
+- Q6-16
+- Q6-18
+depends_on:
+- '042'
+- '044'
+- '045'
+- '046'
+- '047'
+- 048
+- 049
+- '050'
+- '051'
+- '052'
+- '055'
+- '056'
+- '057'
+- 058
+- 059
+- '060'
+- '061'
+target_components:
+- tests/quality/report.py
+existing_assets:
+- E41
+- EC
+problem:
+- 追加測定の費用・頻度・実行枠
+- 追加検証の実測とレビューの結合
+- Q3/Q4/Q6等の結果の取り込みと保存期限
+- 全軸の新測定と判定を一つの報告経路へ統合
+acceptance:
+- 'Q6-01: 既存jobを再利用し、PRの軽量検証と高コスト測定を分け、全軸の証拠を保存'
+- 'Q6-02: 最終ソースに結ぶ結果を保存し、ログ成功だけで試験妥当性を合格にしない'
+- 'Q6-16: 全要求IDと実行/未実行・根拠hashを機械的に参照でき、工具障害と製品退行を分離'
+- 'Q6-18: 対象commit/版・機能範囲・規格・方法・環境・実測・Q1〜Q6・制約/未確認・重大懸念・過去比較・優先順位・受入判定を入力/コマンド/成果物へ結ぶ。機械JSONと人向け報告の事実が一致'
+deliverables:
+- target/quality-task-053/ci-measurement-plan.md
+- target/quality-task-053/quality-assessment.md
+- target/quality-task-053/quality-evidence-index.json
+- target/quality-task-053/test-evidence-index.json
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- 実行費用とノイズの増大、工具障害の製品退行扱い、失敗時の証拠欠落が生じ得る。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。

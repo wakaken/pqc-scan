@@ -46,10 +46,61 @@ impl RegexDetector {
         let mut observations = Vec::new();
         let mut out = Vec::new();
         let mut status = DetectorStatus::NotApplicable;
+        let source_facts = crate::source_facts::for_regex(file, rules);
 
         for rule in rules.by_kind(RuleKind::Regex) {
             if status == DetectorStatus::NotApplicable {
                 status = DetectorStatus::Complete;
+            }
+            if rule.id == "API_NODE_CRYPTO_SIGN_RSA" && crate::source_facts::builtin(rule) {
+                if let Some(facts) = &source_facts {
+                    if facts.status() != DetectorStatus::Complete
+                        && (status != DetectorStatus::Truncated || facts.truncated)
+                    {
+                        status = facts.status();
+                    }
+                    for found in facts.rule_matches(rule).iter().take(33) {
+                        if out
+                            .iter()
+                            .filter(|d: &&Detection| d.rule_id == rule.id)
+                            .count()
+                            == 32
+                        {
+                            status = DetectorStatus::Truncated;
+                            break;
+                        }
+                        let (line, column) = line_col_for_offset(text, found.start);
+                        let raw = &text[found.start..found.end];
+                        let detection = Detection {
+                            rule_id: rule.id.clone(),
+                            location: Location {
+                                file: file.path.to_string_lossy().into_owned(),
+                                line,
+                                column,
+                            },
+                            evidence: Evidence {
+                                r#type: "regex_match".into(),
+                                r#match: mask_preview(raw),
+                                snippet_preview: snippet_around(text, found.start, found.end, 64),
+                                metadata: std::collections::BTreeMap::from([
+                                    ("detector".into(), self.name().into()),
+                                    ("scope".into(), rule.scope.clone()),
+                                    ("source_resolution".into(), found.reason.into()),
+                                ]),
+                            },
+                        };
+                        if observe {
+                            observations.push(pqc_scan_core::ObservationDraft::source(
+                                &detection,
+                                pqc_scan_core::ObservationMethod::AstPattern,
+                                raw,
+                                Some((found.start, found.end)),
+                            ));
+                        }
+                        out.push(detection);
+                    }
+                    continue;
+                }
             }
             let regex = match rule.compiled_pattern() {
                 Some(v) => v,

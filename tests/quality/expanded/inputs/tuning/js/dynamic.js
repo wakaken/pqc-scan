@@ -1,0 +1,1 @@
+generateKeyPairSync(request.algorithm);

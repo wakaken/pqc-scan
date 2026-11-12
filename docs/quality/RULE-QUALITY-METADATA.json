@@ -24,7 +24,7 @@
     },
     {
       "path": "rules/default/pqc.yml",
-      "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+      "sha256": "8a912f5b8f660695b7a22e880c3889c02e967d01fa52f588c5f888ef80fba852"
     },
     {
       "path": "rules/default/ssh.yml",
@@ -387,9 +387,10 @@
       ],
       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
       "method_limits": [
-        "Textual pattern/reference, not symbol binding, active use or effective configuration.",
+        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
         "Comment filtering is heuristic; strings/data/generated text can match.",
-        "Per-rule output/candidate budgets and unsupported syntax can limit capture."
+        "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
       ],
       "known_gaps": [
         "Known API/name heuristic; aliases, wrappers, parameters and execution are not resolved."
@@ -627,7 +628,9 @@
         "No signature/trust/hostname/revocation/private-key verification.",
         "Unknown containers/attributes and parser limits remain visible diagnostics."
       ],
-      "known_gaps": [],
+      "known_gaps": [
+
+      ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
         {
@@ -673,7 +676,9 @@
         "No signature/trust/hostname/revocation/private-key verification.",
         "Unknown containers/attributes and parser limits remain visible diagnostics."
       ],
-      "known_gaps": [],
+      "known_gaps": [
+
+      ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
         {
@@ -811,7 +816,9 @@
         "No signature/trust/hostname/revocation/private-key verification.",
         "Unknown containers/attributes and parser limits remain visible diagnostics."
       ],
-      "known_gaps": [],
+      "known_gaps": [
+
+      ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
         {
@@ -999,7 +1006,9 @@
         "No signature/trust/hostname/revocation/private-key verification.",
         "Unknown containers/attributes and parser limits remain visible diagnostics."
       ],
-      "known_gaps": [],
+      "known_gaps": [
+
+      ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
         {
@@ -1187,7 +1196,9 @@
         "No signature/trust/hostname/revocation/private-key verification.",
         "Unknown containers/attributes and parser limits remain visible diagnostics."
       ],
-      "known_gaps": [],
+      "known_gaps": [
+
+      ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
         {
@@ -1233,7 +1244,9 @@
         "No signature/trust/hostname/revocation/private-key verification.",
         "Unknown containers/attributes and parser limits remain visible diagnostics."
       ],
-      "known_gaps": [],
+      "known_gaps": [
+
+      ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
         {
@@ -1279,7 +1292,9 @@
         "No signature/trust/hostname/revocation/private-key verification.",
         "Unknown containers/attributes and parser limits remain visible diagnostics."
       ],
-      "known_gaps": [],
+      "known_gaps": [
+
+      ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
         {
@@ -1327,7 +1342,9 @@
         "No signature/trust/hostname/revocation/private-key verification.",
         "Unknown containers/attributes and parser limits remain visible diagnostics."
       ],
-      "known_gaps": [],
+      "known_gaps": [
+
+      ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
         {
@@ -1777,7 +1794,7 @@
         "risk": "quantum-uncertain",
         "confidence": 0.6,
         "migration_hint": "Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection.",
-        "pattern": "^(?:(?:rustls|aws-lc-rs|ml-kem|ml-dsa|slh-dsa|openssl)\\s+\\S+\\s+cargo\\b|@noble/post-quantum\\s+\\S+\\s+npm\\b|cryptography\\s+\\S+\\s+pypi\\b|openssl\\s+\\S+\\s+gem\\b|org\\.bouncycastle:bcprov-jdk18on\\s+\\S+\\s+maven\\b)",
+        "pattern": "^(?:(?:rustls|aws-lc-rs|ml-kem|ml-dsa|slh-dsa|openssl)\\s+\\S+\\s+cargo\\b|@noble/post-quantum\\s+\\S+\\s+npm\\b|cryptography\\s+\\S+\\s+pypi\\b|openssl\\s+\\S+\\s+(?:gem|generic|unknown)\\b|org\\.bouncycastle:bcprov-jdk18on\\s+\\S+\\s+maven\\b|github\\.com/cloudflare/circl\\s+\\S+\\s+golang\\b)",
         "scope": "dependency",
         "description": "Library with version-dependent PQC capabilities inventoried; capability is not an enabled-state finding."
       },
@@ -1812,7 +1829,8 @@
           "desired_positive": false,
           "expected_pattern_match": false
         }
-      ]
+      ],
+      "last_pattern_review": "TASK-043/2026-11-12; existing hand-labelled controls retained"
     },
     {
       "id": "DEP_PYCA_CRYPTOGRAPHY",
@@ -3794,7 +3812,7 @@
         "risk": "quantum-uncertain",
         "confidence": 0.75,
         "migration_hint": "Identify the exact implementation and wire format; draft Kyber/Dilithium names are not evidence of final ML-KEM/ML-DSA conformance.",
-        "pattern": "\\b(?:X25519Kyber768Draft00|Kyber(?:512|768|1024)|Dilithium[235])\\b",
+        "pattern": "(?i)\\b(?:X25519Kyber768Draft00|Kyber(?:512|768|1024)|Dilithium[235])\\b",
         "scope": "java,go,javascript,typescript,python,rust,ruby",
         "description": "Pre-standard PQC algorithm name referenced; check compatibility before replacing it."
       },
@@ -3832,7 +3850,8 @@
           "desired_positive": false,
           "expected_pattern_match": false
         }
-      ]
+      ],
+      "last_pattern_review": "TASK-043/2026-11-12; existing hand-labelled controls retained"
     },
     {
       "id": "PQC_GO_API",
@@ -3939,7 +3958,7 @@
         "risk": "quantum-safe",
         "confidence": 0.8,
         "migration_hint": "JDK 24+ provides ML-KEM and ML-DSA; verify provider and protocol support independently.",
-        "pattern": "(?:KEM|Signature|KeyPairGenerator)\\s*\\.\\s*getInstance\\(\\s*\"ML-(?:KEM|DSA)(?:-(?:512|768|1024|44|65|87))?\"",
+        "pattern": "\\b(?:KEM|Signature|KeyPairGenerator)\\s*\\.\\s*getInstance\\(\\s*\"(?:ML-KEM(?:-(?:512|768|1024))?|ML-DSA(?:-(?:44|65|87))?|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf])\"",
         "scope": "java",
         "description": "Standard PQC algorithm requested through Java APIs; runtime success is not established."
       },
@@ -3956,9 +3975,10 @@
       ],
       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
       "method_limits": [
-        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
       ],
       "known_gaps": [
         "API spelling does not verify provider/version, symbol identity or active use."
@@ -3975,7 +3995,8 @@
           "desired_positive": false,
           "expected_pattern_match": false
         }
-      ]
+      ],
+      "last_pattern_review": "TASK-043/2026-11-12; existing hand-labelled controls retained"
     },
     {
       "id": "PQC_JAVA_CLASSICAL_GROUPS",
@@ -3987,9 +4008,9 @@
         "risk": "quantum-uncertain",
         "confidence": 0.8,
         "migration_hint": "Review explicit group restrictions against the deployed JSSE version and peer support.",
-        "pattern": "(?im)^\\s*jdk\\.tls\\.namedGroups\\s*=\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\\s*,\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*\\s*$",
+        "pattern": "(?im)^\\s*(?:jdk\\.tls\\.namedGroups\\s*=\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\\s*,\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*|System\\.setProperty\\(\\s*\"jdk\\.tls\\.namedGroups\"\\s*,\\s*\"(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\\s*,\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*\"\\s*\\)\\s*;?|<entry\\s+key=\"jdk\\.tls\\.namedGroups\"\\s*>\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\\s*,\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*\\s*</entry>)\\s*$",
         "scope": "config",
-        "description": "Java property explicitly lists only recognized classical TLS groups."
+        "description": "Explicit classical-only Java property intent in assignment, XML entry or static System.setProperty; effective loading is not established."
       },
       "purpose": "key_establishment_configuration_hint",
       "algorithm_families": [
@@ -4022,7 +4043,8 @@
           "desired_positive": false,
           "expected_pattern_match": false
         }
-      ]
+      ],
+      "last_pattern_review": "TASK-043/2026-11-12; existing hand-labelled controls retained"
     },
     {
       "id": "PQC_NODE_API",
@@ -4053,9 +4075,10 @@
       ],
       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
       "method_limits": [
-        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
       ],
       "known_gaps": [
         "API spelling does not verify provider/version, symbol identity or active use."
@@ -4101,9 +4124,10 @@
       ],
       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
       "method_limits": [
-        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
       ],
       "known_gaps": [
         "API spelling does not verify provider/version, symbol identity or active use."
@@ -4132,7 +4156,7 @@
         "risk": "quantum-safe",
         "confidence": 0.65,
         "migration_hint": "Verify openssl gem and linked OpenSSL/provider capabilities, not Ruby version alone.",
-        "pattern": "['\"]ML-(?:KEM-(?:512|768|1024)|DSA-(?:44|65|87))['\"]",
+        "pattern": "['\"](?:ML-(?:KEM-(?:512|768|1024)|DSA-(?:44|65|87))|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf])['\"]",
         "scope": "ruby",
         "description": "Ruby PQC algorithm literal referenced; key generation or signing success is not established."
       },
@@ -4168,7 +4192,8 @@
           "desired_positive": false,
           "expected_pattern_match": false
         }
-      ]
+      ],
+      "last_pattern_review": "TASK-043/2026-11-12; existing hand-labelled controls retained"
     },
     {
       "id": "PQC_RUBY_CLASSICAL_GROUPS",
@@ -4246,9 +4271,10 @@
       ],
       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
       "method_limits": [
-        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
       ],
       "known_gaps": [
         "API spelling does not verify provider/version, symbol identity or active use."
@@ -5437,9 +5463,10 @@
       ],
       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
       "method_limits": [
-        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
       ],
       "known_gaps": [
         "Known API/name heuristic; aliases, wrappers, parameters and execution are not resolved."
@@ -5797,5 +5824,18 @@
         }
       ]
     }
-  ]
+  ],
+  "revision_record": {
+    "date": "2026-11-12",
+    "task": "043",
+    "scope": "Approved detector/pattern corrections; original companion retained under target/quality-task-043-fixes-20261112/before/source/docs/quality/RULE-QUALITY-METADATA.json",
+    "changed_pattern_rows": [
+      "DEP_PQC_CAPABLE_LIBRARY",
+      "PQC_DRAFT_ALGORITHM",
+      "PQC_JAVA_API",
+      "PQC_JAVA_CLASSICAL_GROUPS",
+      "PQC_RUBY_API"
+    ],
+    "controls": "Original target labels and expected outcomes unchanged; new detector semantics have separate source-level tests"
+  }
 }
