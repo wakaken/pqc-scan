@@ -1,5 +1,7 @@
 # pqc-scan品質評価（Phase 0 / Phase 1）
 
+対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](QUALITY-ROADMAP.md#v03-scope)）。
+
 2026-11-12の検出修正は[TASK-043の結果](TASK-043-FIXES-RESULTS.md)を参照してください。以下の本文と数値はTASK-041時点の測定記録として保持します。
 
 

@@ -1,5 +1,7 @@
 # TASK-042: 追加正解データと評価の結果
 
+対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](QUALITY-ROADMAP.md#v03-scope)）。
+
 対象HEADは `0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf`、ブランチは `codex/quality-assessment-model` です。
 041と計画更新を含む未コミットの作業ツリーで測定しました。製品コード・規則・公開Schemaは変えていません。
 対象ソース・入力・正解・バイナリ・実行コマンドのhashと終了状態は[実行記録](task042/MEASUREMENT.json)を正本とします。

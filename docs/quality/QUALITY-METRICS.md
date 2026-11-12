@@ -1,5 +1,7 @@
 # PQS-QAMの指標と分母
 
+対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](QUALITY-ROADMAP.md#v03-scope)）。
+
 定義版: 1。正解単位、Unicode位置の半開区間、不明な依存関係位置の照合は[既存の測定手順](../../tests/quality/PROTOCOL.md)と `evaluate.py` が正本です。
 この文書は既存の採点を説明します。追加する測定は[要求対応表](QUALITY-REQUIREMENTS.md)にまとめています。
 

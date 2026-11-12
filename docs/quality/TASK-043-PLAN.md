@@ -1,5 +1,7 @@
 # TASK-043: 検出誤りと注釈不足の調査計画
 
+対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](QUALITY-ROADMAP.md#v03-scope)）。
+
 対象HEAD: `0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf`。
 作業ブランチ: `codex/quality-assessment-model`。041・042と計画更新の未コミット変更を保持します。
 

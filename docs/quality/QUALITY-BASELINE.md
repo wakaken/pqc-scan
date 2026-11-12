@@ -1,5 +1,7 @@
 # 品質ベースライン（2026-11-11測定）
 
+対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](QUALITY-ROADMAP.md#v03-scope)）。
+
 測定対象HEAD: `0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf`、version `0.1.0`。
 測定開始時はdevelopで未コミット変更なし。作業ブランチは `codex/quality-assessment-model`。
 TASK-041では製品のRust実装・ルール・Cargo.lockを変更していません。今回の文書推敲でも再測定はしていません。

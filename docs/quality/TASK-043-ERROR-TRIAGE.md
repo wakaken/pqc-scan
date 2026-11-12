@@ -1,5 +1,7 @@
 # TASK-043: 誤報・見逃し・注釈不足の原因と修正候補
 
+対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](QUALITY-ROADMAP.md#v03-scope)）。
+
 調査日: 2026-11-11。対象HEAD: `0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf`。
 ブランチは `codex/quality-assessment-model`。041・042の未コミット変更を保持しています。
 042の受入記録・必須9成果物・128成果物hash・現行runtime/harnessの一致を確認し、042の残作業はないと判断しました。
