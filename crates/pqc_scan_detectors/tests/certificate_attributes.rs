@@ -227,12 +227,20 @@ fn damaged_or_unsupported_pem_block_preserves_neighboring_valid_certificates() {
         "-----BEGIN CERTIFICATE-----\ninvalid base64!\n-----END CERTIFICATE-----\n",
         "-----BEGIN CERTIFICATE-----\nmissing end marker\n",
         "-----BEGIN PRIVATE KEY-----\nSYNTHETIC_PRIVATE_CANARY_020\n-----END PRIVATE KEY-----\n",
+        "-----BEGIN FUTURE OBJECT-----\nopaque\n-----END FUTURE OBJECT-----\n",
     ] {
         let text = pem(RSA2048) + middle + &pem(RSA_SECOND);
         let result = CertificateDetector
             .detect_detailed(&file("bundle.pem", text.as_bytes()), &rules())
             .unwrap();
-        assert_eq!(result.status(), DetectorStatus::Partial);
+        assert_eq!(
+            result.status(),
+            if middle.starts_with("-----BEGIN PRIVATE KEY-----") {
+                DetectorStatus::Complete
+            } else {
+                DetectorStatus::Partial
+            }
+        );
         let hits: Vec<_> = result
             .detections()
             .iter()
@@ -326,7 +334,10 @@ fn private_pem_payload_is_not_attached_to_certificate_container_findings() {
         let detectors: Vec<Arc<dyn Detector>> = vec![Arc::new(CertificateDetector)];
         let result = scan_repository_detailed(&config, &rules(), &detectors).unwrap();
         std::fs::remove_dir_all(root).unwrap();
-        assert!(!result.legacy().findings.is_empty());
+        assert!(
+            result.legacy().findings.is_empty(),
+            "a known private object is not a certificate"
+        );
         assert!(
             !serde_json::to_string(result.legacy())
                 .unwrap()
@@ -598,4 +609,28 @@ fn a_pem_marker_inside_der_name_does_not_change_format_selection() {
         .detections()
         .iter()
         .any(|h| h.rule_id == "CERT_RSA_SIGNATURE"));
+}
+
+#[test]
+fn legacy_dsa_oid_requires_the_same_well_formed_public_parameters() {
+    use pqc_scan_detectors::certificate_detector::parse_public_key_der;
+    let params = der(0x30, &[2, 1, 23, 2, 1, 11, 2, 1, 2]);
+    for oid in [
+        &[0x2b, 0x0e, 3, 2, 12][..],
+        &[0x2a, 0x86, 0x48, 0xce, 0x38, 4, 1][..],
+    ] {
+        let key = parse_public_key_der(&spki(oid, &params, &[2, 1, 8], 0)).unwrap();
+        assert_eq!(key.algorithm, "DSA");
+        assert_eq!(key.status, DetectorStatus::Complete);
+        for (p, y) in [
+            (&params[..], &[2, 1, 0][..]),
+            (&params[..], &[2, 1, 0x80][..]),
+            (&[0x30, 3, 2, 1, 23][..], &[2, 1, 8][..]),
+        ] {
+            assert_eq!(
+                parse_public_key_der(&spki(oid, p, y, 0)).unwrap().status,
+                DetectorStatus::Partial
+            );
+        }
+    }
 }

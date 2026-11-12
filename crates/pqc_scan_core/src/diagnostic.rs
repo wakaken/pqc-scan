@@ -20,6 +20,7 @@ pub struct DetectorOutcome {
     detections: Vec<Detection>,
     status: DetectorStatus,
     observations: Vec<crate::observation::ObservationDraft>,
+    explanation: Option<&'static str>,
 }
 
 impl DetectorOutcome {
@@ -34,9 +35,17 @@ impl DetectorOutcome {
             detections,
             status,
             observations: Vec::new(),
+            explanation: None,
         }
     }
 
+    pub fn with_explanation(mut self, explanation: &'static str) -> Self {
+        self.explanation = Some(explanation);
+        self
+    }
+    pub fn explanation(&self) -> Option<&'static str> {
+        self.explanation
+    }
     pub fn complete(detections: Vec<Detection>) -> Self {
         Self::new(detections, DetectorStatus::Complete)
     }
@@ -116,6 +125,12 @@ pub struct ScanDiagnostic {
 }
 
 impl ScanDiagnostic {
+    pub(crate) fn with_explanation(mut self, explanation: Option<&'static str>) -> Self {
+        if let Some(message) = explanation {
+            self.message = message;
+        }
+        self
+    }
     pub(crate) fn new(
         code: DiagnosticCode,
         file: Option<String>,
@@ -344,6 +359,12 @@ pub struct ScanDocument {
 }
 
 impl ScanDocument {
+    pub(crate) fn record_binary_exclusion_policy(&mut self) {
+        self.scope
+            .default_excludes
+            .push(crate::file_selection::POLICY_LABEL);
+    }
+
     pub(crate) fn new(
         legacy: ScanResult,
         mut diagnostics: Vec<ScanDiagnostic>,

@@ -156,3 +156,7 @@ Completion is not full package-manager validation or proof of installation.
 
 The `--require-complete` exit-code contract is unchanged, but actual returned codes depend on parser outcomes and supported scope.
 See [dependency declarations and resolution evidence](../architecture/DEPENDENCY-PROVENANCE.md) for format-specific details.
+
+## Including normally excluded binary formats
+
+`scan` excludes known media/archive/compiled-data extensions and otherwise non-text binary inputs before selecting files. These exclusions are counted separately from unfinished checks. `--include-non-scannable` restores their inclusion for forensic/custom-detector runs; it does not add parsers for those formats and can increase “not applicable” counts. Existing directory, Markdown, Git-ignore and size policies still apply. Cryptographic container extensions are retained by default even when unsupported, so their inspection gaps remain visible. Full exclusion paths remain in diagnostic JSON, while human diagnostics show counts and at most three examples per reason.

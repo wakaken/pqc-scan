@@ -113,4 +113,4 @@ SARIF correction retains 2.1.0: encode paths as valid URIs, specify column units
 
 ## Open decisions for maintainers
 
-Approve opt-in artifact/CLI names and exit-3 policy; scope of corrective rule-result changes; default probe address policy and safety budgets; initial supported targets/platforms; and the eventual 1.0 support/deprecation window. Library selections remain conditional on spikes. Model extraction, enterprise services and dynamic plugins are explicitly deferred. [QUALITY-GATES.md](../quality/QUALITY-GATES.md) and [OSS-ROADMAP.md](../roadmap/OSS-ROADMAP.md) specify the evidence required to proceed.
+Approve opt-in artifact/CLI names and exit-3 policy; scope of corrective rule-result changes; default probe address policy and safety budgets; initial supported targets/platforms; and the eventual 1.0 support/deprecation window. Library selections remain conditional on spikes. Model extraction, enterprise services and dynamic plugins are explicitly deferred. [QUALITY-GATES.md](../quality/QUALITY-GATES.md) and [OSS-ROADMAP-v0.2.md](../roadmap/OSS-ROADMAP-v0.2.md) specify the evidence required to proceed.

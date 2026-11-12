@@ -4,7 +4,7 @@ Reviewed on 2026-11-09 against `b3104f9a4193b1b21ea11ca060f06301de2e936b`, branc
 
 ## Reading this historical snapshot
 
-The findings below describe the 2026-11-09 design baseline, not the current unresolved backlog. Tasks 018–029 subsequently implemented the Phase 0/1 work, with task 023 still in `review` for maintainer protocol/budget approval. Current rule count is 119 rather than this snapshot's 117. Use the [implementation alignment](PHASE-0-1-ALIGNMENT.md), [roadmap checkpoint](../roadmap/OSS-ROADMAP.md#implementation-checkpoint-2026-11-10) and task-specific validation records to distinguish addressed gaps from remaining limits. Original source line references and source-only evidence claims are retained as historical provenance, not newly verified runtime findings.
+The findings below describe the 2026-11-09 design baseline, not the current unresolved backlog. Tasks 018–029 subsequently implemented the Phase 0/1 work, with task 023 still in `review` for maintainer protocol/budget approval. Current rule count is 119 rather than this snapshot's 117. Use the [implementation alignment](PHASE-0-1-ALIGNMENT.md), [roadmap checkpoint](../roadmap/OSS-ROADMAP-v0.2.md#implementation-checkpoint-2026-11-10) and task-specific validation records to distinguish addressed gaps from remaining limits. Original source line references and source-only evidence claims are retained as historical provenance, not newly verified runtime findings.
 
 ## Evidence limits
 

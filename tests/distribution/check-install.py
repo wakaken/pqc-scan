@@ -43,12 +43,7 @@ with tempfile.TemporaryDirectory(prefix='pqc-clean-install-') as directory:
         if result.returncode:
             raise RuntimeError(f'{name} failed: {result.stderr}')
     report = json.loads((base/'reports/report.json').read_text())
-    expected = {'TLS_RSA_KEY_EXCHANGE','TS_TLS_RSA_CIPHER_LITERAL'}
-    actual = {finding['rule_id'] for finding in report['findings']}
-    if actual != expected or len(report['findings']) != 2 or report['summary']['scanned_files'] != 2:
-        raise RuntimeError('synthetic positive/negative installation fixture did not match expected results')
-    if any(f['location']['file'] != 'example.py' or f['location']['line'] != 1 for f in report['findings']):
-        raise RuntimeError('synthetic finding is attached to the wrong file or line')
+    package.validate_installed_scan(report)
     if not results['rules']['stdout'].strip() or results['version']['stdout'].strip() != 'pqc-scan '+provenance['version']:
         raise RuntimeError('installed rules/version not confirmed')
     if any(results[name]['stderr'] for name in ['help','version']):

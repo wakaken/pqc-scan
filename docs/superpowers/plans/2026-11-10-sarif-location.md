@@ -5,7 +5,7 @@
 **Goal:** Correct SARIF 2.1.0 locations without changing native findings or CLI.
 **Architecture:** Keep projection in the existing report writer. Preserve zero-valued native unknowns, omit unknown SARIF regions/columns, encode filesystem paths as URI references, declare Unicode code point columns. Do not read source files during reporting.
 **Tech Stack:** Rust 1.93.1, serde, pinned jsonschema (development only).
-**Spec:** tasks/022-sarif-location-contract.yaml and docs/roadmap/OSS-ROADMAP.md#task-022.
+**Spec:** tasks/022-sarif-location-contract.yaml and docs/roadmap/OSS-ROADMAP-v0.2.md#task-022.
 
 ## Constraints and design
 

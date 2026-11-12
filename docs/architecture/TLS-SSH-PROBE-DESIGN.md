@@ -120,7 +120,7 @@ Use a network-isolated test environment with synthetic public certificates, loca
 - Network policy: mocked DNS and connected peer binding for public/private/mixed answers, IPv4-mapped IPv6, rebinding between attempts, SNI independent of IP, cancellations, closed socket cleanup, and budgets across all profiles.
 - Determinism: compare semantic facts after excluding run time/IDs/ephemeral handshake bytes. Server randomness is not an inventory difference. Failure reproducibility means classified outcomes within bounded conditions, not byte-identical wire exchanges.
 
-All defaults, capability claims and no-auth guarantees require evidence in [QUALITY-GATES.md](../quality/QUALITY-GATES.md). The [roadmap](../roadmap/OSS-ROADMAP.md) schedules safety before protocol release. No enterprise management service is part of this design.
+All defaults, capability claims and no-auth guarantees require evidence in [QUALITY-GATES.md](../quality/QUALITY-GATES.md). The [roadmap](../roadmap/OSS-ROADMAP-v0.2.md) schedules safety before protocol release. No enterprise management service is part of this design.
 
 ## Task039 selected use case and feasibility — 2026-11-11
 

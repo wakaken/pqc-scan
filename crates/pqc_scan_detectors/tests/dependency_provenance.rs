@@ -72,7 +72,7 @@ fn structured_outcomes_distinguish_empty_invalid_partial_and_unknown_versions() 
             "no dependencies",
             DetectorStatus::NotApplicable,
         ),
-        ("Gemfile", "gem ENV['NAME']", DetectorStatus::NotReported),
+        ("Gemfile", "gem ENV['NAME']", DetectorStatus::Partial),
     ] {
         assert_eq!(f.inspect(name, text).status(), status, "{name}: {text}");
     }
@@ -348,7 +348,7 @@ fn malformed_known_record_fields_and_node_limits_cannot_be_complete() {
     for (name,text) in [("package.json",r#"{"dependencies":{"openssl":"${VERSION}"}}"#),("Cargo.toml","[dependencies]\nopenssl = { git = 7 }\n"),("Cargo.lock","version = 4\n[[package]]\nname = 'openssl'\nversion = '1.2.3'\nsource = 7\n"),("Pipfile.lock",r#"{"_meta":{"pipfile-spec":6},"default":{"openssl":{"git":7}}}"#),("poetry.lock","[[package]]\nname = 'openssl'\nversion = '1.2.3'\nsource = {}\n[metadata]\nlock-version = '2.1'\n"),("pnpm-lock.yaml","lockfileVersion: '9.0'\npackages:\n  openssl@1.2.3:\n    resolution: 7\n")] {let result=DependencyDetector.detect_detailed(&ScannableFile::from_bytes(PathBuf::from(name),text.as_bytes().to_vec()),&f.rules());assert!(result.as_ref().map_or(true,|o|o.status()!=DetectorStatus::Complete),"{name}: {text}");}
     let text = format!(
         "{{\"x\":[{}]}}",
-        std::iter::repeat_n("0", 50001)
+        std::iter::repeat_n("0", 500001)
             .collect::<Vec<_>>()
             .join(",")
     );
@@ -371,4 +371,111 @@ fn sbom_display_label_uses_validated_maven_identity_without_resolution_claim() {
         d.evidence.metadata["dep_purl"],
         "pkg:maven/org.bouncycastle/bcprov"
     );
+}
+
+#[test]
+fn semantic_repairs_keep_locator_and_declared_versions_distinct_from_resolution() {
+    let f = Fixture::new("semantic-provenance");
+    for (name, source) in [
+        ("package.json",r#"{"dependencies":{"catalogpkg":"catalog:","patchpkg":"patch:pkg@npm%3A1.0.0#./fix.patch","gitpkg":"owner/repo#1234"}}"#),
+        ("pnpm-lock.yaml","lockfileVersion: '9.0'\nimporters:\n  .:\n    dependencies:\n      alias:\n        specifier: 'npm:ring@^9.0.0'\n        version: 9.0.2\npackages:\n  ring@9.0.2: {}\n"),
+        ("Gemfile.lock","GIT\n  remote: https://example.org/repo.git\n  revision: abcdef1234567890\n  specs:\n    gitlib (0.1.0)\n\nPATH\n  remote: ../local\n  specs:\n    pathlib (0.2.0)\n\nGEM\n  remote: https://rubygems.org/\n  specs:\n    openssl (3.3.0)\n\nPLATFORMS\n  ruby\n\nDEPENDENCIES\n  gitlib!\n  pathlib!\n  openssl\n"),
+        ("go.mod","module example.org/app\nrequire example.org/lib v1.2.3\nreplace example.org/lib => example.org/replacement v2.0.0\n"),
+        ("pom.xml","<project><modelVersion>4.0.0</modelVersion><properties><dep.version>1.2.3</dep.version></properties><dependencies><dependency><groupId>g</groupId><artifactId>a</artifactId><version>${dep.version}</version></dependency></dependencies></project>"),
+    ] { std::fs::write(f.0.join("input").join(name),source).unwrap(); assert_eq!(f.inspect(name,source).status(),DetectorStatus::Complete,"{name}"); }
+    let n = f.native();
+    let deps: Vec<_> = n["assets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|a| a["kind"] == "dependency")
+        .collect();
+    let attr = |name: &str| {
+        deps.iter()
+            .find(|a| a["attributes"]["name"] == name)
+            .unwrap()["attributes"]
+            .clone()
+    };
+    for (name, origin) in [
+        ("catalogpkg", "workspace_inherited"),
+        ("patchpkg", "source_unresolved"),
+        ("gitpkg", "git_dependency_unresolved"),
+    ] {
+        let a = attr(name);
+        assert_eq!(a["version_provenance"], origin);
+        assert!(a["resolved_version"].is_null());
+        assert!(a["declared_constraint"].is_null());
+        assert!(a["reported_version"].is_null());
+    }
+    let alias = deps
+        .iter()
+        .find(|a| {
+            a["attributes"]["name"] == "ring"
+                && a["attributes"]["version_provenance"] == "manifest_declared"
+        })
+        .unwrap();
+    assert_eq!(alias["attributes"]["declared_constraint"], "^9.0.0");
+    assert!(alias["attributes"]["resolved_version"].is_null());
+    let locked = deps
+        .iter()
+        .find(|a| {
+            a["attributes"]["name"] == "ring"
+                && a["attributes"]["version_provenance"] == "lock_resolved"
+        })
+        .unwrap();
+    assert_eq!(locked["attributes"]["resolved_version"], "9.0.2");
+    assert!(locked["attributes"]["declared_constraint"].is_null());
+    for (name, version, origin) in [
+        ("gitlib", "0.1.0", "git_dependency_unresolved"),
+        ("pathlib", "0.2.0", "path_dependency_unresolved"),
+    ] {
+        let a = attr(name);
+        assert_eq!(a["reported_version"], version);
+        assert_eq!(a["version_provenance"], origin);
+        assert!(a["resolved_version"].is_null());
+    }
+    assert_eq!(attr("openssl")["resolved_version"], "3.3.0");
+    for (name, version) in [("example.org/lib", "v1.2.3"), ("g:a", "1.2.3")] {
+        let a = attr(name);
+        assert_eq!(a["declared_constraint"], version);
+        assert_eq!(a["version_provenance"], "manifest_declared");
+        assert!(a["resolved_version"].is_null());
+    }
+    assert!(!deps
+        .iter()
+        .any(|a| a["attributes"]["resolved_version"] == "2.0.0"));
+    for properties in ["<a>${b}</a><b>${a}</b>", "<a>${missing}</a>"] {
+        let source=format!("<project><properties>{properties}</properties><dependencies><dependency><groupId>g</groupId><artifactId>a</artifactId><version>${{a}}</version></dependency></dependencies></project>");
+        assert_eq!(
+            f.inspect("pom.xml", &source).status(),
+            DetectorStatus::Partial
+        );
+    }
+}
+
+#[test]
+fn platform_lock_records_preserve_reported_versions_and_source_provenance() {
+    let f = Fixture::new("gem-platform");
+    let text = "GIT\n  remote: https://example.org/lib.git\n  revision: abcdef1234567890\n  specs:\n    gitlib (1.2.3-arm64-darwin)\n\nPATH\n  remote: ../lib\n  specs:\n    pathlib (1.2.3-arm64-darwin)\n\nGEM\n  remote: https://rubygems.org/\n  specs:\n    openssl (3.3.0-arm64-darwin)\n\nPLATFORMS\n  arm64-darwin\n\nBUNDLED WITH\n  4.0.12\n";
+    std::fs::write(f.0.join("input/Gemfile.lock"), text).unwrap();
+    assert_eq!(
+        f.inspect("Gemfile.lock", text).status(),
+        DetectorStatus::Complete
+    );
+    let native = f.native();
+    let attr = |name: &str| {
+        native["assets"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["attributes"]["name"] == name)
+            .unwrap()["attributes"]
+            .clone()
+    };
+    assert_eq!(attr("openssl")["reported_version"], "3.3.0-arm64-darwin");
+    assert_eq!(attr("openssl")["resolved_version"], "3.3.0");
+    for name in ["gitlib", "pathlib"] {
+        assert_eq!(attr(name)["reported_version"], "1.2.3-arm64-darwin");
+        assert!(attr(name)["resolved_version"].is_null());
+    }
 }

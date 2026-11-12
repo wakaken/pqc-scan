@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-11-10",
-  "base_commit": "b21330034d33ef30ec002c8e0d8222effd4b9d01",
+  "reviewed_at": "2026-11-12",
+  "base_commit": "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf",
   "fixture_layer": "compiled_pattern_target_only",
   "license": "MIT; original synthetic fixtures and review text, references linked not copied",
   "scope": "Development-only companion. Existing rule YAML, Risk/severity and matching remain authoritative; no runtime loading.",
   "source_files": [
     {
       "path": "rules/default/cert.yml",
-      "sha256": "97b333ea8cab9269a18b91cd12aad58e7258d5ed6b0ce27157b372f511b052aa"
+      "sha256": "4b508af4b18cdfb8bb0b811bc021c24b0837d667b19a3d136e6f6dc9e808a75b"
     },
     {
       "path": "rules/default/crypto_api.yml",
@@ -32,11 +32,11 @@
     },
     {
       "path": "rules/default/tls.yml",
-      "sha256": "9c4a18c98005d4ca581c0eb0f3595ee7e762dc2a626e4166d8eb9b0be0ccbe0a"
+      "sha256": "49b1a3fbc0d4be718f49378a0716cf1fa515c9c9e31589b1bd40995f1401d1f2"
     },
     {
       "path": "rules/default/tree_sitter.yml",
-      "sha256": "34ae0e842ce9e36cff90da2d188d8eb842fa00755af7b2eac8e90a09a7cde69b"
+      "sha256": "32b947684ae1ced57552285187d416dd27a6e7f9276b4223dbc1b73b2ef09f5c"
     }
   ],
   "references": {
@@ -1070,10 +1070,10 @@
         "severity": "low",
         "risk": "quantum-uncertain",
         "confidence": 0.3,
-        "migration_hint": "Validate signing algorithms in PEM-based certificates.",
+        "migration_hint": "Identify the cryptographic object type; inspect certificate algorithms only when a certificate is present.",
         "pattern": "(?i)\\.(pem|crt|cer|der)$",
         "scope": "certificate",
-        "description": "Certificate container file detected."
+        "description": "PEM/DER cryptographic container detected; certificate presence is not established."
       },
       "purpose": "container_inventory",
       "algorithm_families": [
@@ -1089,7 +1089,8 @@
       "method_limits": [
         "Pattern targets are parsed selected fields or legacy container/composite input.",
         "No signature/trust/hostname/revocation/private-key verification.",
-        "Unknown containers/attributes and parser limits remain visible diagnostics."
+        "Unknown containers/attributes and parser limits remain visible diagnostics.",
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
       ],
       "known_gaps": [
         "Filename/container match does not establish parsed cryptography."
@@ -3652,7 +3653,7 @@
         "risk": "non-quantum-risk",
         "confidence": 0.65,
         "migration_hint": "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.",
-        "pattern": "minVersion\\s*:\\s*['\"]TLSv1",
+        "pattern": "minVersion\\s*:\\s*['\"]TLSv1(?:[._][01])?['\"]",
         "scope": "code",
         "description": "Node.js TLS minimum version may be too weak."
       },
@@ -3670,11 +3671,11 @@
       "method_limits": [
         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
         "Comment filtering is heuristic; strings/data/generated text can match.",
-        "Per-rule output/candidate budgets and unsupported syntax can limit capture."
+        "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
       ],
       "known_gaps": [
-        "Version strings do not establish a live listener or negotiated security.",
-        "Legacy prefix/boundary pattern can also match some modern-version spellings; no pattern change in task028."
+        "Version strings do not establish a live listener or negotiated security."
       ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
@@ -3686,8 +3687,12 @@
         {
           "target": "minVersion: \"TLSv1.3\"",
           "desired_positive": false,
-          "expected_pattern_match": true,
-          "known_gap": "Retained legacy prefix/heuristic behavior disagrees with desired control; no matcher tuning."
+          "expected_pattern_match": false
+        },
+        {
+          "target": "minVersion: 'TLSv1.3'",
+          "desired_positive": false,
+          "expected_pattern_match": false
         }
       ]
     },
@@ -4896,7 +4901,7 @@
         "risk": "quantum-vulnerable",
         "confidence": 0.68,
         "migration_hint": "Migrate to PQC-ready or hybrid cipher suites.",
-        "pattern": "TLS_[A-Z0-9_]*_RSA_[A-Z0-9_]*",
+        "pattern": "\\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\\b",
         "scope": "code",
         "description": "RSA-based TLS cipher suite detected."
       },
@@ -4914,7 +4919,8 @@
       "method_limits": [
         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
         "Comment filtering is heuristic; strings/data/generated text can match.",
-        "Per-rule output/candidate budgets and unsupported syntax can limit capture."
+        "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
       ],
       "known_gaps": [
         "RSA authentication and RSA key transport are distinct; text does not establish negotiated use."
@@ -4930,6 +4936,11 @@
           "target": "TLS_AES_128_GCM_SHA256",
           "desired_positive": false,
           "expected_pattern_match": false
+        },
+        {
+          "target": "TLS_PK_RSA_ALT",
+          "desired_positive": false,
+          "expected_pattern_match": false
         }
       ]
     },
@@ -4943,7 +4954,7 @@
         "risk": "quantum-vulnerable",
         "confidence": 0.7,
         "migration_hint": "Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats.",
-        "pattern": "TLS_RSA_",
+        "pattern": "\\bTLS_RSA_WITH_[A-Z0-9_]+\\b",
         "scope": "code",
         "description": "TLS RSA key-exchange suite detected."
       },
@@ -4961,7 +4972,8 @@
       "method_limits": [
         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
         "Comment filtering is heuristic; strings/data/generated text can match.",
-        "Per-rule output/candidate budgets and unsupported syntax can limit capture."
+        "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
       ],
       "known_gaps": [
         "RSA authentication and RSA key transport are distinct; text does not establish negotiated use."
@@ -4990,7 +5002,7 @@
         "risk": "non-quantum-risk",
         "confidence": 0.75,
         "migration_hint": "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.",
-        "pattern": "(?:^|[^A-Za-z0-9])TLSv1(?:\\.0)?(?:$|[^0-9.])",
+        "pattern": "(?:^|[^A-Za-z0-9_])TLSv1(?:[._]0)?(?:$|[^A-Za-z0-9_.])",
         "scope": "code",
         "description": "Legacy TLS 1.0 configuration detected."
       },
@@ -5008,11 +5020,11 @@
       "method_limits": [
         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
         "Comment filtering is heuristic; strings/data/generated text can match.",
-        "Per-rule output/candidate budgets and unsupported syntax can limit capture."
+        "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
       ],
       "known_gaps": [
-        "Version strings do not establish a live listener or negotiated security.",
-        "Legacy prefix/boundary pattern can also match some modern-version spellings; no pattern change in task028."
+        "Version strings do not establish a live listener or negotiated security."
       ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
@@ -5029,8 +5041,12 @@
         {
           "target": "TLSv1_3",
           "desired_positive": false,
-          "expected_pattern_match": true,
-          "known_gap": "Underscore boundary can match a modern TLS constant."
+          "expected_pattern_match": false
+        },
+        {
+          "target": "TLSv1_2",
+          "desired_positive": false,
+          "expected_pattern_match": false
         }
       ]
     },
@@ -5044,7 +5060,7 @@
         "risk": "non-quantum-risk",
         "confidence": 0.75,
         "migration_hint": "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.",
-        "pattern": "TLSv1\\.1",
+        "pattern": "\\bTLSv1[._]1\\b",
         "scope": "code",
         "description": "Legacy TLS 1.1 configuration detected."
       },
@@ -5062,7 +5078,8 @@
       "method_limits": [
         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
         "Comment filtering is heuristic; strings/data/generated text can match.",
-        "Per-rule output/candidate budgets and unsupported syntax can limit capture."
+        "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
       ],
       "known_gaps": [
         "Version strings do not establish a live listener or negotiated security."
@@ -5177,6 +5194,101 @@
       ]
     },
     {
+      "id": "TS_CLASSICAL_EC_API",
+      "rule_snapshot": {
+        "id": "TS_CLASSICAL_EC_API",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "medium",
+        "risk": "quantum-vulnerable",
+        "confidence": 0.65,
+        "migration_hint": "Inventory classical elliptic-curve operations and plan a supported PQC or hybrid replacement.",
+        "pattern": "(?:\\bec\\.generate_private_key\\b|\\bOpenSSL::PKey::EC\\.(?:new|generate)\\b|\\bgenerateKeyPair(?:Sync)?\\s*\\(\\s*['\"]ec['\"])",
+        "scope": "python,ruby,javascript,typescript",
+        "description": "Classical elliptic-curve API reference; deployment and effective configuration require confirmation."
+      },
+      "purpose": "classical_public_key_reference",
+      "algorithm_families": [
+        "EC"
+      ],
+      "quantum": "vulnerable_family_reference_not_active_use",
+      "classical": "parameters_and_implementation_not_assessed",
+      "reference_ids": [
+        "NIST-PQ-FAQ",
+        "RFC7518"
+      ],
+      "reference_application": "Algorithm family classification only; a source reference does not establish active use, reachability, or effective configuration.",
+      "method_limits": [
+        "Regex over eligible AST source nodes; no execution or complete data-flow analysis.",
+        "Python API adaptation accepts only supported imports without detected rebinding; other aliases/computed expressions can remain undetected.",
+        "String/call references may be fixtures or catalogs; findings are investigation candidates."
+      ],
+      "known_gaps": [
+        "Coverage is bounded to explicit supported spellings; this is not a completeness or runtime security claim."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "OpenSSL::PKey::EC.generate('prime256v1')",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "OpenSSL::Cipher.new('aes-256-gcm')",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "TS_CLASSICAL_EDDSA_API",
+      "rule_snapshot": {
+        "id": "TS_CLASSICAL_EDDSA_API",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "medium",
+        "risk": "quantum-vulnerable",
+        "confidence": 0.65,
+        "migration_hint": "Inventory EdDSA and classical curve key operations; Ed25519 is not post-quantum secure.",
+        "pattern": "(?:\\bEd(?:25519|448)PrivateKey\\.generate\\b|\\bOpenSSL::PKey\\.generate_key\\s*\\(\\s*['\"]ED(?:25519|448)['\"]|\\bgenerateKeyPair(?:Sync)?\\s*\\(\\s*['\"](?:ed25519|ed448|x25519|x448)['\"])",
+        "scope": "python,ruby,javascript,typescript",
+        "description": "Classical EdDSA or curve key-generation API reference."
+      },
+      "purpose": "classical_public_key_reference",
+      "algorithm_families": [
+        "EdDSA",
+        "ECDH"
+      ],
+      "quantum": "vulnerable_family_reference_not_active_use",
+      "classical": "parameters_and_implementation_not_assessed",
+      "reference_ids": [
+        "NIST-PQ-FAQ",
+        "RFC7518"
+      ],
+      "reference_application": "Algorithm family classification only; a source reference does not establish active use, reachability, or effective configuration.",
+      "method_limits": [
+        "Regex over eligible AST source nodes; no execution or complete data-flow analysis.",
+        "Python API adaptation accepts only supported imports without detected rebinding; other aliases/computed expressions can remain undetected.",
+        "String/call references may be fixtures or catalogs; findings are investigation candidates."
+      ],
+      "known_gaps": [
+        "Coverage is bounded to explicit supported spellings; this is not a completeness or runtime security claim."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "Ed25519PrivateKey.generate()",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "AESGCM.generate_key()",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
       "id": "TS_GO_RSA_USAGE",
       "rule_snapshot": {
         "id": "TS_GO_RSA_USAGE",
@@ -5265,6 +5377,53 @@
         },
         {
           "target": "KeyPairGenerator.getInstance(\"EC\")",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "TS_JWT_EDDSA_ALG",
+      "rule_snapshot": {
+        "id": "TS_JWT_EDDSA_ALG",
+        "kind": "tree_sitter",
+        "category": "JWT",
+        "severity": "medium",
+        "risk": "quantum-vulnerable",
+        "confidence": 0.6,
+        "migration_hint": "Review EdDSA JWT signing references for PQC migration; a literal alone does not establish active signing.",
+        "pattern": "\\bEdDSA\\b",
+        "scope": "java,javascript,typescript,python,go,rust,ruby",
+        "description": "EdDSA algorithm reference in source; this is a classical public-key algorithm."
+      },
+      "purpose": "classical_public_key_reference",
+      "algorithm_families": [
+        "EdDSA"
+      ],
+      "quantum": "vulnerable_family_reference_not_active_use",
+      "classical": "parameters_and_implementation_not_assessed",
+      "reference_ids": [
+        "NIST-PQ-FAQ",
+        "RFC7518"
+      ],
+      "reference_application": "Algorithm family classification only; a source reference does not establish active use, reachability, or effective configuration.",
+      "method_limits": [
+        "Regex over eligible AST source nodes; no execution or complete data-flow analysis.",
+        "Python API adaptation accepts only supported imports without detected rebinding; other aliases/computed expressions can remain undetected.",
+        "String/call references may be fixtures or catalogs; findings are investigation candidates."
+      ],
+      "known_gaps": [
+        "Coverage is bounded to explicit supported spellings; this is not a completeness or runtime security claim."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "EdDSA",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "HS256",
           "desired_positive": false,
           "expected_pattern_match": false
         }
@@ -5421,7 +5580,7 @@
         "risk": "quantum-vulnerable",
         "confidence": 0.59,
         "migration_hint": "Migrate Node.js RSA signing/verification logic to a PQC-ready design.",
-        "pattern": "(?i)(\\b(createSign|createVerify)\\s*\\(\\s*['\"]RSA|\\b(privateEncrypt|publicDecrypt)\\s*\\(|\\b(RS|PS)(256|384|512)\\b)",
+        "pattern": "(?i)(\\b(createSign|createVerify)\\s*\\(\\s*['\"]RSA|\\bgenerateKeyPair(?:Sync)?\\s*\\(\\s*['\"]rsa(?:-pss)?['\"]|\\b(privateEncrypt|publicDecrypt)\\s*\\(|\\b(RS|PS)(256|384|512)\\b)",
         "scope": "javascript,typescript",
         "description": "RSA-related API symbols detected from JavaScript/TypeScript AST."
       },
@@ -5439,7 +5598,8 @@
       "method_limits": [
         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
       ],
       "known_gaps": [
         "Known API/name heuristic; aliases, wrappers, parameters and execution are not resolved."
@@ -5455,6 +5615,11 @@
           "target": "generateKeyPairSync(\"ed25519\")",
           "desired_positive": false,
           "expected_pattern_match": false
+        },
+        {
+          "target": "crypto.generateKeyPairSync('rsa', { modulusLength: 4096 })",
+          "desired_positive": true,
+          "expected_pattern_match": true
         }
       ]
     },
@@ -5562,16 +5727,15 @@
         "risk": "quantum-vulnerable",
         "confidence": 0.58,
         "migration_hint": "Replace Ruby OpenSSL RSA usage with PQC-ready migration targets.",
-        "pattern": "(?i)(\\bOpenSSL::PKey::RSA\\b|\\bOpenSSL::PKey::RSA\\.new\\b|\\bJWT\\.(encode|decode)\\b|\\bRS(256|384|512)\\b)",
+        "pattern": "(?i)(\\bOpenSSL::PKey::RSA\\b|\\bOpenSSL::PKey::RSA\\.new\\b|\\bRS(256|384|512)\\b)",
         "scope": "ruby",
         "description": "RSA-related crypto symbols detected from Ruby AST."
       },
-      "purpose": "rsa_or_generic_jwt_api_reference",
+      "purpose": "rsa_api_or_algorithm_reference",
       "algorithm_families": [
-        "RSA",
-        "unknown_for_generic_JWT_branch"
+        "RSA"
       ],
-      "quantum": "conditional_rsa_or_unknown_JWT_algorithm",
+      "quantum": "vulnerable_family_reference_not_active_use",
       "classical": "parameters_and_implementation_not_assessed",
       "reference_ids": [
         "RFC7518",
@@ -5581,10 +5745,11 @@
       "method_limits": [
         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
       ],
       "known_gaps": [
-        "OpenSSL RSA branch differs from generic JWT.encode/decode, which can use HMAC/ECDSA or other algorithms. Legacy single risk tag cannot classify every branch."
+        "Computed/aliased Ruby receivers and algorithm values are not exhaustively resolved. Generic JWT.encode/decode alone is no longer classified as RSA."
       ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
@@ -5601,8 +5766,7 @@
         {
           "target": "JWT.encode({}, key, 'HS256')",
           "desired_positive": false,
-          "expected_pattern_match": true,
-          "known_gap": "Generic JWT API branch cannot establish RSA; HMAC example remains a known false positive."
+          "expected_pattern_match": false
         }
       ]
     },
@@ -5711,7 +5875,7 @@
         "risk": "non-quantum-risk",
         "confidence": 0.75,
         "migration_hint": "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.",
-        "pattern": "(?i)(?:^|[^A-Za-z0-9])TLSv1(?:\\.0|\\.1)?(?:$|[^0-9.])|TLSv1_0|TLSv1_1",
+        "pattern": "(?i)(?:^|[^A-Za-z0-9_])TLSv1(?:[._][01])?(?:$|[^A-Za-z0-9_.])",
         "scope": "java,javascript,typescript,python,go,rust,ruby",
         "description": "Legacy TLS version literals detected in AST nodes."
       },
@@ -5733,7 +5897,7 @@
       ],
       "known_gaps": [
         "Version strings do not establish a live listener or negotiated security.",
-        "Legacy prefix/boundary pattern can also match some modern-version spellings; no pattern change in task028."
+        "Only explicit supported legacy version spellings are classified; computed protocol settings and runtime negotiation are not resolved."
       ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
@@ -5745,8 +5909,17 @@
         {
           "target": "TLSv1_3",
           "desired_positive": false,
-          "expected_pattern_match": true,
-          "known_gap": "Retained legacy prefix/heuristic behavior disagrees with desired control; no matcher tuning."
+          "expected_pattern_match": false
+        },
+        {
+          "target": "TLSv1_2",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "TLSv1_1",
+          "desired_positive": true,
+          "expected_pattern_match": true
         }
       ]
     },
@@ -5760,7 +5933,7 @@
         "risk": "quantum-vulnerable",
         "confidence": 0.66,
         "migration_hint": "Update TLS suites containing RSA key exchange to PQC-hybrid suites.",
-        "pattern": "(?i)TLS_[A-Z0-9_]*RSA[A-Z0-9_]*",
+        "pattern": "(?i)\\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\\b",
         "scope": "java,javascript,typescript,python,go,rust,ruby",
         "description": "RSA-family TLS cipher suite literals detected in AST nodes."
       },
@@ -5778,7 +5951,8 @@
       "method_limits": [
         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
       ],
       "known_gaps": [
         "RSA authentication and RSA key transport are distinct; text does not establish negotiated use."
@@ -5792,6 +5966,11 @@
         },
         {
           "target": "TLS_AES_128_GCM_SHA256",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "TLS_PK_RSA_ALT",
           "desired_positive": false,
           "expected_pattern_match": false
         }

@@ -109,7 +109,12 @@ fn same_line_unique_hits_consume_the_existing_cap() {
     ] {
         let text = "wrap(".to_string() + &vec!["'TOKEN'"; n].join(",") + ");";
         let file = ScannableFile::from_bytes(PathBuf::from("app.js"), text.into_bytes());
-        let outcome = TreeSitterDetector.detect_detailed(&file, &f.rules).unwrap();
+        let outcome = TreeSitterDetector::with_budget(pqc_scan_detectors::DetectorBudget {
+            max_hits_per_rule: 32,
+            ..Default::default()
+        })
+        .detect_detailed(&file, &f.rules)
+        .unwrap();
         assert_eq!(outcome.detections().len(), 32);
         assert_eq!(outcome.status(), expected);
     }
@@ -121,7 +126,7 @@ fn clipped_display_suffix_is_not_a_source_match() {
     let text = format!("wrap('{}');", "x".repeat(3000));
     let file = ScannableFile::from_bytes(PathBuf::from("app.js"), text.into_bytes());
     let outcome = TreeSitterDetector.detect_detailed(&file, &f.rules).unwrap();
-    assert_eq!(outcome.status(), DetectorStatus::Truncated);
+    assert_eq!(outcome.status(), DetectorStatus::Complete);
     assert!(outcome.detections().is_empty());
 }
 

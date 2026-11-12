@@ -150,10 +150,10 @@ impl ScannableFile {
             .extension()
             .and_then(|e| e.to_str())
             .is_some_and(|e| e.eq_ignore_ascii_case("p12") || e.eq_ignore_ascii_case("pfx"));
-        let text = if opaque || is_probably_binary(&bytes) {
+        let text = if opaque {
             None
         } else {
-            Some(String::from_utf8_lossy(&bytes).into_owned())
+            crate::text_encoding::decode(&bytes)
         };
 
         Self {
@@ -162,6 +162,14 @@ impl ScannableFile {
             bytes,
             text,
         }
+    }
+
+    /// Map decoded UTF-8 character boundaries to original file byte offsets.
+    /// None means ordinary UTF-8 needs no remapping, or there is no decoded text.
+    pub fn decoded_source_offsets(&self) -> Option<Vec<(usize, usize)>> {
+        self.text
+            .as_deref()
+            .and_then(|text| crate::text_encoding::source_offsets(&self.bytes, text))
     }
 
     pub fn ext(&self) -> Option<&str> {
@@ -229,11 +237,6 @@ pub fn mask_preview(raw: &str) -> String {
         .rev()
         .collect();
     format!("{}***{}", head, tail)
-}
-
-fn is_probably_binary(bytes: &[u8]) -> bool {
-    let sample_len = usize::min(1024, bytes.len());
-    bytes[..sample_len].contains(&0)
 }
 
 fn floor_char_boundary(text: &str, mut idx: usize) -> usize {
@@ -312,5 +315,67 @@ mod opaque_container_tests {
             );
             assert!(file.text.is_none());
         }
+    }
+}
+
+#[cfg(test)]
+mod wide_text_repairs {
+    use super::*;
+    #[test]
+    fn utf16_source_is_decoded_with_and_without_bom() {
+        let source = "const key = 'RS256';\n";
+        for bom in [true, false] {
+            for little in [true, false] {
+                let mut bytes = if bom {
+                    if little {
+                        vec![0xff, 0xfe]
+                    } else {
+                        vec![0xfe, 0xff]
+                    }
+                } else {
+                    vec![]
+                };
+                for c in source.encode_utf16() {
+                    bytes.extend(if little {
+                        c.to_le_bytes()
+                    } else {
+                        c.to_be_bytes()
+                    });
+                }
+                let file = ScannableFile::from_bytes("code.js".into(), bytes);
+                assert_eq!(file.text.as_deref(), Some(source));
+            }
+        }
+    }
+    #[test]
+    fn utf32_source_is_decoded_with_and_without_bom() {
+        let source = "const 日 = 'RS256';\n";
+        for bom in [true, false] {
+            for little in [true, false] {
+                let mut bytes = if bom {
+                    if little {
+                        vec![0xff, 0xfe, 0, 0]
+                    } else {
+                        vec![0, 0, 0xfe, 0xff]
+                    }
+                } else {
+                    vec![]
+                };
+                for c in source.chars() {
+                    bytes.extend(if little {
+                        (c as u32).to_le_bytes()
+                    } else {
+                        (c as u32).to_be_bytes()
+                    });
+                }
+                let file = ScannableFile::from_bytes("code.js".into(), bytes);
+                assert_eq!(file.text.as_deref(), Some(source));
+            }
+        }
+    }
+    #[test]
+    fn encrypted_containers_stay_opaque_even_with_unicode_bom() {
+        let f = ScannableFile::from_bytes("opaque.p12".into(), vec![0xff, 0xfe, b'a', 0]);
+        assert!(f.text.is_none());
     }
 }

@@ -8,10 +8,27 @@ use pqc_scan_core::{
     ScanConfig, ScannableFile,
 };
 use pqc_scan_detectors::{
-    default_detectors, key_detector::KeyDetector, regex_detector::RegexDetector,
-    tree_sitter_detector::TreeSitterDetector,
+    default_detectors, key_detector::KeyDetector,
+    regex_detector::RegexDetector as RawRegexDetector,
+    tree_sitter_detector::TreeSitterDetector as RawTreeSitterDetector,
 };
 use pqc_scan_rules::RuleSet;
+
+fn test_budget() -> pqc_scan_detectors::DetectorBudget {
+    pqc_scan_detectors::DetectorBudget {
+        max_hits_per_rule: 32,
+        max_match_candidates: 4096,
+        max_ast_candidates: 4096,
+        max_ast_nodes: 100_000,
+        ..Default::default()
+    }
+}
+fn regex_detector() -> impl Detector {
+    RawRegexDetector::with_budget(test_budget())
+}
+fn ast_detector() -> impl Detector {
+    RawTreeSitterDetector::with_budget(test_budget())
+}
 
 struct Fixture {
     root: PathBuf,
@@ -62,11 +79,11 @@ impl Drop for Fixture {
 fn regex_accepts_code_after_thirty_two_comment_matches() {
     let f = Fixture::new("regex", "code", "RS256");
     let file = f.file("app.js", &("// RS256\n".repeat(32) + "'RS256';\n"));
-    let result = RegexDetector.detect_detailed(&file, &f.rules).unwrap();
+    let result = regex_detector().detect_detailed(&file, &f.rules).unwrap();
     assert_eq!(result.detections().len(), 1);
     assert_eq!(result.status(), DetectorStatus::Complete);
     assert_eq!(result.detections()[0].location.line, 33);
-    assert_eq!(RegexDetector.detect(&file, &f.rules).unwrap().len(), 1);
+    assert_eq!(regex_detector().detect(&file, &f.rules).unwrap().len(), 1);
 }
 
 #[test]
@@ -79,7 +96,7 @@ fn regex_distinguishes_exact_hit_cap_from_proven_truncation() {
         (33, DetectorStatus::Truncated),
         (40, DetectorStatus::Truncated),
     ] {
-        let result = RegexDetector
+        let result = regex_detector()
             .detect_detailed(&f.file("app.txt", &"RS256\n".repeat(n)), &f.rules)
             .unwrap();
         assert_eq!(result.status(), expected, "{n}");
@@ -94,7 +111,7 @@ fn regex_distinguishes_exact_hit_cap_from_proven_truncation() {
 fn comments_after_exact_regex_cap_do_not_prove_an_omitted_hit() {
     let f = Fixture::new("regex", "code", "RS256");
     let text = "'RS256';\n".repeat(32) + &"// RS256\n".repeat(20);
-    let result = RegexDetector
+    let result = regex_detector()
         .detect_detailed(&f.file("app.js", &text), &f.rules)
         .unwrap();
     assert_eq!(result.detections().len(), 32);
@@ -109,7 +126,7 @@ fn regex_work_budget_bounds_comment_only_search_without_claiming_missing_hits() 
         (4096, DetectorStatus::Complete),
         (4097, DetectorStatus::Truncated),
     ] {
-        let result = RegexDetector
+        let result = regex_detector()
             .detect_detailed(&f.file("app.js", &"// RS256\n".repeat(n)), &f.rules)
             .unwrap();
         assert!(result.detections().is_empty());
@@ -130,7 +147,7 @@ fn truncated_regex_rule_does_not_prevent_later_rules_from_running() {
         rule("FIRST", "RS256"),
         rule("SECOND", "RSA")
     ]));
-    let result = RegexDetector
+    let result = regex_detector()
         .detect_detailed(
             &f.file("app.txt", &("RS256\n".repeat(40) + "RSA\n")),
             &f.rules,
@@ -186,7 +203,7 @@ fn ast_counts_unique_eligible_hits_and_looks_past_duplicates_at_exact_cap() {
         (33, DetectorStatus::Truncated),
         (40, DetectorStatus::Truncated),
     ] {
-        let result = TreeSitterDetector
+        let result = ast_detector()
             .detect_detailed(&f.file("app.js", &"crypto('RS256');\n".repeat(n)), &f.rules)
             .unwrap();
         assert_eq!(result.status(), expected, "{n}");
@@ -204,7 +221,7 @@ fn ast_collection_exact_limit_can_complete_and_one_more_is_truncated() {
         (4096, DetectorStatus::Complete),
         (4097, DetectorStatus::Truncated),
     ] {
-        let result = TreeSitterDetector
+        let result = ast_detector()
             .detect_detailed(&f.file("app.js", &"x;\n".repeat(n)), &f.rules)
             .unwrap();
         assert!(result.detections().is_empty());
@@ -226,7 +243,7 @@ fn ast_hit_limit_does_not_prevent_a_later_rule_from_running() {
         rule("SECOND", "RSA")
     ]));
     let text = "crypto('RS256');\n".repeat(40) + "crypto('RSA');\n";
-    let result = TreeSitterDetector
+    let result = ast_detector()
         .detect_detailed(&f.file("app.js", &text), &f.rules)
         .unwrap();
     assert_eq!(result.status(), DetectorStatus::Truncated);
@@ -242,7 +259,7 @@ fn ast_hit_limit_does_not_prevent_a_later_rule_from_running() {
 #[test]
 fn ast_parser_errors_keep_obtainable_hits_and_report_partial_inspection() {
     let f = Fixture::new("tree_sitter", "javascript", "RS256");
-    let result = TreeSitterDetector
+    let result = ast_detector()
         .detect_detailed(
             &f.file("app.js", "crypto('RS256');\nfunction broken( {\n"),
             &f.rules,
@@ -253,17 +270,20 @@ fn ast_parser_errors_keep_obtainable_hits_and_report_partial_inspection() {
 }
 
 #[test]
-fn ast_clipped_text_and_collection_limits_are_not_complete_zero_hits() {
+fn long_text_completes_but_explicit_collection_limits_stay_visible() {
     let f = Fixture::new("tree_sitter", "javascript", "RS256");
-    for text in [
-        format!("crypto('{}');", "x".repeat(2200)),
-        "x;\n".repeat(5000),
-        ";".repeat(100001),
+    for (text, expected) in [
+        (
+            format!("crypto('{}');", "x".repeat(2200)),
+            DetectorStatus::Complete,
+        ),
+        ("x;\n".repeat(5000), DetectorStatus::Truncated),
+        (";".repeat(100001), DetectorStatus::Truncated),
     ] {
-        let result = TreeSitterDetector
+        let result = ast_detector()
             .detect_detailed(&f.file("app.js", &text), &f.rules)
             .unwrap();
-        assert_eq!(result.status(), DetectorStatus::Truncated);
+        assert_eq!(result.status(), expected);
         assert!(result.detections().is_empty());
     }
 }
@@ -278,7 +298,7 @@ fn ast_match_work_budget_applies_across_duplicate_and_rejected_candidates() {
         // Each parser node sees the same long identifier fragment. These are
         // rejected embedded matches, not thousands of actual crypto usages.
         let text = format!("crypto('{}');", "a".repeat(n));
-        let result = TreeSitterDetector
+        let result = ast_detector()
             .detect_detailed(&f.file("app.js", &text), &f.rules)
             .unwrap();
         assert!(result.detections().is_empty());
@@ -287,14 +307,14 @@ fn ast_match_work_budget_applies_across_duplicate_and_rejected_candidates() {
 }
 
 #[test]
-fn ast_clipping_is_unicode_safe_and_only_over_the_character_limit() {
+fn unicode_matching_is_not_limited_by_preview_length() {
     let f = Fixture::new("tree_sitter", "javascript", "RS256");
     for (n, expected) in [
         (1990, DetectorStatus::Complete),
-        (1991, DetectorStatus::Truncated),
+        (1991, DetectorStatus::Complete),
     ] {
         let text = format!("crypto('{}')", "あ".repeat(n));
-        let result = TreeSitterDetector
+        let result = ast_detector()
             .detect_detailed(&f.file("app.js", &text), &f.rules)
             .unwrap();
         assert!(result.detections().is_empty());
@@ -307,14 +327,14 @@ fn inapplicable_inputs_are_explicit_but_plain_supported_text_can_complete() {
     let f = Fixture::new("regex", "code", "RS256");
     let plain = f.file("app.txt", "nothing cryptographic");
     assert_eq!(
-        RegexDetector
+        regex_detector()
             .detect_detailed(&plain, &f.rules)
             .unwrap()
             .status(),
         DetectorStatus::Complete
     );
     assert_eq!(
-        TreeSitterDetector
+        ast_detector()
             .detect_detailed(&plain, &f.rules)
             .unwrap()
             .status(),
@@ -329,8 +349,8 @@ fn inapplicable_inputs_are_explicit_but_plain_supported_text_can_complete() {
     );
     let binary = ScannableFile::from_bytes(PathBuf::from("input.bin"), vec![0, 1, 2]);
     for detector in [
-        Box::new(RegexDetector) as Box<dyn Detector>,
-        Box::new(TreeSitterDetector),
+        Box::new(regex_detector()) as Box<dyn Detector>,
+        Box::new(ast_detector()),
         Box::new(KeyDetector::default()),
     ] {
         assert_eq!(
@@ -342,7 +362,7 @@ fn inapplicable_inputs_are_explicit_but_plain_supported_text_can_complete() {
         );
     }
     assert_eq!(
-        RegexDetector
+        regex_detector()
             .detect_detailed(&plain, &RuleSet::default())
             .unwrap()
             .status(),
@@ -361,8 +381,8 @@ fn real_detector_outcomes_reach_pipeline_and_legacy_unknowns_remain_visible() {
         ..ScanConfig::default()
     };
     let supported: Vec<Arc<dyn Detector>> = vec![
-        Arc::new(RegexDetector),
-        Arc::new(TreeSitterDetector),
+        Arc::new(regex_detector()),
+        Arc::new(ast_detector()),
         Arc::new(KeyDetector::default()),
     ];
     let complete = scan_repository_detailed(&config, &f.rules, &supported).unwrap();

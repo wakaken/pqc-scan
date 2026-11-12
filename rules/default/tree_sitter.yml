@@ -49,7 +49,7 @@
   risk: quantum-vulnerable
   confidence: 0.59
   migration_hint: Migrate Node.js RSA signing/verification logic to a PQC-ready design.
-  pattern: "(?i)(\\b(createSign|createVerify)\\s*\\(\\s*['\"]RSA|\\b(privateEncrypt|publicDecrypt)\\s*\\(|\\b(RS|PS)(256|384|512)\\b)"
+  pattern: "(?i)(\\b(createSign|createVerify)\\s*\\(\\s*['\"]RSA|\\bgenerateKeyPair(?:Sync)?\\s*\\(\\s*['\"]rsa(?:-pss)?['\"]|\\b(privateEncrypt|publicDecrypt)\\s*\\(|\\b(RS|PS)(256|384|512)\\b)"
   scope: "javascript,typescript"
   description: RSA-related API symbols detected from JavaScript/TypeScript AST.
 
@@ -93,7 +93,7 @@
   risk: quantum-vulnerable
   confidence: 0.58
   migration_hint: Replace Ruby OpenSSL RSA usage with PQC-ready migration targets.
-  pattern: "(?i)(\\bOpenSSL::PKey::RSA\\b|\\bOpenSSL::PKey::RSA\\.new\\b|\\bJWT\\.(encode|decode)\\b|\\bRS(256|384|512)\\b)"
+  pattern: "(?i)(\\bOpenSSL::PKey::RSA\\b|\\bOpenSSL::PKey::RSA\\.new\\b|\\bRS(256|384|512)\\b)"
   scope: ruby
   description: RSA-related crypto symbols detected from Ruby AST.
 
@@ -115,7 +115,7 @@
   risk: quantum-vulnerable
   confidence: 0.66
   migration_hint: Update TLS suites containing RSA key exchange to PQC-hybrid suites.
-  pattern: "(?i)TLS_[A-Z0-9_]*RSA[A-Z0-9_]*"
+  pattern: "(?i)\\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\\b"
   scope: "java,javascript,typescript,python,go,rust,ruby"
   description: RSA-family TLS cipher suite literals detected in AST nodes.
 
@@ -126,7 +126,7 @@
   risk: non-quantum-risk
   confidence: 0.75
   migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
-  pattern: "(?i)(?:^|[^A-Za-z0-9])TLSv1(?:\\.0|\\.1)?(?:$|[^0-9.])|TLSv1_0|TLSv1_1"
+  pattern: "(?i)(?:^|[^A-Za-z0-9_])TLSv1(?:[._][01])?(?:$|[^A-Za-z0-9_.])"
   scope: "java,javascript,typescript,python,go,rust,ruby"
   description: Legacy TLS version literals detected in AST nodes.
 
@@ -151,3 +151,36 @@
   pattern: "(?i)(sha256WithRSAEncryption|sha384WithRSAEncryption|sha512WithRSAEncryption|ecdsa-with-SHA(256|384|512))"
   scope: "java,javascript,typescript,python,go,rust,ruby"
   description: Certificate signature algorithm literals detected in AST nodes.
+
+- id: TS_CLASSICAL_EC_API
+  kind: tree_sitter
+  category: CryptoAPI
+  severity: medium
+  risk: quantum-vulnerable
+  confidence: 0.65
+  migration_hint: Inventory classical elliptic-curve operations and plan a supported PQC or hybrid replacement.
+  pattern: '(?:\bec\.generate_private_key\b|\bOpenSSL::PKey::EC\.(?:new|generate)\b|\bgenerateKeyPair(?:Sync)?\s*\(\s*[''"]ec[''"])'
+  scope: python,ruby,javascript,typescript
+  description: Classical elliptic-curve API reference; deployment and effective configuration require confirmation.
+
+- id: TS_CLASSICAL_EDDSA_API
+  kind: tree_sitter
+  category: CryptoAPI
+  severity: medium
+  risk: quantum-vulnerable
+  confidence: 0.65
+  migration_hint: Inventory EdDSA and classical curve key operations; Ed25519 is not post-quantum secure.
+  pattern: '(?:\bEd(?:25519|448)PrivateKey\.generate\b|\bOpenSSL::PKey\.generate_key\s*\(\s*[''"]ED(?:25519|448)[''"]|\bgenerateKeyPair(?:Sync)?\s*\(\s*[''"](?:ed25519|ed448|x25519|x448)[''"])'
+  scope: python,ruby,javascript,typescript
+  description: Classical EdDSA or curve key-generation API reference.
+
+- id: TS_JWT_EDDSA_ALG
+  kind: tree_sitter
+  category: JWT
+  severity: medium
+  risk: quantum-vulnerable
+  confidence: 0.60
+  migration_hint: Review EdDSA JWT signing references for PQC migration; a literal alone does not establish active signing.
+  pattern: '\bEdDSA\b'
+  scope: java,javascript,typescript,python,go,rust,ruby
+  description: EdDSA algorithm reference in source; this is a classical public-key algorithm.

@@ -47,6 +47,7 @@ pub fn scan_repository_native(
         detectors,
         &|path| crate::safe_read::read(&config.root, path, config.max_file_size_bytes),
         Some(options),
+        crate::FileSelection::default(),
     )
 }
 
@@ -59,7 +60,14 @@ fn scan_with_reader<F>(
 where
     F: Fn(&std::path::Path) -> std::io::Result<Vec<u8>> + Sync,
 {
-    scan_observed_with_reader(config, rules, detectors, read, None)
+    scan_observed_with_reader(
+        config,
+        rules,
+        detectors,
+        read,
+        None,
+        crate::FileSelection::default(),
+    )
 }
 
 fn scan_observed_with_reader<F>(
@@ -68,12 +76,18 @@ fn scan_observed_with_reader<F>(
     detectors: &[Arc<dyn Detector>],
     read: &F,
     native: Option<&crate::NativeOptions>,
+    selection: crate::FileSelection,
 ) -> Result<ScanDocument>
 where
     F: Fn(&std::path::Path) -> std::io::Result<Vec<u8>> + Sync,
 {
-    let walk = walker::walk_repository_detailed(&config.root, config.max_file_size_bytes)?;
+    let walk = walker::walk_repository_detailed_with_selection(
+        &config.root,
+        config.max_file_size_bytes,
+        selection,
+    )?;
     let files = walk.files;
+    let context = crate::RepositoryContext::new(&config.root, &files, config.max_file_size_bytes);
     let mut diagnostics = walk.diagnostics;
     let mut coverage = CoverageSummary::new();
     coverage.selected_files = files.len() as u64;
@@ -112,7 +126,14 @@ where
                 };
 
                 let file = ScannableFile::from_bytes(path.clone(), bytes);
-                inspect_file(&file, &relative, rules, detectors, native.is_some())
+                inspect_file(
+                    &file,
+                    &relative,
+                    rules,
+                    detectors,
+                    native.is_some(),
+                    context.as_ref(),
+                )
             })
             .collect()
     });
@@ -224,6 +245,9 @@ where
         summary,
     };
     let mut document = ScanDocument::new(legacy, diagnostics, coverage, config);
+    if !selection.include_non_scannable {
+        document.record_binary_exclusion_policy();
+    }
     if let Some(options) = native {
         let native = crate::inventory::NativeScan::build(
             &config.root,
@@ -265,6 +289,7 @@ fn inspect_file(
     rules: &RuleSet,
     detectors: &[Arc<dyn Detector>],
     native: bool,
+    context: Option<&crate::RepositoryContext>,
 ) -> FileOutcome {
     let privacy = file
         .text
@@ -272,6 +297,13 @@ fn inspect_file(
         .map(crate::privacy::SourcePrivacy::from_text)
         .filter(|p| !p.is_empty())
         .map(|p| (relative.to_string(), p));
+    let source_offsets = native
+        .then(|| {
+            file.text
+                .as_deref()
+                .and_then(|text| crate::text_encoding::source_offsets(&file.bytes, text))
+        })
+        .flatten();
     let mut observations = Vec::new();
     let mut detections = Vec::new();
     let mut diagnostics = Vec::new();
@@ -281,16 +313,14 @@ fn inspect_file(
         diagnostics.push(ScanDiagnostic::new(DiagnosticCode::NoDetectors, None, None));
     }
     for detector in detectors {
-        let code = match if native {
-            detector.detect_observed(file, rules)
-        } else {
-            detector.detect_detailed(file, rules)
-        } {
+        let mut explanation = None;
+        let code = match detector.detect_in_repository(file, rules, context, native) {
             Err(_) => {
                 failed = true;
                 Some(DiagnosticCode::DetectorFailed)
             }
             Ok(outcome) => {
+                explanation = outcome.explanation();
                 let code = match outcome.status() {
                     DetectorStatus::Complete => {
                         complete = true;
@@ -314,13 +344,26 @@ fn inspect_file(
                         Some(DiagnosticCode::DetectorNotReported)
                     }
                 };
-                observations.extend(
-                    outcome
-                        .observations()
-                        .iter()
-                        .cloned()
-                        .map(|draft| draft.bind_to_inspected_file(&file.path, relative)),
-                );
+                observations.extend(outcome.observations().iter().cloned().map(|mut draft| {
+                    if matches!(
+                        draft.method.as_str(),
+                        "lexical_match"
+                            | "ast_pattern"
+                            | "configuration_match"
+                            | "private_key_marker"
+                    ) {
+                        if let Some(map) = &source_offsets {
+                            let raw = |offset: usize| {
+                                map.binary_search_by_key(&offset, |p| p.0)
+                                    .ok()
+                                    .map(|i| map[i].1)
+                            };
+                            draft.target.byte_start = draft.target.byte_start.and_then(raw);
+                            draft.target.byte_end = draft.target.byte_end.and_then(raw);
+                        }
+                    }
+                    draft.bind_to_inspected_file(&file.path, relative)
+                }));
                 detections.extend(outcome.into_detections());
                 code
             }
@@ -329,12 +372,24 @@ fn inspect_file(
             // Legacy coverage notices are detector-wide, avoiding one duplicate per file.
             let target =
                 (code != DiagnosticCode::DetectorNotReported).then(|| relative.to_string());
-            diagnostics.push(ScanDiagnostic::new(
-                code,
-                target,
-                Some(detector.name().into()),
-            ));
+            diagnostics.push(
+                ScanDiagnostic::new(code, target, Some(detector.name().into()))
+                    .with_explanation(explanation),
+            );
         }
+    }
+    if file.text.is_none()
+        && crate::text_encoding::has_wide_bom(&file.bytes)
+        && !file
+            .ext()
+            .is_some_and(|e| e.eq_ignore_ascii_case("p12") || e.eq_ignore_ascii_case("pfx"))
+    {
+        unsupported = true;
+        diagnostics.push(ScanDiagnostic::new(
+            DiagnosticCode::DetectorUnsupported,
+            Some(relative.into()),
+            Some("text_decoder".into()),
+        ));
     }
     let usable = complete || !detections.is_empty();
     let disposition = if partial || ((failed || unsupported) && usable) {
@@ -610,12 +665,9 @@ fn load_snippet_source(
         Ok(v) => v,
         Err(_) => return CachedSnippetSource::Unavailable,
     };
-    let sample_len = usize::min(bytes.len(), 1024);
-    if bytes[..sample_len].contains(&0) {
+    let Some(raw) = crate::model::ScannableFile::from_bytes(path.to_path_buf(), bytes).text else {
         return CachedSnippetSource::Unavailable;
-    }
-
-    let raw = String::from_utf8_lossy(&bytes).into_owned();
+    };
     // Locator credentials can be escaped or live outside parsed dependency records.
     // Never copy source context from these containers into any report.
     if contains_private_key_marker(&raw)
@@ -1216,4 +1268,22 @@ mod opaque_container_snippet_tests {
         }
         fs::remove_dir_all(root).unwrap();
     }
+}
+
+/// Additive entry point for explicit file selection without changing ScanConfig.
+pub fn scan_repository_with_selection(
+    config: &ScanConfig,
+    rules: &RuleSet,
+    detectors: &[Arc<dyn Detector>],
+    selection: crate::FileSelection,
+    native: Option<&crate::NativeOptions>,
+) -> Result<ScanDocument> {
+    scan_observed_with_reader(
+        config,
+        rules,
+        detectors,
+        &|path| crate::safe_read::read(&config.root, path, config.max_file_size_bytes),
+        native,
+        selection,
+    )
 }

@@ -139,19 +139,20 @@ fn typed_calls_keep_distinct_source_occurrences_and_ignore_comments_and_namesake
 }
 
 #[test]
-fn typed_source_preserves_exact_hit_limit_and_explicit_truncation() {
+fn typed_source_inspects_occurrences_beyond_the_old_hit_limit() {
     let fixture = Fixture::new("RS256");
     for name in ["app.ts", "view.tsx"] {
         for (count, expected) in [
             (32, DetectorStatus::Complete),
-            (33, DetectorStatus::Truncated),
+            (33, DetectorStatus::Complete),
+            (80, DetectorStatus::Complete),
         ] {
             let text = "const algorithms: string[] = [".to_string()
                 + &vec!["'RS256'"; count].join(",")
                 + "];";
             let outcome = fixture.detect(name, &text);
             assert_eq!(outcome.status(), expected, "{name}: {count}");
-            assert_eq!(outcome.detections().len(), 32);
+            assert_eq!(outcome.detections().len(), count);
         }
     }
 }

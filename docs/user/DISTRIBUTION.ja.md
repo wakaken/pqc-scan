@@ -1,10 +1,8 @@
 # ローカル導入と配布準備
 
-現在の導入方法はソースのチェックアウトです。0.1.0は開発スナップショットで、
-保守は最新の検証済み開発スナップショットに対するベストエフォートとします。
-SLA、旧版への修正提供、1.0のサポートは保証しません。ローカルアーカイブの準備対象は
-macOS Apple Silicon（`aarch64-apple-darwin`）です。他の環境への対応やcrates.ioでの公開は、
-この作業では確認していません。[脆弱性の連絡方法](../../SECURITY.md)もご確認ください。
+リリース目標は **v0.2.0** です。ソースからの導入に加え、GitHub Releasesで静的スキャン版のmacOS Apple Silicon（`aarch64-apple-darwin`）アーカイブ、対応するルールとライセンス文書、SHA-256、GitHubのビルド来歴証明を配布する方針です。developへのマージやActionsの成果物保存は、Release公開とは区別します。[リリース内容](../releases/v0.2.0.ja.md)も参照してください。
+
+保守は最新の検証済み0.2.xに対するベストエフォートとし、SLAや旧版への修正提供は保証しません。TLS／SSHは実験的機能です。probe同梱アーカイブは技術的な配布準備として維持し、既存のライセンス確認フラグも残します。他のバイナリ環境やcrates.io公開は今回の範囲に含めません。[脆弱性の連絡方法](../../SECURITY.md)も確認してください。
 
 ## ソースから導入する
 
@@ -35,7 +33,7 @@ cargo build --locked --release --package pqc_scan_cli
 python3 scripts/package-release.py --binary target/release/pqc-scan --variant static --out-dir target/task-038/static
 cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh --target-dir target/probe-release-build
 python3 scripts/package-release.py --binary target/probe-release-build/release/pqc-scan --variant combined-probes --out-dir target/task-038/combined
-python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.1.0-aarch64-apple-darwin-static.tar.gz
+python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz
 ```
 
 準備処理はオフラインのCargoメタデータを使うため、依存物は先にビルドで取得します。
@@ -89,3 +87,13 @@ python3 tests/distribution/check-install.py target/task-038/all/*.tar.gz --out-d
 ```
 
 依存noticeとprovenanceも同じfeature構成から生成します。インストール検証は`tls`・`ssh`・`ssh-kex`の過不足と公開鍵pinオプションを確認します。既存のobjc2系4件に加え、この構成ではrussh-utilのCargo VCS記録がdirty=trueのため、上流リビジョンと配布ソースの差の公開前確認を残します。固定リビジョンのライセンス原文は同梱します。これは未署名・未公開の技術的な配布準備です。
+
+## ホスト型ビルドの来歴を検証する
+
+配布準備workflowが生成したアーカイブでは、リポジトリ・workflow・公開対象のソースコミットを指定して検証します。
+
+```sh
+gh attestation verify pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz --repo wakaken/pqc-scan --signer-workflow wakaken/pqc-scan/.github/workflows/release.yml --source-digest FULL_RELEASE_COMMIT_SHA
+```
+
+`FULL_RELEASE_COMMIT_SHA` は選択したリリースの記録から確認します。版名やハッシュだけで来歴を判断しません。この検証はビルドの出所を確認するもので、検出精度やライセンスの適法性を認定するものではありません。ローカルアーカイブは、ホスト型の来歴証明を検証できない限り未署名の準備物です。タグ作成・Releaseへのアップロードは候補の受入後に別途実施します。

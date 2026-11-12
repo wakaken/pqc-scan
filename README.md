@@ -1,5 +1,7 @@
 # pqc-scan
 
+Release target: **v0.2.0**. Static scanning is the formal scope; TLS/SSH probes remain experimental. See the [v0.2 roadmap](docs/roadmap/OSS-ROADMAP-v0.2.md) and [release notes](docs/releases/v0.2.0.md).
+
 [日本語](README.ja.md)
 
 `pqc-scan` is a Rust command-line tool for investigating migration to post-quantum cryptography (PQC).
@@ -138,3 +140,19 @@ codes or the scope-based meaning of `--require-complete`.
 Distribution preparation now supports three macOS arm64 variants: `static`,
 `combined-probes` (TLS and SSH offers), and `all-probes` (also trusted SSH KEX).
 All probe modes remain experimental. See [distribution preparation](docs/user/DISTRIBUTION.md).
+
+### Inspection scope and binary exclusions
+
+Known media, archives, compiled artifacts and non-text binary data are excluded before inspection by default. Certificates, private-key inputs and key/trust stores remain in scope. Use `--include-non-scannable` to explicitly include the normally excluded formats for custom inspection. HTML/Markdown summarize diagnostic counts with at most three example paths per reason; `--diagnostics` retains the full JSON records.
+
+Source inspection matches full candidate text, with finite repository-sized work budgets. UTF-16/UTF-32 source text is decoded strictly (BOMs, or a conservative BOM-less ASCII-lane signature); previews and masking use the same decoded text. See [coverage](docs/user/COVERAGE.md#source-limits) for syntax and budget details.
+
+### Source inspection coverage
+
+Supported Python imports and `as` aliases, Ruby OpenSSL RSA/EC calls, EdDSA references, and Node RSA key generation produce investigation candidates. This is bounded static inspection: computed names, ambiguous bindings and runtime configuration may remain unknown. HS256/AES references and a library dependency alone do not establish RSA use. Go import indicators require Go import syntax. Dependency declarations, catalog/workspace references and Git/path sources are inventoried separately from resolved versions; no package manager or Ruby DSL is executed. Known non-certificate key/CSR/CRL objects are distinguished from certificate failures, while encrypted PKCS#12 remains incomplete. Supported syntax compatibility preserves original evidence and positions; incomplete or malformed inspection is still reported. See [coverage](docs/user/COVERAGE.md) and the [rule reference](docs/rules-reference.md).
+
+Dockerfile variant names are corroborated by their first instruction before overriding a source extension; lexical cryptography inspection continues. Bundler lock records retain platform-qualified reported versions while resolving corroborated registry versions separately. TypeScript import types, empty type-alias parameter lists and quoted JSX URL attributes retain original evidence positions.
+
+### Local declaration context
+
+Repository scans can read walker-selected local Maven parents and gemspec files through the same bounded, no-symlink reader. Maven parent coordinates must match; excluded files, external parents and network resolution are not used. Profile and Ruby platform/group/conditional declarations remain candidates, with explicit uncertainty instead of an effective or installed version. Unrendered JavaScript/requirements templates retain static findings and available branch declarations, but generated contents and dynamic Ruby evaluation remain incomplete with an explanatory diagnostic. Selected V8 script grammar compatibility preserves source positions and strict/module boundaries. Recognized legacy DSA identifiers do not make missing public-key parameters available.

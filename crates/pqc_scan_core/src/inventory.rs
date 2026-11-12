@@ -342,7 +342,19 @@ impl NativeScan {
                         attributes: serde_json::to_value(dep).expect("typed dependency"),
                         relations: Vec::new(),
                         uncertainty: if draft.typed_dependency {
-                            vec!["source_ordinal_can_shift_no_inferred_dependency_graph".into()]
+                            {
+                                let mut reasons =
+                                    vec!["source_ordinal_can_shift_no_inferred_dependency_graph"
+                                        .into()];
+                                if draft.evidence.capture_status.starts_with("conditional_")
+                                    || draft.evidence.capture_status.starts_with("deferred_")
+                                {
+                                    reasons.push(
+                                        "conditional_declaration_not_effective_dependency".into(),
+                                    );
+                                }
+                                reasons
+                            }
                         } else {
                             vec!["declared_vs_resolved_version_unavailable".into()]
                         },

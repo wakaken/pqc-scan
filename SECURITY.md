@@ -1,9 +1,8 @@
 # Security policy
 
-This project is a development-stage static scanner with optional explicitly
-invoked network probes. The latest verified development snapshot receives
-best-effort maintenance. No response SLA, old-version backport guarantee or 1.0
-support commitment is declared. Unsupported inputs and incomplete observations
+The v0.2 release targets static scanning with optional explicitly
+invoked network probes. The latest verified 0.2.x snapshot receives
+best-effort maintenance. No response SLA or old-version backport guarantee is declared. Optional probes remain experimental. Unsupported inputs and incomplete observations
 must not be interpreted as a clean security assessment.
 
 ## Reporting a vulnerability
@@ -23,7 +22,7 @@ metadata can remain sensitive even when recognized key material is masked.
 
 ## Distribution and updates
 
-No publication or signature is established by local packaging preparation.
+Local packaging alone does not establish publication or authenticity. Hosted static-candidate archives have GitHub build-provenance attestations; verify the repository, workflow and exact source commit using the distribution guide.
 SHA-256 manifests detect changes relative to supplied hashes; they do not prove
 authenticity. Follow the [installation and update guide](docs/user/DISTRIBUTION.md)
 or [日本語の導入・更新手順](docs/user/DISTRIBUTION.ja.md). Keep binary and rule

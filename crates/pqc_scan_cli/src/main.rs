@@ -7,9 +7,7 @@ use std::{
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 
-use pqc_scan_core::{
-    pipeline, scan_repository_detailed, scan_repository_native, NativeOptions, ScanConfig,
-};
+use pqc_scan_core::{pipeline, NativeOptions, ScanConfig};
 use pqc_scan_detectors::default_detectors;
 use pqc_scan_report::{
     write_assessment_json, write_cyclonedx_17, write_diagnostics, write_document_reports,
@@ -99,6 +97,10 @@ struct ScanArgs {
 
     #[arg(long, default_value_t = 0usize)]
     threads: usize,
+
+    /// Include known media, archives and binary data normally excluded before inspection.
+    #[arg(long)]
+    include_non_scannable: bool,
 
     /// Write inspection coverage and safe failure reasons to diagnostics.json.
     #[arg(long)]
@@ -334,12 +336,20 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     };
 
     let detectors = default_detectors();
-    let document = if args.inventory_json || args.cyclonedx_17 {
-        let options = NativeOptions::new(args.repository_scope.as_deref())?;
-        scan_repository_native(&config, &rules, &detectors, &options)?
+    let native_options = if args.inventory_json || args.cyclonedx_17 {
+        Some(NativeOptions::new(args.repository_scope.as_deref())?)
     } else {
-        scan_repository_detailed(&config, &rules, &detectors)?
+        None
     };
+    let document = pipeline::scan_repository_with_selection(
+        &config,
+        &rules,
+        &detectors,
+        pqc_scan_core::FileSelection {
+            include_non_scannable: args.include_non_scannable,
+        },
+        native_options.as_ref(),
+    )?;
     let assessment = if let Some(profile) = &args.policy_profile {
         Some(pqc_scan_core::policy::evaluate(
             document

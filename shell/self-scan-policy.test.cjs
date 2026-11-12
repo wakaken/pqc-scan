@@ -4,9 +4,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { prepareCodeScanning } = require('./prepare-code-scanning.cjs');
-const root = path.resolve(__dirname, '..');
-const read = name => JSON.parse(fs.readFileSync(path.join(root, name), 'utf8'));
-const policy = () => read('docs/quality/SELF-SCAN-EXPECTATIONS.json');
+const repositoryRoot = path.resolve(__dirname, '..');
+const read = name => JSON.parse(fs.readFileSync(path.join(repositoryRoot, name), 'utf8'));
+const { reviewedResultTestSource } = require('./reviewed-result-test-source.cjs');
+const fixture = reviewedResultTestSource(read('docs/quality/SELF-SCAN-EXPECTATIONS.json'));
+const root = fixture.root;
+const policy = () => structuredClone(fixture.policy);
+test.after(fixture.cleanup);
 const reviewed = () => read('docs/quality/pr14/REVIEWED-RESULTS.json');
 const sourcePath = r => r.locations[0].physicalLocation.artifactLocation.uri;
 const document = results => ({ version: '2.1.0', runs: [{
