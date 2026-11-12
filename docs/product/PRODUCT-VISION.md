@@ -49,4 +49,4 @@ First establish measured precision/recall by detection family, inspection covera
 
 The default delivery unit is one task with its implementation, tests and documentation in one PR; a necessary prerequisite feasibility study can remain a separate task.
 
-This design records recommendations, not human approval of future schema, rule-semantic or high-risk architectural changes. See the [roadmap](../roadmap/OSS-ROADMAP.md) for task scope and decision gates, the [domain model](../architecture/DOMAIN-MODEL.md) for evidence semantics and the [boundary](OSS-ENTERPRISE-BOUNDARY.md) for platform responsibilities.
+This design records recommendations, not human approval of future schema, rule-semantic or high-risk architectural changes. See the [roadmap](../roadmap/OSS-ROADMAP-v0.2.md) for task scope and decision gates, the [domain model](../architecture/DOMAIN-MODEL.md) for evidence semantics and the [boundary](OSS-ENTERPRISE-BOUNDARY.md) for platform responsibilities.

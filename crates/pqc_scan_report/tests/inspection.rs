@@ -624,7 +624,7 @@ fn html_prioritizes_coverage_and_omits_internal_observation_and_asset_tables() {
 }
 
 #[test]
-fn html_groups_diagnostic_reasons_with_bounded_examples_and_preserves_full_markdown() {
+fn human_reports_group_diagnostics_and_preserve_full_machine_records() {
     let fixture = Fixture::new();
     fs::remove_file(fixture.0.join("input/<untrusted>&.txt")).unwrap();
     for i in 0..12 {
@@ -647,6 +647,51 @@ fn html_groups_diagnostic_reasons_with_bounded_examples_and_preserves_full_markd
     assert!(html.contains("12件"));
     assert!(html.contains("ほか9件"));
     assert!(!html.contains("file-11.txt"));
-    assert!(md.contains("file-11.txt"));
+    assert!(!md.contains("file-11.txt"));
+    assert!(serde_json::to_string(&doc.diagnostics_report())
+        .unwrap()
+        .contains("file-11.txt"));
     assert!(html.contains("data-inspection-status=\"partial\""));
+}
+
+#[test]
+fn human_reports_summarize_exclusions_while_machine_diagnostics_keep_all_paths() {
+    let fixture = Fixture::new();
+    for i in 0..100 {
+        fs::write(
+            fixture.0.join(format!("input/picture-{i:03}.png")),
+            b"synthetic picture",
+        )
+        .unwrap();
+    }
+    let doc = fixture.document(DetectorStatus::Complete);
+    assert_eq!(doc.coverage().excluded_enumerated_files(), 100);
+    assert_eq!(doc.coverage().selected_files(), 1);
+    let output = fixture.0.join("reports");
+    write_document_reports(
+        &doc,
+        None,
+        true,
+        &output,
+        ReportFormat::All,
+        ReportLanguage::Ja,
+    )
+    .unwrap();
+    let html = fs::read_to_string(output.join("report.html")).unwrap();
+    let md = fs::read_to_string(output.join("report.md")).unwrap();
+    for content in [&html, &md] {
+        assert!(content.contains("100"));
+        assert!(content.contains("picture-000.png"));
+        assert!(content.contains("picture-002.png"));
+        assert!(!content.contains("picture-099.png"));
+    }
+    let diagnostic = serde_json::to_string(&doc.diagnostics_report()).unwrap();
+    assert!(diagnostic.contains("picture-099.png"));
+    assert_eq!(
+        doc.diagnostics()
+            .iter()
+            .filter(|d| d.code() == pqc_scan_core::DiagnosticCode::ExcludedPath)
+            .count(),
+        100
+    );
 }

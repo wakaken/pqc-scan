@@ -31,7 +31,7 @@ Start with the [input overview](../../README.md#targets). This guide gives the s
 - CycloneDX JSON (`*.cdx.json`, `*bom*.json`)
 - SPDX JSON (`*.spdx.json`, `*sbom*.json`)
 
-These are bounded component/package subsets: CycloneDX 1.4–1.7 and SPDX 2.2–2.3. They are input formats, not full-schema validation, installed-state proof or standards export. Structured dependency parsing, lexical fallbacks, supported versions and limits are listed in the [dependency provenance contract](../architecture/DEPENDENCY-PROVENANCE.md).
+These are bounded component/package subsets: CycloneDX 1.4 to 1.7 and SPDX 2.2 to 2.3. They are input formats, not full-schema validation, installed-state proof or standards export. Structured dependency parsing, lexical fallbacks, supported versions and limits are listed in the [dependency provenance contract](../architecture/DEPENDENCY-PROVENANCE.md).
 
 <a id="certificates"></a>
 
@@ -78,10 +78,9 @@ retaining static facts. Time findings record `assessment_time_unix` and
 
 The CLI uses a fresh certificate assessment clock for each scan.
 
-Existing custom `certificate` and other legacy scopes keep composite-text matching,
-except the newly reserved opt-in scopes `rsa_modulus_bits`, `certificate_validity`
-and `legacy_not_after_2026`. External packs previously using those exact strings as
-opaque legacy labels should rename them (or use `certificate`) before upgrading.
+`certificate` and other general scopes use composite-text matching. The reserved
+scopes `rsa_modulus_bits`, `certificate_validity` and `legacy_not_after_2026` use
+typed modulus, current-validity and fixed-cutoff inputs respectively.
 Existing `signature_oid`/`public_key_oid` scopes remain exact identifier inputs.
 Corrected facts, typed evidence and risk tags intentionally change affected
 certificate findings, IDs and legacy CBOM algorithm strings; CLI options, report
@@ -116,7 +115,7 @@ Limits are 2 MiB, 256 bags, 256 content entries, nesting depth 8 and 4096 attrib
 ### Built-in Rule Set
 
 - Default rules live under `rules/default/`
-- Current built-in rules: 119
+- Current built-in rules: 122
 - Full reference (all rule IDs + severity definitions): [docs/rules-reference.md](../rules-reference.md)
 
 Rule packs reject blank IDs, non-finite confidence or values outside `0..1`, duplicate IDs, invalid patterns and traversal failures. Invalid packs return operational error 1 instead of a partial pack. Valid custom scopes retain their per-detector semantics; unknown scope labels are not rejected. Check [scope compatibility](../architecture/RULE-VALIDATION.md) when upgrading a custom pack.
@@ -127,13 +126,39 @@ Rule packs reject blank IDs, non-finite confidence or values outside `0..1`, dup
 
 AST findings distinguish source spans per rule: repeated uses on the same line
 remain separate, while parent/child representations of the same lexical match
-produce one observation. The existing 32-hit rule/file cap and bounded-work
-truncation diagnostics remain. A display-only clipping ellipsis is never treated
-as source. CLI flags, report schemas/filenames and IDs for unchanged occurrences
-are preserved; finding counts and new occurrence IDs may increase intentionally.
-Legacy AST Unicode column limitations still apply (see [SARIF locations](REPORTS.md#sarif-locations)).
+produce one observation. Per rule/file, at most 4,096 accepted hits and 65,536 examined matches are retained; bounded-work truncation remains explicit. A display-only clipping ellipsis is never treated
+as source. Finding IDs use the rule, path, position and original matched text.
+AST Unicode column limitations apply (see [SARIF locations](REPORTS.md#sarif-locations)).
+
+Python imports and `as` aliases, Ruby OpenSSL RSA/EC calls and Node RSA key generation have dedicated matching support. Computed names and ambiguous bindings may remain unknown; a dependency or an HS256/AES reference alone does not establish RSA use.
 
 TypeScript and TSX use their dedicated pinned grammars. Valid type syntax no longer becomes partial merely because it is not JavaScript. Syntax errors still retain available findings and report partial inspection. Matching remains nominal: imported aliases can be missed, namesakes/display strings can be false positives, and comments inside ancestor text are not full semantic analysis. No symbol resolver or dataflow engine is implied.
+
+## Repository inspection budgets and encoded text
+
+AST candidates borrow full source slices: the former 2,000-character matching cutoff is removed; only displayed previews are clipped. Defaults allow 262,144 semantic candidates, 2,000,000 scheduled nodes, 4,096 accepted hits per rule/file, 65,536 examined matches per rule/file, and 256 MiB of cumulative candidate text examined across AST rules per file. Exactly reaching a hit cap is distinguished from observing another eligible hit. Real exhaustion remains `detector_truncated`; these are finite resource controls, not proof that a specific number of findings was lost. Library callers can use `DetectorBudget` with `TreeSitterDetector::with_budget` / `RegexDetector::with_budget` to set explicit budgets.
+
+The pinned module grammars are supplemented by a parse-only compatibility view for TypeScript `export type *` (including namespace re-exports) and JavaScript/TypeScript `import defer * as ...`. ASCII modifier bytes are replaced with spaces only in actual top-level module statements; evidence and matching use the original decoded text with unchanged offsets. Other syntax errors retain partial status. This does not evaluate modules or validate runtime behavior.
+
+UTF-16LE/BE and UTF-32LE/BE BOMs are recognized and decoded strictly; BOM-less wide text needs a strong ASCII-lane signature and valid printable Unicode. Malformed BOM-marked wide text is reported as unsupported rather than completed or silently excluded. Detection, source context and redaction use the same decoded text. Binary certificate/private container bytes remain opaque to source detectors, and no decryption is performed.
+
+Default pre-inspection policy excludes known media, archives, compiled data (including WebAssembly, MO and protobuf-style extensions), and non-text binary input. Protected certificate/key/store extensions remain selected. The explicit opt-out is `--include-non-scannable`; `.gitignore`, directory exclusions and the 2 MiB limit still apply. Do not infer full repository enumeration from selected counts.
+
+Dependency structured-value decoding is bounded at 500,000 values and depth 64; aliases and explicit tags remain unsupported. YAML plain/quoted/block scalar punctuation is distinguished from node properties, and empty metadata values are valid nulls.
+
+pnpm single-document locks and the boot/project two-document layout are both supported. Both graphs are inventoried separately with globally unique record ordinals; matching schema versions and at most two documents are required. The 500,000-value and 10,000-record budgets apply to the entire file, not separately to each document. See [pnpm’s lockfile reader guidance](https://github.com/pnpm/pnpm/blob/main/pnpm/docs/lockfile.md).
+
+Dockerfile routing uses the final filename (`Dockerfile` or `Dockerfile.*`) plus a first meaningful `FROM`/`ARG` instruction, skipping comments and a BOM. Ordinary language source with the same filename keeps its language parser; lexical rules continue on Dockerfiles. Bundler platform suffixes require a matching `PLATFORMS` declaration (including Linux GNU normalization), and only registry records gain a resolved base version; Git/path records remain unresolved. Compatibility for empty type-alias parameter lists, type-context `import(...)` and quoted JSX attributes is parse-only. Runtime imports and expression operators are preserved, malformed inputs retain partial status, and compatibility work remains bounded.
+
+### Static context and conditional declarations
+
+Maven parent properties are inherited only from selected, bounded regular files inside the scan root, after matching the declared group/artifact/version. Local references honor empty relativePath, reject links and excluded/out-of-root files, and stop at 16 levels or 8 MiB of parent input. Conflicting properties remain unresolved; identical duplicates are idempotent for declaration inspection. Profile property candidates are labelled conditional (`dep_context`, native observation capture status and dependency uncertainty), never selected as an effective configuration or a resolved artifact. No Maven execution, BOM fetch, transitive graph or installed-package claim is implied.
+
+Ruby Gemfile/gemspec inspection reads literal dependency calls and supported groups/platforms/branches using the Ruby syntax tree. A gemspec receiver must be bound to the specification block; rebound/ambiguous receivers, dynamic versions/names and evaluation/loading remain incomplete. Delegated gemspec dependencies keep the gemspec's own path and positions instead of being copied to the Gemfile. Git/path sources stay unresolved. Unknown DSL calls remain incomplete; arbitrary Ruby is not evaluated.
+
+Recognized unrendered template directives have an offset-preserving static parse view. Requirements branch declarations are retained separately as conditional candidates. Template rendering/branch selection is not executed, and generated values remain partial even when the static source is parsed. Literal strings, comments and regular expressions do not become source directives solely by resembling a template.
+
+Selected V8 grammar compatibility covers native-call expression positions, sloppy-script `yield` identifiers, tagged-template escape content and legacy runtime-error assignment targets. It does not execute those calls or assert runtime success. Explicit module/strict boundaries and malformed controls remain incomplete. Legacy DSA OID 1.3.14.3.2.12 uses the known public-parameter/public-integer layout; absent parameters retain partial status and no key size or domain parameters are invented. Sources: [OpenSSL object identifiers](https://github.com/openssl/openssl/blob/master/crypto/objects/objects.txt), [OpenSSL DSA decoder](https://github.com/openssl/openssl/blob/master/crypto/dsa/dsa_ameth.c), [Maven POM reference](https://maven.apache.org/pom.html), [Django template language](https://docs.djangoproject.com/en/5.2/ref/templates/language/).
 
 <a id="privacy"></a>
 

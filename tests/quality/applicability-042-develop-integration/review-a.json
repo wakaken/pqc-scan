@@ -1,0 +1,57 @@
+{
+  "reviewer": "develop-integration-implementation-review",
+  "timestampUtc": "2026-11-12T06:24:29.194582Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "a3b0bae7f5ae7ac5da14d7430d521ac981642422118f8057aaeec40341f0c349",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "752c264988f9551bc8ccb9dc7e3707c33d36c33e17e57bfba0b38cb79a24d290",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "元入力tuning/certs/public-only.p12のDERを構造的に確認し、PFX v3外側data内のAuthenticatedSafe ContentInfo OIDが2a864886f70d010706（encryptedData）であることを確認した。質問CERT_ECDSA_SIGNATUREは公開証明書の属性であり、ファイル名シグナルではない。COVERAGEの非復号・暗号化contents対象外の契約とpkcs12.rs::contentの非DATA OIDをopaqueとして返す実装から、この属性抽出は公開対応範囲外である。provenanceがRSA3072元DERへの変換を記録していても暗号化された入力自体が対応範囲内になるわけではなく、nominal真実は保持する。"
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "元入力tuning/certs/public-only.pfxのDERを構造的に確認し、PFX v3外側data内のAuthenticatedSafe ContentInfo OIDが2a864886f70d010706（encryptedData）であることを確認した。質問CERT_ECDSA_SIGNATUREは公開証明書の属性であり、ファイル名シグナルではない。COVERAGEの非復号・暗号化contents対象外の契約とpkcs12.rs::contentの非DATA OIDをopaqueとして返す実装から、この属性抽出は公開対応範囲外である。provenanceがRSA3072元DERへの変換を記録していても暗号化された入力自体が対応範囲内になるわけではなく、nominal真実は保持する。"
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "元入力tuning/certs/public-only.p12のDERを構造的に確認し、PFX v3外側data内のAuthenticatedSafe ContentInfo OIDが2a864886f70d010706（encryptedData）であることを確認した。質問CERT_RSA_3072は公開証明書の属性であり、ファイル名シグナルではない。COVERAGEの非復号・暗号化contents対象外の契約とpkcs12.rs::contentの非DATA OIDをopaqueとして返す実装から、この属性抽出は公開対応範囲外である。provenanceがRSA3072元DERへの変換を記録していても暗号化された入力自体が対応範囲内になるわけではなく、nominal真実は保持する。"
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "元入力tuning/certs/public-only.p12のDERを構造的に確認し、PFX v3外側data内のAuthenticatedSafe ContentInfo OIDが2a864886f70d010706（encryptedData）であることを確認した。質問CERT_RSA_SIGNATUREは公開証明書の属性であり、ファイル名シグナルではない。COVERAGEの非復号・暗号化contents対象外の契約とpkcs12.rs::contentの非DATA OIDをopaqueとして返す実装から、この属性抽出は公開対応範囲外である。provenanceがRSA3072元DERへの変換を記録していても暗号化された入力自体が対応範囲内になるわけではなく、nominal真実は保持する。"
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "元入力tuning/certs/public-only.pfxのDERを構造的に確認し、PFX v3外側data内のAuthenticatedSafe ContentInfo OIDが2a864886f70d010706（encryptedData）であることを確認した。質問CERT_RSA_3072は公開証明書の属性であり、ファイル名シグナルではない。COVERAGEの非復号・暗号化contents対象外の契約とpkcs12.rs::contentの非DATA OIDをopaqueとして返す実装から、この属性抽出は公開対応範囲外である。provenanceがRSA3072元DERへの変換を記録していても暗号化された入力自体が対応範囲内になるわけではなく、nominal真実は保持する。"
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "元入力tuning/certs/public-only.pfxのDERを構造的に確認し、PFX v3外側data内のAuthenticatedSafe ContentInfo OIDが2a864886f70d010706（encryptedData）であることを確認した。質問CERT_RSA_SIGNATUREは公開証明書の属性であり、ファイル名シグナルではない。COVERAGEの非復号・暗号化contents対象外の契約とpkcs12.rs::contentの非DATA OIDをopaqueとして返す実装から、この属性抽出は公開対応範囲外である。provenanceがRSA3072元DERへの変換を記録していても暗号化された入力自体が対応範囲内になるわけではなく、nominal真実は保持する。"
+    }
+  ],
+  "remainingUnitsReview": {
+    "count": 240,
+    "sourceFilesVerified": 203,
+    "basis": "全corpus.filesのsourceを読みSHA-256を検証し、全246 unitと元truthラベルの性質を公開契約と照合した。ソースAPI・Ruby literal・設定断片・依存宣言・SBOM版・秘密鍵marker・malformed/Swift/crypto-only CBOMの既存scopeは維持。sourceの検出成否はscope判断に用いない。",
+    "legacySignal": "x153/x155/v2-a1/v2-a2のCERT_P12_CONTAINERは拡張子の既存シグナルなので維持し、属性抽出と混同しない。",
+    "unencryptedControls": "width/public-unencrypted.p12/.pfxは同じ元公開DERの変換来歴を持ち、内側ContentInfoがdata OID 2a864886f70d010701であるため公開属性の8 unitを維持。",
+    "otherConflicts": []
+  }
+}

@@ -1,3 +1,7 @@
+mod repository_context;
+pub use repository_context::RepositoryContext;
+pub mod file_selection;
+pub use file_selection::FileSelection;
 pub mod assessment;
 pub mod classifier;
 pub mod compat;
@@ -16,6 +20,7 @@ pub mod recommendation;
 pub mod risk;
 mod safe_read;
 pub mod target_policy;
+mod text_encoding;
 pub mod walker;
 
 pub use diagnostic::{
@@ -38,6 +43,21 @@ use pqc_scan_rules::RuleSet;
 pub trait Detector: Send + Sync {
     fn name(&self) -> &'static str;
     fn detect(&self, file: &ScannableFile, rules: &RuleSet) -> Result<Vec<Detection>>;
+
+    /// Optional read-only context; legacy detector implementations retain their behavior.
+    fn detect_in_repository(
+        &self,
+        file: &ScannableFile,
+        rules: &RuleSet,
+        _context: Option<&RepositoryContext>,
+        observed: bool,
+    ) -> Result<DetectorOutcome> {
+        if observed {
+            self.detect_observed(file, rules)
+        } else {
+            self.detect_detailed(file, rules)
+        }
+    }
 
     /// Compatibility adapter: successful legacy output does not attest to completeness.
     fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {

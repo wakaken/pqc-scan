@@ -11,6 +11,10 @@ jobs:
   prepare:
     runs-on: macos-15
     timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -28,6 +32,22 @@ jobs:
           python3 scripts/package-release.py --binary target/release/pqc-scan --variant static --out-dir target/task-038/static-second
           cmp target/task-038/static-first/*.tar.gz target/task-038/static-second/*.tar.gz
           python3 tests/distribution/check-install.py target/task-038/static-first/*.tar.gz --out-dir target/task-038/static-install
+      - name: Attest static candidate build provenance
+        id: static-provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: target/task-038/static-first/*.tar.gz
+      - name: Verify static provenance for this exact source commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ATTESTATION_BUNDLE: ${{ steps.static-provenance.outputs.bundle-path }}
+          SOURCE_COMMIT: ${{ github.sha }}
+          SOURCE_REPOSITORY: ${{ github.repository }}
+        run: |
+          for archive in target/task-038/static-first/*.tar.gz; do
+            gh attestation verify "$archive" --repo "$SOURCE_REPOSITORY" --signer-workflow "$SOURCE_REPOSITORY/.github/workflows/release.yml" --source-digest "$SOURCE_COMMIT"
+          done
+          cp "$ATTESTATION_BUNDLE" target/task-038/static-first/build-provenance.jsonl
       - name: Build and prepare combined probe snapshot
         run: |
           cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh --target-dir target/probe-release-build

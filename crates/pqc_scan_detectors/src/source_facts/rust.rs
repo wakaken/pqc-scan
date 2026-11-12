@@ -229,7 +229,7 @@ pub(super) fn inspect<'a>(ctx: &mut Context<'a, '_>, facts: &mut Facts) {
     let incomplete = &*INCOMPLETE_USE;
     let mut examined = 0;
     for node in nodes {
-        if examined == 4096 {
+        if examined >= ctx.budget.max_match_candidates {
             facts.truncated = true;
             break;
         }
@@ -284,7 +284,7 @@ pub(super) fn inspect<'a>(ctx: &mut Context<'a, '_>, facts: &mut Facts) {
             "ERROR" => {
                 examined += 1;
                 let raw = ctx.source(node);
-                if raw.len() > 2000 {
+                if raw.len() > ctx.budget.max_ast_match_bytes {
                     facts.truncated = true;
                     continue;
                 }

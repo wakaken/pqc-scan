@@ -136,10 +136,28 @@ fn gemspec_binds_the_declared_block_variable() {
     for text in [
         "Gem::Specification.new do |s|\n other.add_dependency 'openssl', '3.3.0'\nend",
         "# spec.add_dependency 'openssl', '3.3.0'",
-        "Gem::Specification.new do |s|\n s.add_dependency 'openssl', version\nend",
     ] {
         assert_count("package.gemspec", text, "DEP_PQC_CAPABLE_LIBRARY", 0);
     }
+    // v0.2 retains a literal dependency name even when its version is dynamic.
+    // It must never infer a resolved version or successful evaluation.
+    let file = ScannableFile::from_bytes(
+        PathBuf::from("package.gemspec"),
+        b"Gem::Specification.new do |s|\n s.add_dependency 'openssl', version\nend".to_vec(),
+    );
+    let outcome = DependencyDetector.detect_detailed(&file, &rules()).unwrap();
+    assert_eq!(outcome.status(), pqc_scan_core::DetectorStatus::Partial);
+    let hits: Vec<_> = outcome
+        .detections()
+        .iter()
+        .filter(|d| d.rule_id == "DEP_PQC_CAPABLE_LIBRARY")
+        .collect();
+    assert_eq!(hits.len(), 1);
+    assert_eq!(hits[0].evidence.metadata["dep_version"], "unknown");
+    assert_eq!(
+        hits[0].evidence.metadata["dep_context"],
+        "dynamic_version_not_evaluated"
+    );
 }
 #[test]
 fn capable_library_rule_respects_exact_identity_and_source_ecosystem() {
@@ -336,7 +354,12 @@ fn source_fact_limits_are_explicit_and_custom_patterns_keep_their_meaning() {
     ] {
         let text = "generateKeyPairSync('ml-kem-768');\n".repeat(count);
         let file = ScannableFile::from_bytes(PathBuf::from("use.js"), text.into_bytes());
-        let out = TreeSitterDetector.detect_detailed(&file, &rules).unwrap();
+        let out = TreeSitterDetector::with_budget(pqc_scan_detectors::DetectorBudget {
+            max_hits_per_rule: 32,
+            ..Default::default()
+        })
+        .detect_detailed(&file, &rules)
+        .unwrap();
         assert_eq!(out.status(), expected_status);
         assert_eq!(
             out.detections()
@@ -534,7 +557,12 @@ fn built_in_source_facts_enforce_alias_depth_ast_depth_and_candidate_budgets() {
         ),
     ] {
         let file = ScannableFile::from_bytes(PathBuf::from("use.js"), text.into_bytes());
-        let out = TreeSitterDetector.detect_detailed(&file, &rules()).unwrap();
+        let out = TreeSitterDetector::with_budget(pqc_scan_detectors::DetectorBudget {
+            max_ast_nodes: 4096,
+            ..Default::default()
+        })
+        .detect_detailed(&file, &rules())
+        .unwrap();
         assert_eq!(out.status(), pqc_scan_core::DetectorStatus::Truncated);
         assert!(!out.detections().iter().any(|d| d.rule_id == "PQC_NODE_API"));
     }
@@ -551,7 +579,12 @@ fn enhanced_regex_keeps_distinct_source_starts_and_its_32_hit_budget() {
             "createSign('RSA-SHA256'); ".repeat(count)
         );
         let file = ScannableFile::from_bytes(PathBuf::from("use.js"), text.as_bytes().to_vec());
-        let out = RegexDetector.detect_observed(&file, &rules()).unwrap();
+        let out = RegexDetector::with_budget(pqc_scan_detectors::DetectorBudget {
+            max_hits_per_rule: 32,
+            ..Default::default()
+        })
+        .detect_observed(&file, &rules())
+        .unwrap();
         assert_eq!(out.status(), status);
         let hits: Vec<_> = out
             .detections()
@@ -587,7 +620,7 @@ fn python_context_exception_and_unrelated_imports_block_name_fallback() {
 fn gemspec_ast_budget_is_truncated_rather_than_an_empty_unreported_success() {
     let text = format!(
         "Gem::Specification.new do |s|\n{}\n s.add_dependency 'openssl', '3.3.0'\nend\n",
-        "ordinary()\n".repeat(4097)
+        "ordinary()\n".repeat(100001)
     );
     let file = ScannableFile::from_bytes(PathBuf::from("package.gemspec"), text.into_bytes());
     assert_eq!(

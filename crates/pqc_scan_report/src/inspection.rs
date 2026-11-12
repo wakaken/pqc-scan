@@ -165,22 +165,27 @@ fn sections(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<Vec<Sect
         intro: text(lang, "Completeness covers supported inspection within the declared scope, after ignore settings, exclusions and size limits. It does not prove runtime use, certificate trust or security. Unenumerated files remain unknown.", "完了は、ignore設定・除外・サイズ制限を適用した範囲内で、対応する検査を終えたという意味です。実際の稼働、証明書の信頼性、安全性を保証しません。列挙されなかったファイルは不明です。").into(), rows,
     }];
     if context.diagnostics {
-        let rows = context
-            .document
-            .diagnostics()
-            .iter()
-            .map(|d| {
+        let mut grouped: BTreeMap<DiagnosticCode, Vec<_>> = BTreeMap::new();
+        for record in context.document.diagnostics() {
+            grouped.entry(record.code()).or_default().push(record);
+        }
+        let rows = grouped
+            .into_iter()
+            .map(|(code, records)| {
+                let files: BTreeSet<_> = records.iter().filter_map(|d| d.file()).collect();
+                let examples = files.iter().take(3).copied().collect::<Vec<_>>().join("; ");
                 Ok((
-                    diagnostic(d.code(), lang)?,
+                    diagnostic(code, lang)?,
                     format!(
-                        "{} / {}",
-                        d.file().unwrap_or("-"),
-                        d.detector().unwrap_or("-")
+                        "{}{}; {}",
+                        records.len(),
+                        text(lang, " records", "件"),
+                        examples
                     ),
                 ))
             })
             .collect::<Result<Vec<_>>>()?;
-        result.push(Section { heading: text(lang, "Inspection diagnostics", "検査の診断情報").into(), intro: text(lang, "Safe reason codes, paths and detector names; file contents and arbitrary error messages are omitted.", "理由コード、パス、検出器名を示します。ファイル内容や任意のエラー本文は含めません。").into(), rows });
+        result.push(Section { heading: text(lang, "Inspection diagnostics", "検査の診断情報").into(), intro: text(lang, "Counts and up to three example paths per reason; full records remain in diagnostics JSON.", "理由ごとの件数と最大3件のファイル例を示します。全件の記録は診断JSONに残ります。").into(), rows });
     }
     if let Some(native) = context.document.native() {
         let rows = native
@@ -275,8 +280,20 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
     writeln!(
         out,
         "<li>{}: <code>{}</code></li>",
-        text(lang, "Excluded directories", "除外するディレクトリ"),
-        h(&scope.default_excludes().join(", "))
+        text(lang, "Pre-inspection exclusions", "検査前に除外するもの"),
+        h(&scope
+            .default_excludes()
+            .iter()
+            .copied()
+            .map(
+                |s| if s == "known non-scannable media, archives and binary data" {
+                    text(lang, s, "画像・アーカイブ・検査できないバイナリ")
+                } else {
+                    s
+                }
+            )
+            .collect::<Vec<_>>()
+            .join(", "))
     )?;
     writeln!(
         out,
@@ -452,7 +469,7 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
                 }
                 writeln!(out, "</ul></div>")?;
             }
-            writeln!(out,"<p>{}</p></details>",text(lang,"Only up to three example paths per reason are shown. Full diagnostic records remain in the optional diagnostics JSON and Markdown report.","理由ごとに最大3件のファイル例を示します。全件の記録は、診断JSONやMarkdownレポートで確認できます。"))?;
+            writeln!(out,"<p>{}</p></details>",text(lang,"Only up to three example paths per reason are shown. Full diagnostic records remain in the optional diagnostics JSON.","理由ごとに最大3件のファイル例を示します。全件の記録は診断JSONで確認できます。"))?;
         }
     }
     writeln!(out, "</div></section>")?;

@@ -1,32 +1,6 @@
 use super::super::DependencyItem;
 use super::*;
 use std::sync::LazyLock;
-pub(super) fn parse_gemfile(text: &str) -> Vec<DependencyItem> {
-    let mut out = Vec::new();
-    static GEM_RE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r#"(?m)^\s*gem\s+['"]([^'"]+)['"]\s*(?:,\s*['"]([^'"]+)['"])?"#)
-            .expect("constant gem syntax")
-    });
-    let gem_re = &*GEM_RE;
-
-    for caps in gem_re.captures_iter(text).take(10001) {
-        let name = caps.get(1).map(|m| m.as_str()).unwrap_or("unknown");
-        let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
-        let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
-        out.push(DependencyItem {
-            name: name.to_string(),
-            version: sanitize_version(version),
-            ecosystem: "gem".to_string(),
-            purl: make_purl("gem", name, version),
-            line,
-            source_type: "manifest".to_string(),
-            ..Default::default()
-        });
-    }
-
-    out
-}
-
 pub(super) fn parse_gemfile_lock(text: &str) -> Vec<DependencyItem> {
     let mut out = Vec::new();
     let spec_re = match Regex::new(r"(?m)^ {4}([A-Za-z0-9_.-]+)(?: \(([^)]+)\))?") {
@@ -39,6 +13,7 @@ pub(super) fn parse_gemfile_lock(text: &str) -> Vec<DependencyItem> {
         let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
         let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
         out.push(DependencyItem {
+            context: None,
             name: name.to_string(),
             version: sanitize_version(version),
             ecosystem: "gem".to_string(),
@@ -50,131 +25,6 @@ pub(super) fn parse_gemfile_lock(text: &str) -> Vec<DependencyItem> {
     }
 
     out
-}
-
-pub(super) fn parse_gemspec(text: &str, truncated: &mut bool) -> Vec<DependencyItem> {
-    let mut out = Vec::new();
-    let mut parser = tree_sitter::Parser::new();
-    if parser
-        .set_language(&tree_sitter_ruby::LANGUAGE.into())
-        .is_err()
-    {
-        return out;
-    }
-    let Some(tree) = parser.parse(text, None) else {
-        return out;
-    };
-    // Static receiver scopes only. Never execute a gemspec or infer a receiver
-    // from a quoted block header, a different block or a reassigned variable.
-    let mut writes = std::collections::HashMap::<(usize, String), usize>::new();
-    let mut stack = vec![tree.root_node()];
-    let mut visited = 0;
-    while let Some(node) = stack.pop() {
-        visited += 1;
-        if visited > 100_000 || node.named_child_count() > 4096 {
-            *truncated = true;
-            return out;
-        }
-        if node.kind() == "assignment" {
-            if let Some(left) = node
-                .child_by_field_name("left")
-                .filter(|n| n.kind() == "identifier")
-            {
-                let name = &text[left.start_byte()..left.end_byte()];
-                if let Some((block, _)) = ruby_receiver_scope(node, name, text, truncated) {
-                    writes
-                        .entry((block.id(), name.into()))
-                        .and_modify(|at| *at = (*at).min(node.start_byte()))
-                        .or_insert(node.start_byte());
-                }
-            }
-        }
-        let mut cursor = node.walk();
-        stack.extend(node.named_children(&mut cursor));
-    }
-    for call in static_declarations(text, true) {
-        let Some((receiver, method)) = call.name.split_once('.') else {
-            continue;
-        };
-        if !matches!(
-            method,
-            "add_dependency" | "add_runtime_dependency" | "add_development_dependency"
-        ) {
-            continue;
-        }
-        let Some(node) = tree
-            .root_node()
-            .descendant_for_byte_range(call.start, call.start + 1)
-        else {
-            continue;
-        };
-        let Some((block, trusted)) = ruby_receiver_scope(node, receiver, text, truncated) else {
-            continue;
-        };
-        if !trusted
-            || writes
-                .get(&(block.id(), receiver.into()))
-                .is_some_and(|at| *at < call.start)
-        {
-            continue;
-        }
-        let Some(name) = call.args.first() else {
-            continue;
-        };
-        let version = call.args.get(1).map_or("unknown", String::as_str);
-        let line = line_col_for_offset(text, call.start).0;
-        out.push(DependencyItem {
-            name: name.to_string(),
-            version: sanitize_version(version),
-            ecosystem: "gem".to_string(),
-            purl: make_purl("gem", name, version),
-            line,
-            source_type: "manifest".to_string(),
-            ..Default::default()
-        });
-    }
-
-    out
-}
-
-fn ruby_receiver_scope<'a>(
-    mut node: tree_sitter::Node<'a>,
-    receiver: &str,
-    text: &str,
-    truncated: &mut bool,
-) -> Option<(tree_sitter::Node<'a>, bool)> {
-    for _ in 0..64 {
-        if matches!(
-            node.kind(),
-            "method" | "singleton_method" | "class" | "module"
-        ) {
-            return None;
-        }
-        if matches!(node.kind(), "do_block" | "block") {
-            if let Some(parameters) = node.child_by_field_name("parameters") {
-                let mut cursor = parameters.walk();
-                if parameters
-                    .named_children(&mut cursor)
-                    .any(|p| &text[p.start_byte()..p.end_byte()] == receiver)
-                {
-                    let trusted =
-                        node.parent()
-                            .filter(|n| n.kind() == "call")
-                            .is_some_and(|call| {
-                                call.child_by_field_name("receiver").is_some_and(|r| {
-                                    &text[r.start_byte()..r.end_byte()] == "Gem::Specification"
-                                }) && call
-                                    .child_by_field_name("method")
-                                    .is_some_and(|m| &text[m.start_byte()..m.end_byte()] == "new")
-                            });
-                    return Some((node, trusted));
-                }
-            }
-        }
-        node = node.parent()?;
-    }
-    *truncated = true;
-    None
 }
 
 pub(super) fn parse_requirements(text: &str) -> Vec<DependencyItem> {
@@ -197,6 +47,7 @@ pub(super) fn parse_requirements(text: &str) -> Vec<DependencyItem> {
         let name = caps.get(1).map(|m| m.as_str()).unwrap_or("unknown");
         let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
         out.push(DependencyItem {
+            context: None,
             name: name.to_string(),
             version: sanitize_version(version),
             ecosystem: "pypi".to_string(),
@@ -241,6 +92,7 @@ pub(super) fn parse_go_mod(text: &str) -> Vec<DependencyItem> {
         let version = parts.next().unwrap_or("unknown");
 
         out.push(DependencyItem {
+            context: None,
             name: name.to_string(),
             version: sanitize_version(version),
             ecosystem: "golang".to_string(),
@@ -271,6 +123,7 @@ pub(super) fn parse_pom_xml(text: &str) -> Vec<DependencyItem> {
         let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
 
         out.push(DependencyItem {
+            context: None,
             name: name.clone(),
             version: sanitize_version(version),
             ecosystem: "maven".to_string(),
@@ -308,6 +161,7 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
         let line = line_col_for_offset(text, call.start).0;
 
         out.push(DependencyItem {
+            context: None,
             name: name.clone(),
             version: sanitize_version(version),
             ecosystem: "maven".to_string(),
@@ -454,6 +308,7 @@ pub(super) fn parse_gradle_lockfile(text: &str) -> Vec<DependencyItem> {
         let version = parts[2];
 
         out.push(DependencyItem {
+            context: None,
             name: name.clone(),
             version: sanitize_version(version),
             ecosystem: "maven".to_string(),

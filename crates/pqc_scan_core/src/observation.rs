@@ -559,7 +559,24 @@ impl ObservationDraft {
                 .filter(|s| safe_dependency_version(s))
                 .map(str::to_string);
             dep.version_provenance = f.origin.as_str().into();
-            draft.evidence.capture_status = "dependency_provenance_recorded".into();
+            draft.evidence.capture_status = match d
+                .evidence
+                .metadata
+                .get("dep_context")
+                .map(String::as_str)
+            {
+                Some("conditional_declaration_not_effective") => {
+                    "conditional_declaration_not_effective"
+                }
+                Some("conditional_profile_declaration_not_effective") => {
+                    "conditional_profile_declaration_not_effective"
+                }
+                Some("deferred_declaration_not_evaluated") => "deferred_declaration_not_evaluated",
+                Some("dynamic_version_not_evaluated") => "dynamic_version_not_evaluated",
+                Some("unresolved_property_not_effective") => "unresolved_property_not_effective",
+                _ => "dependency_provenance_recorded",
+            }
+            .into();
             draft.assurance = if f.parsed { "parsed" } else { "unknown" }.into();
         }
         draft

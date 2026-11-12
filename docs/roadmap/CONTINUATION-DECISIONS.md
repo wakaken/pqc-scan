@@ -229,3 +229,14 @@ signal was investigated and retained; controlled6e098de/current measurements and
 sampling identify the existing bounded-read safety cost. No criterion was revised.
 All-probes includes SSH KEX. Product remains beta0.1.0. Publication/signing and notice
 review are separate. Current evidence: FINAL-GAPS-VALIDATION.md/.json.
+
+## v0.2 release target — 2026-11-12
+
+The maintainer retargeted the roadmap to v0.2.0 while retaining the approved
+static scope, experimental probe status, macOS arm64 distribution target and
+frozen-truth/2x-investigation criteria. Earlier1.0 references are historical.
+The current roadmap is [OSS-ROADMAP-v0.2.md](OSS-ROADMAP-v0.2.md).
+Formal public archives initially cover the static variant. Experimental probe
+preparation remains available with the existing variant-specific notice reviews;
+no license flag is cleared by this retargeting. Candidate merge/CI is authorized;
+public tagging/Release publication is a separate action.

@@ -1,6 +1,10 @@
 # Explicit TLS and SSH diagnostics
 
-[日本語](PROBING.ja.md) · [README](../../README.md)
+[日本語](PROBING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
+
+All three probe modes are experimental in v0.2.0. The public binary is
+the static variant, which has no `probe` command. Probe bundles have completed
+technical preparation but retain publication checks; see [distribution status](DISTRIBUTION.md#release-status).
 
 Use probes only for a host/port you are authorized to inspect. A probe exchanges
 protocol traffic with that endpoint. Repository `scan` and report generation stay
@@ -15,8 +19,9 @@ commands at build time using the pinned Rust toolchain:
 cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh
 ```
 
-The initially exercised protocol environment is macOS on Apple Silicon. Other
-OS/architectures are not yet qualified. TLS adds a native cryptographic provider
+The binary distribution target is macOS on Apple Silicon. Linux CI also exercises
+protocols and OpenSSH under resource confinement; this does not qualify a Linux
+binary distribution or other OS/architecture combinations. TLS adds a native cryptographic provider
 build; static builds/tests do not require that provider. No AI service is used.
 
 ## TLS
@@ -116,7 +121,10 @@ before DNS or connections; Unix symlinks/nonregular files are rejected.
 The fixed profile offers only `mlkem768x25519-sha256` (ML-KEM768+X25519 hybrid)
 and `ssh-ed25519` host signatures. No fallback to classical-only key exchange.
 The library verifies the exchange signature; the peer key must match the supplied
-pin and the initial exchange must complete. The connection is then closed without
+pin and the initial exchange must complete. The library may send NEWKEYS before
+the application checks the pin, including on a later pin mismatch. A mismatch
+never produces a verified result. `user_authentication_attempted: false` records
+the client mode; it is not a per-connection packet trace. The connection is then closed without
 an authentication service request, username, password, `none` authentication,
 login, channel or remote command. Ed25519 authentication is classical: this does
 not establish PQ host signatures or complete PQC migration.
@@ -132,5 +140,7 @@ folder `./pqc-probe/ssh-kex`. JSON contract:
 failed/partial observations. HTML presents the result/reason first, with technical
 details closed. Existing `probe ssh` remains advertisement-only; no existing
 static/TLS/SSH-offer output format changes. Enable `probe-tls,probe-ssh,probe-ssh-kex`
-for all three commands. Existing prepared static/combined-probes archives do not
-include the new feature until separately rebuilt and validated for it.
+for all three commands. The `static` archive has no probes; `combined-probes` includes TLS and SSH offers;
+`all-probes` also includes SSH KEX. All three variants have been prepared and
+installation-tested for the v0.2 candidate; this does not clear the probe bundles
+for publication.

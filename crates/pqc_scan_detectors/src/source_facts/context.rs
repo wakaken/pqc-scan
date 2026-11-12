@@ -3,7 +3,6 @@ use std::cell::Cell;
 use std::collections::{HashMap, HashSet};
 use tree_sitter::Node;
 
-pub(super) const MAX_NODES: usize = 100_000;
 pub(super) const MAX_DEPTH: usize = 8;
 #[derive(Clone)]
 pub(super) struct Binding<'a> {
@@ -23,6 +22,7 @@ pub(super) struct Context<'a, 's> {
     pub nodes: Vec<Node<'a>>,
     pub text: &'s str,
     pub truncated: Cell<bool>,
+    pub budget: crate::DetectorBudget,
     language: &'s str,
     scopes: Vec<Scope<'a>>,
     node_scopes: HashMap<usize, usize>,
@@ -32,8 +32,15 @@ pub(super) struct Context<'a, 's> {
     dangling_strings: Vec<(usize, usize)>,
 }
 impl<'a, 's> Context<'a, 's> {
-    pub fn new(root: Node<'a>, text: &'s str, language: &'s str) -> Self {
+    pub fn new(
+        root: Node<'a>,
+        text: &'s str,
+        language: &'s str,
+        budget: crate::DetectorBudget,
+    ) -> Self {
+        let max_nodes = budget.max_ast_nodes;
         let mut result = Self {
+            budget,
             nodes: Vec::new(),
             text,
             language,
@@ -50,10 +57,14 @@ impl<'a, 's> Context<'a, 's> {
             protected: Vec::new(),
             dangling_strings: Vec::new(),
         };
+        if max_nodes == 0 {
+            result.truncated.set(true);
+            return result;
+        }
         let mut stack = vec![(root, 0, 0)];
         let mut scheduled = 1;
         while let Some((node, parent_scope, depth)) = stack.pop() {
-            if depth > 64 || node.named_child_count() > 4096 {
+            if depth > 64 || node.named_child_count() > max_nodes {
                 result.truncated.set(true);
                 continue;
             }
@@ -137,7 +148,7 @@ impl<'a, 's> Context<'a, 's> {
             }
             let mut cursor = node.walk();
             for child in node.named_children(&mut cursor) {
-                if scheduled == MAX_NODES {
+                if scheduled >= max_nodes {
                     result.truncated.set(true);
                     break;
                 }
@@ -157,6 +168,16 @@ impl<'a, 's> Context<'a, 's> {
         }
         result.protected = merged;
         result
+    }
+    pub fn bounded_source(&self, node: Node<'_>) -> &'s str {
+        let raw = self.source(node);
+        let mut boundary = raw.len().min(self.budget.max_ast_match_bytes);
+        while !raw.is_char_boundary(boundary) {
+            boundary -= 1;
+        }
+        self.truncated
+            .set(self.truncated.get() || boundary < raw.len());
+        &raw[..boundary]
     }
     pub fn source(&self, node: Node<'_>) -> &'s str {
         &self.text[node.start_byte()..node.end_byte()]
@@ -267,7 +288,6 @@ pub(super) fn children(node: Node<'_>) -> Vec<Node<'_>> {
     let mut cursor = node.walk();
     node.named_children(&mut cursor)
         .filter(|n| !n.kind().contains("comment"))
-        .take(4096)
         .collect()
 }
 pub(super) fn literal<'s>(text: &'s str, node: Node<'_>) -> Option<&'s str> {
@@ -322,7 +342,7 @@ pub(super) fn pattern_names<'a>(
             let mut result = Vec::new();
             let mut slot = 0;
             let mut cursor = node.walk();
-            for child in node.children(&mut cursor).take(4096) {
+            for child in node.children(&mut cursor) {
                 if child.kind() == "," {
                     slot += 1;
                 }

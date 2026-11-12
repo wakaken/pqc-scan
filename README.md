@@ -1,5 +1,7 @@
 # pqc-scan
 
+**v0.2.0** is a static-scanning release. Static scanning is the formal scope; TLS, SSH offers and SSH KEX probes remain experimental. See the [v0.2 roadmap](docs/roadmap/OSS-ROADMAP-v0.2.md) and [release notes](docs/releases/v0.2.0.md).
+
 [日本語](README.ja.md)
 
 `pqc-scan` is a Rust command-line tool for investigating migration to post-quantum cryptography (PQC).
@@ -63,6 +65,8 @@ cd /path/to/pqc-scan
 cargo install --locked --path crates/pqc_scan_cli
 ```
 
+For archive verification and installation, see the [installation guide](docs/user/DISTRIBUTION.md). The v0.2 binary is the static macOS Apple Silicon variant, available from [GitHub Releases](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0); probe bundles are not yet cleared for public distribution.
+
 Keep the checkout's `rules` directory available after installation. The binary does not bundle that directory; use an absolute `--rules-dir` path when scanning another project.
 If the command is not found, check that `~/.cargo/bin` is in `PATH`.
 Use `pqc-scan --help` or `pqc-scan --version` to check the installed command; both exit successfully without scanning or networking.
@@ -112,7 +116,7 @@ The existing offline benchmark also supports a separate [JSON/Markdown quality r
 The [reopened TASK-042 evaluation](docs/quality/TASK-042-REOPEN-RESULTS.md) preserves earlier measurements and separates source-audited tuning from fresh upstream data.
 Its optional reviewed corpus adds algorithm/use and format coverage without changing scanner behavior.
 
-Built-in Node, Python and Rust PQC reference checks now follow explicit imports, aliases and bounded local bindings; Node also follows literal finite `for...of` algorithm lists and locally generated RSA keys into signing/verification. Shadowed names and help strings are excluded. Java/Ruby SLH variants, case-insensitive pre-standard names, explicit Java classical-group settings, commented SSH settings and static Gradle/gemspec/SBOM dependency declarations have regression fixes. These references do not prove execution or enabled PQC support. Custom patterns retain their generic matcher. Built-in source-analysis bindings and supported Node/Python selectors now use the default YAML compiled into the scanner; modified custom pattern/scope/kind still use the generic path. See [the detection contract](docs/quality/TASK-043-FIXES-CONTRACT.md) for bounds and changes to findings.
+Built-in Node, Python and Rust PQC reference checks now follow explicit imports, aliases and bounded local bindings; Node also follows literal finite `for...of` algorithm lists and locally generated RSA keys into signing/verification. Shadowed names and help strings are excluded. Java/Ruby SLH variants, case-insensitive pre-standard names, explicit Java classical-group settings, commented SSH settings and static Gradle/gemspec/SBOM dependency declarations have regression fixes. These references do not prove execution or enabled PQC support. Custom patterns retain their generic matcher. Built-in source-analysis bindings and supported Node/Python selectors now use the default YAML compiled into the scanner; modified custom pattern/scope/kind still use the generic path. See [the original detection contract](docs/quality/TASK-043-FIXES-CONTRACT.md) for the TASK-043 changes. After integration with v0.2, source-fact matching uses the released `DetectorBudget` limits; see [the integration record](docs/quality/develop-integration-20261112/REPORT.md) for the updated bounds and compatibility checks.
 
 Each guide has a Japanese version linked at the top.
 
@@ -130,18 +134,16 @@ ordinary certificate/name validation, while `probe ssh` collects unauthenticated
 Recognized private-key/credential syntax is masked, with deliberately conservative previews. This is not universal secret detection: unknown/obfuscated content and secrets placed in paths or identifiers can remain outside the policy.
 Review the [privacy and scan-scope limits](docs/user/COVERAGE.md#privacy) before sharing reports.
 
+Only regular files are read, within the configured file-size limit. Git-ignore rules,
+excluded directories and known binary formats limit the selected scope. Incomplete
+parsing retains available findings; it does not make the rest of a file disappear.
+Use `--diagnostics` to see the reasons, and `--require-complete` if incomplete
+inspection should fail CI. See [inspection status](docs/user/SCANNING.md#diagnostics)
+and [supported inputs and limits](docs/user/COVERAGE.md).
+
 <a id="license"></a>
 
 ## License
 
-MIT
-
-The scanner reads regular files only; in-tree symbolic links and special files are
-reported as read failures. Reads, including source context and runtime hints, are
-bounded by the configured file-size limit. CLI scope notes explain that ignore
-and traversal policies may leave files unenumerated. This does not change exit
-codes or the scope-based meaning of `--require-complete`.
-
-Distribution preparation now supports three macOS arm64 variants: `static`,
-`combined-probes` (TLS and SSH offers), and `all-probes` (also trusted SSH KEX).
-All probe modes remain experimental. See [distribution preparation](docs/user/DISTRIBUTION.md).
+[MIT](LICENSE). Bundled dependencies have their own licenses; see the archive’s
+`DEPENDENCY-LICENSES.json` and `licenses/` directory.

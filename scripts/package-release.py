@@ -224,6 +224,16 @@ def json_bytes(value):
     return (json.dumps(value, sort_keys=True, indent=2, ensure_ascii=False)+'\n').encode()
 
 
+def validate_installed_scan(report):
+    expected = {'TLS_RSA_KEY_EXCHANGE', 'TLS_RSA_CIPHER_SUITE', 'TS_TLS_RSA_CIPHER_LITERAL'}
+    findings = report['findings']
+    if ({f['rule_id'] for f in findings} != expected or len(findings) != len(expected)
+            or report['summary']['scanned_files'] != 2):
+        raise ValueError('synthetic positive/negative installation fixture differs from reviewed rule results')
+    if any(f['location']['file'] != 'example.py' or f['location']['line'] != 1 for f in findings):
+        raise ValueError('synthetic finding is attached to the wrong file or line')
+
+
 def validate_command_surface(variant, top_help, probe_help):
     def names(text):
         return {line.split()[0] for line in text.splitlines() if line.startswith('  ') and line.split()}
@@ -260,7 +270,8 @@ def prepare(args):
         raise ValueError('expected thin Mach-O aarch64 binary for declared target')
     entries = {'bin/pqc-scan': (binary_data, 0o755)}
     explicit = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md', 'docs/user/PROBING.ja.md', 'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json', 'third_party/notices/README.md']
-    paths = [root/p for p in explicit] + sorted((root/'rules/default').glob('*.yml'))
+    paths = ([root/p for p in explicit] + sorted((root/'rules/default').glob('*.yml'))
+             + sorted((root/'docs/releases').glob('*.md')))
     source_hashes = {}
     for path in paths:
         if path.is_symlink() or not path.resolve().is_relative_to(root):

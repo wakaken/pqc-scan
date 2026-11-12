@@ -164,7 +164,7 @@ pub(super) fn inspect<'a>(
         if !matches!(node.kind(), "call" | "ERROR") {
             continue;
         }
-        if examined == 4096 {
+        if examined >= ctx.budget.max_match_candidates {
             facts.truncated = true;
             break;
         }
@@ -185,10 +185,12 @@ pub(super) fn inspect<'a>(
                 );
             }
         } else {
-            let raw = ctx.source(node);
-            let boundary = raw.char_indices().nth(2000).map_or(raw.len(), |(i, _)| i);
-            facts.truncated |= boundary < raw.len();
-            for hit in pattern.find_iter(&raw[..boundary]).take(4096) {
+            let raw = ctx.bounded_source(node);
+            for (candidate, hit) in pattern.find_iter(raw).enumerate() {
+                if candidate >= ctx.budget.max_match_candidates {
+                    facts.truncated = true;
+                    break;
+                }
                 let start = node.start_byte() + hit.start();
                 let root = hit.as_str().split('.').next().unwrap_or("");
                 let shadowed = ctx.lookup(node, root).is_some_and(|b| b.imported.is_none());

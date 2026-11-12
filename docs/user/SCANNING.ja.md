@@ -2,7 +2,7 @@
 
 [English](SCANNING.md) · [README](../../README.ja.md)
 
-出力の選択、CIでの終了判定、検査できなかった箇所の確認を説明します。
+v0.2.0の静的スキャンで使う出力オプション、CIの終了判定、検査できなかった箇所の確認方法を説明します。
 棚卸しや評価の見方は[結果の読み方](REPORTS.ja.md)、形式ごとの制約は[対応する入力と検査範囲](COVERAGE.ja.md)を参照してください。
 
 ## 目次
@@ -16,10 +16,8 @@
 
 ## コマンドと指定方法
 
-CLIツールは以下の通り実行します。
-
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--include-non-scannable] [--cyclonedx-17] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 pqc-scan diff <before-inventory> <after-inventory> --repository-scope ID --out-dir DIR
@@ -39,7 +37,7 @@ pqc-scan diff <before-inventory> <after-inventory> --repository-scope ID --out-d
 `pqc-scan` を自分のプロダクトリポジトリ内（`pqc-scan` リポジトリ外）で実行する場合は、`--rules-dir` に **絶対パス** を指定してください。
 
 ```bash
-pqc-scan scan . --format all --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
 ### よく使うコマンド
@@ -47,15 +45,15 @@ pqc-scan scan . --format all --out-dir ./pqc-report --rules-dir /path/to/pqc-sca
 ```bash
 # すべてのレポート形式を出力
 
-pqc-scan scan . --format all --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 
 # SARIF形式で出力（GitHub Code Scanning向け）
 
-pqc-scan scan . --format sarif --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --format sarif --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 
 # CI失敗ゲート
 
-pqc-scan scan . --fail-on high --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --fail-on high --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 
 # 1つのルール詳細を確認
 
@@ -89,7 +87,7 @@ cargo run --manifest-path /path/to/pqc-scan/crates/pqc_scan_cli/Cargo.toml --bin
 ## 診断情報と検査の完全性
 
 検出がゼロでも、すべての対象を検査できたとは限りません。読み込みや解析に失敗した場合も、ほかの検出結果は保持します。
-検査が部分成功・失敗・不明の場合は、標準エラーに警告を1回表示します。
+検査が部分成功・失敗・不明の場合は、標準エラーに警告を表示します。これとは別に、ignoreなどで列挙していないファイルがあり得るという注記も表示します。注記だけで検査失敗にはなりません。
 CLIが生成するHTML・Markdownにも検査状態と件数を表示します。
 `--diagnostics` を付けると安全な理由情報も確認できます。言語指定で変わるのは人間向けの文面だけです。
 
@@ -106,7 +104,7 @@ CLIが生成するHTML・Markdownにも検査状態と件数を表示します�
 両方を指定する例です。
 
 ```bash
-pqc-scan scan . --diagnostics --require-complete --out-dir ./pqc-report --rules-dir /path/to/pqc-scan/rules
+pqc-scan scan . --diagnostics --require-complete --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
 `diagnostics.json` には `schema_version: "1"` と生成時刻も含みます。ファイル内容や検出器・I/Oのエラー本文は含めません。
@@ -135,20 +133,9 @@ pqc-scan scan . --diagnostics --require-complete --out-dir ./pqc-report --rules-
 
 ### 検出件数と処理量の上限
 
-正規表現・AST・秘密鍵マーカーの検出器は、適用可否と上限到達の状況を報告します。採用する検出件数の上限は次のとおりです。
+1ルール・1ファイル当たりの採用上限は、正規表現とASTが4,096件、秘密鍵マーカーが8件です。正規表現は言語ごとのコメント除外後に数えます。上限ちょうどでは打ち切りとせず、追加の有効な一致があるか、探索を終えられなかった場合に `detector_truncated` を記録します。それまでの所見は残し、省略件数は推測しません。
 
-| 検出方法 | 1ルール・1ファイル当たりの採用件数 |
-|---|---|
-| 正規表現 | 32件。既存の言語別コメント除外後に数えるため、コメントだけで枠を使い切らない |
-| AST | 32件 |
-| 秘密鍵マーカー | 8件 |
-
-上限ちょうどの件数だけでは打ち切りと判定しません。残りの候補を有限の処理量で確認し、追加の有効な検出があるか、探索を終えられなかった場合に `detector_truncated` とします。
-それまでの検出は保持し、検査は部分成功として扱います。省略された件数は推測しません。
-
-件数とは別に、正規表現・ASTは1ルール・1ファイル当たり最大4096候補と、残りを確認する1候補を扱います。
-ASTには、保持する意味ノード4096件、探索に積むノード100000件、候補の切り詰め2000文字の制限もあり、切り詰めを通知します。
-これらは処理量を抑えるための上限で、性能測定の目標値ではありません。コメント判定の方針は従来どおりですが、コメントが検出枠を消費しなくなったことで、以前は見逃していた所見が増える場合があります。
+正規表現とASTの一致候補は、1ルール・1ファイル当たり65,536件までです。ASTには、構文候補262,144件、処理予定ノード2,000,000件、全ルールで調べる候補テキストの累計256 MiBというファイル単位の上限もあります。候補テキスト全体を検査し、表示用プレビューの短縮は検査範囲に影響しません。性能の保証値ではなく、処理量を抑えるための制限です。[対応範囲](COVERAGE.ja.md#source-limits)も参照してください。
 
 ### 解析エラー・未対応形式の扱い
 
@@ -159,8 +146,12 @@ ASTに構文エラーがあれば、取得できた検出を残して `detector_
 コンテナーを検出しても、内部を検査できたとは限りません。解析できてもルールに一致しない証明書は所見を出しません。
 
 依存関係では、有効な空データ、不正な対応形式、部分成功、未対応の版、上限到達を区別します。
-対応する構造化データの範囲では完了を報告し、関係のないファイルは対象外です。Go・Maven POM・requirements・Rubyの定義とロックは、対応する構文を解析できた範囲で完了を報告します。動的・未対応の記述は不完全のままとし、Gradle・gemspecの簡易解析は `detector_not_reported` を維持します。
+対応する構造化データの範囲では完了を報告し、関係のないファイルは対象外です。Go・Maven POM・requirements・Rubyの定義とロックは、対応する構文を解析できた範囲で完了を報告します。Gemfile・gemspecのリテラルによる依存宣言は、選択済みのローカルgemspec参照を含め、Rubyの構文木で検査します。動的・未対応の記述は未完了とし、Gradleの簡易解析は `detector_not_reported` とします。
 完了はパッケージ管理ツールと同じ検証やインストール状態の保証ではありません。
 
 `--require-complete` の終了コードの規約は変わりませんが、解析結果や対応範囲によって、実際に返るコードは変わり得ます。
 依存関係ごとの詳細は[指定と確認根拠](../architecture/DEPENDENCY-PROVENANCE.md)を参照してください。
+
+## 通常は除外するバイナリ形式を含める
+
+`scan` は既知の画像・アーカイブ・コンパイル済みデータの拡張子と、テキストとして扱えないバイナリを、ファイルの選択前に除外します。除外件数は検査未完了と分けて記録します。`--include-non-scannable` でこれらも対象に戻せますが、形式の解析機能が増えるわけではなく「適用する検査なし」の件数が増える場合があります。既存のディレクトリ・Markdown・Git ignore・サイズの除外は引き続き適用します。鍵・証明書・信頼ストア等の拡張子は、検査できない部分も把握できるよう既定で残します。全パスは診断JSONに残し、人向け診断は件数と理由ごとに最大3件の例に集約します。

@@ -6,7 +6,7 @@
 **Goal:** Keep distinct source occurrences while collapsing overlapping AST candidates for the same source match.
 **Architecture:** Extend private CandidateNode with source byte provenance and use canonical source intervals for per-rule deduplication. Preserve candidate traversal, budgets, legacy native coordinates/IDs for existing matches, public model/CLI/report schemas and rule semantics.
 **Tech Stack:** Rust 1.93.1 and existing pinned tree-sitter grammars; existing Python baseline and Node projection tools.
-**Spec:** tasks/024-ast-occurrence-fidelity.yaml and docs/roadmap/OSS-ROADMAP.md#task-024.
+**Spec:** tasks/024-ast-occurrence-fidelity.yaml and docs/roadmap/OSS-ROADMAP-v0.2.md#task-024.
 
 ## Constraints and decisions
 

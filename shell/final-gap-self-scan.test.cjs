@@ -4,10 +4,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { prepareCodeScanning } = require('./prepare-code-scanning.cjs');
-const root = path.resolve(__dirname, '..');
-const read = name => JSON.parse(fs.readFileSync(path.join(root, name)));
+const repositoryRoot = path.resolve(__dirname, '..');
+const read = name => JSON.parse(fs.readFileSync(path.join(repositoryRoot, name)));
 const ledger = read('docs/quality/FINAL-GAPS-SELF-SCAN-REVIEW.json');
-const policy = read('docs/quality/SELF-SCAN-EXPECTATIONS.json');
+const { reviewedResultTestSource } = require('./reviewed-result-test-source.cjs');
+const fixture = reviewedResultTestSource(read('docs/quality/SELF-SCAN-EXPECTATIONS.json'));
+const { root, policy } = fixture;
+test.after(fixture.cleanup);
 const input = () => ({version:'2.1.0', runs:[{tool:{driver:{name:'pqc-scan'}},
   results:structuredClone(ledger.results.map(r => r.result))}]});
 

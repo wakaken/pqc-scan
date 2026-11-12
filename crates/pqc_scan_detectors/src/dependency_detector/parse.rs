@@ -82,6 +82,7 @@ impl Build {
             .map(lexical::sanitize_version)
             .unwrap_or_else(|| "unknown".into());
         self.items.push(DependencyItem {
+            context: None,
             name: name.into(),
             version,
             ecosystem: ecosystem.into(),
@@ -150,7 +151,7 @@ fn located(text: &str, name: &str) -> usize {
 }
 fn locator(value: &str) -> Option<Origin> {
     let lower = value.to_ascii_lowercase();
-    if lower.starts_with("workspace:") {
+    if lower.starts_with("workspace:") || lower.starts_with("catalog:") {
         Some(Origin::WorkspaceInherited)
     } else if lower.starts_with("file:")
         || lower.starts_with("link:")
@@ -169,6 +170,20 @@ fn locator(value: &str) -> Option<Origin> {
         Some(Origin::Git)
     } else if lower.contains("://") {
         Some(Origin::Archive)
+    } else if lower.starts_with("patch:") {
+        Some(Origin::Unknown)
+    } else if value.split_once('/').is_some_and(|(owner, repo)| {
+        !owner.is_empty()
+            && owner
+                .bytes()
+                .all(|c| c.is_ascii_alphanumeric() || c == b'-')
+            && !repo.is_empty()
+            && !repo.contains('/')
+            && repo
+                .bytes()
+                .all(|c| c.is_ascii_alphanumeric() || b"._-#".contains(&c))
+    }) {
+        Some(Origin::Git)
     } else if lower.starts_with("npm:") {
         Some(Origin::Unknown)
     } else {
@@ -265,10 +280,70 @@ pub(super) fn inspect(file: &ScannableFile) -> anyhow::Result<Parsed> {
             status: DetectorStatus::Unsupported,
         });
     };
+    if name == "pnpm-lock.yaml" {
+        let values = match decode::yaml_documents(text) {
+            Ok(values) => values,
+            Err(e) => return failure(e),
+        };
+        let mut combined = Parsed {
+            items: Vec::new(),
+            status: DetectorStatus::Complete,
+        };
+        let multiple_documents = values.len() > 1;
+        let mut version = None;
+        for value in values {
+            object(&value)?;
+            let current = value
+                .get("lockfileVersion")
+                .and_then(|v| {
+                    v.as_str()
+                        .map(str::to_string)
+                        .or_else(|| v.as_f64().map(|n| n.to_string()))
+                })
+                .map(|s| {
+                    if s == "9.0" {
+                        "9".into()
+                    } else if s == "6.0" {
+                        "6".into()
+                    } else {
+                        s
+                    }
+                });
+            if multiple_documents && current.is_none() {
+                return failure(Failure::Unsupported);
+            }
+            if version
+                .as_ref()
+                .is_some_and(|v| Some(v) != current.as_ref())
+            {
+                return failure(Failure::Unsupported);
+            }
+            version = current;
+            let parsed = pnpm(&value, text)?;
+            let rank = |status: DetectorStatus| match status {
+                DetectorStatus::Truncated => 5,
+                DetectorStatus::Unsupported => 4,
+                DetectorStatus::Partial => 3,
+                DetectorStatus::NotReported => 2,
+                _ => 1,
+            };
+            if rank(parsed.status) > rank(combined.status) {
+                combined.status = parsed.status;
+            }
+            for mut item in parsed.items {
+                if combined.items.len() >= 10_000 {
+                    combined.status = DetectorStatus::Truncated;
+                    break;
+                }
+                item.ordinal = combined.items.len();
+                combined.items.push(item);
+            }
+        }
+        return Ok(combined);
+    }
     let format = match name {
         "package.json" | "package-lock.json" | "Pipfile.lock" => Some(Format::Json),
         "Cargo.toml" | "Cargo.lock" | "poetry.lock" => Some(Format::Toml),
-        "pnpm-lock.yaml" => Some(Format::Yaml),
         _ if classifier::is_sbom_file(&file.path) => Some(Format::Json),
         _ => None,
     };
@@ -277,6 +352,18 @@ pub(super) fn inspect(file: &ScannableFile) -> anyhow::Result<Parsed> {
             Ok(v) => v,
             Err(e) => return failure(e),
         };
+        if !classifier::is_dependency_manifest(&file.path)
+            && (value.get("$schema").is_some()
+                || !value.is_object()
+                || ["bomFormat", "spdxVersion", "components", "packages"]
+                    .iter()
+                    .all(|key| value.get(key).is_none()))
+        {
+            return Ok(Parsed {
+                items: Vec::new(),
+                status: DetectorStatus::NotApplicable,
+            });
+        }
         object(&value)?;
         let field = match name {
             "package-lock.json" => Some(("lockfileVersion", false)),
@@ -294,7 +381,6 @@ pub(super) fn inspect(file: &ScannableFile) -> anyhow::Result<Parsed> {
             "Cargo.lock" => cargo_lock(&value, text),
             "Pipfile.lock" => pipfile(&value, text),
             "poetry.lock" => poetry(&value, text),
-            "pnpm-lock.yaml" => pnpm(&value, text),
             _ => sbom(&value, text),
         }
     } else if let Some(result) = super::bounded::inspect(name, text) {
@@ -871,6 +957,21 @@ fn pnpm_declarations(value: &Value, text: &str, b: &mut Build) {
                         .or_else(|| v["specifier"].as_str())
                         .or_else(|| v.as_str());
                     if let Some(spec) = spec {
+                        let (name, spec) = if let Some(alias) = spec.strip_prefix("npm:") {
+                            match alias.rsplit_once('@') {
+                                Some((target, constraint))
+                                    if valid_dependency_name(target, "npm") =>
+                                {
+                                    (target, constraint)
+                                }
+                                _ => {
+                                    b.bad += 1;
+                                    continue;
+                                }
+                            }
+                        } else {
+                            (name.as_str(), spec)
+                        };
                         b.add(
                             "npm",
                             name,
@@ -1145,11 +1246,13 @@ pub(super) fn heuristic(name: &str, text: &str) -> anyhow::Result<Parsed> {
     if text.len() > 2 * 1024 * 1024 {
         return failure(Failure::Limit);
     }
-    let mut lexical_truncated = false;
+    if matches!(name, "Gemfile" | "gems.rb") || name.ends_with(".gemspec") {
+        let file =
+            ScannableFile::from_bytes(std::path::PathBuf::from(name), text.as_bytes().to_vec());
+        return super::ruby::inspect(&file, None);
+    }
     let mut items = match name {
-        "Gemfile" | "gems.rb" => lexical::parse_gemfile(text),
         "Gemfile.lock" | "gems.locked" => lexical::parse_gemfile_lock(text),
-        v if v.ends_with(".gemspec") => lexical::parse_gemspec(text, &mut lexical_truncated),
         "requirements.txt" => lexical::parse_requirements(text),
         "go.mod" => lexical::parse_go_mod(text),
         "pom.xml" => lexical::parse_pom_xml(text),
@@ -1157,11 +1260,7 @@ pub(super) fn heuristic(name: &str, text: &str) -> anyhow::Result<Parsed> {
         "gradle.lockfile" => lexical::parse_gradle_lockfile(text),
         _ => vec![],
     };
-    let mut b = Build::new(if lexical_truncated {
-        DetectorStatus::Truncated
-    } else {
-        DetectorStatus::NotReported
-    });
+    let mut b = Build::new(DetectorStatus::NotReported);
     for item in items.drain(..) {
         let raw = text.lines().nth(item.line.saturating_sub(1)).unwrap_or("");
         let compact: String = raw.chars().filter(|c| !c.is_whitespace()).collect();

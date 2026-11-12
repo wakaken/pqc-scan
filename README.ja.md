@@ -1,5 +1,7 @@
 # pqc-scan
 
+**v0.2.0** は静的スキャン向けのリリースです。静的スキャンを正式対象とし、TLS・SSH提示方式・SSH KEXの診断は実験的機能として扱います。[v0.2ロードマップ](docs/roadmap/OSS-ROADMAP-v0.2.md)と[リリース内容](docs/releases/v0.2.0.ja.md)を参照してください。
+
 [English](README.md)
 
 `pqc-scan` は、耐量子暗号（PQC）への移行調査に使うRust製のコマンドラインツールです。
@@ -64,6 +66,8 @@ cd /path/to/pqc-scan
 cargo install --locked --path crates/pqc_scan_cli
 ```
 
+アーカイブの検証と導入方法は[インストールガイド](docs/user/DISTRIBUTION.ja.md)を参照してください。v0.2の配布バイナリはmacOS Apple Silicon向けの静的版です。[GitHub Releases](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0)から取得できます。probe同梱版は公開前の確認が残っています。
+
 インストール後も、このリポジトリの `rules` ディレクトリを参照できる場所に残してください。
 バイナリにルールディレクトリは含まれないため、別のプロジェクトを調べるときは `--rules-dir` を絶対パスで指定します。
 コマンドが見つからない場合は、`~/.cargo/bin` が `PATH` に含まれているか確認してください。
@@ -116,7 +120,7 @@ CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚�
 既存のオフラインベンチマークから、別途[JSON／Markdownの品質報告](tests/quality/README.md)も生成できます。
 [TASK-042の再評価](docs/quality/TASK-042-REOPEN-RESULTS.md)では過去の測定を保持し、注釈を確認し直した調整用データと新しい第三者由来データを分けています。
 
-組込のNode・Python・RustのPQC検出で、明示import、別名、ファイル内の限定した参照関係を確認するようにしました。Nodeでは固定配列の`for...of`と、局所的に生成したRSA鍵を使う署名・検証も追跡します。同名の別関数や説明文字列は除外します。Java・RubyのSLH変種、旧称の大小文字、Javaの古典方式限定設定、SSHの無効コメント、Gradle・gemspec・SBOMの依存宣言も修正対象です。参照の検出は、実行やPQC機能の有効化の証明ではありません。制限と所見の変更は[検出仕様](docs/quality/TASK-043-FIXES-CONTRACT.md)を参照してください。 組込解析の規則照合とNode/Pythonの方式・生成API選択は、ビルド時に取り込む既定YAMLへ集約しています。カスタム規則のpattern・scope・kindを変えた場合は、従来の汎用matcherを使います。
+組込のNode・Python・RustのPQC検出で、明示import、別名、ファイル内の限定した参照関係を確認するようにしました。Nodeでは固定配列の`for...of`と、局所的に生成したRSA鍵を使う署名・検証も追跡します。同名の別関数や説明文字列は除外します。Java・RubyのSLH変種、旧称の大小文字、Javaの古典方式限定設定、SSHの無効コメント、Gradle・gemspec・SBOMの依存宣言も修正対象です。参照の検出は、実行やPQC機能の有効化の証明ではありません。043での変更は[当初の検出仕様](docs/quality/TASK-043-FIXES-CONTRACT.md)を参照してください。v0.2の取り込み後は局所解析にも公開された`DetectorBudget`を適用します。現在の上限と互換性の確認結果は[統合記録](docs/quality/develop-integration-20261112/REPORT.md)に記載しています。 組込解析の規則照合とNode/Pythonの方式・生成API選択は、ビルド時に取り込む既定YAMLへ集約しています。カスタム規則のpattern・scope・kindを変えた場合は、従来の汎用matcherを使います。
 
 各ガイドの冒頭から英語版へ移れます。
 
@@ -134,15 +138,11 @@ CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚�
 あらゆる秘密情報を見つける機能ではなく、未知・難読化された内容や、パス・識別子に含まれる秘密は対象外になる場合があります。
 レポートを共有する前に[秘密情報の扱いと除外範囲](docs/user/COVERAGE.ja.md#privacy)を確認してください。
 
+読み取るのは、指定したサイズ上限内の通常ファイルです。Gitのignore設定、除外ディレクトリ、既知のバイナリ形式は検査範囲に含めません。解析を完了できなくても、読み取れた部分の所見は残します。
+理由を確認するには `--diagnostics`、未完了の検査でCIを失敗させるには `--require-complete` を使ってください。[検査状態の読み方](docs/user/SCANNING.ja.md#diagnostics)と[対応範囲・上限](docs/user/COVERAGE.ja.md)に詳しい説明があります。
+
 <a id="license"></a>
 
 ## ライセンス
 
-MIT
-
-スキャンで読み取るのは通常ファイルのみです。ツリー内のシンボリックリンクや特殊ファイルは
-読み取り失敗として記録します。ソースの抜粋や実行環境の推奨情報も、指定したファイルサイズ上限内で読み取ります。
-CLIには、ignoreや走査方針によって列挙していないファイルがあり得る旨を表示します。
-終了コードと、検査範囲内の完了を求める `--require-complete` の意味は変わりません。
-
-macOS arm64の配布準備は、`static`、TLS/SSH提示の`combined-probes`、信頼済みSSH KEXも含む`all-probes`の3構成に対応します。probeは引き続き実験的機能です。[配布準備](docs/user/DISTRIBUTION.ja.md)を参照してください。
+[MIT](LICENSE)。同梱する依存パッケージにはそれぞれのライセンスが適用されます。配布物の `DEPENDENCY-LICENSES.json` と `licenses/` を参照してください。

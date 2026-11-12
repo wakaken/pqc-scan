@@ -27,7 +27,12 @@ fn inspect(language: &str, pattern: &str, text: &str) -> Facts {
     };
     parser.set_language(&grammar.into()).unwrap();
     let tree = parser.parse(text, None).unwrap();
-    let mut ctx = Context::new(tree.root_node(), text, language);
+    let mut ctx = Context::new(
+        tree.root_node(),
+        text,
+        language,
+        crate::DetectorBudget::default(),
+    );
     let mut facts = Facts {
         partial: tree.root_node().has_error(),
         ..Facts::default()

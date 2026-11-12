@@ -1,0 +1,115 @@
+{
+  "status": "Passed",
+  "scope": "develop merge compatibility; not an overall PQS-QAM or release acceptance decision",
+  "native": [
+    {
+      "name": "fmt-final",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "workspace-verified",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--offline",
+        "--locked"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "clippy-verified",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--offline",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "all-features",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features",
+        "--offline",
+        "--locked"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "release-verified",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--workspace",
+        "--offline",
+        "--locked"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "testCounts": {
+    "workspace": {
+      "passed": 514,
+      "ignored": 0
+    },
+    "allFeatures": {
+      "passed": 565,
+      "ignored": 1
+    },
+    "pythonQuality": 54,
+    "node": 35,
+    "distribution": 11,
+    "protocolHostAndKernel": 11
+  },
+  "beforeMatchesPriorVerifiedEvidence": {
+    "path": "docs/quality/task043-maintainability-20261112/SOURCE-MATCH.json",
+    "sha256": "d5668179d8d22de51caa61c8cbe94ef9501f8dd1a0295fca27173f85c40e8432",
+    "runtimeSourceBindingsIdentical": true,
+    "binarySha256Identical": true
+  },
+  "integrationReview": "Approved",
+  "testReview": "Approved",
+  "originDevelop": "4ee5ceb2ca6bab3cf3336fae17fb9f42f3446d65",
+  "unresolvedGitConflicts": 0,
+  "selfScan": {
+    "rawResults": 1831,
+    "expectedResults": 1422,
+    "retainedResults": 409,
+    "staleSourcePolicyFiles": 3,
+    "disposition": "No blanket suppression; retained findings not comprehensively audited"
+  },
+  "notTested": [
+    "Hosted GitHub Actions execution",
+    "Full isolated optional protocol matrix and explicitly ignored installed-OpenSSH interop",
+    "New browser layout observations",
+    "Generalized performance equivalence or complete quality/release approval"
+  ],
+  "investigationWarnings": [
+    {
+      "workload": "pathological",
+      "beforeToIntegratedWallRatio": 31.52013769997228,
+      "beforeToIntegratedRssRatio": 19.43297974927676,
+      "developToIntegratedWallRatio": 1.0000844042154169,
+      "developToIntegratedRssRatio": 1.001043167254483,
+      "findingCountBefore": 128,
+      "findingCountAfterAndDevelop": 16384,
+      "disposition": "Released v0.2 budget/output-volume effect reproduced; not a new merge regression; no performance equivalence or numeric gate change claimed."
+    }
+  ]
+}

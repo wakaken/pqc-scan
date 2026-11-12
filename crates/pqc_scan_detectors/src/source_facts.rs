@@ -25,18 +25,27 @@ pub(crate) struct Facts {
     hits: HashMap<&'static str, Vec<SourceMatch>>,
     pub truncated: bool,
     pub partial: bool,
+    remaining_candidates: Option<usize>,
+    remaining_bytes: Option<usize>,
 }
 impl Facts {
     fn push(&mut self, id: &'static str, start: usize, end: usize, reason: &'static str) {
-        if end.saturating_sub(start) > 8192 {
-            self.truncated = true;
-            return;
+        if let Some(remaining) = &mut self.remaining_bytes {
+            let bytes = end.saturating_sub(start);
+            if bytes > *remaining {
+                self.truncated = true;
+                return;
+            }
+            *remaining -= bytes;
+        }
+        if let Some(remaining) = &mut self.remaining_candidates {
+            if *remaining == 0 {
+                self.truncated = true;
+                return;
+            }
+            *remaining -= 1;
         }
         let hits = self.hits.entry(id).or_default();
-        if hits.len() >= 4096 {
-            self.truncated = true;
-            return;
-        }
         if start < end {
             hits.push(SourceMatch { start, end, reason });
         }
@@ -91,9 +100,17 @@ fn exact_match(pattern: &regex::Regex, target: &str) -> bool {
         .find(target)
         .is_some_and(|m| m.start() == 0 && m.end() == target.len())
 }
-pub(crate) fn inspect(root: Node<'_>, text: &str, language: &str, rules: &RuleSet) -> Facts {
+pub(crate) fn inspect(
+    root: Node<'_>,
+    text: &str,
+    language: &str,
+    rules: &RuleSet,
+    budget: crate::DetectorBudget,
+) -> Facts {
     let mut facts = Facts {
         partial: root.has_error(),
+        remaining_candidates: Some(budget.max_ast_candidates),
+        remaining_bytes: Some(budget.max_ast_match_bytes),
         ..Facts::default()
     };
     if !Handler::ALL
@@ -103,7 +120,7 @@ pub(crate) fn inspect(root: Node<'_>, text: &str, language: &str, rules: &RuleSe
     {
         return facts;
     }
-    let mut context = Context::new(root, text, language);
+    let mut context = Context::new(root, text, language, budget);
     if context.truncated.get() {
         facts.truncated = true;
         return facts;
@@ -118,15 +135,14 @@ pub(crate) fn inspect(root: Node<'_>, text: &str, language: &str, rules: &RuleSe
                     if !matches!(node.kind(), "method_invocation" | "ERROR") {
                         continue;
                     }
-                    let raw = context.source(*node);
-                    let boundary = raw.char_indices().nth(2000).map_or(raw.len(), |(i, _)| i);
-                    facts.truncated |= boundary < raw.len();
-                    for hit in rule
-                        .compiled_pattern()
-                        .unwrap()
-                        .find_iter(&raw[..boundary])
-                        .take(4096)
+                    let raw = context.bounded_source(*node);
+                    for (examined, hit) in
+                        rule.compiled_pattern().unwrap().find_iter(raw).enumerate()
                     {
+                        if examined >= budget.max_match_candidates {
+                            facts.truncated = true;
+                            break;
+                        }
                         let start = node.start_byte() + hit.start();
                         let embedded = text[..start]
                             .chars()
@@ -171,27 +187,30 @@ pub(crate) fn inspect(root: Node<'_>, text: &str, language: &str, rules: &RuleSe
     }
     facts
 }
-pub(crate) fn for_regex(file: &ScannableFile, rules: &RuleSet) -> Option<Facts> {
+pub(crate) fn for_regex(
+    file: &ScannableFile,
+    rules: &RuleSet,
+    budget: crate::DetectorBudget,
+) -> Option<Facts> {
     if !rules.get("API_NODE_CRYPTO_SIGN_RSA").is_some_and(builtin) {
         return None;
     }
-    let (language, name) = crate::tree_sitter_detector::resolve_language(&file.path)?;
+    let (language, name) =
+        crate::tree_sitter_detector::resolve_language(&file.path, file.text.as_deref()?)?;
     if !matches!(name, "javascript" | "typescript") {
         return None;
     }
     let text = file.text.as_deref()?;
-    let mut parser = tree_sitter::Parser::new();
-    if parser.set_language(&language).is_err() {
-        return Some(Facts {
-            partial: true,
-            ..Facts::default()
-        });
-    }
-    let Some(tree) = parser.parse(text, None) else {
+    let Ok(parsed) =
+        crate::tree_sitter_detector::source_tree(text, &file.path, language, name, budget)
+    else {
         return Some(Facts {
             partial: true,
             ..Facts::default()
         });
     };
-    Some(inspect(tree.root_node(), text, name, rules))
+    let mut facts = inspect(parsed.tree.root_node(), text, name, rules, budget);
+    facts.truncated |= parsed.compatibility_limited || parsed.template_limited;
+    facts.partial |= parsed.template_pending;
+    Some(facts)
 }

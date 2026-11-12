@@ -1,5 +1,7 @@
 # OSS quality gates
 
+Current release target: v0.2.0, retargeted by the maintainer on2026-11-12. Earlier1.0 references in historical evidence retain their original meaning. Functional scope and accepted criteria are unchanged.
+
 Design date: 2026-11-09. Status: proposed acceptance policy; passing tests or benchmark results are not asserted by this document. Current capabilities/gaps are in [CURRENT-GAP-ANALYSIS.md](CURRENT-GAP-ANALYSIS.md).
 
 ## Evidence and lifecycle
@@ -81,11 +83,11 @@ Use local versioned test servers and CAs inside a network-isolated environment. 
 
 TLS matrix: TLS 1.2/1.3, supported hybrid/classical KX, HRR, unknown/unavailable group, certificate/name/trust/expiry errors, mTLS-required failure without credentials, alerts, timeout and oversized input. SSH matrix: classical/hybrid offers, unknown names/extension markers, KEXINIT-wait behavior, fragmentation, malformed framing and limits; verify zero userauth/service/channel requests. Completed SSH KEX uses explicit public-key pinning and a separate no-auth packet-type assertion.
 
-## 1.0 release gate
+## v0.2 release gate
 
 All supported paths have measured baselines and agreed regression budgets; critical correctness/safety issues in the supported scope are resolved or explicitly excluded with accurate diagnostics; no silent inspection loss; schemas and compatibility policy published; deterministic and privacy contracts tested; platform/install/rule-pack evidence recorded; security reporting and release process documented. External publication/release verification is a future explicit action, not performed by this design task.
 
-Do not claim complete coverage of all cryptography or universal migration compliance at 1.0. Unsupported languages/protocol profiles and residual uncertainty remain visible. See [OSS-ROADMAP.md](../roadmap/OSS-ROADMAP.md).
+Do not claim complete coverage of all cryptography or universal migration compliance at v0.2. Unsupported languages/protocol profiles and residual uncertainty remain visible. See [OSS-ROADMAP-v0.2.md](../roadmap/OSS-ROADMAP-v0.2.md).
 
 ## Review record for this design
 

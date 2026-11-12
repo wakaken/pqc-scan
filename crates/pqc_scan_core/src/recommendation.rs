@@ -165,12 +165,12 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
             &mut actions,
             RecommendedAction {
                 action_id: "incident.private-key-rotation".to_string(),
-                title: "Rotate exposed private keys and revoke affected credentials".to_string(),
+                title: "Review private-key markers and rotate exposed live credentials".to_string(),
                 priority: "immediate".to_string(),
-                rationale: "Private key material was detected. This is an active key-management incident and must be remediated immediately.".to_string(),
+                rationale: "A private-key marker was found. Confirm whether complete key material is present and whether it belongs to a live exposed credential; the marker alone does not establish an incident.".to_string(),
                 steps: vec![
-                    "Revoke/disable the exposed key and issue a replacement key pair.".to_string(),
-                    "Invalidate sessions/tokens signed by the compromised key if applicable.".to_string(),
+                    "Check whether the signal is a header reference, a synthetic test key, or complete live key material.".to_string(),
+                    "If a live credential is exposed, revoke or replace it and invalidate affected sessions/tokens as appropriate.".to_string(),
                     "Move keys to a secret manager or HSM and enforce commit scanning in CI.".to_string(),
                 ],
                 references: vec![
@@ -181,7 +181,11 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
         );
     }
 
-    if finding.risk.as_str() == "quantum-vulnerable" {
+    let dependency_reference = matches!(
+        finding.evidence.r#type.as_str(),
+        "dependency" | "sbom_dependency"
+    );
+    if finding.risk.as_str() == "quantum-vulnerable" && !dependency_reference {
         push_action(
             &mut actions,
             RecommendedAction {
@@ -204,12 +208,14 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
         );
     }
 
-    match category.as_str() {
-        "jwt" => add_jwt_actions(&mut actions, finding, language, profile),
-        "tls" => add_tls_actions(&mut actions, finding, language, profile),
-        "pki" => add_pki_actions(&mut actions, finding, language, profile),
-        "cryptoapi" => add_crypto_api_actions(&mut actions, finding, language, profile),
-        _ => {}
+    if !dependency_reference {
+        match category.as_str() {
+            "jwt" => add_jwt_actions(&mut actions, finding, language, profile),
+            "tls" => add_tls_actions(&mut actions, finding, language, profile),
+            "pki" => add_pki_actions(&mut actions, finding, language, profile),
+            "cryptoapi" => add_crypto_api_actions(&mut actions, finding, language, profile),
+            _ => {}
+        }
     }
 
     if matches!(category.as_str(), "cryptoapi" | "jwt" | "tls" | "pki") {
@@ -870,7 +876,11 @@ fn push_action(actions: &mut Vec<RecommendedAction>, action: RecommendedAction) 
 }
 
 fn read_text_limited(root: &Path, path: &Path, max_bytes: usize) -> Option<String> {
-    String::from_utf8(crate::safe_read::read(root, path, max_bytes).ok()?).ok()
+    crate::model::ScannableFile::from_bytes(
+        path.to_path_buf(),
+        crate::safe_read::read(root, path, max_bytes).ok()?,
+    )
+    .text
 }
 
 fn parse_java_version_from_pom(text: &str) -> Option<String> {
@@ -1051,6 +1061,33 @@ mod tests {
                 .any(|a| a.action_id == expected_action_id),
             "expected action {expected_action_id} to be present for {rule_id}:{file}"
         );
+    }
+
+    #[test]
+    fn dependency_presence_does_not_claim_a_direct_classical_operation() {
+        let mut f = make_finding("DEP_RUBY_JWT", "CryptoAPI", "Gemfile.lock");
+        f.evidence.r#type = "dependency".into();
+        let actions = recommend_for_finding(&f, &RuntimeProfile::default());
+        assert!(actions
+            .iter()
+            .all(|a| a.action_id != "plan.hybrid-migration"
+                && a.action_id != "cryptoapi.abstraction-layer"));
+        assert!(actions
+            .iter()
+            .any(|a| a.action_id == "dependency.track-pqc-readiness"));
+    }
+
+    #[test]
+    fn marker_reference_does_not_assert_an_active_key_incident() {
+        let mut f = make_finding("PRIVATE_KEY_PKCS8_HEADER", "KeyMaterial", "PemUtils.java");
+        f.evidence.r#type = "private_key".into();
+        let actions = recommend_for_finding(&f, &RuntimeProfile::default());
+        let a = actions
+            .iter()
+            .find(|a| a.action_id == "incident.private-key-rotation")
+            .unwrap();
+        assert!(!a.rationale.contains("active key-management incident"));
+        assert!(a.rationale.contains("marker"));
     }
 
     #[test]

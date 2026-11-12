@@ -5,7 +5,7 @@
   risk: quantum-vulnerable
   confidence: 0.70
   migration_hint: Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats.
-  pattern: "TLS_RSA_"
+  pattern: "\\bTLS_RSA_WITH_[A-Z0-9_]+\\b"
   scope: code
   description: TLS RSA key-exchange suite detected.
 
@@ -27,7 +27,7 @@
   risk: non-quantum-risk
   confidence: 0.75
   migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
-  pattern: "(?:^|[^A-Za-z0-9])TLSv1(?:\\.0)?(?:$|[^0-9.])"
+  pattern: "(?:^|[^A-Za-z0-9_])TLSv1(?:[._]0)?(?:$|[^A-Za-z0-9_.])"
   scope: code
   description: Legacy TLS 1.0 configuration detected.
 
@@ -38,7 +38,7 @@
   risk: non-quantum-risk
   confidence: 0.75
   migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
-  pattern: "TLSv1\\.1"
+  pattern: "\\bTLSv1[._]1\\b"
   scope: code
   description: Legacy TLS 1.1 configuration detected.
 
@@ -49,7 +49,7 @@
   risk: quantum-vulnerable
   confidence: 0.68
   migration_hint: Migrate to PQC-ready or hybrid cipher suites.
-  pattern: "TLS_[A-Z0-9_]*_RSA_[A-Z0-9_]*"
+  pattern: "\\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\\b"
   scope: code
   description: RSA-based TLS cipher suite detected.
 
@@ -93,7 +93,7 @@
   risk: non-quantum-risk
   confidence: 0.65
   migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
-  pattern: "minVersion\\s*:\\s*['\"]TLSv1"
+  pattern: "minVersion\\s*:\\s*['\"]TLSv1(?:[._][01])?['\"]"
   scope: code
   description: Node.js TLS minimum version may be too weak.
 

@@ -174,7 +174,7 @@ fn array_elements(node: Node<'_>) -> Option<Vec<Node<'_>>> {
     let mut result = Vec::new();
     let mut present = false;
     let mut cursor = node.walk();
-    for child in node.children(&mut cursor).take(4096) {
+    for child in node.children(&mut cursor) {
         if child.kind() == "," {
             if !present {
                 return None;
@@ -463,7 +463,7 @@ pub(super) fn inspect<'a>(
         .filter(|n| n.kind() == "call_expression")
         .enumerate()
     {
-        if examined == 4096 {
+        if examined >= ctx.budget.max_match_candidates {
             facts.truncated = true;
             break;
         }
