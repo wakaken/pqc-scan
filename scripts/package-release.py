@@ -224,6 +224,16 @@ def json_bytes(value):
     return (json.dumps(value, sort_keys=True, indent=2, ensure_ascii=False)+'\n').encode()
 
 
+def validate_installed_scan(report):
+    expected = {'TLS_RSA_KEY_EXCHANGE', 'TLS_RSA_CIPHER_SUITE', 'TS_TLS_RSA_CIPHER_LITERAL'}
+    findings = report['findings']
+    if ({f['rule_id'] for f in findings} != expected or len(findings) != len(expected)
+            or report['summary']['scanned_files'] != 2):
+        raise ValueError('synthetic positive/negative installation fixture differs from reviewed rule results')
+    if any(f['location']['file'] != 'example.py' or f['location']['line'] != 1 for f in findings):
+        raise ValueError('synthetic finding is attached to the wrong file or line')
+
+
 def validate_command_surface(variant, top_help, probe_help):
     def names(text):
         return {line.split()[0] for line in text.splitlines() if line.startswith('  ') and line.split()}

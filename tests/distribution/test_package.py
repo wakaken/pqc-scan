@@ -18,6 +18,24 @@ class PackageTests(unittest.TestCase):
         cls.mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.mod)
 
+    def test_installed_scan_requires_all_reviewed_rules_and_clean_negative_control(self):
+        ids = ['TLS_RSA_KEY_EXCHANGE', 'TLS_RSA_CIPHER_SUITE', 'TS_TLS_RSA_CIPHER_LITERAL']
+        def report():
+            return {'summary': {'scanned_files': 2}, 'findings': [
+                {'rule_id': rule, 'location': {'file': 'example.py', 'line': 1}}
+                for rule in ids]}
+        self.mod.validate_installed_scan(report())
+        for mutation in ['missing', 'duplicate', 'extra', 'negative', 'line', 'unread']:
+            value = report()
+            if mutation == 'missing': value['findings'].pop()
+            elif mutation == 'duplicate': value['findings'].append(value['findings'][0])
+            elif mutation == 'extra': value['findings'][0]['rule_id'] = 'UNREVIEWED'
+            elif mutation == 'negative': value['findings'][0]['location']['file'] = 'plain.py'
+            elif mutation == 'line': value['findings'][0]['location']['line'] = 2
+            else: value['summary']['scanned_files'] = 1
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                self.mod.validate_installed_scan(value)
+
     def test_installed_surface_rejects_missing_and_extra_protocols(self):
         top = "Commands:\n  scan  Scan\n  probe  Probe\n  help  Help\n"
         both = "Commands:\n  tls  TLS\n  ssh  SSH\n  help  Help\n"
