@@ -84,19 +84,49 @@ impl CertificateDetector {
         let ext = file.ext().unwrap_or_default().to_ascii_lowercase();
         let p12 = matches!(ext.as_str(), "p12" | "pfx").then(|| pkcs12::inspect(&file.bytes));
         let p12_reason = p12.as_ref().map(|p| p.reason);
-        let (objects, mut status) = if let Some(p12) = p12 {
+        let mut decoded_pem = false;
+        let (mut objects, mut status) = if let Some(p12) = p12 {
             (p12.objects, p12.status)
         } else {
             // A DER name/extension may itself contain PEM-looking text. Prefer
             // actual DER parsing rather than a substring-based format guess.
             let der = parse_der_object(&file.bytes);
-            if der.0.is_empty() {
-                parse_pem_objects(&file.bytes)
+            if der.0.is_empty() && der.1 != DetectorStatus::NotApplicable {
+                decoded_pem = true;
+                parse_pem_objects(
+                    file.text
+                        .as_deref()
+                        .map(str::as_bytes)
+                        .unwrap_or(&file.bytes),
+                )
             } else {
                 der
             }
         };
+        if decoded_pem {
+            if let Some(map) = file.decoded_source_offsets() {
+                for object in &mut objects {
+                    if let Ok(i) = map.binary_search_by_key(&object.byte_offset, |p| p.0) {
+                        object.byte_offset = map[i].1;
+                    } else {
+                        status = DetectorStatus::Partial;
+                    }
+                }
+            }
+        }
         let file_path = file.path.to_string_lossy().into_owned();
+        if objects.is_empty() && status == DetectorStatus::NotApplicable {
+            let observations = if observe {
+                vec![pqc_scan_core::ObservationDraft::container(
+                    &file_path,
+                    status,
+                    &[],
+                )]
+            } else {
+                Vec::new()
+            };
+            return Ok(DetectorOutcome::new(Vec::new(), status).with_observations(observations));
+        }
         let mut container_detections = Vec::new();
         if objects.is_empty() || p12_reason.is_some() {
             // Compatibility: a filename/container signal is not a parsed certificate.
@@ -135,6 +165,13 @@ impl CertificateDetector {
                     });
                 }
             }
+            if status == DetectorStatus::NotApplicable {
+                for hit in &mut out {
+                    hit.evidence
+                        .metadata
+                        .insert("container_inspection".into(), "not_certificate".into());
+                }
+            }
             if let Some(reason) = p12_reason {
                 for hit in &mut out {
                     hit.evidence
@@ -168,6 +205,10 @@ impl CertificateDetector {
                 .with_observations(drafts));
             }
         }
+        let missing_dsa_parameters = objects.iter().any(|o| {
+            o.attributes.public_key.algorithm == "DSA"
+                && matches!(o.attributes.public_key.parameters_kind, "absent" | "null")
+        });
         let mut out = container_detections;
         let mut observations = Vec::new();
         if observe && (status != DetectorStatus::Complete || p12_reason.is_some()) {
@@ -331,7 +372,7 @@ impl CertificateDetector {
                 }
             }
         }
-        Ok(DetectorOutcome::new(
+        let outcome = DetectorOutcome::new(
             out,
             if applicable {
                 status
@@ -339,7 +380,14 @@ impl CertificateDetector {
                 DetectorStatus::NotApplicable
             },
         )
-        .with_observations(observations))
+        .with_observations(observations);
+        Ok(
+            if missing_dsa_parameters && status == DetectorStatus::Partial {
+                outcome.with_explanation("DSA algorithm identified; absent public-key parameters prevent complete key-attribute inspection.")
+            } else {
+                outcome
+            },
+        )
     }
 }
 
@@ -446,7 +494,14 @@ fn object_metadata(object: &LocatedCertificate) -> BTreeMap<String, String> {
 
 fn parse_der_object(bytes: &[u8]) -> (Vec<LocatedCertificate>, DetectorStatus) {
     let Ok((rest, cert)) = parse_x509_certificate(bytes) else {
-        return (Vec::new(), DetectorStatus::Partial);
+        return (
+            Vec::new(),
+            if known_non_certificate_der(bytes) {
+                DetectorStatus::NotApplicable
+            } else {
+                DetectorStatus::Partial
+            },
+        );
     };
     let consumed = bytes.len() - rest.len();
     let Ok(attributes) = attributes::certificate_attributes(&cert, &bytes[..consumed]) else {
@@ -487,6 +542,7 @@ fn parse_pem_objects(bytes: &[u8]) -> (Vec<LocatedCertificate>, DetectorStatus) 
     let mut index = 0;
     let mut malformed = false;
     let mut unsupported = false;
+    let mut other_objects = false;
     for (line_index, line) in bytes.split_inclusive(|b| *b == b'\n').enumerate() {
         let trimmed = line.trim_ascii();
         if let Some(label) = pem_label(trimmed, b"-----BEGIN ") {
@@ -521,6 +577,8 @@ fn parse_pem_objects(bytes: &[u8]) -> (Vec<LocatedCertificate>, DetectorStatus) 
                             }),
                             Err(_) => malformed = true,
                         }
+                    } else if known_non_certificate_pem(label) {
+                        other_objects = true;
                     } else {
                         unsupported = true;
                     }
@@ -540,6 +598,8 @@ fn parse_pem_objects(bytes: &[u8]) -> (Vec<LocatedCertificate>, DetectorStatus) 
         DetectorStatus::Partial
     } else if unsupported {
         DetectorStatus::Unsupported
+    } else if objects.is_empty() && other_objects {
+        DetectorStatus::NotApplicable
     } else if objects.is_empty() {
         DetectorStatus::Partial
     } else {
@@ -575,6 +635,50 @@ fn signature_name(oid: &str) -> String {
         }
         _ => oid.to_string(),
     }
+}
+
+fn known_non_certificate_pem(label: &[u8]) -> bool {
+    matches!(
+        label,
+        b"PUBLIC KEY"
+            | b"RSA PUBLIC KEY"
+            | b"PRIVATE KEY"
+            | b"ENCRYPTED PRIVATE KEY"
+            | b"RSA PRIVATE KEY"
+            | b"EC PRIVATE KEY"
+            | b"DSA PRIVATE KEY"
+            | b"OPENSSH PRIVATE KEY"
+            | b"CERTIFICATE REQUEST"
+            | b"NEW CERTIFICATE REQUEST"
+            | b"X509 CRL"
+            | b"DH PARAMETERS"
+            | b"DSA PARAMETERS"
+            | b"EC PARAMETERS"
+    )
+}
+fn known_non_certificate_der(bytes: &[u8]) -> bool {
+    use x509_parser::asn1_rs::{Any, FromDer, Tag};
+    if parse_public_key_der(bytes).is_ok() {
+        return true;
+    }
+    let Ok((rest, sequence)) = Any::from_der(bytes) else {
+        return false;
+    };
+    if !rest.is_empty() || sequence.tag() != Tag::Sequence {
+        return false;
+    }
+    let Ok((rest, first)) = Any::from_der(sequence.as_bytes()) else {
+        return false;
+    };
+    let Ok((rest, second)) = Any::from_der(rest) else {
+        return false;
+    };
+    if !rest.is_empty() {
+        return false;
+    }
+    // Public PKCS#1 RSA, or opaque EncryptedPrivateKeyInfo. Never decode private bodies.
+    first.tag() == Tag::Integer && second.tag() == Tag::Integer
+        || first.tag() == Tag::Sequence && second.tag() == Tag::OctetString
 }
 
 #[cfg(test)]

@@ -87,7 +87,9 @@ pub(super) fn certificate_attributes(
     let status = if public_key.status != DetectorStatus::Complete
         || cert.signature_algorithm != cert.tbs_certificate.signature
         || cert.signature_value.unused_bits != 0
-    {
+        || pqc_signature_size(&signature_oid).is_some_and(|size| {
+            cert.signature_algorithm.parameters.is_some() || cert.signature_value.data.len() != size
+        }) {
         DetectorStatus::Partial
     } else {
         DetectorStatus::Complete
@@ -197,6 +199,7 @@ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes
             "1.2.840.113549.1.1.1" => "RSA".into(),
             "1.2.840.113549.1.1.10" => "RSA-PSS".into(),
             "1.2.840.10045.2.1" => "EC".into(),
+            "1.2.840.10040.4.1" | "1.3.14.3.2.12" => "DSA".into(),
             "1.3.101.112" => "Ed25519".into(),
             "1.3.101.113" => "Ed448".into(),
             "1.3.101.110" => "X25519".into(),
@@ -280,6 +283,63 @@ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes
                 DetectorStatus::Partial
             };
         }
+        // RFC 9881 / RFC 9909: raw public-key octets and absent parameters.
+        // Shape checks establish extraction completeness, never key validity,
+        // signature verification, security strength, or trust.
+        "2.16.840.1.101.3.4.3.17" | "2.16.840.1.101.3.4.3.18" | "2.16.840.1.101.3.4.3.19" => {
+            let expected = match oid.as_str() {
+                "2.16.840.1.101.3.4.3.17" => 1312,
+                "2.16.840.1.101.3.4.3.18" => 1952,
+                _ => 2592,
+            };
+            out.status = if parameters.is_none() && data.len() == expected {
+                DetectorStatus::Complete
+            } else {
+                DetectorStatus::Partial
+            };
+        }
+        _ if oid
+            .strip_prefix("2.16.840.1.101.3.4.3.")
+            .and_then(|s| s.parse::<u8>().ok())
+            .is_some_and(|n| (20..=31).contains(&n)) =>
+        {
+            let n = oid.rsplit('.').next().unwrap().parse::<u8>().unwrap();
+            let expected = match (n - 20) % 6 {
+                0 | 1 => 32,
+                2 | 3 => 48,
+                _ => 64,
+            };
+            out.status = if parameters.is_none() && data.len() == expected {
+                DetectorStatus::Complete
+            } else {
+                DetectorStatus::Partial
+            };
+        }
+        "1.2.840.10040.4.1" | "1.3.14.3.2.12" => {
+            out.status = DetectorStatus::Partial;
+            if let Some(p) = parameters {
+                if let Ok(fields) = integer_parameter_fields(p) {
+                    let valid = fields.len() == 3
+                        && fields.iter().all(|f| {
+                            Any::from_der(f).ok().is_some_and(|(rest, v)| {
+                                rest.is_empty()
+                                    && v.tag() == Tag::Integer
+                                    && positive_integer_bits(v.as_bytes()).is_some()
+                            })
+                        });
+                    let y = Any::from_der(data).ok();
+                    if valid
+                        && y.is_some_and(|(rest, y)| {
+                            rest.is_empty()
+                                && y.tag() == Tag::Integer
+                                && positive_integer_bits(y.as_bytes()).is_some()
+                        })
+                    {
+                        out.status = DetectorStatus::Complete;
+                    }
+                }
+            }
+        }
         _ => {}
     }
     out
@@ -320,4 +380,43 @@ fn positive_integer_bits(bytes: &[u8]) -> Option<usize> {
 
 fn fingerprint(bytes: &[u8]) -> String {
     hex::encode(Sha256::digest(bytes))
+}
+
+fn integer_parameter_fields<'a>(p: &Any<'a>) -> Result<Vec<&'a [u8]>, PublicDerParseError> {
+    if p.tag() != Tag::Sequence {
+        return Err(PublicDerParseError);
+    }
+    let mut input = p.as_bytes();
+    let mut fields = Vec::new();
+    while !input.is_empty() {
+        if fields.len() == 3 {
+            return Err(PublicDerParseError);
+        }
+        let (rest, _) = Any::from_der(input).map_err(|_| PublicDerParseError)?;
+        fields.push(&input[..input.len() - rest.len()]);
+        input = rest;
+    }
+    Ok(fields)
+}
+
+// RFC 9881 and RFC 9909 fixed signature encodings; no signature verification.
+fn pqc_signature_size(oid: &str) -> Option<usize> {
+    let n = oid
+        .strip_prefix("2.16.840.1.101.3.4.3.")?
+        .parse::<u8>()
+        .ok()?;
+    match n {
+        17 => Some(2420),
+        18 => Some(3309),
+        19 => Some(4627),
+        20..=43 => Some(match (n - 20) % 6 {
+            0 => 7856,
+            1 => 17088,
+            2 => 16224,
+            3 => 35664,
+            4 => 29792,
+            _ => 49856,
+        }),
+        _ => None,
+    }
 }

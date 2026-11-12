@@ -19,7 +19,7 @@ fn every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls() {
         );
     }
     let rules = RuleSet::load_from_dir(&root.join("rules/default")).unwrap();
-    assert_eq!(rules.len(), 119);
+    assert_eq!(rules.len(), 122);
     let rows = metadata["rules"].as_array().unwrap();
     assert_eq!(rows.len(), rules.len());
     let mut seen = BTreeSet::new();

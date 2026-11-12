@@ -4,9 +4,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { prepareCodeScanning } = require('./prepare-code-scanning.cjs');
-const root = path.resolve(__dirname, '..');
-const read = p => JSON.parse(fs.readFileSync(path.join(root, p), 'utf8'));
-const policy = () => read('docs/quality/SELF-SCAN-EXPECTATIONS.json');
+const repositoryRoot = path.resolve(__dirname, '..');
+const read = p => JSON.parse(fs.readFileSync(path.join(repositoryRoot, p), 'utf8'));
+const { reviewedResultTestSource } = require('./reviewed-result-test-source.cjs');
+const fixture = reviewedResultTestSource(read('docs/quality/SELF-SCAN-EXPECTATIONS.json'));
+const root = fixture.root;
+const policy = () => structuredClone(fixture.policy);
+test.after(fixture.cleanup);
 const records = () => read('docs/quality/self-scan-backlog/REVIEWED-RESULTS.json');
 const document = results => ({ version: '2.1.0', runs: [{ tool: { driver: { name: 'pqc-scan' } }, results }] });
 

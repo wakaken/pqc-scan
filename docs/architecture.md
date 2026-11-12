@@ -50,7 +50,7 @@
 
 Rule loading rejects blank IDs, invalid source confidence and every traversal
 error before returning a RuleSet; valid custom scope semantics are unchanged.
-See [loading contract](architecture/RULE-VALIDATION.md). The [source-bound119-rule
+See [loading contract](architecture/RULE-VALIDATION.md). The [source-bound122-rule
 companion](quality/RULE-QUALITY.md) is development-only and has no runtime/report
 schema dependency. Existing matcher/Risk/severity remain authoritative.
 
@@ -124,7 +124,10 @@ not add the artifact. Diagnostic messages are fixed safe descriptions, never raw
 error chains or scanned contents. This is a diagnostics schema, not the proposed
 Phase 1 native inventory schema.
 
-### Bounded detector outcomes (task 019)
+### Bounded detector outcomes (task 019 original baseline)
+
+The numeric values in this historical baseline were superseded by the
+[current inspection limits](user/COVERAGE.md#source-limits) during the14-OSS repairs.
 
 Regex, tree-sitter and key detectors override `detect_detailed`; legacy `detect`
 consumes that same outcome without rerunning detection. No serialized fields,
@@ -441,3 +444,11 @@ decimal column and the original evidence match. IDs are computed before evidence
 redaction; downstream references reuse the same value. The same ID is used for
 exact finding deduplication, so field delimiters cannot discard distinct tuples.
 Assets and observations retain their own identity domains and meanings.
+
+### Inspection repairs following the 14-OSS coverage investigation
+
+The current AST adapter borrows full source slices rather than clipping matching text at 2,000 characters. `DetectorBudget` configures finite repository-sized hit/candidate/node/byte-work limits, and exhaustion retains partial results and diagnostics. Narrow top-level module compatibility preserves byte offsets and matches original text. A shared strict wide-text decoder is used for detection, snippets and runtime manifest reads. `FileSelection` and the additive `scan_repository_with_selection` entry point expose default known-binary pre-exclusions with an opt-out; `ScanConfig` and serialized field shapes are unchanged. Human diagnostics aggregate counts/examples while diagnostic JSON retains exact records. See the current user coverage guide for numeric limits; task 019 above describes its original baseline.
+
+## Selected-file repository context
+
+The pipeline supplies an optional `RepositoryContext` to detectors through a backwards-compatible default trait adapter. References are restricted to the walker-selected file set, normalized inside the root and read via `safe_read`, retaining size and no-link protections. Context does not widen the scan scope. Maven uses validated local parents for properties only; gemspec delegation retains observations at their actual source files. Conditional assertions use existing metadata/capture-status/uncertainty fields, without changing inventory schemas or claiming effective dependency resolution. Detector explanations are fixed strings in the existing diagnostic message field, never arbitrary parser or I/O error text.

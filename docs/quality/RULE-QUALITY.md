@@ -1,6 +1,6 @@
 # Built-in rule quality companion (task028)
 
-[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **119 current
+[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **122 current
 built-in rules**, not the historical117 in the task description. Existing YAML is
 the executable source of truth. This original MIT development-only companion is
 not loaded by the CLI, does not add report fields, and does not certify accuracy.
@@ -41,7 +41,7 @@ The 244 examples exercise **compiled regex targets only**, with desired labels
 separate from expected current matches. They are not end-to-end source truth,
 symbol resolution, a key parser test, provider validation or performance evidence.
 The existing detector/CLI/certificate/schema suites and frozen task023 corpus still
-provide their own bounded integration evidence. Do not count these controls as119
+provide their own bounded integration evidence. Do not count these controls as122
 new independently labeled accuracy units or as approved quality budgets.
 
 Eight negative controls intentionally retain known false positives:
@@ -83,3 +83,5 @@ RFC9325 (2022), RFC8332 (2018), RFC9142 (2022), RFC5280 (2008), SP800-131A Rev2
 (2019), FIPS203/204/205 final (2024), and reviewed NIST PQC/CSOR registers. These
 are classification context, not a current-law compliance engine. Local task021
 cutoff and task028 method policy are explicitly marked repository references.
+
+The 2026-11-12 source repair refresh includes three additional classical API/EdDSA rules, narrowed Ruby/Go/TLS predicates and source-bound controls. Pattern fixtures remain distinct from language-aware detector tests (`semantic_repairs.rs`); current changes do not retroactively alter historical task028 evidence.

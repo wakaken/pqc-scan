@@ -1,7 +1,10 @@
 //! Dependency assertions and a compatible flat projection; no package resolution.
 mod bounded;
 mod decode;
+mod maven_context;
 mod parse;
+mod ruby;
+mod yaml_preflight;
 use anyhow::Result;
 use pqc_scan_core::model::mask_preview;
 use pqc_scan_core::observation::{DependencyOrigin, DependencyVersionFacts};
@@ -27,6 +30,7 @@ struct DependencyItem {
     origin: DependencyOrigin,
     ordinal: usize,
     parsed: bool,
+    context: Option<&'static str>,
 }
 impl DependencyDetector {
     fn inspect(
@@ -34,8 +38,42 @@ impl DependencyDetector {
         file: &ScannableFile,
         rules: &RuleSet,
         observe: bool,
+        context: Option<&pqc_scan_core::RepositoryContext>,
     ) -> Result<DetectorOutcome> {
-        let parsed = parse::inspect(file)?;
+        let parsed = if file.file_name() == Some("pom.xml") && file.text.is_some() {
+            let props = maven_context::load(file, context);
+            bounded::pom_with_context(file.text.as_deref().unwrap_or(""), &props)?
+        } else if matches!(file.file_name(), Some("Gemfile" | "gems.rb"))
+            || file.ext() == Some("gemspec")
+        {
+            ruby::inspect(file, context)?
+        } else if file.file_name() == Some("requirements.txt")
+            && file.text.as_ref().is_some_and(|t| t.contains("{%"))
+        {
+            let text = file.text.as_deref().unwrap();
+            let view = crate::template_source::requirements_view(text);
+            let mut parsed =
+                bounded::requirements(std::str::from_utf8(&view.bytes).unwrap_or(text))?;
+            for item in &mut parsed.items {
+                let end = view
+                    .conditional_ranges
+                    .partition_point(|r| r.0 <= item.line);
+                if end > 0 && item.line <= view.conditional_ranges[end - 1].1 {
+                    item.origin = DependencyOrigin::ManifestOptional;
+                    item.context = Some("conditional_declaration_not_effective");
+                }
+            }
+            parsed.status = if !view.found && !view.limited {
+                parse::inspect(file)?.status
+            } else if view.limited {
+                pqc_scan_core::DetectorStatus::Truncated
+            } else {
+                pqc_scan_core::DetectorStatus::Partial
+            };
+            parsed
+        } else {
+            parse::inspect(file)?
+        };
         let mut detections = Vec::new();
         let mut drafts = Vec::new();
         let path = file.path.to_string_lossy();
@@ -85,21 +123,42 @@ impl DependencyDetector {
             }
             detections.extend(hits);
         }
-        Ok(DetectorOutcome::new(detections, parsed.status).with_observations(drafts))
+        let outcome = DetectorOutcome::new(detections, parsed.status).with_observations(drafts);
+        Ok(
+            if parsed.status == pqc_scan_core::DetectorStatus::Partial
+                && matches!(
+                    file.file_name(),
+                    Some("Gemfile" | "gems.rb" | "requirements.txt")
+                )
+            {
+                outcome.with_explanation("Conditional or dynamic declarations: available static candidates inspected; effective values were not evaluated.")
+            } else {
+                outcome
+            },
+        )
     }
 }
 impl Detector for DependencyDetector {
+    fn detect_in_repository(
+        &self,
+        file: &ScannableFile,
+        rules: &RuleSet,
+        context: Option<&pqc_scan_core::RepositoryContext>,
+        observed: bool,
+    ) -> Result<DetectorOutcome> {
+        self.inspect(file, rules, observed, context)
+    }
     fn name(&self) -> &'static str {
         "dependency_detector"
     }
     fn detect(&self, file: &ScannableFile, rules: &RuleSet) -> Result<Vec<Detection>> {
-        Ok(self.inspect(file, rules, false)?.into_detections())
+        Ok(self.inspect(file, rules, false, None)?.into_detections())
     }
     fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
-        self.inspect(file, rules, false)
+        self.inspect(file, rules, false, None)
     }
     fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
-        self.inspect(file, rules, true)
+        self.inspect(file, rules, true, None)
     }
 }
 fn inventory_detection(path: &str, item: &DependencyItem, producer: &str) -> Detection {
@@ -112,6 +171,9 @@ fn inventory_detection(path: &str, item: &DependencyItem, producer: &str) -> Det
         ("dep_purl".into(), item.purl.clone()),
         ("dep_source_type".into(), item.source_type.clone()),
     ]);
+    if let Some(context) = item.context {
+        metadata.insert("dep_context".into(), context.into());
+    }
     if matches!(
         item.origin,
         DependencyOrigin::Path

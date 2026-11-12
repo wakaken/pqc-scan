@@ -5,7 +5,6 @@ use serde_json::{Map, Number, Value};
 pub(super) enum Format {
     Json,
     Toml,
-    Yaml,
 }
 #[derive(Debug, Clone, Copy)]
 pub(super) enum Failure {
@@ -96,9 +95,6 @@ fn preflight(text: &str, format: Format) -> Result<(), Failure> {
     let mut escape = false;
     let mut depth = 0usize;
     for line in text.lines() {
-        if matches!(format, Format::Yaml) && line.len() - line.trim_start().len() > 256 {
-            return Err(Failure::Limit);
-        }
         let mut dots = 0;
         for c in line.chars() {
             if let Some(q) = quote {
@@ -117,9 +113,6 @@ fn preflight(text: &str, format: Format) -> Result<(), Failure> {
             if c == '\'' || c == '"' {
                 quote = Some(c);
                 continue;
-            }
-            if matches!(format, Format::Yaml) && matches!(c, '&' | '*' | '!') {
-                return Err(Failure::Unsupported);
             }
             if c == '[' || c == '{' {
                 depth += 1;
@@ -147,7 +140,7 @@ fn preflight(text: &str, format: Format) -> Result<(), Failure> {
 pub(super) fn decode(text: &str, format: Format) -> Result<Value, Failure> {
     preflight(text, format)?;
     let mut budget = Budget {
-        remaining: 50000,
+        remaining: 500_000,
         limited: false,
     };
     let seed = Seed {
@@ -167,15 +160,6 @@ pub(super) fn decode(text: &str, format: Format) -> Result<Value, Failure> {
         Format::Toml => seed
             .deserialize(toml::de::Deserializer::new(text))
             .map_err(|_| ()),
-        Format::Yaml => {
-            let mut docs = serde_yaml::Deserializer::from_str(text);
-            let first = docs.next().ok_or(Failure::Malformed)?;
-            let v = seed.deserialize(first).map_err(|_| ());
-            if docs.next().is_some() {
-                return Err(Failure::Unsupported);
-            }
-            v
-        }
     };
     result.map_err(|_| {
         if budget.limited {
@@ -184,4 +168,39 @@ pub(super) fn decode(text: &str, format: Format) -> Result<Value, Failure> {
             Failure::Malformed
         }
     })
+}
+
+/// pnpm stores an optional boot graph followed by its project graph. Both
+/// documents share one finite value budget and remain separate inventories.
+pub(super) fn yaml_documents(text: &str) -> Result<Vec<Value>, Failure> {
+    if text.len() > 2 * 1024 * 1024 {
+        return Err(Failure::Limit);
+    }
+    super::yaml_preflight::inspect(text)?;
+    let mut budget = Budget {
+        remaining: 500_000,
+        limited: false,
+    };
+    let mut values = Vec::new();
+    for doc in serde_yaml::Deserializer::from_str(text) {
+        if values.len() == 2 {
+            return Err(Failure::Unsupported);
+        }
+        let seed = Seed {
+            budget: &mut budget,
+            depth: 0,
+        };
+        let value = seed.deserialize(doc).map_err(|_| {
+            if budget.limited {
+                Failure::Limit
+            } else {
+                Failure::Malformed
+            }
+        })?;
+        values.push(value);
+    }
+    if values.is_empty() {
+        return Err(Failure::Malformed);
+    }
+    Ok(values)
 }

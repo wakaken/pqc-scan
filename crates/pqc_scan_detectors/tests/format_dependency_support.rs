@@ -32,11 +32,10 @@ fn actual_examples_are_fully_consumed() {
 #[test]
 fn unsupported_syntax_never_becomes_complete_and_retains_safe_records() {
     for (name, text) in [
-        ("go.mod", "module example.org/app\nrequire example.org/openssl v1.2.3\nreplace example.org/openssl => ../local\n"),
         ("requirements.txt", "openssl==1.2.3\n-r secret.txt\n"),
         ("requirements.txt", "openssl==1.2.3\nother; python_version > '3'\n"),
         ("Gemfile", "gem 'openssl'\neval_gemfile 'other'\n"),
-        ("Gemfile", "gem 'openssl'\ngroup :test do\ngem 'jwt'\nend\n"),
+        ("Gemfile", "gem 'openssl'\ncustom_dependencies()\n"),
         ("Gemfile.lock", "GEM\n  specs:\n    openssl (1.2.3)\nUNKNOWN\n  ignored\n"),
         ("pom.xml", "<project><dependencies><dependency><groupId>org.example</groupId><artifactId>openssl</artifactId><version>${v}</version></dependency></dependencies><profiles/></project>"),
     ] {
@@ -88,7 +87,6 @@ fn malformed_and_unknown_constructs_are_never_complete() {
         ("requirements.txt", "openssl[crypto]==1.2.3\n"),
         ("requirements.txt", "openssl==1.2.3 --hash=sha256:abc\n"),
         ("go.mod", "require (\nexample.org/openssl v1.2.3\n"),
-        ("go.mod", "module example.org/app\nexclude (\n example.org/openssl v1.2.3\n)\n"),
         ("pom.xml", "<project><dependencies><dependency><groupId>org.example</groupId><artifactId>openssl</artifactId><version>1</version><version>2</version></dependency></dependencies></project>"),
         ("pom.xml", "<project><dependencies magic='ignored'/></project>"),
         ("pom.xml", "<!DOCTYPE project [<!ENTITY x SYSTEM 'file:///secret'>]><project/>"),
@@ -163,7 +161,15 @@ fn unsupported_static_dependency_locators_keep_safe_package_records() {
         ),
     ] {
         let result = inspect(name, text).unwrap();
-        assert_ne!(result.status(), DetectorStatus::Complete);
+        if name == "Gemfile" {
+            assert_eq!(result.status(), DetectorStatus::Complete);
+            assert!(result
+                .detections()
+                .iter()
+                .all(|d| d.evidence.metadata["dep_purl"].is_empty()));
+        } else {
+            assert_ne!(result.status(), DetectorStatus::Complete);
+        }
         assert!(!result.detections().is_empty());
         for d in result.detections() {
             assert_eq!(d.evidence.metadata["dep_name"], "openssl");
@@ -305,4 +311,12 @@ fn requirements_comments_require_a_whitespace_boundary() {
             .status(),
         DetectorStatus::Complete
     );
+}
+
+#[test]
+fn supported_go_replace_and_exclude_blocks_preserve_unresolved_declarations() {
+    for text in ["module example.org/app\nrequire example.org/openssl v1.2.3\nreplace example.org/openssl => ../local\n", "module example.org/app\nexclude (\n example.org/openssl v1.2.3\n)\n"] {
+        let result=inspect("go.mod",text).unwrap();assert_eq!(result.status(),DetectorStatus::Complete);
+        for d in result.detections(){assert!(!d.evidence.metadata["dep_purl"].contains('@'));}
+    }
 }

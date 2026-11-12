@@ -27,6 +27,14 @@ pub(crate) struct WalkOutcome {
 }
 
 pub(crate) fn walk_repository_detailed(root: &Path, max_size_bytes: usize) -> Result<WalkOutcome> {
+    walk_repository_detailed_with_selection(root, max_size_bytes, crate::FileSelection::default())
+}
+
+pub(crate) fn walk_repository_detailed_with_selection(
+    root: &Path,
+    max_size_bytes: usize,
+    selection: crate::FileSelection,
+) -> Result<WalkOutcome> {
     std::fs::metadata(root).with_context(|| "failed to access scan root")?;
     let mut builder = WalkBuilder::new(root);
     builder
@@ -37,13 +45,27 @@ pub(crate) fn walk_repository_detailed(root: &Path, max_size_bytes: usize) -> Re
         .git_global(true)
         .git_exclude(true);
 
-    collect_entries(root, max_size_bytes, builder.build())
+    collect_entries_with_selection(root, max_size_bytes, builder.build(), selection)
 }
 
+#[cfg(test)]
 fn collect_entries(
     root: &Path,
     max_size_bytes: usize,
     entries: impl IntoIterator<Item = std::result::Result<ignore::DirEntry, ignore::Error>>,
+) -> Result<WalkOutcome> {
+    collect_entries_with_selection(
+        root,
+        max_size_bytes,
+        entries,
+        crate::FileSelection::default(),
+    )
+}
+fn collect_entries_with_selection(
+    root: &Path,
+    max_size_bytes: usize,
+    entries: impl IntoIterator<Item = std::result::Result<ignore::DirEntry, ignore::Error>>,
+    selection: crate::FileSelection,
 ) -> Result<WalkOutcome> {
     let mut files = Vec::new();
     let mut stats = WalkStats::default();
@@ -73,7 +95,9 @@ fn collect_entries(
             continue;
         }
 
-        if should_exclude(path) {
+        if excluded_directory_or_markdown(path)
+            || (!selection.include_non_scannable && crate::file_selection::known_extension(path))
+        {
             stats.skipped += 1;
             excluded += 1;
             diagnostics.push(ScanDiagnostic::new(
@@ -120,6 +144,22 @@ fn collect_entries(
             continue;
         }
 
+        // Failure to preflight must not turn a read/metadata error into an exclusion.
+        // safe_read retains no-follow, regular-file and size checks here too.
+        if !selection.include_non_scannable && !crate::file_selection::protects_crypto(path) {
+            if let Ok(bytes) = crate::safe_read::read(root, path, max_size_bytes) {
+                if crate::file_selection::non_text(path, &bytes) {
+                    stats.skipped += 1;
+                    excluded += 1;
+                    diagnostics.push(ScanDiagnostic::new(
+                        DiagnosticCode::ExcludedPath,
+                        Some(relative_path(root, path)),
+                        None,
+                    ));
+                    continue;
+                }
+            }
+        }
         stats.scanned += 1;
         files.push(path.to_path_buf());
     }
@@ -140,7 +180,11 @@ pub(crate) fn relative_path(root: &Path, path: &Path) -> String {
         .into_owned()
 }
 
+#[cfg(test)]
 fn should_exclude(path: &Path) -> bool {
+    excluded_directory_or_markdown(path) || crate::file_selection::known_extension(path)
+}
+fn excluded_directory_or_markdown(path: &Path) -> bool {
     if path.components().any(|c| {
         let value = c.as_os_str().to_string_lossy();
         DEFAULT_EXCLUDES
@@ -332,5 +376,31 @@ mod tests {
         assert!(names.iter().any(|n| n == "src/main.rs"));
         assert!(!names.iter().any(|n| n == "README.md"));
         assert!(!names.iter().any(|n| n == "docs/guide.yaml"));
+    }
+}
+
+#[cfg(test)]
+mod non_scannable_repairs {
+    #[test]
+    fn known_binary_artifacts_are_excluded_but_crypto_files_are_retained() {
+        for name in [
+            "image.png",
+            "archive.zip",
+            "module.wasm",
+            "binary.exe",
+            "messages.mo",
+            "fixture.pb",
+        ] {
+            assert!(super::should_exclude(std::path::Path::new(name)), "{name}");
+        }
+        for name in [
+            "code.js",
+            "key.pem",
+            "trust.jks",
+            "store.pkcs12",
+            "unknown.data",
+        ] {
+            assert!(!super::should_exclude(std::path::Path::new(name)), "{name}");
+        }
     }
 }

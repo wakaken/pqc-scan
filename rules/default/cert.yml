@@ -98,10 +98,10 @@
   severity: low
   risk: quantum-uncertain
   confidence: 0.3
-  migration_hint: Validate signing algorithms in PEM-based certificates.
+  migration_hint: Identify the cryptographic object type; inspect certificate algorithms only when a certificate is present.
   pattern: (?i)\.(pem|crt|cer|der)$
   scope: certificate
-  description: Certificate container file detected.
+  description: PEM/DER cryptographic container detected; certificate presence is not established.
 - id: CERT_EXPIRY_2026_OR_BEFORE
   kind: certificate
   category: PKI

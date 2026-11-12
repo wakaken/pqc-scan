@@ -22,6 +22,9 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
         "TS_NODE_JOSE_USAGE" => ("Node.jsのJOSE関連処理が見つかりました。", "利用している署名方式とJOSE実装の対応範囲を確認してください。"),
         "TS_PY_RSA_USAGE" | "API_PY_RSA_MODULE" => ("PythonのRSA関連APIの参照が見つかりました。", "暗号ライブラリの版と実装を確認し、署名・鍵共有それぞれのPQC移行候補を調べてください。"),
         "TS_RUST_RSA_USAGE" => ("RustのRSA関連APIの参照が見つかりました。", "署名と鍵共有の処理を整理し、PQC対応実装を切り替えられる構成を検討してください。"),
+        "TS_CLASSICAL_EC_API" => ("古典暗号の楕円曲線APIの参照が見つかりました。", "鍵共有と署名の用途を確認し、接続相手や検証側と合わせてPQCへの移行を検討してください。"),
+        "TS_CLASSICAL_EDDSA_API" => ("EdDSA・X25519系の古典暗号APIの参照が見つかりました。", "鍵共有と署名を分けて確認し、それぞれに適したPQC方式への移行を検討してください。"),
+        "TS_JWT_EDDSA_ALG" => ("EdDSAを使うJWT署名方式の記述が見つかりました。", "署名側と検証側の対応を確認し、PQC署名への移行計画を立ててください。"),
         "TS_RUBY_RSA_USAGE" => ("RubyのRSA関連APIの参照が見つかりました。", "利用中のOpenSSLと署名方式を確認し、PQC移行時の鍵更新・検証手順を決めてください。"),
         "API_OPENSSL_RSA_NEW" | "OPENSSL_RSA_API" => ("OpenSSLの低水準RSA APIの参照が見つかりました。", "暗号方式の変更に備え、EVPなどの高水準APIを使う構成を検討してください。"),
         "API_EVP_PKEY_RSA" => ("OpenSSLのEVP_PKEYをRSA用に使う記述が見つかりました。", "鍵の種類を切り替えられる構成か確認し、PQC対応への移行に備えてください。"),
@@ -41,9 +44,9 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
         "SSH_DH_GROUP14_SHA1" => ("SHA-1に依存するSSH鍵共有方式が見つかりました。", "SHA-1に依存しない方式への更新を計画してください。"),
         "SSH_CONFIG_HOSTKEY_RSA" => ("SSHのRSAホスト鍵を指定する設定が見つかりました。", "ホスト鍵の更新計画にPQC対応と接続クライアントの互換性確認を含めてください。"),
         "SSH_AUTHORIZED_KEYS_RSA" => ("authorized_keysのRSA公開鍵が見つかりました。", "利用者と接続元を確認し、RSA鍵の段階的な更新を計画してください。"),
-        "PRIVATE_KEY_RSA_HEADER" => ("RSA秘密鍵のヘッダーが見つかりました。", "鍵が漏えいした可能性を調査し、対象の鍵を失効・再発行してください。鍵本体はレポートに出力していません。"),
-        "PRIVATE_KEY_PKCS8_HEADER" => ("PKCS#8秘密鍵のヘッダーが見つかりました。", "秘密鍵の保管場所と漏えい範囲を確認し、必要な鍵・認証情報を更新してください。"),
-        "PRIVATE_KEY_OPENSSH_HEADER" => ("OpenSSH秘密鍵のヘッダーが見つかりました。", "秘密鍵の露出として速やかに調査し、鍵の失効・更新と保管方法の見直しを行ってください。"),
+        "PRIVATE_KEY_RSA_HEADER" => ("RSA秘密鍵のヘッダーが見つかりました。", "ヘッダーの参照、テスト用の鍵、運用中の鍵を区別し、運用中の鍵が露出していれば失効・再発行してください。鍵本体はレポートに出力していません。"),
+        "PRIVATE_KEY_PKCS8_HEADER" => ("PKCS#8秘密鍵のヘッダーが見つかりました。", "参照やテスト用の鍵か、運用中の鍵かを確認し、運用中の鍵が露出していれば鍵・認証情報を更新してください。"),
+        "PRIVATE_KEY_OPENSSH_HEADER" => ("OpenSSH秘密鍵のヘッダーが見つかりました。", "参照やテスト用の鍵か、運用中の鍵かを確認し、運用中の鍵が露出していれば失効・更新と保管方法の見直しを行ってください。"),
         "CERT_RSA_SIGNATURE" | "CERT_OID_RSA_PSS" => ("証明書のRSA系署名方式が見つかりました。", "認証局・検証側・鍵形式の対応を確認し、標準化されたPQC署名への移行候補を評価してください。"),
         "CERT_SHA1_SIGNATURE" => ("証明書のSHA-1署名が見つかりました。", "SHA-256以降を使う署名方式での証明書更新を検討してください。"),
         "CERT_RSA_1024" => ("証明書の公開鍵に1024ビットRSAが使われています。", "利用中か確認し、弱い鍵の更新と用途に応じたPQC移行を計画してください。認証局と検証側の対応も確認してください。"),
@@ -53,7 +56,7 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
         "CERT_DSA_SIGNATURE" => ("証明書の署名方式にDSAが使われています。", "DSA署名の置き換えを計画し、過去の署名を検証する互換性も別に確認してください。"),
         "CERT_MD5_SIGNATURE" => ("証明書のMD5署名が見つかりました。", "対象の証明書を速やかに再発行してください。"),
         "CERT_P12_CONTAINER" => ("PKCS#12・PFX形式のファイルが見つかりました。", "ファイル内部の証明書と鍵の暗号方式を確認してください。ファイルの存在だけでは方式を判断できません。"),
-        "CERT_PEM_CONTAINER" => ("証明書を格納する形式のファイルが見つかりました。", "内容を確認し、署名方式と公開鍵方式を調べてください。ファイル名だけの検出も含まれます。"),
+        "CERT_PEM_CONTAINER" => ("証明書・鍵などを格納できる形式のファイルが見つかりました。", "証明書を含むかを確認し、含む場合は署名方式と公開鍵方式を調べてください。ファイル名だけでは証明書の存在を断定できません。"),
         "CERT_EXPIRY_2026_OR_BEFORE" => ("解析した証明書の有効期限が2026年以前です（従来の固定基準）。", "現在時刻での期限切れ所見を確認し、固定基準の所見は互換性維持のための情報として扱ってください。"),
         "CERT_EXPIRED" => ("判定時刻で証明書の有効期限が切れています。", "利用中か確認し、必要なら認証局と検証側の互換性を確認して更新してください。"),
         "CERT_NOT_YET_VALID" => ("判定時刻では、証明書の有効期間が始まっていません。", "利用開始の予定とシステム時刻を確認し、必要に応じて現在有効な証明書を使ってください。"),
@@ -138,7 +141,7 @@ pub(crate) fn localize_finding(source: &Finding) -> Finding {
 fn action_text(id: &str) -> Option<(&'static str, &'static str, &'static [&'static str])> {
     Some(match id {
         "tls.review-pqc-override" => ("PQCの上書き設定を確認する", "検出した設定はハイブリッド鍵共有を制限しています。RSAの利用や実際のTLSバージョンを確認した結果ではありません。", &["この箇所のGODEBUG、jdk.tls.namedGroups、groups=・ecdh_curves=のうち、検出対象の設定を確認してください。", "設定が必要な理由と接続相手の対応を確認してから、ハイブリッド方式や既定設定で通信を試してください。", "鍵共有、TLSバージョン、証明書の署名方式は別々に確認してください。TLS 1.3であるだけではPQC対応とは判断できません。"]),
-        "incident.private-key-rotation" => ("露出した秘密鍵を失効し、更新する", "秘密鍵のヘッダーが検出されています。漏えいの範囲と利用先を速やかに確認してください。", &["対象の鍵を失効・再発行し、影響する認証情報も更新してください。", "その鍵で署名したトークンやセッションの扱いを確認してください。", "鍵を専用の保管先へ移し、リポジトリへの再混入を防いでください。"]),
+        "incident.private-key-rotation" => ("秘密鍵の参照を確認し、露出した運用中の鍵を更新する", "ヘッダーだけでは漏えいの発生を断定できません。鍵本体の存在と利用状況を確認してください。", &["ヘッダーの参照、テスト用の鍵、運用中の鍵を区別してください。", "運用中の鍵が露出していれば失効・再発行し、影響する認証情報やセッションを更新してください。", "鍵を専用の保管先へ移し、リポジトリへの再混入を防いでください。"]),
         "plan.hybrid-migration" => ("既存方式とPQCを併用し、段階的に移行する", "検出した方式には、量子計算による将来のリスクがあります。接続相手との互換性を確かめながら移行を進めてください。", &["利用箇所と担当チームを洗い出してください。", "既存方式とPQCの併用を試し、一括切替の前に影響を確認してください。", "旧方式を廃止する条件と時期を決めてください。"]),
         "dependency.track-pqc-readiness" => ("依存ライブラリのPQC対応を確認する", "PQCへの移行方法は、利用しているライブラリの版や設定にも左右されます。", &["dependency-sbom.jsonで現在の版を確認し、更新候補を決めてください。", "リリース情報でPQC機能とAPIの変更を確認してください。", "本番導入の前にPQC・ハイブリッド方式の結合テストを行ってください。"]),
         "runtime.verify-pqc-capabilities" => ("実行環境と通信相手のPQC対応を確認する", "コードに方式名があるだけでは、その環境で動くか、接続相手が対応しているかは分かりません。", &["実際に配備している版、プロバイダー、機能設定を確認してください。", "本番設定を変える前に、接続相手との互換性を試してください。"]),
@@ -226,6 +229,28 @@ pub(crate) fn write_markdown(result: &ScanResult, path: &Path) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn private_key_markers_require_confirmation_before_incident_actions() {
+        for id in [
+            "PRIVATE_KEY_RSA_HEADER",
+            "PRIVATE_KEY_PKCS8_HEADER",
+            "PRIVATE_KEY_OPENSSH_HEADER",
+        ] {
+            let (_, guidance) = rule_text(id).unwrap();
+            assert!(guidance.contains("テスト用"));
+            assert!(guidance.contains("運用中の鍵が露出していれば"));
+        }
+        let (_, rationale, steps) = action_text("incident.private-key-rotation").unwrap();
+        assert!(rationale.contains("断定できません"));
+        assert!(steps
+            .iter()
+            .any(|s| s.contains("運用中の鍵が露出していれば")));
+        assert!(rule_text("CERT_PEM_CONTAINER")
+            .unwrap()
+            .1
+            .contains("存在を断定できません"));
+    }
 
     #[test]
     fn every_builtin_rule_and_action_has_japanese_copy() {

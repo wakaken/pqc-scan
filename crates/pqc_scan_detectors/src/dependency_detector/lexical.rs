@@ -14,6 +14,7 @@ pub(super) fn parse_gemfile(text: &str) -> Vec<DependencyItem> {
         let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
         let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
         out.push(DependencyItem {
+            context: None,
             name: name.to_string(),
             version: sanitize_version(version),
             ecosystem: "gem".to_string(),
@@ -39,6 +40,7 @@ pub(super) fn parse_gemfile_lock(text: &str) -> Vec<DependencyItem> {
         let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
         let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
         out.push(DependencyItem {
+            context: None,
             name: name.to_string(),
             version: sanitize_version(version),
             ecosystem: "gem".to_string(),
@@ -66,6 +68,7 @@ pub(super) fn parse_gemspec(text: &str) -> Vec<DependencyItem> {
         let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
         let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
         out.push(DependencyItem {
+            context: None,
             name: name.to_string(),
             version: sanitize_version(version),
             ecosystem: "gem".to_string(),
@@ -99,6 +102,7 @@ pub(super) fn parse_requirements(text: &str) -> Vec<DependencyItem> {
         let name = caps.get(1).map(|m| m.as_str()).unwrap_or("unknown");
         let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
         out.push(DependencyItem {
+            context: None,
             name: name.to_string(),
             version: sanitize_version(version),
             ecosystem: "pypi".to_string(),
@@ -143,6 +147,7 @@ pub(super) fn parse_go_mod(text: &str) -> Vec<DependencyItem> {
         let version = parts.next().unwrap_or("unknown");
 
         out.push(DependencyItem {
+            context: None,
             name: name.to_string(),
             version: sanitize_version(version),
             ecosystem: "golang".to_string(),
@@ -173,6 +178,7 @@ pub(super) fn parse_pom_xml(text: &str) -> Vec<DependencyItem> {
         let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
 
         out.push(DependencyItem {
+            context: None,
             name: name.clone(),
             version: sanitize_version(version),
             ecosystem: "maven".to_string(),
@@ -203,6 +209,7 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
         let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
 
         out.push(DependencyItem {
+            context: None,
             name: name.clone(),
             version: sanitize_version(version),
             ecosystem: "maven".to_string(),
@@ -233,6 +240,7 @@ pub(super) fn parse_gradle_lockfile(text: &str) -> Vec<DependencyItem> {
         let version = parts[2];
 
         out.push(DependencyItem {
+            context: None,
             name: name.clone(),
             version: sanitize_version(version),
             ecosystem: "maven".to_string(),
