@@ -1,8 +1,28 @@
 name: pqc-scan
 
 on:
+  # Keep this list limited to prose: docs/ also contains executable CI inputs.
+  # If these checks become required, use job-level gating instead of skipping
+  # the entire workflow, which would leave required checks pending.
   push:
+    paths-ignore:
+      - 'README.md'
+      - 'README.ja.md'
+      - 'AGENTS.md'
+      - 'SECURITY.md'
+      - 'docs/**/*.md'
+      - 'prompts/**/*.md'
+      - 'tasks/README.md'
   pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'README.ja.md'
+      - 'AGENTS.md'
+      - 'SECURITY.md'
+      - 'docs/**/*.md'
+      - 'prompts/**/*.md'
+      - 'tasks/README.md'
+  workflow_dispatch:
 
 permissions:
   contents: read

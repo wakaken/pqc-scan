@@ -134,6 +134,23 @@ Use `--diagnostics` to see the reasons, and `--require-complete` if incomplete
 inspection should fail CI. See [inspection status](docs/user/SCANNING.md#diagnostics)
 and [supported inputs and limits](docs/user/COVERAGE.md).
 
+## Repository CI
+
+The `pqc-scan` workflow skips branch pushes and pull requests whose changed paths all
+match its documentation list: the root README files, `AGENTS.md`, `SECURITY.md`,
+Markdown under `docs/` and `prompts/`, and `tasks/README.md`.
+Other changes, including mixed documentation/code changes, rules, workflow files
+and JSON data under `docs/`, still run CI. The exact list is maintained in
+[the workflow](.github/workflows/pqc-scan.yml). Run it manually from GitHub Actions
+when validation is needed for an otherwise skipped change.
+
+Tag pushes still run CI. GitHub limits the number of changed files considered
+by path filtering; for large changes, manually run CI if it was omitted.
+
+Before making these checks required for merging, replace workflow-level path
+filtering with job-level gating so skipped documentation changes do not leave
+required checks pending.
+
 <a id="license"></a>
 
 ## License
