@@ -31,7 +31,7 @@ Start with the [input overview](../../README.md#targets). This guide gives the s
 - CycloneDX JSON (`*.cdx.json`, `*bom*.json`)
 - SPDX JSON (`*.spdx.json`, `*sbom*.json`)
 
-These are bounded component/package subsets: CycloneDX 1.4–1.7 and SPDX 2.2–2.3. They are input formats, not full-schema validation, installed-state proof or standards export. Structured dependency parsing, lexical fallbacks, supported versions and limits are listed in the [dependency provenance contract](../architecture/DEPENDENCY-PROVENANCE.md).
+These are bounded component/package subsets: CycloneDX 1.4 to 1.7 and SPDX 2.2 to 2.3. They are input formats, not full-schema validation, installed-state proof or standards export. Structured dependency parsing, lexical fallbacks, supported versions and limits are listed in the [dependency provenance contract](../architecture/DEPENDENCY-PROVENANCE.md).
 
 <a id="certificates"></a>
 
@@ -78,10 +78,9 @@ retaining static facts. Time findings record `assessment_time_unix` and
 
 The CLI uses a fresh certificate assessment clock for each scan.
 
-Existing custom `certificate` and other legacy scopes keep composite-text matching,
-except the newly reserved opt-in scopes `rsa_modulus_bits`, `certificate_validity`
-and `legacy_not_after_2026`. External packs previously using those exact strings as
-opaque legacy labels should rename them (or use `certificate`) before upgrading.
+`certificate` and other general scopes use composite-text matching. The reserved
+scopes `rsa_modulus_bits`, `certificate_validity` and `legacy_not_after_2026` use
+typed modulus, current-validity and fixed-cutoff inputs respectively.
 Existing `signature_oid`/`public_key_oid` scopes remain exact identifier inputs.
 Corrected facts, typed evidence and risk tags intentionally change affected
 certificate findings, IDs and legacy CBOM algorithm strings; CLI options, report
@@ -116,7 +115,7 @@ Limits are 2 MiB, 256 bags, 256 content entries, nesting depth 8 and 4096 attrib
 ### Built-in Rule Set
 
 - Default rules live under `rules/default/`
-- Current built-in rules: 119
+- Current built-in rules: 122
 - Full reference (all rule IDs + severity definitions): [docs/rules-reference.md](../rules-reference.md)
 
 Rule packs reject blank IDs, non-finite confidence or values outside `0..1`, duplicate IDs, invalid patterns and traversal failures. Invalid packs return operational error 1 instead of a partial pack. Valid custom scopes retain their per-detector semantics; unknown scope labels are not rejected. Check [scope compatibility](../architecture/RULE-VALIDATION.md) when upgrading a custom pack.
@@ -128,23 +127,12 @@ Rule packs reject blank IDs, non-finite confidence or values outside `0..1`, dup
 AST findings distinguish source spans per rule: repeated uses on the same line
 remain separate, while parent/child representations of the same lexical match
 produce one observation. Per rule/file, at most 4,096 accepted hits and 65,536 examined matches are retained; bounded-work truncation remains explicit. A display-only clipping ellipsis is never treated
-as source. CLI flags, report schemas/filenames and IDs for unchanged occurrences
-are preserved; finding counts and new occurrence IDs may increase intentionally.
-Legacy AST Unicode column limitations still apply (see [SARIF locations](REPORTS.md#sarif-locations)).
+as source. Finding IDs use the rule, path, position and original matched text.
+AST Unicode column limitations apply (see [SARIF locations](REPORTS.md#sarif-locations)).
+
+Python imports and `as` aliases, Ruby OpenSSL RSA/EC calls and Node RSA key generation have dedicated matching support. Computed names and ambiguous bindings may remain unknown; a dependency or an HS256/AES reference alone does not establish RSA use.
 
 TypeScript and TSX use their dedicated pinned grammars. Valid type syntax no longer becomes partial merely because it is not JavaScript. Syntax errors still retain available findings and report partial inspection. Matching remains nominal: imported aliases can be missed, namesakes/display strings can be false positives, and comments inside ancestor text are not full semantic analysis. No symbol resolver or dataflow engine is implied.
-
-<a id="privacy"></a>
-
-## Privacy and excluded files
-
-Recognized private-key blocks and credential literals are masked in exported evidence. The policy covers RSA, generic PKCS#8, OpenSSH, EC, DSA and encrypted private-key markers; single-line named password/token/key literals; Bearer/Basic tokens; and HTTP(S) userinfo and named credential query values. Marker masking does not add private-key parsing or decryption support.
-
-Previews are conservatively masked when recognized private/credential context is present. Metadata values, action text/code, CBOM and dependency text also pass through bounded redaction. Typed inventory and diagnostics omit raw payloads and arbitrary error text.
-
-This is not a universal secret scanner. Unknown/obfuscated syntax, arbitrary credential names, multiline credential position tracking and secret-bearing structural fields are outside the contract. Keep paths, IDs, repository scopes and custom metadata keys free of secrets. Public certificate fingerprints/subjects and other retained facts can still require distribution review. Some benign preview text is omitted conservatively. See the [supported syntax, field policy and limits](../architecture/EVIDENCE-PRIVACY.md) and [synthetic-canary verification](../quality/TASK-029-EVIDENCE-PRIVACY.md).
-
-Repository walking respects Git ignore settings. Default exclusions include `.git`, `node_modules`, `target`, `dist`, `docs` and Markdown files; files larger than 2 MiB are skipped. Test directories are not generally excluded. These scope limits mean a successful scan does not establish absence of cryptography in ignored or unsupported files.
 
 ## Repository inspection budgets and encoded text
 
@@ -171,3 +159,15 @@ Ruby Gemfile/gemspec inspection reads literal dependency calls and supported gro
 Recognized unrendered template directives have an offset-preserving static parse view. Requirements branch declarations are retained separately as conditional candidates. Template rendering/branch selection is not executed, and generated values remain partial even when the static source is parsed. Literal strings, comments and regular expressions do not become source directives solely by resembling a template.
 
 Selected V8 grammar compatibility covers native-call expression positions, sloppy-script `yield` identifiers, tagged-template escape content and legacy runtime-error assignment targets. It does not execute those calls or assert runtime success. Explicit module/strict boundaries and malformed controls remain incomplete. Legacy DSA OID 1.3.14.3.2.12 uses the known public-parameter/public-integer layout; absent parameters retain partial status and no key size or domain parameters are invented. Sources: [OpenSSL object identifiers](https://github.com/openssl/openssl/blob/master/crypto/objects/objects.txt), [OpenSSL DSA decoder](https://github.com/openssl/openssl/blob/master/crypto/dsa/dsa_ameth.c), [Maven POM reference](https://maven.apache.org/pom.html), [Django template language](https://docs.djangoproject.com/en/5.2/ref/templates/language/).
+
+<a id="privacy"></a>
+
+## Privacy and excluded files
+
+Recognized private-key blocks and credential literals are masked in exported evidence. The policy covers RSA, generic PKCS#8, OpenSSH, EC, DSA and encrypted private-key markers; single-line named password/token/key literals; Bearer/Basic tokens; and HTTP(S) userinfo and named credential query values. Marker masking does not add private-key parsing or decryption support.
+
+Previews are conservatively masked when recognized private/credential context is present. Metadata values, action text/code, CBOM and dependency text also pass through bounded redaction. Typed inventory and diagnostics omit raw payloads and arbitrary error text.
+
+This is not a universal secret scanner. Unknown/obfuscated syntax, arbitrary credential names, multiline credential position tracking and secret-bearing structural fields are outside the contract. Keep paths, IDs, repository scopes and custom metadata keys free of secrets. Public certificate fingerprints/subjects and other retained facts can still require distribution review. Some benign preview text is omitted conservatively. See the [supported syntax, field policy and limits](../architecture/EVIDENCE-PRIVACY.md) and [synthetic-canary verification](../quality/TASK-029-EVIDENCE-PRIVACY.md).
+
+Repository walking respects Git ignore settings. Default exclusions include `.git`, `node_modules`, `target`, `dist`, `docs` and Markdown files; files larger than 2 MiB are skipped. Test directories are not generally excluded. These scope limits mean a successful scan does not establish absence of cryptography in ignored or unsupported files.
