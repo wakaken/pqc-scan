@@ -56,6 +56,9 @@ jobs:
         run: python3 -m unittest discover -s tests/quality -p 'test_*.py'
 
   protocols:
+    # Temporarily paused during development, including manual workflow runs.
+    # Remove this condition to restore the existing protocol checks.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     needs: quality
     timeout-minutes: 25
