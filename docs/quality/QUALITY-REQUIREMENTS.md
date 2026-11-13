@@ -36,6 +36,8 @@ E41の実測対象は `0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf` と記録され
 E42は方式・用途別の固定注釈への一致評価です。未注釈所見が残るため精度評価の完全性はPartialであり、製品全体の精度保証ではありません。
 E43は[既知の不一致50件の原因と修正候補](TASK-043-ERROR-TRIAGE.md)です。規則変更や修正効果の測定は含みません。追加承認後の実装・44件の受入・再評価はE43Fとして[TASK-043の修正結果](TASK-043-FIXES-RESULTS.md)に分けて保存します。
 
+E44は[到達率と追加検証の適用判断](TASK-044-RESULTS.md)です。2026-11-13のsource-bound測定と局所Miri試行、対象外・未記録理由を保持します。[Miriの追加調査](TASK-044-MIRI-FOLLOWUP.md)ではhost runnerの衝突を解消し、元crateでの実行範囲を確認しています。[現行の計測基盤](TASK-044-RETIREMENT.md)ではcoverageを独立させ、Miri専用実装は調査資料として保管します。全製品の安全性や形式的証明の合格には一般化しません。
+
 ## Q1: 検出精度
 
 | 要求項目 | 既存実装と証拠 | 不足 | 担当タスク | 受入条件 | 必須成果物（予定） |
@@ -98,10 +100,10 @@ E43は[既知の不一致50件の原因と修正候補](TASK-043-ERROR-TRIAGE.md
 | Q4-10 SSH KEXINIT offer・交渉済みhybrid ML-KEM・host pin | EP: 既存039の実装と試験 | peer設定と観測・認証状態の対応 | [049](../../tasks/049-quality-protocol-matrix.yaml) | pin不一致・unknown/古典/hybridを分け、未認証情報と検証済み事実を区別 | `ssh-matrix.json` |
 | Q4-11 SSHの認証・ログイン・コマンド実行禁止 | EP: no-auth試験あり | 送信packet種別と全失敗経路の対応 | [049](../../tasks/049-quality-protocol-matrix.yaml) | service/userauth/channel/commandを送らず切断することを実peerで確認 | `ssh-no-auth.json` |
 | Q4-12 SSH不正frame・timeout・通信量・接続先制限 | EP: parser/runtimeの境界試験 | fragment/巨大/途中切断・接続拒否を含む全対応 | [049](../../tasks/049-quality-protocol-matrix.yaml) | 割当て前の長さ検査、有限の通信/時間/接続数、中止と後始末を検証 | `ssh-failures.json` |
-| Q4-13 コードカバレッジと重要な未到達処理 | E41: line/region/branch未測定 | 到達位置とfeature別の測定 | [044](../../tasks/044-quality-coverage-feasibility.yaml) | 取得可能なline/region/branchを区別し、安全上重要な未到達箇所と対象外理由を列挙 | `coverage-review.md` |
+| Q4-13 コードカバレッジと重要な未到達処理 | E41の未測定を保持。E44: 通常/全featureのline・region、固定nightlyのbranchを測定 | resolverの集約・子process、別OS/arch・FFI等の制約を分離して記録 | [044](../../tasks/044-quality-coverage-feasibility.yaml) | 取得可能なline/region/branchを区別し、安全上重要な未到達箇所と対象外理由を列挙 | `coverage-review.md` |
 | Q4-14 変異試験によるassertionの有効性 | E41: mutation未実施 | risk・規則一致・読取失敗・正規化・証明書属性・未検査・秘匿の評価 | [045](../../tasks/045-quality-mutation-study.yaml) | caught/missed/timeout/unviableを分離し、残存変異の意味とscore分母を説明 | `mutation-review.md` |
 | Q4-15 生成試験による不変条件 | E19/E41: 固定境界例あり、proptestなし | 入力生成・縮小による追加検証 | [046](../../tasks/046-quality-property-testing.yaml) | 意味的再現、失敗≠成功、unknown非捏造、検査統計、ID安定/一意/連結境界を検証 | `property-results.json` |
-| Q4-16 Miri・形式検証の適用判断 | E41: 未導入 | 純RustとFFI/OS依存を分けた適用検討 | [044](../../tasks/044-quality-coverage-feasibility.yaml) | 適用可能な小範囲を試し、実行不能・費用過大なら根拠と代替検証を明記。導入数を目標にしない | `verification-feasibility.md` |
+| Q4-16 Miri・形式検証の適用判断 | E41の未導入を保持。E44: 原sourceのscope helperでMiri3試験と工具の正負対照 | 当初のcore build script停止は追加調査で解消。元crateの結果とFFI/OS依存・時間上限・Kani未試行を分離し、代替検証を記録 | [044](../../tasks/044-quality-coverage-feasibility.yaml) | 適用可能な小範囲を試し、実行不能・費用過大なら根拠と代替検証を明記。導入数を目標にしない | `verification-feasibility.md` |
 
 ## Q5: 性能と再現性
 

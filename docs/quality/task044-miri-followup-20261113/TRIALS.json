@@ -1,0 +1,47 @@
+[
+  {
+    "trial": "diagnose-01",
+    "classification": "root-cause exploration",
+    "use": "build.rs presence and ELF evidence; final causal controls are diagnose-03"
+  },
+  {
+    "trial": "diagnose-02",
+    "classification": "failed configuration exploration",
+    "use": "missing -Ztarget-applies-to-host rejected before tests; excluded from product success"
+  },
+  {
+    "trial": "diagnose-03",
+    "classification": "accepted causal controls",
+    "use": "unfixed/build.rs failure, plain success, flags-only failure, host runner success, original core identity2 success"
+  },
+  {
+    "trial": "range-01",
+    "classification": "invalid product range trial",
+    "use": "direct runner env mismatch; 63 listing failures/0 registered, excluded regardless host exit0"
+  },
+  {
+    "trial": "range-02",
+    "classification": "intentional interrupted exploration",
+    "use": "correct crate cwd before proceeding; excluded from final product counts"
+  },
+  {
+    "trial": "range-cwd-red",
+    "classification": "failed synthetic control",
+    "use": "std::env::current_dir is unsupported with isolation; no product result"
+  },
+  {
+    "trial": "range-03",
+    "classification": "accepted standard profile",
+    "use": "566 registrations/63 targets, default Miri flags, individual results"
+  },
+  {
+    "trial": "os-range-01",
+    "classification": "intentional interrupted exploration",
+    "use": "two CLI timeout observations then SIGINT; preserve failure and logs, excluded from final counts"
+  },
+  {
+    "trial": "os-range-02",
+    "classification": "final supplemental profile",
+    "use": "baseline isolation-error candidates only, original inventory checked, bounded OS-access trial"
+  }
+]

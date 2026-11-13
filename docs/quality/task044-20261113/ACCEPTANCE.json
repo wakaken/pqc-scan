@@ -1,0 +1,58 @@
+{
+  "task": "044",
+  "status": "done",
+  "baseHead": "f8aff1888525f0f3e350a734166c12c6de3e71ed",
+  "branch": "codex/quality-assessment-model",
+  "criteria": {
+    "Q4-13": {
+      "status": "Verified",
+      "evidence": [
+        "COVERAGE-REVIEW.md",
+        "MEASUREMENTS.json",
+        "UNOBSERVED-COUNTERS.json",
+        "RAW-EVIDENCE.tar.gz"
+      ],
+      "interpretation": "line/region/branch and per-feature scopes measured; important zero-counter positions and absent/ambiguous mappings separated; no product-wide assurance"
+    },
+    "Q4-16": {
+      "status": "Verified",
+      "evidence": [
+        "VERIFICATION-FEASIBILITY.md",
+        "MEASUREMENTS.json",
+        "SOURCE-MATCH.json",
+        "RAW-EVIDENCE.tar.gz"
+      ],
+      "interpretation": "Exact original pure-helper fragment tried in Miri with positive/negative/boundary controls; failed full-core route, FFI/OS/formal-platform limits and alternatives disclosed; not formal verification success"
+    }
+  },
+  "reviews": {
+    "implementation": {
+      "reviewer": "/root/task044_implementation_review",
+      "acceptedScopeSha256": "adb5c22daf572dd1ffe1808340a6afc9301552f47277789046aae8547671533a",
+      "finding": "P2 source-position explanation corrected and confirmed",
+      "result": "Accepted"
+    },
+    "testing": {
+      "reviewer": "/root/task044_test_review",
+      "acceptedScopeSha256": "c42ea1ef2f560b94218fc2536da3b7d0e4801fe736149f4b4e58fa6c17d946f3",
+      "result": "Accepted; no actionable findings"
+    }
+  },
+  "deliverables": {
+    "target/quality-task-044/coverage-review.md": "7906a7170df11364633aa6169fe595b04691ff88d2f9da1308d27784b611dea2",
+    "target/quality-task-044/verification-feasibility.md": "9ce7d2a52e6a50f6389f87bb98092ee364470ab2ce142044758864779f117be0"
+  },
+  "requiredRemaining": [],
+  "evaluationOnly": true,
+  "notTested": [
+    "hosted CI",
+    "workspace coverage doctests",
+    "other OS/architecture",
+    "full workspace Miri",
+    "formal proofs",
+    "mutation",
+    "fuzz"
+  ],
+  "publication": "uncommitted; no push/PR/merge/tag/release",
+  "postReviewChanges": "Task lifecycle and acceptance records only. Reviewed executable code, numerical measurements and evaluation report bodies unchanged."
+}

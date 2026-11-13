@@ -1,0 +1,68 @@
+{
+  "scope": "Source-bound study and final script/unit/doc checks; reviews separately recorded",
+  "initialChecks": [
+    {
+      "command": "python3 -m unittest discover -s tests/quality -p 'test_*.py'",
+      "exit": 0,
+      "passed": 57,
+      "log": "quality.log"
+    },
+    {
+      "command": "node --test shell/*.test.cjs",
+      "exit": 0,
+      "passed": 35,
+      "log": "node.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/distribution -v",
+      "exit": 0,
+      "passed": 11,
+      "log": "distribution.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/protocol -p 'test_*.py'",
+      "exit": 0,
+      "passed": 5,
+      "skipped": 6,
+      "log": "protocol-unit.log"
+    },
+    {
+      "command": "cargo fmt --all --check",
+      "exit": 0,
+      "log": "fmt.log"
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "notClaimed": [
+    "hosted CI",
+    "new uninstrumented workspace/clippy run",
+    "doctests in workspace coverage",
+    "all OS/architectures",
+    "full Miri workspace",
+    "formal proof",
+    "mutation/fuzz"
+  ],
+  "finalChecks": [
+    {
+      "command": "python3 -m unittest discover -s tests/quality -p 'test_*.py'",
+      "exit": 0,
+      "passed": 57,
+      "log": "quality-final.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/protocol -p 'test_*.py'",
+      "exit": 0,
+      "passed": 5,
+      "skipped": 6,
+      "log": "protocol-final.log"
+    },
+    {
+      "command": "Ruby YAML parse/original mapping; Python py_compile; local Markdown links; evidence SHA-256 audit",
+      "exit": 0,
+      "localLinks": 145
+    }
+  ]
+}
