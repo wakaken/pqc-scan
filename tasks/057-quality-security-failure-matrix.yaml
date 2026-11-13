@@ -2,8 +2,8 @@ id: '057'
 title: 安全境界と故障注入の横断検証表を作り不足試験を補う
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Evaluator Agent
 phase: '3'
 description: crash/timeout/資源/秘匿/ファイル/通信の失敗経路と結果保持を確認する。
 quality_alias: '追加: Q4横断'
@@ -64,3 +64,38 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+
+execution_record:
+  authorization: ユーザーが057を先に完了し、続けて047を実施することを明示承認。
+  base_head: 34b763d188bfc8ada49876c18b15f5406b6628b3
+  lifecycle:
+  - pending -> planned: 当初5条件と055完了・既存の隔離/秘匿/transport試験を確認。
+  - planned -> in-progress: 既存試験を横断表に結び、位置不明の秘匿・リンク競合・終了分類の不足を補う。
+  approach:
+  - 元の公開契約を維持し、実scan/既存Rust試験とkernel隔離を再利用する。
+  - 子process単位の有限supervisorを047と共用し、成功・panic・signal・timeout・エラーを区別して停止・後始末を検証する。
+  - 合成canaryと位置不明の秘匿、symlink競合とhardlinkの限界、offline scan/明示probeの許可先と中止を検証する。
+  - 通常/全機能の必須検証、5成果物、二段階レビューで完了判定する。
+  constraints: 既存ブランチと045/046/055・過去証拠を保持する。公開形式・ルール・暗号判断・CIは変更しない。
+  review_identities:
+    implementation: /root/quality057047_implementation_review
+    test: /root/quality057047_test_review
+  review_budget: 057と後続047で同じ二者を継続利用し、追加委任は行わない。
+  verification:
+    rust_default_passed: 539
+    rust_all_features_passed: 590
+    rust_all_features_ignored: 1
+    clippy_build_fmt: 両構成で終了コード0
+    python_quality_passed: 69
+    host_and_kernel_boundary_passed: 10
+    source_before_after_match: true
+    container_removed: true
+    evidence: docs/quality/task057-20261113/VALIDATION.json
+  review_source: docs/quality/task057-20261113/SOURCE.json
+  completion:
+    decision: 当初5条件と指定5成果物を最終ソース・実行証拠・二段階レビューに照合し、doneと判断。
+    source_scope_sha256: daca3c2776b2bbf570817e8678831a10b73a0c68d5e0726978d03c01cf2c4f88
+    implementation_review: accepted; race同期・対照・回数とCPU終了signalを補強後、成果物まで確認。
+    test_review: accepted; 正負境界・参照hash・生ログと最終ソース一致を確認。
+    report: docs/quality/TASK-057-RESULTS.md
+    limitations: Windows実行、全競合順序、hardlink出所、atomic snapshot、未知の秘密構文、全socket syscall追跡を保証しない。

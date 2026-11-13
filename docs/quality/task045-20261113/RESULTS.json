@@ -1,0 +1,342 @@
+{
+  "rawCounts": {
+    "caught": 14,
+    "missed": 6,
+    "timeout": 0,
+    "unviable": 0
+  },
+  "rawScorePercent": 70.0,
+  "equivalentMutations": [
+    "M20"
+  ],
+  "nonEquivalentScore": {
+    "caught": 14,
+    "missed": 5,
+    "denominator": 19,
+    "percent": 73.6842105263158
+  },
+  "scope": "Linux aarch64, Rust1.93.1, all-features; fixed 20 mutations; not product-wide score",
+  "unverified": "default-feature-only configuration, doctests, other platforms and unselected mutations",
+  "sourceBeforeAfterMatch": true,
+  "containerRemoved": true,
+  "image": "sha256:2e97b36b3a9d0a006b8dae8812889ea39fa29d03530292d3661575ba6a1a464d",
+  "mutations": [
+    {
+      "id": "M01",
+      "group": "risk",
+      "path": "crates/pqc_scan_core/src/risk.rs",
+      "old": "if rule.confidence < 0.45 {",
+      "new": "if rule.confidence >= 0.45 {",
+      "meaning": "高信頼と低信頼の昇格条件を反転",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "74672b217077909b68a35ced37a41de16bedac6a8340e2cbf9ecb35ba62cdefa",
+      "afterSha256": "f4ae0c6a4d6a7f85229a63690b57947aee074df4ca37a0ae1fef4a7c0e1354cb",
+      "failedTests": [
+        "risk::tests::escalates_private_key_evidence_to_critical",
+        "risk::tests::keeps_low_confidence_sensitive_findings_unpromoted",
+        "risk::tests::promotes_sensitive_quantum_vulnerable_findings"
+      ]
+    },
+    {
+      "id": "M02",
+      "group": "risk",
+      "path": "crates/pqc_scan_core/src/risk.rs",
+      "old": "if !sensitive_category {",
+      "new": "if sensitive_category {",
+      "meaning": "対象カテゴリの昇格条件を反転",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "74672b217077909b68a35ced37a41de16bedac6a8340e2cbf9ecb35ba62cdefa",
+      "afterSha256": "88dfee5723934881e299965d878b1cb739d3bf6793cf84432494ba8d5d739118",
+      "failedTests": [
+        "risk::tests::escalates_private_key_evidence_to_critical",
+        "risk::tests::keeps_non_sensitive_categories_at_original_severity",
+        "risk::tests::promotes_sensitive_quantum_vulnerable_findings"
+      ]
+    },
+    {
+      "id": "M03",
+      "group": "risk",
+      "path": "crates/pqc_scan_core/src/risk.rs",
+      "old": "Severity::Info => Severity::Low,",
+      "new": "Severity::Info => Severity::Info,",
+      "meaning": "InfoからLowへの昇格を省略。044の未記録候補",
+      "primaryOutcome": "missed",
+      "outcome": "missed",
+      "beforeSha256": "74672b217077909b68a35ced37a41de16bedac6a8340e2cbf9ecb35ba62cdefa",
+      "afterSha256": "cdde4daa37be1d168b3203b13dbafaceaede6e9ceb9c48fb37dc5c60e761e995",
+      "failedTests": []
+    },
+    {
+      "id": "M04",
+      "group": "risk",
+      "path": "crates/pqc_scan_core/src/risk.rs",
+      "old": "Severity::Low => Severity::Medium,",
+      "new": "Severity::Low => Severity::Low,",
+      "meaning": "LowからMediumへの昇格を省略。044の未記録候補",
+      "primaryOutcome": "missed",
+      "outcome": "missed",
+      "beforeSha256": "74672b217077909b68a35ced37a41de16bedac6a8340e2cbf9ecb35ba62cdefa",
+      "afterSha256": "9f122c2f08eab04cb3fa91fd47084ef26d7890266a7fd5ef1b5cc43ed576202d",
+      "failedTests": []
+    },
+    {
+      "id": "M05",
+      "group": "read",
+      "path": "crates/pqc_scan_core/src/safe_read.rs",
+      "old": "if bytes.len() > max {",
+      "new": "if false {",
+      "meaning": "読み取り後のサイズ超過拒否を省略",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "ce50b68976d9b1b8392b0e0b84074abeefd4c293511ea0d54bf0c5431e366793",
+      "afterSha256": "c9cde94952fc5b3f8de48869048c81c705b4cd1735da94e33af65476da47f27f",
+      "failedTests": [
+        "safe_read::tests::growing_input_is_stopped_at_limit_plus_one"
+      ]
+    },
+    {
+      "id": "M06",
+      "group": "read",
+      "path": "crates/pqc_scan_core/src/safe_read.rs",
+      "old": ".take((max as u64).saturating_add(1))",
+      "new": ".take(max as u64)",
+      "meaning": "超過確認の1バイトを読まず切り詰めを成功扱い",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "ce50b68976d9b1b8392b0e0b84074abeefd4c293511ea0d54bf0c5431e366793",
+      "afterSha256": "eb2acde7d6b154bab580434759280b6288b0ea24997af91d6a218ead23e7f637",
+      "failedTests": [
+        "safe_read::tests::growing_input_is_stopped_at_limit_plus_one"
+      ]
+    },
+    {
+      "id": "M07",
+      "group": "normalization",
+      "path": "crates/pqc_scan_core/src/pipeline.rs",
+      "old": "if !dedup.insert(finding_id.clone()) {",
+      "new": "if dedup.insert(finding_id.clone()) {",
+      "meaning": "重複排除の条件を反転",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "cd387906c96e0e41f6836b95dc3f4493198d16af7e176416c88ac9d1db1bd773",
+      "afterSha256": "ca9d545398664c71de4b67898232e6723a75b49826d63e620a9c3f3cfdc05658",
+      "failedTests": [
+        "redaction_preserves_legacy_ids_native_associations_cbom_rows_and_technical_metadata"
+      ]
+    },
+    {
+      "id": "M08",
+      "group": "normalization",
+      "path": "crates/pqc_scan_core/src/pipeline.rs",
+      "old": "line: detection.location.line,",
+      "new": "line: 0,",
+      "meaning": "正規化後の検出行を喪失",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "cd387906c96e0e41f6836b95dc3f4493198d16af7e176416c88ac9d1db1bd773",
+      "afterSha256": "45a8cd8eba5fc0522ed7912d2c0d84fdc43ec7146cfd021182167d3c7938c080",
+      "failedTests": [
+        "redaction_preserves_legacy_ids_native_associations_cbom_rows_and_technical_metadata"
+      ]
+    },
+    {
+      "id": "M09",
+      "group": "normalization",
+      "path": "crates/pqc_scan_core/src/pipeline.rs",
+      "old": "confidence: rule.confidence,",
+      "new": "confidence: 0.0,",
+      "meaning": "正規化後の確信度を喪失",
+      "primaryOutcome": "missed",
+      "outcome": "missed",
+      "beforeSha256": "cd387906c96e0e41f6836b95dc3f4493198d16af7e176416c88ac9d1db1bd773",
+      "afterSha256": "857db288e4275211d30c00429e103055e298bb5a8c91547dffa06b0c0503815b",
+      "failedTests": []
+    },
+    {
+      "id": "M10",
+      "group": "inspection",
+      "path": "crates/pqc_scan_core/src/pipeline.rs",
+      "old": "D::ReadFailed => coverage.read_failed_files += 1,",
+      "new": "D::ReadFailed => coverage.analyzed_files += 1,",
+      "meaning": "読み取り失敗を解析成功として計上",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "cd387906c96e0e41f6836b95dc3f4493198d16af7e176416c88ac9d1db1bd773",
+      "afterSha256": "2011a66fe445b138ec4a831d2bdf0deb1c17dfff1216a7081828b419ebec2944",
+      "failedTests": [
+        "pipeline::tests::read_failure_retains_other_files_and_legacy_selected_count"
+      ]
+    },
+    {
+      "id": "M11",
+      "group": "inspection",
+      "path": "crates/pqc_scan_core/src/diagnostic.rs",
+      "old": "} else if self.unknown_files > 0 {",
+      "new": "} else if false {",
+      "meaning": "不明な検査を完了扱い",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "82119db20cbe310a0a4189d3357df1fb3ff30523dc54dd59ac66e637f3444af5",
+      "afterSha256": "27261462d33ae3aa94c8a18909b19ef532367b82488024834984198f2db28d85",
+      "failedTests": [
+        "pipeline::tests::detailed_scan_distinguishes_empty_success_from_legacy_unknown",
+        "pipeline::tests::detailed_statuses_partition_files_without_claiming_false_completeness",
+        "pipeline::tests::selected_files_without_detectors_are_unknown_but_empty_scope_can_complete"
+      ]
+    },
+    {
+      "id": "M12",
+      "group": "inspection",
+      "path": "crates/pqc_scan_core/src/diagnostic.rs",
+      "old": "let incomplete = self.partial_files + self.unsupported_files;",
+      "new": "let incomplete = 0;",
+      "meaning": "部分検査と未対応を完了判定から除外",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "82119db20cbe310a0a4189d3357df1fb3ff30523dc54dd59ac66e637f3444af5",
+      "afterSha256": "f504c11b3d67f85a2e5e512e1c0fc256f63247ddc9814d42bc871efe43cd4693",
+      "failedTests": [
+        "pipeline::tests::detector_error_preserves_other_hits_and_does_not_export_error_content",
+        "pipeline::tests::detailed_statuses_partition_files_without_claiming_false_completeness"
+      ]
+    },
+    {
+      "id": "M13",
+      "group": "privacy",
+      "path": "crates/pqc_scan_core/src/privacy.rs",
+      "old": "return self.private_marker || !self.credentials.is_empty();",
+      "new": "return false;",
+      "meaning": "行不明時の保守的な秘匿を解除。044の未記録候補",
+      "primaryOutcome": "missed",
+      "outcome": "missed",
+      "beforeSha256": "5505c9ab854b1038d13d4c492f32b2234efa1edde07cfcf179af1348d27a49e8",
+      "afterSha256": "00e0264e4cecb2dabf039a6b6f66a000f848c40c88bb04b7d91d2f376f243d5f",
+      "failedTests": []
+    },
+    {
+      "id": "M14",
+      "group": "privacy",
+      "path": "crates/pqc_scan_core/src/privacy.rs",
+      "old": "if column == 0 {\n                return true;",
+      "new": "if column == 0 {\n                return false;",
+      "meaning": "列不明時の保守的な秘匿を解除。044の未記録候補",
+      "primaryOutcome": "missed",
+      "outcome": "missed",
+      "beforeSha256": "5505c9ab854b1038d13d4c492f32b2234efa1edde07cfcf179af1348d27a49e8",
+      "afterSha256": "d3d071bcab830fda537301fd8d0c492a9c92f65142708996fbce98e431fb2e40",
+      "failedTests": []
+    },
+    {
+      "id": "M15",
+      "group": "privacy",
+      "path": "crates/pqc_scan_core/src/privacy.rs",
+      "old": "return Cow::Borrowed(PRIVATE);",
+      "new": "return Cow::Borrowed(input);",
+      "meaning": "秘密鍵マーカーを含むテキストの秘匿を解除",
+      "primaryOutcome": "missed",
+      "outcome": "caught",
+      "beforeSha256": "5505c9ab854b1038d13d4c492f32b2234efa1edde07cfcf179af1348d27a49e8",
+      "afterSha256": "480c70195f572689b980b8a439e2daec6ceb5667c5dd3eb8bb1b74211bb011d3",
+      "failedTests": [
+        "known_secret_syntax_is_omitted_in_all_legacy_formats_and_both_languages"
+      ]
+    },
+    {
+      "id": "M16",
+      "group": "rule_matching",
+      "path": "crates/pqc_scan_detectors/src/regex_detector.rs",
+      "old": "if should_skip_comment_only_match(&file.path, text, start) {",
+      "new": "if false {",
+      "meaning": "コメント中の一致を誤って検出",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "b0e4db9fc70c6d12ec765959ad6d71ec1049ecb82428ced271cf9bf68bf755d2",
+      "afterSha256": "1f71a17780a791d29b2e40a8803a9cdfe4320c4fde46a0e51c43aeff131057b1",
+      "failedTests": [
+        "comments_after_exact_regex_cap_do_not_prove_an_omitted_hit",
+        "regex_accepts_code_after_thirty_two_comment_matches",
+        "regex_work_budget_bounds_comment_only_search_without_claiming_missing_hits"
+      ]
+    },
+    {
+      "id": "M17",
+      "group": "rule_matching",
+      "path": "crates/pqc_scan_detectors/src/regex_detector.rs",
+      "old": "if accepted == budget.max_hits_per_rule {",
+      "new": "if accepted != budget.max_hits_per_rule {",
+      "meaning": "検出件数上限の条件を反転",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "b0e4db9fc70c6d12ec765959ad6d71ec1049ecb82428ced271cf9bf68bf755d2",
+      "afterSha256": "190cd002c30e7e86774df11995bcf8cb9d3655a1feaebbafc2c73e39561513b6",
+      "failedTests": [
+        "dockerfile_named_real_sources_are_still_parsed_as_their_languages",
+        "dockerfile_names_override_source_suffixes_and_keep_lexical_inspection"
+      ]
+    },
+    {
+      "id": "M18",
+      "group": "rule_matching",
+      "path": "crates/pqc_scan_detectors/src/regex_detector.rs",
+      "old": "regex.find_iter(target) {",
+      "new": "regex.find_iter(target).take(0) {",
+      "meaning": "正規表現の一致を全て見落とす",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "b0e4db9fc70c6d12ec765959ad6d71ec1049ecb82428ced271cf9bf68bf755d2",
+      "afterSha256": "13949b29fcd723f7fc44354cc9d5adf87394a6ab63bac247da230a5ac4d4b1f6",
+      "failedTests": [
+        "dockerfile_named_real_sources_are_still_parsed_as_their_languages",
+        "dockerfile_names_override_source_suffixes_and_keep_lexical_inspection"
+      ]
+    },
+    {
+      "id": "M19",
+      "group": "certificate",
+      "path": "crates/pqc_scan_detectors/src/certificate_detector/attributes.rs",
+      "old": "out.key_bits = Some(bits);\n                        out.key_size_kind = \"rsa_modulus\";",
+      "new": "out.key_bits = Some(bits + 1);\n                        out.key_size_kind = \"rsa_modulus\";",
+      "meaning": "RSA鍵長を1ビット過大評価",
+      "primaryOutcome": "caught",
+      "outcome": "caught",
+      "beforeSha256": "d4355465a444b6762499f0391c1ae9528ad40c639cb3cfc3fbebdfe350a74da6",
+      "afterSha256": "5adb7f3c6d10019e17bfef311b1429c21208536af82a500f0daaaded32be8c3f",
+      "failedTests": [
+        "public_der_helpers_require_exact_objects_and_return_safe_errors",
+        "rsa_modulus_bits_handle_sign_padding_and_non_byte_aligned_integers",
+        "rsa_sizes_are_modulus_bits_and_public_fingerprints_match_openssl"
+      ]
+    },
+    {
+      "id": "M20",
+      "group": "certificate",
+      "path": "crates/pqc_scan_detectors/src/certificate_detector/attributes.rs",
+      "old": "if !rest.is_empty() {\n        return Err(PublicDerParseError);\n    }\n    certificate_attributes(&cert, der)",
+      "new": "if false {\n        return Err(PublicDerParseError);\n    }\n    certificate_attributes(&cert, der)",
+      "meaning": "証明書DER末尾の最初の検査を省略。後段にも同じ拒否があるため等価性を確認",
+      "primaryOutcome": "missed",
+      "outcome": "missed",
+      "beforeSha256": "d4355465a444b6762499f0391c1ae9528ad40c639cb3cfc3fbebdfe350a74da6",
+      "afterSha256": "4170d8aac89fc642dbb5a60af882b8c98011c7f945df4f8ba939e68b9dac67e4",
+      "failedTests": []
+    }
+  ],
+  "baselines": {
+    "baseline-workspace": {
+      "passed": 578,
+      "failed": 0,
+      "ignored": 1,
+      "binaries": 64
+    },
+    "restored-workspace": {
+      "passed": 578,
+      "failed": 0,
+      "ignored": 1,
+      "binaries": 64
+    }
+  },
+  "recordedCommandWallSeconds": 864.5808482199973,
+  "recordedCommands": 689
+}

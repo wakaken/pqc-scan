@@ -471,3 +471,7 @@ mod tests {
         assert_eq!(tls_diagnostic(error), ProbeDiagnostic::UnsupportedLocal);
     }
 }
+
+#[cfg(test)]
+#[path = "quality047.rs"]
+mod quality047;

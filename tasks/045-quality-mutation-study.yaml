@@ -2,8 +2,8 @@ id: '045'
 title: 重要判断の変異試験で既存テストの弱点を調べる
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Evaluator Agent
 phase: '3'
 description: 判定反転等を試し、検出できない変異とその意味を残す。
 quality_alias: QAM-04
@@ -42,3 +42,42 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+
+execution_record:
+  date: '2026-11-13'
+  authorization: ユーザーが044に続けて045の実施を明示指示。
+  branch: codex/quality-assessment-model
+  base_head: 34b763d188bfc8ada49876c18b15f5406b6628b3
+  preexisting_changes: TASK-044-RETIREMENT.mdの日本語推敲のみ。保持し、045の測定対象から分離する。
+  lifecycle:
+  - pending -> planned: 当初Q4-14・7領域・既存ロードマップを再確認。
+  - planned -> in-progress: 20件の明示的な変異を既存の隔離環境で測定する。
+  approach:
+  - 新しい工具は導入せず、7領域から選んだ単一箇所の変異を固定する。全変異の網羅的探索とはしない。
+  - 読取専用の元ソースをscratchへコピーし、1件ずつ変更・build・既存テスト実行・原状復帰を行う。
+  - 無変異の対照が成功した設定だけを評価し、caught/missed/timeout/unviableと工具障害を区別する。
+  - 見逃しは影響と既存テストを照合する。テスト補強時も初回結果を保存し、再測定を別に記録する。
+  - source・工具・入力・規則・各変更・コマンド・終了状態・ログをhash付きで保存し、二段階レビューを実施する。
+  constraints: 製品の判定・ルール・Schemaは変更しない。新branch/worktree・develop取込・Miri実行・CI変更・公開操作は行わない。
+  result: docs/quality/TASK-045-RESULTS.md
+  durable_evidence: docs/quality/task045-20261113/
+  verification: 20件中14検出・非等価見逃し5・等価1、timeout/unviable0。無変異/復元対照各578成功1ignored。Python62・実隔離10・Node35・配布11・fmt/構文成功。
+  lifecycle_after_measurement: in-progress -> review（7領域・20件・見逃しのworkspace追試・復元対照と証拠保存を完了）
+  review_record:
+    implementation_reviewer: /root/task045_implementation_review
+    implementation_findings: 環境障害のunviable混入を防ぐ診断確認と、M20等価性の説明を修正。同じ担当者が修正と最終証拠を追加確認して受入。
+    test_reviewer: /root/task045_test_review
+    accepted_code_scope_sha256: 7feabf97273321d7a9ff30a8d3caad96286d5debcbf85a542a46c2d5c956a78b
+    reviewed_sources: docs/quality/task045-20261113/REVIEW-SOURCE-R2.json
+    decisions: 両者受入。対応必須の未解消指摘なし。
+completion:
+  date: '2026-11-13'
+  lifecycle: review -> done
+  criterion: 当初Q4-14の7領域・20変異を評価し、caught/missed/timeout/unviable、等価性、分母、見逃しの意味を確認。
+  deliverable: target/quality-task-045/mutation-review.md
+  durable_deliverable: docs/quality/TASK-045-RESULTS.md
+  evidence: docs/quality/task045-20261113/
+  product_result: 検出14、非等価の見逃し5、等価1。製品全体の合格や見逃しの解消を意味しない。
+  remaining_required_evaluation_work: なし。全コードの変異・通常機能だけの構成・doctest・別環境は今回の評価範囲外。
+  final_source: レビュー後は状態・レビュー記録のみ更新。計測コード・変異・製品コード・測定結果は不変。
+  publication: 未コミット。push/PR/merge/CI設定変更は行っていない。

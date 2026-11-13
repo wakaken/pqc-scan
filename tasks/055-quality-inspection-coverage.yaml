@@ -2,8 +2,8 @@ id: '055'
 title: 列挙・検出器適用・処理完了を分けて測定する
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Evaluator Agent
 phase: '2'
 description: 未知母数を保持し、検出器別の適用/未報告/部分/失敗を既存診断から集約する。
 quality_alias: '追加: Q2専用'
@@ -72,3 +72,34 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+
+execution_record:
+  authorization: ユーザーが055を先に完了し、その後046を完遂するよう明示承認。
+  base_head: 34b763d188bfc8ada49876c18b15f5406b6628b3
+  preexisting_changes: 045の完了済み未コミット変更と044日本語推敲を保持。測定証拠を上書きしない。
+  lifecycle:
+  - pending -> planned: 当初Q2-01〜08と既存計画・診断APIを確認。
+  - planned -> in-progress: 製品出力を変えず、テスト用収集と開発用集約を実装する。
+  approach:
+  - 既存pipelineを8終端状態・故障注入・管理された入力集合で検証し、診断と統計の事実を収集する。
+  - 実検出器を入力形式・対応版・未対応版・境界入力で実行し、状態と結果保持を照合する。
+  - 開発用集約でselected/read/terminalの等式と重複、分母、未知母数を検証し、当初8成果物を作成する。
+  - 隔離環境で通常/全機能の検証とRust必須チェックを行い、二段階レビュー後に完了を判定する。
+  constraints: 公開Schema・判定・暗号ロジック・ルール・CI条件は変更しない。新工具・新branch/worktree・公開操作は行わない。
+  lifecycle_after_verification: in-progress -> review
+  result: docs/quality/TASK-055-RESULTS.md
+  evidence: docs/quality/task055-20261113/
+  verification: Rust通常532成功・全機能583成功1ignored、両clippy/build・fmt終了0。Python66・Node35・配布11成功。74入力370検出器呼出し、8成果物作成、元ソース前後一致・隔離終了後削除。
+  review_record:
+    implementation_reviewer: /root/quality055046_implementation_review
+    finding: テスト専用ScanConfig初期化のneedless_updateを削除。通常/全機能clippyで確認。
+    test_reviewer: /root/quality055046_test_review
+    status: 両者受入。対応必須の未解消指摘なし。
+    accepted_code_scope_sha256: 78968c6c6019ebbd52b2c1ff08879012dcc9826482a32ea79298f72eb922b03a
+completion:
+  lifecycle: review -> done
+  criteria: 当初Q2-01〜08と8成果物を最終ソース・実測・二段階レビューで照合。
+  result: docs/quality/TASK-055-RESULTS.md
+  evidence: docs/quality/task055-20261113/
+  remaining_required_work: なし。有限の入力・構文・Linux arm64の検証で、全入力や検出精度の合格とはしない。
+  publication: 未コミット。push/PR/merge・CI変更は行っていない。

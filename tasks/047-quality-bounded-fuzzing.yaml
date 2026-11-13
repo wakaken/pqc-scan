@@ -2,8 +2,8 @@ id: '047'
 title: parserと入出力の短時間・長時間fuzz試験を整える
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Evaluator Agent
 phase: '3'
 description: 入力・時間・資源に上限を設け、crashの保存と再現までを一つの検証経路にする。
 quality_alias: QAM-05のfuzz部分
@@ -44,3 +44,44 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+
+execution_record:
+  authorization: ユーザーが057を先に完了し、続けて047を実施することを明示承認。
+  base_head: 34b763d188bfc8ada49876c18b15f5406b6628b3
+  prerequisite: 044と057はdone。057の5条件・最終ソース・二段階レビューの受入後に着手。
+  lifecycle:
+  - pending -> planned: 元の8入力群と既存の055公開/合成seed・057有限supervisorを確認。
+  - planned -> in-progress: 通常の製品parser/outputとTLS/SSH処理をテスト用workerから呼び出す。
+  approach:
+  - 055の74入力と追加の公開SPKI/構造化出力/protocol seedを再利用し、長さ・切断・挿入・置換・反復で変異させる。
+  - 8入力群を9対象に分け、短時間30秒/256入力・長時間120秒/2048入力のいずれかに先に達するまで各対象を測定を行う。計画の30分/対象は費用確認前の案であり、今回の全探索枠は約23分とする。
+  - 入力1MiB・各入力2秒/CPU2秒、既存コンテナーの子孫共通上限、成功ログの削除と要約/再現recipe保持で資源を制限する。
+  - seedと全変異の再現条件・hash、到達した処理状態、終了分類を残す。製品不具合は元入力と縮小入力を別プロセスで再確認する。
+  - 縮小とpanic保存は意図した故障を持つ独立controlでも試験し、製品の失敗と混同しない。
+  - 通常/全機能の必須検証と、057と同じ二者によるレビュー後に当初Q4-03と照合する。
+  constraints: 製品の検出仕様・暗号検証・公開Schema・rules・依存・CIは変更しない。coverage-guided engineや全入力の証明とは主張しない。
+  review_identities:
+    implementation: /root/quality057047_implementation_review
+    test: /root/quality057047_test_review
+  completion:
+    decision: 当初Q4-03の8入力群・有限探索・保存と再現/縮小・指定成果物を最終ソースと二段階レビューに照合してdoneと判断。
+    source_scope_sha256: 1c4fc811624fed18d742461fc53e49a392e88506d5ad1cbc4a126563fa08904b
+    normal_campaigns: 20
+    normal_inputs: 14547
+    distinct_target_name_inputs: 12133
+    distinct_byte_inputs: 11667
+    product_failures_found: 0
+    harness_control: 16バイトから5バイトCRASHへ18回で削除縮小し、元/縮小入力を別process再現。
+    coverage_replay: 全seedと続く16変異の255入力、通常feedback/hash全一致、044 stableLLVM集約を再利用。
+    coverage_scope: linked Rust75ファイル・cfgtest含む。line6080/18975、region9371/30312。未リンク11とFFI/依存は分母外、branch未計測。
+    normal_source: 通常実行時10filesをORDINARY-SOURCEへ保存。追加計測はprofile module/corpus/caseのみでRustと通常worker不変。
+    verification: 通常542成功3ignored/全機能594成功5ignored、両clippy/build/fmt0、Python74成功。両隔離実行source一致/削除true。
+    implementation_review: accepted; 通常/補足/profile追加/最終成果物を同担当が確認。
+    test_review: accepted; 全input独立再生成・coverage再集計・正負境界/縮小/通常profile source一致を確認。
+    initial_measurement_failures: profile counterが2MiB filecap超過、並行計測と通常実行の終了処理が競合。専用caseの16MiB counter枠で解消し、元ログ保持。
+    report: docs/quality/TASK-047-RESULTS.md
+    evidence: docs/quality/task047-20261113/VALIDATION.json
+    limitations: 固定seedのバイト変異・TLS単回record・SSH frame/KEXINIT・削除最小性・255入力のcoverageに限る。coverage-guidedや全入力/全protocol状態/製品全体の安全性の証明ではない。
+  closure_lifecycle:
+  - in-progress -> review: 実行・集計・指定成果物と二者の最終評価を確認し、文書/状態の最終照合へ移行。
+  - review -> done: 当初受入/成果物不変、最終source/入力hash、過去証拠/先行変更保持、リンク/品質74件を最終確認。

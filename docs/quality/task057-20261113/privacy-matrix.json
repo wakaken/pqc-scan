@@ -1,0 +1,160 @@
+{
+  "requirement": "Q4-04",
+  "collectionPaths": [
+    {
+      "from": "source/PEM/private marker/evidence snapshot/unknown positions/detector errors",
+      "to": "legacy JSON + native inventory + diagnostics; all formats via CLI",
+      "evidence": [
+        0,
+        1
+      ]
+    },
+    {
+      "from": "manifest/dependency URL credentials/purl",
+      "to": "all CLI outputs and stderr",
+      "evidence": [
+        2
+      ]
+    },
+    {
+      "from": "finding/evidence/metadata/actions/examples/references/snippets/CBOM/dependency rows",
+      "to": "JSON/HTML/Markdown/SARIF/CycloneDX/CSV, English and Japanese",
+      "evidence": [
+        3
+      ]
+    },
+    {
+      "from": "TLS/SSH probe envelope and details/serializer errors",
+      "to": "JSON/HTML/Markdown; error leaves no outputs",
+      "evidence": [
+        4
+      ]
+    }
+  ],
+  "nativePublicObjectBoundary": "CycloneDX native public objects and private marker observations checked by evidence6; source redaction recognized syntax checked by evidence5",
+  "evidence": [
+    {
+      "source": "crates/pqc_scan_core/tests/evidence_privacy.rs",
+      "sha256": "d9732c27cbdb3b6b3970b11160bc91d8ebad1cba52981a1785709cd21e28a84a",
+      "tests": [
+        "redaction_preserves_legacy_ids_native_associations_cbom_rows_and_technical_metadata",
+        "initial_source_snapshot_masks_body_even_if_a_detector_changes_the_file",
+        "detector_error_content_is_not_exported_by_diagnostics_or_inventory",
+        "quality057_unknown_line_or_column_preserves_conservative_redaction"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    },
+    {
+      "source": "crates/pqc_scan_cli/tests/evidence_privacy.rs",
+      "sha256": "b6c184e0f1fe916f5840ad882f201506f1aace017b98bf5461ad1e19d218a6d5",
+      "tests": [
+        "private_bodies_and_inline_credentials_never_survive_cli_report_paths"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    },
+    {
+      "source": "crates/pqc_scan_cli/tests/dependency_privacy.rs",
+      "sha256": "ed75fe2e3f29ec23404dc5dae43807f643f4cef6de746337c527fbc2bb94a709",
+      "tests": [
+        "dependency_locator_credentials_are_omitted_from_all_outputs_and_stderr"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    },
+    {
+      "source": "crates/pqc_scan_report/tests/evidence_privacy.rs",
+      "sha256": "7dc4ddb747738231ae6656e8b10f5affe66bec36cfe4d8a5cb15cb264da88042",
+      "tests": [
+        "known_secret_syntax_is_omitted_in_all_legacy_formats_and_both_languages"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    },
+    {
+      "source": "crates/pqc_scan_report/tests/probe_reports.rs",
+      "sha256": "9f5d39214c3f4ed25982fbb2c3b03e18cd92747aca8deb95ca07652b4809e8b9",
+      "tests": [
+        "recognized_secret_syntax_is_omitted_consistently_and_disclosed_as_export_loss",
+        "failed_serialization_does_not_disclose_arbitrary_error_text_or_create_outputs"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    },
+    {
+      "source": "crates/pqc_scan_core/src/privacy.rs",
+      "sha256": "5505c9ab854b1038d13d4c492f32b2234efa1edde07cfcf179af1348d27a49e8",
+      "tests": [
+        "known_literals_keys_urls_and_encoded_value_strings_are_redacted"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    },
+    {
+      "source": "crates/pqc_scan_report/tests/cyclonedx_17.rs",
+      "sha256": "a16d03ffb09d5886a6c6763471257d07cafe15b8faacf0c0fc51e59b281d26d9",
+      "tests": [
+        "separate_public_objects_have_resolving_refs_and_no_secret_claims",
+        "private_marker_observation_does_not_invent_a_key_asset"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    }
+  ],
+  "staticCanary": {
+    "command": [
+      "/scratch/target/debug/pqc-scan",
+      "scan",
+      "/scratch/static057",
+      "--rules-dir",
+      "/source/rules",
+      "--out-dir",
+      "/scratch/static057-output",
+      "--format",
+      "all",
+      "--diagnostics",
+      "--inventory-json",
+      "--cyclonedx-17"
+    ],
+    "result": {
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "scan",
+        "/scratch/static057",
+        "--rules-dir",
+        "/source/rules",
+        "--out-dir",
+        "/scratch/static057-output",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--cyclonedx-17"
+      ],
+      "status": "completed",
+      "returncode": 0,
+      "wallSeconds": 0.11591345900001215,
+      "wallLimitSeconds": 30,
+      "cpuLimitSeconds": 20,
+      "fileLimitBytes": 2097152,
+      "coreDumpBytes": 0,
+      "groupTerminationSent": false,
+      "stdoutBytes": 557,
+      "stderrBytes": 169
+    },
+    "configuredLoopbackReceivedConnections": false,
+    "externalNetwork": "none namespace, checked by boundary()",
+    "reportHashes": {
+      "scan.inventory.v1.json": "c733d46007d5cb16d6506b30c299915061cd98e4c96f73fd7cb88a56502af9c4",
+      "diagnostics.json": "4ba07a5a240d237ff2401c71da72d64e719b69c3c92f69743a759ddff5c12207",
+      "dependency-sbom.cdx-1.7.json": "224ac1e53756bc1a4cba1a7d201818118ad5bbd413ff37f737520599e9a76b96",
+      "cbom.cdx-1.7.json": "42737227aced1321499d72ad3ed5573447ec86844a3e97d97ccdda8d2748e850",
+      "dependency-sbom.json": "4b4f670c60ef3cabc0d1c388591f7583abef880b9d4b347b3146877b5d52cf37",
+      "cbom.json": "3050418e314d0a0294e1d3946192f8bd8367f2e9ed838c92d43014d1232c792d",
+      "report.sarif": "d3e1cfe86d1a3616d7407bc0baaa5dfb801bb62d9a61647b6b6cf40693f92bdd",
+      "report.md": "2d43b986fdcfa0aabb2e7e896bbabef170871def00ec7971fb985e49b5124fd9",
+      "report.html": "db2d0f3bab854ccbe552b5f24cd094fb06b5006d5863a42b36a55674aa50f27c",
+      "report.json": "1c791d6cd72d7b350cb18cacfc080d1ffe01ab57a735657297220d266d1f5db3"
+    },
+    "canaryAbsent": true
+  },
+  "outsideContract": [
+    "file paths and stable identifiers",
+    "arbitrary opaque/encoded values without recognized secret syntax",
+    "absence of canary is not proof of all real secrets being recognized"
+  ]
+}

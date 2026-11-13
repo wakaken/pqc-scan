@@ -1,0 +1,162 @@
+[
+  {
+    "id": "M01",
+    "group": "risk",
+    "path": "crates/pqc_scan_core/src/risk.rs",
+    "old": "if rule.confidence < 0.45 {",
+    "new": "if rule.confidence >= 0.45 {",
+    "meaning": "高信頼と低信頼の昇格条件を反転"
+  },
+  {
+    "id": "M02",
+    "group": "risk",
+    "path": "crates/pqc_scan_core/src/risk.rs",
+    "old": "if !sensitive_category {",
+    "new": "if sensitive_category {",
+    "meaning": "対象カテゴリの昇格条件を反転"
+  },
+  {
+    "id": "M03",
+    "group": "risk",
+    "path": "crates/pqc_scan_core/src/risk.rs",
+    "old": "Severity::Info => Severity::Low,",
+    "new": "Severity::Info => Severity::Info,",
+    "meaning": "InfoからLowへの昇格を省略。044の未記録候補"
+  },
+  {
+    "id": "M04",
+    "group": "risk",
+    "path": "crates/pqc_scan_core/src/risk.rs",
+    "old": "Severity::Low => Severity::Medium,",
+    "new": "Severity::Low => Severity::Low,",
+    "meaning": "LowからMediumへの昇格を省略。044の未記録候補"
+  },
+  {
+    "id": "M05",
+    "group": "read",
+    "path": "crates/pqc_scan_core/src/safe_read.rs",
+    "old": "if bytes.len() > max {",
+    "new": "if false {",
+    "meaning": "読み取り後のサイズ超過拒否を省略"
+  },
+  {
+    "id": "M06",
+    "group": "read",
+    "path": "crates/pqc_scan_core/src/safe_read.rs",
+    "old": ".take((max as u64).saturating_add(1))",
+    "new": ".take(max as u64)",
+    "meaning": "超過確認の1バイトを読まず切り詰めを成功扱い"
+  },
+  {
+    "id": "M07",
+    "group": "normalization",
+    "path": "crates/pqc_scan_core/src/pipeline.rs",
+    "old": "if !dedup.insert(finding_id.clone()) {",
+    "new": "if dedup.insert(finding_id.clone()) {",
+    "meaning": "重複排除の条件を反転"
+  },
+  {
+    "id": "M08",
+    "group": "normalization",
+    "path": "crates/pqc_scan_core/src/pipeline.rs",
+    "old": "line: detection.location.line,",
+    "new": "line: 0,",
+    "meaning": "正規化後の検出行を喪失"
+  },
+  {
+    "id": "M09",
+    "group": "normalization",
+    "path": "crates/pqc_scan_core/src/pipeline.rs",
+    "old": "confidence: rule.confidence,",
+    "new": "confidence: 0.0,",
+    "meaning": "正規化後の確信度を喪失"
+  },
+  {
+    "id": "M10",
+    "group": "inspection",
+    "path": "crates/pqc_scan_core/src/pipeline.rs",
+    "old": "D::ReadFailed => coverage.read_failed_files += 1,",
+    "new": "D::ReadFailed => coverage.analyzed_files += 1,",
+    "meaning": "読み取り失敗を解析成功として計上"
+  },
+  {
+    "id": "M11",
+    "group": "inspection",
+    "path": "crates/pqc_scan_core/src/diagnostic.rs",
+    "old": "} else if self.unknown_files > 0 {",
+    "new": "} else if false {",
+    "meaning": "不明な検査を完了扱い"
+  },
+  {
+    "id": "M12",
+    "group": "inspection",
+    "path": "crates/pqc_scan_core/src/diagnostic.rs",
+    "old": "let incomplete = self.partial_files + self.unsupported_files;",
+    "new": "let incomplete = 0;",
+    "meaning": "部分検査と未対応を完了判定から除外"
+  },
+  {
+    "id": "M13",
+    "group": "privacy",
+    "path": "crates/pqc_scan_core/src/privacy.rs",
+    "old": "return self.private_marker || !self.credentials.is_empty();",
+    "new": "return false;",
+    "meaning": "行不明時の保守的な秘匿を解除。044の未記録候補"
+  },
+  {
+    "id": "M14",
+    "group": "privacy",
+    "path": "crates/pqc_scan_core/src/privacy.rs",
+    "old": "if column == 0 {\n                return true;",
+    "new": "if column == 0 {\n                return false;",
+    "meaning": "列不明時の保守的な秘匿を解除。044の未記録候補"
+  },
+  {
+    "id": "M15",
+    "group": "privacy",
+    "path": "crates/pqc_scan_core/src/privacy.rs",
+    "old": "return Cow::Borrowed(PRIVATE);",
+    "new": "return Cow::Borrowed(input);",
+    "meaning": "秘密鍵マーカーを含むテキストの秘匿を解除"
+  },
+  {
+    "id": "M16",
+    "group": "rule_matching",
+    "path": "crates/pqc_scan_detectors/src/regex_detector.rs",
+    "old": "if should_skip_comment_only_match(&file.path, text, start) {",
+    "new": "if false {",
+    "meaning": "コメント中の一致を誤って検出"
+  },
+  {
+    "id": "M17",
+    "group": "rule_matching",
+    "path": "crates/pqc_scan_detectors/src/regex_detector.rs",
+    "old": "if accepted == budget.max_hits_per_rule {",
+    "new": "if accepted != budget.max_hits_per_rule {",
+    "meaning": "検出件数上限の条件を反転"
+  },
+  {
+    "id": "M18",
+    "group": "rule_matching",
+    "path": "crates/pqc_scan_detectors/src/regex_detector.rs",
+    "old": "regex.find_iter(target) {",
+    "new": "regex.find_iter(target).take(0) {",
+    "meaning": "正規表現の一致を全て見落とす"
+  },
+  {
+    "id": "M19",
+    "group": "certificate",
+    "path": "crates/pqc_scan_detectors/src/certificate_detector/attributes.rs",
+    "old": "out.key_bits = Some(bits);\n                        out.key_size_kind = \"rsa_modulus\";",
+    "new": "out.key_bits = Some(bits + 1);\n                        out.key_size_kind = \"rsa_modulus\";",
+    "meaning": "RSA鍵長を1ビット過大評価"
+  },
+  {
+    "id": "M20",
+    "group": "certificate",
+    "path": "crates/pqc_scan_detectors/src/certificate_detector/attributes.rs",
+    "old": "if !rest.is_empty() {\n        return Err(PublicDerParseError);\n    }\n    certificate_attributes(&cert, der)",
+    "new": "if false {\n        return Err(PublicDerParseError);\n    }\n    certificate_attributes(&cert, der)",
+    "meaning": "証明書DER末尾の最初の検査を省略。後段にも同じ拒否があるため等価性を確認"
+  }
+]
