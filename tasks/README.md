@@ -27,10 +27,12 @@ Fields:
 
 ## Working Rules
 
-Follow `AGENTS.md` for authorization, verification and completion gates and
-`docs/TASK-LIFECYCLE.md` for state definitions. The main agent performs planning,
-implementation and evaluation. Role names in task records are responsibility
-labels, not separate agents. `prompts/REVIEWER.md` is the only review template.
+Follow [AGENTS.md](../AGENTS.md) for authorization and required reading,
+[verification and completion](../docs/agent/VERIFICATION.md) for full completion
+gates, [review policy](../docs/agent/REVIEWS.md) for independent reviews, and
+[task lifecycle](../docs/TASK-LIFECYCLE.md) for states and task boundaries.
+The main agent performs planning, implementation and evaluation. Role names in
+task records are responsibility labels, not separate agents. `prompts/REVIEWER.md` is the only review template.
 Do not create unrelated tasks or automatically generate tasks from an empty queue,
 reflection or monitoring without authorization.
 
