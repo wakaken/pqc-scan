@@ -136,20 +136,34 @@ and [supported inputs and limits](docs/user/COVERAGE.md).
 
 ## Repository CI
 
-The `pqc-scan` workflow skips branch pushes and pull requests whose changed paths all
+The `pqc-scan` workflow runs automatically for pull requests and pushes to
+`develop`. Working-branch and tag pushes do not start it; updating an open PR
+still triggers PR validation.
+
+| Event | Jobs |
+|---|---|
+| Pull request | `quality` |
+| Push to `develop` | `baseline`, `scan` |
+| Manual execution | `quality`, `baseline`, `scan` |
+
+On `develop`, `baseline` and `scan` run independently of `quality`; PR validation
+provides the pre-merge quality check. Manual execution remains available for
+running all three enabled jobs together.
+
+It skips eligible pushes and pull requests whose changed paths all
 match its documentation list: the root README files, `AGENTS.md`, `SECURITY.md`,
 Markdown under `docs/` and `prompts/`, and `tasks/README.md`.
-Other changes, including mixed documentation/code changes, rules, workflow files
-and JSON data under `docs/`, still run CI. The exact list is maintained in
+Other changes in eligible events, including mixed documentation/code changes,
+rules, workflow files and JSON data under `docs/`, still run CI. The exact list is maintained in
 [the workflow](.github/workflows/pqc-scan.yml). Run it manually from GitHub Actions
 when validation is needed for an otherwise skipped change.
 
 During development, the `protocols` job is temporarily disabled for all triggers,
 including manual runs. Its protocol, isolation and packaging checks do not run;
-`quality`, `baseline` and `scan` remain enabled. Remove the job's `if: ${{ false }}`
+The jobs in the event table remain enabled. Remove the job's `if: ${{ false }}`
 condition in the workflow to restore those checks.
 
-Tag pushes still run CI. GitHub limits the number of changed files considered
+GitHub limits the number of changed files considered
 by path filtering; for large changes, manually run CI if it was omitted.
 
 Before making these checks required for merging, replace workflow-level path
