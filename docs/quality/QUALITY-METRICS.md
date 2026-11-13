@@ -74,5 +74,6 @@ Q4は入力や故障注入ケースごとのpanic、timeout、制限超過、秘
 Q5は入力レシピ、hash、build/features、ホストと隔離条件が同じ試料を比較します。
 処理量はfiles/wall、bytes/wallで定義しますが、現在は起動・出力を含む小規模入力の値です。
 本当のOS cold cache、失敗時の資源、複数ホストの差は別測定です。
+Linuxのwait4由来のpeak RSSは、exec前の起動プロセス像による下限も含み得ます。スキャナー本体だけのRSSやprocess tree全体の合計とは扱いません。資源統計がexecをまたいで保持される点と最大RSSの定義は[Linux man-pages](https://man7.org/linux/man-pages/man2/getrusage.2.html)を参照してください。同じlauncher条件を記録し、小さい試料の同値を測定器の累積値と即断しません。
 
 Q6は設定、手順、環境、検証項目ごとに状態と根拠を示します。全体点には合算しません。

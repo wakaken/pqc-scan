@@ -74,3 +74,9 @@ Python品質59件、実コンテナー境界10件、macOS隔離1件、preview単
 [統合検証台帳](task044-integration-20261113/VALIDATION.json)・[原記録](task044-integration-20261113/VERIFICATION.tar.gz)・[限定レビュー](task044-integration-20261113/REVIEWS.md)を参照してください。renderer13ファイルはdevelopと同じbytesで、PR24の実browser証拠を変更のない表示範囲に再利用しました。coverage/共通隔離のコードも1bbから不変です。過去の測定値・レビューhashは現在の版へ付け替えていません。
 
 統合修正・ローカル検証・既存二者の限定レビューを終え、044をdoneとしました。公開前のこの記録はhosted CIやmergeの成功を先取りするものではありません。PR25で実際のCIを確認してからmergeします。
+
+## 公開CIで判明したRSS試験の修正
+
+統合head b1b1488の[初回CI](https://github.com/wakaken/pqc-scan/actions/runs/43382596747)はRust・fmt・clippy・Nodeを通過しましたが、PythonのRSS比較1件が失敗しました。固定32MiBの子より親imageのRSS floorが大きく、Linuxで大小の子が同じpeakを報告する条件を再現しました。計測器や過去のRSS値は変更せず、試験の大きい子を親SELF peakより大きな実接触入力に変更しました。
+
+Linux高RSS親でのred/green、累積値を返す誤実装を検出する負対照、Linux計測試験6件・Mac品質59件を確認し、既存二者が受入済みです。[修正証拠](task044-ci-fix-20261113/VALIDATION.json)・[レビュー](task044-ci-fix-20261113/REVIEWS.md)を参照してください。Sourceとraw log、正確な再現recipeを保持しています。044をdoneへ戻し、最終headの実CIで再確認してからmergeします。

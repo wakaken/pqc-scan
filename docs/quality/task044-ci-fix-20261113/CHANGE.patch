@@ -1,0 +1,57 @@
+diff --git a/docs/quality/QUALITY-METRICS.md b/docs/quality/QUALITY-METRICS.md
+index 98ebd89..8071a8f 100644
+--- a/docs/quality/QUALITY-METRICS.md
++++ b/docs/quality/QUALITY-METRICS.md
+@@ -74,5 +74,6 @@ Q4は入力や故障注入ケースごとのpanic、timeout、制限超過、秘
+ Q5は入力レシピ、hash、build/features、ホストと隔離条件が同じ試料を比較します。
+ 処理量はfiles/wall、bytes/wallで定義しますが、現在は起動・出力を含む小規模入力の値です。
+ 本当のOS cold cache、失敗時の資源、複数ホストの差は別測定です。
++Linuxのwait4由来のpeak RSSは、exec前の起動プロセス像による下限も含み得ます。スキャナー本体だけのRSSやprocess tree全体の合計とは扱いません。資源統計がexecをまたいで保持される点と最大RSSの定義は[Linux man-pages](https://man7.org/linux/man-pages/man2/getrusage.2.html)を参照してください。同じlauncher条件を記録し、小さい試料の同値を測定器の累積値と即断しません。
+ 
+ Q6は設定、手順、環境、検証項目ごとに状態と根拠を示します。全体点には合算しません。
+diff --git a/tasks/044-quality-coverage-feasibility.yaml b/tasks/044-quality-coverage-feasibility.yaml
+index f6d6701..75e1d4c 100644
+--- a/tasks/044-quality-coverage-feasibility.yaml
++++ b/tasks/044-quality-coverage-feasibility.yaml
+@@ -2,8 +2,8 @@ id: '044'
+ title: 到達率と追加検証手法の適用範囲を測る
+ type: improvement
+ priority: high
+-status: done
+-owner: Evaluator Agent
++status: in-progress
++owner: Executor Agent
+ phase: '3'
+ description: 重要な未到達箇所を特定し、Miriや形式検証の適用可否も根拠付きで判断する。
+ quality_alias: QAM-03
+@@ -179,3 +179,9 @@ integration:
+   preserved: 過去3証拠folderと旧applicabilityの92ファイルは不変。旧RULE companionもexact保存し現行版を新しいsource束縛として構成。
+   scope_limits: 元の到達率はf8時点の測定として維持。新Miri/coverage/性能測定なし。5corpusの既知FP/FNを保持し、製品全面合格としない。
+   publication: 公開前の評価完了記録。既存branchのmerge commitをpush後、PR25の実CIを確認してdevelopへmergeする。実際の公開結果はGit/PR履歴で確認する。
++
++ci_followup:
++  failed_run: https://github.com/wakaken/pqc-scan/actions/runs/43382596747
++  lifecycle: done -> in-progress（Linux CIのRSS回帰試験前提を修正）
++  cause: wait4は子ごとだがexec前の親image由来RSS floorを含み得る。固定32MiB childが親より小さいと大小両childのpeakが同値になり試験が失敗。
++  approach: 計測器や測定値は変えず、large childの実接触allocationを親SELF peakより大きくして、累積値への退行を引き続き検出する。Linux高RSS親でred/greenと通常suiteを確認し、既存二者の限定確認後CIを再実行する。
+diff --git a/tests/quality/test_run.py b/tests/quality/test_run.py
+index 65cbd01..f2c0e4e 100644
+--- a/tests/quality/test_run.py
++++ b/tests/quality/test_run.py
+@@ -22,7 +22,15 @@ class MeasurementTests(unittest.TestCase):
+     def test_small_second_child_does_not_inherit_previous_child_peak_rss(self):
+         with tempfile.TemporaryDirectory(prefix="pqc023-rss-") as name:
+             root = pathlib.Path(name)
+-            large = run.measure([sys.executable, "-c", "data = bytearray(32 * 1024 * 1024); print(len(data))"], root / "large", 5)
++            import resource
++            # Linux may include the pre-exec parent image in the child's peak.
++            # Ensure the large child's touched allocation exceeds that floor;
++            # a cumulative RUSAGE_CHILDREN maximum must still fail this test.
++            unit = 1 if sys.platform == "darwin" else 1024
++            parent_peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * unit
++            size = max(64 * 1024 * 1024, parent_peak + 32 * 1024 * 1024)
++            program = f"data = bytearray({size}); data[::4096] = b'x' * len(data[::4096]); print(len(data))"
++            large = run.measure([sys.executable, "-c", program], root / "large", 5)
+             small = run.measure([sys.executable, "-c", "print('small')"], root / "small", 5)
+             self.assertEqual((large["exitCode"], small["exitCode"]), (0, 0))
+             self.assertLess(small["peakRssBytes"], large["peakRssBytes"])
