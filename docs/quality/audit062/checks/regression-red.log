@@ -1,0 +1,61 @@
+   Compiling pqc_scan_cli v0.2.0 (/Users/waka/.codex/worktrees/audit-p1-p2-fixes/pqc-scan/crates/pqc_scan_cli)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.70s
+     Running tests/audit_remediation.rs (target/debug/deps/audit_remediation-a3f90b3d17c8e8f0)
+
+running 6 tests
+test gradle_map_declarations_preserve_constraints_without_resolving_variables ... FAILED
+test reference_guidance_does_not_assert_exposure_jwt_issuance_or_missing_hybrid ... FAILED
+test rsa_sizes_require_rsa_context_not_pqc_names_or_usage_counts ... FAILED
+test standard_pqc_names_and_registrations_are_inventoried_without_execution_claims ... FAILED
+test tls_references_do_not_claim_effective_configuration_or_static_rsa_exchange ... FAILED
+test human_summaries_distinguish_raw_hits_locations_and_incomplete_counts_in_both_languages ... FAILED
+
+failures:
+
+---- gradle_map_declarations_preserve_constraints_without_resolving_variables stdout ----
+
+thread 'gradle_map_declarations_preserve_constraints_without_resolving_variables' (14612943) panicked at crates/pqc_scan_cli/tests/audit_remediation.rs:100:5:
+assertion `left == right` failed
+  left: 1
+ right: 5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- reference_guidance_does_not_assert_exposure_jwt_issuance_or_missing_hybrid stdout ----
+
+thread 'reference_guidance_does_not_assert_exposure_jwt_issuance_or_missing_hybrid' (14612945) panicked at crates/pqc_scan_cli/tests/audit_remediation.rs:69:5:
+assertion failed: marker[0]["migration_hint"].as_str().unwrap().contains("If")
+
+---- rsa_sizes_require_rsa_context_not_pqc_names_or_usage_counts stdout ----
+
+thread 'rsa_sizes_require_rsa_context_not_pqc_names_or_usage_counts' (14612946) panicked at crates/pqc_scan_cli/tests/audit_remediation.rs:36:5:
+assertion failed: scan.hits("Params.java", "TS_RSA_KEY_SIZE_LITERAL").is_empty()
+
+---- standard_pqc_names_and_registrations_are_inventoried_without_execution_claims stdout ----
+
+thread 'standard_pqc_names_and_registrations_are_inventoried_without_execution_claims' (14612947) panicked at crates/pqc_scan_cli/tests/audit_remediation.rs:89:63:
+assertion `left == right` failed: schemes.go
+  left: 0
+ right: 4
+
+---- tls_references_do_not_claim_effective_configuration_or_static_rsa_exchange stdout ----
+
+thread 'tls_references_do_not_claim_effective_configuration_or_static_rsa_exchange' (14612948) panicked at crates/pqc_scan_cli/tests/audit_remediation.rs:47:5:
+assertion failed: scan.findings().iter().all(|f| f["location"]["file"] != "comment.conf")
+
+---- human_summaries_distinguish_raw_hits_locations_and_incomplete_counts_in_both_languages stdout ----
+
+thread 'human_summaries_distinguish_raw_hits_locations_and_incomplete_counts_in_both_languages' (14612944) panicked at crates/pqc_scan_cli/tests/audit_remediation.rs:115:9:
+assertion failed: html.contains("data-candidate-locations=\"1\"")
+
+
+failures:
+    gradle_map_declarations_preserve_constraints_without_resolving_variables
+    human_summaries_distinguish_raw_hits_locations_and_incomplete_counts_in_both_languages
+    reference_guidance_does_not_assert_exposure_jwt_issuance_or_missing_hybrid
+    rsa_sizes_require_rsa_context_not_pqc_names_or_usage_counts
+    standard_pqc_names_and_registrations_are_inventoried_without_execution_claims
+    tls_references_do_not_claim_effective_configuration_or_static_rsa_exchange
+
+test result: FAILED. 0 passed; 6 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s
+
+error: test failed, to rerun pass `-p pqc_scan_cli --test audit_remediation`

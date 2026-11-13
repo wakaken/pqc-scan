@@ -4,6 +4,10 @@
 
 Start with the [input overview](../../README.md#targets). This guide gives the supported formats and boundaries behind that table. Support for a file type means the documented subset can be inspected; it does not mean every cryptographic operation or runtime path can be found.
 
+Audit rule coverage: the RSA-size rule requires an explicit RSA token or recognized RSA-size identifier, not any `Key` substring. It remains nominal matching, not binding or measured key-size proof. `PQC_STANDARD_REFERENCE` recognizes ML-KEM/ML-DSA/SLH-DSA parameter names and X25519MLKEM768, including compact MLKEM/MLDSA symbols. Evidence metadata records `reference_kind` as `name_literal`, `call_reference` or `symbol_reference` based on the eligible AST candidate; none establishes execution. Hash-commented `.conf`/`.cfg` lines are excluded by the lexical comment filter. Generic C/text protocol references remain references, not effective settings.
+
+Gradle's lexical single-line subset accepts the existing six dependency configurations with quoted coordinates or literal `group`/`name` map fields and optional `version`. Variables/interpolation are unresolved, declarations never supply a resolved version, and lexical inspection remains NotReported rather than full Gradle analysis. Dynamic expressions, multiline declarations and script evaluation remain outside this subset.
+
 ## Contents
 
 - [Dependency files](#dependencies)
@@ -115,7 +119,7 @@ Limits are 2 MiB, 256 bags, 256 content entries, nesting depth 8 and 4096 attrib
 ### Built-in Rule Set
 
 - Default rules live under `rules/default/`
-- Current built-in rules: 122
+- Current built-in rules: 123
 - Full reference (all rule IDs + severity definitions): [docs/rules-reference.md](../rules-reference.md)
 
 Rule packs reject blank IDs, non-finite confidence or values outside `0..1`, duplicate IDs, invalid patterns and traversal failures. Invalid packs return operational error 1 instead of a partial pack. Valid custom scopes retain their per-detector semantics; unknown scope labels are not rejected. Check [scope compatibility](../architecture/RULE-VALIDATION.md) when upgrading a custom pack.

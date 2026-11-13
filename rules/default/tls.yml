@@ -29,7 +29,7 @@
   migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "(?:^|[^A-Za-z0-9_])TLSv1(?:[._]0)?(?:$|[^A-Za-z0-9_.])"
   scope: code
-  description: Legacy TLS 1.0 configuration detected.
+  description: TLS 1.0 name referenced; effective configuration and runtime use are not established.
 
 - id: TLS_VERSION_1_1
   kind: regex
@@ -40,7 +40,7 @@
   migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
   pattern: "\\bTLSv1[._]1\\b"
   scope: code
-  description: Legacy TLS 1.1 configuration detected.
+  description: TLS 1.1 name referenced; effective configuration and runtime use are not established.
 
 - id: TLS_RSA_CIPHER_SUITE
   kind: regex
@@ -48,7 +48,7 @@
   severity: high
   risk: quantum-vulnerable
   confidence: 0.68
-  migration_hint: Migrate to PQC-ready or hybrid cipher suites.
+  migration_hint: Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication.
   pattern: "\\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\\b"
   scope: code
   description: RSA-based TLS cipher suite detected.

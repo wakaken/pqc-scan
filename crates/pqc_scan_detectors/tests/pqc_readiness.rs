@@ -38,11 +38,10 @@ fn checked_in_seven_language_fixtures_match_the_documented_rules() {
     }
     let path = root.join("negative.js");
     let file = ScannableFile::from_bytes(path.clone(), std::fs::read(path).unwrap());
-    assert!(TreeSitterDetector
-        .detect(&file, &rules)
-        .unwrap()
-        .iter()
-        .all(|hit| !hit.rule_id.starts_with("PQC_")));
+    let hits = TreeSitterDetector.detect(&file, &rules).unwrap();
+    assert_eq!(hits.len(), 1);
+    assert_eq!(hits[0].rule_id, "PQC_STANDARD_REFERENCE");
+    assert_eq!(hits[0].location.line, 3);
 }
 
 #[test]

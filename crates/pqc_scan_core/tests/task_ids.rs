@@ -28,7 +28,7 @@ fn task_ids_are_exact_unique_strings_and_dependencies_resolve() {
         );
         assert!(tasks.insert(id, task).is_none(), "duplicate task id");
     }
-    assert_eq!(tasks.len(), 40);
+    assert_eq!(tasks.len(), 41);
     for (id, task) in &tasks {
         if let Some(dependencies) = task.get("depends_on") {
             for dep in dependencies.as_sequence().unwrap() {

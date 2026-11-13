@@ -10,14 +10,18 @@ const read=p=>JSON.parse(fs.readFileSync(path.join(root,p)));
 const ledger=read('docs/quality/V02-SELF-SCAN-REVIEW.json');
 const policy=()=>read('docs/quality/SELF-SCAN-EXPECTATIONS.json');
 const input=()=>({version:'2.1.0',runs:[{tool:{driver:{name:'pqc-scan'}},results:structuredClone(ledger.results.map(x=>x.result))}]});
-test('v0.2 finite review matches actual sources and keeps dependency observations',()=>{
+test('v0.2 historical review omits only unchanged-source expectations and keeps inventory',()=>{
+ const changed=new Set();
  for(const [p,h] of Object.entries(ledger.sourceBindings))
-  assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,p))).digest('hex'),h,p);
+  if(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,p))).digest('hex')!==h) changed.add(p);
  const raw=input(),before=JSON.stringify(raw),out=prepareCodeScanning(raw,policy(),root);
  assert.equal(JSON.stringify(raw),before);
- assert.equal(out.audit.expectedResults,ledger.counts.expected);
- assert.equal(out.audit.retainedResults,ledger.counts.retained);
- assert.deepEqual(out.sarif.runs[0].results,ledger.results.filter(x=>x.disposition==='retained_inventory').map(x=>x.result));
+ // Never refresh historical allowances to match edited sources. Their old
+ // observations must remain visible, alongside all inventory observations.
+ const retained=ledger.results.filter(x=>x.disposition==='retained_inventory'||changed.has(x.path));
+ assert.equal(out.audit.expectedResults,ledger.counts.raw-retained.length);
+ assert.equal(out.audit.retainedResults,retained.length);
+ assert.deepEqual(out.sarif.runs[0].results,retained.map(x=>x.result));
  assert.ok(out.audit.retainedResults>0);
  assert.equal(out.audit.rawResults,ledger.counts.raw);
 });

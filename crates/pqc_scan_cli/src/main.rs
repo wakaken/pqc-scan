@@ -768,7 +768,7 @@ mod tests {
         assert!(md.contains("tlsmlkem=0"));
         let json: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
-        assert_eq!(json["summary"]["total_findings"], 10);
+        assert_eq!(json["summary"]["total_findings"], 15);
         assert!(json["findings"]
             .as_array()
             .unwrap()
@@ -812,16 +812,21 @@ mod tests {
         let report: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
         let hits = report["findings"].as_array().unwrap();
-        assert_eq!(hits.len(), 10);
+        assert_eq!(hits.len(), 15);
         assert_eq!(
             hits.iter()
                 .filter(|hit| hit["risk"] == "quantum-safe" && hit["severity"] == "info")
                 .count(),
-            7
+            12
         );
-        assert!(hits
+        // The former API-negative fixture contains a real hybrid group name;
+        // it is now a nominal inventory reference, never an API execution hit.
+        let nominal = hits
             .iter()
-            .all(|hit| hit["location"]["file"] != "negative.js"));
+            .filter(|hit| hit["location"]["file"] == "negative.js")
+            .collect::<Vec<_>>();
+        assert_eq!(nominal.len(), 1);
+        assert_eq!(nominal[0]["rule_id"], "PQC_STANDARD_REFERENCE");
         assert!(hits
             .iter()
             .filter(|hit| hit["risk"] == "quantum-safe")
@@ -829,7 +834,7 @@ mod tests {
         let cbom: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("cbom.json")).unwrap()).unwrap();
         assert_eq!(cbom, report["cbom"]);
-        assert_eq!(cbom.as_array().unwrap().len(), 10);
+        assert_eq!(cbom.as_array().unwrap().len(), 15);
         for file in ["report.html", "report.md", "report.sarif"] {
             let text = fs::read_to_string(out.join(file)).unwrap();
             assert!(text.contains("PQC_PYTHON_API"));

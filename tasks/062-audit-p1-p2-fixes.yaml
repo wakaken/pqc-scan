@@ -1,0 +1,56 @@
+id: "062"
+title: "Develop audit P1/P2 remediation"
+type: implementation
+priority: high
+status: done
+owner: Evaluator
+baseline: 5f552b818ec82cc0b6b4a8af77b6179d63e281e3
+description: >-
+  Implement the user-approved P1/P2 audit plan. Preserve schemas and evidence
+  masking; no P3 HAProxy inventory, SARIF severity extension or curve UI work.
+acceptance_criteria:
+  - RSA size rules reject PQC parameters, filenames and HSS counters, retaining RSA controls.
+  - TLS guidance distinguishes static RSA exchange from ECDHE/DHE RSA authentication.
+  - Generic protocol references do not assert effective configuration; hash-commented settings are excluded.
+  - Private-key markers retain detection and masking with conditional incident guidance.
+  - General EdDSA, RSA generation and composite contexts receive reference-oriented guidance.
+  - Standard PQC names/registrations are inventoried in CIRCL, jose and rustls without runtime/conformance claims.
+  - Human reports retain raw findings and add unique candidate positions with unknown positions separate.
+  - Human report summaries disclose uninspected/truncated omissions and incomplete status.
+  - Gradle group/name/version declarations are inventoried without executing scripts or fabricating resolution.
+  - Regression and workspace checks, 10-target comparison, bilingual reports and browser verification pass.
+  - Implementation and test reviews accept the final source.
+compatibility:
+  authorization: User approved all P1/P2 items after the plan disclosed rule compatibility effects.
+  preserved: [CLI flags, JSON schemas, legacy IDs for unchanged inputs, severity engine, CBOM grouping, masking]
+  intentional_changes: [false-positive removal, reference guidance, additive PQC rule, Gradle records, human summaries]
+implementation_steps:
+  - Add failing CLI regression controls, then narrow size rules and correct reference guidance.
+  - Add bounded PQC reference coverage and Gradle map declaration parsing.
+  - Add human-only position aggregates and incomplete-count notice.
+  - Update English/Japanese guides and current rule metadata without changing historical audit evidence.
+  - Run required checks and real-target comparison; obtain the two reviews.
+evidence:
+  - docs/quality/audit062/SOURCE-FINAL.json
+  - docs/quality/audit062/CHECKS.json
+  - docs/quality/audit062/COMPARISON.json
+  - docs/quality/audit062/ACCEPTANCE.json
+  - docs/quality/audit062/BROWSER.json
+  - docs/quality/audit062/IMPLEMENTATION-REVIEW.md
+reviews:
+  implementation:
+    reviewer: /root/implementation_review
+    scope: combined P1/P2 change
+    source: docs/quality/audit062/SOURCE-FINAL.json
+    status: accepted
+  test:
+    reviewer: /root/test_review
+    scope: combined final-source verification and coverage
+    source: docs/quality/audit062/SOURCE-FINAL.json
+    status: accepted
+completion:
+  source_manifest: docs/quality/audit062/SOURCE-FINAL.json
+  source_manifest_sha256: e6d4f52a17d8fa6f0cc4210ee84cb12bbe661dd8369e4edba523c63fe799b293
+  result: All original P1/P2 acceptance criteria verified; P3 excluded by user.
+  report: docs/quality/AUDIT-P1-P2.md
+  python_optional_skip: PyYAML YAML 1.1 cross-check; Rust YAML validation passed.

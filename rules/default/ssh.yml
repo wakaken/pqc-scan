@@ -81,7 +81,7 @@
   severity: critical
   risk: non-quantum-risk
   confidence: 0.95
-  migration_hint: Rotate exposed private keys immediately and strengthen key handling.
+  migration_hint: Confirm whether this is a header example, test key or complete live key. If a live key is exposed, revoke or rotate it and review key handling.
   pattern: "-----BEGIN RSA PRIVATE KEY-----"
   scope: keymaterial
   description: RSA private key header detected.
@@ -92,7 +92,7 @@
   severity: critical
   risk: non-quantum-risk
   confidence: 0.95
-  migration_hint: Investigate private-key exposure and rotate credentials.
+  migration_hint: Confirm whether complete live key material is present. If exposure is confirmed, revoke or rotate the affected credentials.
   pattern: "-----BEGIN PRIVATE KEY-----"
   scope: keymaterial
   description: PKCS#8 private key header detected.
@@ -103,7 +103,7 @@
   severity: critical
   risk: non-quantum-risk
   confidence: 0.95
-  migration_hint: Treat OpenSSH private-key exposure as an urgent incident.
+  migration_hint: Confirm whether this marker belongs to a complete live OpenSSH key. If a live key is exposed, treat it as an urgent incident and rotate it.
   pattern: "-----BEGIN OPENSSH PRIVATE KEY-----"
   scope: keymaterial
   description: OpenSSH private key header detected.
