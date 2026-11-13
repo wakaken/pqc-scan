@@ -19,7 +19,18 @@ do not automatically require independent review subagents.
 
 ## Required Review Stages
 
-Use two review stages for each user implementation request:
+For this policy, a user implementation request includes changes to product code,
+tests, detection rules, Cargo configuration or dependencies, CI, scripts,
+packaging, executable examples or other executable behavior, regardless of file
+extension. A request mixing these with documentation follows both stages for the
+combined change. Small implementation changes are not exempt.
+
+Explanations, research, design proposals and prose-only documentation changes
+normally require neither stage unless the original acceptance criteria or an
+explicit user instruction require review. This exception does not waive applicable
+verification, safety, compatibility or human-review gates.
+
+Use two review stages for each user implementation request in this scope:
 
 1. Implementation review:
    - After implementation, start one implementation-review subagent.
