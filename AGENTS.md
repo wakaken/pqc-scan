@@ -44,7 +44,7 @@ before the affected work.
 | Any change; verification; completion decision | [Verification and completion](docs/agent/VERIFICATION.md) |
 | Product implementation, Rust tests, Cargo, rules, CI, scripts or packaging changes | [Best practices](docs/BEST-PRACTICES.md); relevant sections of [patterns](docs/PATTERNS.md) and [known mistakes](docs/MISTAKES.md) |
 | Understanding or changing product behavior, components or interfaces | Relevant sections of [English README](README.md), [Japanese README](README.ja.md), [architecture](docs/architecture.md), and affected user guides/designs |
-| Design or architecture decisions | Relevant sections of [architecture](docs/architecture.md), [decisions](docs/DECISIONS.md), [patterns](docs/PATTERNS.md) and [known mistakes](docs/MISTAKES.md) |
+| Design or architecture decisions | Relevant sections of [architecture](docs/architecture.md), recorded decisions in the [decision log](docs/DECISIONS.md), [patterns](docs/PATTERNS.md) and [known mistakes](docs/MISTAKES.md); use the decision template only when recording an agreed decision |
 | User implementation request; independent review or material follow-up | [Review policy](docs/agent/REVIEWS.md); reviewers also read this file, [review template](prompts/REVIEWER.md) and their review package |
 | Creating, updating, resuming or closing task records | [Task lifecycle](docs/TASK-LIFECYCLE.md) and [task queue guide](tasks/README.md) |
 | Rule changes | [Rules reference](docs/rules-reference.md) |
@@ -74,8 +74,11 @@ before the affected work.
 - Main-agent investigation, design, implementation, testing and documentation
   must not be delegated. Explanations, research, design proposals and
   documentation-only changes do not automatically require review subagents.
-- Each user implementation request requires two independent stages: implementation
-  review after implementation, then test review after required tests.
+- Requests changing product code, tests, rules, Cargo/dependencies, CI, scripts,
+  packaging or other executable behavior require two independent stages:
+  implementation review after implementation, then test review after required tests.
+  Prose-only documentation changes are normally exempt; mixed requests and
+  executable examples require both stages. Explicit review requirements still apply.
 - Use at most two reviewer identities per request, one per stage. Review the
   combined change; reuse each reviewer for material fixes. Reviewers cannot delegate.
 - Extra agents require explicit user authorization of purpose and maximum count.
@@ -115,6 +118,12 @@ Human review is separate from independent reviews and grants no extra agent slot
   behavior changes; report format changes also require applicable report docs,
   subject to the human review conditions above.
 - Update affected agent references together when terms or paths change.
+- This file owns core constraints and summarizes detailed rules. Linked guides
+  own verification/completion (`docs/agent/VERIFICATION.md`), reviews
+  (`docs/agent/REVIEWS.md`), reports (`docs/agent/REPORTS.md`) and task lifecycle
+  (`docs/TASK-LIFECYCLE.md`) details. Core constraints always apply; update affected
+  summaries, details and references together in the same change. Resolve conflicts
+  before dependent work; neither location permits weakening the other's constraints.
 - Preserve past reviews, completed tasks and measurements. Historical role names
   and paths describe their time, not instructions to restore removed prompts.
 - Use existing knowledge documents for durable lessons; avoid duplicate knowledge
