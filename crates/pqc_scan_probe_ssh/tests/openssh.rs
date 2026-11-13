@@ -194,6 +194,11 @@ fn installed_openssh_classical_and_hybrid_offers_have_zero_authentication_messag
             "only the diagnostic KEXINIT may reach the server"
         );
         assert!(!log.contains("userauth-request"));
+        if let Some(path) = std::env::var_os("PQC049_EVIDENCE") {
+            let out = PathBuf::from(path).join("openssh-offers");
+            std::fs::create_dir_all(&out).unwrap();
+            std::fs::write(out.join(format!("{label}.json")),serde_json::to_vec_pretty(&serde_json::json!({"case":label,"offeredKex":kex,"report":report,"receivedMessageTypes":received,"cleanup":"Fixture::stop joined reader/reaped server; TestDirectory drop removes ephemeral keys"})).unwrap()).unwrap();
+        }
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../target/task-033");
         std::fs::write(
             root.join(format!("openssh-{label}-report.json")),

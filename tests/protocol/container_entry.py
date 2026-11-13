@@ -211,6 +211,9 @@ def main():
             elif args.case == 'fuzz047-profile':
                 import runpy
                 runpy.run_path(str(ROOT/'tests/quality/task047/profile.py'), run_name='__main__')
+            elif args.case == 'protocol049':
+                import runpy
+                runpy.run_path(str(ROOT/'tests/quality/task049/entry.py'), run_name='__main__')
             elif args.case == 'suite': suite(args.previews,args.ssh_kex)
             else: exercise(args.case)
         except BaseException as error:

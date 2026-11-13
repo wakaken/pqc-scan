@@ -47,6 +47,9 @@ impl Drop for Fixture {
     }
 }
 fn fixture(expired: bool, extra: usize) -> Fixture {
+    fixture_time(expired, false, extra)
+}
+fn fixture_time(expired: bool, future: bool, extra: usize) -> Fixture {
     let mut ca = CertificateParams::new(vec![]).unwrap();
     ca.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
     ca.key_usages = vec![KeyUsagePurpose::KeyCertSign, KeyUsagePurpose::CrlSign];
@@ -55,6 +58,10 @@ fn fixture(expired: bool, extra: usize) -> Fixture {
     if expired {
         leaf.not_before = rcgen::date_time_ymd(2000, 1, 1);
         leaf.not_after = rcgen::date_time_ymd(2001, 1, 1);
+    }
+    if future {
+        leaf.not_before = rcgen::date_time_ymd(2090, 1, 1);
+        leaf.not_after = rcgen::date_time_ymd(2091, 1, 1);
     }
     let key = KeyPair::generate().unwrap();
     let leaf = leaf.signed_by(&key, &issuer).unwrap();
@@ -80,6 +87,9 @@ fn fixture(expired: bool, extra: usize) -> Fixture {
         key: PrivatePkcs8KeyDer::from(key.serialize_der()),
     }
 }
+
+#[path = "support/quality049.rs"]
+mod quality049;
 fn server(
     listener: TcpListener,
     f: &Fixture,

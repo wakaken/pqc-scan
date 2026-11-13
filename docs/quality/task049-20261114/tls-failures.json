@@ -1,0 +1,1971 @@
+{
+  "requirement": "Q4-09",
+  "status": "Passed",
+  "cases": [
+    {
+      "case": "untrusted",
+      "peer": {
+        "expired": false,
+        "future": false,
+        "joined": true,
+        "trusted": false,
+        "verificationName": "localhost"
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "failed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "86c02d21c2b203d30bf8f4b3782c0a8c7695828d8d25b6744474e9381d65bc00",
+            "sent_sni": "localhost",
+            "trust_bundle_version": "1.0.11",
+            "trust_source": "bundled_mozilla",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "certificate_validation_failed"
+        ],
+        "generated_at": "2026-11-13T21:41:41.100743833+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 5000000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:33989",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:33989",
+          "port": 33989,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 1071,
+          "sent_bytes": 242
+        }
+      }
+    },
+    {
+      "case": "wrong-name",
+      "peer": {
+        "expired": false,
+        "future": false,
+        "joined": true,
+        "trusted": true,
+        "verificationName": "wrong.example"
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "failed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "696be59591c3d827177723dc480dbddde524683107512fbc814a854490ab9506",
+            "sent_sni": "wrong.example",
+            "trust_bundle_version": null,
+            "trust_source": "local_ca_file",
+            "verification_name": "wrong.example"
+          }
+        },
+        "diagnostics": [
+          "certificate_validation_failed"
+        ],
+        "generated_at": "2026-11-13T21:41:41.111436166+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 5000000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:41415",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:41415",
+          "port": 41415,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 1068,
+          "sent_bytes": 246
+        }
+      }
+    },
+    {
+      "case": "expired",
+      "peer": {
+        "expired": true,
+        "future": false,
+        "joined": true,
+        "trusted": true,
+        "verificationName": "localhost"
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "failed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "002167dd42ae8404f884797e01118bfc85246ac9d28390f4b76d574749a8e02b",
+            "sent_sni": "localhost",
+            "trust_bundle_version": null,
+            "trust_source": "local_ca_file",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "certificate_validation_failed"
+        ],
+        "generated_at": "2026-11-13T21:41:41.128043125+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 5000000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:42425",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:42425",
+          "port": 42425,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 1069,
+          "sent_bytes": 242
+        }
+      }
+    },
+    {
+      "case": "not-yet-valid",
+      "peer": {
+        "expired": false,
+        "future": true,
+        "joined": true,
+        "trusted": true,
+        "verificationName": "localhost"
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "failed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "da84a3bc4d59c7b6b36332f4fd735f7f93711e67a8f70f7616d515273aacb6a2",
+            "sent_sni": "localhost",
+            "trust_bundle_version": null,
+            "trust_source": "local_ca_file",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "certificate_validation_failed"
+        ],
+        "generated_at": "2026-11-13T21:41:41.138322500+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 5000000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:46273",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:46273",
+          "port": 46273,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 1070,
+          "sent_bytes": 242
+        }
+      }
+    },
+    {
+      "case": "chain-limit",
+      "peer": {
+        "joined": true,
+        "presentedCertificates": 17
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 16,
+            "presented_bytes": 6697,
+            "presented_count": 17,
+            "status": "partial"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": true,
+          "handshake_kind": "full",
+          "negotiated": {
+            "cipher_suite": {
+              "id": 4866,
+              "name": "TLS13_AES_256_GCM_SHA384"
+            },
+            "group_classification": "classical",
+            "key_exchange_group": {
+              "id": 29,
+              "name": "X25519"
+            },
+            "version": {
+              "id": 772,
+              "name": "TLSv1_3"
+            }
+          },
+          "peer_certificates": [
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "f9560a7ad4d14e93a044c9ad67e84ad441ec0d373690cfac1740908ac0d201e2",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "35ad948a5fdf9f1d967ebec45a0e5ef06aa4664dc9e398a17f206fe641d589ca"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            },
+            {
+              "attribute_status": "complete",
+              "certificate_der_sha256": "7cd87d5ea8106aa78cea53824f372568c61b6ec462c70e24cbe507cbfb0b99f1",
+              "key_bits": 256,
+              "named_curve_oid": "1.2.840.10045.3.1.7",
+              "not_after_unix": 67090118400,
+              "not_before_unix": 157766400,
+              "public_key_oid": "1.2.840.10045.2.1",
+              "signature_oid": "1.2.840.10045.4.3.2",
+              "spki_sha256": "ef7e3d51fe8f345b85f4dff0729e0e6f40d31c519e5d4a80a70deff8b79090ce"
+            }
+          ],
+          "verification": {
+            "certificate_chain_and_name": "verified",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "5f2638f08690a78e13a0bb944d1f23fabd1511bd330664e5618e82e2412e1bb5",
+            "sent_sni": "localhost",
+            "trust_bundle_version": null,
+            "trust_source": "local_ca_file",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "certificate_collection_limit"
+        ],
+        "generated_at": "2026-11-13T21:41:41.153973625+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 5000000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "partial",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:33601",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:33601",
+          "port": 33601,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 7087,
+          "sent_bytes": 322
+        }
+      }
+    },
+    {
+      "case": "message-limit",
+      "peer": {
+        "joined": true,
+        "presentedCertificates": 201
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "not_completed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "22764ccb13a4e1fd8f137170c0a9548815e0b93fe71a8b0f4e5f776d73a8d72b",
+            "sent_sni": "localhost",
+            "trust_bundle_version": null,
+            "trust_source": "local_ca_file",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "local_resource_limit"
+        ],
+        "generated_at": "2026-11-13T21:41:41.167627708+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 5000000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:36691",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:36691",
+          "port": 36691,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 18570,
+          "sent_bytes": 248
+        }
+      }
+    },
+    {
+      "case": "mtls",
+      "peer": {
+        "joined": true,
+        "receivedRecordTypes": [
+          22
+        ]
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "not_completed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "964475cceecc031cda4201b155b836b11db7015a47e294374c7985db701bf648",
+            "sent_sni": "localhost",
+            "trust_bundle_version": null,
+            "trust_source": "local_ca_file",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "unsupported_local"
+        ],
+        "generated_at": "2026-11-13T21:41:40.739301347+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 5000000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:34089",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:34089",
+          "port": 34089,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 1150,
+          "sent_bytes": 242
+        }
+      }
+    },
+    {
+      "case": "refused",
+      "peer": {
+        "bytesAfterClientHello": null,
+        "elapsedMillis": 1,
+        "joined": true
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "not_completed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "86c02d21c2b203d30bf8f4b3782c0a8c7695828d8d25b6744474e9381d65bc00",
+            "sent_sni": "localhost",
+            "trust_bundle_version": "1.0.11",
+            "trust_source": "bundled_mozilla",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "transport_failed"
+        ],
+        "generated_at": "2026-11-13T21:41:40.754351264+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 150000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": null,
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:37331",
+          "port": 37331,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 0,
+          "sent_bytes": 0
+        }
+      }
+    },
+    {
+      "case": "timeout",
+      "peer": {
+        "bytesAfterClientHello": 242,
+        "elapsedMillis": 153,
+        "joined": true
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "not_completed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "86c02d21c2b203d30bf8f4b3782c0a8c7695828d8d25b6744474e9381d65bc00",
+            "sent_sni": "localhost",
+            "trust_bundle_version": "1.0.11",
+            "trust_source": "bundled_mozilla",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "deadline_exceeded"
+        ],
+        "generated_at": "2026-11-13T21:41:40.758183597+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 150000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:33295",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:33295",
+          "port": 33295,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 0,
+          "sent_bytes": 242
+        }
+      }
+    },
+    {
+      "case": "cancelled",
+      "peer": {
+        "bytesAfterClientHello": 242,
+        "elapsedMillis": 36,
+        "joined": true
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "not_completed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "86c02d21c2b203d30bf8f4b3782c0a8c7695828d8d25b6744474e9381d65bc00",
+            "sent_sni": "localhost",
+            "trust_bundle_version": "1.0.11",
+            "trust_source": "bundled_mozilla",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "cancelled"
+        ],
+        "generated_at": "2026-11-13T21:41:40.913720555+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 150000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:33745",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:33745",
+          "port": 33745,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 0,
+          "sent_bytes": 242
+        }
+      }
+    },
+    {
+      "case": "oversized-record",
+      "peer": {
+        "bytesAfterClientHello": 0,
+        "elapsedMillis": 7,
+        "joined": true
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "not_completed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "86c02d21c2b203d30bf8f4b3782c0a8c7695828d8d25b6744474e9381d65bc00",
+            "sent_sni": "localhost",
+            "trust_bundle_version": "1.0.11",
+            "trust_source": "bundled_mozilla",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "local_resource_limit"
+        ],
+        "generated_at": "2026-11-13T21:41:40.952707555+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 150000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:38789",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:38789",
+          "port": 38789,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 5,
+          "sent_bytes": 242
+        }
+      }
+    },
+    {
+      "case": "truncated-record",
+      "peer": {
+        "bytesAfterClientHello": 0,
+        "elapsedMillis": 7,
+        "joined": true
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "not_completed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "86c02d21c2b203d30bf8f4b3782c0a8c7695828d8d25b6744474e9381d65bc00",
+            "sent_sni": "localhost",
+            "trust_bundle_version": "1.0.11",
+            "trust_source": "bundled_mozilla",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "peer_disconnected"
+        ],
+        "generated_at": "2026-11-13T21:41:40.962914055+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 150000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:39471",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:39471",
+          "port": 39471,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 6,
+          "sent_bytes": 242
+        }
+      }
+    },
+    {
+      "case": "profile-no-overlap",
+      "peer": {
+        "group": 4587,
+        "joined": true
+      },
+      "report": {
+        "attempt_id": 1,
+        "details": {
+          "certificate_collection": {
+            "collected_count": 0,
+            "presented_bytes": null,
+            "presented_count": null,
+            "status": "not_available"
+          },
+          "client_profile": {
+            "cipher_suites": [
+              {
+                "id": 4866,
+                "name": "TLS13_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 4865,
+                "name": "TLS13_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 4867,
+                "name": "TLS13_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49196,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49195,
+                "name": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52393,
+                "name": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256"
+              },
+              {
+                "id": 49200,
+                "name": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+              },
+              {
+                "id": 49199,
+                "name": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+              },
+              {
+                "id": 52392,
+                "name": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+              }
+            ],
+            "key_exchange_groups": [
+              {
+                "id": 29,
+                "name": "X25519"
+              },
+              {
+                "id": 23,
+                "name": "secp256r1"
+              },
+              {
+                "id": 24,
+                "name": "secp384r1"
+              },
+              {
+                "id": 4588,
+                "name": "X25519MLKEM768"
+              }
+            ],
+            "name": "default_secure_fresh",
+            "protocol_versions": [
+              {
+                "id": 772,
+                "name": "TLSv1_3"
+              },
+              {
+                "id": 771,
+                "name": "TLSv1_2"
+              }
+            ],
+            "provider": "aws_lc_rs",
+            "provider_version": "1.18.0",
+            "rustls_version": "0.23.46"
+          },
+          "handshake_complete": false,
+          "handshake_kind": null,
+          "negotiated": null,
+          "peer_certificates": [],
+          "verification": {
+            "certificate_chain_and_name": "not_completed",
+            "revocation": "not_checked",
+            "root_set_digest_basis": "sorted_length_prefixed_trust_anchor_der_fields_sha256_v1",
+            "root_set_sha256": "7bbfa29b495b8eeb726507336b99ac176c5ce24a3285253c750f8fed1c7c9f0d",
+            "sent_sni": "localhost",
+            "trust_bundle_version": null,
+            "trust_source": "local_ca_file",
+            "verification_name": "localhost"
+          }
+        },
+        "diagnostics": [
+          "tls_alert"
+        ],
+        "generated_at": "2026-11-13T21:41:41.178876625+00:00",
+        "limits": {
+          "dns_timeout_ns": 5000000000,
+          "max_dns_answers": 8,
+          "max_received_bytes": 524288,
+          "max_sent_bytes": 65536,
+          "overall_timeout_ns": 15000000000,
+          "protocol_timeout_ns": 5000000000,
+          "tcp_timeout_ns": 3000000000
+        },
+        "outcome": "failed",
+        "protocol": "tls",
+        "redaction_applied": false,
+        "scanner_version": "0.2.0",
+        "schema_version": 1,
+        "target": {
+          "connected_peer": "127.0.0.1:41069",
+          "host": "127.0.0.1",
+          "pinned_address": "127.0.0.1:41069",
+          "port": 41069,
+          "resolved_addresses": [
+            "127.0.0.1"
+          ]
+        },
+        "traffic": {
+          "received_bytes": 7,
+          "sent_bytes": 242
+        }
+      }
+    }
+  ]
+}

@@ -429,6 +429,41 @@ fn root_digest(roots: &RootCertStore) -> String {
 mod tests {
     use super::*;
     #[test]
+    fn unknown_group049_is_not_guessed_from_a_known_cipher_suite() {
+        for group in [None, Some(identifier(0x7a7a, "future-group"))] {
+            let mut details = TlsProbe::new(&TlsOptions {
+                verification_name: "localhost".into(),
+                ca_file: None,
+            })
+            .unwrap()
+            .initial;
+            set_verified_negotiation(
+                &mut details,
+                Some(HandshakeKind::Full),
+                Some(rustls::ProtocolVersion::TLSv1_3),
+                Some(rustls::CipherSuite::TLS13_AES_128_GCM_SHA256),
+                group.clone(),
+            )
+            .unwrap();
+            let observed = details.negotiated.as_ref().unwrap();
+            assert_eq!(observed.group_classification, "unknown");
+            assert_eq!(
+                observed.key_exchange_group.as_ref().map(|g| g.id),
+                group.map(|g| g.id)
+            );
+            if let Some(path) = std::env::var_os("PQC049_EVIDENCE") {
+                let dir = std::path::PathBuf::from(path).join("tls");
+                std::fs::create_dir_all(&dir).unwrap();
+                let case = if observed.key_exchange_group.is_some() {
+                    "unknown-group"
+                } else {
+                    "absent-group"
+                };
+                std::fs::write(dir.join(format!("{case}.json")),serde_json::to_vec_pretty(&serde_json::json!({"case":case,"scope":"post-verification accessor projection unit control; not a network handshake","details":details})).unwrap()).unwrap();
+            }
+        }
+    }
+    #[test]
     fn missing_post_handshake_parameters_do_not_publish_verified_details() {
         for (version, suite) in [
             (None, Some(rustls::CipherSuite::TLS13_AES_128_GCM_SHA256)),
