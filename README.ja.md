@@ -1,6 +1,8 @@
 # pqc-scan
 
-**v0.2.0** は静的スキャン向けのリリースです。静的スキャンを正式対象とし、TLS・SSH提示方式・SSH KEXの診断は実験的機能として扱います。[v0.2ロードマップ](docs/roadmap/OSS-ROADMAP-v0.2.md)と[リリース内容](docs/releases/v0.2.0.ja.md)を参照してください。
+このブランチでは、検出精度・検査範囲・検証の限界を測定する基盤を中心に、**v0.3**を開発しています。実施済みの内容と今後の作業は[品質評価ロードマップ](docs/quality/QUALITY-ROADMAP.md)を参照してください。
+
+公開済みのリリースは**v0.2.0**です。公開版の対象範囲は[リリース内容](docs/releases/v0.2.0.ja.md)に記載しています。静的スキャンを正式対象とし、TLS・SSH診断は引き続き実験的機能として扱います。
 
 [English](README.md)
 
@@ -20,6 +22,7 @@ JWT、TLS、PKI、SSHなどの暗号処理を変更する前に、調査する�
 - [結果を確認する](#results)
 - [利用ガイド](#guides)
 - [制約と秘密情報の扱い](#limits)
+- [リポジトリのCI](#repository-ci)
 - [ライセンス](#license)
 
 <a id="targets"></a>
@@ -115,12 +118,9 @@ CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚�
 
 脆弱性の報告方法は[SECURITY.md](SECURITY.md)を参照してください。
 
-開発用の測定結果と限界は[PQS-QAM品質評価](docs/quality/QUALITY-ASSESSMENT.md)に記載しています。
-追加の正解データを指定すると、方式・用途・入力形式ごとの検出成績と未評価範囲も確認できます。
-既存のオフラインベンチマークから、別途[JSON／Markdownの品質報告](tests/quality/README.md)も生成できます。
-[TASK-042の再評価](docs/quality/TASK-042-REOPEN-RESULTS.md)では過去の測定を保持し、注釈を確認し直した調整用データと新しい第三者由来データを分けています。
+一部の組込ルールでは、import・別名・ファイル内の限定した参照関係を調べます。Nodeでは、固定配列の`for...of`や、局所的に生成したRSA鍵を使う署名・検証も追跡します。詳しくは[解析範囲と制約](docs/user/COVERAGE.ja.md#source-facts)を参照してください。参照の検出だけで、実行やPQC機能の有効化が確認できるわけではありません。
 
-組込のNode・Python・RustのPQC検出で、明示import、別名、ファイル内の限定した参照関係を確認するようにしました。Nodeでは固定配列の`for...of`と、局所的に生成したRSA鍵を使う署名・検証も追跡します。同名の別関数や説明文字列は除外します。Java・RubyのSLH変種、旧称の大小文字、Javaの古典方式限定設定、SSHの無効コメント、Gradle・gemspec・SBOMの依存宣言も修正対象です。参照の検出は、実行やPQC機能の有効化の証明ではありません。043での変更は[当初の検出仕様](docs/quality/TASK-043-FIXES-CONTRACT.md)を参照してください。v0.2の取り込み後は局所解析にも公開された`DetectorBudget`を適用します。現在の上限と互換性の確認結果は[統合記録](docs/quality/develop-integration-20261112/REPORT.md)に記載しています。 組込解析の規則照合とNode/Pythonの方式・生成API選択は、ビルド時に取り込む既定YAMLへ集約しています。カスタム規則のpattern・scope・kindを変えた場合は、従来の汎用matcherを使います。
+スキャナー自身の測定結果と限界は[PQS-QAM品質評価](docs/quality/QUALITY-ASSESSMENT.md)に記載しています。各測定は入力とソースの版を明示したもので、製品全体の安全性を認定するものではありません。既存のオフラインベンチマークから、別途[JSON・Markdownの品質報告](tests/quality/README.md)を生成できます。
 
 各ガイドの冒頭から英語版へ移れます。
 
@@ -140,6 +140,38 @@ CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚�
 
 読み取るのは、指定したサイズ上限内の通常ファイルです。Gitのignore設定、除外ディレクトリ、既知のバイナリ形式は検査範囲に含めません。解析を完了できなくても、読み取れた部分の所見は残します。
 理由を確認するには `--diagnostics`、未完了の検査でCIを失敗させるには `--require-complete` を使ってください。[検査状態の読み方](docs/user/SCANNING.ja.md#diagnostics)と[対応範囲・上限](docs/user/COVERAGE.ja.md)に詳しい説明があります。
+
+<a id="repository-ci"></a>
+
+## リポジトリのCI
+
+`pqc-scan`ワークフローの自動実行は、PRと`develop`へのpushを対象とします。
+作業ブランチやタグへのpushでは起動しません。公開済みPRを更新した場合はPR側の検証が起動します。
+
+| イベント | 実行するジョブ |
+|---|---|
+| PR | `quality` |
+| `develop`へのpush | `baseline`、`scan` |
+| 手動実行 | `quality`、`baseline`、`scan` |
+
+`develop`では`baseline`と`scan`を`quality`に依存せず実行し、マージ前の品質確認はPR側で行います。
+手動実行では、有効な3ジョブをまとめて実行できます。
+
+PRとdevelopへのpushでは、変更パスがすべて文書用の一覧に一致する場合は自動実行しません。
+対象はルートのREADMEファイル、`AGENTS.md`、`SECURITY.md`、`docs/`と`prompts/`配下のMarkdown、`tasks/README.md`です。
+対象イベントでコードと文書の混在、ルール、ワークフロー、`docs/`配下のJSONなどを変更した場合はCIを実行します。
+正確な一覧は[ワークフロー](.github/workflows/pqc-scan.yml)で管理します。
+スキップ対象の変更でも検証が必要な場合は、GitHub Actionsから手動実行できます。
+
+開発中は`protocols`ジョブを一時停止し、手動実行を含むすべての起動方法でスキップします。
+このジョブのプロトコル・隔離・パッケージ検証は実行しません。上の表に示すジョブは引き続き有効です。
+再開する際は、ワークフローの該当ジョブから`if: ${{ false }}`を削除してください。
+
+GitHubのパス判定には変更ファイル数の上限があるため、
+大量のファイルを変更してCIが起動しなかった場合は手動実行してください。
+
+将来これらのチェックをマージの必須条件にする場合は、文書のみの変更で必須チェックが待機状態にならないよう、
+ワークフロー全体のパスフィルターからジョブ単位の実行判定へ変更してください。
 
 <a id="license"></a>
 

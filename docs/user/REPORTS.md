@@ -2,6 +2,8 @@
 
 [日本語](REPORTS.ja.md) · [README](../../README.md)
 
+This guide describes the v0.3 development checkout. Detected references and findings can differ from the published v0.2.0 release.
+
 After a scan, use the human report to investigate findings, then choose machine-readable files for tracking or automation. A finding records evidence and suggested checks; it is not an instruction to replace an algorithm without investigating its use.
 
 ## Contents
@@ -80,8 +82,10 @@ For example:
 | A Kyber/Dilithium draft name | Which implementation and specification version it refers to; old and final names are not interchangeable evidence |
 | A TLS setting that disables PQC/hybrid groups | The effective configuration and peer support; this is a configuration signal, not an observed negotiated connection |
 
-The rule set includes ML-KEM/ML-DSA references across the seven listed languages, selected Node SLH-DSA key generation, selected libraries, Java/Ruby classical-only TLS group settings and Go `GODEBUG=tlsmlkem=0`.
+The rule set includes ML-KEM/ML-DSA references across the seven listed languages, selected Java, Node and Ruby SLH-DSA API references, selected libraries, Java/Ruby classical-only TLS group settings and Go `GODEBUG=tlsmlkem=0`.
 Certificate signature OIDs and subject-public-key OIDs for ML-DSA/SLH-DSA are checked separately; a filename does not establish the certificate's algorithm. Parsed OIDs do not verify a signature, trust chain or valid PQC key.
+
+Selected built-in rules use [bounded local source analysis](COVERAGE.md#source-facts) to distinguish supported API calls from shadowed names or display strings. Other rules remain nominal pattern checks. In either case, review the evidence and inspection status; local reference tracing does not establish execution.
 
 These references can appear as informational findings in CBOM and SARIF too. Read `quantum-safe` as a classification of the primitive, not “migration complete.” Dependency findings remain `quantum-uncertain`.
 Node crypto/WebCrypto, browser and TypeScript runtime support must be checked individually; their version requirements differ. JWT signature changes also need compatible JOSE formats, libraries and verifiers.
@@ -114,8 +118,7 @@ exports (ten files in total):
 pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang en --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
-A policy assessment is an additional, separate opt-in. Product version 0.2.0 does
-not change the inventory v1, SARIF 2.1.0 or CycloneDX 1.7 schema versions. Separate
+A policy assessment is an additional, separate opt-in. The v0.3 development work retains inventory v1, SARIF 2.1.0 and CycloneDX 1.7; the product roadmap version does not rename these formats. Separate
 probe reports are described in the [probe guide](PROBING.md).
 
 ### What CBOM and SBOM mean here

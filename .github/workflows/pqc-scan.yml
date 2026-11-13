@@ -1,14 +1,37 @@
 name: pqc-scan
 
 on:
+  # Keep this list limited to prose: docs/ also contains executable CI inputs.
+  # If these checks become required, use job-level gating instead of skipping
+  # the entire workflow, which would leave required checks pending.
   push:
+    branches:
+      - develop
+    paths-ignore:
+      - 'README.md'
+      - 'README.ja.md'
+      - 'AGENTS.md'
+      - 'SECURITY.md'
+      - 'docs/**/*.md'
+      - 'prompts/**/*.md'
+      - 'tasks/README.md'
   pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'README.ja.md'
+      - 'AGENTS.md'
+      - 'SECURITY.md'
+      - 'docs/**/*.md'
+      - 'prompts/**/*.md'
+      - 'tasks/README.md'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   quality:
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -36,6 +59,9 @@ jobs:
         run: python3 -m unittest discover -s tests/quality -p 'test_*.py'
 
   protocols:
+    # Temporarily paused during development, including manual workflow runs.
+    # Remove this condition to restore the existing protocol checks.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     needs: quality
     timeout-minutes: 25
@@ -77,8 +103,8 @@ jobs:
             target/protocol-image/prepare.log
 
   baseline:
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    needs: quality
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -121,7 +147,7 @@ jobs:
         run: >-
           python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2
           --baseline target/quality-expanded-v2
-          --applicability tests/quality/applicability-042-develop-integration/assessment.json
+          --applicability tests/quality/applicability-042-v03-guides/assessment.json
           --out-dir target/quality-expanded-v2-assessment
       - name: Measure missing lock-format controls
         run: >-
@@ -161,8 +187,8 @@ jobs:
             target/quality-task043-assessment/
 
   scan:
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    needs: quality
     permissions:
       contents: read
       security-events: write

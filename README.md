@@ -1,6 +1,8 @@
 # pqc-scan
 
-**v0.2.0** is a static-scanning release. Static scanning is the formal scope; TLS, SSH offers and SSH KEX probes remain experimental. See the [v0.2 roadmap](docs/roadmap/OSS-ROADMAP-v0.2.md) and [release notes](docs/releases/v0.2.0.md).
+This branch develops **v0.3**, with a focus on measuring scanner accuracy, inspection coverage and verification limits. See the [quality roadmap](docs/quality/QUALITY-ROADMAP.md) for completed and planned work.
+
+The published release is **v0.2.0**; its [release notes](docs/releases/v0.2.0.md) describe the released scope. Static scanning is the formal scope; TLS and SSH probes remain experimental.
 
 [日本語](README.ja.md)
 
@@ -20,6 +22,7 @@ Downloading build/install dependencies, uploading reports through CI you configu
 - [Read the results](#results)
 - [User guides](#guides)
 - [Limits and privacy](#limits)
+- [Repository CI](#repository-ci)
 - [License](#license)
 
 <a id="targets"></a>
@@ -111,12 +114,9 @@ Finding IDs use `finding-v1-<SHA-256>` with length-prefixed fields and repositor
 
 For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
 
-For developer measurements and their limits, see the [PQS-QAM quality assessment](docs/quality/QUALITY-ASSESSMENT.md).
-The existing offline benchmark also supports a separate [JSON/Markdown quality report](tests/quality/README.md).
-The [reopened TASK-042 evaluation](docs/quality/TASK-042-REOPEN-RESULTS.md) preserves earlier measurements and separates source-audited tuning from fresh upstream data.
-Its optional reviewed corpus adds algorithm/use and format coverage without changing scanner behavior.
+Selected built-in source rules follow imports, aliases and bounded local bindings. Node checks also follow literal `for...of` algorithm lists and locally generated RSA keys into signing/verification. See [source analysis and its limits](docs/user/COVERAGE.md#source-facts); these observations do not prove execution or enabled PQC support.
 
-Built-in Node, Python and Rust PQC reference checks now follow explicit imports, aliases and bounded local bindings; Node also follows literal finite `for...of` algorithm lists and locally generated RSA keys into signing/verification. Shadowed names and help strings are excluded. Java/Ruby SLH variants, case-insensitive pre-standard names, explicit Java classical-group settings, commented SSH settings and static Gradle/gemspec/SBOM dependency declarations have regression fixes. These references do not prove execution or enabled PQC support. Custom patterns retain their generic matcher. Built-in source-analysis bindings and supported Node/Python selectors now use the default YAML compiled into the scanner; modified custom pattern/scope/kind still use the generic path. See [the original detection contract](docs/quality/TASK-043-FIXES-CONTRACT.md) for the TASK-043 changes. After integration with v0.2, source-fact matching uses the released `DetectorBudget` limits; see [the integration record](docs/quality/develop-integration-20261112/REPORT.md) for the updated bounds and compatibility checks.
+For the scanner's own measured capabilities and limitations, see the [PQS-QAM quality assessment](docs/quality/QUALITY-ASSESSMENT.md). Measurements identify their inputs and source versions; they do not certify overall security. The existing offline benchmark produces separate [JSON/Markdown quality reports](tests/quality/README.md).
 
 Each guide has a Japanese version linked at the top.
 
@@ -140,6 +140,44 @@ parsing retains available findings; it does not make the rest of a file disappea
 Use `--diagnostics` to see the reasons, and `--require-complete` if incomplete
 inspection should fail CI. See [inspection status](docs/user/SCANNING.md#diagnostics)
 and [supported inputs and limits](docs/user/COVERAGE.md).
+
+<a id="repository-ci"></a>
+
+## Repository CI
+
+The `pqc-scan` workflow runs automatically for pull requests and pushes to
+`develop`. Working-branch and tag pushes do not start it; updating an open PR
+still triggers PR validation.
+
+| Event | Jobs |
+|---|---|
+| Pull request | `quality` |
+| Push to `develop` | `baseline`, `scan` |
+| Manual execution | `quality`, `baseline`, `scan` |
+
+On `develop`, `baseline` and `scan` run independently of `quality`; PR validation
+provides the pre-merge quality check. Manual execution remains available for
+running all three enabled jobs together.
+
+It skips eligible pushes and pull requests whose changed paths all
+match its documentation list: the root README files, `AGENTS.md`, `SECURITY.md`,
+Markdown under `docs/` and `prompts/`, and `tasks/README.md`.
+Other changes in eligible events, including mixed documentation/code changes,
+rules, workflow files and JSON data under `docs/`, still run CI. The exact list is maintained in
+[the workflow](.github/workflows/pqc-scan.yml). Run it manually from GitHub Actions
+when validation is needed for an otherwise skipped change.
+
+During development, the `protocols` job is temporarily disabled for all triggers,
+including manual runs. Its protocol, isolation and packaging checks do not run;
+the jobs in the event table remain enabled. Remove the job's `if: ${{ false }}`
+condition in the workflow to restore those checks.
+
+GitHub limits the number of changed files considered
+by path filtering; for large changes, manually run CI if it was omitted.
+
+Before making these checks required for merging, replace workflow-level path
+filtering with job-level gating so skipped documentation changes do not leave
+required checks pending.
 
 <a id="license"></a>
 
