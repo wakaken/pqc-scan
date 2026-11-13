@@ -92,6 +92,7 @@ Advisory policy decisions are kept in explicitly requested JSON/Markdown exports
 
 Open `report.html` first. Review a finding's file location, source context and suggested checks before deciding on a change.
 Search and filters help you work through repeated findings; `report.md` provides a portable text version.
+Markdown keeps multiline source excerpts and code examples inside code blocks, including CR/LF input.
 Both show inspection status. Local assessment decisions appear only in Markdown and explicitly requested JSON; HTML does not display them.
 
 `--format all` writes six files: `report.html`, `report.md`, `report.json`, `report.sarif`, `cbom.json` and `dependency-sbom.json`.

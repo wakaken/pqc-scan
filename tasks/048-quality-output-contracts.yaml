@@ -1,9 +1,9 @@
-id: 048
+id: '048'
 title: 標準Schemaと全出力形式の意味・表示・秘匿を検証する
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Main agent (Evaluator)
 phase: '4'
 description: 既存Schema検証を再利用し、実体・位置・版・根拠・欠落/重複と表示の正しさを確認する。
 quality_alias: QAM-06
@@ -56,3 +56,49 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+
+execution_record:
+  date: '2026-11-14'
+  source_head: c1bc58e59baffdee73beae73f79b1f9a68804bd2
+  authorization: 既存計画と元の受入条件による実装・検証・二段階レビュー。
+  approach: 既存のoffline validatorとwriter/CLI試験を再利用し、実出力横断試験と実ブラウザー観察を追加する。
+  alternatives: 公開Schemaや出力契約の再設計は不要。既存ログだけでは横断照合と実ブラウザー条件を満たさない。
+  steps:
+  - Schema群の出典・版・license・hashを固定し、実出力の正例と破壊例をofflineで照合する。
+  - 実CLIの入力事実と全形式の実体・位置・ID・来歴・unknown・宣言/解決版・export lossを照合する。
+  - 悪意ある文字列を含む日英レポートを生成し、loopback配信でブラウザー・キーボード・offlineを観察する。
+  - fmt・workspace試験・clippy・buildとoptional featuresを検証し、実装/試験レビュー後に全条件を判定する。
+  compatibility: 公開Schema・暗号判断・検出規則・保存形式は維持する。048以外のタスクと過去の証拠を変更しない。
+  cost: 既存Rust/jsonschemaとPython標準ライブラリを使用。新規依存なし、対象試験から通常/全機能の検証へ進む。
+  reviewers:
+    implementation:
+      id: /root/quality048_implementation_review
+      source_manifest: target/quality-task-048/REVIEW-SOURCE-R2.json
+      outcome: R1のexport loss/観測来歴不足を修正し、R2で承認。追加必須指摘なし。
+    test:
+      id: /root/quality048_test_review
+      source_manifest: target/quality-task-048/REVIEW-SOURCE-R3.json
+      outcome: 元3条件と最終ソース・ログ・ブラウザー観察を照合し受入。追加必須指摘なし。
+final_acceptance:
+  date: '2026-11-14'
+  source_head: c1bc58e59baffdee73beae73f79b1f9a68804bd2
+  source_scope: HEADと048の未コミット差分。code hashは保存証拠FINAL-SOURCE.jsonに記録。
+  evidence: docs/quality/task048-20261114/
+  result: docs/quality/TASK-048-RESULTS.md
+  requirements:
+    Q3-11: 実CLIのSchema正負23例、全probe偽completed拒否、offlineとpins、legacy非CycloneDXを確認。
+    Q3-12: 日英14所見と実体/位置/ID/来歴/unknown/版/省略情報を照合。5改変を拒否。
+    Q4-05: 攻撃入力の日英8群・実ブラウザー16ページ、陽性対照、keyboard、読込後offlineを確認。
+  verification:
+    default: Rust544成功・3ignored、clippy/build終了0。
+    all_features: Rust597成功・5ignored、clippy/build終了0。
+    other: fmt終了0、Python77成功、JavaScript3成功、collector終了0。
+  ignored: 既存047の明示起動workerと隔離OpenSSH相互運用。048の必須条件には使わない。
+  limitations:
+  - Chrome 1466x1381とmarkdown-it-py3.0.0、有限固定入力の検証。全環境・全入力の保証ではない。
+  - probeの通信認証網羅は049。今回CI、commit、push、PR、releaseは未実施。
+  unrelated_worktree_changes:
+  - AGENTS.md
+  - docs/DECISIONS.md
+  - docs/PATTERNS.md
+  - docs/agent/REVIEWS.md

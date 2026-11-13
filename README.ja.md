@@ -95,6 +95,7 @@ HTMLは検査範囲と未完了の確認から読み始められます。観測�
 
 まず `report.html` を開きます。所見ごとのファイル位置、周辺のコード、確認事項を読み、実際に修正が必要か判断してください。
 同じ種類の所見が多い場合は検索・絞り込みを使えます。テキストで共有・保管する場合は `report.md` を使います。
+Markdownでは、CR・LFを含む複数行のソース断片やコード例もコード表示の中に収めます。
 どちらにも検査状態を表示します。ローカル評価の参考判定はMarkdownと明示的に指定したJSONに出力し、HTMLには表示しません。
 
 `--format all` では、`report.html`、`report.md`、`report.json`、`report.sarif`、`cbom.json`、`dependency-sbom.json` の6ファイルを出力します。

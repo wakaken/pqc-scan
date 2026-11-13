@@ -219,7 +219,7 @@ pub(crate) fn md(value: &str) -> String {
         .replace('`', "\\`")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
-        .replace('\n', " ")
+        .replace(['\n', '\r'], " ")
 }
 
 pub(crate) fn write_html(result: &ScanResult, path: &Path) -> Result<()> {
