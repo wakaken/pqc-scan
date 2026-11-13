@@ -173,3 +173,14 @@
   pattern: '^2\.16\.840\.1\.101\.3\.4\.3\.(?:2[0-9]|3[01])$'
   scope: public_key_oid
   description: Parsed certificate declares an SLH-DSA subject public key algorithm.
+
+- id: PQC_STANDARD_REFERENCE
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.60
+  migration_hint: A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security.
+  pattern: '(?i)\b(?:ML-KEM-(?:512|768|1024)|ML-DSA-(?:44|65|87)|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf]|MLKEM(?:512|768|1024)|MLDSA(?:44|65|87)|X25519MLKEM768)\b'
+  scope: java,go,javascript,typescript,python,rust,ruby
+  description: Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established.

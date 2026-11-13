@@ -4,29 +4,27 @@
   severity: high
   risk: quantum-vulnerable
   confidence: 0.72
-  migration_hint: Migrate JWT signing to ML-DSA or hybrid signatures.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "(?i)\\b(RS256|RS384|RS512|PS256|PS384|PS512)\\b"
   scope: "java,javascript,typescript,python,go,rust,ruby"
   description: RSA-family JWT signing algorithms detected in AST nodes.
-
 - id: TS_JWT_ES_ALG
   kind: tree_sitter
   category: JWT
   severity: medium
   risk: quantum-uncertain
   confidence: 0.60
-  migration_hint: Define a PQC migration plan for ES-family algorithms.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "(?i)\\b(ES256|ES384|ES512)\\b"
   scope: "java,javascript,typescript,python,go,rust,ruby"
   description: ES-family JWT signing algorithms detected in AST nodes.
-
 - id: TS_JAVA_RSA_API
   kind: tree_sitter
   category: CryptoAPI
   severity: high
   risk: quantum-vulnerable
   confidence: 0.68
-  migration_hint: Replace Java RSA API usage with PQC-capable libraries.
+  migration_hint: Review the Java RSA reference, provider and any existing PQC composition before selecting compatible migration changes.
   pattern: "(KeyPairGenerator|KeyFactory|Cipher|Signature)\\s*\\.\\s*getInstance\\s*\\(\\s*\"(RSA|RSA/[^\"\\s]*|SHA(1|224|256|384|512)withRSA|RSASSA-PSS)"
   scope: "java"
   description: RSA-related API symbols detected from Java AST.
@@ -48,7 +46,7 @@
   severity: medium
   risk: quantum-vulnerable
   confidence: 0.59
-  migration_hint: Migrate Node.js RSA signing/verification logic to a PQC-ready design.
+  migration_hint: Review the RSA reference and its purpose (key generation, signing, verification or encryption); confirm active use and compatible PQC or hybrid options.
   pattern: "(?i)(\\b(createSign|createVerify)\\s*\\(\\s*['\"]RSA|\\bgenerateKeyPair(?:Sync)?\\s*\\(\\s*['\"]rsa(?:-pss)?['\"]|\\b(privateEncrypt|publicDecrypt)\\s*\\(|\\b(RS|PS)(256|384|512)\\b)"
   scope: "javascript,typescript"
   description: RSA-related API symbols detected from JavaScript/TypeScript AST.
@@ -59,11 +57,10 @@
   severity: medium
   risk: quantum-uncertain
   confidence: 0.55
-  migration_hint: Evaluate PQC-capable options in JOSE/JWT implementations.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "(?i)(\\bjwt\\.(sign|verify)\\b|\\bjsonwebtoken\\.(sign|verify)\\b|\\bjose\\.jwtVerify\\b|\\bSignJWT\\b)"
   scope: "javascript,typescript"
   description: JOSE/JWT calls detected from JavaScript/TypeScript AST.
-
 - id: TS_PY_RSA_USAGE
   kind: tree_sitter
   category: CryptoAPI
@@ -114,7 +111,7 @@
   severity: high
   risk: quantum-vulnerable
   confidence: 0.66
-  migration_hint: Update TLS suites containing RSA key exchange to PQC-hybrid suites.
+  migration_hint: "Identify the suite role: RSA_WITH uses static RSA key exchange; ECDHE_RSA and DHE_RSA use RSA authentication. Review hybrid key agreement and PQC authentication separately."
   pattern: "(?i)\\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\\b"
   scope: "java,javascript,typescript,python,go,rust,ruby"
   description: RSA-family TLS cipher suite literals detected in AST nodes.
@@ -137,7 +134,7 @@
   risk: quantum-vulnerable
   confidence: 0.57
   migration_hint: Shift from key-length based planning to PQC signatures/key exchange.
-  pattern: "(?i)((rsa|key(size|length)?|modulus)[^\\n]{0,32}\\b(1024|2048|3072)\\b|\\b(1024|2048|3072)\\b[^\\n]{0,32}(rsa|key(size|length)?|modulus))"
+  pattern: '(?i)(?:\b(?:rsa(?:_(?:key_size|key_length|bits|modulus))?|RSAKeyGenParameterSpec)\b[^\n]{0,32}\b(?:1024|2048|3072)\b|\b(?:1024|2048|3072)\b[^\n]{0,32}\brsa\b)'
   scope: "java,javascript,typescript,python,go,rust,ruby"
   description: Classical public-key size literals detected in AST nodes.
 
@@ -180,7 +177,7 @@
   severity: medium
   risk: quantum-vulnerable
   confidence: 0.60
-  migration_hint: Review EdDSA JWT signing references for PQC migration; a literal alone does not establish active signing.
+  migration_hint: Confirm the purpose and protocol of this EdDSA reference; a name establishes neither JWT usage nor active signing. Assess compatible PQC signature options for the actual use.
   pattern: '\bEdDSA\b'
   scope: java,javascript,typescript,python,go,rust,ruby
   description: EdDSA algorithm reference in source; this is a classical public-key algorithm.

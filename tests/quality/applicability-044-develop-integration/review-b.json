@@ -1,0 +1,50 @@
+{
+  "reviewer": "/root/task044_test_review",
+  "timestampUtc": "2026-11-13T06:48:18Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "a3b0bae7f5ae7ac5da14d7430d521ac981642422118f8057aaeec40341f0c349",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "60192749f7bfbd604f7d7c6a7d3f51c725626803cd69b899a370a1bc2f462c20",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "remainingUnitsReason": "203原入力のhash・246単位の対象と原truthを確認。残る240単位は元scopeを保持する。x153/x155とv2-a1/v2-a2は拡張子によるlegacy container signalであり、証明書属性抽出とは別。明示unencrypted P12/PFXの8単位はDATA経由の公開証明書として契約内。元unsupported/ambiguousラベルも維持し、新たなscope矛盾なし。",
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "public-only.p12の原bytesはPKCS7 encryptedData（PBES2/AES-256-CBC）。pass:で復号できる来歴は名目的RSA証明書を確定しても、復号未実装の契約とpkcs12::contentのoid!=DATA拒否を変えない。暗号化内部のECDSA否定属性は抽出対象外。"
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "public-only.pfxはP12と同hashの暗号化原bytes。空passwordとcertificateOnlyの変換来歴は非暗号化を意味しない。ECDSA署名の否定判定も復号しない検査の対象外。"
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "public-only.p12内部はencryptedDataであり、来歴上RSA3072でもmodulus属性の抽出には復号が必要。公開契約は非暗号化certificate bagsのみ。"
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "public-only.p12の既知元証明書はRSA署名でも、暗号化contentをopaqueに保つ現契約では署名OID抽出の対象外。"
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "public-only.pfxは暗号化P12と同一bytes。既知元RSA3072属性と検査可能範囲を区別し、modulus抽出単位を対象外とする。"
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "public-only.pfxのcertificateOnlyは鍵bag不在の来歴であり復号不要の保証ではない。encryptedData内のRSA署名OID抽出は契約外。"
+    }
+  ]
+}

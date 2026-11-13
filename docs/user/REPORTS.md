@@ -6,6 +6,8 @@ This guide describes the v0.3 development checkout. Detected references and find
 
 After a scan, use the human report to investigate findings, then choose machine-readable files for tracking or automation. A finding records evidence and suggested checks; it is not an instruction to replace an algorithm without investigating its use.
 
+Reports show findings, locations and suggested next steps. The inspection overview separately identifies incomplete checks and files needing follow-up.
+
 ## Contents
 
 - [Review findings](#review)

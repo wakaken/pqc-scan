@@ -264,6 +264,16 @@ impl TreeSitterDetector {
                     metadata.insert("detector".to_string(), self.name().to_string());
                     metadata.insert("language".to_string(), language_name.to_string());
                     metadata.insert("node_kind".to_string(), candidate.kind.to_string());
+                    if rule.id == "PQC_STANDARD_REFERENCE" {
+                        let kind = if candidate.kind.contains("string") {
+                            "name_literal"
+                        } else if candidate.kind.contains("call") {
+                            "call_reference"
+                        } else {
+                            "symbol_reference"
+                        };
+                        metadata.insert("reference_kind".into(), kind.into());
+                    }
                     metadata.insert("scope".to_string(), rule.scope.clone());
                     if candidate.canonical.is_some() {
                         metadata.insert("resolution_method".into(), "static_import_binding".into());

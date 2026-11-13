@@ -2,7 +2,7 @@ id: '044'
 title: 到達率と追加検証手法の適用範囲を測る
 type: improvement
 priority: high
-status: blocked
+status: done
 owner: Evaluator Agent
 phase: '3'
 description: 重要な未到達箇所を特定し、Miriや形式検証の適用可否も根拠付きで判断する。
@@ -162,3 +162,20 @@ retirement:
     attempted: sourceを変更しないmerge-treeで競合位置を確認。退役の検証・二段階レビューは完了し、既存branchへcommit/pushしてPRを提示する。
     remaining: develop取込の指示確認、競合解消後の統合source検証・必要な限定レビュー・PR CI・merge。
     needed: 今回のマージ指示にdevelop24の取込と競合解消を含めるか確認する。原受入条件と過去証拠は維持。
+
+integration:
+  authorization: ユーザーが新developの取込・競合解消・再検証・既存二者の限定レビュー・mergeまで明示承認。
+  lifecycle: blocked -> in-progress（取込禁止の依存を明示承認で解消）
+  target: 26fa19e7bd2434836d6c4dbed0185f34e15b9e45
+  approach: 043の静的呼出し/コメント対策と062のGradle map/unknown保持を両立する。タスク一覧は001〜062を確認し、過去証拠を改変しない。
+  review_record:
+    implementation_reviewer: /root/task044_implementation_review
+    test_reviewer: /root/task044_test_review
+    accepted_scope_sha256: 2928943191644eed2ea122326d8265c20f3054a010f9f4ae9d965f83618e1454
+    finding: P2のinline map終端をquote-awareに修正しred/greenを確認。両者受入、対応必須の未解消指摘なし。
+  lifecycle_after_verification: in-progress -> review -> done（統合修正・ローカル検証・二段階限定レビューを完了）
+  evidence: docs/quality/task044-integration-20261113/VALIDATION.json
+  verification: Rust通常527/全feature578成功1ignored、両clippy/build、5corpus各3反復と報告、fresh二者applicability・scoped再集計、Python59・Node35・配布11・fmtが終了0。
+  preserved: 過去3証拠folderと旧applicabilityの92ファイルは不変。旧RULE companionもexact保存し現行版を新しいsource束縛として構成。
+  scope_limits: 元の到達率はf8時点の測定として維持。新Miri/coverage/性能測定なし。5corpusの既知FP/FNを保持し、製品全面合格としない。
+  publication: 公開前の評価完了記録。既存branchのmerge commitをpush後、PR25の実CIを確認してdevelopへmergeする。実際の公開結果はGit/PR履歴で確認する。

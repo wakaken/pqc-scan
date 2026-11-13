@@ -1,0 +1,365 @@
+{
+  "featureParent": "1bb45f891c3b39f5e784e9b10cff23a1ee94ab0c",
+  "developParent": "26fa19e7bd2434836d6c4dbed0185f34e15b9e45",
+  "reviewedSource": "REVIEW-SOURCE-R2.json",
+  "rustChecks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "log": "workspace-final.log",
+      "exit": 0,
+      "seconds": 133.00753770797746
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features",
+        "--locked"
+      ],
+      "log": "all-features.log",
+      "exit": 0,
+      "seconds": 129.84884820802836
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "log": "clippy.log",
+      "exit": 0,
+      "seconds": 10.949440958967898
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--all-features",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "log": "clippy-all-features.log",
+      "exit": 0,
+      "seconds": 11.201526166987605
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--locked"
+      ],
+      "log": "build.log",
+      "exit": 0,
+      "seconds": 3.2188090000418015
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--all-features",
+        "--locked"
+      ],
+      "log": "build-all-features.log",
+      "exit": 0,
+      "seconds": 3.338860208983533
+    }
+  ],
+  "rustResults": {
+    "workspace": {
+      "passed": 527,
+      "ignored": 0
+    },
+    "allFeatures": {
+      "passed": 578,
+      "ignored": 1
+    }
+  },
+  "corpora": {
+    "baseline": {
+      "nominal": {
+        "tp": 28,
+        "fp": 4,
+        "fn": 2,
+        "tn": 19
+      },
+      "repeats": 3,
+      "semanticDiagnosticScoreStable": true,
+      "binarySHA256": "d49623936178459b4a5dbdfd0eefb22773030417be4df770272ea3cec727e707"
+    },
+    "expanded": {
+      "nominal": {
+        "tp": 60,
+        "fp": 17,
+        "fn": 0,
+        "tn": 57
+      },
+      "repeats": 3,
+      "semanticDiagnosticScoreStable": true,
+      "binarySHA256": "d49623936178459b4a5dbdfd0eefb22773030417be4df770272ea3cec727e707"
+    },
+    "expanded-v2": {
+      "nominal": {
+        "tp": 98,
+        "fp": 2,
+        "fn": 4,
+        "tn": 93
+      },
+      "repeats": 3,
+      "semanticDiagnosticScoreStable": true,
+      "binarySHA256": "d49623936178459b4a5dbdfd0eefb22773030417be4df770272ea3cec727e707",
+      "separatelyReviewedScope": {
+        "tp": 98,
+        "fp": 2,
+        "fn": 0,
+        "tn": 91
+      }
+    },
+    "lock-controls": {
+      "nominal": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "repeats": 3,
+      "semanticDiagnosticScoreStable": true,
+      "binarySHA256": "d49623936178459b4a5dbdfd0eefb22773030417be4df770272ea3cec727e707"
+    },
+    "task043": {
+      "nominal": {
+        "tp": 103,
+        "fp": 0,
+        "fn": 0,
+        "tn": 94
+      },
+      "repeats": 3,
+      "semanticDiagnosticScoreStable": true,
+      "binarySHA256": "d49623936178459b4a5dbdfd0eefb22773030417be4df770272ea3cec727e707"
+    }
+  },
+  "corpusCommands": [
+    {
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+        "tests/quality/run.py",
+        "--binary",
+        "target/debug/pqc-scan",
+        "--build-profile",
+        "debug",
+        "--out-dir",
+        "target/quality-task-044/integration-20261113/baseline",
+        "--repeats",
+        "3",
+        "--skip-benchmarks"
+      ],
+      "exit": 0,
+      "seconds": 1.6725613749586046
+    },
+    {
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+        "tests/quality/report.py",
+        "--baseline",
+        "target/quality-task-044/integration-20261113/baseline",
+        "--out-dir",
+        "target/quality-task-044/integration-20261113/baseline-assessment"
+      ],
+      "exit": 0,
+      "seconds": 0.10823324997909367
+    },
+    {
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+        "tests/quality/run.py",
+        "--binary",
+        "target/debug/pqc-scan",
+        "--build-profile",
+        "debug",
+        "--out-dir",
+        "target/quality-task-044/integration-20261113/expanded",
+        "--repeats",
+        "3",
+        "--skip-benchmarks",
+        "--corpus-dir",
+        "tests/quality/expanded"
+      ],
+      "exit": 0,
+      "seconds": 1.4620973330456764
+    },
+    {
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+        "tests/quality/report.py",
+        "--baseline",
+        "target/quality-task-044/integration-20261113/expanded",
+        "--out-dir",
+        "target/quality-task-044/integration-20261113/expanded-assessment",
+        "--corpus-dir",
+        "tests/quality/expanded"
+      ],
+      "exit": 0,
+      "seconds": 0.17144437500974163
+    },
+    {
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+        "tests/quality/run.py",
+        "--binary",
+        "target/debug/pqc-scan",
+        "--build-profile",
+        "debug",
+        "--out-dir",
+        "target/quality-task-044/integration-20261113/expanded-v2",
+        "--repeats",
+        "3",
+        "--skip-benchmarks",
+        "--corpus-dir",
+        "tests/quality/expanded-v2"
+      ],
+      "exit": 0,
+      "seconds": 1.6995726670138538
+    },
+    {
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+        "tests/quality/report.py",
+        "--baseline",
+        "target/quality-task-044/integration-20261113/expanded-v2",
+        "--out-dir",
+        "target/quality-task-044/integration-20261113/expanded-v2-assessment",
+        "--corpus-dir",
+        "tests/quality/expanded-v2"
+      ],
+      "exit": 0,
+      "seconds": 0.20929258404066786
+    },
+    {
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+        "tests/quality/run.py",
+        "--binary",
+        "target/debug/pqc-scan",
+        "--build-profile",
+        "debug",
+        "--out-dir",
+        "target/quality-task-044/integration-20261113/lock-controls",
+        "--repeats",
+        "3",
+        "--skip-benchmarks",
+        "--corpus-dir",
+        "tests/quality/expanded-v2-lock-controls"
+      ],
+      "exit": 0,
+      "seconds": 0.5871711249928921
+    },
+    {
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+        "tests/quality/report.py",
+        "--baseline",
+        "target/quality-task-044/integration-20261113/lock-controls",
+        "--out-dir",
+        "target/quality-task-044/integration-20261113/lock-controls-assessment",
+        "--corpus-dir",
+        "tests/quality/expanded-v2-lock-controls"
+      ],
+      "exit": 0,
+      "seconds": 0.09549408400198445
+    },
+    {
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+        "tests/quality/run.py",
+        "--binary",
+        "target/debug/pqc-scan",
+        "--build-profile",
+        "debug",
+        "--out-dir",
+        "target/quality-task-044/integration-20261113/task043",
+        "--repeats",
+        "3",
+        "--skip-benchmarks",
+        "--corpus-dir",
+        "tests/quality/task043-corpus-v2"
+      ],
+      "exit": 0,
+      "seconds": 1.8668291250360198
+    },
+    {
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+        "tests/quality/report.py",
+        "--baseline",
+        "target/quality-task-044/integration-20261113/task043",
+        "--out-dir",
+        "target/quality-task-044/integration-20261113/task043-assessment",
+        "--corpus-dir",
+        "tests/quality/task043-corpus-v2"
+      ],
+      "exit": 0,
+      "seconds": 0.2206968329846859
+    }
+  ],
+  "applicabilityReport": {
+    "command": "python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2 --baseline target/quality-task-044/integration-20261113/expanded-v2 --applicability tests/quality/applicability-044-develop-integration/assessment.json --out-dir target/quality-task-044/integration-20261113/expanded-v2-scoped",
+    "exit": 0,
+    "oldAssessmentPreserved": true,
+    "twoFreshIndependentReviewers": true
+  },
+  "otherChecks": [
+    {
+      "command": "python3 -m unittest discover -s tests/quality -p 'test_*.py'",
+      "exit": 0,
+      "passed": 59,
+      "log": "python-final.log"
+    },
+    {
+      "command": "node --test shell/*.test.cjs",
+      "exit": 0,
+      "passed": 35,
+      "log": "node-final.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/distribution",
+      "exit": 0,
+      "passed": 11,
+      "log": "distribution.log"
+    },
+    {
+      "command": "cargo fmt --all --check",
+      "exit": 0,
+      "log": "fmt.log"
+    }
+  ],
+  "preservedFiles": 92,
+  "reusedEvidence": "Unchanged renderer13 matches target and prior actual browser observations; coverage/common isolation byte-identical to feature parent, recent retirement verification reused",
+  "excludedTrials": [
+    "Initial workspace failure from stale rule metadata source binding; fixed by renewed live companion with old bytes preserved",
+    "pre-p2/: earlier passing source superseded by P2 fix",
+    "trial-all-features-label-mismatch/: caller feature mismatch, final default build and reruns replace claims"
+  ],
+  "notClaimed": [
+    "new Miri run",
+    "new coverage measurement after integration",
+    "performance benchmark or comparable release performance",
+    "new browser observations",
+    "hosted CI until PR checks finish"
+  ]
+}

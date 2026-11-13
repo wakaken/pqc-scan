@@ -1,0 +1,1399 @@
+diff --git a/.github/workflows/pqc-scan.yml b/.github/workflows/pqc-scan.yml
+index 4657c29..4df5c57 100644
+--- a/.github/workflows/pqc-scan.yml
++++ b/.github/workflows/pqc-scan.yml
+@@ -147,7 +147,7 @@ jobs:
+         run: >-
+           python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2
+           --baseline target/quality-expanded-v2
+-          --applicability tests/quality/applicability-042-v03-guides/assessment.json
++          --applicability tests/quality/applicability-044-develop-integration/assessment.json
+           --out-dir target/quality-expanded-v2-assessment
+       - name: Measure missing lock-format controls
+         run: >-
+diff --git a/crates/pqc_scan_cli/tests/audit_remediation.rs b/crates/pqc_scan_cli/tests/audit_remediation.rs
+new file mode 100644
+index 0000000..1325ec1
+--- /dev/null
++++ b/crates/pqc_scan_cli/tests/audit_remediation.rs
+@@ -0,0 +1,324 @@
++//! Observable controls for the user-approved develop audit repairs.
++use serde_json::Value;
++use std::{
++    path::{Path, PathBuf},
++    process::Command,
++    sync::atomic::{AtomicUsize, Ordering},
++};
++static NEXT: AtomicUsize = AtomicUsize::new(0);
++struct Scan {
++    root: PathBuf,
++    report: Value,
++}
++impl Drop for Scan {
++    fn drop(&mut self) {
++        let _ = std::fs::remove_dir_all(&self.root);
++    }
++}
++impl Scan {
++    fn new(files: &[(&str, &str)], lang: &str) -> Self {
++        let root = std::env::temp_dir().join(format!(
++            "pqc-audit-regression-{}-{}",
++            std::process::id(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        let input = root.join("input");
++        std::fs::create_dir_all(&input).unwrap();
++        for (name, text) in files {
++            let p = input.join(name);
++            std::fs::create_dir_all(p.parent().unwrap()).unwrap();
++            std::fs::write(p, text).unwrap();
++        }
++        let r = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++            .arg("scan")
++            .arg(&input)
++            .args([
++                "--format",
++                "all",
++                "--diagnostics",
++                "--inventory-json",
++                "--lang",
++                lang,
++                "--rules-dir",
++            ])
++            .arg(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules"))
++            .arg("--out-dir")
++            .arg(root.join("report"))
++            .output()
++            .unwrap();
++        assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
++        let report =
++            serde_json::from_slice(&std::fs::read(root.join("report/report.json")).unwrap())
++                .unwrap();
++        Self { root, report }
++    }
++    fn findings(&self) -> &[Value] {
++        self.report["findings"].as_array().unwrap()
++    }
++    fn hits(&self, file: &str, rule: &str) -> Vec<&Value> {
++        self.findings()
++            .iter()
++            .filter(|f| f["location"]["file"] == file && f["rule_id"] == rule)
++            .collect()
++    }
++    fn text(&self, file: &str) -> String {
++        std::fs::read_to_string(self.root.join("report").join(file)).unwrap()
++    }
++}
++#[test]
++fn rsa_sizes_require_rsa_context_not_pqc_names_or_usage_counts() {
++    let scan = Scan::new(&[
++        ("Params.java", "class Params { void f() { addKeyFactoryAlgorithm(provider, \"ML-KEM-1024\", PREFIX + \"MLKEMKeyFactorySpi\"); addKeyFactoryAlgorithm(provider, \"FALCON-1024\", PREFIX + \"FalconKeyFactorySpi\"); assertEquals(1024, privKey.getUsagesRemaining()); read(\"keyGen_ML-KEM-1024.txt\"); }}"),
++        ("rsa.rb", "OpenSSL::PKey::RSA.new(1024)\nOpenSSL::PKey::RSA.new(2048)\nOpenSSL::PKey::RSA.new(3072)\n"),
++    ], "en");
++    assert!(scan
++        .hits("Params.java", "TS_RSA_KEY_SIZE_LITERAL")
++        .is_empty());
++    assert_eq!(scan.hits("rsa.rb", "TS_RSA_KEY_SIZE_LITERAL").len(), 3);
++}
++#[test]
++fn tls_references_do_not_claim_effective_configuration_or_static_rsa_exchange() {
++    let scan = Scan::new(&[
++        ("table.rs", "const A: &str = \"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256\";\nconst B: &str = \"TLS_DHE_RSA_WITH_AES_128_GCM_SHA256\";\nconst C: &str = \"TLS_RSA_WITH_AES_128_GCM_SHA256\";\n"),
++        ("table.c", "const char *x = \"Stopped a TLSv1 heartbeat attack\";\n/* TLSv1 minimum */\n"),
++        ("active.conf", "ssl_protocols TLSv1;\n"),
++        ("comment.conf", "# ssl_protocols TLSv1;\n# ssl_ciphers RSA;\n"),
++    ], "en");
++    assert!(scan
++        .findings()
++        .iter()
++        .all(|f| f["location"]["file"] != "comment.conf"));
++    assert_eq!(
++        scan.hits("active.conf", "NGINX_SSL_PROTOCOLS_LEGACY").len(),
++        1
++    );
++    for f in scan.hits("table.c", "TLS_VERSION_1_0") {
++        assert!(!f["description"]
++            .as_str()
++            .unwrap()
++            .contains("configuration detected"));
++        assert!(!f["recommended_actions"]
++            .to_string()
++            .contains("config was detected"));
++    }
++    let tls = scan.hits("table.rs", "TS_TLS_RSA_CIPHER_LITERAL");
++    assert_eq!(tls.len(), 3);
++    for f in tls.iter().filter(|f| f["location"]["line"] != 3) {
++        assert!(!f["migration_hint"]
++            .as_str()
++            .unwrap()
++            .contains("containing RSA key exchange"));
++        assert!(f["recommended_actions"]
++            .to_string()
++            .contains("authentication"));
++    }
++    assert_eq!(scan.hits("table.rs", "TLS_RSA_KEY_EXCHANGE").len(), 1);
++}
++#[test]
++fn reference_guidance_does_not_assert_exposure_jwt_issuance_or_missing_hybrid() {
++    let scan = Scan::new(&[
++        ("Marker.c", "/* -----BEGIN RSA PRIVATE KEY-----\n * [...] */\n"),
++        ("Composite.java", "class Composite { void f() { checkLength(\"EdDSA public key\", 32); Cipher.getInstance(\"RSA/NONE/OAEPPadding\"); }}"),
++        ("rsa.js", "const crypto = require('crypto'); crypto.generateKeyPairSync('rsa', {modulusLength: 2048});"),
++    ], "en");
++    let marker = scan.hits("Marker.c", "PRIVATE_KEY_RSA_HEADER");
++    assert_eq!(marker.len(), 1);
++    assert!(marker[0]["migration_hint"].as_str().unwrap().contains("If"));
++    for f in scan.findings() {
++        let guidance = format!("{} {}", f["migration_hint"], f["recommended_actions"]);
++        assert!(!guidance.contains("Stop issuing new JWTs"));
++        assert!(!guidance.contains("Migrate Node.js RSA signing/verification logic"));
++        assert!(!guidance.contains("Migrate to hybrid KEM+AEAD cryptographic design"));
++        assert!(!guidance.contains("Replace Java RSA API usage"));
++    }
++    let ed = scan.hits("Composite.java", "TS_JWT_EDDSA_ALG");
++    assert_eq!(ed.len(), 1);
++    assert!(!ed[0]["recommended_actions"]
++        .to_string()
++        .contains("jwt.remove-rsa-algorithms"));
++}
++#[test]
++fn standard_pqc_names_and_registrations_are_inventoried_without_execution_claims() {
++    let scan = Scan::new(&[
++        ("schemes.go", "package schemes\nfunc Name() string { return \"ML-KEM-768\" }\nvar schemes = []interface{}{mlkem512.Scheme(), hybrid.X25519MLKEM768()}\nvar params = \"SLH-DSA-SHA2-128s\"\n"),
++        ("algs.ts", "type Alg = 'RS256' | 'ML-DSA-44' | 'ML-DSA-65' | 'ML-DSA-87';\n"),
++        ("groups.rs", "enum Group { MLKEM512, MLKEM768, MLKEM1024, X25519MLKEM768 }\n"),
++        ("negative.go", "package schemes\nvar x = \"Kyber512\"\nvar y = \"NOTMLKEM768\"\n"),
++    ], "en");
++    for (file, count) in [("schemes.go", 4), ("algs.ts", 3), ("groups.rs", 4)] {
++        let hits = scan.hits(file, "PQC_STANDARD_REFERENCE");
++        assert_eq!(hits.len(), count, "{file}");
++        for f in hits {
++            assert_eq!(f["severity"], "info");
++            assert_eq!(f["risk"], "quantum-safe");
++            assert!(f["evidence"]["metadata"]["reference_kind"].is_string());
++        }
++    }
++    for f in scan.hits("schemes.go", "PQC_STANDARD_REFERENCE") {
++        let expected = match f["location"]["line"].as_u64().unwrap() {
++            2 | 4 => "name_literal",
++            _ => "call_reference",
++        };
++        assert_eq!(f["evidence"]["metadata"]["reference_kind"], expected);
++    }
++    for f in scan.hits("algs.ts", "PQC_STANDARD_REFERENCE") {
++        assert_eq!(f["evidence"]["metadata"]["reference_kind"], "name_literal");
++    }
++    for f in scan.hits("groups.rs", "PQC_STANDARD_REFERENCE") {
++        assert_eq!(
++            f["evidence"]["metadata"]["reference_kind"],
++            "symbol_reference"
++        );
++    }
++    assert!(scan
++        .hits("negative.go", "PQC_STANDARD_REFERENCE")
++        .is_empty());
++    assert_eq!(scan.hits("negative.go", "PQC_DRAFT_ALGORITHM").len(), 1);
++}
++#[test]
++fn gradle_map_declarations_preserve_constraints_without_resolving_variables() {
++    let scan = Scan::new(&[("build.gradle", "dependencies {\n implementation group: 'javax.mail', name: 'mail', version: '1.4'\n testImplementation group: 'junit', name: 'junit', version: '4.13.2'\n implementation group: 'io.grpc', name: 'grpc-stub', version: grpcVersion\n // implementation group: 'bad', name: 'comment', version: '1.0'\n implementation \"io.grpc:grpc-api:${grpcVersion}\"\n compileOnly group: 'org.test', name: 'no-version'\n}\n")], "en");
++    let sbom: Value = serde_json::from_str(&scan.text("dependency-sbom.json")).unwrap();
++    let rows = sbom.as_array().unwrap();
++    assert_eq!(rows.len(), 5);
++    for (name, version) in [
++        ("javax.mail:mail", "1.4"),
++        ("junit:junit", "4.13.2"),
++        ("io.grpc:grpc-stub", "unknown"),
++        ("io.grpc:grpc-api", "unknown"),
++        ("org.test:no-version", "unknown"),
++    ] {
++        let row = rows.iter().find(|r| r["name"] == name).unwrap();
++        assert_eq!(row["version"], version);
++        assert!(!row["purl"].as_str().unwrap().contains('@'));
++    }
++    let native: Value = serde_json::from_str(&scan.text("scan.inventory.v1.json")).unwrap();
++    let mail = native["assets"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .find(|a| a["attributes"]["name"] == "javax.mail:mail")
++        .unwrap();
++    assert_eq!(mail["attributes"]["declared_constraint"], "1.4");
++    assert!(mail["attributes"]["resolved_version"].is_null());
++}
++#[test]
++fn human_headers_omit_internal_explanations_but_keep_findings_and_inspection_status() {
++    for lang in ["en", "ja"] {
++        let scan = Scan::new(
++            &[("algorithm.ts", "const alg = 'RS256';\nfunction broken( {\n")],
++            lang,
++        );
++        let html = scan.text("report.html");
++        let md = scan.text("report.md");
++        for unwanted in [
++            "Unique candidate locations",
++            "Candidate findings with unknown positions",
++            "Uninspected or truncated results are not counted",
++            "Inspection is incomplete or unknown",
++            "Expand a rule, then a location",
++            "not a runtime or migration-completion guarantee",
++            "Static evidence does not prove runtime use or completed PQC migration",
++            "対応候補の重複を除いた位置数",
++            "位置不明の対応候補所見数",
++            "検査は未完了または不明です",
++            "未検査・打ち切り分は件数に含みません",
++            "PQCへの対応完了を保証するものではありません",
++            "ルール、検出箇所の順に開くと",
++            "実際の利用やPQC対応完了を保証するものではありません",
++        ] {
++            assert!(!html.contains(unwanted), "HTML: {lang}: {unwanted}");
++            assert!(!md.contains(unwanted), "Markdown: {lang}: {unwanted}");
++        }
++        assert_eq!(
++            html.matches("data-finding-id=").count(),
++            scan.findings().len()
++        );
++        assert!(html.contains("data-inspection-status=\"partial\""));
++        assert!(md.contains("partial"));
++        assert!(html.contains("JWT_RS256"));
++        assert!(md.contains("JWT_RS256"));
++        let heading = if lang == "en" {
++            "Inspection scope and completion"
++        } else {
++            "検査範囲と完了状況"
++        };
++        assert!(html.contains(heading));
++    }
++}
++
++#[test]
++fn gradle_never_promotes_dynamic_fragments_to_literal_facts() {
++    let scan = Scan::new(&[("build.gradle", "dependencies {\n implementation group: 'org.example' + suffix, name: 'bad', version: '1.' + minor\n implementation group: 'org.example', name: 'lib', version: '1.4' + patch\n implementation group: 'org.example', name: 'other' + suffix, version: '2.0'\n}\n")], "en");
++    let rows: Value = serde_json::from_str(&scan.text("dependency-sbom.json")).unwrap();
++    let rows = rows.as_array().unwrap();
++    assert_eq!(rows.len(), 1);
++    assert_eq!(rows[0]["name"], "org.example:lib");
++    assert_eq!(rows[0]["version"], "unknown");
++    assert!(!rows[0]["purl"].as_str().unwrap().contains('@'));
++    let native: Value = serde_json::from_str(&scan.text("scan.inventory.v1.json")).unwrap();
++    let lib = native["assets"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .find(|a| a["attributes"]["name"] == "org.example:lib")
++        .unwrap();
++    assert!(lib["attributes"]["declared_constraint"].is_null());
++    assert!(lib["attributes"]["resolved_version"].is_null());
++}
++
++#[test]
++fn jwt_algorithm_names_do_not_claim_active_signing() {
++    let scan = Scan::new(&[("types.ts", "type Algorithms = 'RS256' | 'RS384' | 'RS512' | 'PS256' | 'PS384' | 'PS512' | 'ES256';\n")], "en");
++    for f in scan.findings().iter().filter(|f| f["category"] == "JWT") {
++        assert!(!f["description"].as_str().unwrap().contains("is in use"));
++        assert!(f["migration_hint"].as_str().unwrap().contains("Confirm"));
++        assert!(!f["recommended_actions"]
++            .to_string()
++            .contains("Stop issuing new JWTs"));
++    }
++}
++
++#[test]
++fn gradle_quoted_commas_do_not_drop_dependency_identity() {
++    let scan = Scan::new(&[("build.gradle", "dependencies {\n implementation group: 'org.example', name: 'map-lib', version: '[1.0,2.0)'\n implementation 'org.example:coordinate-lib:[1.0,2.0)'\n}\n")], "en");
++    let rows: Value = serde_json::from_str(&scan.text("dependency-sbom.json")).unwrap();
++    let rows = rows.as_array().unwrap();
++    assert_eq!(rows.len(), 2);
++    for name in ["org.example:map-lib", "org.example:coordinate-lib"] {
++        let row = rows.iter().find(|r| r["name"] == name).unwrap();
++        assert_eq!(row["version"], "unknown");
++        assert!(!row["purl"].as_str().unwrap().contains('@'));
++    }
++}
++
++#[test]
++fn gradle_dynamic_versions_keep_literal_identity_without_resolved_facts() {
++    for name in ["build.gradle", "build.gradle.kts"] {
++        let scan = Scan::new(
++            &[(
++                name,
++                r#"dependencies {
++ implementation("org.bouncycastle:bcprov-jdk18on:$version")
++ implementation("${group}:not-a-literal:1.0")
++}
++"#,
++            )],
++            "en",
++        );
++        let rows: Value = serde_json::from_str(&scan.text("dependency-sbom.json")).unwrap();
++        assert_eq!(rows.as_array().unwrap().len(), 1);
++        assert_eq!(rows[0]["name"], "org.bouncycastle:bcprov-jdk18on");
++        assert_eq!(rows[0]["version"], "unknown");
++        assert_eq!(rows[0]["purl"], "");
++        let native: Value = serde_json::from_str(&scan.text("scan.inventory.v1.json")).unwrap();
++        let dependency = native["assets"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .find(|a| a["attributes"]["name"] == "org.bouncycastle:bcprov-jdk18on")
++            .unwrap();
++        assert!(dependency["attributes"]["declared_constraint"].is_null());
++        assert!(dependency["attributes"]["resolved_version"].is_null());
++    }
++}
+diff --git a/crates/pqc_scan_core/tests/task_ids.rs b/crates/pqc_scan_core/tests/task_ids.rs
+index 30f610a..36af4fe 100644
+--- a/crates/pqc_scan_core/tests/task_ids.rs
++++ b/crates/pqc_scan_core/tests/task_ids.rs
+@@ -28,11 +28,8 @@ fn task_ids_are_exact_unique_strings_and_dependencies_resolve() {
+         );
+         assert!(tasks.insert(id, task).is_none(), "duplicate task id");
+     }
+-    for id in 1..=40 {
+-        assert!(
+-            tasks.contains_key(&format!("{id:03}")),
+-            "missing original task"
+-        );
++    for id in 1..=62 {
++        assert!(tasks.contains_key(&format!("{id:03}")), "missing task");
+     }
+     for (id, task) in &tasks {
+         if let Some(dependencies) = task.get("depends_on") {
+diff --git a/crates/pqc_scan_detectors/src/dependency_detector/lexical.rs b/crates/pqc_scan_detectors/src/dependency_detector/lexical.rs
+index 8522d6a..8e9e50f 100644
+--- a/crates/pqc_scan_detectors/src/dependency_detector/lexical.rs
++++ b/crates/pqc_scan_detectors/src/dependency_detector/lexical.rs
+@@ -137,7 +137,37 @@ pub(super) fn parse_pom_xml(text: &str) -> Vec<DependencyItem> {
+     out
+ }
+ 
++// Split map fields outside quoted literals. Escapes keep a quoted comma from
++// becoming syntax; literal contents are still validated by the shared policy.
++fn gradle_fields(body: &str) -> impl Iterator<Item = &str> {
++    let mut quote = None;
++    let mut escaped = false;
++    body.split(move |ch| {
++        if escaped {
++            escaped = false;
++            return false;
++        }
++        if quote.is_some() && ch == '\\' {
++            escaped = true;
++            return false;
++        }
++        if quote == Some(ch) {
++            quote = None;
++            return false;
++        }
++        if quote.is_none() && matches!(ch, '\'' | '"') {
++            quote = Some(ch);
++            return false;
++        }
++        quote.is_none() && ch == ','
++    })
++}
++
+ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
++    static FIELD: LazyLock<Regex> = LazyLock::new(|| {
++        Regex::new(r#"^\s*(group|name|version)\s*:\s*(?:'([^']*)'|"([^"\n]*)"|(.+?))\s*$"#)
++            .expect("Gradle map field")
++    });
+     let mut out = Vec::new();
+     for call in static_declarations(text, false) {
+         if !matches!(
+@@ -148,41 +178,84 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
+                 | "runtimeOnly"
+                 | "testImplementation"
+                 | "testRuntimeOnly"
+-        ) || call.args.len() != 1
+-        {
+-            continue;
+-        }
+-        let parts: Vec<_> = call.args[0].split(':').collect();
+-        if parts.len() != 3 {
++        ) {
+             continue;
+         }
+-        let (group, artifact, version) = (parts[0], parts[1], parts[2]);
+-        let name = format!("{}:{}", group, artifact);
+-        let line = line_col_for_offset(text, call.start).0;
+-
++        let (group, artifact, version) = if let Some(body) = call.map_body {
++            let mut fields = std::collections::BTreeMap::new();
++            let mut duplicate = false;
++            for field in gradle_fields(body.trim_end_matches(';')) {
++                let Some(c) = FIELD.captures(field) else {
++                    duplicate = true;
++                    break;
++                };
++                let value = c.get(2).or_else(|| c.get(3)).map(|m| m.as_str());
++                if fields.insert(c[1].to_string(), value).is_some() {
++                    duplicate = true;
++                }
++            }
++            if duplicate {
++                continue;
++            }
++            let (Some(Some(group)), Some(Some(name))) = (fields.get("group"), fields.get("name"))
++            else {
++                continue;
++            };
++            (
++                group.to_string(),
++                name.to_string(),
++                fields
++                    .get("version")
++                    .and_then(|v| *v)
++                    .unwrap_or("unknown")
++                    .to_string(),
++            )
++        } else {
++            if call.args.len() != 1 {
++                continue;
++            }
++            let parts: Vec<_> = call.args[0].split(':').collect();
++            if parts.len() != 3
++                || parts[..2]
++                    .iter()
++                    .any(|v| v.contains(['$', '\\']) || v.contains("#{"))
++            {
++                continue;
++            }
++            (
++                parts[0].to_string(),
++                parts[1].to_string(),
++                parts[2].to_string(),
++            )
++        };
++        let name = format!("{group}:{artifact}");
+         out.push(DependencyItem {
+             context: None,
+             name: name.clone(),
+-            version: sanitize_version(version),
++            version: sanitize_version(&version),
+             ecosystem: "maven".to_string(),
+-            purl: make_purl("maven", &name, version),
+-            line,
++            purl: make_purl("maven", &name, &version),
++            line: line_col_for_offset(text, call.start).0,
+             source_type: "manifest".to_string(),
+             ..Default::default()
+         });
++        if out.len() == 10001 {
++            break;
++        }
+     }
+-
+     out
+ }
+ 
+ struct StaticDeclaration<'a> {
+     name: &'a str,
+     args: Vec<String>,
++    map_body: Option<&'a str>,
+     start: usize,
+ }
+ 
+ // A lexical subset only: skip comments/strings and accept literal-only calls at
+-// statement boundaries. Unknown DSL expressions never become resolved versions.
++// statement boundaries. Gradle versions remain declared constraints; dynamic
++// versions are filtered to Unknown by the shared manifest policy.
+ fn static_declarations(text: &str, hash_comments: bool) -> Vec<StaticDeclaration<'_>> {
+     let bytes = text.as_bytes();
+     let mut out = Vec::new();
+@@ -226,6 +299,26 @@ fn static_declarations(text: &str, hash_comments: bool) -> Vec<StaticDeclaration
+         if parenthesized {
+             cursor += 1;
+         }
++        // The audited Groovy map subset is single-line. Its head is found by
++        // the same scanner, so comments and quoted lookalikes stay excluded.
++        if !parenthesized
++            && ["group", "name", "version"].iter().any(|key| {
++                text[cursor..]
++                    .strip_prefix(key)
++                    .is_some_and(|rest| rest.trim_start_matches([' ', '\t']).starts_with(':'))
++            })
++        {
++            let end = text[cursor..]
++                .find('\n')
++                .map_or(bytes.len(), |n| cursor + n);
++            out.push(StaticDeclaration {
++                name,
++                args: Vec::new(),
++                map_body: Some(&text[cursor..end]),
++                start,
++            });
++            continue;
++        }
+         let mut args = Vec::new();
+         loop {
+             while bytes.get(cursor).is_some_and(u8::is_ascii_whitespace) {
+@@ -235,10 +328,6 @@ fn static_declarations(text: &str, hash_comments: bool) -> Vec<StaticDeclaration
+                 args.clear();
+                 break;
+             };
+-            if value.contains(['$', '\\']) || value.contains("#{") {
+-                args.clear();
+-                break;
+-            }
+             args.push(value.to_string());
+             cursor = end;
+             while bytes
+@@ -263,7 +352,12 @@ fn static_declarations(text: &str, hash_comments: bool) -> Vec<StaticDeclaration
+             break;
+         }
+         if !args.is_empty() {
+-            out.push(StaticDeclaration { name, args, start });
++            out.push(StaticDeclaration {
++                name,
++                args,
++                map_body: None,
++                start,
++            });
+         }
+     }
+     out
+diff --git a/crates/pqc_scan_detectors/tests/task043_detection_fixes.rs b/crates/pqc_scan_detectors/tests/task043_detection_fixes.rs
+index b2168ae..c1858d7 100644
+--- a/crates/pqc_scan_detectors/tests/task043_detection_fixes.rs
++++ b/crates/pqc_scan_detectors/tests/task043_detection_fixes.rs
+@@ -120,9 +120,19 @@ fn gradle_static_declarations_are_found_without_executing_dsl() {
+         assert_eq!(dep.evidence.metadata["dep_version"], "1.80");
+         assert_eq!(dep.location.line, 1);
+     }
++    // Dynamic versions retain literal identity as Unknown under the audited
++    // Gradle inventory contract; they do not establish resolved capability.
++    let unresolved = hits(
++        "build.gradle.kts",
++        "dependencies { implementation(\"org.bouncycastle:bcprov-jdk18on:$version\") }",
++    );
++    let reference = unresolved
++        .iter()
++        .find(|d| d.rule_id == "DEP_PQC_CAPABLE_LIBRARY")
++        .unwrap();
++    assert_eq!(reference.evidence.metadata["dep_version"], "unknown");
+     for text in [
+         "// implementation(\"org.bouncycastle:bcprov-jdk18on:1.80\")",
+-        "dependencies { implementation(\"org.bouncycastle:bcprov-jdk18on:$version\") }",
+         "println(\"implementation 'org.bouncycastle:bcprov-jdk18on:1.80'\")",
+     ] {
+         assert_count("build.gradle.kts", text, "DEP_PQC_CAPABLE_LIBRARY", 0);
+@@ -636,3 +646,30 @@ fn gemspec_ast_budget_is_truncated_rather_than_an_empty_unreported_success() {
+ fn python_loop_body_assignments_also_shadow_following_calls() {
+     assert_count("use.py", "from cryptography.hazmat.primitives.asymmetric import mlkem\nfor other in values:\n mlkem = local\nmlkem.MLKEM768PrivateKey.generate()\n", "PQC_PYTHON_API", 1);
+ }
++
++#[test]
++fn gradle_map_and_coordinate_forms_share_comment_and_string_boundaries() {
++    let text = r#"dependencies {
++ implementation("org.bouncycastle:bcprov-jdk18on:1.80")
++ implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.80'
++ /*
++ implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.80'
++ */
++ println("implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.80'")
++ // implementation('org.bouncycastle:bcprov-jdk18on:1.80')
++}
++"#;
++    let detected = hits("build.gradle", text);
++    let findings: Vec<_> = detected
++        .iter()
++        .filter(|d| d.rule_id == "DEP_PQC_CAPABLE_LIBRARY")
++        .collect();
++    assert_eq!(findings.len(), 2);
++    assert_eq!(
++        findings.iter().map(|d| d.location.line).collect::<Vec<_>>(),
++        vec![2, 3]
++    );
++    for d in findings {
++        assert_eq!(d.evidence.metadata["dep_version"], "1.80");
++    }
++}
+diff --git a/crates/pqc_scan_rules/tests/quality_metadata.rs b/crates/pqc_scan_rules/tests/quality_metadata.rs
+index 7fe7142..59e16fc 100644
+--- a/crates/pqc_scan_rules/tests/quality_metadata.rs
++++ b/crates/pqc_scan_rules/tests/quality_metadata.rs
+@@ -19,7 +19,7 @@ fn every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls() {
+         );
+     }
+     let rules = RuleSet::load_from_dir(&root.join("rules/default")).unwrap();
+-    assert_eq!(rules.len(), 122);
++    assert_eq!(rules.len(), 123);
+     let rows = metadata["rules"].as_array().unwrap();
+     assert_eq!(rows.len(), rules.len());
+     let mut seen = BTreeSet::new();
+diff --git a/docs/quality/RULE-QUALITY-METADATA.json b/docs/quality/RULE-QUALITY-METADATA.json
+index ae2b22c..4ff80d5 100644
+--- a/docs/quality/RULE-QUALITY-METADATA.json
++++ b/docs/quality/RULE-QUALITY-METADATA.json
+@@ -1,10 +1,10 @@
+ {
+   "schema_version": 1,
+-  "reviewed_at": "2026-11-12",
+-  "base_commit": "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf",
++  "reviewed_at": "2026-11-13",
++  "base_commit": "1bb45f891c3b39f5e784e9b10cff23a1ee94ab0c",
+   "fixture_layer": "compiled_pattern_target_only",
+   "license": "MIT; original synthetic fixtures and review text, references linked not copied",
+-  "scope": "Development-only companion. Existing rule YAML, Risk/severity and matching remain authoritative; no runtime loading.",
++  "scope": "Current integrated v0.3 rule companion. New source binding; inherits unchanged classifications and exact pattern fixtures from the two archived companions. Not an accuracy certification or a reassignment of historical review hashes.",
+   "source_files": [
+     {
+       "path": "rules/default/cert.yml",
+@@ -12,11 +12,11 @@
+     },
+     {
+       "path": "rules/default/crypto_api.yml",
+-      "sha256": "8020d85ef00fae35571427521f975b022b9b9e72cdcbb6f0687925cf5c40865e"
++      "sha256": "84f672787e883cbd2c2dd790ada8076c8a4c3f0628f3bc26aeb2b5bf4f7ea10a"
+     },
+     {
+       "path": "rules/default/jwt.yml",
+-      "sha256": "8d79f81a4b90c64b68301d19fc5a2255deef9e47e1871aed1181f498883866ae"
++      "sha256": "580a9f4f263b9e441757619c7f655a38b8496edeb570807cbb6bff5070b87a51"
+     },
+     {
+       "path": "rules/default/middleware.yml",
+@@ -24,19 +24,19 @@
+     },
+     {
+       "path": "rules/default/pqc.yml",
+-      "sha256": "8a912f5b8f660695b7a22e880c3889c02e967d01fa52f588c5f888ef80fba852"
++      "sha256": "acde689dc784a1866c738014fe47cb071948f7e452c3bdf32722b83082f824d2"
+     },
+     {
+       "path": "rules/default/ssh.yml",
+-      "sha256": "2508cfbb33e200e57603a4bb0ed34c3e37c0a592f4ee4d03259310357d1cf004"
++      "sha256": "e4d8745770860f74fb9d79d842e4636ac52ccfbb762aa11debf88d07a1b7fcb4"
+     },
+     {
+       "path": "rules/default/tls.yml",
+-      "sha256": "49b1a3fbc0d4be718f49378a0716cf1fa515c9c9e31589b1bd40995f1401d1f2"
++      "sha256": "87d9e3940b476b79612d4c864541867336d1afff985ad5c938d28980d39ed511"
+     },
+     {
+       "path": "rules/default/tree_sitter.yml",
+-      "sha256": "32b947684ae1ced57552285187d416dd27a6e7f9276b4223dbc1b73b2ef09f5c"
++      "sha256": "9e3ee8bd1442bd99562565ab08f28e7c624f6100dcc858054f789d4a861d0edf"
+     }
+   ],
+   "references": {
+@@ -182,7 +182,7 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.64,
+-        "migration_hint": "Migrate to hybrid KEM+AEAD cryptographic design.",
++        "migration_hint": "Review the purpose of this RSA reference and whether it is already a classical component of a hybrid design; assess compatible KEM and AEAD choices.",
+         "pattern": "Cipher\\.getInstance\\(\\s*\"RSA",
+         "scope": "code",
+         "description": "RSA cipher API usage detected."
+@@ -201,7 +201,8 @@
+       "method_limits": [
+         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
+         "Comment filtering is heuristic; strings/data/generated text can match.",
+-        "Per-rule output/candidate budgets and unsupported syntax can limit capture."
++        "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "Generic Java Cipher request is not TLS-specific; padding, binding and actual use are unresolved."
+@@ -387,10 +388,9 @@
+       ],
+       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
+       "method_limits": [
+-        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
++        "Textual pattern/reference, not symbol binding, active use or effective configuration.",
+         "Comment filtering is heuristic; strings/data/generated text can match.",
+-        "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+-        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
++        "Per-rule output/candidate budgets and unsupported syntax can limit capture."
+       ],
+       "known_gaps": [
+         "Known API/name heuristic; aliases, wrappers, parameters and execution are not resolved."
+@@ -628,9 +628,7 @@
+         "No signature/trust/hostname/revocation/private-key verification.",
+         "Unknown containers/attributes and parser limits remain visible diagnostics."
+       ],
+-      "known_gaps": [
+-
+-      ],
++      "known_gaps": [],
+       "review_status": "source_classification_review_not_accuracy_certification",
+       "fixtures": [
+         {
+@@ -676,9 +674,7 @@
+         "No signature/trust/hostname/revocation/private-key verification.",
+         "Unknown containers/attributes and parser limits remain visible diagnostics."
+       ],
+-      "known_gaps": [
+-
+-      ],
++      "known_gaps": [],
+       "review_status": "source_classification_review_not_accuracy_certification",
+       "fixtures": [
+         {
+@@ -816,9 +812,7 @@
+         "No signature/trust/hostname/revocation/private-key verification.",
+         "Unknown containers/attributes and parser limits remain visible diagnostics."
+       ],
+-      "known_gaps": [
+-
+-      ],
++      "known_gaps": [],
+       "review_status": "source_classification_review_not_accuracy_certification",
+       "fixtures": [
+         {
+@@ -1006,9 +1000,7 @@
+         "No signature/trust/hostname/revocation/private-key verification.",
+         "Unknown containers/attributes and parser limits remain visible diagnostics."
+       ],
+-      "known_gaps": [
+-
+-      ],
++      "known_gaps": [],
+       "review_status": "source_classification_review_not_accuracy_certification",
+       "fixtures": [
+         {
+@@ -1197,9 +1189,7 @@
+         "No signature/trust/hostname/revocation/private-key verification.",
+         "Unknown containers/attributes and parser limits remain visible diagnostics."
+       ],
+-      "known_gaps": [
+-
+-      ],
++      "known_gaps": [],
+       "review_status": "source_classification_review_not_accuracy_certification",
+       "fixtures": [
+         {
+@@ -1245,9 +1235,7 @@
+         "No signature/trust/hostname/revocation/private-key verification.",
+         "Unknown containers/attributes and parser limits remain visible diagnostics."
+       ],
+-      "known_gaps": [
+-
+-      ],
++      "known_gaps": [],
+       "review_status": "source_classification_review_not_accuracy_certification",
+       "fixtures": [
+         {
+@@ -1293,9 +1281,7 @@
+         "No signature/trust/hostname/revocation/private-key verification.",
+         "Unknown containers/attributes and parser limits remain visible diagnostics."
+       ],
+-      "known_gaps": [
+-
+-      ],
++      "known_gaps": [],
+       "review_status": "source_classification_review_not_accuracy_certification",
+       "fixtures": [
+         {
+@@ -1343,9 +1329,7 @@
+         "No signature/trust/hostname/revocation/private-key verification.",
+         "Unknown containers/attributes and parser limits remain visible diagnostics."
+       ],
+-      "known_gaps": [
+-
+-      ],
++      "known_gaps": [],
+       "review_status": "source_classification_review_not_accuracy_certification",
+       "fixtures": [
+         {
+@@ -2758,7 +2742,7 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.62,
+-        "migration_hint": "Migrate JWKs to ML-DSA or hybrid key types.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "\"kty\"\\s*:\\s*\"RSA\"",
+         "scope": "code",
+         "description": "RSA key type in JWK detected."
+@@ -2805,10 +2789,10 @@
+         "severity": "medium",
+         "risk": "quantum-uncertain",
+         "confidence": 0.5,
+-        "migration_hint": "Plan migration from ECDSA to PQC signatures.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "\\bES256\\b",
+         "scope": "code",
+-        "description": "ES256 (ECDSA-based JWT signing) is in use."
++        "description": "ES256 algorithm name referenced; active signing and effective policy are not established."
+       },
+       "purpose": "signature_reference",
+       "algorithm_families": [
+@@ -2853,7 +2837,7 @@
+         "severity": "low",
+         "risk": "quantum-uncertain",
+         "confidence": 0.35,
+-        "migration_hint": "Add PQC keys into the key-rotation strategy.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "\"kid\"\\s*:",
+         "scope": "code",
+         "description": "JWT kid header usage detected, indicating key-management touch points."
+@@ -2993,10 +2977,10 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.55,
+-        "migration_hint": "Migrate to ML-DSA signatures.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "\\bPS256\\b",
+         "scope": "code",
+-        "description": "PS256 (RSA-PSS) is used for JWT signing."
++        "description": "PS256 algorithm name referenced; active signing and effective policy are not established."
+       },
+       "purpose": "signature_reference",
+       "algorithm_families": [
+@@ -3040,10 +3024,10 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.55,
+-        "migration_hint": "Migrate to ML-DSA signatures.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "\\bPS384\\b",
+         "scope": "code",
+-        "description": "PS384 (RSA-PSS) is used for JWT signing."
++        "description": "PS384 algorithm name referenced; active signing and effective policy are not established."
+       },
+       "purpose": "signature_reference",
+       "algorithm_families": [
+@@ -3087,10 +3071,10 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.55,
+-        "migration_hint": "Migrate to ML-DSA signatures.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "\\bPS512\\b",
+         "scope": "code",
+-        "description": "PS512 (RSA-PSS) is used for JWT signing."
++        "description": "PS512 algorithm name referenced; active signing and effective policy are not established."
+       },
+       "purpose": "signature_reference",
+       "algorithm_families": [
+@@ -3134,10 +3118,10 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.6,
+-        "migration_hint": "Migrate to ML-DSA signatures.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "\\bRS256\\b",
+         "scope": "code",
+-        "description": "RS256 (RSA-based JWT signing) is in use."
++        "description": "RS256 algorithm name referenced; active signing and effective policy are not established."
+       },
+       "purpose": "signature_reference",
+       "algorithm_families": [
+@@ -3181,10 +3165,10 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.6,
+-        "migration_hint": "Migrate to ML-DSA signatures.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "\\bRS384\\b",
+         "scope": "code",
+-        "description": "RS384 is used for JWT signing."
++        "description": "RS384 algorithm name referenced; active signing and effective policy are not established."
+       },
+       "purpose": "signature_reference",
+       "algorithm_families": [
+@@ -3228,10 +3212,10 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.6,
+-        "migration_hint": "Migrate to ML-DSA signatures.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "\\bRS512\\b",
+         "scope": "code",
+-        "description": "RS512 is used for JWT signing."
++        "description": "RS512 algorithm name referenced; active signing and effective policy are not established."
+       },
+       "purpose": "signature_reference",
+       "algorithm_families": [
+@@ -3275,7 +3259,7 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.65,
+-        "migration_hint": "Migrate to ML-DSA signatures.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "SigningMethodRS(256|384|512)",
+         "scope": "code",
+         "description": "RS* JWT signing method is used in code."
+@@ -3723,7 +3707,7 @@
+         "severity": "medium",
+         "risk": "quantum-uncertain",
+         "confidence": 0.4,
+-        "migration_hint": "Select PQC-ready algorithms in OIDC provider settings.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "id_token_signed_response_alg",
+         "scope": "code",
+         "description": "OIDC ID token signature algorithm configuration detected."
+@@ -4080,10 +4064,9 @@
+       ],
+       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
+       "method_limits": [
+-        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
++        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
+-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+-        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
++        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+       ],
+       "known_gaps": [
+         "API spelling does not verify provider/version, symbol identity or active use."
+@@ -4129,10 +4112,9 @@
+       ],
+       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
+       "method_limits": [
+-        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
++        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
+-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+-        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
++        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+       ],
+       "known_gaps": [
+         "API spelling does not verify provider/version, symbol identity or active use."
+@@ -4276,10 +4258,9 @@
+       ],
+       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
+       "method_limits": [
+-        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
++        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
+-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+-        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
++        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+       ],
+       "known_gaps": [
+         "API spelling does not verify provider/version, symbol identity or active use."
+@@ -4355,7 +4336,7 @@
+         "severity": "critical",
+         "risk": "non-quantum-risk",
+         "confidence": 0.95,
+-        "migration_hint": "Treat OpenSSH private-key exposure as an urgent incident.",
++        "migration_hint": "Confirm whether this marker belongs to a complete live OpenSSH key. If a live key is exposed, treat it as an urgent incident and rotate it.",
+         "pattern": "-----BEGIN OPENSSH PRIVATE KEY-----",
+         "scope": "keymaterial",
+         "description": "OpenSSH private key header detected."
+@@ -4372,7 +4353,8 @@
+       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
+       "method_limits": [
+         "Only bounded recognized header/marker prefilter and regex, not key validation.",
+-        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown."
++        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "Header alone is not proof that valid secret material exists or is exposed."
+@@ -4400,7 +4382,7 @@
+         "severity": "critical",
+         "risk": "non-quantum-risk",
+         "confidence": 0.95,
+-        "migration_hint": "Investigate private-key exposure and rotate credentials.",
++        "migration_hint": "Confirm whether complete live key material is present. If exposure is confirmed, revoke or rotate the affected credentials.",
+         "pattern": "-----BEGIN PRIVATE KEY-----",
+         "scope": "keymaterial",
+         "description": "PKCS#8 private key header detected."
+@@ -4417,7 +4399,8 @@
+       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
+       "method_limits": [
+         "Only bounded recognized header/marker prefilter and regex, not key validation.",
+-        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown."
++        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "Header alone is not proof that valid secret material exists or is exposed."
+@@ -4445,7 +4428,7 @@
+         "severity": "critical",
+         "risk": "non-quantum-risk",
+         "confidence": 0.95,
+-        "migration_hint": "Rotate exposed private keys immediately and strengthen key handling.",
++        "migration_hint": "Confirm whether this is a header example, test key or complete live key. If a live key is exposed, revoke or rotate it and review key handling.",
+         "pattern": "-----BEGIN RSA PRIVATE KEY-----",
+         "scope": "keymaterial",
+         "description": "RSA private key header detected."
+@@ -4462,7 +4445,8 @@
+       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
+       "method_limits": [
+         "Only bounded recognized header/marker prefilter and regex, not key validation.",
+-        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown."
++        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "Header alone is not proof that valid secret material exists or is exposed."
+@@ -4926,7 +4910,7 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.68,
+-        "migration_hint": "Migrate to PQC-ready or hybrid cipher suites.",
++        "migration_hint": "Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication.",
+         "pattern": "\\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\\b",
+         "scope": "code",
+         "description": "RSA-based TLS cipher suite detected."
+@@ -4946,7 +4930,8 @@
+         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
+         "Comment filtering is heuristic; strings/data/generated text can match.",
+         "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+-        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
++        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "RSA authentication and RSA key transport are distinct; text does not establish negotiated use."
+@@ -5030,7 +5015,7 @@
+         "migration_hint": "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.",
+         "pattern": "(?:^|[^A-Za-z0-9_])TLSv1(?:[._]0)?(?:$|[^A-Za-z0-9_.])",
+         "scope": "code",
+-        "description": "Legacy TLS 1.0 configuration detected."
++        "description": "TLS 1.0 name referenced; effective configuration and runtime use are not established."
+       },
+       "purpose": "transport_configuration_reference",
+       "algorithm_families": [
+@@ -5047,7 +5032,8 @@
+         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
+         "Comment filtering is heuristic; strings/data/generated text can match.",
+         "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+-        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
++        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "Version strings do not establish a live listener or negotiated security."
+@@ -5088,7 +5074,7 @@
+         "migration_hint": "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.",
+         "pattern": "\\bTLSv1[._]1\\b",
+         "scope": "code",
+-        "description": "Legacy TLS 1.1 configuration detected."
++        "description": "TLS 1.1 name referenced; effective configuration and runtime use are not established."
+       },
+       "purpose": "transport_configuration_reference",
+       "algorithm_families": [
+@@ -5105,7 +5091,8 @@
+         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
+         "Comment filtering is heuristic; strings/data/generated text can match.",
+         "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+-        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
++        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "Version strings do not establish a live listener or negotiated security."
+@@ -5370,7 +5357,7 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.68,
+-        "migration_hint": "Replace Java RSA API usage with PQC-capable libraries.",
++        "migration_hint": "Review the Java RSA reference, provider and any existing PQC composition before selecting compatible migration changes.",
+         "pattern": "(KeyPairGenerator|KeyFactory|Cipher|Signature)\\s*\\.\\s*getInstance\\s*\\(\\s*\"(RSA|RSA/[^\"\\s]*|SHA(1|224|256|384|512)withRSA|RSASSA-PSS)",
+         "scope": "java",
+         "description": "RSA-related API symbols detected from Java AST."
+@@ -5389,7 +5376,8 @@
+       "method_limits": [
+         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
+-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
++        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "Known API/name heuristic; aliases, wrappers, parameters and execution are not resolved."
+@@ -5417,7 +5405,7 @@
+         "severity": "medium",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.6,
+-        "migration_hint": "Review EdDSA JWT signing references for PQC migration; a literal alone does not establish active signing.",
++        "migration_hint": "Confirm the purpose and protocol of this EdDSA reference; a name establishes neither JWT usage nor active signing. Assess compatible PQC signature options for the actual use.",
+         "pattern": "\\bEdDSA\\b",
+         "scope": "java,javascript,typescript,python,go,rust,ruby",
+         "description": "EdDSA algorithm reference in source; this is a classical public-key algorithm."
+@@ -5436,7 +5424,8 @@
+       "method_limits": [
+         "Regex over eligible AST source nodes; no execution or complete data-flow analysis.",
+         "Python API adaptation accepts only supported imports without detected rebinding; other aliases/computed expressions can remain undetected.",
+-        "String/call references may be fixtures or catalogs; findings are investigation candidates."
++        "String/call references may be fixtures or catalogs; findings are investigation candidates.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "Coverage is bounded to explicit supported spellings; this is not a completeness or runtime security claim."
+@@ -5464,7 +5453,7 @@
+         "severity": "medium",
+         "risk": "quantum-uncertain",
+         "confidence": 0.6,
+-        "migration_hint": "Define a PQC migration plan for ES-family algorithms.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "(?i)\\b(ES256|ES384|ES512)\\b",
+         "scope": "java,javascript,typescript,python,go,rust,ruby",
+         "description": "ES-family JWT signing algorithms detected in AST nodes."
+@@ -5512,7 +5501,7 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.72,
+-        "migration_hint": "Migrate JWT signing to ML-DSA or hybrid signatures.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "(?i)\\b(RS256|RS384|RS512|PS256|PS384|PS512)\\b",
+         "scope": "java,javascript,typescript,python,go,rust,ruby",
+         "description": "RSA-family JWT signing algorithms detected in AST nodes."
+@@ -5559,7 +5548,7 @@
+         "severity": "medium",
+         "risk": "quantum-uncertain",
+         "confidence": 0.55,
+-        "migration_hint": "Evaluate PQC-capable options in JOSE/JWT implementations.",
++        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+         "pattern": "(?i)(\\bjwt\\.(sign|verify)\\b|\\bjsonwebtoken\\.(sign|verify)\\b|\\bjose\\.jwtVerify\\b|\\bSignJWT\\b)",
+         "scope": "javascript,typescript",
+         "description": "JOSE/JWT calls detected from JavaScript/TypeScript AST."
+@@ -5605,7 +5594,7 @@
+         "severity": "medium",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.59,
+-        "migration_hint": "Migrate Node.js RSA signing/verification logic to a PQC-ready design.",
++        "migration_hint": "Review the RSA reference and its purpose (key generation, signing, verification or encryption); confirm active use and compatible PQC or hybrid options.",
+         "pattern": "(?i)(\\b(createSign|createVerify)\\s*\\(\\s*['\"]RSA|\\bgenerateKeyPair(?:Sync)?\\s*\\(\\s*['\"]rsa(?:-pss)?['\"]|\\b(privateEncrypt|publicDecrypt)\\s*\\(|\\b(RS|PS)(256|384|512)\\b)",
+         "scope": "javascript,typescript",
+         "description": "RSA-related API symbols detected from JavaScript/TypeScript AST."
+@@ -5622,11 +5611,11 @@
+       ],
+       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
+       "method_limits": [
+-        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
++        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
+         "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+-        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching.",
+-        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
++        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "Known API/name heuristic; aliases, wrappers, parameters and execution are not resolved."
+@@ -5707,13 +5696,13 @@
+         "risk": "quantum-vulnerable",
+         "confidence": 0.57,
+         "migration_hint": "Shift from key-length based planning to PQC signatures/key exchange.",
+-        "pattern": "(?i)((rsa|key(size|length)?|modulus)[^\\n]{0,32}\\b(1024|2048|3072)\\b|\\b(1024|2048|3072)\\b[^\\n]{0,32}(rsa|key(size|length)?|modulus))",
++        "pattern": "(?i)(?:\\b(?:rsa(?:_(?:key_size|key_length|bits|modulus))?|RSAKeyGenParameterSpec)\\b[^\\n]{0,32}\\b(?:1024|2048|3072)\\b|\\b(?:1024|2048|3072)\\b[^\\n]{0,32}\\brsa\\b)",
+         "scope": "java,javascript,typescript,python,go,rust,ruby",
+         "description": "Classical public-key size literals detected in AST nodes."
+       },
+-      "purpose": "key_size_text_hint",
++      "purpose": "explicit_RSA_size_reference",
+       "algorithm_families": [
+-        "unknown_or_RSA_hint"
++        "RSA"
+       ],
+       "quantum": "unknown_without_algorithm_binding",
+       "classical": "parameter_context_required",
+@@ -5725,10 +5714,11 @@
+       "method_limits": [
+         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
+-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
++        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+-        "A number near key/size/modulus is not a measured RSA key; no generic size-based quantum fix."
++        "Nominal RSA text context only, not measured size, binding resolution or active key generation."
+       ],
+       "review_status": "source_classification_review_not_accuracy_certification",
+       "fixtures": [
+@@ -5741,6 +5731,21 @@
+           "target": "cache_size = 2048",
+           "desired_positive": false,
+           "expected_pattern_match": false
++        },
++        {
++          "target": "assertEquals(1024, privKey.getUsagesRemaining())",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        },
++        {
++          "target": "addKeyFactoryAlgorithm(provider, \"ML-KEM-1024\", PREFIX + \"MLKEMKeyFactorySpi\")",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        },
++        {
++          "target": "keyGen_ML-KEM-1024.txt",
++          "desired_positive": false,
++          "expected_pattern_match": false
+         }
+       ]
+     },
+@@ -5959,7 +5964,7 @@
+         "severity": "high",
+         "risk": "quantum-vulnerable",
+         "confidence": 0.66,
+-        "migration_hint": "Update TLS suites containing RSA key exchange to PQC-hybrid suites.",
++        "migration_hint": "Identify the suite role: RSA_WITH uses static RSA key exchange; ECDHE_RSA and DHE_RSA use RSA authentication. Review hybrid key agreement and PQC authentication separately.",
+         "pattern": "(?i)\\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\\b",
+         "scope": "java,javascript,typescript,python,go,rust,ruby",
+         "description": "RSA-family TLS cipher suite literals detected in AST nodes."
+@@ -5979,7 +5984,8 @@
+         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
+         "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+-        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
++        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+       ],
+       "known_gaps": [
+         "RSA authentication and RSA key transport are distinct; text does not establish negotiated use."
+@@ -6002,19 +6008,83 @@
+           "expected_pattern_match": false
+         }
+       ]
++    },
++    {
++      "id": "PQC_STANDARD_REFERENCE",
++      "rule_snapshot": {
++        "id": "PQC_STANDARD_REFERENCE",
++        "kind": "tree_sitter",
++        "category": "PQC",
++        "severity": "info",
++        "risk": "quantum-safe",
++        "confidence": 0.6,
++        "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security.",
++        "pattern": "(?i)\\b(?:ML-KEM-(?:512|768|1024)|ML-DSA-(?:44|65|87)|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf]|MLKEM(?:512|768|1024)|MLDSA(?:44|65|87)|X25519MLKEM768)\\b",
++        "scope": "java,go,javascript,typescript,python,rust,ruby",
++        "description": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established."
++      },
++      "purpose": "standard_PQC_name_or_hybrid_group_reference",
++      "algorithm_families": [
++        "ML-KEM",
++        "ML-DSA",
++        "SLH-DSA",
++        "X25519MLKEM768"
++      ],
++      "quantum": "resistant_primitive_reference_not_enabled_state",
++      "classical": "implementation_not_assessed",
++      "reference_ids": [
++        "FIPS203",
++        "FIPS204",
++        "FIPS205"
++      ],
++      "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
++      "method_limits": [
++        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
++        "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
++        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
++      ],
++      "known_gaps": [
++        "Names and registration symbols do not establish execution, final implementation conformance or product security."
++      ],
++      "review_status": "source_classification_review_not_accuracy_certification",
++      "fixtures": [
++        {
++          "target": "ML-KEM-768",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "X25519MLKEM768",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "SLH-DSA-SHA2-128s",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "Kyber512",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        },
++        {
++          "target": "NOTMLKEM768",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        }
++      ]
+     }
+   ],
+-  "revision_record": {
+-    "date": "2026-11-12",
+-    "task": "043",
+-    "scope": "Approved detector/pattern corrections; original companion retained under target/quality-task-043-fixes-20261112/before/source/docs/quality/RULE-QUALITY-METADATA.json",
+-    "changed_pattern_rows": [
+-      "DEP_PQC_CAPABLE_LIBRARY",
+-      "PQC_DRAFT_ALGORITHM",
+-      "PQC_JAVA_API",
+-      "PQC_JAVA_CLASSICAL_GROUPS",
+-      "PQC_RUBY_API"
+-    ],
+-    "controls": "Original target labels and expected outcomes unchanged; new detector semantics have separate source-level tests"
+-  }
++  "integrated_develop": "26fa19e7bd2434836d6c4dbed0185f34e15b9e45",
++  "inherited_companions": [
++    {
++      "path": "docs/quality/task044-integration-20261113/PRE-INTEGRATION-RULE-METADATA.json",
++      "sha256": "a2a1b60728ed906cd5900cb45ba0b4ca9f0d6a7b686d834dcc675012ce761637"
++    },
++    {
++      "path": "docs/quality/AUDIT-RULE-QUALITY-METADATA.json",
++      "sha256": "d8c442e07ac674ca1aa203fba651384de9ae5e541f407713e5e0a603ee42f024"
++    }
++  ]
+ }
+diff --git a/docs/user/COVERAGE.ja.md b/docs/user/COVERAGE.ja.md
+index 7eac0d4..c5899d7 100644
+--- a/docs/user/COVERAGE.ja.md
++++ b/docs/user/COVERAGE.ja.md
+@@ -7,6 +7,10 @@
+ まず[スキャン対象の一覧](../../README.ja.md#targets)を確認してください。このガイドでは、一覧に挙げた形式の対応範囲と制約を説明します。
+ 対象形式でも、すべての暗号処理や実行経路を見つけられるとは限りません。
+ 
++監査対応後のRSA鍵長ルールは、一般的な `Key` の部分文字列ではなく、明示的なRSA名または対応するRSA鍵長識別子を必要とします。名前の照合であり、参照先の解決や実測した鍵長ではありません。`PQC_STANDARD_REFERENCE` はML-KEM・ML-DSA・SLH-DSAのパラメータ名、X25519MLKEM768、MLKEM・MLDSAの対応する識別子を検出します。evidence metadata の `reference_kind` は、照合したAST候補に応じて `name_literal`・`call_reference`・`symbol_reference` を記録します。実行を保証するものではありません。`.conf`・`.cfg` の `#` コメント行を文字列照合から除外します。Cやテキスト中の一般的なTLS名は、有効な設定ではなく参照として扱います。
++
++Gradleは、既存の6種類の依存設定について、1行の座標文字列またはリテラルの `group`・`name` と任意の `version` に対応します。変数や文字列への埋込みは未解決とし、宣言から解決済みバージョンを作りません。文字列による検査の状態はNotReportedを保持し、Gradle全体を解析したとは扱いません。動的な式、複数行の宣言、スクリプト評価は対象外です。
++
+ ## 目次
+ 
+ - [依存関係ファイル](#dependencies)
+@@ -122,7 +126,7 @@ PFX v3のData・AuthenticatedSafe・SafeContentsとX.509証明書bagを、長さ
+ ### 組み込みルールセット
+ 
+ - デフォルトルールは `rules/default/` 配下にあります。
+-- 現在の組み込みルール数: 122件
++- 現在の組み込みルール数: 123件
+ - ルールIDと重大度の定義は[ルール一覧](../rules-reference.md)を参照してください。
+ 
+ 空白だけのID、有限でない信頼度や `0〜1` の範囲外の値、IDの重複、不正なパターン、ルール探索の失敗は実行エラー1になります。
+diff --git a/docs/user/COVERAGE.md b/docs/user/COVERAGE.md
+index 7e43d71..aea5d0e 100644
+--- a/docs/user/COVERAGE.md
++++ b/docs/user/COVERAGE.md
+@@ -6,6 +6,10 @@ This guide describes the v0.3 development checkout. Detected references and find
+ 
+ Start with the [input overview](../../README.md#targets). This guide gives the supported formats and boundaries behind that table. Support for a file type means the documented subset can be inspected; it does not mean every cryptographic operation or runtime path can be found.
+ 
++Audit rule coverage: the RSA-size rule requires an explicit RSA token or recognized RSA-size identifier, not any `Key` substring. It remains nominal matching, not binding or measured key-size proof. `PQC_STANDARD_REFERENCE` recognizes ML-KEM/ML-DSA/SLH-DSA parameter names and X25519MLKEM768, including compact MLKEM/MLDSA symbols. Evidence metadata records `reference_kind` as `name_literal`, `call_reference` or `symbol_reference` based on the eligible AST candidate; none establishes execution. Hash-commented `.conf`/`.cfg` lines are excluded by the lexical comment filter. Generic C/text protocol references remain references, not effective settings.
++
++Gradle's lexical single-line subset accepts the existing six dependency configurations with quoted coordinates or literal `group`/`name` map fields and optional `version`. Variables/interpolation are unresolved, declarations never supply a resolved version, and lexical inspection remains NotReported rather than full Gradle analysis. Dynamic expressions, multiline declarations and script evaluation remain outside this subset.
++
+ ## Contents
+ 
+ - [Dependency files](#dependencies)
+@@ -119,7 +123,7 @@ Settings remain static references, not effective runtime configuration. Supporte
+ ### Built-in Rule Set
+ 
+ - Default rules live under `rules/default/`
+-- Current built-in rules: 122
++- Current built-in rules: 123
+ - Full reference (all rule IDs + severity definitions): [docs/rules-reference.md](../rules-reference.md)
+ 
+ Rule packs reject blank IDs, non-finite confidence or values outside `0..1`, duplicate IDs, invalid patterns and traversal failures. Invalid packs return operational error 1 instead of a partial pack. Valid custom scopes retain their per-detector semantics; unknown scope labels are not rejected. Check [scope compatibility](../architecture/RULE-VALIDATION.md) when upgrading a custom pack.
+diff --git a/tests/quality/test_task_queue.py b/tests/quality/test_task_queue.py
+index c1b5ed4..c1bf5a1 100644
+--- a/tests/quality/test_task_queue.py
++++ b/tests/quality/test_task_queue.py
+@@ -20,7 +20,7 @@ class TaskQueueTests(unittest.TestCase):
+                 self.assertEqual(identifier, path.name.split('-')[0])
+                 self.assertNotIn(identifier, tasks)
+                 tasks[identifier] = task
+-        self.assertTrue({f'{n:03}' for n in range(1, 41)} <= tasks.keys())
++        self.assertTrue({f'{n:03}' for n in range(1, 63)} <= tasks.keys())
+         for identifier, task in tasks.items():
+             for dependency in task.get('depends_on', []):
+                 self.assertIsInstance(dependency, str)

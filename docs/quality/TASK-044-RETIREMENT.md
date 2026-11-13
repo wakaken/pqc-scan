@@ -60,3 +60,17 @@ Python品質59件、実コンテナー境界10件、macOS隔離1件、preview単
 既存の[実装・試験レビュー](task044-retirement-20261113/REVIEWS.md)はともに受入で、修正必須の指摘はありません。退役変更の検証は完了しました。
 
 公開作業はdevelopとの競合で未完了です。初期の取込禁止と今回のmerge指示の関係を確認するため、044は`blocked`としてPRを提示します。統合してよいことが確認できた後、競合解消したsourceの検証と必要な同じ二者の限定確認を行い、doneとmergeを判断します。
+
+## develop統合の再開と検証
+
+ユーザーがdevelopの取込・競合解消・再検証・mergeを明示承認したため、上記の公開依存を解除しました。親はfeature `1bb45f8` とdevelop `26fa19e`です。タスク001〜062、configコメント処理、syntheticな歴史的self-scan試験を維持しました。Gradleは静的callとmapを同じcomment/string境界で扱い、動的versionはliteralな依存名を残して宣言値・解決値をUnknownにします。これはPQC有効化の証明ではありません。
+
+レビューで指摘されたinline map終端のP2は、quote外の`;`・`}`・コメントで区切る処理へ修正し、versionあり/なし・同一行複数宣言・quote内delimiterの回帰を追加しました。
+
+旧RULEメタデータは[exactな旧版](task044-integration-20261113/PRE-INTEGRATION-RULE-METADATA.json)へ保存し、現行companionはtarget由来118行とfeature由来5行のsnapshot/fixtureをそのまま継承して新sourceに束縛しました。旧AUDIT companionや旧applicability reviewは変更していません。COVERAGE契約の更新には、新しい二者の独立レビューを[別のapplicability記録](../../tests/quality/applicability-044-develop-integration/assessment.json)として保存しました。
+
+修正後のRust通常527件・全feature578件成功/既存ignored1件、両clippy/build、Python59・Node35・配布11・fmtは終了0です。5corpusはdebug通常構成で各3反復し、nominal報告と別のscoped報告を生成しました。043固定コーパスのFP/FNは0を維持します。baselineのFP4/FN2、expandedのFP17/FN0、expanded-v2のFP2/FN4等のnominal集計を保持します。対応単位のない予測は未注釈として区別し、製品の確定的な誤検知とはしません。全製品の精度へ一般化しません。性能比較は行っていません。
+
+[統合検証台帳](task044-integration-20261113/VALIDATION.json)・[原記録](task044-integration-20261113/VERIFICATION.tar.gz)・[限定レビュー](task044-integration-20261113/REVIEWS.md)を参照してください。renderer13ファイルはdevelopと同じbytesで、PR24の実browser証拠を変更のない表示範囲に再利用しました。coverage/共通隔離のコードも1bbから不変です。過去の測定値・レビューhashは現在の版へ付け替えていません。
+
+統合修正・ローカル検証・既存二者の限定レビューを終え、044をdoneとしました。公開前のこの記録はhosted CIやmergeの成功を先取りするものではありません。PR25で実際のCIを確認してからmergeします。

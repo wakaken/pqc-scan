@@ -120,9 +120,19 @@ fn gradle_static_declarations_are_found_without_executing_dsl() {
         assert_eq!(dep.evidence.metadata["dep_version"], "1.80");
         assert_eq!(dep.location.line, 1);
     }
+    // Dynamic versions retain literal identity as Unknown under the audited
+    // Gradle inventory contract; they do not establish resolved capability.
+    let unresolved = hits(
+        "build.gradle.kts",
+        "dependencies { implementation(\"org.bouncycastle:bcprov-jdk18on:$version\") }",
+    );
+    let reference = unresolved
+        .iter()
+        .find(|d| d.rule_id == "DEP_PQC_CAPABLE_LIBRARY")
+        .unwrap();
+    assert_eq!(reference.evidence.metadata["dep_version"], "unknown");
     for text in [
         "// implementation(\"org.bouncycastle:bcprov-jdk18on:1.80\")",
-        "dependencies { implementation(\"org.bouncycastle:bcprov-jdk18on:$version\") }",
         "println(\"implementation 'org.bouncycastle:bcprov-jdk18on:1.80'\")",
     ] {
         assert_count("build.gradle.kts", text, "DEP_PQC_CAPABLE_LIBRARY", 0);
@@ -635,4 +645,31 @@ fn gemspec_ast_budget_is_truncated_rather_than_an_empty_unreported_success() {
 #[test]
 fn python_loop_body_assignments_also_shadow_following_calls() {
     assert_count("use.py", "from cryptography.hazmat.primitives.asymmetric import mlkem\nfor other in values:\n mlkem = local\nmlkem.MLKEM768PrivateKey.generate()\n", "PQC_PYTHON_API", 1);
+}
+
+#[test]
+fn gradle_map_and_coordinate_forms_share_comment_and_string_boundaries() {
+    let text = r#"dependencies {
+ implementation("org.bouncycastle:bcprov-jdk18on:1.80")
+ implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.80'
+ /*
+ implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.80'
+ */
+ println("implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.80'")
+ // implementation('org.bouncycastle:bcprov-jdk18on:1.80')
+}
+"#;
+    let detected = hits("build.gradle", text);
+    let findings: Vec<_> = detected
+        .iter()
+        .filter(|d| d.rule_id == "DEP_PQC_CAPABLE_LIBRARY")
+        .collect();
+    assert_eq!(findings.len(), 2);
+    assert_eq!(
+        findings.iter().map(|d| d.location.line).collect::<Vec<_>>(),
+        vec![2, 3]
+    );
+    for d in findings {
+        assert_eq!(d.evidence.metadata["dep_version"], "1.80");
+    }
 }

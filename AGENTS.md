@@ -387,6 +387,20 @@ final source, including the required review stages.
 - Cancellation is an explicit maintainer decision, not implementation completion.
   Preserve its reason and history. Reopening requires an explicit new request.
 
+# User-Facing Report Content
+
+- Design generated HTML/Markdown reports for people investigating their project:
+  prioritize what was found, where it was found and the next useful check.
+- Keep the opening focused on results. Do not place internal aggregation rules,
+  implementation terminology, generic guarantee disclaimers or obvious interface
+  instructions ahead of the findings.
+- Explain incomplete inspection in the inspection overview using concrete states,
+  affected files and reasons. Do not repeat a generic warning above that overview.
+- Keep technical definitions, counting conventions and detailed limitations in
+  documentation, diagnostics or machine-readable exports as appropriate.
+- Review changed report copy in the rendered report, including its first screen.
+  Prefer short, natural wording that helps the reader make a decision.
+
 # Reports to the User
 
 - Explain in clear, concise and polite Japanese what changed and why.

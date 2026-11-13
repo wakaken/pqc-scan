@@ -14,6 +14,8 @@ Scanning and report generation run entirely on your machine using local rules an
 
 Downloading build/install dependencies, uploading reports through CI you configure, and opening external reference links are separate network activities. Once the tool and rules are available locally, scanning works offline.
 
+Reports show findings, locations and suggested next steps. The inspection overview separately identifies incomplete checks and files needing follow-up.
+
 ## Contents
 
 - [What can I scan?](#targets)

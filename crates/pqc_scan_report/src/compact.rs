@@ -36,16 +36,23 @@ fn risk(lang: ReportLanguage, s: &str) -> &str {
     }
 }
 fn text(finding: &Finding, lang: ReportLanguage) -> Finding {
-    if lang == ReportLanguage::Ja {
+    let mut display = if lang == ReportLanguage::Ja {
         japanese::localize_finding(finding)
     } else {
-        let mut display = finding.clone();
-        if protocol_rule(&finding.rule_id) {
-            display.migration_hint="Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.".into();
-        }
-        display
+        finding.clone()
+    };
+    if lang == ReportLanguage::En && protocol_rule(&finding.rule_id) {
+        display.migration_hint = "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.".into();
     }
+    if matches!(
+        finding.rule_id.as_str(),
+        "TLS_VERSION_1_0" | "TLS_VERSION_1_1" | "TS_TLS_LEGACY_VERSION_LITERAL"
+    ) {
+        display.migration_hint = format!("{} {}", label(lang, "First distinguish constants, comments and test references from effective configuration.", "まず定数・コメント・テストの参照と有効な設定を区別してください。"), display.migration_hint);
+    }
+    display
 }
+
 fn protocol_rule(id: &str) -> bool {
     matches!(
         id,
@@ -139,7 +146,17 @@ pub(crate) fn html_report_with_context(
     );
     let mut out = String::new();
     writeln!(out,"<!doctype html><html lang=\"{}\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>{title}</title><style>{}\n{}</style></head><body><main class=\"container\" data-compact-report>",label(lang,"en","ja"),crate::html_report::css(),include_str!("compact.css"))?;
-    writeln!(out,"<header class=\"top\"><h1>{title}</h1><p class=\"meta\">{}: {}</p><p>{}</p></header>",label(lang,"Generated","作成日時"),result.generated_at,label(lang,"Static evidence, not a runtime or migration-completion guarantee. Expand a rule, then a location, to inspect its next steps.","コードや設定の手掛かりをまとめた調査結果です。PQCへの対応完了を保証するものではありません。ルール、検出箇所の順に開くと、その箇所の対応を確認できます。"))?;
+    writeln!(
+        out,
+        "<header class=\"top\"><h1>{title}</h1><p class=\"meta\">{}: {}</p><p>{}</p></header>",
+        label(lang, "Generated", "作成日時"),
+        result.generated_at,
+        label(
+            lang,
+            "Cryptographic references found in source code and configuration.",
+            "コードや設定の手掛かりをまとめた調査結果です。"
+        )
+    )?;
     let inv = result.findings.iter().filter(|f| inventory(f)).count();
     writeln!(out, "<section class=\"summary\">")?;
     let mut metrics = vec![
@@ -171,9 +188,10 @@ pub(crate) fn html_report_with_context(
     for (name, count) in metrics {
         writeln!(out,"<div class=\"metric\"><div class=\"metric-label\">{name}</div><div class=\"metric-value\">{count}</div></div>")?;
     }
+    writeln!(out, "</section>")?;
     writeln!(
         out,
-        "</section><p>{}</p><p>",
+        "<p>{}</p><p>",
         label(
             lang,
             "Severity counts (all findings):",
@@ -443,8 +461,8 @@ pub(crate) fn markdown_report_with_context(
         result.summary.scanned_files,
         label(
             lang,
-            "Static evidence does not prove runtime use or completed PQC migration.",
-            "コードや設定の手掛かりであり、実際の利用やPQC対応完了を保証するものではありません。"
+            "Cryptographic references found in source code and configuration.",
+            "コードや設定の手掛かりをまとめた調査結果です。"
         )
     )?;
     writeln!(

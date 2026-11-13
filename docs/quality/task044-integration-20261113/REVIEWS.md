@@ -1,0 +1,17 @@
+# 統合の限定レビュー
+
+両reviewerは既存identityを再利用し、全suiteを自動反復していません。判定は主担当が受領した回答の記録です。
+
+## 実装
+
+`/root/task044_implementation_review`がfeature親1bb45f8/develop親26fa19eの統合を確認。初期scope41e8173dではP2（inline Gradle mapの終端が行末になり、version/identityを失う）を指摘しました。quote外のstatement終端処理と回帰試験を追加し、scope2928943191644eed2ea122326d8265c20f3054a010f9f4ae9d965f83618e1454で受入。新しいactionable findingsなし。
+
+metadata123行はtarget118＋feature5のexact JSON値、旧companion保管と新source bindingを確認。独立applicabilityは6候補の原bytes/provenance・現在の契約/parserに基づき、203入力/246単位を確認。独自JSONは新review-a.jsonに保存しました。
+
+## 試験
+
+`/root/task044_test_review`が同じR2 scopeを受入、対応必須の指摘なし。Gradleのmixed形式・dynamic version・コメント/文字列・quote内外delimiter、red→green、Rust527/578成功1ignored、両clippy/build、5corpus3反復を照合しました。binary/runtime159/harness342のhash一致、旧feature表示不整合trial除外、metadata由来値、過去92ファイル不変を確認。
+
+renderer13のtarget一致と既存browser証拠、変更のないcoverage/隔離コードの直前証拠再利用も受入。独立applicabilityは他者判断を見ずに先に著述し、新review-b.jsonへ保存。残る240単位と元truthを保持し、新scoped集計も確認しました。
+
+CI・mergeの成功や全製品品質の保証はレビュー単体では意味しません。判定後の変更は状態・結果など管理情報で、実装コード・契約・真値は不変です。
