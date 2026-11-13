@@ -1,0 +1,27 @@
+.E.F
+======================================================================
+ERROR: test_libtest_timeout_warning_keeps_test_active (tests.quality.test_miri044.MiriEvidenceTests.test_libtest_timeout_warning_keeps_test_active)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/test_miri044.py", line 41, in test_libtest_timeout_warning_keeps_test_active
+    self.assertEqual(parse_test_events(log,['slow'])['active'],['slow'])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/task044/miri_support.py", line 42, in parse_test_events
+    raise ValueError('unknown test event')
+ValueError: unknown test event
+
+======================================================================
+FAIL: test_undefined_behavior_is_failure_even_with_unsupported_in_backtrace (tests.quality.test_miri044.MiriEvidenceTests.test_undefined_behavior_is_failure_even_with_unsupported_in_backtrace)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/test_miri044.py", line 26, in test_undefined_behavior_is_failure_even_with_unsupported_in_backtrace
+    self.assertEqual(classify_failure('timeout',''),'Partial: timeout')
+AssertionError: 'Not Tested: timeout' != 'Partial: timeout'
+- Not Tested: timeout
++ Partial: timeout
+
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+FAILED (failures=1, errors=1)

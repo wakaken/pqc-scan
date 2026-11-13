@@ -2,6 +2,8 @@
 
 [日本語](COVERAGE.ja.md) · [README](../../README.md)
 
+This guide describes the v0.3 development checkout. Detected references and findings can differ from the published v0.2.0 release.
+
 Start with the [input overview](../../README.md#targets). This guide gives the supported formats and boundaries behind that table. Support for a file type means the documented subset can be inspected; it does not mean every cryptographic operation or runtime path can be found.
 
 Audit rule coverage: the RSA-size rule requires an explicit RSA token or recognized RSA-size identifier, not any `Key` substring. It remains nominal matching, not binding or measured key-size proof. `PQC_STANDARD_REFERENCE` recognizes ML-KEM/ML-DSA/SLH-DSA parameter names and X25519MLKEM768, including compact MLKEM/MLDSA symbols. Evidence metadata records `reference_kind` as `name_literal`, `call_reference` or `symbol_reference` based on the eligible AST candidate; none establishes execution. Hash-commented `.conf`/`.cfg` lines are excluded by the lexical comment filter. Generic C/text protocol references remain references, not effective settings.
@@ -116,6 +118,8 @@ Limits are 2 MiB, 256 bags, 256 content entries, nesting depth 8 and 4096 attrib
 - HAProxy
 - Traefik
 
+Settings remain static references, not effective runtime configuration. Supported Java/Ruby rules include selected SLH-DSA variants and classical-only TLS group settings; pre-standard algorithm names are checked case-insensitively. Hash-commented SSH settings in `.conf`/`.cfg` files are excluded by the applicable comment filter. See the rule reference for exact patterns; these checks do not negotiate a connection.
+
 ### Built-in Rule Set
 
 - Default rules live under `rules/default/`
@@ -134,9 +138,26 @@ produce one observation. Per rule/file, at most 4,096 accepted hits and 65,536 e
 as source. Finding IDs use the rule, path, position and original matched text.
 AST Unicode column limitations apply (see [SARIF locations](REPORTS.md#sarif-locations)).
 
-Python imports and `as` aliases, Ruby OpenSSL RSA/EC calls and Node RSA key generation have dedicated matching support. Computed names and ambiguous bindings may remain unknown; a dependency or an HS256/AES reference alone does not establish RSA use.
+TypeScript and TSX use their dedicated pinned grammars. Syntax errors retain available findings and report partial inspection.
 
-TypeScript and TSX use their dedicated pinned grammars. Valid type syntax no longer becomes partial merely because it is not JavaScript. Syntax errors still retain available findings and report partial inspection. Matching remains nominal: imported aliases can be missed, namesakes/display strings can be false positives, and comments inside ancestor text are not full semantic analysis. No symbol resolver or dataflow engine is implied.
+<a id="source-facts"></a>
+
+### Built-in local source analysis
+
+Selected built-in rules supplement pattern matching with imports, aliases and bindings within one file.
+
+| Target | Relationships inspected |
+|---|---|
+| Node PQC and RSA APIs | Supported crypto imports/aliases, local bindings, literal finite `for...of` lists and synchronously generated RSA keys passed to signing/verification |
+| Python PQC generation APIs | Supported explicit imports/aliases and local bindings that shadow the referenced name |
+| Rust PQC APIs | Supported crate/type imports and local ML-KEM key roles and receivers |
+| Java PQC APIs | Supported explicit algorithm requests through `getInstance`; available references are retained in incomplete syntax |
+
+Where bindings can be resolved, these checks exclude unrelated namesakes and help strings. They do not resolve computed names, external modules, arbitrary expressions or runtime paths. Other rules can still miss aliases or match display strings/comments. A dependency or an HS256/AES reference alone does not establish RSA use.
+
+Local analysis uses the `DetectorBudget` limits below. Additional analysis limits include alias depth 8, finite arrays of 32 elements and traversal depth 64. Exhausted analysis reports `detector_truncated`; syntax errors remain partial. Resolving a reference does not prove successful execution, enabled functionality or completed PQC migration.
+
+This analysis applies when the loaded rule ID, kind, pattern and scope match the default definition corresponding to that binary. Modified custom patterns/scopes use generic matching and do not automatically gain the same alias tracking. The runtime rule directory is still required.
 
 ## Repository inspection budgets and encoded text
 

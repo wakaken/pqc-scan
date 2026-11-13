@@ -1,0 +1,45 @@
+--- a/tasks/044-quality-coverage-feasibility.yaml
++++ b/tasks/044-quality-coverage-feasibility.yaml
+@@ -2,8 +2,8 @@
+ title: 到達率と追加検証手法の適用範囲を測る
+ type: improvement
+ priority: high
+-status: review
+-owner: Reviewer Agent
++status: done
++owner: Evaluator Agent
+ phase: '3'
+ description: 重要な未到達箇所を特定し、Miriや形式検証の適用可否も根拠付きで判断する。
+ quality_alias: QAM-03
+@@ -112,4 +112,22 @@
+   current_lifecycle: in-progress -> review（根本原因対処・有限範囲の元crate実行・初期チェックを完了）
+   profiles: 標準566登録、120成功441非対応4時間上限1既存ignored。OSアクセス条件は396候補中92試行、23成功46非対応23時間上限、304未着手。
+   conditions: Linux/aarch64、固定nightly、all-features。OS追加条件のみMiri内部のOSアクセスを許可し、外側コンテナー隔離とUB検査は維持。
+-  required_review_status: R1実装範囲は受入。最終集計の限定実装確認と試験レビュー待ち。
++  required_review_status: R1とR2実装レビュー・R2試験レビューを同じ二者が受入。対応必須の未解消指摘なし。
++  review_record:
++    implementation_reviewer: /root/task044_implementation_review
++    test_reviewer: /root/task044_test_review
++    accepted_source: docs/quality/task044-miri-followup-20261113/FOLLOWUP-SOURCE-R2.json
++    accepted_scope_sha256: bf4baac8d239002e0a8c430b992cc8a9e51f6ac5e0fdc7f216a5f9eddf70aa31
++    final_changes: 判定後は完了・レビューの管理情報のみ。driver・製品ソース・測定値は不変。
++
++miri_followup_completion:
++  date: '2026-11-13'
++  lifecycle: review -> done（停止原因調査・元crateでの有限範囲拡大・未検証理由の明示）
++  scope: 根本原因はhost/target runnerの衝突。固定工具コマンドで分離し、元workspaceの63targetをbuildして566登録を確認。
++  result: docs/quality/TASK-044-MIRI-FOLLOWUP.md
++  evidence: docs/quality/task044-miri-followup-20261113/ACCEPTANCE.json
++  verification: 2条件の原イベントと個別結果、工具正負対照、前後source一致と後始末、Python61成功、protocol5成功6skip、構文・リンク・hash照合を確認。
++  remaining_required_evaluation_work: なし。全製品のMiri合格を意味せず、下記未検証を保持。
++  product_unverified: OS追加条件の304未着手、時間上限、非対応FFI/OS操作、default feature構成、doctest、別OS/arch・複数seed等。
++  historical_evidence: 当初task044-20261113の20indexed filesとindexは不変保持。今回の証拠は別フォルダー。
++  publication: 未コミット。push/PR/merge/tag/release・CI変更は未実施。
+--- a/docs/quality/TASK-044-MIRI-FOLLOWUP.md
++++ b/docs/quality/TASK-044-MIRI-FOLLOWUP.md
+@@ -89,4 +89,4 @@
+ 
+ [測定の集計](task044-miri-followup-20261113/MEASUREMENTS.json)、[標準の個別結果](task044-miri-followup-20261113/DEFAULT-RESULTS.json)、[OS追加の個別結果](task044-miri-followup-20261113/OS-RESULTS.json)でテスト名・状態・ログを確認できます。原ログ、コマンドと環境、工具版、実行時source bindings、終了状態は証拠フォルダーのarchiveと各JSONに保持しました。両最終試行でsourceの前後一致、63targetの列挙成功、実行情報の不変、コンテナー削除を確認しています。元crateのbuild停止の解消、所定条件での実行、残る未検証理由の整理に対して完了を判定します。全製品のMiri合格は主張しません。
+ 
+-最終チェックと同じ二者による追加範囲のレビューは進行中です。
++最終チェックと同じ二者による実装・試験レビューを受け、停止原因の解消・元crateでの有限範囲拡大・未検証理由の明示を完了しました。[受入記録](task044-miri-followup-20261113/ACCEPTANCE.json)と[実装レビュー](task044-miri-followup-20261113/IMPLEMENTATION-REVIEW-R2.md)・[試験レビュー](task044-miri-followup-20261113/TEST-REVIEW.md)を参照してください。記載した未検証範囲は残っています。

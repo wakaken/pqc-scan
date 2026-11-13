@@ -1,0 +1,52 @@
+id: "041"
+title: "Define PQS-QAM and aggregate source-bound quality evidence"
+type: improvement
+priority: high
+status: done
+owner: Evaluator Agent
+phase: "1"
+description: >
+  Reuse the accepted TASK-023 corpus, evaluator and runner for a current-HEAD
+  baseline and an offline development-only JSON/Markdown quality report.
+  Document Q1-Q6, official reference status, gaps and phased follow-up work.
+  Product CLI, rules, schemas, risk semantics and approved thresholds are unchanged.
+depends_on: ["023", "028", "037"]
+plan_reference: "docs/quality/QUALITY-IMPLEMENTATION-PLAN.md"
+required_files:
+  - "tests/quality/evaluate.py"
+  - "tests/quality/run.py"
+  - ".github/workflows/pqc-scan.yml"
+  - "docs/quality/QUALITY-GATES.md"
+deliverables:
+  - "tests/quality/report.py and hand-derived evaluator-extension tests"
+  - "docs/quality/QUALITY-{MODEL,METRICS,BASELINE,ASSESSMENT,ROADMAP,REFERENCES}.md"
+metrics: ["TP/FP/FN/TN", "precision/recall/F1", "negative-unit FPR/FNR", "coverage partitions", "repeatability", "wall/CPU/RSS"]
+acceptance:
+  - "Raw current measurements, truth and source hashes are traceable; no old baseline is replaced."
+  - "Undefined denominators, unsupported inputs, unknown populations and unexecuted checks stay explicit."
+  - "Report generation reuses scoring and rejects inconsistent raw evidence; product and numeric gate semantics stay unchanged."
+  - "Independent implementation and test-adequacy reviews accept the final scope."
+testing_requirements:
+  - "Hand-derived duplicate/extra/negative/ambiguous/unsupported/zero-denominator cases."
+  - "Truth/raw-summary tamper, failed measurement, comparison mismatch and overwrite rejection."
+  - "Pinned offline build/fmt/workspace tests/clippy; Python quality, Node and distribution tests."
+risks:
+  - "A descriptive finite-corpus metric could be mistaken for whole-product assurance."
+  - "Prediction FP count and negative truth-unit FPR require different denominators."
+  - "Historical CI and measured source must not be confused with changed-worktree CI."
+implementation_record:
+  base_head: "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf"
+  branch: "codex/quality-assessment-model"
+  initial_worktree: clean
+  lifecycle: ["Planner: pending -> planned", "Executor: planned -> in-progress", "Executor: in-progress -> review", "Evaluator: review -> done after both independent review stages"]
+  evidence: "target/quality-assessment-20261111/"
+completion:
+  scope: "Development-only quality model/current baseline/report generation; not product-wide or publication acceptance"
+  evaluation: "Build/fmt/workspace356/clippy passed; final quality Python31, Node31 and distribution10 passed. Current frozen-truth metrics25TP/3FP/5FN/17TN and three repeatable runs; all four synthetic workloads measured."
+  reviews: ["quality_implementation_review", "quality_test_review"]
+  independent_testing_review: "Verified source/evidence hashes, 84 stratified rows independently recounted, meaningful positive/negative cases and unexecuted limits; no required fixes."
+  machine_evidence: "docs/quality/assessment-20261111/EVIDENCE.json"
+  report: "docs/quality/QUALITY-ASSESSMENT.md"
+  preserved_decisions: "Existing001/023/037 acceptance and014/016 cancellation unchanged; no new numeric CI gate"
+  unexecuted: "Hosted CI for these unpushed changes; coverage/mutation/fuzz/Miri/audit/deny/Scorecard; new independent algorithm/purpose truth; platform/real-product generalization"
+  publication: "Uncommitted local changes only; no push/PR/merge/tag/release/signing"

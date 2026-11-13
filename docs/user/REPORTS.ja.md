@@ -2,6 +2,8 @@
 
 [English](REPORTS.md) · [README](../../README.ja.md)
 
+このガイドはv0.3開発ブランチを対象とします。公開済みv0.2.0とは、検出できる参照や所見が異なる場合があります。
+
 スキャンが終わったら、まず人が読むレポートで所見を確認し、追跡や自動処理に必要なファイルを選びます。
 所見には検出根拠と確認事項が含まれますが、それだけを理由に暗号方式を置き換える必要はありません。
 
@@ -83,9 +85,11 @@ ML-KEM（鍵共有）、ML-DSA・SLH-DSA（署名）の名前や、Kyber・Dilit
 | Kyber・Dilithiumなどの旧名称 | どの実装・仕様の版を指すか。旧草案と最終仕様を同じものとして扱わない |
 | PQC・ハイブリッド方式を無効にするTLS設定 | 実際に有効な設定と接続相手の対応。通信して決まった方式を観測した結果ではない |
 
-対象には、[対象一覧](../../README.ja.md#targets)の7言語のML-KEM・ML-DSA参照、一部のNode SLH-DSA鍵生成、対応候補のライブラリ、Java・Rubyの古典方式限定TLS設定、Goの `GODEBUG=tlsmlkem=0` があります。
+対象には、[対象一覧](../../README.ja.md#targets)の7言語のML-KEM・ML-DSA参照、Java・Node・Rubyの一部のSLH-DSA API参照、対応候補のライブラリ、Java・Rubyの古典方式限定TLS設定、Goの `GODEBUG=tlsmlkem=0` があります。
 証明書ではML-DSA・SLH-DSAの署名OIDと公開鍵OIDを別々に照合し、ファイル名では方式を判定しません。
 OIDの解析だけで、署名・信頼チェーンやPQC鍵の妥当性を検証したことにはなりません。
+
+一部の組込ルールでは、[限定した局所解析](COVERAGE.ja.md#source-facts)で参照先を確認し、対応する範囲で同名の別関数や表示文字列を除外します。他のルールはパターンによる名目的な参照検出です。どちらも証拠と検査状態を確認してください。参照を追跡できても、実行したことの証明にはなりません。
 
 参考情報の所見もCBOMやSARIFに含まれます。`quantum-safe` は方式の分類として読み、「移行完了」と解釈しないでください。依存関係の所見は `quantum-uncertain` のままです。
 Node crypto・WebCrypto、ブラウザー、TypeScriptの実行環境では対応条件や必要な版が異なります。
@@ -118,7 +122,7 @@ JWT署名を変更する際は、JOSE形式・ライブラリ・検証側の互�
 pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang ja --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
-ローカル方針による評価を加える場合は、別途指定が必要です。製品バージョンは0.2.0ですが、出力形式の版はInventory v1、SARIF 2.1.0、CycloneDX 1.7のままです。probeの独立した出力は[診断ガイド](PROBING.ja.md)を参照してください。
+ローカル方針による評価を加える場合は、別途指定が必要です。v0.3向けの開発でも、出力形式の版はInventory v1、SARIF 2.1.0、CycloneDX 1.7を維持します。ロードマップの版に合わせて出力形式の名前が変わるわけではありません。probeの独立した出力は[診断ガイド](PROBING.ja.md)を参照してください。
 
 ### このツールでいうCBOMとSBOM
 

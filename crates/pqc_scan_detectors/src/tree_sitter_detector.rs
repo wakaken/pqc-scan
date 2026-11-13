@@ -82,41 +82,13 @@ impl TreeSitterDetector {
             ));
         }
 
-        let mut parser = Parser::new();
-        parser
-            .set_language(&language)
-            .map_err(|_| anyhow::anyhow!("failed to initialize source parser"))?;
-
-        let tree = parser
-            .parse(text, None)
-            .ok_or_else(|| anyhow::anyhow!("source parser produced no tree"))?;
-
-        let original_tree = tree.clone();
-        let template = if language_name == "javascript" {
-            Some(crate::template_source::view(text, &original_tree))
-        } else {
-            None
-        };
-        let parse_text = template
-            .as_ref()
-            .filter(|v| v.found)
-            .and_then(|v| std::str::from_utf8(&v.bytes).ok())
-            .unwrap_or(text);
-        let tree = if parse_text != text {
-            parser
-                .parse(parse_text, None)
-                .ok_or_else(|| anyhow::anyhow!("template parser produced no tree"))?
-        } else {
-            tree
-        };
-        let (tree, compatibility_limited) = module_syntax::compatible_tree(
-            &mut parser,
-            parse_text,
+        let ParsedSource {
             tree,
-            language_name,
-            budget.max_ast_match_bytes,
-            file.ext().is_some_and(|e| e.eq_ignore_ascii_case("mjs")),
-        )?;
+            original_tree,
+            compatibility_limited,
+            template_pending,
+            template_limited,
+        } = source_tree(text, &file.path, language, language_name, budget)?;
         let (mut candidates, mut status) = collect_candidate_nodes(text, &tree, budget);
         if compatibility_limited {
             status = DetectorStatus::Truncated;
@@ -181,6 +153,11 @@ impl TreeSitterDetector {
         if tree.root_node().has_error() && status != DetectorStatus::Truncated {
             status = DetectorStatus::Partial;
         }
+        let facts =
+            crate::source_facts::inspect(tree.root_node(), text, language_name, rules, budget);
+        if facts.truncated {
+            status = DetectorStatus::Truncated;
+        }
 
         let mut observations = Vec::new();
         let mut out = Vec::new();
@@ -206,6 +183,9 @@ impl TreeSitterDetector {
             let mut rule_hits = 0usize;
             let mut examined = 0usize;
             'candidates: for candidate in &candidates {
+                if facts.replaces(rule) {
+                    break;
+                }
                 if language_name == "python"
                     && matches!(
                         rule.id.as_str(),
@@ -328,10 +308,66 @@ impl TreeSitterDetector {
                     rule_hits += 1;
                 }
             }
+            for found in facts.rule_matches(rule) {
+                if dedup
+                    .iter()
+                    .any(|&(start, end)| found.start <= start && end <= found.end)
+                {
+                    continue;
+                }
+                if rule_hits >= budget.max_hits_per_rule || examined >= budget.max_match_candidates
+                {
+                    status = DetectorStatus::Truncated;
+                    break;
+                }
+                let (line, column) = pqc_scan_core::model::line_col_for_offset(text, found.start);
+                let raw = &text[found.start..found.end];
+                if raw.len() > remaining_match_bytes {
+                    status = DetectorStatus::Truncated;
+                    break;
+                }
+                remaining_match_bytes -= raw.len();
+                examined += 1;
+                let detection = Detection {
+                    rule_id: rule.id.clone(),
+                    location: Location {
+                        file: file_path.clone(),
+                        line,
+                        column,
+                    },
+                    evidence: Evidence {
+                        r#type: "tree_sitter_match".into(),
+                        r#match: mask_preview(raw),
+                        snippet_preview: pqc_scan_core::model::snippet_around(
+                            text,
+                            found.start,
+                            found.end,
+                            64,
+                        ),
+                        metadata: BTreeMap::from([
+                            ("detector".into(), self.name().into()),
+                            ("language".into(), language_name.into()),
+                            ("node_kind".into(), "bounded_source_fact".into()),
+                            ("scope".into(), rule.scope.clone()),
+                            ("source_resolution".into(), found.reason.into()),
+                        ]),
+                    },
+                };
+                if observe {
+                    observations.push(pqc_scan_core::ObservationDraft::source(
+                        &detection,
+                        pqc_scan_core::ObservationMethod::AstPattern,
+                        raw,
+                        Some((found.start, found.end)),
+                    ));
+                }
+                dedup.insert((found.start, found.end));
+                out.push(detection);
+                rule_hits += 1;
+            }
         }
 
-        let template_pending = template.as_ref().is_some_and(|v| v.found);
-        if template.as_ref().is_some_and(|v| v.limited) {
+        if template_limited {
             status = DetectorStatus::Truncated;
         } else if template_pending && status != DetectorStatus::Truncated {
             status = DetectorStatus::Partial;
@@ -489,7 +525,7 @@ fn scope_matches(scope: &str, language: &str) -> bool {
     false
 }
 
-fn resolve_language(path: &Path, text: &str) -> Option<(Language, &'static str)> {
+pub(crate) fn resolve_language(path: &Path, text: &str) -> Option<(Language, &'static str)> {
     if crate::source_kind::is_dockerfile(path, text) {
         return None;
     }
@@ -561,6 +597,68 @@ impl Detector for BoundedTreeSitterDetector {
     fn detect_observed(&self, f: &ScannableFile, r: &RuleSet) -> Result<DetectorOutcome> {
         TreeSitterDetector.detect_internal(f, r, true, self.0)
     }
+}
+
+pub(crate) struct ParsedSource {
+    pub tree: tree_sitter::Tree,
+    pub original_tree: tree_sitter::Tree,
+    pub compatibility_limited: bool,
+    pub template_pending: bool,
+    pub template_limited: bool,
+}
+
+// Both AST rules and source-aware regex rules must use the same grammar view.
+pub(crate) fn source_tree(
+    text: &str,
+    path: &Path,
+    language: Language,
+    language_name: &str,
+    budget: crate::DetectorBudget,
+) -> Result<ParsedSource> {
+    let mut parser = Parser::new();
+    parser
+        .set_language(&language)
+        .map_err(|_| anyhow::anyhow!("failed to initialize source parser"))?;
+
+    let tree = parser
+        .parse(text, None)
+        .ok_or_else(|| anyhow::anyhow!("source parser produced no tree"))?;
+
+    let original_tree = tree.clone();
+    let template = if language_name == "javascript" {
+        Some(crate::template_source::view(text, &original_tree))
+    } else {
+        None
+    };
+    let parse_text = template
+        .as_ref()
+        .filter(|v| v.found)
+        .and_then(|v| std::str::from_utf8(&v.bytes).ok())
+        .unwrap_or(text);
+    let tree = if parse_text != text {
+        parser
+            .parse(parse_text, None)
+            .ok_or_else(|| anyhow::anyhow!("template parser produced no tree"))?
+    } else {
+        tree
+    };
+    let (tree, compatibility_limited) = module_syntax::compatible_tree(
+        &mut parser,
+        parse_text,
+        tree,
+        language_name,
+        budget.max_ast_match_bytes,
+        path.extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|e| e.eq_ignore_ascii_case("mjs")),
+    )?;
+    Ok(ParsedSource {
+        tree,
+        original_tree,
+        compatibility_limited,
+        template_pending: template.as_ref().is_some_and(|v| v.found),
+        template_limited: template.as_ref().is_some_and(|v| v.limited),
+    })
 }
 
 #[cfg(test)]

@@ -5,6 +5,7 @@ mod comment_filter;
 pub mod dependency_detector;
 pub mod key_detector;
 pub mod regex_detector;
+mod source_facts;
 mod source_kind;
 mod template_source;
 pub mod tree_sitter_detector;

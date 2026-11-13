@@ -51,3 +51,123 @@ true OS cold cache. CI enforces integrity, sanity and repeatability only; numeri
 accuracy/performance proposals require maintainer review after measurement.
 
 See [the measured baseline and proposed budgets](../../docs/quality/TASK-023-BASELINE.md).
+
+## Source-bound quality report (PQS-QAM)
+
+After a measurement, generate a separate development report using the same
+scorer and frozen truth. Use a new output directory; existing evidence is never
+overwritten. This command reads raw accuracy reports, measurements and source
+bindings. It does not scan, execute corpus code or fetch dependencies.
+
+```sh
+python3 tests/quality/report.py --baseline target/quality-baseline \
+  --reference docs/quality/task023/BASELINE.json --out-dir target/quality-assessment
+```
+
+`quality.json` retains denominators, split/family and language/rule/detector/input
+strata, FP/FN, coverage, resources and source hashes; `quality.md` is a short view.
+FPR counts negative truth units with a hit, separately from duplicate/extra
+prediction FP counts. Zero denominators stay null. Algorithm-specific truth is
+not available in the unchanged TASK-023 data. Q3/Q4/Q6 require separate evidence and remain Not Tested in
+this automatic report; release acceptance remains Unknown. A failed numeric
+comparison is reported without a new numeric CI failure threshold.
+TASK-023's local nonregression and 2x investigation criteria were approved;
+see [acceptance](../../docs/quality/TASK-023-ACCEPTANCE.md). The original runner's
+historical `budgets: unapproved` string is not the current policy authority.
+No tool silently rewrites that historical metadata or old measurement files.
+See [metric definitions](../../docs/quality/QUALITY-METRICS.md) and the
+[current assessment](../../docs/quality/QUALITY-ASSESSMENT.md).
+
+## Additional reviewed data (TASK-042)
+
+The optional data directory reuses the runner, matcher and reporter. Omitting
+`--corpus-dir` still selects the original 57-unit TASK-023 corpus. Data are never
+imported, installed or executed. The expanded corpus binds two source-only label
+records, adjudication, protocol, upstream commits, licenses and exact input bytes.
+
+```sh
+python3 tests/quality/run.py --corpus-dir tests/quality/expanded \
+  --binary target/release/pqc-scan --build-profile release \
+  --out-dir target/quality-expanded --repeats 3 --skip-benchmarks
+python3 tests/quality/report.py --corpus-dir tests/quality/expanded \
+  --baseline target/quality-expanded --out-dir target/quality-expanded-assessment
+```
+
+Use fresh output paths. Additional JSON files include algorithm/use truth,
+algorithm/parameter/use/case/format strata, the complete rule coverage ledger,
+FP/FN and comparison scope. Rates retain denominators; empty cells are null.
+Algorithm-conditioned reference detection is not classifier correctness,
+execution or enabled cryptographic protection. Unmatched FP stay unattributed;
+mixed-algorithm units occupy combined cells without multiplying their counts.
+
+The locally authored portion is tuning. Public Node.js source predates this
+scanner but is a single correlated upstream lineage selected by a rule-aware
+coordinator. It is an authorship-independent first evaluation, not an unbiased
+estimate of population accuracy. Equivalent filename/encoding cases and parameter
+loops do not create independent samples. See [source-only protocol](expanded/PROTOCOL.md)
+and [provenance](expanded/provenance.json). Keep these data immutable; tuning on
+their results requires a new held-out lineage. Performance is Not Tested when
+`--skip-benchmarks` is used. Existing numeric gates remain unchanged.
+
+The first 042-v1 measurement exposed incomplete annotation coverage: nominated
+findings outside annotated spans count as FP under the unchanged protocol, but
+can include legitimate facts. Generated `annotationInterpretation` separates
+negative-unit hits, duplicate-positive predictions and unattributed predictions.
+Precision/F1 describe agreement with these fixed annotations; unattributed FP
+are not established product false positives. Preserve v1 and investigate under
+TASK-043; any post-observation annotation correction is tuning evidence.
+
+### Source-audited correction and remaining format controls
+
+`expanded-v2` preserves v1 and adds source-reviewed facts and format/parameter
+controls. All inherited data, including Node files whose paths still start with
+`holdout/`, are tuning. Only the separately pinned RustCrypto excerpt is fresh
+upstream-authored holdout. `expanded-v2-lock-controls` is an additional two-file
+tuning supplement, frozen after v2; it does not rewrite the measured v2 data.
+Each corpus requires two hash-bound reviews of every nominated rule against
+every file. Missing source facts, unresolved definitions, wrong populations,
+changed protocol/review bytes or removal of the required audit flag are rejected.
+Zero findings alone never establishes annotation completeness.
+
+Use the commands above with either new directory and a fresh output directory.
+The existing CI baseline job measures all versions separately. No new numeric
+hard gate is introduced. A reference is a same-data regression only if the
+truth, corpus and materialized input bindings match; supplying no reference
+does not itself prove a first independent evaluation.
+
+For v2, also pass
+`--applicability tests/quality/applicability-042-v2/assessment.json` to `report.py`.
+This adds `supported-scope.json` after checking two independent, source-bound
+applicability reviews. The original object-property truth and counts remain
+visible. Six attributes inside encrypted certificate contents are outside the
+documented public subset; their post-observation scope correction is separate
+from the original nominal-property measurement. It is not detector improvement
+or a new blind evaluation.
+
+The [reopened TASK-042 results](../../docs/quality/TASK-042-REOPEN-RESULTS.md)
+link the original nine acceptance criteria, every supported format, algorithm
+controls, known errors, exact commands and independent review records.
+
+## TASK-043 fixes and metadata replay
+
+`task043-corpus-v2` reuses all 042-v2 inputs/questions as tuning, adds two
+previously unannotated verification references and seven questions from two
+pre-scanner upstream authors. Six encrypted attributes are unsupported under
+the existing public scanner contract; original object truth stays immutable.
+Original 043-v1 source-only labels were frozen before measurements. The v2
+change only corrects upstream hashes versus connector copies with an additional
+trailing LF. It retains exact inputs, definitions, labels and original blind
+records under `inherited-v1/`; reviewers disclose post-freeze output exposure.
+The evaluator rejects replay with changed input hashes, questions, definitions
+or labels, and the reporter never calls it a new independent trial.
+
+```sh
+python3 tests/quality/run.py --corpus-dir tests/quality/task043-corpus-v2 \
+  --out-dir target/task043-measurement --build-profile release --repeats 3 --skip-benchmarks
+python3 tests/quality/report.py --corpus-dir tests/quality/task043-corpus-v2 \
+  --baseline target/task043-measurement --out-dir target/task043-assessment
+```
+
+Use a new directory for each run. Source selection is targeted, not random;
+seven holdout questions include correlated rules and one ambiguous control.
+These data cannot establish population accuracy or Q3–Q6 assurance.

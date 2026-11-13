@@ -1,33 +1,6 @@
 use super::super::DependencyItem;
 use super::*;
 use std::sync::LazyLock;
-pub(super) fn parse_gemfile(text: &str) -> Vec<DependencyItem> {
-    let mut out = Vec::new();
-    static GEM_RE: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r#"(?m)^\s*gem\s+['"]([^'"]+)['"]\s*(?:,\s*['"]([^'"]+)['"])?"#)
-            .expect("constant gem syntax")
-    });
-    let gem_re = &*GEM_RE;
-
-    for caps in gem_re.captures_iter(text).take(10001) {
-        let name = caps.get(1).map(|m| m.as_str()).unwrap_or("unknown");
-        let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
-        let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
-        out.push(DependencyItem {
-            context: None,
-            name: name.to_string(),
-            version: sanitize_version(version),
-            ecosystem: "gem".to_string(),
-            purl: make_purl("gem", name, version),
-            line,
-            source_type: "manifest".to_string(),
-            ..Default::default()
-        });
-    }
-
-    out
-}
-
 pub(super) fn parse_gemfile_lock(text: &str) -> Vec<DependencyItem> {
     let mut out = Vec::new();
     let spec_re = match Regex::new(r"(?m)^ {4}([A-Za-z0-9_.-]+)(?: \(([^)]+)\))?") {
@@ -36,34 +9,6 @@ pub(super) fn parse_gemfile_lock(text: &str) -> Vec<DependencyItem> {
     };
 
     for caps in spec_re.captures_iter(text).take(10001) {
-        let name = caps.get(1).map(|m| m.as_str()).unwrap_or("unknown");
-        let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
-        let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
-        out.push(DependencyItem {
-            context: None,
-            name: name.to_string(),
-            version: sanitize_version(version),
-            ecosystem: "gem".to_string(),
-            purl: make_purl("gem", name, version),
-            line,
-            source_type: "manifest".to_string(),
-            ..Default::default()
-        });
-    }
-
-    out
-}
-
-pub(super) fn parse_gemspec(text: &str) -> Vec<DependencyItem> {
-    let mut out = Vec::new();
-    let re = match Regex::new(
-        r#"(?m)^\s*spec\.(?:add_dependency|add_runtime_dependency|add_development_dependency)\s+['"]([^'"]+)['"](?:\s*,\s*['"]([^'"]+)['"])?"#,
-    ) {
-        Ok(v) => v,
-        Err(_) => return out,
-    };
-
-    for caps in re.captures_iter(text).take(10001) {
         let name = caps.get(1).map(|m| m.as_str()).unwrap_or("unknown");
         let version = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
         let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
@@ -218,30 +163,56 @@ fn gradle_fields(body: &str) -> impl Iterator<Item = &str> {
     })
 }
 
+fn gradle_map_body(text: &str) -> &str {
+    let mut quote = None;
+    let mut escaped = false;
+    for (at, ch) in text.char_indices() {
+        if ch == '\n' {
+            return &text[..at];
+        }
+        if escaped {
+            escaped = false;
+            continue;
+        }
+        if let Some(q) = quote {
+            if ch == '\\' {
+                escaped = true;
+            } else if ch == q {
+                quote = None;
+            }
+            continue;
+        }
+        if matches!(ch, '\'' | '"') {
+            quote = Some(ch);
+        } else if matches!(ch, ';' | '}')
+            || text[at..].starts_with("//")
+            || text[at..].starts_with("/*")
+        {
+            return &text[..at];
+        }
+    }
+    text
+}
+
 pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
-    static DECL: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(
-        r"^\s*(?:implementation|api|compileOnly|runtimeOnly|testImplementation|testRuntimeOnly)\s+(.+)"
-    ).expect("Gradle declaration")
-    });
-    static COORD: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r#"^["']([^:"']+):([^:"']+):([^"']+)["']"#).expect("Gradle coordinate")
-    });
     static FIELD: LazyLock<Regex> = LazyLock::new(|| {
         Regex::new(r#"^\s*(group|name|version)\s*:\s*(?:'([^']*)'|"([^"\n]*)"|(.+?))\s*$"#)
             .expect("Gradle map field")
     });
     let mut out = Vec::new();
-    // Single-line lexical subset. Scripts, closures, interpolation and variables
-    // are never evaluated; the existing heuristic outcome stays NotReported.
-    for (idx, raw) in text.lines().enumerate() {
-        let Some(decl) = DECL.captures(raw) else {
+    for call in static_declarations(text, false) {
+        if !matches!(
+            call.name,
+            "implementation"
+                | "api"
+                | "compileOnly"
+                | "runtimeOnly"
+                | "testImplementation"
+                | "testRuntimeOnly"
+        ) {
             continue;
-        };
-        let body = &decl[1];
-        let (group, artifact, version) = if let Some(c) = COORD.captures(body) {
-            (c[1].to_string(), c[2].to_string(), c[3].to_string())
-        } else {
+        }
+        let (group, artifact, version) = if let Some(body) = call.map_body {
             let mut fields = std::collections::BTreeMap::new();
             let mut duplicate = false;
             for field in gradle_fields(body.trim_end_matches(';')) {
@@ -270,6 +241,23 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
                     .unwrap_or("unknown")
                     .to_string(),
             )
+        } else {
+            if call.args.len() != 1 {
+                continue;
+            }
+            let parts: Vec<_> = call.args[0].split(':').collect();
+            if parts.len() != 3
+                || parts[..2]
+                    .iter()
+                    .any(|v| v.contains(['$', '\\']) || v.contains("#{"))
+            {
+                continue;
+            }
+            (
+                parts[0].to_string(),
+                parts[1].to_string(),
+                parts[2].to_string(),
+            )
         };
         let name = format!("{group}:{artifact}");
         out.push(DependencyItem {
@@ -278,7 +266,7 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
             version: sanitize_version(&version),
             ecosystem: "maven".to_string(),
             purl: make_purl("maven", &name, &version),
-            line: idx + 1,
+            line: line_col_for_offset(text, call.start).0,
             source_type: "manifest".to_string(),
             ..Default::default()
         });
@@ -287,6 +275,142 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
         }
     }
     out
+}
+
+struct StaticDeclaration<'a> {
+    name: &'a str,
+    args: Vec<String>,
+    map_body: Option<&'a str>,
+    start: usize,
+}
+
+// A lexical subset only: skip comments/strings and accept literal-only calls at
+// statement boundaries. Gradle versions remain declared constraints; dynamic
+// versions are filtered to Unknown by the shared manifest policy.
+fn static_declarations(text: &str, hash_comments: bool) -> Vec<StaticDeclaration<'_>> {
+    let bytes = text.as_bytes();
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < bytes.len() && out.len() < 10001 {
+        if bytes[i..].starts_with(b"//") || (hash_comments && bytes[i] == b'#') {
+            i = text[i..].find('\n').map_or(bytes.len(), |n| i + n + 1);
+            continue;
+        }
+        if bytes[i..].starts_with(b"/*") {
+            i = text[i + 2..].find("*/").map_or(bytes.len(), |n| i + n + 4);
+            continue;
+        }
+        if matches!(bytes[i], b'\'' | b'"') {
+            i = quoted_literal(text, i).map_or(bytes.len(), |(_, end)| end);
+            continue;
+        }
+        if !bytes[i].is_ascii_alphabetic() && bytes[i] != b'_' {
+            i += 1;
+            continue;
+        }
+        let start = i;
+        while i < bytes.len()
+            && (bytes[i].is_ascii_alphanumeric() || matches!(bytes[i], b'_' | b'.'))
+        {
+            i += 1;
+        }
+        let name = &text[start..i];
+        let previous = text[..start]
+            .chars()
+            .rev()
+            .find(|c| !matches!(c, ' ' | '\t' | '\r'));
+        if previous.is_some_and(|c| !matches!(c, '\n' | '{' | ';')) {
+            continue;
+        }
+        let mut cursor = i;
+        while bytes.get(cursor).is_some_and(u8::is_ascii_whitespace) {
+            cursor += 1;
+        }
+        let parenthesized = bytes.get(cursor) == Some(&b'(');
+        if parenthesized {
+            cursor += 1;
+        }
+        // The audited Groovy map subset is single-line. Its head is found by
+        // the same scanner, so comments and quoted lookalikes stay excluded.
+        if !parenthesized
+            && ["group", "name", "version"].iter().any(|key| {
+                text[cursor..]
+                    .strip_prefix(key)
+                    .is_some_and(|rest| rest.trim_start_matches([' ', '\t']).starts_with(':'))
+            })
+        {
+            out.push(StaticDeclaration {
+                name,
+                args: Vec::new(),
+                map_body: Some(gradle_map_body(&text[cursor..])),
+                start,
+            });
+            continue;
+        }
+        let mut args = Vec::new();
+        loop {
+            while bytes.get(cursor).is_some_and(u8::is_ascii_whitespace) {
+                cursor += 1;
+            }
+            let Some((value, end)) = quoted_literal(text, cursor) else {
+                args.clear();
+                break;
+            };
+            args.push(value.to_string());
+            cursor = end;
+            while bytes
+                .get(cursor)
+                .is_some_and(|b| matches!(b, b' ' | b'\t' | b'\r'))
+            {
+                cursor += 1;
+            }
+            if bytes.get(cursor) == Some(&b',') && args.len() < 16 {
+                cursor += 1;
+                continue;
+            }
+            if (parenthesized && bytes.get(cursor) != Some(&b')'))
+                || (!parenthesized
+                    && bytes
+                        .get(cursor)
+                        .is_some_and(|b| !matches!(b, b'\n' | b'}' | b';' | b'#'))
+                    && !bytes[cursor..].starts_with(b"//"))
+            {
+                args.clear();
+            }
+            break;
+        }
+        if !args.is_empty() {
+            out.push(StaticDeclaration {
+                name,
+                args,
+                map_body: None,
+                start,
+            });
+        }
+    }
+    out
+}
+
+fn quoted_literal(text: &str, start: usize) -> Option<(&str, usize)> {
+    let bytes = text.as_bytes();
+    let quote = *bytes.get(start)?;
+    if !matches!(quote, b'\'' | b'"') {
+        return None;
+    }
+    let mut i = start + 1;
+    while i < bytes.len() {
+        if bytes[i] == quote {
+            return Some((&text[start + 1..i], i + 1));
+        }
+        if bytes[i] == b'\\' {
+            i += 1;
+        }
+        if bytes.get(i) == Some(&b'\n') {
+            return None;
+        }
+        i += 1;
+    }
+    None
 }
 
 pub(super) fn parse_gradle_lockfile(text: &str) -> Vec<DependencyItem> {

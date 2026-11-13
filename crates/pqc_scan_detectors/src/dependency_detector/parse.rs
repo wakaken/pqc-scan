@@ -1246,10 +1246,13 @@ pub(super) fn heuristic(name: &str, text: &str) -> anyhow::Result<Parsed> {
     if text.len() > 2 * 1024 * 1024 {
         return failure(Failure::Limit);
     }
+    if matches!(name, "Gemfile" | "gems.rb") || name.ends_with(".gemspec") {
+        let file =
+            ScannableFile::from_bytes(std::path::PathBuf::from(name), text.as_bytes().to_vec());
+        return super::ruby::inspect(&file, None);
+    }
     let mut items = match name {
-        "Gemfile" | "gems.rb" => lexical::parse_gemfile(text),
         "Gemfile.lock" | "gems.locked" => lexical::parse_gemfile_lock(text),
-        v if v.ends_with(".gemspec") => lexical::parse_gemspec(text),
         "requirements.txt" => lexical::parse_requirements(text),
         "go.mod" => lexical::parse_go_mod(text),
         "pom.xml" => lexical::parse_pom_xml(text),

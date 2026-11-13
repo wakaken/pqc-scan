@@ -1,0 +1,452 @@
+[
+  {
+    "name": "fmt-final",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--check"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "workspace-verified",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--offline",
+      "--locked"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "clippy-verified",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--offline",
+      "--locked",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "all-features",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--all-features",
+      "--offline",
+      "--locked"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "release-verified",
+    "command": [
+      "cargo",
+      "build",
+      "--release",
+      "--workspace",
+      "--offline",
+      "--locked"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before/task023",
+      "--repeats",
+      "3",
+      "--corpus-dir",
+      "tests/quality",
+      "--skip-benchmarks"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before/expanded",
+      "--repeats",
+      "3",
+      "--corpus-dir",
+      "tests/quality/expanded",
+      "--skip-benchmarks"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before/expanded-v2",
+      "--repeats",
+      "3",
+      "--corpus-dir",
+      "tests/quality/expanded-v2",
+      "--skip-benchmarks"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before/lock-controls",
+      "--repeats",
+      "3",
+      "--corpus-dir",
+      "tests/quality/expanded-v2-lock-controls",
+      "--skip-benchmarks"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before/task043",
+      "--repeats",
+      "3",
+      "--corpus-dir",
+      "tests/quality/task043-corpus-v2",
+      "--skip-benchmarks"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/task023",
+      "--repeats",
+      "3",
+      "--corpus-dir",
+      "tests/quality"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/report.py",
+      "--baseline",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/task023",
+      "--reference",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before/task023/summary.json",
+      "--corpus-dir",
+      "tests/quality",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/reports/task023"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/expanded",
+      "--repeats",
+      "3",
+      "--corpus-dir",
+      "tests/quality/expanded",
+      "--skip-benchmarks"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/report.py",
+      "--baseline",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/expanded",
+      "--reference",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before/expanded/summary.json",
+      "--corpus-dir",
+      "tests/quality/expanded",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/reports/expanded"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/expanded-v2",
+      "--repeats",
+      "3",
+      "--corpus-dir",
+      "tests/quality/expanded-v2",
+      "--skip-benchmarks"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/report.py",
+      "--baseline",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/expanded-v2",
+      "--reference",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before/expanded-v2/summary.json",
+      "--corpus-dir",
+      "tests/quality/expanded-v2",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/reports/expanded-v2",
+      "--applicability",
+      "tests/quality/applicability-042-develop-integration/assessment.json"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/lock-controls",
+      "--repeats",
+      "3",
+      "--corpus-dir",
+      "tests/quality/expanded-v2-lock-controls",
+      "--skip-benchmarks"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/report.py",
+      "--baseline",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/lock-controls",
+      "--reference",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before/lock-controls/summary.json",
+      "--corpus-dir",
+      "tests/quality/expanded-v2-lock-controls",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/reports/lock-controls"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/task043",
+      "--repeats",
+      "3",
+      "--corpus-dir",
+      "tests/quality/task043-corpus-v2",
+      "--skip-benchmarks"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/report.py",
+      "--baseline",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/task043",
+      "--reference",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before/task043/summary.json",
+      "--corpus-dir",
+      "tests/quality/task043-corpus-v2",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/final/reports/task043"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "target/release/pqc-scan",
+      "scan",
+      ".",
+      "--format",
+      "sarif",
+      "--out-dir",
+      "target/develop-integration-20261112/self-scan",
+      "--rules-dir",
+      "rules"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "node",
+      "shell/prepare-code-scanning.cjs",
+      "--input",
+      "target/develop-integration-20261112/self-scan/report.sarif",
+      "--expectations",
+      "docs/quality/SELF-SCAN-EXPECTATIONS.json",
+      "--root",
+      ".",
+      "--output",
+      "target/develop-integration-20261112/self-scan/code-scanning.sarif",
+      "--audit",
+      "target/develop-integration-20261112/self-scan/audit.json"
+    ],
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/quality",
+      "-p",
+      "test_*.py"
+    ],
+    "log": "target/develop-integration-20261112/python-quality-final.log",
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "node",
+      "--test",
+      "shell/*.test.cjs"
+    ],
+    "log": "target/develop-integration-20261112/node-final.log",
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/distribution",
+      "-v"
+    ],
+    "log": "target/develop-integration-20261112/distribution.log",
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/protocol",
+      "-p",
+      "test_*.py",
+      "-v"
+    ],
+    "log": "target/develop-integration-20261112/protocol-kernel.log",
+    "exitCode": 0,
+    "environment": {
+      "PQC_RUN_CONTAINER_TESTS": "1",
+      "PQC_PROTOCOL_IMAGE_FILE": "target/develop-integration-20261112/IMAGE.json"
+    }
+  },
+  {
+    "command": [
+      "python3",
+      "target/develop-integration-20261112/before/tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before-pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/before/target/integration-before-performance",
+      "--repeats",
+      "3"
+    ],
+    "log": "target/develop-integration-20261112/before-performance.log",
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "cargo",
+      "build",
+      "--manifest-path",
+      "target/develop-integration-20261112/develop/Cargo.toml",
+      "--target-dir",
+      "target/develop-integration-20261112/develop-build",
+      "--release",
+      "--workspace",
+      "--offline",
+      "--locked"
+    ],
+    "log": "target/develop-integration-20261112/develop-build.log",
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "python3",
+      "target/develop-integration-20261112/develop/tests/quality/run.py",
+      "--binary",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/develop-build/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/develop-integration-20261112/develop/target/integration-performance",
+      "--repeats",
+      "3"
+    ],
+    "log": "target/develop-integration-20261112/develop-performance.log",
+    "exitCode": 0
+  }
+]

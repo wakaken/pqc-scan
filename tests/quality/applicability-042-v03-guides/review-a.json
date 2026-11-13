@@ -1,0 +1,49 @@
+{
+  "reviewer": "/root/develop_sync_docs_implementation_review",
+  "timestampUtc": "2026-11-13T01:01:09Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "a3b0bae7f5ae7ac5da14d7430d521ac981642422118f8057aaeec40341f0c349",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "db4349d31169787f183a873f0499439bb962a4c70f0585b4ab7e85ef6963b90b",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "元public-only.p12の来歴ハッシュを照合し、AuthenticatedSafe内のContentInfoがencryptedDataであることをASN.1構造で確認した。既知の変換元はRSA署名の公開証明書だが、現在のCOVERAGEは暗号化内容の抽出を対応外とし、pkcs12.rsも非Data内容を読み進めない。ECDSA属性の否定を対応内検査へ要求できないため、この属性単位だけを対象外とする。元のnegativeラベルは保持する。"
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "元public-only.pfxは来歴で束縛されたpublic-only.p12と同一バイトで、暗号化ContentInfoを持つ。公開契約とcontent関数の非Data分岐により証明書署名の抽出は対応外である。変換元から確定するRSA署名という名目的真値は残し、ECDSA属性のこの検査単位のみsupported-scopeから除く。ファイル名のコンテナ信号は保持する。"
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "public-only.p12の来歴は公開RSA3072 DERを指し、その公開鍵サイズも独立に確認できる。一方、実際のP12バイトでは証明書内容がencryptedDataに包まれている。COVERAGEと束縛済みパーサは復号しないため、3072ビット属性抽出を対応範囲に含めない。元positive真値と過去測定は変更しない。"
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "変換元公開DERの署名はsha256WithRSAEncryptionだが、元public-only.p12のAuthenticatedSafeは暗号化内容を格納する。現在の公開契約はこれをopaqueとし、content関数はunsupportedを設定して属性抽出へ進まない。したがってRSA署名属性の単位は対応範囲外であり、既知オブジェクトのpositiveラベルそのものは維持する。"
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "public-only.pfxの元バイトと来歴ハッシュは暗号化P12と一致する。由来するRSA3072証明書の事実と、入力から公開鍵属性を抽出できるという対応契約は別である。暗号化ContentInfoを復号しない現在の契約・実装に従い、この鍵サイズ抽出単位だけを対象外とし、positive真値は保存する。"
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "元public-only.pfxはencryptedDataを含む同一変換物であり、公開契約では証明書署名抽出の対応外となる。pkcs12.rsのcontentも当該OIDでNoneを返す。変換元のRSA署名を否定せず、当該属性単位だけsupported-scopeから除外する。旧コンテナ所見と元positiveラベル・測定は維持する。"
+    }
+  ]
+}

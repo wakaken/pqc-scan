@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-11-12",
-  "base_commit": "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf",
+  "reviewed_at": "2026-11-13",
+  "base_commit": "1bb45f891c3b39f5e784e9b10cff23a1ee94ab0c",
   "fixture_layer": "compiled_pattern_target_only",
   "license": "MIT; original synthetic fixtures and review text, references linked not copied",
-  "scope": "Development-only companion. Existing rule YAML, Risk/severity and matching remain authoritative; no runtime loading.",
+  "scope": "Current integrated v0.3 rule companion. New source binding; inherits unchanged classifications and exact pattern fixtures from the two archived companions. Not an accuracy certification or a reassignment of historical review hashes.",
   "source_files": [
     {
       "path": "rules/default/cert.yml",
@@ -12,11 +12,11 @@
     },
     {
       "path": "rules/default/crypto_api.yml",
-      "sha256": "8020d85ef00fae35571427521f975b022b9b9e72cdcbb6f0687925cf5c40865e"
+      "sha256": "84f672787e883cbd2c2dd790ada8076c8a4c3f0628f3bc26aeb2b5bf4f7ea10a"
     },
     {
       "path": "rules/default/jwt.yml",
-      "sha256": "8d79f81a4b90c64b68301d19fc5a2255deef9e47e1871aed1181f498883866ae"
+      "sha256": "580a9f4f263b9e441757619c7f655a38b8496edeb570807cbb6bff5070b87a51"
     },
     {
       "path": "rules/default/middleware.yml",
@@ -24,19 +24,19 @@
     },
     {
       "path": "rules/default/pqc.yml",
-      "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+      "sha256": "acde689dc784a1866c738014fe47cb071948f7e452c3bdf32722b83082f824d2"
     },
     {
       "path": "rules/default/ssh.yml",
-      "sha256": "2508cfbb33e200e57603a4bb0ed34c3e37c0a592f4ee4d03259310357d1cf004"
+      "sha256": "e4d8745770860f74fb9d79d842e4636ac52ccfbb762aa11debf88d07a1b7fcb4"
     },
     {
       "path": "rules/default/tls.yml",
-      "sha256": "49b1a3fbc0d4be718f49378a0716cf1fa515c9c9e31589b1bd40995f1401d1f2"
+      "sha256": "87d9e3940b476b79612d4c864541867336d1afff985ad5c938d28980d39ed511"
     },
     {
       "path": "rules/default/tree_sitter.yml",
-      "sha256": "32b947684ae1ced57552285187d416dd27a6e7f9276b4223dbc1b73b2ef09f5c"
+      "sha256": "9e3ee8bd1442bd99562565ab08f28e7c624f6100dcc858054f789d4a861d0edf"
     }
   ],
   "references": {
@@ -182,7 +182,7 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.64,
-        "migration_hint": "Migrate to hybrid KEM+AEAD cryptographic design.",
+        "migration_hint": "Review the purpose of this RSA reference and whether it is already a classical component of a hybrid design; assess compatible KEM and AEAD choices.",
         "pattern": "Cipher\\.getInstance\\(\\s*\"RSA",
         "scope": "code",
         "description": "RSA cipher API usage detected."
@@ -201,7 +201,8 @@
       "method_limits": [
         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
         "Comment filtering is heuristic; strings/data/generated text can match.",
-        "Per-rule output/candidate budgets and unsupported syntax can limit capture."
+        "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "Generic Java Cipher request is not TLS-specific; padding, binding and actual use are unresolved."
@@ -1778,7 +1779,7 @@
         "risk": "quantum-uncertain",
         "confidence": 0.6,
         "migration_hint": "Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection.",
-        "pattern": "^(?:(?:rustls|aws-lc-rs|ml-kem|ml-dsa|slh-dsa|openssl)\\s+\\S+\\s+cargo\\b|@noble/post-quantum\\s+\\S+\\s+npm\\b|cryptography\\s+\\S+\\s+pypi\\b|openssl\\s+\\S+\\s+gem\\b|org\\.bouncycastle:bcprov-jdk18on\\s+\\S+\\s+maven\\b)",
+        "pattern": "^(?:(?:rustls|aws-lc-rs|ml-kem|ml-dsa|slh-dsa|openssl)\\s+\\S+\\s+cargo\\b|@noble/post-quantum\\s+\\S+\\s+npm\\b|cryptography\\s+\\S+\\s+pypi\\b|openssl\\s+\\S+\\s+(?:gem|generic|unknown)\\b|org\\.bouncycastle:bcprov-jdk18on\\s+\\S+\\s+maven\\b|github\\.com/cloudflare/circl\\s+\\S+\\s+golang\\b)",
         "scope": "dependency",
         "description": "Library with version-dependent PQC capabilities inventoried; capability is not an enabled-state finding."
       },
@@ -1813,7 +1814,8 @@
           "desired_positive": false,
           "expected_pattern_match": false
         }
-      ]
+      ],
+      "last_pattern_review": "TASK-043/2026-11-12; existing hand-labelled controls retained"
     },
     {
       "id": "DEP_PYCA_CRYPTOGRAPHY",
@@ -2740,7 +2742,7 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.62,
-        "migration_hint": "Migrate JWKs to ML-DSA or hybrid key types.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "\"kty\"\\s*:\\s*\"RSA\"",
         "scope": "code",
         "description": "RSA key type in JWK detected."
@@ -2787,10 +2789,10 @@
         "severity": "medium",
         "risk": "quantum-uncertain",
         "confidence": 0.5,
-        "migration_hint": "Plan migration from ECDSA to PQC signatures.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "\\bES256\\b",
         "scope": "code",
-        "description": "ES256 (ECDSA-based JWT signing) is in use."
+        "description": "ES256 algorithm name referenced; active signing and effective policy are not established."
       },
       "purpose": "signature_reference",
       "algorithm_families": [
@@ -2835,7 +2837,7 @@
         "severity": "low",
         "risk": "quantum-uncertain",
         "confidence": 0.35,
-        "migration_hint": "Add PQC keys into the key-rotation strategy.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "\"kid\"\\s*:",
         "scope": "code",
         "description": "JWT kid header usage detected, indicating key-management touch points."
@@ -2975,10 +2977,10 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.55,
-        "migration_hint": "Migrate to ML-DSA signatures.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "\\bPS256\\b",
         "scope": "code",
-        "description": "PS256 (RSA-PSS) is used for JWT signing."
+        "description": "PS256 algorithm name referenced; active signing and effective policy are not established."
       },
       "purpose": "signature_reference",
       "algorithm_families": [
@@ -3022,10 +3024,10 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.55,
-        "migration_hint": "Migrate to ML-DSA signatures.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "\\bPS384\\b",
         "scope": "code",
-        "description": "PS384 (RSA-PSS) is used for JWT signing."
+        "description": "PS384 algorithm name referenced; active signing and effective policy are not established."
       },
       "purpose": "signature_reference",
       "algorithm_families": [
@@ -3069,10 +3071,10 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.55,
-        "migration_hint": "Migrate to ML-DSA signatures.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "\\bPS512\\b",
         "scope": "code",
-        "description": "PS512 (RSA-PSS) is used for JWT signing."
+        "description": "PS512 algorithm name referenced; active signing and effective policy are not established."
       },
       "purpose": "signature_reference",
       "algorithm_families": [
@@ -3116,10 +3118,10 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.6,
-        "migration_hint": "Migrate to ML-DSA signatures.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "\\bRS256\\b",
         "scope": "code",
-        "description": "RS256 (RSA-based JWT signing) is in use."
+        "description": "RS256 algorithm name referenced; active signing and effective policy are not established."
       },
       "purpose": "signature_reference",
       "algorithm_families": [
@@ -3163,10 +3165,10 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.6,
-        "migration_hint": "Migrate to ML-DSA signatures.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "\\bRS384\\b",
         "scope": "code",
-        "description": "RS384 is used for JWT signing."
+        "description": "RS384 algorithm name referenced; active signing and effective policy are not established."
       },
       "purpose": "signature_reference",
       "algorithm_families": [
@@ -3210,10 +3212,10 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.6,
-        "migration_hint": "Migrate to ML-DSA signatures.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "\\bRS512\\b",
         "scope": "code",
-        "description": "RS512 is used for JWT signing."
+        "description": "RS512 algorithm name referenced; active signing and effective policy are not established."
       },
       "purpose": "signature_reference",
       "algorithm_families": [
@@ -3257,7 +3259,7 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.65,
-        "migration_hint": "Migrate to ML-DSA signatures.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "SigningMethodRS(256|384|512)",
         "scope": "code",
         "description": "RS* JWT signing method is used in code."
@@ -3705,7 +3707,7 @@
         "severity": "medium",
         "risk": "quantum-uncertain",
         "confidence": 0.4,
-        "migration_hint": "Select PQC-ready algorithms in OIDC provider settings.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "id_token_signed_response_alg",
         "scope": "code",
         "description": "OIDC ID token signature algorithm configuration detected."
@@ -3799,7 +3801,7 @@
         "risk": "quantum-uncertain",
         "confidence": 0.75,
         "migration_hint": "Identify the exact implementation and wire format; draft Kyber/Dilithium names are not evidence of final ML-KEM/ML-DSA conformance.",
-        "pattern": "\\b(?:X25519Kyber768Draft00|Kyber(?:512|768|1024)|Dilithium[235])\\b",
+        "pattern": "(?i)\\b(?:X25519Kyber768Draft00|Kyber(?:512|768|1024)|Dilithium[235])\\b",
         "scope": "java,go,javascript,typescript,python,rust,ruby",
         "description": "Pre-standard PQC algorithm name referenced; check compatibility before replacing it."
       },
@@ -3837,7 +3839,8 @@
           "desired_positive": false,
           "expected_pattern_match": false
         }
-      ]
+      ],
+      "last_pattern_review": "TASK-043/2026-11-12; existing hand-labelled controls retained"
     },
     {
       "id": "PQC_GO_API",
@@ -3944,7 +3947,7 @@
         "risk": "quantum-safe",
         "confidence": 0.8,
         "migration_hint": "JDK 24+ provides ML-KEM and ML-DSA; verify provider and protocol support independently.",
-        "pattern": "(?:KEM|Signature|KeyPairGenerator)\\s*\\.\\s*getInstance\\(\\s*\"ML-(?:KEM|DSA)(?:-(?:512|768|1024|44|65|87))?\"",
+        "pattern": "\\b(?:KEM|Signature|KeyPairGenerator)\\s*\\.\\s*getInstance\\(\\s*\"(?:ML-KEM(?:-(?:512|768|1024))?|ML-DSA(?:-(?:44|65|87))?|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf])\"",
         "scope": "java",
         "description": "Standard PQC algorithm requested through Java APIs; runtime success is not established."
       },
@@ -3961,9 +3964,10 @@
       ],
       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
       "method_limits": [
-        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+        "Default detector may supplement the pattern with bounded local AST/import/key provenance. These fixtures validate only the compiled pattern target, not the complete detector.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "TASK-043: no execution, general module resolution or unbounded data flow; custom changed patterns retain generic matching."
       ],
       "known_gaps": [
         "API spelling does not verify provider/version, symbol identity or active use."
@@ -3980,7 +3984,8 @@
           "desired_positive": false,
           "expected_pattern_match": false
         }
-      ]
+      ],
+      "last_pattern_review": "TASK-043/2026-11-12; existing hand-labelled controls retained"
     },
     {
       "id": "PQC_JAVA_CLASSICAL_GROUPS",
@@ -3992,9 +3997,9 @@
         "risk": "quantum-uncertain",
         "confidence": 0.8,
         "migration_hint": "Review explicit group restrictions against the deployed JSSE version and peer support.",
-        "pattern": "(?im)^\\s*jdk\\.tls\\.namedGroups\\s*=\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\\s*,\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*\\s*$",
+        "pattern": "(?im)^\\s*(?:jdk\\.tls\\.namedGroups\\s*=\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\\s*,\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*|System\\.setProperty\\(\\s*\"jdk\\.tls\\.namedGroups\"\\s*,\\s*\"(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\\s*,\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*\"\\s*\\)\\s*;?|<entry\\s+key=\"jdk\\.tls\\.namedGroups\"\\s*>\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1)(?:\\s*,\\s*(?:x25519|x448|secp256r1|secp384r1|secp521r1))*\\s*</entry>)\\s*$",
         "scope": "config",
-        "description": "Java property explicitly lists only recognized classical TLS groups."
+        "description": "Explicit classical-only Java property intent in assignment, XML entry or static System.setProperty; effective loading is not established."
       },
       "purpose": "key_establishment_configuration_hint",
       "algorithm_families": [
@@ -4027,7 +4032,8 @@
           "desired_positive": false,
           "expected_pattern_match": false
         }
-      ]
+      ],
+      "last_pattern_review": "TASK-043/2026-11-12; existing hand-labelled controls retained"
     },
     {
       "id": "PQC_NODE_API",
@@ -4137,7 +4143,7 @@
         "risk": "quantum-safe",
         "confidence": 0.65,
         "migration_hint": "Verify openssl gem and linked OpenSSL/provider capabilities, not Ruby version alone.",
-        "pattern": "['\"]ML-(?:KEM-(?:512|768|1024)|DSA-(?:44|65|87))['\"]",
+        "pattern": "['\"](?:ML-(?:KEM-(?:512|768|1024)|DSA-(?:44|65|87))|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf])['\"]",
         "scope": "ruby",
         "description": "Ruby PQC algorithm literal referenced; key generation or signing success is not established."
       },
@@ -4173,7 +4179,8 @@
           "desired_positive": false,
           "expected_pattern_match": false
         }
-      ]
+      ],
+      "last_pattern_review": "TASK-043/2026-11-12; existing hand-labelled controls retained"
     },
     {
       "id": "PQC_RUBY_CLASSICAL_GROUPS",
@@ -4329,7 +4336,7 @@
         "severity": "critical",
         "risk": "non-quantum-risk",
         "confidence": 0.95,
-        "migration_hint": "Treat OpenSSH private-key exposure as an urgent incident.",
+        "migration_hint": "Confirm whether this marker belongs to a complete live OpenSSH key. If a live key is exposed, treat it as an urgent incident and rotate it.",
         "pattern": "-----BEGIN OPENSSH PRIVATE KEY-----",
         "scope": "keymaterial",
         "description": "OpenSSH private key header detected."
@@ -4346,7 +4353,8 @@
       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
       "method_limits": [
         "Only bounded recognized header/marker prefilter and regex, not key validation.",
-        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown."
+        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "Header alone is not proof that valid secret material exists or is exposed."
@@ -4374,7 +4382,7 @@
         "severity": "critical",
         "risk": "non-quantum-risk",
         "confidence": 0.95,
-        "migration_hint": "Investigate private-key exposure and rotate credentials.",
+        "migration_hint": "Confirm whether complete live key material is present. If exposure is confirmed, revoke or rotate the affected credentials.",
         "pattern": "-----BEGIN PRIVATE KEY-----",
         "scope": "keymaterial",
         "description": "PKCS#8 private key header detected."
@@ -4391,7 +4399,8 @@
       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
       "method_limits": [
         "Only bounded recognized header/marker prefilter and regex, not key validation.",
-        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown."
+        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "Header alone is not proof that valid secret material exists or is exposed."
@@ -4419,7 +4428,7 @@
         "severity": "critical",
         "risk": "non-quantum-risk",
         "confidence": 0.95,
-        "migration_hint": "Rotate exposed private keys immediately and strengthen key handling.",
+        "migration_hint": "Confirm whether this is a header example, test key or complete live key. If a live key is exposed, revoke or rotate it and review key handling.",
         "pattern": "-----BEGIN RSA PRIVATE KEY-----",
         "scope": "keymaterial",
         "description": "RSA private key header detected."
@@ -4436,7 +4445,8 @@
       "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
       "method_limits": [
         "Only bounded recognized header/marker prefilter and regex, not key validation.",
-        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown."
+        "No private payload is needed by these fixtures; encrypted/unsupported formats may be unknown.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "Header alone is not proof that valid secret material exists or is exposed."
@@ -4900,7 +4910,7 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.68,
-        "migration_hint": "Migrate to PQC-ready or hybrid cipher suites.",
+        "migration_hint": "Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication.",
         "pattern": "\\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\\b",
         "scope": "code",
         "description": "RSA-based TLS cipher suite detected."
@@ -4920,7 +4930,8 @@
         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
         "Comment filtering is heuristic; strings/data/generated text can match.",
         "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
-        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "RSA authentication and RSA key transport are distinct; text does not establish negotiated use."
@@ -5004,7 +5015,7 @@
         "migration_hint": "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.",
         "pattern": "(?:^|[^A-Za-z0-9_])TLSv1(?:[._]0)?(?:$|[^A-Za-z0-9_.])",
         "scope": "code",
-        "description": "Legacy TLS 1.0 configuration detected."
+        "description": "TLS 1.0 name referenced; effective configuration and runtime use are not established."
       },
       "purpose": "transport_configuration_reference",
       "algorithm_families": [
@@ -5021,7 +5032,8 @@
         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
         "Comment filtering is heuristic; strings/data/generated text can match.",
         "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
-        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "Version strings do not establish a live listener or negotiated security."
@@ -5062,7 +5074,7 @@
         "migration_hint": "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.",
         "pattern": "\\bTLSv1[._]1\\b",
         "scope": "code",
-        "description": "Legacy TLS 1.1 configuration detected."
+        "description": "TLS 1.1 name referenced; effective configuration and runtime use are not established."
       },
       "purpose": "transport_configuration_reference",
       "algorithm_families": [
@@ -5079,7 +5091,8 @@
         "Textual pattern/reference, not symbol binding, active use or effective configuration.",
         "Comment filtering is heuristic; strings/data/generated text can match.",
         "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
-        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "Version strings do not establish a live listener or negotiated security."
@@ -5344,7 +5357,7 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.68,
-        "migration_hint": "Replace Java RSA API usage with PQC-capable libraries.",
+        "migration_hint": "Review the Java RSA reference, provider and any existing PQC composition before selecting compatible migration changes.",
         "pattern": "(KeyPairGenerator|KeyFactory|Cipher|Signature)\\s*\\.\\s*getInstance\\s*\\(\\s*\"(RSA|RSA/[^\"\\s]*|SHA(1|224|256|384|512)withRSA|RSASSA-PSS)",
         "scope": "java",
         "description": "RSA-related API symbols detected from Java AST."
@@ -5363,7 +5376,8 @@
       "method_limits": [
         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "Known API/name heuristic; aliases, wrappers, parameters and execution are not resolved."
@@ -5391,7 +5405,7 @@
         "severity": "medium",
         "risk": "quantum-vulnerable",
         "confidence": 0.6,
-        "migration_hint": "Review EdDSA JWT signing references for PQC migration; a literal alone does not establish active signing.",
+        "migration_hint": "Confirm the purpose and protocol of this EdDSA reference; a name establishes neither JWT usage nor active signing. Assess compatible PQC signature options for the actual use.",
         "pattern": "\\bEdDSA\\b",
         "scope": "java,javascript,typescript,python,go,rust,ruby",
         "description": "EdDSA algorithm reference in source; this is a classical public-key algorithm."
@@ -5410,7 +5424,8 @@
       "method_limits": [
         "Regex over eligible AST source nodes; no execution or complete data-flow analysis.",
         "Python API adaptation accepts only supported imports without detected rebinding; other aliases/computed expressions can remain undetected.",
-        "String/call references may be fixtures or catalogs; findings are investigation candidates."
+        "String/call references may be fixtures or catalogs; findings are investigation candidates.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "Coverage is bounded to explicit supported spellings; this is not a completeness or runtime security claim."
@@ -5438,7 +5453,7 @@
         "severity": "medium",
         "risk": "quantum-uncertain",
         "confidence": 0.6,
-        "migration_hint": "Define a PQC migration plan for ES-family algorithms.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "(?i)\\b(ES256|ES384|ES512)\\b",
         "scope": "java,javascript,typescript,python,go,rust,ruby",
         "description": "ES-family JWT signing algorithms detected in AST nodes."
@@ -5486,7 +5501,7 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.72,
-        "migration_hint": "Migrate JWT signing to ML-DSA or hybrid signatures.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "(?i)\\b(RS256|RS384|RS512|PS256|PS384|PS512)\\b",
         "scope": "java,javascript,typescript,python,go,rust,ruby",
         "description": "RSA-family JWT signing algorithms detected in AST nodes."
@@ -5533,7 +5548,7 @@
         "severity": "medium",
         "risk": "quantum-uncertain",
         "confidence": 0.55,
-        "migration_hint": "Evaluate PQC-capable options in JOSE/JWT implementations.",
+        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
         "pattern": "(?i)(\\bjwt\\.(sign|verify)\\b|\\bjsonwebtoken\\.(sign|verify)\\b|\\bjose\\.jwtVerify\\b|\\bSignJWT\\b)",
         "scope": "javascript,typescript",
         "description": "JOSE/JWT calls detected from JavaScript/TypeScript AST."
@@ -5579,7 +5594,7 @@
         "severity": "medium",
         "risk": "quantum-vulnerable",
         "confidence": 0.59,
-        "migration_hint": "Migrate Node.js RSA signing/verification logic to a PQC-ready design.",
+        "migration_hint": "Review the RSA reference and its purpose (key generation, signing, verification or encryption); confirm active use and compatible PQC or hybrid options.",
         "pattern": "(?i)(\\b(createSign|createVerify)\\s*\\(\\s*['\"]RSA|\\bgenerateKeyPair(?:Sync)?\\s*\\(\\s*['\"]rsa(?:-pss)?['\"]|\\b(privateEncrypt|publicDecrypt)\\s*\\(|\\b(RS|PS)(256|384|512)\\b)",
         "scope": "javascript,typescript",
         "description": "RSA-related API symbols detected from JavaScript/TypeScript AST."
@@ -5599,7 +5614,8 @@
         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
         "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
-        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "Known API/name heuristic; aliases, wrappers, parameters and execution are not resolved."
@@ -5680,13 +5696,13 @@
         "risk": "quantum-vulnerable",
         "confidence": 0.57,
         "migration_hint": "Shift from key-length based planning to PQC signatures/key exchange.",
-        "pattern": "(?i)((rsa|key(size|length)?|modulus)[^\\n]{0,32}\\b(1024|2048|3072)\\b|\\b(1024|2048|3072)\\b[^\\n]{0,32}(rsa|key(size|length)?|modulus))",
+        "pattern": "(?i)(?:\\b(?:rsa(?:_(?:key_size|key_length|bits|modulus))?|RSAKeyGenParameterSpec)\\b[^\\n]{0,32}\\b(?:1024|2048|3072)\\b|\\b(?:1024|2048|3072)\\b[^\\n]{0,32}\\brsa\\b)",
         "scope": "java,javascript,typescript,python,go,rust,ruby",
         "description": "Classical public-key size literals detected in AST nodes."
       },
-      "purpose": "key_size_text_hint",
+      "purpose": "explicit_RSA_size_reference",
       "algorithm_families": [
-        "unknown_or_RSA_hint"
+        "RSA"
       ],
       "quantum": "unknown_without_algorithm_binding",
       "classical": "parameter_context_required",
@@ -5698,10 +5714,11 @@
       "method_limits": [
         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
-        "A number near key/size/modulus is not a measured RSA key; no generic size-based quantum fix."
+        "Nominal RSA text context only, not measured size, binding resolution or active key generation."
       ],
       "review_status": "source_classification_review_not_accuracy_certification",
       "fixtures": [
@@ -5712,6 +5729,21 @@
         },
         {
           "target": "cache_size = 2048",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "assertEquals(1024, privKey.getUsagesRemaining())",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "addKeyFactoryAlgorithm(provider, \"ML-KEM-1024\", PREFIX + \"MLKEMKeyFactorySpi\")",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "keyGen_ML-KEM-1024.txt",
           "desired_positive": false,
           "expected_pattern_match": false
         }
@@ -5932,7 +5964,7 @@
         "severity": "high",
         "risk": "quantum-vulnerable",
         "confidence": 0.66,
-        "migration_hint": "Update TLS suites containing RSA key exchange to PQC-hybrid suites.",
+        "migration_hint": "Identify the suite role: RSA_WITH uses static RSA key exchange; ECDHE_RSA and DHE_RSA use RSA authentication. Review hybrid key agreement and PQC authentication separately.",
         "pattern": "(?i)\\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\\b",
         "scope": "java,javascript,typescript,python,go,rust,ruby",
         "description": "RSA-family TLS cipher suite literals detected in AST nodes."
@@ -5952,7 +5984,8 @@
         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
         "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
-        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks."
+        "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
       ],
       "known_gaps": [
         "RSA authentication and RSA key transport are distinct; text does not establish negotiated use."
@@ -5975,6 +6008,83 @@
           "expected_pattern_match": false
         }
       ]
+    },
+    {
+      "id": "PQC_STANDARD_REFERENCE",
+      "rule_snapshot": {
+        "id": "PQC_STANDARD_REFERENCE",
+        "kind": "tree_sitter",
+        "category": "PQC",
+        "severity": "info",
+        "risk": "quantum-safe",
+        "confidence": 0.6,
+        "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security.",
+        "pattern": "(?i)\\b(?:ML-KEM-(?:512|768|1024)|ML-DSA-(?:44|65|87)|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf]|MLKEM(?:512|768|1024)|MLDSA(?:44|65|87)|X25519MLKEM768)\\b",
+        "scope": "java,go,javascript,typescript,python,rust,ruby",
+        "description": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established."
+      },
+      "purpose": "standard_PQC_name_or_hybrid_group_reference",
+      "algorithm_families": [
+        "ML-KEM",
+        "ML-DSA",
+        "SLH-DSA",
+        "X25519MLKEM768"
+      ],
+      "quantum": "resistant_primitive_reference_not_enabled_state",
+      "classical": "implementation_not_assessed",
+      "reference_ids": [
+        "FIPS203",
+        "FIPS204",
+        "FIPS205"
+      ],
+      "reference_application": "Context and identifiers only; not evidence that the heuristic detects all source constructs or enforces a standard.",
+      "method_limits": [
+        "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
+        "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+      ],
+      "known_gaps": [
+        "Names and registration symbols do not establish execution, final implementation conformance or product security."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "ML-KEM-768",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "X25519MLKEM768",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "SLH-DSA-SHA2-128s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "Kyber512",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "NOTMLKEM768",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    }
+  ],
+  "integrated_develop": "26fa19e7bd2434836d6c4dbed0185f34e15b9e45",
+  "inherited_companions": [
+    {
+      "path": "docs/quality/task044-integration-20261113/PRE-INTEGRATION-RULE-METADATA.json",
+      "sha256": "a2a1b60728ed906cd5900cb45ba0b4ca9f0d6a7b686d834dcc675012ce761637"
+    },
+    {
+      "path": "docs/quality/AUDIT-RULE-QUALITY-METADATA.json",
+      "sha256": "d8c442e07ac674ca1aa203fba651384de9ae5e541f407713e5e0a603ee42f024"
     }
   ]
 }

@@ -193,7 +193,10 @@ def main():
     status = {'exit':0}
     with (EVIDENCE/'entry.log').open('w') as log, contextlib.redirect_stdout(log), contextlib.redirect_stderr(log):
         try:
-            if args.case == 'suite': suite(args.previews,args.ssh_kex)
+            if args.case in {'coverage044', 'coverage044-branch'}:
+                import runpy
+                runpy.run_path(str(ROOT/'tests/quality/task044/entry.py'), run_name='__main__', init_globals={'STUDY_MODE': args.case})
+            elif args.case == 'suite': suite(args.previews,args.ssh_kex)
             else: exercise(args.case)
         except BaseException as error:
             status = {'exit':1, 'errorType':type(error).__name__}

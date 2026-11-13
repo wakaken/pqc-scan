@@ -1,8 +1,8 @@
-# Installation and distribution for v0.2
+# Installation and distribution
 
 [日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
 
-This guide covers **v0.2.0**. Source checkout remains available. The public
+This guide covers source installation from the **v0.3 development checkout** and the published **v0.2.0** archives. Build this checkout with its matching rules to use the development changes; downloading the v0.2.0 archive does not include them. The public
 distribution channel is GitHub Releases with a static macOS Apple Silicon archive
 (`aarch64-apple-darwin`), its matching rules/notices, SHA-256 checksums and a GitHub
 build-provenance attestation. A merged candidate or Actions artifact is not yet a
@@ -55,6 +55,8 @@ See the [candidate validation record](https://github.com/wakaken/pqc-scan/blob/d
 completed technical checks. `review_required` is not an end-user setting to disable.
 
 ## Source installation
+
+The workspace currently declares package version `0.2.0` during v0.3 development. Record the source commit and keep its binary/rules together; `--version` alone does not identify the development snapshot. Local package filenames below follow the Cargo version and do not establish a new official release.
 
 Use the toolchain pinned in `rust-toolchain.toml`, retain this checkout's reviewed
 rules, and run from its root:

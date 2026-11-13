@@ -1,0 +1,83 @@
+{
+  "reviewer": "implementation-reviewer-a / q42_reopen_implementation_review",
+  "timestampUtc": "2026-11-11T22:40:35.886791Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "a3b0bae7f5ae7ac5da14d7430d521ac981642422118f8057aaeec40341f0c349",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "b4b057d003151a853768e04af39f439d781f3fdb615a7bc235c3b8a28f4f59bd",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "remainingUnitCount": 240,
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "旧.p12のAuthenticatedSafeは暗号化ContentInfo OID 1.2.840.113549.1.7.6（encryptedData）を持つ。公開COVERAGEは暗号化contentsをopaque/unsupportedとし、束縛したpkcs12.rsのcontentは非data OIDをunsupportedとしてNoneへ返す。元DERと変換来歴で既知オブジェクト属性が分かっても、公開対応内の属性抽出を要求する根拠にはならない。この属性単位だけをsupported-scope外にし、元nominalラベルは変更しない。"
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "旧.pfxのAuthenticatedSafeは暗号化ContentInfo OID 1.2.840.113549.1.7.6（encryptedData）を持つ。公開COVERAGEは暗号化contentsをopaque/unsupportedとし、束縛したpkcs12.rsのcontentは非data OIDをunsupportedとしてNoneへ返す。元DERと変換来歴で既知オブジェクト属性が分かっても、公開対応内の属性抽出を要求する根拠にはならない。この属性単位だけをsupported-scope外にし、元nominalラベルは変更しない。"
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "旧.p12のAuthenticatedSafeは暗号化ContentInfo OID 1.2.840.113549.1.7.6（encryptedData）を持つ。公開COVERAGEは暗号化contentsをopaque/unsupportedとし、束縛したpkcs12.rsのcontentは非data OIDをunsupportedとしてNoneへ返す。元DERと変換来歴で既知オブジェクト属性が分かっても、公開対応内の属性抽出を要求する根拠にはならない。この属性単位だけをsupported-scope外にし、元nominalラベルは変更しない。"
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "旧.p12のAuthenticatedSafeは暗号化ContentInfo OID 1.2.840.113549.1.7.6（encryptedData）を持つ。公開COVERAGEは暗号化contentsをopaque/unsupportedとし、束縛したpkcs12.rsのcontentは非data OIDをunsupportedとしてNoneへ返す。元DERと変換来歴で既知オブジェクト属性が分かっても、公開対応内の属性抽出を要求する根拠にはならない。この属性単位だけをsupported-scope外にし、元nominalラベルは変更しない。"
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "旧.pfxのAuthenticatedSafeは暗号化ContentInfo OID 1.2.840.113549.1.7.6（encryptedData）を持つ。公開COVERAGEは暗号化contentsをopaque/unsupportedとし、束縛したpkcs12.rsのcontentは非data OIDをunsupportedとしてNoneへ返す。元DERと変換来歴で既知オブジェクト属性が分かっても、公開対応内の属性抽出を要求する根拠にはならない。この属性単位だけをsupported-scope外にし、元nominalラベルは変更しない。"
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "旧.pfxのAuthenticatedSafeは暗号化ContentInfo OID 1.2.840.113549.1.7.6（encryptedData）を持つ。公開COVERAGEは暗号化contentsをopaque/unsupportedとし、束縛したpkcs12.rsのcontentは非data OIDをunsupportedとしてNoneへ返す。元DERと変換来歴で既知オブジェクト属性が分かっても、公開対応内の属性抽出を要求する根拠にはならない。この属性単位だけをsupported-scope外にし、元nominalラベルは変更しない。"
+    }
+  ],
+  "sourceEvidence": [
+    {
+      "path": "tuning/certs/public-only.p12",
+      "sha256": "36349ac3da751a23c682371fe9b56fe44a13dffcc9f94dc692bb5586871cf5a1",
+      "authenticatedSafeContentTypeOidsHex": [
+        "2a864886f70d010706"
+      ]
+    },
+    {
+      "path": "tuning/certs/public-only.pfx",
+      "sha256": "36349ac3da751a23c682371fe9b56fe44a13dffcc9f94dc692bb5586871cf5a1",
+      "authenticatedSafeContentTypeOidsHex": [
+        "2a864886f70d010706"
+      ]
+    },
+    {
+      "path": "tuning/width/public-unencrypted.p12",
+      "sha256": "e574b0dab9c251efc07e5e9b874eaab851685d9cd2deca481c46da3ea4cbd0e4",
+      "authenticatedSafeContentTypeOidsHex": [
+        "2a864886f70d010701"
+      ]
+    },
+    {
+      "path": "tuning/width/public-unencrypted.pfx",
+      "sha256": "e574b0dab9c251efc07e5e9b874eaab851685d9cd2deca481c46da3ea4cbd0e4",
+      "authenticatedSafeContentTypeOidsHex": [
+        "2a864886f70d010701"
+      ]
+    }
+  ],
+  "remainingScopeReason": "全246単位を元corpus/truthと全203原文hashに結び付け、残り240単位のscope保持を確認した。既存unsupported47・ambiguous4を対応内の正負へ変更しない。Swift/crypto-only CBOM/値不明破損は元分類を保持し、名目的参照・無効コメント・既知classical対照をruntime実行と混同しない。旧暗号化容器のfilename/container x153/x155と破損filename v2-a1/a2は抽出属性とは異なる既存シグナルなので保持する。新public-unencrypted P12/PFXのContentInfoはdata OIDだけで、原バイトに既知RSA3072 DERが含まれるため属性参照は保持する。他の元cert形式は既知公開DER/PEMであり新しいopaque範囲はない。",
+  "priorExposure": "元v1/v2のラベル・集計とv2属性FN、製品規則/実装・単体試験・主担当の6候補を既知としている。これは二者による独立著述の事後適用性訂正でありblind/fresh holdoutや検出器改善ではない。補正理由は成功/不成功の出力に関係なく公開契約とContentInfo構造に基づく。",
+  "originalEvidencePreserved": true
+}

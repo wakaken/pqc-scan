@@ -1,0 +1,192 @@
+{
+  "head": "f8aff1888525f0f3e350a734166c12c6de3e71ed",
+  "coverageCases": {
+    "default": {
+      "passed": 514,
+      "ignored": 0,
+      "binaries": 63,
+      "coverage": {
+        "lines": {
+          "count": 21265,
+          "covered": 19549,
+          "percent": 91.93040206912768
+        },
+        "regions": {
+          "count": 34661,
+          "covered": 31626,
+          "percent": 91.24376099939413
+        },
+        "functions": {
+          "count": 1750,
+          "covered": 1624,
+          "percent": 92.8
+        },
+        "branches": {
+          "count": 0,
+          "covered": 0,
+          "percent": null,
+          "status": "Not Measured"
+        }
+      }
+    },
+    "all-features": {
+      "passed": 565,
+      "ignored": 1,
+      "binaries": 63,
+      "coverage": {
+        "lines": {
+          "count": 22585,
+          "covered": 20782,
+          "percent": 92.01682532654416
+        },
+        "regions": {
+          "count": 36882,
+          "covered": 33578,
+          "percent": 91.04170055853804
+        },
+        "functions": {
+          "count": 1875,
+          "covered": 1734,
+          "percent": 92.48
+        },
+        "branches": {
+          "count": 0,
+          "covered": 0,
+          "percent": null,
+          "status": "Not Measured"
+        }
+      }
+    },
+    "branch-default": {
+      "passed": 514,
+      "ignored": 0,
+      "binaries": 63,
+      "coverage": {
+        "lines": {
+          "count": 21265,
+          "covered": 19549,
+          "percent": 91.93040206912768
+        },
+        "regions": {
+          "count": 34661,
+          "covered": 31626,
+          "percent": 91.24376099939413
+        },
+        "functions": {
+          "count": 1750,
+          "covered": 1624,
+          "percent": 92.8
+        },
+        "branches": {
+          "count": 5334,
+          "covered": 3938,
+          "percent": 73.82827146606674,
+          "status": "Measured"
+        }
+      }
+    },
+    "branch-all-features": {
+      "passed": 565,
+      "ignored": 1,
+      "binaries": 63,
+      "coverage": {
+        "lines": {
+          "count": 22585,
+          "covered": 20749,
+          "percent": 91.87071064866062
+        },
+        "regions": {
+          "count": 36882,
+          "covered": 33534,
+          "percent": 90.92240117130308
+        },
+        "functions": {
+          "count": 1875,
+          "covered": 1732,
+          "percent": 92.37333333333333
+        },
+        "branches": {
+          "count": 5534,
+          "covered": 4077,
+          "percent": 73.67184676544994,
+          "status": "Measured"
+        }
+      }
+    }
+  },
+  "noMiriCommands": true,
+  "stableHasNoNightlyCommands": true,
+  "sourceBeforeAfterMatch": true,
+  "containersRemoved": true,
+  "historicalFilesUnchanged": 77,
+  "checks": [
+    {
+      "command": "python3 -m unittest discover -s tests/quality -p 'test_*.py'",
+      "exit": 0,
+      "passed": 59,
+      "log": "quality.log"
+    },
+    {
+      "command": "PQC_RUN_CONTAINER_TESTS=1 python3 -m unittest discover -s tests/protocol -p test_container_runner.py -v",
+      "exit": 0,
+      "passed": 10,
+      "log": "kernel.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/protocol -p test_isolation.py",
+      "exit": 0,
+      "passed": 1,
+      "log": "isolation.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/protocol -p test_report_previews.py",
+      "exit": 0,
+      "passed": 1,
+      "log": "previews.log"
+    },
+    {
+      "command": "node --test shell/*.test.cjs",
+      "exit": 0,
+      "passed": 35,
+      "log": "node.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/distribution -v",
+      "exit": 0,
+      "passed": 11,
+      "log": "distribution.log"
+    },
+    {
+      "command": "cargo fmt --all --check",
+      "exit": 0,
+      "log": "fmt.log"
+    },
+    {
+      "command": "py_compile of changed Python; git diff --check",
+      "exit": 0
+    }
+  ],
+  "notClaimed": [
+    "new Miri execution",
+    "hosted CI execution",
+    "doctests in coverage",
+    "new uninstrumented workspace/clippy run"
+  ],
+  "developMovedTo": "26fa19e7bd2434836d6c4dbed0185f34e15b9e45",
+  "developMergeCheckExit": 1,
+  "developMergeConflicts": [
+    "crates/pqc_scan_core/tests/task_ids.rs",
+    "crates/pqc_scan_detectors/src/comment_filter.rs",
+    "crates/pqc_scan_detectors/src/dependency_detector/lexical.rs",
+    "shell/v02-self-scan.test.cjs",
+    "tests/quality/test_task_queue.py"
+  ],
+  "finalFormatting": {
+    "path": "tests/quality/task044/entry.py",
+    "change": "one trailing blank line removed after staged whitespace audit",
+    "pythonASTUnchanged": true,
+    "measuredSHA256": "386ba74c4f3818e49305e15883e4cda814d77d4d8cbb85c08fcac1c3cdb02f52",
+    "finalSHA256": "9a764707566115a3cc820645a552378c9834551501aa8186f9fa31e72ae4475b",
+    "historicalArtifacts": "raw patches and archived sources keep their original bytes; excluded from curated whitespace check"
+  }
+}

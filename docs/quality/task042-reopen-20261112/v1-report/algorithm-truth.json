@@ -1,0 +1,1690 @@
+[
+  {
+    "id": "x001",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ML-DSA-44"
+    ],
+    "reason": "Signature.getInstance explicitly requests ML-DSA-44."
+  },
+  {
+    "id": "x002",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ML-KEM-1024"
+    ],
+    "reason": "KEM.getInstance explicitly requests ML-KEM-1024."
+  },
+  {
+    "id": "x003",
+    "label": "positive",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "SLH-DSA-SHAKE-256s"
+    ],
+    "reason": "Signature.getInstance explicitly requests SLH-DSA-SHAKE-256s."
+  },
+  {
+    "id": "x004",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256withRSA"
+    ],
+    "reason": "The requested signature algorithm is classical SHA256withRSA."
+  },
+  {
+    "id": "x005",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ML-DSA-65"
+    ],
+    "reason": "The closing call syntax is missing but Signature.getInstance and its complete ML-DSA-65 string are visible."
+  },
+  {
+    "id": "x006",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [],
+    "reason": "importパスは引数・方式パラメータではないため空配列を採用。PQC importの正解は一致。 A: The import explicitly names crypto/mlkem. B: The Go import explicitly names the standard crypto/mlkem package."
+  },
+  {
+    "id": "x007",
+    "label": "negative",
+    "algorithms": [
+      "not_applicable"
+    ],
+    "parameters": [],
+    "reason": "fmtのimportは暗号パラメータではないため空配列を採用。負例の正解は一致。 A: Only fmt is imported; no cryptographic API is referenced. B: The sole import names fmt, with no cryptographic API reference."
+  },
+  {
+    "id": "x008",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The import string has no contents, so the imported package cannot be established."
+  },
+  {
+    "id": "x009",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "MLKEM768PrivateKey"
+    ],
+    "reason": "The imported mlkem module supplies MLKEM768PrivateKey.generate()."
+  },
+  {
+    "id": "x010",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ML-KEM-768"
+    ],
+    "reason": "print emits an algorithm name string; no cryptographic generation API appears."
+  },
+  {
+    "id": "x011",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "MLKEM768PrivateKey"
+    ],
+    "reason": "mlkem.MLKEM768PrivateKey.generate is visible despite its unclosed argument list."
+  },
+  {
+    "id": "x012",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "MlKem768"
+    ],
+    "reason": "use imports MlKem768 from ml_kem."
+  },
+  {
+    "id": "x013",
+    "label": "negative",
+    "algorithms": [
+      "not_applicable"
+    ],
+    "parameters": [],
+    "reason": "ローカルの空関数だけで暗号方式の事実はなく、not_applicableを採用。 A: ml_kem is an explicitly local empty function, not an imported cryptographic symbol. B: ml_kem is explicitly a local empty function declaration, not an imported cryptographic symbol."
+  },
+  {
+    "id": "x014",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [],
+    "reason": "The incomplete use statement still explicitly names the ml_kem crate."
+  },
+  {
+    "id": "x015",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ML-DSA-87"
+    ],
+    "reason": "OpenSSL::PKey.generate_key explicitly requests ML-DSA-87."
+  },
+  {
+    "id": "x016",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "SLH-DSA-SHA2-128s"
+    ],
+    "reason": "puts emits only an algorithm string."
+  },
+  {
+    "id": "x017",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The generate_key type string is truncated before any algorithm appears."
+  },
+  {
+    "id": "x018",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ML-KEM-768"
+    ],
+    "reason": "subtle.generateKey has the explicit name ML-KEM-768."
+  },
+  {
+    "id": "x019",
+    "label": "negative",
+    "algorithms": [
+      "AES"
+    ],
+    "parameters": [
+      "AES-GCM"
+    ],
+    "reason": "subtle.generateKey requests AES-GCM, a symmetric algorithm."
+  },
+  {
+    "id": "x020",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The generateKey object is truncated after name, with no algorithm value."
+  },
+  {
+    "id": "x021",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512"
+    ],
+    "reason": "generateKeyPairSync requests the explicit ml-kem-512 string."
+  },
+  {
+    "id": "x022",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "The entire apparent call is inside a line comment."
+  },
+  {
+    "id": "x023",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "The apparent call is text inside the help string."
+  },
+  {
+    "id": "x024",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "明示的にローカルの無関係な関数であり、用途はnot_applicable。文字列から暗号実行を補わない。 A: The called generateKeyPairSync is explicitly a local identity function. B: An explicit local function named generateKeyPairSync returns its argument; no crypto API provenance exists."
+  },
+  {
+    "id": "x025",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-65"
+    ],
+    "reason": "make is explicitly imported as an alias of node:crypto generateKeyPairSync and requests ml-dsa-65."
+  },
+  {
+    "id": "x026",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "引数によるshadowingで実際の呼出先は不明。用途unknownを採用し、暗号用途を推測しない。 A: The render parameter shadows the crypto import at this call site. B: The render parameter shadows the imported generateKeyPairSync at the apparent call site."
+  },
+  {
+    "id": "x027",
+    "label": "ambiguous",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "request.algorithm is externally unconstrained, so the requested key algorithm is unknown."
+  },
+  {
+    "id": "x028",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "The false branch contains an explicit nominal ml-kem-768 generation reference; no execution is claimed."
+  },
+  {
+    "id": "x029",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "rsa"
+    ],
+    "reason": "This first separate call requests rsa; a different call later on the line requests ML-KEM."
+  },
+  {
+    "id": "x030",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "This second separate call explicitly requests ml-kem-768."
+  },
+  {
+    "id": "x031",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512"
+    ],
+    "reason": "The first of two separate calls requests ml-kem-512."
+  },
+  {
+    "id": "x032",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-1024"
+    ],
+    "reason": "The second of two separate calls requests ml-kem-1024."
+  },
+  {
+    "id": "x033",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "A name object is passed where the Node API requires a string key type."
+  },
+  {
+    "id": "x034",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "future-quantum-safe-v9"
+    ],
+    "reason": "The explicit future-quantum-safe-v9 name identifies no standardized algorithm."
+  },
+  {
+    "id": "x035",
+    "label": "negative",
+    "algorithms": [
+      "EdDSA"
+    ],
+    "parameters": [
+      "ed25519"
+    ],
+    "reason": "The key type is classical ed25519."
+  },
+  {
+    "id": "x036",
+    "label": "positive",
+    "algorithms": [
+      "pre_standard"
+    ],
+    "parameters": [
+      "kyber768"
+    ],
+    "reason": "generateKeyPairSync explicitly references pre-standard kyber768."
+  },
+  {
+    "id": "x037",
+    "label": "negative",
+    "algorithms": [
+      "Hybrid"
+    ],
+    "parameters": [
+      "X25519MLKEM768"
+    ],
+    "reason": "A hybrid group string is assigned; no Node key-generation API is called."
+  },
+  {
+    "id": "x038",
+    "label": "unsupported",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "The specimen is Swift, outside the nominated Node source-language scope."
+  },
+  {
+    "id": "x039",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RS256"
+    ],
+    "reason": "sign selects the JWT RS256 algorithm explicitly."
+  },
+  {
+    "id": "x040",
+    "label": "negative",
+    "algorithms": [
+      "HMAC"
+    ],
+    "parameters": [
+      "HS256"
+    ],
+    "reason": "sign selects HMAC HS256 rather than RSA RS256."
+  },
+  {
+    "id": "x041",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The algorithm property has no value in the truncated call."
+  },
+  {
+    "id": "x042",
+    "label": "positive",
+    "algorithms": [
+      "ECDH"
+    ],
+    "parameters": [
+      "secp256r1",
+      "secp384r1"
+    ],
+    "reason": "The explicit namedGroups list contains only the classical secp256r1 and secp384r1 groups."
+  },
+  {
+    "id": "x043",
+    "label": "negative",
+    "algorithms": [
+      "Hybrid",
+      "ECDH"
+    ],
+    "parameters": [
+      "X25519MLKEM768",
+      "secp256r1"
+    ],
+    "reason": "The effective list includes the hybrid X25519MLKEM768 group alongside secp256r1."
+  },
+  {
+    "id": "x044",
+    "label": "negative",
+    "algorithms": [
+      "ECDH"
+    ],
+    "parameters": [
+      "secp256r1"
+    ],
+    "reason": "設定のコメントアウトという具体的な無効化をdisabledと分類。sourceコメントは別セルに残す。 A: The namedGroups assignment is commented with # and is not effective configuration. B: The hash-prefixed assignment is commented out and does not select effective groups."
+  },
+  {
+    "id": "x045",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The namedGroups string is opened without a group value."
+  },
+  {
+    "id": "x046",
+    "label": "positive",
+    "algorithms": [
+      "DSA"
+    ],
+    "parameters": [
+      "ssh-dss"
+    ],
+    "reason": "HostKeyAlgorithms explicitly selects ssh-dss."
+  },
+  {
+    "id": "x047",
+    "label": "negative",
+    "algorithms": [
+      "EdDSA"
+    ],
+    "parameters": [
+      "ssh-ed25519"
+    ],
+    "reason": "HostKeyAlgorithms selects ssh-ed25519 rather than DSA."
+  },
+  {
+    "id": "x048",
+    "label": "positive",
+    "algorithms": [
+      "DH"
+    ],
+    "parameters": [
+      "diffie-hellman-group14-sha1"
+    ],
+    "reason": "KexAlgorithms explicitly selects diffie-hellman-group14-sha1."
+  },
+  {
+    "id": "x049",
+    "label": "negative",
+    "algorithms": [
+      "Hybrid"
+    ],
+    "parameters": [
+      "mlkem768x25519-sha256"
+    ],
+    "reason": "KexAlgorithms selects a hybrid ML-KEM/X25519 algorithm, not group14 SHA1."
+  },
+  {
+    "id": "x050",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "アルゴリズムを欠く設定指令なのでconfigurationを採用。鍵交換の実行事実はない。 A: The KexAlgorithms directive has no configured algorithm. B: The KexAlgorithms directive has no algorithm argument."
+  },
+  {
+    "id": "x051",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "0.10.75"
+    ],
+    "reason": "The source explicitly declares openssl; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x052",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "0.10.75"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x053",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x054",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "0.10.75"
+    ],
+    "reason": "The source explicitly declares openssl; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x055",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "0.10.75"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x056",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x057",
+    "label": "ambiguous",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "固定版jose 6.0.0の宣言は存在するが、公式ソースは標準PQC能力を確立しない。初期protocolの例示に根拠不足があり、二者の補足監査を受け、未確立な能力前提をpositiveにも安全なnegativeにもせずambiguousとした。測定結果は未参照。"
+  },
+  {
+    "id": "x058",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x059",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x060",
+    "label": "ambiguous",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "固定版jose 6.0.0の宣言は存在するが、公式ソースは標準PQC能力を確立しない。初期protocolの例示に根拠不足があり、二者の補足監査を受け、未確立な能力前提をpositiveにも安全なnegativeにもせずambiguousとした。測定結果は未参照。"
+  },
+  {
+    "id": "x061",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x062",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x063",
+    "label": "ambiguous",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "固定版jose 6.0.0の宣言は存在するが、公式ソースは標準PQC能力を確立しない。初期protocolの例示に根拠不足があり、二者の補足監査を受け、未確立な能力前提をpositiveにも安全なnegativeにもせずambiguousとした。測定結果は未参照。"
+  },
+  {
+    "id": "x064",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x065",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x066",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "v1.6.1"
+    ],
+    "reason": "The source explicitly declares github.com/cloudflare/circl; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x067",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "v1.6.1"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x068",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x069",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "The source explicitly declares org.bouncycastle:bcprov-jdk18on; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x070",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x071",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x072",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "The source explicitly declares org.bouncycastle:bcprov-jdk18on; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x073",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x074",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x075",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "The source explicitly declares org.bouncycastle:bcprov-jdk18on; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x076",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x077",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x078",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "The source explicitly declares org.bouncycastle:bcprov-jdk18on; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x079",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x080",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x081",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "==48.0.0"
+    ],
+    "reason": "ソースに宣言された制約文字列==48.0.0をそのまま保持。解決版と混同しない。 A: The source explicitly declares cryptography; library presence proves no enabled algorithm. B: The document explicitly declares cryptography with version ==48.0.0; library presence does not prove enabled algorithms."
+  },
+  {
+    "id": "x082",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "==48.0.0"
+    ],
+    "reason": "無関係な依存でも宣言制約==48.0.0は見えているため文字列を保持。 A: The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency. B: The only declared library is unrelated ordinary-package with version ==48.0.0; no recognized PQC-capable library is declared."
+  },
+  {
+    "id": "x083",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x084",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "==48.0.0"
+    ],
+    "reason": "Pipfile.lockのversion値==48.0.0をそのまま保持。実環境の解決・有効化は推測しない。 A: The source explicitly declares cryptography; library presence proves no enabled algorithm. B: The document explicitly declares cryptography with version ==48.0.0; library presence does not prove enabled algorithms."
+  },
+  {
+    "id": "x085",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "==48.0.0"
+    ],
+    "reason": "Pipfile.lockのversion値==48.0.0を保持。負例の方式はunknownで変えない。 A: The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency. B: The only declared library is unrelated ordinary-package with version ==48.0.0; no recognized PQC-capable library is declared."
+  },
+  {
+    "id": "x086",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x087",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "48.0.0"
+    ],
+    "reason": "The source explicitly declares cryptography; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x088",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "48.0.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x089",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x090",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "The source explicitly declares openssl; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x091",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x092",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x093",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "The source explicitly declares openssl; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x094",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x095",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x096",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "The source explicitly declares openssl; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x097",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x098",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x099",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "The source explicitly declares openssl; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x100",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x101",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x102",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "The source explicitly declares openssl; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x103",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x104",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x105",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "The source explicitly declares openssl; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x106",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x107",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x108",
+    "label": "unsupported",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ML-KEM-768"
+    ],
+    "reason": "The SBOM contains only a cryptographic-asset ML-KEM-768 component; no dependency library declaration is represented."
+  },
+  {
+    "id": "x109",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "The source explicitly declares openssl; library presence proves no enabled algorithm."
+  },
+  {
+    "id": "x110",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "The source declares ordinary-package (ordinary:package in Maven), with no recognized PQC-capable dependency."
+  },
+  {
+    "id": "x111",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The document is syntactically incomplete and establishes no dependency declaration."
+  },
+  {
+    "id": "x113",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RSA PRIVATE KEY"
+    ],
+    "reason": "BEGIN markerの可視の型名をparametersに残す。鍵サイズや本物の鍵の存在は主張しない。 A: A complete recognized BEGIN marker is present; the synthetic body does not establish a real key. B: The complete recognized BEGIN RSA PRIVATE KEY marker is present; the canary body does not establish key validity."
+  },
+  {
+    "id": "x114",
+    "label": "negative",
+    "algorithms": [
+      "not_applicable"
+    ],
+    "parameters": [],
+    "reason": "PUBLIC DOCUMENTだけでmarkerも暗号用途もないためnot_applicableを採用。秘密不存在の保証ではない。 A: The input contains only PUBLIC DOCUMENT, with no private-key BEGIN marker. B: The file contains only PUBLIC DOCUMENT and no private-key BEGIN marker."
+  },
+  {
+    "id": "x115",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RSA PRIVATE KEY"
+    ],
+    "reason": "BEGIN markerの可視の型名をparametersに残す。鍵サイズや本物の鍵の存在は主張しない。 A: The visible BEGIN fragment lacks the complete recognized marker delimiters. B: The marker has only three opening dashes and lacks the complete closing delimiter; it is not a complete recognized BEGIN marker."
+  },
+  {
+    "id": "x116",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "PRIVATE KEY"
+    ],
+    "reason": "BEGIN markerの可視の型名をparametersに残す。鍵サイズや本物の鍵の存在は主張しない。 A: A complete recognized BEGIN marker is present; the synthetic body does not establish a real key. B: The complete recognized BEGIN PRIVATE KEY marker is present; the canary body does not establish key validity."
+  },
+  {
+    "id": "x117",
+    "label": "negative",
+    "algorithms": [
+      "not_applicable"
+    ],
+    "parameters": [],
+    "reason": "PUBLIC DOCUMENTだけでmarkerも暗号用途もないためnot_applicableを採用。秘密不存在の保証ではない。 A: The input contains only PUBLIC DOCUMENT, with no private-key BEGIN marker. B: The file contains only PUBLIC DOCUMENT and no private-key BEGIN marker."
+  },
+  {
+    "id": "x118",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "PRIVATE KEY"
+    ],
+    "reason": "BEGIN markerの可視の型名をparametersに残す。鍵サイズや本物の鍵の存在は主張しない。 A: The visible BEGIN fragment lacks the complete recognized marker delimiters. B: The marker has only three opening dashes and lacks the complete closing delimiter; it is not a complete recognized BEGIN marker."
+  },
+  {
+    "id": "x119",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "OPENSSH PRIVATE KEY"
+    ],
+    "reason": "BEGIN markerの可視の型名をparametersに残す。鍵サイズや本物の鍵の存在は主張しない。 A: A complete recognized BEGIN marker is present; the synthetic body does not establish a real key. B: The complete recognized BEGIN OPENSSH PRIVATE KEY marker is present; the canary body does not establish key validity."
+  },
+  {
+    "id": "x120",
+    "label": "negative",
+    "algorithms": [
+      "not_applicable"
+    ],
+    "parameters": [],
+    "reason": "PUBLIC DOCUMENTだけでmarkerも暗号用途もないためnot_applicableを採用。秘密不存在の保証ではない。 A: The input contains only PUBLIC DOCUMENT, with no private-key BEGIN marker. B: The file contains only PUBLIC DOCUMENT and no private-key BEGIN marker."
+  },
+  {
+    "id": "x121",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "OPENSSH PRIVATE KEY"
+    ],
+    "reason": "BEGIN markerの可視の型名をparametersに残す。鍵サイズや本物の鍵の存在は主張しない。 A: The visible BEGIN fragment lacks the complete recognized marker delimiters. B: The marker has only three opening dashes and lacks the complete closing delimiter; it is not a complete recognized BEGIN marker."
+  },
+  {
+    "id": "x122",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "The public certificate hash matches the pinned manifest recording rsaEncryption and a 3072-bit public key."
+  },
+  {
+    "id": "x123",
+    "label": "negative",
+    "algorithms": [
+      "EdDSA"
+    ],
+    "parameters": [
+      "ED25519"
+    ],
+    "reason": "The public certificate hash matches the manifest recording ED25519 signature, not RSA."
+  },
+  {
+    "id": "x124",
+    "label": "positive",
+    "algorithms": [
+      "ECDSA"
+    ],
+    "parameters": [
+      "ecdsa-with-SHA256"
+    ],
+    "reason": "The public certificate hash matches the manifest recording ecdsa-with-SHA256."
+  },
+  {
+    "id": "x125",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The container bytes are not a public certificate and establish no signature attribute."
+  },
+  {
+    "id": "x126",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The container bytes are not a public certificate and establish no signature attribute."
+  },
+  {
+    "id": "x127",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The container bytes are not a public certificate and establish no signature attribute."
+  },
+  {
+    "id": "x128",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The container bytes are not a public certificate and establish no signature attribute."
+  },
+  {
+    "id": "x129",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The container bytes are not a public certificate and establish no signature attribute."
+  },
+  {
+    "id": "x130",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "The container bytes are not a public certificate and establish no signature attribute."
+  },
+  {
+    "id": "x131",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512",
+      "ml-kem-768",
+      "ml-kem-1024"
+    ],
+    "reason": "generateKeyPair is imported from crypto and its asymmetricKeyType argument resolves to the explicit finite ML-KEM loop list; capability guards retain the nominal reference."
+  },
+  {
+    "id": "x132",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512",
+      "ml-kem-768",
+      "ml-kem-1024"
+    ],
+    "reason": "generateKeyPair is imported from crypto and its asymmetricKeyType argument resolves to the explicit finite ML-KEM loop list; capability guards retain the nominal reference."
+  },
+  {
+    "id": "x133",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512",
+      "ml-kem-768",
+      "ml-kem-1024"
+    ],
+    "reason": "generateKeyPair is imported from crypto and its asymmetricKeyType argument resolves to the explicit finite ML-KEM loop list; capability guards retain the nominal reference."
+  },
+  {
+    "id": "x134",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-44",
+      "ml-dsa-65",
+      "ml-dsa-87"
+    ],
+    "reason": "generateKeyPair is imported from crypto and its asymmetricKeyType argument resolves to the explicit finite ML-DSA loop list; capability guards retain the nominal reference."
+  },
+  {
+    "id": "x135",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-44",
+      "ml-dsa-65",
+      "ml-dsa-87"
+    ],
+    "reason": "generateKeyPair is imported from crypto and its asymmetricKeyType argument resolves to the explicit finite ML-DSA loop list; capability guards retain the nominal reference."
+  },
+  {
+    "id": "x136",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-44",
+      "ml-dsa-65",
+      "ml-dsa-87"
+    ],
+    "reason": "generateKeyPair is imported from crypto and its asymmetricKeyType argument resolves to the explicit finite ML-DSA loop list; capability guards retain the nominal reference."
+  },
+  {
+    "id": "x137",
+    "label": "positive",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-128f",
+      "slh-dsa-sha2-128s",
+      "slh-dsa-sha2-192f",
+      "slh-dsa-sha2-192s",
+      "slh-dsa-sha2-256f",
+      "slh-dsa-sha2-256s",
+      "slh-dsa-shake-128f",
+      "slh-dsa-shake-128s",
+      "slh-dsa-shake-192f",
+      "slh-dsa-shake-192s",
+      "slh-dsa-shake-256f",
+      "slh-dsa-shake-256s"
+    ],
+    "reason": "generateKeyPair is imported from crypto and its asymmetricKeyType argument resolves to the explicit finite SLH-DSA loop list; capability guards retain the nominal reference."
+  },
+  {
+    "id": "x138",
+    "label": "positive",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-128f",
+      "slh-dsa-sha2-128s",
+      "slh-dsa-sha2-192f",
+      "slh-dsa-sha2-192s",
+      "slh-dsa-sha2-256f",
+      "slh-dsa-sha2-256s",
+      "slh-dsa-shake-128f",
+      "slh-dsa-shake-128s",
+      "slh-dsa-shake-192f",
+      "slh-dsa-shake-192s",
+      "slh-dsa-shake-256f",
+      "slh-dsa-shake-256s"
+    ],
+    "reason": "generateKeyPair is imported from crypto and its asymmetricKeyType argument resolves to the explicit finite SLH-DSA loop list; capability guards retain the nominal reference."
+  },
+  {
+    "id": "x139",
+    "label": "positive",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-128f",
+      "slh-dsa-sha2-128s",
+      "slh-dsa-sha2-192f",
+      "slh-dsa-sha2-192s",
+      "slh-dsa-sha2-256f",
+      "slh-dsa-sha2-256s",
+      "slh-dsa-shake-128f",
+      "slh-dsa-shake-128s",
+      "slh-dsa-shake-192f",
+      "slh-dsa-shake-192s",
+      "slh-dsa-shake-256f",
+      "slh-dsa-shake-256s"
+    ],
+    "reason": "generateKeyPair is imported from crypto and its asymmetricKeyType argument resolves to the explicit finite SLH-DSA loop list; capability guards retain the nominal reference."
+  },
+  {
+    "id": "x140",
+    "label": "negative",
+    "algorithms": [
+      "DH"
+    ],
+    "parameters": [
+      "2048"
+    ],
+    "reason": "The source imports and constructs classical DH with 2048, not a standardized PQC key-generation type."
+  },
+  {
+    "id": "x141",
+    "label": "negative",
+    "algorithms": [
+      "DH"
+    ],
+    "parameters": [
+      "modp16"
+    ],
+    "reason": "The source imports and constructs classical DH with modp16, not a standardized PQC key-generation type."
+  },
+  {
+    "id": "x142",
+    "label": "negative",
+    "algorithms": [
+      "ECDH"
+    ],
+    "parameters": [
+      "secp521r1"
+    ],
+    "reason": "The source imports and constructs classical ECDH with secp521r1, not a standardized PQC key-generation type."
+  },
+  {
+    "id": "x143",
+    "label": "negative",
+    "algorithms": [
+      "ECDH"
+    ],
+    "parameters": [
+      "secp256k1"
+    ],
+    "reason": "The source imports and constructs classical ECDH with secp256k1, not a standardized PQC key-generation type."
+  },
+  {
+    "id": "x144",
+    "label": "negative",
+    "algorithms": [
+      "ECDSA"
+    ],
+    "parameters": [
+      "ec",
+      "sect239k1"
+    ],
+    "reason": "generateKeyPairSync explicitly requests ec with namedCurve sect239k1 for signing, not PQC."
+  },
+  {
+    "id": "x145",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "rsa",
+      "2048"
+    ],
+    "reason": "generateKeyPairSync explicitly requests rsa with modulusLength 2048."
+  },
+  {
+    "id": "x146",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256",
+      "rsa",
+      "2048"
+    ],
+    "reason": "The local privateKey comes from explicit 2048-bit rsa generation and is passed to sign.sign; SHA256 alone is not the RSA evidence."
+  },
+  {
+    "id": "x147",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "The public DER/PEM conversion is bound by provenance to rsa3072.der, whose manifest records a 3072-bit RSA SPKI."
+  },
+  {
+    "id": "x148",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "The provenance binds the sole public certificate to rsa3072.der; its manifest records sha256WithRSAEncryption, not ECDSA."
+  },
+  {
+    "id": "x149",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "The public DER/PEM conversion is bound by provenance to rsa3072.der, whose manifest records a 3072-bit RSA SPKI."
+  },
+  {
+    "id": "x150",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "The provenance binds the sole public certificate to rsa3072.der; its manifest records sha256WithRSAEncryption, not ECDSA."
+  },
+  {
+    "id": "x151",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "The public DER/PEM conversion is bound by provenance to rsa3072.der, whose manifest records a 3072-bit RSA SPKI."
+  },
+  {
+    "id": "x152",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "The provenance binds the sole public certificate to rsa3072.der; its manifest records sha256WithRSAEncryption, not ECDSA."
+  },
+  {
+    "id": "x153",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "PKCS12"
+    ],
+    "reason": "証明されるのはPKCS12コンテナ型だけ。暗号用途はunknown、形式名PKCS12を保持。 A: The recorded certificate-only PKCS12 conversion and hash establish PKCS12 container presence; no key presence is inferred. B: The bound conversion record uses openssl pkcs12 -export -nokeys with the public RSA certificate; this is certificate-only PKCS12 container presence, not key or decryption evidence."
+  },
+  {
+    "id": "x154",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "The provenance binds the sole public certificate to rsa3072.der; its manifest records sha256WithRSAEncryption, not ECDSA."
+  },
+  {
+    "id": "x155",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "PKCS12"
+    ],
+    "reason": "証明されるのはPKCS12コンテナ型だけ。暗号用途はunknown、形式名PKCS12を保持。 A: The recorded certificate-only PKCS12 conversion and hash establish PKCS12 container presence; no key presence is inferred. B: The bound conversion record uses openssl pkcs12 -export -nokeys with the public RSA certificate; this is certificate-only PKCS12 container presence, not key or decryption evidence."
+  },
+  {
+    "id": "x156",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "The provenance binds the sole public certificate to rsa3072.der; its manifest records sha256WithRSAEncryption, not ECDSA."
+  },
+  {
+    "id": "x157",
+    "label": "negative",
+    "algorithms": [
+      "EdDSA"
+    ],
+    "parameters": [
+      "ED25519"
+    ],
+    "reason": "The certificate matches the pinned ED25519 public-key manifest, not RSA 3072."
+  }
+]

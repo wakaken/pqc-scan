@@ -291,3 +291,58 @@ fn gradle_quoted_commas_do_not_drop_dependency_identity() {
         assert!(!row["purl"].as_str().unwrap().contains('@'));
     }
 }
+
+#[test]
+fn gradle_dynamic_versions_keep_literal_identity_without_resolved_facts() {
+    for name in ["build.gradle", "build.gradle.kts"] {
+        let scan = Scan::new(
+            &[(
+                name,
+                r#"dependencies {
+ implementation("org.bouncycastle:bcprov-jdk18on:$version")
+ implementation("${group}:not-a-literal:1.0")
+}
+"#,
+            )],
+            "en",
+        );
+        let rows: Value = serde_json::from_str(&scan.text("dependency-sbom.json")).unwrap();
+        assert_eq!(rows.as_array().unwrap().len(), 1);
+        assert_eq!(rows[0]["name"], "org.bouncycastle:bcprov-jdk18on");
+        assert_eq!(rows[0]["version"], "unknown");
+        assert_eq!(rows[0]["purl"], "");
+        let native: Value = serde_json::from_str(&scan.text("scan.inventory.v1.json")).unwrap();
+        let dependency = native["assets"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["attributes"]["name"] == "org.bouncycastle:bcprov-jdk18on")
+            .unwrap();
+        assert!(dependency["attributes"]["declared_constraint"].is_null());
+        assert!(dependency["attributes"]["resolved_version"].is_null());
+    }
+}
+
+#[test]
+fn gradle_inline_maps_stop_at_statement_boundaries_outside_quotes() {
+    let scan = Scan::new(
+        &[(
+            "build.gradle",
+            r#"dependencies { implementation group: 'org.example', name: 'known', version: '1.80'; compileOnly group: 'org.example', name: 'no-version' }
+dependencies { implementation version: '1;}2', group: 'org.example', name: 'quoted-delimiters' }
+"#,
+        )],
+        "en",
+    );
+    let rows: Value = serde_json::from_str(&scan.text("dependency-sbom.json")).unwrap();
+    let rows = rows.as_array().unwrap();
+    assert_eq!(rows.len(), 3);
+    for (name, version) in [
+        ("org.example:known", "1.80"),
+        ("org.example:no-version", "unknown"),
+        ("org.example:quoted-delimiters", "unknown"),
+    ] {
+        let row = rows.iter().find(|r| r["name"] == name).unwrap();
+        assert_eq!(row["version"], version);
+    }
+}

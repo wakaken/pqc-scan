@@ -143,3 +143,19 @@ loopback-only communication, empty environment and deadline cleanup. Run them
 with `PQC_RUN_CONTAINER_TESTS=1` and `PQC_PROTOCOL_IMAGE_FILE` set to the prepared
 image record. The legacy native macOS smoke runner is explicitly weaker and is
 not the CI confinement gate. No hosted-CI success is inferred from local runs.
+
+## PQS-QAM evidence reporting (TASK-041)
+
+The independent [quality model](QUALITY-MODEL.md) and [metric definitions](QUALITY-METRICS.md)
+classify evidence as Verified, Passed, Failed, Partial, Unsupported, Unknown,
+Not Tested or Not Applicable. [Current measurements](QUALITY-BASELINE.md) and
+[assessment](QUALITY-ASSESSMENT.md) are new snapshots; old baselines remain intact.
+The existing baseline CI job also runs `tests/quality/report.py` over its raw
+measurements and saves JSON/Markdown. Inconsistent truth/source/raw evidence is
+an evaluation-infrastructure failure, not a measured product-accuracy regression.
+Numeric accuracy comparisons are descriptive; no new numeric CI failure policy
+is introduced. Performance beyond the existing same-environment 2x signal still
+requires investigation, not an automatic claim of regression or acceptance.
+Unsupported and unknown populations never become safe or zero-loss results.
+Release acceptance uses the supported scope and individual evidence, not an
+average score. [Follow-up work](QUALITY-ROADMAP.md) records unexecuted dimensions.

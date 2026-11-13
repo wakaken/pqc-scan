@@ -1,6 +1,8 @@
 # pqc-scan
 
-**v0.2.0** is a static-scanning release. Static scanning is the formal scope; TLS, SSH offers and SSH KEX probes remain experimental. See the [v0.2 roadmap](docs/roadmap/OSS-ROADMAP-v0.2.md) and [release notes](docs/releases/v0.2.0.md).
+This branch develops **v0.3**, with a focus on measuring scanner accuracy, inspection coverage and verification limits. See the [quality roadmap](docs/quality/QUALITY-ROADMAP.md) for completed and planned work.
+
+The published release is **v0.2.0**; its [release notes](docs/releases/v0.2.0.md) describe the released scope. Static scanning is the formal scope; TLS and SSH probes remain experimental.
 
 [日本語](README.ja.md)
 
@@ -22,6 +24,7 @@ Reports show findings, locations and suggested next steps. The inspection overvi
 - [Read the results](#results)
 - [User guides](#guides)
 - [Limits and privacy](#limits)
+- [Repository CI](#repository-ci)
 - [License](#license)
 
 <a id="targets"></a>
@@ -113,6 +116,10 @@ Finding IDs use `finding-v1-<SHA-256>` with length-prefixed fields and repositor
 
 For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
 
+Selected built-in source rules follow imports, aliases and bounded local bindings. Node checks also follow literal `for...of` algorithm lists and locally generated RSA keys into signing/verification. See [source analysis and its limits](docs/user/COVERAGE.md#source-facts); these observations do not prove execution or enabled PQC support.
+
+For the scanner's own measured capabilities and limitations, see the [PQS-QAM quality assessment](docs/quality/QUALITY-ASSESSMENT.md). Measurements identify their inputs and source versions; they do not certify overall security. The existing offline benchmark produces separate [JSON/Markdown quality reports](tests/quality/README.md).
+
 Each guide has a Japanese version linked at the top.
 
 <a id="limits"></a>
@@ -135,6 +142,8 @@ parsing retains available findings; it does not make the rest of a file disappea
 Use `--diagnostics` to see the reasons, and `--require-complete` if incomplete
 inspection should fail CI. See [inspection status](docs/user/SCANNING.md#diagnostics)
 and [supported inputs and limits](docs/user/COVERAGE.md).
+
+<a id="repository-ci"></a>
 
 ## Repository CI
 
@@ -162,7 +171,7 @@ when validation is needed for an otherwise skipped change.
 
 During development, the `protocols` job is temporarily disabled for all triggers,
 including manual runs. Its protocol, isolation and packaging checks do not run;
-The jobs in the event table remain enabled. Remove the job's `if: ${{ false }}`
+the jobs in the event table remain enabled. Remove the job's `if: ${{ false }}`
 condition in the workflow to restore those checks.
 
 GitHub limits the number of changed files considered

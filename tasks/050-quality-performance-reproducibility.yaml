@@ -1,0 +1,83 @@
+id: '050'
+title: 規模・環境・失敗時の性能と再現性を測る
+type: improvement
+priority: medium
+status: pending
+owner: Planner Agent
+phase: '4'
+description: 既存run.pyを拡張し、比較可能な条件と変動幅を記録する。
+quality_alias: QAM-08
+plan_reference: docs/quality/QUALITY-ROADMAP.md
+requirements_reference: docs/quality/QUALITY-REQUIREMENTS.md
+quality_requirements:
+- Q5-01
+- Q5-02
+- Q5-03
+- Q5-04
+- Q5-05
+- Q5-06
+- Q5-07
+- Q5-08
+- Q5-09
+depends_on:
+- '041'
+- '055'
+- '057'
+target_components:
+- tests/quality/run.py
+existing_assets:
+- E19
+- E23
+- E41
+- EG
+- EP
+- ER
+problem:
+- 測定対象拡大とOSごとの単位・取得範囲
+- 実製品相当のサイズ・構成
+- 異なる規模・並列度・構成での測定
+- cache条件と実行日差の測定
+- 新入力・feature・環境にまたがる再現
+- 並列度・環境・全出力形式での確認
+- tool/provider/OS/arch差の比較条件
+- 失敗時の資源測定
+- 測定拡大後の比較と調査手順
+acceptance:
+- 'Q5-01: 時刻・CPU・RSSの単位/対象プロセスを明示し、取得不能値をnullで保持'
+- 'Q5-02: files/bytesを実入力と照合し、起動/出力時間込みのthroughputと分母を示す'
+- 'Q5-03: 認可済み/再配布可能な入力を固定し、増加傾向とばらつきを記録'
+- 'Q5-04: 本当のcoldと初回を区別し、sample数・分布・環境差を開示'
+- 'Q5-05: 除去する変動項目を限定し、事実・ID・重複の変化を検出'
+- 'Q5-06: 意味が同じでも順序差を別報告し、安定性を主張する条件を定める'
+- 'Q5-07: 比較できる条件とできない条件を識別し、環境変化を製品退行と混同しない'
+- 'Q5-08: 失敗を高速成功に数えず、原因・使用資源・保持結果を併記'
+- 'Q5-09: 既存条件を保ち、2x超過は調査として残し、改定には測定変動と承認を要する'
+deliverables:
+- target/quality-task-050/environment-comparison.json
+- target/quality-task-050/failure-resources.json
+- target/quality-task-050/noise-study.md
+- target/quality-task-050/ordering.json
+- target/quality-task-050/regression-review.md
+- target/quality-task-050/resources.json
+- target/quality-task-050/scaling.json
+- target/quality-task-050/semantic-reproducibility.json
+- target/quality-task-050/throughput.json
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- キャッシュ・起動費用・ホスト負荷・環境差を製品の性能差と取り違えるおそれがある。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。

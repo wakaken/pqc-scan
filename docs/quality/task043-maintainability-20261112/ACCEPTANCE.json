@@ -1,0 +1,67 @@
+{
+  "task": "043",
+  "followup": "maintainability",
+  "status": "done",
+  "decision": "Passed",
+  "timestampUtc": "2026-11-12T03:22:54.809082+00:00",
+  "baseCommit": "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf",
+  "branch": "codex/quality-assessment-model",
+  "worktree": "Uncommitted changes; prior work preserved",
+  "requirements": [
+    {
+      "id": "canonical-rule-definitions",
+      "status": "Passed",
+      "evidence": [
+        "CHANGE.patch",
+        "IMPLEMENTATION-REVIEW.md"
+      ],
+      "detail": "Six pattern/scope/kind fingerprints derive from canonical YAML; Node/Python selector/recovery reuse loaded compiled pattern"
+    },
+    {
+      "id": "remove-unnecessary-special-cases",
+      "status": "Passed",
+      "detail": "No evaluation-case IDs/paths/line exceptions found; shared evidence extraction no longer branches on Rust rule ID; Rust recovery derives from namespace registry; language/API semantics retained"
+    },
+    {
+      "id": "compatibility-and-regression",
+      "status": "Passed",
+      "evidence": [
+        "COMPARISON.json",
+        "SOURCE-MATCH.json"
+      ],
+      "corpora": 5,
+      "repeatsPerVersion": 3,
+      "detail": "Same inputs/truth/harness, score/semantic findings/positions/IDs/diagnostics/order identical"
+    },
+    {
+      "id": "required-validation",
+      "status": "Passed",
+      "evidence": "VALIDATION.json"
+    },
+    {
+      "id": "independent-implementation-review",
+      "status": "Passed",
+      "evidence": "IMPLEMENTATION-REVIEW.md",
+      "unresolved": []
+    },
+    {
+      "id": "independent-test-review",
+      "status": "Passed",
+      "evidence": "TEST-REVIEW.md",
+      "unresolved": []
+    }
+  ],
+  "historicalEvidence": {
+    "priorPacket": "docs/quality/task043-fixes-20261112/EVIDENCE-INDEX.json",
+    "priorPacketIndexSha256": "fc6f9beb728fed0b24ac2269306352929ce518c4081d6b72499fa86065e15811",
+    "verifiedFiles": 44,
+    "unchanged": true
+  },
+  "remainingRequiredWork": [],
+  "notClaimed": [
+    "Arbitrary API/language semantics from YAML",
+    "New independently held-out accuracy trial",
+    "Whole Q1-Q6 or release readiness"
+  ],
+  "publication": "No commit/push/PR/merge/tag/release"
+}

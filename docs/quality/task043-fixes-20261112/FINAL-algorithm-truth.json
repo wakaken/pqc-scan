@@ -1,0 +1,2750 @@
+[
+  {
+    "id": "x001",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ML-DSA-44"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：Signature.getInstance が ML-DSA-44 を明示している。"
+  },
+  {
+    "id": "x002",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ML-KEM-1024"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：KEM.getInstance が ML-KEM-1024 を明示している。"
+  },
+  {
+    "id": "x003",
+    "label": "positive",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "SLH-DSA-SHAKE-256s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：Signature.getInstance が SLH-DSA の変種を明示している。"
+  },
+  {
+    "id": "x004",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256withRSA"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：要求は SHA256withRSA であり、標準PQC署名ではない。"
+  },
+  {
+    "id": "x005",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ML-DSA-65"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：閉じ括弧はないが Signature.getInstance と完全な ML-DSA-65 文字列は識別できる。"
+  },
+  {
+    "id": "x006",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：Go import の crypto/mlkem は ML-KEM パッケージを明示している。"
+  },
+  {
+    "id": "x007",
+    "label": "negative",
+    "algorithms": [
+      "not_applicable"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：import は fmt のみであり、PQC API参照ではない。"
+  },
+  {
+    "id": "x008",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：import の引用符直後で切れており、対象パッケージを確定できない。"
+  },
+  {
+    "id": "x009",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "MLKEM768PrivateKey"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：前行で明示した mlkem の MLKEM768PrivateKey.generate 呼出しである。"
+  },
+  {
+    "id": "x010",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ML-KEM-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：print は標準名を文字列として出力するだけで、PQC API呼出しではない。"
+  },
+  {
+    "id": "x011",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "MLKEM768PrivateKey"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：構文は未完だが mlkem.MLKEM768PrivateKey.generate という名目的参照を識別できる。"
+  },
+  {
+    "id": "x012",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "MlKem768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：use ml_kem::MlKem768 はML-KEMの明示的なシンボル参照である。"
+  },
+  {
+    "id": "x013",
+    "label": "negative",
+    "algorithms": [
+      "not_applicable"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ml_kem はローカルに定義された空関数であり、暗号クレートの参照ではない。"
+  },
+  {
+    "id": "x014",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：末尾のシンボルはないが use ml_kem:: はクレートの名目的参照を保持する。"
+  },
+  {
+    "id": "x015",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ML-DSA-87"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：OpenSSL::PKey.generate_key に ML-DSA-87 が明示されている。"
+  },
+  {
+    "id": "x016",
+    "label": "positive",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "SLH-DSA-SHA2-128s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：v2のRuby定義はAPI実行でなく標準名リテラルの参照を評価するため、puts 内の完全な標準名は陽性である。"
+  },
+  {
+    "id": "x017",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：generate_key の文字列が空のまま切れており、アルゴリズムは確定できない。"
+  },
+  {
+    "id": "x018",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ML-KEM-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：crypto.subtle.generateKey の name が ML-KEM-768 を明示している。要求された操作は鍵生成である。"
+  },
+  {
+    "id": "x019",
+    "label": "negative",
+    "algorithms": [
+      "AES"
+    ],
+    "parameters": [
+      "AES-GCM"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：generateKey の対象は AES-GCM であり、標準PQCアルゴリズムではない。"
+  },
+  {
+    "id": "x020",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：name の値が欠けており、対象アルゴリズムを決定できない。"
+  },
+  {
+    "id": "x021",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：generateKeyPairSync の文字列引数が標準 ML-KEM 型を指定している。"
+  },
+  {
+    "id": "x022",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：呼出し全体は行コメント内にあり、名目的API呼出しではない。"
+  },
+  {
+    "id": "x023",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：呼出しに見えるテキスト全体は help の文字列内容である。"
+  },
+  {
+    "id": "x024",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：直前のローカル関数定義は値を返すだけであり、暗号APIではない。"
+  },
+  {
+    "id": "x025",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-65"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：make は node:crypto の generateKeyPairSync の明示的な別名である。"
+  },
+  {
+    "id": "x026",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：関数引数 generateKeyPairSync が import を隠しており、この呼出しは暗号APIと確定できない。"
+  },
+  {
+    "id": "x027",
+    "label": "ambiguous",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：request.algorithm は外部から制約されない値であり、標準PQCか決められない。"
+  },
+  {
+    "id": "x028",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：if(false) は実行を防ぐが、完全なML-KEM鍵生成の静的参照は残る。"
+  },
+  {
+    "id": "x029",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "rsa"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：同じ行の最初の呼出しはRSA鍵生成であり、PQC生成ではない。"
+  },
+  {
+    "id": "x030",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：同じ行の二番目の呼出しはML-KEM鍵生成を明示している。"
+  },
+  {
+    "id": "x031",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：同一行の最初の独立した標準PQC鍵生成呼出しである。"
+  },
+  {
+    "id": "x032",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-1024"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：同一行の二番目の独立した標準PQC鍵生成呼出しである。"
+  },
+  {
+    "id": "x033",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：Nodeのkey-type引数位置は文字列を要求するが、ここではnameオブジェクトを渡している。"
+  },
+  {
+    "id": "x034",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "future-quantum-safe-v9"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：名前は明示されているが、識別済みの標準PQCアルゴリズムではない。"
+  },
+  {
+    "id": "x035",
+    "label": "negative",
+    "algorithms": [
+      "EdDSA"
+    ],
+    "parameters": [
+      "ed25519"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ed25519 は古典的EdDSAであり、標準PQC鍵生成ではない。"
+  },
+  {
+    "id": "x036",
+    "label": "positive",
+    "algorithms": [
+      "pre_standard"
+    ],
+    "parameters": [
+      "kyber768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：明示した kyber768 は標準化前の名前であり、最終標準ML-KEMと同一視しない。"
+  },
+  {
+    "id": "x037",
+    "label": "negative",
+    "algorithms": [
+      "Hybrid"
+    ],
+    "parameters": [
+      "X25519MLKEM768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：group の文字列はハイブリッド名の広告であり、Node鍵生成API呼出しではない。"
+  },
+  {
+    "id": "x038",
+    "label": "unsupported",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：Swift はこのコーパスの当該ソースAPI対応範囲外である。"
+  },
+  {
+    "id": "x039",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RS256"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：sign のalgorithmオプションはJWT RSA署名のRS256を選択している。"
+  },
+  {
+    "id": "x040",
+    "label": "negative",
+    "algorithms": [
+      "HMAC"
+    ],
+    "parameters": [
+      "HS256"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：algorithm はHS256であり、JWT RSA署名ではない。"
+  },
+  {
+    "id": "x041",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：algorithm の値がなく、署名方式を確定できない。"
+  },
+  {
+    "id": "x042",
+    "label": "positive",
+    "algorithms": [
+      "ECDH"
+    ],
+    "parameters": [
+      "secp256r1",
+      "secp384r1"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：表現された明示的なグループ制限は古典的な二つのECグループだけである。ロードや実行は主張しない。"
+  },
+  {
+    "id": "x043",
+    "label": "negative",
+    "algorithms": [
+      "Hybrid",
+      "ECDH"
+    ],
+    "parameters": [
+      "X25519MLKEM768",
+      "secp256r1"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：明示したリストにハイブリッド群が含まれ、古典群だけの制限ではない。"
+  },
+  {
+    "id": "x044",
+    "label": "negative",
+    "algorithms": [
+      "ECDH"
+    ],
+    "parameters": [
+      "secp256r1"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：設定表現全体が # コメントで無効化されている。"
+  },
+  {
+    "id": "x045",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：グループ文字列が未完であり、明示的なリストを判定できない。"
+  },
+  {
+    "id": "x046",
+    "label": "positive",
+    "algorithms": [
+      "DSA"
+    ],
+    "parameters": [
+      "ssh-dss"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：HostKeyAlgorithms が完全な ssh-dss を指定する。"
+  },
+  {
+    "id": "x047",
+    "label": "negative",
+    "algorithms": [
+      "EdDSA"
+    ],
+    "parameters": [
+      "ssh-ed25519"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：指定は ssh-ed25519 であり、ssh-dssではない。"
+  },
+  {
+    "id": "x048",
+    "label": "positive",
+    "algorithms": [
+      "DH"
+    ],
+    "parameters": [
+      "diffie-hellman-group14-sha1"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：KexAlgorithms が正確に group14/SHA1 の古典DHを指定する。"
+  },
+  {
+    "id": "x049",
+    "label": "negative",
+    "algorithms": [
+      "Hybrid"
+    ],
+    "parameters": [
+      "mlkem768x25519-sha256"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：指定はML-KEM/X25519のハイブリッドであり、group14/SHA1ではない。"
+  },
+  {
+    "id": "x050",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：KexAlgorithms に値がなく、アルゴリズムを決定できない。"
+  },
+  {
+    "id": "x051",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "0.10.75"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x052",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "0.10.75"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x053",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x054",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "0.10.75"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x055",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "0.10.75"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x056",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x057",
+    "label": "ambiguous",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：依存宣言はjose 6.0.0の存在を示す。公式v6.0.0 READMEはJOSE機能を記述し、generate_key_pair.tsの有限分岐はRSA/EC/EdDSA/ECDH等を列挙するが、標準PQC対応の根拠にはならない。存在を能力と同一視せず、全機能の非対応を証明する陰性保証にも広げない。参照: https://raw.githubusercontent.com/panva/jose/v6.0.0/README.md, https://raw.githubusercontent.com/panva/jose/v6.0.0/src/key/generate_key_pair.ts"
+  },
+  {
+    "id": "x058",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x059",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x060",
+    "label": "ambiguous",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：依存宣言はjose 6.0.0の存在を示す。公式v6.0.0 READMEはJOSE機能を記述し、generate_key_pair.tsの有限分岐はRSA/EC/EdDSA/ECDH等を列挙するが、標準PQC対応の根拠にはならない。存在を能力と同一視せず、全機能の非対応を証明する陰性保証にも広げない。参照: https://raw.githubusercontent.com/panva/jose/v6.0.0/README.md, https://raw.githubusercontent.com/panva/jose/v6.0.0/src/key/generate_key_pair.ts"
+  },
+  {
+    "id": "x061",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x062",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x063",
+    "label": "ambiguous",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：依存宣言はjose 6.0.0の存在を示す。公式v6.0.0 READMEはJOSE機能を記述し、generate_key_pair.tsの有限分岐はRSA/EC/EdDSA/ECDH等を列挙するが、標準PQC対応の根拠にはならない。存在を能力と同一視せず、全機能の非対応を証明する陰性保証にも広げない。参照: https://raw.githubusercontent.com/panva/jose/v6.0.0/README.md, https://raw.githubusercontent.com/panva/jose/v6.0.0/src/key/generate_key_pair.ts"
+  },
+  {
+    "id": "x064",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "6.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x065",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x066",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "v1.6.1"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の github.com/cloudflare/circl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x067",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "v1.6.1"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x068",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x069",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の org.bouncycastle:bcprov-jdk18on と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x070",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x071",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x072",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の org.bouncycastle:bcprov-jdk18on と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x073",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x074",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x075",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の org.bouncycastle:bcprov-jdk18on と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x076",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x077",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x078",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の org.bouncycastle:bcprov-jdk18on と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x079",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.80"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x080",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x081",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "==48.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：A recognized library is explicitly declared/resolved; this records presence only: cryptography==48.0.0"
+  },
+  {
+    "id": "x082",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "==48.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：The sole declared dependency is unrelated ordinary-package; no recognized library is declared: ordinary-package==48.0.0"
+  },
+  {
+    "id": "x083",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x084",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "==48.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の cryptography と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x085",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "==48.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x086",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x087",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "48.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の cryptography と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x088",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "48.0.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x089",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x090",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x091",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x092",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x093",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x094",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x095",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x096",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x097",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x098",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x099",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x100",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x101",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x102",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x103",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.3.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x104",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{ = \"' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x105",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x106",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x107",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{broken' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x108",
+    "label": "unsupported",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ML-KEM-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：暗号資産のみのCBOMであり、ライブラリ依存取込みの対応範囲外である。"
+  },
+  {
+    "id": "x109",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：宣言には認識対象の openssl と明示バージョンがある。存在のみを示し、アルゴリズム有効化は示さない。"
+  },
+  {
+    "id": "x110",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ordinary-package の宣言だけであり、認識対象ライブラリは存在しない。"
+  },
+  {
+    "id": "x111",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：不完全な文書 '{broken' から依存宣言を確定できない。"
+  },
+  {
+    "id": "x113",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RSA"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：完全なBEGINマーカーがある。本文は意図的な無効カナリアであり、実鍵の存在は主張しない。"
+  },
+  {
+    "id": "x114",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：PUBLIC DOCUMENT のみであり、認識対象BEGINマーカーは存在しない。"
+  },
+  {
+    "id": "x115",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RSA"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：BEGIN記号は不完全であり、完全な認識対象マーカーは存在しない。"
+  },
+  {
+    "id": "x116",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "PKCS8"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：完全なBEGINマーカーがある。本文は意図的な無効カナリアであり、実鍵の存在は主張しない。"
+  },
+  {
+    "id": "x117",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：PUBLIC DOCUMENT のみであり、認識対象BEGINマーカーは存在しない。"
+  },
+  {
+    "id": "x118",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "PKCS8"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：BEGIN記号は不完全であり、完全な認識対象マーカーは存在しない。"
+  },
+  {
+    "id": "x119",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "OpenSSH"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：完全なBEGINマーカーがある。本文は意図的な無効カナリアであり、実鍵の存在は主張しない。"
+  },
+  {
+    "id": "x120",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：PUBLIC DOCUMENT のみであり、認識対象BEGINマーカーは存在しない。"
+  },
+  {
+    "id": "x121",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "OpenSSH"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：BEGIN記号は不完全であり、完全な認識対象マーカーは存在しない。"
+  },
+  {
+    "id": "x122",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：DERハッシュは公開マニフェストのrsa3072.derと一致し、SPKIがRSA 3072ビットと記録されている。"
+  },
+  {
+    "id": "x123",
+    "label": "negative",
+    "algorithms": [
+      "EdDSA"
+    ],
+    "parameters": [
+      "ED25519"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開マニフェストに対応する署名属性はED25519であり、RSAではない。"
+  },
+  {
+    "id": "x124",
+    "label": "positive",
+    "algorithms": [
+      "ECDSA"
+    ],
+    "parameters": [
+      "ecdsa-with-SHA256"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：DERハッシュが公開p256.derと一致し、署名属性はecdsa-with-SHA256である。"
+  },
+  {
+    "id": "x125",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：実バイトは not a certificate のみであり、署名属性を確定できない。"
+  },
+  {
+    "id": "x126",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：実バイトは not a certificate のみであり、署名属性を確定できない。"
+  },
+  {
+    "id": "x127",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：実バイトは not a certificate のみであり、署名属性を確定できない。"
+  },
+  {
+    "id": "x128",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：実バイトは not a certificate のみであり、署名属性を確定できない。"
+  },
+  {
+    "id": "x129",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：実バイトは not a certificate のみであり、署名属性を確定できない。"
+  },
+  {
+    "id": "x130",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：実バイトは not a certificate のみであり、署名属性を確定できない。"
+  },
+  {
+    "id": "x131",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512",
+      "ml-kem-768",
+      "ml-kem-1024"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。"
+  },
+  {
+    "id": "x132",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512",
+      "ml-kem-768",
+      "ml-kem-1024"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。"
+  },
+  {
+    "id": "x133",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512",
+      "ml-kem-768",
+      "ml-kem-1024"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。"
+  },
+  {
+    "id": "x134",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-44",
+      "ml-dsa-65",
+      "ml-dsa-87"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。"
+  },
+  {
+    "id": "x135",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-44",
+      "ml-dsa-65",
+      "ml-dsa-87"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。"
+  },
+  {
+    "id": "x136",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-44",
+      "ml-dsa-65",
+      "ml-dsa-87"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。"
+  },
+  {
+    "id": "x137",
+    "label": "positive",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-128f",
+      "slh-dsa-sha2-128s",
+      "slh-dsa-sha2-192f",
+      "slh-dsa-sha2-192s",
+      "slh-dsa-sha2-256f",
+      "slh-dsa-sha2-256s",
+      "slh-dsa-shake-128f",
+      "slh-dsa-shake-128s",
+      "slh-dsa-shake-192f",
+      "slh-dsa-shake-192s",
+      "slh-dsa-shake-256f",
+      "slh-dsa-shake-256s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。"
+  },
+  {
+    "id": "x138",
+    "label": "positive",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-128f",
+      "slh-dsa-sha2-128s",
+      "slh-dsa-sha2-192f",
+      "slh-dsa-sha2-192s",
+      "slh-dsa-sha2-256f",
+      "slh-dsa-sha2-256s",
+      "slh-dsa-shake-128f",
+      "slh-dsa-shake-128s",
+      "slh-dsa-shake-192f",
+      "slh-dsa-shake-192s",
+      "slh-dsa-shake-256f",
+      "slh-dsa-shake-256s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。"
+  },
+  {
+    "id": "x139",
+    "label": "positive",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-128f",
+      "slh-dsa-sha2-128s",
+      "slh-dsa-sha2-192f",
+      "slh-dsa-sha2-192s",
+      "slh-dsa-sha2-256f",
+      "slh-dsa-sha2-256s",
+      "slh-dsa-shake-128f",
+      "slh-dsa-shake-128s",
+      "slh-dsa-shake-192f",
+      "slh-dsa-shake-192s",
+      "slh-dsa-shake-256f",
+      "slh-dsa-shake-256s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：crypto から明示的に import した generateKeyPair に、ローカル有限ループの標準名を渡す。能力ガードは静的参照を消さず、変種を独立単位には増やさない。"
+  },
+  {
+    "id": "x140",
+    "label": "negative",
+    "algorithms": [
+      "DH"
+    ],
+    "parameters": [
+      "2048"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：createDiffieHellman と後続の共有秘密計算は古典DHであり、標準PQC鍵生成ではない。"
+  },
+  {
+    "id": "x141",
+    "label": "negative",
+    "algorithms": [
+      "DH"
+    ],
+    "parameters": [
+      "modp16"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：createDiffieHellmanGroup が古典modp16群を指定している。"
+  },
+  {
+    "id": "x142",
+    "label": "negative",
+    "algorithms": [
+      "ECDH"
+    ],
+    "parameters": [
+      "secp521r1"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：createECDH と後続の共有秘密計算は古典ECDHである。"
+  },
+  {
+    "id": "x143",
+    "label": "negative",
+    "algorithms": [
+      "ECDH"
+    ],
+    "parameters": [
+      "secp256k1"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：createECDH は古典secp256k1群を指定する。"
+  },
+  {
+    "id": "x144",
+    "label": "negative",
+    "algorithms": [
+      "ECDSA"
+    ],
+    "parameters": [
+      "ec",
+      "sect239k1"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：generateKeyPairSync は古典EC鍵を生成し、後続の署名処理に渡している。"
+  },
+  {
+    "id": "x145",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "rsa",
+      "2048"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：node:crypto 由来の generateKeyPairSync が rsa とmodulusLength 2048を明示する。"
+  },
+  {
+    "id": "x146",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256",
+      "2048"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：SHA256だけではRSAを示さないが、同一ソースで生成したRSA privateKeyを後続sign.signに渡すため、RSA署名参照を確定できる。"
+  },
+  {
+    "id": "x147",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開rsa3072.derと同じバイト、または同一DERに復号されるPEMであり、SPKIはRSA 3072ビットである。"
+  },
+  {
+    "id": "x148",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開マニフェストと変換来歴が結び付ける同一証明書の署名はRSAであり、ECDSAではない。"
+  },
+  {
+    "id": "x149",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開rsa3072.derと同じバイト、または同一DERに復号されるPEMであり、SPKIはRSA 3072ビットである。"
+  },
+  {
+    "id": "x150",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開マニフェストと変換来歴が結び付ける同一証明書の署名はRSAであり、ECDSAではない。"
+  },
+  {
+    "id": "x151",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開rsa3072.derと同じバイト、または同一DERに復号されるPEMであり、SPKIはRSA 3072ビットである。"
+  },
+  {
+    "id": "x152",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開マニフェストと変換来歴が結び付ける同一証明書の署名はRSAであり、ECDSAではない。"
+  },
+  {
+    "id": "x153",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      ".p12"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：拡張子はPKCS12/PFX容器の既存シグナルである。来歴には証明書のみの変換があり、秘密鍵の存在や任意容器の復号能力は主張しない。"
+  },
+  {
+    "id": "x154",
+    "label": "unsupported",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原バイトにEncryptedData OIDがあり、来歴は既知RSA3072公開証明書を示すが、公開入力契約は暗号化内容を対象外とする。従ってこの新しいsupported-scopeのSPKI/署名属性質問はunsupportedとする。algorithms/parametersは来歴で判明する元の公開物属性を保持し、原042-v2の正解と測定を変更しない。"
+  },
+  {
+    "id": "x155",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      ".pfx"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：拡張子はPKCS12/PFX容器の既存シグナルである。来歴には証明書のみの変換があり、秘密鍵の存在や任意容器の復号能力は主張しない。"
+  },
+  {
+    "id": "x156",
+    "label": "unsupported",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原バイトにEncryptedData OIDがあり、来歴は既知RSA3072公開証明書を示すが、公開入力契約は暗号化内容を対象外とする。従ってこの新しいsupported-scopeのSPKI/署名属性質問はunsupportedとする。algorithms/parametersは来歴で判明する元の公開物属性を保持し、原042-v2の正解と測定を変更しない。"
+  },
+  {
+    "id": "x157",
+    "label": "negative",
+    "algorithms": [
+      "EdDSA"
+    ],
+    "parameters": [
+      "ED25519"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開ed25519.derのSPKIはED25519であり、RSA 3072ビットではない。"
+  },
+  {
+    "id": "v2-a0",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RS256"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：RSA方式RS256をsignのalgorithmとして明示的に選択しており、名目的RSA署名参照である。"
+  },
+  {
+    "id": "v2-a1",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      ".p12"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：v2は妥当性でなく拡張子シグナルを測る。内容は不正でも .p12 名のシグナルは存在する。"
+  },
+  {
+    "id": "v2-a2",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      ".pfx"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：v2は妥当性でなく拡張子シグナルを測る。内容は不正でも .pfx 名のシグナルは存在する。"
+  },
+  {
+    "id": "v2-a3",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開rsa3072.derと一致する証明書の署名属性はsha256WithRSAEncryptionである。"
+  },
+  {
+    "id": "v2-a4",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開rsa3072.derと一致する証明書の署名属性はsha256WithRSAEncryptionである。"
+  },
+  {
+    "id": "v2-a5",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開rsa3072.derと一致する証明書の署名属性はsha256WithRSAEncryptionである。"
+  },
+  {
+    "id": "v2-a6",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：公開rsa3072.derと一致する証明書の署名属性はsha256WithRSAEncryptionである。"
+  },
+  {
+    "id": "v2-Encrypt.java",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：Cipher.getInstance の完全な変換文字列がRSA暗号化を選択する。"
+  },
+  {
+    "id": "v2-Symmetric.java",
+    "label": "negative",
+    "algorithms": [
+      "AES"
+    ],
+    "parameters": [
+      "AES/GCM/NoPadding"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：Cipher.getInstance はAES/GCMであり、RSA暗号化ではない。"
+  },
+  {
+    "id": "v2-BrokenCipher.java",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：Cipher.getInstance の文字列が空のまま切れており、暗号方式を決定できない。"
+  },
+  {
+    "id": "v2-independent-import",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：use ml_kem::* は公開ML-KEMクレートの明示的なワイルドカード参照である。"
+  },
+  {
+    "id": "v2-audit0",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：cryptography の asymmetric から mlkem を明示的にimportする。生成呼出しとは異なる標準ML-KEMの名目的参照である。"
+  },
+  {
+    "id": "v2-audit1",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "rsa"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：同一行の第一呼出しは generateKeyPairSync に rsa を明示する。"
+  },
+  {
+    "id": "v2-audit2",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "rsa",
+      "2048"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：node:cryptoの生成呼出しはRSA 2048ビットを指定し、標準PQC生成ではない。"
+  },
+  {
+    "id": "v2-audit3",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256",
+      "2048"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：同一ソースでRSA生成に結び付いた privateKey を sign.sign に渡す。SHA256の文字列だけから推測していない。"
+  },
+  {
+    "id": "v2-audit4",
+    "label": "unsupported",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "原バイトにEncryptedData OIDがあり、来歴は既知RSA3072公開証明書を示すが、公開入力契約は暗号化内容を対象外とする。従ってこの新しいsupported-scopeのSPKI/署名属性質問はunsupportedとする。algorithms/parametersは来歴で判明する元の公開物属性を保持し、原042-v2の正解と測定を変更しない。"
+  },
+  {
+    "id": "v2-audit5",
+    "label": "unsupported",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原バイトにEncryptedData OIDがあり、来歴は既知RSA3072公開証明書を示すが、公開入力契約は暗号化内容を対象外とする。従ってこの新しいsupported-scopeのSPKI/署名属性質問はunsupportedとする。algorithms/parametersは来歴で判明する元の公開物属性を保持し、原042-v2の正解と測定を変更しない。"
+  },
+  {
+    "id": "v2-audit6",
+    "label": "unsupported",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "原バイトにEncryptedData OIDがあり、来歴は既知RSA3072公開証明書を示すが、公開入力契約は暗号化内容を対象外とする。従ってこの新しいsupported-scopeのSPKI/署名属性質問はunsupportedとする。algorithms/parametersは来歴で判明する元の公開物属性を保持し、原042-v2の正解と測定を変更しない。"
+  },
+  {
+    "id": "v2-audit7",
+    "label": "unsupported",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原バイトにEncryptedData OIDがあり、来歴は既知RSA3072公開証明書を示すが、公開入力契約は暗号化内容を対象外とする。従ってこの新しいsupported-scopeのSPKI/署名属性質問はunsupportedとする。algorithms/parametersは来歴で判明する元の公開物属性を保持し、原042-v2の正解と測定を変更しない。"
+  },
+  {
+    "id": "v2-audit8",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "MlKem768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：ml_kemのワイルドカードimportに由来する MlKem768::generate の独立した鍵生成呼出しである。"
+  },
+  {
+    "id": "v2-audit9",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "MlKem768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：直前の MlKem768::generate から得たekに encapsulate を呼ぶため、ML-KEMの名目的API参照である。"
+  },
+  {
+    "id": "v2-audit10",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "MlKem768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：MlKem768::generate から得たdkに decapsulate を呼ぶため、ML-KEMの名目的API参照である。"
+  },
+  {
+    "id": "v2-rsa-11",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256",
+      "2048"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：createSignが作る署名オブジェクトに、14行目で明示的RSA生成由来の秘密鍵を渡す。ダイジェスト単独ではなくローカル鍵来歴に基づくRSA factory参照である。"
+  },
+  {
+    "id": "v2-rsa-14",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256",
+      "2048"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：sign.sign(privateKey)のprivateKeyは7行目のRSA鍵生成から得るため、独立したRSA署名利用である。"
+  },
+  {
+    "id": "v2-rsa-16",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256",
+      "2048"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：createVerifyが作る検証オブジェクトに、19行目で明示的RSA生成由来の公開鍵を渡す。ローカル鍵来歴に基づくRSA factory参照である。"
+  },
+  {
+    "id": "v2-rsa-19",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256",
+      "2048"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：verify.verify(publicKey, signature)のpublicKeyは7行目のRSA鍵生成に結び付くため、独立したRSA検証利用である。"
+  },
+  {
+    "id": "w182",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対応するSBOMのlibrary/package要素がopenssl 3.5.0を明示する。依存存在を示すだけで、特定アルゴリズムの有効化を主張しない。"
+  },
+  {
+    "id": "w183",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：SBOMに列挙されているのはordinary-packageだけであり、認識対象のPQC能力ライブラリ宣言はない。"
+  },
+  {
+    "id": "w184",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：SBOMの版識別子は見えるが、配列と文書が途中で切れており、依存内容を決定できない。非検出や安全の陰性にはしない。"
+  },
+  {
+    "id": "w185",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対応するSBOMのlibrary/package要素がopenssl 3.5.0を明示する。依存存在を示すだけで、特定アルゴリズムの有効化を主張しない。"
+  },
+  {
+    "id": "w186",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：SBOMに列挙されているのはordinary-packageだけであり、認識対象のPQC能力ライブラリ宣言はない。"
+  },
+  {
+    "id": "w187",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：SBOMの版識別子は見えるが、配列と文書が途中で切れており、依存内容を決定できない。非検出や安全の陰性にはしない。"
+  },
+  {
+    "id": "w188",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対応するSBOMのlibrary/package要素がopenssl 3.5.0を明示する。依存存在を示すだけで、特定アルゴリズムの有効化を主張しない。"
+  },
+  {
+    "id": "w189",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "1.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：SBOMに列挙されているのはordinary-packageだけであり、認識対象のPQC能力ライブラリ宣言はない。"
+  },
+  {
+    "id": "w190",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：SBOMの版識別子は見えるが、配列と文書が途中で切れており、依存内容を決定できない。非検出や安全の陰性にはしない。"
+  },
+  {
+    "id": "w191",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対応するSBOMのlibrary/package要素がopenssl 3.5.0を明示する。依存存在を示すだけで、特定アルゴリズムの有効化を主張しない。"
+  },
+  {
+    "id": "w192",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "3.5.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：SBOMに列挙されているのはordinary-packageだけであり、認識対象のPQC能力ライブラリ宣言はない。"
+  },
+  {
+    "id": "w193",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：SBOMの版識別子は見えるが、配列と文書が途中で切れており、依存内容を決定できない。非検出や安全の陰性にはしない。"
+  },
+  {
+    "id": "w194",
+    "label": "positive",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ML-KEM-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：TSXの型注釈とは別のgenerateKey呼出しが、nameにML-KEM-768を明示する。実行成功や鍵用途の妥当性は主張しない。"
+  },
+  {
+    "id": "w195",
+    "label": "negative",
+    "algorithms": [
+      "AES"
+    ],
+    "parameters": [
+      "AES-GCM"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対応TSXのgenerateKeyで選択される方式はAES-GCMであり、標準PQCではない。"
+  },
+  {
+    "id": "w196",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：TSX自体は対応文法だが、generateKeyのname値が欠けており、対象方式を決定できない。"
+  },
+  {
+    "id": "w197",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RSA"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveが名前付きRSA operandを明示する。静的な設定意図でありデプロイ/交渉を主張しない。"
+  },
+  {
+    "id": "w198",
+    "label": "negative",
+    "algorithms": [
+      "AES"
+    ],
+    "parameters": [
+      "AESGCM"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveのoperandはAESGCMであり、名前付きRSA operandを含まない。cipher展開後の安全性を主張しない。"
+  },
+  {
+    "id": "w199",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+  },
+  {
+    "id": "w200",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "TLSv1.0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveはTLS 1.0というlegacy版の選択を明示する。完全な配置済み設定や実行は主張しない。"
+  },
+  {
+    "id": "w201",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "TLSv1.3"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveの明示値はTLS 1.3であり、legacy版の選択ではない。"
+  },
+  {
+    "id": "w202",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+  },
+  {
+    "id": "w203",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "TLSv1_0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveはTLS 1.0というlegacy版の選択を明示する。完全な配置済み設定や実行は主張しない。"
+  },
+  {
+    "id": "w204",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "TLSv1_3"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveの明示値はTLS 1.3であり、legacy版の選択ではない。"
+  },
+  {
+    "id": "w205",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+  },
+  {
+    "id": "w206",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "TLSV1_0"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveはTLS 1.0というlegacy版の選択を明示する。完全な配置済み設定や実行は主張しない。"
+  },
+  {
+    "id": "w207",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "TLSV1_3"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveの明示値はTLS 1.3であり、legacy版の選択ではない。"
+  },
+  {
+    "id": "w208",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+  },
+  {
+    "id": "w209",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "force-tlsv10"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveはTLS 1.0というlegacy版の選択を明示する。完全な配置済み設定や実行は主張しない。"
+  },
+  {
+    "id": "w210",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "force-tlsv13"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveの明示値はTLS 1.3であり、legacy版の選択ではない。"
+  },
+  {
+    "id": "w211",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+  },
+  {
+    "id": "w212",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "VersionTLS10"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveはTLS 1.0というlegacy版の選択を明示する。完全な配置済み設定や実行は主張しない。"
+  },
+  {
+    "id": "w213",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      "VersionTLS13"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveの明示値はTLS 1.3であり、legacy版の選択ではない。"
+  },
+  {
+    "id": "w214",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+  },
+  {
+    "id": "w215",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RSA"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveが名前付きRSA operandを明示する。静的な設定意図でありデプロイ/交渉を主張しない。"
+  },
+  {
+    "id": "w216",
+    "label": "negative",
+    "algorithms": [
+      "AES"
+    ],
+    "parameters": [
+      "AESGCM"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：directiveのoperandはAESGCMであり、名前付きRSA operandを含まない。cipher展開後の安全性を主張しない。"
+  },
+  {
+    "id": "w217",
+    "label": "unsupported",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：対象directiveの値が開いた引用符のまま切れており、方式やTLS版の選択を決定できない。"
+  },
+  {
+    "id": "w218",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-512"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w219",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-768"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w220",
+    "label": "negative",
+    "algorithms": [
+      "ML-KEM"
+    ],
+    "parameters": [
+      "ml-kem-1024"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w221",
+    "label": "negative",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-44"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w222",
+    "label": "negative",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-65"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w223",
+    "label": "negative",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ml-dsa-87"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w224",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-128s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w225",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-128f"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w226",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-192s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w227",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-192f"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w228",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-256s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w229",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-sha2-256f"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w230",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-shake-128s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w231",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-shake-128f"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w232",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-shake-192s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w233",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-shake-192f"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w234",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-shake-256s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w235",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "slh-dsa-shake-256f"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "w236",
+    "label": "negative",
+    "algorithms": [
+      "DSA"
+    ],
+    "parameters": [
+      "ssh-dss"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：#でコメント化されたHostKeyAlgorithmsはDSA名を示すが、有効なDSA選択ではない。"
+  },
+  {
+    "id": "w237",
+    "label": "negative",
+    "algorithms": [
+      "SLH-DSA"
+    ],
+    "parameters": [
+      "SLH-DSA-SHAKE-256s"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：標準方式の完全な変種名は見えるが、呼出し全体は行コメント内にあるため、名目的なAPI利用ではない。"
+  },
+  {
+    "id": "public-p12-CERT_P12_CONTAINER",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      ".p12"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：認識対象拡張子の容器シグナルがある。原バイトには公開RSA3072 DERが1回含まれ、来歴の-nokeys/-certpbe NONE/-nomacと整合するが、秘密鍵やMAC/信頼検証を主張しない。"
+  },
+  {
+    "id": "public-p12-CERT_RSA_3072",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：容器原バイトに、公開属性マニフェストがRSA3072 SPKIとする同一DERが1回含まれる。SPKIサイズを署名方式と混同しない。"
+  },
+  {
+    "id": "public-p12-CERT_RSA_SIGNATURE",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：容器原バイトに含まれる既知公開DERの署名属性は、マニフェスト上sha256WithRSAEncryptionである。"
+  },
+  {
+    "id": "public-p12-CERT_ECDSA_SIGNATURE",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：同じ公開RSA3072証明書の署名はRSAであり、ECDSA署名ではない。"
+  },
+  {
+    "id": "public-pfx-CERT_P12_CONTAINER",
+    "label": "positive",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [
+      ".pfx"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：認識対象拡張子の容器シグナルがある。原バイトには公開RSA3072 DERが1回含まれ、来歴の-nokeys/-certpbe NONE/-nomacと整合するが、秘密鍵やMAC/信頼検証を主張しない。"
+  },
+  {
+    "id": "public-pfx-CERT_RSA_3072",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "3072"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：容器原バイトに、公開属性マニフェストがRSA3072 SPKIとする同一DERが1回含まれる。SPKIサイズを署名方式と混同しない。"
+  },
+  {
+    "id": "public-pfx-CERT_RSA_SIGNATURE",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：容器原バイトに含まれる既知公開DERの署名属性は、マニフェスト上sha256WithRSAEncryptionである。"
+  },
+  {
+    "id": "public-pfx-CERT_ECDSA_SIGNATURE",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "sha256WithRSAEncryption"
+    ],
+    "reason": "原ソースを全体確認したうえで継承oracleの属性記録と照合：同じ公開RSA3072証明書の署名はRSAであり、ECDSA署名ではない。"
+  },
+  {
+    "id": "v3-verify-factory",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256",
+      "2048"
+    ],
+    "reason": "createVerify(SHA256)の生成物verifyが、同じファイルのgenerateKeyPairSync(rsa,{modulusLength:2048})から得たpublicKeyを使ってverify.verifyする。SHA256だけでRSAとは判断していない。"
+  },
+  {
+    "id": "v3-verify-use",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "SHA256",
+      "2048"
+    ],
+    "reason": "verify.verify(publicKey,signature)は同じファイルで明示RSA生成に結び付く公開鍵の検証参照である。署名の生成とは独立したsource startである。"
+  },
+  {
+    "id": "fresh-jwt-rsa",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RS256"
+    ],
+    "reason": "jwt.signのalgorithmオプションがRS256を明示的に選択する。TS_NODE_RSA_USAGEのRSA JOSE方式選択の定義を満たす。private.keyという名前自体から鍵方式を推測していない。"
+  },
+  {
+    "id": "fresh-jwt-selection",
+    "label": "positive",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RS256"
+    ],
+    "reason": "jwt.sign(...,{algorithm:RS256})はJWTのRSA署名方式選択を明示している。"
+  },
+  {
+    "id": "fresh-jwt-node-direct",
+    "label": "negative",
+    "algorithms": [
+      "RSA"
+    ],
+    "parameters": [
+      "RS256"
+    ],
+    "reason": "呼出しはJWTライブラリのjwt.signであり、Node cryptoのcreateSign/createVerifyまたはその生成物による直接参照ではない。RSA JOSE選択は別の二質問に記録する。"
+  },
+  {
+    "id": "fresh-helper-node",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "ソースのjwtはrequire(../)でありjwt.signはJWTヘルパーである。Nodeの標準PQC生成API参照は存在しない。"
+  },
+  {
+    "id": "fresh-helper-rsa",
+    "label": "negative",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "jwt.signはJWTライブラリの呼出しであり、Node crypto署名/検証APIの参照ではない。外部鍵パラメータの名前からRSAを推測しない。"
+  },
+  {
+    "id": "fresh-helper-tsrsa",
+    "label": "ambiguous",
+    "algorithms": [
+      "unknown"
+    ],
+    "parameters": [],
+    "reason": "jwt.signのoptionsとsecretOrPrivateKeyは関数の外部引数で、方式やRSA鍵へのローカルな拘束がない。RSA JOSE方式選択であるか否かはこのソースから確定できないためdynamic/ambiguousとする。"
+  },
+  {
+    "id": "fresh-java-mldsa",
+    "label": "positive",
+    "algorithms": [
+      "ML-DSA"
+    ],
+    "parameters": [
+      "ML-DSA-44"
+    ],
+    "reason": "KeyPairGenerator.getInstanceがML-DSA-44を指定する明示的なJava鍵生成API参照である。生成実行やプロバイダ対応を保証しない。"
+  }
+]

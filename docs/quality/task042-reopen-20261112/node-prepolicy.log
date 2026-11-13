@@ -1,0 +1,232 @@
+TAP version 13
+# Subtest: default is compact and occurrence/group pagination preserves every record
+ok 1 - default is compact and occurrence/group pagination preserves every record
+  ---
+  duration_ms: 15.212042
+  type: 'test'
+  ...
+# Subtest: inventory, search, empty filters and resetting report correct counts
+ok 2 - inventory, search, empty filters and resetting report correct counts
+  ---
+  duration_ms: 14.216959
+  type: 'test'
+  ...
+# Subtest: deep links reveal inventory findings outside both pagers
+ok 3 - deep links reveal inventory findings outside both pagers
+  ---
+  duration_ms: 7.094
+  type: 'test'
+  ...
+# Subtest: reviewed final-gap results omit only the finite 81 matches and retain inventory
+ok 4 - reviewed final-gap results omit only the finite 81 matches and retain inventory
+  ---
+  duration_ms: 32.454542
+  type: 'test'
+  ...
+# Subtest: a new error at a reviewed diagnostic location remains actionable
+ok 5 - a new error at a reviewed diagnostic location remains actionable
+  ---
+  duration_ms: 19.743375
+  type: 'test'
+  ...
+# Subtest: stale source binding and excess identical occurrences invalidate finite allowances
+ok 6 - stale source binding and excess identical occurrences invalidate finite allowances
+  ---
+  duration_ms: 32.645291
+  type: 'test'
+  ...
+# Subtest: only the exact reviewed result is omitted; native input and run metadata stay intact
+ok 7 - only the exact reviewed result is omitted; native input and run metadata stay intact
+  ---
+  duration_ms: 4.528
+  type: 'test'
+  ...
+# Subtest: canonical digest is independent of object key ordering and includes nested properties
+ok 8 - canonical digest is independent of object key ordering and includes nested properties
+  ---
+  duration_ms: 0.140916
+  type: 'test'
+  ...
+# Subtest: a new result in the same fixture file remains actionable
+ok 9 - a new result in the same fixture file remains actionable
+  ---
+  duration_ms: 2.000292
+  type: 'test'
+  ...
+# Subtest: changed message, rule, level or properties are never covered by a previous allowance
+ok 10 - changed message, rule, level or properties are never covered by a previous allowance
+  ---
+  duration_ms: 2.771667
+  type: 'test'
+  ...
+# Subtest: changing even the body of a reviewed source file keeps its result
+ok 11 - changing even the body of a reviewed source file keeps its result
+  ---
+  duration_ms: 1.90825
+  type: 'test'
+  ...
+# Subtest: missing or symlinked sources do not borrow a reviewed source identity
+ok 12 - missing or symlinked sources do not borrow a reviewed source identity
+  ---
+  duration_ms: 1.816584
+  type: 'test'
+  ...
+# Subtest: an excess duplicate keeps the entire group rather than consuming a prefix allowance
+ok 13 - an excess duplicate keeps the entire group rather than consuming a prefix allowance
+  ---
+  duration_ms: 1.664166
+  type: 'test'
+  ...
+# Subtest: allowance counts cover the whole SARIF, including repeated runs
+ok 14 - allowance counts cover the whole SARIF, including repeated runs
+  ---
+  duration_ms: 1.273083
+  type: 'test'
+  ...
+# Subtest: other tools and multi-location or related/code-flow results stay unchanged
+ok 15 - other tools and multi-location or related/code-flow results stay unchanged
+  ---
+  duration_ms: 1.955375
+  type: 'test'
+  ...
+# Subtest: indirect URI resolution is ineligible even with a matching result digest
+ok 16 - indirect URI resolution is ineligible even with a matching result digest
+  ---
+  duration_ms: 2.358667
+  type: 'test'
+  ...
+# Subtest: unregistered product locations and missing regions are retained
+ok 17 - unregistered product locations and missing regions are retained
+  ---
+  duration_ms: 1.28425
+  type: 'test'
+  ...
+# Subtest: unsafe or nonliteral expectation paths and duplicate policies are rejected
+ok 18 - unsafe or nonliteral expectation paths and duplicate policies are rejected
+  ---
+  duration_ms: 1.20825
+  type: 'test'
+  ...
+# Subtest: empty or malformed SARIF cannot become a successful empty upload
+ok 19 - empty or malformed SARIF cannot become a successful empty upload
+  ---
+  duration_ms: 1.238666
+  type: 'test'
+  ...
+# Subtest: audit contains identities and reasons without copying message/source payloads
+ok 20 - audit contains identities and reasons without copying message/source payloads
+  ---
+  duration_ms: 1.159042
+  type: 'test'
+  ...
+# Subtest: CLI writes a separate upload and audit, preserving the raw SARIF bytes
+ok 21 - CLI writes a separate upload and audit, preserving the raw SARIF bytes
+  ---
+  duration_ms: 31.861375
+  type: 'test'
+  ...
+# Subtest: CLI refuses output aliases and reports malformed input without echoing a canary
+ok 22 - CLI refuses output aliases and reports malformed input without echoing a canary
+  ---
+  duration_ms: 53.666625
+  type: 'test'
+  ...
+# Subtest: CLI also protects raw input through hard-link and symlink output aliases
+ok 23 - CLI also protects raw input through hard-link and symlink output aliases
+  ---
+  duration_ms: 46.710125
+  type: 'test'
+  ...
+# Subtest: actual scanner still detects identical fixture and product inputs; only the reviewed fixture is omitted
+ok 24 - actual scanner still detects identical fixture and product inputs; only the reviewed fixture is omitted
+  ---
+  duration_ms: 1541.71925
+  type: 'test'
+  ...
+# Subtest: a reviewed line-only result requires an explicit null column and exact full digest
+ok 25 - a reviewed line-only result requires an explicit null column and exact full digest
+  ---
+  duration_ms: 2.778458
+  type: 'test'
+  ...
+# Subtest: reviewed rule definitions, guidance, identifiers and OID labels are upload-only exceptions
+not ok 26 - reviewed rule definitions, guidance, identifiers and OID labels are upload-only exceptions
+  ---
+  duration_ms: 39.341334
+  type: 'test'
+  location: '/Users/waka/development/pqc/pqc-scan/shell/self-scan-backlog.test.cjs:13:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert(audit.sourceChecks.every(s => s.status === 'verified'))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/waka/development/pqc/pqc-scan/shell/self-scan-backlog.test.cjs:21:3)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: an unreviewed result in a registered rule-definition file remains visible
+ok 27 - an unreviewed result in a registered rule-definition file remains visible
+  ---
+  duration_ms: 19.046041
+  type: 'test'
+  ...
+# Subtest: artifact-only test findings remain visible without a reviewed positive line
+ok 28 - artifact-only test findings remain visible without a reviewed positive line
+  ---
+  duration_ms: 17.301541
+  type: 'test'
+  ...
+# Subtest: PR14 reviewed test inputs and classification data are omitted only from the upload copy
+not ok 29 - PR14 reviewed test inputs and classification data are omitted only from the upload copy
+  ---
+  duration_ms: 36.376292
+  type: 'test'
+  location: '/Users/waka/development/pqc/pqc-scan/shell/self-scan-policy.test.cjs:16:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert(audit.sourceChecks.every(s => s.status === 'verified'))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (/Users/waka/development/pqc/pqc-scan/shell/self-scan-policy.test.cjs:26:3)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: new error at the same reviewed production source position remains actionable
+ok 30 - new error at the same reviewed production source position remains actionable
+  ---
+  duration_ms: 18.487625
+  type: 'test'
+  ...
+# Subtest: stale classification-source binding retains every finding from that file
+ok 31 - stale classification-source binding retains every finding from that file
+  ---
+  duration_ms: 17.748667
+  type: 'test'
+  ...
+1..31
+# tests 31
+# suites 0
+# pass 29
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1746.190083

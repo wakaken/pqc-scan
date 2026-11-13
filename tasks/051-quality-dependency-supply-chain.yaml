@@ -1,0 +1,50 @@
+id: '051'
+title: 依存脆弱性・供給元・ライセンスを評価する
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: '5'
+description: 工具とDBを固定し、配布variantごとの依存・notice・未解決事項を追跡する。
+quality_alias: QAM-09の依存部分
+plan_reference: docs/quality/QUALITY-ROADMAP.md
+requirements_reference: docs/quality/QUALITY-REQUIREMENTS.md
+quality_requirements:
+- Q6-03
+- Q6-04
+depends_on:
+- '041'
+target_components:
+- Cargo.lock
+existing_assets:
+- E41
+- ED
+- ER
+problem:
+- 工具・advisory DBの取得と定期確認
+- 公開前の調査と許容判断
+acceptance:
+- 'Q6-03: 版/feature/供給元とDB取得日/hash、脆弱性・未保守・例外期限・対処を記録'
+- 'Q6-04: 全配布variantの依存とlicense/noticeを対応付け、未解決許容は維持者判断として残す'
+deliverables:
+- target/quality-task-051/dependency-review.json
+- target/quality-task-051/license-review.md
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- 脆弱性DBの古さ、featureによる依存差、未確認のlicense条件を見落とすおそれがある。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。

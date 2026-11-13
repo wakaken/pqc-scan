@@ -1,0 +1,3405 @@
+{
+  "reviewer": "B: q42_reopen_test_review (sole test-review identity)",
+  "timestampUtc": "2026-11-11T22:20:37.399077+00:00",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "protocolSha256": "300313c7a8e6867a4f7283a06c2ec0546ae38f6d987c4300575d98d39bf65dd9",
+  "provenanceSha256": "1253727e7c892a41844ec374230b447f4191b21cb7bc74ecd06447663e3b4874",
+  "sourceOnly": true,
+  "otherLabelsSeen": false,
+  "scannerResultsSeen": false,
+  "previousIndependentRecordSha256": "9ece8bdf34f09a2d015685e33a10ae6f110ec73b432475ee9d6b355e4ea83606",
+  "sourceReferences": [
+    {
+      "url": "https://raw.githubusercontent.com/panva/jose/v6.0.0/README.md",
+      "sha256": "09a3764a2203a8f3030884583f00c43ca2a12407b73a49e8226644ec9724569a",
+      "role": "Official tagged v6.0.0 source consulted independently; read only, never executed."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/panva/jose/v6.0.0/src/key/generate_key_pair.ts",
+      "sha256": "d213a7850446e70099c0d72b65612f7239f116093a6b0ffb1dfb5c20fa625e61",
+      "role": "Official tagged v6.0.0 source consulted independently; read only, never executed."
+    }
+  ],
+  "context": "Candidate4 source-only extension review, before first v2 scan. Existing own labels retained except the explicitly corrected jose-capability premise; original records are immutable. All 30 properties were reapplied to all 203 files, including the seven new config properties against every inherited file. Added specimens were read only, never imported, compiled or executed.",
+  "exposureDisclosure": [
+    "Before neutral question revision, corpus questions v2-audit0/1 and other source-audit added questions contained coordinator-proposed interpretations; these were seen during source reading. No other reviewer label file or scanner output was opened.",
+    "The inherited base PROTOCOL.md contains historical TASK023 adjudication text; it was seen as part of reading the extension dependency. No v1 label file, scanner code, native patterns or scanner results were read.",
+    "All inherited Node and coordinator-authored files are tuning. The RustCrypto 2024 excerpt alone is the fresh authorship holdout; no v2 run had occurred before this record.",
+    "Between candidate3 and candidate4, reviewed evaluator/report Python source and synthetic unit-test assertions, plus parent status reports about historic findings and passed checks. No actual v2 scanner output, native scanner implementation/patterns, other reviewer label file or adjudication was read.",
+    "For candidate4 the parent explicitly corrected the earlier jose recognized-library premise. Independent judgment now uses the official tagged README and key-generation implementation recorded above; old reviewer conclusions were not consulted."
+  ],
+  "labels": [
+    {
+      "id": "x001",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ML-DSA-44"
+      ],
+      "reason": "Signature.getInstance explicitly selects ML-DSA-44."
+    },
+    {
+      "id": "x002",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "kem",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ML-KEM-1024"
+      ],
+      "reason": "KEM.getInstance explicitly requests ML-KEM-1024."
+    },
+    {
+      "id": "x003",
+      "label": "positive",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SLH-DSA-SHAKE-256s"
+      ],
+      "reason": "Signature.getInstance explicitly requests the named SLH-DSA variant."
+    },
+    {
+      "id": "x004",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256withRSA"
+      ],
+      "reason": "The signature request explicitly selects classical RSA, not standardized PQC."
+    },
+    {
+      "id": "x005",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "malformed",
+      "parameters": [
+        "ML-DSA-65"
+      ],
+      "reason": "Missing closing syntax does not obscure the explicit ML-DSA-65 Signature.getInstance reference."
+    },
+    {
+      "id": "x006",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "The Go import explicitly names crypto/mlkem; this is import presence only."
+    },
+    {
+      "id": "x007",
+      "label": "negative",
+      "algorithms": [
+        "not_applicable"
+      ],
+      "usage": "not_applicable",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "Only fmt is imported; no PQC API or algorithm is referenced."
+    },
+    {
+      "id": "x008",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "unknown",
+      "artifact": "source",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The import string is truncated before any package can be determined."
+    },
+    {
+      "id": "x009",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "MLKEM768PrivateKey"
+      ],
+      "reason": "The mlkem import on line 1 establishes the origin of MLKEM768PrivateKey.generate on line 2."
+    },
+    {
+      "id": "x010",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "string",
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "print contains only an algorithm string, with no nominal cryptographic API reference."
+    },
+    {
+      "id": "x011",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "malformed",
+      "parameters": [
+        "MLKEM768PrivateKey"
+      ],
+      "reason": "The explicit MLKEM768PrivateKey.generate member reference remains visible despite the unclosed call."
+    },
+    {
+      "id": "x012",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "MlKem768"
+      ],
+      "reason": "The use declaration explicitly imports MlKem768 from ml_kem."
+    },
+    {
+      "id": "x013",
+      "label": "negative",
+      "algorithms": [
+        "not_applicable"
+      ],
+      "usage": "not_applicable",
+      "artifact": "source",
+      "caseKind": "namesake",
+      "parameters": [],
+      "reason": "ml_kem is a locally declared empty function, with no PQC crate provenance."
+    },
+    {
+      "id": "x014",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The incomplete use statement nevertheless explicitly identifies the ml_kem crate."
+    },
+    {
+      "id": "x015",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ML-DSA-87"
+      ],
+      "reason": "OpenSSL::PKey.generate_key explicitly names ML-DSA-87."
+    },
+    {
+      "id": "x016",
+      "label": "positive",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "string",
+      "parameters": [
+        "SLH-DSA-SHA2-128s"
+      ],
+      "reason": "The Ruby puts literal names the standardized SLH-DSA variant; the v2 Ruby property is a literal reference, not execution."
+    },
+    {
+      "id": "x017",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The generate_key argument is an unclosed empty string; no algorithm is decidable."
+    },
+    {
+      "id": "x018",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "WebCrypto generateKey has an explicit ML-KEM-768 name object; the operation is key generation."
+    },
+    {
+      "id": "x019",
+      "label": "negative",
+      "algorithms": [
+        "AES"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "AES-GCM"
+      ],
+      "reason": "The WebCrypto key generation name is AES-GCM, not standardized PQC."
+    },
+    {
+      "id": "x020",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The WebCrypto name field is truncated without a value."
+    },
+    {
+      "id": "x021",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-kem-512"
+      ],
+      "reason": "generateKeyPairSync has the explicit standard ML-KEM string key type."
+    },
+    {
+      "id": "x022",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "The apparent key generation call is wholly inside a line comment."
+    },
+    {
+      "id": "x023",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "string",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "The apparent call appears solely within a help string."
+    },
+    {
+      "id": "x024",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "namesake",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "The invoked generateKeyPairSync is explicitly defined locally to return its argument, without crypto provenance."
+    },
+    {
+      "id": "x025",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "alias",
+      "parameters": [
+        "ml-dsa-65"
+      ],
+      "reason": "make is explicitly imported as the alias of node:crypto generateKeyPairSync and selects ml-dsa-65."
+    },
+    {
+      "id": "x026",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "shadowing",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "The render parameter shadows the imported function at the call site."
+    },
+    {
+      "id": "x027",
+      "label": "ambiguous",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "dynamic",
+      "parameters": [],
+      "reason": "request.algorithm has no locally constrained value, so the selected family cannot be determined."
+    },
+    {
+      "id": "x028",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "dead_code",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "The if(false) branch retains an explicit static ML-KEM key-generation reference."
+    },
+    {
+      "id": "x029",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "mixed",
+      "parameters": [
+        "rsa"
+      ],
+      "reason": "The first call selects RSA; the adjacent PQC call is a distinct interval."
+    },
+    {
+      "id": "x030",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "mixed",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "The second call independently selects ML-KEM; the adjacent RSA call is distinct."
+    },
+    {
+      "id": "x031",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "same_line",
+      "parameters": [
+        "ml-kem-512"
+      ],
+      "reason": "The first of two same-family calls explicitly selects ml-kem-512."
+    },
+    {
+      "id": "x032",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "same_line",
+      "parameters": [
+        "ml-kem-1024"
+      ],
+      "reason": "The second of two same-family calls explicitly selects ml-kem-1024."
+    },
+    {
+      "id": "x033",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "typed",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "An object argument is not the string key-type argument required by this Node API property."
+    },
+    {
+      "id": "x034",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "future-quantum-safe-v9"
+      ],
+      "reason": "The unknown key-type name does not identify a standardized PQC algorithm."
+    },
+    {
+      "id": "x035",
+      "label": "negative",
+      "algorithms": [
+        "EdDSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ed25519"
+      ],
+      "reason": "The selected ed25519 key type is classical EdDSA, not standardized PQC."
+    },
+    {
+      "id": "x036",
+      "label": "positive",
+      "algorithms": [
+        "pre_standard"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "kyber768"
+      ],
+      "reason": "The explicit kyber768 key-type string names the pre-standard algorithm."
+    },
+    {
+      "id": "x037",
+      "label": "negative",
+      "algorithms": [
+        "Hybrid"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "string",
+      "parameters": [
+        "X25519MLKEM768"
+      ],
+      "reason": "Only an advertised hybrid group string is present; no Node PQC key-generation API is invoked."
+    },
+    {
+      "id": "x038",
+      "label": "unsupported",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "unsupported",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "The apparent call is in Swift, outside the declared language support."
+    },
+    {
+      "id": "x039",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "RS256"
+      ],
+      "reason": "The nominal JWT sign invocation explicitly chooses RS256."
+    },
+    {
+      "id": "x040",
+      "label": "negative",
+      "algorithms": [
+        "HMAC"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "HS256"
+      ],
+      "reason": "The JWT algorithm is HS256, identifying HMAC rather than RSA."
+    },
+    {
+      "id": "x041",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The truncated JWT algorithm field has no decidable algorithm value."
+    },
+    {
+      "id": "x042",
+      "label": "positive",
+      "algorithms": [
+        "ECDH"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "secp256r1",
+        "secp384r1"
+      ],
+      "reason": "The represented jdk.tls.namedGroups list contains only the two explicit classical curves; loading is not claimed."
+    },
+    {
+      "id": "x043",
+      "label": "negative",
+      "algorithms": [
+        "Hybrid",
+        "ECDH"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "mixed",
+      "parameters": [
+        "X25519MLKEM768",
+        "secp256r1"
+      ],
+      "reason": "The explicit list includes a hybrid group and is therefore not classical-only."
+    },
+    {
+      "id": "x044",
+      "label": "negative",
+      "algorithms": [
+        "ECDH"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "comment",
+      "parameters": [
+        "secp256r1"
+      ],
+      "reason": "The represented assignment is commented out with #."
+    },
+    {
+      "id": "x045",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The group-list string is truncated before any configured value."
+    },
+    {
+      "id": "x046",
+      "label": "positive",
+      "algorithms": [
+        "DSA"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ssh-dss"
+      ],
+      "reason": "HostKeyAlgorithms explicitly configures the exact ssh-dss signature name."
+    },
+    {
+      "id": "x047",
+      "label": "negative",
+      "algorithms": [
+        "EdDSA"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ssh-ed25519"
+      ],
+      "reason": "HostKeyAlgorithms selects ssh-ed25519, not ssh-dss."
+    },
+    {
+      "id": "x048",
+      "label": "positive",
+      "algorithms": [
+        "DH"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "diffie-hellman-group14-sha1"
+      ],
+      "reason": "KexAlgorithms explicitly selects the exact classical group14-SHA1 name."
+    },
+    {
+      "id": "x049",
+      "label": "negative",
+      "algorithms": [
+        "Hybrid"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "mlkem768x25519-sha256"
+      ],
+      "reason": "KexAlgorithms selects a hybrid group, not diffie-hellman-group14-sha1."
+    },
+    {
+      "id": "x050",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The KexAlgorithms directive has no algorithm argument."
+    },
+    {
+      "id": "x051",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "0.10.75"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: [dependencies]\nopenssl = \"0.10.75\""
+    },
+    {
+      "id": "x052",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "0.10.75"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: [dependencies]\nordinary-package = \"0.10.75\""
+    },
+    {
+      "id": "x053",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x054",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "0.10.75"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: version = 3\n[[package]]\nname = \"openssl\"\nversion = \"0.10.75\""
+    },
+    {
+      "id": "x055",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "0.10.75"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: version = 3\n[[package]]\nname = \"ordinary-package\"\nversion = \"0.10.75\""
+    },
+    {
+      "id": "x056",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x057",
+      "label": "ambiguous",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "The document declares jose 6.0.0, establishing JOSE dependency presence. Tagged official README and generate_key_pair.ts enumerate classical algorithms but do not establish standardized PQC capability; this is not sufficient for the nominated capable-library premise."
+    },
+    {
+      "id": "x058",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: {\"dependencies\":{\"ordinary-package\":\"6.0.0\"}}"
+    },
+    {
+      "id": "x059",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x060",
+      "label": "ambiguous",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "The document declares jose 6.0.0, establishing JOSE dependency presence. Tagged official README and generate_key_pair.ts enumerate classical algorithms but do not establish standardized PQC capability; this is not sufficient for the nominated capable-library premise."
+    },
+    {
+      "id": "x061",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: {\"lockfileVersion\":3,\"packages\":{\"node_modules/ordinary-package\":{\"version\":\"6.0.0\"}}}"
+    },
+    {
+      "id": "x062",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x063",
+      "label": "ambiguous",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "The document declares jose 6.0.0, establishing JOSE dependency presence. Tagged official README and generate_key_pair.ts enumerate classical algorithms but do not establish standardized PQC capability; this is not sufficient for the nominated capable-library premise."
+    },
+    {
+      "id": "x064",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "6.0.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: lockfileVersion: '9.0'\npackages:\n  ordinary-package@6.0.0: {}"
+    },
+    {
+      "id": "x065",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x066",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "v1.6.1"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: module example.invalid/data\ngo 1.24\nrequire github.com/cloudflare/circl v1.6.1"
+    },
+    {
+      "id": "x067",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "v1.6.1"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: module example.invalid/data\ngo 1.24\nrequire ordinary-package v1.6.1"
+    },
+    {
+      "id": "x068",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x069",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: <project><dependencies><dependency><groupId>org.bouncycastle</groupId><artifactId>bcprov-jdk18on</artifactId><version>1.80</version></dependency></dependencies></project>"
+    },
+    {
+      "id": "x070",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: <project><dependencies><dependency><groupId>ordinary</groupId><artifactId>package</artifactId><version>1.80</version></dependency></dependencies></project>"
+    },
+    {
+      "id": "x071",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x072",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: dependencies { implementation 'org.bouncycastle:bcprov-jdk18on:1.80' }"
+    },
+    {
+      "id": "x073",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: dependencies { implementation 'ordinary-package:1.80' }"
+    },
+    {
+      "id": "x074",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x075",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: dependencies { implementation(\"org.bouncycastle:bcprov-jdk18on:1.80\") }"
+    },
+    {
+      "id": "x076",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: dependencies { implementation(\"ordinary-package:1.80\") }"
+    },
+    {
+      "id": "x077",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x078",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: org.bouncycastle:bcprov-jdk18on:1.80=runtimeClasspath"
+    },
+    {
+      "id": "x079",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.80"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: ordinary-package:1.80=runtimeClasspath"
+    },
+    {
+      "id": "x080",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x081",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "==48.0.0"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: cryptography==48.0.0"
+    },
+    {
+      "id": "x082",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "==48.0.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: ordinary-package==48.0.0"
+    },
+    {
+      "id": "x083",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x084",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "==48.0.0"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: {\"default\":{\"cryptography\":{\"version\":\"==48.0.0\"}}}"
+    },
+    {
+      "id": "x085",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "==48.0.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: {\"default\":{\"ordinary-package\":{\"version\":\"==48.0.0\"}}}"
+    },
+    {
+      "id": "x086",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x087",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "48.0.0"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: [[package]]\nname = \"cryptography\"\nversion = \"48.0.0\""
+    },
+    {
+      "id": "x088",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "48.0.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: [[package]]\nname = \"ordinary-package\"\nversion = \"48.0.0\""
+    },
+    {
+      "id": "x089",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x090",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: gem 'openssl', '3.3.0'"
+    },
+    {
+      "id": "x091",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: gem 'ordinary-package', '3.3.0'"
+    },
+    {
+      "id": "x092",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x093",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: gem 'openssl', '3.3.0'"
+    },
+    {
+      "id": "x094",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: gem 'ordinary-package', '3.3.0'"
+    },
+    {
+      "id": "x095",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x096",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: GEM\n  specs:\n    openssl (3.3.0)"
+    },
+    {
+      "id": "x097",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: GEM\n  specs:\n    ordinary-package (3.3.0)"
+    },
+    {
+      "id": "x098",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x099",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: GEM\n  specs:\n    openssl (3.3.0)"
+    },
+    {
+      "id": "x100",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: GEM\n  specs:\n    ordinary-package (3.3.0)"
+    },
+    {
+      "id": "x101",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x102",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: Gem::Specification.new do |s|\n  s.add_dependency 'openssl', '3.3.0'\nend"
+    },
+    {
+      "id": "x103",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.3.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: Gem::Specification.new do |s|\n  s.add_dependency 'ordinary-package', '3.3.0'\nend"
+    },
+    {
+      "id": "x104",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: { = \""
+    },
+    {
+      "id": "x105",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: {\"bomFormat\": \"CycloneDX\", \"specVersion\": \"1.5\", \"version\": 1, \"components\": [{\"type\": \"library\", \"name\": \"openssl\", \"version\": \"3.5.0\", \"purl\": \"pkg:generic/openssl@3.5.0\"}]}"
+    },
+    {
+      "id": "x106",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: {\"bomFormat\": \"CycloneDX\", \"specVersion\": \"1.5\", \"version\": 1, \"components\": [{\"type\": \"library\", \"name\": \"ordinary-package\", \"version\": \"3.5.0\", \"purl\": \"pkg:generic/ordinary-package@3.5.0\"}]}"
+    },
+    {
+      "id": "x107",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: {broken"
+    },
+    {
+      "id": "x108",
+      "label": "unsupported",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "sbom",
+      "caseKind": "unsupported",
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "The SBOM component is a cryptographic-asset algorithm, outside dependency-ingestion support; it is not a library declaration."
+    },
+    {
+      "id": "x109",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "A recognized library is explicitly declared/resolved; this records presence only: {\"spdxVersion\": \"SPDX-2.3\", \"packages\": [{\"name\": \"openssl\", \"versionInfo\": \"3.5.0\"}]}"
+    },
+    {
+      "id": "x110",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "The sole declared dependency is unrelated ordinary-package; no recognized library is declared: {\"spdxVersion\": \"SPDX-2.3\", \"packages\": [{\"name\": \"ordinary-package\", \"versionInfo\": \"3.5.0\"}]}"
+    },
+    {
+      "id": "x111",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The document is malformed without a decidable dependency declaration: {broken"
+    },
+    {
+      "id": "x113",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_marker",
+      "artifact": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "The complete recognized BEGIN marker is present; the invalid canary body does not establish a real key: -----BEGIN RSA PRIVATE KEY-----"
+    },
+    {
+      "id": "x114",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "artifact": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "There is no complete recognized BEGIN marker: PUBLIC DOCUMENT"
+    },
+    {
+      "id": "x115",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_marker",
+      "artifact": "key_marker",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "There is no complete recognized BEGIN marker: ---BEGIN RSA PRIVATE KEY"
+    },
+    {
+      "id": "x116",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "artifact": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "The complete recognized BEGIN marker is present; the invalid canary body does not establish a real key: -----BEGIN PRIVATE KEY-----"
+    },
+    {
+      "id": "x117",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "artifact": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "There is no complete recognized BEGIN marker: PUBLIC DOCUMENT"
+    },
+    {
+      "id": "x118",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "artifact": "key_marker",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "There is no complete recognized BEGIN marker: ---BEGIN PRIVATE KEY"
+    },
+    {
+      "id": "x119",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "artifact": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "The complete recognized BEGIN marker is present; the invalid canary body does not establish a real key: -----BEGIN OPENSSH PRIVATE KEY-----"
+    },
+    {
+      "id": "x120",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "artifact": "key_marker",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "There is no complete recognized BEGIN marker: PUBLIC DOCUMENT"
+    },
+    {
+      "id": "x121",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_marker",
+      "artifact": "key_marker",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "There is no complete recognized BEGIN marker: ---BEGIN OPENSSH PRIVATE KEY"
+    },
+    {
+      "id": "x122",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "x123",
+      "label": "negative",
+      "algorithms": [
+        "EdDSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ed25519"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: SPKI and signature are ED25519."
+    },
+    {
+      "id": "x124",
+      "label": "positive",
+      "algorithms": [
+        "ECDSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ecdsa-with-SHA256"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: SPKI is P-256 and the signature is ecdsa-with-SHA256."
+    },
+    {
+      "id": "x125",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The bytes are only \"not a certificate\"; no requested public-object attribute is available."
+    },
+    {
+      "id": "x126",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The bytes are only \"not a certificate\"; no requested public-object attribute is available."
+    },
+    {
+      "id": "x127",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The bytes are only \"not a certificate\"; no requested public-object attribute is available."
+    },
+    {
+      "id": "x128",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The bytes are only \"not a certificate\"; no requested public-object attribute is available."
+    },
+    {
+      "id": "x129",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The bytes are only \"not a certificate\"; no requested public-object attribute is available."
+    },
+    {
+      "id": "x130",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The bytes are only \"not a certificate\"; no requested public-object attribute is available."
+    },
+    {
+      "id": "x131",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-kem-512",
+        "ml-kem-768",
+        "ml-kem-1024"
+      ],
+      "reason": "generateKeyPair uses asymmetricKeyType from the locally explicit finite ML-KEM list; runtime capability guards do not erase the nominal reference."
+    },
+    {
+      "id": "x132",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-kem-512",
+        "ml-kem-768",
+        "ml-kem-1024"
+      ],
+      "reason": "generateKeyPair uses asymmetricKeyType from the locally explicit finite ML-KEM list; runtime capability guards do not erase the nominal reference."
+    },
+    {
+      "id": "x133",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-kem-512",
+        "ml-kem-768",
+        "ml-kem-1024"
+      ],
+      "reason": "generateKeyPair uses asymmetricKeyType from the locally explicit finite ML-KEM list; runtime capability guards do not erase the nominal reference."
+    },
+    {
+      "id": "x134",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-dsa-44",
+        "ml-dsa-65",
+        "ml-dsa-87"
+      ],
+      "reason": "generateKeyPair uses asymmetricKeyType from the locally explicit finite ML-DSA list; runtime capability guards do not erase the nominal reference."
+    },
+    {
+      "id": "x135",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-dsa-44",
+        "ml-dsa-65",
+        "ml-dsa-87"
+      ],
+      "reason": "generateKeyPair uses asymmetricKeyType from the locally explicit finite ML-DSA list; runtime capability guards do not erase the nominal reference."
+    },
+    {
+      "id": "x136",
+      "label": "positive",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ml-dsa-44",
+        "ml-dsa-65",
+        "ml-dsa-87"
+      ],
+      "reason": "generateKeyPair uses asymmetricKeyType from the locally explicit finite ML-DSA list; runtime capability guards do not erase the nominal reference."
+    },
+    {
+      "id": "x137",
+      "label": "positive",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "slh-dsa-sha2-128f",
+        "slh-dsa-sha2-128s",
+        "slh-dsa-sha2-192f",
+        "slh-dsa-sha2-192s",
+        "slh-dsa-sha2-256f",
+        "slh-dsa-sha2-256s",
+        "slh-dsa-shake-128f",
+        "slh-dsa-shake-128s",
+        "slh-dsa-shake-192f",
+        "slh-dsa-shake-192s",
+        "slh-dsa-shake-256f",
+        "slh-dsa-shake-256s"
+      ],
+      "reason": "generateKeyPair uses asymmetricKeyType from the locally explicit finite SLH-DSA list; runtime capability guards do not erase the nominal reference."
+    },
+    {
+      "id": "x138",
+      "label": "positive",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "slh-dsa-sha2-128f",
+        "slh-dsa-sha2-128s",
+        "slh-dsa-sha2-192f",
+        "slh-dsa-sha2-192s",
+        "slh-dsa-sha2-256f",
+        "slh-dsa-sha2-256s",
+        "slh-dsa-shake-128f",
+        "slh-dsa-shake-128s",
+        "slh-dsa-shake-192f",
+        "slh-dsa-shake-192s",
+        "slh-dsa-shake-256f",
+        "slh-dsa-shake-256s"
+      ],
+      "reason": "generateKeyPair uses asymmetricKeyType from the locally explicit finite SLH-DSA list; runtime capability guards do not erase the nominal reference."
+    },
+    {
+      "id": "x139",
+      "label": "positive",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "slh-dsa-sha2-128f",
+        "slh-dsa-sha2-128s",
+        "slh-dsa-sha2-192f",
+        "slh-dsa-sha2-192s",
+        "slh-dsa-sha2-256f",
+        "slh-dsa-sha2-256s",
+        "slh-dsa-shake-128f",
+        "slh-dsa-shake-128s",
+        "slh-dsa-shake-192f",
+        "slh-dsa-shake-192s",
+        "slh-dsa-shake-256f",
+        "slh-dsa-shake-256s"
+      ],
+      "reason": "generateKeyPair uses asymmetricKeyType from the locally explicit finite SLH-DSA list; runtime capability guards do not erase the nominal reference."
+    },
+    {
+      "id": "x140",
+      "label": "negative",
+      "algorithms": [
+        "DH"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "2048"
+      ],
+      "reason": "The selected operation is explicitly classical DH rather than a standardized PQC key API."
+    },
+    {
+      "id": "x141",
+      "label": "negative",
+      "algorithms": [
+        "DH"
+      ],
+      "usage": "key_exchange",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "modp16"
+      ],
+      "reason": "The selected operation is explicitly classical DH rather than a standardized PQC key API."
+    },
+    {
+      "id": "x142",
+      "label": "negative",
+      "algorithms": [
+        "ECDH"
+      ],
+      "usage": "key_exchange",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "secp521r1"
+      ],
+      "reason": "The selected operation is explicitly classical ECDH rather than a standardized PQC key API."
+    },
+    {
+      "id": "x143",
+      "label": "negative",
+      "algorithms": [
+        "ECDH"
+      ],
+      "usage": "key_exchange",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "secp256k1"
+      ],
+      "reason": "The selected operation is explicitly classical ECDH rather than a standardized PQC key API."
+    },
+    {
+      "id": "x144",
+      "label": "negative",
+      "algorithms": [
+        "ECDSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ec",
+        "sect239k1"
+      ],
+      "reason": "The selected operation is explicitly classical ECDSA rather than a standardized PQC key API."
+    },
+    {
+      "id": "x145",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "rsa",
+        "2048"
+      ],
+      "reason": "The local generateKeyPairSync('rsa', {modulusLength:2048}) establishes RSA provenance for privateKey/publicKey and the corresponding signing/verification factory/use on this line; SHA256 alone is not the RSA evidence."
+    },
+    {
+      "id": "x146",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256"
+      ],
+      "reason": "The local generateKeyPairSync('rsa', {modulusLength:2048}) establishes RSA provenance for privateKey/publicKey and the corresponding signing/verification factory/use on this line; SHA256 alone is not the RSA evidence."
+    },
+    {
+      "id": "x147",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "x148",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "x149",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "x150",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "x151",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "x152",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "x153",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "The .p12/.pfx filename is the explicit legacy container signal; no validity, key presence or decryption success is asserted."
+    },
+    {
+      "id": "x154",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The provenance conversion record binds this certificate-only container to the independent RSA3072 public fixture: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "x155",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "The .p12/.pfx filename is the explicit legacy container signal; no validity, key presence or decryption success is asserted."
+    },
+    {
+      "id": "x156",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The provenance conversion record binds this certificate-only container to the independent RSA3072 public fixture: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "x157",
+      "label": "negative",
+      "algorithms": [
+        "EdDSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ed25519"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: SPKI and signature are ED25519."
+    },
+    {
+      "id": "v2-a0",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "RS256"
+      ],
+      "reason": "The explicit RS256 JOSE selection establishes nominal RSA usage under the clarified TS_NODE_RSA_USAGE property."
+    },
+    {
+      "id": "v2-a1",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "certificate",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The .p12/.pfx filename is the explicit legacy container signal; no validity, key presence or decryption success is asserted."
+    },
+    {
+      "id": "v2-a2",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "certificate",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The .p12/.pfx filename is the explicit legacy container signal; no validity, key presence or decryption success is asserted."
+    },
+    {
+      "id": "v2-a3",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "v2-a4",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "v2-a5",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "v2-a6",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The public certificate hash matches the independent fixture manifest: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "v2-Encrypt.java",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "encryption",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"
+      ],
+      "reason": "Cipher.getInstance explicitly selects the RSA encryption transformation."
+    },
+    {
+      "id": "v2-Symmetric.java",
+      "label": "negative",
+      "algorithms": [
+        "AES"
+      ],
+      "usage": "encryption",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "AES/GCM/NoPadding"
+      ],
+      "reason": "The explicit cipher transformation selects AES, not RSA."
+    },
+    {
+      "id": "v2-BrokenCipher.java",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "encryption",
+      "artifact": "source",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "Cipher.getInstance has a truncated argument without an algorithm."
+    },
+    {
+      "id": "v2-independent-import",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "The explicit ml_kem wildcard import and MlKem768::generate locally bind dk/ek to ML-KEM; this interval separately records the import."
+    },
+    {
+      "id": "v2-audit0",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "The from import explicitly imports the mlkem module from cryptography asymmetric primitives; this is separate from the subsequent generation call."
+    },
+    {
+      "id": "v2-audit1",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "mixed",
+      "parameters": [
+        "rsa"
+      ],
+      "reason": "This distinct first call explicitly selects the RSA key type; the adjacent call selects ML-KEM."
+    },
+    {
+      "id": "v2-audit2",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "rsa",
+        "2048"
+      ],
+      "reason": "generateKeyPairSync explicitly selects classical RSA, not a standardized PQC key type."
+    },
+    {
+      "id": "v2-audit3",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256"
+      ],
+      "reason": "The local generateKeyPairSync('rsa', {modulusLength:2048}) establishes RSA provenance for privateKey/publicKey and the corresponding signing/verification factory/use on this line; SHA256 alone is not the RSA evidence."
+    },
+    {
+      "id": "v2-audit4",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "The provenance conversion record binds this certificate-only container to the independent RSA3072 public fixture: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "v2-audit5",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The provenance conversion record binds this certificate-only container to the independent RSA3072 public fixture: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "v2-audit6",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "The provenance conversion record binds this certificate-only container to the independent RSA3072 public fixture: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "v2-audit7",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The provenance conversion record binds this certificate-only container to the independent RSA3072 public fixture: RSA SPKI is 3072 bits and the signature is sha256WithRSAEncryption."
+    },
+    {
+      "id": "v2-audit8",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "MlKem768"
+      ],
+      "reason": "The explicit ml_kem wildcard import and MlKem768::generate locally bind dk/ek to ML-KEM; this interval separately records typed key generation."
+    },
+    {
+      "id": "v2-audit9",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "kem",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "MlKem768"
+      ],
+      "reason": "The explicit ml_kem wildcard import and MlKem768::generate locally bind dk/ek to ML-KEM; this interval separately records ek.encapsulate."
+    },
+    {
+      "id": "v2-audit10",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "kem",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "MlKem768"
+      ],
+      "reason": "The explicit ml_kem wildcard import and MlKem768::generate locally bind dk/ek to ML-KEM; this interval separately records dk.decapsulate."
+    },
+    {
+      "id": "v2-rsa-11",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256"
+      ],
+      "reason": "The local generateKeyPairSync('rsa', {modulusLength:2048}) establishes RSA provenance for privateKey/publicKey and the corresponding signing/verification factory/use on this line; SHA256 alone is not the RSA evidence."
+    },
+    {
+      "id": "v2-rsa-14",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256"
+      ],
+      "reason": "The local generateKeyPairSync('rsa', {modulusLength:2048}) establishes RSA provenance for privateKey/publicKey and the corresponding signing/verification factory/use on this line; SHA256 alone is not the RSA evidence."
+    },
+    {
+      "id": "v2-rsa-16",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256"
+      ],
+      "reason": "The local generateKeyPairSync('rsa', {modulusLength:2048}) establishes RSA provenance for privateKey/publicKey and the corresponding signing/verification factory/use on this line; SHA256 alone is not the RSA evidence."
+    },
+    {
+      "id": "v2-rsa-19",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "signature",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "SHA256"
+      ],
+      "reason": "The local generateKeyPairSync('rsa', {modulusLength:2048}) establishes RSA provenance for privateKey/publicKey and the corresponding signing/verification factory/use on this line; SHA256 alone is not the RSA evidence."
+    },
+    {
+      "id": "w182",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "The supported CycloneDX-1.4 document explicitly names openssl; this records recognized library presence only, without runtime enabledness."
+    },
+    {
+      "id": "w183",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.0"
+      ],
+      "reason": "The supported CycloneDX-1.4 document explicitly names ordinary-package; this unrelated package does not establish a PQC-capable library."
+    },
+    {
+      "id": "w184",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The supported SBOM version is visible, but the components/packages array is truncated; dependency content is undecidable."
+    },
+    {
+      "id": "w185",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "The supported CycloneDX-1.6 document explicitly names openssl; this records recognized library presence only, without runtime enabledness."
+    },
+    {
+      "id": "w186",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.0"
+      ],
+      "reason": "The supported CycloneDX-1.6 document explicitly names ordinary-package; this unrelated package does not establish a PQC-capable library."
+    },
+    {
+      "id": "w187",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The supported SBOM version is visible, but the components/packages array is truncated; dependency content is undecidable."
+    },
+    {
+      "id": "w188",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "The supported CycloneDX-1.7 document explicitly names openssl; this records recognized library presence only, without runtime enabledness."
+    },
+    {
+      "id": "w189",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "1.0"
+      ],
+      "reason": "The supported CycloneDX-1.7 document explicitly names ordinary-package; this unrelated package does not establish a PQC-capable library."
+    },
+    {
+      "id": "w190",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The supported SBOM version is visible, but the components/packages array is truncated; dependency content is undecidable."
+    },
+    {
+      "id": "w191",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "The supported SPDX-2.2 document explicitly names openssl; this records recognized library presence only, without runtime enabledness."
+    },
+    {
+      "id": "w192",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3.5.0"
+      ],
+      "reason": "The supported SPDX-2.2 document explicitly names ordinary-package; this unrelated package does not establish a PQC-capable library."
+    },
+    {
+      "id": "w193",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "sbom",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The supported SBOM version is visible, but the components/packages array is truncated; dependency content is undecidable."
+    },
+    {
+      "id": "w194",
+      "label": "positive",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "The TSX WebCrypto key-generation request explicitly selects ML-KEM-768."
+    },
+    {
+      "id": "w195",
+      "label": "negative",
+      "algorithms": [
+        "AES"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "ordinary",
+      "parameters": [
+        "AES-GCM"
+      ],
+      "reason": "The TSX WebCrypto key-generation request explicitly selects AES-GCM."
+    },
+    {
+      "id": "w196",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "key_generation",
+      "artifact": "source",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The TSX WebCrypto generateKey name field is truncated without a value; supported grammar does not make the algorithm decidable."
+    },
+    {
+      "id": "w197",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "RSA"
+      ],
+      "reason": "The nginx cipher operand explicitly names RSA; this establishes the named RSA operand property."
+    },
+    {
+      "id": "w198",
+      "label": "negative",
+      "algorithms": [
+        "AES"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "AESGCM"
+      ],
+      "reason": "The nginx cipher operand explicitly names AESGCM; this does not establish a named RSA operand or effective quantum safety."
+    },
+    {
+      "id": "w199",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The nginx directive fragment has an unfinished value, so the nominated selection cannot be determined."
+    },
+    {
+      "id": "w200",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "TLSv1.0"
+      ],
+      "reason": "The apache directive fragment explicitly selects TLSv1.0; this is the legacy TLS-version selection property."
+    },
+    {
+      "id": "w201",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "TLSv1.3"
+      ],
+      "reason": "The apache directive fragment explicitly selects TLSv1.3; this is an alternative TLS1.3 selection, not the nominated legacy version."
+    },
+    {
+      "id": "w202",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The apache directive fragment has an unfinished value, so the nominated selection cannot be determined."
+    },
+    {
+      "id": "w203",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "TLSv1_0"
+      ],
+      "reason": "The envoy directive fragment explicitly selects TLSv1_0; this is the legacy TLS-version selection property."
+    },
+    {
+      "id": "w204",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "TLSv1_3"
+      ],
+      "reason": "The envoy directive fragment explicitly selects TLSv1_3; this is an alternative TLS1.3 selection, not the nominated legacy version."
+    },
+    {
+      "id": "w205",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The envoy directive fragment has an unfinished value, so the nominated selection cannot be determined."
+    },
+    {
+      "id": "w206",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "TLSV1_0"
+      ],
+      "reason": "The istio directive fragment explicitly selects TLSV1_0; this is the legacy TLS-version selection property."
+    },
+    {
+      "id": "w207",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "TLSV1_3"
+      ],
+      "reason": "The istio directive fragment explicitly selects TLSV1_3; this is an alternative TLS1.3 selection, not the nominated legacy version."
+    },
+    {
+      "id": "w208",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The istio directive fragment has an unfinished value, so the nominated selection cannot be determined."
+    },
+    {
+      "id": "w209",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "force-tlsv10"
+      ],
+      "reason": "The haproxy directive fragment explicitly selects force-tlsv10; this is the legacy TLS-version selection property."
+    },
+    {
+      "id": "w210",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "force-tlsv13"
+      ],
+      "reason": "The haproxy directive fragment explicitly selects force-tlsv13; this is an alternative TLS1.3 selection, not the nominated legacy version."
+    },
+    {
+      "id": "w211",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The haproxy directive fragment has an unfinished value, so the nominated selection cannot be determined."
+    },
+    {
+      "id": "w212",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "VersionTLS10"
+      ],
+      "reason": "The traefik directive fragment explicitly selects VersionTLS10; this is the legacy TLS-version selection property."
+    },
+    {
+      "id": "w213",
+      "label": "negative",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "VersionTLS13"
+      ],
+      "reason": "The traefik directive fragment explicitly selects VersionTLS13; this is an alternative TLS1.3 selection, not the nominated legacy version."
+    },
+    {
+      "id": "w214",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The traefik directive fragment has an unfinished value, so the nominated selection cannot be determined."
+    },
+    {
+      "id": "w215",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "RSA"
+      ],
+      "reason": "The kubernetes cipher operand explicitly names RSA; this establishes the named RSA operand property."
+    },
+    {
+      "id": "w216",
+      "label": "negative",
+      "algorithms": [
+        "AES"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "ordinary",
+      "parameters": [
+        "AESGCM"
+      ],
+      "reason": "The kubernetes cipher operand explicitly names AESGCM; this does not establish a named RSA operand or effective quantum safety."
+    },
+    {
+      "id": "w217",
+      "label": "unsupported",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "malformed",
+      "parameters": [],
+      "reason": "The kubernetes directive fragment has an unfinished value, so the nominated selection cannot be determined."
+    },
+    {
+      "id": "w218",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "ml-kem-512"
+      ],
+      "reason": "The explicit ml-kem-512 algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w219",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "ml-kem-768"
+      ],
+      "reason": "The explicit ml-kem-768 algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w220",
+      "label": "negative",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "ml-kem-1024"
+      ],
+      "reason": "The explicit ml-kem-1024 algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w221",
+      "label": "negative",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "ml-dsa-44"
+      ],
+      "reason": "The explicit ml-dsa-44 algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w222",
+      "label": "negative",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "ml-dsa-65"
+      ],
+      "reason": "The explicit ml-dsa-65 algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w223",
+      "label": "negative",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "ml-dsa-87"
+      ],
+      "reason": "The explicit ml-dsa-87 algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w224",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-sha2-128s"
+      ],
+      "reason": "The explicit slh-dsa-sha2-128s algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w225",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-sha2-128f"
+      ],
+      "reason": "The explicit slh-dsa-sha2-128f algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w226",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-sha2-192s"
+      ],
+      "reason": "The explicit slh-dsa-sha2-192s algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w227",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-sha2-192f"
+      ],
+      "reason": "The explicit slh-dsa-sha2-192f algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w228",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-sha2-256s"
+      ],
+      "reason": "The explicit slh-dsa-sha2-256s algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w229",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-sha2-256f"
+      ],
+      "reason": "The explicit slh-dsa-sha2-256f algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w230",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-shake-128s"
+      ],
+      "reason": "The explicit slh-dsa-shake-128s algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w231",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-shake-128f"
+      ],
+      "reason": "The explicit slh-dsa-shake-128f algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w232",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-shake-192s"
+      ],
+      "reason": "The explicit slh-dsa-shake-192s algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w233",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-shake-192f"
+      ],
+      "reason": "The explicit slh-dsa-shake-192f algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w234",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-shake-256s"
+      ],
+      "reason": "The explicit slh-dsa-shake-256s algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w235",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "slh-dsa-shake-256f"
+      ],
+      "reason": "The explicit slh-dsa-shake-256f algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "w236",
+      "label": "negative",
+      "algorithms": [
+        "DSA"
+      ],
+      "usage": "configuration",
+      "artifact": "configuration",
+      "caseKind": "comment",
+      "parameters": [
+        "ssh-dss"
+      ],
+      "reason": "The ssh-dss HostKeyAlgorithms directive is commented out; it is a disabled configuration reference."
+    },
+    {
+      "id": "w237",
+      "label": "negative",
+      "algorithms": [
+        "SLH-DSA"
+      ],
+      "usage": "algorithm_reference",
+      "artifact": "source",
+      "caseKind": "comment",
+      "parameters": [
+        "SLH-DSA-SHAKE-256s"
+      ],
+      "reason": "The explicit SLH-DSA-SHAKE-256s algorithm appears only in a commented-out call, not a nominal API invocation."
+    },
+    {
+      "id": "public-p12-CERT_P12_CONTAINER",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "The .p12/.pfx extension supplies the legacy container signal; key presence and validity are separate properties."
+    },
+    {
+      "id": "public-p12-CERT_RSA_3072",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "The unencrypted certificate-only PKCS12 conversion is bound by provenance to the public RSA3072 DER fixture: 3072-bit RSA SPKI and sha256WithRSAEncryption signature, rather than ECDSA. No private keys are involved."
+    },
+    {
+      "id": "public-p12-CERT_RSA_SIGNATURE",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The unencrypted certificate-only PKCS12 conversion is bound by provenance to the public RSA3072 DER fixture: 3072-bit RSA SPKI and sha256WithRSAEncryption signature, rather than ECDSA. No private keys are involved."
+    },
+    {
+      "id": "public-p12-CERT_ECDSA_SIGNATURE",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The unencrypted certificate-only PKCS12 conversion is bound by provenance to the public RSA3072 DER fixture: 3072-bit RSA SPKI and sha256WithRSAEncryption signature, rather than ECDSA. No private keys are involved."
+    },
+    {
+      "id": "public-pfx-CERT_P12_CONTAINER",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "configuration",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [],
+      "reason": "The .p12/.pfx extension supplies the legacy container signal; key presence and validity are separate properties."
+    },
+    {
+      "id": "public-pfx-CERT_RSA_3072",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "public_key",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "3072"
+      ],
+      "reason": "The unencrypted certificate-only PKCS12 conversion is bound by provenance to the public RSA3072 DER fixture: 3072-bit RSA SPKI and sha256WithRSAEncryption signature, rather than ECDSA. No private keys are involved."
+    },
+    {
+      "id": "public-pfx-CERT_RSA_SIGNATURE",
+      "label": "positive",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The unencrypted certificate-only PKCS12 conversion is bound by provenance to the public RSA3072 DER fixture: 3072-bit RSA SPKI and sha256WithRSAEncryption signature, rather than ECDSA. No private keys are involved."
+    },
+    {
+      "id": "public-pfx-CERT_ECDSA_SIGNATURE",
+      "label": "negative",
+      "algorithms": [
+        "RSA"
+      ],
+      "usage": "certificate_signature",
+      "artifact": "certificate",
+      "caseKind": "ordinary",
+      "parameters": [
+        "sha256WithRSAEncryption"
+      ],
+      "reason": "The unencrypted certificate-only PKCS12 conversion is bound by provenance to the public RSA3072 DER fixture: 3072-bit RSA SPKI and sha256WithRSAEncryption signature, rather than ECDSA. No private keys are involved."
+    }
+  ],
+  "coverageAudit": {
+    "status": "Verified",
+    "scope": "all_nominated_rules_all_files",
+    "fileCount": 203,
+    "nominatedRuleCount": 30,
+    "reviewedFileRulePairs": 6090,
+    "missingFacts": [],
+    "unresolvedDefinitions": [],
+    "protocolSha256": "300313c7a8e6867a4f7283a06c2ec0546ae38f6d987c4300575d98d39bf65dd9",
+    "reason": "All 203 complete input byte streams are read and hash-checked against manifest/provenance. The 30 nominated properties were assessed across every file: new config directives have no additional qualifying selection in inherited inputs; source comments remain non-API controls; SBOM versions retain declaration, unrelated and malformed distinctions; public certificate conversions retain SPKI/signature/container distinctions. Existing explicit Python/Rust imports and locally bound typed operations, RSA JOSE and RSA factory/use references each have units. No additional legitimate positive fact lacking a unit was found. jose capability is an ambiguous source fact under a defined property, not an unresolved definition or safe negative. This verifies bounded annotation completeness, never runtime behavior, independence of correlated variants, population coverage or product correctness."
+  }
+}

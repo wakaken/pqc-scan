@@ -1,0 +1,49 @@
+{
+  "reviewer": "/root/task044_implementation_review",
+  "timestampUtc": "2026-11-13T06:30:35.330074+00:00",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "a3b0bae7f5ae7ac5da14d7430d521ac981642422118f8057aaeec40341f0c349",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "60192749f7bfbd604f7d7c6a7d3f51c725626803cd69b899a370a1bc2f462c20",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "原P12のAuthenticatedSafeはencryptedData/PBES2であり、現契約とpkcs12::contentは復号せずopaqueとして扱う。変換元RSA証明書の真値は維持するが、内包証明書のECDSA署名否定判定は対応範囲外。"
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "原PFXはP12と同一hashのencryptedDataである。既知変換元の署名属性と、非復号parserが検査可能な属性を区別し、この属性判定は対応範囲外。"
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "変換元のRSA3072真値は確定していても、暗号化された原P12からSPKIを抽出する処理は現契約の非復号subset外。"
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "変換元のsha256WithRSAEncryption真値は維持するが、原P12の暗号化内容から署名属性を抽出する処理は対応範囲外。"
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "原PFXは暗号化されたP12と同一bytesであり、RSA3072属性の抽出は現契約の非復号subset外。"
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "原PFXの暗号化内容はopaqueであり、変換元で既知のRSA署名属性を現parserの対応属性判定へ読み替えない。"
+    }
+  ]
+}

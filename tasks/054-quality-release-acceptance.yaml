@@ -1,0 +1,46 @@
+id: '054'
+title: 次の対象版の1.0品質受入と残存リスクを判定する
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: '6'
+description: 要求対応表の全行を照合し、範囲・必須条件・承認を伴う判定と次の改善作業を残す。
+quality_alias: QAM-11
+plan_reference: docs/quality/QUALITY-ROADMAP.md
+requirements_reference: docs/quality/QUALITY-REQUIREMENTS.md
+quality_requirements:
+- Q6-17
+depends_on:
+- '043'
+- '053'
+target_components:
+- docs/quality/QUALITY-GATES.md
+existing_assets:
+- EG
+- ER
+problem:
+- 次の対象版の全要求別判定
+acceptance:
+- 'Q6-17: 全要求に結果/証拠/範囲を付け、必須検証未実行・未解決欠陥は自動合格にせず、除外/条件変更は維持者承認に結ぶ'
+deliverables:
+- target/quality-task-054/release-assessment.md
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- タスクのdone件数だけで受入を決め、必須検証の未実行や残存欠陥を見逃すおそれがある。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。

@@ -1,0 +1,157 @@
+[
+  {
+    "command": [
+      "target/release/pqc-scan",
+      "scan",
+      ".",
+      "--format",
+      "sarif",
+      "--rules-dir",
+      "./rules",
+      "--out-dir",
+      "target/quality-task-042-reopen-20261112/self-scan-final"
+    ],
+    "exitCode": 0,
+    "log": "target/quality-task-042-reopen-20261112/self-scan-final.log",
+    "wallSeconds": 0.5455466250132304
+  },
+  {
+    "command": [
+      "node",
+      "shell/prepare-code-scanning.cjs",
+      "--input",
+      "target/quality-task-042-reopen-20261112/self-scan-final/report.sarif",
+      "--expectations",
+      "docs/quality/SELF-SCAN-EXPECTATIONS.json",
+      "--root",
+      ".",
+      "--output",
+      "target/quality-task-042-reopen-20261112/self-scan-final/code-scanning.sarif",
+      "--audit",
+      "target/quality-task-042-reopen-20261112/self-scan-final/code-scanning-audit.json"
+    ],
+    "exitCode": 0,
+    "log": "target/quality-task-042-reopen-20261112/prepare-self-scan-final.log",
+    "wallSeconds": 2.1786703749967273
+  },
+  {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/quality",
+      "-p",
+      "test_*.py"
+    ],
+    "exitCode": 0,
+    "log": "target/quality-task-042-reopen-20261112/python-final.log",
+    "wallSeconds": 1.9250803329923656
+  },
+  {
+    "command": [
+      "node",
+      "--test",
+      "shell/compact-report.test.cjs",
+      "shell/final-gap-self-scan.test.cjs",
+      "shell/prepare-code-scanning.test.cjs",
+      "shell/self-scan-backlog.test.cjs",
+      "shell/self-scan-policy.test.cjs"
+    ],
+    "exitCode": 0,
+    "log": "target/quality-task-042-reopen-20261112/node-verified.log",
+    "wallSeconds": 1.747099625004921
+  },
+  {
+    "command": [
+      "ruby",
+      "-r",
+      "yaml",
+      "-e",
+      "YAML.load_file(ARGV.fetch(0)); puts \"Workflow YAML parsed\"",
+      ".github/workflows/pqc-scan.yml"
+    ],
+    "exitCode": 0,
+    "log": "target/quality-task-042-reopen-20261112/workflow-final.log",
+    "wallSeconds": 0.1462705830053892
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exitCode": 0,
+    "log": "target/quality-task-042-reopen-20261112/diff-check.log",
+    "wallSeconds": 0.020950667007127777
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/report.py",
+      "--corpus-dir",
+      "tests/quality",
+      "--baseline",
+      "target/quality-task-042-reopen-20261112/legacy",
+      "--out-dir",
+      "target/quality-task-042-reopen-20261112/legacy-report-complete",
+      "--reference",
+      "target/quality-task-042/legacy-regression-02/summary.json"
+    ],
+    "exitCode": 0,
+    "log": "target/quality-task-042-reopen-20261112/legacy-report-complete.log",
+    "wallSeconds": 0.2519125420076307
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/report.py",
+      "--corpus-dir",
+      "tests/quality/expanded",
+      "--baseline",
+      "target/quality-task-042-reopen-20261112/v1",
+      "--out-dir",
+      "target/quality-task-042-reopen-20261112/v1-report-complete",
+      "--reference",
+      "target/quality-task-042/expanded-accepted/summary.json"
+    ],
+    "exitCode": 0,
+    "log": "target/quality-task-042-reopen-20261112/v1-report-complete.log",
+    "wallSeconds": 2.4323424589820206
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/report.py",
+      "--corpus-dir",
+      "tests/quality/expanded-v2",
+      "--baseline",
+      "target/quality-task-042-reopen-20261112/v2",
+      "--out-dir",
+      "target/quality-task-042-reopen-20261112/v2-report-complete",
+      "--reference",
+      "target/quality-task-042/expanded-accepted/summary.json",
+      "--applicability",
+      "tests/quality/applicability-042-v2/assessment.json"
+    ],
+    "exitCode": 0,
+    "log": "target/quality-task-042-reopen-20261112/v2-report-complete.log",
+    "wallSeconds": 0.3988387080025859
+  },
+  {
+    "command": [
+      "python3",
+      "tests/quality/report.py",
+      "--corpus-dir",
+      "tests/quality/expanded-v2-lock-controls",
+      "--baseline",
+      "target/quality-task-042-reopen-20261112/lock-controls",
+      "--out-dir",
+      "target/quality-task-042-reopen-20261112/lock-controls-report-complete"
+    ],
+    "exitCode": 0,
+    "log": "target/quality-task-042-reopen-20261112/lock-controls-report-complete.log",
+    "wallSeconds": 0.11998291601776145
+  }
+]

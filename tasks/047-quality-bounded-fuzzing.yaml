@@ -1,0 +1,46 @@
+id: '047'
+title: parserと入出力の短時間・長時間fuzz試験を整える
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: '3'
+description: 入力・時間・資源に上限を設け、crashの保存と再現までを一つの検証経路にする。
+quality_alias: QAM-05のfuzz部分
+plan_reference: docs/quality/QUALITY-ROADMAP.md
+requirements_reference: docs/quality/QUALITY-REQUIREMENTS.md
+quality_requirements:
+- Q4-03
+depends_on:
+- '044'
+- '057'
+target_components:
+- crates/pqc_scan_detectors/
+existing_assets:
+- E19
+- E21
+problem:
+- 全parser・出力経路への対応
+acceptance:
+- 'Q4-03: DER/PEM/PKCS12/SBOM/設定/ソース/出力/protocolに上限付き探索を行い、最小再現例を保存'
+deliverables:
+- target/quality-task-047/fuzz-results.json
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- 入力探索による資源枯渇やcrash成果物への秘密混入、fuzz専用設定による検証の弱体化を防ぐ必要がある。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。

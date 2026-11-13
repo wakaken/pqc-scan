@@ -29,6 +29,15 @@ def archive(name, kind=None, data=b'public result'):
 
 
 class HostBoundaryTests(unittest.TestCase):
+    def test_retired_miri_cases_are_rejected_before_container_work(self):
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as temp, mock.patch.object(
+                runner.subprocess, 'run', side_effect=AssertionError('unexpected container work')):
+            for case in ['coverage044-miri', 'miri044-followup', 'miri044-range', 'miri044-os-range']:
+                with self.subTest(case=case), self.assertRaises(ValueError):
+                    runner.execute('sha256:'+'0'*64, Path(temp)/case, case=case)
+            self.assertEqual(list(Path(temp).iterdir()), [])
+
     def test_only_regular_bounded_relative_artifacts_are_extracted(self):
         with tempfile.TemporaryDirectory() as temp:
             out = Path(temp) / 'safe'

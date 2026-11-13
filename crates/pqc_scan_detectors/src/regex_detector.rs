@@ -61,6 +61,7 @@ impl RegexDetector {
         let mut status = imports
             .as_ref()
             .map_or(DetectorStatus::NotApplicable, |i| i.status);
+        let source_facts = crate::source_facts::for_regex(file, rules, budget);
 
         for rule in rules.by_kind(RuleKind::Regex) {
             // Go import indicators require a Go source file and an actual quoted
@@ -70,6 +71,59 @@ impl RegexDetector {
             }
             if status == DetectorStatus::NotApplicable {
                 status = DetectorStatus::Complete;
+            }
+            if rule.id == "API_NODE_CRYPTO_SIGN_RSA" && crate::source_facts::builtin(rule) {
+                if let Some(facts) = &source_facts {
+                    if facts.status() != DetectorStatus::Complete
+                        && (status != DetectorStatus::Truncated || facts.truncated)
+                    {
+                        status = facts.status();
+                    }
+                    let mut remaining_bytes = budget.max_ast_match_bytes;
+                    for (accepted, found) in facts.rule_matches(rule).iter().enumerate() {
+                        if accepted >= budget.max_hits_per_rule
+                            || accepted >= budget.max_match_candidates
+                        {
+                            status = DetectorStatus::Truncated;
+                            break;
+                        }
+                        let (line, column) = line_col_for_offset(text, found.start);
+                        let raw = &text[found.start..found.end];
+                        if raw.len() > remaining_bytes {
+                            status = DetectorStatus::Truncated;
+                            break;
+                        }
+                        remaining_bytes -= raw.len();
+                        let detection = Detection {
+                            rule_id: rule.id.clone(),
+                            location: Location {
+                                file: file.path.to_string_lossy().into_owned(),
+                                line,
+                                column,
+                            },
+                            evidence: Evidence {
+                                r#type: "regex_match".into(),
+                                r#match: mask_preview(raw),
+                                snippet_preview: snippet_around(text, found.start, found.end, 64),
+                                metadata: std::collections::BTreeMap::from([
+                                    ("detector".into(), self.name().into()),
+                                    ("scope".into(), rule.scope.clone()),
+                                    ("source_resolution".into(), found.reason.into()),
+                                ]),
+                            },
+                        };
+                        if observe {
+                            observations.push(pqc_scan_core::ObservationDraft::source(
+                                &detection,
+                                pqc_scan_core::ObservationMethod::AstPattern,
+                                raw,
+                                Some((found.start, found.end)),
+                            ));
+                        }
+                        out.push(detection);
+                    }
+                    continue;
+                }
             }
             let regex = match rule.compiled_pattern() {
                 Some(v) => v,

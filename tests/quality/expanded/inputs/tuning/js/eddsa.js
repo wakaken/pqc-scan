@@ -1,0 +1,1 @@
+generateKeyPairSync("ed25519");

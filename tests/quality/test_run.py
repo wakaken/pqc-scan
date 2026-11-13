@@ -22,7 +22,15 @@ class MeasurementTests(unittest.TestCase):
     def test_small_second_child_does_not_inherit_previous_child_peak_rss(self):
         with tempfile.TemporaryDirectory(prefix="pqc023-rss-") as name:
             root = pathlib.Path(name)
-            large = run.measure([sys.executable, "-c", "data = bytearray(32 * 1024 * 1024); print(len(data))"], root / "large", 5)
+            import resource
+            # Linux may include the pre-exec parent image in the child's peak.
+            # Ensure the large child's touched allocation exceeds that floor;
+            # a cumulative RUSAGE_CHILDREN maximum must still fail this test.
+            unit = 1 if sys.platform == "darwin" else 1024
+            parent_peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * unit
+            size = max(64 * 1024 * 1024, parent_peak + 32 * 1024 * 1024)
+            program = f"data = bytearray({size}); data[::4096] = b'x' * len(data[::4096]); print(len(data))"
+            large = run.measure([sys.executable, "-c", program], root / "large", 5)
             small = run.measure([sys.executable, "-c", "print('small')"], root / "small", 5)
             self.assertEqual((large["exitCode"], small["exitCode"]), (0, 0))
             self.assertLess(small["peakRssBytes"], large["peakRssBytes"])

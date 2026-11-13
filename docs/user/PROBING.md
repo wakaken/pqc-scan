@@ -2,7 +2,7 @@
 
 [日本語](PROBING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
 
-All three probe modes are experimental in v0.2.0. The public binary is
+All three probe modes remain experimental in the v0.3 development checkout, as in v0.2.0. The published v0.2.0 binary is
 the static variant, which has no `probe` command. Probe bundles have completed
 technical preparation but retain publication checks; see [distribution status](DISTRIBUTION.md#release-status).
 
@@ -19,9 +19,7 @@ commands at build time using the pinned Rust toolchain:
 cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh
 ```
 
-The binary distribution target is macOS on Apple Silicon. Linux CI also exercises
-protocols and OpenSSH under resource confinement; this does not qualify a Linux
-binary distribution or other OS/architecture combinations. TLS adds a native cryptographic provider
+The published binary targets macOS on Apple Silicon. An isolated Linux protocol/OpenSSH test harness is available, but the repository's `protocols` CI job is currently paused, including manual workflow runs. Do not infer a fresh protocol pass from a successful `quality`, `baseline` or `scan` job. The harness does not qualify a Linux binary distribution or other OS/architecture combinations. TLS adds a native cryptographic provider
 build; static builds/tests do not require that provider. No AI service is used.
 
 ## TLS

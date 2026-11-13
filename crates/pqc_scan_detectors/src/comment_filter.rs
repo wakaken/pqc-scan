@@ -5,6 +5,30 @@ pub fn should_skip_comment_only_match(path: &Path, text: &str, start: usize) -> 
         Some(v) => v,
         None => return false,
     };
+    if language == "configuration" {
+        let left = text[..start].rfind('\n').map_or(0, |i| i + 1);
+        let mut quote = None;
+        let mut escaped = false;
+        for c in text[left..start].chars() {
+            if escaped {
+                escaped = false;
+                continue;
+            }
+            if c == '\\' {
+                escaped = true;
+                continue;
+            }
+            if let Some(q) = quote {
+                if c == q {
+                    quote = None;
+                }
+            } else if matches!(c, '\'' | '"') {
+                quote = Some(c);
+            } else if c == '#' {
+                return true;
+            }
+        }
+    }
     should_skip_comment_only_match_for_language(language, text, start)
 }
 
@@ -36,7 +60,7 @@ fn detect_language(path: &Path) -> Option<&'static str> {
         "go" => Some("go"),
         "rs" => Some("rust"),
         "rb" => Some("ruby"),
-        "conf" | "cfg" => Some("config"),
+        "conf" | "cfg" => Some("configuration"),
         _ => None,
     }
 }
@@ -64,7 +88,7 @@ fn is_comment_only_line(language: &str, line: &str) -> bool {
                 || trimmed.starts_with('*')
                 || trimmed.starts_with("*/")
         }
-        "python" | "config" => trimmed.starts_with('#'),
+        "python" | "configuration" => trimmed.starts_with('#'),
         "ruby" => {
             trimmed.starts_with('#') || trimmed.starts_with("=begin") || trimmed.starts_with("=end")
         }

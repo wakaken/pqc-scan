@@ -1,0 +1,62 @@
+{
+  "reviewer": "implementation-reviewer-a / q42_reopen_implementation_review",
+  "timestampUtc": "2026-11-11T22:28:34.537555Z",
+  "corpusSha256": "55d668218071458baadd4857f8bac3043b1f5a4b48e583a0a08722b580cd5f73",
+  "protocolSha256": "6396581d37af0d5a815d9e670413a59c1faa8a1d3f78ef685300651f0b50660a",
+  "sourceOnly": true,
+  "otherLabelsSeen": false,
+  "scannerResultsSeen": false,
+  "attestationScope": "Only independence from other lock-control labels and lock-control outputs is asserted. Prior v1/v2 tuning and product rule/test exposure is disclosed below.",
+  "priorExposure": {
+    "v1HistoricalLabelAndResultSummariesSeen": true,
+    "v2FrozenTruthAndFormatResultSummariesSeen": true,
+    "productRulesAndUnitTestsSeen": true,
+    "supplementLabelsSeen": false,
+    "supplementScannerOutputsSeen": false,
+    "coordinatorKnownIntent": "不足する認識対象ライブラリのlock形式対照として追加されたと知っている。無作為選択や新しい独立著作holdoutとは主張しない。"
+  },
+  "externalPrimaryReferences": [
+    "https://raw.githubusercontent.com/paulmillr/noble-post-quantum/0.7.1/README.md"
+  ],
+  "labels": [
+    {
+      "id": "lock-0",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "0.7.1"
+      ],
+      "reason": "npm lock形式のpackage宣言が @noble/post-quantum と0.7.1を明示する。公式READMEが標準PQC実装を記述する認識対象ライブラリの存在を評価し、インストール・解決・機能有効化・実行成功は推論しない。宣言の実際の行位置も区間で覆う。"
+    },
+    {
+      "id": "lock-1",
+      "label": "positive",
+      "algorithms": [
+        "unknown"
+      ],
+      "usage": "dependency_presence",
+      "artifact": "dependency_manifest",
+      "caseKind": "ordinary",
+      "parameters": [
+        "0.7.1"
+      ],
+      "reason": "npm lock形式のpackage宣言が @noble/post-quantum と0.7.1を明示する。公式READMEが標準PQC実装を記述する認識対象ライブラリの存在を評価し、インストール・解決・機能有効化・実行成功は推論しない。宣言の実際の行位置も区間で覆う。"
+    }
+  ],
+  "coverageAudit": {
+    "status": "Verified",
+    "scope": "all_nominated_rules_all_files",
+    "fileCount": 2,
+    "nominatedRuleCount": 30,
+    "reviewedFileRulePairs": 60,
+    "missingFacts": [],
+    "unresolvedDefinitions": [],
+    "protocolSha256": "6396581d37af0d5a815d9e670413a59c1faa8a1d3f78ef685300651f0b50660a",
+    "reason": "両入力をデータとして読み、30規則の全60組を確認した。名目的ソースAPI/設定/鍵marker/証明書属性の参照はなく、同じ認識対象依存が各1件である。原バイトはcorpus/provenanceのSHA256と一致する。ライブラリ名から特定アルゴリズムの有効化を推測せずunknownとした。宣言がそれぞれ実区間で覆われ、追加の陽性事実や未解決定義はないため有限範囲の完全性をVerifiedとする。"
+  }
+}

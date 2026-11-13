@@ -1,0 +1,3473 @@
+--- a/tests/protocol/container_entry.py
++++ b/tests/protocol/container_entry.py
+@@ -193,10 +193,9 @@
+     status = {'exit':0}
+     with (EVIDENCE/'entry.log').open('w') as log, contextlib.redirect_stdout(log), contextlib.redirect_stderr(log):
+         try:
+-            if args.case in {'coverage044', 'coverage044-branch', 'coverage044-miri', 'miri044-followup', 'miri044-range', 'miri044-os-range'}:
++            if args.case in {'coverage044', 'coverage044-branch'}:
+                 import runpy
+-                script = {'miri044-followup':'miri_followup.py', 'miri044-range':'miri_range.py', 'miri044-os-range':'miri_range.py'}.get(args.case, 'entry.py')
+-                runpy.run_path(str(ROOT/'tests/quality/task044'/script), run_name='__main__', init_globals={'STUDY_MODE': args.case})
++                runpy.run_path(str(ROOT/'tests/quality/task044/entry.py'), run_name='__main__', init_globals={'STUDY_MODE': args.case})
+             elif args.case == 'suite': suite(args.previews,args.ssh_kex)
+             else: exercise(args.case)
+         except BaseException as error:
+--- a/tests/protocol/container_runner.py
++++ b/tests/protocol/container_runner.py
+@@ -153,7 +153,7 @@
+             memory=6*1024**3, scratch=4*1024**3, pids=128, timeout=1200):
+     if not re.fullmatch(r'sha256:[0-9a-f]{64}', image):
+         raise ValueError('immutable local image ID required')
+-    if case not in {'suite', 'boundary', 'memory', 'disk', 'pids', 'timeout', 'coverage044', 'coverage044-branch', 'coverage044-miri', 'miri044-followup', 'miri044-range', 'miri044-os-range'}:
++    if case not in {'suite', 'boundary', 'memory', 'disk', 'pids', 'timeout', 'coverage044', 'coverage044-branch'}:
+         raise ValueError('unknown isolation case')
+     output = Path(output).resolve(); output.mkdir(parents=True, exist_ok=False)
+     record = {'image':image, 'environment':ENV, 'case':case, 'exit':None, 'containerRemoved':False,
+@@ -165,7 +165,7 @@
+         subprocess.run(['docker', 'image', 'inspect', image], check=True, stdout=subprocess.DEVNULL, timeout=30)
+         with tempfile.TemporaryDirectory(prefix='pqc-confined-source-') as temporary:
+             source = Path(temporary)/'source'; bindings = snapshot(ROOT, source)
+-            if case in {'coverage044', 'coverage044-branch', 'coverage044-miri', 'miri044-followup', 'miri044-range', 'miri044-os-range'}:
++            if case in {'coverage044', 'coverage044-branch'}:
+                 # Legacy tests write beneath the repository target/ instead of
+                 # CARGO_TARGET_DIR. Route only that untracked output to tmpfs.
+                 (source/'target').symlink_to('/scratch/test-target', target_is_directory=True)
+@@ -209,7 +209,7 @@
+                 except RuntimeError:
+                     time.sleep(.05)
+             record['exit'] = status['exit']
+-            if case in {'coverage044', 'coverage044-branch', 'coverage044-miri', 'miri044-followup', 'miri044-range', 'miri044-os-range'} and record['exit']:
++            if case in {'coverage044', 'coverage044-branch'} and record['exit']:
+                 diagnostic = bounded_output(['docker','exec',container,'/usr/bin/tail','-c','32768','/scratch/evidence/entry.log'], limit=32768)
+                 (output/'failure-diagnostic.log').write_bytes(diagnostic)
+             data = bounded_output(['docker','exec',container,'/bin/tar','-C','/scratch/evidence','-cf','-','.'], limit=64*1024**2-32768)
+--- a/tests/quality/task044/entry.py
++++ b/tests/quality/task044/entry.py
+@@ -15,7 +15,7 @@
+ from container_entry import boundary, EVIDENCE, SCRATCH, write
+ from task044.coverage import summarize
+ 
+-from task044.miri_support import NIGHTLY, miri_command
++NIGHTLY = 'nightly-2026-02-12'  # Explicit branch-coverage toolchain only.
+ COMMANDS = []
+ 
+ 
+@@ -43,7 +43,7 @@
+     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+ 
+ 
+-def measure(label, *, all_features=False, nightly=False, pilot=False):
++def measure(label, *, all_features=False, nightly=False):
+     folder = EVIDENCE/label
+     folder.mkdir()
+     target = SCRATCH/('nightly-target' if nightly else 'target')
+@@ -54,8 +54,7 @@
+                RUSTFLAGS='-C instrument-coverage' + (' -Z coverage-options=branch' if nightly else ''),
+                LLVM_PROFILE_FILE=str(raw/'%p-%m.profraw'))
+     cargo = ['cargo', '+'+toolchain]
+-    selection = ['-p', 'pqc_scan_core', '--lib'] if pilot else ['--workspace']
+-    args = cargo + ['test', *selection, '--locked', '--offline', '--no-run', '--message-format=json']
++    args = cargo + ['test', '--workspace', '--locked', '--offline', '--no-run', '--message-format=json']
+     if all_features:
+         args.append('--all-features')
+     # Keep JSON separate from compiler diagnostics for exact artifact discovery.
+@@ -99,7 +98,7 @@
+               'reason': 'previous variant measured and hashed; no current executable removed'})
+ 
+     for i, binary in enumerate(tests):
+-        run([binary, *(['identity::tests'] if pilot else [])],
++        run([binary],
+             f'{label}/test-{i:02}.log', env=env, timeout=180)
+         profiles = sorted(raw.glob('*.profraw'))
+         if not profiles:
+@@ -170,96 +169,15 @@
+         cache = Path('/usr/local/cargo')/name
+         if cache.exists():
+             (cargo/name).symlink_to(cache, target_is_directory=True)
+-    if globals().get('STUDY_MODE') == 'coverage044-miri':
+-        miri_study()
+-        return
+     smoke()
+     if globals().get('STUDY_MODE') == 'coverage044-branch':
+         run(['rustc', '+'+NIGHTLY, '-Vv'], 'nightly.log')
+         measure('branch-default', nightly=True)
+         measure('branch-all-features', nightly=True, all_features=True)
+-        shutil.rmtree(SCRATCH/'nightly-target')
+-        miri_study()
+-        return
+-    run(['rustc', '-Vv'], 'rustc.log')
+-    run(['rustc', '+'+NIGHTLY, '-Vv'], 'nightly.log')
+-    measure('default')
+-    measure('all-features', all_features=True)
+-    # Stable never emits branch counters; attempt a small explicit nightly scope.
+-    shutil.rmtree(SCRATCH/'target')
+-    measure('branch-pilot', nightly=True, pilot=True)
+-    shutil.rmtree(SCRATCH/'nightly-target')
+-    miri_study()
+-
+-
+-def miri_study():
+-    env = dict(os.environ, CARGO_TARGET_DIR='/scratch/miri-target',
+-               MIRI_SYSROOT='/root/.cache/miri', RUSTUP_TOOLCHAIN=NIGHTLY)
+-    # Preparation sysroot is copied into the tool image below; never disable
+-    # isolation, UB checks, provenance or native intrinsic checks to force success.
+-    env['MIRI_SYSROOT'] = '/opt/miri-sysroot'
+-    status = 'Not repeated; see measurement-07/miri-identity.log'
+-    if globals().get('STUDY_MODE') == 'coverage044':
+-        status = run(miri_command('test', '-p', 'pqc_scan_core',
+-                 '--lib', 'identity::tests', '--locked', '--offline'), 'miri-identity.log',
+-                 env=env, timeout=300, required=False)
+-    # Preserve the original fragment trial for comparison. The follow-up
+-    # miri_range.py exercises the original workspace after host-runner repair.
+-    source_path = Path('/source/crates/pqc_scan_core/src/identity.rs')
+-    source = source_path.read_bytes()
+-    start = source.index(b'pub(crate) fn safe_token(')
+-    end = source.index(b'pub(crate) fn relative_path(', start)
+-    fragment = source[start:end]
+-    helper = SCRATCH/'miri-scope'
+-    (helper/'src').mkdir(parents=True)
+-    (helper/'Cargo.toml').write_text('[package]\nname = "miri-scope"\nversion = "0.0.0"\nedition = "2021"\n')
+-    assertions = """
+-#[cfg(test)] mod checks {
+-    use super::*;
+-    #[test] fn accepted() {
+-        assert!(safe_token("abc_9.-"));
+-        assert!(valid_scope("team/project"));
+-    }
+-    #[test] fn rejected() {
+-        for value in ["", "../project", "a//b", "/root", "https://token@host/project", "日本"] {
+-            assert!(!valid_scope(value));
+-        }
+-        assert!(!safe_token("a/b"));
+-    }
+-    #[test] fn length_boundary() {
+-        assert!(safe_token(&"a".repeat(128)));
+-        assert!(valid_scope(&"a".repeat(128)));
+-        assert!(!safe_token(&"a".repeat(129)));
+-        assert!(!valid_scope(&"a".repeat(129)));
+-    }
+-}
+-""".encode()
+-    (helper/'src/lib.rs').write_bytes(fragment+assertions)
+-    write('miri-source.json', {'source': str(source_path), 'sourceSha256': sha(source_path),
+-          'startByte': start, 'endByteExclusive': end,
+-          'fragmentSha256': hashlib.sha256(fragment).hexdigest(),
+-          'harnessSha256': sha(helper/'src/lib.rs'),
+-          'harness': (fragment+assertions).decode()})
+-    isolated = run(miri_command('test', '--manifest-path',
+-                    str(helper/'Cargo.toml'), '--offline'), 'miri-scope.log',
+-                    env=env, timeout=120)
+-    control = SCRATCH/'miri-control'
+-    (control/'src').mkdir(parents=True)
+-    (control/'Cargo.toml').write_text('[package]\nname = "miri-control"\nversion = "0.0.0"\nedition = "2021"\n')
+-    control_args = miri_command('run', '--manifest-path',
+-                    str(control/'Cargo.toml'), '--offline')
+-    (control/'src/main.rs').write_text('fn main() { let a = [1u8, 2]; assert_eq!(a[1], 2); }\n')
+-    positive = run(control_args, 'miri-control-positive.log', env=env, timeout=60)
+-    (control/'src/main.rs').write_text('fn main() { unsafe { let _ = std::ptr::read_volatile(std::ptr::null::<u8>()); } }\n')
+-    negative = run(control_args, 'miri-control-negative.log', env=env, timeout=60, required=False)
+-    detected = negative != 0 and negative != 'timeout' and 'Undefined Behavior' in (EVIDENCE/'miri-control-negative.log').read_text()
+-    if not detected:
+-        raise RuntimeError('Miri negative control did not detect UB')
+-    write('feasibility.json', {'miriIdentityExit': status, 'miriScopeExit': isolated,
+-          'miriControlPositiveExit': positive, 'miriControlNegativeExit': negative,
+-          'miriNegativeDetectedUndefinedBehavior': detected, 'formalPlatform': 'aarch64-unknown-linux-gnu',
+-          'kaniPrebuiltForThisPlatform': False,
+-          'scope': 'Exact safe_token/valid_scope source fragment in an isolated std-only crate; three tests, not the whole identity module or unsafe code'})
++    else:
++        run(['rustc', '-Vv'], 'rustc.log')
++        measure('default')
++        measure('all-features', all_features=True)
+ 
+ 
+ if __name__ == '__main__':
+--- a/tests/quality/task044/miri_followup.py
++++ b/tests/quality/task044/miri_followup.py
+@@ -1,83 +0,0 @@
+-"""Reproduce and diagnose Miri using original crate inputs in strict confinement."""
+-import hashlib
+-import json
+-import os
+-from pathlib import Path
+-import sys
+-import traceback
+-
+-sys.path.insert(0, '/source/tests/protocol')
+-sys.path.insert(0, '/source/tests/quality')
+-from container_entry import boundary, EVIDENCE, SCRATCH, write
+-from task044.entry import run, NIGHTLY
+-
+-
+-def main():
+-    write('checks.json', boundary())
+-    (SCRATCH/'test-target').mkdir()
+-    cargo = SCRATCH/'cargo'
+-    cargo.mkdir()
+-    for name in ('registry', 'git'):
+-        cache = Path('/usr/local/cargo')/name
+-        if cache.exists():
+-            (cargo/name).symlink_to(cache, target_is_directory=True)
+-    env = dict(os.environ, CARGO_TARGET_DIR='/scratch/miri-original',
+-               MIRI_SYSROOT='/opt/miri-sysroot', RUSTUP_TOOLCHAIN=NIGHTLY)
+-    for label, command in [('rustc',['rustc','+'+NIGHTLY,'-Vv']),
+-                           ('cargo',['cargo','+'+NIGHTLY,'-Vv']),
+-                           ('miri',['cargo','+'+NIGHTLY,'miri','--version'])]:
+-        run(command,label+'.log',env=env)
+-    result = run(['cargo','+'+NIGHTLY,'miri','test','-vv','-p','pqc_scan_core',
+-                  '--lib','identity::tests','--locked','--offline'],
+-                 'original-core.log',env=env,timeout=180,required=False)
+-    files = {}
+-    for path in (SCRATCH/'miri-original').rglob('build-script-build'):
+-        data = path.read_bytes()
+-        files[str(path)]={'length':len(data),'magicHex':data[:16].hex(),
+-                         'sha256':hashlib.sha256(data).hexdigest()}
+-    write('failed-build-files.json',files)
+-    results={'originalCore':result}
+-    for has_build in (False, True):
+-        label='minimal-build' if has_build else 'minimal-plain'
+-        folder=SCRATCH/label
+-        (folder/'src').mkdir(parents=True)
+-        (folder/'Cargo.toml').write_text('[package]\nname="'+label+'"\nversion="0.0.0"\nedition="2021"\n')
+-        (folder/'src/lib.rs').write_text('pub fn sum(a:u32,b:u32)->u32{a+b}\n#[test] fn check(){assert_eq!(sum(2,3),5);}\n')
+-        if has_build:
+-            (folder/'build.rs').write_text('fn main(){println!("cargo:rerun-if-changed=build.rs");}\n')
+-        mode_env=dict(env,CARGO_TARGET_DIR='/scratch/'+label+'-target')
+-        results[label]=run(['cargo','+'+NIGHTLY,'miri','test','-vv','--manifest-path',
+-                           str(folder/'Cargo.toml'),'--offline'],label+'.log',
+-                          env=mode_env,timeout=90,required=False)
+-    # Hypothesis: Cargo's new host runner path also matches Miri's cfg(all())
+-    # target runner. Select an explicit native host runner, keeping interpreted
+-    # test target execution under cargo-miri.
+-    manifest = str(SCRATCH/'minimal-build/Cargo.toml')
+-    for label, flags in [('host-config-only',['-Zhost-config','-Ztarget-applies-to-host']),
+-                         ('native-host',['-Zhost-config','-Ztarget-applies-to-host','--config','host.runner=["/usr/bin/env"]'])]:
+-        mode_env = dict(env,CARGO_TARGET_DIR='/scratch/'+label+'-target')
+-        results[label] = run(['cargo','+'+NIGHTLY,'miri','test','-vv',*flags,
+-                              '--manifest-path',manifest,'--offline'],
+-                             label+'.log',env=mode_env,timeout=90,required=False)
+-    write('diagnosis.json',results)
+-    if results['native-host'] != 0 or results['host-config-only'] == 0:
+-        raise RuntimeError('host-runner hypothesis did not match controls')
+-    fixed_env = dict(env,CARGO_TARGET_DIR='/scratch/core-fixed')
+-    results['originalCoreFixed'] = run(['cargo','+'+NIGHTLY,'miri','test','-vv',
+-                      '-Zhost-config','-Ztarget-applies-to-host','--config','host.runner=["/usr/bin/env"]',
+-                      '-p','pqc_scan_core','--lib','identity::tests','--locked','--offline'],
+-                     'core-fixed.log',env=fixed_env,timeout=300,required=False)
+-    write('diagnosis.json',results)
+-    identities={}
+-    for target in ['native-host-target','core-fixed']:
+-        for path in (SCRATCH/target).rglob('build-script-build'):
+-            data=path.read_bytes();identities[str(path)]={'length':len(data),'magicHex':data[:16].hex()}
+-    write('fixed-build-files.json',identities)
+-
+-
+-if __name__ == '__main__':
+-    try:
+-        main()
+-    except BaseException:
+-        traceback.print_exc()
+-        raise
+--- a/tests/quality/task044/miri_os_selection.json
++++ b/tests/quality/task044/miri_os_selection.json
+@@ -1,2788 +0,0 @@
+-{
+-  "baselineResultsSHA256": "fee382319c8f115b5e64fd8fc14533f8ea272b049e6128740cd6017e3d736b66",
+-  "inventorySHA256": "1e66bcae3baee6f137770d93f09102a4213ae364ae5f22f7ddaa6f4a1a22738a",
+-  "selected": [
+-    {
+-      "targetId": 0,
+-      "test": "diff_command::tests::malformed_or_wrong_scope_input_creates_no_output_directory"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "diff_command::tests::missing_input_and_output_failure_propagate"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "diff_command::tests::oversized_input_is_rejected_before_output"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "diff_command::tests::valid_inputs_write_only_separate_diff_artifacts"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "probe_resolver::tests::slow_resolver_process_is_killed_and_reaped_on_timeout_and_cancellation"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::diagnostics_opt_in_exports_complete_coverage_without_changing_legacy_json"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::explicit_regular_file_scan_retains_findings_and_strict_success"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::ignored_crypto_warns_about_scope_without_changing_strict_exit"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::pqc_fixtures_preserve_report_contract_and_do_not_trigger_high_gate"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::require_complete_accepts_empty_scope_and_operational_errors_stay_errors"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::require_complete_rejects_broken_ignore_policy_even_with_no_selected_files"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::require_complete_returns_three_before_finding_threshold_and_keeps_reports"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::rules_list_command_prints_summary_and_rules"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::rules_show_command_errors_for_missing_rule_id"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::rules_show_command_prints_single_rule_details"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::scan_command_errors_for_missing_rules_dir"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::scan_command_returns_fail_on_threshold_exit_code"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::scan_command_writes_requested_report"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::scan_japanese_language_localizes_human_reports"
+-    },
+-    {
+-      "targetId": 0,
+-      "test": "tests::synthetic_scan_acceptance_checks_all_reports"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::opaque_container_snippet_tests::pkcs12_payloads_are_never_reread_as_source_snippets"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::tests::all_detector_errors_are_failed_not_empty_success"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::tests::detailed_scan_distinguishes_empty_success_from_legacy_unknown"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::tests::detailed_statuses_partition_files_without_claiming_false_completeness"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::tests::detector_error_preserves_other_hits_and_does_not_export_error_content"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::tests::exclusions_describe_declared_scope_and_do_not_become_successful_inspections"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::tests::finding_identity_is_checkout_independent_and_deduplicates_exact_tuples"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::tests::legacy_adapter_runs_once_and_wrapper_keeps_the_same_result"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::tests::marks_sensitive_file_for_snippet_masking"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::tests::read_failure_retains_other_files_and_legacy_selected_count"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "pipeline::tests::selected_files_without_detectors_are_unknown_but_empty_scope_can_complete"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "safe_read::tests::read_bounds_and_rejects_replaced_files_and_parent_links"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "walker::tests::excludes_default_directories"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "walker::tests::excludes_docs_directory_and_markdown_files"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "walker::tests::ignore_parse_errors_are_diagnostic_even_if_all_files_are_excluded"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "walker::tests::respects_gitignore_patterns"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "walker::tests::skips_files_over_size_limit"
+-    },
+-    {
+-      "targetId": 1,
+-      "test": "walker::tests::special_entries_are_failed_without_selecting_or_following_them"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "certificate_detector::tests::falls_back_to_container_match_for_unparseable_pem"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "certificate_detector::tests::matches_certificate_metadata_for_valid_rsa_pem"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "certificate_detector::tests::missing_assessment_clock_retains_static_facts_without_a_false_validity_verdict"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "certificate_detector::tests::recognizes_pqc_oids_without_confusing_signature_and_public_key"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "dependency_detector::tests::cargo_lock_uses_package_block_lines_and_versions"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "dependency_detector::tests::cargo_toml_detects_manifest_dependencies_and_preserves_unknown_workspace_versions"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "dependency_detector::tests::cyclonedx_sbom_dependencies_use_sbom_metadata_and_purl_ecosystem"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "dependency_detector::tests::package_json_dependency_detection_reports_actual_line"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "dependency_detector::tests::requirements_txt_ignores_comments_and_option_lines"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "key_detector::tests::detects_private_key_header_and_masks_evidence"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "key_detector::tests::ignores_text_without_private_key_markers"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "regex_detector::tests::detects_regex_match_with_location_and_metadata"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "regex_detector::tests::explicit_small_budget_limits_matches_per_rule"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "regex_detector::tests::masks_private_key_like_matches_in_evidence_and_snippet"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "regex_detector::tests::skips_comment_only_matches_for_javascript"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "source_facts::bindings::tests::installed_rule_copies_bind_but_modified_semantics_do_not"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "source_facts::selectors_tests::node_alias_and_literal_loop_follow_the_supplied_selector"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "source_facts::selectors_tests::python_import_alias_and_recovery_follow_the_supplied_selector"
+-    },
+-    {
+-      "targetId": 2,
+-      "test": "source_facts::selectors_tests::quoting_and_partial_algorithm_names_do_not_forge_a_selected_argument"
+-    },
+-    {
+-      "targetId": 5,
+-      "test": "html_report::tests::html_report_escapes_grouped_findings_and_renders_actions"
+-    },
+-    {
+-      "targetId": 5,
+-      "test": "japanese::tests::every_builtin_rule_and_action_has_japanese_copy"
+-    },
+-    {
+-      "targetId": 5,
+-      "test": "json_report::tests::write_cbom_serializes_expected_fields"
+-    },
+-    {
+-      "targetId": 5,
+-      "test": "json_report::tests::write_dependency_sbom_serializes_expected_fields"
+-    },
+-    {
+-      "targetId": 5,
+-      "test": "json_report::tests::write_json_report_serializes_expected_sections_and_fields"
+-    },
+-    {
+-      "targetId": 5,
+-      "test": "markdown_report::tests::markdown_report_preserves_grouping_and_escapes_table_cells"
+-    },
+-    {
+-      "targetId": 5,
+-      "test": "tests::sarif_output_uses_camel_case_fields"
+-    },
+-    {
+-      "targetId": 5,
+-      "test": "tests::write_reports_masks_sensitive_fragments"
+-    },
+-    {
+-      "targetId": 5,
+-      "test": "tests::write_reports_preserves_json_inventory_contracts"
+-    },
+-    {
+-      "targetId": 6,
+-      "test": "tests::load_from_dir_compiles_regex"
+-    },
+-    {
+-      "targetId": 6,
+-      "test": "tests::rejects_duplicate_rule_ids"
+-    },
+-    {
+-      "targetId": 6,
+-      "test": "traversal_validation_tests::a_late_injected_traversal_error_does_not_return_a_partial_pack"
+-    },
+-    {
+-      "targetId": 7,
+-      "test": "cli_keeps_distinct_occurrence_ids_and_legacy_report_contracts"
+-    },
+-    {
+-      "targetId": 8,
+-      "test": "informational_flags_succeed_on_stdout_without_error_output"
+-    },
+-    {
+-      "targetId": 8,
+-      "test": "invalid_arguments_keep_the_existing_failure_exit_contract"
+-    },
+-    {
+-      "targetId": 9,
+-      "test": "cyclonedx_flag_only_adds_two_documents_and_keeps_legacy_machine_content"
+-    },
+-    {
+-      "targetId": 10,
+-      "test": "dependency_locator_credentials_are_omitted_from_all_outputs_and_stderr"
+-    },
+-    {
+-      "targetId": 11,
+-      "test": "private_bodies_and_inline_credentials_never_survive_cli_report_paths"
+-    },
+-    {
+-      "targetId": 12,
+-      "test": "documented_examples_complete_supported_inspection_and_keep_all_requested_reports"
+-    },
+-    {
+-      "targetId": 13,
+-      "test": "binary_diff_compares_real_inventory_outputs_and_requires_scope"
+-    },
+-    {
+-      "targetId": 13,
+-      "test": "diff_command::tests::malformed_or_wrong_scope_input_creates_no_output_directory"
+-    },
+-    {
+-      "targetId": 13,
+-      "test": "diff_command::tests::missing_input_and_output_failure_propagate"
+-    },
+-    {
+-      "targetId": 13,
+-      "test": "diff_command::tests::oversized_input_is_rejected_before_output"
+-    },
+-    {
+-      "targetId": 13,
+-      "test": "diff_command::tests::valid_inputs_write_only_separate_diff_artifacts"
+-    },
+-    {
+-      "targetId": 14,
+-      "test": "inventory_is_explicit_and_legacy_outputs_are_a_shadow_not_a_replacement"
+-    },
+-    {
+-      "targetId": 14,
+-      "test": "inventory_option_is_the_only_cli_switch_and_preserves_exit_behavior"
+-    },
+-    {
+-      "targetId": 14,
+-      "test": "inventory_private_markers_do_not_export_payload_and_remain_language_independent"
+-    },
+-    {
+-      "targetId": 14,
+-      "test": "inventory_schema_and_references_cover_public_certificates_dependencies_and_rejected_package_paths"
+-    },
+-    {
+-      "targetId": 15,
+-      "test": "advisory_golden_is_repeatable_and_does_not_pass_with_incomplete_scope"
+-    },
+-    {
+-      "targetId": 15,
+-      "test": "explicit_policy_writes_a_separate_linked_report_without_changing_inventory_or_legacy"
+-    },
+-    {
+-      "targetId": 15,
+-      "test": "strict_context_cannot_echo_sensitive_values_or_create_reports_on_error"
+-    },
+-    {
+-      "targetId": 16,
+-      "test": "ssh_denial_writes_failed_advertisement_scope_without_network"
+-    },
+-    {
+-      "targetId": 16,
+-      "test": "tls_ca_private_block_is_rejected_without_echoing_contents"
+-    },
+-    {
+-      "targetId": 16,
+-      "test": "tls_denial_writes_failed_observation_without_network_and_keeps_language_parity"
+-    },
+-    {
+-      "targetId": 17,
+-      "test": "helper_is_absent_from_help_and_rejects_non_hostname_input"
+-    },
+-    {
+-      "targetId": 17,
+-      "test": "probe_resolver::tests::slow_resolver_process_is_killed_and_reaped_on_timeout_and_cancellation"
+-    },
+-    {
+-      "targetId": 17,
+-      "test": "self_executable_resolves_once_and_authorizes_all_local_answers"
+-    },
+-    {
+-      "targetId": 18,
+-      "test": "invalid_rule_metadata_is_an_operational_error_before_any_report_is_written"
+-    },
+-    {
+-      "targetId": 19,
+-      "test": "cli_preserves_native_locations_and_projects_unknown_unicode_and_ast_locations"
+-    },
+-    {
+-      "targetId": 20,
+-      "test": "a123_repairs_reach_all_reports_and_keep_stable_findings_and_invalid_controls"
+-    },
+-    {
+-      "targetId": 20,
+-      "test": "final_scan_distinguishes_tls_versions_and_rejects_malformed_go_retract"
+-    },
+-    {
+-      "targetId": 20,
+-      "test": "malformed_source_retains_findings_without_claiming_completed_analysis"
+-    },
+-    {
+-      "targetId": 21,
+-      "test": "denied_target_has_no_verified_facts_and_bilingual_schema_valid_outputs"
+-    },
+-    {
+-      "targetId": 21,
+-      "test": "key_is_required_and_private_or_invalid_key_fails_before_connection"
+-    },
+-    {
+-      "targetId": 22,
+-      "test": "compiled_default_bindings_work_with_copied_rules_outside_the_checkout"
+-    },
+-    {
+-      "targetId": 22,
+-      "test": "local_rsa_source_positions_spans_and_secret_masking_survive_exports"
+-    },
+-    {
+-      "targetId": 24,
+-      "test": "detector_error_content_is_not_exported_by_diagnostics_or_inventory"
+-    },
+-    {
+-      "targetId": 24,
+-      "test": "initial_source_snapshot_masks_body_even_if_a_detector_changes_the_file"
+-    },
+-    {
+-      "targetId": 24,
+-      "test": "redaction_preserves_legacy_ids_native_associations_cbom_rows_and_technical_metadata"
+-    },
+-    {
+-      "targetId": 26,
+-      "test": "a_custom_detection_cannot_attribute_native_facts_to_another_scanned_relative_path"
+-    },
+-    {
+-      "targetId": 26,
+-      "test": "native_loss_ledger_keeps_distinct_delimited_tuples_and_only_reports_actual_losses"
+-    },
+-    {
+-      "targetId": 26,
+-      "test": "old_consumer_runs_once_and_distinct_finding_ids_keep_native_associations"
+-    },
+-    {
+-      "targetId": 27,
+-      "test": "positive_submillisecond_limits_remain_exact_valid_report_values"
+-    },
+-    {
+-      "targetId": 27,
+-      "test": "report_preserves_unknown_addresses_and_checks_completion_and_traffic"
+-    },
+-    {
+-      "targetId": 30,
+-      "test": "task_ids_are_exact_unique_strings_and_dependencies_resolve"
+-    },
+-    {
+-      "targetId": 31,
+-      "test": "bundler_platform_records_and_standard_metadata_complete_without_guessing_versions"
+-    },
+-    {
+-      "targetId": 31,
+-      "test": "dockerfile_named_real_sources_are_still_parsed_as_their_languages"
+-    },
+-    {
+-      "targetId": 31,
+-      "test": "dockerfile_names_override_source_suffixes_and_keep_lexical_inspection"
+-    },
+-    {
+-      "targetId": 31,
+-      "test": "dynamic_imports_and_nearby_invalid_expressions_are_not_retyped"
+-    },
+-    {
+-      "targetId": 31,
+-      "test": "empty_type_alias_parameters_are_accepted_without_accepting_empty_function_parameters"
+-    },
+-    {
+-      "targetId": 31,
+-      "test": "import_types_in_assertions_and_function_return_types_keep_original_locations"
+-    },
+-    {
+-      "targetId": 31,
+-      "test": "quoted_jsx_query_parameters_are_recovered_when_the_original_tree_loses_the_tag"
+-    },
+-    {
+-      "targetId": 31,
+-      "test": "undeclared_platforms_bad_versions_and_bad_bundler_metadata_remain_incomplete"
+-    },
+-    {
+-      "targetId": 32,
+-      "test": "clipped_display_suffix_is_not_a_source_match"
+-    },
+-    {
+-      "targetId": 32,
+-      "test": "dedicated_grammars_parse_javascript_typescript_and_tsx"
+-    },
+-    {
+-      "targetId": 32,
+-      "test": "different_case_and_unicode_prefix_do_not_merge_distinct_source_spans"
+-    },
+-    {
+-      "targetId": 32,
+-      "test": "nested_parent_child_and_quoted_representations_share_one_source_occurrence"
+-    },
+-    {
+-      "targetId": 32,
+-      "test": "same_line_occurrences_survive_in_all_seven_language_scopes"
+-    },
+-    {
+-      "targetId": 32,
+-      "test": "same_line_unique_hits_consume_the_existing_cap"
+-    },
+-    {
+-      "targetId": 32,
+-      "test": "standalone_comments_are_not_duplicate_ast_occurrences"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "ast_collection_exact_limit_can_complete_and_one_more_is_truncated"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "ast_counts_unique_eligible_hits_and_looks_past_duplicates_at_exact_cap"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "ast_hit_limit_does_not_prevent_a_later_rule_from_running"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "ast_match_work_budget_applies_across_duplicate_and_rejected_candidates"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "ast_parser_errors_keep_obtainable_hits_and_report_partial_inspection"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "comments_after_exact_regex_cap_do_not_prove_an_omitted_hit"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "inapplicable_inputs_are_explicit_but_plain_supported_text_can_complete"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "key_limit_is_eight_masked_headers_and_ninth_proves_truncation"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "long_text_completes_but_explicit_collection_limits_stay_visible"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "real_detector_outcomes_reach_pipeline_and_legacy_unknowns_remain_visible"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "regex_accepts_code_after_thirty_two_comment_matches"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "regex_distinguishes_exact_hit_cap_from_proven_truncation"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "regex_work_budget_bounds_comment_only_search_without_claiming_missing_hits"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "truncated_regex_rule_does_not_prevent_later_rules_from_running"
+-    },
+-    {
+-      "targetId": 33,
+-      "test": "unicode_matching_is_not_limited_by_preview_length"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "a_pem_marker_inside_der_name_does_not_change_format_selection"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "damaged_or_unsupported_pem_block_preserves_neighboring_valid_certificates"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "der_trailing_bytes_keep_parsed_facts_but_make_inspection_partial"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "distinct_bundle_objects_survive_real_pipeline_normalization"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "ec_sizes_come_from_named_curve_including_p521_not_point_encoding"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "ed25519_retains_encoded_size_without_inventing_rsa_or_security_bits"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "format_selection_uses_bytes_within_all_supported_certificate_suffixes"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "malformed_and_unsupported_containers_keep_signals_but_do_not_complete"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "nested_asn1_remainders_are_rejected_in_helpers_and_not_complete_in_detector"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "noncandidate_and_no_certificate_rules_are_explicitly_inapplicable"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "pem_bundle_retains_real_positions_and_distinct_certificates_sharing_spki"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "pqc_and_unknown_spki_oids_are_not_measured_as_rsa"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "private_pem_payload_is_not_attached_to_certificate_container_findings"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "rsa_signature_does_not_turn_ec_subject_into_rsa_key"
+-    },
+-    {
+-      "targetId": 34,
+-      "test": "rsa_sizes_are_modulus_bits_and_public_fingerprints_match_openssl"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "certificate_truth_table_matches_exact_parsed_facts_and_safe_container_fallback"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "current_time_metadata_is_explicit_and_does_not_change_static_certificate_facts"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "custom_legacy_cutoff_scope_evidence_describes_both_possible_predicate_results"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "custom_legacy_same_id_and_unknown_scope_keep_their_composite_text_behavior"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "ecdsa_and_dsa_have_distinct_oid_predicates_and_quantum_classification"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "fixed_clock_observes_inclusive_validity_endpoints"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "frozen_detector_registry_reuse_retains_its_explicit_assessment_instant"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "invalid_time_ranges_do_not_receive_assertive_expiry_or_cutoff_findings"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "legacy_cutoff_stays_fixed_instead_of_becoming_a_current_expiry_alias"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "opted_in_typed_scopes_never_claim_attributes_from_an_unparsed_filename"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "reused_task020_attribute_parser_is_independent_of_rule_policy_changes"
+-    },
+-    {
+-      "targetId": 35,
+-      "test": "rsa_size_requires_subject_modulus_and_pss_scope_requires_signature_oid"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "computed_fields_do_not_rewrite_nested_call_or_catch_parentheses"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "conditional_requirements_keep_both_declarations_and_do_not_resolve_either"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "delegated_gemspec_records_keep_their_own_file_and_rebound_receivers_are_not_trusted"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "excluded_and_symlink_parents_are_not_read_for_context"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "gemspec_static_dependency_declarations_have_parsed_provenance"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "intrinsic_after_recovered_control_block_keeps_statement_context"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "intrinsic_prefixes_are_expressions_not_remainders_or_literal_text"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "javascript_unicode_whitespace_does_not_hide_intrinsic_expression_boundaries"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "jsx_objects_and_quoted_template_examples_are_not_unrendered_source"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "local_parent_properties_are_expanded_without_registry_resolution"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "mjs_and_explicit_module_sources_do_not_gain_sloppy_yield_bindings"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "parent_scope_identity_conflicts_and_cycles_do_not_fabricate_facts"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "profile_overrides_keep_default_and_override_candidates_conditional"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "profile_versions_are_conditional_candidates_not_a_selected_effective_version"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "regular_expression_template_examples_are_not_generated_source"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "review_javascript_invalid_modes_and_untagged_templates_remain_partial"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "review_ruby_parallel_assignment_and_deferred_method_context_are_not_unconditional"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "ruby_dynamic_or_invalid_declarations_stay_partial_and_strings_are_not_calls"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "sloppy_yield_and_runtime_negative_syntax_are_not_parse_errors"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "string_in_an_ordinary_block_does_not_enable_function_strict_mode"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "tagged_invalid_escapes_are_identified_despite_original_error_recovery"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "unknown_receiver_blocks_and_postfix_loops_are_deferred"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "unrendered_source_templates_keep_original_findings_and_state_the_missing_context"
+-    },
+-    {
+-      "targetId": 36,
+-      "test": "whitespace_control_and_multiline_jinja_branches_keep_conditional_provenance"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "declarations_and_lock_evidence_remain_distinct_without_inferred_resolution"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "duplicate_input_and_partial_records_are_never_clean_empty"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "ecosystem_matrix_preserves_declarations_and_only_lock_records_resolve"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "malformed_known_record_fields_and_node_limits_cannot_be_complete"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "parser_resource_limits_are_explicit_and_never_expand_aliases"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "platform_lock_records_preserve_reported_versions_and_source_provenance"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "pnpm_peer_variants_and_root_declarations_survive"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "range_versions_and_nonregistry_lock_sources_are_not_resolved"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "same_file_origins_are_distinct_and_ambiguous_line_is_not_guessed"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "sbom_display_label_uses_validated_maven_identity_without_resolution_claim"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "semantic_repairs_keep_locator_and_declared_versions_distinct_from_resolution"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "structured_outcomes_distinguish_empty_invalid_partial_and_unknown_versions"
+-    },
+-    {
+-      "targetId": 37,
+-      "test": "workspace_path_git_and_unsafe_locators_do_not_fabricate_registry_versions"
+-    },
+-    {
+-      "targetId": 38,
+-      "test": "both_source_paths_share_compatible_syntax_and_original_spans"
+-    },
+-    {
+-      "targetId": 38,
+-      "test": "java_python_and_rust_fact_paths_honor_released_work_budgets"
+-    },
+-    {
+-      "targetId": 38,
+-      "test": "source_fact_paths_respect_small_work_budgets"
+-    },
+-    {
+-      "targetId": 38,
+-      "test": "source_facts_allow_explicitly_larger_hit_and_span_budgets"
+-    },
+-    {
+-      "targetId": 38,
+-      "test": "source_facts_obey_the_released_default_and_explicit_hit_budgets"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "actual_examples_are_fully_consumed"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "bounded_declarations_support_bom_comments_and_continuations"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "explicit_identity_conflicts_and_encoded_credentials_do_not_survive"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "go_and_scoped_npm_purls_keep_valid_source_claims"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "invalid_purl_versions_retain_independent_safe_namespaced_labels"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "invalid_version_requirements_are_never_complete_and_keep_package_hits"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "malformed_and_unknown_constructs_are_never_complete"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "malformed_sbom_identity_field_types_and_xml_node_limits_are_explicit"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "malformed_supported_directives_and_conflicting_sbom_references_are_incomplete"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "malicious_or_conflicting_purls_are_not_identity_evidence"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "pom_unconsumed_mixed_text_or_namespaces_never_complete"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "purl_only_version_is_reported_without_lock_resolution"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "requirements_comments_require_a_whitespace_boundary"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "resource_limits_are_honest"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "sbom_validated_purl_separates_display_label_from_package_identity"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "supported_go_replace_and_exclude_blocks_preserve_unresolved_declarations"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "unsupported_static_dependency_locators_keep_safe_package_records"
+-    },
+-    {
+-      "targetId": 39,
+-      "test": "unsupported_syntax_never_becomes_complete_and_retains_safe_records"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "crypto_after_long_candidate_prefix_is_inspected"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "deferred_namespace_imports_preserve_original_locations"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "duplicate_packages_in_two_documents_keep_distinct_native_record_ordinals"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "encoded_pem_public_certificate_offsets_refer_to_original_bytes"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "file_selection_opt_out_retains_custom_inspection_and_crypto_inputs"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "finite_ast_work_budget_keeps_already_obtained_hits"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "flow_yaml_alias_and_tag_after_quoted_key_remain_rejected"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "malformed_module_syntax_still_reports_partial_and_retains_hits"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "malformed_wide_source_is_not_silently_excluded_or_counted_complete"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "module_compatibility_does_not_rewrite_bindings_strings_or_comments"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "pnpm_boot_and_project_documents_are_both_inventoried_without_overwriting"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "pnpm_document_versions_and_shared_value_budget_are_enforced"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "pnpm_empty_metadata_and_plain_apostrophes_do_not_hide_quoted_wildcards"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "pnpm_plain_scalar_wildcards_are_not_yaml_aliases"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "pnpm_record_limit_is_shared_by_both_documents_and_retains_partial_inventory"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "repository_sized_ast_does_not_stop_at_4096_candidates"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "repository_sized_dependency_values_are_supported_and_real_exhaustion_is_not_unsupported"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "repository_sized_occurrence_counts_are_not_silently_capped_at_32"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "type_only_star_exports_preserve_later_findings_and_locations"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "utf16_and_utf32_keep_findings_and_redact_decoded_source_snippets"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "yaml_aliases_and_tags_remain_unsupported"
+-    },
+-    {
+-      "targetId": 40,
+-      "test": "yaml_document_start_properties_are_rejected_but_scalar_markers_remain_text"
+-    },
+-    {
+-      "targetId": 41,
+-      "test": "exact_algorithm_is_classified_at_the_source_match_before_legacy_preview_masking"
+-    },
+-    {
+-      "targetId": 41,
+-      "test": "parse_only_public_certificates_share_spki_without_replacing_legacy_or_claiming_trust"
+-    },
+-    {
+-      "targetId": 41,
+-      "test": "trailing_or_malformed_neighbor_is_visible_even_without_certificate_rules"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "binary_certificate_observations_do_not_invent_text_positions"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "bounded_nested_contents_are_supported_but_deep_or_oversized_inputs_are_incomplete"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "encrypted_only_is_unsupported_and_malformed_input_is_partial"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "extracts_public_certificates_and_retains_one_legacy_container_signal"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "inspection_limits_remain_truncated_when_retained_certificate_attributes_are_partial"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "mac_presence_never_claims_verification_and_bad_mac_retains_certificates"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "malformed_attributes_do_not_turn_a_certificate_container_complete"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "mixed_encrypted_and_key_bags_keep_public_certificates_without_payload_leaks"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "recovered_certificate_offsets_reference_original_public_der"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "reviewed_public_example_is_fully_inspected_within_supported_scope"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "truncated_bag_oid_prefix_cannot_panic_or_become_complete"
+-    },
+-    {
+-      "targetId": 42,
+-      "test": "wrong_inner_tags_cannot_smuggle_public_certificates"
+-    },
+-    {
+-      "targetId": 43,
+-      "test": "checked_in_seven_language_fixtures_match_the_documented_rules"
+-    },
+-    {
+-      "targetId": 43,
+-      "test": "detects_only_explicit_classical_tls_settings"
+-    },
+-    {
+-      "targetId": 43,
+-      "test": "existing_same_line_baseline_fixture_retains_each_api_call"
+-    },
+-    {
+-      "targetId": 43,
+-      "test": "identifies_draft_algorithms_separately_from_final_mlkem"
+-    },
+-    {
+-      "targetId": 43,
+-      "test": "inventories_dependencies_without_claiming_pqc_is_enabled"
+-    },
+-    {
+-      "targetId": 43,
+-      "test": "inventories_pqc_in_all_seven_languages_but_not_comments_or_similar_names"
+-    },
+-    {
+-      "targetId": 44,
+-      "test": "ast_scopes_preserve_lists_case_wildcards_javascript_alias_and_unknown_tokens"
+-    },
+-    {
+-      "targetId": 44,
+-      "test": "certificate_unknown_scopes_keep_path_fallback_but_typed_scopes_do_not"
+-    },
+-    {
+-      "targetId": 44,
+-      "test": "key_and_dependency_custom_scopes_remain_nonfiltering"
+-    },
+-    {
+-      "targetId": 44,
+-      "test": "regex_scope_is_legacy_metadata_not_a_language_or_file_filter"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "ast_tls_versions_have_the_same_boundaries_as_regex_detection"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "bundler_git_path_sections_preserve_declared_sources"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "catalog_and_patch_declarations_are_parsed_without_invented_versions"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "classical_ec_and_eddsa_calls_are_detected"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "compatibility_work_limit_is_explicit_and_keeps_available_hits"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "gemfile_static_loading_options_do_not_change_dependency_versions"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "go_expression_new_uses_lexical_strings_when_error_tree_mispairs_quotes"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "go_metadata_and_replacement_directives_are_statically_parsed"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "go_paths_in_non_go_data_are_not_go_imports"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "go_retract_requires_versions_or_a_closed_two_version_interval"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "irrelevant_go_strings_do_not_exhaust_the_import_candidate_budget"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "malformed_module_attributes_and_go_directives_do_not_complete"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "malformed_real_sbom_is_still_an_error"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "nested_typescript_import_types_keep_module_literals_and_crypto"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "node_rsa_key_generation_is_detected"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "non_certificate_der_formats_remain_inapplicable_without_exposing_private_content"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "non_certificate_pem_does_not_produce_unsupported_certificate_diagnostic"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "normal_syntax_keeps_crypto_and_original_coordinates"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "pnpm_importer_alias_and_catalog_do_not_make_valid_yaml_partial"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "private_field_before_computed_field_uses_class_field_asi"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "python_default_argument_calls_use_definition_scope_instead_of_parameter_bindings"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "python_function_local_imports_do_not_bind_other_functions"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "python_import_forms_and_unicode_aliases_preserve_real_call_spans"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "python_import_shadowing_and_parameter_annotations_are_distinct"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "python_rebound_or_unimported_receivers_are_not_resolved_as_crypto"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "python_rsa_calls_and_aliases_are_detected"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "requirements_hashes_are_metadata_not_invalid_dependencies"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "ruby_endless_raise_string_is_valid_but_unterminated_string_is_partial"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "ruby_rsa_call_without_jwt_literal_is_detected"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "rust_compatibility_does_not_accept_bad_macro_or_missing_syntax"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "sbom_like_filenames_with_non_sbom_json_are_not_failures"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "supported_dialects_and_module_attributes_keep_source_locations"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "symmetric_and_unrelated_calls_do_not_become_rsa"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "syntax_compatibility_does_not_hide_malformed_input"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "tls_versions_and_enum_symbols_are_not_misclassified_as_legacy_tls_or_suites"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "valid_maven_metadata_does_not_invalidate_literal_dependencies"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "valid_private_fields_asi_and_tagged_template_types_are_supported"
+-    },
+-    {
+-      "targetId": 45,
+-      "test": "valid_rust_attributes_and_macro_token_trees_keep_algorithm_locations"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "binding_limit_does_not_reuse_an_older_crypto_binding"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "built_in_source_facts_enforce_alias_depth_ast_depth_and_candidate_budgets"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "capable_library_rule_respects_exact_identity_and_source_ecosystem"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "default_rest_and_loop_bindings_do_not_fall_back_to_crypto_names"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "enhanced_regex_keeps_distinct_source_starts_and_its_32_hit_budget"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "explicit_python_import_and_rust_typed_operations_are_separate_references"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "gemspec_ast_budget_is_truncated_rather_than_an_empty_unreported_success"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "gemspec_binds_the_declared_block_variable"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "gemspec_receivers_end_with_their_block_and_rebindings"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "gradle_static_declarations_are_found_without_executing_dsl"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "inline_configuration_comments_do_not_create_enabled_ssh_findings"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "java_parameter_sets_are_not_interchanged_between_pqc_families"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "java_static_property_forms_preserve_intent_not_effective_state"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "malformed_calls_retain_explicit_facts_and_partial_status"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "malformed_display_text_and_identifier_prefixes_are_not_recovered_as_calls"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "method_and_closure_bindings_do_not_leak_across_scopes"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "node_alias_calls_are_real_calls_and_local_scopes_are_respected"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "node_static_loop_variants_are_one_reference_per_call"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "python_context_exception_and_unrelated_imports_block_name_fallback"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "python_loop_body_assignments_also_shadow_following_calls"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "rsa_generation_and_key_bound_signatures_do_not_infer_rsa_from_digest"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "rust_items_shadow_for_the_whole_scope_but_let_is_sequential"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "rust_key_roles_and_shadowing_are_not_guessed_from_variable_names"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "slhdsa_and_prestandard_names_have_exact_variant_boundaries"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "source_fact_limits_are_explicit_and_custom_patterns_keep_their_meaning"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "source_resolution_does_not_turn_unknown_bindings_into_crypto"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "ssh_disabled_comment_is_not_an_enabled_algorithm"
+-    },
+-    {
+-      "targetId": 46,
+-      "test": "unchanged_pattern_with_custom_scope_does_not_enable_builtin_semantics"
+-    },
+-    {
+-      "targetId": 47,
+-      "test": "malformed_typed_source_is_partial_and_retains_obtainable_hits"
+-    },
+-    {
+-      "targetId": 47,
+-      "test": "tsx_combines_typed_props_and_jsx_without_losing_expression_hits"
+-    },
+-    {
+-      "targetId": 47,
+-      "test": "typed_calls_keep_distinct_source_occurrences_and_ignore_comments_and_namesakes"
+-    },
+-    {
+-      "targetId": 47,
+-      "test": "typed_example_completes_and_retains_algorithm_literals"
+-    },
+-    {
+-      "targetId": 47,
+-      "test": "typed_source_inspects_occurrences_beyond_the_old_hit_limit"
+-    },
+-    {
+-      "targetId": 47,
+-      "test": "typescript_types_generics_and_angle_assertions_complete"
+-    },
+-    {
+-      "targetId": 48,
+-      "test": "symlink_and_fifo_trust_inputs_are_rejected_without_blocking"
+-    },
+-    {
+-      "targetId": 52,
+-      "test": "advertised_only_document_has_a_self_contained_offline_schema_and_no_negotiated_claim"
+-    },
+-    {
+-      "targetId": 54,
+-      "test": "compact_reports_keep_all_locations_and_only_share_identical_actions"
+-    },
+-    {
+-      "targetId": 55,
+-      "test": "absent_public_fingerprints_do_not_fabricate_parsed_objects_or_dangling_refs"
+-    },
+-    {
+-      "targetId": 55,
+-      "test": "empty_documents_are_official_schema_valid_and_truthful"
+-    },
+-    {
+-      "targetId": 55,
+-      "test": "lexical_reference_provenance_matches_semantic_golden_without_runtime_claims"
+-    },
+-    {
+-      "targetId": 55,
+-      "test": "observation_columns_preserve_byte_and_scalar_units_with_their_values"
+-    },
+-    {
+-      "targetId": 55,
+-      "test": "pinned_upstream_example_and_all_source_digests_validate_offline"
+-    },
+-    {
+-      "targetId": 55,
+-      "test": "private_marker_observation_does_not_invent_a_key_asset"
+-    },
+-    {
+-      "targetId": 55,
+-      "test": "relationships_with_wrong_asset_kind_do_not_become_crypto_references"
+-    },
+-    {
+-      "targetId": 55,
+-      "test": "selected_writer_adds_exactly_two_files_and_preserves_legacy_bytes"
+-    },
+-    {
+-      "targetId": 55,
+-      "test": "separate_public_objects_have_resolving_refs_and_no_secret_claims"
+-    },
+-    {
+-      "targetId": 55,
+-      "test": "source_version_provenance_is_not_upgraded_to_resolution_or_installation"
+-    },
+-    {
+-      "targetId": 56,
+-      "test": "known_secret_syntax_is_omitted_in_all_legacy_formats_and_both_languages"
+-    },
+-    {
+-      "targetId": 57,
+-      "test": "assurance_usage_and_per_asset_policy_keep_exact_observation_bindings"
+-    },
+-    {
+-      "targetId": 57,
+-      "test": "document_reports_localize_status_and_escape_diagnostics_without_machine_drift"
+-    },
+-    {
+-      "targetId": 57,
+-      "test": "document_reports_retain_unknown_custom_rule_copy_and_escape_it_in_japanese"
+-    },
+-    {
+-      "targetId": 57,
+-      "test": "exact_observation_states_stay_in_markdown_but_do_not_overload_html"
+-    },
+-    {
+-      "targetId": 57,
+-      "test": "explicit_policy_stays_in_markdown_and_never_changes_ordinary_html"
+-    },
+-    {
+-      "targetId": 57,
+-      "test": "failed_and_empty_inspection_preserve_scope_and_safe_diagnostics"
+-    },
+-    {
+-      "targetId": 57,
+-      "test": "html_prioritizes_coverage_and_omits_internal_observation_and_asset_tables"
+-    },
+-    {
+-      "targetId": 57,
+-      "test": "human_reports_group_diagnostics_and_preserve_full_machine_records"
+-    },
+-    {
+-      "targetId": 57,
+-      "test": "human_reports_summarize_exclusions_while_machine_diagnostics_keep_all_paths"
+-    },
+-    {
+-      "targetId": 58,
+-      "test": "japanese_human_reports_preserve_machine_output_and_source_evidence"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "contradictory_tls_details_never_override_failed_or_fatal_envelope"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "diagnostic_client_proposals_are_not_labeled_as_remote_advertisements"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "failed_serialization_does_not_disclose_arbitrary_error_text_or_create_outputs"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "failed_tls_does_not_promote_unverified_negotiation_into_initial_html"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "incomplete_outcomes_keep_raw_reason_codes_and_invalid_envelopes_write_nothing"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "outcome_is_visible_before_potentially_long_protocol_details"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "recognized_secret_syntax_is_omitted_consistently_and_disclosed_as_export_loss"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "ssh_initial_html_summarizes_remote_offers_and_keeps_all_facts_in_closed_details"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "ssh_kex_summary_requires_completed_trusted_hybrid_and_never_promotes_failure"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "ssh_preserves_every_ordered_offer_and_extension_marker_as_unauthenticated"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "tls_fact_paths_and_unknown_fields_survive_both_languages_without_machine_drift"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "tls_initial_html_explains_verified_facts_partial_collection_and_next_checks"
+-    },
+-    {
+-      "targetId": 59,
+-      "test": "unavailable_ssh_lists_are_unconfirmed_and_network_failure_has_actionable_guidance"
+-    },
+-    {
+-      "targetId": 60,
+-      "test": "paths_are_uri_references_not_queries_or_fragments"
+-    },
+-    {
+-      "targetId": 60,
+-      "test": "projection_preserves_results_rules_and_is_deterministic"
+-    },
+-    {
+-      "targetId": 60,
+-      "test": "unicode_columns_and_legacy_ast_abstention"
+-    },
+-    {
+-      "targetId": 60,
+-      "test": "unknown_positions_are_not_invented"
+-    },
+-    {
+-      "targetId": 61,
+-      "test": "every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls"
+-    },
+-    {
+-      "targetId": 62,
+-      "test": "blank_ids_are_rejected_without_trimming_valid_custom_ids"
+-    },
+-    {
+-      "targetId": 62,
+-      "test": "confidence_rejects_nonfinite_out_of_bounds_and_source_rounding_loopholes"
+-    },
+-    {
+-      "targetId": 62,
+-      "test": "empty_directory_readable_yaml_root_and_unrelated_extensions_stay_compatible"
+-    },
+-    {
+-      "targetId": 62,
+-      "test": "missing_root_is_not_a_successful_empty_pack"
+-    },
+-    {
+-      "targetId": 62,
+-      "test": "nested_invalid_rules_prevent_partial_success_and_regex_validation_remains"
+-    },
+-    {
+-      "targetId": 62,
+-      "test": "valid_endpoints_and_custom_scopes_keep_existing_acceptance_and_values"
+-    }
+-  ],
+-  "targets": [
+-    {
+-      "id": 0,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "pqc-scan",
+-      "kind": [
+-        "bin"
+-      ],
+-      "tests": [
+-        "diff_command::tests::malformed_or_wrong_scope_input_creates_no_output_directory",
+-        "diff_command::tests::missing_input_and_output_failure_propagate",
+-        "diff_command::tests::oversized_input_is_rejected_before_output",
+-        "diff_command::tests::valid_inputs_write_only_separate_diff_artifacts",
+-        "probe_resolver::tests::resolver_output_is_bounded_and_typed",
+-        "probe_resolver::tests::slow_resolver_process_is_killed_and_reaped_on_timeout_and_cancellation",
+-        "tests::diagnostics_opt_in_exports_complete_coverage_without_changing_legacy_json",
+-        "tests::explicit_regular_file_scan_retains_findings_and_strict_success",
+-        "tests::ignored_crypto_warns_about_scope_without_changing_strict_exit",
+-        "tests::no_scope_note_when_population_is_enumerated",
+-        "tests::pqc_fixtures_preserve_report_contract_and_do_not_trigger_high_gate",
+-        "tests::report_language_defaults_to_english_and_rejects_unknown_values",
+-        "tests::require_complete_accepts_empty_scope_and_operational_errors_stay_errors",
+-        "tests::require_complete_rejects_broken_ignore_policy_even_with_no_selected_files",
+-        "tests::require_complete_returns_three_before_finding_threshold_and_keeps_reports",
+-        "tests::rules_list_command_prints_summary_and_rules",
+-        "tests::rules_show_command_errors_for_missing_rule_id",
+-        "tests::rules_show_command_prints_single_rule_details",
+-        "tests::scan_command_errors_for_missing_rules_dir",
+-        "tests::scan_command_returns_fail_on_threshold_exit_code",
+-        "tests::scan_command_writes_requested_report",
+-        "tests::scan_japanese_language_localizes_human_reports",
+-        "tests::synthetic_scan_acceptance_checks_all_reports"
+-      ]
+-    },
+-    {
+-      "id": 1,
+-      "package": "path+file:///source/crates/pqc_scan_core#0.2.0",
+-      "name": "pqc_scan_core",
+-      "kind": [
+-        "lib"
+-      ],
+-      "tests": [
+-        "classifier::tests::detects_certificate_extensions_case_insensitively",
+-        "classifier::tests::detects_sbom_filenames_by_common_conventions",
+-        "classifier::tests::detects_supported_dependency_manifests",
+-        "identity::tests::paths_and_scope_do_not_admit_roots_credentials_or_traversal",
+-        "identity::tests::tuples_domains_and_empty_fields_are_unambiguous",
+-        "inventory::contract_tests::tolerant_reader_preserves_unknown_vocabulary_and_rejects_broken_references_or_major_version",
+-        "inventory::contract_tests::usage_order_is_independent_of_run_ids_even_for_same_target_and_method",
+-        "inventory::tests::distinct_methods_survive_and_colliding_legacy_ids_keep_every_index",
+-        "inventory::tests::duplicate_members_are_all_ambiguous_and_scope_absence_never_implies_cross_run_usage",
+-        "inventory::tests::raw_private_material_metadata_and_unsafe_paths_never_reach_new_evidence_or_identity",
+-        "inventory::tests::roots_and_line_insertions_preserve_scoped_occurrences_but_moves_change_them",
+-        "inventory::tests::typed_public_certificates_remain_distinct_while_sharing_a_key",
+-        "inventory::tests::uninterpreted_parameter_digests_do_not_create_exact_algorithm_variants",
+-        "inventory::tests::unsafe_dependency_credentials_are_omitted_before_hashing",
+-        "model::opaque_container_tests::pkcs12_payloads_are_never_exposed_as_source_text",
+-        "model::tests::line_col_for_offset_handles_multiline_text",
+-        "model::tests::mask_preview_masks_private_key_markers",
+-        "model::tests::mask_preview_truncates_long_text",
+-        "model::tests::scannable_file_detects_binary_and_relative_paths",
+-        "model::tests::snippet_around_clips_and_masks_sensitive_content",
+-        "model::wide_text_repairs::encrypted_containers_stay_opaque_even_with_unicode_bom",
+-        "model::wide_text_repairs::utf16_source_is_decoded_with_and_without_bom",
+-        "model::wide_text_repairs::utf32_source_is_decoded_with_and_without_bom",
+-        "observation::version_tests::bounded_prereleases_are_reported_but_urls_and_credentials_are_not",
+-        "observation::version_tests::package_grammar_rejects_paths_and_credential_shapes_before_identity",
+-        "pipeline::opaque_container_snippet_tests::pkcs12_payloads_are_never_reread_as_source_snippets",
+-        "pipeline::tests::all_detector_errors_are_failed_not_empty_success",
+-        "pipeline::tests::detailed_scan_distinguishes_empty_success_from_legacy_unknown",
+-        "pipeline::tests::detailed_statuses_partition_files_without_claiming_false_completeness",
+-        "pipeline::tests::detector_error_preserves_other_hits_and_does_not_export_error_content",
+-        "pipeline::tests::exclusions_describe_declared_scope_and_do_not_become_successful_inspections",
+-        "pipeline::tests::finding_identity_frames_every_boundary_and_uses_full_versioned_digest",
+-        "pipeline::tests::finding_identity_is_checkout_independent_and_deduplicates_exact_tuples",
+-        "pipeline::tests::legacy_adapter_runs_once_and_wrapper_keeps_the_same_result",
+-        "pipeline::tests::marks_sensitive_file_for_snippet_masking",
+-        "pipeline::tests::masks_entire_private_key_block",
+-        "pipeline::tests::read_failure_retains_other_files_and_legacy_selected_count",
+-        "pipeline::tests::selected_files_without_detectors_are_unknown_but_empty_scope_can_complete",
+-        "privacy::tests::benign_technical_facts_expressions_and_public_urls_stay_exact",
+-        "privacy::tests::cbom_collision_cannot_unmask_a_sensitive_occurrence_or_collapse_rows",
+-        "privacy::tests::known_literals_keys_urls_and_encoded_value_strings_are_redacted",
+-        "privacy::tests::private_formats_and_unicode_credential_positions_have_bounded_context",
+-        "privacy::tests::trailing_marker_without_header_is_conservatively_private_context",
+-        "recommendation::tests::adds_middleware_readiness_notes_for_all_supported_targets",
+-        "recommendation::tests::crypto_api_guidance_covers_every_runtime_without_claiming_deployment_support",
+-        "recommendation::tests::dependency_presence_does_not_claim_a_direct_classical_operation",
+-        "recommendation::tests::does_not_add_middleware_note_for_non_middleware_category",
+-        "recommendation::tests::jwt_guidance_requires_protocol_compatibility_and_current_runtime_options",
+-        "recommendation::tests::marker_reference_does_not_assert_an_active_key_incident",
+-        "recommendation::tests::pqc_inventory_does_not_receive_classical_migration_actions",
+-        "recommendation::tests::tls_guidance_prefers_13_and_pqc_overrides_do_not_assert_rsa_use",
+-        "recommendation::tests::tls_local_actions_do_not_borrow_unrelated_repository_middleware",
+-        "risk::tests::escalates_private_key_evidence_to_critical",
+-        "risk::tests::keeps_low_confidence_sensitive_findings_unpromoted",
+-        "risk::tests::keeps_non_sensitive_categories_at_original_severity",
+-        "risk::tests::promotes_sensitive_quantum_vulnerable_findings",
+-        "safe_read::tests::growing_input_is_stopped_at_limit_plus_one",
+-        "safe_read::tests::read_bounds_and_rejects_replaced_files_and_parent_links",
+-        "walker::non_scannable_repairs::known_binary_artifacts_are_excluded_but_crypto_files_are_retained",
+-        "walker::tests::excludes_default_directories",
+-        "walker::tests::excludes_docs_directory_and_markdown_files",
+-        "walker::tests::ignore_parse_errors_are_diagnostic_even_if_all_files_are_excluded",
+-        "walker::tests::iterator_failures_remain_fatal_instead_of_becoming_successful_empty_scans",
+-        "walker::tests::respects_gitignore_patterns",
+-        "walker::tests::skips_files_over_size_limit",
+-        "walker::tests::special_entries_are_failed_without_selecting_or_following_them"
+-      ]
+-    },
+-    {
+-      "id": 2,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "pqc_scan_detectors",
+-      "kind": [
+-        "lib"
+-      ],
+-      "tests": [
+-        "certificate_detector::tests::falls_back_to_container_match_for_unparseable_pem",
+-        "certificate_detector::tests::matches_certificate_metadata_for_valid_rsa_pem",
+-        "certificate_detector::tests::missing_assessment_clock_retains_static_facts_without_a_false_validity_verdict",
+-        "certificate_detector::tests::recognizes_pqc_oids_without_confusing_signature_and_public_key",
+-        "certificate_detector::tests::unix_clock_conversion_floors_seconds_on_both_sides_of_the_epoch",
+-        "comment_filter::tests::does_not_skip_java_comment_match_by_policy",
+-        "comment_filter::tests::does_not_skip_js_inline_code_line",
+-        "comment_filter::tests::skips_js_comment_only_line",
+-        "dependency_detector::tests::cargo_lock_uses_package_block_lines_and_versions",
+-        "dependency_detector::tests::cargo_toml_detects_manifest_dependencies_and_preserves_unknown_workspace_versions",
+-        "dependency_detector::tests::cyclonedx_sbom_dependencies_use_sbom_metadata_and_purl_ecosystem",
+-        "dependency_detector::tests::package_json_dependency_detection_reports_actual_line",
+-        "dependency_detector::tests::requirements_txt_ignores_comments_and_option_lines",
+-        "key_detector::tests::detects_private_key_header_and_masks_evidence",
+-        "key_detector::tests::ignores_text_without_private_key_markers",
+-        "regex_detector::tests::detects_regex_match_with_location_and_metadata",
+-        "regex_detector::tests::explicit_small_budget_limits_matches_per_rule",
+-        "regex_detector::tests::masks_private_key_like_matches_in_evidence_and_snippet",
+-        "regex_detector::tests::skips_comment_only_matches_for_javascript",
+-        "source_facts::bindings::tests::installed_rule_copies_bind_but_modified_semantics_do_not",
+-        "source_facts::selectors_tests::node_alias_and_literal_loop_follow_the_supplied_selector",
+-        "source_facts::selectors_tests::python_import_alias_and_recovery_follow_the_supplied_selector",
+-        "source_facts::selectors_tests::quoting_and_partial_algorithm_names_do_not_forge_a_selected_argument",
+-        "source_kind::tests::python_from_import_is_source_even_with_a_dockerfile_name",
+-        "tree_sitter_detector::syntax_compat::javascript::tests::computed_field_nested_calls_and_catch_keep_their_parentheses",
+-        "tree_sitter_detector::syntax_compat::javascript::tests::depleted_compatibility_work_is_reported_as_incomplete",
+-        "tree_sitter_detector::syntax_compat::javascript::tests::literal_regex_and_remainder_percent_bytes_are_preserved",
+-        "tree_sitter_detector::syntax_compat::jsx_attributes::tests::only_complete_quoted_attributes_change_and_work_exhaustion_is_reported",
+-        "tree_sitter_detector::syntax_compat::tests::go_lexical_boundaries_protect_literals_and_comments_beside_expression_new",
+-        "tree_sitter_detector::syntax_compat::typescript_types::tests::runtime_import_bytes_remain_original_beside_recovered_type_imports",
+-        "tree_sitter_detector::tests::keeps_standalone_token_matches",
+-        "tree_sitter_detector::tests::rejects_signature_inside_snake_case_identifier",
+-        "tree_sitter_detector::tests::rejects_substring_inside_identifier"
+-      ]
+-    },
+-    {
+-      "id": 3,
+-      "package": "path+file:///source/crates/pqc_scan_probe_ssh#0.2.0",
+-      "name": "pqc_scan_probe_ssh",
+-      "kind": [
+-        "lib"
+-      ],
+-      "tests": [
+-        "negotiated::tests::repeated_key_exchange_or_missing_prior_trust_cannot_replace_initial_facts"
+-      ]
+-    },
+-    {
+-      "id": 4,
+-      "package": "path+file:///source/crates/pqc_scan_probe_tls#0.2.0",
+-      "name": "pqc_scan_probe_tls",
+-      "kind": [
+-        "lib"
+-      ],
+-      "tests": [
+-        "runtime::tests::missing_post_handshake_parameters_do_not_publish_verified_details",
+-        "runtime::tests::unsupported_certificate_signature_is_a_local_limitation"
+-      ]
+-    },
+-    {
+-      "id": 5,
+-      "package": "path+file:///source/crates/pqc_scan_report#0.2.0",
+-      "name": "pqc_scan_report",
+-      "kind": [
+-        "lib"
+-      ],
+-      "tests": [
+-        "grouping::tests::groups_retain_all_occurrences_and_sort_by_severity_then_rule",
+-        "html_report::tests::html_report_escapes_grouped_findings_and_renders_actions",
+-        "japanese::tests::every_builtin_rule_and_action_has_japanese_copy",
+-        "japanese::tests::private_key_markers_require_confirmation_before_incident_actions",
+-        "json_report::tests::write_cbom_serializes_expected_fields",
+-        "json_report::tests::write_dependency_sbom_serializes_expected_fields",
+-        "json_report::tests::write_json_report_serializes_expected_sections_and_fields",
+-        "markdown_report::tests::markdown_report_preserves_grouping_and_escapes_table_cells",
+-        "tests::sarif_output_uses_camel_case_fields",
+-        "tests::write_reports_masks_sensitive_fragments",
+-        "tests::write_reports_preserves_json_inventory_contracts"
+-      ]
+-    },
+-    {
+-      "id": 6,
+-      "package": "path+file:///source/crates/pqc_scan_rules#0.2.0",
+-      "name": "pqc_scan_rules",
+-      "kind": [
+-        "lib"
+-      ],
+-      "tests": [
+-        "tests::load_from_dir_compiles_regex",
+-        "tests::loads_yaml_sequence_and_map",
+-        "tests::rejects_duplicate_rule_ids",
+-        "tests::tls_v1_legacy_pattern_does_not_match_tls_1_2",
+-        "traversal_validation_tests::a_late_injected_traversal_error_does_not_return_a_partial_pack"
+-      ]
+-    },
+-    {
+-      "id": 7,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "ast_occurrences",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "cli_keeps_distinct_occurrence_ids_and_legacy_report_contracts"
+-      ]
+-    },
+-    {
+-      "id": 8,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "cli_information",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "informational_flags_succeed_on_stdout_without_error_output",
+-        "invalid_arguments_keep_the_existing_failure_exit_contract"
+-      ]
+-    },
+-    {
+-      "id": 9,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "cyclonedx_export",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "cyclonedx_flag_only_adds_two_documents_and_keeps_legacy_machine_content"
+-      ]
+-    },
+-    {
+-      "id": 10,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "dependency_privacy",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "dependency_locator_credentials_are_omitted_from_all_outputs_and_stderr"
+-      ]
+-    },
+-    {
+-      "id": 11,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "evidence_privacy",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "private_bodies_and_inline_credentials_never_survive_cli_report_paths"
+-      ]
+-    },
+-    {
+-      "id": 12,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "example_inspection",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "documented_examples_complete_supported_inspection_and_keep_all_requested_reports"
+-      ]
+-    },
+-    {
+-      "id": 13,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "inventory_diff",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "binary_diff_compares_real_inventory_outputs_and_requires_scope",
+-        "comparison_output_and_semantic_golden_validate_offline",
+-        "diff_command::tests::malformed_or_wrong_scope_input_creates_no_output_directory",
+-        "diff_command::tests::missing_input_and_output_failure_propagate",
+-        "diff_command::tests::oversized_input_is_rejected_before_output",
+-        "diff_command::tests::valid_inputs_write_only_separate_diff_artifacts"
+-      ]
+-    },
+-    {
+-      "id": 14,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "native_json",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "inventory_is_explicit_and_legacy_outputs_are_a_shadow_not_a_replacement",
+-        "inventory_option_is_the_only_cli_switch_and_preserves_exit_behavior",
+-        "inventory_private_markers_do_not_export_payload_and_remain_language_independent",
+-        "inventory_schema_and_references_cover_public_certificates_dependencies_and_rejected_package_paths"
+-      ]
+-    },
+-    {
+-      "id": 15,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "policy_report",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "advisory_golden_is_repeatable_and_does_not_pass_with_incomplete_scope",
+-        "explicit_policy_writes_a_separate_linked_report_without_changing_inventory_or_legacy",
+-        "strict_context_cannot_echo_sensitive_values_or_create_reports_on_error"
+-      ]
+-    },
+-    {
+-      "id": 16,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "probe_commands",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "ssh_denial_writes_failed_advertisement_scope_without_network",
+-        "tls_ca_private_block_is_rejected_without_echoing_contents",
+-        "tls_denial_writes_failed_observation_without_network_and_keeps_language_parity"
+-      ]
+-    },
+-    {
+-      "id": 17,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "probe_resolver",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "helper_is_absent_from_help_and_rejects_non_hostname_input",
+-        "probe_resolver::tests::resolver_output_is_bounded_and_typed",
+-        "probe_resolver::tests::slow_resolver_process_is_killed_and_reaped_on_timeout_and_cancellation",
+-        "self_executable_resolves_once_and_authorizes_all_local_answers"
+-      ]
+-    },
+-    {
+-      "id": 18,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "rule_validation",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "invalid_rule_metadata_is_an_operational_error_before_any_report_is_written"
+-      ]
+-    },
+-    {
+-      "id": 19,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "sarif_locations",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "cli_preserves_native_locations_and_projects_unknown_unicode_and_ast_locations"
+-      ]
+-    },
+-    {
+-      "id": 20,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "semantic_repairs",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "a123_repairs_reach_all_reports_and_keep_stable_findings_and_invalid_controls",
+-        "final_scan_distinguishes_tls_versions_and_rejects_malformed_go_retract",
+-        "malformed_source_retains_findings_without_claiming_completed_analysis"
+-      ]
+-    },
+-    {
+-      "id": 21,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "ssh_kex",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "denied_target_has_no_verified_facts_and_bilingual_schema_valid_outputs",
+-        "key_is_required_and_private_or_invalid_key_fails_before_connection"
+-      ]
+-    },
+-    {
+-      "id": 22,
+-      "package": "path+file:///source/crates/pqc_scan_cli#0.2.0",
+-      "name": "task043_source_facts",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "compiled_default_bindings_work_with_copied_rules_outside_the_checkout",
+-        "local_rsa_source_positions_spans_and_secret_masking_survive_exports"
+-      ]
+-    },
+-    {
+-      "id": 23,
+-      "package": "path+file:///source/crates/pqc_scan_core#0.2.0",
+-      "name": "assessment_policy",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "aggregate_truth_table_never_treats_incomplete_empty_or_mixed_unknown_as_clean",
+-        "context_is_strict_bounded_and_does_not_echo_sensitive_values",
+-        "formal_pqc_oids_preserve_parameter_set_and_purpose",
+-        "hybrid_never_inherits_resistance_and_symmetric_hash_models_are_parameter_specific",
+-        "inventory_policy_retains_certificate_components_and_never_transfers_purpose_or_unknown_assurance",
+-        "opaque_or_unexpected_pqc_parameters_never_become_known_encodings",
+-        "policy_tables_require_applicability_purpose_and_declared_support",
+-        "quantum_and_classical_axes_coexist_and_unknown_facts_are_not_guessed",
+-        "rsa_pss_is_signature_only_even_when_operator_declares_establishment"
+-      ]
+-    },
+-    {
+-      "id": 24,
+-      "package": "path+file:///source/crates/pqc_scan_core#0.2.0",
+-      "name": "evidence_privacy",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "detector_error_content_is_not_exported_by_diagnostics_or_inventory",
+-        "initial_source_snapshot_masks_body_even_if_a_detector_changes_the_file",
+-        "redaction_preserves_legacy_ids_native_associations_cbom_rows_and_technical_metadata"
+-      ]
+-    },
+-    {
+-      "id": 25,
+-      "package": "path+file:///source/crates/pqc_scan_core#0.2.0",
+-      "name": "inventory_diff",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "a_matching_anchor_elsewhere_prevents_a_unique_move_claim",
+-        "absent_after_is_unresolved_even_with_complete_legacy_coverage",
+-        "after_only_ambiguous_or_unknown_assets_remain_unresolved",
+-        "ambiguous_duplicate_anchor_never_corresponds_or_moves",
+-        "ambiguous_duplicates_count_before_move_candidate_selection",
+-        "changed_coverage_is_disclosed_even_when_records_match",
+-        "changed_observation_facts_and_metadata_drift_are_explicit",
+-        "comparison_order_is_independent_of_input_array_order",
+-        "duplicate_occurrence_keys_and_unsafe_paths_are_rejected",
+-        "line_and_run_changes_preserve_exact_occurrence_correspondence",
+-        "malformed_and_oversized_json_are_rejected",
+-        "move_candidates_reject_changed_or_ambiguous_referenced_asset_facts",
+-        "multiple_matching_move_anchors_abstain_instead_of_guessing",
+-        "run_local_observations_remain_visible_without_cross_run_identity",
+-        "scope_schema_and_reference_errors_are_rejected_without_echoing_input",
+-        "summary_retains_uncertainty_without_imported_markup",
+-        "unique_move_is_only_a_heuristic_candidate",
+-        "unknown_assurance_stays_unresolved_and_future_fields_are_tolerated"
+-      ]
+-    },
+-    {
+-      "id": 26,
+-      "package": "path+file:///source/crates/pqc_scan_core#0.2.0",
+-      "name": "native_capture",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "a_custom_detection_cannot_attribute_native_facts_to_another_scanned_relative_path",
+-        "native_loss_ledger_keeps_distinct_delimited_tuples_and_only_reports_actual_losses",
+-        "old_consumer_runs_once_and_distinct_finding_ids_keep_native_associations"
+-      ]
+-    },
+-    {
+-      "id": 27,
+-      "package": "path+file:///source/crates/pqc_scan_core#0.2.0",
+-      "name": "probe_report",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "positive_submillisecond_limits_remain_exact_valid_report_values",
+-        "report_preserves_unknown_addresses_and_checks_completion_and_traffic"
+-      ]
+-    },
+-    {
+-      "id": 28,
+-      "package": "path+file:///source/crates/pqc_scan_core#0.2.0",
+-      "name": "probe_transport",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "aggregate_deadline_wins_over_protocol_deadline",
+-        "cancellation_interrupts_stalled_read_and_closes_socket",
+-        "cancelled_connect_sends_no_connection",
+-        "cancelling_idle_connection_shuts_peer_without_another_io_call",
+-        "dropping_stream_wakes_and_joins_deadline_watchdog_promptly",
+-        "exact_socket_bytes_are_counted_and_caller_buffers_clipped",
+-        "failed_flush_closes_socket_at_absolute_deadline",
+-        "idle_socket_closes_at_deadline_without_protocol_io",
+-        "protocol_deadline_does_not_extend_on_successful_reads",
+-        "target_cannot_be_attached_to_a_fresh_budget",
+-        "trait_io_preserves_typed_failure_and_drop_closes_peer",
+-        "try_io_is_nonblocking_metered_and_cancellable"
+-      ]
+-    },
+-    {
+-      "id": 29,
+-      "package": "path+file:///source/crates/pqc_scan_core#0.2.0",
+-      "name": "target_policy",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "broad_allowlist_never_permits_nonunicast_or_unspecified",
+-        "duplicate_answers_consume_limit_and_empty_resolution_fails",
+-        "elapsed_deadline_takes_precedence_over_late_dns_error",
+-        "limit_validation_covers_zero_and_every_ceiling",
+-        "literal_ip_bypasses_dns_but_never_policy",
+-        "mapped_cidr_is_canonicalized_and_cannot_authorize_wrong_family",
+-        "nonpublic_and_tunnel_ranges_require_explicit_authorization",
+-        "one_budget_cannot_resolve_twice_and_deadline_overrides_resolver_result",
+-        "reduced_limits_only_and_cancelled_resolution_never_calls_resolver",
+-        "rejects_entire_mixed_answer_set_not_just_selected_address",
+-        "rejects_url_control_wildcard_and_scope_syntax_before_resolution",
+-        "strict_idna_and_ipv6_have_separate_destination_identity",
+-        "validates_every_answer_and_keeps_host_separate_from_pinned_ip"
+-      ]
+-    },
+-    {
+-      "id": 30,
+-      "package": "path+file:///source/crates/pqc_scan_core#0.2.0",
+-      "name": "task_ids",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "task_ids_are_exact_unique_strings_and_dependencies_resolve"
+-      ]
+-    },
+-    {
+-      "id": 31,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "a123_repairs",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "bundler_platform_records_and_standard_metadata_complete_without_guessing_versions",
+-        "dockerfile_named_real_sources_are_still_parsed_as_their_languages",
+-        "dockerfile_names_override_source_suffixes_and_keep_lexical_inspection",
+-        "dynamic_imports_and_nearby_invalid_expressions_are_not_retyped",
+-        "empty_type_alias_parameters_are_accepted_without_accepting_empty_function_parameters",
+-        "import_types_in_assertions_and_function_return_types_keep_original_locations",
+-        "quoted_jsx_query_parameters_are_recovered_when_the_original_tree_loses_the_tag",
+-        "undeclared_platforms_bad_versions_and_bad_bundler_metadata_remain_incomplete"
+-      ]
+-    },
+-    {
+-      "id": 32,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "ast_occurrences",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "clipped_display_suffix_is_not_a_source_match",
+-        "dedicated_grammars_parse_javascript_typescript_and_tsx",
+-        "different_case_and_unicode_prefix_do_not_merge_distinct_source_spans",
+-        "nested_parent_child_and_quoted_representations_share_one_source_occurrence",
+-        "same_line_occurrences_survive_in_all_seven_language_scopes",
+-        "same_line_unique_hits_consume_the_existing_cap",
+-        "standalone_comments_are_not_duplicate_ast_occurrences"
+-      ]
+-    },
+-    {
+-      "id": 33,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "bounded_outcomes",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "ast_collection_exact_limit_can_complete_and_one_more_is_truncated",
+-        "ast_counts_unique_eligible_hits_and_looks_past_duplicates_at_exact_cap",
+-        "ast_hit_limit_does_not_prevent_a_later_rule_from_running",
+-        "ast_match_work_budget_applies_across_duplicate_and_rejected_candidates",
+-        "ast_parser_errors_keep_obtainable_hits_and_report_partial_inspection",
+-        "comments_after_exact_regex_cap_do_not_prove_an_omitted_hit",
+-        "inapplicable_inputs_are_explicit_but_plain_supported_text_can_complete",
+-        "key_limit_is_eight_masked_headers_and_ninth_proves_truncation",
+-        "long_text_completes_but_explicit_collection_limits_stay_visible",
+-        "real_detector_outcomes_reach_pipeline_and_legacy_unknowns_remain_visible",
+-        "regex_accepts_code_after_thirty_two_comment_matches",
+-        "regex_distinguishes_exact_hit_cap_from_proven_truncation",
+-        "regex_work_budget_bounds_comment_only_search_without_claiming_missing_hits",
+-        "truncated_regex_rule_does_not_prevent_later_rules_from_running",
+-        "unicode_matching_is_not_limited_by_preview_length"
+-      ]
+-    },
+-    {
+-      "id": 34,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "certificate_attributes",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "a_pem_marker_inside_der_name_does_not_change_format_selection",
+-        "damaged_or_unsupported_pem_block_preserves_neighboring_valid_certificates",
+-        "der_trailing_bytes_keep_parsed_facts_but_make_inspection_partial",
+-        "distinct_bundle_objects_survive_real_pipeline_normalization",
+-        "ec_sizes_come_from_named_curve_including_p521_not_point_encoding",
+-        "ed25519_retains_encoded_size_without_inventing_rsa_or_security_bits",
+-        "ed_and_x_keys_check_oid_specific_lengths_parameters_and_bit_alignment",
+-        "format_selection_uses_bytes_within_all_supported_certificate_suffixes",
+-        "legacy_dsa_oid_requires_the_same_well_formed_public_parameters",
+-        "malformed_and_unsupported_containers_keep_signals_but_do_not_complete",
+-        "malformed_rsa_integers_or_extra_fields_do_not_become_measured_keys",
+-        "nested_asn1_remainders_are_rejected_in_helpers_and_not_complete_in_detector",
+-        "noncandidate_and_no_certificate_rules_are_explicitly_inapplicable",
+-        "pem_bundle_retains_real_positions_and_distinct_certificates_sharing_spki",
+-        "pqc_and_unknown_spki_oids_are_not_measured_as_rsa",
+-        "private_pem_payload_is_not_attached_to_certificate_container_findings",
+-        "public_der_helpers_require_exact_objects_and_return_safe_errors",
+-        "rsa_modulus_bits_handle_sign_padding_and_non_byte_aligned_integers",
+-        "rsa_signature_does_not_turn_ec_subject_into_rsa_key",
+-        "rsa_sizes_are_modulus_bits_and_public_fingerprints_match_openssl",
+-        "unknown_ec_parameters_and_invalid_points_have_no_invented_curve_size"
+-      ]
+-    },
+-    {
+-      "id": 35,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "certificate_policy",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "certificate_truth_table_matches_exact_parsed_facts_and_safe_container_fallback",
+-        "current_time_metadata_is_explicit_and_does_not_change_static_certificate_facts",
+-        "custom_legacy_cutoff_scope_evidence_describes_both_possible_predicate_results",
+-        "custom_legacy_same_id_and_unknown_scope_keep_their_composite_text_behavior",
+-        "ecdsa_and_dsa_have_distinct_oid_predicates_and_quantum_classification",
+-        "fixed_clock_observes_inclusive_validity_endpoints",
+-        "frozen_detector_registry_reuse_retains_its_explicit_assessment_instant",
+-        "invalid_time_ranges_do_not_receive_assertive_expiry_or_cutoff_findings",
+-        "legacy_cutoff_stays_fixed_instead_of_becoming_a_current_expiry_alias",
+-        "opted_in_typed_scopes_never_claim_attributes_from_an_unparsed_filename",
+-        "reused_task020_attribute_parser_is_independent_of_rule_policy_changes",
+-        "rsa_size_requires_subject_modulus_and_pss_scope_requires_signature_oid"
+-      ]
+-    },
+-    {
+-      "id": 36,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "context_repairs",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "computed_fields_do_not_rewrite_nested_call_or_catch_parentheses",
+-        "conditional_requirements_keep_both_declarations_and_do_not_resolve_either",
+-        "delegated_gemspec_records_keep_their_own_file_and_rebound_receivers_are_not_trusted",
+-        "excluded_and_symlink_parents_are_not_read_for_context",
+-        "gemspec_static_dependency_declarations_have_parsed_provenance",
+-        "intrinsic_after_recovered_control_block_keeps_statement_context",
+-        "intrinsic_prefixes_are_expressions_not_remainders_or_literal_text",
+-        "javascript_unicode_whitespace_does_not_hide_intrinsic_expression_boundaries",
+-        "jsx_objects_and_quoted_template_examples_are_not_unrendered_source",
+-        "local_parent_properties_are_expanded_without_registry_resolution",
+-        "mjs_and_explicit_module_sources_do_not_gain_sloppy_yield_bindings",
+-        "parent_scope_identity_conflicts_and_cycles_do_not_fabricate_facts",
+-        "profile_overrides_keep_default_and_override_candidates_conditional",
+-        "profile_versions_are_conditional_candidates_not_a_selected_effective_version",
+-        "regular_expression_template_examples_are_not_generated_source",
+-        "review_javascript_invalid_modes_and_untagged_templates_remain_partial",
+-        "review_ruby_parallel_assignment_and_deferred_method_context_are_not_unconditional",
+-        "ruby_dynamic_or_invalid_declarations_stay_partial_and_strings_are_not_calls",
+-        "sloppy_yield_and_runtime_negative_syntax_are_not_parse_errors",
+-        "string_in_an_ordinary_block_does_not_enable_function_strict_mode",
+-        "tagged_invalid_escapes_are_identified_despite_original_error_recovery",
+-        "unknown_receiver_blocks_and_postfix_loops_are_deferred",
+-        "unrendered_source_templates_keep_original_findings_and_state_the_missing_context",
+-        "whitespace_control_and_multiline_jinja_branches_keep_conditional_provenance"
+-      ]
+-    },
+-    {
+-      "id": 37,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "dependency_provenance",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "declarations_and_lock_evidence_remain_distinct_without_inferred_resolution",
+-        "duplicate_input_and_partial_records_are_never_clean_empty",
+-        "ecosystem_matrix_preserves_declarations_and_only_lock_records_resolve",
+-        "malformed_known_record_fields_and_node_limits_cannot_be_complete",
+-        "parser_resource_limits_are_explicit_and_never_expand_aliases",
+-        "platform_lock_records_preserve_reported_versions_and_source_provenance",
+-        "pnpm_peer_variants_and_root_declarations_survive",
+-        "range_versions_and_nonregistry_lock_sources_are_not_resolved",
+-        "same_file_origins_are_distinct_and_ambiguous_line_is_not_guessed",
+-        "sbom_display_label_uses_validated_maven_identity_without_resolution_claim",
+-        "semantic_repairs_keep_locator_and_declared_versions_distinct_from_resolution",
+-        "structured_outcomes_distinguish_empty_invalid_partial_and_unknown_versions",
+-        "workspace_path_git_and_unsafe_locators_do_not_fabricate_registry_versions"
+-      ]
+-    },
+-    {
+-      "id": 38,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "develop_integration",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "both_source_paths_share_compatible_syntax_and_original_spans",
+-        "java_python_and_rust_fact_paths_honor_released_work_budgets",
+-        "source_fact_paths_respect_small_work_budgets",
+-        "source_facts_allow_explicitly_larger_hit_and_span_budgets",
+-        "source_facts_obey_the_released_default_and_explicit_hit_budgets"
+-      ]
+-    },
+-    {
+-      "id": 39,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "format_dependency_support",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "actual_examples_are_fully_consumed",
+-        "bounded_declarations_support_bom_comments_and_continuations",
+-        "explicit_identity_conflicts_and_encoded_credentials_do_not_survive",
+-        "go_and_scoped_npm_purls_keep_valid_source_claims",
+-        "invalid_purl_versions_retain_independent_safe_namespaced_labels",
+-        "invalid_version_requirements_are_never_complete_and_keep_package_hits",
+-        "malformed_and_unknown_constructs_are_never_complete",
+-        "malformed_sbom_identity_field_types_and_xml_node_limits_are_explicit",
+-        "malformed_supported_directives_and_conflicting_sbom_references_are_incomplete",
+-        "malicious_or_conflicting_purls_are_not_identity_evidence",
+-        "pom_unconsumed_mixed_text_or_namespaces_never_complete",
+-        "purl_only_version_is_reported_without_lock_resolution",
+-        "requirements_comments_require_a_whitespace_boundary",
+-        "resource_limits_are_honest",
+-        "sbom_validated_purl_separates_display_label_from_package_identity",
+-        "supported_go_replace_and_exclude_blocks_preserve_unresolved_declarations",
+-        "unsupported_static_dependency_locators_keep_safe_package_records",
+-        "unsupported_syntax_never_becomes_complete_and_retains_safe_records"
+-      ]
+-    },
+-    {
+-      "id": 40,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "inspection_repairs",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "crypto_after_long_candidate_prefix_is_inspected",
+-        "deferred_namespace_imports_preserve_original_locations",
+-        "duplicate_packages_in_two_documents_keep_distinct_native_record_ordinals",
+-        "encoded_pem_public_certificate_offsets_refer_to_original_bytes",
+-        "file_selection_opt_out_retains_custom_inspection_and_crypto_inputs",
+-        "finite_ast_work_budget_keeps_already_obtained_hits",
+-        "flow_yaml_alias_and_tag_after_quoted_key_remain_rejected",
+-        "malformed_module_syntax_still_reports_partial_and_retains_hits",
+-        "malformed_wide_source_is_not_silently_excluded_or_counted_complete",
+-        "module_compatibility_does_not_rewrite_bindings_strings_or_comments",
+-        "pnpm_boot_and_project_documents_are_both_inventoried_without_overwriting",
+-        "pnpm_document_versions_and_shared_value_budget_are_enforced",
+-        "pnpm_empty_metadata_and_plain_apostrophes_do_not_hide_quoted_wildcards",
+-        "pnpm_plain_scalar_wildcards_are_not_yaml_aliases",
+-        "pnpm_record_limit_is_shared_by_both_documents_and_retains_partial_inventory",
+-        "repository_sized_ast_does_not_stop_at_4096_candidates",
+-        "repository_sized_dependency_values_are_supported_and_real_exhaustion_is_not_unsupported",
+-        "repository_sized_occurrence_counts_are_not_silently_capped_at_32",
+-        "type_only_star_exports_preserve_later_findings_and_locations",
+-        "utf16_and_utf32_keep_findings_and_redact_decoded_source_snippets",
+-        "yaml_aliases_and_tags_remain_unsupported",
+-        "yaml_document_start_properties_are_rejected_but_scalar_markers_remain_text"
+-      ]
+-    },
+-    {
+-      "id": 41,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "native_inventory",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "exact_algorithm_is_classified_at_the_source_match_before_legacy_preview_masking",
+-        "parse_only_public_certificates_share_spki_without_replacing_legacy_or_claiming_trust",
+-        "trailing_or_malformed_neighbor_is_visible_even_without_certificate_rules"
+-      ]
+-    },
+-    {
+-      "id": 42,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "pkcs12_certificates",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "binary_certificate_observations_do_not_invent_text_positions",
+-        "bounded_nested_contents_are_supported_but_deep_or_oversized_inputs_are_incomplete",
+-        "encrypted_only_is_unsupported_and_malformed_input_is_partial",
+-        "extracts_public_certificates_and_retains_one_legacy_container_signal",
+-        "inspection_limits_remain_truncated_when_retained_certificate_attributes_are_partial",
+-        "mac_presence_never_claims_verification_and_bad_mac_retains_certificates",
+-        "malformed_attributes_do_not_turn_a_certificate_container_complete",
+-        "mixed_encrypted_and_key_bags_keep_public_certificates_without_payload_leaks",
+-        "recovered_certificate_offsets_reference_original_public_der",
+-        "reviewed_public_example_is_fully_inspected_within_supported_scope",
+-        "truncated_bag_oid_prefix_cannot_panic_or_become_complete",
+-        "wrong_inner_tags_cannot_smuggle_public_certificates"
+-      ]
+-    },
+-    {
+-      "id": 43,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "pqc_readiness",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "checked_in_seven_language_fixtures_match_the_documented_rules",
+-        "detects_only_explicit_classical_tls_settings",
+-        "existing_same_line_baseline_fixture_retains_each_api_call",
+-        "identifies_draft_algorithms_separately_from_final_mlkem",
+-        "inventories_dependencies_without_claiming_pqc_is_enabled",
+-        "inventories_pqc_in_all_seven_languages_but_not_comments_or_similar_names"
+-      ]
+-    },
+-    {
+-      "id": 44,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "rule_scope_compatibility",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "ast_scopes_preserve_lists_case_wildcards_javascript_alias_and_unknown_tokens",
+-        "certificate_unknown_scopes_keep_path_fallback_but_typed_scopes_do_not",
+-        "key_and_dependency_custom_scopes_remain_nonfiltering",
+-        "regex_scope_is_legacy_metadata_not_a_language_or_file_filter"
+-      ]
+-    },
+-    {
+-      "id": 45,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "semantic_repairs",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "all_supported_pqc_public_key_oids_have_shape_controls",
+-        "ast_tls_versions_have_the_same_boundaries_as_regex_detection",
+-        "bundler_git_path_sections_preserve_declared_sources",
+-        "catalog_and_patch_declarations_are_parsed_without_invented_versions",
+-        "classical_ec_and_eddsa_calls_are_detected",
+-        "compatibility_work_limit_is_explicit_and_keeps_available_hits",
+-        "gemfile_static_loading_options_do_not_change_dependency_versions",
+-        "generated_source_with_178k_candidates_is_inspected",
+-        "go_expression_new_uses_lexical_strings_when_error_tree_mispairs_quotes",
+-        "go_metadata_and_replacement_directives_are_statically_parsed",
+-        "go_paths_in_non_go_data_are_not_go_imports",
+-        "go_retract_requires_versions_or_a_closed_two_version_interval",
+-        "irrelevant_go_strings_do_not_exhaust_the_import_candidate_budget",
+-        "malformed_module_attributes_and_go_directives_do_not_complete",
+-        "malformed_real_sbom_is_still_an_error",
+-        "nested_typescript_import_types_keep_module_literals_and_crypto",
+-        "node_rsa_key_generation_is_detected",
+-        "non_certificate_der_formats_remain_inapplicable_without_exposing_private_content",
+-        "non_certificate_pem_does_not_produce_unsupported_certificate_diagnostic",
+-        "normal_syntax_keeps_crypto_and_original_coordinates",
+-        "pnpm_importer_alias_and_catalog_do_not_make_valid_yaml_partial",
+-        "pqc_certificate_signature_shapes_have_positive_and_adjacent_negative_controls",
+-        "pqc_public_key_shapes_are_measured_without_rsa_bit_claims",
+-        "pqc_signature_oid_does_not_make_wrong_signature_shapes_complete",
+-        "private_field_before_computed_field_uses_class_field_asi",
+-        "python_default_argument_calls_use_definition_scope_instead_of_parameter_bindings",
+-        "python_function_local_imports_do_not_bind_other_functions",
+-        "python_import_forms_and_unicode_aliases_preserve_real_call_spans",
+-        "python_import_shadowing_and_parameter_annotations_are_distinct",
+-        "python_rebound_or_unimported_receivers_are_not_resolved_as_crypto",
+-        "python_rsa_calls_and_aliases_are_detected",
+-        "requirements_hashes_are_metadata_not_invalid_dependencies",
+-        "ruby_endless_raise_string_is_valid_but_unterminated_string_is_partial",
+-        "ruby_rsa_call_without_jwt_literal_is_detected",
+-        "rust_compatibility_does_not_accept_bad_macro_or_missing_syntax",
+-        "sbom_like_filenames_with_non_sbom_json_are_not_failures",
+-        "supported_dialects_and_module_attributes_keep_source_locations",
+-        "symmetric_and_unrelated_calls_do_not_become_rsa",
+-        "syntax_compatibility_does_not_hide_malformed_input",
+-        "tls_versions_and_enum_symbols_are_not_misclassified_as_legacy_tls_or_suites",
+-        "valid_maven_metadata_does_not_invalidate_literal_dependencies",
+-        "valid_private_fields_asi_and_tagged_template_types_are_supported",
+-        "valid_rust_attributes_and_macro_token_trees_keep_algorithm_locations"
+-      ]
+-    },
+-    {
+-      "id": 46,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "task043_detection_fixes",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "binding_limit_does_not_reuse_an_older_crypto_binding",
+-        "built_in_source_facts_enforce_alias_depth_ast_depth_and_candidate_budgets",
+-        "capable_library_rule_respects_exact_identity_and_source_ecosystem",
+-        "default_rest_and_loop_bindings_do_not_fall_back_to_crypto_names",
+-        "enhanced_regex_keeps_distinct_source_starts_and_its_32_hit_budget",
+-        "explicit_python_import_and_rust_typed_operations_are_separate_references",
+-        "gemspec_ast_budget_is_truncated_rather_than_an_empty_unreported_success",
+-        "gemspec_binds_the_declared_block_variable",
+-        "gemspec_receivers_end_with_their_block_and_rebindings",
+-        "gradle_static_declarations_are_found_without_executing_dsl",
+-        "inline_configuration_comments_do_not_create_enabled_ssh_findings",
+-        "java_parameter_sets_are_not_interchanged_between_pqc_families",
+-        "java_static_property_forms_preserve_intent_not_effective_state",
+-        "malformed_calls_retain_explicit_facts_and_partial_status",
+-        "malformed_display_text_and_identifier_prefixes_are_not_recovered_as_calls",
+-        "method_and_closure_bindings_do_not_leak_across_scopes",
+-        "node_alias_calls_are_real_calls_and_local_scopes_are_respected",
+-        "node_static_loop_variants_are_one_reference_per_call",
+-        "python_context_exception_and_unrelated_imports_block_name_fallback",
+-        "python_loop_body_assignments_also_shadow_following_calls",
+-        "rsa_generation_and_key_bound_signatures_do_not_infer_rsa_from_digest",
+-        "rust_items_shadow_for_the_whole_scope_but_let_is_sequential",
+-        "rust_key_roles_and_shadowing_are_not_guessed_from_variable_names",
+-        "slhdsa_and_prestandard_names_have_exact_variant_boundaries",
+-        "source_fact_limits_are_explicit_and_custom_patterns_keep_their_meaning",
+-        "source_resolution_does_not_turn_unknown_bindings_into_crypto",
+-        "ssh_disabled_comment_is_not_an_enabled_algorithm",
+-        "unchanged_pattern_with_custom_scope_does_not_enable_builtin_semantics"
+-      ]
+-    },
+-    {
+-      "id": 47,
+-      "package": "path+file:///source/crates/pqc_scan_detectors#0.2.0",
+-      "name": "typescript_grammar",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "malformed_typed_source_is_partial_and_retains_obtainable_hits",
+-        "tsx_combines_typed_props_and_jsx_without_losing_expression_hits",
+-        "typed_calls_keep_distinct_source_occurrences_and_ignore_comments_and_namesakes",
+-        "typed_example_completes_and_retains_algorithm_literals",
+-        "typed_source_inspects_occurrences_beyond_the_old_hit_limit",
+-        "typescript_types_generics_and_angle_assertions_complete"
+-      ]
+-    },
+-    {
+-      "id": 48,
+-      "package": "path+file:///source/crates/pqc_scan_probe_ssh#0.2.0",
+-      "name": "negotiated",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "async_transport_enforces_send_and_receive_budgets",
+-        "cancellation_and_timeout_interrupt_async_stalled_reads_and_close_socket",
+-        "cancelled_before_connection_has_no_traffic",
+-        "oversized_ssh_frame_is_rejected_before_large_body_allocation",
+-        "symlink_and_fifo_trust_inputs_are_rejected_without_blocking",
+-        "synchronous_api_inside_async_runtime_fails_without_network_instead_of_panicking"
+-      ]
+-    },
+-    {
+-      "id": 49,
+-      "package": "path+file:///source/crates/pqc_scan_probe_ssh#0.2.0",
+-      "name": "openssh",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "installed_openssh_classical_and_hybrid_offers_have_zero_authentication_messages"
+-      ]
+-    },
+-    {
+-      "id": 50,
+-      "package": "path+file:///source/crates/pqc_scan_probe_ssh#0.2.0",
+-      "name": "parser",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "deterministic_malformed_byte_mutations_never_panic_or_lose_successful_bounds",
+-        "exact_limits_and_ssh199_compatibility_are_supported",
+-        "identification_and_frame_boundaries_are_checked_before_payload_access",
+-        "malformed_and_excessive_name_lists_are_rejected_without_truncation",
+-        "ordered_unknown_names_and_extension_markers_remain_distinct_advertisements"
+-      ]
+-    },
+-    {
+-      "id": 51,
+-      "package": "path+file:///source/crates/pqc_scan_probe_ssh#0.2.0",
+-      "name": "runtime",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "banner_aggregate_and_transport_budgets_are_enforced_at_actual_io",
+-        "banner_and_early_message_limits_accept_exactly64_and_reject_the_next",
+-        "cancellation_and_deadline_interrupt_offer_wait_and_close_socket",
+-        "coalesced_banner_and_early_ignored_payloads_preserve_only_safe_observations",
+-        "declared_frame_without_any_body_is_malformed_instead_of_a_fresh_disconnect",
+-        "disconnect_and_unexpected_auth_messages_are_terminal_with_no_client_followup",
+-        "oversized_frame_stops_after_header_and_does_not_allocate_or_silently_complete",
+-        "truncated_peer_frame_is_not_complete",
+-        "waiting_peer_fragmentation_and_guessed_packet_never_trigger_kex_or_authentication"
+-      ]
+-    },
+-    {
+-      "id": 52,
+-      "package": "path+file:///source/crates/pqc_scan_probe_ssh#0.2.0",
+-      "name": "schema",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "advertised_only_document_has_a_self_contained_offline_schema_and_no_negotiated_claim"
+-      ]
+-    },
+-    {
+-      "id": 53,
+-      "package": "path+file:///source/crates/pqc_scan_probe_tls#0.2.0",
+-      "name": "runtime",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "chain_collection_and_upstream_limits_remain_incomplete",
+-        "client_auth_request_stops_before_any_encrypted_client_auth_or_finished_record",
+-        "configuration_rejects_private_pem_and_oversized_ca_without_exposing_input",
+-        "custom_roots_are_bounded_certificate_only_and_have_set_digest_semantics",
+-        "failed_verification_never_publishes_negotiated_facts",
+-        "ip_identity_sends_no_sni_and_root_provenance_is_public_and_deterministic",
+-        "oversized_tls_record_is_a_local_resource_limit_not_an_algorithm_verdict",
+-        "schema_rejects_a_completed_label_on_unverified_details",
+-        "slow_peer_and_cancellation_close_with_typed_outcomes",
+-        "unsupported_client_profile_never_becomes_remote_absence_or_verified_negotiation",
+-        "verified_classical_versions_and_hybrid_hrr_use_actual_group_not_suite"
+-      ]
+-    },
+-    {
+-      "id": 54,
+-      "package": "path+file:///source/crates/pqc_scan_report#0.2.0",
+-      "name": "compact",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "compact_reports_keep_all_locations_and_only_share_identical_actions"
+-      ]
+-    },
+-    {
+-      "id": 55,
+-      "package": "path+file:///source/crates/pqc_scan_report#0.2.0",
+-      "name": "cyclonedx_17",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "absent_public_fingerprints_do_not_fabricate_parsed_objects_or_dangling_refs",
+-        "empty_documents_are_official_schema_valid_and_truthful",
+-        "lexical_reference_provenance_matches_semantic_golden_without_runtime_claims",
+-        "malformed_native_reference_is_rejected_and_order_is_deterministic",
+-        "observation_columns_preserve_byte_and_scalar_units_with_their_values",
+-        "pinned_upstream_example_and_all_source_digests_validate_offline",
+-        "private_marker_observation_does_not_invent_a_key_asset",
+-        "relationships_with_wrong_asset_kind_do_not_become_crypto_references",
+-        "selected_writer_adds_exactly_two_files_and_preserves_legacy_bytes",
+-        "separate_public_objects_have_resolving_refs_and_no_secret_claims",
+-        "source_version_provenance_is_not_upgraded_to_resolution_or_installation"
+-      ]
+-    },
+-    {
+-      "id": 56,
+-      "package": "path+file:///source/crates/pqc_scan_report#0.2.0",
+-      "name": "evidence_privacy",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "known_secret_syntax_is_omitted_in_all_legacy_formats_and_both_languages"
+-      ]
+-    },
+-    {
+-      "id": 57,
+-      "package": "path+file:///source/crates/pqc_scan_report#0.2.0",
+-      "name": "inspection",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "assurance_usage_and_per_asset_policy_keep_exact_observation_bindings",
+-        "document_reports_localize_status_and_escape_diagnostics_without_machine_drift",
+-        "document_reports_retain_unknown_custom_rule_copy_and_escape_it_in_japanese",
+-        "exact_observation_states_stay_in_markdown_but_do_not_overload_html",
+-        "explicit_policy_stays_in_markdown_and_never_changes_ordinary_html",
+-        "failed_and_empty_inspection_preserve_scope_and_safe_diagnostics",
+-        "html_prioritizes_coverage_and_omits_internal_observation_and_asset_tables",
+-        "human_reports_group_diagnostics_and_preserve_full_machine_records",
+-        "human_reports_summarize_exclusions_while_machine_diagnostics_keep_all_paths"
+-      ]
+-    },
+-    {
+-      "id": 58,
+-      "package": "path+file:///source/crates/pqc_scan_report#0.2.0",
+-      "name": "japanese",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "japanese_human_reports_preserve_machine_output_and_source_evidence"
+-      ]
+-    },
+-    {
+-      "id": 59,
+-      "package": "path+file:///source/crates/pqc_scan_report#0.2.0",
+-      "name": "probe_reports",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "contradictory_tls_details_never_override_failed_or_fatal_envelope",
+-        "diagnostic_client_proposals_are_not_labeled_as_remote_advertisements",
+-        "failed_serialization_does_not_disclose_arbitrary_error_text_or_create_outputs",
+-        "failed_tls_does_not_promote_unverified_negotiation_into_initial_html",
+-        "incomplete_outcomes_keep_raw_reason_codes_and_invalid_envelopes_write_nothing",
+-        "outcome_is_visible_before_potentially_long_protocol_details",
+-        "recognized_secret_syntax_is_omitted_consistently_and_disclosed_as_export_loss",
+-        "ssh_initial_html_summarizes_remote_offers_and_keeps_all_facts_in_closed_details",
+-        "ssh_kex_summary_requires_completed_trusted_hybrid_and_never_promotes_failure",
+-        "ssh_preserves_every_ordered_offer_and_extension_marker_as_unauthenticated",
+-        "tls_fact_paths_and_unknown_fields_survive_both_languages_without_machine_drift",
+-        "tls_initial_html_explains_verified_facts_partial_collection_and_next_checks",
+-        "unavailable_ssh_lists_are_unconfirmed_and_network_failure_has_actionable_guidance"
+-      ]
+-    },
+-    {
+-      "id": 60,
+-      "package": "path+file:///source/crates/pqc_scan_report#0.2.0",
+-      "name": "sarif_contract",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "official_schema_validates_output_offline_and_rejects_zero_positions",
+-        "paths_are_uri_references_not_queries_or_fragments",
+-        "projection_preserves_results_rules_and_is_deterministic",
+-        "unicode_columns_and_legacy_ast_abstention",
+-        "unknown_positions_are_not_invented"
+-      ]
+-    },
+-    {
+-      "id": 61,
+-      "package": "path+file:///source/crates/pqc_scan_rules#0.2.0",
+-      "name": "quality_metadata",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls"
+-      ]
+-    },
+-    {
+-      "id": 62,
+-      "package": "path+file:///source/crates/pqc_scan_rules#0.2.0",
+-      "name": "validation",
+-      "kind": [
+-        "test"
+-      ],
+-      "tests": [
+-        "blank_ids_are_rejected_without_trimming_valid_custom_ids",
+-        "confidence_rejects_nonfinite_out_of_bounds_and_source_rounding_loopholes",
+-        "empty_directory_readable_yaml_root_and_unrelated_extensions_stay_compatible",
+-        "missing_root_is_not_a_successful_empty_pack",
+-        "nested_invalid_rules_prevent_partial_success_and_regex_validation_remains",
+-        "valid_endpoints_and_custom_scopes_keep_existing_acceptance_and_values"
+-      ]
+-    }
+-  ]
+-}
+--- a/tests/quality/task044/miri_range.py
++++ b/tests/quality/task044/miri_range.py
+@@ -1,228 +0,0 @@
+-"""Original-workspace Miri matrix with bounded tests and explicit non-results."""
+-import ctypes
+-import hashlib
+-import json
+-import os
+-from pathlib import Path
+-import re
+-import signal
+-import subprocess
+-import sys
+-import time
+-import traceback
+-
+-sys.path.insert(0, '/source/tests/protocol')
+-sys.path.insert(0, '/source/tests/quality')
+-from container_entry import boundary, EVIDENCE, SCRATCH, write
+-from task044.miri_support import NIGHTLY, miri_command, parse_test_events, classify_failure
+-
+-COMMANDS = []
+-
+-
+-def execute(args, log, env, *, known=(), wall=600, idle=120, stdout_json=False, cwd='/source'):
+-    started = time.monotonic()
+-    path = EVIDENCE/log
+-    status = None
+-    reaped = 0
+-    with path.open('wb') as stream, (EVIDENCE/(log+'.stderr')).open('wb') as errors:
+-        process = subprocess.Popen(args, cwd=cwd, env=env, stdout=stream,
+-                                   stderr=errors if stdout_json else subprocess.STDOUT,
+-                                   start_new_session=True)
+-        previous = None
+-        progress = started
+-        try:
+-            while process.poll() is None:
+-                current = path.read_text(errors='replace') if known else ''
+-                events = parse_test_events(current, known) if known else {}
+-                marker = json.dumps(events, sort_keys=True)
+-                if marker != previous:
+-                    previous = marker
+-                    progress = time.monotonic()
+-                if time.monotonic()-started > wall or time.monotonic()-progress > idle:
+-                    status = 'timeout'
+-                    break
+-                time.sleep(.1)
+-            if status is None:
+-                status = process.returncode
+-        finally:
+-            try:
+-                os.killpg(process.pid, signal.SIGKILL)
+-            except ProcessLookupError:
+-                pass
+-            process.wait()
+-            deadline = time.monotonic()+5
+-            while True:
+-                try:
+-                    pid, _ = os.waitpid(-process.pid, os.WNOHANG)
+-                except ChildProcessError:
+-                    break
+-                if pid:
+-                    reaped += 1
+-                elif time.monotonic() > deadline:
+-                    raise RuntimeError('test descendants did not exit')
+-                else:
+-                    time.sleep(.01)
+-    record = {'command':args,'cwd':cwd,'environment':env,'exit':status,'log':log,
+-              'wallSeconds':time.monotonic()-started,'wallLimit':wall,'idleLimit':idle,
+-              'descendantsReaped':reaped}
+-    COMMANDS.append(record)
+-    write('commands.json', COMMANDS)
+-    return status
+-
+-
+-def startup():
+-    write('checks.json', boundary())
+-    # Keep orphaned interpreter children reapable on both ordinary and timeout
+-    # exits, rather than exhausting the container's finite PID budget.
+-    if ctypes.CDLL(None).prctl(36, 1, 0, 0, 0) != 0:
+-        raise RuntimeError('Linux child subreaper unavailable')
+-    (SCRATCH/'test-target').mkdir()
+-    cargo = SCRATCH/'cargo'; cargo.mkdir()
+-    for name in ('registry','git'):
+-        source=Path('/usr/local/cargo')/name
+-        if source.exists(): (cargo/name).symlink_to(source,target_is_directory=True)
+-    return dict(os.environ, MIRI_SYSROOT='/opt/miri-sysroot',RUSTUP_TOOLCHAIN=NIGHTLY,
+-                CARGO_TARGET_DIR='/scratch/miri-workspace')
+-
+-
+-def controls(env):
+-    code='import subprocess,time; subprocess.Popen(["/bin/sleep","30"]); time.sleep(30)'
+-    result=execute([sys.executable,'-c',code],'timeout-control.log',env,wall=.3,idle=.3)
+-    assert result == 'timeout' and COMMANDS[-1]['descendantsReaped'] >= 1
+-    folder=SCRATCH/'build-regression'; (folder/'src').mkdir(parents=True)
+-    (folder/'Cargo.toml').write_text('[package]\nname="build-regression"\nversion="0.0.0"\nedition="2021"\n')
+-    (folder/'build.rs').write_text('fn main(){println!("cargo:rerun-if-changed=build.rs");}\n')
+-    positive='#[test] fn check(){assert_eq!(2+3,5);}\n'
+-    (folder/'src/lib.rs').write_text(positive)
+-    manifest=['--manifest-path',str(folder/'Cargo.toml'),'--offline']
+-    broken_env=dict(env,CARGO_TARGET_DIR='/scratch/control-broken')
+-    broken=execute(['cargo','+'+NIGHTLY,'miri','test',*manifest],'broken-control.log',broken_env)
+-    assert broken == 101 and 'invalid JSON' in (EVIDENCE/'broken-control.log').read_text()
+-    fixed_env=dict(env,CARGO_TARGET_DIR='/scratch/control-fixed')
+-    fixed=execute(miri_command('test',*manifest,'--','--format=json','-Zunstable-options'),
+-                  'fixed-control.log',fixed_env,known=['check'])
+-    events=parse_test_events((EVIDENCE/'fixed-control.log').read_text(),['check'])
+-    assert fixed==0 and events['passed']==['check']
+-    # phase_runner removes MIRI_BE_RUSTC before launching the interpreter,
+-    # then restores build-time env only when it differs from the caller.
+-    # Match Cargo's normal runner env; otherwise the stored host value gets
+-    # reintroduced and the interpreter acts as rustc. Validate both outcomes.
+-    direct_env=dict(fixed_env,MIRI_BE_RUSTC='host',MIRI_VERBOSE='1')
+-    sysroot=subprocess.check_output(['rustc','+'+NIGHTLY,'--print','sysroot'],env=env,text=True).strip()
+-    runner=str(Path(sysroot)/'bin/cargo-miri')
+-    descriptor_args=miri_command('test',*manifest,'--no-run','--message-format=json')
+-    code=execute(descriptor_args,'control-descriptor.jsonl',fixed_env,stdout_json=True)
+-    assert code==0
+-    descriptor=next(json.loads(line)['executable'] for line in (EVIDENCE/'control-descriptor.jsonl').read_text().splitlines()
+-                    if line.startswith('{') and json.loads(line).get('reason')=='compiler-artifact'
+-                    and json.loads(line).get('profile',{}).get('test') and json.loads(line).get('executable'))
+-    direct=execute([runner,'runner',descriptor,'--format=json','-Zunstable-options'],
+-                   'direct-positive.log',direct_env,known=['check'],cwd=str(folder))
+-    assert direct==0 and parse_test_events((EVIDENCE/'direct-positive.log').read_text(),['check'])['passed']==['check']
+-    assert re.search(r'MIRI_CWD=[\"\']?'+re.escape(str(folder)), (EVIDENCE/'direct-positive.log').read_text())
+-    negative='#[test] fn check(){unsafe{let _=std::ptr::read_volatile(std::ptr::null::<u8>());}}\n'
+-    (folder/'src/lib.rs').write_text(negative)
+-    bad=execute(miri_command('test',*manifest,'--','--format=json','-Zunstable-options'),
+-                'ub-control.log',fixed_env,known=['check'])
+-    assert bad!=0 and classify_failure(bad,(EVIDENCE/'ub-control.log').read_text())=='Failed: UB'
+-    direct_bad=execute([runner,'runner',descriptor,'--format=json','-Zunstable-options'],
+-                       'direct-ub.log',direct_env,known=['check'],cwd=str(folder))
+-    assert direct_bad!=0 and classify_failure(direct_bad,(EVIDENCE/'direct-ub.log').read_text())=='Failed: UB'
+-
+-    write('controls.json',{'broken':broken,'fixed':fixed,'undefinedBehavior':bad,
+-                           'positiveSource':positive,'negativeSource':negative,'directPositive':direct,'directUB':direct_bad,
+-                           'timeoutDescendantsReaped':COMMANDS[0]['descendantsReaped']})
+-
+-
+-def main():
+-    env=startup()
+-    os_profile=globals().get("STUDY_MODE") == "miri044-os-range"
+-    if os_profile:
+-        env["MIRIFLAGS"]="-Zmiri-disable-isolation"
+-    controls(env)
+-    command=miri_command('test','--workspace','--all-features','--no-run',
+-                         '--locked','--offline','--message-format=json')
+-    status=execute(command,'workspace-build.jsonl',env,wall=700,idle=700,stdout_json=True)
+-    if status!=0:
+-        raise RuntimeError('original workspace Miri build failed')
+-    artifacts=[]
+-    for line in (EVIDENCE/'workspace-build.jsonl').read_text().splitlines():
+-        if not line.startswith('{'): continue
+-        item=json.loads(line)
+-        if item.get('reason')=='compiler-artifact' and item.get('profile',{}).get('test') and item.get('executable'):
+-            path=Path(item['executable'])
+-            artifacts.append({'package':item['package_id'],'target':item['target'],
+-                              'workingDirectory':str(Path(item['manifest_path']).parent),
+-                              'executable':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
+-    assert artifacts
+-    artifacts.sort(key=lambda a:(a['target']['kind']==['test'],a['package'],a['target']['name']))
+-    sysroot=subprocess.check_output(['rustc','+'+NIGHTLY,'--print','sysroot'],env=env,text=True).strip()
+-    runner=str(Path(sysroot)/'bin/cargo-miri')
+-    runner_env=dict(env,MIRI_BE_RUSTC='host')
+-    inventory=[]
+-    for i, artifact in enumerate(artifacts):
+-        result=execute([runner,'runner',artifact['executable'],'--list','--format=terse'],
+-                       f'list-{i:02}.log',runner_env,wall=90,idle=90,cwd=artifact['workingDirectory'])
+-        text=(EVIDENCE/f'list-{i:02}.log').read_text()
+-        names=re.findall(r'^(.+): test$',text,re.MULTILINE) if result==0 else []
+-        inventory.append({**artifact,'id':i,'listingExit':result,'tests':names})
+-    write('inventory.json',inventory)
+-    assert any(x['tests'] for x in inventory), 'no original test could be listed'
+-    selection=None
+-    if os_profile:
+-        selection=json.loads(Path('/source/tests/quality/task044/miri_os_selection.json').read_text())
+-        actual=[{'id':x['id'],'package':x['package'],'name':x['target']['name'],'kind':x['target']['kind'],'tests':x['tests']} for x in inventory]
+-        assert actual==selection['targets'], 'baseline test inventory mismatch'
+-        write('selection.json',selection)
+-    results=[]
+-    deadline=time.monotonic()+1600
+-    execution_inventory=sorted(inventory,key=lambda x:({1:0,5:1,6:2,2:3,0:100}.get(x['id'],10),x['id'])) if os_profile else inventory
+-    for item in execution_inventory:
+-        remaining=[name for name in item['tests'] if selection is None or {'targetId':item['id'],'test':name} in selection['selected']]
+-        if os_profile:
+-            remaining.sort(key=lambda name:(not name.startswith(('safe_read::','walker::')),name))
+-        batch=0
+-        while remaining and time.monotonic()<deadline:
+-            log=f'target-{item["id"]:02}-batch-{batch:03}.log'
+-            args=[runner,'runner',item['executable'],'--exact',*remaining,
+-                  '--format=json','-Zunstable-options','--test-threads=1']
+-            result=execute(args,log,runner_env,known=remaining,cwd=item['workingDirectory'],wall=min(600,max(1,deadline-time.monotonic())),idle=60)
+-            text=(EVIDENCE/log).read_text(errors='replace')
+-            parsed=parse_test_events(text,remaining)
+-            removed=[]
+-            for key,status in [('passed','Passed'),('failed','Failed: assertion'),('ignored','Not Tested: ignored')]:
+-                for name in parsed[key]:
+-                    results.append({'targetId':item['id'],'test':name,'status':status,'log':log,'exit':result})
+-                    removed.append(name)
+-            if parsed['active']:
+-                for name in parsed['active']:
+-                    results.append({'targetId':item['id'],'test':name,'status':classify_failure(result,text),'log':log,'exit':result})
+-                    removed.append(name)
+-            if not removed:
+-                for name in remaining:
+-                    results.append({'targetId':item['id'],'test':name,'status':'Unknown: no attributable test event','log':log,'exit':result})
+-                remaining=[]
+-            else:
+-                remaining=[name for name in remaining if name not in removed]
+-            write('results.json',results)
+-            batch+=1
+-        for name in remaining:
+-            results.append({'targetId':item['id'],'test':name,'status':'Not Tested: study deadline','reason':'finite measured execution budget'})
+-    write('results.json',results)
+-    counts={status:sum(r['status']==status for r in results) for status in sorted({r['status'] for r in results})}
+-    assert (len(selection['selected']) if selection else sum(len(x['tests']) for x in inventory))==len(results)
+-    for item in inventory:
+-        assert hashlib.sha256(Path(item['executable']).read_bytes()).hexdigest()==item['sha256']
+-    write('summary.json',{'featureConfiguration':'workspace --all-features','counts':counts,
+-          'registeredTests':sum(len(x['tests']) for x in inventory),'selectedTests':len(results),'targets':len(inventory),
+-          'miriFlags':env.get('MIRIFLAGS',''),'selection':'baseline isolation errors only' if selection else 'all registered tests',
+-          'listingFailures':[x['id'] for x in inventory if x['listingExit']!=0],
+-          'executableDescriptorsUnchanged':True,'doctests':'Not Tested: no-run inventory excludes workspace doctests'})
+-
+-
+-if __name__ == '__main__':
+-    try:
+-        main()
+-    except BaseException:
+-        traceback.print_exc()
+-        raise
+--- a/tests/quality/task044/miri_support.py
++++ b/tests/quality/task044/miri_support.py
+@@ -1,59 +0,0 @@
+-"""Pinned Miri host/target separation and fail-closed libtest evidence parsing."""
+-import json
+-import re
+-
+-NIGHTLY = 'nightly-2026-02-12'
+-# Cargo 0c9e687 also uses cfg(all()).runner for host build scripts. Keep
+-# those native while target test JSON continues through cargo-miri runner.
+-HOST_FLAGS = ['-Zhost-config', '-Ztarget-applies-to-host', '--config', 'host.runner=["/usr/bin/env"]']
+-
+-
+-def miri_command(verb, *args):
+-    return ['cargo', '+'+NIGHTLY, 'miri', verb, *HOST_FLAGS, *args]
+-
+-
+-def parse_test_events(log, known):
+-    known = list(known)
+-    if len(set(known)) != len(known):
+-        raise ValueError('duplicate registered test')
+-    states = {}
+-    for line in log.splitlines():
+-        if not line.startswith('{'):
+-            continue
+-        try:
+-            item = json.loads(line)
+-        except json.JSONDecodeError:
+-            continue  # truncated final event is not a completed test
+-        if item.get('type') != 'test':
+-            continue
+-        name, event = item.get('name'), item.get('event')
+-        if name not in known:
+-            raise ValueError('unregistered test event')
+-        if event == 'started':
+-            if name in states:
+-                raise ValueError('duplicate test start')
+-            states[name] = 'active'
+-        elif event == 'timeout':
+-            if states.get(name) != 'active':
+-                raise ValueError('timeout warning without active test')
+-        elif event in {'ok', 'failed', 'ignored'}:
+-            # libtest can emit ignored directly, without a start event.
+-            if states.get(name) != 'active' and not (event == 'ignored' and name not in states):
+-                raise ValueError('missing start or duplicate test completion')
+-            states[name] = {'ok':'passed', 'failed':'failed', 'ignored':'ignored'}[event]
+-        else:
+-            raise ValueError('unknown test event')
+-    return {key:[name for name in known if states.get(name)==key] for key in
+-            ['passed','failed','ignored','active']} | {'unseen':[name for name in known if name not in states]}
+-
+-
+-def classify_failure(status, log):
+-    if re.search(r'^error: Undefined Behavior:', log, re.MULTILINE):
+-        return 'Failed: UB'
+-    if status == 'timeout':
+-        return 'Partial: timeout'
+-    if re.search(r'^error: unsupported operation:', log, re.MULTILINE):
+-        return 'Unsupported'
+-    if 'assertion failed' in log or '... FAILED' in log:
+-        return 'Failed: assertion'
+-    return 'Unknown: execution error'
+--- a/tests/quality/test_coverage044.py
++++ b/tests/quality/test_coverage044.py
+@@ -39,3 +39,51 @@
+         result = summarize({'data': [{'files': [row]}]}, branches=True)
+         self.assertAlmostEqual(result['totals']['branches']['percent'], 100 / 3)
+         self.assertEqual(result['totals']['branches']['status'], 'Measured')
++
++
++class CoverageEntryTests(unittest.TestCase):
++    def check_mode(self, mode, expected_measurements):
++        import builtins
++        import importlib.util
++        from pathlib import Path
++        import sys
++        import tempfile
++        from unittest import mock
++
++        original_import = builtins.__import__
++        def without_miri(name, *args, **kwargs):
++            if 'miri' in name:
++                raise ImportError('Miri support is deliberately unavailable')
++            return original_import(name, *args, **kwargs)
++
++        here = Path(__file__).resolve().parent
++        spec = importlib.util.spec_from_file_location('coverage_study', here/'task044/entry.py')
++        entry = importlib.util.module_from_spec(spec)
++        with mock.patch.object(sys, 'path', [str(here.parent/'protocol'), *sys.path]), \
++                mock.patch('builtins.__import__', side_effect=without_miri):
++            spec.loader.exec_module(entry)
++        with tempfile.TemporaryDirectory() as temp:
++            entry.SCRATCH = Path(temp)
++            entry.STUDY_MODE = mode
++            measurements, commands = [], []
++            entry.boundary = lambda: {'checked': True}
++            entry.write = lambda *args: None
++            entry.smoke = lambda: None
++            entry.measure = lambda label, **kwargs: measurements.append((label, kwargs))
++            def run(command, *args, **kwargs):
++                self.assertNotIn('miri', command)
++                if mode == 'coverage044':
++                    self.assertFalse(any('nightly' in arg for arg in command))
++                commands.append(command)
++            entry.run = run
++            entry.main()
++            self.assertEqual(measurements, expected_measurements)
++            self.assertEqual(len(commands), 1)
++
++    def test_stable_coverage_needs_neither_miri_nor_nightly(self):
++        self.check_mode('coverage044', [('default', {}), ('all-features', {'all_features': True})])
++
++    def test_branch_coverage_is_explicit_and_has_no_miri_trial(self):
++        self.check_mode('coverage044-branch', [
++            ('branch-default', {'nightly': True}),
++            ('branch-all-features', {'nightly': True, 'all_features': True})])
+--- a/tests/quality/test_miri044.py
++++ b/tests/quality/test_miri044.py
+@@ -1,44 +0,0 @@
+-"""Observable libtest/Miri outcome parsing; never confuse missing tests with pass."""
+-import json
+-import unittest
+-from task044.miri_support import parse_test_events, classify_failure
+-
+-
+-class MiriEvidenceTests(unittest.TestCase):
+-    def test_completed_active_and_ignored_are_separate(self):
+-        known=['scope::ok','scope::blocked','scope::later','scope::ignored']
+-        log='\n'.join(json.dumps(x) for x in [
+-            {'type':'test','event':'started','name':'scope::ok'},
+-            {'type':'test','event':'ok','name':'scope::ok'},
+-            {'type':'test','event':'started','name':'scope::ignored'},
+-            {'type':'test','event':'ignored','name':'scope::ignored'},
+-            {'type':'test','event':'started','name':'scope::blocked'}])+'\nerror: unsupported operation: ts_parser_new\n'
+-        events=parse_test_events(log,known)
+-        self.assertEqual(events['passed'],['scope::ok'])
+-        self.assertEqual(events['ignored'],['scope::ignored'])
+-        self.assertEqual(events['active'],['scope::blocked'])
+-        self.assertEqual(events['unseen'],['scope::later'])
+-        self.assertEqual(classify_failure(1,log),'Unsupported')
+-
+-    def test_undefined_behavior_is_failure_even_with_unsupported_in_backtrace(self):
+-        log='error: Undefined Behavior: null pointer\nnote: unsupported is not the primary diagnostic'
+-        self.assertEqual(classify_failure(1,log),'Failed: UB')
+-        self.assertEqual(classify_failure('timeout',''),'Partial: timeout')
+-        self.assertEqual(classify_failure(101,'test a ... FAILED\nassertion failed'),'Failed: assertion')
+-        self.assertEqual(classify_failure(1,'tool exited'),'Unknown: execution error')
+-
+-    def test_no_success_from_empty_summary_or_foreign_test_names(self):
+-        events=parse_test_events('test result: ok. 0 passed; 0 failed\n',['a'])
+-        self.assertEqual(events['passed'],[])
+-        self.assertEqual(events['unseen'],['a'])
+-        with self.assertRaises(ValueError):
+-            parse_test_events(json.dumps({'type':'test','event':'started','name':'foreign'}),['a'])
+-        with self.assertRaises(ValueError):
+-            parse_test_events('\n'.join(json.dumps({'type':'test','event':event,'name':'a'}) for event in ['started','ok','failed']),['a'])
+-
+-    def test_libtest_timeout_warning_keeps_test_active(self):
+-        log='\n'.join(json.dumps({'type':'test','event':e,'name':'slow'}) for e in ['started','timeout'])
+-        self.assertEqual(parse_test_events(log,['slow'])['active'],['slow'])
+-        self.assertEqual(parse_test_events(log,['slow'])['passed'],[])
+-        log+='\n'+json.dumps({'type':'test','event':'ok','name':'slow'})
+-        self.assertEqual(parse_test_events(log,['slow'])['passed'],['slow'])
+--- a/tests/protocol/test_container_runner.py
++++ b/tests/protocol/test_container_runner.py
+@@ -29,6 +29,15 @@
+ 
+ 
+ class HostBoundaryTests(unittest.TestCase):
++    def test_retired_miri_cases_are_rejected_before_container_work(self):
++        from unittest import mock
++        with tempfile.TemporaryDirectory() as temp, mock.patch.object(
++                runner.subprocess, 'run', side_effect=AssertionError('unexpected container work')):
++            for case in ['coverage044-miri', 'miri044-followup', 'miri044-range', 'miri044-os-range']:
++                with self.subTest(case=case), self.assertRaises(ValueError):
++                    runner.execute('sha256:'+'0'*64, Path(temp)/case, case=case)
++            self.assertEqual(list(Path(temp).iterdir()), [])
++
+     def test_only_regular_bounded_relative_artifacts_are_extracted(self):
+         with tempfile.TemporaryDirectory() as temp:
+             out = Path(temp) / 'safe'

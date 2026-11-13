@@ -2,7 +2,9 @@
 
 [日本語](SCANNING.ja.md) · [README](../../README.md)
 
-This guide describes v0.2.0 static scanning. Use it after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
+This guide describes the v0.3 development checkout. Detected references and findings can differ from the published v0.2.0 release.
+
+Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
 
 ## Contents
 
@@ -63,7 +65,7 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 
 For a CI scan of your product, generate SARIF with `--format sarif` and choose `--fail-on high|critical` if findings should fail the job. Add `--require-complete` only if incomplete inspection must also fail; its exit 3 takes precedence over the finding threshold. The selected scope and unsupported formats still matter.
 
-The checked-in [workflow](../../.github/workflows/pqc-scan.yml) shows GitHub Code Scanning upload and artifact storage. Retain the raw report so findings remain available for review.
+The checked-in [workflow](../../.github/workflows/pqc-scan.yml) shows GitHub Code Scanning upload and artifact storage. Its `quality` job runs on PRs, while `baseline` and `scan` run on develop pushes; manual runs enable all three. Documentation-only automatic runs are skipped, and `protocols` is temporarily disabled even for manual runs. See [repository CI](../../README.md#repository-ci) for the event conditions. These are this repository's CI choices; select exit gates explicitly for your own product. Retain the raw report so findings remain available for review.
 This repository applies an additional source/result-bound policy to its own reviewed test/catalog references; it is not a general exclusion of test directories. See [self-scan policy](../quality/CI-SELF-SCAN.md) before reusing that preparation step in another project.
 
 <a id="from-source"></a>
@@ -137,7 +139,7 @@ Regex and AST each examine at most 65,536 match candidates per rule/file. AST al
 limits semantic candidates to 262,144, scheduled tree nodes to 2,000,000 and
 cumulative candidate text examined across rules to 256 MiB per file. Matching uses
 full candidate text; clipping a displayed preview does not limit inspection.
-These are finite resource bounds, not performance guarantees. See the
+Large numbers of accepted findings can increase report size, memory use and output time even within these limits. These are finite resource bounds, not performance guarantees. See the
 [coverage guide](COVERAGE.md#source-limits) for syntax and encoding limits.
 
 ### Parsing errors and unsupported formats

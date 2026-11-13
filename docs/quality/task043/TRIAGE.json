@@ -1,0 +1,2274 @@
+{
+  "version": 1,
+  "task": "043",
+  "head": "0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf",
+  "branch": "codex/quality-assessment-model",
+  "scope": "Post-observation source-based triage; immutable truth and native counts preserved; proposals are not implementations",
+  "observationCounts": {
+    "legacy": 8,
+    "expanded": 34,
+    "pattern_control": 8
+  },
+  "groups": [
+    {
+      "id": "C01",
+      "title": "Node.jsの別名とローカル束縛",
+      "priority": "P1",
+      "category": "detector_limit",
+      "rootCauseStatus": "Verified",
+      "cause": "PQC_NODE_APIは呼出しの綴りとリテラルに一致し、import aliasと局所的な同名定義・引数の束縛を解決しない。",
+      "proposedSpec": "明示的なcrypto importのaliasを追跡し、明示的な同名ローカル定義・shadowingは別扱いにする。import省略の既存nominal参照は一律削除しない。",
+      "impact": "FNとFPの両方に影響。JS/TS/TSXのscope・出現位置・32件上限・既存互換性の確認が必要。",
+      "positiveTestProposal": "u003の直接呼出しとu014/x025の明示的import aliasを保持。",
+      "negativeTestProposal": "u015/x024のローカル同名関数、x026の引数shadowingをcrypto APIと確定しない。",
+      "boundaryTestProposal": "別scopeでの再束縛、namespace alias、importなしnominal、同一行2件、判定不能な束縛を試す。",
+      "sourceEvidence": [
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 120,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        },
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 23,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        }
+      ],
+      "unitIds": [
+        "u014",
+        "u015",
+        "x024",
+        "x025",
+        "x026"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "legacy-02",
+        "legacy-03",
+        "expanded-07",
+        "expanded-08",
+        "expanded-14"
+      ]
+    },
+    {
+      "id": "C02",
+      "title": "ヘルプ文字列をNode APIと認識する",
+      "priority": "P1",
+      "category": "detector_limit",
+      "rootCauseStatus": "Verified",
+      "cause": "ASTのstringを候補に含め、その内部へgenerateKeyPairの正規表現を適用する。x023は実際の呼出しnodeではない。",
+      "proposedSpec": "呼出し構造とその引数を使ってPQC_NODE_APIを判定し、文字列中のコード例を分離する。",
+      "impact": "説明文字列のFPを減らせる可能性。実APIの方式リテラルを落とさず、他のliteral用規則の意味を変えない。",
+      "positiveTestProposal": "x021の直接呼出し、x030等の同一行複数呼出しを保持。",
+      "negativeTestProposal": "x023のヘルプ文字列とx022のコメントはAPI呼出しにしない。",
+      "boundaryTestProposal": "template literal内のコード文字列と実補間式、escape、親子候補の重複を区別。",
+      "sourceEvidence": [
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 294,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 125,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        },
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 30,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        }
+      ],
+      "unitIds": [
+        "x023"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "expanded-09"
+      ]
+    },
+    {
+      "id": "C03",
+      "title": "Rustのローカルmoduleとcrateの取り違え",
+      "priority": "P1",
+      "category": "detector_limit",
+      "rootCauseStatus": "Verified",
+      "cause": "u021はローカルmod ml_kemとDummy型だが、scoped_identifierの文字列がcrate参照の綴りに一致する。",
+      "proposedSpec": "明示的なローカルmoduleが隠す範囲を認識する。出所不明の名前は実crateや実行済みと断定しない。",
+      "impact": "Rust PQC在庫の根拠に影響。Cargo依存の存在をAPI使用の証明にしない。",
+      "positiveTestProposal": "x012のuse ml_kem::MlKem768など既存参照を保持。",
+      "negativeTestProposal": "u021のローカルmodとDummyを外部PQC crateとして確定しない。",
+      "boundaryTestProposal": "nested module、use alias、別scope、依存宣言なしのnominal参照。",
+      "sourceEvidence": [
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 294,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        },
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 56,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        }
+      ],
+      "unitIds": [
+        "u021"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "legacy-01"
+      ]
+    },
+    {
+      "id": "C04",
+      "title": "Rubyの方式名リテラルとAPI正解の違い",
+      "priority": "P1",
+      "category": "scope_or_contract",
+      "rootCauseStatus": "Verified",
+      "cause": "u022はputsの文字列。現規則はdescriptionもpatternもRuby PQC algorithm literalで、protocolはAPI利用を問うため定義が一致しない。",
+      "proposedSpec": "リテラル在庫を維持するか、PKey APIの呼出しへ限定するかを先に決める。正解と命名・説明を同じ性質へそろえる。",
+      "impact": "単にpatternを狭めると承認済みのliteral inventoryを失う。Risk/Confidenceの再解釈は056。",
+      "positiveTestProposal": "既存RubyのPKey生成例を保持し、literal在庫を維持するならその正解を別評価する。",
+      "negativeTestProposal": "putsの文字列をAPI実利用や生成成功の証拠にしない。",
+      "boundaryTestProposal": "変数へ格納した方式名、alias、コメント、provider非対応を分離。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 67,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 122,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        },
+        {
+          "path": "tests/quality/PROTOCOL.md",
+          "line": 11,
+          "sha256": "28d37934f6a584294fd8093b2f343b936b3f492dae023d8f57664fdc35b2a018"
+        }
+      ],
+      "unitIds": [
+        "u022"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "legacy-00"
+      ]
+    },
+    {
+      "id": "C05",
+      "title": "Pythonでimport aliasを解決しない",
+      "priority": "P2",
+      "category": "detector_limit",
+      "rootCauseStatus": "Verified",
+      "cause": "u020はMLKEM768PrivateKey as Keyの後にKey.generate()。規則は型名とgenerateの直接表記のみ。",
+      "proposedSpec": "明示的import aliasと呼出しを有界に関連付ける。",
+      "impact": "Pythonの参照Recallに影響。名前だけ同じ別クラスへの誤報を増やさない。",
+      "positiveTestProposal": "u020と通常のMLKEM768PrivateKey.generateを検出対象にする。",
+      "negativeTestProposal": "Keyという任意のローカルclassのgenerateはPQCと確定しない。",
+      "boundaryTestProposal": "aliasの再代入、関数引数shadowing、動的importは不明として扱う。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 45,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 125,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        }
+      ],
+      "unitIds": [
+        "u020"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "legacy-04"
+      ]
+    },
+    {
+      "id": "C06",
+      "title": "Pythonのimport参照と生成専用pattern",
+      "priority": "P2",
+      "category": "scope_or_contract",
+      "rootCauseStatus": "Verified",
+      "cause": "u051の正解spanは複数行import。現patternはPrivateKey.generate(のみで、単なるimportと生成呼出しは別の性質。",
+      "proposedSpec": "import在庫を対象に含めるか、生成専用規則に別の観測を追加するかを決める。",
+      "impact": "importの存在から生成・backend利用へ格上げしない。旧正解を事後に負例へ変えない。",
+      "positiveTestProposal": "MLDSA87PrivateKey importを対象にするなら正例として別の用途を記録する。",
+      "negativeTestProposal": "コメントや無関係な同名型をimportとして判定しない。",
+      "boundaryTestProposal": "複数行import、alias、未使用import、途中で切れたimport。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 52,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        },
+        {
+          "path": "tests/quality/corpus/independent-holdout/approval_backend.py",
+          "line": 3,
+          "sha256": "d2a6c4e718070019c0ddde6c6f8c89e8b38bd3003f929987517dbcad6e71da8b"
+        }
+      ],
+      "unitIds": [
+        "u051"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "legacy-06"
+      ]
+    },
+    {
+      "id": "C07",
+      "title": "構文エラー時の呼出し候補の不足",
+      "priority": "P2",
+      "category": "detector_limit",
+      "rootCauseStatus": "Partial",
+      "cause": "u027/x011/x005には名目的な呼出しが見えるが、Partialな構文木から十分なcall/method候補を得られない可能性が高い。Partial診断と不検出は実測済み。回復木の全候補dumpによる特定は未実施。",
+      "proposedSpec": "構文エラー時に残せる参照と信頼度を定義し、ERROR nodeの無制限全文検索は避ける。",
+      "impact": "破損入力のRecallと文字列FPの両方に影響。Partial診断と上限を保持する。",
+      "positiveTestProposal": "u027/x011/x005の見える参照をどこまで保持するか受入仕様を決める。",
+      "negativeTestProposal": "破損したヘルプ文字列・コメントから暗号APIを捏造しない。",
+      "boundaryTestProposal": "閉じ括弧/引用符の欠落、UTF-8境界、候補上限、他の正常参照の保持を試す。",
+      "sourceEvidence": [
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 93,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 237,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        },
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 8,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        },
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 52,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        }
+      ],
+      "unitIds": [
+        "u027",
+        "x005",
+        "x011"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "legacy-05",
+        "expanded-11",
+        "expanded-12"
+      ]
+    },
+    {
+      "id": "C08",
+      "title": "Rustの未完了crate pathを正例にする範囲",
+      "priority": "P2",
+      "category": "scope_or_contract",
+      "rootCauseStatus": "Verified",
+      "cause": "x014はuse ml_kem::で終わり、規則は::に続くsymbolを要求する。正解はcrate名の名目的参照までをpositiveとしている。",
+      "proposedSpec": "未完了pathを低い保証の参照として残すか、完全symbol専用の意味を維持するか決める。",
+      "impact": "不完全構文の扱いと参照定義の変更。crate名だけから利用成功を主張しない。",
+      "positiveTestProposal": "完成したuse ml_kem::MlKem768は保持する。",
+      "negativeTestProposal": "似た名前のローカルmoduleや文字列を完成したcrate symbolにしない。",
+      "boundaryTestProposal": "空pathと完全path、コメント後のEOF、ERROR nodeを比較。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 63,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 93,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        }
+      ],
+      "unitIds": [
+        "x014"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "expanded-13"
+      ]
+    },
+    {
+      "id": "C09",
+      "title": "JavaのSLH-DSA参照がML専用patternにない",
+      "priority": "P2",
+      "category": "rule_coverage_gap",
+      "rootCauseStatus": "Verified",
+      "cause": "x003はSLH-DSA-SHAKE-256sを指定するが、PQC_JAVA_APIのpatternはML-KEM/ML-DSAだけ。",
+      "proposedSpec": "SLH-DSAの名目的な標準方式参照を対象に加えるなら、認める名称とprovider依存を仕様化する。",
+      "impact": "providerの存在・JDKでの成功やFIPS適合を意味しない。既存ML参照を維持。",
+      "positiveTestProposal": "ML-DSAの既存例と採用したSLH-DSA名を保持。",
+      "negativeTestProposal": "無関係な文字列・未知suffix・似た型名を標準方式と確定しない。",
+      "boundaryTestProposal": "大文字小文字、方式variant、未知parameter、provider指定の有無。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 1,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        }
+      ],
+      "unitIds": [
+        "x003"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "expanded-10"
+      ]
+    },
+    {
+      "id": "C10",
+      "title": "旧称Kyberの大文字小文字",
+      "priority": "P2",
+      "category": "rule_coverage_gap",
+      "rootCauseStatus": "Verified",
+      "cause": "x036のkyber768は小文字だが、旧称patternは大文字KのKyberでcase-sensitive。",
+      "proposedSpec": "認める旧称aliasとcase正規化範囲を明示する。",
+      "impact": "単純な全体case-insensitive化で識別子・無関係語のFPが増える可能性。最終ML-KEMとの同一性は主張しない。",
+      "positiveTestProposal": "既存Kyber768と、採用したkyber768表記を旧称として残す。",
+      "negativeTestProposal": "最終ml-kem-768や無関係なmykyber768型を旧称と誤認しない。",
+      "boundaryTestProposal": "語境界、大小文字混在、未知parameter、draft suffix。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 122,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 142,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        }
+      ],
+      "unitIds": [
+        "x036"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "expanded-15"
+      ]
+    },
+    {
+      "id": "C11",
+      "title": "Javaプロパティの表記と評価範囲",
+      "priority": "P1",
+      "category": "scope_or_contract",
+      "rootCauseStatus": "Verified",
+      "cause": "u054はXML形のentry、x042は.conf内のJava System.setProperty断片。規則は行全体のkey=value形式だけ。文字列上の設定意図と実際に読み込まれる設定は別。",
+      "proposedSpec": "properties/XML/Java APIを別の入力表現として定義し、対応する静的な代入・値と適用不明を分離する。",
+      "impact": "x042を有効設定とみなす根拠はUnknown。u054もload経路・XMLの実受理は未確認。正解の再評価は別版。",
+      "positiveTestProposal": "既存key=value正例を保持し、採用する表記ごとに専用正例を用意。",
+      "negativeTestProposal": "comment、hybrid混在、無関係な同名key、読込経路不明を実有効設定にしない。",
+      "boundaryTestProposal": "空list、未知group、XML形の破損、Java断片を.confに置いた例を区別。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 89,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        },
+        {
+          "path": "tests/quality/corpus/independent-holdout/archive-policy.xml",
+          "line": 6,
+          "sha256": "9b36fc1f8fa21dcacc48759ecd0f8a6888f27da23a53defaac5da88ef1700454"
+        }
+      ],
+      "unitIds": [
+        "u054",
+        "x042"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "legacy-07",
+        "expanded-16"
+      ]
+    },
+    {
+      "id": "C12",
+      "title": "Node.jsの有限loopの値を追跡しない",
+      "priority": "P2",
+      "category": "detector_limit",
+      "rootCauseStatus": "Verified",
+      "cause": "x131〜x139の引数はasymmetricKeyType。patternは同じcall内の引用された方式名を要求し、有限配列とloop変数の関係を解かない。",
+      "proposedSpec": "同じscopeの明示的な有限文字列集合だけを有界に伝播する仕様を別途設計する。",
+      "impact": "9件は一系統の相関例。修正に使った後は独立holdoutと呼べず、新系統が必要。",
+      "positiveTestProposal": "元の直接literalと、有限loopのnominal参照を保持。",
+      "negativeTestProposal": "外部requestの動的値や再代入後の値を標準PQCと確定しない。",
+      "boundaryTestProposal": "集合サイズ・scope・再代入・分岐・生成候補数の上限を設定し、guardを実行成功と混同しない。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 30,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 125,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        }
+      ],
+      "unitIds": [
+        "x131",
+        "x132",
+        "x133",
+        "x134",
+        "x135",
+        "x136",
+        "x137",
+        "x138",
+        "x139"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "expanded-23",
+        "expanded-24",
+        "expanded-25",
+        "expanded-26",
+        "expanded-27",
+        "expanded-28",
+        "expanded-29",
+        "expanded-30",
+        "expanded-31"
+      ]
+    },
+    {
+      "id": "C13",
+      "title": "RSA生成とhash名だけの署名呼出し",
+      "priority": "P2",
+      "category": "rule_coverage_gap",
+      "rootCauseStatus": "Verified",
+      "cause": "x145のgenerateKeyPairSync(rsa)はTS_NODE_RSA_USAGEにbranchがなく、x146のcreateSign(SHA256)はRSA prefix専用API規則へ一致しない。別規則の鍵長所見は存在する。",
+      "proposedSpec": "RSA生成参照の追加と、生成鍵から署名への局所的な関連付けを別候補として仕様化する。",
+      "impact": "ファイル全体でRSAが存在しないわけではない。SHA256というdigest名だけをRSAにしてはならない。",
+      "positiveTestProposal": "明示的RSA生成、同じRSA鍵を署名へ渡す例を採用仕様に従い試す。",
+      "negativeTestProposal": "EC鍵や由来不明の鍵でcreateSign(SHA256)をRSAと確定しない。",
+      "boundaryTestProposal": "別scope/複数鍵/別名関数/再代入を分け、交差statementの推論は有界にする。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 23,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        },
+        {
+          "path": "rules/default/tree_sitter.yml",
+          "line": 45,
+          "sha256": "34ae0e842ce9e36cff90da2d188d8eb842fa00755af7b2eac8e90a09a7cde69b"
+        },
+        {
+          "path": "rules/default/crypto_api.yml",
+          "line": 67,
+          "sha256": "8020d85ef00fae35571427521f975b022b9b9e72cdcbb6f0687925cf5c40865e"
+        }
+      ],
+      "unitIds": [
+        "x145",
+        "x146"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "expanded-32",
+        "expanded-33"
+      ]
+    },
+    {
+      "id": "C14",
+      "title": "Gradleとgemspecの狭い宣言文法",
+      "priority": "P2",
+      "category": "detector_limit",
+      "rootCauseStatus": "Verified",
+      "cause": "x072の同一行dependencies block、x075のKotlin括弧呼出し、x102のs.add_dependencyは、行頭implementation+空白、固定receiver spec.だけのlexical parserに入らない。依存一覧にも項目がない。",
+      "proposedSpec": "コードを実行せず、対応するDSLの有限な宣言形を増やす。",
+      "impact": "動的DSL全体の解析や解決ではない。Partial/NotReportedをCompleteへ安易に変えない。",
+      "positiveTestProposal": "複数行Groovyの既存形に加えて同一行・Kotlin括弧・任意block変数の採用形を試す。",
+      "negativeTestProposal": "コメント・単なる文字列・別objectの同名method・動的補間を依存宣言と確定しない。",
+      "boundaryTestProposal": "改行/括弧/quote/receiver binding/unknown directiveと10000件上限。",
+      "sourceEvidence": [
+        {
+          "path": "crates/pqc_scan_detectors/src/dependency_detector/lexical.rs",
+          "line": 55,
+          "sha256": "1fe116a2de1f99a7d58f6e86351376472156d9020adc39b7e295d8855707d6fb"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/dependency_detector/lexical.rs",
+          "line": 189,
+          "sha256": "1fe116a2de1f99a7d58f6e86351376472156d9020adc39b7e295d8855707d6fb"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/dependency_detector/parse.rs",
+          "line": 1144,
+          "sha256": "2060798ecb245bad252ec44b441e1c268a66d6a9dfdd0df8b82b057fc9ce6db7"
+        }
+      ],
+      "unitIds": [
+        "x072",
+        "x075",
+        "x102"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "expanded-18",
+        "expanded-19",
+        "expanded-20"
+      ]
+    },
+    {
+      "id": "C15",
+      "title": "抽出済み依存がPQC規則の対象にない",
+      "priority": "P2",
+      "category": "rule_coverage_gap",
+      "rootCauseStatus": "Verified",
+      "cause": "x066のCIRCLはgolang、x105のOpenSSLはgeneric、x109はunknown ecosystemとして依存一覧にある。PQC ruleの列挙に該当する組合せがない。",
+      "proposedSpec": "依存抽出の修正と取り違えず、追加するlibrary/ecosystem/版の根拠・来歴を定義する。",
+      "impact": "generic/unknownの名前だけでは実体や機能を確定できない。presenceからPQC enabledへ格上げしない。",
+      "positiveTestProposal": "元のcargo/gem/pypi等を保持し、採用する来歴付きCIRCL/OpenSSL候補を試す。",
+      "negativeTestProposal": "同名の無関係package、不正purl、未知版、機能無効をPQC有効扱いしない。",
+      "boundaryTestProposal": "reported/declared/resolved版、purlとnameの衝突、generic/unknownの不足情報。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/pqc.yml",
+          "line": 111,
+          "sha256": "0606e7d3caf45ca7b3d4179112c7175a3344d5cfe3032eec9c8109c536231f8a"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/dependency_detector.rs",
+          "line": 42,
+          "sha256": "e0b1cd827a02ab75ae31615648f41b88f7c3c8e67f8dd5a687c6d5029add66bd"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/dependency_detector/parse.rs",
+          "line": 1048,
+          "sha256": "2060798ecb245bad252ec44b441e1c268a66d6a9dfdd0df8b82b057fc9ce6db7"
+        }
+      ],
+      "unitIds": [
+        "x066",
+        "x105",
+        "x109"
+      ],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "expanded-17",
+        "expanded-21",
+        "expanded-22"
+      ]
+    },
+    {
+      "id": "C16",
+      "title": "正しい所見が未注釈のためFPになる",
+      "priority": "P1",
+      "category": "annotation_gap",
+      "rootCauseStatus": "Verified",
+      "cause": "JWTのRS256に対するTS_NODE_RSA_USAGE1件と、同じ公開RSA3072証明書の署名属性4件は、指定済み規則の正解単位がないためFPになる。原ソースと公開属性manifestはその参照・署名を裏付ける。",
+      "proposedSpec": "042-v1を不変に保ち、全評価対象の注釈を監査した別版を作る。",
+      "impact": "これら5件を製品の誤報として修正しない。修正版は事後調整であり独立評価や旧データの精度改善とは呼ばない。",
+      "positiveTestProposal": "JWT signatureとcertificate SPKI/signatureを別属性として記録する。",
+      "negativeTestProposal": "正しい追加属性・別規則の所見を一括抑制せず、重複FPや本当の誤報を残す。",
+      "boundaryTestProposal": "同一line複数規則、複数属性、証明書形式変換、未知位置・未注釈の網羅性を点検。",
+      "sourceEvidence": [
+        {
+          "path": "tests/quality/evaluate.py",
+          "line": 133,
+          "sha256": "4b341b0d4c8374615198d18a8ccf449de326f1df197ebc98a9994ddc8333351c"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/tests/fixtures/certificates/manifest.json",
+          "line": 106,
+          "sha256": "a3dd30971583ef3fbf6769465008070d521f4c0733bc768ddd4229fc05e29fed"
+        },
+        {
+          "path": "rules/default/tree_sitter.yml",
+          "line": 45,
+          "sha256": "34ae0e842ce9e36cff90da2d188d8eb842fa00755af7b2eac8e90a09a7cde69b"
+        }
+      ],
+      "unitIds": [],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "expanded-00",
+        "expanded-03",
+        "expanded-04",
+        "expanded-05",
+        "expanded-06"
+      ]
+    },
+    {
+      "id": "C17",
+      "title": "破損PKCS12にも互換性のfilename signalが出る",
+      "priority": "P1",
+      "category": "scope_or_contract",
+      "rootCauseStatus": "Verified",
+      "cause": "broken.p12/pfxはmalformed_structureを報告しつつ、既存互換性のfilename/container signalを残す。これはPKCS12の解析成功や鍵の存在ではない。",
+      "proposedSpec": "弱い拡張子signalと解析済みcontainerの保証をどう示し評価するかを決める。",
+      "impact": "signal削除は既存互換性に影響。現出力から解析失敗の事実を隠してはならない。",
+      "positiveTestProposal": "有効な公開certificate-only PKCS12と既存signalの互換性を保持。",
+      "negativeTestProposal": "破損ファイル名だけでvalid container/鍵/信頼性を確定しない。",
+      "boundaryTestProposal": "encrypted-only、malformed、正しい公開属性を一部回収できた状態、MAC未検証を区別。",
+      "sourceEvidence": [
+        {
+          "path": "crates/pqc_scan_detectors/src/certificate_detector.rs",
+          "line": 101,
+          "sha256": "330c5293ef9aabb7818c419280dc1fcc3c4d79930e5fde6f6c983c11d0973c5d"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/certificate_detector.rs",
+          "line": 138,
+          "sha256": "330c5293ef9aabb7818c419280dc1fcc3c4d79930e5fde6f6c983c11d0973c5d"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/tests/pkcs12_certificates.rs",
+          "line": 121,
+          "sha256": "ae54f8e346cd41a2b27681227212ea461dedc590703c9a3c3def40d04d11f658"
+        }
+      ],
+      "unitIds": [],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "expanded-01",
+        "expanded-02"
+      ]
+    },
+    {
+      "id": "C18",
+      "title": "TLSバージョンのprefix/boundary",
+      "priority": "P1",
+      "category": "known_pattern_risk",
+      "rootCauseStatus": "Verified",
+      "cause": "NODE_TLS_MIN_VERSIONはTLSv1 prefix、TLS_VERSION_1_0はunderscoreを境界に認める。TS規則も同種のpatternだがbare identifierはAST guardで抑えられ、string文脈では実際に出力される。",
+      "proposedSpec": "TLS version tokenを正確に区切り、認める旧版と現代版・別名表記を明示する。",
+      "impact": "TLS1.0/1.1の検出を維持し、TLS1.2/1.3やTLSv1_3を旧版にしない。regexとASTを別々に回帰確認。",
+      "positiveTestProposal": "TLSv1.0/TLSv1.1/TLSv1_0/TLSv1_1の採用表記を保持。",
+      "negativeTestProposal": "minVersion TLSv1.3、TLSv1_3文字列、TLSv1.2、長い識別子を旧版としない。",
+      "boundaryTestProposal": "quote、underscore、suffix、大小文字、コメント、bare identifierとliteralを別試験。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/tls.yml",
+          "line": 23,
+          "sha256": "9c4a18c98005d4ca581c0eb0f3595ee7e762dc2a626e4166d8eb9b0be0ccbe0a"
+        },
+        {
+          "path": "rules/default/tls.yml",
+          "line": 89,
+          "sha256": "9c4a18c98005d4ca581c0eb0f3595ee7e762dc2a626e4166d8eb9b0be0ccbe0a"
+        },
+        {
+          "path": "rules/default/tree_sitter.yml",
+          "line": 122,
+          "sha256": "34ae0e842ce9e36cff90da2d188d8eb842fa00755af7b2eac8e90a09a7cde69b"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 353,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        }
+      ],
+      "unitIds": [],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "pattern-NODE_TLS_MIN_VERSION",
+        "pattern-TLS_VERSION_1_0",
+        "pattern-TS_TLS_LEGACY_VERSION_LITERAL"
+      ]
+    },
+    {
+      "id": "C19",
+      "title": "無効化されたprotocol/cipher operand",
+      "priority": "P1",
+      "category": "known_pattern_risk",
+      "rootCauseStatus": "Verified",
+      "cause": "Apacheの-TLSv1/-TLSv1.1とcipher listの!RSA/!3DES/!RC4/!DESを文字列で検出し、除外operandの意味を見ていない。4つのexact controlはCLIでも所見を出す。",
+      "proposedSpec": "有界に設定operandの追加・除去を解釈し、不明な表現は有効設定と断定しない。",
+      "impact": "単純に!がある行全体を無視すると同じ行の有効な危険operandを落とす。ECDSAが量子安全という意味ではない。",
+      "positiveTestProposal": "実際に有効なTLS1.0/1.1やRSA/弱cipherの選択を保持。",
+      "negativeTestProposal": "既存の-TLS/!RSA等の除外だけを有効な選択と判定しない。",
+      "boundaryTestProposal": "enabledとdisabledの混在、+/-/!、順序、Include等で未解決の設定を区別。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/middleware.yml",
+          "line": 78,
+          "sha256": "58cca7b8dd25144a1f40a306d46ec5619fbf7da4504140b2607af7b34404b145"
+        },
+        {
+          "path": "rules/default/middleware.yml",
+          "line": 89,
+          "sha256": "58cca7b8dd25144a1f40a306d46ec5619fbf7da4504140b2607af7b34404b145"
+        },
+        {
+          "path": "rules/default/middleware.yml",
+          "line": 45,
+          "sha256": "58cca7b8dd25144a1f40a306d46ec5619fbf7da4504140b2607af7b34404b145"
+        }
+      ],
+      "unitIds": [],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "pattern-HTTPD_SSLCIPHERSUITE_RSA",
+        "pattern-HTTPD_SSLPROTOCOL_LEGACY",
+        "pattern-K8S_INGRESS_RSA_CIPHERS",
+        "pattern-NGINX_SSL_CIPHERS_RSA"
+      ]
+    },
+    {
+      "id": "C20",
+      "title": "Ruby汎用JWT APIとRSAの分類",
+      "priority": "P1",
+      "category": "known_pattern_risk",
+      "rootCauseStatus": "Verified",
+      "cause": "TS_RUBY_RSA_USAGEのJWT.encode/decode branchはalgorithmを問わない。exact HMAC callは非PQC call候補をskipするためnativeでは出ず、同じ文言をstringにすると出力される。",
+      "proposedSpec": "RSA-familyの証拠と汎用JWTの不明なalgorithmを分け、AST candidate/stringの境界も確認する。",
+      "impact": "patternの一致とnative所見は別。Risk/Confidenceやlocal assessmentへの伝播は056の検証対象。",
+      "positiveTestProposal": "RS256/PS256や明示的RSAの参照を保持。",
+      "negativeTestProposal": "HMAC呼出し・そのヘルプ文字列をRSAと確定しない。",
+      "boundaryTestProposal": "decode時のalgorithm不明、複数候補、文字列、node-kind差と正負を別に試す。",
+      "sourceEvidence": [
+        {
+          "path": "rules/default/tree_sitter.yml",
+          "line": 89,
+          "sha256": "34ae0e842ce9e36cff90da2d188d8eb842fa00755af7b2eac8e90a09a7cde69b"
+        },
+        {
+          "path": "crates/pqc_scan_detectors/src/tree_sitter_detector.rs",
+          "line": 122,
+          "sha256": "d5b23f66405287f488c6e16a4d0e10dd0aa82d5f5709b09ec2298ee100bc1677"
+        }
+      ],
+      "unitIds": [],
+      "approvalBeforeChange": "Required: 検出規則・対応範囲・出力意味の変更は仕様と影響を維持者が確認。正解修正版は別版・独立レビューとデータ版変更の確認が必要。",
+      "implementationStatus": "Not Tested",
+      "implementationNote": "修正案と試験案。今回製品を変更しておらず、改善効果は未測定。",
+      "observationIds": [
+        "pattern-TS_RUBY_RSA_USAGE"
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "id": "legacy-00",
+      "dataset": "legacy",
+      "originalDisposition": "fp",
+      "unit": "u022",
+      "ruleId": "PQC_RUBY_API",
+      "path": "tuning/variants/display.rb",
+      "location": {
+        "file": "tuning/variants/display.rb",
+        "line": 1,
+        "column": 6
+      },
+      "group": "C04",
+      "source": {
+        "path": "tests/quality/corpus/holdout/display.rb",
+        "sha256": "5868bd512f68b57d668cb048edf083559469cb6c8ac4c80fc7de40f862fd5514"
+      },
+      "originalTruthLabel": "negative",
+      "rawEvidence": "target/quality-task-043/legacy/accuracy-0/report.json",
+      "truthVersion": "023-v2",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 10000
+      }
+    },
+    {
+      "id": "legacy-01",
+      "dataset": "legacy",
+      "originalDisposition": "fp",
+      "unit": "u021",
+      "ruleId": "PQC_RUST_API",
+      "path": "tuning/variants/shadow.rs",
+      "location": {
+        "file": "tuning/variants/shadow.rs",
+        "line": 2,
+        "column": 5
+      },
+      "group": "C03",
+      "source": {
+        "path": "tests/quality/corpus/holdout/shadow.rs",
+        "sha256": "bfbb3506bb6d436d59e7376c64345036d37fc6cf76353711a0a5eebc6d3611d7"
+      },
+      "originalTruthLabel": "negative",
+      "rawEvidence": "target/quality-task-043/legacy/accuracy-0/report.json",
+      "truthVersion": "023-v2",
+      "truthSpan": {
+        "line": 2,
+        "startColumn": 1,
+        "endColumn": 10000
+      }
+    },
+    {
+      "id": "legacy-02",
+      "dataset": "legacy",
+      "originalDisposition": "fp",
+      "unit": "u015",
+      "ruleId": "PQC_NODE_API",
+      "path": "tuning/variants/shadow.js",
+      "location": {
+        "file": "tuning/variants/shadow.js",
+        "line": 2,
+        "column": 1
+      },
+      "group": "C01",
+      "source": {
+        "path": "tests/quality/corpus/holdout/shadow.js",
+        "sha256": "321acad5b8bf7bbaf493969960c4486f5e0bd80426ec01aa5ef22b398a46495b"
+      },
+      "originalTruthLabel": "negative",
+      "rawEvidence": "target/quality-task-043/legacy/accuracy-0/report.json",
+      "truthVersion": "023-v2",
+      "truthSpan": {
+        "line": 2,
+        "startColumn": 1,
+        "endColumn": 10000
+      }
+    },
+    {
+      "id": "legacy-03",
+      "dataset": "legacy",
+      "originalDisposition": "fn",
+      "unit": "u014",
+      "ruleId": "PQC_NODE_API",
+      "path": "tuning/variants/alias.js",
+      "location": null,
+      "group": "C01",
+      "source": {
+        "path": "tests/quality/corpus/holdout/alias.js",
+        "sha256": "7d58c51df7e31549f82cfa19bb4356c204f72491761757e629b598025ecf3cb0"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/legacy/accuracy-0/report.json",
+      "truthVersion": "023-v2",
+      "truthSpan": {
+        "line": 2,
+        "startColumn": 1,
+        "endColumn": 10000
+      }
+    },
+    {
+      "id": "legacy-04",
+      "dataset": "legacy",
+      "originalDisposition": "fn",
+      "unit": "u020",
+      "ruleId": "PQC_PYTHON_API",
+      "path": "tuning/variants/alias.py",
+      "location": null,
+      "group": "C05",
+      "source": {
+        "path": "tests/quality/corpus/holdout/alias.py",
+        "sha256": "4c6075a16eab63415181bb215246c953ed9014f9c645f54b5ea048588aae4159"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/legacy/accuracy-0/report.json",
+      "truthVersion": "023-v2",
+      "truthSpan": {
+        "line": 2,
+        "startColumn": 1,
+        "endColumn": 10000
+      }
+    },
+    {
+      "id": "legacy-05",
+      "dataset": "legacy",
+      "originalDisposition": "fn",
+      "unit": "u027",
+      "ruleId": "PQC_PYTHON_API",
+      "path": "tuning/variants/broken.py",
+      "location": null,
+      "group": "C07",
+      "source": {
+        "path": "tests/quality/corpus/holdout/broken.py",
+        "sha256": "8b84d8321ea29c29752a7c387a709f18476c7f0586cd0240b4c5ac704dd93911"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/legacy/accuracy-0/report.json",
+      "truthVersion": "023-v2",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 10000
+      }
+    },
+    {
+      "id": "legacy-06",
+      "dataset": "legacy",
+      "originalDisposition": "fn",
+      "unit": "u051",
+      "ruleId": "PQC_PYTHON_API",
+      "path": "holdout/approval-adapter/approval_backend.py",
+      "location": null,
+      "group": "C06",
+      "source": {
+        "path": "tests/quality/corpus/independent-holdout/approval_backend.py",
+        "sha256": "d2a6c4e718070019c0ddde6c6f8c89e8b38bd3003f929987517dbcad6e71da8b"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/legacy/accuracy-0/report.json",
+      "truthVersion": "023-v2",
+      "truthSpan": {
+        "line": 3,
+        "startColumn": 6,
+        "endColumn": 53
+      }
+    },
+    {
+      "id": "legacy-07",
+      "dataset": "legacy",
+      "originalDisposition": "fn",
+      "unit": "u054",
+      "ruleId": "PQC_JAVA_CLASSICAL_GROUPS",
+      "path": "holdout/approval-adapter/archive-policy.xml",
+      "location": null,
+      "group": "C11",
+      "source": {
+        "path": "tests/quality/corpus/independent-holdout/archive-policy.xml",
+        "sha256": "9b36fc1f8fa21dcacc48759ecd0f8a6888f27da23a53defaac5da88ef1700454"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/legacy/accuracy-0/report.json",
+      "truthVersion": "023-v2",
+      "truthSpan": {
+        "line": 6,
+        "startColumn": 3,
+        "endColumn": 63
+      }
+    },
+    {
+      "id": "expanded-00",
+      "dataset": "expanded",
+      "originalDisposition": "fp",
+      "unit": null,
+      "ruleId": "TS_NODE_RSA_USAGE",
+      "path": "tuning/jwt/sign.js",
+      "location": {
+        "file": "tuning/jwt/sign.js",
+        "line": 1,
+        "column": 33
+      },
+      "group": "C16",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/jwt/sign.js",
+        "sha256": "8a57a5c0b9b34066855a5e93878757dbdbbbb65edbe5de4b80159c5ccd064b23"
+      },
+      "originalTruthLabel": null,
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "reclassification": "Unannotated legitimate fact"
+    },
+    {
+      "id": "expanded-01",
+      "dataset": "expanded",
+      "originalDisposition": "fp",
+      "unit": null,
+      "ruleId": "CERT_P12_CONTAINER",
+      "path": "tuning/certs/broken.p12",
+      "location": {
+        "file": "tuning/certs/broken.p12",
+        "line": 1,
+        "column": 1
+      },
+      "group": "C17",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/certs/broken.p12",
+        "sha256": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a"
+      },
+      "originalTruthLabel": null,
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "reclassification": "Compatibility filename signal; contract decision needed"
+    },
+    {
+      "id": "expanded-02",
+      "dataset": "expanded",
+      "originalDisposition": "fp",
+      "unit": null,
+      "ruleId": "CERT_P12_CONTAINER",
+      "path": "tuning/certs/broken.pfx",
+      "location": {
+        "file": "tuning/certs/broken.pfx",
+        "line": 1,
+        "column": 1
+      },
+      "group": "C17",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/certs/broken.pfx",
+        "sha256": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a"
+      },
+      "originalTruthLabel": null,
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "reclassification": "Compatibility filename signal; contract decision needed"
+    },
+    {
+      "id": "expanded-03",
+      "dataset": "expanded",
+      "originalDisposition": "fp",
+      "unit": null,
+      "ruleId": "CERT_RSA_SIGNATURE",
+      "path": "tuning/certs/rsa3072.der",
+      "location": {
+        "file": "tuning/certs/rsa3072.der",
+        "line": 1,
+        "column": 1
+      },
+      "group": "C16",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/certs/rsa3072.der",
+        "sha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46"
+      },
+      "originalTruthLabel": null,
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "reclassification": "Unannotated legitimate fact"
+    },
+    {
+      "id": "expanded-04",
+      "dataset": "expanded",
+      "originalDisposition": "fp",
+      "unit": null,
+      "ruleId": "CERT_RSA_SIGNATURE",
+      "path": "tuning/certs/public-rsa3072.cer",
+      "location": {
+        "file": "tuning/certs/public-rsa3072.cer",
+        "line": 1,
+        "column": 1
+      },
+      "group": "C16",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/certs/public-rsa3072.cer",
+        "sha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46"
+      },
+      "originalTruthLabel": null,
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "reclassification": "Unannotated legitimate fact"
+    },
+    {
+      "id": "expanded-05",
+      "dataset": "expanded",
+      "originalDisposition": "fp",
+      "unit": null,
+      "ruleId": "CERT_RSA_SIGNATURE",
+      "path": "tuning/certs/public-rsa3072.crt",
+      "location": {
+        "file": "tuning/certs/public-rsa3072.crt",
+        "line": 1,
+        "column": 1
+      },
+      "group": "C16",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/certs/public-rsa3072.crt",
+        "sha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46"
+      },
+      "originalTruthLabel": null,
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "reclassification": "Unannotated legitimate fact"
+    },
+    {
+      "id": "expanded-06",
+      "dataset": "expanded",
+      "originalDisposition": "fp",
+      "unit": null,
+      "ruleId": "CERT_RSA_SIGNATURE",
+      "path": "tuning/certs/public-rsa3072.pem",
+      "location": {
+        "file": "tuning/certs/public-rsa3072.pem",
+        "line": 1,
+        "column": 1
+      },
+      "group": "C16",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/certs/public-rsa3072.pem",
+        "sha256": "166c938aa8812b13f31d0e55e5ff9acdefe8bd2a11fd8fc9f353f45eb6c174e2"
+      },
+      "originalTruthLabel": null,
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "reclassification": "Unannotated legitimate fact"
+    },
+    {
+      "id": "expanded-07",
+      "dataset": "expanded",
+      "originalDisposition": "fp",
+      "unit": "x024",
+      "ruleId": "PQC_NODE_API",
+      "path": "tuning/js/namesake.js",
+      "location": {
+        "file": "tuning/js/namesake.js",
+        "line": 2,
+        "column": 1
+      },
+      "group": "C01",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/js/namesake.js",
+        "sha256": "d8c88b75d5721bea78cdd0de85fb02320590f2adfd729122da49b94f77af9b40"
+      },
+      "originalTruthLabel": "negative",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 2,
+        "startColumn": 1,
+        "endColumn": 35
+      }
+    },
+    {
+      "id": "expanded-08",
+      "dataset": "expanded",
+      "originalDisposition": "fp",
+      "unit": "x026",
+      "ruleId": "PQC_NODE_API",
+      "path": "tuning/js/shadow.js",
+      "location": {
+        "file": "tuning/js/shadow.js",
+        "line": 2,
+        "column": 47
+      },
+      "group": "C01",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/js/shadow.js",
+        "sha256": "af99601a844995a4619f97964e8577d2ac7c03ba62c24c632b41757097b3ffce"
+      },
+      "originalTruthLabel": "negative",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 2,
+        "startColumn": 1,
+        "endColumn": 83
+      }
+    },
+    {
+      "id": "expanded-09",
+      "dataset": "expanded",
+      "originalDisposition": "fp",
+      "unit": "x023",
+      "ruleId": "PQC_NODE_API",
+      "path": "tuning/js/string.js",
+      "location": {
+        "file": "tuning/js/string.js",
+        "line": 1,
+        "column": 15
+      },
+      "group": "C02",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/js/string.js",
+        "sha256": "1113326eb9e741da5db2fc45fa5adb77c97e8cdf0dba3e5ebc63ba974aa806f2"
+      },
+      "originalTruthLabel": "negative",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 50
+      }
+    },
+    {
+      "id": "expanded-10",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x003",
+      "ruleId": "PQC_JAVA_API",
+      "path": "tuning/java/Slh.java",
+      "location": null,
+      "group": "C09",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/java/Slh.java",
+        "sha256": "878a1535f094b3d34cbf7c24bdc6f788dbb18f30c3574b417b50f3bd3f4b00da"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 45
+      }
+    },
+    {
+      "id": "expanded-11",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x005",
+      "ruleId": "PQC_JAVA_API",
+      "path": "tuning/java/Broken.java",
+      "location": null,
+      "group": "C07",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/java/Broken.java",
+        "sha256": "fa706773e256d0489f9882fbba530772b1bd340334b9812387c58b3f14d2547f"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 34
+      }
+    },
+    {
+      "id": "expanded-12",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x011",
+      "ruleId": "PQC_PYTHON_API",
+      "path": "tuning/python/broken.py",
+      "location": null,
+      "group": "C07",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/python/broken.py",
+        "sha256": "f4980165315bb83a61d78efe222fdcec23c41adfca385e1e29ad506b6eedd160"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 41
+      }
+    },
+    {
+      "id": "expanded-13",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x014",
+      "ruleId": "PQC_RUST_API",
+      "path": "tuning/rust/broken.rs",
+      "location": null,
+      "group": "C08",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/rust/broken.rs",
+        "sha256": "3f4ff41f37ee764f6580819c84f85a9ec218b6c114d0067605768419b793828f"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 13
+      }
+    },
+    {
+      "id": "expanded-14",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x025",
+      "ruleId": "PQC_NODE_API",
+      "path": "tuning/js/alias.js",
+      "location": null,
+      "group": "C01",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/js/alias.js",
+        "sha256": "a4daad0b1b87770fba80582bd22bf43cfae0d3ab787281baca203981df730f68"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 2,
+        "startColumn": 1,
+        "endColumn": 19
+      }
+    },
+    {
+      "id": "expanded-15",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x036",
+      "ruleId": "PQC_DRAFT_ALGORITHM",
+      "path": "tuning/js/draft.js",
+      "location": null,
+      "group": "C10",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/js/draft.js",
+        "sha256": "168fe54558ecb8988cb1a10c9c7b29f77abda3cafe85ae2dab9c0dd32482372d"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 33
+      }
+    },
+    {
+      "id": "expanded-16",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x042",
+      "ruleId": "PQC_JAVA_CLASSICAL_GROUPS",
+      "path": "tuning/tls/positive.conf",
+      "location": null,
+      "group": "C11",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/tls/positive.conf",
+        "sha256": "649cc731266d26f68ce2856453c6b566c46d01d2db24ca2d8d7eeaf02ccab464"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 66
+      }
+    },
+    {
+      "id": "expanded-17",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x066",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "path": "tuning/manifests/go.mod/declared/go.mod",
+      "location": null,
+      "group": "C15",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/manifests/go.mod/declared/go.mod",
+        "sha256": "f58c53ed55e563dc38846c0363fc98466e1e922dd100ae4e344142572c682f31"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 3,
+        "startColumn": 1,
+        "endColumn": 43
+      }
+    },
+    {
+      "id": "expanded-18",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x072",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "path": "tuning/manifests/build.gradle/declared/build.gradle",
+      "location": null,
+      "group": "C14",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/manifests/build.gradle/declared/build.gradle",
+        "sha256": "7e77425f619d82d64a6bcebc7d5a79df8c40bc1b7a9ef0e97daa513deef4dab1"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 71
+      }
+    },
+    {
+      "id": "expanded-19",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x075",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "path": "tuning/manifests/build.gradle.kts/declared/build.gradle.kts",
+      "location": null,
+      "group": "C14",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/manifests/build.gradle.kts/declared/build.gradle.kts",
+        "sha256": "81fce435b94dae182836c9ad289d2198096d83566e6628cfa60e5689f45e91ff"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 72
+      }
+    },
+    {
+      "id": "expanded-20",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x102",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "path": "tuning/manifests/fixture.gemspec/declared/fixture.gemspec",
+      "location": null,
+      "group": "C14",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/manifests/fixture.gemspec/declared/fixture.gemspec",
+        "sha256": "a292ffb34b72c8eea6c32f77b13cc6e67ff59846057fbd0fb129db5cc6f23c92"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 2,
+        "startColumn": 1,
+        "endColumn": 38
+      }
+    },
+    {
+      "id": "expanded-21",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x105",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "path": "tuning/sbom/CycloneDX-1.5/declared/bom.json",
+      "location": null,
+      "group": "C15",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/sbom/CycloneDX-1.5/declared/bom.json",
+        "sha256": "409a88156b48c270b60076fe50f49b1f6e19d6c4e0fbb43dfc21e137a439d808"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 176
+      }
+    },
+    {
+      "id": "expanded-22",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x109",
+      "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+      "path": "tuning/sbom/SPDX-2.3/declared/bom.json",
+      "location": null,
+      "group": "C15",
+      "source": {
+        "path": "tests/quality/expanded/inputs/tuning/sbom/SPDX-2.3/declared/bom.json",
+        "sha256": "772535f8b5964e5ac58a8bce650b2f41a9e24c881087690278f385bd0b05a092"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 1,
+        "startColumn": 1,
+        "endColumn": 87
+      }
+    },
+    {
+      "id": "expanded-23",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x131",
+      "ruleId": "PQC_NODE_API",
+      "path": "holdout/ml-kem.js",
+      "location": null,
+      "group": "C12",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/ml-kem.js",
+        "sha256": "c9d943c82da73429541a4cbd30e99f7611feafc9683b3ecc3b46a0745dae012d"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 16,
+        "startColumn": 1,
+        "endColumn": 84
+      }
+    },
+    {
+      "id": "expanded-24",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x132",
+      "ruleId": "PQC_NODE_API",
+      "path": "holdout/ml-kem.js",
+      "location": null,
+      "group": "C12",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/ml-kem.js",
+        "sha256": "c9d943c82da73429541a4cbd30e99f7611feafc9683b3ecc3b46a0745dae012d"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 32,
+        "startColumn": 1,
+        "endColumn": 95
+      }
+    },
+    {
+      "id": "expanded-25",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x133",
+      "ruleId": "PQC_NODE_API",
+      "path": "holdout/ml-kem.js",
+      "location": null,
+      "group": "C12",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/ml-kem.js",
+        "sha256": "c9d943c82da73429541a4cbd30e99f7611feafc9683b3ecc3b46a0745dae012d"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 43,
+        "startColumn": 1,
+        "endColumn": 96
+      }
+    },
+    {
+      "id": "expanded-26",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x134",
+      "ruleId": "PQC_NODE_API",
+      "path": "holdout/ml-dsa.js",
+      "location": null,
+      "group": "C12",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/ml-dsa.js",
+        "sha256": "ec7fdd5696ed4ebe30249f8bda33bdab33f1d769ecd19e8d5442d16d2b2b6973"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 16,
+        "startColumn": 1,
+        "endColumn": 84
+      }
+    },
+    {
+      "id": "expanded-27",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x135",
+      "ruleId": "PQC_NODE_API",
+      "path": "holdout/ml-dsa.js",
+      "location": null,
+      "group": "C12",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/ml-dsa.js",
+        "sha256": "ec7fdd5696ed4ebe30249f8bda33bdab33f1d769ecd19e8d5442d16d2b2b6973"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 54,
+        "startColumn": 1,
+        "endColumn": 95
+      }
+    },
+    {
+      "id": "expanded-28",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x136",
+      "ruleId": "PQC_NODE_API",
+      "path": "holdout/ml-dsa.js",
+      "location": null,
+      "group": "C12",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/ml-dsa.js",
+        "sha256": "ec7fdd5696ed4ebe30249f8bda33bdab33f1d769ecd19e8d5442d16d2b2b6973"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 66,
+        "startColumn": 1,
+        "endColumn": 96
+      }
+    },
+    {
+      "id": "expanded-29",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x137",
+      "ruleId": "PQC_NODE_API",
+      "path": "holdout/slh-dsa.js",
+      "location": null,
+      "group": "C12",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/slh-dsa.js",
+        "sha256": "136e44a3ade4286713bcd8fb4377d346d9b3d207ba58e36fbbda4c70bd91bcd7"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 20,
+        "startColumn": 1,
+        "endColumn": 84
+      }
+    },
+    {
+      "id": "expanded-30",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x138",
+      "ruleId": "PQC_NODE_API",
+      "path": "holdout/slh-dsa.js",
+      "location": null,
+      "group": "C12",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/slh-dsa.js",
+        "sha256": "136e44a3ade4286713bcd8fb4377d346d9b3d207ba58e36fbbda4c70bd91bcd7"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 40,
+        "startColumn": 1,
+        "endColumn": 95
+      }
+    },
+    {
+      "id": "expanded-31",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x139",
+      "ruleId": "PQC_NODE_API",
+      "path": "holdout/slh-dsa.js",
+      "location": null,
+      "group": "C12",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/slh-dsa.js",
+        "sha256": "136e44a3ade4286713bcd8fb4377d346d9b3d207ba58e36fbbda4c70bd91bcd7"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 51,
+        "startColumn": 1,
+        "endColumn": 96
+      }
+    },
+    {
+      "id": "expanded-32",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x145",
+      "ruleId": "TS_NODE_RSA_USAGE",
+      "path": "holdout/rsa-sign.js",
+      "location": null,
+      "group": "C13",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/rsa-sign.js",
+        "sha256": "1324395a9ab016d2fb86deb09889b007b54d8c7e453980b8c6ae63e96367287e"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 7,
+        "startColumn": 1,
+        "endColumn": 63
+      }
+    },
+    {
+      "id": "expanded-33",
+      "dataset": "expanded",
+      "originalDisposition": "fn",
+      "unit": "x146",
+      "ruleId": "API_NODE_CRYPTO_SIGN_RSA",
+      "path": "holdout/rsa-sign.js",
+      "location": null,
+      "group": "C13",
+      "source": {
+        "path": "tests/quality/expanded/inputs/holdout/rsa-sign.js",
+        "sha256": "1324395a9ab016d2fb86deb09889b007b54d8c7e453980b8c6ae63e96367287e"
+      },
+      "originalTruthLabel": "positive",
+      "rawEvidence": "target/quality-task-043/expanded/accuracy-0/report.json",
+      "truthVersion": "042-v1",
+      "truthSpan": {
+        "line": 11,
+        "startColumn": 1,
+        "endColumn": 35
+      }
+    },
+    {
+      "id": "pattern-HTTPD_SSLCIPHERSUITE_RSA",
+      "dataset": "pattern_control",
+      "ruleId": "HTTPD_SSLCIPHERSUITE_RSA",
+      "fixtureIndex": 2,
+      "group": "C19",
+      "desiredPositive": false,
+      "expectedPatternMatch": true,
+      "target": "SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:!RSA:!3DES:!RC4:!DES",
+      "knownGap": "Excluded RSA/weak-cipher operands are not enabled selections; no claim that ECDSA is quantum resistant.",
+      "nativeControlObservations": [
+        {
+          "path": "HTTPD_SSLCIPHERSUITE_RSA.conf",
+          "source": "target/quality-task-043/control-inputs/HTTPD_SSLCIPHERSUITE_RSA.conf",
+          "sha256": "3abcffb54ec1338c321e6a5e9edf35dc3e14dc25df63e4eaf496cedf77837fec",
+          "ruleId": "HTTPD_SSLCIPHERSUITE_RSA",
+          "fixtureIndex": 2,
+          "variant": "exact pattern target used as source data",
+          "desiredPositive": false,
+          "expectedPatternMatch": true,
+          "nativeNominatedCount": 1,
+          "nativeOtherRuleCounts": {}
+        }
+      ],
+      "evidence": "docs/quality/RULE-QUALITY-METADATA.json",
+      "sourceSha256": "c739f603f900ef10a120162ddd40d21d1b43c8259ed92b9a577cdc47cd34b033",
+      "notAccuracyUnit": true
+    },
+    {
+      "id": "pattern-HTTPD_SSLPROTOCOL_LEGACY",
+      "dataset": "pattern_control",
+      "ruleId": "HTTPD_SSLPROTOCOL_LEGACY",
+      "fixtureIndex": 2,
+      "group": "C19",
+      "desiredPositive": false,
+      "expectedPatternMatch": true,
+      "target": "SSLProtocol -all +TLSv1.2 +TLSv1.3 -TLSv1 -TLSv1.1",
+      "knownGap": "Explicitly disabled legacy protocol operands still match.",
+      "nativeControlObservations": [
+        {
+          "path": "HTTPD_SSLPROTOCOL_LEGACY.conf",
+          "source": "target/quality-task-043/control-inputs/HTTPD_SSLPROTOCOL_LEGACY.conf",
+          "sha256": "497f74499bfa05ebd630560b90600f78bd9b44df01575c544ea9e10c815e7669",
+          "ruleId": "HTTPD_SSLPROTOCOL_LEGACY",
+          "fixtureIndex": 2,
+          "variant": "exact pattern target used as source data",
+          "desiredPositive": false,
+          "expectedPatternMatch": true,
+          "nativeNominatedCount": 1,
+          "nativeOtherRuleCounts": {
+            "TLS_VERSION_1_0": 1,
+            "TLS_VERSION_1_1": 1
+          }
+        }
+      ],
+      "evidence": "docs/quality/RULE-QUALITY-METADATA.json",
+      "sourceSha256": "c739f603f900ef10a120162ddd40d21d1b43c8259ed92b9a577cdc47cd34b033",
+      "notAccuracyUnit": true
+    },
+    {
+      "id": "pattern-K8S_INGRESS_RSA_CIPHERS",
+      "dataset": "pattern_control",
+      "ruleId": "K8S_INGRESS_RSA_CIPHERS",
+      "fixtureIndex": 2,
+      "group": "C19",
+      "desiredPositive": false,
+      "expectedPatternMatch": true,
+      "target": "nginx.ingress.kubernetes.io/ssl-ciphers: ECDHE-ECDSA-AES128-GCM-SHA256:!RSA:!3DES:!RC4",
+      "knownGap": "Annotation cipher exclusions are not enabled RSA/weak-cipher selections; ECDSA is not claimed quantum resistant.",
+      "nativeControlObservations": [
+        {
+          "path": "K8S_INGRESS_RSA_CIPHERS.conf",
+          "source": "target/quality-task-043/control-inputs/K8S_INGRESS_RSA_CIPHERS.conf",
+          "sha256": "69abc7e32f190d0191782cf577290094dfc9e7edd79312347a1753a4eecaa823",
+          "ruleId": "K8S_INGRESS_RSA_CIPHERS",
+          "fixtureIndex": 2,
+          "variant": "exact pattern target used as source data",
+          "desiredPositive": false,
+          "expectedPatternMatch": true,
+          "nativeNominatedCount": 1,
+          "nativeOtherRuleCounts": {}
+        }
+      ],
+      "evidence": "docs/quality/RULE-QUALITY-METADATA.json",
+      "sourceSha256": "c739f603f900ef10a120162ddd40d21d1b43c8259ed92b9a577cdc47cd34b033",
+      "notAccuracyUnit": true
+    },
+    {
+      "id": "pattern-NGINX_SSL_CIPHERS_RSA",
+      "dataset": "pattern_control",
+      "ruleId": "NGINX_SSL_CIPHERS_RSA",
+      "fixtureIndex": 2,
+      "group": "C19",
+      "desiredPositive": false,
+      "expectedPatternMatch": true,
+      "target": "ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:!RSA:!3DES:!RC4;",
+      "knownGap": "Excluded operands are not enabled RSA/weak-cipher selections; ECDSA is not claimed quantum resistant.",
+      "nativeControlObservations": [
+        {
+          "path": "NGINX_SSL_CIPHERS_RSA.conf",
+          "source": "target/quality-task-043/control-inputs/NGINX_SSL_CIPHERS_RSA.conf",
+          "sha256": "49267ed039865e917f99d6eaf46ea99665d21a1f531fc3adcf2cce67d581a014",
+          "ruleId": "NGINX_SSL_CIPHERS_RSA",
+          "fixtureIndex": 2,
+          "variant": "exact pattern target used as source data",
+          "desiredPositive": false,
+          "expectedPatternMatch": true,
+          "nativeNominatedCount": 1,
+          "nativeOtherRuleCounts": {}
+        }
+      ],
+      "evidence": "docs/quality/RULE-QUALITY-METADATA.json",
+      "sourceSha256": "c739f603f900ef10a120162ddd40d21d1b43c8259ed92b9a577cdc47cd34b033",
+      "notAccuracyUnit": true
+    },
+    {
+      "id": "pattern-NODE_TLS_MIN_VERSION",
+      "dataset": "pattern_control",
+      "ruleId": "NODE_TLS_MIN_VERSION",
+      "fixtureIndex": 1,
+      "group": "C18",
+      "desiredPositive": false,
+      "expectedPatternMatch": true,
+      "target": "minVersion: \"TLSv1.3\"",
+      "knownGap": "Retained legacy prefix/heuristic behavior disagrees with desired control; no matcher tuning.",
+      "nativeControlObservations": [
+        {
+          "path": "NODE_TLS_MIN_VERSION.js",
+          "source": "target/quality-task-043/control-inputs/NODE_TLS_MIN_VERSION.js",
+          "sha256": "27f69b36589391ad94862f5fec8c2f48f6ff792661c281978939b6fdf9a22161",
+          "ruleId": "NODE_TLS_MIN_VERSION",
+          "fixtureIndex": 1,
+          "variant": "exact pattern target used as source data",
+          "desiredPositive": false,
+          "expectedPatternMatch": true,
+          "nativeNominatedCount": 1,
+          "nativeOtherRuleCounts": {}
+        }
+      ],
+      "evidence": "docs/quality/RULE-QUALITY-METADATA.json",
+      "sourceSha256": "c739f603f900ef10a120162ddd40d21d1b43c8259ed92b9a577cdc47cd34b033",
+      "notAccuracyUnit": true
+    },
+    {
+      "id": "pattern-TLS_VERSION_1_0",
+      "dataset": "pattern_control",
+      "ruleId": "TLS_VERSION_1_0",
+      "fixtureIndex": 2,
+      "group": "C18",
+      "desiredPositive": false,
+      "expectedPatternMatch": true,
+      "target": "TLSv1_3",
+      "knownGap": "Underscore boundary can match a modern TLS constant.",
+      "nativeControlObservations": [
+        {
+          "path": "TLS_VERSION_1_0.js",
+          "source": "target/quality-task-043/control-inputs/TLS_VERSION_1_0.js",
+          "sha256": "ef53277454fc97944021bfa0c159a3b44fb27e7637b0d4fd46eeefb10a07d983",
+          "ruleId": "TLS_VERSION_1_0",
+          "fixtureIndex": 2,
+          "variant": "exact pattern target used as source data",
+          "desiredPositive": false,
+          "expectedPatternMatch": true,
+          "nativeNominatedCount": 1,
+          "nativeOtherRuleCounts": {}
+        }
+      ],
+      "evidence": "docs/quality/RULE-QUALITY-METADATA.json",
+      "sourceSha256": "c739f603f900ef10a120162ddd40d21d1b43c8259ed92b9a577cdc47cd34b033",
+      "notAccuracyUnit": true
+    },
+    {
+      "id": "pattern-TS_RUBY_RSA_USAGE",
+      "dataset": "pattern_control",
+      "ruleId": "TS_RUBY_RSA_USAGE",
+      "fixtureIndex": 2,
+      "group": "C20",
+      "desiredPositive": false,
+      "expectedPatternMatch": true,
+      "target": "JWT.encode({}, key, 'HS256')",
+      "knownGap": "Generic JWT API branch cannot establish RSA; HMAC example remains a known false positive.",
+      "nativeControlObservations": [
+        {
+          "path": "TS_RUBY_RSA_USAGE.rb",
+          "source": "target/quality-task-043/control-inputs/TS_RUBY_RSA_USAGE.rb",
+          "sha256": "393c99e85ad8e4217fcde12f9a59bfb681775e4750b964d04593bf50e6152f9b",
+          "ruleId": "TS_RUBY_RSA_USAGE",
+          "fixtureIndex": 2,
+          "variant": "exact pattern target used as source data",
+          "desiredPositive": false,
+          "expectedPatternMatch": true,
+          "nativeNominatedCount": 0,
+          "nativeOtherRuleCounts": {}
+        },
+        {
+          "path": "TS_RUBY_RSA_USAGE-string.rb",
+          "source": "target/quality-task-043/control-inputs/TS_RUBY_RSA_USAGE-string.rb",
+          "sha256": "dc692b5252e3b374eb55884436d52a8019b325976b76d34eafa1d348d01577cb",
+          "ruleId": "TS_RUBY_RSA_USAGE",
+          "variant": "post-observation string-context diagnostic; not independent accuracy truth",
+          "desiredPositive": false,
+          "nativeNominatedCount": 1,
+          "nativeOtherRuleCounts": {}
+        }
+      ],
+      "evidence": "docs/quality/RULE-QUALITY-METADATA.json",
+      "sourceSha256": "c739f603f900ef10a120162ddd40d21d1b43c8259ed92b9a577cdc47cd34b033",
+      "notAccuracyUnit": true
+    },
+    {
+      "id": "pattern-TS_TLS_LEGACY_VERSION_LITERAL",
+      "dataset": "pattern_control",
+      "ruleId": "TS_TLS_LEGACY_VERSION_LITERAL",
+      "fixtureIndex": 1,
+      "group": "C18",
+      "desiredPositive": false,
+      "expectedPatternMatch": true,
+      "target": "TLSv1_3",
+      "knownGap": "Retained legacy prefix/heuristic behavior disagrees with desired control; no matcher tuning.",
+      "nativeControlObservations": [
+        {
+          "path": "TS_TLS_LEGACY_VERSION_LITERAL.js",
+          "source": "target/quality-task-043/control-inputs/TS_TLS_LEGACY_VERSION_LITERAL.js",
+          "sha256": "ef53277454fc97944021bfa0c159a3b44fb27e7637b0d4fd46eeefb10a07d983",
+          "ruleId": "TS_TLS_LEGACY_VERSION_LITERAL",
+          "fixtureIndex": 1,
+          "variant": "exact pattern target used as source data",
+          "desiredPositive": false,
+          "expectedPatternMatch": true,
+          "nativeNominatedCount": 0,
+          "nativeOtherRuleCounts": {
+            "TLS_VERSION_1_0": 1
+          }
+        },
+        {
+          "path": "TS_TLS_LEGACY_VERSION_LITERAL-string.js",
+          "source": "target/quality-task-043/control-inputs/TS_TLS_LEGACY_VERSION_LITERAL-string.js",
+          "sha256": "6c9ab034c6ff071c948c75e1a070946445373f330960e8e2e933cd2557a0ddbb",
+          "ruleId": "TS_TLS_LEGACY_VERSION_LITERAL",
+          "variant": "post-observation string-context diagnostic; not independent accuracy truth",
+          "desiredPositive": false,
+          "nativeNominatedCount": 1,
+          "nativeOtherRuleCounts": {
+            "TLS_VERSION_1_0": 1
+          }
+        }
+      ],
+      "evidence": "docs/quality/RULE-QUALITY-METADATA.json",
+      "sourceSha256": "c739f603f900ef10a120162ddd40d21d1b43c8259ed92b9a577cdc47cd34b033",
+      "notAccuracyUnit": true
+    }
+  ],
+  "extractedDependencyEvidence": [
+    {
+      "name": "openssl",
+      "version": "3.5.0",
+      "ecosystem": "generic",
+      "source_file": "tuning/sbom/CycloneDX-1.5/declared/bom.json",
+      "source_type": "sbom",
+      "purl": "pkg:generic/openssl"
+    },
+    {
+      "name": "github.com/cloudflare/circl",
+      "version": "v1.6.1",
+      "ecosystem": "golang",
+      "source_file": "tuning/manifests/go.mod/declared/go.mod",
+      "source_type": "manifest",
+      "purl": "pkg:golang/github.com/cloudflare/circl"
+    },
+    {
+      "name": "openssl",
+      "version": "3.5.0",
+      "ecosystem": "unknown",
+      "source_file": "tuning/sbom/SPDX-2.3/declared/bom.json",
+      "source_type": "sbom",
+      "purl": ""
+    }
+  ],
+  "controlEvidence": {
+    "scope": "Diagnostic replays of known pattern controls; source fragments are never executed; no TP/FP/precision estimate",
+    "input": {
+      "files": 10,
+      "bytes": 395,
+      "sha256": "6a20037f0e658646f3e1fa5965902382e46ce1107761d582b343d5a371386fa8",
+      "bindings": {
+        "HTTPD_SSLCIPHERSUITE_RSA.conf": {
+          "sha256": "3abcffb54ec1338c321e6a5e9edf35dc3e14dc25df63e4eaf496cedf77837fec",
+          "bytes": 66
+        },
+        "HTTPD_SSLPROTOCOL_LEGACY.conf": {
+          "sha256": "497f74499bfa05ebd630560b90600f78bd9b44df01575c544ea9e10c815e7669",
+          "bytes": 51
+        },
+        "K8S_INGRESS_RSA_CIPHERS.conf": {
+          "sha256": "69abc7e32f190d0191782cf577290094dfc9e7edd79312347a1753a4eecaa823",
+          "bytes": 87
+        },
+        "NGINX_SSL_CIPHERS_RSA.conf": {
+          "sha256": "49267ed039865e917f99d6eaf46ea99665d21a1f531fc3adcf2cce67d581a014",
+          "bytes": 59
+        },
+        "NODE_TLS_MIN_VERSION.js": {
+          "sha256": "27f69b36589391ad94862f5fec8c2f48f6ff792661c281978939b6fdf9a22161",
+          "bytes": 22
+        },
+        "TLS_VERSION_1_0.js": {
+          "sha256": "ef53277454fc97944021bfa0c159a3b44fb27e7637b0d4fd46eeefb10a07d983",
+          "bytes": 8
+        },
+        "TS_RUBY_RSA_USAGE.rb": {
+          "sha256": "393c99e85ad8e4217fcde12f9a59bfb681775e4750b964d04593bf50e6152f9b",
+          "bytes": 29
+        },
+        "TS_TLS_LEGACY_VERSION_LITERAL.js": {
+          "sha256": "ef53277454fc97944021bfa0c159a3b44fb27e7637b0d4fd46eeefb10a07d983",
+          "bytes": 8
+        },
+        "TS_TLS_LEGACY_VERSION_LITERAL-string.js": {
+          "sha256": "6c9ab034c6ff071c948c75e1a070946445373f330960e8e2e933cd2557a0ddbb",
+          "bytes": 27
+        },
+        "TS_RUBY_RSA_USAGE-string.rb": {
+          "sha256": "dc692b5252e3b374eb55884436d52a8019b325976b76d34eafa1d348d01577cb",
+          "bytes": 38
+        }
+      }
+    },
+    "sample": {
+      "command": [
+        "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+        "scan",
+        "/tmp/pqc043-controls-mhe3nnln/input",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "/Users/waka/development/pqc/pqc-scan/rules",
+        "--out-dir",
+        "/Users/waka/development/pqc/pqc-scan/target/quality-task-043/controls-observed"
+      ],
+      "exitCode": 0,
+      "timedOut": false,
+      "wallSeconds": 0.017278625018661842,
+      "cpuSeconds": 0.013926000000000001,
+      "peakRssBytes": 15908864,
+      "resourceMethod": "wait4 per child",
+      "rssNativeUnit": "bytes",
+      "semanticDigest": "f2032034ac11f8565b8d227d277453728d8eea6cfa603d0e9c61c86aba048397",
+      "orderDigest": "5cfca218b214481a22b8c210c771ea41834d7ffd43f632716f9aef0387f00079",
+      "coverage": {
+        "selected_files": 10,
+        "read_ok_files": 10,
+        "read_failed_files": 0,
+        "analyzed_files": 10,
+        "partial_files": 0,
+        "analysis_failed_files": 0,
+        "unsupported_files": 0,
+        "not_applicable_files": 0,
+        "unknown_files": 0,
+        "excluded_enumerated_files": 0,
+        "enumeration_failed_entries": 0,
+        "not_enumerated_population": true,
+        "status": "complete_within_scope"
+      },
+      "scope": {
+        "max_file_size_bytes": 2097152,
+        "git_ignore": true,
+        "git_global": true,
+        "git_exclude": true,
+        "default_excludes": [
+          ".git",
+          "node_modules",
+          "target",
+          "dist",
+          "docs"
+        ],
+        "markdown_excluded": true
+      },
+      "diagnosticCodes": [],
+      "diagnosticDigest": "66824fdeacbfb6edfb9b428f0fd60c21cbce5485d68785908f4680f3ced35713",
+      "findingCount": 12,
+      "outputBytes": 130913
+    },
+    "cases": [
+      {
+        "path": "HTTPD_SSLCIPHERSUITE_RSA.conf",
+        "source": "target/quality-task-043/control-inputs/HTTPD_SSLCIPHERSUITE_RSA.conf",
+        "sha256": "3abcffb54ec1338c321e6a5e9edf35dc3e14dc25df63e4eaf496cedf77837fec",
+        "ruleId": "HTTPD_SSLCIPHERSUITE_RSA",
+        "fixtureIndex": 2,
+        "variant": "exact pattern target used as source data",
+        "desiredPositive": false,
+        "expectedPatternMatch": true,
+        "nativeNominatedCount": 1,
+        "nativeOtherRuleCounts": {}
+      },
+      {
+        "path": "HTTPD_SSLPROTOCOL_LEGACY.conf",
+        "source": "target/quality-task-043/control-inputs/HTTPD_SSLPROTOCOL_LEGACY.conf",
+        "sha256": "497f74499bfa05ebd630560b90600f78bd9b44df01575c544ea9e10c815e7669",
+        "ruleId": "HTTPD_SSLPROTOCOL_LEGACY",
+        "fixtureIndex": 2,
+        "variant": "exact pattern target used as source data",
+        "desiredPositive": false,
+        "expectedPatternMatch": true,
+        "nativeNominatedCount": 1,
+        "nativeOtherRuleCounts": {
+          "TLS_VERSION_1_0": 1,
+          "TLS_VERSION_1_1": 1
+        }
+      },
+      {
+        "path": "K8S_INGRESS_RSA_CIPHERS.conf",
+        "source": "target/quality-task-043/control-inputs/K8S_INGRESS_RSA_CIPHERS.conf",
+        "sha256": "69abc7e32f190d0191782cf577290094dfc9e7edd79312347a1753a4eecaa823",
+        "ruleId": "K8S_INGRESS_RSA_CIPHERS",
+        "fixtureIndex": 2,
+        "variant": "exact pattern target used as source data",
+        "desiredPositive": false,
+        "expectedPatternMatch": true,
+        "nativeNominatedCount": 1,
+        "nativeOtherRuleCounts": {}
+      },
+      {
+        "path": "NGINX_SSL_CIPHERS_RSA.conf",
+        "source": "target/quality-task-043/control-inputs/NGINX_SSL_CIPHERS_RSA.conf",
+        "sha256": "49267ed039865e917f99d6eaf46ea99665d21a1f531fc3adcf2cce67d581a014",
+        "ruleId": "NGINX_SSL_CIPHERS_RSA",
+        "fixtureIndex": 2,
+        "variant": "exact pattern target used as source data",
+        "desiredPositive": false,
+        "expectedPatternMatch": true,
+        "nativeNominatedCount": 1,
+        "nativeOtherRuleCounts": {}
+      },
+      {
+        "path": "NODE_TLS_MIN_VERSION.js",
+        "source": "target/quality-task-043/control-inputs/NODE_TLS_MIN_VERSION.js",
+        "sha256": "27f69b36589391ad94862f5fec8c2f48f6ff792661c281978939b6fdf9a22161",
+        "ruleId": "NODE_TLS_MIN_VERSION",
+        "fixtureIndex": 1,
+        "variant": "exact pattern target used as source data",
+        "desiredPositive": false,
+        "expectedPatternMatch": true,
+        "nativeNominatedCount": 1,
+        "nativeOtherRuleCounts": {}
+      },
+      {
+        "path": "TLS_VERSION_1_0.js",
+        "source": "target/quality-task-043/control-inputs/TLS_VERSION_1_0.js",
+        "sha256": "ef53277454fc97944021bfa0c159a3b44fb27e7637b0d4fd46eeefb10a07d983",
+        "ruleId": "TLS_VERSION_1_0",
+        "fixtureIndex": 2,
+        "variant": "exact pattern target used as source data",
+        "desiredPositive": false,
+        "expectedPatternMatch": true,
+        "nativeNominatedCount": 1,
+        "nativeOtherRuleCounts": {}
+      },
+      {
+        "path": "TS_RUBY_RSA_USAGE.rb",
+        "source": "target/quality-task-043/control-inputs/TS_RUBY_RSA_USAGE.rb",
+        "sha256": "393c99e85ad8e4217fcde12f9a59bfb681775e4750b964d04593bf50e6152f9b",
+        "ruleId": "TS_RUBY_RSA_USAGE",
+        "fixtureIndex": 2,
+        "variant": "exact pattern target used as source data",
+        "desiredPositive": false,
+        "expectedPatternMatch": true,
+        "nativeNominatedCount": 0,
+        "nativeOtherRuleCounts": {}
+      },
+      {
+        "path": "TS_TLS_LEGACY_VERSION_LITERAL.js",
+        "source": "target/quality-task-043/control-inputs/TS_TLS_LEGACY_VERSION_LITERAL.js",
+        "sha256": "ef53277454fc97944021bfa0c159a3b44fb27e7637b0d4fd46eeefb10a07d983",
+        "ruleId": "TS_TLS_LEGACY_VERSION_LITERAL",
+        "fixtureIndex": 1,
+        "variant": "exact pattern target used as source data",
+        "desiredPositive": false,
+        "expectedPatternMatch": true,
+        "nativeNominatedCount": 0,
+        "nativeOtherRuleCounts": {
+          "TLS_VERSION_1_0": 1
+        }
+      },
+      {
+        "path": "TS_TLS_LEGACY_VERSION_LITERAL-string.js",
+        "source": "target/quality-task-043/control-inputs/TS_TLS_LEGACY_VERSION_LITERAL-string.js",
+        "sha256": "6c9ab034c6ff071c948c75e1a070946445373f330960e8e2e933cd2557a0ddbb",
+        "ruleId": "TS_TLS_LEGACY_VERSION_LITERAL",
+        "variant": "post-observation string-context diagnostic; not independent accuracy truth",
+        "desiredPositive": false,
+        "nativeNominatedCount": 1,
+        "nativeOtherRuleCounts": {
+          "TLS_VERSION_1_0": 1
+        }
+      },
+      {
+        "path": "TS_RUBY_RSA_USAGE-string.rb",
+        "source": "target/quality-task-043/control-inputs/TS_RUBY_RSA_USAGE-string.rb",
+        "sha256": "dc692b5252e3b374eb55884436d52a8019b325976b76d34eafa1d348d01577cb",
+        "ruleId": "TS_RUBY_RSA_USAGE",
+        "variant": "post-observation string-context diagnostic; not independent accuracy truth",
+        "desiredPositive": false,
+        "nativeNominatedCount": 1,
+        "nativeOtherRuleCounts": {}
+      }
+    ]
+  },
+  "rootCauseInterpretation": "Verified means source/observation agrees with the stated mechanism, not repaired or product correct. C07 parser recovery mechanism remains Partial.",
+  "currentAssessment": "Partial",
+  "releaseDecision": "Unknown",
+  "noProductOrCorpusOrScorerChange": true,
+  "recoveryTreeInspection": {
+    "status": "Not Tested",
+    "scope": "Attempted deeper recovery-tree dump for C07; no AST executable produced and no fixture executed",
+    "compiler": "/usr/bin/clang (Apple clang 17.0.0)",
+    "attempts": [
+      {
+        "exitCode": 1,
+        "log": "target/quality-task-043/ast-compile.log",
+        "sha256": "b8a06979680c909cfcfb5367746df59a558bf95e287e0a92243a7e1c4b90d620"
+      },
+      {
+        "exitCode": 1,
+        "log": "target/quality-task-043/ast-system-compile.log",
+        "sha256": "b8a06979680c909cfcfb5367746df59a558bf95e287e0a92243a7e1c4b90d620"
+      }
+    ],
+    "reason": "Native diagnostic link failed because installed SDK libSystem.tbd contains arm64e.x1 architecture unsupported by the selected linker. Existing Rust tests passed; this is not recorded as a scanner failure.",
+    "environmentChanges": false,
+    "toolSource": "target/quality-task-043/ast-inspect.c",
+    "toolSourceSha256": "5b41d52e57f2bfde72546d9af120f3a7de8a1881760797bfc5d933d53eb386e6"
+  }
+}

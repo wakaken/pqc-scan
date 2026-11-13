@@ -1,0 +1,64 @@
+{
+  "freshChecks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/quality -p 'test_*.py'",
+      "exit": 0,
+      "passed": 61,
+      "log": "python-quality.log"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/protocol -p 'test_*.py'",
+      "exit": 0,
+      "passed": 5,
+      "skipped": 6,
+      "log": "python-protocol.log"
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "reusedEvidence": "../task044-20261113/VALIDATION.json and measured native workspace logs: product/Rust/Cargo/rules/schemas unchanged; no new full native workspace/clippy success claimed",
+  "notClaimed": [
+    "hosted CI",
+    "all original tests pass under Miri",
+    "native dependency FFI internals",
+    "doctests",
+    "other OS/architecture and many seeds",
+    "formal proof"
+  ],
+  "finalChecks": [
+    {
+      "command": "python3 -m unittest discover -s tests/quality -p 'test_*.py'",
+      "exit": 0,
+      "passed": 61,
+      "log": "python-quality-final.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/protocol -p 'test_*.py'",
+      "exit": 0,
+      "passed": 5,
+      "skipped": 6,
+      "log": "python-protocol-final.log"
+    },
+    {
+      "command": "py_compile; Ruby YAML original mapping; git diff --check; local Markdown references; source/evidence SHA256 audit",
+      "exit": 0,
+      "localLinks": 147
+    }
+  ],
+  "closureChecks": [
+    {
+      "command": "task queue unittest after completion metadata",
+      "exit": 0,
+      "passed": 1
+    },
+    {
+      "command": "Ruby compare original acceptance/deliverables/requirements/dependencies; git diff --check; local links and final source/evidence hashes",
+      "exit": 0,
+      "localLinks": 150,
+      "oldIndexedArtifactsUnchanged": 20,
+      "productFilesUnchanged": 195
+    }
+  ]
+}

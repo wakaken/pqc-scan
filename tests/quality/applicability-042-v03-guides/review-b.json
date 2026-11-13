@@ -1,0 +1,49 @@
+{
+  "reviewer": "develop_sync_docs_test_review",
+  "timestampUtc": "2026-11-13T01:04:29Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "a3b0bae7f5ae7ac5da14d7430d521ac981642422118f8057aaeec40341f0c349",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "db4349d31169787f183a873f0499439bb962a4c70f0585b4ab7e85ef6963b90b",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "元p12のAuthenticatedSafe内ContentInfoをASN.1で確認するとencryptedDataであり、来歴上のRSA証明書をECDSAと区別する属性検査には復号が必要になる。現行公開契約は暗号化内容を不透明な未対応入力とし、content関数も非dataを抽出しないため、この属性単位は対応範囲外。既知オブジェクトの元negativeラベルは変更しない。"
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "元pfxはp12と同じSHA-256を持ち、encryptedData内の証明書属性を問う。変換元がRSAである事実とは別に、公開契約と非復号parserではこの暗号化内容のECDSA属性判定を提供しないため対応範囲外。元nominal truthは保持する。"
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "p12の既知変換元RSA3072という来歴は元positive truthを支えるが、入力の証明書bagはencryptedDataで包まれている。公開対応は非暗号化X.509 bagの抽出であり、pkcs12.rsは暗号化ContentInfoをスキップするため、RSA modulus属性抽出のこの単位をsupported-scopeから外す。"
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "来歴で既知のsha256WithRSAEncryptionを元truthとして残す一方、元p12のencryptedDataからの署名OID抽出は公開された非復号subsetの外側である。COVERAGEのopaque/unsupportedとcontentのNone返却が一致するため対応範囲外。"
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "元pfxの暗号化ContentInfoはdata型ではなく、現行parserは内部公開鍵を読み取らない。RSA3072変換来歴によるnominal positiveは保持するが、この入力からのmodulus属性抽出は公開された非暗号化subsetの保証範囲外。"
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "pfx元bytesでencryptedDataを確認した。元証明書のRSA署名という来歴上の属性と、公開parserが入力から抽出できる属性は分ける必要がある。公開契約は復号しないため、この署名OID属性単位はunsupportedとし元truthを保持する。"
+    }
+  ]
+}
