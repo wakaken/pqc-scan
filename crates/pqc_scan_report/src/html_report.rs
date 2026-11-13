@@ -428,4 +428,33 @@ mod tests {
 
         let _ = fs::remove_file(path);
     }
+    #[test]
+    fn concise_header_keeps_all_certificate_facts_and_unknown_locations() {
+        let mut result = sample_result();
+        let mut attribute = result.findings[0].clone();
+        attribute.finding_id = "attribute".into();
+        attribute.rule_id = "CERT_SHA1_SIGNATURE".into();
+        let mut unknown_line = attribute.clone();
+        unknown_line.finding_id = "unknown-line".into();
+        unknown_line.location.line = 0;
+        let mut unknown_column = attribute.clone();
+        unknown_column.finding_id = "unknown-column".into();
+        unknown_column.location.column = 0;
+        let mut info = attribute.clone();
+        info.finding_id = "info".into();
+        info.severity = Severity::Info;
+        info.risk = Risk::QuantumSafe;
+        info.location.line = 99;
+        result
+            .findings
+            .extend([attribute, unknown_line, unknown_column, info]);
+        let path = temp_file("position-summary", "html");
+        write_html_report(&result, &path).unwrap();
+        let html = fs::read_to_string(&path).unwrap();
+        assert!(!html.contains("data-candidate-locations="));
+        assert!(!html.contains("Candidate findings with unknown positions"));
+        assert_eq!(html.matches("data-finding-id=").count(), 6);
+        assert!(html.contains("CERT_SHA1_SIGNATURE"));
+        fs::remove_file(path).unwrap();
+    }
 }

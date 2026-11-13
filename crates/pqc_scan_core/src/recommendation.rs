@@ -158,7 +158,22 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
     let language = detect_language(finding);
     let category = finding.category.to_ascii_lowercase();
 
-    add_middleware_pqc_signature_notes(&mut actions, finding);
+    if category == "middleware"
+        || finding
+            .evidence
+            .metadata
+            .get("scope")
+            .is_some_and(|v| v == "config")
+    {
+        add_middleware_pqc_signature_notes(&mut actions, finding);
+    }
+    if matches!(
+        finding.rule_id.as_str(),
+        "TS_JWT_EDDSA_ALG" | "API_CIPHER_RSA" | "TS_JAVA_RSA_API"
+    ) {
+        push_action(&mut actions, reference_action());
+        return actions;
+    }
 
     if finding.evidence.r#type == "private_key" {
         push_action(
@@ -195,7 +210,7 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
                 rationale: "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.".to_string(),
                 steps: vec![
                     "Inventory all call sites using this algorithm and owner teams.".to_string(),
-                    "Introduce dual-stack or hybrid mode (classical + PQC) before hard cut-over.".to_string(),
+                    "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.".to_string(),
                     "Define retirement dates for legacy classical algorithms.".to_string(),
                 ],
                 references: vec![
@@ -255,6 +270,18 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
     }
 
     actions
+}
+
+fn reference_action() -> RecommendedAction {
+    RecommendedAction {
+        action_id: "crypto.review-reference".into(),
+        title: "Review the cryptographic reference and its actual purpose".into(),
+        priority: "planned".into(),
+        rationale: "A source reference does not establish active signing, JWT issuance, or the absence of an existing PQC/hybrid composition.".into(),
+        steps: vec!["Identify key generation, signing, verification, encryption or key establishment and separate tests/examples from deployed use.".into(), "Check existing PQC or hybrid components, provider support and protocol compatibility before selecting a change.".into()],
+        references: vec!["https://www.nist.gov/itl/post-quantum-cryptography".into()],
+        code_examples: Vec::new(),
+    }
 }
 
 fn runtime_pqc_capabilities(language: Option<&str>) -> Option<(&'static str, &'static str)> {
@@ -441,7 +468,7 @@ fn add_jwt_actions(
         actions,
         RecommendedAction {
             action_id: "jwt.remove-rsa-algorithms".to_string(),
-            title: "Stop issuing new JWTs with RSA/PKCS#1/ECDSA-only algorithms".to_string(),
+            title: "Review whether the JOSE reference is used for signing, verification, tests or documentation".to_string(),
             priority: "near-term".to_string(),
             rationale: "JWT signatures using classical public-key algorithms become long-term high risk under quantum adversaries.".to_string(),
             steps: vec![
@@ -664,6 +691,23 @@ fn add_tls_actions(
             steps:vec![format!("Inspect {setting} at this location and confirm why the override is required."),"Verify deployed library and peer support before testing a hybrid group or removing the override.".to_string(),"Check key exchange, TLS protocol version and certificate signatures separately; TLS 1.3 alone does not establish PQC protection.".to_string()],
             references:vec!["https://go.dev/doc/godebug".to_string(),"https://www.rfc-editor.org/rfc/rfc9325.html#section-3.1.1".to_string()],
             code_examples:Vec::new(),
+        });
+        return;
+    }
+    if finding
+        .evidence
+        .metadata
+        .get("scope")
+        .is_none_or(|v| v != "config")
+    {
+        push_action(actions, RecommendedAction {
+            action_id: "tls.review-reference".into(),
+            title: "Review the TLS reference before changing effective settings".into(),
+            priority: "planned".into(),
+            rationale: "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.".into(),
+            steps: vec!["Distinguish constants, comments, tests and active settings.".into(), "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration.".into()],
+            references: vec!["https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2".into()],
+            code_examples: Vec::new(),
         });
         return;
     }
@@ -1103,6 +1147,7 @@ mod tests {
             .iter()
             .all(|a| !a.action_id.ends_with("-hardening")));
         f = make_finding("NGINX_SSL_PROTOCOLS_LEGACY", "TLS", "settings.conf");
+        f.evidence.metadata.insert("scope".into(), "config".into());
         annotate_findings(std::slice::from_mut(&mut f), &profile);
         assert!(f
             .recommended_actions
@@ -1114,11 +1159,15 @@ mod tests {
             ("TLS_VERSION_1_0", "etc/apache2/ports.conf"),
         ] {
             f = make_finding(rule, "TLS", file);
+            if rule == "HTTPD_SSLPROTOCOL_LEGACY" {
+                f.evidence.metadata.insert("scope".into(), "config".into());
+            }
             annotate_findings(std::slice::from_mut(&mut f), &profile);
-            assert!(
+            assert_eq!(
                 f.recommended_actions
                     .iter()
                     .any(|a| a.action_id == "tls.httpd-hardening"),
+                rule == "HTTPD_SSLPROTOCOL_LEGACY",
                 "{rule}:{file}"
             );
         }
@@ -1142,7 +1191,8 @@ mod tests {
                 .iter()
                 .all(|a| a.action_id != "tls.remove-rsa-kex"));
         }
-        let mut f = make_finding("TLS_VERSION_1_0", "TLS", "tls.conf");
+        let mut f = make_finding("NGINX_SSL_PROTOCOLS_LEGACY", "TLS", "tls.conf");
+        f.evidence.metadata.insert("scope".into(), "config".into());
         annotate_findings(std::slice::from_mut(&mut f), &RuntimeProfile::default());
         let a = f
             .recommended_actions

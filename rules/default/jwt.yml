@@ -4,77 +4,70 @@
   severity: high
   risk: quantum-vulnerable
   confidence: 0.60
-  migration_hint: Migrate to ML-DSA signatures.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "\\bRS256\\b"
   scope: code
-  description: RS256 (RSA-based JWT signing) is in use.
-
+  description: RS256 algorithm name referenced; active signing and effective policy are not established.
 - id: JWT_RS384
   kind: regex
   category: JWT
   severity: high
   risk: quantum-vulnerable
   confidence: 0.60
-  migration_hint: Migrate to ML-DSA signatures.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "\\bRS384\\b"
   scope: code
-  description: RS384 is used for JWT signing.
-
+  description: RS384 algorithm name referenced; active signing and effective policy are not established.
 - id: JWT_RS512
   kind: regex
   category: JWT
   severity: high
   risk: quantum-vulnerable
   confidence: 0.60
-  migration_hint: Migrate to ML-DSA signatures.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "\\bRS512\\b"
   scope: code
-  description: RS512 is used for JWT signing.
-
+  description: RS512 algorithm name referenced; active signing and effective policy are not established.
 - id: JWT_PS256
   kind: regex
   category: JWT
   severity: high
   risk: quantum-vulnerable
   confidence: 0.55
-  migration_hint: Migrate to ML-DSA signatures.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "\\bPS256\\b"
   scope: code
-  description: PS256 (RSA-PSS) is used for JWT signing.
-
+  description: PS256 algorithm name referenced; active signing and effective policy are not established.
 - id: JWT_PS384
   kind: regex
   category: JWT
   severity: high
   risk: quantum-vulnerable
   confidence: 0.55
-  migration_hint: Migrate to ML-DSA signatures.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "\\bPS384\\b"
   scope: code
-  description: PS384 (RSA-PSS) is used for JWT signing.
-
+  description: PS384 algorithm name referenced; active signing and effective policy are not established.
 - id: JWT_PS512
   kind: regex
   category: JWT
   severity: high
   risk: quantum-vulnerable
   confidence: 0.55
-  migration_hint: Migrate to ML-DSA signatures.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "\\bPS512\\b"
   scope: code
-  description: PS512 (RSA-PSS) is used for JWT signing.
-
+  description: PS512 algorithm name referenced; active signing and effective policy are not established.
 - id: JWT_ES256
   kind: regex
   category: JWT
   severity: medium
   risk: quantum-uncertain
   confidence: 0.50
-  migration_hint: Plan migration from ECDSA to PQC signatures.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "\\bES256\\b"
   scope: code
-  description: ES256 (ECDSA-based JWT signing) is in use.
-
+  description: ES256 algorithm name referenced; active signing and effective policy are not established.
 - id: JWT_LIB_JSONWEBTOKEN
   kind: dependency
   category: JWT
@@ -103,40 +96,37 @@
   severity: low
   risk: quantum-uncertain
   confidence: 0.35
-  migration_hint: Add PQC keys into the key-rotation strategy.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "\"kid\"\\s*:"
   scope: code
   description: JWT kid header usage detected, indicating key-management touch points.
-
 - id: JWK_RSA_KEY
   kind: regex
   category: JWT
   severity: high
   risk: quantum-vulnerable
   confidence: 0.62
-  migration_hint: Migrate JWKs to ML-DSA or hybrid key types.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "\"kty\"\\s*:\\s*\"RSA\""
   scope: code
   description: RSA key type in JWK detected.
-
 - id: JWT_SIGNING_METHOD_RS
   kind: regex
   category: JWT
   severity: high
   risk: quantum-vulnerable
   confidence: 0.65
-  migration_hint: Migrate to ML-DSA signatures.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "SigningMethodRS(256|384|512)"
   scope: code
   description: RS* JWT signing method is used in code.
-
 - id: OIDC_ID_TOKEN_SIGALG
   kind: regex
   category: JWT
   severity: medium
   risk: quantum-uncertain
   confidence: 0.40
-  migration_hint: Select PQC-ready algorithms in OIDC provider settings.
+  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
   pattern: "id_token_signed_response_alg"
   scope: code
   description: OIDC ID token signature algorithm configuration detected.

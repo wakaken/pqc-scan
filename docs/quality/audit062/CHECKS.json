@@ -1,0 +1,124 @@
+{
+  "baseline": "5f552b818ec82cc0b6b4a8af77b6179d63e281e3",
+  "source": "SOURCE-FINAL.json",
+  "source_manifest_sha256": "e6d4f52a17d8fa6f0cc4210ee84cb12bbe661dd8369e4edba523c63fe799b293",
+  "checks": [
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "environment": {},
+      "exit": 0,
+      "seconds": 0.44,
+      "log": "checks/fmt.log"
+    },
+    {
+      "name": "workspace",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace"
+      ],
+      "environment": {},
+      "exit": 0,
+      "seconds": 28.33,
+      "log": "checks/workspace.log"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "environment": {},
+      "exit": 0,
+      "seconds": 0.6,
+      "log": "checks/clippy.log"
+    },
+    {
+      "name": "build",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace"
+      ],
+      "environment": {},
+      "exit": 0,
+      "seconds": 0.45,
+      "log": "checks/build.log"
+    },
+    {
+      "name": "all-features-regression",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "pqc_scan_cli",
+        "--all-features",
+        "--test",
+        "audit_remediation"
+      ],
+      "environment": {
+        "CARGO_TARGET_DIR": "target/audit-all-features"
+      },
+      "exit": 0,
+      "seconds": 1.89,
+      "log": "checks/all-features-regression.log"
+    },
+    {
+      "name": "node",
+      "command": [
+        "node",
+        "--test",
+        "shell/compact-report.test.cjs",
+        "shell/final-gap-self-scan.test.cjs",
+        "shell/prepare-code-scanning.test.cjs",
+        "shell/self-scan-backlog.test.cjs",
+        "shell/self-scan-policy.test.cjs",
+        "shell/v02-self-scan.test.cjs"
+      ],
+      "environment": {},
+      "exit": 0,
+      "seconds": 3.44,
+      "log": "checks/node.log"
+    },
+    {
+      "name": "python",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_*.py"
+      ],
+      "environment": {},
+      "exit": 0,
+      "seconds": 0.71,
+      "log": "checks/python.log"
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "environment": {},
+      "exit": 0,
+      "seconds": 0.02,
+      "log": "checks/diff.log"
+    }
+  ]
+}

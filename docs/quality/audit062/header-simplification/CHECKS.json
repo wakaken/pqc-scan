@@ -1,0 +1,86 @@
+{
+  "source": "SOURCE.json",
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace"
+      ],
+      "exit": 0,
+      "log": "checks/workspace.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "environment": {},
+      "exit": 0,
+      "log": "checks/fmt.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "environment": {},
+      "exit": 0,
+      "log": "checks/clippy.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace"
+      ],
+      "environment": {},
+      "exit": 0,
+      "log": "checks/build.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "pqc_scan_cli",
+        "--all-features",
+        "--test",
+        "audit_remediation"
+      ],
+      "environment": {
+        "CARGO_TARGET_DIR": "target/audit-all-features"
+      },
+      "exit": 0,
+      "log": "checks/features.log"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "shell/compact-report.test.cjs",
+        "shell/v02-self-scan.test.cjs"
+      ],
+      "environment": {},
+      "exit": 0,
+      "log": "checks/node.log"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "environment": {},
+      "exit": 0,
+      "log": "checks/diff.log"
+    }
+  ]
+}

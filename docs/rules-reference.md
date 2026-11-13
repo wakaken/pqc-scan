@@ -2,9 +2,9 @@
 
 This document lists all built-in detection rules shipped in `rules/default/` and explains severity levels used in reports.
 
-- Total rules: **122**
+- Total rules: **123**
 - Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`
-- Kind breakdown: `certificate`: 18, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 25
+- Kind breakdown: `certificate`: 18, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 26
 
 ## Validation and quality review
 
@@ -212,3 +212,11 @@ Python API detection uses supported static import bindings, including `as` alias
 Grammar compatibility reads original source for evidence, offsets and matching. It preserves source bytes/line positions and retains original candidate nodes alongside compatible trees. Rust compatibility requiring attribute/type erasure first validates bounded syntax using Syn without macro expansion. Supported V8 intrinsics, source-phase/module attributes, contextual identifiers, JSX, Flow-marked files and selected Babel syntax remain references, not runtime compatibility certification. Unsupported/malformed inputs retain partial diagnostics.
 
 Known non-certificate PEM/DER objects are inapplicable to certificate parsing; native container observations retain their presence without inventing a certificate. ML-DSA and SLH-DSA shapes follow [RFC9881](https://www.rfc-editor.org/rfc/rfc9881.html) and [RFC9909](https://www.rfc-editor.org/rfc/rfc9909.html). Shape completeness is separate from signature/trust validation; encrypted PKCS#12 stays incomplete.
+
+## Audit P1/P2 corrections (2026-11-13)
+
+The user-approved audit remediation retains IDs, schemas and the severity engine. RSA size matching now needs explicit RSA context, avoiding ML-KEM/Falcon parameter names and HSS counters. TLS reference guidance separates static RSA exchange from ECDHE/DHE RSA authentication. Generic protocol names and private-key markers do not establish enabled settings or a live credential incident. General EdDSA names do not establish JWT usage; Java RSA references can already belong to a PQC composition.
+
+`PQC_STANDARD_REFERENCE` (tree_sitter, info, quantum-safe, seven language scopes) inventories recognized standard parameter names and X25519MLKEM768. It is nominal source inventory, not execution, enabled state, implementation conformance or certification. Specific API rules remain separate findings.
+
+The current source-bound companion is [AUDIT-RULE-QUALITY-METADATA.json](quality/AUDIT-RULE-QUALITY-METADATA.json); the original metadata and past measurements remain unchanged. These are hand-authored pattern controls, not a calibrated accuracy claim. Actual detector/CLI regression controls are in `crates/pqc_scan_cli/tests/audit_remediation.rs`.

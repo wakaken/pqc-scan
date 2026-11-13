@@ -4,7 +4,7 @@ These minimal source fragments are scanner inputs, not runnable applications or
 cryptographic migration recipes. They intentionally omit imports, provider setup
 and key material. The seven positive files map to PQC_JAVA_API, PQC_GO_API,
 PQC_NODE_API, PQC_WEBCRYPTO_API, PQC_PYTHON_API, PQC_RUST_API and PQC_RUBY_API.
-negative.js must not produce PQC API or draft-algorithm findings. overrides.conf
+negative.js must not produce PQC API or draft-algorithm findings. Its X25519MLKEM768 literal now produces one PQC_STANDARD_REFERENCE inventory finding; this is not an API call. overrides.conf
 contains three explicit classical-only/disabled TLS configuration signals.
 
 Scan only this directory with --format all to inspect informational PQC inventory

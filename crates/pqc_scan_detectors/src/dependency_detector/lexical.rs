@@ -192,34 +192,100 @@ pub(super) fn parse_pom_xml(text: &str) -> Vec<DependencyItem> {
     out
 }
 
+// Split map fields outside quoted literals. Escapes keep a quoted comma from
+// becoming syntax; literal contents are still validated by the shared policy.
+fn gradle_fields(body: &str) -> impl Iterator<Item = &str> {
+    let mut quote = None;
+    let mut escaped = false;
+    body.split(move |ch| {
+        if escaped {
+            escaped = false;
+            return false;
+        }
+        if quote.is_some() && ch == '\\' {
+            escaped = true;
+            return false;
+        }
+        if quote == Some(ch) {
+            quote = None;
+            return false;
+        }
+        if quote.is_none() && matches!(ch, '\'' | '"') {
+            quote = Some(ch);
+            return false;
+        }
+        quote.is_none() && ch == ','
+    })
+}
+
 pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
+    static DECL: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(
+        r"^\s*(?:implementation|api|compileOnly|runtimeOnly|testImplementation|testRuntimeOnly)\s+(.+)"
+    ).expect("Gradle declaration")
+    });
+    static COORD: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r#"^["']([^:"']+):([^:"']+):([^"']+)["']"#).expect("Gradle coordinate")
+    });
+    static FIELD: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r#"^\s*(group|name|version)\s*:\s*(?:'([^']*)'|"([^"\n]*)"|(.+?))\s*$"#)
+            .expect("Gradle map field")
+    });
     let mut out = Vec::new();
-    let re = match Regex::new(
-        r#"(?m)^\s*(implementation|api|compileOnly|runtimeOnly|testImplementation|testRuntimeOnly)\s+['"]([^:'"]+):([^:'"]+):([^'"]+)['"]"#,
-    ) {
-        Ok(v) => v,
-        Err(_) => return out,
-    };
-
-    for caps in re.captures_iter(text).take(10001) {
-        let group = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
-        let artifact = caps.get(3).map(|m| m.as_str()).unwrap_or("unknown");
-        let version = caps.get(4).map(|m| m.as_str()).unwrap_or("unknown");
-        let name = format!("{}:{}", group, artifact);
-        let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
-
+    // Single-line lexical subset. Scripts, closures, interpolation and variables
+    // are never evaluated; the existing heuristic outcome stays NotReported.
+    for (idx, raw) in text.lines().enumerate() {
+        let Some(decl) = DECL.captures(raw) else {
+            continue;
+        };
+        let body = &decl[1];
+        let (group, artifact, version) = if let Some(c) = COORD.captures(body) {
+            (c[1].to_string(), c[2].to_string(), c[3].to_string())
+        } else {
+            let mut fields = std::collections::BTreeMap::new();
+            let mut duplicate = false;
+            for field in gradle_fields(body.trim_end_matches(';')) {
+                let Some(c) = FIELD.captures(field) else {
+                    duplicate = true;
+                    break;
+                };
+                let value = c.get(2).or_else(|| c.get(3)).map(|m| m.as_str());
+                if fields.insert(c[1].to_string(), value).is_some() {
+                    duplicate = true;
+                }
+            }
+            if duplicate {
+                continue;
+            }
+            let (Some(Some(group)), Some(Some(name))) = (fields.get("group"), fields.get("name"))
+            else {
+                continue;
+            };
+            (
+                group.to_string(),
+                name.to_string(),
+                fields
+                    .get("version")
+                    .and_then(|v| *v)
+                    .unwrap_or("unknown")
+                    .to_string(),
+            )
+        };
+        let name = format!("{group}:{artifact}");
         out.push(DependencyItem {
             context: None,
             name: name.clone(),
-            version: sanitize_version(version),
+            version: sanitize_version(&version),
             ecosystem: "maven".to_string(),
-            purl: make_purl("maven", &name, version),
-            line,
+            purl: make_purl("maven", &name, &version),
+            line: idx + 1,
             source_type: "manifest".to_string(),
             ..Default::default()
         });
+        if out.len() == 10001 {
+            break;
+        }
     }
-
     out
 }
 

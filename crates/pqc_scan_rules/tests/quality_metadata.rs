@@ -6,7 +6,7 @@ use std::{collections::BTreeSet, fs, path::Path};
 fn every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let metadata: Value = serde_json::from_slice(
-        &fs::read(root.join("docs/quality/RULE-QUALITY-METADATA.json")).unwrap(),
+        &fs::read(root.join("docs/quality/AUDIT-RULE-QUALITY-METADATA.json")).unwrap(),
     )
     .unwrap();
     assert_eq!(metadata["schema_version"], 1);
@@ -19,7 +19,7 @@ fn every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls() {
         );
     }
     let rules = RuleSet::load_from_dir(&root.join("rules/default")).unwrap();
-    assert_eq!(rules.len(), 122);
+    assert_eq!(rules.len(), 123);
     let rows = metadata["rules"].as_array().unwrap();
     assert_eq!(rows.len(), rules.len());
     let mut seen = BTreeSet::new();

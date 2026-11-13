@@ -36,6 +36,7 @@ fn detect_language(path: &Path) -> Option<&'static str> {
         "go" => Some("go"),
         "rs" => Some("rust"),
         "rb" => Some("ruby"),
+        "conf" | "cfg" => Some("config"),
         _ => None,
     }
 }
@@ -63,7 +64,7 @@ fn is_comment_only_line(language: &str, line: &str) -> bool {
                 || trimmed.starts_with('*')
                 || trimmed.starts_with("*/")
         }
-        "python" => trimmed.starts_with('#'),
+        "python" | "config" => trimmed.starts_with('#'),
         "ruby" => {
             trimmed.starts_with('#') || trimmed.starts_with("=begin") || trimmed.starts_with("=end")
         }

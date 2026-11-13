@@ -1331,6 +1331,9 @@ pub(super) fn heuristic(name: &str, text: &str) -> anyhow::Result<Parsed> {
                 None
             }
         };
+        if matches!(name, "build.gradle" | "build.gradle.kts") {
+            declared = (item.version != "unknown").then(|| item.version.clone());
+        }
         if name == "pom.xml" {
             let source = text
                 .lines()
