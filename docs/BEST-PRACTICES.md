@@ -43,6 +43,7 @@ For recurring repository structures and extension styles, see `docs/PATTERNS.md`
 
 ## User-Facing Reports
 
-Follow the User-Facing Report Content rules in [AGENTS.md](../AGENTS.md). Review
-the rendered first screen for useful findings, locations and next checks; keep
+Follow the [report content and browser rules](agent/REPORTS.md), as required by
+[AGENTS.md](../AGENTS.md). Review the rendered first screen for useful findings,
+locations and next checks; keep
 technical accounting and repeated disclaimers out of the opening.

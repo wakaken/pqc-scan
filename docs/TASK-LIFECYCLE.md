@@ -1,7 +1,9 @@
 # Task Lifecycle
 
-Tasks are YAML files in `tasks/`. AGENTS.md defines the working rules,
-verification and completion gates; this document explains task states.
+Tasks are YAML files in `tasks/`. [AGENTS.md](../AGENTS.md) defines core working
+rules and required reading. This file defines task states, responsibilities and
+boundaries. Follow [verification and completion](agent/VERIFICATION.md) for full
+completion gates and [review policy](agent/REVIEWS.md) for independent reviews.
 
 The main agent owns planning, implementation and evaluation. Planner, Executor,
 Evaluator, Reflection and Monitor are responsibility labels retained in task
@@ -22,7 +24,7 @@ blocked work is unfinished; cancellation records an explicit maintainer decision
 | pending | Authorized task exists but has not been selected for execution | Main agent; historically Planner / Reflection / Monitor |
 | planned | Scope, original acceptance criteria and implementation steps are established | Main agent as Planner |
 | in-progress | Implementation or corrections are underway | Main agent as Executor |
-| review | Change is ready for assessment; required review and validation may still be unfinished | Main agent as Executor records readiness; reviewers record findings |
+| review | Change is ready for assessment; required review and validation may still be unfinished | Main agent as Executor records readiness; reviewers record findings and acceptance |
 | done | Every original criterion and deliverable is verified against the final source, including required reviews | Main agent as Evaluator |
 | blocked | Required progress depends on human input or unavailable validation | Main agent or a role identifying the blocker |
 | cancelled | Maintainer explicitly ended further work | Main agent as Planner records the decision |
@@ -38,8 +40,10 @@ Task creation requires authorization under AGENTS.md.
   review when ready. It does not automatically reset work to pending.
 - Replan when assumptions or dependencies change. Record the revised approach
   before proceeding and obtain agreement before changing scope or criteria.
-- Preserve prior evidence and distinguish historical results from validation
-  of the final source. Passing tests alone do not establish done.
+- Keep original acceptance criteria and preserve prior evidence. Distinguish
+  historical results from validation of final source; passing tests alone do not
+  establish done.
+- Apply any explicitly applicable task-specific retry limits.
 - Apply `docs/RESTART-LOOP.md` only to the restart baseline and task 014, unless
   explicitly extended by the user. Its applicable retry limits, pending
   transition and completion gates remain exceptions to the normal flow.
@@ -49,7 +53,8 @@ Task creation requires authorization under AGENTS.md.
 Record the blocker, attempts made, unmet criteria and concrete action needed.
 Do not claim completion while required verification is unavailable.
 Resume only after the dependency is resolved and any required human decision
-is obtained. Record the reason and return to the appropriate state. A temporary
+is obtained. Record the reason and return to the appropriate state; resumption
+does not authorize scope changes or reopening cancelled work. A temporary
 validation outage does not itself require a new human approval when no such
 decision or stop condition applies.
 
@@ -68,3 +73,12 @@ and record why the former completion decision is superseded.
 Old role names and removed prompt paths in completed tasks and past review
 artifacts are historical evidence. Preserve them rather than rewriting history
 to match the current guidance layout.
+
+## Task Boundaries
+
+- Default to one task per PR, including its implementation, tests and docs.
+- Plan steps do not require separate tasks, PRs or review agents.
+- Keep a prerequisite feasibility study separate when its result determines
+  whether or how implementation should proceed.
+- Do not select unrelated queue items or generate new work automatically.
+- Record out-of-scope findings as proposals unless task creation is authorized.

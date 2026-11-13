@@ -2,7 +2,8 @@
 
 The main agent fills the request below for each required review stage and sends
 it to that stage's reviewer. Use the same template for both stages; do not combine
-reviewer identities. Follow AGENTS.md for criteria, budget and revision handling.
+reviewer identities. Read [AGENTS.md](../AGENTS.md) and the
+[review policy](../docs/agent/REVIEWS.md) for criteria, budget and revision handling.
 
 ## Request
 
@@ -16,8 +17,9 @@ reviewer identities. Follow AGENTS.md for criteria, budget and revision handling
 
 ## Reviewer Instructions
 
-- Apply the assigned stage's criteria in AGENTS.md. Read additional source or
-  documentation only as needed to evaluate the supplied scope.
+- Apply the assigned stage's criteria in `docs/agent/REVIEWS.md` and the applicable
+  completion/verification gates in `docs/agent/VERIFICATION.md`. Read additional
+  source or documentation only as needed to evaluate the supplied scope.
 - Do not modify files or delegate. Rely on supplied test results unless a
   specific concern requires independent reproduction; do not automatically
   repeat the full suite.
