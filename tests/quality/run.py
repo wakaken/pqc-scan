@@ -25,6 +25,16 @@ def write_json(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
 
 
+def resource_scope(system=None, available=None):
+    system = sys.platform if system is None else system
+    available = hasattr(os, "wait4") if available is None else available
+    return dict(wallUnit="seconds", wallScope="launch through exit/reap; output included; build excluded",
+                cpuUnit="seconds", cpuScope="wait4 child plus waited descendants; user + system" if available else None,
+                rssUnit="bytes", rssScope="wait4 child high-water RSS, not aggregate process-tree memory" if available and system in {"darwin", "linux"} else None,
+                rssNativeUnit=("bytes" if system == "darwin" else "KiB" if system == "linux" else None) if available else None,
+                pollingSeconds=0.005)
+
+
 def measure(command, directory, timeout):
     directory.mkdir(parents=True, exist_ok=True)
     start = time.monotonic()
@@ -63,7 +73,8 @@ def measure(command, directory, timeout):
                 wallSeconds=time.monotonic() - start,
                 cpuSeconds=usage.ru_utime + usage.ru_stime if usage else None,
                 peakRssBytes=rss, resourceMethod="wait4 per child" if usage else "unavailable",
-                rssNativeUnit="bytes" if sys.platform == "darwin" else "KiB" if sys.platform == "linux" else "unavailable")
+                rssNativeUnit=resource_scope(available=usage is not None)["rssNativeUnit"],
+                resourceScope=resource_scope(available=usage is not None))
 
 
 def materialize(data, repo, root, copies):
@@ -169,6 +180,7 @@ def run(args):
                   truthSha256=bytes_digest(corpus_dir / "truth.json"),
                   budgets=dict(status="unapproved; descriptive baseline only", enforced=False))
     result["environment"]["buildProfile"] = args.build_profile
+    result["environment"]["features"] = getattr(args, "features_label", "default")
     if data.get('annotationVersion'):
         from taxonomy import utc_time
         truth = json.loads((corpus_dir/'truth.json').read_text())
@@ -232,10 +244,17 @@ def main():
     parser.add_argument("--build-profile", choices=["release", "debug", "unspecified"], default="unspecified")
     parser.add_argument("--skip-benchmarks", action="store_true")
     parser.add_argument("--corpus-dir", type=pathlib.Path, help="Optional frozen corpus under tests/quality; default is TASK-023")
+    parser.add_argument("--performance-study", action="store_true", help="Opt-in TASK-050 measurement matrix; old baseline remains default")
+    parser.add_argument("--features-label", choices=["default", "all-features"], default="default")
     args = parser.parse_args()
     if args.repeats < 2 or args.warm_samples < 3 or not 0 < args.timeout <= 60:
         parser.error("Need >=2 accuracy repeats, >=3 warm samples and 0 < timeout <=60 seconds")
     try:
+        if args.performance_study:
+            from task050.study import study
+            study(args)
+            print("TASK-050 measurements saved; comparisons are descriptive, not numeric CI gates.")
+            return 0
         summary = run(args)
     except (ValueError, RuntimeError, OSError, KeyError) as error:
         print(f"Baseline failed: {error}", file=sys.stderr)

@@ -211,6 +211,9 @@ def main():
             elif args.case == 'fuzz047-profile':
                 import runpy
                 runpy.run_path(str(ROOT/'tests/quality/task047/profile.py'), run_name='__main__')
+            elif args.case == 'performance050':
+                import runpy
+                runpy.run_path(str(ROOT/'tests/quality/task050/entry.py'), run_name='__main__')
             elif args.case == 'protocol049':
                 import runpy
                 runpy.run_path(str(ROOT/'tests/quality/task049/entry.py'), run_name='__main__')

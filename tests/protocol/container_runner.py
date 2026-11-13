@@ -153,7 +153,7 @@ def execute(image, output, *, case='suite', previews=False, ssh_kex=False,
             memory=6*1024**3, scratch=4*1024**3, pids=128, timeout=1200):
     if not re.fullmatch(r'sha256:[0-9a-f]{64}', image):
         raise ValueError('immutable local image ID required')
-    if case not in {'suite', 'boundary', 'memory', 'disk', 'pids', 'timeout', 'coverage044', 'coverage044-branch', 'mutation045', 'quality055', 'security057', 'fuzz047', 'fuzz047-profile', 'protocol049'}:
+    if case not in {'suite', 'boundary', 'memory', 'disk', 'pids', 'timeout', 'coverage044', 'coverage044-branch', 'mutation045', 'quality055', 'security057', 'fuzz047', 'fuzz047-profile', 'protocol049', 'performance050'}:
         raise ValueError('unknown isolation case')
     output = Path(output).resolve(); output.mkdir(parents=True, exist_ok=False)
     record = {'image':image, 'environment':ENV, 'case':case, 'exit':None, 'containerRemoved':False,
@@ -165,7 +165,7 @@ def execute(image, output, *, case='suite', previews=False, ssh_kex=False,
         subprocess.run(['docker', 'image', 'inspect', image], check=True, stdout=subprocess.DEVNULL, timeout=30)
         with tempfile.TemporaryDirectory(prefix='pqc-confined-source-') as temporary:
             source = Path(temporary)/'source'; bindings = snapshot(ROOT, source)
-            if case in {'coverage044', 'coverage044-branch', 'mutation045', 'quality055', 'security057', 'fuzz047', 'fuzz047-profile', 'protocol049'}:
+            if case in {'coverage044', 'coverage044-branch', 'mutation045', 'quality055', 'security057', 'fuzz047', 'fuzz047-profile', 'protocol049', 'performance050'}:
                 # Legacy tests write beneath the repository target/ instead of
                 # CARGO_TARGET_DIR. Route only that untracked output to tmpfs.
                 (source/'target').symlink_to('/scratch/test-target', target_is_directory=True)
@@ -209,7 +209,7 @@ def execute(image, output, *, case='suite', previews=False, ssh_kex=False,
                 except RuntimeError:
                     time.sleep(.05)
             record['exit'] = status['exit']
-            if case in {'coverage044', 'coverage044-branch', 'mutation045', 'quality055', 'security057', 'fuzz047', 'fuzz047-profile', 'protocol049'} and record['exit']:
+            if case in {'coverage044', 'coverage044-branch', 'mutation045', 'quality055', 'security057', 'fuzz047', 'fuzz047-profile', 'protocol049', 'performance050'} and record['exit']:
                 diagnostic = bounded_output(['docker','exec',container,'/usr/bin/tail','-c','32768','/scratch/evidence/entry.log'], limit=32768)
                 (output/'failure-diagnostic.log').write_bytes(diagnostic)
             data = bounded_output(['docker','exec',container,'/bin/tar','-C','/scratch/evidence','-cf','-','.'], limit=64*1024**2-32768)
