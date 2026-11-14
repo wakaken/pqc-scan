@@ -136,13 +136,21 @@ truth, corpus and materialized input bindings match; supplying no reference
 does not itself prove a first independent evaluation.
 
 For v2, also pass
-`--applicability tests/quality/applicability-042-v2/assessment.json` to `report.py`.
+`--applicability tests/quality/applicability-document-relocation-20261114/assessment.json`
+to `report.py`, as selected by the current CI workflow.
 This adds `supported-scope.json` after checking two independent, source-bound
 applicability reviews. The original object-property truth and counts remain
 visible. Six attributes inside encrypted certificate contents are outside the
 documented public subset; their post-observation scope correction is separate
 from the original nominal-property measurement. It is not detector improvement
 or a new blind evaluation.
+
+The current applicability review binds the link-updated public contract and the
+unchanged parser. Earlier `applicability-042-v2/` and
+`applicability-044-develop-integration/` records remain immutable historical
+assessments; their old contract hashes are not current CI inputs. A changed
+contract requires a new source-based applicability review, preserving the old
+records, rather than replacing hashes inside past reviews or bypassing checks.
 
 The [reopened TASK-042 results](../../tasks/042/TASK-042-REOPEN-RESULTS.md)
 link the original nine acceptance criteria, every supported format, algorithm
