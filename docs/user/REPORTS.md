@@ -38,6 +38,8 @@ shared guidance is linked instead of repeating it at every location. Different
 recommendations sharing an action ID remain distinct. Without JavaScript, all
 records remain available through native expandable details. No external scripts
 or network connection are required. Markdown provides a linked rule/location index.
+Source excerpts and code examples normalize CRLF and CR line endings and indent
+every line so embedded markup remains code when rendered as Markdown.
 
 TLS guidance prefers TLS 1.3, retaining securely configured TLS 1.2 only for an
 identified interoperability need. PQC override settings receive setting-specific
@@ -239,4 +241,4 @@ keeps a column only when the existing unmasked snippet proves an ASCII prefix;
 otherwise it retains the line only. Missing, masked or clipped prefixes cannot
 prove a column. `report.json` locations/IDs, other reports, CLI flags and filenames
 are unchanged. These corrections intentionally replace invalid/misleading SARIF
-positions and unescaped paths. See the [contract and validation record](../quality/SARIF-LOCATION-CONTRACT-022.md).
+positions and unescaped paths. See the [contract and validation record](../../tasks/022/SARIF-LOCATION-CONTRACT-022.md).

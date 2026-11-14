@@ -1,0 +1,61 @@
+{
+  "baseHead": "34b763d188bfc8ada49876c18b15f5406b6628b3",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_*.py"
+      ],
+      "exit": 0,
+      "log": "quality-final.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "tests/quality/task045/entry.py",
+        "tests/quality/task045/study.py",
+        "tests/quality/test_mutation045.py",
+        "tests/protocol/container_entry.py",
+        "tests/protocol/container_runner.py"
+      ],
+      "exit": 0,
+      "log": "syntax-final.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "fmt-final.log"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "whitespace-final.log"
+    }
+  ],
+  "additionalPassingChecks": {
+    "kernel": "kernel.log:10 tests, no skips",
+    "node": "node.log:35 tests",
+    "distribution": "distribution.log:11 tests"
+  },
+  "historicalHashMatches": 77,
+  "measurementCodeMatchesFinal": true,
+  "productSourceChanged": false,
+  "githubActions": "Not run for TASK-045; local checks only"
+}

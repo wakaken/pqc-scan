@@ -70,18 +70,62 @@ class HostBoundaryTests(unittest.TestCase):
         with self.assertRaises(subprocess.TimeoutExpired):
             runner.bounded_output([sys.executable,'-c','import time; time.sleep(5)'],timeout=.1)
 
+    def test_snapshot_handles_unstaged_task_moves_without_copying_evidence(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp); root = base/'repository'; root.mkdir()
+            subprocess.run(['git', 'init', '-q', str(root)], check=True)
+            tasks = root/'tasks'; tasks.mkdir()
+            old = tasks/'001-original.yaml'; old.write_text('id: "001"\n')
+            subprocess.run(['git', '-C', str(root), 'add', '.'], check=True)
+            current = tasks/'001/task.yaml'; current.parent.mkdir()
+            old.rename(current)
+            evidence = current.parent/'evidence/run'; evidence.mkdir(parents=True)
+            (evidence/'task.yaml').write_text('historical definition\n')
+            (evidence/'large.json').write_bytes(b'x' * (33*1024**2))
+            (tasks/'README.md').write_text('Task queue\n')
+            bindings = runner.snapshot(root, base/'snapshot')
+            self.assertEqual(set(bindings), {'tasks/001/task.yaml', 'tasks/README.md'})
+            self.assertEqual((base/'snapshot/tasks/001/task.yaml').read_bytes(), current.read_bytes())
+            self.assertFalse((base/'snapshot/tasks/001/evidence').exists())
+
+    def test_snapshot_skips_known_deletions_but_rejects_copy_time_disappearance(self):
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp); root = base/'repository'; root.mkdir()
+            subprocess.run(['git', 'init', '-q', str(root)], check=True)
+            source = root/'crates/example'; source.mkdir(parents=True)
+            removed = source/'removed.rs'; removed.write_text('// deleted\n')
+            kept = source/'lib.rs'; kept.write_text('// current\n')
+            subprocess.run(['git', '-C', str(root), 'add', '.'], check=True)
+            removed.unlink()
+            self.assertEqual(set(runner.snapshot(root, base/'snapshot')), {'crates/example/lib.rs'})
+            original = runner.source_bytes
+            def disappear(root, name, *args, **kwargs):
+                if name == 'crates/example/lib.rs':
+                    kept.unlink()
+                return original(root, name, *args, **kwargs)
+            with mock.patch.object(runner, 'source_bytes', side_effect=disappear):
+                with self.assertRaises(ValueError):
+                    runner.snapshot(root, base/'raced')
+
     def test_snapshot_excludes_host_metadata_and_rejects_parent_symlinks(self):
         with tempfile.TemporaryDirectory() as temp:
             base = Path(temp); root = base/'repository'; root.mkdir()
             subprocess.run(['git', 'init', '-q', str(root)], check=True)
             source = root/'crates/example/src'; source.mkdir(parents=True)
             (source/'lib.rs').write_text('// public fixture\n')
+            metadata = root/'docs/quality/rules/RULE-QUALITY-METADATA.json'
+            metadata.parent.mkdir(parents=True)
+            metadata.write_text('{"source_files": [], "rules": []}\n')
             (root/'.env').write_text('SYNTHETIC_SECRET=must-not-copy')
             (root/'.git/config-canary').write_text('must-not-copy')
             subprocess.run(['git', '-C', str(root), 'add', 'crates'], check=True)
             snapshot = base/'snapshot'
             bindings = runner.snapshot(root, snapshot)
-            self.assertEqual(set(bindings), {'crates/example/src/lib.rs'})
+            self.assertEqual(set(bindings), {'crates/example/src/lib.rs',
+                                             'docs/quality/rules/RULE-QUALITY-METADATA.json'})
+            self.assertEqual((snapshot/metadata.relative_to(root)).read_bytes(),
+                             metadata.read_bytes())
             self.assertFalse((snapshot/'.env').exists())
             self.assertFalse((snapshot/'.git').exists())
             source.rename(root/'original')

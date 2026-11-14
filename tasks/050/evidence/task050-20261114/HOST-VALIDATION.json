@@ -1,0 +1,201 @@
+[
+  {
+    "name": "host-build-default",
+    "command": [
+      "cargo",
+      "build",
+      "--release",
+      "--workspace",
+      "--locked",
+      "--offline"
+    ],
+    "exit": 0,
+    "log": "host-build-default.log",
+    "sha256": "01ab7913311adc9c8e2b40778454dfe208fa890eb37b144c3aec71fd3c7a9d12"
+  },
+  {
+    "name": "host-build-all",
+    "command": [
+      "cargo",
+      "build",
+      "--release",
+      "--workspace",
+      "--all-features",
+      "--locked",
+      "--offline",
+      "--target-dir",
+      "target/quality-task-050/build-host-all"
+    ],
+    "exit": 0,
+    "log": "host-build-all.log",
+    "sha256": "a1a0bc6c6db964df2857ac1532b02946435abe014b697e3ee64bf869dde9cd98"
+  },
+  {
+    "name": "python-final",
+    "command": [
+      "env",
+      "PQC050_BINARY=/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/quality",
+      "-p",
+      "test_*.py"
+    ],
+    "exit": 0,
+    "log": "python-final.log",
+    "sha256": "70316155a46b52d49e6c5e141143f9352ac6eedfb4cb1d78bc5d7272e9b23136"
+  },
+  {
+    "name": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--check"
+    ],
+    "exit": 0,
+    "log": "fmt.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "container-host-tests",
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/protocol",
+      "-p",
+      "test_container_runner.py"
+    ],
+    "exit": 0,
+    "log": "container-tests.log",
+    "sha256": "c45f4a76436b6f36a95d4c7e249a91cbc23bb02bbbf64dcae500bff6dadeb56a"
+  },
+  {
+    "name": "host-default-final-2",
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--performance-study",
+      "--binary",
+      "target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "target/quality-task-050/host-default-final-2"
+    ],
+    "exit": 0,
+    "log": "host-default-final-2.log",
+    "sha256": "3fa18833b7763ee8f137957d137af1acb33e7e5e7fa81127d7b5561a0cf9735c"
+  },
+  {
+    "name": "host-default-final-3",
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--performance-study",
+      "--binary",
+      "target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "target/quality-task-050/host-default-final-3"
+    ],
+    "exit": 0,
+    "log": "host-default-final-3.log",
+    "sha256": "3c192099b7a29078e8376194e8877c4799d724aef33db3aad4ee319eb2aa7e9e"
+  },
+  {
+    "name": "accuracy-default",
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--skip-benchmarks",
+      "--binary",
+      "target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "target/quality-task-050/accuracy-default"
+    ],
+    "exit": 0,
+    "log": "accuracy-default.log",
+    "sha256": "4b1070199869648981864c236e204edd42ebbec841c16154ebc5b73618df8ff3"
+  },
+  {
+    "name": "accuracy-all",
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--skip-benchmarks",
+      "--binary",
+      "target/quality-task-050/build-host-all/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--features-label",
+      "all-features",
+      "--out-dir",
+      "target/quality-task-050/accuracy-all"
+    ],
+    "exit": 0,
+    "log": "accuracy-all.log",
+    "sha256": "4b1070199869648981864c236e204edd42ebbec841c16154ebc5b73618df8ff3"
+  },
+  {
+    "name": "python-final-r4",
+    "command": [
+      "env",
+      "PQC050_BINARY=/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/quality",
+      "-p",
+      "test_*.py"
+    ],
+    "exit": 0,
+    "passed": 91,
+    "log": "python-final-r4.log",
+    "sha256": "27f4d9d2eeaa01fc13660dc532ab99388f410e6a2ad9c447847209fe1c8e29fa"
+  },
+  {
+    "name": "accuracy-default-final",
+    "command": [
+      "python3",
+      "tests/quality/run.py",
+      "--skip-benchmarks",
+      "--binary",
+      "target/release/pqc-scan",
+      "--build-profile",
+      "release",
+      "--out-dir",
+      "target/quality-task-050/accuracy-default-final"
+    ],
+    "exit": 0,
+    "log": "accuracy-default-final.log"
+  },
+  {
+    "name": "final-postprocessing-r4",
+    "command": [
+      "python3",
+      "tests/quality/task050/compare.py",
+      "--runs",
+      "target/quality-task-050/host-default-final-2",
+      "target/quality-task-050/host-default-final-3",
+      "target/quality-task-050/confined-final/default-1",
+      "target/quality-task-050/confined-final/default-2",
+      "target/quality-task-050/confined-final/all-features-1",
+      "target/quality-task-050/confined-final/all-features-2",
+      "--out",
+      "target/quality-task-050/aggregate-r4"
+    ],
+    "exit": 0
+  }
+]

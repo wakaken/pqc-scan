@@ -254,7 +254,7 @@ def build_assessment(baseline, repo=REPO, reference=None, corpus_dir=None, appli
         # Full per-copy bindings remain in the hashed original summary.
         benchmarks[name] = {k: v for k, v in benchmark.items() if k != 'input'}
         benchmarks[name]['input'] = {k: v for k, v in benchmark['input'].items() if k != 'bindings'}
-    metadata_path = repo/'docs/quality/RULE-QUALITY-METADATA.json'
+    metadata_path = repo/'docs/quality/rules/RULE-QUALITY-METADATA.json'
     metadata = load_json(metadata_path)
     for source in metadata['source_files']:
         if bytes_digest(repo/safe_relative(source['path'])) != source['sha256']:

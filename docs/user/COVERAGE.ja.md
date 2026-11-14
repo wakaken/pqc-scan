@@ -91,7 +91,7 @@ CLIはスキャンごとに証明書の判定時刻を取得します。
 CLIオプション、出力構造・列挙値、ID生成・重大度を引き上げる処理は維持します。
 署名・信頼チェーン・実際の利用状況は保証しません。PSSのダイジェストパラメーターや未収載OIDの評価には
 制限があり、ハッシュの所見がないだけで安全とは判断できません。
-[分類仕様](../roadmap/TASK-021-IMPLEMENTATION.md)と[証明書限定の比較結果](../quality/CERTIFICATE-BASELINE-021.md)を参照してください。
+[分類仕様](../../tasks/021/TASK-021-IMPLEMENTATION.md)と[証明書限定の比較結果](../../tasks/021/CERTIFICATE-BASELINE-021.md)を参照してください。
 EC・DSA・暗号化秘密鍵のPEMマーカーを含むファイルも、ソース抜粋全体をマスクします。
 新たな秘密鍵検出ルールの追加や、鍵の復号は行いません。
 
@@ -206,7 +206,7 @@ Bearer／Basicトークン、HTTP(S) URLの認証部分と名前付き認証ク�
 あらゆる秘密情報を見つける機能ではありません。未知・難読化された構文、任意の認証項目名、複数行の認証情報の位置追跡、構造を表す項目に埋め込まれた秘密は対象外です。
 パス、ID、repository scope、独自メタデータのキーには秘密情報を入れないでください。
 公開証明書の指紋・subjectなど、残す情報にも共有先に応じた確認が必要です。保守的な処理で公開テキストのプレビューも省略する場合があります。
-[対応構文・項目ごとの方針・制約](../architecture/EVIDENCE-PRIVACY.md)と[ダミー値による検証](../quality/TASK-029-EVIDENCE-PRIVACY.md)に詳細を記載しています。
+[対応構文・項目ごとの方針・制約](../architecture/EVIDENCE-PRIVACY.md)と[ダミー値による検証](../../tasks/029/TASK-029-EVIDENCE-PRIVACY.md)に詳細を記載しています。
 
 走査ではGitのignore設定を尊重し、既定で `.git`、`node_modules`、`target`、`dist`、`docs` とMarkdownファイルを除外します。
 2 MiBを超えるファイルも対象外です。テストディレクトリ全体を除外する動作はありません。

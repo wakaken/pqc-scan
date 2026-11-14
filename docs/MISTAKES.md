@@ -87,4 +87,4 @@ child environment boundary merely to collect coverage.
 
 ### Miriのbuild script失敗を依存crateの非対応と早合点しない
 
-固定版Cargo/Miriでは汎用target runnerがhostのbuild scriptにも適用され、native ELFをMiri用JSONとして誤読する場合がありました。依存なしのbuild.rs有無で再現を比較し、生成物の形式と同版工具のhost/target処理を照合します。今回の固定版ではhost runnerの明示で解消しました。対処後も、元crateでの試験、工具の正負対照、OS/FFIの制約と時間上限は別に確認します。[044の追加調査](quality/TASK-044-MIRI-FOLLOWUP.md)を参照してください。
+固定版Cargo/Miriでは汎用target runnerがhostのbuild scriptにも適用され、native ELFをMiri用JSONとして誤読する場合がありました。依存なしのbuild.rs有無で再現を比較し、生成物の形式と同版工具のhost/target処理を照合します。今回の固定版ではhost runnerの明示で解消しました。対処後も、元crateでの試験、工具の正負対照、OS/FFIの制約と時間上限は別に確認します。[044の追加調査](../tasks/044/TASK-044-MIRI-FOLLOWUP.md)を参照してください。

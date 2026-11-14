@@ -176,3 +176,7 @@ mod tests {
         std::fs::remove_dir_all(root).unwrap();
     }
 }
+
+#[cfg(all(test, unix))]
+#[path = "safe_read057.rs"]
+mod quality057;

@@ -31,4 +31,4 @@ Source positions account for Unicode character columns; legacy AST adapters may 
 
 Opaque/obfuscated content, arbitrary secret names, encoded field names, unsupported assignment syntax and secret-bearing structural fields are outside this bounded contract. Free-form caller results cannot recover private block context lost before construction. Public certificate fingerprints/subjects/endpoints are existing typed facts, not automatically secret; consumers must assess their own distribution policy. URLs may remain public and identifiable after credentials are removed. Conservative masking can remove benign preview text in a file containing recognized credentials. Canary success proves the exercised paths, not universal absence of secrets.
 
-See [task evidence](../quality/TASK-029-EVIDENCE-PRIVACY.md) for validation and independent review.
+See [task evidence](../../tasks/029/TASK-029-EVIDENCE-PRIVACY.md) for validation and independent review.

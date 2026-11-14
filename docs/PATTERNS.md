@@ -136,6 +136,8 @@ Current example:
 ## Task Queue Pattern
 
 Pattern:
+- keep each task definition in `tasks/<ID>/task.yaml`, with plans, results and reviews beside it and raw evidence under `tasks/<ID>/evidence/`
+- discover only the numbered task directories and their direct `task.yaml`; do not treat YAML inside evidence as task definitions
 - keep tasks small; responsibility labels describe work performed by the main agent
 - let Planner move tasks to `planned`, Executor to `in-progress`, Reviewer review the implementation, and Evaluator close the loop with `done`
 - use `blocked` when progress depends on unavailable validation or human decisions

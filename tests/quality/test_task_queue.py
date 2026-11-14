@@ -1,4 +1,4 @@
-"""Task identifiers must survive YAML 1.1 parsing as exact filename strings."""
+"""Task identifiers must survive YAML 1.1 parsing as exact task-directory strings."""
 from pathlib import Path
 import unittest
 try:
@@ -10,14 +10,18 @@ ROOT = Path(__file__).resolve().parents[2]
 
 @unittest.skipIf(yaml is None, 'PyYAML is needed for the optional YAML 1.1 cross-check; Rust covers YAML 1.2')
 class TaskQueueTests(unittest.TestCase):
-    def test_string_ids_filenames_unique_dependencies_and_preserved_decisions(self):
+    def test_string_ids_directories_unique_dependencies_and_preserved_decisions(self):
         tasks = {}
-        for path in sorted((ROOT / 'tasks').glob('*.yaml')):
-            with self.subTest(path=path.name):
+        root = ROOT / 'tasks'
+        self.assertFalse(list(root.glob('*.yaml')), 'task definitions must be nested')
+        for directory in sorted(path for path in root.iterdir() if path.is_dir()):
+            with self.subTest(directory=directory.name):
+                self.assertRegex(directory.name, r'^[0-9]{3}$')
+                path = directory / 'task.yaml'
                 task = yaml.safe_load(path.read_text())
                 identifier = task['id']
                 self.assertIsInstance(identifier, str)
-                self.assertEqual(identifier, path.name.split('-')[0])
+                self.assertEqual(identifier, directory.name)
                 self.assertNotIn(identifier, tasks)
                 tasks[identifier] = task
         self.assertTrue({f'{n:03}' for n in range(1, 63)} <= tasks.keys())

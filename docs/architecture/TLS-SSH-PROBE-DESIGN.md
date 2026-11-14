@@ -5,7 +5,7 @@ probe, remote scan or compiled library spike existed. See the [standards registe
 
 Continuation checkpoint (2026-11-10): task030's safety foundation is implemented
 under its approved one-attempt policy; task031's
-[pinned isolated study](../quality/TASK-031-TLS-FEASIBILITY.md) has passed independent
+[pinned isolated study](../../tasks/031/TASK-031-TLS-FEASIBILITY.md) has passed independent
 source review. Its backend/features/platform adoption and the
 [concrete product contract](RUNTIME-PROBE-IMPLEMENTATION.md) remain maintainer gates.
 No product TLS/SSH command or public endpoint scan is claimed. In particular,
@@ -120,13 +120,13 @@ Use a network-isolated test environment with synthetic public certificates, loca
 - Network policy: mocked DNS and connected peer binding for public/private/mixed answers, IPv4-mapped IPv6, rebinding between attempts, SNI independent of IP, cancellations, closed socket cleanup, and budgets across all profiles.
 - Determinism: compare semantic facts after excluding run time/IDs/ephemeral handshake bytes. Server randomness is not an inventory difference. Failure reproducibility means classified outcomes within bounded conditions, not byte-identical wire exchanges.
 
-All defaults, capability claims and no-auth guarantees require evidence in [QUALITY-GATES.md](../quality/QUALITY-GATES.md). The [roadmap](../roadmap/OSS-ROADMAP-v0.2.md) schedules safety before protocol release. No enterprise management service is part of this design.
+All defaults, capability claims and no-auth guarantees require evidence in [QUALITY-GATES.md](../quality/QUALITY-GATES.md). The [roadmap](../roadmap/v0.2/ROADMAP.md) schedules safety before protocol release. No enterprise management service is part of this design.
 
 ## Task039 selected use case and feasibility — 2026-11-11
 
 The maintainer explicitly selected verification of actual hybrid KEX and prior-trust
 host authentication without user authentication/login. The completed standalone
-[task039 study](../quality/TASK-039-SSH-KEX-FEASIBILITY.md) selects russh0.65.1/AWS-LC
+[task039 study](../../tasks/039/TASK-039-SSH-KEX-FEASIBILITY.md) selects russh0.65.1/AWS-LC
 conditionally for a future negotiated mode. In isolated OpenSSH10.2p1 fixtures,
 ML-KEM768+X25519 KEX completes with an exact pre-provisioned Ed25519 host-key pin;
 wrong/unknown pins and signature tampering fail. The server decodes NEWKEYS then
@@ -156,7 +156,7 @@ socket escape hatch. Existing030 one-attempt, target policy, time/traffic and
 cancellation budgets remain enforced. The runtime and socket are stopped before
 return. Separate `probe.ssh-kex.v1.json` plus guarded bilingual human reports do
 not alter existing TLS/SSH-offer contracts or make static scans access the network.
-See [product validation](../quality/SSH-KEX-PRODUCT-VALIDATION.md) and bilingual
+See [product validation](../../tasks/039/SSH-KEX-PRODUCT-VALIDATION.md) and bilingual
 [usage](../user/PROBING.md). This supersedes the earlier study-only limitation for
 the specifically authorized integration; it does not claim stable/hosted-CI or
 all-platform release acceptance.

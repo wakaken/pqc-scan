@@ -7,11 +7,11 @@ Report** (暗号資産・検出根拠レポート), selected by `--inventory-jso
 [current contract](INVENTORY-REPORT-V1.md) specifies compatibility.
 
 
-Design date: 2026-11-09. Status: recommended design for review, not permission to implement breaking changes. Existing architecture: [../architecture.md](../architecture.md). Evidence baseline: [CURRENT-GAP-ANALYSIS.md](../quality/CURRENT-GAP-ANALYSIS.md).
+Design date: 2026-11-09. Status: recommended design for review, not permission to implement breaking changes. Existing architecture: [../architecture.md](../architecture.md). Evidence baseline: [CURRENT-GAP-ANALYSIS.md](../records/v0.2-roadmap/CURRENT-GAP-ANALYSIS.md).
 
 ## Decision
 
-Retain the five-crate workspace. Tasks 018–029 have implemented the diagnostic result path, precise certificate semantics and core modules for observations/inventory/assessment; task 023 retains its maintainer approval gate. See the [current alignment](../quality/PHASE-0-1-ALIGNMENT.md). Add TLS and SSH as opt-in modules with independent network dependencies. No rewrite, framework migration, service layer or generic dynamic extension system is justified.
+Retain the five-crate workspace. Tasks 018–029 have implemented the diagnostic result path, precise certificate semantics and core modules for observations/inventory/assessment; task 023 retains its maintainer approval gate. See the [current alignment](../records/v0.2-roadmap/PHASE-0-1-ALIGNMENT.md). Add TLS and SSH as opt-in modules with independent network dependencies. No rewrite, framework migration, service layer or generic dynamic extension system is justified.
 
 ```mermaid
 flowchart TD
@@ -113,4 +113,4 @@ SARIF correction retains 2.1.0: encode paths as valid URIs, specify column units
 
 ## Open decisions for maintainers
 
-Approve opt-in artifact/CLI names and exit-3 policy; scope of corrective rule-result changes; default probe address policy and safety budgets; initial supported targets/platforms; and the eventual 1.0 support/deprecation window. Library selections remain conditional on spikes. Model extraction, enterprise services and dynamic plugins are explicitly deferred. [QUALITY-GATES.md](../quality/QUALITY-GATES.md) and [OSS-ROADMAP-v0.2.md](../roadmap/OSS-ROADMAP-v0.2.md) specify the evidence required to proceed.
+Approve opt-in artifact/CLI names and exit-3 policy; scope of corrective rule-result changes; default probe address policy and safety budgets; initial supported targets/platforms; and the eventual 1.0 support/deprecation window. Library selections remain conditional on spikes. Model extraction, enterprise services and dynamic plugins are explicitly deferred. [QUALITY-GATES.md](../quality/QUALITY-GATES.md) and [ROADMAP.md](../roadmap/v0.2/ROADMAP.md) specify the evidence required to proceed.

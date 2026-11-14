@@ -11,5 +11,5 @@ the existing QUALITY-GATES.md; do not start final1.0 acceptance before dependenc
 5. Retain actual browser, notice, baseline-budget and hosted current-HEAD CI gates.
    Stop final acceptance at blocked; no publication or extra SSH use case implied.
 
-Result: see docs/quality/RUNTIME-INTEGRATION-VALIDATION.md. This plan does not
+Result: see docs/records/runtime-integration/RUNTIME-INTEGRATION-VALIDATION.md. This plan does not
 change task023 truth, thresholds, support promises or release policy.

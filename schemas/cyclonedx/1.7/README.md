@@ -13,4 +13,4 @@ network fetch is performed during export or offline validation.
 
 The public certificate example is a pinned upstream compatibility fixture, not an
 assertion that pqc-scan extracts every field shown there. Exporter mappings and
-omissions are documented in `docs/quality/TASK-034-CYCLONEDX.md`.
+omissions are documented in `tasks/034/TASK-034-CYCLONEDX.md`.

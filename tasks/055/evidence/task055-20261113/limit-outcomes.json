@@ -1,0 +1,201 @@
+{
+  "malformedSibling": {
+    "input": "{\"dependencies\":{\"openssl\":\"1\",\"bad\":42}}",
+    "retained": 2,
+    "status": "Partial"
+  },
+  "regex": [
+    {
+      "input": "RS256\n",
+      "maxHits": 2,
+      "n": 1,
+      "retained": 1,
+      "status": "Complete"
+    },
+    {
+      "input": "RS256\nRS256\n",
+      "maxHits": 2,
+      "n": 2,
+      "retained": 2,
+      "status": "Complete"
+    },
+    {
+      "input": "RS256\nRS256\nRS256\n",
+      "maxHits": 2,
+      "n": 3,
+      "retained": 2,
+      "status": "Truncated"
+    }
+  ],
+  "explicitWorkLimits": {
+    "cases": [
+      {
+        "configured": 2,
+        "input": "RS256",
+        "limit": "ast_nodes",
+        "retained": 0,
+        "status": "Truncated"
+      },
+      {
+        "configured": 3,
+        "input": "RS256",
+        "limit": "ast_nodes",
+        "retained": 1,
+        "status": "Complete"
+      },
+      {
+        "configured": 4,
+        "input": "RS256",
+        "limit": "ast_nodes",
+        "retained": 1,
+        "status": "Complete"
+      },
+      {
+        "configured": 0,
+        "input": "RS256",
+        "limit": "ast_candidates",
+        "retained": 0,
+        "status": "Truncated"
+      },
+      {
+        "configured": 1,
+        "input": "RS256",
+        "limit": "ast_candidates",
+        "retained": 1,
+        "status": "Complete"
+      },
+      {
+        "configured": 2,
+        "input": "RS256",
+        "limit": "ast_candidates",
+        "retained": 1,
+        "status": "Complete"
+      },
+      {
+        "configured": 4,
+        "input": "RS256",
+        "limit": "ast_match_bytes",
+        "retained": 0,
+        "status": "Truncated"
+      },
+      {
+        "configured": 5,
+        "input": "RS256",
+        "limit": "ast_match_bytes",
+        "retained": 1,
+        "status": "Complete"
+      },
+      {
+        "configured": 6,
+        "input": "RS256",
+        "limit": "ast_match_bytes",
+        "retained": 1,
+        "status": "Complete"
+      },
+      {
+        "configured": 2,
+        "input": "RS256\n",
+        "inputCount": 1,
+        "limit": "match_candidates",
+        "retained": 1,
+        "status": "Complete"
+      },
+      {
+        "configured": 2,
+        "input": "RS256\nRS256\n",
+        "inputCount": 2,
+        "limit": "match_candidates",
+        "retained": 2,
+        "status": "Complete"
+      },
+      {
+        "configured": 2,
+        "input": "RS256\nRS256\nRS256\n",
+        "inputCount": 3,
+        "limit": "match_candidates",
+        "retained": 2,
+        "status": "Truncated"
+      },
+      {
+        "configured": 2,
+        "input": "RS256\n",
+        "inputCount": 1,
+        "limit": "accepted_hits",
+        "retained": 1,
+        "status": "Complete"
+      },
+      {
+        "configured": 2,
+        "input": "RS256\nRS256\n",
+        "inputCount": 2,
+        "limit": "accepted_hits",
+        "retained": 2,
+        "status": "Complete"
+      },
+      {
+        "configured": 2,
+        "input": "RS256\nRS256\nRS256\n",
+        "inputCount": 3,
+        "limit": "accepted_hits",
+        "retained": 2,
+        "status": "Truncated"
+      }
+    ]
+  },
+  "existingBoundaryTests": [
+    {
+      "source": "crates/pqc_scan_detectors/tests/bounded_outcomes.rs",
+      "sourceSha256": "7ceb1500a57e01a73857c0279d838fcbb98d5a829da44ccd2a96a8b421bca6a3",
+      "test": "key_limit_is_eight_masked_headers_and_ninth_proves_truncation",
+      "results": {
+        "default": "passed",
+        "all-features": "passed"
+      }
+    },
+    {
+      "source": "crates/pqc_scan_detectors/tests/bounded_outcomes.rs",
+      "sourceSha256": "7ceb1500a57e01a73857c0279d838fcbb98d5a829da44ccd2a96a8b421bca6a3",
+      "test": "ast_collection_exact_limit_can_complete_and_one_more_is_truncated",
+      "results": {
+        "default": "passed",
+        "all-features": "passed"
+      }
+    },
+    {
+      "source": "crates/pqc_scan_detectors/tests/bounded_outcomes.rs",
+      "sourceSha256": "7ceb1500a57e01a73857c0279d838fcbb98d5a829da44ccd2a96a8b421bca6a3",
+      "test": "ast_parser_errors_keep_obtainable_hits_and_report_partial_inspection",
+      "results": {
+        "default": "passed",
+        "all-features": "passed"
+      }
+    },
+    {
+      "source": "crates/pqc_scan_detectors/tests/format_dependency_support.rs",
+      "sourceSha256": "b0e6ac2be5d1982231f519db476a56c6f4037e95fd382023334e8401fc156b1c",
+      "test": "resource_limits_are_honest",
+      "results": {
+        "default": "passed",
+        "all-features": "passed"
+      }
+    },
+    {
+      "source": "crates/pqc_scan_detectors/tests/pkcs12_certificates.rs",
+      "sourceSha256": "ae54f8e346cd41a2b27681227212ea461dedc590703c9a3c3def40d04d11f658",
+      "test": "bounded_nested_contents_are_supported_but_deep_or_oversized_inputs_are_incomplete",
+      "results": {
+        "default": "passed",
+        "all-features": "passed"
+      }
+    },
+    {
+      "source": "crates/pqc_scan_detectors/tests/pkcs12_certificates.rs",
+      "sourceSha256": "ae54f8e346cd41a2b27681227212ea461dedc590703c9a3c3def40d04d11f658",
+      "test": "inspection_limits_remain_truncated_when_retained_certificate_attributes_are_partial",
+      "results": {
+        "default": "passed",
+        "all-features": "passed"
+      }
+    }
+  ]
+}

@@ -6,7 +6,7 @@ use std::{collections::BTreeSet, fs, path::Path};
 fn every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let metadata: Value = serde_json::from_slice(
-        &fs::read(root.join("docs/quality/RULE-QUALITY-METADATA.json")).unwrap(),
+        &fs::read(root.join("docs/quality/rules/RULE-QUALITY-METADATA.json")).unwrap(),
     )
     .unwrap();
     assert_eq!(metadata["schema_version"], 1);

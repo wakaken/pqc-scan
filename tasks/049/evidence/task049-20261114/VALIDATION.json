@@ -1,0 +1,198 @@
+[
+  {
+    "name": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--check"
+    ],
+    "exit": 0,
+    "seconds": 0.3720472079999695,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "fmt.log"
+  },
+  {
+    "name": "default-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--offline"
+    ],
+    "exit": 0,
+    "seconds": 101.44308717199999,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "default-tests.log"
+  },
+  {
+    "name": "default-clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--offline",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0,
+    "seconds": 10.281026129999987,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "default-clippy.log"
+  },
+  {
+    "name": "default-build",
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--locked",
+      "--offline"
+    ],
+    "exit": 0,
+    "seconds": 4.259217086000035,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "default-build.log"
+  },
+  {
+    "name": "all-features-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--offline",
+      "--all-features"
+    ],
+    "exit": 0,
+    "seconds": 129.69005239199998,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "all-features-tests.log"
+  },
+  {
+    "name": "all-features-clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0,
+    "seconds": 12.71575950600004,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "all-features-clippy.log"
+  },
+  {
+    "name": "all-features-build",
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--locked",
+      "--offline",
+      "--all-features"
+    ],
+    "exit": 0,
+    "seconds": 4.591684627000063,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "all-features-build.log"
+  },
+  {
+    "name": "openssh-offers",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "pqc_scan_probe_ssh",
+      "--all-features",
+      "--test",
+      "openssh",
+      "--",
+      "--ignored",
+      "--nocapture"
+    ],
+    "exit": 0,
+    "seconds": 10.899769297000034,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "openssh-offers.log"
+  },
+  {
+    "name": "openssh-kex",
+    "command": [
+      "/usr/bin/python3",
+      "/source/tests/protocol/ssh-kex-product.py",
+      "--inside",
+      "--binary",
+      "/scratch/target/debug/pqc-scan",
+      "--out-dir",
+      "/scratch/evidence/ssh-kex"
+    ],
+    "exit": 0,
+    "seconds": 0.5198495829999956,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "openssh-kex.log"
+  },
+  {
+    "name": "tools",
+    "command": [
+      "sh",
+      "-c",
+      "rustc -Vv; cargo -V; /usr/sbin/sshd -V 2>&1; /opt/openssh/sbin/sshd -V 2>&1; python3 -V"
+    ],
+    "exit": 0,
+    "seconds": 0.032535541000015655,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "tools.log"
+  },
+  {
+    "name": "test-binaries",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--all-features",
+      "--locked",
+      "--offline",
+      "--no-run",
+      "--message-format=json"
+    ],
+    "exit": 0,
+    "seconds": 0.1671414579999464,
+    "evidenceEnvironment": {
+      "PQC049_EVIDENCE": "/scratch/evidence/raw"
+    },
+    "log": "test-binaries.log"
+  }
+]

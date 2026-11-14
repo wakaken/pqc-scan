@@ -196,6 +196,27 @@ def main():
             if args.case in {'coverage044', 'coverage044-branch'}:
                 import runpy
                 runpy.run_path(str(ROOT/'tests/quality/task044/entry.py'), run_name='__main__', init_globals={'STUDY_MODE': args.case})
+            elif args.case == 'mutation045':
+                import runpy
+                runpy.run_path(str(ROOT/'tests/quality/task045/entry.py'), run_name='__main__')
+            elif args.case == 'quality055':
+                import runpy
+                runpy.run_path(str(ROOT/'tests/quality/inspection055_entry.py'), run_name='__main__')
+            elif args.case == 'security057':
+                import runpy
+                runpy.run_path(str(ROOT/'tests/quality/security057_entry.py'), run_name='__main__')
+            elif args.case == 'fuzz047':
+                import runpy
+                runpy.run_path(str(ROOT/'tests/quality/task047/entry.py'), run_name='__main__')
+            elif args.case == 'fuzz047-profile':
+                import runpy
+                runpy.run_path(str(ROOT/'tests/quality/task047/profile.py'), run_name='__main__')
+            elif args.case == 'performance050':
+                import runpy
+                runpy.run_path(str(ROOT/'tests/quality/task050/entry.py'), run_name='__main__')
+            elif args.case == 'protocol049':
+                import runpy
+                runpy.run_path(str(ROOT/'tests/quality/task049/entry.py'), run_name='__main__')
             elif args.case == 'suite': suite(args.previews,args.ssh_kex)
             else: exercise(args.case)
         except BaseException as error:

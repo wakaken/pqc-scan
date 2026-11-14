@@ -1,0 +1,51 @@
+id: "034"
+title: "Add truthful opt-in CycloneDX 1.7 exports"
+type: feature
+priority: medium
+status: done
+planned_new_paths:
+  - "crates/pqc_scan_report/src/cyclonedx.rs"
+  - "schemas/cyclonedx/1.7/ (pinned official schemas, digests and licenses)"
+owner: Evaluator Agent
+evaluation_record:
+  reviewer: "Independent source review accepted corrected fingerprint semantics and source-column units."
+  outcome: "Evaluator accepted review -> done after official offline schema11, CLI opt-in/legacy parity1, default321/feature338 workspace tests, build/fmt/clippy, Node28/Python20 and bilingual docs."
+  evidence: "docs/records/roadmap-continuation/ROADMAP-CONTINUATION-VALIDATION.md"
+  limitations: "Static observations only; no runtime protocols or installed-version claim; conversion loss retained."
+phase: "4"
+description: "Approved separate opt-in export contract; implementation follows the task-specific plan."
+plan_reference: "docs/roadmap/v0.2/ROADMAP.md#task-034"
+change_size: "Medium/high; standards mapping validation"
+decision_gate: "Approve separate filenames/format; never replace old arrays without new migration approval."
+change_categories:
+  - "New feature addition"
+  - "Existing implementation extension"
+depends_on:
+  - "025"
+  - "027"
+  - "029"
+required_files:
+  - "crates/pqc_scan_report/src/json_report.rs"
+  - "crates/pqc_scan_report/src/lib.rs"
+  - "crates/pqc_scan_cli/src/main.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Pin official schema/references/samples and license/digests for offline tests."
+  - "Map separate algorithms/certificates/keys/protocols/software with valid references/provenance."
+  - "Add separate cbom.cdx-1.7.json/dependency-sbom.cdx-1.7.json opt-in outputs; retain legacy arrays/default all."
+  - "Record conversion loss and omit unsupported strength/state/certification/resolved-version claims."
+out_of_scope:
+  - "No secret values, invented graph/CVEs or rebranding legacy arrays."
+risks:
+  - "Schema-valid documents can still have false crypto semantics/dangling refs."
+acceptance:
+  - "Official schemas plus semantic/ref/privacy gates pass."
+  - "Observed facts only; legacy contracts unchanged; uncertainty/loss explicit."
+testing_requirements:
+  - "Offline schema, unique/resolving refs, cert/key/unknown fixtures, semantic golden and consumer compatibility."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+implementation_plan: "docs/superpowers/plans/2026-11-10-cyclonedx-17.md"
+
+validation_record: "tasks/034/TASK-034-CYCLONEDX.md"

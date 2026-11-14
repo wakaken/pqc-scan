@@ -154,3 +154,70 @@ fn detector_error_content_is_not_exported_by_diagnostics_or_inventory() {
         .unwrap()
         .contains("LEAK029"));
 }
+
+#[test]
+fn quality057_unknown_line_or_column_preserves_conservative_redaction() {
+    struct Position(usize, usize);
+    impl Detector for Position {
+        fn name(&self) -> &'static str {
+            "position057"
+        }
+        fn detect(&self, file: &ScannableFile, _: &RuleSet) -> anyhow::Result<Vec<Detection>> {
+            Ok(vec![Detection {
+                rule_id: "CONTROL".into(),
+                location: Location {
+                    file: file.path.to_string_lossy().into(),
+                    line: self.0,
+                    column: self.1,
+                },
+                evidence: Evidence {
+                    r#type: "regex_match".into(),
+                    r#match: "MISSING057".into(),
+                    snippet_preview: "MISSING057".into(),
+                    metadata: BTreeMap::new(),
+                },
+            }])
+        }
+    }
+    for (line, column, tag) in [(0, 1, "line-zero"), (1, 0, "column-zero")] {
+        let f = Fixture::new(tag);
+        let input = f.0.join("input/body.txt");
+        let rules = RuleSet::load_from_dir(&f.0.join("rules")).unwrap();
+        let config = ScanConfig {
+            root: f.0.join("input"),
+            threads: 1,
+            ..Default::default()
+        };
+        let scan = || {
+            scan_repository_native(
+                &config,
+                &rules,
+                &[Arc::new(Position(line, column))],
+                &NativeOptions::new(Some("synthetic/057")).unwrap(),
+            )
+            .unwrap()
+        };
+        fs::write(&input, "public MISSING057").unwrap();
+        let public = scan();
+        assert!(serde_json::to_string(public.legacy())
+            .unwrap()
+            .contains("MISSING057"));
+        fs::write(
+            &input,
+            format!(
+                "{} password='MISSING057_SYNTHETIC_VALUE'",
+                "public ".repeat(12)
+            ),
+        )
+        .unwrap();
+        let protected = scan();
+        assert_eq!(protected.legacy().findings.len(), 1);
+        for value in [
+            serde_json::to_value(protected.legacy()).unwrap(),
+            serde_json::to_value(protected.native().unwrap()).unwrap(),
+            serde_json::to_value(protected.diagnostics_report()).unwrap(),
+        ] {
+            assert!(!value.to_string().contains("MISSING057"));
+        }
+    }
+}

@@ -1,0 +1,56 @@
+id: "028"
+title: "Strengthen rule validation and quality provenance compatibly"
+type: improvement
+priority: high
+status: done
+owner: Evaluator Agent
+phase: "0"
+description: "Strengthen rule validation and quality provenance compatibly. Implemented compatible loader validation and source-bound quality provenance for all119 built-ins; independent review and final local evaluation passed. No push/PR."
+plan_reference: "docs/roadmap/v0.2/ROADMAP.md#task-028"
+change_size: "Small/medium; compatibility review"
+decision_gate: "Human approval before rejecting existing custom semantics or changing detection patterns."
+change_categories:
+  - "Existing implementation correction"
+  - "Existing implementation extension"
+depends_on:
+  - "018"
+  - "023"
+required_files:
+  - "crates/pqc_scan_rules/src/lib.rs"
+  - "rules/default/"
+  - "docs/rules-reference.md"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Report traversal failures; retain regex/duplicate-ID validation."
+  - "Validate finite bounded confidence and nonempty IDs; inventory custom-scope semantics before tightening."
+  - "Add companion metadata for standard edition, method limits and positive/negative fixtures."
+  - "Review all 119 current built-in rules against a purpose/algorithm/quantum/classical classification matrix; record unsupported constructs and gaps without silently changing detections."
+out_of_scope:
+  - "No rule DSL, breaking scope rejection or bulk rewrite."
+risks:
+  - "Loose custom packs may depend on current acceptance."
+acceptance:
+  - "Invalid confidence and partial rule loading cannot silently succeed."
+  - "Built-in/custom corpus preserves compatibility with reviewed warning/migration behavior."
+testing_requirements:
+  - "Empty IDs, numeric bounds/nonfinite, traversal injection, regex and legacy/custom scopes."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+implementation_plan: "docs/superpowers/plans/2026-11-10-rule-quality.md"
+design_reference: "docs/superpowers/specs/2026-11-10-rule-quality-design.md"
+
+implementation_record:
+  base_head: "b21330034d33ef30ec002c8e0d8222effd4b9d01"
+  branch: "codex/scanner-quality-improvements"
+  runtime_change: "Nonblank IDs, source-f64 finite inclusive0..1 confidence, all-or-nothing traversal errors; public fields and valid custom scopes retained."
+  companion: "docs/quality/rules/RULE-QUALITY-METADATA.json;119 rules/244 pattern-target controls/8 retained known false-positive controls."
+  compatibility: "No executable rule or CLI/report schema change. Invalid metadata/traversal intentionally becomes an early operational error."
+  validation: "214 Rust,28 Node,20 Python; pinned offline locked build/release/fmt/clippy; five-profile output shadow and custom-pack controls; frozen corpus unchanged."
+  self_scan: "857 raw=853 reviewed omissions+4 retained;113 verified sources;46 existing entries rebound and1 synthetic header-only control registered."
+  report: "tasks/028/TASK-028-RULE-QUALITY.md"
+  review: "tasks/028/TASK-028-REVIEW.md"
+  evaluation: "tasks/028/TASK-028-EVALUATION.md"
+  evidence: "tasks/028/evidence/task028/COMPARISON.json"
+  task023_gate: "Implemented baseline consumed without changing corpus/labels/status or approving numeric budgets."
+  delivery: "Local commit only;push/PR/merge not authorized."

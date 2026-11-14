@@ -1287,3 +1287,7 @@ pub fn scan_repository_with_selection(
         selection,
     )
 }
+
+#[cfg(test)]
+#[path = "quality055.rs"]
+mod quality055;

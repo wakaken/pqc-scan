@@ -1,9 +1,9 @@
 # PQS-QAMの指標と分母
 
-対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](QUALITY-ROADMAP.md#v03-scope)）。
+対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](../roadmap/v0.3/ROADMAP.md#v03-scope)）。
 
 定義版: 1。正解単位、Unicode位置の半開区間、不明な依存関係位置の照合は[既存の測定手順](../../tests/quality/PROTOCOL.md)と `evaluate.py` が正本です。
-この文書は既存の採点を説明します。追加する測定は[要求対応表](QUALITY-REQUIREMENTS.md)にまとめています。
+この文書は既存の採点を説明します。追加する測定は[要求対応表](../roadmap/v0.3/REQUIREMENTS.md)にまとめています。
 
 ## Q1: 検出精度の計算
 
@@ -72,8 +72,9 @@ Q4は入力や故障注入ケースごとのpanic、timeout、制限超過、秘
 到達率はline・region・branchを分けます。
 
 Q5は入力レシピ、hash、build/features、ホストと隔離条件が同じ試料を比較します。
-処理量はfiles/wall、bytes/wallで定義しますが、現在は起動・出力を含む小規模入力の値です。
-本当のOS cold cache、失敗時の資源、複数ホストの差は別測定です。
+処理量はfiles/wall、bytes/wallで定義し、起動・出力生成を含めます。
+[050の測定](../../tasks/050/TASK-050-RESULTS.md)はMITの製品sourceを1/4/8コピーした約1.19〜9.49MB、1/2threads、通常/全機能buildとLinux隔離/macOSを扱い、失敗時資源も成功分布と分けて保存しました。
+本当のOS cold cache、制御した同条件の複数日・複数ホスト比較は未測定です。環境・工具・測定器の差がある結果を性能退行と扱いません。
 Linuxのwait4由来のpeak RSSは、exec前の起動プロセス像による下限も含み得ます。スキャナー本体だけのRSSやprocess tree全体の合計とは扱いません。資源統計がexecをまたいで保持される点と最大RSSの定義は[Linux man-pages](https://man7.org/linux/man-pages/man2/getrusage.2.html)を参照してください。同じlauncher条件を記録し、小さい試料の同値を測定器の累積値と即断しません。
 
 Q6は設定、手順、環境、検証項目ごとに状態と根拠を示します。全体点には合算しません。

@@ -26,6 +26,6 @@ unsafe context/unknown strings; schema/reference drift; changed legacy severity.
 
 ## Execution evidence
 
-[Validation and limitations](../../quality/TASK-026-LOCAL-ASSESSMENT.md) and
-[independent reviews](../../quality/TASK-026-REVIEW.md) bind the final source,
+[Validation and limitations](../../../tasks/026/TASK-026-LOCAL-ASSESSMENT.md) and
+[independent reviews](../../../tasks/026/TASK-026-REVIEW.md) bind the final source,
 inputs, command outcomes, compatibility and still-unapproved numeric budgets.

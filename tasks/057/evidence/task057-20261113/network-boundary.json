@@ -1,0 +1,93 @@
+{
+  "requirement": "Q4-07",
+  "staticScan": {
+    "command": [
+      "/scratch/target/debug/pqc-scan",
+      "scan",
+      "/scratch/static057",
+      "--rules-dir",
+      "/source/rules",
+      "--out-dir",
+      "/scratch/static057-output",
+      "--format",
+      "all",
+      "--diagnostics",
+      "--inventory-json",
+      "--cyclonedx-17"
+    ],
+    "result": {
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "scan",
+        "/scratch/static057",
+        "--rules-dir",
+        "/source/rules",
+        "--out-dir",
+        "/scratch/static057-output",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--cyclonedx-17"
+      ],
+      "status": "completed",
+      "returncode": 0,
+      "wallSeconds": 0.11591345900001215,
+      "wallLimitSeconds": 30,
+      "cpuLimitSeconds": 20,
+      "fileLimitBytes": 2097152,
+      "coreDumpBytes": 0,
+      "groupTerminationSent": false,
+      "stdoutBytes": 557,
+      "stderrBytes": 169
+    },
+    "configuredLoopbackReceivedConnections": false,
+    "externalNetwork": "none namespace, checked by boundary()",
+    "reportHashes": {
+      "scan.inventory.v1.json": "c733d46007d5cb16d6506b30c299915061cd98e4c96f73fd7cb88a56502af9c4",
+      "diagnostics.json": "4ba07a5a240d237ff2401c71da72d64e719b69c3c92f69743a759ddff5c12207",
+      "dependency-sbom.cdx-1.7.json": "224ac1e53756bc1a4cba1a7d201818118ad5bbd413ff37f737520599e9a76b96",
+      "cbom.cdx-1.7.json": "42737227aced1321499d72ad3ed5573447ec86844a3e97d97ccdda8d2748e850",
+      "dependency-sbom.json": "4b4f670c60ef3cabc0d1c388591f7583abef880b9d4b347b3146877b5d52cf37",
+      "cbom.json": "3050418e314d0a0294e1d3946192f8bd8367f2e9ed838c92d43014d1232c792d",
+      "report.sarif": "d3e1cfe86d1a3616d7407bc0baaa5dfb801bb62d9a61647b6b6cf40693f92bdd",
+      "report.md": "2d43b986fdcfa0aabb2e7e896bbabef170871def00ec7971fb985e49b5124fd9",
+      "report.html": "db2d0f3bab854ccbe552b5f24cd094fb06b5006d5863a42b36a55674aa50f27c",
+      "report.json": "1c791d6cd72d7b350cb18cacfc080d1ffe01ab57a735657297220d266d1f5db3"
+    },
+    "canaryAbsent": true
+  },
+  "explicitProbe": [
+    {
+      "source": "crates/pqc_scan_core/tests/target_policy.rs",
+      "sha256": "a2dc124551bf52d9e1482280c3e1d1a38975b13a4a4066ee2a4c4e875c606208",
+      "tests": [
+        "validates_every_answer_and_keeps_host_separate_from_pinned_ip",
+        "rejects_entire_mixed_answer_set_not_just_selected_address",
+        "literal_ip_bypasses_dns_but_never_policy",
+        "nonpublic_and_tunnel_ranges_require_explicit_authorization",
+        "broad_allowlist_never_permits_nonunicast_or_unspecified",
+        "reduced_limits_only_and_cancelled_resolution_never_calls_resolver",
+        "one_budget_cannot_resolve_twice_and_deadline_overrides_resolver_result"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    },
+    {
+      "source": "crates/pqc_scan_core/tests/probe_transport.rs",
+      "sha256": "f63d9f9dfb0de13c0eee2d2f62ffde3f1f8c7aca71dc56d5ce8a3284511eb29a",
+      "tests": [
+        "exact_socket_bytes_are_counted_and_caller_buffers_clipped",
+        "cancellation_interrupts_stalled_read_and_closes_socket",
+        "protocol_deadline_does_not_extend_on_successful_reads",
+        "cancelled_connect_sends_no_connection",
+        "target_cannot_be_attached_to_a_fresh_budget",
+        "aggregate_deadline_wins_over_protocol_deadline",
+        "idle_socket_closes_at_deadline_without_protocol_io"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    }
+  ],
+  "externalNetwork": "network=none, kernel external connection refusal; no unauthorized remote targets",
+  "measurementLimit": "no syscall trace: demonstrates offline scan succeeds, configured dependency URL is not fetched, and external traffic is denied; not a claim of zero attempted socket syscalls",
+  "preparation": "immutable prepared image with locked cached dependencies, target execution uses cargo --offline"
+}

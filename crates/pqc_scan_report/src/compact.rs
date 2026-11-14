@@ -94,6 +94,13 @@ fn h(s: &str) -> String {
 fn m(s: &str) -> String {
     japanese::md(s)
 }
+// Normalize every Markdown line ending before indenting untrusted code. A
+// continuation must not escape an indented block and become HTML or a link.
+fn md_code(s: &str) -> String {
+    s.replace("\r\n", "\n")
+        .replace('\r', "\n")
+        .replace('\n', "\n    ")
+}
 fn location(f: &Finding, lang: ReportLanguage) -> String {
     if f.location.line == 0 {
         format!(
@@ -633,7 +640,7 @@ pub(crate) fn markdown_report_with_context(
                         "    {} {} {}",
                         if line.highlighted { ">" } else { " " },
                         line.line,
-                        line.text
+                        md_code(&line.text)
                     )?;
                 }
             }
@@ -690,9 +697,9 @@ fn render_md_action(out: &mut String, a: &RecommendedAction, lang: ReportLanguag
             "\n{} ({})\n\n    {}\n\n{}\n\n    {}\n",
             label(lang, "Before", "変更前"),
             m(&e.language),
-            e.before.replace('\n', "\n    "),
+            md_code(&e.before),
             label(lang, "After", "変更後"),
-            e.after.replace('\n', "\n    ")
+            md_code(&e.after)
         )?;
     }
     Ok(())

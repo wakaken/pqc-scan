@@ -2,7 +2,7 @@
 
 Current release target: v0.2.0, retargeted by the maintainer on2026-11-12. Earlier1.0 references in historical evidence retain their original meaning. Functional scope and accepted criteria are unchanged.
 
-Design date: 2026-11-09. Status: proposed acceptance policy; passing tests or benchmark results are not asserted by this document. Current capabilities/gaps are in [CURRENT-GAP-ANALYSIS.md](CURRENT-GAP-ANALYSIS.md).
+Design date: 2026-11-09. Status: proposed acceptance policy; passing tests or benchmark results are not asserted by this document. Current capabilities/gaps are in [CURRENT-GAP-ANALYSIS.md](../records/v0.2-roadmap/CURRENT-GAP-ANALYSIS.md).
 
 ## Evidence and lifecycle
 
@@ -24,7 +24,7 @@ Source review, local execution, independent review, browser acceptance and remot
 6. Set precision/recall and performance budgets only after this baseline and maintainer review. Preserve holdout data to evaluate subsequent changes. Record environment limits and unsupported populations alongside results.
 
 The measured development baseline and maintainer-approved local regression signals
-are recorded in [TASK-023-ACCEPTANCE.md](TASK-023-ACCEPTANCE.md). On the same eligible
+are recorded in [TASK-023-ACCEPTANCE.md](../../tasks/023/TASK-023-ACCEPTANCE.md). On the same eligible
 truth, TP must not decrease and FP/FN must not increase. On the same environment,
 wall time or peak RSS above 2x the preceding warm maximum requires investigation.
 These are local comparison signals, not universal targets or automatic numeric CI
@@ -87,7 +87,7 @@ TLS matrix: TLS 1.2/1.3, supported hybrid/classical KX, HRR, unknown/unavailable
 
 All supported paths have measured baselines and agreed regression budgets; critical correctness/safety issues in the supported scope are resolved or explicitly excluded with accurate diagnostics; no silent inspection loss; schemas and compatibility policy published; deterministic and privacy contracts tested; platform/install/rule-pack evidence recorded; security reporting and release process documented. External publication/release verification is a future explicit action, not performed by this design task.
 
-Do not claim complete coverage of all cryptography or universal migration compliance at v0.2. Unsupported languages/protocol profiles and residual uncertainty remain visible. See [OSS-ROADMAP-v0.2.md](../roadmap/OSS-ROADMAP-v0.2.md).
+Do not claim complete coverage of all cryptography or universal migration compliance at v0.2. Unsupported languages/protocol profiles and residual uncertainty remain visible. See [ROADMAP.md](../roadmap/v0.2/ROADMAP.md).
 
 ## Review record for this design
 
@@ -99,7 +99,7 @@ Documentation validation parsed all 22 new YAML records, checked pending status/
 
 The development-only [measurement protocol](../../tests/quality/PROTOCOL.md),
 source-bound corpus and two independent label records now support baseline
-measurements through the existing CLI. [Measured results and limitations](TASK-023-BASELINE.md)
+measurements through the existing CLI. [Measured results and limitations](../../tasks/023/TASK-023-BASELINE.md)
 record finite-corpus counts, actual diagnostics and repeated resource samples.
 The baseline implementation and the maintainer-approved local criteria satisfy
 task 023's development-only decision gate; task 023 is done. CI validates evaluator
@@ -114,7 +114,7 @@ same-environment2x prior warm maximum time/RSS investigation signals. The earlie
 2026-11-09 design checkpoint is historical; current criteria are stated above. Existing independent technical
 approval, fresh corpus/harness integrity checks and20 evaluator sanity tests allow
 023 to close for its development-only baseline scope; see
-[TASK-023-ACCEPTANCE.md](TASK-023-ACCEPTANCE.md). No numeric CI enforcement is
+[TASK-023-ACCEPTANCE.md](../../tasks/023/TASK-023-ACCEPTANCE.md). No numeric CI enforcement is
 claimed. This does not close037, imply current-HEAD hosted CI, replace the ongoing
 Cursor audit, change truth/labels or promise multi-platform/global accuracy.
 
@@ -148,8 +148,8 @@ not the CI confinement gate. No hosted-CI success is inferred from local runs.
 
 The independent [quality model](QUALITY-MODEL.md) and [metric definitions](QUALITY-METRICS.md)
 classify evidence as Verified, Passed, Failed, Partial, Unsupported, Unknown,
-Not Tested or Not Applicable. [Current measurements](QUALITY-BASELINE.md) and
-[assessment](QUALITY-ASSESSMENT.md) are new snapshots; old baselines remain intact.
+Not Tested or Not Applicable. [Current measurements](../../tasks/041/QUALITY-BASELINE.md) and
+[assessment](../../tasks/041/QUALITY-ASSESSMENT.md) are new snapshots; old baselines remain intact.
 The existing baseline CI job also runs `tests/quality/report.py` over its raw
 measurements and saves JSON/Markdown. Inconsistent truth/source/raw evidence is
 an evaluation-infrastructure failure, not a measured product-accuracy regression.
@@ -158,4 +158,4 @@ is introduced. Performance beyond the existing same-environment 2x signal still
 requires investigation, not an automatic claim of regression or acceptance.
 Unsupported and unknown populations never become safe or zero-loss results.
 Release acceptance uses the supported scope and individual evidence, not an
-average score. [Follow-up work](QUALITY-ROADMAP.md) records unexecuted dimensions.
+average score. [Follow-up work](../roadmap/v0.3/ROADMAP.md) records unexecuted dimensions.

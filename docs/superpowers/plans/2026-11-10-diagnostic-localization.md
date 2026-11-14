@@ -12,8 +12,8 @@ sections outside occurrence/action groups. Core exposes only read-only getters.
 
 **Tech Stack:** Existing Rust 1.93.1 workspace, static HTML/Markdown catalogs.
 
-**Spec:** tasks/036-diagnostic-localization.yaml and
-docs/roadmap/CONTINUATION-DECISIONS.md, section 036. The continuation request
+**Spec:** tasks/036/task.yaml and
+docs/records/v0.2-roadmap/CONTINUATION-DECISIONS.md, section 036. The continuation request
 authorizes this existing-report extension; no network or new storage format.
 
 ## Global constraints

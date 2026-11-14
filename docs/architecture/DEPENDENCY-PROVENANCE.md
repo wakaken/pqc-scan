@@ -42,10 +42,10 @@ HTTP registry/archive locations are conservatively unresolved. Cargo locks witho
 | CycloneDX / SPDX JSON | CycloneDX 1.4–1.7 / SPDX 2.2–2.3 component/package subset; reported claims only, no trust/full-schema validation |
 | requirements.txt | Fully consumed bounded name/version-specifier subset; directives, markers/extras and unsupported syntax retain safe lexical records and incomplete status; no include/URL fetching |
 | go.mod | Bounded module/go/require declarations; unsupported directives retain safe facts and incomplete status; no module resolution |
-| Gemfile / gems.rb | Static quoted gem declarations and supported source syntax; dynamic Ruby is never executed and stays incomplete |
+| Gemfile / gems.rb / gemspec | Static quoted declarations, including dependency calls on a recognized `Gem::Specification` block receiver; dynamic Ruby is never executed and stays incomplete |
 | Gemfile.lock / gems.locked | Bounded sections and records; only accepted GEM registry source records resolve, git/path/custom sources remain unverified |
 | pom.xml | Bounded XML dependency subset, DTD/external entity disabled; unknown/dynamic/property/profile constructs remain incomplete |
-| Gradle / gemspec | Existing bounded lexical fallback, NotReported |
+| Gradle | Existing bounded lexical fallback, NotReported |
 
 `Complete` means this supported inventory subset was inspected, including valid
 empty containers. It is not complete package-manager schema validation. Duplicate

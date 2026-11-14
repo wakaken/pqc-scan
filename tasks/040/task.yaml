@@ -1,0 +1,109 @@
+id: '040'
+title: Separate intentional self-scan fixtures from actionable Code Scanning results
+type: improvement
+priority: high
+status: done
+owner: Evaluator Agent
+description: Implemented and locally validated exact test expectations for the CI-only Code Scanning upload projection;
+  raw scan artifacts and unexpected production observations retained. Independent review approved. Local commit
+  only.
+execution_plan: docs/quality/self-scan/CI-SELF-SCAN.md
+change_categories:
+- Existing implementation correction
+- Existing implementation extension
+implementation_steps:
+- Add exact source/result-bound expectations and a dependency-free CI-only preparation helper with tests.
+- Archive raw/upload/audit evidence, update both READMEs, independently review and validate before local commit.
+out_of_scope:
+- No Rust, scanner rule, severity, native schema, failure-threshold or broad directory-exclusion changes.
+- No automatic expectation learning in CI, push, PR, merge or live alert dismissal.
+acceptance:
+- Only exactly reviewed intentional test/fixture results can be absent from the upload copy; full raw results are
+  retained.
+- Changed or unregistered source/result, unexpected duplicates and unsafe provenance remain actionable or fail safely.
+- Pinned Rust checks, all Node tests, actual scanner/projection acceptance, documentation and independent review
+  recorded.
+implementation_evidence:
+  baseline_head: dc7b63c361263dd3ef44e03855b983c485c9fde6
+  baseline_ref: origin/develop (task 020 / PR 11 merged)
+  baseline_worktree: clean
+  branch: codex/ci-self-scan-expectations
+  authorization: User requested CI correction, tests, docs, review and local commit; push/PR explicitly excluded.
+  scope: 'Eight files: workflow, both READMEs, helper/test, exact expectation registry, quality guide and task 040.
+    No Rust, rules, existing fixtures, dependency, CLI/native output or other task changes.'
+  policy: 81 reviewed files / 618 exact result groups. Full-source SHA-256 + canonical full-result SHA-256 + literal
+    rule/location + exact whole-SARIF count. Only examples, integration-test fixtures, shell tests and actual cfg(test)
+    module observations registered; no product/rule-wide baseline.
+  failure_behavior: Unknown/changed sources/results, excess duplicates, indirect URIs and unsafe provenance are
+    retained. Invalid input/policy and output aliases fail safely. Input bytes and all remaining result/run metadata
+    stay unchanged.
+  artifact_boundary: Only code-scanning.sarif is uploaded to Code Scanning. Raw SARIF, upload copy, safe audit and
+    exact policy archived with always condition; existing dependency SBOM artifact retained. No GitHub threshold/dismissal
+    changes.
+  code_sha256:
+    .github/workflows/pqc-scan.yml: a72babab69ff8ae2e6e11b98bae2656554fc89e0dcc505c58c11bc0701981545
+    shell/prepare-code-scanning.cjs: 2fa436c8fb473d1768656f006b0cdd1c7a0e356b4eb521b39f04657cd383725c
+    shell/prepare-code-scanning.test.cjs: 20fff02d3b776bef45887473a18354d97dd83460646b21471d8101765623b2e2
+    docs/quality/SELF-SCAN-EXPECTATIONS.json: 04cefea89fa20097dd7e1779338b5f366c3c4addc5effed6eb5c1a6af9805b77
+review:
+  agent: ci_self_scan_review
+  design: Approved; requested whole-SARIF counts, literal URI/no indirection, always evidence and malformed/empty-run
+    guards, all implemented.
+  full_diff: Approved with no material findings. Reviewer independently verified all 81 source hashes and scope
+    of all 618 registrations, replayed raw projection and compared unchanged remaining results/run metadata.
+  independent_execution: 'node --test shell/*.test.cjs: 21 passed, 0 failed, including real scanner fixture/product
+    acceptance.'
+  remote_scope: No GitHub upload/check execution or live alert dismissal performed.
+validation:
+  date: '2026-11-09'
+  toolchain: Rust 1.93.1; Cargo offline; Node v22.23.4
+  test_first: All 16 initial helper/CLI tests failed before the helper existed; a policy-type regression later failed
+    before explicit digest-string validation, then passed. Two additional actual-scanner/alias cases pass.
+  commands:
+  - cargo fmt --all
+  - cargo build --workspace --offline
+  - cargo fmt --all --check
+  - cargo test --workspace --offline
+  - cargo clippy --workspace --all-targets --offline -- -D warnings
+  - node --test shell/*.test.cjs
+  - Actual YAML scan and preparation commands, with only output paths redirected under target/task040 and Cargo
+    offline
+  - git diff --check
+  results:
+    build: 0
+    fmt: 0
+    tests: 0
+    clippy: 0
+    node: 0
+    rust_tests_passed: 125
+    node_tests_passed: 21
+    workflow-scan: 0
+    workflow-prepare: 0
+    raw_baseline_results: 745
+    raw_results: 746
+    expected_test_results: 618
+    retained_results: 128
+    manifest_files: 81
+    yaml_and_workflow_commands: 0
+    known_task020_alert_omitted: true
+    rust_rules_fixtures_unchanged: true
+    other_tasks_unchanged: true
+  actual_scanner_acceptance: Identical synthetic private-marker fixture.txt/product.txt both produce error-level
+    findings in raw SARIF. Only explicitly reviewed fixture omitted; unregistered product result stays error. Raw
+    bytes and canary masking preserved.
+  compatibility: Existing 745 raw self-scan results remain; the new shell acceptance test adds one deliberate marker
+    (746 total). 618 reviewed test results omitted only from upload copy; 128 unchanged observations retained. Original
+    task020 private-marker alert matched and removed from upload copy.
+  registry_placement: Initial .github registry generated 37 self-references; moved quality metadata beside its guide
+    under preexisting docs exclusion. No scanner exclusion or inspected source/test placement changed.
+  artifacts: target/task040/{baseline,workflow-output,validation-summary.json,VERIFICATION-REPORT.md,final-*.log}
+  unexecuted:
+  - Remote GitHub Actions and actual Code Scanning acceptance (push/PR forbidden); no claim that remote checks have
+    passed or existing live alerts are dismissed.
+  - actionlint is not installed; workflow YAML parsed and real local scan/preparation commands executed instead.
+  - No new performance/precision/recall measurement; no browser acceptance needed for unchanged renderers.
+completion:
+  evaluator: Evaluator Agent
+  basis: Pinned local checks, real scanner and workflow-command acceptance, exact partition/immutability assertions
+    and independent review/21-test execution.
+  publication: Local commit only; no push/PR/merge or security-alert dismissal.

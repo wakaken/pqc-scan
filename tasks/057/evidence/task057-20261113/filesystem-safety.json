@@ -1,0 +1,59 @@
+{
+  "requirement": "Q4-06",
+  "tests": [
+    {
+      "source": "crates/pqc_scan_core/src/safe_read.rs",
+      "sha256": "f82302a1becbabb4f28a63add75a8c18363ce404f5bd983372d44167da27d06e",
+      "tests": [
+        "growing_input_is_stopped_at_limit_plus_one",
+        "read_bounds_and_rejects_replaced_files_and_parent_links"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    },
+    {
+      "source": "crates/pqc_scan_core/src/walker.rs",
+      "sha256": "2528792a015884727ba55081b253096fefad292468267dc7e87fc3f46e800fa2",
+      "tests": [
+        "special_entries_are_failed_without_selecting_or_following_them"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    },
+    {
+      "source": "crates/pqc_scan_core/src/safe_read057.rs",
+      "sha256": "224fd77fbdc599bf0bbc786848ea8eb28f40b57e6d5240d60d105e81bb513255",
+      "tests": [
+        "parent_link_replacement_never_reads_the_outside_control",
+        "hard_links_are_bounded_regular_files_not_proof_of_origin"
+      ],
+      "result": "passed in fresh confined workspace tests"
+    }
+  ],
+  "raceObservations": {
+    "default": {
+      "deterministicLinkRejected": true,
+      "linkSwaps": 1375,
+      "outsideControlReadableByOrdinaryRead": true,
+      "outsideReads": 0,
+      "raceAttempts": 2000,
+      "successfulInsideReads": 1059
+    },
+    "all-features": {
+      "deterministicLinkRejected": true,
+      "linkSwaps": 1370,
+      "outsideControlReadableByOrdinaryRead": true,
+      "outsideReads": 0,
+      "raceAttempts": 2000,
+      "successfulInsideReads": 1026
+    }
+  },
+  "platforms": {
+    "Linux arm64": "fresh full workspace and race tests",
+    "macOS arm64": "host targeted privacy and filesystem tests",
+    "Windows": "not executed; source has separate handle verification implementation; no claim of Windows runtime certification"
+  },
+  "limitations": [
+    "hard links are regular files: byte bound holds, original path provenance cannot be inferred",
+    "concurrent content writes do not provide an atomic filesystem snapshot",
+    "finite race stress is not an exhaustive interleaving proof"
+  ]
+}
