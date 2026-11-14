@@ -4,6 +4,20 @@ This document captures recurring repository-specific design and implementation p
 Use it to understand how this codebase is typically extended.
 For normative rules and contributor expectations, see `docs/BEST-PRACTICES.md`.
 
+## Activity Index
+
+Start with the affected area's entries; follow other relevant sections as needed.
+These links locate guidance, not an exhaustive checklist or a waiver of required reading.
+
+| Activity | Starting sections |
+|---|---|
+| CLI | [Thin entrypoints](#thin-cli-entrypoints); [CLI testability lesson](MISTAKES.md#cli-testability) |
+| Pipeline or detectors | [Pipeline](#pipeline-centered-scanning); [detector extensions](#detector-extension-pattern); [redaction](#export-redaction-after-stable-identity-task-029) |
+| Rules | [Rule-driven matching](#rule-driven-matching) |
+| Reports or output contracts | [Writers](#report-writer-extension-pattern); [contract tests](#report-contract-test-pattern); [fact binding](#bind-comparisons-and-human-assessments-to-actual-facts); [export semantics](#preserve-standards-semantics-through-explicit-export-loss) |
+| Guidance or task layout | [Documentation synchronization](#documentation-synchronization-pattern); [task queue](#task-queue-pattern); [documentation drift lesson](MISTAKES.md#documentation-drift) |
+| Feature or coverage measurements | [Shared target-directory lesson](MISTAKES.md#shared-target-directories-can-invalidate-feature-specific-protocol-evidence); [coverage collection lesson](MISTAKES.md#llvm-coverage-counters-need-a-bounded-and-attributable-collection-path) |
+
 ---
 
 ## Thin CLI Entrypoints
@@ -119,7 +133,7 @@ Pattern:
 - when renaming docs or changing workflow terms, update all agent-facing references in the same patch
 - keep core working rules and activity-based reading triggers in `AGENTS.md`, detailed verification/review/report rules in `docs/agent/`, and the shared review request template in `prompts/REVIEWER.md`
 - treat `AGENTS.md` as the owner of core constraints and the linked guides as owners of detailed procedures; update affected summaries, details and references in the same change, preserving constraints in both
-- keep current lifecycle definitions aligned across `AGENTS.md`, `docs/TASK-LIFECYCLE.md` and `tasks/README.md`
+- keep the lifecycle summary in `AGENTS.md` aligned with detailed definitions in `docs/TASK-LIFECYCLE.md`; link to those definitions from `tasks/README.md` rather than duplicating them
 - preserve completed task records and past review evidence, including historical prompt paths
 
 Why it works here:

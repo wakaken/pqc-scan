@@ -78,6 +78,25 @@ For user-facing behavior:
 - Use assertions that establish observable requirements and relevant failures.
 - Do not claim an unexecuted, unavailable or failed check passed.
 
+## Reusing Evidence After Changes
+
+Compare final source, inputs, configuration and environment with the recorded run.
+Record why each reused result remains applicable; uncertainty requires the
+affected checks to run again. These examples do not waive any required check:
+
+| Later change | Evidence to reassess |
+|---|---|
+| Prose or comments only | Check links, commands and consistency; product execution results may remain applicable if behavior, executable examples and build/test inputs are unchanged. |
+| Tests or fixtures only | Rerun changed tests and checks that consume those inputs; reassess whether earlier coverage conclusions still hold. |
+| Product or shared helper logic | Rerun affected behavior, failure and compatibility checks, including dependent callers; shared impact may require the full suite. |
+| Dependencies, features, toolchain or environment | Reassess every result that depends on them; rerun the affected configurations, builds and acceptance checks. |
+
+Checks required by the change categories above must have applicable passing
+evidence for final source. An unchanged file alone does not establish this:
+dependencies, generated inputs and invoked binaries can change its behavior.
+Use the [review revision rules](REVIEWS.md#revisions-and-resumption) to determine
+whether the existing reviewer must confirm affected conclusions.
+
 # Completion and Partial Results
 
 Mark a task `done` only when every original acceptance criterion and required

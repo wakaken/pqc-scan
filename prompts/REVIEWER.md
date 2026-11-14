@@ -13,7 +13,9 @@ reviewer identities. Read [AGENTS.md](../AGENTS.md) and the
 - Change: relevant diff or diff artifact, affected files and pre-existing changes
 - Evidence: commands, features/configurations, results and artifact paths
 - Gaps: failed, unavailable or unexecuted required checks
-- Follow-up, if applicable: prior findings, material fixes and affected conclusions
+- Follow-up, if applicable: previously reviewed source, changes since that review,
+  resolved/unresolved findings, affected conclusions, rerun checks and reasons
+  that reused evidence still applies
 
 ## Reviewer Instructions
 

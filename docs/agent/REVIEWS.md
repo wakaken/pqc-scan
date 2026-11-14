@@ -1,8 +1,9 @@
 # Independent Reviews
 
-These are mandatory details of [AGENTS.md](../../AGENTS.md). The main agent reads
-this file before starting a user implementation request and before each review
-stage or material follow-up. Reviewers read it with AGENTS.md,
+These are mandatory details of [AGENTS.md](../../AGENTS.md). Read this file before
+starting a user implementation request. At each review stage or material follow-up,
+confirm the applicable rules using the [reading-reuse policy](../../AGENTS.md#required-references-by-activity);
+reread only changed or uncertain sections. Reviewers read it with AGENTS.md,
 [prompts/REVIEWER.md](../../prompts/REVIEWER.md) and the supplied review package.
 The main agent's full reading list is not a reviewer checklist; reviewers consult
 additional source and documents only as needed for their assigned scope.
@@ -75,10 +76,20 @@ When starting a reviewer:
 Reviewers rely on the main agent's test evidence unless a specific concern
 requires independent reproduction. Do not automatically repeat the full suite.
 
+## Review Records
+
+Record each reviewer's ID, assigned stage, scope, reviewed source version,
+decision and unresolved findings in the existing task record or handoff.
+Include relevant uncommitted changes; HEAD alone cannot identify a dirty source.
+For work without a task record, use an existing PR description or review thread;
+before a PR exists, keep a concise handoff in the current chat. Carry that record
+forward when opening a PR or moving to another chat. Do not create a task or a
+separate document solely to store review metadata. Include evidence paths,
+unexecuted checks and the next action so resumption does not require the original
+reviewer's conversation.
+
 ## Revisions and Resumption
 
-- Record reviewer IDs, review scope and reviewed source versions in the
-  existing task record or handoff.
 - Splitting a plan, fixing findings, resuming a chat or handing off work
   does not reset the review budget.
 - After review-driven changes, rerun affected checks and determine whether
@@ -88,3 +99,7 @@ requires independent reproduction. Do not automatically repeat the full suite.
 - A test-review-driven product change must also receive scoped
   implementation review when it affects correctness or compatibility.
 - Do not claim an earlier review covers later changes without checking them.
+- If a reviewer cannot be resumed, preserve their record and keep affected work
+  unfinished. A replacement is another reviewer identity and requires explicit
+  user authorization of its purpose and maximum additional count before starting
+  it. Do not reset the budget or replace independent review with self-review.
