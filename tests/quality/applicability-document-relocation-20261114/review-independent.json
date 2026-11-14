@@ -1,0 +1,50 @@
+{
+  "reviewer": "/root/baseline_binding_implementation_review",
+  "timestampUtc": "2026-11-14T05:50:13Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "e855f21121bad3e94db494717f36936333abbccac6d49a523b8b8ab5c007751b",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "89a1ec7edda7791e06532318566f014c955d9267800ad93b52f13354176143b9",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": false,
+  "historicalApplicabilityReviewsSeen": false,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "Original public-only.p12 bytes place the certificate-bearing AuthenticatedSafe content in encryptedData, OID 1.2.840.113549.1.7.6. Conversion provenance binds an RSA3072 public certificate and establishes the nominal non-ECDSA fact, but neither certificate-only export nor an empty password makes its contents unencrypted. The current public contract excludes encrypted contents and the unchanged parser returns no certificate attributes from this content type. Preserve the original negative object-property truth separately."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "Original public-only.pfx has the same bound bytes as public-only.p12, including encryptedData OID 1.2.840.113549.1.7.6. Its RSA certificate conversion provenance establishes the nominal non-ECDSA fact, not readable certificate attributes under the documented non-decrypting subset. The filename-based container signal remains in scope; the inner signature attribute does not. Preserve the original negative truth."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "The original public-only.p12 source frames an encryptedData certificate-bearing content. Provenance links it to the SHA-256-bound RSA3072 DER fixture, so the original positive modulus-size truth remains meaningful for the known object. The documented parser deliberately leaves encrypted content opaque and cannot extract its SPKI modulus; this attribute is outside the public input subset."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The original public-only.p12 AuthenticatedSafe content uses encryptedData OID 1.2.840.113549.1.7.6. The conversion record links the known public certificate with sha256WithRSAEncryption signature, preserving the nominal positive truth. The current contract and unchanged content parser exclude extraction of the inner signature OID from encrypted content, independently of any prediction."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The original public-only.pfx is byte-identical to the encrypted public-only.p12 conversion. Its provenance binds the known RSA3072 public certificate, but the non-decrypting parser does not enter encryptedData content to recover the modulus. Retain the original positive object-property truth and exclude only this inner SPKI-size question from the documented public subset."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The original public-only.pfx contains encryptedData rather than the unencrypted Data content supported for certificate extraction. Provenance establishes the known RSA signature object fact; it does not establish parser access to that fact. The current contract explicitly excludes encrypted content and the unchanged parser keeps it opaque, making the inner signature question unsupported while preserving the original positive truth."
+    }
+  ]
+}
