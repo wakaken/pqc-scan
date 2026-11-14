@@ -230,7 +230,7 @@ class EvidenceTests(unittest.TestCase):
             save(q/f'{who}.json', dict(reviewer=who, corpusSha256=evaluate.bytes_digest(q/'corpus.json'), labels=labels))
         save(q/'truth.json', dict(corpusSha256=evaluate.bytes_digest(q/'corpus.json'), labels=labels,
                                   labelSources={f'{who}.json': evaluate.bytes_digest(q/f'{who}.json') for who in ['a', 'b']}))
-        save(self.repo/'docs/quality/RULE-QUALITY-METADATA.json', dict(source_files=[], rules=[
+        save(self.repo/'docs/quality/rules/RULE-QUALITY-METADATA.json', dict(source_files=[], rules=[
             dict(id='API', rule_snapshot={'kind': 'tree_sitter'}, algorithm_families=['unknown'])]))
         raw = dict(findings=[dict(rule_id='API', location=dict(file='a.js', line=1, column=1))])
         coverage = dict(selected_files=1, read_ok_files=1, read_failed_files=0, analyzed_files=0,
@@ -354,7 +354,7 @@ class EvidenceTests(unittest.TestCase):
         save(truth_path, truth)
         with self.assertRaises(ValueError): self.build()
         truth_path.write_bytes(original)
-        save(self.repo/'docs/quality/RULE-QUALITY-METADATA.json', dict(source_files=[], rules=[]))
+        save(self.repo/'docs/quality/rules/RULE-QUALITY-METADATA.json', dict(source_files=[], rules=[]))
         with self.assertRaises(ValueError): self.build()
 
     def test_generated_markdown_matches_metrics_and_overwrite_is_refused(self):

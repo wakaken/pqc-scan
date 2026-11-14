@@ -1,7 +1,7 @@
 # Task 030: explicit target policy and bounded transport
 
 **Goal:** authorize and pin a single endpoint without protocol dependencies.
-**Spec:** `docs/roadmap/CONTINUATION-DECISIONS.md` (maintainer-approved A).
+**Spec:** `docs/records/v0.2-roadmap/CONTINUATION-DECISIONS.md` (maintainer-approved A).
 **Baseline:** `3c357cef879f69ae4058fefe7a03b4f074283b3f`.
 
 ## Constraints

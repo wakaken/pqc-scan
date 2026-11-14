@@ -7,25 +7,29 @@ fn task_ids_are_exact_unique_strings_and_dependencies_resolve() {
     let mut tasks = BTreeMap::new();
     for entry in fs::read_dir(root).unwrap() {
         let path = entry.unwrap().path();
-        if path.extension().and_then(|s| s.to_str()) != Some("yaml") {
+        assert_ne!(
+            path.extension().and_then(|s| s.to_str()),
+            Some("yaml"),
+            "task definitions belong in tasks/<id>/task.yaml: {}",
+            path.display()
+        );
+        if !path.is_dir() {
             continue;
         }
+        let directory_id = path.file_name().unwrap().to_str().unwrap();
+        assert!(
+            directory_id.len() == 3 && directory_id.bytes().all(|b| b.is_ascii_digit()),
+            "invalid task directory: {}",
+            path.display()
+        );
+        let definition = path.join("task.yaml");
         let task: serde_yaml::Value =
-            serde_yaml::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
+            serde_yaml::from_str(&fs::read_to_string(&definition).unwrap()).unwrap();
         let id = task["id"]
             .as_str()
             .expect("task id must remain a string")
             .to_string();
-        assert_eq!(
-            id,
-            path.file_name()
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .split('-')
-                .next()
-                .unwrap()
-        );
+        assert_eq!(id, directory_id, "task ID must match its directory");
         assert!(tasks.insert(id, task).is_none(), "duplicate task id");
     }
     for id in 1..=62 {

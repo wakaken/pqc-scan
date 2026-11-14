@@ -3,7 +3,7 @@
 **Goal:** Compare existing inventory-v1 documents without treating absent or
 uninspected observations as resolved cryptographic risks.
 
-**Spec:** [approved continuation decisions](../../roadmap/CONTINUATION-DECISIONS.md#035-proposed-comparison-contract-approval-required)
+**Spec:** [approved continuation decisions](../../records/v0.2-roadmap/CONTINUATION-DECISIONS.md#035-proposed-comparison-contract-approval-required)
 
 **Architecture:** A pure core module accepts validated `NativeScan` values and an
 explicit repository scope, producing a separately versioned serializable report.

@@ -127,7 +127,7 @@ jobs:
       - name: Summarize source-bound quality evidence
         run: >-
           python3 tests/quality/report.py --baseline target/quality-baseline
-          --reference docs/quality/task023/BASELINE.json
+          --reference tasks/023/evidence/task023/BASELINE.json
           --out-dir target/quality-assessment
       - name: Measure independently reviewed additional corpus
         run: >-
@@ -211,7 +211,7 @@ jobs:
         run: >-
           node shell/prepare-code-scanning.cjs
           --input ./pqc-report/report.sarif
-          --expectations docs/quality/SELF-SCAN-EXPECTATIONS.json
+          --expectations docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json
           --root .
           --output ./pqc-report/code-scanning.sarif
           --audit ./pqc-report/code-scanning-audit.json
@@ -231,7 +231,7 @@ jobs:
             ./pqc-report/report.sarif
             ./pqc-report/code-scanning.sarif
             ./pqc-report/code-scanning-audit.json
-            ./docs/quality/SELF-SCAN-EXPECTATIONS.json
+            ./docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json
 
       - name: Upload Dependency SBOM
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

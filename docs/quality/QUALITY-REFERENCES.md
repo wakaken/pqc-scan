@@ -1,6 +1,6 @@
 # 品質評価で参照する公式資料と適用範囲
 
-対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](QUALITY-ROADMAP.md#v03-scope)）。
+対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](../roadmap/v0.3/ROADMAP.md#v03-scope)）。
 
 資料の確認日: 2026-11-11（Asia/Tokyo）。公開ページ・概要と下記資料を確認した記録です。今回の推敲では再調査していません。
 ISOの有料本文全体を読んだ、あるいは全規格条項に適合したとは主張しません。
@@ -28,7 +28,7 @@ ISOの有料本文全体を読んだ、あるいは全規格条項に適合し�
 | [NIST IR 8547](https://csrc.nist.gov/pubs/ir/8547/final) | Final、2026-10（履歴2026-10-27）。2024 draftとは区別 | 移行対象・用途・情報寿命の判断根拠。普遍的なOSS期限を作らない |
 | [SP 800-227](https://csrc.nist.gov/pubs/sp/800/227/final) | Final、2025-09 | KEMの性質・安全な利用。ソースの検出パターンの精度を証明しない |
 | [SP 800-131A Rev.2](https://csrc.nist.gov/pubs/sp/800/131/a/r2/final)、[Key Management刊行一覧](https://csrc.nist.gov/Projects/Key-Management/publications) | Rev.2 Final (2019)。一覧上Rev.3は2024-10-21 Draft、SP800-57 Rev.6もDraft | 古典的な強度と量子計算への脆弱性を分離。草案を現行の最終版として扱わない。Rev.2ページの取得はtimeoutとなり、公式検索・索引で確認 |
-| [TLS 1.2 RFC5246](https://www.rfc-editor.org/info/rfc5246/)、[RFC8446](https://www.rfc-editor.org/info/rfc8446/)、[RFC9846](https://datatracker.ietf.org/doc/rfc9846/) | TLS1.2 2008、TLS1.3 2018。現在はRFC9846 (2026-07, Proposed Standard)が5246/8446等を置き換える | 旧台帳の8446参照を最新仕様への完全適合としない。9846の固定profile差分は[049対応表](TASK-049-TLS-PROFILE.md)に整理し、全面適合の認定とは区別。TLS版・暗号スイート・鍵交換group・証明書は別の事実 |
+| [TLS 1.2 RFC5246](https://www.rfc-editor.org/info/rfc5246/)、[RFC8446](https://www.rfc-editor.org/info/rfc8446/)、[RFC9846](https://datatracker.ietf.org/doc/rfc9846/) | TLS1.2 2008、TLS1.3 2018。現在はRFC9846 (2026-07, Proposed Standard)が5246/8446等を置き換える | 旧台帳の8446参照を最新仕様への完全適合としない。9846の固定profile差分は[049対応表](../../tasks/049/TASK-049-TLS-PROFILE.md)に整理し、全面適合の認定とは区別。TLS版・暗号スイート・鍵交換group・証明書は別の事実 |
 | [RFC10024](https://www.rfc-editor.org/rfc/rfc10024.html) | 2026-08、Standards Track | TLS1.3の3 ML-KEM/ECDHE hybrid group。実際の交渉結果と設定文字列を区別 |
 | [RFC4253](https://www.rfc-editor.org/info/rfc4253/)、[RFC10042](https://www.rfc-editor.org/rfc/rfc10042.html) | SSH transport 2006、後者2026-08 Informational | 提示方式・KEXの認証・ホスト鍵の事前照合を分離。ML-KEM SSH方式がRFC化されても認証のPQC化は証明されない |
 | [CycloneDX概要](https://cyclonedx.org/specification/overview/)、[CBOM](https://cyclonedx.org/capabilities/cbom/) | current 1.7、2025-10-21。ECMA-424公開2025-12-10 | 既存tag1.7のオフラインSchemaと意味を確認する試験を再利用。従来の配列だけのCBOMはCycloneDXではない |
@@ -44,5 +44,5 @@ nightlyが必要なbranch option、[cargo-mutantsの結果分類](https://mutant
 [cargo-fuzz/libFuzzer guide](https://rust-fuzz.github.io/book/cargo-fuzz/guide.html)、
 [proptest](https://proptest-rs.github.io/proptest/)、[RustSec](https://rustsec.org/)、
 [cargo-deny](https://embarkstudios.github.io/cargo-deny/)、[Miri](https://github.com/rust-lang/miri)
-を確認しました。採用順序・隔離・コスト・未実行事項は[ロードマップ](QUALITY-ROADMAP.md)にまとめます。
+を確認しました。採用順序・隔離・コスト・未実行事項は[ロードマップ](../roadmap/v0.3/ROADMAP.md)にまとめます。
 ツール追加そのものを検証能力向上の証拠にはしません。

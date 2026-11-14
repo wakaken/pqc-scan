@@ -72,7 +72,7 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 このリポジトリの[ワークフロー](../../.github/workflows/pqc-scan.yml)には、GitHub Code Scanningへの送信と成果物保存の例があります。PRでは`quality`、developへのpushでは`baseline`・`scan`を実行し、手動実行では3ジョブを有効にします。文書だけの変更では自動実行を省略し、`protocols`は手動実行を含めて一時停止しています。[CIの実行条件](../../README.ja.md#repository-ci)を確認してください。自分のプロダクトで使う終了条件は、用途に合わせて明示します。
 元のレポートも保存し、所見を確認できるようにします。
 本リポジトリの自己スキャンでは、確認済みのテスト・分類データをソースと結果の一致に基づいて扱います。テストディレクトリ全体の除外ではありません。
-その送信準備を別のプロジェクトへ転用する前に、[自己スキャンの方針](../quality/CI-SELF-SCAN.md)を確認してください。
+その送信準備を別のプロジェクトへ転用する前に、[自己スキャンの方針](../quality/self-scan/CI-SELF-SCAN.md)を確認してください。
 
 <a id="from-source"></a>
 

@@ -6,7 +6,7 @@ Design date: 2026-11-09. Status: proposed implementation plan; no capabilities a
 
 pqc-scan is a locally executable OSS scanner that discovers cryptographic usage through static analysis and explicitly requested runtime diagnostics. It reports evidence, uncertainty, quantum exposure and feasible migration options. It evolves the existing Rust product; a rewrite is not a goal.
 
-The current baseline is commit `b3104f9a4193b1b21ea11ca060f06301de2e936b` on `codex/japanese-reports`, with a clean initial worktree. The five workspace crates, detectors, YAML rules, recommendation engine, report writers and bilingual presentation are reusable product assets. [Current evidence](../quality/CURRENT-GAP-ANALYSIS.md) distinguishes implemented behavior from proposals.
+The current baseline is commit `b3104f9a4193b1b21ea11ca060f06301de2e936b` on `codex/japanese-reports`, with a clean initial worktree. The five workspace crates, detectors, YAML rules, recommendation engine, report writers and bilingual presentation are reusable product assets. [Current evidence](../records/v0.2-roadmap/CURRENT-GAP-ANALYSIS.md) distinguishes implemented behavior from proposals.
 
 ## Product promises
 
@@ -49,4 +49,4 @@ First establish measured precision/recall by detection family, inspection covera
 
 The default delivery unit is one task with its implementation, tests and documentation in one PR; a necessary prerequisite feasibility study can remain a separate task.
 
-This design records recommendations, not human approval of future schema, rule-semantic or high-risk architectural changes. See the [roadmap](../roadmap/OSS-ROADMAP-v0.2.md) for task scope and decision gates, the [domain model](../architecture/DOMAIN-MODEL.md) for evidence semantics and the [boundary](OSS-ENTERPRISE-BOUNDARY.md) for platform responsibilities.
+This design records recommendations, not human approval of future schema, rule-semantic or high-risk architectural changes. See the [roadmap](../roadmap/v0.2/ROADMAP.md) for task scope and decision gates, the [domain model](../architecture/DOMAIN-MODEL.md) for evidence semantics and the [boundary](OSS-ENTERPRISE-BOUNDARY.md) for platform responsibilities.

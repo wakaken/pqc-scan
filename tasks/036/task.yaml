@@ -1,0 +1,63 @@
+id: "036"
+title: "Extend existing bilingual reports for diagnostics and assessments"
+type: feature
+priority: medium
+status: done
+owner: Evaluator Agent
+phase: "4"
+description: "Bilingual HTML diagnostics and simplified coverage accepted in actual HTTP browser checks; advisory assessments and observation-ID ledgers remain absent from HTML per maintainer request. Explicit machine/Markdown records are retained."
+execution_plan: "docs/superpowers/plans/2026-11-10-diagnostic-localization.md"
+lifecycle_record:
+  - "Planner selected pending -> planned: existing-report scope and implementation plan recorded on 2026-11-10."
+  - "Executor started planned -> in-progress on 2026-11-10."
+  - "Executor completed in-progress -> review after CLI/bilingual docs integration and six fact-binding/privacy regressions."
+  - "Independent Reviewer accepted inventory-bound assessment rendering, per-ID assurance/usage rows and wrapping correction."
+  - "Evaluator set review -> blocked: automated Chrome file URL display denied by browser URL policy; user manual desktop/mobile/keyboard/offline acceptance is pending."
+evaluation_evidence: "docs/records/runtime-integration/RUNTIME-INTEGRATION-VALIDATION.md"
+plan_reference: "docs/roadmap/v0.2/ROADMAP.md#task-036"
+change_size: "Small/medium; language/browser review"
+decision_gate: "No runtime LLM; add optional runtime sections only after their feature exists."
+change_categories:
+  - "Existing implementation extension"
+depends_on:
+  - "025"
+  - "026"
+required_files:
+  - "crates/pqc_scan_report/src/japanese.rs"
+  - "crates/pqc_scan_report/src/grouping.rs"
+  - "crates/pqc_scan_report/src/compact.rs"
+  - "crates/pqc_scan_report/src/markdown_report.rs"
+  - "crates/pqc_scan_report/tests/japanese.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Reuse current catalogs/renderers/full-payload action sharing."
+  - "Add completeness/assurance/policy wording with exact fact bindings; runtime sections follow available probes."
+  - "Use humanizer-jp and optional pinned textlint in development only."
+out_of_scope:
+  - "No translation service, new UI framework or recreation of tasks 016/017."
+risks:
+  - "Readable prose can strengthen uncertainty into false verified security claims."
+acceptance:
+  - "Both languages retain records, facts, numbers, IDs and custom fallback."
+  - "Existing compact layout/action association stays intact."
+testing_requirements:
+  - "Machine parity, localized fact binding, escaping and real-browser/keyboard/offline acceptance."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+report_usability_followup:
+  code_commit: "6945a03176623b5fdf51f0bec7f32fbe3d44f7ed"
+  evidence: "docs/records/report-usability/REPORT-USABILITY-VALIDATION.md"
+  result: "Human HTML simplified and independently source-reviewed; actual browser capture/acceptance remains blocked by URL policy. Status is not advanced to done."
+
+html_assessment_followup:
+  evidence: "docs/records/html-assessment-removal/HTML-ASSESSMENT-REMOVAL.md"
+  result: "Per user request, HTML omits advisory decisions entirely; explicit JSON/Markdown policy records remain. Source review accepted; actual browser acceptance stays blocked."
+
+continuation_acceptance:
+  date: "2026-11-11"
+  source_head: "75b9afd"
+  evidence: "docs/records/remaining-roadmap/REMAINING-ROADMAP-VALIDATION.md"
+  browser_evidence: "docs/records/browser-acceptance/LOCAL-BROWSER-ACCEPTANCE.md"
+  reviews: "One implementation reviewer and one separate test reviewer accepted; no delegated implementation or additional reviewers."
+  transition: "Evaluator: blocked -> review -> done after previously missing local acceptance evidence was established."

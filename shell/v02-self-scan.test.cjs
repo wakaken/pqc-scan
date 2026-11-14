@@ -7,9 +7,9 @@ const crypto=require('node:crypto');
 const {prepareCodeScanning}=require('./prepare-code-scanning.cjs');
 const repositoryRoot=path.resolve(__dirname,'..');
 const read=p=>JSON.parse(fs.readFileSync(path.join(repositoryRoot,p)));
-const ledger=read('docs/quality/V02-SELF-SCAN-REVIEW.json');
+const ledger=read('docs/records/v0.2-release/V02-SELF-SCAN-REVIEW.json');
 const {reviewedResultTestSource}=require('./reviewed-result-test-source.cjs');
-const fixture=reviewedResultTestSource(read('docs/quality/SELF-SCAN-EXPECTATIONS.json'));
+const fixture=reviewedResultTestSource(read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json'));
 const root=fixture.root;
 const policy=()=>structuredClone(fixture.policy);
 test.after(fixture.cleanup);
@@ -40,9 +40,16 @@ test('v0.2 changed source binding retains all observations from that source',()=
 });
 
 test('historical v0.2 evidence never authorizes changed current sources',()=>{
- const currentPolicy=read('docs/quality/SELF-SCAN-EXPECTATIONS.json');
+ const currentPolicy=read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json');
  const actual=prepareCodeScanning(input(),currentPolicy,repositoryRoot);
  for(const [p,h] of Object.entries(ledger.sourceBindings)) {
+  if(!fs.existsSync(path.join(repositoryRoot,p))) {
+   const fromFile=r=>r.locations[0].physicalLocation.artifactLocation.uri===p;
+   assert.deepEqual(actual.sarif.runs[0].results.filter(fromFile),input().runs[0].results.filter(fromFile));
+   const sourceCheck=actual.audit.sourceChecks.find(x=>x.path===p);
+   if(sourceCheck) assert.equal(sourceCheck.status,'unavailable');
+   continue;
+  }
   const bytes=fs.readFileSync(path.join(repositoryRoot,p));
   if(crypto.createHash('sha256').update(bytes).digest('hex')===h) continue;
   const policyFile=currentPolicy.files.find(f=>f.path===p);

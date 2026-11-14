@@ -37,6 +37,6 @@ historical implementation/review/measurement records stay historical.
 ## Execution record
 
 Implemented and independently reviewed. See
-[the validation report](../../quality/TASK-025-INVENTORY-NAMING.md) for exact source
+[the validation report](../../../tasks/025/TASK-025-INVENTORY-NAMING.md) for exact source
 bindings, executed outcomes, compatibility and limitations. Final local commit
 and clean-tree check are performed after this record is staged.

@@ -40,7 +40,7 @@ def compare_runs(paths, out, historical):
 
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--runs',nargs='+',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--historical',type=Path,default=Path('docs/quality/task023/BASELINE.json'));a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--runs',nargs='+',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--historical',type=Path,default=Path('tasks/023/evidence/task023/BASELINE.json'));a=p.parse_args()
     compare_runs(a.runs,a.out,a.historical)
 
 

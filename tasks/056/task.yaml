@@ -1,0 +1,79 @@
+id: '056'
+title: 暗号分類・Severity・Confidence・移行推奨を独立に検証する
+type: improvement
+priority: high
+status: pending
+owner: Planner Agent
+phase: '2'
+description: 検出一致とは別の正解表を用い、用途・規格・来歴・保証の強さと推奨内容を検証する。
+quality_alias: QAM-02の判断検証部分を独立
+plan_reference: docs/roadmap/v0.3/ROADMAP.md
+requirements_reference: docs/roadmap/v0.3/REQUIREMENTS.md
+quality_requirements:
+- Q3-01
+- Q3-02
+- Q3-03
+- Q3-04
+- Q3-05
+- Q3-07
+- Q3-08
+- Q3-09
+- Q3-10
+depends_on:
+- '042'
+target_components:
+- crates/pqc_scan_core/src/assessment.rs
+existing_assets:
+- E21
+- E23
+- E26
+- E28
+problem:
+- 全ての判断分岐に対する独立正解
+- 鍵長・digest・用途・unknownの組合せ検証
+- 規格の版・errataと実装判断の全対応
+- 存在から実行済みへ飛躍しない試験
+- backend/features/未使用依存の判断ケース
+- 属性抽出と署名/chain/trust保証の境界確認
+- category/risk/confidence/evidenceの全分岐検証
+- 公開文言と下流利用の確認
+- 用途・provider/相手側・JOSE/PKI制約・旧版推奨の検証
+acceptance:
+- 'Q3-01: 規格と公開事実から正解を作り、matcher正解と別に正誤・未評価数を示す'
+- 'Q3-02: 古典的な弱さと量子耐性を取り違えず、情報不足を安全と断定しない'
+- 'Q3-03: FIPS203/204/205・IR8547・関連SP/RFCの適用範囲と未確認事項を判断ごとに結ぶ'
+- 'Q3-04: 文字列・dead code・API参照だけで実利用/安全を断定しない'
+- 'Q3-05: 依存名だけでPQC有効とせず、宣言と解決の来歴を保持'
+- 'Q3-07: OID・鍵長・期限だけから数学的妥当性や信頼を捏造しない'
+- 'Q3-08: 既存仕様を独立表で検証し、意図的変更は影響分析と承認後に分ける'
+- 'Q3-09: 未校正の値を正答確率として扱わない。確率化する場合だけ別仕様・独立校正を要求'
+- 'Q3-10: KEMと署名等を混同せず、必要条件・検証手順・根拠版・利用不能時の留保を示す'
+deliverables:
+- target/quality-task-056/assessment-oracle.json
+- target/quality-task-056/assurance-cases.json
+- target/quality-task-056/certificate-assessment.json
+- target/quality-task-056/confidence-review.md
+- target/quality-task-056/dependency-assessment.json
+- target/quality-task-056/recommendation-review.md
+- target/quality-task-056/risk-matrix.json
+- target/quality-task-056/severity-cases.json
+- target/quality-task-056/standards-mapping.md
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- 分類・用途・暗号属性と信頼の保証を混同する、またはConfidenceを未校正の確率として扱うおそれがある。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。

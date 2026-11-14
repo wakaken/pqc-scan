@@ -86,7 +86,9 @@ before the affected work.
 - Splitting plans, fixing findings, resuming or handing off never resets the budget.
 - Follow [review details](docs/agent/REVIEWS.md), including isolated reviewer context,
   evidence, ID recording and scoped confirmation after material fixes.
-- Tasks live in `tasks/*.yaml`. Normal states are pending → planned → in-progress
+- Tasks live in `tasks/<ID>/task.yaml`; plans, results and reviews belong in the
+  same task directory, with raw evidence under `evidence/`. Normal states are
+  pending → planned → in-progress
   → review → done; blocked and cancelled are distinct optional states. Follow
   [task lifecycle](docs/TASK-LIFECYCLE.md) for transitions, failures and resumption.
 - Default to one task per PR, including implementation, tests and docs. Plan steps
@@ -114,9 +116,19 @@ Human review is separate from independent reviews and grants no extra agent slot
 
 ## Documentation
 
-- `README.md` is English; `README.ja.md` is Japanese. Update both for user-facing
-  behavior changes; report format changes also require applicable report docs,
-  subject to the human review conditions above.
+- Maintain English and Japanese versions of end-user documentation: the root
+  `README.md` (English), root `README.ja.md` (Japanese), and documents under
+  `docs/user/`. Keep paired versions factually consistent and update both for
+  user-facing behavior changes. Report format changes also require applicable
+  report docs, subject to the human review conditions above.
+- Write developer-only documentation in English: `tasks/`, `docs/agent/`,
+  `docs/quality/`, `docs/records/`, `docs/roadmap/`, `docs/architecture/`,
+  `docs/product/`, `docs/releases/`, and all other files under `docs/` outside
+  `docs/user/`. This includes explanatory prose in task definitions and results.
+- Apply these language rules to newly authored or revised explanatory prose.
+  Do not translate code, commands, identifiers, paths, structured data or quoted
+  material to satisfy this policy. These rules do not change the requirement to
+  communicate with the user in Japanese.
 - Update affected agent references together when terms or paths change.
 - This file owns core constraints and summarizes detailed rules. Linked guides
   own verification/completion (`docs/agent/VERIFICATION.md`), reviews
@@ -124,7 +136,9 @@ Human review is separate from independent reviews and grants no extra agent slot
   (`docs/TASK-LIFECYCLE.md`) details. Core constraints always apply; update affected
   summaries, details and references together in the same change. Resolve conflicts
   before dependent work; neither location permits weakening the other's constraints.
-- Preserve past reviews, completed tasks and measurements. Historical role names
+- Preserve past reviews, completed tasks and measurements, including their
+  original languages and wording; the language policy does not authorize
+  translating or rewriting historical records or evidence. Historical role names
   and paths describe their time, not instructions to restore removed prompts.
 - Use existing knowledge documents for durable lessons; avoid duplicate knowledge
   and unnecessary design/reflection docs. Documentation never replaces validation.

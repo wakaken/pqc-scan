@@ -13,7 +13,7 @@
 ## Constraints and review focus
 - Preserve the current branch and all previous implementation/approved scope;014/016 cancelled,023 baseline criteria retained.
 - Use 0.2.0 for product version; do not rename versioned report schemas, TLS1.0 literals, API format versions or immutable historical measurements.
-- Rename docs/roadmap/OSS-ROADMAP-v0.2.md to OSS-ROADMAP-v0.2.md; resolve all active file links and mark historical1.0 planning references as superseded.
+- Rename docs/roadmap/v0.2/ROADMAP.md to ROADMAP.md; resolve all active file links and mark historical1.0 planning references as superseded.
 - Classify each retained result from its actual file/line/content. Only exact reviewed test/reference matches may be omitted; dependency inventory/unexpected production observations remain.
 - Assert exact positive rule IDs/locations and negative control, with an actual clean archive install. Unknown and changed observations must stay actionable.
 - Bind final tests/performance/source/package to actual source; performance2x is an investigation signal, not a new numeric fail threshold.

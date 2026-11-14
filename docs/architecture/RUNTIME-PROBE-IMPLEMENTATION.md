@@ -186,6 +186,6 @@ loopback fixtures with ephemeral test keys, never public targets. Browser accept
 remains a separate gate; task036's current automation restriction does not disappear.
 
 031's measured backend evidence is in
-[TASK-031-TLS-FEASIBILITY.md](../quality/TASK-031-TLS-FEASIBILITY.md).
+[TASK-031-TLS-FEASIBILITY.md](../../tasks/031/TASK-031-TLS-FEASIBILITY.md).
 No negotiated SSH mode, release channel, numeric quality budget, publication or
 task039 use case is selected by these proposals.

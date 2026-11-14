@@ -41,6 +41,6 @@ AST language scopes are case-insensitive. This asymmetry is deliberate compatibi
 not an endorsement of a new scope contract. Future tightening needs explicit
 migration/human review; task028 makes no such change and emits no new default warning.
 
-[The built-in companion](../quality/RULE-QUALITY.md) separately records all119 rules'
+[The built-in companion](../quality/rules/RULE-QUALITY.md) separately records all119 rules'
 classifications, source editions, method limits and pattern-only controls. The data
 has no effect on rule loading or detection. Numeric task023 budgets remain unapproved.

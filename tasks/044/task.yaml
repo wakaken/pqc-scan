@@ -1,0 +1,195 @@
+id: '044'
+title: 到達率と追加検証手法の適用範囲を測る
+type: improvement
+priority: high
+status: done
+owner: Evaluator Agent
+phase: '3'
+description: 重要な未到達箇所を特定し、Miriや形式検証の適用可否も根拠付きで判断する。
+quality_alias: QAM-03
+plan_reference: docs/roadmap/v0.3/ROADMAP.md
+requirements_reference: docs/roadmap/v0.3/REQUIREMENTS.md
+quality_requirements:
+- Q4-13
+- Q4-16
+depends_on:
+- '041'
+target_components:
+- crates/
+existing_assets:
+- E41
+problem:
+- 到達位置とfeature別の測定
+- 純RustとFFI/OS依存を分けた適用検討
+acceptance:
+- 'Q4-13: 取得可能なline/region/branchを区別し、安全上重要な未到達箇所と対象外理由を列挙'
+- 'Q4-16: 適用可能な小範囲を試し、実行不能・費用過大なら根拠と代替検証を明記。導入数を目標にしない'
+deliverables:
+- target/quality-task-044/coverage-review.md
+- target/quality-task-044/verification-feasibility.md
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- FFI・OS依存・feature差・nightly専用機能によって、取得した到達率の範囲を誤解しやすい。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+
+execution_record:
+  date: '2026-11-13'
+  authorization: ユーザーが既存ブランチ・計画で044を当初条件に沿って完遂するよう明示指示。
+  branch: codex/quality-assessment-model
+  base_head: f8aff1888525f0f3e350a734166c12c6de3e71ed
+  evidence: target/quality-task-044/run-20261113/
+  lifecycle:
+  - pending -> planned: 既存ロードマップと当初Q4-13/Q4-16を再確認。
+  - planned -> in-progress: 工具準備と隔離測定を開始。
+  - in-progress -> review: 合成変更・初期チェックと実測を主担当が確認。
+  scope: 製品挙動・規則・Schema・CIは変更せず、隔離環境で測定と小範囲の適用試行を行う。
+  approach:
+  - 既存のsource snapshot・kernel境界検査・bounded exportを再利用し、工具取得と対象実行を分離する。
+  - Rust1.93.1のdefault/all-featuresを別プロファイルでline/region測定し、branchの取得条件を確認する。
+  - 純Rust小範囲のMiri試行、FFI/OS依存の制約、形式検証の適用可能性と代替策を記録する。
+  - 重要未到達箇所を元ソース・既存試験に結び、証拠hashと二段階レビューを照合する。
+  result: tasks/044/TASK-044-RESULTS.md
+  durable_evidence: tasks/044/evidence/task044-20261113/
+  review_scope: Q4-13/Q4-16と計測driver・集計器・証拠の合成変更。製品変更なし。
+  verification_status: 当初2条件・指定成果物・最終チェック・二段階レビューを照合し、評価作業を完了。
+  review_record:
+    implementation_reviewer: /root/task044_implementation_review
+    initial_scope_sha256: bcb83394b1b007911b741ddb65f83fccf3dc0c98e5f44e5eb71ac457e11fee12
+    finding: P2のsafe_read位置説明を原ソース・0カウンターに照合して訂正。実測値・コード変更なし。
+    lifecycle: review -> in-progress -> review（位置説明の訂正）
+    status: R2実装レビュー、R3試験妥当性レビューとも受入。必須未解消なし。
+    implementation_accepted_scope_sha256: adb5c22daf572dd1ffe1808340a6afc9301552f47277789046aae8547671533a
+    test_reviewer: /root/task044_test_review
+    test_accepted_scope_sha256: c42ea1ef2f560b94218fc2536da3b7d0e4801fe736149f4b4e58fa6c17d946f3
+completion:
+  date: '2026-11-13'
+  lifecycle: review -> done（当初Q4-13/Q4-16を変更せず照合）
+  scope: 到達率の観測・重要未記録と対象外理由・追加検証の適用判断。全製品品質の合格ではない。
+  evidence: tasks/044/evidence/task044-20261113/ACCEPTANCE.json
+  report: tasks/044/TASK-044-RESULTS.md
+  actual_deliverables:
+  - target/quality-task-044/coverage-review.md
+  - target/quality-task-044/verification-feasibility.md
+  durable_deliverables:
+  - tasks/044/evidence/task044-20261113/COVERAGE-REVIEW.md
+  - tasks/044/evidence/task044-20261113/VERIFICATION-FEASIBILITY.md
+  verification: stable通常514/全feature565成功1ignored、nightly通常514/全feature565成功1ignored、局所Miri3成功・工具正負対照、Python57・Node35・配布11成功、protocol5成功6skip、fmt/構文/リンク/証拠照合終了0。
+  remaining_required_work: なし。resolver制約・別OS/arch・FFI・core Miri経路・形式証明等の評価結果と未検証範囲は保持。
+  publication: 未コミット。push/PR/merge/tag/release・GitHub設定変更は未実施。
+
+miri_followup:
+  date: '2026-11-13'
+  authorization: ユーザーがMiriの停止根本原因の調査・解消と、元のcrate構成で可能な範囲の検証を明示指示。
+  lifecycle: done -> in-progress（追加依頼。以前の評価・受入・測定は不変保持）
+  evidence: target/quality-task-044/miri-followup-20261113/
+  acceptance:
+  - 保存済みのbuild script JSONエラーを再現し、原因仮説を正負対照で切り分けて根本原因を特定・解消する。
+  - 元のcrate構成のMiri実行範囲を広げ、対象・feature・成功/失敗/未検証・理由・時間・source/工具hashを記録する。
+  - コンテナー隔離とMiriのUB検査・製品境界を維持し、旧証拠を維持し、同じ二段階reviewerで最終変更を確認する。
+  approach:
+  - 固定工具image・失敗条件とverboseログで最小再現を得る。
+  - 工具の同版ソースと実際のrunner/成果物を照合し、一条件ずつ変えて原因を確認する。
+  - 実行できる元crateのunit/integration targetを列挙し、適合/OS/FFI/実行費用を区別して測定する。
+  - 必要なdriver試験とnative退行確認、証拠保存、既存reviewerによる二段階確認で完了判定する。
+  reviewers: [/root/task044_implementation_review, /root/task044_test_review]
+  report: tasks/044/TASK-044-MIRI-FOLLOWUP.md
+  durable_evidence: tasks/044/evidence/task044-miri-followup-20261113/
+  current_lifecycle: in-progress -> review（根本原因対処・有限範囲の元crate実行・初期チェックを完了）
+  profiles: 標準566登録、120成功441非対応4時間上限1既存ignored。OSアクセス条件は396候補中92試行、23成功46非対応23時間上限、304未着手。
+  conditions: Linux/aarch64、固定nightly、all-features。OS追加条件のみMiri内部のOSアクセスを許可し、外側コンテナー隔離とUB検査は維持。
+  required_review_status: R1とR2実装レビュー・R2試験レビューを同じ二者が受入。対応必須の未解消指摘なし。
+  review_record:
+    implementation_reviewer: /root/task044_implementation_review
+    test_reviewer: /root/task044_test_review
+    accepted_source: tasks/044/evidence/task044-miri-followup-20261113/FOLLOWUP-SOURCE-R2.json
+    accepted_scope_sha256: bf4baac8d239002e0a8c430b992cc8a9e51f6ac5e0fdc7f216a5f9eddf70aa31
+    final_changes: 判定後は完了・レビューの管理情報のみ。driver・製品ソース・測定値は不変。
+
+miri_followup_completion:
+  date: '2026-11-13'
+  lifecycle: review -> done（停止原因調査・元crateでの有限範囲拡大・未検証理由の明示）
+  scope: 根本原因はhost/target runnerの衝突。固定工具コマンドで分離し、元workspaceの63targetをbuildして566登録を確認。
+  result: tasks/044/TASK-044-MIRI-FOLLOWUP.md
+  evidence: tasks/044/evidence/task044-miri-followup-20261113/ACCEPTANCE.json
+  verification: 2条件の原イベントと個別結果、工具正負対照、前後source一致と後始末、Python61成功、protocol5成功6skip、構文・リンク・hash照合を確認。
+  remaining_required_evaluation_work: なし。全製品のMiri合格を意味せず、下記未検証を保持。
+  product_unverified: OS追加条件の304未着手、時間上限、非対応FFI/OS操作、default feature構成、doctest、別OS/arch・複数seed等。
+  historical_evidence: 当初task044-20261113の20indexed filesとindexは不変保持。今回の証拠は別フォルダー。
+  publication: 未コミット。push/PR/merge/tag/release・CI変更は未実施。
+
+retirement:
+  authorization: ユーザーがMiri専用実装の退役・coverage分離・既存二者レビュー・完了後のcommit/push/PR/develop mergeを明示指示。
+  lifecycle: done -> in-progress（追加整理。過去の受入・測定証拠は不変保持）
+  acceptance:
+  - 過去の2証拠フォルダーをbyte単位で維持し、退役前の現行コードをhash付きで保管する。
+  - coverageの通常/全featureと明示branch計測、共通コンテナー境界を維持する。
+  - coverageからMiriと通常計測時のnightly依存を切り離し、Miri専用module/test/selection/caseを通常経路から除く。
+  - 必要な検証と同じ二者による合成変更レビュー後にdoneを判断し、既存branchで公開・developへmergeする。
+  approach:
+  - 退役前snapshotと旧証拠のhash台帳を保存する。
+  - coverageの独立性と2モードの振舞いを試験し、Miri専用コードを退役させる。
+  - 関連試験・実際のcoverage実行・証拠照合を行い、既存reviewerの二段階確認を受ける。
+  - done判定後にcommit/pushし、PRの差分・CI・merge結果を確認する。
+  reviewers: [/root/task044_implementation_review, /root/task044_test_review]
+  evidence: tasks/044/evidence/task044-retirement-20261113/
+  verification: stable/nightly各通常514成功、全feature565成功1ignored。品質59・実コンテナー境界10・他protocol2・Node35・配布11・fmt/構文が終了0。通常計測にnightly/Miriコマンドなし。
+  review_progress: 既存実装reviewerが初期変更を受入。最終証拠の限定確認と試験reviewを依頼する。
+  publication_dependency: 作業中にdevelopへ別PR24がmergeされ5ファイル競合。初期のdevelop自動取込禁止を維持し、作業ツリーへの取込なし。PRで競合を提示する。
+  review_result:
+    implementation_reviewer: /root/task044_implementation_review
+    test_reviewer: /root/task044_test_review
+    accepted_scope_sha256: 87b675d0a3930ed5cfe7836658931c8bcbab8a89c681719885711875de98055a
+    status: 退役実装・試験妥当性とも受入、対応必須の指摘なし。
+  cleanup_verified: true
+  lifecycle_after_review: review -> blocked（公開先developの更新・初期取込禁止の指示確認待ち）
+  blocker:
+    reason: develop26fa19eとの5競合。Gradle等の検出動作の統合が必要で、初期の新develop自動取込禁止に従い未統合。
+    attempted: sourceを変更しないmerge-treeで競合位置を確認。退役の検証・二段階レビューは完了し、既存branchへcommit/pushしてPRを提示する。
+    remaining: develop取込の指示確認、競合解消後の統合source検証・必要な限定レビュー・PR CI・merge。
+    needed: 今回のマージ指示にdevelop24の取込と競合解消を含めるか確認する。原受入条件と過去証拠は維持。
+
+integration:
+  authorization: ユーザーが新developの取込・競合解消・再検証・既存二者の限定レビュー・mergeまで明示承認。
+  lifecycle: blocked -> in-progress（取込禁止の依存を明示承認で解消）
+  target: 26fa19e7bd2434836d6c4dbed0185f34e15b9e45
+  approach: 043の静的呼出し/コメント対策と062のGradle map/unknown保持を両立する。タスク一覧は001〜062を確認し、過去証拠を改変しない。
+  review_record:
+    implementation_reviewer: /root/task044_implementation_review
+    test_reviewer: /root/task044_test_review
+    accepted_scope_sha256: 2928943191644eed2ea122326d8265c20f3054a010f9f4ae9d965f83618e1454
+    finding: P2のinline map終端をquote-awareに修正しred/greenを確認。両者受入、対応必須の未解消指摘なし。
+  lifecycle_after_verification: in-progress -> review -> done（統合修正・ローカル検証・二段階限定レビューを完了）
+  evidence: tasks/044/evidence/task044-integration-20261113/VALIDATION.json
+  verification: Rust通常527/全feature578成功1ignored、両clippy/build、5corpus各3反復と報告、fresh二者applicability・scoped再集計、Python59・Node35・配布11・fmtが終了0。
+  preserved: 過去3証拠folderと旧applicabilityの92ファイルは不変。旧RULE companionもexact保存し現行版を新しいsource束縛として構成。
+  scope_limits: 元の到達率はf8時点の測定として維持。新Miri/coverage/性能測定なし。5corpusの既知FP/FNを保持し、製品全面合格としない。
+  publication: 公開前の評価完了記録。既存branchのmerge commitをpush後、PR25の実CIを確認してdevelopへmergeする。実際の公開結果はGit/PR履歴で確認する。
+
+ci_followup:
+  failed_run: https://github.com/wakaken/pqc-scan/actions/runs/43382596747
+  lifecycle: done -> in-progress（Linux CIのRSS回帰試験前提を修正）
+  cause: wait4は子ごとだがexec前の親image由来RSS floorを含み得る。固定32MiB childが親より小さいと大小両childのpeakが同値になり試験が失敗。
+  approach: 計測器や測定値は変えず、large childの実接触allocationを親SELF peakより大きくして、累積値への退行を引き続き検出する。Linux高RSS親でred/greenと通常suiteを確認し、既存二者の限定確認後CIを再実行する。
+  review_record:
+    implementation_reviewer: /root/task044_implementation_review
+    test_reviewer: /root/task044_test_review
+    accepted_scope_sha256: 64c49d52e3650f309f0d98ccd99b12c3b64d487bf26b7d5b61eb172ecd30f90c
+    result: 両者受入、対応必須の指摘なし。実行recipeを含め確認。
+  completion: in-progress -> review -> done（Linux再現red/green・累積値負対照・Linux6/Mac59・二者確認を完了）
+  evidence: tasks/044/evidence/task044-ci-fix-20261113/
+  publication: この修正をpushし、最終headの実CI成功を確認してからmergeする。過去の失敗・測定は保持。

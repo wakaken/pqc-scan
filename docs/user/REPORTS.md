@@ -241,4 +241,4 @@ keeps a column only when the existing unmasked snippet proves an ASCII prefix;
 otherwise it retains the line only. Missing, masked or clipped prefixes cannot
 prove a column. `report.json` locations/IDs, other reports, CLI flags and filenames
 are unchanged. These corrections intentionally replace invalid/misleading SARIF
-positions and unescaped paths. See the [contract and validation record](../quality/SARIF-LOCATION-CONTRACT-022.md).
+positions and unescaped paths. See the [contract and validation record](../../tasks/022/SARIF-LOCATION-CONTRACT-022.md).

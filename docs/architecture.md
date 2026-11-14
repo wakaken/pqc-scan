@@ -51,7 +51,7 @@
 Rule loading rejects blank IDs, invalid source confidence and every traversal
 error before returning a RuleSet; valid custom scope semantics are unchanged.
 See [loading contract](architecture/RULE-VALIDATION.md). The [source-bound122-rule
-companion](quality/RULE-QUALITY.md) is development-only and has no runtime/report
+companion](quality/rules/RULE-QUALITY.md) is development-only and has no runtime/report
 schema dependency. Existing matcher/Risk/severity remain authoritative.
 
 ## Rule System
@@ -183,7 +183,7 @@ TypeScript and TSX use dedicated pinned grammars. Syntax recovery and
 nominal API matching do not resolve aliases, local namesakes, actual execution
 or all comments inside ancestor text. Frozen corpus and grammar-subset tests
 record these limitations rather than silently expanding dependency support.
-See [the task024 evidence](quality/TASK-024-AST-OCCURRENCES.md).
+See [the task024 evidence](../tasks/024/TASK-024-AST-OCCURRENCES.md).
 
 ### Regex detector
 
@@ -246,8 +246,8 @@ See [the task024 evidence](quality/TASK-024-AST-OCCURRENCES.md).
   masked file-wide, extending the existing RSA/PKCS#8/OpenSSH protection. Bodies of
   unsupported blocks are never decoded/exported by certificate parsing.
 
-See [task 021 specification/evidence](roadmap/TASK-021-IMPLEMENTATION.md),
-[task 020 specification/evidence](roadmap/TASK-020-IMPLEMENTATION.md) and
+See [task 021 specification/evidence](../tasks/021/TASK-021-IMPLEMENTATION.md),
+[task 020 specification/evidence](../tasks/020/TASK-020-IMPLEMENTATION.md) and
 [public fixture provenance](../crates/pqc_scan_detectors/tests/fixtures/certificates/README.md).
 
 ### Key detector

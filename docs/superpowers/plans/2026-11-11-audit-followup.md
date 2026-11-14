@@ -15,4 +15,4 @@
 
 範囲外: legacy finding_id/SARIF同一性の変更、新しい保存形式、公開/push/署名、014/016再開、ルール・暗号方式変更。legacy IDの衝突は認めるが、互換方針の人手確認が必要として残す。CIとobjc4件は未完了を維持する。
 
-結果と未達条件は docs/quality/CURSOR-AUDIT-FOLLOWUP-2026-11-11.md に集約。最終テストレビューは承認・必須改善0で完了し、証拠JSONへ記録した。
+結果と未達条件は docs/records/cursor-audit-20261111/CURSOR-AUDIT-FOLLOWUP-2026-11-11.md に集約。最終テストレビューは承認・必須改善0で完了し、証拠JSONへ記録した。

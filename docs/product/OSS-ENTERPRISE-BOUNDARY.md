@@ -34,4 +34,4 @@ No automatic upload, licensing check, cloud credential flow, background agent or
 
 ## Required human decisions before expansion
 
-Deployment, data retention, tenant boundaries, remote authorization, sensitive metadata handling and organizational deadlines belong to a future platform design. This roadmap does not approve a hosted scanner or collection service. Refer to [NEXT-GEN-ARCHITECTURE.md](../architecture/NEXT-GEN-ARCHITECTURE.md) and [OSS-ROADMAP-v0.2.md](../roadmap/OSS-ROADMAP-v0.2.md).
+Deployment, data retention, tenant boundaries, remote authorization, sensitive metadata handling and organizational deadlines belong to a future platform design. This roadmap does not approve a hosted scanner or collection service. Refer to [NEXT-GEN-ARCHITECTURE.md](../architecture/NEXT-GEN-ARCHITECTURE.md) and [ROADMAP.md](../roadmap/v0.2/ROADMAP.md).

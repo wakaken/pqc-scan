@@ -2,7 +2,7 @@
 
 **Goal:** measure pinned rustls/provider feasibility without shipping TLS probes.
 **Baseline:** continuation HEAD recorded in the generated bindings.
-**Spec:** `tasks/031-tls-feasibility.yaml`, approved 030 safety policy and
+**Spec:** `tasks/031/task.yaml`, approved 030 safety policy and
 `docs/architecture/TLS-SSH-PROBE-DESIGN.md`.
 
 ## Constraints

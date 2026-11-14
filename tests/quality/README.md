@@ -50,7 +50,7 @@ estimates. Resource samples include startup/report writing and do not measure
 true OS cold cache. CI enforces integrity, sanity and repeatability only; numeric
 accuracy/performance proposals require maintainer review after measurement.
 
-See [the measured baseline and proposed budgets](../../docs/quality/TASK-023-BASELINE.md).
+See [the measured baseline and proposed budgets](../../tasks/023/TASK-023-BASELINE.md).
 
 ## Source-bound quality report (PQS-QAM)
 
@@ -61,7 +61,7 @@ bindings. It does not scan, execute corpus code or fetch dependencies.
 
 ```sh
 python3 tests/quality/report.py --baseline target/quality-baseline \
-  --reference docs/quality/task023/BASELINE.json --out-dir target/quality-assessment
+  --reference tasks/023/evidence/task023/BASELINE.json --out-dir target/quality-assessment
 ```
 
 `quality.json` retains denominators, split/family and language/rule/detector/input
@@ -72,11 +72,11 @@ not available in the unchanged TASK-023 data. Q3/Q4/Q6 require separate evidence
 this automatic report; release acceptance remains Unknown. A failed numeric
 comparison is reported without a new numeric CI failure threshold.
 TASK-023's local nonregression and 2x investigation criteria were approved;
-see [acceptance](../../docs/quality/TASK-023-ACCEPTANCE.md). The original runner's
+see [acceptance](../../tasks/023/TASK-023-ACCEPTANCE.md). The original runner's
 historical `budgets: unapproved` string is not the current policy authority.
 No tool silently rewrites that historical metadata or old measurement files.
 See [metric definitions](../../docs/quality/QUALITY-METRICS.md) and the
-[current assessment](../../docs/quality/QUALITY-ASSESSMENT.md).
+[current assessment](../../tasks/041/QUALITY-ASSESSMENT.md).
 
 ## Additional reviewed data (TASK-042)
 
@@ -144,7 +144,7 @@ documented public subset; their post-observation scope correction is separate
 from the original nominal-property measurement. It is not detector improvement
 or a new blind evaluation.
 
-The [reopened TASK-042 results](../../docs/quality/TASK-042-REOPEN-RESULTS.md)
+The [reopened TASK-042 results](../../tasks/042/TASK-042-REOPEN-RESULTS.md)
 link the original nine acceptance criteria, every supported format, algorithm
 controls, known errors, exact commands and independent review records.
 

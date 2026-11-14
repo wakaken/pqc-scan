@@ -1,0 +1,63 @@
+id: "024"
+title: "Preserve AST occurrences and characterize grammar limits"
+type: improvement
+priority: high
+status: done
+owner: Evaluator Agent
+phase: "0"
+description: "Preserve AST occurrences and characterize grammar limits. Private source-span deduplication; preserve CLI, native model, report schemas and existing finding IDs."
+plan_reference: "docs/roadmap/v0.2/ROADMAP.md#task-024"
+change_size: "Medium; language-specific uncertainty"
+decision_gate: "Review dependency cost before adding a grammar."
+change_categories:
+  - "Existing implementation correction"
+  - "Existing implementation extension"
+depends_on:
+  - "023"
+required_files:
+  - "crates/pqc_scan_detectors/src/tree_sitter_detector.rs"
+  - "crates/pqc_scan_detectors/src/comment_filter.rs"
+  - "crates/pqc_scan_detectors/tests/pqc_readiness.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Distinguish nested duplicate candidates from separate same-line calls using spans/columns."
+  - "Characterize JS-grammar TypeScript handling, aliases and same-named functions."
+  - "Add only corpus-justified structural improvements; proper TS grammar requires measured benefit."
+out_of_scope:
+  - "No whole-program resolver, dataflow engine or tree-sitter rewrite."
+risks:
+  - "Traversal/grammar changes can alter precision, recall and performance."
+acceptance:
+  - "Distinct same-line calls survive without duplicate parent/child hits."
+  - "Grammar/API limits are measured and documented."
+testing_requirements:
+  - "Alias/local-function/string/TS/nested/same-line fixtures, holdout and performance comparison."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+implementation_plan: "docs/superpowers/plans/2026-11-10-ast-occurrences.md"
+
+implementation_record:
+  base_head: "757d067bff36f6e0538c1482ae4123611a9aab81"
+  branch: "codex/task-022-sarif-location"
+  lifecycle: ["Planner: pending -> planned", "Executor: in-progress -> review"]
+  dependency_note: "Technical task023 baseline reused under explicit user request to continue; its pending maintainer numeric-budget decision and status remain unchanged."
+  design: "Private per-rule parsed-source byte-span deduplication, quote/whitespace boundary normalization, synthetic clipping suffix rejection. Existing native coordinates/ID algorithm and schemas unchanged."
+  unchanged_scope: "No rule/grammar/dependency/comment-policy/core/model/reporter/CLI or task023 corpus/harness/workflow changes."
+  report: "tasks/024/TASK-024-AST-OCCURRENCES.md"
+  measurements: "tasks/024/evidence/task024/COMPARISON.json"
+  review: "tasks/024/TASK-024-REVIEW.md"
+  artifacts: "target/task024/"
+  tests: "154 Rust / 20 Python / 22 Node; offline build/fmt/clippy all exit 0."
+  regression_proof: "Five detector cases and actual twice.js regression failed before correction; seven detector and one actual CLI/schema contract test now pass."
+  accuracy_delta: "Frozen corpus raw35->36; tuning source_api TP9->10 FN5->4 FP3 unchanged; all holdout cells unchanged; no relabeling or approved numeric budgets."
+  compatibility: "Same-root unchanged 12files/18findings all formats timestamp-only equality; occurrence 42files/41->44 retains every prior full native finding/ID/SARIF/CBOM and dependency inventory."
+  self_scan: "793 raw = 660 reviewed test omissions + 133 retained, 99 verified sources. Preserve old131 retained and add two product observations; all old raw results retained."
+  schema: "Actual CLI emitted SARIF validates offline against pinned official 2.1.0 schema."
+  measurements_protocol: "Three accuracy repeats, one first-measured plus three warm samples for each of four workloads; actual per-child wall/CPU/RSS, input/tool/source/rule/label digests recorded."
+  unexecuted: ["Hosted Actions/Code Scanning", "Linux/Windows/platform matrix", "True OS cold cache", "Real-product or multi-host benchmarks", "Browser acceptance (renderer unchanged)"]
+  publication: "Local commit only; no push, PR or merge."
+
+  review_outcome: "Independent review024 final approval; no blocking findings. Focused 29 tests independently passed; 55 runtime and 45 harness source bindings, accuracy tables, performance medians and full command logs independently verified."
+  evaluation_outcome: "Evaluator validated local acceptance and marked done after independent review. Hosted checks and platform limitations remain explicit."
+  reflection: "Deduplicate overlapping AST views by parsed-source provenance, not line/text identity. Apply accepted-hit caps after occurrence deduplication and keep display-only clipping bytes out of source identity."

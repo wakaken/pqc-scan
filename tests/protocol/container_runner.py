@@ -16,7 +16,7 @@ import uuid
 
 ROOT = Path(__file__).resolve().parents[2]
 ALLOWED_DIRS = {'crates', 'rules', 'schemas', 'tests', 'tasks', 'shell', 'examples'}
-ALLOWED_FILES = {'Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', '.gitignore', 'README.md', 'README.ja.md', 'LICENSE', 'docs/quality/RULE-QUALITY-METADATA.json'}
+ALLOWED_FILES = {'Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', '.gitignore', 'README.md', 'README.ja.md', 'LICENSE', 'docs/quality/rules/RULE-QUALITY-METADATA.json'}
 ENV = {'PATH':'/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
        'HOME':'/scratch/home', 'TMPDIR':'/scratch/tmp', 'CARGO_HOME':'/scratch/cargo',
        'RUSTUP_HOME':'/usr/local/rustup', 'CARGO_NET_OFFLINE':'true', 'CARGO_BUILD_JOBS':'2',
@@ -60,6 +60,10 @@ def snapshot(root, destination):
     root = Path(root).resolve(); destination = Path(destination)
     destination.mkdir(parents=True, exist_ok=False)
     names = subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=root).decode().split('\0')
+    # Index entries can outlive an unstaged move/deletion. Only deletions already
+    # observed by Git may be absent; later disappearances still fail closed.
+    deleted = set(subprocess.check_output(
+        ['git', 'ls-files', '-z', '--deleted'], cwd=root).decode().split('\0'))
     bindings = {}; size = 0
     for name in sorted(set(filter(None, names))):
         path = PurePosixPath(name)
@@ -67,10 +71,18 @@ def snapshot(root, destination):
             raise ValueError('unsafe source path')
         if name not in ALLOWED_FILES and path.parts[0] not in ALLOWED_DIRS:
             continue
+        # Task outputs are historical records, not build inputs. Keep only the
+        # direct definitions used by queue validation and their operational guide.
+        if path.parts[0] == 'tasks' and name != 'tasks/README.md' and not re.fullmatch(r'tasks/[0-9]{3}/task\.yaml', name):
+            continue
         if any(p == '.git' or p.startswith('.env') or p == '__pycache__' for p in path.parts):
             continue
         try:
             data = source_bytes(root, name)
+        except FileNotFoundError as error:
+            if name in deleted:
+                continue
+            raise ValueError('source disappeared while copying') from error
         except OSError as error:
             raise ValueError('source changed or contains a link/special entry') from error
         size += len(data)

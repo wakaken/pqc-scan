@@ -1,7 +1,7 @@
 # TASK-049 評価の再実行
 
-元の計画と受入条件は`tasks/049-quality-protocol-matrix.yaml`、結果とprofile差分は
-`docs/quality/TASK-049-RESULTS.md`と`TASK-049-TLS-PROFILE.md`を参照してください。
+元の計画と受入条件は`tasks/049/task.yaml`、結果とprofile差分は
+`tasks/049/TASK-049-RESULTS.md`と`TASK-049-TLS-PROFILE.md`を参照してください。
 
 既存の`tests/protocol/prepare-image.py`で工具とlocked Cargo cacheを準備します。
 対象実行はこの準備から分離し、既存の`container_runner.execute`を

@@ -1,0 +1,105 @@
+id: '055'
+title: 列挙・検出器適用・処理完了を分けて測定する
+type: improvement
+priority: high
+status: done
+owner: Evaluator Agent
+phase: '2'
+description: 未知母数を保持し、検出器別の適用/未報告/部分/失敗を既存診断から集約する。
+quality_alias: '追加: Q2専用'
+plan_reference: docs/roadmap/v0.3/ROADMAP.md
+requirements_reference: docs/roadmap/v0.3/REQUIREMENTS.md
+quality_requirements:
+- Q2-01
+- Q2-02
+- Q2-03
+- Q2-04
+- Q2-05
+- Q2-06
+- Q2-07
+- Q2-08
+depends_on:
+- '041'
+target_components:
+- crates/pqc_scan_core/src/pipeline.rs
+existing_assets:
+- E18
+- E19
+- E41
+problem:
+- 評価範囲拡大時の集計と試験
+- 全形式・版の対応表と実結果の対応
+- 制限別件数・停止理由の集約
+- 明示除外と列挙できない対象の分離
+- 既知の全入力集合による列挙漏れの試験
+- 開発用の検出器別集約が未実装
+- 三つの測定を分けた報告
+- 故障注入と報告の対応確認
+acceptance:
+- 'Q2-01: selected/read/terminalの等式を満たし、重複計上と失敗の成功扱いを拒否'
+- 'Q2-02: 未対応の理由と対象を記録し、未対応入力の所見0を安全判定にしない'
+- 'Q2-03: 境界値と超過例で部分結果を保持し、打ち切りを通常完了と区別'
+- 'Q2-04: 設定した除外と実際に列挙した除外を区別して再現試験で確認'
+- 'Q2-05: 管理された入力一覧で列挙漏れを検証し、任意リポジトリの未知母数を0に置換しない'
+- 'Q2-06: 検出器×入力形式ごとの適用・非適用・未報告・失敗を集計し、想定値と照合'
+- 'Q2-07: 計算可能な率だけを分母付きで示し、未知の列挙総数で率を作らない'
+- 'Q2-08: 読み取り不能・不正構文・一検出器失敗でも他の結果と診断を保持'
+deliverables:
+- target/quality-task-055/coverage-denominators.json
+- target/quality-task-055/detector-coverage.json
+- target/quality-task-055/enumeration-review.md
+- target/quality-task-055/exclusions.json
+- target/quality-task-055/failure-retention.json
+- target/quality-task-055/file-outcomes.json
+- target/quality-task-055/format-coverage.json
+- target/quality-task-055/limit-outcomes.json
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- 未列挙母数を0とする、適用不能を成功とする、fileと検出器の状態を二重計上するおそれがある。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+
+execution_record:
+  authorization: ユーザーが055を先に完了し、その後046を完遂するよう明示承認。
+  base_head: 34b763d188bfc8ada49876c18b15f5406b6628b3
+  preexisting_changes: 045の完了済み未コミット変更と044日本語推敲を保持。測定証拠を上書きしない。
+  lifecycle:
+  - pending -> planned: 当初Q2-01〜08と既存計画・診断APIを確認。
+  - planned -> in-progress: 製品出力を変えず、テスト用収集と開発用集約を実装する。
+  approach:
+  - 既存pipelineを8終端状態・故障注入・管理された入力集合で検証し、診断と統計の事実を収集する。
+  - 実検出器を入力形式・対応版・未対応版・境界入力で実行し、状態と結果保持を照合する。
+  - 開発用集約でselected/read/terminalの等式と重複、分母、未知母数を検証し、当初8成果物を作成する。
+  - 隔離環境で通常/全機能の検証とRust必須チェックを行い、二段階レビュー後に完了を判定する。
+  constraints: 公開Schema・判定・暗号ロジック・ルール・CI条件は変更しない。新工具・新branch/worktree・公開操作は行わない。
+  lifecycle_after_verification: in-progress -> review
+  result: tasks/055/TASK-055-RESULTS.md
+  evidence: tasks/055/evidence/task055-20261113/
+  verification: Rust通常532成功・全機能583成功1ignored、両clippy/build・fmt終了0。Python66・Node35・配布11成功。74入力370検出器呼出し、8成果物作成、元ソース前後一致・隔離終了後削除。
+  review_record:
+    implementation_reviewer: /root/quality055046_implementation_review
+    finding: テスト専用ScanConfig初期化のneedless_updateを削除。通常/全機能clippyで確認。
+    test_reviewer: /root/quality055046_test_review
+    status: 両者受入。対応必須の未解消指摘なし。
+    accepted_code_scope_sha256: 78968c6c6019ebbd52b2c1ff08879012dcc9826482a32ea79298f72eb922b03a
+completion:
+  lifecycle: review -> done
+  criteria: 当初Q2-01〜08と8成果物を最終ソース・実測・二段階レビューで照合。
+  result: tasks/055/TASK-055-RESULTS.md
+  evidence: tasks/055/evidence/task055-20261113/
+  remaining_required_work: なし。有限の入力・構文・Linux arm64の検証で、全入力や検出精度の合格とはしない。
+  publication: 未コミット。push/PR/merge・CI変更は行っていない。

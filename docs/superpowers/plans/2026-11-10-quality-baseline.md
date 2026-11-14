@@ -6,7 +6,7 @@
 **Goal:** Establish a reviewed, reproducible local baseline without changing scanner behavior.
 **Architecture:** Python standard-library development harness invokes the existing CLI, scores a pinned source-only corpus and records raw reports/diagnostics/resource samples outside inputs. Existing examples and public certificates remain immutable.
 **Tech Stack:** Rust 1.93.1 scanner, Python 3.12 development tools, existing Node CI helper.
-**Spec:** tasks/023-quality-baseline.yaml; tests/quality/PROTOCOL.md; docs/quality/QUALITY-GATES.md.
+**Spec:** tasks/023/task.yaml; tests/quality/PROTOCOL.md; docs/quality/QUALITY-GATES.md.
 
 ## Global constraints and design
 

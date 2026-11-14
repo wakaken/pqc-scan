@@ -38,5 +38,5 @@ so results do not imply server-wide capabilities or provider-default negotiation
 The matrix covers TLS 1.2/1.3 classical exchange, two available standardized
 hybrids, HelloRetryRequest, pre-handshake unknowns, trust/name/expiry failure,
 certificate collection/upstream message limits and repeated fresh handshakes.
-Read the [evidence and limitations](../../../docs/quality/TASK-031-TLS-FEASIBILITY.md),
+Read the [evidence and limitations](../../../tasks/031/TASK-031-TLS-FEASIBILITY.md),
 especially provisional group access after failed certificate verification.

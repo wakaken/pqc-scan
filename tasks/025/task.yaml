@@ -1,0 +1,84 @@
+id: "025"
+title: "Add observations, normalized inventory and opt-in native JSON"
+type: feature
+priority: high
+status: done
+planned_new_paths:
+  - "crates/pqc_scan_core/src/observation.rs"
+  - "crates/pqc_scan_core/src/inventory.rs"
+  - "crates/pqc_scan_core/src/identity.rs"
+  - "crates/pqc_scan_core/src/compat.rs"
+  - "schemas/native-scan-v1.schema.json"
+owner: Evaluator Agent
+phase: "1"
+description: "Add observations, normalized inventory and opt-in native JSON. Additive opt-in native observation capture; retain legacy pipeline, IDs and default artifacts."
+plan_reference: "docs/roadmap/v0.2/ROADMAP.md#task-025"
+change_size: "Large but incremental; high identity/contract validation"
+decision_gate: "Approve native v1 artifact and identity scope; no default schema replacement."
+change_categories:
+  - "Existing implementation extension"
+  - "New feature addition"
+depends_on:
+  - "018"
+  - "019"
+  - "020"
+  - "023"
+required_files:
+  - "crates/pqc_scan_core/src/model.rs"
+  - "crates/pqc_scan_core/src/pipeline.rs"
+  - "crates/pqc_scan_core/src/lib.rs"
+  - "crates/pqc_scan_detectors/src/"
+  - "crates/pqc_scan_report/src/json_report.rs"
+  - "crates/pqc_scan_cli/src/main.rs"
+  - "README.md"
+  - "README.ja.md"
+implementation_steps:
+  - "Add focused core observation/inventory/identity/compat modules with safe evidence and assurance/usage distinctions."
+  - "Normalize exact algorithms, public cert/SPKI identities and separate source instances."
+  - "Add versioned length-delimited IDs and legacy-index/ID multimap associations while retaining legacy normalization."
+  - "Publish native schema and separately selected scan.native.v1.json with explicit loss notes."
+out_of_scope:
+  - "No new model/inventory crate, changed default schemas or replacement legacy ID algorithm."
+risks:
+  - "Weak/duplicate anchors and premature API freezing."
+acceptance:
+  - "Algorithm vs instance, certificate vs key and multi-method observations remain distinct."
+  - "New keys avoid tuple ambiguity/checkout roots; old IDs and machine shapes remain unchanged."
+  - "Native schema and legacy shadow comparison have reviewed fixtures."
+testing_requirements:
+  - "Schema/golden/tolerant-reader, root/line/move/duplicate/public-cert cases and old consumer entrypoints."
+  - "Apply docs/quality/QUALITY-GATES.md; record exact HEAD, executed outcomes and unexecuted checks."
+
+implementation_plan: "docs/superpowers/plans/2026-11-10-native-v1.md"
+design_reference: "docs/superpowers/specs/2026-11-10-native-v1-design.md"
+
+evaluation:
+  date: "2026-11-10"
+  role: "Independent Evaluator Agent"
+  result: "accepted locally; independent source review approved"
+  base_head: "8ba863ff335023b3e3a33affa7cb250b3f7bec25"
+  evaluated_state: "Pre-commit working tree, bound by all 62 verified runtime source SHA-256 values in COMPARISON.json"
+  runtime_source_digest: "cbfbece6848eaf0d9b3bddffc7e04e2343b7f9477279e133661af24ef9753157"
+  evidence:
+    - "tasks/025/TASK-025-NATIVE-SCAN.md"
+    - "tasks/025/TASK-025-REVIEW.md"
+    - "tasks/025/evidence/task025/COMPARISON.json"
+    - "target/task025/verification.json"
+    - "target/task025/legacy-shadow.json"
+    - "target/task025/exit-matrix.json"
+    - "target/task025/code-scanning-audit.json"
+    - "target/task025/accepted-baseline-before/summary.json"
+    - "target/task025/accepted-baseline-after/summary.json"
+    - "target/task025/accepted-baseline-native/summary.json"
+  verified:
+    - "All 12 final verification entries exit 0 with existing logs: workspace/release builds, fmt, 176 Rust tests, clippy, 20 Python tests, 22 Node tests, three accepted baseline runs, legacy shadow and CI projection."
+    - "Independently matched all 62 current runtime source hashes, schema/golden hashes, three executable/wrapper hashes and native underlying release hash."
+    - "Independently checked all 41 corpus source bindings and equal accepted baseline input summaries/per-family confusion counts."
+    - "Independently compared seven saved legacy artifacts before/default/native after only documented generation-time normalization; exit matrices agree in both languages."
+    - "Independently reran in-memory CI projection: full audit matches, 814 raw/660 expected/154 retained, raw SARIF digest matches, no new omission registrations."
+    - "Independently reran cargo fmt --all --check successfully; accepted source review has no unresolved blocking findings."
+  limitations:
+    - "Remote CI, external-product acceptance, platform matrix, publication and deployment were not executed or claimed. No UI changes require browser acceptance."
+    - "Task 023 numeric performance/accuracy budgets remain unapproved; recorded local distributions are descriptive, not an approved regression budget."
+    - "Earlier red/mutation/refused-overwrite experiments are historical; final acceptance uses verification.json and accepted-baseline-* only."
+    - "Target evidence is local and uncommitted; committed quality documents retain the source/binary/corpus bindings and summarized results."

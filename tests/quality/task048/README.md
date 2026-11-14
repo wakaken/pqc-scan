@@ -1,7 +1,7 @@
 # TASK-048 検証手順
 
-元の計画・受入条件は`tasks/048-quality-output-contracts.yaml`、結果は
-`docs/quality/TASK-048-RESULTS.md`を参照してください。
+元の計画・受入条件は`tasks/048/task.yaml`、結果は
+`tasks/048/TASK-048-RESULTS.md`を参照してください。
 
 Rustは`rust-toolchain.toml`の1.93.1、validatorは既存のjsonschema 0.29.1です。
 Schema取得機能を無効にし、同梱のSARIF・CycloneDXと独自v1 Schemaだけを使います。

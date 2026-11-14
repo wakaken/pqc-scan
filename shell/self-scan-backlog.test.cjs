@@ -7,11 +7,11 @@ const { prepareCodeScanning } = require('./prepare-code-scanning.cjs');
 const repositoryRoot = path.resolve(__dirname, '..');
 const read = p => JSON.parse(fs.readFileSync(path.join(repositoryRoot, p), 'utf8'));
 const { reviewedResultTestSource } = require('./reviewed-result-test-source.cjs');
-const fixture = reviewedResultTestSource(read('docs/quality/SELF-SCAN-EXPECTATIONS.json'));
+const fixture = reviewedResultTestSource(read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json'));
 const root = fixture.root;
 const policy = () => structuredClone(fixture.policy);
 test.after(fixture.cleanup);
-const records = () => read('docs/quality/self-scan-backlog/REVIEWED-RESULTS.json');
+const records = () => read('docs/records/self-scan-backlog/evidence/self-scan-backlog/REVIEWED-RESULTS.json');
 const document = results => ({ version: '2.1.0', runs: [{ tool: { driver: { name: 'pqc-scan' } }, results }] });
 
 test('reviewed rule definitions, guidance, identifiers and OID labels are upload-only exceptions', () => {

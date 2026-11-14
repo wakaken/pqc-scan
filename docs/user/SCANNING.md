@@ -66,7 +66,7 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 For a CI scan of your product, generate SARIF with `--format sarif` and choose `--fail-on high|critical` if findings should fail the job. Add `--require-complete` only if incomplete inspection must also fail; its exit 3 takes precedence over the finding threshold. The selected scope and unsupported formats still matter.
 
 The checked-in [workflow](../../.github/workflows/pqc-scan.yml) shows GitHub Code Scanning upload and artifact storage. Its `quality` job runs on PRs, while `baseline` and `scan` run on develop pushes; manual runs enable all three. Documentation-only automatic runs are skipped, and `protocols` is temporarily disabled even for manual runs. See [repository CI](../../README.md#repository-ci) for the event conditions. These are this repository's CI choices; select exit gates explicitly for your own product. Retain the raw report so findings remain available for review.
-This repository applies an additional source/result-bound policy to its own reviewed test/catalog references; it is not a general exclusion of test directories. See [self-scan policy](../quality/CI-SELF-SCAN.md) before reusing that preparation step in another project.
+This repository applies an additional source/result-bound policy to its own reviewed test/catalog references; it is not a general exclusion of test directories. See [self-scan policy](../quality/self-scan/CI-SELF-SCAN.md) before reusing that preparation step in another project.
 
 <a id="from-source"></a>
 

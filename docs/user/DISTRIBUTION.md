@@ -51,7 +51,7 @@ commit recorded in the Release.
 Publishing a probe bundle is additional scope: resolve its reviews above,
 provide and verify hosted provenance for that variant (the current workflow
 attests only `static`), then validate the final release inputs before upload.
-See the [candidate validation record](https://github.com/wakaken/pqc-scan/blob/develop/docs/quality/V02-RELEASE-VALIDATION.md) for the
+See the [candidate validation record](../records/v0.2-release/V02-RELEASE-VALIDATION.md) for the
 completed technical checks. `review_required` is not an end-user setting to disable.
 
 ## Source installation

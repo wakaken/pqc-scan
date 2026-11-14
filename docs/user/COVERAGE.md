@@ -93,8 +93,8 @@ certificate findings, IDs and legacy CBOM algorithm strings; CLI options, report
 structures/enums and core ID/scoring algorithms remain unchanged. No signature,
 chain or runtime-use guarantee follows. PSS digest parameters and unlisted
 signature OIDs are not fully assessed; absence of a hash finding does not prove a
-safe digest. See [classification specification](../roadmap/TASK-021-IMPLEMENTATION.md)
-and [focused baseline](../quality/CERTIFICATE-BASELINE-021.md).
+safe digest. See [classification specification](../../tasks/021/TASK-021-IMPLEMENTATION.md)
+and [focused baseline](../../tasks/021/CERTIFICATE-BASELINE-021.md).
 Files containing EC/DSA/encrypted private-key PEM markers also receive file-wide source
 snippet masking; this does not add new private-key detection rules or decrypt keys.
 
@@ -193,6 +193,6 @@ Recognized private-key blocks and credential literals are masked in exported evi
 
 Previews are conservatively masked when recognized private/credential context is present. Metadata values, action text/code, CBOM and dependency text also pass through bounded redaction. Typed inventory and diagnostics omit raw payloads and arbitrary error text.
 
-This is not a universal secret scanner. Unknown/obfuscated syntax, arbitrary credential names, multiline credential position tracking and secret-bearing structural fields are outside the contract. Keep paths, IDs, repository scopes and custom metadata keys free of secrets. Public certificate fingerprints/subjects and other retained facts can still require distribution review. Some benign preview text is omitted conservatively. See the [supported syntax, field policy and limits](../architecture/EVIDENCE-PRIVACY.md) and [synthetic-canary verification](../quality/TASK-029-EVIDENCE-PRIVACY.md).
+This is not a universal secret scanner. Unknown/obfuscated syntax, arbitrary credential names, multiline credential position tracking and secret-bearing structural fields are outside the contract. Keep paths, IDs, repository scopes and custom metadata keys free of secrets. Public certificate fingerprints/subjects and other retained facts can still require distribution review. Some benign preview text is omitted conservatively. See the [supported syntax, field policy and limits](../architecture/EVIDENCE-PRIVACY.md) and [synthetic-canary verification](../../tasks/029/TASK-029-EVIDENCE-PRIVACY.md).
 
 Repository walking respects Git ignore settings. Default exclusions include `.git`, `node_modules`, `target`, `dist`, `docs` and Markdown files; files larger than 2 MiB are skipped. Test directories are not generally excluded. These scope limits mean a successful scan does not establish absence of cryptography in ignored or unsupported files.

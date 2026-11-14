@@ -1,6 +1,8 @@
 # Task Lifecycle
 
-Tasks are YAML files in `tasks/`. [AGENTS.md](../AGENTS.md) defines core working
+Tasks are defined in `tasks/<ID>/task.yaml`, where `<ID>` is the three-digit task
+number. Plans, results and reviews live beside the definition; raw evidence lives
+in its `evidence/` directory. [AGENTS.md](../AGENTS.md) defines core working
 rules and required reading. This file defines task states, responsibilities and
 boundaries. Follow [verification and completion](agent/VERIFICATION.md) for full
 completion gates and [review policy](agent/REVIEWS.md) for independent reviews.

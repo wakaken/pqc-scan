@@ -9,7 +9,7 @@ This document lists all built-in detection rules shipped in `rules/default/` and
 ## Validation and quality review
 
 Task028 established the original 119-rule review. The authorized 2026-11-12 repairs below update selected predicates and add three classical API/reference rules.
-The [source-bound companion](quality/RULE-QUALITY.md) reviews purpose/algorithm/
+The [source-bound companion](quality/rules/RULE-QUALITY.md) reviews purpose/algorithm/
 quantum/classical axes, standard editions, method limits and target-layer positive/
 negative controls. Known disagreements and false positives are recorded, not tuned
 away. These annotations do not replace existing Risk/severity tags or certify
@@ -86,8 +86,8 @@ newly reserved `rsa_modulus_bits`, `certificate_validity`, `legacy_not_after_202
 change affected certificate finding IDs/CBOM strings; no serialized field/enum or
 core scoring/ID algorithm changes. PSS digest parameters and unlisted signature
 identifiers are not exhaustively assessed. See the
-[specification](roadmap/TASK-021-IMPLEMENTATION.md) and
-[focused baseline](quality/CERTIFICATE-BASELINE-021.md).
+[specification](../tasks/021/TASK-021-IMPLEMENTATION.md) and
+[focused baseline](../tasks/021/CERTIFICATE-BASELINE-021.md).
 
 ### Original catalog
 
@@ -203,7 +203,7 @@ The default fingerprints for `PQC_NODE_API`, `PQC_PYTHON_API`, `PQC_RUST_API` an
 
 Java recognizes KEM 512/768/1024, DSA 44/65/87 and explicit SLH SHA2/SHAKE 128/192/256 s/f parameter names without interchanging families. Ruby adds those SLH literals. Pre-standard Kyber/Dilithium references are case-insensitive and retain draft classification. Java classical-only groups accept explicit property assignments, XML entry values and static `System.setProperty`; loaded/effective configuration is not proved. SSH hash-comments are ignored. CIRCL/golang and OpenSSL generic/unknown SBOM presence are recognized; dependency presence does not establish enabled capability. Static Gradle coordinates and gemspec declarations do not execute DSL code or resolve package versions.
 
-See [the full contract and limits](quality/TASK-043-FIXES-CONTRACT.md). The source-bound metadata fixtures test compiled patterns only, not the completeness of these detector predicates.
+See [the full contract and limits](../tasks/043/TASK-043-FIXES-CONTRACT.md). The source-bound metadata fixtures test compiled patterns only, not the completeness of these detector predicates.
 
 ## TASK-043 maintenance follow-up
 
@@ -220,7 +220,7 @@ loaded compiled pattern. Canonical request prefixes must match in full, so an
 embedded quote or partial name cannot create a supported algorithm reference.
 Language scope rules and library module/type/return-value knowledge remain
 explicit in the adapters. This does not make arbitrary APIs or new language
-constructs automatically supported. See the [maintenance plan](quality/TASK-043-MAINTAINABILITY-PLAN.md).
+constructs automatically supported. See the [maintenance plan](../tasks/043/TASK-043-MAINTAINABILITY-PLAN.md).
 | `TS_TLS_LEGACY_VERSION_LITERAL` | `tree_sitter` | TLS | `high` | `non-quantum-risk` | 0.75 | `java,javascript,typescript,python,go,rust,ruby` | `tree_sitter.yml` | Legacy TLS version literals detected in AST nodes. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `(?i)(?:^\|[^A-Za-z0-9_])TLSv1(?:[._][01])?(?:$\|[^A-Za-z0-9_.])` |
 | `TS_TLS_RSA_CIPHER_LITERAL` | `tree_sitter` | TLS | `high` | `quantum-vulnerable` | 0.66 | `java,javascript,typescript,python,go,rust,ruby` | `tree_sitter.yml` | RSA-family TLS cipher suite literals detected in AST nodes. | Update TLS suites containing RSA key exchange to PQC-hybrid suites. | `(?i)\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\b` |
 
@@ -246,4 +246,4 @@ The user-approved audit remediation retains IDs, schemas and the severity engine
 
 `PQC_STANDARD_REFERENCE` (tree_sitter, info, quantum-safe, seven language scopes) inventories recognized standard parameter names and X25519MLKEM768. It is nominal source inventory, not execution, enabled state, implementation conformance or certification. Specific API rules remain separate findings.
 
-The current source-bound companion is [AUDIT-RULE-QUALITY-METADATA.json](quality/AUDIT-RULE-QUALITY-METADATA.json); the original metadata and past measurements remain unchanged. These are hand-authored pattern controls, not a calibrated accuracy claim. Actual detector/CLI regression controls are in `crates/pqc_scan_cli/tests/audit_remediation.rs`.
+The current source-bound companion is [AUDIT-RULE-QUALITY-METADATA.json](../tasks/062/evidence/AUDIT-RULE-QUALITY-METADATA.json); the original metadata and past measurements remain unchanged. These are hand-authored pattern controls, not a calibrated accuracy claim. Actual detector/CLI regression controls are in `crates/pqc_scan_cli/tests/audit_remediation.rs`.
