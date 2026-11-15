@@ -28,6 +28,11 @@ cargo run --bin pqc-scan -- scan ./examples \
 
 ## Verification by Change Type
 
+During development, use targeted checks to diagnose and validate the affected
+behavior. Before completion, every applicable requirement below and every
+task-specific acceptance check needs passing evidence for the final source.
+Targeted success alone does not replace required broader checks.
+
 For Rust implementation, Rust tests, Cargo configuration or dependency changes:
 
 - Run relevant targeted tests during development.
@@ -72,8 +77,10 @@ For user-facing behavior:
   feature configuration and exit result.
 - Preserve logs or artifacts needed to assess required acceptance criteria.
 - A HEAD SHA alone is insufficient when the worktree contains tested changes.
-- Reuse passing results while their source, inputs and environment remain
-  applicable. Repeat checks when changes or unresolved concerns invalidate them.
+- Reuse passing results while their source, inputs, configuration and environment
+  remain applicable under the reuse rules below; do not repeat or broaden checks
+  without changes, a new requirement or an unresolved concern. Rerun affected
+  checks when applicability is invalidated. Required checks are not waived.
 - Do not write tests that merely mirror implementation details.
 - Use assertions that establish observable requirements and relevant failures.
 - Do not claim an unexecuted, unavailable or failed check passed.

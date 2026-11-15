@@ -1,0 +1,39 @@
+{
+  "command": [
+    "python3",
+    "target/agent-guidance-validation/relocation.py",
+    "relocation-initial"
+  ],
+  "validatorSource": "from pathlib import Path\nimport hashlib,json,re,subprocess,sys\nr=Path('docs/records/gpt6-agent-guidance-20261116'); e=r/'evidence'\nprior=json.loads((e/'final.json').read_text())\nsha=lambda b:hashlib.sha256(b).hexdigest()\nfiles=['AGENTS.md','docs/agent/REVIEWER.md','docs/agent/REVIEWS.md','docs/PATTERNS.md','docs/agent/VERIFICATION.md']\n# Prove that the template and previously reviewed guidance changed only as authorized.\nt=Path('docs/agent/REVIEWER.md').read_text().replace('[AGENTS.md](../../AGENTS.md)','[AGENTS.md](../AGENTS.md)').replace('[review policy](REVIEWS.md)','[review policy](../docs/agent/REVIEWS.md)')\nassert sha(t.encode())==prior['sourceBindings']['prompts/REVIEWER.md']['afterSha256']\na=Path('AGENTS.md').read_text().replace('docs/agent/REVIEWER.md','prompts/REVIEWER.md')\nassert sha(a.encode())==prior['sourceBindings']['AGENTS.md']['afterSha256']\nassert sha(Path('docs/agent/VERIFICATION.md').read_bytes())==prior['sourceBindings']['docs/agent/VERIFICATION.md']['afterSha256']\nfor name in ['docs/PATTERNS.md','docs/agent/REVIEWS.md']:\n old=subprocess.check_output(['git','show','HEAD:'+name],text=True)\n expected=old.replace('prompts/REVIEWER.md','docs/agent/REVIEWER.md') if name.endswith('PATTERNS.md') else old.replace('[prompts/REVIEWER.md](../../prompts/REVIEWER.md)','[docs/agent/REVIEWER.md](REVIEWER.md)')\n assert Path(name).read_text()==expected,name\nassert not Path('prompts').exists()\n# Reuse the previously exercised link resolver definitions without executing its checks.\nsource=Path('target/agent-guidance-validation/check.py').read_text()\nnamespace={}\nexec(source[source.index('def without_fences'):source.index('# Validator controls')],dict(re=re,html=__import__('html'),unquote=__import__('urllib.parse',fromlist=['unquote']).unquote,urlsplit=__import__('urllib.parse',fromlist=['urlsplit']).urlsplit),namespace)\n# Functions share globals; supply the extracted helpers to that namespace.\nnamespace.update(re=re,html=__import__('html'),unquote=__import__('urllib.parse',fromlist=['unquote']).unquote,urlsplit=__import__('urllib.parse',fromlist=['urlsplit']).urlsplit)\nexec(source[source.index('def without_fences'):source.index('# Validator controls')],namespace)\nchecked=0\nfor name in files+['docs/agent/REPORTS.md','docs/BEST-PRACTICES.md','docs/MISTAKES.md','docs/TASK-LIFECYCLE.md','tasks/README.md']:\n text=namespace['without_fences'](Path(name).read_text())\n assert 'prompts/REVIEWER.md' not in text,name\n for link in re.findall(r'\\[[^\\]]*\\]\\(([^)]+)\\)',text):\n  assert namespace['resolve_link'](Path(name).resolve(),link) is None,(name,link)\n  if not __import__('urllib.parse',fromlist=['urlsplit']).urlsplit(link).scheme:checked+=1\nsubprocess.run(['git','diff','--check'],check=True)\nchanged=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()\nassert set(changed)=={'AGENTS.md','docs/PATTERNS.md','docs/agent/REVIEWS.md','docs/agent/VERIFICATION.md','prompts/REVIEWER.md'}\nuntracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines()\nassert all(n=='docs/agent/REVIEWER.md' or n.startswith(str(r)+'/') for n in untracked)\nresult={'command':['python3','target/agent-guidance-validation/relocation.py',sys.argv[1]],'validatorSource':Path(__file__).read_text(),'exitCode':0,'localLinksChecked':checked,'sourceBindings':{n:sha(Path(n).read_bytes()) for n in files},'templateChange':'path and two relative Markdown links only; reverse-normalized SHA matches previously reviewed template','policies':'all other previously reviewed guidance preserved; REVIEWS/PATTERNS path replacements only','historicalEvidence':'previous records unchanged except an append-only relocation section in REPORT.md; historical old-path links intentionally retained','trackedChanges':changed,'untracked':untracked}\n(e/(sys.argv[1]+'.json')).write_text(json.dumps(result,indent=2)+'\\n')\nprint(json.dumps({k:v for k,v in result.items() if k not in ['validatorSource','untracked']},indent=2))\n",
+  "exitCode": 0,
+  "localLinksChecked": 66,
+  "sourceBindings": {
+    "AGENTS.md": "4ab1156d784bdea7fc4cc9140237ac5e5794c99063f83b089fb512ec8334391c",
+    "docs/agent/REVIEWER.md": "173abf18c4fb69d46029e73a7732885b004225d59a1bdb25d8b7b40b4463243c",
+    "docs/agent/REVIEWS.md": "d2cbc5bd49cdbe40d45847f660878d97e3f7ca372499eb479cbc30ea31eab98f",
+    "docs/PATTERNS.md": "d170bdb92ae635847776c14ff53b4a38d6e4014ed8f28ca4a628992244f3253c",
+    "docs/agent/VERIFICATION.md": "a52093ebd63d65ad451e55a2410c7e0696be7aa0fa5cf102a7e65c1a0be7f4b0"
+  },
+  "templateChange": "path and two relative Markdown links only; reverse-normalized SHA matches previously reviewed template",
+  "policies": "all other previously reviewed guidance preserved; REVIEWS/PATTERNS path replacements only",
+  "historicalEvidence": "previous records unchanged except an append-only relocation section in REPORT.md; historical old-path links intentionally retained",
+  "trackedChanges": [
+    "AGENTS.md",
+    "docs/PATTERNS.md",
+    "docs/agent/REVIEWS.md",
+    "docs/agent/VERIFICATION.md",
+    "prompts/REVIEWER.md"
+  ],
+  "untracked": [
+    "docs/agent/REVIEWER.md",
+    "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/closure.json",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/final-source.json",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/final.json",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/implementation-review.json",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/implementation-scope.json",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/initial.json",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/test-review.json",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/test-scope.json"
+  ]
+}

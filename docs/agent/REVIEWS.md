@@ -4,7 +4,7 @@ These are mandatory details of [AGENTS.md](../../AGENTS.md). Read this file befo
 starting a user implementation request. At each review stage or material follow-up,
 confirm the applicable rules using the [reading-reuse policy](../../AGENTS.md#required-references-by-activity);
 reread only changed or uncertain sections. Reviewers read it with AGENTS.md,
-[prompts/REVIEWER.md](../../prompts/REVIEWER.md) and the supplied review package.
+[docs/agent/REVIEWER.md](REVIEWER.md) and the supplied review package.
 The main agent's full reading list is not a reviewer checklist; reviewers consult
 additional source and documents only as needed for their assigned scope.
 

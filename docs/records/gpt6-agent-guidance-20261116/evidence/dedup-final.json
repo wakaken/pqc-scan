@@ -1,0 +1,37 @@
+{
+  "baseline": "929caed4caf36461ee6d7fc9a81491807b2fdcb4",
+  "command": [
+    "python3",
+    "target/agent-guidance-validation/dedup.py",
+    "dedup-final"
+  ],
+  "validatorSource": "from pathlib import Path\nimport hashlib,json,re,subprocess,sys,html\nfrom urllib.parse import unquote,urlsplit\nr=Path('docs/records/gpt6-agent-guidance-20261116');e=r/'evidence'\nbefore=json.loads((e/'dedup-before.json').read_text())\nsha=lambda b:hashlib.sha256(b).hexdigest()\nexpected={\n'AGENTS.md':before['files']['AGENTS.md'].replace('  materially affecting correctness, compatibility, security or scope; continue\\n  authorized work that does not depend on them.','  materially affecting correctness, compatibility, security or scope.'),\n'docs/agent/VERIFICATION.md':before['files']['docs/agent/VERIFICATION.md'].replace('- Reuse passing results while their source, inputs and environment remain\\n  applicable. Repeat checks when changes or unresolved concerns invalidate them.\\n- Once required checks have applicable passing evidence, do not repeat or broaden\\n  checks without a changed input, new requirement or unresolved concern. Assess\\n  applicability using the reuse rules below; this does not waive required checks.','- Reuse passing results while their source, inputs, configuration and environment\\n  remain applicable under the reuse rules below; do not repeat or broaden checks\\n  without changes, a new requirement or an unresolved concern. Rerun affected\\n  checks when applicability is invalidated. Required checks are not waived.'),\n'docs/agent/REVIEWER.md':before['files']['docs/agent/REVIEWER.md'].replace('- Do not modify files or delegate. Rely on supplied test results unless a\\n  specific concern requires independent reproduction; do not automatically\\n  repeat the full suite.','- Do not modify files or delegate. Follow the test-evidence and reproduction\\n  rules in the [review policy](REVIEWS.md#review-budget-and-context).')}\nfor n,s in before['files'].items():\n if n==str(r/'REPORT.md'):\n  it=iter(Path(n).read_text().splitlines())\n  assert all(any(candidate==line for candidate in it) for line in s.splitlines()),'historical report line changed'\n else:assert Path(n).read_text()==expected.get(n,s),n\nfor n,h in before['historicalEvidenceHashes'].items():assert sha(Path(n).read_bytes())==h,n\n# Reuse the independently reviewed resolver; original negative controls are in initial.json.\nsource=Path('target/agent-guidance-validation/check.py').read_text()\nns=dict(re=re,html=html,unquote=unquote,urlsplit=urlsplit)\nexec(source[source.index('def without_fences'):source.index('# Validator controls')],ns)\nfor n,s in expected.items():\n assert re.findall(r'```.*?```',s,re.S)==re.findall(r'```.*?```',before['files'][n],re.S),n\nfiles=list(before['files'])+['docs/agent/REPORTS.md','docs/BEST-PRACTICES.md','docs/MISTAKES.md','docs/TASK-LIFECYCLE.md','tasks/README.md']\nlinks=0;historical=[]\nfor n in files:\n for link in re.findall(r'\\[[^\\]]*\\]\\(([^)]+)\\)',ns['without_fences'](Path(n).read_text())):\n  if n==str(r/'REPORT.md') and link=='../../../prompts/REVIEWER.md':\n   historical.append(link);continue\n  assert ns['resolve_link'](Path(n).resolve(),link) is None,(n,link)\n  if not urlsplit(link).scheme:links+=1\nsubprocess.run(['git','diff','--check'],check=True)\nchanged=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()\nassert set(changed)=={'AGENTS.md','docs/PATTERNS.md','docs/agent/REVIEWS.md','docs/agent/VERIFICATION.md','prompts/REVIEWER.md'}\nuntracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines()\nassert all(n=='docs/agent/REVIEWER.md' or n.startswith(str(r)+'/') for n in untracked)\nout={'baseline':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'command':['python3','target/agent-guidance-validation/dedup.py',sys.argv[1]],'validatorSource':Path(__file__).read_text(),'exitCode':0,'localLinksChecked':links,'historicalLinkExceptions':historical,'sourceBindings':{n:sha(Path(n).read_bytes()) for n in files},'guidanceChanges':'Only three exact, approved consolidations; all other instruction text unchanged','historyChecks':'All previous report lines retained in order; all previous evidence bytes unchanged','previousEvidenceFilesVerified':len(before['historicalEvidenceHashes']),'executableFences':'unchanged','scope':'only approved guidance/record paths','lineChanges':{n:len(Path(n).read_text().splitlines())-len(before['files'][n].splitlines()) for n in expected}}\n(e/(sys.argv[1]+'.json')).write_text(json.dumps(out,indent=2)+'\\n')\nprint(json.dumps({k:v for k,v in out.items() if k not in ['validatorSource','sourceBindings']},indent=2))\n",
+  "exitCode": 0,
+  "localLinksChecked": 100,
+  "historicalLinkExceptions": [
+    "../../../prompts/REVIEWER.md"
+  ],
+  "sourceBindings": {
+    "AGENTS.md": "64d6196575b324505d84e19aa204dd8f6537e18f0aca23a06cd5a08981cf9af6",
+    "docs/agent/VERIFICATION.md": "48e8e8fda66f1a74376ab225b32039694a768b18be563238a0d5432915c51607",
+    "docs/agent/REVIEWER.md": "8c3f5212753082221888dbac4c15b3d0b23a2c37ec1163804da6a64f78c47f38",
+    "docs/agent/REVIEWS.md": "d2cbc5bd49cdbe40d45847f660878d97e3f7ca372499eb479cbc30ea31eab98f",
+    "docs/PATTERNS.md": "d170bdb92ae635847776c14ff53b4a38d6e4014ed8f28ca4a628992244f3253c",
+    "docs/records/gpt6-agent-guidance-20261116/REPORT.md": "ed4fe619e0d000ae07415ca11b8371a544c7ed90c23f90f281b417f1c5d9ceaf",
+    "docs/agent/REPORTS.md": "fe743c92e0e6711634f301717e1ef0b30bd0efb65eb6c3a15ad37ab1adb748ff",
+    "docs/BEST-PRACTICES.md": "59631d4f8d499aa304689593074ec0e5cfa7b60136c20fbe8367c1dda005a2a7",
+    "docs/MISTAKES.md": "c59b9b8c05176d8e329599b0705a083c5f2608c4a4f0ecb52034ca0ea75cda2a",
+    "docs/TASK-LIFECYCLE.md": "5e08dc0347f48f4236ff8e892604bcfc4ae235165d6ff24912591e6a4309cada",
+    "tasks/README.md": "7e7fc1fbaa273e965a227c5bbd5430561112bca5f38894be338000b104de19e0"
+  },
+  "guidanceChanges": "Only three exact, approved consolidations; all other instruction text unchanged",
+  "historyChecks": "All previous report lines retained in order; all previous evidence bytes unchanged",
+  "previousEvidenceFilesVerified": 14,
+  "executableFences": "unchanged",
+  "scope": "only approved guidance/record paths",
+  "lineChanges": {
+    "AGENTS.md": -1,
+    "docs/agent/VERIFICATION.md": -1,
+    "docs/agent/REVIEWER.md": -1
+  }
+}
