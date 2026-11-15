@@ -9,17 +9,25 @@ stable output are critical.
 
 ## Working Approach
 
+Apply instructions by their purpose: **Constraints** are mandatory boundaries;
+**Outcomes** are required results; **Guidance** recommends methods within those
+boundaries; **Verification** defines required evidence and completion gates.
+This distinction does not downgrade existing requirements or create exceptions.
+
 - The main agent investigates, plans, implements, debugs, tests, evaluates and
   documents. Planner, Executor and Evaluator are responsibilities, not processes
-  or separate prompts. The only review prompt is `prompts/REVIEWER.md`.
+  or separate prompts. The only review prompt is `docs/agent/REVIEWER.md`.
 - Prefer small, safe changes; avoid unrelated refactoring and preserve user edits.
 - Clear, small changes need no separate design or implementation plan.
   Explanations, research and small changes need no separate task record.
 - For complex or ambiguous work, first summarize purpose, acceptance criteria,
   constraints, compatibility, viable approaches, recommendation, steps and checks.
 - Reuse applicable plans, task records and evidence. Ask about unresolved decisions
-  materially affecting correctness, compatibility, security or scope; continue
-  authorized work that does not depend on them.
+  materially affecting correctness, compatibility, security or scope.
+- For authorized work, continue through implementation, applicable tests,
+  required reviews, fixes and final verification without asking for approval at
+  each stage. Resolve minor, reversible choices within scope; a plan or first
+  implementation alone does not fulfill an implementation request.
 - Do not change agreed scope or acceptance criteria without explicit agreement.
 - Do not select unrelated work or create tasks because the queue is empty.
   Task creation and scope expansion require authorization. Report out-of-scope
@@ -28,6 +36,11 @@ stable output are critical.
   duration. Do not automatically generate tasks from reflection or monitoring.
 - Saved plans, handoffs and skills must obey these limits and completion gates.
 - Identify unresolved instruction conflicts before performing dependent work.
+- When a rule or skill requires a pause or human decision, identify and link the
+  exact source, quote the relevant instruction and explain the decision needed.
+  Distinguish an explicit requirement from interpretation; complete independent,
+  authorized preparation without crossing the approval boundary. Skills do not
+  authorize scope expansion, delegation or bypassing repository constraints.
 
 ## Required References by Activity
 
@@ -41,19 +54,21 @@ before the affected work.
 | Activity | Required references |
 |---|---|
 | Any repository work | This file; selected task, original acceptance criteria and applicable plans, if any |
-| Any change; verification; completion decision | [Verification and completion](docs/agent/VERIFICATION.md) |
-| Product implementation, Rust tests, Cargo, rules, CI, scripts or packaging changes | [Best practices](docs/BEST-PRACTICES.md); relevant sections of [patterns](docs/PATTERNS.md) and [known mistakes](docs/MISTAKES.md) |
-| Understanding or changing product behavior, components or interfaces | Relevant sections of [English README](README.md), [Japanese README](README.ja.md), [architecture](docs/architecture.md), and affected user guides/designs |
-| Design or architecture decisions | Relevant sections of [architecture](docs/architecture.md), recorded decisions in the [decision log](docs/DECISIONS.md), [patterns](docs/PATTERNS.md) and [known mistakes](docs/MISTAKES.md); use the decision template only when recording an agreed decision |
-| User implementation request; independent review or material follow-up | [Review policy](docs/agent/REVIEWS.md); reviewers also read this file, [review template](prompts/REVIEWER.md) and their review package |
-| Creating, updating, resuming or closing task records | [Task lifecycle](docs/TASK-LIFECYCLE.md) and [task queue guide](tasks/README.md) |
-| Rule changes | [Rules reference](docs/rules-reference.md) |
-| Report content, presentation, interaction or browser acceptance | [Report and browser rules](docs/agent/REPORTS.md), plus affected report/user/design documentation |
-| Agent guidance or workflow documentation changes | [Best practices](docs/BEST-PRACTICES.md), documentation synchronization in [patterns](docs/PATTERNS.md), and every affected current guidance document |
+| Any change; verification; completion decision | [Verification by change type](docs/agent/VERIFICATION.md#verification-by-change-type), evidence and completion rules in that guide |
+| Product implementation, Rust tests, Cargo, rules, CI, scripts or packaging changes | [Best practices](docs/BEST-PRACTICES.md); relevant sections of [patterns by activity](docs/PATTERNS.md#activity-index) and [known mistakes](docs/MISTAKES.md) |
+| Understanding or changing product behavior, components or interfaces | Relevant sections of [English README](README.md#features), [Japanese README](README.ja.md#features), [architecture](docs/architecture.md#workspace-modules), and affected user guides/designs |
+| Design or architecture decisions | Relevant sections of [architecture](docs/architecture.md#workspace-modules), recorded decisions in the [decision log](docs/DECISIONS.md), [patterns by activity](docs/PATTERNS.md#activity-index) and [known mistakes](docs/MISTAKES.md); use the decision template only when recording an agreed decision |
+| User implementation request; independent review or material follow-up | [Review policy](docs/agent/REVIEWS.md#required-review-stages); reviewers also read this file, [review template](docs/agent/REVIEWER.md) and their review package |
+| Creating, updating, resuming or closing task records | [Task lifecycle definitions](docs/TASK-LIFECYCLE.md#status-definitions) and [task layout and fields](tasks/README.md) |
+| Rule changes | [Rule validation and quality review](docs/rules-reference.md#validation-and-quality-review) and affected rule entries |
+| Report content, presentation, interaction or browser acceptance | [Report content](docs/agent/REPORTS.md#user-facing-report-content) and [browser verification](docs/agent/REPORTS.md#local-report-browser-verification), plus affected report/user/design documentation |
+| Agent guidance or workflow documentation changes | [Documentation best practices](docs/BEST-PRACTICES.md#documentation), [documentation synchronization](docs/PATTERNS.md#documentation-synchronization-pattern), and every affected current guidance document |
 | Restart baseline or task 014 only, unless explicitly extended by the user | [Restart loop](docs/RESTART-LOOP.md) |
 
 - Read required material once per session and reuse it; revisit changed or
   uncertain sections. Use targeted searches, not repeated whole-directory reads.
+  Linked headings are entry points; read all other applicable sections, not only
+  the landing section.
 - After compaction or handoff, restore scope, decisions, evidence, reviewer IDs
   and next actions from the existing task record or handoff before reinvestigating.
 - Conditional reading never reduces required verification or relevant evidence.
@@ -85,7 +100,8 @@ before the affected work.
   Tools, task count and generic skill/delegation wording are not authorization.
 - Splitting plans, fixing findings, resuming or handing off never resets the budget.
 - Follow [review details](docs/agent/REVIEWS.md), including isolated reviewer context,
-  evidence, ID recording and scoped confirmation after material fixes.
+  evidence, [recording without a task](docs/agent/REVIEWS.md#review-records),
+  reviewer continuity and scoped confirmation after material fixes.
 - Tasks live in `tasks/<ID>/task.yaml`; plans, results and reviews belong in the
   same task directory, with raw evidence under `evidence/`. Normal states are
   pending → planned → in-progress
@@ -157,6 +173,9 @@ Human review is separate from independent reviews and grants no extra agent slot
   truth, missing measurements and unverified assessment validity stay unfinished.
 - Continue resolvable work. For blockers, keep work unfinished and record the
   dependency, attempts, unmet criteria and concrete action/decision needed.
+- Base retries on a correction, new evidence or a changed approach; do not repeat
+  an unchanged failed attempt without a reason to expect progress. Preserve any
+  applicable task-specific retry limits and keep blocked work unfinished.
 - Reopening incorrectly closed work preserves history and reconciles queue/roadmap;
   cancellation requires a maintainer decision and reopening an explicit new request.
 - Report in concise, polite Japanese: resulting behavior, why it changed, actual
