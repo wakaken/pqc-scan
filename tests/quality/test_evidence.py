@@ -21,6 +21,26 @@ def save(path, data):
     path.write_text(json.dumps(data)+'\n')
 
 
+def assert_hosted_receipt(case, record, receipt):
+    """Check actual detached facts; command success alone cannot authenticate CI."""
+    case.assertEqual(receipt['status'],'Verified')
+    case.assertEqual(receipt['sourceBindings'],record['sourceBindings'])
+    case.assertEqual(receipt['populationDigest'],record['measurement']['populationDigest'])
+    case.assertEqual(receipt['runConclusion'],'success')
+    case.assertEqual(receipt['enabledJobs'],{'quality':'success','baseline':'success','scan':'success'})
+    case.assertEqual(receipt['protocols'],'skipped')
+    case.assertIs(receipt['requiredStepsVerified'],True)
+    case.assertIs(receipt['artifactDigestsVerified'],True)
+    case.assertIs(receipt['qualityBaselineFourOutputsByteEqual'],True)
+    case.assertIs(receipt['localRemoteFactsEqualExceptActualCommit'],True)
+    case.assertRegex(receipt['commit'],r'^[0-9a-f]{40}$')
+    case.assertGreater(receipt['runId'],0)
+    case.assertEqual(len(receipt['artifacts']),4)
+    for artifact in receipt['artifacts']:
+        case.assertIs(artifact['githubDigestMatches'],True)
+        case.assertIs(artifact['candidateCommitMatches'],True)
+
+
 class EvidenceIndexTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -302,6 +322,30 @@ class EvidenceIndexTests(unittest.TestCase):
         self.assertEqual(result['infrastructureStatus'],'Verified')
 
 
+
+class HostedReceiptTests(unittest.TestCase):
+    def fixture(self):
+        record={'sourceBindings':{'source.rs':'a'*64},'measurement':{'populationDigest':'b'*64}}
+        receipt={'status':'Verified','sourceBindings':dict(record['sourceBindings']),
+            'populationDigest':'b'*64,'runConclusion':'success','enabledJobs':{'quality':'success','baseline':'success','scan':'success'},
+            'protocols':'skipped','requiredStepsVerified':True,'artifactDigestsVerified':True,
+            'qualityBaselineFourOutputsByteEqual':True,'localRemoteFactsEqualExceptActualCommit':True,
+            'commit':'c'*40,'runId':1,'artifacts':[{'githubDigestMatches':True,'candidateCommitMatches':True} for _ in range(4)]}
+        return record,receipt
+
+    def test_complete_hosted_receipt_has_independent_positive_control(self):
+        record,receipt=self.fixture()
+        assert_hosted_receipt(self,record,receipt)
+
+    def test_hosted_source_failure_and_artifact_gaps_cannot_be_called_verified(self):
+        for field,value in [('sourceBindings',{'source.rs':'d'*64}),('populationDigest','d'*64),
+                            ('runConclusion','failure'),('enabledJobs',{'quality':'skipped'}),
+                            ('artifactDigestsVerified',False),('requiredStepsVerified',False)]:
+            record,receipt=self.fixture();receipt[field]=value
+            with self.subTest(field=field),self.assertRaises(AssertionError):
+                assert_hosted_receipt(self,record,receipt)
+
+
 class EnrolledEvidenceTests(unittest.TestCase):
     def test_real_catalog_preserves_all_requirements_and_selected_actual_facts(self):
         root=pathlib.Path(__file__).resolve().parents[2]
@@ -324,7 +368,15 @@ class EnrolledEvidenceTests(unittest.TestCase):
             self.assertNotEqual(rows[key]['status'],'Not Tested', key)
         own=records['053']
         self.assertEqual(own['inputApplicability']['status'],'Verified')
-        self.assertEqual(own['result']['criteria']['Q6-01'],'Partial')
+        hosted=own['measurement'].get('hostedCI')
+        if hosted and hosted['status']=='Verified':
+            self.assertEqual(own['result']['criteria']['Q6-01'],'Passed')
+            reference=next(a for a in own['artifacts'] if a['path']==hosted['verificationArtifact'])
+            receipt=evidence.parse_json(evidence.checked(root,reference))
+            self.assertEqual(receipt['commit'],hosted['commit'])
+            assert_hosted_receipt(self,own,receipt)
+        else:
+            self.assertEqual(own['result']['criteria']['Q6-01'],'Partial')
 
 
 if __name__=='__main__':
