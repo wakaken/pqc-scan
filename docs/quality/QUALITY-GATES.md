@@ -1,5 +1,26 @@
 # OSS quality gates
 
+## Current Applicability
+
+[AGENTS.md](../../AGENTS.md) and its linked agent guides define current workflow,
+review stages and completion procedures. This document supplies additional
+product-quality checks for the affected change classes; it does not replace or
+waive those procedures or original task acceptance criteria. Read the relevant
+sections when the selected task or affected product design invokes these gates.
+
+The release target and proposal status below describe the original v0.2 design,
+not the current development version. Dated review and measurement records retain
+their original scope. In the change-class table, `Documentation/task-only (this
+change)` describes that original design change, including its independent design
+review; it is not a blanket review requirement for later prose-only changes.
+Later documentation work follows [verification by change type](../agent/VERIFICATION.md#verification-by-change-type)
+and the [review-stage policy](../agent/REVIEWS.md#required-review-stages), plus any
+explicit task requirements. The Rust-behavior build requirement and specialized
+product gates below remain applicable to their stated scope. Stop and resolve
+any remaining conflict before dependent work; do not choose a weaker requirement.
+
+## Original Design Context
+
 Current release target: v0.2.0, retargeted by the maintainer on2026-11-12. Earlier1.0 references in historical evidence retain their original meaning. Functional scope and accepted criteria are unchanged.
 
 Design date: 2026-11-09. Status: proposed acceptance policy; passing tests or benchmark results are not asserted by this document. Current capabilities/gaps are in [CURRENT-GAP-ANALYSIS.md](../records/v0.2-roadmap/CURRENT-GAP-ANALYSIS.md).

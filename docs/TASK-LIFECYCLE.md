@@ -82,5 +82,10 @@ to match the current guidance layout.
 - Plan steps do not require separate tasks, PRs or review agents.
 - Keep a prerequisite feasibility study separate when its result determines
   whether or how implementation should proceed.
+- Do not preassign A/B/C PRs or separate tests and documentation from the behavior
+  they validate. Before using a different task boundary, record the reason and
+  dependencies under Planner responsibility and obtain any required scope agreement.
+- Conditional steps do not automatically require a follow-up PR. Record why a
+  step applies or is omitted without weakening the original acceptance criteria.
 - Do not select unrelated queue items or generate new work automatically.
 - Record out-of-scope findings as proposals unless task creation is authorized.

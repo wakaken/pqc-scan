@@ -41,19 +41,21 @@ before the affected work.
 | Activity | Required references |
 |---|---|
 | Any repository work | This file; selected task, original acceptance criteria and applicable plans, if any |
-| Any change; verification; completion decision | [Verification and completion](docs/agent/VERIFICATION.md) |
-| Product implementation, Rust tests, Cargo, rules, CI, scripts or packaging changes | [Best practices](docs/BEST-PRACTICES.md); relevant sections of [patterns](docs/PATTERNS.md) and [known mistakes](docs/MISTAKES.md) |
-| Understanding or changing product behavior, components or interfaces | Relevant sections of [English README](README.md), [Japanese README](README.ja.md), [architecture](docs/architecture.md), and affected user guides/designs |
-| Design or architecture decisions | Relevant sections of [architecture](docs/architecture.md), recorded decisions in the [decision log](docs/DECISIONS.md), [patterns](docs/PATTERNS.md) and [known mistakes](docs/MISTAKES.md); use the decision template only when recording an agreed decision |
-| User implementation request; independent review or material follow-up | [Review policy](docs/agent/REVIEWS.md); reviewers also read this file, [review template](prompts/REVIEWER.md) and their review package |
-| Creating, updating, resuming or closing task records | [Task lifecycle](docs/TASK-LIFECYCLE.md) and [task queue guide](tasks/README.md) |
-| Rule changes | [Rules reference](docs/rules-reference.md) |
-| Report content, presentation, interaction or browser acceptance | [Report and browser rules](docs/agent/REPORTS.md), plus affected report/user/design documentation |
-| Agent guidance or workflow documentation changes | [Best practices](docs/BEST-PRACTICES.md), documentation synchronization in [patterns](docs/PATTERNS.md), and every affected current guidance document |
+| Any change; verification; completion decision | [Verification by change type](docs/agent/VERIFICATION.md#verification-by-change-type), evidence and completion rules in that guide |
+| Product implementation, Rust tests, Cargo, rules, CI, scripts or packaging changes | [Best practices](docs/BEST-PRACTICES.md); relevant sections of [patterns by activity](docs/PATTERNS.md#activity-index) and [known mistakes](docs/MISTAKES.md) |
+| Understanding or changing product behavior, components or interfaces | Relevant sections of [English README](README.md#features), [Japanese README](README.ja.md#features), [architecture](docs/architecture.md#workspace-modules), and affected user guides/designs |
+| Design or architecture decisions | Relevant sections of [architecture](docs/architecture.md#workspace-modules), recorded decisions in the [decision log](docs/DECISIONS.md), [patterns by activity](docs/PATTERNS.md#activity-index) and [known mistakes](docs/MISTAKES.md); use the decision template only when recording an agreed decision |
+| User implementation request; independent review or material follow-up | [Review policy](docs/agent/REVIEWS.md#required-review-stages); reviewers also read this file, [review template](prompts/REVIEWER.md) and their review package |
+| Creating, updating, resuming or closing task records | [Task lifecycle definitions](docs/TASK-LIFECYCLE.md#status-definitions) and [task layout and fields](tasks/README.md) |
+| Rule changes | [Rule validation and quality review](docs/rules-reference.md#validation-and-quality-review) and affected rule entries |
+| Report content, presentation, interaction or browser acceptance | [Report content](docs/agent/REPORTS.md#user-facing-report-content) and [browser verification](docs/agent/REPORTS.md#local-report-browser-verification), plus affected report/user/design documentation |
+| Agent guidance or workflow documentation changes | [Documentation best practices](docs/BEST-PRACTICES.md#documentation), [documentation synchronization](docs/PATTERNS.md#documentation-synchronization-pattern), and every affected current guidance document |
 | Restart baseline or task 014 only, unless explicitly extended by the user | [Restart loop](docs/RESTART-LOOP.md) |
 
 - Read required material once per session and reuse it; revisit changed or
   uncertain sections. Use targeted searches, not repeated whole-directory reads.
+  Linked headings are entry points; read all other applicable sections, not only
+  the landing section.
 - After compaction or handoff, restore scope, decisions, evidence, reviewer IDs
   and next actions from the existing task record or handoff before reinvestigating.
 - Conditional reading never reduces required verification or relevant evidence.
@@ -85,7 +87,8 @@ before the affected work.
   Tools, task count and generic skill/delegation wording are not authorization.
 - Splitting plans, fixing findings, resuming or handing off never resets the budget.
 - Follow [review details](docs/agent/REVIEWS.md), including isolated reviewer context,
-  evidence, ID recording and scoped confirmation after material fixes.
+  evidence, [recording without a task](docs/agent/REVIEWS.md#review-records),
+  reviewer continuity and scoped confirmation after material fixes.
 - Tasks live in `tasks/<ID>/task.yaml`; plans, results and reviews belong in the
   same task directory, with raw evidence under `evidence/`. Normal states are
   pending → planned → in-progress
