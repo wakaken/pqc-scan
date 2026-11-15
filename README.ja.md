@@ -71,6 +71,8 @@ cd /path/to/pqc-scan
 cargo install --locked --path crates/pqc_scan_cli
 ```
 
+この開発版で準備する配布物は、`static`（ローカルの静的スキャン）と`network`（静的スキャン＋TLS・SSHの接続先診断）の2構成です。`network`は実験的機能を含む未公開の構成です。内部の機能スイッチは、個別ビルド用に残しています。
+
 アーカイブの検証と導入方法は[インストールガイド](docs/user/DISTRIBUTION.ja.md)を参照してください。v0.2の配布バイナリはmacOS Apple Silicon向けの静的版です。[GitHub Releases](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0)から取得できます。probe同梱版は公開前の確認が残っています。
 
 インストール後も、このリポジトリの `rules` ディレクトリを参照できる場所に残してください。
@@ -159,6 +161,11 @@ CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚�
 
 `develop`では`baseline`と`scan`を`quality`に依存せず実行し、マージ前の品質確認はPR側で行います。
 手動実行では、有効な3ジョブをまとめて実行できます。
+
+既存の`quality`と`baseline`ジョブでは、記録済みの証拠から6つの品質軸をオフラインで集約します。
+未確認事項や古い測定は明示し、集約時に高コストの測定を起動したり、リリースを承認したりはしません。
+集約レポートは途中のステップが失敗した場合もアップロードし、保存期間は30日です。
+詳しくは[測定と保存の計画](docs/quality/CI-MEASUREMENT-PLAN.md)を参照してください。
 
 PRとdevelopへのpushでは、変更パスがすべて文書用の一覧に一致する場合は自動実行しません。
 対象はルートのREADMEファイル、`AGENTS.md`、`SECURITY.md`、`docs/`と`prompts/`配下のMarkdown、`tasks/README.md`です。

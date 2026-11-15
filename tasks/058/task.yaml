@@ -2,8 +2,8 @@ id: 058
 title: 公開互換性と利用手順・日英説明を検証する
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Main agent (Evaluator)
 phase: '5'
 description: CLI/Rust API/出力契約と利用者の操作を現行証拠に結び付ける。
 quality_alias: '追加: Q6互換性・利用性'
@@ -50,3 +50,31 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+execution_record:
+  date: '2026-11-15'
+  authorization: Proceed with unfinished053 dependencies; preserve052 unfinished and053 interrupted.
+  plan: tasks/058/TASK-058-PLAN.md
+  baseline: tasks/058/evidence/compatibility-20261115/BASELINE.json
+  transitions:
+  - from: pending
+    to: planned
+    reason: Original criteria, done048 evidence and current public contracts inspected.
+  - from: planned
+    to: in-progress
+    reason: Source-bound compatibility and usability measurements started; preserve original acceptance.
+  reviews: Reuse at most two isolated reviewer identities throughout this prerequisite request.
+  ready_for_review:
+    source: tasks/058/evidence/compatibility-20261115/REVIEW-SOURCE.json
+    implementation_review: /root/task056_implementation_review accepted.
+    test_review: /root/task056_test_review accepted after sourceidentity metadata correction.
+    checks: Native default/optional checks and actual user/browser workflows passed; see task evidence.
+  completion_record:
+    date: '2026-11-15'
+    results: tasks/058/TASK-058-RESULTS.md
+    reviews: tasks/058/TASK-058-REVIEWS.md
+    evidence: tasks/058/evidence/compatibility-20261115/EVIDENCE-FINAL.json
+    transition:
+      from: review
+      to: done
+      reason: Both original criteria and deliverables verified against final source; both review stages accepted.
+    preserved_states: Task052 unfinished; task053 interrupted; no other task resumed by this completion.

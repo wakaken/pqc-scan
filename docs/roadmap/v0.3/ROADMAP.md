@@ -120,3 +120,17 @@ GitHub管理設定、ライセンス等の告知事項の許容判断、公開�
 049は[TLS/SSHの観測・失敗・認証境界](../../../tasks/049/TASK-049-RESULTS.md)で、元のQ3-06・Q4-08〜12と二段階レビューを確認し、完了（done）としました。固定した接続設定によるTLSの21記録、SSHの生パケットを扱う対向実装の26試験枠、OpenSSHの7試験枠を隔離測定し、実際に交渉されたグループ・検証失敗・未知・認証禁止・上限・中止・後始末を照合しています。RFC9846は[差分対応表](../../../tasks/049/TASK-049-TLS-PROFILE.md)で適用範囲を明示し、全面適合の認定とは区別します。
 
 050は[性能・再現性の評価](../../../tasks/050/TASK-050-RESULTS.md)で、元のQ5-01〜09と9成果物・二段階レビューを照合して完了（done）としました。6つの測定で成功標本144件・意図的な失敗24ケースを取得し、同じ条件の18比較区分では2倍超過の調査条件に該当せず、条件が異なる72比較区分には比較できない理由を残しています。旧023-v2精度条件の不合格（Failed）と実行固有IDの変化を合格へ読み替えず、キャッシュが温まっていない状態・条件を制御した複数日・Windows等の未実測範囲を明示しました。
+
+Task 051 is done for the [dependency and license evaluation](../../../tasks/051/TASK-051-RESULTS.md)
+against Q6-03/Q6-04, with both independent reviews accepted. The three declared
+macOS arm64 variants map 139/168/271 packages to exact notice bytes. Four RustSec
+findings and the existing 0/4/5 notice-review flags remain explicit; evaluation
+completion does not grant remediation acceptance or publication clearance.
+
+The user-authorized [task 063 follow-up](../../../tasks/063/TASK-063-RESULTS.md)
+remediated those four dependency findings, validated the maintained YAML
+replacement and resolved the russh-util source-difference flag. All three Rust
+configurations and native macOS package/install checks passed, with both review
+stages accepted. Four objc2 notice questions remain: the user selected continued
+probe-publication hold and an unsent upstream clarification draft. Task 051's
+original measurements are preserved; no release or publication was performed.

@@ -13,6 +13,11 @@ import tarfile
 import tomllib
 from urllib.parse import urlsplit, unquote
 
+VARIANT_FEATURES = {
+    'static': [],
+    'network': ['probe-tls', 'probe-ssh', 'probe-ssh-kex'],
+}
+
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
@@ -234,11 +239,15 @@ def validate_installed_scan(report):
         raise ValueError('synthetic finding is attached to the wrong file or line')
 
 
-def validate_command_surface(variant, top_help, probe_help):
+def validate_command_surface(variant, top_help, probe_help, *, allow_legacy=False):
     def names(text):
         return {line.split()[0] for line in text.splitlines() if line.startswith('  ') and line.split()}
-    expected = {'static': set(), 'combined-probes': {'tls', 'ssh'},
-                'all-probes': {'tls', 'ssh', 'ssh-kex'}}[variant]
+    surfaces = {'static': set(), 'network': {'tls', 'ssh', 'ssh-kex'}}
+    if allow_legacy:
+        surfaces.update({'combined-probes': {'tls', 'ssh'}, 'all-probes': surfaces['network']})
+    if variant not in surfaces:
+        raise ValueError('unknown distribution variant; prepare static or network')
+    expected = surfaces[variant]
     if ('probe' in names(top_help)) != bool(expected):
         raise ValueError('binary command surface differs from declared package variant')
     if names(probe_help) & {'tls', 'ssh', 'ssh-kex'} != expected:
@@ -249,8 +258,9 @@ def prepare(args):
     root = args.source_root.resolve()
     binary = args.binary.resolve(strict=True)
     target = args.target
-    features = {'static': [], 'combined-probes': ['probe-tls', 'probe-ssh'],
-                'all-probes': ['probe-tls', 'probe-ssh', 'probe-ssh-kex']}[args.variant]
+    if args.variant not in VARIANT_FEATURES:
+        raise ValueError('unknown distribution variant; prepare static or network')
+    features = VARIANT_FEATURES[args.variant]
     metadata_command = ['cargo', 'metadata', '--locked', '--offline', '--format-version', '1', '--filter-platform', target]
     if features:
         metadata_command += ['--features', ','.join('pqc_scan_cli/'+f for f in features)]
@@ -330,7 +340,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--verify', type=Path)
     parser.add_argument('--binary', type=Path)
-    parser.add_argument('--variant', choices=['static', 'combined-probes', 'all-probes'])
+    parser.add_argument('--variant', choices=list(VARIANT_FEATURES),
+                        help='static: local scanning; network: scanning plus TLS, SSH offers and SSH key exchange')
     parser.add_argument('--target', default='aarch64-apple-darwin', choices=['aarch64-apple-darwin'])
     parser.add_argument('--source-root', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--out-dir', type=Path)

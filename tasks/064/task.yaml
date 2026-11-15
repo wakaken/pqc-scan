@@ -1,0 +1,36 @@
+id: '064'
+title: Simplify distribution to static and network packages
+type: improvement
+priority: high
+status: done
+owner: Main agent
+depends_on:
+- '063'
+description: User-authorized distribution consolidation and clearer naming; no publication or release.
+acceptance:
+- Offer exactly two newly prepared distribution variants, static and network; network includes TLS, SSH offers and SSH hybrid KEX.
+- Preserve all existing Cargo feature switches and product commands; do not alter scanner or cryptographic behavior.
+- Update packaging, dependency assessment, CI, installation checks, tests and paired user documentation consistently.
+- Preserve verification of historical archives and past records while rejecting removed names for new preparation.
+- Verify positive and negative package/CLI/CI cases, real native archive preparation and clean installation, archive repeatability and source-bound evidence; obtain both independent reviews.
+constraints:
+- No publishing, release, tag, signing, push, merge or remote-setting changes.
+- Preserve task-051/task-063 evidence and unrelated existing worktree changes.
+- Keep the existing four objc2 review flags and network publication hold; no new licensing decision.
+plan: tasks/064/TASK-064-PLAN.md
+baseline:
+  head: f07d782cd68cfac95d93585d5ace049f590160d4
+  branch: codex/task051-dependency-supply-chain-review
+  worktree: Completed task-051 and task-063 changes are uncommitted and must be preserved.
+evidence: tasks/064/evidence/consolidation-20261114/
+results: tasks/064/TASK-064-RESULTS.md
+reviewers:
+  implementation: /root/dependency051_implementation_review
+  test: /root/dependency051_test_review
+review_record: tasks/064/TASK-064-REVIEWS.md
+final_acceptance:
+  date: '2026-11-14'
+  outcome: Both distribution configurations, compatibility, scripts/CI/tests/docs and all required local checks/reviews completed.
+  verification: 25 Python tests and two-variant dependency evaluation exit 0; two new native archives repeat identically and install; three historical archives install; syntax/docs/source checks pass.
+  rust_reuse: All 194 compiled input files and binary/archive hashes match task063 evidence; no Rust or Cargo change in task064.
+  limits: Hosted Actions not dispatched; four notice questions and network publication hold remain. No release, publication, tag, signing, upstream message, commit, push or merge.

@@ -1,0 +1,107 @@
+{
+  "executionStatus": "Passed",
+  "sourceBindings": {
+    ".github/workflows/pqc-scan.yml": "36180dca9134a05cb987e25238cfb620ec0d8445c51c52e5d27b031e4ad5b431",
+    "tests/quality/report.py": "079bbe581360fa7ea3e79fee3b83d6ff5b1ffcdd4d395df2c4a91f7a328bbc47",
+    "tests/quality/evidence.py": "9ac66080dcb4e3b46d724df1d39bc25b6f633d718197d376c0428166e3ec9135",
+    "tests/quality/test_evidence.py": "e5b93c8c4111e51b2a1a1fb7ddedaab4652f2ba29c24bd5430030509d4d1dee7",
+    "tests/quality/test_ci053.py": "02e34d452f92cda1d2e3bd4f41523d509fc0e25cc77cfa8872fcc9650de5fcf4",
+    "tests/quality/README.md": "f8fe97b606745c92ed3ab46f89de4ec4e4a2eed4e2b0ab0fe8e9cdbce67d98ce",
+    "docs/quality/CI-MEASUREMENT-PLAN.md": "b9b28167958d99682fdc000ab9908f7b79a12827843a4ccb80986a895bb72c05",
+    "README.md": "53507368ee8b2da6b08514fce29a61a6c5788bc29514001d948430a611f4548f",
+    "README.ja.md": "87a47e283a4ceb59f11087d10a2a2c0666946a3d4b845b6fb851c34e1a2164e2",
+    "tasks/053/evidence/completion-20261116/enroll-integration.py.txt": "3e3130855f31055ef1fb1e8e8c277aad946d0ebf881d06a132334ba5739af20f",
+    "tasks/053/evidence/completion-20261116/before/docs/quality/EVIDENCE-CATALOG.json": "5244ae39c085b5f9e0769baa5d38446aa21ed1dde160f138347295acac9aebfb"
+  },
+  "populationDigest": "9e0d40891936a5b895b98aa89dfd81d07ae267bedd24448bb801a94dab019774",
+  "commands": [
+    {
+      "label": "quality-r3",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "seconds": 5.504549541990855,
+      "log": "tasks/053/evidence/completion-20261116/quality-r3.log"
+    },
+    {
+      "label": "node-r1",
+      "argv": [
+        "node",
+        "--test",
+        "shell/compact-report.test.cjs",
+        "shell/final-gap-self-scan.test.cjs",
+        "shell/prepare-code-scanning.test.cjs",
+        "shell/relocated-evidence-self-scan.test.cjs",
+        "shell/self-scan-backlog.test.cjs",
+        "shell/self-scan-policy.test.cjs",
+        "shell/v02-self-scan.test.cjs"
+      ],
+      "exitCode": 0,
+      "seconds": 2.0790705420076847,
+      "log": "tasks/053/evidence/completion-20261116/node-r1.log"
+    },
+    {
+      "label": "ci-quality",
+      "argv": [
+        "bash",
+        "-e",
+        "-c",
+        "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-completion-quality-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-completion-quality-r1/ci-measurement-plan.md\n"
+      ],
+      "exitCode": 0,
+      "seconds": 0.844006541010458,
+      "log": "tasks/053/evidence/completion-20261116/ci-quality.log"
+    },
+    {
+      "label": "ci-baseline",
+      "argv": [
+        "bash",
+        "-e",
+        "-c",
+        "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-completion-baseline-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-completion-baseline-r1/ci-measurement-plan.md\n"
+      ],
+      "exitCode": 0,
+      "seconds": 0.7864347090071533,
+      "log": "tasks/053/evidence/completion-20261116/ci-baseline.log"
+    }
+  ],
+  "python": {
+    "total": 130,
+    "passed": 129,
+    "existingSkip": 1,
+    "exitCode": 0
+  },
+  "node": {
+    "passed": 38,
+    "failed": 0,
+    "exitCode": 0
+  },
+  "localCI": {
+    "jobs": [
+      "quality",
+      "baseline"
+    ],
+    "execution": "Changed offline aggregation steps only",
+    "exitCode": 0,
+    "hosted": false
+  },
+  "hostedCI": {
+    "status": "Not Tested",
+    "reason": "Current source and catalog are unpublished dirty changes; existing remote runs do not include053. Job status and artifact-byte verification remain required."
+  },
+  "tooling": {
+    "python": "3.12.7 (main, Nov 26 2024, 10:53:16) [Clang 16.0.0 (clang-1600.0.26.4)]",
+    "executable": "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+    "pyyaml": "6.0.2"
+  },
+  "reuse": "Only a per-criterion regression test was strengthened; production code, Node and CI step inputs unchanged from r1. Node38 and both local CI replays remain applicable."
+}

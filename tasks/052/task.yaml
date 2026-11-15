@@ -2,8 +2,8 @@ id: '052'
 title: OpenSSFとGitHub設定・保守手順を根拠付きで評価する
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: blocked
+owner: Main agent (Evaluator)
 phase: '5'
 description: 実設定・実行実績と推奨変更を分け、権限不足や未運用を隠さない。
 quality_alias: QAM-09のOSS運用部分
@@ -61,3 +61,43 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+execution_record:
+  resumed_date: '2026-11-15'
+  plan: tasks/052/TASK-052-PLAN.md
+  baseline: tasks/052/evidence/assessment-20261115/BASELINE.json
+  transitions:
+  - from: pending
+    to: planned
+    reason: Original scope and handoff verified; assessment plan recorded without changing criteria.
+  - from: planned
+    to: in-progress
+    reason: Started read-only controls inspection and fixed-tool acquisition.
+  - from: in-progress
+    to: blocked
+    reason: Fixed-tool measurement and full criterion table exist, but required ownership and operational truth remain unverified; original criteria are unchanged.
+  results: tasks/052/TASK-052-RESULTS.md
+  evidence: tasks/052/evidence/assessment-20261115/
+  required_outputs: target/quality-task-052/
+  scorecard:
+    version: v5.6.0
+    tool_commit: 61e84743356275f6ffca23b1b2f2cb945e19eb96
+    remote_target_commit: f07d782cd68cfac95d93585d5ace049f590160d4
+    exit_code: 0
+    checks: 18
+    score: 4.3
+    scope: Remote committed source plus live repository/service metadata; not the dirty local checkout or detection accuracy.
+  best_practices:
+    passing_items: 67
+    silver_items: 55
+    gold_items: 23
+    application_submitted: false
+    complete_evidence_verification: false
+  blocker:
+    dependency: Formal human ownership/backup and operational facts are not established by public source or API evidence; other criterion-specific missing truth is explicit in the assessment.
+    attempts: Read current and prior records, official criteria and APIs; used connector and GET-only CLI fallback; measured fixed Scorecard; mapped all 145 medal criteria; asked for factual maintainer input without inferring facts from the clarification reply.
+    unmet_criteria:
+    - Q6-05
+    - Q6-07
+    - Q6-09
+    next_action: Supply existing dated records or factual maintainer confirmation for applicable Unknown items; obtain separately scoped evidence where necessary. Missing truth remains unfinished unless the maintainer explicitly changes acceptance criteria.
+  review_scope: Research and prose/evidence only; no executable repository behavior changed, so no independent implementation/test review identities were created under the current policy.

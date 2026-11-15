@@ -70,6 +70,8 @@ cd /path/to/pqc-scan
 cargo install --locked --path crates/pqc_scan_cli
 ```
 
+This development checkout prepares two archive configurations: `static` (local scanning) and `network` (static scanning plus TLS/SSH diagnostics). `network` remains experimental and unpublished. Internal feature switches remain available for custom source builds.
+
 For archive verification and installation, see the [installation guide](docs/user/DISTRIBUTION.md). The v0.2 binary is the static macOS Apple Silicon variant, available from [GitHub Releases](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0); probe bundles are not yet cleared for public distribution.
 
 Keep the checkout's `rules` directory available after installation. The binary does not bundle that directory; use an absolute `--rules-dir` path when scanning another project.
@@ -161,6 +163,12 @@ still triggers PR validation.
 On `develop`, `baseline` and `scan` run independently of `quality`; PR validation
 provides the pre-merge quality check. Manual execution remains available for
 running all three enabled jobs together.
+
+The existing `quality` and `baseline` jobs also aggregate all six quality axes
+offline from recorded evidence. Missing facts and stale measurements remain
+visible; aggregation does not run the high-cost studies or grant release acceptance.
+Integrated reports are uploaded even after a failed step, with 30-day retention.
+See the [measurement and retention plan](docs/quality/CI-MEASUREMENT-PLAN.md).
 
 It skips eligible pushes and pull requests whose changed paths all
 match its documentation list: the root README files, `AGENTS.md`, `SECURITY.md`,

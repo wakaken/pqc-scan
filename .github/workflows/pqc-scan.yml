@@ -58,6 +58,22 @@ jobs:
       - name: Test baseline evaluator
         run: python3 -m unittest discover -s tests/quality -p 'test_*.py'
 
+      - name: Aggregate all-axis evidence offline
+        if: always()
+        timeout-minutes: 2
+        run: |
+          python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-integrated
+          cp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-integrated/ci-measurement-plan.md
+
+      - name: Preserve integrated evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pqc-quality-integrated-pr
+          if-no-files-found: error
+          retention-days: 30
+          path: target/quality-integrated/
+
   protocols:
     # Temporarily paused during development, including manual workflow runs.
     # Remove this condition to restore the existing protocol checks.
@@ -117,6 +133,11 @@ jobs:
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
+      - name: Aggregate existing all-axis evidence offline
+        timeout-minutes: 2
+        run: |
+          python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-integrated
+          cp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-integrated/ci-measurement-plan.md
       - name: Build baseline scanner
         run: cargo build --workspace --release --locked
       - name: Measure reviewed baseline without enforcing local signals
@@ -174,7 +195,9 @@ jobs:
         with:
           name: pqc-quality-baseline
           if-no-files-found: error
+          retention-days: 30
           path: |
+            target/quality-integrated/
             target/quality-baseline/
             target/quality-assessment/
             target/quality-expanded/

@@ -2,8 +2,8 @@ id: 059
 title: OS・CPU・feature別のbuildとclean installを検証する
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Main agent (Evaluator)
 phase: '5'
 description: 既存038を再利用し、評価対象と正式サポートを区別して環境別の証拠を残す。
 quality_alias: '追加: Q6対応環境'
@@ -44,3 +44,30 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+execution_record:
+  date: '2026-11-15'
+  authorization: Proceed with unfinished053 dependencies; preserve052 unfinished and053 interrupted.
+  plan: tasks/059/TASK-059-PLAN.md
+  baseline: tasks/059/evidence/platform-20261115/BASELINE.json
+  target_policy: Existing maintainerselected macOSAppleSilicon staticpublic/networkunpublished policy; no support expansion.
+  transitions:
+  - from: pending
+    to: planned
+    reason: Done051/058 verified; existing platform/distribution policy and originalQ6-11 inspected.
+  - from: planned
+    to: in-progress
+    reason: Fresh buildsource equality and fulloptionaltest/clean-install matrix started.
+  reviews:
+    implementation: /root/task056_implementation_review accepted.
+    test: /root/task056_test_review accepted; no actionable or material verification gap.
+  evidence: tasks/059/evidence/platform-20261115/platform-matrix.json
+  completion_record:
+    date: '2026-11-15'
+    results: tasks/059/TASK-059-RESULTS.md
+    reviews: tasks/059/TASK-059-REVIEWS.md
+    evidence: tasks/059/evidence/platform-20261115/EVIDENCE-FINAL.json
+    transition:
+      from: review
+      to: done
+      reason: Both selected combinations have actualbuild/test/install/rules evidence and both independentreviews accepted.
+    preserved_states: Task052 unfinished; task053 interrupted; existingnetworkpublicationhold unchanged.

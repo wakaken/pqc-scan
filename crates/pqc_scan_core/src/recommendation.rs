@@ -392,7 +392,8 @@ fn add_middleware_pqc_signature_notes(actions: &mut Vec<RecommendedAction>, find
                 priority: "advisory".to_string(),
                 rationale: "Envoy TLS behavior depends on configured providers and peer capabilities; PQC signature readiness can vary between mesh edges, sidecars, and external clients.".to_string(),
                 steps: vec![
-                    "Harden min/max TLS versions and remove legacy RSA suites first.".to_string(),
+                    "Harden min/max TLS versions and retire static RSA key exchange where configured; ECDHE_RSA uses RSA authentication, not static RSA key exchange.".to_string(),
+                    "Review cipher_suites for TLS 1.0-1.2, not TLS 1.3; review certificate signatures and peer compatibility separately.".to_string(),
                     "Verify PQC certificate-signature compatibility in both downstream and upstream clusters.".to_string(),
                     "Gate production rollout with staged canary tests and explicit fallback paths.".to_string(),
                 ],
@@ -607,7 +608,8 @@ fn add_java_actions(
                 priority: "near-term".to_string(),
                 rationale: "Modern JDKs expose standardized PQC algorithm names through JCA, reducing vendor lock-in.".to_string(),
                 steps: vec![
-                    "Replace RSA-only `Signature.getInstance(...)` calls with `ML-DSA` where policy allows.".to_string(),
+                    "Select an explicit parameter set and generate a new ML-DSA key pair; never reuse RSA key material.".to_string(),
+                    "Provision matching public keys and required JOSE/PKI encodings to all verifiers before switching signers to ML-DSA where policy allows.".to_string(),
                     "Adopt ML-KEM for key establishment in hybrid TLS/key exchange designs.".to_string(),
                     "Keep dual verification during migration to preserve compatibility.".to_string(),
                 ],
@@ -618,7 +620,7 @@ fn add_java_actions(
                 code_examples: vec![CodeExample {
                     language: "java".to_string(),
                     before: "Signature sig = Signature.getInstance(\"SHA256withRSA\");\nsig.initSign(privateKey);\nsig.update(payload);\nbyte[] signature = sig.sign();".to_string(),
-                    after: "Signature sig = Signature.getInstance(\"ML-DSA\");\nsig.initSign(privateKey);\nsig.update(payload);\nbyte[] signature = sig.sign();\n// Keep legacy verification path during staged rollout.".to_string(),
+                    after: "// JDK 24+: provision a new ML-DSA key pair for the selected parameter set.\n// mlDsaPrivateKey is its private key, never the previous RSA key.\n// Provision the matching public key and encoding to verifiers before rollout.\nSignature sig = Signature.getInstance(\"ML-DSA\");\nsig.initSign(mlDsaPrivateKey);\nsig.update(payload);\nbyte[] signature = sig.sign();\n// Keep legacy verification only under the explicit migration policy.".to_string(),
                 }],
             },
         );
@@ -627,9 +629,17 @@ fn add_java_actions(
             actions,
             RecommendedAction {
                 action_id: "java.runtime-upgrade-for-pqc".to_string(),
-                title: "Upgrade Java runtime baseline for standard PQC APIs".to_string(),
+                title: if profile.java_version.as_deref().and_then(first_number).is_none() {
+                    "Check Java runtime baseline for standard PQC APIs"
+                } else {
+                    "Upgrade Java runtime baseline for standard PQC APIs"
+                }.to_string(),
                 priority: "planned".to_string(),
-                rationale: "Detected Java version appears older than JDK releases with standardized PQC APIs.".to_string(),
+                rationale: if profile.java_version.as_deref().and_then(first_number).is_none() {
+                    "The Java version is unknown; verify the deployed runtime before selecting a PQC API baseline."
+                } else {
+                    "Detected Java version appears older than JDK releases with standardized PQC APIs."
+                }.to_string(),
                 steps: vec![
                     "Target JDK 24+ for ML-KEM and ML-DSA support planning.".to_string(),
                     "Pilot compatibility testing in CI before production migration.".to_string(),
@@ -652,8 +662,8 @@ fn add_java_actions(
                 priority: "near-term".to_string(),
                 rationale: "BouncyCastle can be used as a pragmatic transition option when standard runtime support is unavailable or incomplete.".to_string(),
                 steps: vec![
-                    "Add BC provider initialization at bootstrap.".to_string(),
-                    "Use BC ML-DSA / ML-KEM parameter specs for migration pilot implementations.".to_string(),
+                    "Verify the resolved BC release and deployed JDK support before provider initialization; the example uses BC Java 1.85 and the BC provider, not BCPQC.".to_string(),
+                    "Select explicit ML-DSA / ML-KEM parameter sets for the intended purpose. Generate new algorithm-compatible keys and provision matching public keys and encodings to verifiers; never reuse RSA key material.".to_string(),
                     "Document provider ordering and FIPS/compliance impact.".to_string(),
                 ],
                 references: vec![
@@ -663,7 +673,7 @@ fn add_java_actions(
                 code_examples: vec![CodeExample {
                     language: "java".to_string(),
                     before: "Security.addProvider(new BouncyCastleProvider());\nSignature sig = Signature.getInstance(\"SHA256withRSA\", \"BC\");".to_string(),
-                    after: "Security.addProvider(new BouncyCastlePQCProvider());\nSignature sig = Signature.getInstance(\"ML-DSA\", \"BCPQC\");\n// Configure parameter set (example): MLDSAParameterSpec.ml_dsa_65".to_string(),
+                    after: "// BC Java 1.85 example: verify the resolved release/provider supports this name.\nSecurity.addProvider(new BouncyCastleProvider());\n// Provision a new ML-DSA-65 key pair and its public key to verifiers.\n// mlDsaPrivateKey must not be the previous RSA key.\nSignature sig = Signature.getInstance(\"ML-DSA-65\", \"BC\");\nsig.initSign(mlDsaPrivateKey);".to_string(),
                 }],
             },
         );
@@ -776,7 +786,8 @@ fn add_tls_actions(
                 rationale: "Envoy control-plane config supports strict min/max protocol and cipher suite policy.".to_string(),
                 steps: vec![
                     "Prefer `tls_minimum_protocol_version: TLSv1_3`; use TLSv1_2 only when interoperability requires it.".to_string(),
-                    "Remove RSA-dependent suites from `cipher_suites`.".to_string(),
+                    "Review `cipher_suites` for TLS 1.0-1.2, not TLS 1.3. Retire static RSA key exchange where configured; ECDHE_RSA uses RSA authentication, not static RSA key exchange.".to_string(),
+                    "Review certificate-signature migration and peer compatibility separately before removing RSA authentication.".to_string(),
                 ],
                 references: vec!["https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto".to_string()],
                 code_examples: Vec::new(),
@@ -831,12 +842,13 @@ fn add_pki_actions(
         actions,
         RecommendedAction {
             action_id: "pki.hybrid-certificate-roadmap".to_string(),
-            title: "Prepare hybrid certificate issuance and trust-store rollout".to_string(),
+            title: "Plan certificate algorithm and trust-store migration".to_string(),
             priority: "near-term".to_string(),
-            rationale: "PKI updates require coordinated CA, chain, and relying-party compatibility planning.".to_string(),
+            rationale: "PKI updates require coordinated CA, chain, and relying-party compatibility planning. FIPS 204/205 standardize signature primitives, not a universal hybrid certificate format.".to_string(),
             steps: vec![
                 "Inventory certificate signature algorithms and key sizes from CBOM/report output.".to_string(),
-                "Pilot hybrid chain issuance in non-production trust stores.".to_string(),
+                "Identify the exact certificate construction and encoding, then verify provider, CA, client and trust-store support before planning issuance.".to_string(),
+                "Pilot only a supported construction in non-production trust stores; if format or ecosystem support is unavailable, keep issuance unverified and evaluate another supported migration path.".to_string(),
                 "Define reissuance plan for quantum-vulnerable roots/intermediates/end-entity certs.".to_string(),
             ],
             references: vec![

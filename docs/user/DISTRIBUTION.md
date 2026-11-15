@@ -10,7 +10,7 @@ published Release. See the [v0.2 release notes](../releases/v0.2.0.md).
 
 Maintenance is best-effort for the latest verified 0.2.x snapshot. No SLA or
 older-version backport guarantee is declared. Probes remain experimental;
-combined/all-probes packages are technical preparation and retain their notice
+the `network` package is technical preparation and retains its notice
 review flags. Other binary platforms and crates.io publication are outside this
 release scope. See [security reporting](../../SECURITY.md).
 
@@ -26,16 +26,21 @@ for published assets. The probe bundles below are not part of that release.
 | Variant | Optional commands | Public distribution status |
 |---|---|---|
 | `static` | None | v0.2 distribution target; verify hosted build provenance |
-| `combined-probes` | `probe tls`, `probe ssh` | Technical validation completed; four dependency notice reviews remain |
-| `all-probes` | All above plus `probe ssh-kex` | Technical validation completed; those four reviews plus one source-provenance review remain |
+| `network` (network diagnostics included) | `probe tls`, `probe ssh`, `probe ssh-kex`, plus static scanning | Unpublished; four dependency notice reviews remain |
 
 The unresolved dependency checks are recorded in the
 [exact-version notice manifest](../../third_party/notices/manifest.json):
 
 | Dependency | Affected bundles | What must be checked before publication |
 |---|---|---|
-| `block2 0.6.2`, `dispatch2 0.3.1`, `objc2-encode 4.1.0`, `objc2 0.6.5` | Both probe variants | The collected upstream statements link permission texts and raise Apple SDK-derived-work questions. Collect the applicable complete texts/attributions, review the redistribution conditions for these exact versions, and record a supported publication decision. |
-| `russh-util 0.52.0` | `all-probes` | Its registry archive records `dirty=true` in Cargo VCS metadata. Compare that exact archive with the recorded upstream revision, account for the source differences and their notices, and record the result. The bundled Apache-2.0 text alone does not prove source identity. |
+| `block2 0.6.2`, `dispatch2 0.3.1`, `objc2-encode 4.1.0`, `objc2 0.6.5` | The network variant | The collected upstream statements link permission texts and raise Apple SDK-derived-work questions. Collect the applicable complete texts/attributions, review the redistribution conditions for these exact versions, and record a supported publication decision. |
+
+The `russh-util 0.52.0` source comparison found that all three Rust files match
+the recorded revision and the original manifest differs only in the package
+version. Its `dirty=true` archive record is preserved, and the Apache-2.0 text
+remains bound to that revision. This resolves that technical review flag; it does
+not approve publication. The network variant remain on hold for the four notice
+reviews above. See the [follow-up evidence](../../tasks/063/TASK-063-RESULTS.md).
 
 These are open notice/source-origin reviews, not evidence that a probe is broken
 or that a dependency is unlawful. Preserve the flags until the checks are
@@ -75,8 +80,8 @@ and endpoint metadata; review them before sharing.
 ## Local archive preparation
 
 This produces unsigned, unpublished preparation artifacts, not an official release.
-The `static` variant has no optional runtime probes. `combined-probes` enables
-`probe-tls,probe-ssh`; probes require separate explicit commands and authorization.
+The `static` variant has no optional runtime probes. `network` enables
+`probe-tls,probe-ssh,probe-ssh-kex`; probes require separate explicit commands and authorization.
 Read the bundled [probe authorization and usage guide](PROBING.md) before using
 optional network commands. Rules are always selected explicitly with `--rules-dir`; unpacking does not change
 rule discovery or configure your PATH.
@@ -84,8 +89,8 @@ rule discovery or configure your PATH.
 ```sh
 cargo build --locked --release --package pqc_scan_cli
 python3 scripts/package-release.py --binary target/release/pqc-scan --variant static --out-dir target/task-038/static
-cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh --target-dir target/probe-release-build
-python3 scripts/package-release.py --binary target/probe-release-build/release/pqc-scan --variant combined-probes --out-dir target/task-038/combined
+cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/network-release-build
+python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network
 python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz
 ```
 
@@ -132,24 +137,29 @@ custom rules. Keep your scan configuration and reports for comparison. Automatic
 separately as described below; a locally packaged archive has no such attestation
 by default.
 
-## Variant including SSH KEX
+## Network diagnostics and custom source builds
 
-`all-probes` enables `probe-tls,probe-ssh,probe-ssh-kex`. The existing two variants
-retain their command surfaces.
+New archives use exactly two names: `static` and `network`. The former
+`all-probes` distribution is now `network`; `combined-probes` is no longer
+prepared. The preparer rejects both old selectors. Archive verification and
+installation checks still accept historical archives; past records retain their
+original names. The v0.2 three-variant checks above describe that historical candidate.
+
+Internal Cargo feature switches remain independent. Custom source builds can
+still select, for example, `--features probe-tls,probe-ssh`; this is not a third
+distribution configuration. `network` includes SSH advertisement collection and
+the separate pinned hybrid SSH key exchange command.
 
 ```sh
-cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/all-probes-release-build
-python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all
-python3 tests/distribution/check-install.py target/task-038/all/*.tar.gz --out-dir target/task-038/all-install
+python3 tests/distribution/check-install.py target/task-038/network/*.tar.gz --out-dir target/task-038/network-install
 ```
 
 Dependency notices and provenance use the same feature set. Installation validation
 checks exact TLS/SSH/SSH KEX command availability and the public host-key pin option.
-The four existing objc2-family review flags remain. This variant also flags
-russh-util: its Cargo archive VCS metadata records dirty=true, so the difference
-from its recorded upstream revision needs publication review. Full license text
-from that fixed revision is bundled. This remains unsigned, unpublished technical
-preparation.
+The four existing objc2-family review flags remain. The russh-util source
+comparison is resolved as described above; its archived dirty=true fact is
+preserved. Full license text from the fixed revision is bundled. This remains
+unsigned, unpublished technical preparation.
 
 ## Verify hosted build identity
 

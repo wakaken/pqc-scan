@@ -446,22 +446,46 @@ def write_assessment(result, output):
             sameData=result.get('accuracyComparison', dict(status='Not Applicable', reason='No same-data reference supplied'))))
 
 
-def main():
+def main(argv=None, repo=REPO):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--baseline', required=True, type=pathlib.Path)
+    parser.add_argument('--baseline', type=pathlib.Path)
+    parser.add_argument('--evidence-catalog', type=pathlib.Path, help='Optional offline all-axis developer evidence catalog')
     parser.add_argument('--out-dir', required=True, type=pathlib.Path)
     parser.add_argument('--reference', type=pathlib.Path)
     parser.add_argument('--corpus-dir', type=pathlib.Path, help='Optional frozen corpus under tests/quality')
     parser.add_argument('--applicability', type=pathlib.Path, help='Optional separately reviewed public-support scope; original results retained')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    if args.baseline is None and args.evidence_catalog is None:
+        parser.error('--baseline or --evidence-catalog is required')
+    safe_output = False
     try:
         output = args.out_dir.resolve()
-        if not output.is_relative_to(REPO/'target') or output == REPO/'target':
+        repo = pathlib.Path(repo).absolute()
+        if not output.is_relative_to(repo.resolve()/'target') or output == repo.resolve()/'target':
             raise ValueError('Output must be a new directory under target/')
-        result = build_assessment(args.baseline.resolve(), reference=args.reference, corpus_dir=args.corpus_dir,
-                                  applicability=args.applicability)
-        write_assessment(result, output)
-    except (ValueError, OSError, KeyError, TypeError) as error:
+        safe_output = True
+        if args.baseline is None and any(x is not None for x in [args.reference, args.corpus_dir, args.applicability]):
+            raise ValueError('Baseline options need --baseline')
+        integrated = None
+        if args.evidence_catalog is not None:
+            from evidence import build_index, write_index
+            integrated = build_index(args.evidence_catalog, repo)
+        if args.baseline is not None:
+            result = build_assessment(args.baseline.resolve(), repo=repo.resolve(), reference=args.reference,
+                                      corpus_dir=args.corpus_dir, applicability=args.applicability)
+            write_assessment(result, output)
+        if integrated is not None:
+            write_index(integrated, output, existing=args.baseline is not None)
+    except (ValueError, OSError, KeyError, TypeError, AttributeError, RecursionError) as error:
+        if args.evidence_catalog is not None and safe_output and not output.exists():
+            try:
+                output.mkdir(parents=True, exist_ok=False)
+                (output/'quality-infrastructure-error.json').write_text(json.dumps(dict(
+                    model='PQS-QAM-evidence/1', infrastructureStatus='Failed',
+                    errorType=type(error).__name__, releaseDecision='Unknown',
+                    reason='Evidence aggregation failed; no product quality result asserted'), indent=2)+'\n')
+            except OSError:
+                pass  # Keep the original failure; never overwrite an existing evidence directory.
         print(f'Quality evidence/report failed: {type(error).__name__}; no quality pass asserted', file=sys.stderr)
         return 1
     print(f'Quality report saved: {output}; release decision Unknown; numeric gates unchanged')

@@ -40,6 +40,17 @@ E44は[到達率と追加検証の適用判断](../../../tasks/044/TASK-044-RESU
 
 E55は[検査範囲と統計の集計](../../../tasks/055/TASK-055-RESULTS.md)です。試験用に制御した8状態、内容が既知の9ファイル、74入力×5検出器、境界試験でQ2-01〜08を検証しました。母数が不明であることと検査の不完全性を保持し、製品全体の網羅性には一般化しません。
 
+E51 is the [dependency and license assessment](../../../tasks/051/TASK-051-RESULTS.md):
+a pinned cargo-audit/RustSec snapshot, exact archive/notice bindings for all three
+declared macOS arm64 variants, four findings, retained publication review flags
+and two accepted independent review stages. No unresolved issue was accepted.
+
+E63 is the authorized [dependency remediation follow-up](../../../tasks/063/TASK-063-RESULTS.md):
+the same RustSec snapshot now reports zero findings after compatible updates and
+a validated maintained YAML replacement. Current notice flags are 0/4/4; the
+russh-util investigation is resolved and the four objc2 conditions remain on hold
+by explicit maintainer choice. E51 remains the original historical assessment.
+
 ## Q1: 検出精度
 
 | 要求項目 | 既存実装と証拠 | 不足 | 担当タスク | 受入条件 | 必須成果物（予定） |
@@ -127,8 +138,8 @@ E55は[検査範囲と統計の集計](../../../tasks/055/TASK-055-RESULTS.md)�
 |---|---|---|---|---|---|
 | Q6-01 CI品質・PRと定期/手動実行の分担 | EC/E41: 既存の4ジョブと報告追加 | 追加測定の費用・頻度・実行枠 | [053](../../../tasks/053/task.yaml) | 既存のジョブを再利用し、PRの軽量検証と高コスト測定を分け、全軸の証拠を保存 | `ci-measurement-plan.md` |
 | Q6-02 テスト品質・評価器の独立レビュー | E41: 実装/試験妥当性の二段階レビュー | 追加検証の実測とレビューの結合 | [053](../../../tasks/053/task.yaml) | 最終ソースに対応する結果を保存し、ログ上の成功だけで試験妥当性を合格にしない | `test-evidence-index.json` |
-| Q6-03 依存関係・脆弱性管理 | E41: ロックファイルを固定。最新の脆弱性監査は未実行 | ツール・脆弱性情報データベースの取得と定期確認 | [051](../../../tasks/051/task.yaml) | 版/機能構成/供給元とデータベースの取得日・ハッシュ、脆弱性・未保守・例外期限・対処を記録 | `dependency-review.json` |
-| Q6-04 ライセンス管理・告知事項 | ED/ER: 既存の告知事項と5件の要確認事項 | 公開前の調査と許容判断 | [051](../../../tasks/051/task.yaml) | 全ての配布構成の依存とライセンス・告知事項を対応付け、未解決事項を許容する場合は維持者の判断を残す | `license-review.md` |
+| Q6-03 依存関係・脆弱性管理 | E51: pinned tool/DB and all three variant inventories assessed; four findings retained | Remediation and any future exception require explicit assessment/maintainer decisions; no waiver granted | [051](../../../tasks/051/task.yaml) | 版/機能構成/供給元とデータベースの取得日・ハッシュ、脆弱性・未保守・例外期限・対処を記録 | `dependency-review.json` |
+| Q6-04 ライセンス管理・告知事項 | E51: exact license/notice bytes mapped to all variants; existing flags 0/4/5 retained | Publication reviews remain open; only a maintainer may accept unresolved conditions | [051](../../../tasks/051/task.yaml) | 全ての配布構成の依存とライセンス・告知事項を対応付け、未解決事項を許容する場合は維持者の判断を残す | `license-review.md` |
 | Q6-05 開発プロセス・コードレビュー・保守担当者向け文書 | EG/EU: エージェントの作業手順等あり | 貢献・変更・保守手順の実態確認 | [052](../../../tasks/052/task.yaml) | Best Practicesの各項目に根拠と担当を示し、文書の存在と実行実績を区別 | `process-review.md` |
 | Q6-06 GitHubのブランチ保護・必須チェック・最小権限 | E41/EC: 読み取り権限を確認。ブランチ保護設定の取得は403 | 管理設定と実効権限の確認 | [052](../../../tasks/052/task.yaml) | 取得できた設定と推奨変更を分け、権限不足は不明（Unknown）。設定変更は別承認 | `github-controls.json` |
 | Q6-07 セキュリティ報告・脆弱性対応 | EU: SECURITY.mdへの案内あり | 受付・対応・修正版案内の手順確認 | [052](../../../tasks/052/task.yaml) | 公開窓口/対応範囲/担当/連絡経路を確認し、未運用部分を明記 | `security-process.md` |

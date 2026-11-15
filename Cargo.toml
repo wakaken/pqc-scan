@@ -17,12 +17,13 @@ license = "MIT"
 authors = ["pqc-scan contributors"]
 
 [workspace.dependencies]
-anyhow = "1.0.102"
+anyhow = "1.0.103"
 thiserror = "2.0.18"
 clap = { version = "4.5.60", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-serde_yaml = "0.9.34"
+# Preserve the serde_yaml import/API while using the maintained YAML organization fork.
+serde_yaml = { package = "yaml_serde", version = "=0.10.7" }
 regex = "1.12.3"
 aho-corasick = "1.1.4"
 rayon = "1.11.0"

@@ -17,15 +17,15 @@ v0.2候補では、macOS arm64向けの3構成すべてでホスト型CI、同�
 | 構成 | 追加コマンド | 公開までの状況 |
 |---|---|---|
 | `static` | なし | v0.2の配布対象。ホスト型ビルド来歴を検証する |
-| `combined-probes` | `probe tls`、`probe ssh` | 技術検証済み。依存パッケージ4件の通知文・再配布条件の確認が残る |
-| `all-probes` | 上記と `probe ssh-kex` | 技術検証済み。上記4件と、配布ソースの来歴1件の確認が残る |
+| `network`（接続先診断付き） | 静的スキャンに加え、`probe tls`、`probe ssh`、`probe ssh-kex` | 未公開。依存パッケージ4件の通知文・再配布条件の確認が残る |
 
 確認対象は、[版を固定した通知文の記録](../../third_party/notices/manifest.json)に残しています。
 
 | 依存パッケージ | 該当する構成 | 公開前に行うこと |
 |---|---|---|
-| `block2 0.6.2`、`dispatch2 0.3.1`、`objc2-encode 4.1.0`、`objc2 0.6.5` | probe同梱の2構成 | 収集済みの上流文書には、許諾文へのリンクとApple SDK由来部分に関する疑問が記載されている。この版に適用する許諾文の全文と著作権表示を揃え、再配布条件を確認し、根拠と公開判断を記録する |
-| `russh-util 0.52.0` | `all-probes` | レジストリ配布物のCargo VCS情報が `dirty=true` となっている。記録された上流リビジョンと実際の配布ソースを比較し、差分の由来・通知文を確認して結果を記録する。Apache-2.0本文の同梱だけでは、ソースの一致は証明できない |
+| `block2 0.6.2`、`dispatch2 0.3.1`、`objc2-encode 4.1.0`、`objc2 0.6.5` | `network` | 収集済みの上流文書には、許諾文へのリンクとApple SDK由来部分に関する疑問が記載されている。この版に適用する許諾文の全文と著作権表示を揃え、再配布条件を確認し、根拠と公開判断を記録する |
+
+`russh-util 0.52.0` のソースを比較し、Rustファイル3件は記録された上流リビジョンと一致し、元のマニフェストの差はパッケージの版番号だけであることを確認しました。配布物の `dirty=true` の記録は保持し、Apache-2.0本文も固定リビジョンに対応付けています。この技術的な確認フラグは解消しましたが、公開を許可するものではありません。`network`は、上記4件の通知文確認が残るため公開保留を維持します。[追加調査の記録](../../tasks/063/TASK-063-RESULTS.md)を参照してください。
 
 これらは通知文とソースの由来についての未確認事項です。probeの故障や依存パッケージの違法性が判明したという意味ではありません。根拠を揃えるまでは確認フラグを残します。依存パッケージを差し替えたり更新したりする場合は、機能構成・プロトコル・梱包・導入を再検証してください。
 
@@ -54,7 +54,7 @@ pqc-scan scan /absolute/path/to/authorized/repository --rules-dir /absolute/path
 ## ローカルアーカイブを準備する
 
 生成物は未署名・未公開の配布準備用アーカイブです。正式リリースではありません。
-`static`は実接続probeを含まず、`combined-probes`は`probe-tls,probe-ssh`を有効にします。
+`static`は実接続probeを含まず、`network`は`probe-tls,probe-ssh,probe-ssh-kex`を有効にします。
 probeは明示コマンドと接続許可が必要です。実行前に同梱の
 [probeの許可条件と使い方](PROBING.ja.md)を確認してください。ルールは常に`--rules-dir`で指定します。
 展開だけではPATHやルール探索の設定は変わりません。
@@ -62,8 +62,8 @@ probeは明示コマンドと接続許可が必要です。実行前に同梱の
 ```sh
 cargo build --locked --release --package pqc_scan_cli
 python3 scripts/package-release.py --binary target/release/pqc-scan --variant static --out-dir target/task-038/static
-cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh --target-dir target/probe-release-build
-python3 scripts/package-release.py --binary target/probe-release-build/release/pqc-scan --variant combined-probes --out-dir target/task-038/combined
+cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/network-release-build
+python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network
 python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz
 ```
 
@@ -106,17 +106,22 @@ featureとツールの版を記録します。記録したソースからその�
 静的版で補完する通知文には、元の著作権表示を含む上流のライセンス全文を同梱します。
 objc2系4組の上流資料は、ライセンス本文へのリンクとApple SDK由来部分の注意書きです。本文や公開許諾を確認したことにはならないため、`review_required` を残します。[版を固定した資料一覧](../../third_party/notices/README.md)を参照してください。
 
-## SSH KEXを含む構成
+## 接続先診断付きの構成と個別ビルド
 
-`all-probes`は`probe-tls,probe-ssh,probe-ssh-kex`を有効にします。既存の2構成は維持します。
+新しく準備する配布物は、`static`と`network`の2構成です。従来の`all-probes`は
+`network`へ改名し、`combined-probes`の配布物は新規作成しません。準備コマンドでは
+旧名2つを受け付けませんが、過去のアーカイブの検証・導入は引き続き可能です。
+過去の記録は旧名のまま保持します。前述のv0.2の3構成の検証は、当時の候補についての記録です。
+
+内部のCargo featureは個別に残します。ソースからは、例えば
+`--features probe-tls,probe-ssh`だけを選んでビルドできます。これは3つ目の配布構成ではありません。
+`network`にはSSHの提示方式収集と、公開鍵を指定して行うハイブリッド鍵交換の両方を含みます。
 
 ```sh
-cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/all-probes-release-build
-python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all
-python3 tests/distribution/check-install.py target/task-038/all/*.tar.gz --out-dir target/task-038/all-install
+python3 tests/distribution/check-install.py target/task-038/network/*.tar.gz --out-dir target/task-038/network-install
 ```
 
-依存noticeとprovenanceも同じfeature構成から生成します。インストール検証は`tls`・`ssh`・`ssh-kex`の過不足と公開鍵pinオプションを確認します。既存のobjc2系4件に加え、この構成ではrussh-utilのCargo VCS記録がdirty=trueのため、上流リビジョンと配布ソースの差の公開前確認を残します。固定リビジョンのライセンス原文は同梱します。これは未署名・未公開の技術的な配布準備です。
+依存noticeとprovenanceも同じfeature構成から生成します。インストール検証は`tls`・`ssh`・`ssh-kex`の過不足と公開鍵pinオプションを確認します。既存のobjc2系4件の確認フラグは維持します。russh-utilのソース差分調査は前述のとおり解消しましたが、配布物のdirty=trueの記録は保持します。固定リビジョンのライセンス原文は同梱します。これは未署名・未公開の技術的な配布準備です。
 
 ## ホスト型ビルドの来歴を検証する
 

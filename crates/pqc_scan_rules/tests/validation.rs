@@ -16,6 +16,30 @@ impl Drop for Pack {
         let _ = fs::remove_dir_all(&self.0);
     }
 }
+
+#[test]
+fn yaml_aliases_multiline_and_yaml12_strings_preserve_custom_rule_values() {
+    let p = Pack::new("yaml063");
+    fs::write(p.0.join("rule.yml"), "id: CUSTOM_YAML\nkind: treesitter\ncategory: custom\nseverity: low\nrisk: quantum-uncertain\nconfidence: 0.5\nmigration_hint: &text '日本語: review'\ndescription: *text\npattern: |-\n  first\n  second\nscope: on\n").unwrap();
+    let set = RuleSet::load_from_dir(&p.0).unwrap();
+    let rule = set.get("CUSTOM_YAML").unwrap();
+    assert_eq!(rule.kind, pqc_scan_rules::RuleKind::TreeSitter);
+    assert_eq!(rule.scope, "on");
+    assert_eq!(rule.pattern, "first\nsecond");
+    assert_eq!(rule.migration_hint, "日本語: review");
+    assert_eq!(rule.description.as_deref(), Some("日本語: review"));
+}
+
+#[test]
+fn duplicate_keys_and_multiple_rule_documents_remain_rejected() {
+    let p = Pack::new("yaml063-rejected");
+    p.write("CUSTOM", "0.5", "code");
+    let original = fs::read_to_string(p.0.join("rule.yml")).unwrap();
+    for suffix in ["confidence: 0.8\n", "---\n{}\n"] {
+        fs::write(p.0.join("rule.yml"), format!("{original}{suffix}")).unwrap();
+        assert!(RuleSet::load_from_dir(&p.0).is_err());
+    }
+}
 #[test]
 fn blank_ids_are_rejected_without_trimming_valid_custom_ids() {
     let p = Pack::new("ids");

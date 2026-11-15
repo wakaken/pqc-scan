@@ -1,0 +1,28 @@
+from pathlib import Path
+import subprocess,json,hashlib,tempfile,shutil,sys,time,uuid,datetime
+sys.path.insert(0,'tests/protocol');import container_runner
+root=Path('.').resolve();out=root/'tasks/061/evidence/integrity-20261115/container-r2';out.mkdir()
+image='sha256:16a329d30bd8f2b8d12353b678777392203d3e3f567505709a8ca4a408f95bb1'
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();input_source=json.loads((root/'tasks/059/evidence/platform-20261115/package-r2/SOURCE.json').read_text());assert all(sha(root/f)==h for f,h in input_source.items())
+inputs={'head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'sourceInputsSha256':hashlib.sha256(json.dumps(input_source,sort_keys=True,separators=(',',':')).encode()).hexdigest(),'archives':[]}
+record={'image':image,'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'scope':'Localtestkey/preparedartifact fixtures only; no private files/credentials or container scratch files exported','sourceBindings':{},'limits':{'network':'none','root':'readonly','source':'readonly','cpus':1,'memoryBytes':536870912,'additionalSwapBytes':0,'pids':32,'scratchBytes':268435456,'fileBytes':67108864,'wallSeconds':240},'containerRemoved':False}
+name='pqc061-fixture-'+uuid.uuid4().hex
+try:
+ with tempfile.TemporaryDirectory(prefix='pqc061-source-') as tmp:
+  source=Path(tmp)/'source';source.mkdir(mode=0o755)
+  for original,target in [('scripts/package-release.py','package.py'),('tests/protocol/container_entry.py','container_entry.py'),('tasks/061/evidence/integrity-20261115/worker.py.txt','worker.py')]:
+   data=container_runner.source_bytes(root,original);dest=source/target;dest.write_bytes(data);dest.chmod(0o444);record['sourceBindings'][original]=hashlib.sha256(data).hexdigest()
+  for variant in ['static','network']:
+   folder=root/'tasks/059/evidence/platform-20261115/package-r2/packages'/variant;archive,=folder.glob('*.tar.gz');expected=json.loads((folder/'ARCHIVE.json').read_text())['archiveSha256'];assert sha(archive)==expected;shutil.copyfile(archive,source/archive.name);(source/archive.name).chmod(0o444);inputs['archives'].append({'variant':variant,'file':archive.name,'sha256':expected})
+  data=(json.dumps(inputs,sort_keys=True)+'\n').encode();(source/'inputs.json').write_bytes(data);(source/'inputs.json').chmod(0o444);record['inputsSha256']=hashlib.sha256(data).hexdigest()
+  env={'PATH':'/usr/local/cargo/bin:/usr/bin:/bin','HOME':'/scratch/home','TMPDIR':'/scratch/tmp','PYTHONDONTWRITEBYTECODE':'1','LC_ALL':'C'}
+  command=['docker','create','--name',name,'--network','none','--read-only','--user','65534:65534','--log-driver','none','--cap-drop','ALL','--security-opt','no-new-privileges','--memory','512m','--memory-swap','512m','--cpus','1','--pids-limit','32','--shm-size','1m','--ulimit','core=0:0','--ulimit','fsize=67108864:67108864','--ulimit','nofile=128:128','--ulimit','cpu=120:120','--tmpfs','/scratch:rw,exec,nosuid,nodev,size=256m,mode=1777','--mount',f'type=bind,src={source},dst=/source,readonly','--workdir','/source','--entrypoint','/usr/bin/env',image,'-i',*[f'{k}={v}' for k,v in env.items()],'python3','/source/worker.py']
+  record['command']=command;record['environment']=env;(out/'RUN.json').write_text(json.dumps(record,indent=2)+'\n');subprocess.run(command,check=True,capture_output=True,timeout=30)
+  data=container_runner.bounded_output(['docker','start','-a',name],limit=512*1024,timeout=240);result=json.loads(data)
+  assert result['casesAccepted']==2 and result['casesRejected']==30 and result['privateKeyDeleted'] and not result['privateKeyExported']
+  assert all(c['expectedAccepted'] is c['actualAccepted'] for c in result['cases'])
+  # Parent retains parsed bounded publicmeasurement facts only, no scratchfile promotion.
+  (out/'RESULT.json').write_text(json.dumps(result,indent=2)+'\n');(out/'INPUTS.json').write_text(json.dumps(inputs,indent=2)+'\n');record['exitCode']=0;print('061fixture checks passed',len(result['cases']),'cases; accepted',result['casesAccepted'],'rejected',result['casesRejected'])
+finally:
+ removed=subprocess.run(['docker','rm','--force',name],capture_output=True,timeout=30);record['containerRemoved']=removed.returncode==0
+ (out/'RUN.json').write_text(json.dumps(record,indent=2)+'\n')

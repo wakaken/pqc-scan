@@ -1,0 +1,75 @@
+"""Bounded local preparation fixtures only. Nothing under /scratch is exported."""
+from pathlib import Path
+import json,os,sys,subprocess,hashlib,tarfile,importlib.util,copy
+os.umask(0o077);scratch=Path('/scratch');(scratch/'home').mkdir();(scratch/'tmp').mkdir()
+sys.path.insert(0,'/source');import container_entry
+boundary=container_entry.boundary();assert boundary['memoryMax']<=512*1024**2 and boundary['swapMax']==0 and boundary['pidsMax']<=32 and boundary['scratchCapacity']<=256*1024**2
+spec=importlib.util.spec_from_file_location('package','/source/package.py');package=importlib.util.module_from_spec(spec);spec.loader.exec_module(package)
+inputs=json.loads(Path('/source/inputs.json').read_text());sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();commands=[]
+def command(args):
+ result=subprocess.run(args,cwd=scratch,capture_output=True,text=True,timeout=30);commands.append({'command':args,'exitCode':result.returncode,'stdout':result.stdout[:300],'stderr':result.stderr[:300]});return result.returncode
+trusted=scratch/'fixture-private.pem';pub=scratch/'fixture-public.pem'
+assert command(['openssl','genpkey','-algorithm','ED25519','-out',str(trusted)])==0
+assert command(['openssl','pkey','-in',str(trusted),'-pubout','-out',str(pub)])==0
+pub_hash=sha(pub);cases=[];signature_facts=[]
+def save_message(name,body):
+ path=scratch/(name+'.json');path.write_text(json.dumps(body,sort_keys=True,separators=(',',':'))+'\n');return path
+def sign(path,key=trusted):
+ signature=scratch/(path.name+'.sig');assert command(['openssl','pkeyutl','-sign','-rawin','-inkey',str(key),'-in',str(path),'-out',str(signature)])==0;return signature
+def receive(archive,message,signature,expected):
+ # Trustedkey is selected independently of supplied statement or archive.
+ rc=command(['openssl','pkeyutl','-verify','-rawin','-pubin','-inkey',str(pub),'-in',str(message),'-sigfile',str(signature)])
+ if rc:return False,'signature'
+ body=json.loads(message.read_text())
+ if json.dumps(body,sort_keys=True)!=json.dumps(expected,sort_keys=True):return False,'statement_policy'
+ if sha(archive)!=body['artifactSha256']:return False,'subject_digest'
+ try:package.verify_archive(archive)
+ except Exception:return False,'archive_integrity'
+ return True,'verified_fixture'
+def record(name,archive,message,signature,expected,want):
+ accepted,reason=receive(archive,message,signature,expected);assert accepted is want,(name,accepted,reason)
+ cases.append({'case':name,'expectedAccepted':want,'actualAccepted':accepted,'reason':reason})
+for item in inputs['archives']:
+ variant=item['variant'];archive=Path('/source')/item['file'];assert sha(archive)==item['sha256'];package.verify_archive(archive)
+ policy={'type':'pqc-scan-local-preparation-fixture-v1','preparationOnly':True,'builderId':'local-task061-fixture-not-release-identity','sourceHead':inputs['head'],'sourceInputsSha256':inputs['sourceInputsSha256'],'target':'aarch64-apple-darwin','variant':variant,'artifactName':archive.name,'artifactSha256':sha(archive)}
+ message=save_message(variant+'-statement',policy);signature=sign(message);record(variant+'-valid',archive,message,signature,policy,True)
+ signature_facts.append({'variant':variant,'statementSha256':sha(message),'signatureSha256':sha(signature),'signatureBytes':signature.stat().st_size,'trustedPublicKeySha256':pub_hash,'artifactSha256':sha(archive)})
+ with tarfile.open(archive,'r:gz') as tf:
+  members=tf.getmembers();prefix=members[0].name.split('/')[0];entries={m.name.removeprefix(prefix+'/'):(tf.extractfile(m).read(),m.mode) for m in members}
+ assert 'bin/pqc-scan' in entries and 'SHA256SUMS' in entries
+ rule=next(n for n in entries if n.startswith('rules/') and n.endswith('.yml'));notice=next(n for n in entries if n.startswith('licenses/'))
+ for label,key,omit in [('binary-corrupt','bin/pqc-scan',False),('rules-corrupt',rule,False),('notice-corrupt',notice,False),('binary-missing','bin/pqc-scan',True),('rules-missing',rule,True),('notice-missing',notice,True)]:
+  changed=dict(entries)
+  if omit:changed.pop(key)
+  else:
+   data,mode=changed[key];changed[key]=(data+b'CORRUPTED061',mode)
+  damaged=scratch/(variant+'-'+label+'.tar.gz');package.write_archive(damaged,prefix,changed,manifest=False)
+  rejected=False
+  try:package.verify_archive(damaged)
+  except ValueError:rejected=True
+  assert rejected,(variant,label)
+  record(variant+'-'+label,damaged,message,signature,policy,False)
+  cases[-1]['existingChecksumVerifierRejected']=True
+ # Recomputed untrusted checksums are self-consistent, but cannot replace signed subject.
+ forged=dict(entries);forged.pop('SHA256SUMS');data,mode=forged['bin/pqc-scan'];forged['bin/pqc-scan']=(data+b'FORGED061',mode)
+ forged_path=scratch/(variant+'-forged-checksums.tar.gz');package.write_archive(forged_path,prefix,forged);package.verify_archive(forged_path)
+ record(variant+'-recomputed-manifest',forged_path,message,signature,policy,False);cases[-1]['hashOnlyVerifierAccepted']=True
+ for field,value in [('sourceInputsSha256','0'*64),('builderId','unauthorized-fixture'),('target','other-target'),('variant','other-variant'),('preparationOnly',1)]:
+  invalid=dict(policy);invalid[field]=value;invalid_msg=save_message(variant+'-'+field,invalid);invalid_sig=sign(invalid_msg)
+  record(variant+'-valid-signature-wrong-'+field,archive,invalid_msg,invalid_sig,policy,False)
+ broken=scratch/(variant+'-broken.sig');data=signature.read_bytes();broken.write_bytes(bytes([data[0]^1])+data[1:]);record(variant+'-signature-corrupt',archive,message,broken,policy,False)
+ # Explicitly mix binary payloads across variants without changing declared checksums.
+ other=next(x for x in inputs['archives'] if x['variant']!=variant)
+ with tarfile.open(Path('/source')/other['file'],'r:gz') as tf:other_binary=next(m for m in tf.getmembers() if m.name.endswith('/bin/pqc-scan'));mixed_bytes=tf.extractfile(other_binary).read()
+ mixed=dict(entries);mixed['bin/pqc-scan']=(mixed_bytes,entries['bin/pqc-scan'][1]);mixed_path=scratch/(variant+'-mixed.tar.gz');package.write_archive(mixed_path,prefix,mixed,manifest=False)
+ try:package.verify_archive(mixed_path)
+ except ValueError:pass
+ else:raise AssertionError('mixed binary accepted by checksum verifier')
+ record(variant+'-mixed-binary',mixed_path,message,signature,policy,False)
+ attacker=scratch/(variant+'-attacker-private.pem');assert command(['openssl','genpkey','-algorithm','ED25519','-out',str(attacker)])==0
+ wrongsig=sign(message,key=attacker);record(variant+'-wrong-trust-root',archive,message,wrongsig,policy,False);attacker.unlink()
+ trusted_stat=trusted.stat();assert trusted_stat.st_mode&0o077==0
+ # The signature/publickey remain container-local and are destroyed; retain onlypublicfacts.
+trusted.unlink();assert not trusted.exists()
+result={'scope':'Ephemeral local fixture signatures over preparedmetadata, not realrelease signing or GitHub/SLSAidentity certification','boundary':boundary,'opensslVersion':subprocess.check_output(['openssl','version'],text=True).strip(),'opensslSha256':sha(Path('/usr/bin/openssl')),'trustedFixturePublicKeySha256':pub_hash,'privateKeyExported':False,'privateKeyDeleted':True,'cases':cases,'signatureFacts':signature_facts,'commands':commands,'casesAccepted':sum(c['actualAccepted'] for c in cases),'casesRejected':sum(not c['actualAccepted'] for c in cases),'containerScratchFilesRetained':False}
+print(json.dumps(result,sort_keys=True))
