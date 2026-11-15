@@ -1,0 +1,1070 @@
+{
+  "baseline": "929caed4caf36461ee6d7fc9a81491807b2fdcb4",
+  "head": "929caed4caf36461ee6d7fc9a81491807b2fdcb4",
+  "branch": "codex/gpt6-agent-guidance",
+  "workspace": "/Users/waka/.codex/worktrees/gpt6-agent-guidance/pqc-scan",
+  "python": "3.14.5",
+  "platform": "macOS-27.2.1-arm64-arm-64bit-Mach-O",
+  "command": [
+    "python3",
+    "target/agent-guidance-validation/check.py",
+    "final"
+  ],
+  "validatorSha256": "e76f0d96530d53b3d83b290da263da9d8d2c275c53e6ed9979fdf0ede177dc92",
+  "validatorSource": "import difflib\nimport hashlib\nimport html\nimport json\nimport os\nfrom pathlib import Path\nimport platform\nimport re\nimport subprocess\nimport sys\nfrom urllib.parse import unquote, urlsplit\n\nROOT = Path.cwd()\nRECORD = Path('docs/records/gpt6-agent-guidance-20261116')\nOUT = RECORD / 'evidence' / (sys.argv[1] + '.json')\nBASE = '929caed4caf36461ee6d7fc9a81491807b2fdcb4'\nGUIDANCE = ['AGENTS.md', 'docs/agent/VERIFICATION.md', 'prompts/REVIEWER.md']\nUNCHANGED = ['docs/agent/REVIEWS.md', 'docs/agent/REPORTS.md',\n             'docs/TASK-LIFECYCLE.md', 'docs/BEST-PRACTICES.md',\n             'docs/PATTERNS.md', 'docs/MISTAKES.md', 'tasks/README.md',\n             'docs/DECISIONS.md', 'docs/RESTART-LOOP.md', 'README.md',\n             'README.ja.md', 'docs/architecture.md', 'docs/rules-reference.md',\n             '.github/workflows/pqc-scan.yml', '.github/workflows/release.yml',\n             'rust-toolchain.toml', 'scripts/package-release.py',\n             'tests/quality/README.md', 'tests/quality/run.py',\n             'shell/prepare-code-scanning.cjs']\nerrors = []\ndef check(condition, message):\n    if not condition:\n        errors.append(message)\ndef git(*args):\n    return subprocess.check_output(['git', *args], text=True)\ndef baseline(name):\n    return subprocess.check_output(['git', 'show', BASE + ':' + name])\ndef digest(data):\n    return hashlib.sha256(data).hexdigest()\ndef without_fences(text):\n    return re.sub(r'^(`{3,}|~{3,})[^\\n]*\\n.*?^\\1\\s*$', '', text,\n                  flags=re.MULTILINE | re.DOTALL)\ndef anchors(text):\n    text = without_fences(text)\n    result = set(re.findall(r'\\bid=[\"\\']([^\"\\']+)[\"\\']', text))\n    seen = {}\n    for line in text.splitlines():\n        m = re.match(r'^#{1,6}\\s+(.+?)(?:\\s+#+)?\\s*$', line)\n        if not m:\n            continue\n        title = html.unescape(re.sub(r'<[^>]+>', '', m[1])).lower()\n        slug = re.sub(r'[^\\w\\- ]', '', title).replace(' ', '-')\n        n = seen.get(slug, 0)\n        seen[slug] = n + 1\n        result.add(slug + (f'-{n}' if n else ''))\n    return result\ndef resolve_link(source, link):\n    parsed = urlsplit(link)\n    if parsed.scheme or parsed.netloc:\n        return None\n    target = (source.parent / unquote(parsed.path)).resolve() if parsed.path else source.resolve()\n    if not target.exists():\n        return 'missing target'\n    if parsed.fragment and (not target.is_file() or\n       unquote(parsed.fragment) not in anchors(target.read_text())):\n        return 'missing anchor'\n    return None\n\n# Validator controls use real repository files and in-memory heading examples.\ncontrols = {\n    'missing_target_rejected': resolve_link(ROOT / 'AGENTS.md', 'absent-guidance-test-file.md') == 'missing target',\n    'missing_anchor_rejected': resolve_link(ROOT / 'AGENTS.md', 'README.md#absent-guidance-test-anchor') == 'missing anchor',\n    'explicit_html_anchor_accepted': resolve_link(ROOT / 'AGENTS.md', 'README.md#features') is None,\n    'japanese_readme_anchor_accepted': resolve_link(ROOT / 'AGENTS.md', 'README.ja.md#features') is None,\n    'duplicate_heading_anchor': anchors('# Same\\n## Same\\n') == {'same', 'same-1'},\n    'fenced_heading_excluded': anchors('```md\\n# Example\\n```\\n# Actual\\n') == {'actual'},\n}\nfor name, passed in controls.items():\n    check(passed, 'validator control: ' + name)\n\nbindings = {}\nmetrics = {}\nfor name in GUIDANCE + UNCHANGED:\n    before = baseline(name)\n    after = Path(name).read_bytes()\n    bindings[name] = {'beforeSha256': digest(before), 'afterSha256': digest(after)}\n    if name in GUIDANCE:\n        metrics[name] = {'beforeLines': len(before.splitlines()),\n                         'afterLines': len(after.splitlines()),\n                         'beforeBytes': len(before), 'afterBytes': len(after)}\n        removed = [line for line in difflib.ndiff(before.decode().splitlines(), after.decode().splitlines())\n                   if line.startswith('- ')]\n        check(not removed, 'original lines removed: ' + name)\n        check(re.findall(r'^#{1,6} .+$', before.decode(), re.M) ==\n              re.findall(r'^#{1,6} .+$', after.decode(), re.M), 'headings changed: ' + name)\n        check(re.findall(r'```.*?```', before.decode(), re.S) ==\n              re.findall(r'```.*?```', after.decode(), re.S), 'command fences changed: ' + name)\n    else:\n        check(before == after, 'preserved file changed: ' + name)\n\nold = baseline('AGENTS.md').decode()\nnew = Path('AGENTS.md').read_text()\nfor title in ['Required References by Activity', 'Workflow and Review Limits',\n              'Security and Compatibility', 'Documentation']:\n    pattern = r'(?ms)^## ' + re.escape(title) + r'\\n.*?(?=^## |\\Z)'\n    check(re.search(pattern, old).group() == re.search(pattern, new).group(),\n          'core block changed: ' + title)\n\nchanged = git('diff', '--name-only', BASE).splitlines()\nuntracked = git('ls-files', '--others', '--exclude-standard').splitlines()\nfor name in changed + untracked:\n    check(name in GUIDANCE or name.startswith(RECORD.as_posix() + '/'),\n          'out-of-scope file: ' + name)\ncheck(git('branch', '--show-current').strip() == 'codex/gpt6-agent-guidance', 'wrong branch')\ncheck(git('rev-parse', 'HEAD').strip() == BASE, 'baseline HEAD changed')\n\n# Seed this run's output so report links can be checked before writing results.\nOUT.write_text('{}\\n')\nfiles = GUIDANCE + [p for p in UNCHANGED if p.endswith('.md')]\nfiles += [p.as_posix() for p in RECORD.rglob('*.md')]\nlinks = []\nfor name in files:\n    text = without_fences(Path(name).read_text())\n    for match in re.finditer(r'\\[[^\\]]*\\]\\(([^)]+)\\)', text):\n        link = match[1]\n        parsed = urlsplit(link)\n        if parsed.scheme or parsed.netloc:\n            continue\n        issue = resolve_link(ROOT / name, link)\n        links.append({'file': name, 'target': link, 'result': issue or 'pass'})\n        check(issue is None, f'{name}: {link}: {issue}')\n\ndiff_check = subprocess.run(['git', 'diff', '--check'], capture_output=True, text=True)\ncheck(diff_check.returncode == 0, 'git diff --check: ' + diff_check.stdout + diff_check.stderr)\nresult = {\n    'baseline': BASE, 'head': git('rev-parse', 'HEAD').strip(),\n    'branch': git('branch', '--show-current').strip(), 'workspace': str(ROOT),\n    'python': platform.python_version(), 'platform': platform.platform(),\n    'command': ['python3', 'target/agent-guidance-validation/check.py', sys.argv[1]],\n    'validatorSha256': digest(Path(__file__).read_bytes()),\n    'validatorSource': Path(__file__).read_text(),\n    'sourceBindings': bindings, 'metrics': metrics, 'validatorControls': controls,\n    'changedTracked': changed, 'untracked': untracked,\n    'linksChecked': len(links), 'links': links,\n    'diffCheck': {'command': ['git', 'diff', '--check'], 'exitCode': diff_check.returncode,\n                  'stdout': diff_check.stdout, 'stderr': diff_check.stderr},\n    'guidanceDiffSha256': digest(git('diff', BASE, '--', *GUIDANCE).encode()),\n    'errors': errors, 'exitCode': int(bool(errors)),\n    'scope': 'Structural checks only; semantic scenario assessment is in REPORT.md; no runtime performance claims',\n}\nOUT.write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\\n')\nprint(json.dumps({k: result[k] for k in ['linksChecked', 'metrics', 'validatorControls', 'errors', 'exitCode']}, indent=2))\nsys.exit(result['exitCode'])\n",
+  "sourceBindings": {
+    "AGENTS.md": {
+      "beforeSha256": "2b23d684503b7ed0a36c90761aa28e43d9966356a6016da814edbb9596c9ee22",
+      "afterSha256": "fa34373b4a925779c286f019a17dafd092757aace87695215ec5a6afabb55ddf"
+    },
+    "docs/agent/VERIFICATION.md": {
+      "beforeSha256": "12ebc12cc04a3caf62b1639929c38a44d688e6950eb254cdea8f1178488aa95a",
+      "afterSha256": "a52093ebd63d65ad451e55a2410c7e0696be7aa0fa5cf102a7e65c1a0be7f4b0"
+    },
+    "prompts/REVIEWER.md": {
+      "beforeSha256": "1aef3ec2c18dc6bdfdcc2a0982dab06f8c1fcc6afcb88540f1e02efa7e793e3a",
+      "afterSha256": "18316317eb051f62843f6d7e413fd7ab16adbf67f442bcff82d3a2764dd2b072"
+    },
+    "docs/agent/REVIEWS.md": {
+      "beforeSha256": "fc5fa14cd366b2712c9896283d49a48670746c3b22673e7675981a6a89b0921f",
+      "afterSha256": "fc5fa14cd366b2712c9896283d49a48670746c3b22673e7675981a6a89b0921f"
+    },
+    "docs/agent/REPORTS.md": {
+      "beforeSha256": "fe743c92e0e6711634f301717e1ef0b30bd0efb65eb6c3a15ad37ab1adb748ff",
+      "afterSha256": "fe743c92e0e6711634f301717e1ef0b30bd0efb65eb6c3a15ad37ab1adb748ff"
+    },
+    "docs/TASK-LIFECYCLE.md": {
+      "beforeSha256": "5e08dc0347f48f4236ff8e892604bcfc4ae235165d6ff24912591e6a4309cada",
+      "afterSha256": "5e08dc0347f48f4236ff8e892604bcfc4ae235165d6ff24912591e6a4309cada"
+    },
+    "docs/BEST-PRACTICES.md": {
+      "beforeSha256": "59631d4f8d499aa304689593074ec0e5cfa7b60136c20fbe8367c1dda005a2a7",
+      "afterSha256": "59631d4f8d499aa304689593074ec0e5cfa7b60136c20fbe8367c1dda005a2a7"
+    },
+    "docs/PATTERNS.md": {
+      "beforeSha256": "fab001f2058caea08e6fcc929c11eb888b0a23b46514f53ad1ee379ef33dac1e",
+      "afterSha256": "fab001f2058caea08e6fcc929c11eb888b0a23b46514f53ad1ee379ef33dac1e"
+    },
+    "docs/MISTAKES.md": {
+      "beforeSha256": "c59b9b8c05176d8e329599b0705a083c5f2608c4a4f0ecb52034ca0ea75cda2a",
+      "afterSha256": "c59b9b8c05176d8e329599b0705a083c5f2608c4a4f0ecb52034ca0ea75cda2a"
+    },
+    "tasks/README.md": {
+      "beforeSha256": "7e7fc1fbaa273e965a227c5bbd5430561112bca5f38894be338000b104de19e0",
+      "afterSha256": "7e7fc1fbaa273e965a227c5bbd5430561112bca5f38894be338000b104de19e0"
+    },
+    "docs/DECISIONS.md": {
+      "beforeSha256": "17ccd526fc0d8a7babea598594d18a98219d94a7b5fa7ef1db7c5d61b234f06f",
+      "afterSha256": "17ccd526fc0d8a7babea598594d18a98219d94a7b5fa7ef1db7c5d61b234f06f"
+    },
+    "docs/RESTART-LOOP.md": {
+      "beforeSha256": "c87abc4203a02362eb01ef8a4d6a836df341604bf56a3a382cc98f70bfb6ca6f",
+      "afterSha256": "c87abc4203a02362eb01ef8a4d6a836df341604bf56a3a382cc98f70bfb6ca6f"
+    },
+    "README.md": {
+      "beforeSha256": "61c1827fc02f830c8e4047c0adb46fa4671539c0134a5297af707f81adafd14c",
+      "afterSha256": "61c1827fc02f830c8e4047c0adb46fa4671539c0134a5297af707f81adafd14c"
+    },
+    "README.ja.md": {
+      "beforeSha256": "1c97c593200ba0ccfcb89c0641479bafa040769e9b9f56b17481c2281e949585",
+      "afterSha256": "1c97c593200ba0ccfcb89c0641479bafa040769e9b9f56b17481c2281e949585"
+    },
+    "docs/architecture.md": {
+      "beforeSha256": "f598bd1c1ce86509ae7acb0ac00005a3087312e559d6d444cc81e7cecc2ed156",
+      "afterSha256": "f598bd1c1ce86509ae7acb0ac00005a3087312e559d6d444cc81e7cecc2ed156"
+    },
+    "docs/rules-reference.md": {
+      "beforeSha256": "abcb50f8cfa2b60f020103e8f335feb2d1de08fcd7c1d9afc014b36ba08afd84",
+      "afterSha256": "abcb50f8cfa2b60f020103e8f335feb2d1de08fcd7c1d9afc014b36ba08afd84"
+    },
+    ".github/workflows/pqc-scan.yml": {
+      "beforeSha256": "bfba91b40599f5059cdc98f0fda7a2415ba113577a0cfcc0482ade360431b031",
+      "afterSha256": "bfba91b40599f5059cdc98f0fda7a2415ba113577a0cfcc0482ade360431b031"
+    },
+    ".github/workflows/release.yml": {
+      "beforeSha256": "0cdfc8e1aa3f41d5ad1ad67414284469dd94e79f8193f82962703402a443197c",
+      "afterSha256": "0cdfc8e1aa3f41d5ad1ad67414284469dd94e79f8193f82962703402a443197c"
+    },
+    "rust-toolchain.toml": {
+      "beforeSha256": "02dee3b2b81f2c5e7064c6bb118cf19e859100fcc33c220e5ec52ce4b0586b12",
+      "afterSha256": "02dee3b2b81f2c5e7064c6bb118cf19e859100fcc33c220e5ec52ce4b0586b12"
+    },
+    "scripts/package-release.py": {
+      "beforeSha256": "d42888f4062e2169bbf0c94046a32540ca2c5ff0688f11b1c4ca94ec1a1c8cd2",
+      "afterSha256": "d42888f4062e2169bbf0c94046a32540ca2c5ff0688f11b1c4ca94ec1a1c8cd2"
+    },
+    "tests/quality/README.md": {
+      "beforeSha256": "5cbb7d52373824da19f4deca221f3e826156d28a1064aed32a3d8fa724e7df7c",
+      "afterSha256": "5cbb7d52373824da19f4deca221f3e826156d28a1064aed32a3d8fa724e7df7c"
+    },
+    "tests/quality/run.py": {
+      "beforeSha256": "de1483e6f1ebf7da0ad261346d15c680a6742cbb831e1f94d3a51bf4e85483e6",
+      "afterSha256": "de1483e6f1ebf7da0ad261346d15c680a6742cbb831e1f94d3a51bf4e85483e6"
+    },
+    "shell/prepare-code-scanning.cjs": {
+      "beforeSha256": "677dcfdecf37edfb48d068c98d19cfac7e3adb5e1421f6a53d64e1b90e2eaea8",
+      "afterSha256": "677dcfdecf37edfb48d068c98d19cfac7e3adb5e1421f6a53d64e1b90e2eaea8"
+    }
+  },
+  "metrics": {
+    "AGENTS.md": {
+      "beforeLines": 170,
+      "afterLines": 187,
+      "beforeBytes": 12273,
+      "afterBytes": 13523
+    },
+    "docs/agent/VERIFICATION.md": {
+      "beforeLines": 129,
+      "afterLines": 137,
+      "beforeBytes": 5927,
+      "afterBytes": 6465
+    },
+    "prompts/REVIEWER.md": {
+      "beforeLines": 39,
+      "afterLines": 44,
+      "beforeBytes": 1980,
+      "afterBytes": 2352
+    }
+  },
+  "validatorControls": {
+    "missing_target_rejected": true,
+    "missing_anchor_rejected": true,
+    "explicit_html_anchor_accepted": true,
+    "japanese_readme_anchor_accepted": true,
+    "duplicate_heading_anchor": true,
+    "fenced_heading_excluded": true
+  },
+  "changedTracked": [
+    "AGENTS.md",
+    "docs/agent/VERIFICATION.md",
+    "prompts/REVIEWER.md"
+  ],
+  "untracked": [
+    "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/implementation-review.json",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/implementation-scope.json",
+    "docs/records/gpt6-agent-guidance-20261116/evidence/initial.json"
+  ],
+  "linksChecked": 181,
+  "links": [
+    {
+      "file": "AGENTS.md",
+      "target": "docs/agent/REVIEWS.md",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/agent/VERIFICATION.md#verification-by-change-type",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/BEST-PRACTICES.md",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/PATTERNS.md#activity-index",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/MISTAKES.md",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "README.md#features",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "README.ja.md#features",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/architecture.md#workspace-modules",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/architecture.md#workspace-modules",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/DECISIONS.md",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/PATTERNS.md#activity-index",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/MISTAKES.md",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/agent/REVIEWS.md#required-review-stages",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "prompts/REVIEWER.md",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/TASK-LIFECYCLE.md#status-definitions",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "tasks/README.md",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/rules-reference.md#validation-and-quality-review",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/agent/REPORTS.md#user-facing-report-content",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/agent/REPORTS.md#local-report-browser-verification",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/BEST-PRACTICES.md#documentation",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/PATTERNS.md#documentation-synchronization-pattern",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/RESTART-LOOP.md",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/agent/REVIEWS.md",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/agent/REVIEWS.md#review-records",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/TASK-LIFECYCLE.md",
+      "result": "pass"
+    },
+    {
+      "file": "AGENTS.md",
+      "target": "docs/agent/VERIFICATION.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/agent/VERIFICATION.md",
+      "target": "../../AGENTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/agent/VERIFICATION.md",
+      "target": "REVIEWS.md#revisions-and-resumption",
+      "result": "pass"
+    },
+    {
+      "file": "prompts/REVIEWER.md",
+      "target": "../AGENTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "prompts/REVIEWER.md",
+      "target": "../docs/agent/REVIEWS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/agent/REVIEWS.md",
+      "target": "../../AGENTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/agent/REVIEWS.md",
+      "target": "../../AGENTS.md#required-references-by-activity",
+      "result": "pass"
+    },
+    {
+      "file": "docs/agent/REVIEWS.md",
+      "target": "../../prompts/REVIEWER.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/agent/REPORTS.md",
+      "target": "../../AGENTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/TASK-LIFECYCLE.md",
+      "target": "../AGENTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/TASK-LIFECYCLE.md",
+      "target": "agent/VERIFICATION.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/TASK-LIFECYCLE.md",
+      "target": "agent/REVIEWS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/BEST-PRACTICES.md",
+      "target": "agent/REPORTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/BEST-PRACTICES.md",
+      "target": "../AGENTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#thin-cli-entrypoints",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "MISTAKES.md#cli-testability",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#pipeline-centered-scanning",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#detector-extension-pattern",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#export-redaction-after-stable-identity-task-029",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#rule-driven-matching",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#report-writer-extension-pattern",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#report-contract-test-pattern",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#bind-comparisons-and-human-assessments-to-actual-facts",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#preserve-standards-semantics-through-explicit-export-loss",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#documentation-synchronization-pattern",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "#task-queue-pattern",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "MISTAKES.md#documentation-drift",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "MISTAKES.md#shared-target-directories-can-invalidate-feature-specific-protocol-evidence",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "MISTAKES.md#llvm-coverage-counters-need-a-bounded-and-attributable-collection-path",
+      "result": "pass"
+    },
+    {
+      "file": "docs/PATTERNS.md",
+      "target": "architecture/EVIDENCE-PRIVACY.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/MISTAKES.md",
+      "target": "../tasks/044/TASK-044-MIRI-FOLLOWUP.md",
+      "result": "pass"
+    },
+    {
+      "file": "tasks/README.md",
+      "target": "../AGENTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "tasks/README.md",
+      "target": "../docs/agent/VERIFICATION.md",
+      "result": "pass"
+    },
+    {
+      "file": "tasks/README.md",
+      "target": "../docs/agent/REVIEWS.md",
+      "result": "pass"
+    },
+    {
+      "file": "tasks/README.md",
+      "target": "../docs/TASK-LIFECYCLE.md",
+      "result": "pass"
+    },
+    {
+      "file": "tasks/README.md",
+      "target": "../docs/TASK-LIFECYCLE.md#status-definitions",
+      "result": "pass"
+    },
+    {
+      "file": "tasks/README.md",
+      "target": "../docs/TASK-LIFECYCLE.md#corrections-and-replanning",
+      "result": "pass"
+    },
+    {
+      "file": "tasks/README.md",
+      "target": "../docs/TASK-LIFECYCLE.md#blocked-work",
+      "result": "pass"
+    },
+    {
+      "file": "tasks/README.md",
+      "target": "../docs/TASK-LIFECYCLE.md#cancellation-and-historical-evidence",
+      "result": "pass"
+    },
+    {
+      "file": "tasks/README.md",
+      "target": "../docs/TASK-LIFECYCLE.md#task-boundaries",
+      "result": "pass"
+    },
+    {
+      "file": "tasks/README.md",
+      "target": "../docs/agent/REVIEWS.md#review-records",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/roadmap/v0.3/ROADMAP.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/releases/v0.2.0.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "README.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "#targets",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "#features",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "#quick-start",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "#results",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "#guides",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "#limits",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "#repository-ci",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "#license",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/COVERAGE.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/PROBING.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/REPORTS.md#pqc-findings",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "rust-toolchain.toml",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/DISTRIBUTION.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/SCANNING.md#from-source",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/REPORTS.md#choose-report",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/REPORTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/SCANNING.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/REPORTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/COVERAGE.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/PROBING.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/DISTRIBUTION.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "SECURITY.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/COVERAGE.md#source-facts",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "tasks/041/QUALITY-ASSESSMENT.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "tests/quality/README.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/PROBING.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/COVERAGE.md#privacy",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/SCANNING.md#diagnostics",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "docs/user/COVERAGE.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": ".github/workflows/pqc-scan.yml",
+      "result": "pass"
+    },
+    {
+      "file": "README.md",
+      "target": "LICENSE",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/roadmap/v0.3/ROADMAP.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/releases/v0.2.0.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "README.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "#targets",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "#features",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "#quick-start",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "#results",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "#guides",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "#limits",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "#repository-ci",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "#license",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/COVERAGE.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/PROBING.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/REPORTS.ja.md#pqc-findings",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "rust-toolchain.toml",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/DISTRIBUTION.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/SCANNING.ja.md#from-source",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/REPORTS.ja.md#choose-report",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/REPORTS.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/SCANNING.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/REPORTS.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/COVERAGE.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/PROBING.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/DISTRIBUTION.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "SECURITY.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/COVERAGE.ja.md#source-facts",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "tasks/041/QUALITY-ASSESSMENT.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "tests/quality/README.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/PROBING.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/COVERAGE.ja.md#privacy",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/SCANNING.ja.md#diagnostics",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "docs/user/COVERAGE.ja.md",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": ".github/workflows/pqc-scan.yml",
+      "result": "pass"
+    },
+    {
+      "file": "README.ja.md",
+      "target": "LICENSE",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "architecture/RULE-VALIDATION.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "quality/rules/RULE-QUALITY.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "architecture/DEPENDENCY-PROVENANCE.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "user/COVERAGE.md#source-limits",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "../tasks/024/TASK-024-AST-OCCURRENCES.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "../tasks/021/TASK-021-IMPLEMENTATION.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "../tasks/020/TASK-020-IMPLEMENTATION.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "../crates/pqc_scan_detectors/tests/fixtures/certificates/README.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "architecture/EVIDENCE-PRIVACY.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "architecture/INVENTORY-REPORT-V1.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "architecture/LOCAL-ASSESSMENT-V1.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/architecture.md",
+      "target": "architecture/EVIDENCE-PRIVACY.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/rules-reference.md",
+      "target": "quality/rules/RULE-QUALITY.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/rules-reference.md",
+      "target": "architecture/RULE-VALIDATION.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/rules-reference.md",
+      "target": "../tasks/021/TASK-021-IMPLEMENTATION.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/rules-reference.md",
+      "target": "../tasks/021/CERTIFICATE-BASELINE-021.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/rules-reference.md",
+      "target": "../tasks/043/TASK-043-FIXES-CONTRACT.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/rules-reference.md",
+      "target": "../tasks/043/TASK-043-MAINTAINABILITY-PLAN.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/rules-reference.md",
+      "target": "../tasks/062/evidence/AUDIT-RULE-QUALITY-METADATA.json",
+      "result": "pass"
+    },
+    {
+      "file": "tests/quality/README.md",
+      "target": "../../LICENSE",
+      "result": "pass"
+    },
+    {
+      "file": "tests/quality/README.md",
+      "target": "../../tasks/023/TASK-023-BASELINE.md",
+      "result": "pass"
+    },
+    {
+      "file": "tests/quality/README.md",
+      "target": "../../tasks/023/TASK-023-ACCEPTANCE.md",
+      "result": "pass"
+    },
+    {
+      "file": "tests/quality/README.md",
+      "target": "../../docs/quality/QUALITY-METRICS.md",
+      "result": "pass"
+    },
+    {
+      "file": "tests/quality/README.md",
+      "target": "../../tasks/041/QUALITY-ASSESSMENT.md",
+      "result": "pass"
+    },
+    {
+      "file": "tests/quality/README.md",
+      "target": "expanded/PROTOCOL.md",
+      "result": "pass"
+    },
+    {
+      "file": "tests/quality/README.md",
+      "target": "expanded/provenance.json",
+      "result": "pass"
+    },
+    {
+      "file": "tests/quality/README.md",
+      "target": "../../tasks/042/TASK-042-REOPEN-RESULTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "evidence/initial.json",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../../AGENTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../agent/VERIFICATION.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../agent/REVIEWS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../agent/REPORTS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../TASK-LIFECYCLE.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../../tasks/README.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../BEST-PRACTICES.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../PATTERNS.md#documentation-synchronization-pattern",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../MISTAKES.md#documentation-drift",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../../prompts/REVIEWER.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../DECISIONS.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../RESTART-LOOP.md",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../../README.md#features",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../../README.ja.md#features",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../architecture.md#workspace-modules",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "../../rules-reference.md#validation-and-quality-review",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "evidence/implementation-review.json",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "evidence/implementation-scope.json",
+      "result": "pass"
+    },
+    {
+      "file": "docs/records/gpt6-agent-guidance-20261116/REPORT.md",
+      "target": "evidence/final.json",
+      "result": "pass"
+    }
+  ],
+  "diffCheck": {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "guidanceDiffSha256": "7c183a22cdc1039e4edbb413a77549ef838b95459f34bee8a2b2a14c96ac2bf2",
+  "errors": [],
+  "exitCode": 0,
+  "scope": "Structural checks only; semantic scenario assessment is in REPORT.md; no runtime performance claims"
+}

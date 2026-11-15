@@ -2,8 +2,8 @@
 
 The main agent fills the request below for each required review stage and sends
 it to that stage's reviewer. Use the same template for both stages; do not combine
-reviewer identities. Read [AGENTS.md](../AGENTS.md) and the
-[review policy](../docs/agent/REVIEWS.md) for criteria, budget and revision handling.
+reviewer identities. Read [AGENTS.md](../../AGENTS.md) and the
+[review policy](REVIEWS.md) for criteria, budget and revision handling.
 
 ## Request
 
@@ -22,11 +22,15 @@ reviewer identities. Read [AGENTS.md](../AGENTS.md) and the
 - Apply the assigned stage's criteria in `docs/agent/REVIEWS.md` and the applicable
   completion/verification gates in `docs/agent/VERIFICATION.md`. Read additional
   source or documentation only as needed to evaluate the supplied scope.
-- Do not modify files or delegate. Rely on supplied test results unless a
-  specific concern requires independent reproduction; do not automatically
-  repeat the full suite.
+- Do not modify files or delegate. Follow the test-evidence and reproduction
+  rules in the [review policy](REVIEWS.md#review-budget-and-context).
 - For follow-up, check material fixes and whether evidence covers the final
   source. Do not assume an earlier review covers later changes.
+- For prose-only guidance changes requiring review, implementation review checks
+  instruction meaning, reference relationships and preservation of mandatory
+  gates. Test review checks whether structural and consistency verification
+  establishes those requirements for the final source. Structural checks alone
+  do not demonstrate improved agent execution performance.
 
 ## Response
 

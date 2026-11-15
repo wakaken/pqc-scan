@@ -131,7 +131,7 @@ Current example:
 
 Pattern:
 - when renaming docs or changing workflow terms, update all agent-facing references in the same patch
-- keep core working rules and activity-based reading triggers in `AGENTS.md`, detailed verification/review/report rules in `docs/agent/`, and the shared review request template in `prompts/REVIEWER.md`
+- keep core working rules and activity-based reading triggers in `AGENTS.md`, detailed verification/review/report rules in `docs/agent/`, and the shared review request template in `docs/agent/REVIEWER.md`
 - treat `AGENTS.md` as the owner of core constraints and the linked guides as owners of detailed procedures; update affected summaries, details and references in the same change, preserving constraints in both
 - keep the lifecycle summary in `AGENTS.md` aligned with detailed definitions in `docs/TASK-LIFECYCLE.md`; link to those definitions from `tasks/README.md` rather than duplicating them
 - preserve completed task records and past review evidence, including historical prompt paths
@@ -143,7 +143,7 @@ Why it works here:
 Current example:
 - `AGENTS.md`
 - `docs/TASK-LIFECYCLE.md`
-- `prompts/REVIEWER.md`
+- `docs/agent/REVIEWER.md`
 
 ---
 
