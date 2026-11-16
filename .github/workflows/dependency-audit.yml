@@ -1,0 +1,101 @@
+name: Dependency vulnerability check
+
+on:
+  schedule:
+    # Monday 09:23 Japan time (00:23 UTC); GitHub may delay scheduled runs.
+    - cron: '23 0 * * 1'
+  push:
+    branches: [develop]
+    paths:
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+      - 'crates/**/Cargo.toml'
+      - '.github/workflows/dependency-audit.yml'
+      - 'scripts/check-dependencies.py'
+      - 'scripts/notify-dependency-audit.cjs'
+  pull_request:
+    paths:
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+      - 'crates/**/Cargo.toml'
+      - '.github/workflows/dependency-audit.yml'
+      - 'scripts/check-dependencies.py'
+      - 'scripts/notify-dependency-audit.cjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-audit-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Prepare pinned audit tool and current advisory database
+        working-directory: ${{ runner.temp }}
+        env:
+          AUDIT_VERSION: '0.22.2'
+          AUDIT_ARCHIVE_SHA256: ab28a1bdb54db4d5d8ad5981cf1f959410370b3d28250dbd35f6a44248620e39
+        run: |
+          set -euo pipefail
+          mkdir -p audit-tools "$GITHUB_WORKSPACE/target/dependency-audit"
+          curl --fail --location --retry 3 --max-time 120 \
+            "https://github.com/rustsec/rustsec/releases/download/cargo-audit/v${AUDIT_VERSION}/cargo-audit-x86_64-unknown-linux-gnu-v${AUDIT_VERSION}.tgz" \
+            --output audit-tools/cargo-audit.tgz
+          echo "${AUDIT_ARCHIVE_SHA256}  audit-tools/cargo-audit.tgz" | sha256sum --check --strict
+          tar -xzf audit-tools/cargo-audit.tgz -C audit-tools --strip-components=1
+          test "$(audit-tools/cargo-audit --version)" = "cargo-audit ${AUDIT_VERSION}"
+          git -c credential.helper= clone --depth 1 https://github.com/RustSec/advisory-db.git audit-db
+          git -C audit-db rev-parse HEAD > "$GITHUB_WORKSPACE/target/dependency-audit/database-commit.txt"
+          audit-tools/cargo-audit --version > "$GITHUB_WORKSPACE/target/dependency-audit/tool-version.txt"
+          sha256sum audit-tools/cargo-audit.tgz audit-tools/cargo-audit > "$GITHUB_WORKSPACE/target/dependency-audit/tool-sha256.txt"
+          printf '%s\n' "$GITHUB_SHA" > "$GITHUB_WORKSPACE/target/dependency-audit/source-commit.txt"
+      - name: Check all locked workspace dependencies
+        run: >-
+          python3 scripts/check-dependencies.py
+          --binary "$RUNNER_TEMP/audit-tools/cargo-audit"
+          --database "$RUNNER_TEMP/audit-db"
+          --lockfile "$GITHUB_WORKSPACE/Cargo.lock"
+          --out-dir "$GITHUB_WORKSPACE/target/dependency-audit"
+      - name: Preserve audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dependency-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: target/dependency-audit/
+          if-no-files-found: error
+          retention-days: 30
+
+  notify:
+    needs: audit
+    concurrency:
+      group: dependency-audit-notification
+      cancel-in-progress: false
+    if: >-
+      ${{ always() && needs.audit.result == 'failure' &&
+          github.event_name != 'pull_request' &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout trusted notification helper
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Notify maintainer on GitHub
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const notify = require(`${process.env.GITHUB_WORKSPACE}/scripts/notify-dependency-audit.cjs`);
+            await notify({github, context});
