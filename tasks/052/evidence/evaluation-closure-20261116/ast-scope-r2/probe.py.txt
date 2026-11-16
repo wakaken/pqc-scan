@@ -1,0 +1,51 @@
+from pathlib import Path
+import json,re,subprocess,hashlib,time,traceback,contextlib,os
+s=Path('/scratch');e=s/'evidence';e.mkdir();manifest=json.loads(Path('/scope/manifest.json').read_text());records=[]
+span_re=re.compile(r'/input\.rs:(\d+):(\d+): (\d+):(\d+) \(#0\)')
+test_attr=re.compile(r'#\[\s*(?:test|cfg\(\s*test\s*\)|cfg\(\s*all\(\s*test\s*,\s*unix\s*\)\s*\))\s*\]')
+def extract(ast,source):
+ lines=source.splitlines(keepends=True);stack=[];found=[]
+ def text_span(v):
+  a,b,c,d=v
+  if a==c:return lines[a-1][b-1:d-1]
+  return lines[a-1][b-1:]+''.join(lines[a:c-1])+lines[c-1][:d-1]
+ for line in ast.splitlines():
+  n=len(line)-len(line.lstrip());t=line.strip()
+  if re.fullmatch(r'(?:Item|AssocItem|ForeignItem) \{',t):stack.append({'indent':n,'attrs':False,'test':False,'span':None,'matchedAttrs':[]})
+  for record in stack:
+   if n==record['indent']+4 and t.startswith('attrs: ['):record['attrs']=not t.endswith('[],')
+   if record['attrs']:
+    for match in span_re.finditer(line):
+     value=tuple(map(int,match.groups()));snippet=text_span(value)
+     if test_attr.fullmatch(snippet):record['test']=True;record['matchedAttrs'].append({'span':value,'text':snippet})
+   if n==record['indent']+4 and t=='],':record['attrs']=False
+   if n==record['indent']+4 and t.startswith('span: '):
+    match=span_re.search(line)
+    if match:record['span']=tuple(map(int,match.groups()))
+  if stack and n==stack[-1]['indent'] and t in ['}', '},']:
+   record=stack.pop()
+   if record['test']:
+    assert record['span'];a,b,c,d=record['span']
+    # Normalize rustc character columns to LLVM's UTF-8 byte columns.
+    normalized=[a,len(lines[a-1][:b-1].encode())+1,c,len(lines[c-1][:d-1].encode())+1]
+    found.append({'span':normalized,'attributes':record['matchedAttrs']})
+ assert not stack
+ return found
+status={'exit':0}
+try:
+ for row in manifest['files']:
+  path=Path('/scope')/row['copy'];source=path.read_text();assert hashlib.sha256(source.encode()).hexdigest()==row['sha256']
+  # A fixed logical input path keeps emitted Span debug syntax unambiguous.
+  Path('/scratch/input.rs').write_text(source)
+  command=['rustc','+nightly-2026-02-12','--edition','2021','--crate-type','lib','-Zunpretty=ast-tree','/scratch/input.rs']
+  with (s/'ast.txt').open('w') as out,(s/'rustc.stderr').open('w') as err:proc=subprocess.run(command,stdout=out,stderr=err,timeout=25)
+  assert proc.returncode==0,(row['path'],(s/'rustc.stderr').read_text()[:1000])
+  ast=(s/'ast.txt').read_text();assert len(ast.encode())<=64*1024**2
+  # Span paths are normalized only in the trusted parser input, never source.
+  scopes=extract(ast.replace('/scratch/input.rs:', '/input.rs:'),source)
+  record={'path':row['path'],'sourceSha256':row['sha256'],'astSha256':hashlib.sha256(ast.encode()).hexdigest(),'astBytes':len(ast.encode()),'excludedTestScopes':scopes,'rustcExit':0}
+  if 'expected' in row:assert [x['span'] for x in scopes]==row['expected'],(row['path'],scopes,row['expected'])
+  records.append(record);(e/'SCOPES.json').write_text(json.dumps(records,indent=2)+'\n')
+except BaseException:status={'exit':1};(e/'failure.log').write_text(traceback.format_exc())
+finally:(s/'status.json').write_text(json.dumps(status))
+while True:time.sleep(1)

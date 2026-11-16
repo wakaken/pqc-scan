@@ -1,0 +1,28 @@
+from pathlib import Path
+import importlib.util,subprocess,tempfile,json,shutil,hashlib,uuid,time,traceback
+r=Path.cwd();out=r/'tasks/052/evidence/evaluation-closure-20261116/ast-scope-r2';out.mkdir(exist_ok=False);spec=importlib.util.spec_from_file_location('runner',r/'tests/protocol/container_runner.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);name='pqc052-ast-'+uuid.uuid4().hex;record={'image':'sha256:e9de9dffc2a84fc5c7ab438445c74f7466542f3149b54626b706e2646efbe527','exit':None,'containerRemoved':False}
+try:
+ with tempfile.TemporaryDirectory(prefix='pqc052-ast-scopes-') as td:
+  td=Path(td);scope=td/'scope';scope.mkdir();files=[]
+  control='''fn production() { let _ = "#[cfg(test)]"; }\n#[cfg(test)]\nmod hidden {\n    fn helper() { if true {} }\n}\n#[test]\nfn direct() { if false {} }\n#[cfg(any(test, feature = "keep"))]\nmod shared { fn keep() {} }\n#[cfg(all(test, unix))]\nmod unix_tests { fn helper() {} }\nstruct Foo;\nimpl Foo {\n    #[cfg(test)]\n    fn only_test() { let _ = r#"} cfg(test)"#; }\n}\n'''
+  c=scope/'control.rs';c.write_text(control);files.append({'path':'synthetic-control.rs','copy':'control.rs','sha256':m.digest(c),'expected':[[3,1,5,2],[7,1,7,len(control.splitlines()[6].encode())+1],[11,1,11,len(control.splitlines()[10].encode())+1],[15,5,15,len(control.splitlines()[14].encode())+1]]})
+  # Only files containing test attributes need AST scope extraction.
+  for i,p in enumerate(sorted((r/'crates').glob('*/src/**/*.rs'))):
+   text=p.read_text()
+   if '#[cfg(test)]' not in text and '#[cfg(all(test, unix))]' not in text and '#[test]' not in text:continue
+   dst=scope/f'{i}.rs';shutil.copyfile(p,dst);files.append({'path':str(p.relative_to(r)),'copy':dst.name,'sha256':m.digest(p)})
+  (scope/'manifest.json').write_text(json.dumps({'files':files},indent=2));probe=td/'probe.py';shutil.copyfile('/tmp/pqc052-ast-scope-inner.py',probe);probe.chmod(0o444);record['inputs']=files;record['probeSha256']=m.digest(probe)
+  args=['docker','create','--name',name,'--network','none','--read-only','--user','65534:65534','--cap-drop','ALL','--security-opt','no-new-privileges','--memory','2147483648','--memory-swap','2147483648','--cpus','1','--pids-limit','16','--ulimit','cpu=120:120','--ulimit','fsize=67108864:67108864','--ulimit','nofile=128:128','--tmpfs','/scratch:rw,exec,nosuid,nodev,size=134217728,mode=1777','--mount',f'type=bind,src={scope},dst=/scope,readonly','--mount',f'type=bind,src={probe},dst=/probe.py,readonly','--entrypoint','/usr/bin/env',record['image'],'-i','PATH=/usr/local/cargo/bin:/usr/bin:/bin','RUSTUP_HOME=/usr/local/rustup','HOME=/scratch','TMPDIR=/scratch','/usr/bin/python3','/probe.py'];record['command']=args
+  subprocess.run(args,check=True,stdout=subprocess.DEVNULL,timeout=30);subprocess.run(['docker','start',name],check=True,stdout=subprocess.DEVNULL,timeout=10);start=time.monotonic()
+  while time.monotonic()-start<180:
+   p=subprocess.run(['docker','exec',name,'/bin/cat','/scratch/status.json'],capture_output=True,text=True,timeout=4)
+   if p.returncode==0:record['exit']=json.loads(p.stdout)['exit'];break
+   state=json.loads(subprocess.check_output(['docker','inspect',name],timeout=10))[0]['State']
+   if not state['Running']:raise RuntimeError('AST container stopped')
+   time.sleep(.5)
+  else:raise RuntimeError('AST deadline')
+  record['wallSeconds']=time.monotonic()-start;data=m.bounded_output(['docker','exec',name,'/bin/tar','-C','/scratch/evidence','-cf','-','.'],limit=4*1024**2);m.extract_artifacts(data,out)
+except BaseException:record['error']=traceback.format_exc()
+finally:
+ p=subprocess.run(['docker','rm','-f',name],capture_output=True,text=True,timeout=15);record['containerRemoved']=p.returncode==0
+ (out/'RUN.json').write_text(json.dumps(record,indent=2)+'\n');shutil.copyfile('/tmp/pqc052-ast-scope-inner.py',out/'probe.py.txt');shutil.copyfile('/tmp/pqc052-ast-scope-host-r2.py',out/'controller.py.txt');print({k:record.get(k) for k in ['exit','containerRemoved','wallSeconds','error']})

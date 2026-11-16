@@ -1,0 +1,16 @@
+{
+  "hypothesis": "Native resource limits may prevent macOS certificate policy initialization",
+  "variableChanged": "Remove resource rlimits only; sandbox and unauthenticated environment unchanged; 60-second timeout",
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/Users/waka/development/pqc/pqc-scan/tasks/052/evidence/assessment-20261115/scorecard/sandbox.sb",
+    "/Users/waka/development/pqc/pqc-scan/target/quality-task-052/tools/scorecard",
+    "--repo=github.com/wakaken/pqc-scan",
+    "--format=json",
+    "--show-details"
+  ],
+  "exitCode": 0,
+  "hasJson": false,
+  "stderr": "time=\"2026-11-15T05:45:40+09:00\" level=error msg=\"GitHub token env var is not set. Please read https://github.com/ossf/scorecard#authentication\" error=\"an error occurred while getting GitHub credentials\"\nSkipping github.com/wakaken/pqc-scan: run: repo unreachable: Get \"https://api.github.com/repos/wakaken/pqc-scan\": internal error: innerTransport.RoundTrip: internal error: innerTransport.RoundTrip: tls: failed to verify certificate: SecPolicyCreateSSL error: 0\n"
+}

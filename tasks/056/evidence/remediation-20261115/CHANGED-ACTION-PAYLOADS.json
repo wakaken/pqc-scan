@@ -1,0 +1,196 @@
+{
+  "7d9ac158c82047be459dbcd13719dd98e7a422cfba40e777e2e10a6cf9e4f351": {
+    "action": {
+      "action_id": "java.runtime-upgrade-for-pqc",
+      "priority": "planned",
+      "rationale": "The Java version is unknown; verify the deployed runtime before selecting a PQC API baseline.",
+      "references": [
+        "https://openjdk.org/jeps/496",
+        "https://openjdk.org/jeps/497"
+      ],
+      "steps": [
+        "Target JDK 24+ for ML-KEM and ML-DSA support planning.",
+        "Pilot compatibility testing in CI before production migration."
+      ],
+      "title": "Check Java runtime baseline for standard PQC APIs"
+    },
+    "cases": [
+      "recommendation-jwt-Java-code-quantum-vulnerable",
+      "recommendation-jwt-Java-code-quantum-uncertain",
+      "recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Java-code-quantum-uncertain",
+      "supp-recommendation-jwt-Java-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Java-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Java-code-quantum-uncertain",
+      "supp-java-unknown-bcFalse",
+      "supp-java-unknown-bcTrue",
+      "supp-extension-java"
+    ]
+  },
+  "bd3decdd03b250daaa5eed5564c45544340fcfdfa789a6a1b20fb1b1a2d2d8d6": {
+    "action": {
+      "action_id": "java.bouncycastle-pqc",
+      "code_examples": [
+        {
+          "after": "// BC Java 1.85 example: verify the resolved release/provider supports this name.\nSecurity.addProvider(new BouncyCastleProvider());\n// Provision a new ML-DSA-65 key pair and its public key to verifiers.\n// mlDsaPrivateKey must not be the previous RSA key.\nSignature sig = Signature.getInstance(\"ML-DSA-65\", \"BC\");\nsig.initSign(mlDsaPrivateKey);",
+          "before": "Security.addProvider(new BouncyCastleProvider());\nSignature sig = Signature.getInstance(\"SHA256withRSA\", \"BC\");",
+          "language": "java"
+        }
+      ],
+      "priority": "near-term",
+      "rationale": "BouncyCastle can be used as a pragmatic transition option when standard runtime support is unavailable or incomplete.",
+      "references": [
+        "https://www.bouncycastle.org/java.html",
+        "https://downloads.bouncycastle.org/java/docs/bcprov-jdk18on-javadoc/"
+      ],
+      "steps": [
+        "Verify the resolved BC release and deployed JDK support before provider initialization; the example uses BC Java 1.85 and the BC provider, not BCPQC.",
+        "Select explicit ML-DSA / ML-KEM parameter sets for the intended purpose. Generate new algorithm-compatible keys and provision matching public keys and encodings to verifiers; never reuse RSA key material.",
+        "Document provider ordering and FIPS/compliance impact."
+      ],
+      "title": "Provide BouncyCastle PQC fallback path"
+    },
+    "cases": [
+      "recommendation-jwt-Java-code-quantum-vulnerable",
+      "recommendation-jwt-Java-code-quantum-uncertain",
+      "recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Java-code-quantum-uncertain",
+      "supp-recommendation-jwt-Java-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Java-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Java-code-quantum-uncertain",
+      "supp-java-8-bcFalse",
+      "supp-java-8-bcTrue",
+      "supp-java-23-bcFalse",
+      "supp-java-23-bcTrue",
+      "supp-java-24-bcTrue",
+      "supp-java-25-bcTrue",
+      "supp-java-27-bcTrue",
+      "supp-java-unknown-bcFalse",
+      "supp-java-unknown-bcTrue",
+      "supp-extension-java"
+    ]
+  },
+  "c3526ece0a9de9778b92e18ae720fa5b79ae14c4179b99068f8380276d4dad12": {
+    "action": {
+      "action_id": "pki.hybrid-certificate-roadmap",
+      "priority": "near-term",
+      "rationale": "PKI updates require coordinated CA, chain, and relying-party compatibility planning. FIPS 204/205 standardize signature primitives, not a universal hybrid certificate format.",
+      "references": [
+        "https://csrc.nist.gov/pubs/fips/204/final",
+        "https://csrc.nist.gov/pubs/fips/205/final"
+      ],
+      "steps": [
+        "Inventory certificate signature algorithms and key sizes from CBOM/report output.",
+        "Identify the exact certificate construction and encoding, then verify provider, CA, client and trust-store support before planning issuance.",
+        "Pilot only a supported construction in non-production trust stores; if format or ecosystem support is unavailable, keep issuance unverified and evaluate another supported migration path.",
+        "Define reissuance plan for quantum-vulnerable roots/intermediates/end-entity certs."
+      ],
+      "title": "Plan certificate algorithm and trust-store migration"
+    },
+    "cases": [
+      "recommendation-pki-Java-code-quantum-vulnerable",
+      "recommendation-pki-Java-code-quantum-uncertain",
+      "recommendation-pki-JavaScript-code-quantum-vulnerable",
+      "recommendation-pki-JavaScript-code-quantum-uncertain",
+      "recommendation-pki-Go-code-quantum-vulnerable",
+      "recommendation-pki-Go-code-quantum-uncertain",
+      "recommendation-pki-Python-code-quantum-vulnerable",
+      "recommendation-pki-Python-code-quantum-uncertain",
+      "recommendation-pki-Rust-code-quantum-vulnerable",
+      "recommendation-pki-Rust-code-quantum-uncertain",
+      "recommendation-pki-Ruby-code-quantum-vulnerable",
+      "recommendation-pki-Ruby-code-quantum-uncertain",
+      "recommendation-pki-unknown-code-quantum-vulnerable",
+      "recommendation-pki-unknown-code-quantum-uncertain",
+      "supp-recommendation-pki-Java-code-quantum-vulnerable",
+      "supp-recommendation-pki-Java-code-quantum-uncertain",
+      "supp-recommendation-pki-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-pki-JavaScript-code-quantum-uncertain",
+      "supp-recommendation-pki-Go-code-quantum-vulnerable",
+      "supp-recommendation-pki-Go-code-quantum-uncertain",
+      "supp-recommendation-pki-Python-code-quantum-vulnerable",
+      "supp-recommendation-pki-Python-code-quantum-uncertain",
+      "supp-recommendation-pki-Rust-code-quantum-vulnerable",
+      "supp-recommendation-pki-Rust-code-quantum-uncertain",
+      "supp-recommendation-pki-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-pki-Ruby-code-quantum-uncertain",
+      "supp-recommendation-pki-unknown-code-quantum-vulnerable",
+      "supp-recommendation-pki-unknown-code-quantum-uncertain"
+    ]
+  },
+  "55fec814f3aa6fd22bc6ce3f72b489d3e506ca3754fd39cfe9817746309fbf96": {
+    "action": {
+      "action_id": "java.jca-ml-dsa-ml-kem",
+      "code_examples": [
+        {
+          "after": "// JDK 24+: provision a new ML-DSA key pair for the selected parameter set.\n// mlDsaPrivateKey is its private key, never the previous RSA key.\n// Provision the matching public key and encoding to verifiers before rollout.\nSignature sig = Signature.getInstance(\"ML-DSA\");\nsig.initSign(mlDsaPrivateKey);\nsig.update(payload);\nbyte[] signature = sig.sign();\n// Keep legacy verification only under the explicit migration policy.",
+          "before": "Signature sig = Signature.getInstance(\"SHA256withRSA\");\nsig.initSign(privateKey);\nsig.update(payload);\nbyte[] signature = sig.sign();",
+          "language": "java"
+        }
+      ],
+      "priority": "near-term",
+      "rationale": "Modern JDKs expose standardized PQC algorithm names through JCA, reducing vendor lock-in.",
+      "references": [
+        "https://openjdk.org/jeps/496",
+        "https://openjdk.org/jeps/497"
+      ],
+      "steps": [
+        "Select an explicit parameter set and generate a new ML-DSA key pair; never reuse RSA key material.",
+        "Provision matching public keys and required JOSE/PKI encodings to all verifiers before switching signers to ML-DSA where policy allows.",
+        "Adopt ML-KEM for key establishment in hybrid TLS/key exchange designs.",
+        "Keep dual verification during migration to preserve compatibility."
+      ],
+      "title": "Use Java standard JCA names for ML-DSA / ML-KEM"
+    },
+    "cases": [
+      "supp-java-24-bcFalse",
+      "supp-java-24-bcTrue",
+      "supp-java-25-bcFalse",
+      "supp-java-25-bcTrue",
+      "supp-java-27-bcFalse",
+      "supp-java-27-bcTrue"
+    ]
+  },
+  "cac0cf672ae9da82acf08b4f5734cb79608321d2a3322259d6c68007cc14ca7a": {
+    "action": {
+      "action_id": "envoy.pqc-signature-readiness-note",
+      "priority": "advisory",
+      "rationale": "Envoy TLS behavior depends on configured providers and peer capabilities; PQC signature readiness can vary between mesh edges, sidecars, and external clients.",
+      "references": [
+        "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/security/ssl.html",
+        "https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto"
+      ],
+      "steps": [
+        "Harden min/max TLS versions and retire static RSA key exchange where configured; ECDHE_RSA uses RSA authentication, not static RSA key exchange.",
+        "Review cipher_suites for TLS 1.0-1.2, not TLS 1.3; review certificate signatures and peer compatibility separately.",
+        "Verify PQC certificate-signature compatibility in both downstream and upstream clusters.",
+        "Gate production rollout with staged canary tests and explicit fallback paths."
+      ],
+      "title": "Validate Envoy PQC signature compatibility in control/data planes"
+    },
+    "cases": [
+      "supp-middleware-envoy-True"
+    ]
+  },
+  "accd5761b64b194cea2a225e596a5b62d57b7a594c65101ac1bfb6f9a0506a42": {
+    "action": {
+      "action_id": "tls.envoy-hardening",
+      "priority": "near-term",
+      "rationale": "Envoy control-plane config supports strict min/max protocol and cipher suite policy.",
+      "references": [
+        "https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto"
+      ],
+      "steps": [
+        "Prefer `tls_minimum_protocol_version: TLSv1_3`; use TLSv1_2 only when interoperability requires it.",
+        "Review `cipher_suites` for TLS 1.0-1.2, not TLS 1.3. Retire static RSA key exchange where configured; ECDHE_RSA uses RSA authentication, not static RSA key exchange.",
+        "Review certificate-signature migration and peer compatibility separately before removing RSA authentication."
+      ],
+      "title": "Set modern TLS policy in Envoy"
+    },
+    "cases": [
+      "supp-middleware-envoy-True"
+    ]
+  }
+}

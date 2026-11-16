@@ -1,0 +1,460 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 19c31ee..f96f985 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -123,9 +123,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "anyhow"
+-version = "1.0.102"
++version = "1.0.103"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
++checksum = "2a4385e2e34eb35d6b3efe798b9eb88096925d87726c0798709bf56d9ed84af3"
+ 
+ [[package]]
+ name = "argon2"
+@@ -535,9 +535,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "crossbeam-epoch"
+-version = "0.9.18"
++version = "0.9.20"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5b82ac4a3c2ca9c3460964f020e1402edd5753411d7737aa39c3714ad1b5420e"
++checksum = "2d6914041f254d6e9176c01941b21115dcfb7089e55135a35411081bd106ef3f"
+ dependencies = [
+  "crossbeam-utils",
+ ]
+@@ -1402,6 +1402,12 @@ version = "0.2.191"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
+ 
++[[package]]
++name = "libyaml-rs"
++version = "0.3.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "2e126dda6f34391ab7b444f9922055facc83c07a910da3eb16f1e4d9c45dc777"
++
+ [[package]]
+ name = "litemap"
+ version = "0.8.3"
+@@ -1912,11 +1918,11 @@ dependencies = [
+  "regex",
+  "serde",
+  "serde_json",
+- "serde_yaml",
+  "sha2 0.10.9",
+  "socket2",
+  "thiserror",
+  "walkdir",
++ "yaml_serde",
+ ]
+ 
+ [[package]]
+@@ -1933,7 +1939,6 @@ dependencies = [
+  "roxmltree",
+  "serde",
+  "serde_json",
+- "serde_yaml",
+  "sha2 0.10.9",
+  "syn 3.0.10",
+  "toml",
+@@ -1946,6 +1951,7 @@ dependencies = [
+  "tree-sitter-rust",
+  "tree-sitter-typescript",
+  "x509-parser",
++ "yaml_serde",
+ ]
+ 
+ [[package]]
+@@ -2005,9 +2011,9 @@ dependencies = [
+  "regex",
+  "serde",
+  "serde_json",
+- "serde_yaml",
+  "sha2 0.10.9",
+  "walkdir",
++ "yaml_serde",
+ ]
+ 
+ [[package]]
+@@ -2486,19 +2492,6 @@ dependencies = [
+  "serde",
+ ]
+ 
+-[[package]]
+-name = "serde_yaml"
+-version = "0.9.34+deprecated"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
+-dependencies = [
+- "indexmap",
+- "itoa",
+- "ryu",
+- "serde",
+- "unsafe-libyaml",
+-]
+-
+ [[package]]
+ name = "serdect"
+ version = "0.4.3"
+@@ -2806,9 +2799,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "tokio"
+-version = "1.49.0"
++version = "1.51.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "72a2903cd7736441aac9df9d7688bd0ce48edccaadf181c3b90be801e81d3d86"
++checksum = "a13e32eacd0222f9658be2ccbd83b718bfd9bfb0d54b5921913c184cb86124a5"
+ dependencies = [
+  "bytes",
+  "libc",
+@@ -2821,13 +2814,13 @@ dependencies = [
+ 
+ [[package]]
+ name = "tokio-macros"
+-version = "2.6.1"
++version = "2.7.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5c55a2eff8b69ce66c84f85e1da1c233edc36ceb85a2058d11b0d6a3c7e7569c"
++checksum = "78773a2a397f451582ce068015985c33193cf6dea8b74d2a639fe457b2f07b0e"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+- "syn 2.0.117",
++ "syn 3.0.10",
+ ]
+ 
+ [[package]]
+@@ -2976,12 +2969,6 @@ dependencies = [
+  "ctutils",
+ ]
+ 
+-[[package]]
+-name = "unsafe-libyaml"
+-version = "0.2.11"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "673aac59facbab8a9007c7f6108d11f63b603f7cabff99fabf650fea5c32b861"
+-
+ [[package]]
+ name = "untrusted"
+ version = "0.7.1"
+@@ -3403,6 +3390,19 @@ dependencies = [
+  "time",
+ ]
+ 
++[[package]]
++name = "yaml_serde"
++version = "0.10.7"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "33b729a08a9a6be689bbad3e2bf8015926db54b6622cc89c3a5f7dc174b9e918"
++dependencies = [
++ "indexmap",
++ "itoa",
++ "libyaml-rs",
++ "ryu",
++ "serde",
++]
++
+ [[package]]
+ name = "yasna"
+ version = "0.5.2"
+diff --git a/Cargo.toml b/Cargo.toml
+index e0a0110..be95208 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -17,12 +17,13 @@ license = "MIT"
+ authors = ["pqc-scan contributors"]
+ 
+ [workspace.dependencies]
+-anyhow = "1.0.102"
++anyhow = "1.0.103"
+ thiserror = "2.0.18"
+ clap = { version = "4.5.60", features = ["derive"] }
+ serde = { version = "1.0.228", features = ["derive"] }
+ serde_json = "1.0.149"
+-serde_yaml = "0.9.34"
++# Preserve the serde_yaml import/API while using the maintained YAML organization fork.
++serde_yaml = { package = "yaml_serde", version = "=0.10.7" }
+ regex = "1.12.3"
+ aho-corasick = "1.1.4"
+ rayon = "1.11.0"
+diff --git a/crates/pqc_scan_probe_ssh/Cargo.toml b/crates/pqc_scan_probe_ssh/Cargo.toml
+index 6dc88a9..2523003 100644
+--- a/crates/pqc_scan_probe_ssh/Cargo.toml
++++ b/crates/pqc_scan_probe_ssh/Cargo.toml
+@@ -14,7 +14,7 @@ runtime = ["pqc_scan_core/probe-transport", "dep:getrandom"]
+ libc = { version = "0.2", optional = true }
+ aws-lc-rs = { version = "=1.18.0", default-features = false, features = ["aws-lc-sys", "prebuilt-nasm"], optional = true }
+ russh = { version = "=0.65.1", default-features = false, features = ["aws-lc-rs"], optional = true }
+-tokio = { version = "=1.49.0", features = ["rt", "time", "io-util"], optional = true }
++tokio = { version = "=1.51.6", features = ["rt", "time", "io-util"], optional = true }
+ anyhow = { workspace = true, optional = true }
+ serde.workspace = true
+ pqc_scan_core = { path = "../pqc_scan_core" }
+diff --git a/crates/pqc_scan_rules/tests/validation.rs b/crates/pqc_scan_rules/tests/validation.rs
+index 9a927f5..337fd47 100644
+--- a/crates/pqc_scan_rules/tests/validation.rs
++++ b/crates/pqc_scan_rules/tests/validation.rs
+@@ -16,6 +16,30 @@ impl Drop for Pack {
+         let _ = fs::remove_dir_all(&self.0);
+     }
+ }
++
++#[test]
++fn yaml_aliases_multiline_and_yaml12_strings_preserve_custom_rule_values() {
++    let p = Pack::new("yaml063");
++    fs::write(p.0.join("rule.yml"), "id: CUSTOM_YAML\nkind: treesitter\ncategory: custom\nseverity: low\nrisk: quantum-uncertain\nconfidence: 0.5\nmigration_hint: &text '日本語: review'\ndescription: *text\npattern: |-\n  first\n  second\nscope: on\n").unwrap();
++    let set = RuleSet::load_from_dir(&p.0).unwrap();
++    let rule = set.get("CUSTOM_YAML").unwrap();
++    assert_eq!(rule.kind, pqc_scan_rules::RuleKind::TreeSitter);
++    assert_eq!(rule.scope, "on");
++    assert_eq!(rule.pattern, "first\nsecond");
++    assert_eq!(rule.migration_hint, "日本語: review");
++    assert_eq!(rule.description.as_deref(), Some("日本語: review"));
++}
++
++#[test]
++fn duplicate_keys_and_multiple_rule_documents_remain_rejected() {
++    let p = Pack::new("yaml063-rejected");
++    p.write("CUSTOM", "0.5", "code");
++    let original = fs::read_to_string(p.0.join("rule.yml")).unwrap();
++    for suffix in ["confidence: 0.8\n", "---\n{}\n"] {
++        fs::write(p.0.join("rule.yml"), format!("{original}{suffix}")).unwrap();
++        assert!(RuleSet::load_from_dir(&p.0).is_err());
++    }
++}
+ #[test]
+ fn blank_ids_are_rejected_without_trimming_valid_custom_ids() {
+     let p = Pack::new("ids");
+diff --git a/docs/architecture/DEPENDENCY-PROVENANCE.md b/docs/architecture/DEPENDENCY-PROVENANCE.md
+index 135e1b8..a6b897e 100644
+--- a/docs/architecture/DEPENDENCY-PROVENANCE.md
++++ b/docs/architecture/DEPENDENCY-PROVENANCE.md
+@@ -101,7 +101,12 @@ paths/package names and findings from unrelated detectors retain their own polic
+ 
+ The TOML runtime parser is pinned `toml=0.8.23` (parse only, MIT/Apache-2.0); locked support
+ crates are toml_datetime 0.6.11, serde_spanned 0.6.9, toml_edit 0.22.27 and winnow
+-0.7.15. Existing serde/serde_json/serde_yaml are reused. Build-time package fetching
++0.7.15. Existing serde/serde_json are reused. Task 063 replaces the archived YAML
++implementation with yaml_serde 0.10.7 under the existing serde_yaml Cargo alias;
++its maintained low-level parser is libyaml-rs 0.3.0. This addresses maintenance
++status, not a claim that translated unsafe parser code has become memory-safe.
++Compatibility comparisons and regression evidence are in
++[task 063](../../tasks/063/TASK-063-RESULTS.md). Build-time package fetching
+ is distinct from scanner runtime; no runtime network resolution was added.
+ 
+ Source semantics were checked against the official [Cargo dependency reference](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html),
+diff --git a/docs/roadmap/v0.3/REQUIREMENTS.md b/docs/roadmap/v0.3/REQUIREMENTS.md
+index 2872177..328fde0 100644
+--- a/docs/roadmap/v0.3/REQUIREMENTS.md
++++ b/docs/roadmap/v0.3/REQUIREMENTS.md
+@@ -40,6 +40,17 @@ E44は[到達率と追加検証の適用判断](../../../tasks/044/TASK-044-RESU
+ 
+ E55は[検査範囲と統計の集計](../../../tasks/055/TASK-055-RESULTS.md)です。試験用に制御した8状態、内容が既知の9ファイル、74入力×5検出器、境界試験でQ2-01〜08を検証しました。母数が不明であることと検査の不完全性を保持し、製品全体の網羅性には一般化しません。
+ 
++E51 is the [dependency and license assessment](../../../tasks/051/TASK-051-RESULTS.md):
++a pinned cargo-audit/RustSec snapshot, exact archive/notice bindings for all three
++declared macOS arm64 variants, four findings, retained publication review flags
++and two accepted independent review stages. No unresolved issue was accepted.
++
++E63 is the authorized [dependency remediation follow-up](../../../tasks/063/TASK-063-RESULTS.md):
++the same RustSec snapshot now reports zero findings after compatible updates and
++a validated maintained YAML replacement. Current notice flags are 0/4/4; the
++russh-util investigation is resolved and the four objc2 conditions remain on hold
++by explicit maintainer choice. E51 remains the original historical assessment.
++
+ ## Q1: 検出精度
+ 
+ | 要求項目 | 既存実装と証拠 | 不足 | 担当タスク | 受入条件 | 必須成果物（予定） |
+@@ -127,8 +138,8 @@ E55は[検査範囲と統計の集計](../../../tasks/055/TASK-055-RESULTS.md)
+ |---|---|---|---|---|---|
+ | Q6-01 CI品質・PRと定期/手動実行の分担 | EC/E41: 既存の4ジョブと報告追加 | 追加測定の費用・頻度・実行枠 | [053](../../../tasks/053/task.yaml) | 既存のジョブを再利用し、PRの軽量検証と高コスト測定を分け、全軸の証拠を保存 | `ci-measurement-plan.md` |
+ | Q6-02 テスト品質・評価器の独立レビュー | E41: 実装/試験妥当性の二段階レビュー | 追加検証の実測とレビューの結合 | [053](../../../tasks/053/task.yaml) | 最終ソースに対応する結果を保存し、ログ上の成功だけで試験妥当性を合格にしない | `test-evidence-index.json` |
+-| Q6-03 依存関係・脆弱性管理 | E41: ロックファイルを固定。最新の脆弱性監査は未実行 | ツール・脆弱性情報データベースの取得と定期確認 | [051](../../../tasks/051/task.yaml) | 版/機能構成/供給元とデータベースの取得日・ハッシュ、脆弱性・未保守・例外期限・対処を記録 | `dependency-review.json` |
+-| Q6-04 ライセンス管理・告知事項 | ED/ER: 既存の告知事項と5件の要確認事項 | 公開前の調査と許容判断 | [051](../../../tasks/051/task.yaml) | 全ての配布構成の依存とライセンス・告知事項を対応付け、未解決事項を許容する場合は維持者の判断を残す | `license-review.md` |
++| Q6-03 依存関係・脆弱性管理 | E51: pinned tool/DB and all three variant inventories assessed; four findings retained | Remediation and any future exception require explicit assessment/maintainer decisions; no waiver granted | [051](../../../tasks/051/task.yaml) | 版/機能構成/供給元とデータベースの取得日・ハッシュ、脆弱性・未保守・例外期限・対処を記録 | `dependency-review.json` |
++| Q6-04 ライセンス管理・告知事項 | E51: exact license/notice bytes mapped to all variants; existing flags 0/4/5 retained | Publication reviews remain open; only a maintainer may accept unresolved conditions | [051](../../../tasks/051/task.yaml) | 全ての配布構成の依存とライセンス・告知事項を対応付け、未解決事項を許容する場合は維持者の判断を残す | `license-review.md` |
+ | Q6-05 開発プロセス・コードレビュー・保守担当者向け文書 | EG/EU: エージェントの作業手順等あり | 貢献・変更・保守手順の実態確認 | [052](../../../tasks/052/task.yaml) | Best Practicesの各項目に根拠と担当を示し、文書の存在と実行実績を区別 | `process-review.md` |
+ | Q6-06 GitHubのブランチ保護・必須チェック・最小権限 | E41/EC: 読み取り権限を確認。ブランチ保護設定の取得は403 | 管理設定と実効権限の確認 | [052](../../../tasks/052/task.yaml) | 取得できた設定と推奨変更を分け、権限不足は不明（Unknown）。設定変更は別承認 | `github-controls.json` |
+ | Q6-07 セキュリティ報告・脆弱性対応 | EU: SECURITY.mdへの案内あり | 受付・対応・修正版案内の手順確認 | [052](../../../tasks/052/task.yaml) | 公開窓口/対応範囲/担当/連絡経路を確認し、未運用部分を明記 | `security-process.md` |
+diff --git a/docs/roadmap/v0.3/ROADMAP.md b/docs/roadmap/v0.3/ROADMAP.md
+index 1c668bd..ea3e2ad 100644
+--- a/docs/roadmap/v0.3/ROADMAP.md
++++ b/docs/roadmap/v0.3/ROADMAP.md
+@@ -120,3 +120,17 @@ GitHub管理設定、ライセンス等の告知事項の許容判断、公開
+ 049は[TLS/SSHの観測・失敗・認証境界](../../../tasks/049/TASK-049-RESULTS.md)で、元のQ3-06・Q4-08〜12と二段階レビューを確認し、完了（done）としました。固定した接続設定によるTLSの21記録、SSHの生パケットを扱う対向実装の26試験枠、OpenSSHの7試験枠を隔離測定し、実際に交渉されたグループ・検証失敗・未知・認証禁止・上限・中止・後始末を照合しています。RFC9846は[差分対応表](../../../tasks/049/TASK-049-TLS-PROFILE.md)で適用範囲を明示し、全面適合の認定とは区別します。
+ 
+ 050は[性能・再現性の評価](../../../tasks/050/TASK-050-RESULTS.md)で、元のQ5-01〜09と9成果物・二段階レビューを照合して完了（done）としました。6つの測定で成功標本144件・意図的な失敗24ケースを取得し、同じ条件の18比較区分では2倍超過の調査条件に該当せず、条件が異なる72比較区分には比較できない理由を残しています。旧023-v2精度条件の不合格（Failed）と実行固有IDの変化を合格へ読み替えず、キャッシュが温まっていない状態・条件を制御した複数日・Windows等の未実測範囲を明示しました。
++
++Task 051 is done for the [dependency and license evaluation](../../../tasks/051/TASK-051-RESULTS.md)
++against Q6-03/Q6-04, with both independent reviews accepted. The three declared
++macOS arm64 variants map 139/168/271 packages to exact notice bytes. Four RustSec
++findings and the existing 0/4/5 notice-review flags remain explicit; evaluation
++completion does not grant remediation acceptance or publication clearance.
++
++The user-authorized [task 063 follow-up](../../../tasks/063/TASK-063-RESULTS.md)
++remediated those four dependency findings, validated the maintained YAML
++replacement and resolved the russh-util source-difference flag. All three Rust
++configurations and native macOS package/install checks passed, with both review
++stages accepted. Four objc2 notice questions remain: the user selected continued
++probe-publication hold and an unsent upstream clarification draft. Task 051's
++original measurements are preserved; no release or publication was performed.
+diff --git a/docs/user/DISTRIBUTION.ja.md b/docs/user/DISTRIBUTION.ja.md
+index d9bab36..cdb8cda 100644
+--- a/docs/user/DISTRIBUTION.ja.md
++++ b/docs/user/DISTRIBUTION.ja.md
+@@ -18,14 +18,15 @@ v0.2候補では、macOS arm64向けの3構成すべてでホスト型CI、同
+ |---|---|---|
+ | `static` | なし | v0.2の配布対象。ホスト型ビルド来歴を検証する |
+ | `combined-probes` | `probe tls`、`probe ssh` | 技術検証済み。依存パッケージ4件の通知文・再配布条件の確認が残る |
+-| `all-probes` | 上記と `probe ssh-kex` | 技術検証済み。上記4件と、配布ソースの来歴1件の確認が残る |
++| `all-probes` | 上記と `probe ssh-kex` | 上記4件の通知文確認が残る。russh-utilのソース差分調査は解消済み |
+ 
+ 確認対象は、[版を固定した通知文の記録](../../third_party/notices/manifest.json)に残しています。
+ 
+ | 依存パッケージ | 該当する構成 | 公開前に行うこと |
+ |---|---|---|
+ | `block2 0.6.2`、`dispatch2 0.3.1`、`objc2-encode 4.1.0`、`objc2 0.6.5` | probe同梱の2構成 | 収集済みの上流文書には、許諾文へのリンクとApple SDK由来部分に関する疑問が記載されている。この版に適用する許諾文の全文と著作権表示を揃え、再配布条件を確認し、根拠と公開判断を記録する |
+-| `russh-util 0.52.0` | `all-probes` | レジストリ配布物のCargo VCS情報が `dirty=true` となっている。記録された上流リビジョンと実際の配布ソースを比較し、差分の由来・通知文を確認して結果を記録する。Apache-2.0本文の同梱だけでは、ソースの一致は証明できない |
++
++`russh-util 0.52.0` のソースを比較し、Rustファイル3件は記録された上流リビジョンと一致し、元のマニフェストの差はパッケージの版番号だけであることを確認しました。配布物の `dirty=true` の記録は保持し、Apache-2.0本文も固定リビジョンに対応付けています。この技術的な確認フラグは解消しましたが、公開を許可するものではありません。probe同梱2構成は、上記4件の通知文確認が残るため公開保留を維持します。[追加調査の記録](../../tasks/063/TASK-063-RESULTS.md)を参照してください。
+ 
+ これらは通知文とソースの由来についての未確認事項です。probeの故障や依存パッケージの違法性が判明したという意味ではありません。根拠を揃えるまでは確認フラグを残します。依存パッケージを差し替えたり更新したりする場合は、機能構成・プロトコル・梱包・導入を再検証してください。
+ 
+@@ -116,7 +117,7 @@ python3 scripts/package-release.py --binary target/all-probes-release-build/rele
+ python3 tests/distribution/check-install.py target/task-038/all/*.tar.gz --out-dir target/task-038/all-install
+ ```
+ 
+-依存noticeとprovenanceも同じfeature構成から生成します。インストール検証は`tls`・`ssh`・`ssh-kex`の過不足と公開鍵pinオプションを確認します。既存のobjc2系4件に加え、この構成ではrussh-utilのCargo VCS記録がdirty=trueのため、上流リビジョンと配布ソースの差の公開前確認を残します。固定リビジョンのライセンス原文は同梱します。これは未署名・未公開の技術的な配布準備です。
++依存noticeとprovenanceも同じfeature構成から生成します。インストール検証は`tls`・`ssh`・`ssh-kex`の過不足と公開鍵pinオプションを確認します。既存のobjc2系4件の確認フラグは維持します。russh-utilのソース差分調査は前述のとおり解消しましたが、配布物のdirty=trueの記録は保持します。固定リビジョンのライセンス原文は同梱します。これは未署名・未公開の技術的な配布準備です。
+ 
+ ## ホスト型ビルドの来歴を検証する
+ 
+diff --git a/docs/user/DISTRIBUTION.md b/docs/user/DISTRIBUTION.md
+index 366e7ad..c5f1666 100644
+--- a/docs/user/DISTRIBUTION.md
++++ b/docs/user/DISTRIBUTION.md
+@@ -27,7 +27,7 @@ for published assets. The probe bundles below are not part of that release.
+ |---|---|---|
+ | `static` | None | v0.2 distribution target; verify hosted build provenance |
+ | `combined-probes` | `probe tls`, `probe ssh` | Technical validation completed; four dependency notice reviews remain |
+-| `all-probes` | All above plus `probe ssh-kex` | Technical validation completed; those four reviews plus one source-provenance review remain |
++| `all-probes` | All above plus `probe ssh-kex` | Those four notice reviews remain; the russh-util source-difference investigation is resolved |
+ 
+ The unresolved dependency checks are recorded in the
+ [exact-version notice manifest](../../third_party/notices/manifest.json):
+@@ -35,7 +35,13 @@ The unresolved dependency checks are recorded in the
+ | Dependency | Affected bundles | What must be checked before publication |
+ |---|---|---|
+ | `block2 0.6.2`, `dispatch2 0.3.1`, `objc2-encode 4.1.0`, `objc2 0.6.5` | Both probe variants | The collected upstream statements link permission texts and raise Apple SDK-derived-work questions. Collect the applicable complete texts/attributions, review the redistribution conditions for these exact versions, and record a supported publication decision. |
+-| `russh-util 0.52.0` | `all-probes` | Its registry archive records `dirty=true` in Cargo VCS metadata. Compare that exact archive with the recorded upstream revision, account for the source differences and their notices, and record the result. The bundled Apache-2.0 text alone does not prove source identity. |
++
++The `russh-util 0.52.0` source comparison found that all three Rust files match
++the recorded revision and the original manifest differs only in the package
++version. Its `dirty=true` archive record is preserved, and the Apache-2.0 text
++remains bound to that revision. This resolves that technical review flag; it does
++not approve publication. Both probe variants remain on hold for the four notice
++reviews above. See the [follow-up evidence](../../tasks/063/TASK-063-RESULTS.md).
+ 
+ These are open notice/source-origin reviews, not evidence that a probe is broken
+ or that a dependency is unlawful. Preserve the flags until the checks are
+@@ -145,11 +151,10 @@ python3 tests/distribution/check-install.py target/task-038/all/*.tar.gz --out-d
+ 
+ Dependency notices and provenance use the same feature set. Installation validation
+ checks exact TLS/SSH/SSH KEX command availability and the public host-key pin option.
+-The four existing objc2-family review flags remain. This variant also flags
+-russh-util: its Cargo archive VCS metadata records dirty=true, so the difference
+-from its recorded upstream revision needs publication review. Full license text
+-from that fixed revision is bundled. This remains unsigned, unpublished technical
+-preparation.
++The four existing objc2-family review flags remain. The russh-util source
++comparison is resolved as described above; its archived dirty=true fact is
++preserved. Full license text from the fixed revision is bundled. This remains
++unsigned, unpublished technical preparation.
+ 
+ ## Verify hosted build identity
+ 
+diff --git a/tasks/051/task.yaml b/tasks/051/task.yaml
+index be22213..6c9de71 100644
+--- a/tasks/051/task.yaml
++++ b/tasks/051/task.yaml
+@@ -2,8 +2,8 @@ id: '051'
+ title: 依存脆弱性・供給元・ライセンスを評価する
+ type: improvement
+ priority: high
+-status: pending
+-owner: Planner Agent
++status: done
++owner: Evaluator
+ phase: '5'
+ description: 工具とDBを固定し、配布variantごとの依存・notice・未解決事項を追跡する。
+ quality_alias: QAM-09の依存部分
+@@ -48,3 +48,33 @@ planning_record:
+   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
++execution_record:
++  baseline: f07d782cd68cfac95d93585d5ace049f590160d4
++  branch: codex/task051-dependency-supply-chain-review
++  plan: tasks/051/TASK-051-PLAN.md
++  scope: Evaluate the three declared macOS arm64 distribution variants without changing dependencies, publication policy or scanner behavior.
++  evidence: tasks/051/evidence/dependency-20261114/
++  results: tasks/051/TASK-051-RESULTS.md
++  reviews: tasks/051/TASK-051-REVIEWS.md
++  reviewers:
++    implementation:
++      id: /root/dependency051_implementation_review
++      source_binding: tasks/051/evidence/dependency-20261114/final-run/RUN.json
++      outcome: Accepted after fixing partial notice omission; no further actionable findings.
++    test:
++      id: /root/dependency051_test_review
++      source_binding: tasks/051/evidence/dependency-20261114/final-run/RUN.json
++      outcome: Accepted; 21 tests and independent raw metadata, findings, DB and artifact checks establish evaluation adequacy.
++final_acceptance:
++  date: '2026-11-14'
++  source_head: f07d782cd68cfac95d93585d5ace049f590160d4
++  source_scope: Baseline plus task-051 executable/test changes bound in final-run/RUN.json; final prose and task-state reconciliation do not change measured inputs.
++  requirements:
++    Q6-03: Recorded exact versions/features/sources, tool and DB acquisition identities/hashes, four findings, proposed actions and explicitly unapproved exceptions with no invented expiry.
++    Q6-04: Mapped all three macOS arm64 variants and every selected dependency to exact license/notice bytes; retained all publication review flags without accepting unresolved issues.
++  outputs:
++  - target/quality-task-051/dependency-review.json
++  - target/quality-task-051/license-review.md
++  verification: Distribution Python suite 21 passed with no skips; offline evaluation exit 0; raw audit exit 1 correctly retained as findings; final-source/notice/DB/output bindings and both independent reviews accepted.
++  product_quality: Findings require action. No vulnerability, maintenance, license or source-provenance issue was waived, and no publication approval was granted.
++  limitations: RustSec snapshot assessment and resolved normal/build metadata for the three declared variants; no exploitability proof, registry yanked checks, exact linkage, cross-build or new platform certification.
+diff --git a/third_party/notices/README.md b/third_party/notices/README.md
+index 55f606b..d1fcaf6 100644
+--- a/third_party/notices/README.md
++++ b/third_party/notices/README.md
+@@ -28,6 +28,9 @@ inside the binary archive.
+ The all-probes variant additionally includes exact-version upstream license texts
+ for russh0.65.1,russh-util0.52.0,russh-cryptovec0.62.0 and delegate0.13.5.
+ Registry checksums, recorded VCS revisions and file hashes bind each fallback.
+-russh-util retains a publication-review flag because its archive VCS record is
+-dirty=true; the pinned revision identifies the license source, not an identical
+-archive source tree. Existing four objc-family review flags are unchanged.
++Task 063 resolved russh-util's source-difference flag: the checksum-bound archive's
++three Rust files match its recorded upstream revision, and Cargo.toml.orig differs
++only by the package version (0.51.0 to 0.52.0). Its normalized dependency declarations
++match the upstream workspace. The archived dirty=true record is retained; source
++comparison does not imply publication approval. The four objc-family review flags
++remain unresolved. See [the follow-up record](../../tasks/063/TASK-063-RESULTS.md).
+diff --git a/third_party/notices/manifest.json b/third_party/notices/manifest.json
+index 54e9df4..526f466 100644
+--- a/third_party/notices/manifest.json
++++ b/third_party/notices/manifest.json
+@@ -216,8 +216,8 @@
+       "upstream_repository": "https://github.com/warp-tech/russh",
+       "upstream_revision": "3d09c20c52a542ffa327723d3a44cb1edd9b0ca4",
+       "path_in_vcs": "russh-util",
+-      "review_required": true,
+-      "review_note": "Pinned upstream license text. Cargo archive VCS records dirty=true; upstream revision is license provenance, not proof of an identical source tree.",
++      "review_required": false,
++      "review_note": "Task 063 compared the checksum-bound registry archive to the recorded upstream revision: all three Rust source files are identical; Cargo.toml.orig differs only in package version 0.51.0 -> 0.52.0. Cargo normalization preserves the upstream dependency declarations. The Apache-2.0 text remains bound to that revision. dirty=true is retained as a historical archive fact; this resolves the source-difference investigation, not publication approval.",
+       "files": [
+         {
+           "path": "texts/russh-util-0.52.0/LICENSE-2.0.txt",

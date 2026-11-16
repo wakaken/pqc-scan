@@ -138,7 +138,8 @@ folder `./pqc-probe/ssh-kex`. JSON contract:
 failed/partial observations. HTML presents the result/reason first, with technical
 details closed. Existing `probe ssh` remains advertisement-only; no existing
 static/TLS/SSH-offer output format changes. Enable `probe-tls,probe-ssh,probe-ssh-kex`
-for all three commands. The `static` archive has no probes; `combined-probes` includes TLS and SSH offers;
-`all-probes` also includes SSH KEX. All three variants have been prepared and
-installation-tested for the v0.2 candidate; this does not clear the probe bundles
-for publication.
+for all three commands. New distribution archives use `static` (no probes) and
+`network` (TLS, SSH offers and SSH KEX, plus static scanning). Individual feature
+switches remain available for custom source builds. The historical v0.2 candidate
+used three variants; its validation does not clear `network` for publication.
+See the [distribution guide](DISTRIBUTION.md#release-status).

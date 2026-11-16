@@ -1,0 +1,430 @@
+--- before/tests/quality/evidence.py
++++ after/tests/quality/evidence.py
+@@ -187,7 +187,22 @@
+             raise ValueError('Unknown or reassigned requirement')
+         if record['result'].get('status') not in STATES or not record['result'].get('summary'):
+             raise ValueError('Missing result status/scope')
++        criteria = record['result'].get('criteria', {})
++        if not isinstance(criteria, dict) or any(key not in selected or value not in STATES
++                                                 for key, value in criteria.items()):
++            raise ValueError('Invalid per-requirement outcome')
+         measurement = record['measurement']
++        input_status = dict(status='Not Applicable', reason='Ordinary study artifacts are individually hash-bound; no integration population declared')
++        if 'populationDigest' in measurement:
++            expected = measurement['populationDigest']
++            if not isinstance(expected, str) or not re.fullmatch('[0-9a-f]{64}', expected):
++                raise ValueError('Invalid integration population digest')
++            population = dict(catalog, records=[item for item in catalog['records']
++                                               if item.get('id') != identifier])
++            actual = binding_digest(population)
++            input_status = dict(status='Verified' if actual == expected else 'Partial',
++                                expected=expected, actual=actual,
++                                reason='Catalog population excluding this record; complete catalog hash remains separate')
+         for key in ['head', 'version', 'features', 'standards', 'method', 'environment', 'date', 'comparison']:
+             if not measurement.get(key):
+                 raise ValueError('Missing measurement context: ' + key)
+@@ -216,19 +231,25 @@
+             raise ValueError('Explicit limitations/concerns required')
+         source = applicability(repo, record['sourceBindings'])
+         test = test_evidence(record, artifacts, source, repo)
+-        records.append(dict(record, sourceApplicability=source, observations=observations))
++        if input_status['status'] == 'Partial':
++            test['adequacyStatus'] = 'Partial'
++            test['reason'] = 'Catalog population changed after the integration evidence was recorded'
++        test['inputApplicability'] = input_status
++        records.append(dict(record, sourceApplicability=source,
++                            inputApplicability=input_status, observations=observations))
+         tests.append(test)
+     rows = []
+     for key, owner in owners.items():
+         found = [r for r in records if key in r['requirements']]
+-        current = [r for r in found if r['sourceApplicability']['status'] == 'Verified']
++        current = [r for r in found if r['sourceApplicability']['status'] == 'Verified'
++                   and r['inputApplicability']['status'] != 'Partial']
+         if not found:
+             status, reason = 'Not Tested', 'No registered evidence for this requirement; upstream work remains unfinished/unavailable'
+         elif not current:
+             status = 'Unknown' if all(r['result']['status'] == 'Unknown' for r in found) else 'Partial'
+-            reason = 'Only historical or unbound-source evidence is available; original outcomes are retained'
++            reason = 'Only historical, changed-input or unbound-source evidence is available; original outcomes are retained'
+         else:
+-            states = {r['result']['status'] for r in current}
++            states = {r['result'].get('criteria', {}).get(key, r['result']['status']) for r in current}
+             status = ('Failed' if 'Failed' in states else 'Unknown' if states == {'Unknown'}
+                       else next(iter(states)) if len(states) == 1 else 'Partial')
+             if status in {'Passed', 'Verified'} and any(t['adequacyStatus'] != 'Verified' for t in tests if t['record'] in {r['id'] for r in current}):
+@@ -275,6 +296,7 @@
+         m = r['measurement']
+         rows += [f"### {text(r['id'])}", '', f"**{text(r['result']['status'])}**: {text(r['result']['summary'])}",
+                  f"Original recorded outcome: {text(json.dumps(r['result'].get('originalOutcome', r['result']['status']), ensure_ascii=False))}.",
++                 f"Catalog input applicability: **{r['inputApplicability']['status']}**; {text(r['inputApplicability']['reason'])}.",
+                  f"Source applicability: **{r['sourceApplicability']['status']}**; head `{text(m['head'])}`; version `{text(m['version'])}`; date {text(m['date'])}.",
+                  f"Features: {text(m['features'])}. Standards: {text(m['standards'])}.",
+                  f"Method: {text(m['method'])}. Environment: {text(m['environment'])}.",
+--- before/tests/quality/test_evidence.py
++++ after/tests/quality/test_evidence.py
+@@ -129,6 +129,31 @@
+             'sourceBindings':unrelated} for stage,who in [('implementation','impl-a'),('test','test-b')]]
+         self.assertEqual(self.build()['testEvidence'][0]['adequacyStatus'],'Partial')
+ 
++    def test_detached_integration_proof_detects_changed_upstream_population(self):
++        upstream=copy.deepcopy(self.record);upstream['id']='upstream-study'
++        self.catalog['records'].append(upstream)
++        body=dict(self.catalog,records=[upstream])
++        self.record['measurement']['populationDigest']=evidence.binding_digest(body)
++        self.record['result']={'status':'Passed','summary':'Local integration verified'}
++        self.record['reviews']=[{'stage':stage,'reviewer':who,'status':'accepted',
++            'artifact':'review.md','sourceDigest':evidence.binding_digest(self.bindings),
++            'sourceBindings':dict(self.bindings)} for stage,who in [('implementation','impl-a'),('test','test-b')]]
++        first=self.build()
++        self.assertEqual(first['records'][0]['inputApplicability']['status'],'Verified')
++        upstream['result']['summary']='Changed upstream facts after integration validation'
++        changed=self.build()
++        self.assertEqual(changed['records'][0]['inputApplicability']['status'],'Partial')
++        self.assertEqual(changed['testEvidence'][0]['adequacyStatus'],'Partial')
++        self.assertNotEqual(changed['requirements'][0]['status'],'Passed')
++
++    def test_per_criterion_status_preserves_pending_hosted_ci(self):
++        self.record['requirements']=['Q1-01']
++        self.record['result']={'status':'Passed','summary':'Local tests passed',
++            'criteria':{'Q1-01':'Partial'}}
++        self.assertEqual(self.build()['requirements'][0]['status'],'Partial')
++        self.record['result']['criteria']={'Q2-01':'Passed'}
++        with self.assertRaises(ValueError):self.build()
++
+     def test_tampered_artifact_is_infrastructure_error(self):
+         (self.root/'raw.json').write_text('{"counts":{"tp":999}}')
+         with self.assertRaisesRegex(ValueError,'hash'):self.build()
+@@ -288,7 +313,13 @@
+         self.assertEqual(values['probe']['correct'],1531)
+         self.assertEqual(values['pipeline']['correct'],16)
+         self.assertEqual(result['releaseDecision'],'Unknown')
+-        self.assertEqual(len(result['testEvidence']),18)
++        self.assertEqual(len(result['testEvidence']),19)
++        for key in ['Q6-01','Q6-02','Q6-16','Q6-18']:
++            self.assertTrue(rows[key]['records'], key)
++            self.assertNotEqual(rows[key]['status'],'Not Tested', key)
++        own=records['053']
++        self.assertEqual(own['inputApplicability']['status'],'Verified')
++        self.assertEqual(own['result']['criteria']['Q6-01'],'Partial')
+ 
+ 
+ if __name__=='__main__':
+--- before/docs/quality/EVIDENCE-CATALOG.json
++++ after/docs/quality/EVIDENCE-CATALOG.json
+@@ -10637,6 +10637,208 @@
+         "Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings."
+       ],
+       "concerns": []
++    },
++    {
++      "id": "task053-integration-validation",
++      "task": "053",
++      "requirements": [
++        "Q6-01",
++        "Q6-02",
++        "Q6-16",
++        "Q6-18"
++      ],
++      "result": {
++        "status": "Partial",
++        "criteria": {
++          "Q6-01": "Partial",
++          "Q6-02": "Passed",
++          "Q6-16": "Passed",
++          "Q6-18": "Passed"
++        },
++        "summary": "Integration validation and independent review evidence; final-source hosted jobs/artifacts remain unverified",
++        "originalOutcome": "Local validation and hosted CI are assessed separately; no release acceptance"
++      },
++      "measurement": {
++        "head": "f07d782cd68cfac95d93585d5ace049f590160d4",
++        "version": "0.2.0 source / v0.3 quality integration",
++        "features": "Offline all-axis catalog and baseline-only/combined report modes",
++        "standards": "Original Q6-01/Q6-02/Q6-16/Q6-18; no new score or release gate",
++        "method": "Actual unit/negative controls, local changed CI steps and independent source-bound review; no stored command execution",
++        "environment": "macOS arm64 local validation; actual hosted environment remains Not Tested",
++        "date": "2026-11-16",
++        "comparison": "Corrects original053 own-evidence omission; previous observations remain historical",
++        "executionStatus": "Passed",
++        "commands": [
++          {
++            "label": "quality-r1",
++            "argv": [
++              "python3",
++              "-m",
++              "unittest",
++              "discover",
++              "-s",
++              "tests/quality",
++              "-p",
++              "test_*.py",
++              "-v"
++            ],
++            "exitCode": 0,
++            "seconds": 7.4265219579974655,
++            "log": "tasks/053/evidence/completion-20261116/quality-r1.log"
++          },
++          {
++            "label": "node-r1",
++            "argv": [
++              "node",
++              "--test",
++              "shell/compact-report.test.cjs",
++              "shell/final-gap-self-scan.test.cjs",
++              "shell/prepare-code-scanning.test.cjs",
++              "shell/relocated-evidence-self-scan.test.cjs",
++              "shell/self-scan-backlog.test.cjs",
++              "shell/self-scan-policy.test.cjs",
++              "shell/v02-self-scan.test.cjs"
++            ],
++            "exitCode": 0,
++            "seconds": 2.0790705420076847,
++            "log": "tasks/053/evidence/completion-20261116/node-r1.log"
++          },
++          {
++            "label": "ci-quality",
++            "argv": [
++              "bash",
++              "-e",
++              "-c",
++              "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-completion-quality-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-completion-quality-r1/ci-measurement-plan.md\n"
++            ],
++            "exitCode": 0,
++            "seconds": 0.844006541010458,
++            "log": "tasks/053/evidence/completion-20261116/ci-quality.log"
++          },
++          {
++            "label": "ci-baseline",
++            "argv": [
++              "bash",
++              "-e",
++              "-c",
++              "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-completion-baseline-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-completion-baseline-r1/ci-measurement-plan.md\n"
++            ],
++            "exitCode": 0,
++            "seconds": 0.7864347090071533,
++            "log": "tasks/053/evidence/completion-20261116/ci-baseline.log"
++          }
++        ],
++        "populationDigest": "9e0d40891936a5b895b98aa89dfd81d07ae267bedd24448bb801a94dab019774"
++      },
++      "sourceBindings": {
++        ".github/workflows/pqc-scan.yml": "36180dca9134a05cb987e25238cfb620ec0d8445c51c52e5d27b031e4ad5b431",
++        "tests/quality/report.py": "079bbe581360fa7ea3e79fee3b83d6ff5b1ffcdd4d395df2c4a91f7a328bbc47",
++        "tests/quality/evidence.py": "9ac66080dcb4e3b46d724df1d39bc25b6f633d718197d376c0428166e3ec9135",
++        "tests/quality/test_evidence.py": "b2d519089853cdef2d856d7ed1d033b82ab3ddb99a805909251cac37ae115b10",
++        "tests/quality/test_ci053.py": "02e34d452f92cda1d2e3bd4f41523d509fc0e25cc77cfa8872fcc9650de5fcf4",
++        "tests/quality/README.md": "f8fe97b606745c92ed3ab46f89de4ec4e4a2eed4e2b0ab0fe8e9cdbce67d98ce",
++        "docs/quality/CI-MEASUREMENT-PLAN.md": "b9b28167958d99682fdc000ab9908f7b79a12827843a4ccb80986a895bb72c05",
++        "README.md": "53507368ee8b2da6b08514fce29a61a6c5788bc29514001d948430a611f4548f",
++        "README.ja.md": "87a47e283a4ceb59f11087d10a2a2c0666946a3d4b845b6fb851c34e1a2164e2",
++        "tasks/053/evidence/completion-20261116/enroll-integration.py.txt": "3e3130855f31055ef1fb1e8e8c277aad946d0ebf881d06a132334ba5739af20f",
++        "tasks/053/evidence/completion-20261116/before/docs/quality/EVIDENCE-CATALOG.json": "5244ae39c085b5f9e0769baa5d38446aa21ed1dde160f138347295acac9aebfb"
++      },
++      "artifacts": [
++        {
++          "path": ".github/workflows/pqc-scan.yml",
++          "sha256": "36180dca9134a05cb987e25238cfb620ec0d8445c51c52e5d27b031e4ad5b431",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "README.ja.md",
++          "sha256": "87a47e283a4ceb59f11087d10a2a2c0666946a3d4b845b6fb851c34e1a2164e2",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "README.md",
++          "sha256": "53507368ee8b2da6b08514fce29a61a6c5788bc29514001d948430a611f4548f",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "docs/quality/CI-MEASUREMENT-PLAN.md",
++          "sha256": "b9b28167958d99682fdc000ab9908f7b79a12827843a4ccb80986a895bb72c05",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "tasks/053/evidence/completion-20261116/LOCAL-CHECKS-r1.json",
++          "sha256": "cdaf5df211d2cf033d48ea17560efff880d00b1b9abae2aab362739a19abdc53",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "tasks/053/evidence/completion-20261116/before/docs/quality/EVIDENCE-CATALOG.json",
++          "sha256": "5244ae39c085b5f9e0769baa5d38446aa21ed1dde160f138347295acac9aebfb",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "tasks/053/evidence/completion-20261116/enroll-integration.py.txt",
++          "sha256": "3e3130855f31055ef1fb1e8e8c277aad946d0ebf881d06a132334ba5739af20f",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "tests/quality/README.md",
++          "sha256": "f8fe97b606745c92ed3ab46f89de4ec4e4a2eed4e2b0ab0fe8e9cdbce67d98ce",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "tests/quality/evidence.py",
++          "sha256": "9ac66080dcb4e3b46d724df1d39bc25b6f633d718197d376c0428166e3ec9135",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "tests/quality/report.py",
++          "sha256": "079bbe581360fa7ea3e79fee3b83d6ff5b1ffcdd4d395df2c4a91f7a328bbc47",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "tests/quality/test_ci053.py",
++          "sha256": "02e34d452f92cda1d2e3bd4f41523d509fc0e25cc77cfa8872fcc9650de5fcf4",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        },
++        {
++          "path": "tests/quality/test_evidence.py",
++          "sha256": "b2d519089853cdef2d856d7ed1d033b82ab3ddb99a805909251cac37ae115b10",
++          "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
++        }
++      ],
++      "observations": [
++        {
++          "label": "python",
++          "artifact": "tasks/053/evidence/completion-20261116/LOCAL-CHECKS-r1.json",
++          "pointer": "/python"
++        },
++        {
++          "label": "node",
++          "artifact": "tasks/053/evidence/completion-20261116/LOCAL-CHECKS-r1.json",
++          "pointer": "/node"
++        },
++        {
++          "label": "localCI",
++          "artifact": "tasks/053/evidence/completion-20261116/LOCAL-CHECKS-r1.json",
++          "pointer": "/localCI"
++        },
++        {
++          "label": "hostedCI",
++          "artifact": "tasks/053/evidence/completion-20261116/LOCAL-CHECKS-r1.json",
++          "pointer": "/hostedCI"
++        }
++      ],
++      "reviews": [],
++      "limitations": [
++        "Q6-01 stays Partial until final-source hosted job/artifact evidence is verified.",
++        "Record exclusion avoids a circular input self-hash; the complete emitted catalog retains its full SHA-256.",
++        "This record does not change unfinished052 or start054; no overall product/release pass is asserted."
++      ],
++      "concerns": [
++        {
++          "priority": "high",
++          "text": "Final-source hosted CI and uploaded artifact bytes have not been verified."
++        }
++      ]
+     }
+   ]
+ }
+--- before/docs/quality/CI-MEASUREMENT-PLAN.md
++++ after/docs/quality/CI-MEASUREMENT-PLAN.md
+@@ -51,3 +51,14 @@
+ when required source, tools, inputs, feature scope, advisories or live settings
+ change. An aggregation run is not a new performance measurement or hosted CI
+ success. This local implementation has not dispatched a remote workflow.
++
++## Integration evidence without circular self-certification
++
++The integration record declares populationDigest for the complete upstream
++catalog with only that record excluded. The immutable input snapshot and its
++hash remain artifact references. A changed upstream population makes the old
++integration validation Partial even when executable source still matches.
++The emitted full catalog retains its separate full SHA-256. Each original
++criterion can have a separate outcome; pending hosted validation is not hidden
++by successful local tests. Accepted implementation and test reviews are bound
++to actual final sources, not inferred from task state or a test log.
+--- before/tests/quality/README.md
++++ after/tests/quality/README.md
+@@ -207,3 +207,11 @@
+ special files, traversal, duplicate keys and oversized inputs are rejected. No
+ new tools, network access, numeric gates or application output formats are added.
+ See [CI cost and retention](../../docs/quality/CI-MEASUREMENT-PLAN.md).
++
++The integration itself is also a source-bound catalog record. Its optional
++populationDigest hashes the catalog excluding that record to avoid circular
++self-hashes. A mismatch retains the original facts and marks input applicability
++and review adequacy Partial. The optional result.criteria map records distinct
++outcomes for the declared requirements; an unverified hosted CI requirement
++stays Partial even when local validation succeeds. Neither field changes
++baseline-only behavior or the full emitted catalog digest.
+--- before/tasks/053/evidence/completion-20261116/enroll-integration.py.txt
++++ after/tasks/053/evidence/completion-20261116/enroll-integration.py.txt
+@@ -0,0 +1,73 @@
++"""Enroll actual detached integration evidence; never invent hosted execution."""
++import argparse
++import hashlib
++import json
++from pathlib import Path
++import sys
++
++root=Path.cwd()
++sys.path.insert(0,str(root/'tests/quality'))
++import evidence
++
++parser=argparse.ArgumentParser()
++parser.add_argument('--checks',type=Path)
++parser.add_argument('--implementation-review',type=Path)
++parser.add_argument('--test-review',type=Path)
++args=parser.parse_args()
++base=Path('tasks/053/evidence/completion-20261116')
++catalog_path=Path('docs/quality/EVIDENCE-CATALOG.json')
++# The immutable pre-correction catalog contains all18 upstream studies.
++upstream=json.loads((base/'before/docs/quality/EVIDENCE-CATALOG.json').read_text())
++assert len(upstream['records'])==18
++population=evidence.binding_digest(upstream)
++files=['.github/workflows/pqc-scan.yml','tests/quality/report.py',
++       'tests/quality/evidence.py','tests/quality/test_evidence.py','tests/quality/test_ci053.py',
++       'tests/quality/README.md','docs/quality/CI-MEASUREMENT-PLAN.md',
++       'README.md','README.ja.md',str(base/'enroll-integration.py.txt'),
++       str(base/'before/docs/quality/EVIDENCE-CATALOG.json')]
++sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
++bindings={p:sha(p) for p in files}
++selected=set(files)
++commands=[dict(argv=['python3','-m','unittest','discover','-s','tests/quality','-p','test_*.py'],
++               exitCode=None,reason='Current final-source validation is still pending')]
++execution='Not Tested';criteria={q:'Partial' for q in ['Q6-01','Q6-02','Q6-16','Q6-18']}
++if args.checks:
++    checks=json.loads(args.checks.read_text())
++    assert checks['sourceBindings']==bindings,'Validation receipt binds different source bytes'
++    assert checks['populationDigest']==population
++    selected.add(str(args.checks));commands=checks['commands'];execution=checks['executionStatus']
++    if execution=='Passed':
++        criteria.update({'Q6-02':'Passed','Q6-16':'Passed','Q6-18':'Passed'})
++reviews=[]
++for stage,path in [('implementation',args.implementation_review),('test',args.test_review)]:
++    if path:
++        review=json.loads(path.read_text())
++        assert review['stage']==stage and review['status']=='accepted'
++        assert review['sourceBindings']==bindings and review['populationDigest']==population
++        assert review['sourceDigest']==evidence.binding_digest(bindings)
++        selected.add(str(path))
++        reviews.append(dict(review,artifact=str(path)))
++artifacts=[dict(path=p,sha256=sha(p),purpose='Actual integration source, immutable input population or detached validation/review receipt') for p in sorted(selected)]
++observations=[]
++if args.checks:
++    for label in ['python','node','localCI','hostedCI']:
++        observations.append(dict(label=label,artifact=str(args.checks),pointer='/'+label))
++record=dict(id='task053-integration-validation',task='053',requirements=list(criteria),
++  result=dict(status='Partial',criteria=criteria,
++              summary='Integration validation and independent review evidence; final-source hosted jobs/artifacts remain unverified',
++              originalOutcome='Local validation and hosted CI are assessed separately; no release acceptance'),
++  measurement=dict(head=__import__('subprocess').check_output(['git','rev-parse','HEAD'],text=True).strip(),
++       version='0.2.0 source / v0.3 quality integration',features='Offline all-axis catalog and baseline-only/combined report modes',
++       standards='Original Q6-01/Q6-02/Q6-16/Q6-18; no new score or release gate',
++       method='Actual unit/negative controls, local changed CI steps and independent source-bound review; no stored command execution',
++       environment='macOS arm64 local validation; actual hosted environment remains Not Tested',date='2026-11-16',
++       comparison='Corrects original053 own-evidence omission; previous observations remain historical',
++       executionStatus=execution,commands=commands,populationDigest=population),
++  sourceBindings=bindings,artifacts=artifacts,observations=observations,reviews=reviews,
++  limitations=['Q6-01 stays Partial until final-source hosted job/artifact evidence is verified.',
++               'Record exclusion avoids a circular input self-hash; the complete emitted catalog retains its full SHA-256.',
++               'This record does not change unfinished052 or start054; no overall product/release pass is asserted.'],
++  concerns=[dict(priority='high',text='Final-source hosted CI and uploaded artifact bytes have not been verified.')])
++catalog=dict(upstream,records=upstream['records']+[record])
++catalog_path.write_text(json.dumps(catalog,indent=2,ensure_ascii=False)+'\n')
++print('Enrolled053:',len(catalog['records']),'records; hosted criterion remains Partial; review stages',len(reviews))

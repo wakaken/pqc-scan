@@ -1,0 +1,31 @@
+from pathlib import Path
+import json,subprocess,tempfile,hashlib,time,datetime,os,resource,signal,shutil
+r=Path.cwd();out=r/'tasks/052/evidence/reassessment-20261116/scorecard';out.mkdir(exist_ok=False);tool=Path('/Users/waka/development/pqc/pqc-scan/target/quality-task-052/tools/scorecard');H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();assert H(tool)=='d3eef4bae2990deba1cd3f42842c47a01be4a333f1cc68decd9d937d3987b710'
+scratch=Path(tempfile.mkdtemp(prefix='pqc052-reassessment-',dir='/tmp')).resolve();oldprofile=Path('/Users/waka/development/pqc/pqc-scan/tasks/052/evidence/assessment-20261115/scorecard/final-sandbox.sb').read_text();policy=oldprofile.replace('/private/tmp/pqc-task052-scorecard-oufker83',str(scratch));(out/'POLICY.sb').write_text(policy)
+token=subprocess.check_output(['gh','auth','token','--hostname','github.com'],text=True).strip();assert token
+env={'HOME':str(scratch),'TMPDIR':str(scratch),'PATH':'/usr/bin:/bin','LC_ALL':'C','GOMAXPROCS':'2','GITHUB_AUTH_TOKEN':token};argv=['/usr/bin/sandbox-exec','-f',str(out/'POLICY.sb'),str(tool),'--repo=github.com/wakaken/pqc-scan','--format=json','--show-details']
+def limits():
+ for k,v in [(resource.RLIMIT_CPU,300),(resource.RLIMIT_FSIZE,268435456),(resource.RLIMIT_NOFILE,256),(resource.RLIMIT_NPROC,64),(resource.RLIMIT_CORE,0)]:resource.setrlimit(k,(v,v))
+record={'argv':argv,'toolSha256':H(tool),'toolVersion':'5.6.0','toolCommit':'61e84743356275f6ffca23b1b2f2cb945e19eb96','startedAtUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'environmentKeys':list(env),'credential':'ExistingghOAuth passed in memory only; no grants or token persisted','limits':{'wallSeconds':600,'cpuSeconds':300,'fileBytes':268435456,'openFiles':256,'processLimit':64,'rssBytesSupervised':4294967296,'scratchBytesSupervised':1073741824,'GOMAXPROCS':2},'filesystem':'Same reviewed052native profile with only fresh scratch path substituted; execution denied except fixedScorecardbinary; no target source code execution.','network':'Trusted official tool may read publicGitHub/OSV/Badge data; not an offline product-code experiment.','limitations':'Native sampledRSS/disk, not Linux aggregate cgroup quota. The public remote default branch is measured, not local dirty source or detector precision.'};(out/'RUN.json').write_text(json.dumps(record,indent=2)+'\n')
+start=time.monotonic();rssmax=0;sizemax=0;reason=None
+try:
+ with (out/'stdout.json').open('wb') as stdout,(out/'stderr.log').open('wb') as stderr:
+  process=subprocess.Popen(argv,cwd=scratch,env=env,stdout=stdout,stderr=stderr,preexec_fn=limits,start_new_session=True)
+  while process.poll() is None:
+   elapsed=time.monotonic()-start
+   try:rss=int(subprocess.check_output(['/bin/ps','-o','rss=','-p',str(process.pid)],text=True).strip() or '0')*1024
+   except subprocess.CalledProcessError:rss=0
+   size=sum(p.stat().st_size for p in scratch.rglob('*') if p.is_file() and not p.is_symlink());rssmax=max(rssmax,rss);sizemax=max(sizemax,size)
+   if elapsed>600 or rss>4294967296 or size>1073741824:
+    reason='wall' if elapsed>600 else 'rss' if rss>4294967296 else 'scratch';os.killpg(process.pid,signal.SIGKILL);break
+   time.sleep(.5)
+  code=process.wait()
+ record.update(exitCode=code,seconds=time.monotonic()-start,terminationReason=reason,maxObservedRssBytes=rssmax,maxObservedScratchBytes=sizemax,finishedAtUtc=datetime.datetime.now(datetime.timezone.utc).isoformat())
+ for p in [out/'stdout.json',out/'stderr.log']:
+  data=p.read_text();assert token not in data,'Credential unexpectedly present; do not expose outputs'
+ if code==0:
+  d=json.loads((out/'stdout.json').read_text());assert len(d['checks'])==18;record['target']=d.get('repo');record['checks']=len(d['checks']);record['score']=d.get('score');record['result']='Measured; scope limited to recorded remote target'
+ else:record['result']='Failed tool run; no successful measurement claimed'
+finally:
+ token=None;env.pop('GITHUB_AUTH_TOKEN',None);shutil.rmtree(scratch);record['scratchRemoved']=not scratch.exists();record['artifacts']={p.name:H(p) for p in [out/'stdout.json',out/'stderr.log',out/'POLICY.sb'] if p.exists()};(out/'RUN.json').write_text(json.dumps(record,indent=2)+'\n');shutil.copyfile('/tmp/pqc052-rerun-scorecard.py',out/'controller.py.txt')
+print(json.dumps({k:record.get(k) for k in ['exitCode','seconds','checks','score','target','result','scratchRemoved']}),flush=True)

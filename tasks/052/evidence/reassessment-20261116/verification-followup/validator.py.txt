@@ -1,0 +1,47 @@
+from pathlib import Path
+import json,hashlib,collections,copy,subprocess
+r=Path.cwd();e=r/'tasks/052/evidence/reassessment-20261116';f=e/'verification-followup';H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();checks=[]
+def check(n,v):
+ assert v,n
+ checks.append(n)
+a=json.loads((e/'outputs/best-practices-assessment.json').read_text());official=json.loads((r/'tasks/052/evidence/assessment-20261115/official/CRITERIA-EXTRACT.json').read_text());keys={c['level']+'.'+c['id'] for c in official};allowedNA={c['level']+'.'+c['id'] for c in official if c['metadata'].get('na_allowed')};refs=json.loads((e/'EVIDENCE-REFERENCES.json').read_text())
+def valid(d):
+ rows=d['criteria'];assert len(rows)==len({x['key'] for x in rows})==145 and {x['key'] for x in rows}==keys
+ assert dict(collections.Counter(x['status'] for x in rows))==d['countsByStatus']
+ for row in rows:
+  assert row['scope'] and row['owner'] and row['assessment']
+  assert row['status']!='Not applicable' or row['key'] in allowedNA
+  assert row['evidenceApplicability']==[{'key':k,'references':refs[k]} for k in row['evidence']]
+ for rs in refs.values():
+  for ref in rs:assert ref['exists'] and H(r/ref['path'])==ref['sha256']
+valid(a);checks.append('145exact official IDs/status counts/current references and scope')
+for label,mutate in [('missing',lambda d:d['criteria'].pop()),('duplicate',lambda d:d['criteria'].append(copy.deepcopy(d['criteria'][0]))),('scope',lambda d:d['criteria'][0].update(scope='')),('illegalNA',lambda d:d['criteria'][0].update(status='Not applicable')),('staleHash',lambda d:d['criteria'][0]['evidenceApplicability'][0]['references'][0].update(sha256='0'*64))]:
+ d=copy.deepcopy(a);mutate(d)
+ try:valid(d)
+ except AssertionError:checks.append('rejected '+label)
+ else:raise AssertionError('negative control accepted '+label)
+prior=json.loads((f/'before-integration/best-practices-assessment.json').read_text());before={x['key']:x['status'] for x in prior['criteria']};changed={x['key'] for x in a['criteria'] if x['status']!=before[x['key']]};check('exact6criterion status updates',changed=={'1.documentation_achievements','2.two_person_review','1.interfaces_current','1.build_standard_variables','1.build_preserve_debug','2.test_branch_coverage80'})
+for rs in refs.values():
+ for ref in rs:check('current reference '+ref['path'],H(r/ref['path'])==ref['sha256'])
+for n in ['best-practices.md','github-controls.json','process-review.md','scorecard.json','security-process.md']:check('required output parity '+n,(e/'outputs'/n).read_bytes()==(r/'target/quality-task-052'/n).read_bytes())
+check('054output parity',(r/'tasks/054/evidence/assessment-20261116/release-assessment.md').read_bytes()==(r/'target/quality-task-054/release-assessment.md').read_bytes())
+for p,sha in json.loads((f/'PROTECTED.json').read_text()).items():check('protected '+p,H(r/p)==sha)
+for dirname in ['build-flags-debug','build-flags-debug-r2','build-flags-debug-r3','build-flags-debug-r4-static','build-flags-debug-r5-release','build-flags-debug-r6-project-debug','branch-coverage-r1','branch-coverage-r2','branch-coverage-r3-all-features','branch-coverage-r4-all-features']:
+ host=json.loads((f/dirname/'HOST-RESULTS.json').read_text());check('container removed '+dirname,host['containerRemoved']);check('source unchanged '+dirname,host['sourceBeforeAfterMatch'])
+ # These bindings include current source/test/config inputs; policy/task evidence is outside compiled inputs.
+ check('current source binding '+dirname,all((r/p).is_file() and H(r/p)==sha for p,sha in host['sourceBindings'].items()))
+for dirname,exitcode in [('build-flags-debug-r6-project-debug',0),('branch-coverage-r4-all-features',0),('branch-coverage-r2',1)]:check('honest aggregate exit '+dirname,json.loads((f/dirname/'HOST-RESULTS.json').read_text())['exit']==exitcode)
+for dirname in ['branch-coverage-r2','branch-coverage-r4-all-features']:
+ d=json.loads((f/dirname/'checks.json').read_text());check('kernel bounds '+dirname,d['memoryMax']<=6*1024**3 and d['swapMax']==0 and d['pidsMax']<=128 and d['scratchCapacity']<=4*1024**3)
+build=json.loads((f/'build-flags-debug-r6-project-debug/RESULTS.json').read_text());check('independent debug controls and actual installed debug',all(build['checks'][k] for k in ['debugControlPositive','debugControlNegative','installedDebugInfo','rustLinkFlagReachedInstalledBinary','requestedCCInvoked','requestedCFLAGSObserved']));check('unexercised CXX not falsely passed',not build['checks']['requestedCXXInvoked'] and not build['checks']['requestedCXXFLAGSObserved'])
+md=json.loads((f/'MEASURED-RESULTS.json').read_text());check('actual branch populations and below80observations',md['coverage']['records']['default']['totals']['branches']['covered']==4105 and md['coverage']['records']['default']['totals']['branches']['count']==5454 and md['coverage']['records']['all-features']['totals']['branches']['covered']==4248 and md['coverage']['records']['all-features']['totals']['branches']['count']==5658)
+gh=json.loads((f/'GITHUB-HISTORY.json').read_text());check('complete observed31PR/review collections',sorted(p['number'] for p in gh['pulls'])==list(range(1,32)) and all(p['success'] for p in gh['reviews']) and len(gh['reviews'])==31);check('observed review submissions are bots',all(v['user']['type']=='Bot' for x in gh['reviews'] for v in x['reviews']))
+remaining=json.loads((e/'REMAINING.json').read_text());check('9Unknown kept unfinished',remaining['count']==9 and len(remaining['unknownCriteria'])==9 and remaining['pendingMaintainerQuestion'] is None)
+commands=[]
+for args in [['ruby','-ryaml','-e','a=YAML.load_file("tasks/052/evidence/reassessment-20261116/ORIGINAL-TASK.yaml.txt");b=YAML.load_file("tasks/052/task.yaml");b.delete("reassessment_20261116");b["status"]=a["status"];abort "original criteria changed" unless a==b;puts "original052criteria unchanged"'],['git','diff','--check']]:
+ c=subprocess.run(args,capture_output=True,text=True);commands.append({'argv':args,'exitCode':c.returncode,'stdout':c.stdout,'stderr':c.stderr});check('command exit0 '+args[0],c.returncode==0)
+for p in f.rglob('*.json'):json.loads(p.read_text())
+shutil=None
+(f/'validator.py.txt').write_bytes(Path('/tmp/pqc052-validate-followup.py').read_bytes())
+report={'sourceHead':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'checksPassed':checks,'commands':commands,'counts':a['countsByStatus'],'sourceScope':'HEAD plus current dirty source bindings; no product code/shared executable changes.','task052':'in-progress;unfinished','task054':'blocked;unfinished','review':'Assessment/source inspection/measurement evidence only; no product executable change and no review identities started.','notEstablished':['Valid source-statement coverage','Complete individual vulnerability/fix/release and regression-bug populations','All Partial scope/applicability/matrix gaps','New whole-root self-scan or hostedCI','Actual report intake/email delivery','Policy publication or badge award'],'artifactHashes':{str(p.relative_to(r)):H(p) for p in list(f.rglob('*'))+[e/'EVIDENCE-REFERENCES.json',e/'REMAINING.json',e/'SOURCE-FINAL.json']+list((e/'outputs').glob('*')) if p.is_file() and p!=f/'VALIDATION.json'}}
+(f/'VALIDATION.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({'checksPassed':len(checks),'counts':report['counts'],'allCommandsExit0':all(c['exitCode']==0 for c in commands)}))

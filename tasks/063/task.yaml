@@ -1,0 +1,42 @@
+id: '063'
+title: Remediate task-051 dependency findings and investigate publication conditions
+type: improvement
+priority: high
+status: done
+owner: Evaluator
+depends_on:
+- '051'
+description: User-authorized follow-up on 2026-11-14; preserve the completed task-051 evaluation and its original evidence.
+acceptance:
+- Update crossbeam-epoch, anyhow and tokio to compatible patched versions, or document a concrete compatibility blocker requiring a maintainer choice.
+- Investigate removal of unsafe-libyaml through a maintained YAML implementation; implement only if existing supported behavior is preserved, otherwise present demonstrated differences and options for approval.
+- Collect exact-version license/attribution evidence for the four objc2-family packages and compare published sources with recorded upstream revisions for russh-util, idna and ring.
+- Resolve evidence-backed technical omissions; preserve unresolved legal/source questions for a maintainer decision without granting publication clearance.
+- Run applicable default/optional-feature Rust checks, affected protocol/package checks, refreshed dependency assessment and both independent review stages against final source.
+constraints:
+- No publication, release, signing, tag, merge or remote settings changes.
+- No scanner rule, cryptographic decision, public schema or stored-format changes without the applicable human review.
+- Preserve task-051 history and unrelated worktree changes; do not start tasks 052-062.
+plan: tasks/063/TASK-063-PLAN.md
+evidence: tasks/063/evidence/
+baseline:
+  head: f07d782cd68cfac95d93585d5ace049f590160d4
+  branch: codex/task051-dependency-supply-chain-review
+  preexisting_work: Completed task-051 implementation, documents and evidence remain uncommitted and must be retained.
+maintainer_decision:
+  date: '2026-11-14'
+  choice: Keep both probe distributions on hold and prepare an upstream clarification draft without sending it.
+  effect: Preserve all four objc2-family review flags; no license exception or publication approval.
+results: tasks/063/TASK-063-RESULTS.md
+reviewers:
+  implementation: /root/dependency051_implementation_review
+  test: /root/dependency051_test_review
+review_record: tasks/063/TASK-063-REVIEWS.md
+final_acceptance:
+  date: '2026-11-14'
+  outcome: Completed authorized compatible remediation, source/license investigation, unsent clarification draft and required verification/reviews.
+  source: f07d782cd68cfac95d93585d5ace049f590160d4 plus source-bound task-051/task-063 worktree changes.
+  dependency_findings: All four original RustSec findings removed without suppression; final evaluation exit 0 with zero findings.
+  verification: Default/combined/all-feature workspace build/test/clippy passed; 546/580/605 Rust tests; 87 YAML comparisons; 22 final Python tests; five actual SSH cases; native macOS all-three release build/package/clean-install passed; fmt/diff/source/notice hashes checked.
+  remaining_product_conditions: Four objc2-family notice conditions remain unresolved and both probe distributions remain on hold by explicit user decision. No waiver or publication.
+  scope_limits: Ring Windows objects were not regenerated; no new Windows platform or independently reproducible binary claim. No publication, release, upstream message, commit or push.

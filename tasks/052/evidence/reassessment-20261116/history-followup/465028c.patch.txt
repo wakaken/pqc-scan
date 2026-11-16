@@ -1,0 +1,1228 @@
+diff --git a/tests/protocol/README.md b/tests/protocol/README.md
+new file mode 100644
+index 0000000..11f86ca
+--- /dev/null
++++ b/tests/protocol/README.md
+@@ -0,0 +1,39 @@
++# Confined protocol verification
++
++Prepare tools and the exact locked Cargo cache separately:
++
++```sh
++python3 tests/protocol/prepare-image.py --out-dir target/protocol-image
++PQC_RUN_CONTAINER_TESTS=1 PQC_PROTOCOL_IMAGE_FILE=target/protocol-image/IMAGE.json \
++  python3 -m unittest discover -s tests/protocol -p 'test_*.py' -v
++python3 tests/protocol/run-isolated.py --out-dir target/protocol-ci \
++  --image-file target/protocol-image/IMAGE.json --previews --ssh-kex
++```
++
++Preparation may access official package/tool sources. It copies only manifests
++and empty stubs into its new image layer; Cargo fetch does not execute repository
++build scripts/tests. OpenSSH 10.2p1 is checksum-pinned. A cached tool image can be
++selected by immutable image ID using `prepare-image.py --tool-image sha256:...`.
++No target code runs until the offline container starts.
++
++Target compilation, all-feature tests/clippy, eight synthetic TLS/SSH report
++previews and five product OpenSSH cases share the same nonroot, read-only source
++and root, empty environment, no host HOME/agent/socket and loopback-only namespace.
++Container cgroup v2 bounds all descendants to 6 GiB memory (no added swap), two CPU
++quota and 128 PIDs. Incremental caches and debug symbols are disabled, while
++test/debug assertions remain enabled. All build/temp/HOME/evidence data lives in a 4 GiB tmpfs plus
++1 MiB shared memory. The host deadline is 1200 seconds. Every exit path removes
++the container. The host exports at most 64 MiB of regular, relative artifacts.
++Read HOST-RESULTS.json for actual kernel checks, immutable image and source hashes;
++RESULTS.json binds exact executables and their logs. Passing logs do not replace
++the separate resource-pressure and cleanup checks.
++
++Set PQC_PROTOCOL_EVIDENCE_DIR to preserve individual resource-check evidence.
++The tests trigger memory OOM across children, aggregate ENOSPC across files, PID
++exhaustion and a timeout, then check removal. Missing Docker, cache, image, cgroup
++limits or a required fixture fails the gate; there is no weaker fallback.
++
++`run-native-smoke.py` and `isolation.py` retain macOS development smoke checks.
++They do not enforce group memory or aggregate disk and are not the CI confinement
++gate. Previous source-bound records remain historical; current strict-run evidence
++belongs to its own output directory. This workflow does not publish or sign builds.
+diff --git a/tests/protocol/container_entry.py b/tests/protocol/container_entry.py
+new file mode 100644
+index 0000000..035a233
+--- /dev/null
++++ b/tests/protocol/container_entry.py
+@@ -0,0 +1,208 @@
++"""Executed inside the immutable-tool container, never directly on the host."""
++import argparse
++import contextlib
++import errno
++import hashlib
++import json
++import os
++from pathlib import Path
++import signal
++import socket
++import subprocess
++import sys
++import time
++
++ROOT = Path('/source')
++SCRATCH = Path('/scratch')
++EVIDENCE = SCRATCH/'evidence'
++
++
++def sha(path):
++    h = hashlib.sha256()
++    with Path(path).open('rb') as stream:
++        for part in iter(lambda: stream.read(65536), b''):
++            h.update(part)
++    return h.hexdigest()
++
++
++def cgroup(name):
++    value = (Path('/sys/fs/cgroup')/name).read_text().strip()
++    if value == 'max':
++        raise RuntimeError('finite cgroup v2 limits are required')
++    return int(value)
++
++
++def write(name, record):
++    (EVIDENCE/name).write_text(json.dumps(record,indent=2)+'\n')
++
++
++def facts():
++    if sys.platform != 'linux' or os.getuid() != 65534 or not ROOT.is_dir():
++        raise RuntimeError('requires the confined nonroot Linux launcher')
++    memory = cgroup('memory.max'); swap = cgroup('memory.swap.max'); pids = cgroup('pids.max')
++    cpu = (Path('/sys/fs/cgroup')/'cpu.max').read_text().split()
++    if cpu[0] == 'max' or swap != 0:
++        raise RuntimeError('CPU quota and zero additional swap are required')
++    active = {p.name for p in Path('/sys/class/net').iterdir()
++              if (p/'flags').is_file() and int((p/'flags').read_text(),16) & 1}
++    if active != {'lo'}:
++        raise RuntimeError('only loopback may be active in the isolated network namespace')
++    return {'memoryMax':memory, 'swapMax':swap, 'pidsMax':pids, 'cpuMax':cpu,
++            'scratchCapacity':os.statvfs(SCRATCH).f_blocks*os.statvfs(SCRATCH).f_frsize}
++
++
++def boundary():
++    result = facts()
++    for key, path in [('sourceReadonly', ROOT/'forbidden-write'), ('rootReadonly', Path('/forbidden-write'))]:
++        try:
++            path.write_text('unexpected')
++        except OSError as error:
++            if error.errno not in {errno.EACCES, errno.EROFS}:
++                raise
++            result[key] = True
++        else:
++            raise RuntimeError('unexpected writable source/root')
++    result['emptyEnvironment'] = 'PQC_SYNTHETIC_SECRET' not in os.environ and os.environ['HOME']=='/scratch/home'
++    assert result['emptyEnvironment']
++    with socket.socket() as listener:
++        listener.bind(('127.0.0.1',0)); listener.listen()
++        with socket.create_connection(listener.getsockname(), timeout=1):
++            connection, _ = listener.accept(); connection.close()
++    result['loopbackWorks'] = True
++    with socket.socket() as peer:
++        peer.settimeout(1)
++        try:
++            peer.connect(('192.0.2.1',9))
++        except OSError as error:
++            if error.errno not in {errno.ENETUNREACH, errno.EHOSTUNREACH, errno.EPERM, errno.EACCES}:
++                raise
++            result['externalNetworkDenied'] = True
++        else:
++            raise RuntimeError('external connection unexpectedly allowed')
++    return result
++
++
++def oom_kills():
++    events = (Path('/sys/fs/cgroup')/'memory.events').read_text().splitlines()
++    return int(dict(line.split() for line in events)['oom_kill'])
++
++
++def exercise(case):
++    result = boundary()
++    if case == 'memory':
++        before = oom_kills(); children = []
++        try:
++            code = "from pathlib import Path; import time; Path('/proc/self/oom_score_adj').write_text('1000'); data=bytearray(40*1024**2); data[::4096]=b'x'*len(data[::4096]); time.sleep(30)"
++            children = [subprocess.Popen([sys.executable,'-c',code]) for _ in range(2)]
++            deadline = time.monotonic()+15
++            while oom_kills() == before and time.monotonic() < deadline:
++                time.sleep(.05)
++            result['oomKills'] = oom_kills()-before
++            assert result['oomKills'] > 0, 'memory pressure did not trigger the cgroup limit'
++        finally:
++            for child in children:
++                if child.poll() is None: child.kill()
++                child.wait()
++    elif case == 'disk':
++        folder = SCRATCH/'disk-probe'; folder.mkdir(); count = 0
++        try:
++            try:
++                for i in range(64):
++                    with (folder/str(i)).open('wb') as stream:
++                        for _ in range(4): stream.write(b'x'*1024**2)
++                    count += 1
++            except OSError as error:
++                if error.errno != errno.ENOSPC: raise
++                result.update(aggregateDiskDenied=True, filesWritten=count)
++            assert result.get('aggregateDiskDenied') and count > 1
++        finally:
++            for path in folder.iterdir(): path.unlink()
++            folder.rmdir()
++    elif case == 'pids':
++        children = []
++        try:
++            for _ in range(64):
++                try:
++                    pid = os.fork()
++                except OSError as error:
++                    if error.errno != errno.EAGAIN: raise
++                    result.update(forkDenied=True, children=len(children)); break
++                if pid == 0:
++                    signal.pause(); os._exit(0)
++                children.append(pid)
++            assert result.get('forkDenied')
++        finally:
++            for pid in children: os.kill(pid, signal.SIGKILL)
++            for pid in children: os.waitpid(pid, 0)
++    elif case == 'timeout':
++        time.sleep(60)
++    write('checks.json',result)
++
++
++def suite(previews, ssh_kex):
++    write('checks.json',boundary())
++    cargo = SCRATCH/'cargo'; cargo.mkdir()
++    for name in ['registry', 'git']:
++        cache = Path('/usr/local/cargo')/name
++        if cache.exists(): (cargo/name).symlink_to(cache, target_is_directory=True)
++    command = ['cargo','test','--workspace','--all-features','--locked','--offline','--no-run','--message-format=json']
++    with (EVIDENCE/'build.jsonl').open('w') as stdout, (EVIDENCE/'build.log').open('w') as stderr:
++        subprocess.run(command,cwd=ROOT,stdout=stdout,stderr=stderr,check=True,timeout=900)
++    binaries = {}; tests = []
++    for line in (EVIDENCE/'build.jsonl').read_text().splitlines():
++        item = json.loads(line)
++        if item.get('reason')=='compiler-artifact' and item.get('executable'):
++            path = item['executable']; binaries[path] = sha(path)
++            if item.get('profile',{}).get('test'):
++                tests.append((item['target']['name'], path))
++    assert tests
++    records = []
++    for index, (name,path) in enumerate(tests):
++        assert all(sha(p)==h for p,h in binaries.items())
++        log = f'{index:02d}-{name}.log'
++        with (EVIDENCE/log).open('w') as stream:
++            completed = subprocess.run([path],cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT,timeout=180)
++        records.append({'test':name,'executable':path,'sha256':binaries[path],'exit':completed.returncode,'log':log})
++        print(f'{name}: exit {completed.returncode}',flush=True)
++        if completed.returncode:
++            write('RESULTS.json',{'exit':completed.returncode,'binaries':binaries,'tests':records})
++            raise RuntimeError('a confined test executable failed')
++    with (EVIDENCE/'clippy.log').open('w') as log:
++        subprocess.run(['cargo','clippy','--workspace','--all-targets','--all-features','--locked','--offline','--','-D','warnings'],
++                       cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=600)
++    binary = SCRATCH/'target/debug/pqc-scan'
++    for enabled, script, directory in [(previews,'report-previews.py','previews'), (ssh_kex,'ssh-kex-product.py','ssh-kex')]:
++        if enabled:
++            args = [sys.executable,str(ROOT/'tests/protocol'/script),'--binary',str(binary),'--out-dir',str(EVIDENCE/directory)]
++            if script == 'ssh-kex-product.py': args.append('--inside')
++            with (EVIDENCE/(directory+'.log')).open('w') as log:
++                subprocess.run(args,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=120)
++    assert all(sha(p)==h for p,h in binaries.items())
++    write('RESULTS.json',{'command':command,'exit':0,'binaries':binaries,'tests':records,'binariesBeforeAfterMatch':True,
++                          'previews':previews,'sshKex':ssh_kex,'limits':facts()})
++
++
++def main():
++    parser = argparse.ArgumentParser(); parser.add_argument('--case', required=True)
++    parser.add_argument('--previews', action='store_true'); parser.add_argument('--ssh-kex',action='store_true')
++    args = parser.parse_args()
++    for folder in [EVIDENCE, SCRATCH/'home', SCRATCH/'tmp']:
++        folder.mkdir(exist_ok=True)
++    # Keep the container running until the host copies bounded evidence. tmpfs
++    # contents disappear on exit, so completion is an atomic status file.
++    status = {'exit':0}
++    with (EVIDENCE/'entry.log').open('w') as log, contextlib.redirect_stdout(log), contextlib.redirect_stderr(log):
++        try:
++            if args.case == 'suite': suite(args.previews,args.ssh_kex)
++            else: exercise(args.case)
++        except BaseException as error:
++            status = {'exit':1, 'errorType':type(error).__name__}
++            print('confined entry failed:',type(error).__name__,flush=True)
++    temporary = SCRATCH/'status.pending'
++    temporary.write_text(json.dumps(status)+'\n'); temporary.replace(SCRATCH/'status.json')
++    while True:
++        time.sleep(60)
++
++
++if __name__ == '__main__':
++    main()
+diff --git a/tests/protocol/container_runner.py b/tests/protocol/container_runner.py
+new file mode 100644
+index 0000000..42ab4ea
+--- /dev/null
++++ b/tests/protocol/container_runner.py
+@@ -0,0 +1,241 @@
++"""Host-side launcher. Target code runs only in a finite, offline Linux container."""
++import hashlib
++import io
++import json
++import os
++from pathlib import Path, PurePosixPath
++import re
++import selectors
++import shutil
++import stat
++import subprocess
++import tarfile
++import tempfile
++import time
++import uuid
++
++ROOT = Path(__file__).resolve().parents[2]
++ALLOWED_DIRS = {'crates', 'rules', 'schemas', 'tests', 'tasks', 'shell', 'examples'}
++ALLOWED_FILES = {'Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', '.gitignore', 'README.md', 'README.ja.md', 'LICENSE', 'docs/quality/RULE-QUALITY-METADATA.json'}
++ENV = {'PATH':'/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
++       'HOME':'/scratch/home', 'TMPDIR':'/scratch/tmp', 'CARGO_HOME':'/scratch/cargo',
++       'RUSTUP_HOME':'/usr/local/rustup', 'CARGO_NET_OFFLINE':'true', 'CARGO_BUILD_JOBS':'2',
++       'RUST_TEST_THREADS':'2', 'CARGO_INCREMENTAL':'0', 'CARGO_PROFILE_DEV_DEBUG':'0',
++       'CARGO_PROFILE_TEST_DEBUG':'0', 'CARGO_TARGET_DIR':'/scratch/target', 'LC_ALL':'C',
++       'PYTHONDONTWRITEBYTECODE':'1'}
++
++
++def digest(path):
++    h = hashlib.sha256()
++    with Path(path).open('rb') as stream:
++        for part in iter(lambda: stream.read(65536), b''):
++            h.update(part)
++    return h.hexdigest()
++
++
++def source_bytes(root, name, limit=32*1024**2):
++    """Resolve each repository component through held, no-follow directory FDs."""
++    path = PurePosixPath(name); parts = path.parts
++    if not parts or path.is_absolute() or '..' in parts or '\\' in name or ':' in name or any(ord(c)<32 for c in name):
++        raise ValueError('unsafe source path')
++    directory = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
++    try:
++        for part in parts[:-1]:
++            child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=directory)
++            os.close(directory); directory = child
++        fd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
++        with os.fdopen(fd, 'rb') as stream:
++            info = os.fstat(stream.fileno())
++            if not stat.S_ISREG(info.st_mode) or info.st_size > limit:
++                raise ValueError('source must be a bounded regular file')
++            data = stream.read(limit+1)
++            if len(data) > limit:
++                raise ValueError('source grew beyond the size limit')
++            return data
++    finally:
++        os.close(directory)
++
++
++def snapshot(root, destination):
++    root = Path(root).resolve(); destination = Path(destination)
++    destination.mkdir(parents=True, exist_ok=False)
++    names = subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=root).decode().split('\0')
++    bindings = {}; size = 0
++    for name in sorted(set(filter(None, names))):
++        path = PurePosixPath(name)
++        if path.is_absolute() or '..' in path.parts or any(ord(c) < 32 for c in name) or '\\' in name or ':' in name:
++            raise ValueError('unsafe source path')
++        if name not in ALLOWED_FILES and path.parts[0] not in ALLOWED_DIRS:
++            continue
++        if any(p == '.git' or p.startswith('.env') or p == '__pycache__' for p in path.parts):
++            continue
++        try:
++            data = source_bytes(root, name)
++        except OSError as error:
++            raise ValueError('source changed or contains a link/special entry') from error
++        size += len(data)
++        if size > 128*1024**2:
++            raise ValueError('source snapshot exceeds total size limit')
++        target = destination / name; target.parent.mkdir(parents=True, exist_ok=True)
++        target.write_bytes(data); target.chmod(0o444)
++        bindings[name] = hashlib.sha256(data).hexdigest()
++        if bindings[name] != hashlib.sha256(source_bytes(root,name)).hexdigest():
++            raise ValueError('source changed while copying')
++    return bindings
++
++
++def image_id(path):
++    value = json.loads(Path(path).read_text())['image']
++    if not re.fullmatch(r'sha256:[0-9a-f]{64}', value):
++        raise ValueError('a locally prepared immutable image ID is required')
++    return value
++
++
++def extract_artifacts(data, destination, max_bytes=64*1024**2):
++    destination = Path(destination).resolve(); destination.mkdir(parents=True, exist_ok=True)
++    total = 0; names = set()
++    with tarfile.open(fileobj=io.BytesIO(data)) as archive:
++        members = []
++        for member in archive:
++            if len(members) >= 4096:
++                raise ValueError('too many artifact entries')
++            members.append(member)
++        for member in members:
++            name = PurePosixPath(member.name)
++            if name.is_absolute() or '..' in name.parts or any(ord(c) < 32 for c in member.name) or '\\' in member.name or ':' in member.name:
++                raise ValueError('unsafe artifact path')
++            if member.isdir():
++                continue
++            if member.type not in {tarfile.REGTYPE,tarfile.AREGTYPE} or not name.parts or member.size < 0 or name in names:
++                raise ValueError('artifact must be a unique regular file')
++            names.add(name); total += member.size
++            if total > max_bytes:
++                raise ValueError('artifact size limit exceeded')
++        for member in members:
++            if not member.isfile():
++                continue
++            target = destination / member.name
++            if any(parent.is_symlink() for parent in [target, *target.parents]):
++                raise ValueError('artifact destination cannot contain links')
++            target.parent.mkdir(parents=True, exist_ok=True)
++            with target.open('xb') as stream, archive.extractfile(member) as source:
++                shutil.copyfileobj(source, stream, 65536)
++
++
++def bounded_output(command, limit=64*1024**2, timeout=30):
++    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
++    chunks = []; size = 0; deadline = time.monotonic() + timeout
++    try:
++        with selectors.DefaultSelector() as selector:
++            selector.register(process.stdout, selectors.EVENT_READ)
++            while True:
++                remaining = deadline - time.monotonic()
++                if remaining <= 0:
++                    raise subprocess.TimeoutExpired(command, timeout)
++                if not selector.select(remaining):
++                    raise subprocess.TimeoutExpired(command, timeout)
++                part = os.read(process.stdout.fileno(), min(65536, limit-size+1))
++                if not part:
++                    break
++                chunks.append(part); size += len(part)
++                if size > limit:
++                    raise ValueError('container artifact export exceeds limit')
++        if process.wait(timeout=max(.1, deadline-time.monotonic())):
++            raise RuntimeError('container artifact export failed')
++        return b''.join(chunks)
++    finally:
++        if process.poll() is None:
++            process.kill()
++        process.wait(); process.stdout.close()
++
++
++def execute(image, output, *, case='suite', previews=False, ssh_kex=False,
++            memory=6*1024**3, scratch=4*1024**3, pids=128, timeout=1200):
++    if not re.fullmatch(r'sha256:[0-9a-f]{64}', image):
++        raise ValueError('immutable local image ID required')
++    if case not in {'suite', 'boundary', 'memory', 'disk', 'pids', 'timeout'}:
++        raise ValueError('unknown isolation case')
++    output = Path(output).resolve(); output.mkdir(parents=True, exist_ok=False)
++    record = {'image':image, 'environment':ENV, 'case':case, 'exit':None, 'containerRemoved':False,
++              'limits':{'memoryBytes':memory, 'swapBytes':0, 'scratchBytes':scratch,
++                        'sharedMemoryBytes':1024**2, 'pids':pids, 'cpus':2, 'wallSeconds':timeout,
++                        'memoryEnforced':False, 'aggregateDiskEnforced':False}}
++    container = None
++    try:
++        subprocess.run(['docker', 'image', 'inspect', image], check=True, stdout=subprocess.DEVNULL, timeout=30)
++        with tempfile.TemporaryDirectory(prefix='pqc-confined-source-') as temporary:
++            source = Path(temporary)/'source'; bindings = snapshot(ROOT, source)
++            record['sourceBindings'] = bindings
++            for folder in [source, *[p for p in source.rglob('*') if p.is_dir()]]:
++                folder.chmod(0o755)
++            container = 'pqc-confined-'+uuid.uuid4().hex
++            record['containerId'] = container
++            command = ['docker', 'create', '--name', container, '--network', 'none', '--read-only', '--user', '65534:65534',
++                       '--log-driver', 'none', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges',
++                       '--memory', str(memory), '--memory-swap', str(memory), '--cpus', '2',
++                       '--pids-limit', str(pids), '--shm-size', '1m', '--ulimit', 'core=0:0',
++                       '--ulimit', 'fsize=1073741824:1073741824', '--ulimit', 'nofile=1024:1024',
++                       '--ulimit', 'cpu=900:900', '--tmpfs', f'/scratch:rw,exec,nosuid,nodev,size={scratch},mode=1777',
++                       '--mount', f'type=bind,src={source},dst=/source,readonly', '--workdir', '/source',
++                       '--entrypoint', '/usr/bin/env', image, '-i', *[f'{k}={v}' for k,v in ENV.items()],
++                       '/usr/bin/python3', '/source/tests/protocol/container_entry.py', '--case', case]
++            if previews: command.append('--previews')
++            if ssh_kex: command.append('--ssh-kex')
++            record['containerId'] = subprocess.check_output(command,text=True,timeout=30).strip()
++            inspect = json.loads(subprocess.check_output(['docker', 'inspect', container],timeout=10))[0]
++            config = inspect['HostConfig']
++            assert (config['NetworkMode']=='none' and config['ReadonlyRootfs'] and not config['Privileged']
++                    and config['Memory']==memory and config['MemorySwap']==memory and config['PidsLimit']==pids)
++            assert inspect['Config']['User']=='65534:65534'
++            assert len(inspect['Mounts'])==1 and not inspect['Mounts'][0]['RW'] and inspect['Mounts'][0]['Destination']=='/source'
++            record['container'] = {'HostConfig':{k:config[k] for k in ['NetworkMode','ReadonlyRootfs','Memory','MemorySwap','NanoCpus','PidsLimit','SecurityOpt','CapDrop','ShmSize','Tmpfs']},
++                                   'User':inspect['Config']['User'], 'mounts':[{'destination':'/source','readonly':True}]}
++            subprocess.run(['docker','start',container],check=True,stdout=subprocess.DEVNULL,timeout=30)
++            deadline = time.monotonic()+timeout
++            while True:
++                if time.monotonic() >= deadline:
++                    raise subprocess.TimeoutExpired(['docker','exec',container],timeout)
++                state = json.loads(subprocess.check_output(['docker','inspect',container],timeout=10))[0]['State']
++                if not state['Running']:
++                    record['exit'] = state['ExitCode']; record['unexpectedContainerState'] = state
++                    raise RuntimeError('container exited before evidence collection')
++                try:
++                    status = json.loads(bounded_output(['docker','exec',container,'/bin/cat','/scratch/status.json'],limit=4096,timeout=3))
++                    break
++                except RuntimeError:
++                    time.sleep(.05)
++            record['exit'] = status['exit']
++            data = bounded_output(['docker','exec',container,'/bin/tar','-C','/scratch/evidence','-cf','-','.'])
++            extract_artifacts(data, output)
++            checks = json.loads((output/'checks.json').read_text())
++            assert checks['memoryMax'] <= memory and checks['swapMax']==0 and checks['pidsMax']<=pids
++            assert checks['scratchCapacity']<=scratch
++            record['limits'].update(memoryEnforced=True, aggregateDiskEnforced=True)
++            record['sourceBeforeAfterMatch'] = all(hashlib.sha256(source_bytes(ROOT,name)).hexdigest()==h for name,h in bindings.items())
++            if record['exit'] or not record['sourceBeforeAfterMatch']:
++                raise RuntimeError('confined execution failed; inspect entry.log and evidence')
++    except subprocess.TimeoutExpired:
++        record['exit'] = 'deadline_exceeded'
++        raise
++    except BaseException as error:
++        if record['exit'] in {None,0}:
++            record['exit'] = 'host_verification_failed'
++        record['errorType'] = type(error).__name__
++        raise
++    finally:
++        try:
++            if container:
++                try:
++                    removed = subprocess.run(['docker','rm','-f',container],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=30)
++                    if removed.returncode:
++                        remaining = subprocess.run(['docker','container','ls','--all','--quiet','--filter','name=^/'+container+'$'],
++                                                   capture_output=True,text=True,timeout=10)
++                        if remaining.returncode or remaining.stdout.strip():
++                            raise RuntimeError('container cleanup could not be confirmed')
++                except BaseException:
++                    record['exit'] = 'cleanup_failed'
++                    raise
++                record['containerRemoved'] = True
++        finally:
++            (output/'HOST-RESULTS.json').write_text(json.dumps(record,indent=2)+'\n')
++    return record
+diff --git a/tests/protocol/isolation.py b/tests/protocol/isolation.py
+new file mode 100644
+index 0000000..0ba6e0f
+--- /dev/null
++++ b/tests/protocol/isolation.py
+@@ -0,0 +1,71 @@
++"""macOS file/environment/network boundary, with finite per-process limits.
++
++This is not a hostile-code VM: no memory limit, aggregate disk quota or process-tree memory
++accounting is provided. OS read-only source rules and no-egress apply to children.
++"""
++import json
++import os
++from pathlib import Path
++import resource
++import signal
++import subprocess
++import sys
++
++
++def environment(scratch, toolchain=None):
++    scratch = Path(scratch).resolve()
++    for name in ['home', 'tmp', 'cargo']:
++        (scratch / name).mkdir(exist_ok=True)
++    paths = [str(Path(sys.executable).resolve().parent), '/usr/bin', '/bin', '/usr/sbin', '/sbin']
++    if toolchain:
++        paths.insert(0, str(Path(toolchain).resolve().parent))
++    return {'PATH': os.pathsep.join(paths), 'HOME': str(scratch / 'home'),
++            'TMPDIR': str(scratch / 'tmp'), 'CARGO_HOME': str(scratch / 'cargo'),
++            'CARGO_NET_OFFLINE': 'true', 'LC_ALL': 'C', 'RUST_TEST_THREADS': '2'}
++
++
++def profile(source, scratch, read_paths=(), write_paths=()):
++    def subpath(path):
++        return '(subpath ' + json.dumps(str(Path(path).resolve())) + ')'
++    reads = [source, scratch, '/System', '/usr', '/bin', '/sbin',
++             '/opt/homebrew/Cellar', '/opt/homebrew/opt', '/Library/Developer', '/Applications/Xcode.app', '/private/etc', '/dev',
++             *read_paths]
++    writes = [scratch, *write_paths]
++    return '\n'.join([
++        '(version 1)', '(deny default)',
++        '(allow process* signal sysctl-read mach-lookup)',
++        '(allow file-read* (literal "/"))',
++        '(allow file-read-metadata)',
++        '(allow file-read* ' + ' '.join(map(subpath, reads)) + ')',
++        '(allow file-write* ' + ' '.join(map(subpath, writes)) + ' (literal "/dev/null"))',
++        '(allow network-bind (local ip "localhost:*"))',
++        '(allow network-inbound (local ip "localhost:*"))',
++        '(allow network-outbound (remote ip "localhost:*"))',
++    ])
++
++
++def limits():
++    for key, cap in [(resource.RLIMIT_CPU, 900),
++                     (resource.RLIMIT_FSIZE, 1024**3), (resource.RLIMIT_NOFILE, 1024),
++                     (resource.RLIMIT_NPROC, 1024), (resource.RLIMIT_CORE, 0)]:
++        _, hard = resource.getrlimit(key)
++        value = cap if hard == resource.RLIM_INFINITY else min(cap, hard)
++        resource.setrlimit(key, (value, value))
++
++
++def run(command, cwd, env, policy, timeout, **kwargs):
++    process = subprocess.Popen(['/usr/bin/sandbox-exec', '-p', policy, *map(str, command)],
++                               cwd=cwd, env=env, start_new_session=True, preexec_fn=limits,
++                               **{k: v for k, v in kwargs.items() if k != 'capture_output'},
++                               **({'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE}
++                                  if kwargs.get('capture_output') else {}))
++    try:
++        stdout, stderr = process.communicate(timeout=timeout)
++        return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
++    finally:
++        # Reap descendants on timeout as well as on ordinary completion.
++        try:
++            os.killpg(process.pid, signal.SIGKILL)
++        except ProcessLookupError:
++            pass
++        process.wait()
+diff --git a/tests/protocol/prepare-image.py b/tests/protocol/prepare-image.py
+new file mode 100644
+index 0000000..85a8a02
+--- /dev/null
++++ b/tests/protocol/prepare-image.py
+@@ -0,0 +1,57 @@
++#!/usr/bin/env python3
++"""Network-capable tool/cache preparation; never build or run repository target code."""
++import argparse
++import hashlib
++import json
++from pathlib import Path
++import re
++import shutil
++import subprocess
++import tempfile
++import urllib.request
++
++ROOT = Path(__file__).resolve().parents[2]
++URL = 'https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.2p1.tar.gz'
++SHA = 'ccc42c0419937959263fa1dbd16dafc18c56b984c03562d2937ce56a60f798b2'
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--out-dir', type=Path, required=True)
++    parser.add_argument('--tool-image', help='reuse an existing immutable tool image, without rebuilding OpenSSH')
++    args = parser.parse_args(); args.out_dir.mkdir(parents=True, exist_ok=False)
++    with tempfile.TemporaryDirectory(prefix='pqc-tool-image-') as temp:
++        context = Path(temp); manifests = context/'manifests'; manifests.mkdir()
++        for name in ['Cargo.toml','Cargo.lock']:
++            shutil.copyfile(ROOT/name, manifests/name)
++        for manifest in sorted((ROOT/'crates').glob('*/Cargo.toml')):
++            folder = manifests/'crates'/manifest.parent.name; (folder/'src').mkdir(parents=True)
++            shutil.copyfile(manifest, folder/'Cargo.toml')
++            (folder/'src/lib.rs').write_text('')
++            (folder/'src/main.rs').write_text('fn main() {}\n')
++        if args.tool_image:
++            if not re.fullmatch(r'sha256:[0-9a-f]{64}',args.tool_image):
++                raise ValueError('immutable local tool image ID required')
++            tag = 'pqc-protocol-tools:'+args.tool_image.split(':')[1]
++            subprocess.run(['docker','tag',args.tool_image,tag],check=True)
++            prefix = 'FROM '+tag+'\n'
++        else:
++            data = urllib.request.urlopen(URL,timeout=30).read(4*1024**2+1)
++            if hashlib.sha256(data).hexdigest()!=SHA:
++                raise ValueError('OpenSSH tool archive digest mismatch')
++            (context/'openssh-10.2p1.tar.gz').write_bytes(data)
++            prefix = (ROOT/'tests/feasibility/ssh-kex/Dockerfile').read_text().split('WORKDIR /work')[0]
++        # Only Cargo manifests and empty source stubs enter this preparation layer.
++        # cargo fetch resolves/downloads the locked cache; no build.rs or tests run.
++        (context/'Dockerfile').write_text(prefix+'\nRUN rustup component add --toolchain 1.93.1 clippy rustfmt\nCOPY manifests /tool-manifests\nRUN cargo fetch --manifest-path /tool-manifests/Cargo.toml --locked\nWORKDIR /source\n')
++        with (args.out_dir/'prepare.log').open('w') as log:
++            subprocess.run(['docker','build','--pull=false','--iidfile',str(args.out_dir.resolve()/'image-id'),str(context)],
++                           check=True,stdout=log,stderr=subprocess.STDOUT,timeout=900)
++    image = (args.out_dir/'image-id').read_text().strip()
++    (args.out_dir/'IMAGE.json').write_text(json.dumps({'image':image,'preparation':'network-capable trusted tools and Cargo fetch only; no repository source execution',
++        'opensshSourceSha256':SHA,'cargoLockSha256':hashlib.sha256((ROOT/'Cargo.lock').read_bytes()).hexdigest()},indent=2)+'\n')
++    print('Prepared immutable tool/cache image:',image)
++
++
++if __name__ == '__main__':
++    main()
+diff --git a/tests/protocol/report-previews.py b/tests/protocol/report-previews.py
+index e213c2a..8e51cda 100644
+--- a/tests/protocol/report-previews.py
++++ b/tests/protocol/report-previews.py
+@@ -3 +3 @@
+-Invoke through sandbox-exec with outbound traffic allowed only to localhost.
++Invoke through run-isolated.py --previews inside the bounded offline container.
+@@ -97,0 +98,18 @@ def run_cli(binary, out, args, expected):
++def linux_listener_ready(pid, port, proc=Path('/proc')):
++    try:
++        descriptors = list((proc/str(pid)/'fd').iterdir())
++    except FileNotFoundError:
++        return False
++    owned = set()
++    for descriptor in descriptors:
++        try:
++            owned.add(os.readlink(descriptor))
++        except FileNotFoundError:
++            # OpenSSL may close a setup/config descriptor between listing and
++            # readlink. Only a currently owned listening socket establishes readiness.
++            continue
++    rows = (proc/'net/tcp').read_text().splitlines()[1:]
++    return any(int(row.split()[1].split(':')[1],16)==port and row.split()[3]=='0A'
++               and f'socket:[{row.split()[9]}]' in owned for row in rows)
++
++
+@@ -103,2 +121,2 @@ def main():
+-    if sys.platform != 'darwin':
+-        raise RuntimeError('This fixture runner is qualified only under macOS sandbox-exec')
++    if sys.platform not in {'darwin','linux'}:
++        raise RuntimeError('unsupported fixture platform')
+@@ -108 +126 @@ def main():
+-              'isolation':'Interpret with the recorded invoking sandbox-exec command; this runner does not establish its own sandbox',
++              'isolation':'Use the accompanying HOST-RESULTS.json for enforced container limits; this fixture does not establish its own sandbox',
+@@ -128 +146,4 @@ def main():
+-                    ready=subprocess.run(['lsof','-n','-a','-p',str(server.pid),f'-iTCP:{port}','-sTCP:LISTEN'],capture_output=True).returncode==0
++                    if sys.platform == 'linux':
++                        ready = linux_listener_ready(server.pid,port)
++                    else:
++                        ready=subprocess.run(['lsof','-n','-a','-p',str(server.pid),f'-iTCP:{port}','-sTCP:LISTEN'],capture_output=True).returncode==0
+diff --git a/tests/protocol/run-isolated.py b/tests/protocol/run-isolated.py
+index cd2870b..855a1d0 100644
+--- a/tests/protocol/run-isolated.py
++++ b/tests/protocol/run-isolated.py
+@@ -2 +2 @@
+-"""Compile outside isolation, then run exact workspace test binaries with no egress."""
++"""Build/test and optionally render synthetic previews in the strict container."""
+@@ -4,2 +3,0 @@ import argparse
+-import hashlib
+-import json
+@@ -7,3 +5 @@ from pathlib import Path
+-import platform
+-import subprocess
+-import sys
++import container_runner
+@@ -11,2 +6,0 @@ import sys
+-ROOT = Path(__file__).resolve().parents[2]
+-PROFILE = '(version 1) (allow default) (deny network-outbound) (allow network-outbound (remote ip "localhost:*"))'
+@@ -14,2 +8,11 @@ PROFILE = '(version 1) (allow default) (deny network-outbound) (allow network-ou
+-def digest(path):
+-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
++def main(argv=None):
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--out-dir', type=Path, default=Path('target/protocol-matrix'))
++    parser.add_argument('--image-file', type=Path, default=Path('target/protocol-image/IMAGE.json'))
++    parser.add_argument('--previews', action='store_true')
++    parser.add_argument('--ssh-kex', action='store_true')
++    args = parser.parse_args(argv)
++    container_runner.execute(container_runner.image_id(args.image_file), args.out_dir,
++                             previews=args.previews, ssh_kex=args.ssh_kex)
++    print('Confined execution passed; container removed and bounded evidence preserved.')
++    return 0
+@@ -17,52 +19,0 @@ def digest(path):
+-def sources():
+-    names = subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','--','crates','schemas','Cargo.toml','Cargo.lock','rust-toolchain.toml','tests/fixtures/ssh-kex-host.pub'],cwd=ROOT,text=True).splitlines()
+-    return {name:digest(ROOT/name) for name in sorted(set(names)) if (ROOT/name).is_file()}
+-
+-def main():
+-    parser = argparse.ArgumentParser()
+-    parser.add_argument('--out-dir', default='target/protocol-matrix')
+-    parser.add_argument('--target-dir', default='target/probe-runtime-build')
+-    args = parser.parse_args()
+-    if platform.system() != 'Darwin':
+-        raise RuntimeError('This isolation runner requires macOS sandbox-exec; another OS needs its own reviewed runner.')
+-    output = ROOT / args.out_dir
+-    output.mkdir(parents=True, exist_ok=True)
+-    results_path = output / 'RESULTS.json'
+-    results_path.write_text(json.dumps({'status':'building', 'exit':None}) + '\n')
+-    source_bindings = sources()
+-    command = ['cargo', 'test', '--workspace', '--all-features', '--locked', '--no-run', '--message-format=json', '--target-dir', args.target_dir]
+-    with (output / 'build.jsonl').open('w') as stdout, (output / 'build.log').open('w') as stderr:
+-        build = subprocess.run(command, cwd=ROOT, stdout=stdout, stderr=stderr)
+-    if build.returncode:
+-        results_path.write_text(json.dumps({'status':'build_failed','buildExit':build.returncode,'exit':build.returncode}) + '\n')
+-        return build.returncode
+-    tests = []
+-    binaries = {}
+-    for line in (output / 'build.jsonl').read_text().splitlines():
+-        item = json.loads(line)
+-        if item.get('reason') != 'compiler-artifact' or not item.get('executable'):
+-            continue
+-        path = item['executable']
+-        binaries[path] = digest(path)
+-        if item.get('profile', {}).get('test'):
+-            tests.append((item['target']['name'], path))
+-    if not tests:
+-        raise RuntimeError('No test executables were emitted')
+-    records = []
+-    code = 0
+-    for index, (name, path) in enumerate(tests):
+-        if any(digest(binary) != sha for binary, sha in binaries.items()):
+-            raise RuntimeError('A compiled executable changed before execution')
+-        log = output / f'{index:02d}-{name}.log'
+-        with log.open('w') as stream:
+-            result = subprocess.run(['sandbox-exec', '-p', PROFILE, path], cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, timeout=180)
+-        records.append({'test': name, 'executable': path, 'sha256': binaries[path], 'exit': result.returncode, 'log': str(log.relative_to(ROOT))})
+-        print(f'{name}: exit {result.returncode}', flush=True)
+-        code = code or result.returncode
+-    if any(digest(binary) != sha for binary, sha in binaries.items()):
+-        raise RuntimeError('A compiled executable changed during execution')
+-    if source_bindings != sources():
+-        raise RuntimeError('Source content changed during compilation/tests; rerun on a frozen snapshot')
+-    record = {'command': command, 'buildExit': build.returncode, 'platform': platform.platform(), 'machine': platform.machine(), 'profile': PROFILE, 'sourceBindings':source_bindings, 'binaries': binaries, 'tests': records, 'exit': code, 'beforeAfterHashesMatch': True}
+-    results_path.write_text(json.dumps(record, indent=2) + '\n')
+-    return code
+@@ -71 +22 @@ if __name__ == '__main__':
+-    sys.exit(main())
++    raise SystemExit(main())
+diff --git a/tests/protocol/run-native-smoke.py b/tests/protocol/run-native-smoke.py
+new file mode 100644
+index 0000000..551c39e
+--- /dev/null
++++ b/tests/protocol/run-native-smoke.py
+@@ -0,0 +1,107 @@
++#!/usr/bin/env python3
++"""Offline build and exact-binary execution with explicit macOS boundaries.
++
++No hostile-code memory/aggregate disk containment is claimed; see isolation.py.
++"""
++import argparse
++import os
++import tempfile
++import isolation
++import hashlib
++import json
++from pathlib import Path
++import platform
++import subprocess
++import sys
++
++ROOT = Path(__file__).resolve().parents[2]
++
++
++def digest(path):
++    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
++
++def sources():
++    names = subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','--','crates','schemas','Cargo.toml','Cargo.lock','rust-toolchain.toml','tests/fixtures/ssh-kex-host.pub','tests/protocol'],cwd=ROOT,text=True).splitlines()
++    return {name:digest(ROOT/name) for name in sorted(set(names)) if (ROOT/name).is_file()}
++
++def main():
++    parser = argparse.ArgumentParser()
++    parser.add_argument('--out-dir', default='target/protocol-matrix')
++    parser.add_argument('--target-dir', default='target/probe-runtime-build')
++    args = parser.parse_args()
++    if platform.system() != 'Darwin':
++        raise RuntimeError('This isolation runner requires macOS sandbox-exec; another OS needs its own reviewed runner.')
++    output = (ROOT / args.out_dir).resolve()
++    target = (ROOT / args.target_dir).resolve()
++    for path in [output, target]:
++        if not path.is_relative_to((ROOT / 'target').resolve()) or path == (ROOT / 'target').resolve():
++            raise RuntimeError('Output/build directories must be dedicated subdirectories of target')
++    if output == target or output.is_relative_to(target) or target.is_relative_to(output):
++        raise RuntimeError('Evidence and build directories must be separate')
++    output.mkdir(parents=True, exist_ok=True)
++    target.mkdir(parents=True, exist_ok=True)
++    cargo = Path(subprocess.check_output(['rustup', 'which', 'cargo'], text=True).strip()).resolve()
++    cache = Path(os.environ.get('CARGO_HOME', str(Path.home() / '.cargo'))).resolve()
++    scratch_context = tempfile.TemporaryDirectory(prefix='pqc-protocol-scratch-')
++    # Keep scratch alive through exact-binary execution; removed on function exit.
++    with scratch_context as temp:
++        return execute(output, target, cargo, cache, Path(temp).resolve())
++
++
++def execute(output, target, cargo, cache, scratch):
++    env = isolation.environment(scratch, cargo)
++    # Resolve the selected system SDK before isolation; bypass xcrun's ambient
++    # per-user cache and license lookup inside children. No SDK setup is changed.
++    clang = Path(subprocess.check_output(['xcrun', '--sdk', 'macosx', '--find', 'clang'], env={'PATH':'/usr/bin:/bin:/usr/sbin:/sbin'}, text=True).strip()).resolve()
++    sdk = Path(subprocess.check_output(['xcrun', '--sdk', 'macosx', '--show-sdk-path'], env={'PATH':'/usr/bin:/bin:/usr/sbin:/sbin'}, text=True).strip()).resolve()
++    env['PATH'] = str(clang.parent) + os.pathsep + env['PATH']
++    env['CC'] = str(clang)
++    env['SDKROOT'] = str(sdk)
++
++    for name in ['registry', 'git']:
++        if (cache / name).exists():
++            (scratch / 'cargo' / name).symlink_to(cache / name, target_is_directory=True)
++    build_profile = isolation.profile(ROOT, scratch, [cargo.parent.parent, cache / 'registry', cache / 'git'], [target])
++    test_profile = isolation.profile(ROOT, scratch)
++    results_path = output / 'RESULTS.json'
++    results_path.write_text(json.dumps({'status':'building', 'exit':None}) + '\n')
++    source_bindings = sources()
++    command = [str(cargo), 'test', '--workspace', '--all-features', '--locked', '--offline', '--no-run', '--message-format=json', '--target-dir', str(target)]
++    with (output / 'build.jsonl').open('w') as stdout, (output / 'build.log').open('w') as stderr:
++        build = isolation.run(command, ROOT, env, build_profile, timeout=1200, stdout=stdout, stderr=stderr)
++    if build.returncode:
++        results_path.write_text(json.dumps({'status':'build_failed','buildExit':build.returncode,'exit':build.returncode}) + '\n')
++        return build.returncode
++    tests = []
++    binaries = {}
++    for line in (output / 'build.jsonl').read_text().splitlines():
++        item = json.loads(line)
++        if item.get('reason') != 'compiler-artifact' or not item.get('executable'):
++            continue
++        path = item['executable']
++        binaries[path] = digest(path)
++        if item.get('profile', {}).get('test'):
++            tests.append((item['target']['name'], path))
++    if not tests:
++        raise RuntimeError('No test executables were emitted')
++    records = []
++    code = 0
++    for index, (name, path) in enumerate(tests):
++        if any(digest(binary) != sha for binary, sha in binaries.items()):
++            raise RuntimeError('A compiled executable changed before execution')
++        log = output / f'{index:02d}-{name}.log'
++        with log.open('w') as stream:
++            result = isolation.run([path], ROOT, env, test_profile, timeout=180, stdout=stream, stderr=subprocess.STDOUT)
++        records.append({'test': name, 'executable': path, 'sha256': binaries[path], 'exit': result.returncode, 'log': str(log.relative_to(ROOT))})
++        print(f'{name}: exit {result.returncode}', flush=True)
++        code = code or result.returncode
++    if any(digest(binary) != sha for binary, sha in binaries.items()):
++        raise RuntimeError('A compiled executable changed during execution')
++    if source_bindings != sources():
++        raise RuntimeError('Source content changed during compilation/tests; rerun on a frozen snapshot')
++    record = {'command': command, 'buildExit': build.returncode, 'platform': platform.platform(), 'machine': platform.machine(), 'buildProfile': build_profile, 'testProfile': test_profile, 'environmentKeys': sorted(env), 'compiler':str(clang), 'sdk':str(sdk), 'limits': {'cpuSeconds':900, 'fileBytes':1073741824, 'openFiles':1024, 'processesPerUser':1024, 'memoryEnforced':False, 'aggregateDiskEnforced':False}, 'sourceBindings':source_bindings, 'binaries': binaries, 'tests': records, 'exit': code, 'beforeAfterHashesMatch': True}
++    results_path.write_text(json.dumps(record, indent=2) + '\n')
++    return code
++
++if __name__ == '__main__':
++    sys.exit(main())
+diff --git a/tests/protocol/ssh-kex-product.py b/tests/protocol/ssh-kex-product.py
+index f3a1116..aaa21bc 100644
+--- a/tests/protocol/ssh-kex-product.py
++++ b/tests/protocol/ssh-kex-product.py
+@@ -11 +10,0 @@ import re
+-import shutil
+@@ -15 +13,0 @@ import threading
+-import urllib.request
+@@ -21 +19 @@ def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+-def inside(out):
++def inside(out, binary=None):
+@@ -24 +22 @@ def inside(out):
+-    binary=ROOT/'target/debug/pqc-scan'; binary_sha=sha(binary);out.mkdir(parents=True,exist_ok=False);records=[]
++    binary=Path(binary) if binary else ROOT/'target/debug/pqc-scan'; binary_sha=sha(binary);out.mkdir(parents=True,exist_ok=False);records=[]
+@@ -73,30 +71,10 @@ def main():
+-    parser=argparse.ArgumentParser();parser.add_argument('--out-dir',type=Path,required=True);parser.add_argument('--inside',action='store_true');args=parser.parse_args();out=args.out_dir.resolve()
+-    if args.inside:inside(out);return
+-    out.mkdir(parents=True,exist_ok=False)
+-    selected={}
+-    names=['Cargo.toml','Cargo.lock','rust-toolchain.toml','tests/protocol/ssh-kex-product.py','tests/feasibility/ssh-kex/run-isolated.py','tests/fixtures/ssh-kex-host.pub']
+-    for folder in ['crates','rules','schemas']:
+-        names.extend(str(p.relative_to(ROOT)) for p in (ROOT/folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
+-    with tempfile.TemporaryDirectory(prefix='pqc-kex-product-build-') as temp:
+-        context=Path(temp)
+-        for name in sorted(names):
+-            src=ROOT/name
+-            if src.is_symlink() or any(x in ['target','.git'] or x.startswith('.env') for x in src.relative_to(ROOT).parts):raise RuntimeError('unsafe build input')
+-            dst=context/name;dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dst);selected[name]=sha(src)
+-        data=urllib.request.urlopen(URL,timeout=30).read(4*1024*1024+1);assert hashlib.sha256(data).hexdigest()==SHA
+-        (context/'openssh-10.2p1.tar.gz').write_bytes(data)
+-        prefix=(STUDY/'Dockerfile').read_text().split('WORKDIR /work')[0]
+-        (context/'Dockerfile').write_text(prefix+'WORKDIR /work\nCOPY . .\nRUN cargo build -p pqc_scan_cli --features probe-ssh-kex --locked > /tmp/product-build.log 2>&1\nCMD ["python3","tests/protocol/ssh-kex-product.py","--inside","--out-dir","target/product-results"]\n')
+-        with (out/'build.log').open('w') as log:subprocess.run(['docker','build','--iidfile',str(out/'image-id'),str(context)],stdout=log,stderr=subprocess.STDOUT,check=True,timeout=900)
+-    image=(out/'image-id').read_text().strip();container=subprocess.check_output(['docker','create','--network','none','--security-opt','no-new-privileges','--cap-drop','NET_RAW','--memory','1g','--cpus','2','--pids-limit','128',image],text=True).strip()
+-    meta={'source_bindings':selected,'image':image,'openssh_sha256':SHA}
+-    try:
+-        inspect=json.loads(subprocess.check_output(['docker','inspect',container]))[0];host=inspect['HostConfig'];assert host['NetworkMode']=='none' and not host['Privileged'] and not host['Binds'];meta['isolation']={k:host[k] for k in ['NetworkMode','Privileged','Binds','SecurityOpt','CapDrop','Memory','NanoCpus','PidsLimit']}
+-        with (out/'run.log').open('w') as log:r=subprocess.run(['docker','start','-a',container],stdout=log,stderr=subprocess.STDOUT,timeout=90)
+-        meta['exit']=r.returncode
+-        subprocess.run(['docker','cp',container+':/work/target/product-results',str(out/'reports')],check=True)
+-        assert all(sha(ROOT/p)==v for p,v in selected.items()),'source changed during run'
+-        assert r.returncode==0,'product interop failed; inspect run.log'
+-    finally:
+-        subprocess.run(['docker','rm','-f',container],check=True,stdout=subprocess.DEVNULL);meta['container_removed']=True;(out/'DOCKER-RESULTS.json').write_text(json.dumps(meta,indent=2)+'\n')
+-    print((out/'run.log').read_text().strip())
++    parser=argparse.ArgumentParser();parser.add_argument('--out-dir',type=Path,required=True)
++    parser.add_argument('--inside',action='store_true');parser.add_argument('--binary',type=Path)
++    parser.add_argument('--image-file',type=Path,default=Path('target/protocol-image/IMAGE.json'))
++    args=parser.parse_args()
++    if args.inside:
++        inside(args.out_dir.resolve(), args.binary)
++    else:
++        from container_runner import execute, image_id
++        execute(image_id(args.image_file), args.out_dir, ssh_kex=True)
++
+diff --git a/tests/protocol/test_container_runner.py b/tests/protocol/test_container_runner.py
+new file mode 100644
+index 0000000..9370dc3
+--- /dev/null
++++ b/tests/protocol/test_container_runner.py
+@@ -0,0 +1,166 @@
++"""Independent filesystem and real cgroup enforcement checks."""
++import importlib.util
++import io
++import json
++import os
++from pathlib import Path
++import subprocess
++import tarfile
++import tempfile
++import unittest
++
++HERE = Path(__file__).resolve().parent
++spec = importlib.util.spec_from_file_location('container_runner', HERE / 'container_runner.py')
++runner = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(runner)
++
++
++def archive(name, kind=None, data=b'public result'):
++    stream = io.BytesIO()
++    with tarfile.open(fileobj=stream, mode='w') as tar:
++        entry = tarfile.TarInfo(name)
++        if kind is not None:
++            entry.type = kind
++            entry.linkname = '/outside'
++        else:
++            entry.size = len(data)
++        tar.addfile(entry, io.BytesIO(data) if kind is None else None)
++    return stream.getvalue()
++
++
++class HostBoundaryTests(unittest.TestCase):
++    def test_only_regular_bounded_relative_artifacts_are_extracted(self):
++        with tempfile.TemporaryDirectory() as temp:
++            out = Path(temp) / 'safe'
++            runner.extract_artifacts(archive('./nested/result.json'), out, max_bytes=100)
++            self.assertEqual((out / 'nested/result.json').read_bytes(), b'public result')
++            for name, kind in [('../outside', None), ('/outside', None), ('C:/outside',None), ('..\\outside',None),
++                               ('link', tarfile.SYMTYPE), ('hardlink', tarfile.LNKTYPE),
++                               ('pipe', tarfile.FIFOTYPE)]:
++                with self.subTest(name=name, kind=kind):
++                    with self.assertRaises(ValueError):
++                        runner.extract_artifacts(archive(name, kind), Path(temp) / 'rejected')
++            with self.assertRaises(ValueError):
++                runner.extract_artifacts(archive('large', data=b'x'*101), Path(temp)/'oversize', max_bytes=100)
++            self.assertFalse((Path(temp)/'outside').exists())
++
++    def test_artifact_total_is_checked_before_writing_and_export_is_bounded(self):
++        with tempfile.TemporaryDirectory() as temp:
++            stream = io.BytesIO()
++            with tarfile.open(fileobj=stream, mode='w') as tar:
++                for name in ['one','two']:
++                    entry = tarfile.TarInfo(name); entry.size=60
++                    tar.addfile(entry,io.BytesIO(b'x'*60))
++            out = Path(temp)/'evidence'
++            with self.assertRaises(ValueError):
++                runner.extract_artifacts(stream.getvalue(),out,max_bytes=100)
++            self.assertFalse((out/'one').exists())
++        import sys
++        with self.assertRaises(ValueError):
++            runner.bounded_output([sys.executable,'-c',"print('x'*1000)"],limit=64)
++        with self.assertRaises(subprocess.TimeoutExpired):
++            runner.bounded_output([sys.executable,'-c','import time; time.sleep(5)'],timeout=.1)
++
++    def test_snapshot_excludes_host_metadata_and_rejects_parent_symlinks(self):
++        with tempfile.TemporaryDirectory() as temp:
++            base = Path(temp); root = base/'repository'; root.mkdir()
++            subprocess.run(['git', 'init', '-q', str(root)], check=True)
++            source = root/'crates/example/src'; source.mkdir(parents=True)
++            (source/'lib.rs').write_text('// public fixture\n')
++            (root/'.env').write_text('SYNTHETIC_SECRET=must-not-copy')
++            (root/'.git/config-canary').write_text('must-not-copy')
++            subprocess.run(['git', '-C', str(root), 'add', 'crates'], check=True)
++            snapshot = base/'snapshot'
++            bindings = runner.snapshot(root, snapshot)
++            self.assertEqual(set(bindings), {'crates/example/src/lib.rs'})
++            self.assertFalse((snapshot/'.env').exists())
++            self.assertFalse((snapshot/'.git').exists())
++            source.rename(root/'original')
++            source.symlink_to(root/'original', target_is_directory=True)
++            with self.assertRaises(ValueError):
++                runner.snapshot(root, base/'rejected')
++
++
++@unittest.skipUnless(os.environ.get('PQC_RUN_CONTAINER_TESTS') == '1', 'explicit Docker resource tests')
++class KernelBoundaryTests(unittest.TestCase):
++    def image(self):
++        return runner.image_id(Path(os.environ['PQC_PROTOCOL_IMAGE_FILE']))
++
++    def exercise(self, case, **limits):
++        with tempfile.TemporaryDirectory() as temp:
++            evidence = os.environ.get('PQC_PROTOCOL_EVIDENCE_DIR')
++            out = Path(evidence)/case if evidence else Path(temp)/'evidence'
++            result = runner.execute(self.image(), out, case=case, **limits)
++            self.assertEqual(result['exit'], 0)
++            self.assertTrue(result['containerRemoved'])
++            return json.loads((out/'checks.json').read_text()), result
++
++    def test_source_root_environment_and_network_boundaries(self):
++        os.environ['PQC_SYNTHETIC_SECRET'] = 'must-not-inherit'
++        try:
++            checks, result = self.exercise('boundary')
++        finally:
++            os.environ.pop('PQC_SYNTHETIC_SECRET')
++        for key in ['sourceReadonly', 'rootReadonly', 'emptyEnvironment', 'loopbackWorks', 'externalNetworkDenied']:
++            self.assertTrue(checks[key], key)
++        self.assertEqual(result['container']['HostConfig']['NetworkMode'], 'none')
++
++    def test_memory_is_bounded_across_child_processes(self):
++        checks, _ = self.exercise('memory', memory=64*1024**2, scratch=16*1024**2)
++        self.assertGreater(checks['oomKills'], 0)
++        self.assertEqual(checks['memoryMax'], 64*1024**2)
++        self.assertEqual(checks['swapMax'], 0)
++
++    def test_aggregate_scratch_limit_spans_multiple_files(self):
++        checks, _ = self.exercise('disk', memory=128*1024**2, scratch=16*1024**2)
++        self.assertTrue(checks['aggregateDiskDenied'])
++        self.assertGreater(checks['filesWritten'], 1)
++        self.assertLessEqual(checks['scratchCapacity'], 16*1024**2)
++
++    def test_pid_limit_applies_to_descendants(self):
++        checks, _ = self.exercise('pids', memory=128*1024**2, scratch=16*1024**2, pids=16)
++        self.assertTrue(checks['forkDenied'])
++        self.assertLess(checks['children'], 16)
++
++    def test_create_response_failure_removes_daemon_created_container(self):
++        from unittest import mock
++        original = runner.subprocess.check_output
++        created = []
++        def lose_create_response(command, *args, **kwargs):
++            data = original(command, *args, **kwargs)
++            if command[:2] == ['docker','create']:
++                created.append(data.strip())
++                raise subprocess.TimeoutExpired(command,kwargs.get('timeout',30))
++            return data
++        with tempfile.TemporaryDirectory() as temp:
++            evidence = os.environ.get('PQC_PROTOCOL_EVIDENCE_DIR')
++            out = Path(evidence)/'create-response' if evidence else Path(temp)/'evidence'
++            try:
++                with mock.patch.object(runner.subprocess,'check_output',side_effect=lose_create_response):
++                    with self.assertRaises(subprocess.TimeoutExpired):
++                        runner.execute(self.image(),out,case='boundary')
++                self.assertEqual(len(created),1)
++                record = json.loads((out/'HOST-RESULTS.json').read_text())
++                self.assertTrue(record['containerRemoved'])
++                check = subprocess.run(['docker','inspect',created[0]],capture_output=True)
++                self.assertNotEqual(check.returncode,0)
++            finally:
++                # Also clean the deliberately failing old implementation during RED.
++                for container in created:
++                    subprocess.run(['docker','rm','-f',container],capture_output=True)
++
++    def test_timeout_removes_the_entire_container(self):
++        with tempfile.TemporaryDirectory() as temp:
++            evidence = os.environ.get('PQC_PROTOCOL_EVIDENCE_DIR')
++            out = Path(evidence)/'timeout' if evidence else Path(temp)/'evidence'
++            with self.assertRaises(subprocess.TimeoutExpired):
++                runner.execute(self.image(), out, case='timeout', timeout=1)
++            record = json.loads((out/'HOST-RESULTS.json').read_text())
++            self.assertTrue(record['containerRemoved'])
++            self.assertNotEqual(record['exit'], 0)
++            check = subprocess.run(['docker', 'inspect', record['containerId']], capture_output=True)
++            self.assertNotEqual(check.returncode, 0)
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/tests/protocol/test_isolation.py b/tests/protocol/test_isolation.py
+new file mode 100644
+index 0000000..eabdaa1
+--- /dev/null
++++ b/tests/protocol/test_isolation.py
+@@ -0,0 +1,71 @@
++"""OS-enforced boundary tests; invoked separately from the Rust binaries."""
++import importlib.util
++import os
++from pathlib import Path
++import platform
++import subprocess
++import sys
++import tempfile
++import unittest
++
++HERE = Path(__file__).resolve().parent
++spec = importlib.util.spec_from_file_location('protocol_isolation', HERE / 'isolation.py')
++isolation = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(isolation)
++
++@unittest.skipUnless(platform.system() == 'Darwin', 'macOS sandbox-exec policy')
++class IsolationTests(unittest.TestCase):
++    def test_readonly_source_private_home_empty_environment_and_loopback_only(self):
++        with tempfile.TemporaryDirectory() as temp:
++            base = Path(temp).resolve()
++            source, scratch, private = [base / name for name in ['source', 'scratch', 'private-home']]
++            for directory in [source, scratch, private]:
++                directory.mkdir()
++            (source / 'fixture').write_text('public fixture')
++            (private / 'canary').write_text('synthetic private home data')
++            code = '''
++import os, pathlib, socket, sys
++source, scratch, private = map(pathlib.Path, sys.argv[1:])
++assert source.joinpath('fixture').read_text() == 'public fixture'
++assert 'PQC_SYNTHETIC_SECRET' not in os.environ
++assert pathlib.Path(os.environ['HOME']).resolve() == scratch / 'home'
++for path, mode in [(private / 'canary', 'r'), (source / 'modified', 'w')]:
++    try:
++        with path.open(mode) as stream:
++            stream.read() if mode == 'r' else stream.write('unexpected')
++    except PermissionError:
++        pass
++    else:
++        raise AssertionError('sandbox allowed forbidden access')
++with socket.socket() as listener:
++    listener.bind(('127.0.0.1', 0)); listener.listen()
++    with socket.create_connection(listener.getsockname(), timeout=1) as client:
++        conn, _ = listener.accept(); conn.close()
++with socket.socket() as external:
++    external.settimeout(1)
++    try:
++        external.connect(('192.0.2.1', 9))
++    except PermissionError:
++        pass
++    else:
++        raise AssertionError('external connect was not denied by policy')
++scratch.joinpath('result').write_text('boundary checks passed')
++'''
++            env = isolation.environment(scratch)
++            profile = isolation.profile(source, scratch, [Path(sys.prefix)])
++            old = os.environ.get('PQC_SYNTHETIC_SECRET')
++            os.environ['PQC_SYNTHETIC_SECRET'] = 'must-not-be-inherited'
++            try:
++                result = isolation.run([sys.executable, '-c', code, str(source), str(scratch), str(private)],
++                                       source, env, profile, timeout=15, capture_output=True, text=True)
++            finally:
++                if old is None:
++                    os.environ.pop('PQC_SYNTHETIC_SECRET', None)
++                else:
++                    os.environ['PQC_SYNTHETIC_SECRET'] = old
++            self.assertEqual(result.returncode, 0, result.stderr)
++            self.assertEqual((scratch / 'result').read_text(), 'boundary checks passed')
++            self.assertFalse((source / 'modified').exists())
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/tests/protocol/test_report_previews.py b/tests/protocol/test_report_previews.py
+new file mode 100644
+index 0000000..118f18b
+--- /dev/null
++++ b/tests/protocol/test_report_previews.py
+@@ -0,0 +1,31 @@
++"""Readiness checks must tolerate kernel FD entries disappearing mid-read."""
++import importlib.util
++import os
++from pathlib import Path
++import tempfile
++import unittest
++from unittest import mock
++
++spec = importlib.util.spec_from_file_location('report_previews',Path(__file__).with_name('report-previews.py'))
++previews = importlib.util.module_from_spec(spec); spec.loader.exec_module(previews)
++
++
++class ReadinessTests(unittest.TestCase):
++    def test_closed_descriptor_does_not_hide_the_owned_listener(self):
++        with tempfile.TemporaryDirectory() as temp:
++            proc=Path(temp); descriptors=proc/'123/fd';descriptors.mkdir(parents=True)
++            (proc/'net').mkdir();(proc/'net/tcp').write_text('header\n0: 0100007F:1F90 00000000:0000 0A 0:0 00:0 0 0 0 222\n')
++            (descriptors/'3').symlink_to('socket:[111]');(descriptors/'4').symlink_to('socket:[222]')
++            original=os.readlink
++            def closes_before_read(path):
++                path=Path(path)
++                if path.name=='3': path.unlink(missing_ok=True)
++                return original(path)
++            with mock.patch.object(previews.os,'readlink',side_effect=closes_before_read):
++                self.assertTrue(previews.linux_listener_ready(123,8080,proc))
++            (descriptors/'4').unlink()
++            self.assertFalse(previews.linux_listener_ready(123,8080,proc))
++            self.assertFalse(previews.linux_listener_ready(999,8080,proc))
++
++
++if __name__=='__main__':unittest.main()

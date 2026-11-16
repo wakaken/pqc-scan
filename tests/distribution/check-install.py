@@ -49,8 +49,8 @@ with tempfile.TemporaryDirectory(prefix='pqc-clean-install-') as directory:
     if any(results[name]['stderr'] for name in ['help','version']):
         raise RuntimeError('informational command unexpectedly wrote errors')
     package.validate_command_surface(provenance['variant'], results['help']['stdout'],
-                                     results.get('probe-help', {}).get('stdout', ''))
-    if provenance['variant'] == 'all-probes':
+                                     results.get('probe-help', {}).get('stdout', ''), allow_legacy=True)
+    if provenance['variant'] in ('network', 'all-probes'):
         result = subprocess.run(sandbox+[str(binary), 'probe', 'ssh-kex', '--help'], cwd=base, capture_output=True, text=True)
         if result.returncode or '--host-key-file' not in result.stdout or result.stderr:
             raise RuntimeError('installed SSH KEX pin interface unavailable')

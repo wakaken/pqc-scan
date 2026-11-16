@@ -1,0 +1,1340 @@
+{
+  "24e6998d09fb09b5f46351ea07af7174679bdeb72f17571f801f1e0d2ab7cb7b": {
+    "action": {
+      "action_id": "plan.hybrid-migration",
+      "priority": "near-term",
+      "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+      "references": [
+        "https://www.nist.gov/itl/post-quantum-cryptography",
+        "https://csrc.nist.gov/pubs/fips/203/final",
+        "https://csrc.nist.gov/pubs/fips/204/final"
+      ],
+      "steps": [
+        "Inventory all call sites using this algorithm and owner teams.",
+        "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+        "Define retirement dates for legacy classical algorithms."
+      ],
+      "title": "Adopt a phased hybrid PQC migration plan"
+    },
+    "cases": [
+      "recommendation-jwt-Java-code-quantum-vulnerable",
+      "recommendation-jwt-JavaScript-code-quantum-vulnerable",
+      "recommendation-jwt-Go-code-quantum-vulnerable",
+      "recommendation-jwt-Python-code-quantum-vulnerable",
+      "recommendation-jwt-Rust-code-quantum-vulnerable",
+      "recommendation-jwt-Ruby-code-quantum-vulnerable",
+      "recommendation-jwt-unknown-code-quantum-vulnerable",
+      "recommendation-tls-Java-code-quantum-vulnerable",
+      "recommendation-tls-JavaScript-code-quantum-vulnerable",
+      "recommendation-tls-Go-code-quantum-vulnerable",
+      "recommendation-tls-Python-code-quantum-vulnerable",
+      "recommendation-tls-Rust-code-quantum-vulnerable",
+      "recommendation-tls-Ruby-code-quantum-vulnerable",
+      "recommendation-tls-unknown-code-quantum-vulnerable",
+      "recommendation-pki-Java-code-quantum-vulnerable",
+      "recommendation-pki-JavaScript-code-quantum-vulnerable",
+      "recommendation-pki-Go-code-quantum-vulnerable",
+      "recommendation-pki-Python-code-quantum-vulnerable",
+      "recommendation-pki-Rust-code-quantum-vulnerable",
+      "recommendation-pki-Ruby-code-quantum-vulnerable",
+      "recommendation-pki-unknown-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "recommendation-cryptoapi-JavaScript-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Go-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Python-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Rust-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Ruby-code-quantum-vulnerable",
+      "recommendation-cryptoapi-unknown-code-quantum-vulnerable",
+      "recommendation-dependency-Java-code-quantum-vulnerable",
+      "recommendation-dependency-JavaScript-code-quantum-vulnerable",
+      "recommendation-dependency-Go-code-quantum-vulnerable",
+      "recommendation-dependency-Python-code-quantum-vulnerable",
+      "recommendation-dependency-Rust-code-quantum-vulnerable",
+      "recommendation-dependency-Ruby-code-quantum-vulnerable",
+      "recommendation-dependency-unknown-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Java-code-quantum-vulnerable",
+      "supp-recommendation-jwt-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Go-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Python-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Rust-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-jwt-unknown-code-quantum-vulnerable",
+      "supp-recommendation-tls-Java-code-quantum-vulnerable",
+      "supp-recommendation-tls-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-tls-Go-code-quantum-vulnerable",
+      "supp-recommendation-tls-Python-code-quantum-vulnerable",
+      "supp-recommendation-tls-Rust-code-quantum-vulnerable",
+      "supp-recommendation-tls-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-tls-unknown-code-quantum-vulnerable",
+      "supp-recommendation-pki-Java-code-quantum-vulnerable",
+      "supp-recommendation-pki-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-pki-Go-code-quantum-vulnerable",
+      "supp-recommendation-pki-Python-code-quantum-vulnerable",
+      "supp-recommendation-pki-Rust-code-quantum-vulnerable",
+      "supp-recommendation-pki-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-pki-unknown-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Go-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Python-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Rust-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-unknown-code-quantum-vulnerable",
+      "supp-recommendation-dependency-Java-code-quantum-vulnerable",
+      "supp-recommendation-dependency-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-dependency-Go-code-quantum-vulnerable",
+      "supp-recommendation-dependency-Python-code-quantum-vulnerable",
+      "supp-recommendation-dependency-Rust-code-quantum-vulnerable",
+      "supp-recommendation-dependency-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-dependency-unknown-code-quantum-vulnerable",
+      "supp-java-8-bcFalse",
+      "supp-java-8-bcTrue",
+      "supp-java-23-bcFalse",
+      "supp-java-23-bcTrue",
+      "supp-java-24-bcFalse",
+      "supp-java-24-bcTrue",
+      "supp-java-25-bcFalse",
+      "supp-java-25-bcTrue",
+      "supp-java-27-bcFalse",
+      "supp-java-27-bcTrue",
+      "supp-java-unknown-bcFalse",
+      "supp-java-unknown-bcTrue",
+      "supp-runtime-JavaScript-20",
+      "supp-runtime-JavaScript-24.0",
+      "supp-runtime-JavaScript-24.6",
+      "supp-runtime-JavaScript-24.7",
+      "supp-runtime-JavaScript-24.8",
+      "supp-runtime-JavaScript-26.13.1",
+      "supp-runtime-JavaScript-unknown",
+      "supp-runtime-Go-1.23",
+      "supp-runtime-Go-1.24",
+      "supp-runtime-Go-1.27",
+      "supp-runtime-Go-unknown",
+      "supp-runtime-Python-3.11",
+      "supp-runtime-Python-3.14",
+      "supp-runtime-Python-unknown",
+      "supp-runtime-Rust-1.84",
+      "supp-runtime-Rust-1.93",
+      "supp-runtime-Rust-unknown",
+      "supp-runtime-Ruby-3.3",
+      "supp-runtime-Ruby-3.5",
+      "supp-runtime-Ruby-unknown",
+      "supp-middleware-k8s-False",
+      "supp-middleware-k8s-True",
+      "supp-middleware-nginx-False",
+      "supp-middleware-nginx-True",
+      "supp-middleware-httpd-False",
+      "supp-middleware-httpd-True",
+      "supp-middleware-envoy-False",
+      "supp-middleware-envoy-True",
+      "supp-middleware-istio-False",
+      "supp-middleware-istio-True",
+      "supp-middleware-haproxy-False",
+      "supp-middleware-haproxy-True",
+      "supp-middleware-traefik-False",
+      "supp-middleware-traefik-True",
+      "supp-middleware-unknown-False",
+      "supp-middleware-unknown-True",
+      "supp-evidence-kind-private_key",
+      "supp-evidence-kind-code"
+    ]
+  },
+  "e0c204e30b952706966147c5f699d524ec5f3ae3363627af0f30b09a3c997202": {
+    "action": {
+      "action_id": "jwt.remove-rsa-algorithms",
+      "priority": "near-term",
+      "rationale": "JWT signatures using classical public-key algorithms become long-term high risk under quantum adversaries.",
+      "references": [
+        "https://www.rfc-editor.org/rfc/rfc7519"
+      ],
+      "steps": [
+        "Restrict accepted alg values and explicitly deny weak/legacy defaults.",
+        "Introduce short-lived tokens during the migration phase.",
+        "Prepare verifier rollout before signer rollout to avoid compatibility outages.",
+        "Confirm JOSE algorithm identifiers, key encoding, JWT library support and all verifiers before changing token signatures; primitive support alone is insufficient."
+      ],
+      "title": "Review whether the JOSE reference is used for signing, verification, tests or documentation"
+    },
+    "cases": [
+      "recommendation-jwt-Java-code-quantum-vulnerable",
+      "recommendation-jwt-Java-code-quantum-uncertain",
+      "recommendation-jwt-JavaScript-code-quantum-vulnerable",
+      "recommendation-jwt-JavaScript-code-quantum-uncertain",
+      "recommendation-jwt-Go-code-quantum-vulnerable",
+      "recommendation-jwt-Go-code-quantum-uncertain",
+      "recommendation-jwt-Python-code-quantum-vulnerable",
+      "recommendation-jwt-Python-code-quantum-uncertain",
+      "recommendation-jwt-Rust-code-quantum-vulnerable",
+      "recommendation-jwt-Rust-code-quantum-uncertain",
+      "recommendation-jwt-Ruby-code-quantum-vulnerable",
+      "recommendation-jwt-Ruby-code-quantum-uncertain",
+      "recommendation-jwt-unknown-code-quantum-vulnerable",
+      "recommendation-jwt-unknown-code-quantum-uncertain",
+      "supp-recommendation-jwt-Java-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Java-code-quantum-uncertain",
+      "supp-recommendation-jwt-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-jwt-JavaScript-code-quantum-uncertain",
+      "supp-recommendation-jwt-Go-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Go-code-quantum-uncertain",
+      "supp-recommendation-jwt-Python-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Python-code-quantum-uncertain",
+      "supp-recommendation-jwt-Rust-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Rust-code-quantum-uncertain",
+      "supp-recommendation-jwt-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Ruby-code-quantum-uncertain",
+      "supp-recommendation-jwt-unknown-code-quantum-vulnerable",
+      "supp-recommendation-jwt-unknown-code-quantum-uncertain",
+      "supp-java-8-bcFalse",
+      "supp-java-8-bcTrue",
+      "supp-java-23-bcFalse",
+      "supp-java-23-bcTrue",
+      "supp-java-24-bcFalse",
+      "supp-java-24-bcTrue",
+      "supp-java-25-bcFalse",
+      "supp-java-25-bcTrue",
+      "supp-java-27-bcFalse",
+      "supp-java-27-bcTrue",
+      "supp-java-unknown-bcFalse",
+      "supp-java-unknown-bcTrue",
+      "supp-runtime-JavaScript-20",
+      "supp-runtime-JavaScript-24.0",
+      "supp-runtime-JavaScript-24.6",
+      "supp-runtime-JavaScript-24.7",
+      "supp-runtime-JavaScript-24.8",
+      "supp-runtime-JavaScript-26.13.1",
+      "supp-runtime-JavaScript-unknown",
+      "supp-runtime-Go-1.23",
+      "supp-runtime-Go-1.24",
+      "supp-runtime-Go-1.27",
+      "supp-runtime-Go-unknown",
+      "supp-runtime-Python-3.11",
+      "supp-runtime-Python-3.14",
+      "supp-runtime-Python-unknown",
+      "supp-runtime-Rust-1.84",
+      "supp-runtime-Rust-1.93",
+      "supp-runtime-Rust-unknown",
+      "supp-runtime-Ruby-3.3",
+      "supp-runtime-Ruby-3.5",
+      "supp-runtime-Ruby-unknown"
+    ]
+  },
+  "b31ea76f31db4062c8ea581e5c16c0799dc2ff68a403a4bb86070d53045e2a0a": {
+    "action": {
+      "action_id": "java.runtime-upgrade-for-pqc",
+      "priority": "planned",
+      "rationale": "Detected Java version appears older than JDK releases with standardized PQC APIs.",
+      "references": [
+        "https://openjdk.org/jeps/496",
+        "https://openjdk.org/jeps/497"
+      ],
+      "steps": [
+        "Target JDK 24+ for ML-KEM and ML-DSA support planning.",
+        "Pilot compatibility testing in CI before production migration."
+      ],
+      "title": "Upgrade Java runtime baseline for standard PQC APIs"
+    },
+    "cases": [
+      "recommendation-jwt-Java-code-quantum-vulnerable",
+      "recommendation-jwt-Java-code-quantum-uncertain",
+      "recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Java-code-quantum-uncertain",
+      "supp-recommendation-jwt-Java-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Java-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Java-code-quantum-uncertain",
+      "supp-java-8-bcFalse",
+      "supp-java-8-bcTrue",
+      "supp-java-23-bcFalse",
+      "supp-java-23-bcTrue",
+      "supp-java-unknown-bcFalse",
+      "supp-java-unknown-bcTrue",
+      "supp-extension-java"
+    ]
+  },
+  "ef4308158a797f206ba4e2fe1e292911dfea4a4fe422910040deeade1fa035a5": {
+    "action": {
+      "action_id": "java.bouncycastle-pqc",
+      "code_examples": [
+        {
+          "after": "Security.addProvider(new BouncyCastlePQCProvider());\nSignature sig = Signature.getInstance(\"ML-DSA\", \"BCPQC\");\n// Configure parameter set (example): MLDSAParameterSpec.ml_dsa_65",
+          "before": "Security.addProvider(new BouncyCastleProvider());\nSignature sig = Signature.getInstance(\"SHA256withRSA\", \"BC\");",
+          "language": "java"
+        }
+      ],
+      "priority": "near-term",
+      "rationale": "BouncyCastle can be used as a pragmatic transition option when standard runtime support is unavailable or incomplete.",
+      "references": [
+        "https://www.bouncycastle.org/java.html",
+        "https://downloads.bouncycastle.org/java/docs/bcprov-jdk18on-javadoc/"
+      ],
+      "steps": [
+        "Add BC provider initialization at bootstrap.",
+        "Use BC ML-DSA / ML-KEM parameter specs for migration pilot implementations.",
+        "Document provider ordering and FIPS/compliance impact."
+      ],
+      "title": "Provide BouncyCastle PQC fallback path"
+    },
+    "cases": [
+      "recommendation-jwt-Java-code-quantum-vulnerable",
+      "recommendation-jwt-Java-code-quantum-uncertain",
+      "recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Java-code-quantum-uncertain",
+      "supp-recommendation-jwt-Java-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Java-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Java-code-quantum-uncertain",
+      "supp-java-8-bcFalse",
+      "supp-java-8-bcTrue",
+      "supp-java-23-bcFalse",
+      "supp-java-23-bcTrue",
+      "supp-java-24-bcTrue",
+      "supp-java-25-bcTrue",
+      "supp-java-27-bcTrue",
+      "supp-java-unknown-bcFalse",
+      "supp-java-unknown-bcTrue",
+      "supp-extension-java"
+    ]
+  },
+  "61821d6975a497f7a530f0e3f248fba3d3a33c0d562b1510352d8671b4f1f1f4": {
+    "action": {
+      "action_id": "runtime.verify-pqc-capabilities",
+      "priority": "planned",
+      "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+      "references": [
+        "https://docs.oracle.com/en/java/javase/27/security/java-secure-socket-extension-jsse-reference-guide.html"
+      ],
+      "steps": [
+        "JDK 24 adds ML-KEM and ML-DSA primitives. Check deployed JSSE hybrid TLS support separately and inspect jdk.tls.namedGroups restrictions.",
+        "Check resolved versions, provider/features and interoperability before changing production policy."
+      ],
+      "title": "Verify deployed runtime and protocol PQC capabilities"
+    },
+    "cases": [
+      "recommendation-jwt-Java-code-quantum-vulnerable",
+      "recommendation-jwt-Java-code-quantum-uncertain",
+      "recommendation-jwt-Java-dependency-quantum-vulnerable",
+      "recommendation-jwt-Java-dependency-quantum-uncertain",
+      "recommendation-tls-Java-code-quantum-vulnerable",
+      "recommendation-tls-Java-code-quantum-uncertain",
+      "recommendation-tls-Java-dependency-quantum-vulnerable",
+      "recommendation-tls-Java-dependency-quantum-uncertain",
+      "recommendation-pki-Java-code-quantum-vulnerable",
+      "recommendation-pki-Java-code-quantum-uncertain",
+      "recommendation-pki-Java-dependency-quantum-vulnerable",
+      "recommendation-pki-Java-dependency-quantum-uncertain",
+      "recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Java-code-quantum-uncertain",
+      "recommendation-cryptoapi-Java-dependency-quantum-vulnerable",
+      "recommendation-cryptoapi-Java-dependency-quantum-uncertain",
+      "supp-recommendation-jwt-Java-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Java-code-quantum-uncertain",
+      "supp-recommendation-jwt-Java-dependency-quantum-vulnerable",
+      "supp-recommendation-jwt-Java-dependency-quantum-uncertain",
+      "supp-recommendation-tls-Java-code-quantum-vulnerable",
+      "supp-recommendation-tls-Java-code-quantum-uncertain",
+      "supp-recommendation-tls-Java-dependency-quantum-vulnerable",
+      "supp-recommendation-tls-Java-dependency-quantum-uncertain",
+      "supp-recommendation-pki-Java-code-quantum-vulnerable",
+      "supp-recommendation-pki-Java-code-quantum-uncertain",
+      "supp-recommendation-pki-Java-dependency-quantum-vulnerable",
+      "supp-recommendation-pki-Java-dependency-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Java-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Java-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Java-dependency-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Java-dependency-quantum-uncertain",
+      "supp-java-8-bcFalse",
+      "supp-java-8-bcTrue",
+      "supp-java-23-bcFalse",
+      "supp-java-23-bcTrue",
+      "supp-java-24-bcFalse",
+      "supp-java-24-bcTrue",
+      "supp-java-25-bcFalse",
+      "supp-java-25-bcTrue",
+      "supp-java-27-bcFalse",
+      "supp-java-27-bcTrue",
+      "supp-java-unknown-bcFalse",
+      "supp-java-unknown-bcTrue",
+      "supp-extension-java"
+    ]
+  },
+  "155f22c65295aadb2a906045adfe6aba9fa2083c392c84a3750561fd9490350a": {
+    "action": {
+      "action_id": "node.webcrypto.pqc",
+      "code_examples": [
+        {
+          "after": "// Replace RS256 token-signing path with a PQC-capable signing service\n// or WebCrypto ML-DSA workflow once runtime support is enabled.\nconst token = await signWithPqc(payload);",
+          "before": "import jwt from \"jsonwebtoken\";\nconst token = jwt.sign(payload, privateKey, { algorithm: \"RS256\" });",
+          "language": "javascript"
+        }
+      ],
+      "priority": "planned",
+      "rationale": "Node.js runtime level determines whether built-in PQC APIs are available for direct migration.",
+      "references": [
+        "https://nodejs.org/api/webcrypto.html"
+      ],
+      "steps": [
+        "Node crypto: ML-DSA 24.6+, ML-KEM 24.7+, SLH-DSA 24.8+; WebCrypto ML-DSA/ML-KEM 24.7+. Check exact runtime and algorithm support.",
+        "Distinguish Node.js from browser execution; TypeScript types do not establish runtime capabilities. ML-KEM key exchange does not replace JWT signatures."
+      ],
+      "title": "Upgrade Node.js runtime for built-in WebCrypto PQC support"
+    },
+    "cases": [
+      "recommendation-jwt-JavaScript-code-quantum-vulnerable",
+      "recommendation-jwt-JavaScript-code-quantum-uncertain",
+      "supp-recommendation-jwt-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-jwt-JavaScript-code-quantum-uncertain",
+      "supp-runtime-JavaScript-20",
+      "supp-runtime-JavaScript-unknown"
+    ]
+  },
+  "7a4f0a55ad268dbd24032444679769b53f99eba69c23b6f2146355e544ab4b86": {
+    "action": {
+      "action_id": "runtime.verify-pqc-capabilities",
+      "priority": "planned",
+      "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+      "references": [
+        "https://nodejs.org/api/webcrypto.html"
+      ],
+      "steps": [
+        "Node crypto ML-DSA requires 24.6+, ML-KEM 24.7+, SLH-DSA 24.8+; WebCrypto ML-DSA/ML-KEM requires 24.7+. Verify browser support independently of TypeScript declarations.",
+        "Check resolved versions, provider/features and interoperability before changing production policy."
+      ],
+      "title": "Verify deployed runtime and protocol PQC capabilities"
+    },
+    "cases": [
+      "recommendation-jwt-JavaScript-code-quantum-vulnerable",
+      "recommendation-jwt-JavaScript-code-quantum-uncertain",
+      "recommendation-jwt-JavaScript-dependency-quantum-vulnerable",
+      "recommendation-jwt-JavaScript-dependency-quantum-uncertain",
+      "recommendation-tls-JavaScript-code-quantum-vulnerable",
+      "recommendation-tls-JavaScript-code-quantum-uncertain",
+      "recommendation-tls-JavaScript-dependency-quantum-vulnerable",
+      "recommendation-tls-JavaScript-dependency-quantum-uncertain",
+      "recommendation-pki-JavaScript-code-quantum-vulnerable",
+      "recommendation-pki-JavaScript-code-quantum-uncertain",
+      "recommendation-pki-JavaScript-dependency-quantum-vulnerable",
+      "recommendation-pki-JavaScript-dependency-quantum-uncertain",
+      "recommendation-cryptoapi-JavaScript-code-quantum-vulnerable",
+      "recommendation-cryptoapi-JavaScript-code-quantum-uncertain",
+      "recommendation-cryptoapi-JavaScript-dependency-quantum-vulnerable",
+      "recommendation-cryptoapi-JavaScript-dependency-quantum-uncertain",
+      "supp-recommendation-jwt-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-jwt-JavaScript-code-quantum-uncertain",
+      "supp-recommendation-jwt-JavaScript-dependency-quantum-vulnerable",
+      "supp-recommendation-jwt-JavaScript-dependency-quantum-uncertain",
+      "supp-recommendation-tls-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-tls-JavaScript-code-quantum-uncertain",
+      "supp-recommendation-tls-JavaScript-dependency-quantum-vulnerable",
+      "supp-recommendation-tls-JavaScript-dependency-quantum-uncertain",
+      "supp-recommendation-pki-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-pki-JavaScript-code-quantum-uncertain",
+      "supp-recommendation-pki-JavaScript-dependency-quantum-vulnerable",
+      "supp-recommendation-pki-JavaScript-dependency-quantum-uncertain",
+      "supp-recommendation-cryptoapi-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-JavaScript-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-JavaScript-dependency-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-JavaScript-dependency-quantum-uncertain",
+      "supp-runtime-JavaScript-20",
+      "supp-runtime-JavaScript-24.0",
+      "supp-runtime-JavaScript-24.6",
+      "supp-runtime-JavaScript-24.7",
+      "supp-runtime-JavaScript-24.8",
+      "supp-runtime-JavaScript-26.13.1",
+      "supp-runtime-JavaScript-unknown",
+      "supp-extension-js",
+      "supp-extension-mjs",
+      "supp-extension-cjs",
+      "supp-extension-jsx",
+      "supp-extension-ts",
+      "supp-extension-tsx"
+    ]
+  },
+  "589769f33b5c553d68db7024978dc3c9388e5d4353c6057d32e5cfadcd36522e": {
+    "action": {
+      "action_id": "go.hybrid-kem",
+      "priority": "near-term",
+      "rationale": "Go migration is typically introduced via hybrid KEM for transport/session keys while JWT signing transitions separately.",
+      "references": [
+        "https://pkg.go.dev/crypto/mlkem"
+      ],
+      "steps": [
+        "Use `crypto/mlkem` for key encapsulation where available.",
+        "Go 1.24+ provides crypto/mlkem and hybrid TLS defaults; Go 1.27+ provides crypto/mldsa and ML-DSA X.509/TLS 1.3 signatures. Confirm deployed toolchain and peer support.",
+        "Keep compatibility by running classical + PQC in parallel during rollout."
+      ],
+      "title": "Use hybrid key establishment in Go services"
+    },
+    "cases": [
+      "recommendation-jwt-Go-code-quantum-vulnerable",
+      "recommendation-jwt-Go-code-quantum-uncertain",
+      "supp-recommendation-jwt-Go-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Go-code-quantum-uncertain",
+      "supp-runtime-Go-1.23",
+      "supp-runtime-Go-1.24",
+      "supp-runtime-Go-1.27",
+      "supp-runtime-Go-unknown"
+    ]
+  },
+  "3b776f434f9dd3acb9d6f480166f1abca9ccc9d2b5b02ade262643b227385743": {
+    "action": {
+      "action_id": "runtime.verify-pqc-capabilities",
+      "priority": "planned",
+      "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+      "references": [
+        "https://go.dev/doc/go1.27"
+      ],
+      "steps": [
+        "Go 1.24 adds crypto/mlkem and hybrid TLS defaults; Go 1.27 adds crypto/mldsa and ML-DSA X.509/TLS signatures. Inspect GODEBUG and explicit group restrictions.",
+        "Check resolved versions, provider/features and interoperability before changing production policy."
+      ],
+      "title": "Verify deployed runtime and protocol PQC capabilities"
+    },
+    "cases": [
+      "recommendation-jwt-Go-code-quantum-vulnerable",
+      "recommendation-jwt-Go-code-quantum-uncertain",
+      "recommendation-jwt-Go-dependency-quantum-vulnerable",
+      "recommendation-jwt-Go-dependency-quantum-uncertain",
+      "recommendation-tls-Go-code-quantum-vulnerable",
+      "recommendation-tls-Go-code-quantum-uncertain",
+      "recommendation-tls-Go-dependency-quantum-vulnerable",
+      "recommendation-tls-Go-dependency-quantum-uncertain",
+      "recommendation-pki-Go-code-quantum-vulnerable",
+      "recommendation-pki-Go-code-quantum-uncertain",
+      "recommendation-pki-Go-dependency-quantum-vulnerable",
+      "recommendation-pki-Go-dependency-quantum-uncertain",
+      "recommendation-cryptoapi-Go-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Go-code-quantum-uncertain",
+      "recommendation-cryptoapi-Go-dependency-quantum-vulnerable",
+      "recommendation-cryptoapi-Go-dependency-quantum-uncertain",
+      "supp-recommendation-jwt-Go-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Go-code-quantum-uncertain",
+      "supp-recommendation-jwt-Go-dependency-quantum-vulnerable",
+      "supp-recommendation-jwt-Go-dependency-quantum-uncertain",
+      "supp-recommendation-tls-Go-code-quantum-vulnerable",
+      "supp-recommendation-tls-Go-code-quantum-uncertain",
+      "supp-recommendation-tls-Go-dependency-quantum-vulnerable",
+      "supp-recommendation-tls-Go-dependency-quantum-uncertain",
+      "supp-recommendation-pki-Go-code-quantum-vulnerable",
+      "supp-recommendation-pki-Go-code-quantum-uncertain",
+      "supp-recommendation-pki-Go-dependency-quantum-vulnerable",
+      "supp-recommendation-pki-Go-dependency-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Go-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Go-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Go-dependency-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Go-dependency-quantum-uncertain",
+      "supp-runtime-Go-1.23",
+      "supp-runtime-Go-1.24",
+      "supp-runtime-Go-1.27",
+      "supp-runtime-Go-unknown",
+      "supp-extension-go"
+    ]
+  },
+  "335b490a0d23e25fa39a312d29fcb4db4d4b43e067ffb312072139d70bf5e798": {
+    "action": {
+      "action_id": "python.signing-gateway",
+      "priority": "planned",
+      "rationale": "Python ecosystem PQC support is evolving, so isolating signing behind an internal API reduces lock-in.",
+      "references": [
+        "https://cryptography.io/en/50.0.2/changelog/"
+      ],
+      "steps": [
+        "Abstract JWT signing behind an interface to swap implementation safely.",
+        "Evaluate cryptography 48+ for ML-KEM/ML-DSA with OpenSSL 3.5+; 47 introduced the APIs with AWS-LC/BoringSSL requirements. Handle unsupported backend algorithms explicitly."
+      ],
+      "title": "Introduce a PQC signing gateway for Python JWT workloads"
+    },
+    "cases": [
+      "recommendation-jwt-Python-code-quantum-vulnerable",
+      "recommendation-jwt-Python-code-quantum-uncertain",
+      "supp-recommendation-jwt-Python-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Python-code-quantum-uncertain",
+      "supp-runtime-Python-3.11",
+      "supp-runtime-Python-3.14",
+      "supp-runtime-Python-unknown"
+    ]
+  },
+  "140d1a47b96dc62c97895e9730d821f2ab6fc8003e0110b137c806defa701c27": {
+    "action": {
+      "action_id": "runtime.verify-pqc-capabilities",
+      "priority": "planned",
+      "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+      "references": [
+        "https://cryptography.io/en/50.0.2/changelog/"
+      ],
+      "steps": [
+        "cryptography 48 adds OpenSSL 3.5+ support for ML-KEM/ML-DSA; 47 introduced APIs requiring AWS-LC/BoringSSL. Confirm resolved version and backend.",
+        "Check resolved versions, provider/features and interoperability before changing production policy."
+      ],
+      "title": "Verify deployed runtime and protocol PQC capabilities"
+    },
+    "cases": [
+      "recommendation-jwt-Python-code-quantum-vulnerable",
+      "recommendation-jwt-Python-code-quantum-uncertain",
+      "recommendation-jwt-Python-dependency-quantum-vulnerable",
+      "recommendation-jwt-Python-dependency-quantum-uncertain",
+      "recommendation-tls-Python-code-quantum-vulnerable",
+      "recommendation-tls-Python-code-quantum-uncertain",
+      "recommendation-tls-Python-dependency-quantum-vulnerable",
+      "recommendation-tls-Python-dependency-quantum-uncertain",
+      "recommendation-pki-Python-code-quantum-vulnerable",
+      "recommendation-pki-Python-code-quantum-uncertain",
+      "recommendation-pki-Python-dependency-quantum-vulnerable",
+      "recommendation-pki-Python-dependency-quantum-uncertain",
+      "recommendation-cryptoapi-Python-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Python-code-quantum-uncertain",
+      "recommendation-cryptoapi-Python-dependency-quantum-vulnerable",
+      "recommendation-cryptoapi-Python-dependency-quantum-uncertain",
+      "supp-recommendation-jwt-Python-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Python-code-quantum-uncertain",
+      "supp-recommendation-jwt-Python-dependency-quantum-vulnerable",
+      "supp-recommendation-jwt-Python-dependency-quantum-uncertain",
+      "supp-recommendation-tls-Python-code-quantum-vulnerable",
+      "supp-recommendation-tls-Python-code-quantum-uncertain",
+      "supp-recommendation-tls-Python-dependency-quantum-vulnerable",
+      "supp-recommendation-tls-Python-dependency-quantum-uncertain",
+      "supp-recommendation-pki-Python-code-quantum-vulnerable",
+      "supp-recommendation-pki-Python-code-quantum-uncertain",
+      "supp-recommendation-pki-Python-dependency-quantum-vulnerable",
+      "supp-recommendation-pki-Python-dependency-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Python-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Python-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Python-dependency-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Python-dependency-quantum-uncertain",
+      "supp-runtime-Python-3.11",
+      "supp-runtime-Python-3.14",
+      "supp-runtime-Python-unknown",
+      "supp-extension-py"
+    ]
+  },
+  "a8d11db06171693a5a41e288afed07c6c471b41edf1c39d9da84dfde4d8022f6": {
+    "action": {
+      "action_id": "rust.oqs-integration",
+      "priority": "near-term",
+      "rationale": "Rust migrations are safer when algorithm choices are hidden behind typed traits and feature flags.",
+      "references": [
+        "https://docs.rs/rustls/latest/src/rustls/manual/defaults.rs.html"
+      ],
+      "steps": [
+        "Replace direct RSA calls with trait-based signer interfaces.",
+        "Add PQC/hybrid implementations behind cargo features and integration tests.",
+        "For transport, inspect rustls resolved version and provider: 0.23.22 adds X25519MLKEM768; 0.23.27 prefers it by default with aws-lc-rs. ring and custom groups require separate review."
+      ],
+      "title": "Refactor Rust crypto calls to trait-based signer/KEM abstraction"
+    },
+    "cases": [
+      "recommendation-jwt-Rust-code-quantum-vulnerable",
+      "recommendation-jwt-Rust-code-quantum-uncertain",
+      "supp-recommendation-jwt-Rust-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Rust-code-quantum-uncertain",
+      "supp-runtime-Rust-1.84",
+      "supp-runtime-Rust-1.93",
+      "supp-runtime-Rust-unknown"
+    ]
+  },
+  "f2d1ff7a3d2546e258681b7b9f64fb28bdcd6253915c351146decf1a26c64013": {
+    "action": {
+      "action_id": "runtime.verify-pqc-capabilities",
+      "priority": "planned",
+      "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+      "references": [
+        "https://docs.rs/rustls/latest/src/rustls/manual/defaults.rs.html"
+      ],
+      "steps": [
+        "rustls 0.23.22 adds X25519MLKEM768 with aws-lc-rs; 0.23.27 prefers it by default. Inspect provider, features and custom groups; ring is not equivalent.",
+        "Check resolved versions, provider/features and interoperability before changing production policy."
+      ],
+      "title": "Verify deployed runtime and protocol PQC capabilities"
+    },
+    "cases": [
+      "recommendation-jwt-Rust-code-quantum-vulnerable",
+      "recommendation-jwt-Rust-code-quantum-uncertain",
+      "recommendation-jwt-Rust-dependency-quantum-vulnerable",
+      "recommendation-jwt-Rust-dependency-quantum-uncertain",
+      "recommendation-tls-Rust-code-quantum-vulnerable",
+      "recommendation-tls-Rust-code-quantum-uncertain",
+      "recommendation-tls-Rust-dependency-quantum-vulnerable",
+      "recommendation-tls-Rust-dependency-quantum-uncertain",
+      "recommendation-pki-Rust-code-quantum-vulnerable",
+      "recommendation-pki-Rust-code-quantum-uncertain",
+      "recommendation-pki-Rust-dependency-quantum-vulnerable",
+      "recommendation-pki-Rust-dependency-quantum-uncertain",
+      "recommendation-cryptoapi-Rust-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Rust-code-quantum-uncertain",
+      "recommendation-cryptoapi-Rust-dependency-quantum-vulnerable",
+      "recommendation-cryptoapi-Rust-dependency-quantum-uncertain",
+      "supp-recommendation-jwt-Rust-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Rust-code-quantum-uncertain",
+      "supp-recommendation-jwt-Rust-dependency-quantum-vulnerable",
+      "supp-recommendation-jwt-Rust-dependency-quantum-uncertain",
+      "supp-recommendation-tls-Rust-code-quantum-vulnerable",
+      "supp-recommendation-tls-Rust-code-quantum-uncertain",
+      "supp-recommendation-tls-Rust-dependency-quantum-vulnerable",
+      "supp-recommendation-tls-Rust-dependency-quantum-uncertain",
+      "supp-recommendation-pki-Rust-code-quantum-vulnerable",
+      "supp-recommendation-pki-Rust-code-quantum-uncertain",
+      "supp-recommendation-pki-Rust-dependency-quantum-vulnerable",
+      "supp-recommendation-pki-Rust-dependency-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Rust-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Rust-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Rust-dependency-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Rust-dependency-quantum-uncertain",
+      "supp-runtime-Rust-1.84",
+      "supp-runtime-Rust-1.93",
+      "supp-runtime-Rust-unknown",
+      "supp-extension-rs",
+      "supp-evidence-kind-private_key",
+      "supp-evidence-kind-dependency",
+      "supp-evidence-kind-sbom_dependency",
+      "supp-evidence-kind-code"
+    ]
+  },
+  "704af6e47da44730ed090d523f16eda86aa51d23993ef070fd8532a025add364": {
+    "action": {
+      "action_id": "ruby.crypto-service-boundary",
+      "priority": "planned",
+      "rationale": "Ruby runtime support for PQC primitives is commonly mediated through OpenSSL providers or external services.",
+      "references": [
+        "https://docs.ruby-lang.org/en/master/OpenSSL/PKey.html"
+      ],
+      "steps": [
+        "Isolate OpenSSL/JWT calls in one service object.",
+        "Integrate a PQC-capable signer via provider or sidecar.",
+        "Inspect openssl gem and linked library/provider versions; gem 4 adds groups=, sigalgs= and negotiated group inspection. Ruby version alone does not establish PQC support."
+      ],
+      "title": "Move Ruby JWT signing to a provider-backed crypto boundary"
+    },
+    "cases": [
+      "recommendation-jwt-Ruby-code-quantum-vulnerable",
+      "recommendation-jwt-Ruby-code-quantum-uncertain",
+      "supp-recommendation-jwt-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Ruby-code-quantum-uncertain",
+      "supp-runtime-Ruby-3.3",
+      "supp-runtime-Ruby-3.5",
+      "supp-runtime-Ruby-unknown"
+    ]
+  },
+  "dd8bed309b0a8e3c462ca20e8b5f7d01546b50d66623761ecab9bed5634b06e1": {
+    "action": {
+      "action_id": "runtime.verify-pqc-capabilities",
+      "priority": "planned",
+      "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+      "references": [
+        "https://ruby.github.io/openssl/History_md.html"
+      ],
+      "steps": [
+        "Check openssl gem and linked library/provider versions. gem 4 adds groups=, sigalgs= and negotiated group inspection; Ruby version alone is insufficient.",
+        "Check resolved versions, provider/features and interoperability before changing production policy."
+      ],
+      "title": "Verify deployed runtime and protocol PQC capabilities"
+    },
+    "cases": [
+      "recommendation-jwt-Ruby-code-quantum-vulnerable",
+      "recommendation-jwt-Ruby-code-quantum-uncertain",
+      "recommendation-jwt-Ruby-dependency-quantum-vulnerable",
+      "recommendation-jwt-Ruby-dependency-quantum-uncertain",
+      "recommendation-tls-Ruby-code-quantum-vulnerable",
+      "recommendation-tls-Ruby-code-quantum-uncertain",
+      "recommendation-tls-Ruby-dependency-quantum-vulnerable",
+      "recommendation-tls-Ruby-dependency-quantum-uncertain",
+      "recommendation-pki-Ruby-code-quantum-vulnerable",
+      "recommendation-pki-Ruby-code-quantum-uncertain",
+      "recommendation-pki-Ruby-dependency-quantum-vulnerable",
+      "recommendation-pki-Ruby-dependency-quantum-uncertain",
+      "recommendation-cryptoapi-Ruby-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Ruby-code-quantum-uncertain",
+      "recommendation-cryptoapi-Ruby-dependency-quantum-vulnerable",
+      "recommendation-cryptoapi-Ruby-dependency-quantum-uncertain",
+      "supp-recommendation-jwt-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-jwt-Ruby-code-quantum-uncertain",
+      "supp-recommendation-jwt-Ruby-dependency-quantum-vulnerable",
+      "supp-recommendation-jwt-Ruby-dependency-quantum-uncertain",
+      "supp-recommendation-tls-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-tls-Ruby-code-quantum-uncertain",
+      "supp-recommendation-tls-Ruby-dependency-quantum-vulnerable",
+      "supp-recommendation-tls-Ruby-dependency-quantum-uncertain",
+      "supp-recommendation-pki-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-pki-Ruby-code-quantum-uncertain",
+      "supp-recommendation-pki-Ruby-dependency-quantum-vulnerable",
+      "supp-recommendation-pki-Ruby-dependency-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Ruby-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Ruby-dependency-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Ruby-dependency-quantum-uncertain",
+      "supp-runtime-Ruby-3.3",
+      "supp-runtime-Ruby-3.5",
+      "supp-runtime-Ruby-unknown",
+      "supp-extension-rb"
+    ]
+  },
+  "fbf09f5face9fd5101da14cb5e4a9078285adeaacb27601bee9ad282841bb869": {
+    "action": {
+      "action_id": "tls.review-reference",
+      "priority": "planned",
+      "rationale": "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.",
+      "references": [
+        "https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2"
+      ],
+      "steps": [
+        "Distinguish constants, comments, tests and active settings.",
+        "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration."
+      ],
+      "title": "Review the TLS reference before changing effective settings"
+    },
+    "cases": [
+      "recommendation-tls-Java-code-quantum-vulnerable",
+      "recommendation-tls-Java-code-quantum-uncertain",
+      "recommendation-tls-JavaScript-code-quantum-vulnerable",
+      "recommendation-tls-JavaScript-code-quantum-uncertain",
+      "recommendation-tls-Go-code-quantum-vulnerable",
+      "recommendation-tls-Go-code-quantum-uncertain",
+      "recommendation-tls-Python-code-quantum-vulnerable",
+      "recommendation-tls-Python-code-quantum-uncertain",
+      "recommendation-tls-Rust-code-quantum-vulnerable",
+      "recommendation-tls-Rust-code-quantum-uncertain",
+      "recommendation-tls-Ruby-code-quantum-vulnerable",
+      "recommendation-tls-Ruby-code-quantum-uncertain",
+      "recommendation-tls-unknown-code-quantum-vulnerable",
+      "recommendation-tls-unknown-code-quantum-uncertain",
+      "supp-recommendation-tls-Java-code-quantum-vulnerable",
+      "supp-recommendation-tls-Java-code-quantum-uncertain",
+      "supp-recommendation-tls-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-tls-JavaScript-code-quantum-uncertain",
+      "supp-recommendation-tls-Go-code-quantum-vulnerable",
+      "supp-recommendation-tls-Go-code-quantum-uncertain",
+      "supp-recommendation-tls-Python-code-quantum-vulnerable",
+      "supp-recommendation-tls-Python-code-quantum-uncertain",
+      "supp-recommendation-tls-Rust-code-quantum-vulnerable",
+      "supp-recommendation-tls-Rust-code-quantum-uncertain",
+      "supp-recommendation-tls-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-tls-Ruby-code-quantum-uncertain",
+      "supp-recommendation-tls-unknown-code-quantum-vulnerable",
+      "supp-recommendation-tls-unknown-code-quantum-uncertain",
+      "supp-middleware-k8s-False",
+      "supp-middleware-nginx-False",
+      "supp-middleware-httpd-False",
+      "supp-middleware-envoy-False",
+      "supp-middleware-istio-False",
+      "supp-middleware-haproxy-False",
+      "supp-middleware-traefik-False",
+      "supp-middleware-unknown-False"
+    ]
+  },
+  "cc1610968f47774d7d15536c2ef92622d4f66497d91633826f915815b3e5c75e": {
+    "action": {
+      "action_id": "pki.hybrid-certificate-roadmap",
+      "priority": "near-term",
+      "rationale": "PKI updates require coordinated CA, chain, and relying-party compatibility planning.",
+      "references": [
+        "https://csrc.nist.gov/pubs/fips/204/final",
+        "https://csrc.nist.gov/pubs/fips/205/final"
+      ],
+      "steps": [
+        "Inventory certificate signature algorithms and key sizes from CBOM/report output.",
+        "Pilot hybrid chain issuance in non-production trust stores.",
+        "Define reissuance plan for quantum-vulnerable roots/intermediates/end-entity certs."
+      ],
+      "title": "Prepare hybrid certificate issuance and trust-store rollout"
+    },
+    "cases": [
+      "recommendation-pki-Java-code-quantum-vulnerable",
+      "recommendation-pki-Java-code-quantum-uncertain",
+      "recommendation-pki-JavaScript-code-quantum-vulnerable",
+      "recommendation-pki-JavaScript-code-quantum-uncertain",
+      "recommendation-pki-Go-code-quantum-vulnerable",
+      "recommendation-pki-Go-code-quantum-uncertain",
+      "recommendation-pki-Python-code-quantum-vulnerable",
+      "recommendation-pki-Python-code-quantum-uncertain",
+      "recommendation-pki-Rust-code-quantum-vulnerable",
+      "recommendation-pki-Rust-code-quantum-uncertain",
+      "recommendation-pki-Ruby-code-quantum-vulnerable",
+      "recommendation-pki-Ruby-code-quantum-uncertain",
+      "recommendation-pki-unknown-code-quantum-vulnerable",
+      "recommendation-pki-unknown-code-quantum-uncertain",
+      "supp-recommendation-pki-Java-code-quantum-vulnerable",
+      "supp-recommendation-pki-Java-code-quantum-uncertain",
+      "supp-recommendation-pki-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-pki-JavaScript-code-quantum-uncertain",
+      "supp-recommendation-pki-Go-code-quantum-vulnerable",
+      "supp-recommendation-pki-Go-code-quantum-uncertain",
+      "supp-recommendation-pki-Python-code-quantum-vulnerable",
+      "supp-recommendation-pki-Python-code-quantum-uncertain",
+      "supp-recommendation-pki-Rust-code-quantum-vulnerable",
+      "supp-recommendation-pki-Rust-code-quantum-uncertain",
+      "supp-recommendation-pki-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-pki-Ruby-code-quantum-uncertain",
+      "supp-recommendation-pki-unknown-code-quantum-vulnerable",
+      "supp-recommendation-pki-unknown-code-quantum-uncertain"
+    ]
+  },
+  "aee69a78d0fd17f87156651c065563853ba1ef5ff173a7c8462c05c0da29cc37": {
+    "action": {
+      "action_id": "cryptoapi.abstraction-layer",
+      "priority": "near-term",
+      "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+      "references": [
+        "https://www.nist.gov/itl/post-quantum-cryptography"
+      ],
+      "steps": [
+        "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+        "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+      ],
+      "title": "Introduce crypto abstraction boundary for algorithm agility"
+    },
+    "cases": [
+      "recommendation-cryptoapi-JavaScript-code-quantum-vulnerable",
+      "recommendation-cryptoapi-JavaScript-code-quantum-uncertain",
+      "recommendation-cryptoapi-Go-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Go-code-quantum-uncertain",
+      "recommendation-cryptoapi-Python-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Python-code-quantum-uncertain",
+      "recommendation-cryptoapi-Rust-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Rust-code-quantum-uncertain",
+      "recommendation-cryptoapi-Ruby-code-quantum-vulnerable",
+      "recommendation-cryptoapi-Ruby-code-quantum-uncertain",
+      "recommendation-cryptoapi-unknown-code-quantum-vulnerable",
+      "recommendation-cryptoapi-unknown-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-JavaScript-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-JavaScript-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Go-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Go-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Python-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Python-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Rust-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Rust-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-Ruby-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-Ruby-code-quantum-uncertain",
+      "supp-recommendation-cryptoapi-unknown-code-quantum-vulnerable",
+      "supp-recommendation-cryptoapi-unknown-code-quantum-uncertain",
+      "supp-extension-js",
+      "supp-extension-mjs",
+      "supp-extension-cjs",
+      "supp-extension-jsx",
+      "supp-extension-ts",
+      "supp-extension-tsx",
+      "supp-extension-py",
+      "supp-extension-go",
+      "supp-extension-rs",
+      "supp-extension-rb",
+      "supp-extension-txt",
+      "supp-evidence-kind-private_key",
+      "supp-evidence-kind-code"
+    ]
+  },
+  "7df73c3123a9672d77d55a65d25c6be71d79db6e9f35efb4170c1d176ff6f879": {
+    "action": {
+      "action_id": "java.jca-ml-dsa-ml-kem",
+      "code_examples": [
+        {
+          "after": "Signature sig = Signature.getInstance(\"ML-DSA\");\nsig.initSign(privateKey);\nsig.update(payload);\nbyte[] signature = sig.sign();\n// Keep legacy verification path during staged rollout.",
+          "before": "Signature sig = Signature.getInstance(\"SHA256withRSA\");\nsig.initSign(privateKey);\nsig.update(payload);\nbyte[] signature = sig.sign();",
+          "language": "java"
+        }
+      ],
+      "priority": "near-term",
+      "rationale": "Modern JDKs expose standardized PQC algorithm names through JCA, reducing vendor lock-in.",
+      "references": [
+        "https://openjdk.org/jeps/496",
+        "https://openjdk.org/jeps/497"
+      ],
+      "steps": [
+        "Replace RSA-only `Signature.getInstance(...)` calls with `ML-DSA` where policy allows.",
+        "Adopt ML-KEM for key establishment in hybrid TLS/key exchange designs.",
+        "Keep dual verification during migration to preserve compatibility."
+      ],
+      "title": "Use Java standard JCA names for ML-DSA / ML-KEM"
+    },
+    "cases": [
+      "supp-java-24-bcFalse",
+      "supp-java-24-bcTrue",
+      "supp-java-25-bcFalse",
+      "supp-java-25-bcTrue",
+      "supp-java-27-bcFalse",
+      "supp-java-27-bcTrue"
+    ]
+  },
+  "8c70e3f2e3cc521f9c8a89d6779b98220acc24d93c541627476c11b9460c35aa": {
+    "action": {
+      "action_id": "node.webcrypto.pqc",
+      "code_examples": [
+        {
+          "after": "// Replace RS256 token-signing path with a PQC-capable signing service\n// or WebCrypto ML-DSA workflow once runtime support is enabled.\nconst token = await signWithPqc(payload);",
+          "before": "import jwt from \"jsonwebtoken\";\nconst token = jwt.sign(payload, privateKey, { algorithm: \"RS256\" });",
+          "language": "javascript"
+        }
+      ],
+      "priority": "near-term",
+      "rationale": "Node.js runtime level determines whether built-in PQC APIs are available for direct migration.",
+      "references": [
+        "https://nodejs.org/api/webcrypto.html"
+      ],
+      "steps": [
+        "Node crypto: ML-DSA 24.6+, ML-KEM 24.7+, SLH-DSA 24.8+; WebCrypto ML-DSA/ML-KEM 24.7+. Check exact runtime and algorithm support.",
+        "Distinguish Node.js from browser execution; TypeScript types do not establish runtime capabilities. ML-KEM key exchange does not replace JWT signatures."
+      ],
+      "title": "Check Node.js minor version and WebCrypto PQC capabilities"
+    },
+    "cases": [
+      "supp-runtime-JavaScript-24.0",
+      "supp-runtime-JavaScript-24.6",
+      "supp-runtime-JavaScript-24.7",
+      "supp-runtime-JavaScript-24.8",
+      "supp-runtime-JavaScript-26.13.1"
+    ]
+  },
+  "5dd41d50a09232d9596fa22e57eac88394c335c79998203666ec5cd4508f81e0": {
+    "action": {
+      "action_id": "crypto.review-reference",
+      "priority": "planned",
+      "rationale": "A source reference does not establish active signing, JWT issuance, or the absence of an existing PQC/hybrid composition.",
+      "references": [
+        "https://www.nist.gov/itl/post-quantum-cryptography"
+      ],
+      "steps": [
+        "Identify key generation, signing, verification, encryption or key establishment and separate tests/examples from deployed use.",
+        "Check existing PQC or hybrid components, provider support and protocol compatibility before selecting a change."
+      ],
+      "title": "Review the cryptographic reference and its actual purpose"
+    },
+    "cases": [
+      "supp-reference-TS_JWT_EDDSA_ALG",
+      "supp-reference-API_CIPHER_RSA",
+      "supp-reference-TS_JAVA_RSA_API"
+    ]
+  },
+  "68fec79cd8482f822fa0264b1a2ca1dc55614856bbea050b22b27ee3eee4fa08": {
+    "action": {
+      "action_id": "tls.review-pqc-override",
+      "priority": "near-term",
+      "rationale": "The detected setting restricts hybrid key exchange. It does not establish RSA usage or the negotiated TLS version.",
+      "references": [
+        "https://go.dev/doc/godebug",
+        "https://www.rfc-editor.org/rfc/rfc9325.html#section-3.1.1"
+      ],
+      "steps": [
+        "Inspect GODEBUG=tlsmlkem=0 at this location and confirm why the override is required.",
+        "Verify deployed library and peer support before testing a hybrid group or removing the override.",
+        "Check key exchange, TLS protocol version and certificate signatures separately; TLS 1.3 alone does not establish PQC protection."
+      ],
+      "title": "Review the explicit PQC override: GODEBUG=tlsmlkem=0"
+    },
+    "cases": [
+      "supp-override-PQC_GO_TLS_DISABLED"
+    ]
+  },
+  "357c6d732955b73c225fc17407cdb7025e37575de1d5c9df767e2a6de51d725d": {
+    "action": {
+      "action_id": "tls.review-pqc-override",
+      "priority": "near-term",
+      "rationale": "The detected setting restricts hybrid key exchange. It does not establish RSA usage or the negotiated TLS version.",
+      "references": [
+        "https://go.dev/doc/godebug",
+        "https://www.rfc-editor.org/rfc/rfc9325.html#section-3.1.1"
+      ],
+      "steps": [
+        "Inspect jdk.tls.namedGroups at this location and confirm why the override is required.",
+        "Verify deployed library and peer support before testing a hybrid group or removing the override.",
+        "Check key exchange, TLS protocol version and certificate signatures separately; TLS 1.3 alone does not establish PQC protection."
+      ],
+      "title": "Review the explicit PQC override: jdk.tls.namedGroups"
+    },
+    "cases": [
+      "supp-override-PQC_JAVA_CLASSICAL_GROUPS"
+    ]
+  },
+  "afabcbc936af96be5b098acf1102f36433842cac2f96e75161d78cc4503c49d7": {
+    "action": {
+      "action_id": "tls.review-pqc-override",
+      "priority": "near-term",
+      "rationale": "The detected setting restricts hybrid key exchange. It does not establish RSA usage or the negotiated TLS version.",
+      "references": [
+        "https://go.dev/doc/godebug",
+        "https://www.rfc-editor.org/rfc/rfc9325.html#section-3.1.1"
+      ],
+      "steps": [
+        "Inspect groups= / ecdh_curves= at this location and confirm why the override is required.",
+        "Verify deployed library and peer support before testing a hybrid group or removing the override.",
+        "Check key exchange, TLS protocol version and certificate signatures separately; TLS 1.3 alone does not establish PQC protection."
+      ],
+      "title": "Review the explicit PQC override: groups= / ecdh_curves="
+    },
+    "cases": [
+      "supp-override-PQC_RUBY_CLASSICAL_GROUPS"
+    ]
+  },
+  "8350043e1ce7fec5b7895f9f74e0fb6917ac5240a0214e106618435d2f76331e": {
+    "action": {
+      "action_id": "k8s.pqc-signature-readiness-note",
+      "priority": "advisory",
+      "rationale": "As described in Kubernetes guidance dated July 18, 2025, ecosystem readiness is currently stronger for hybrid key exchange than for end-to-end PQC certificate signatures.",
+      "references": [
+        "https://kubernetes.io/blog/2025/07/18/pqc-in-k8s/",
+        "https://go.dev/doc/go1.26"
+      ],
+      "steps": [
+        "Treat TLS modernization (TLS 1.2+/1.3) and hybrid KEM pilots as the immediate baseline.",
+        "Do not assume ML-DSA/SLH-DSA certificate signatures are natively interoperable across ingress/controller/mesh/CA/client paths.",
+        "Run staged compatibility tests before enforcing PQC signatures in production."
+      ],
+      "title": "Validate Kubernetes PQC signature readiness before production rollout"
+    },
+    "cases": [
+      "supp-middleware-k8s-True"
+    ]
+  },
+  "ecd82a36999944ab1cffd371ad7db9a657a1dfe1addee61d8ca63ab3cf8267a9": {
+    "action": {
+      "action_id": "tls.remove-rsa-kex",
+      "priority": "near-term",
+      "rationale": "RSA key exchange and legacy protocol versions are high-priority migration blockers for PQC readiness.",
+      "references": [
+        "https://www.rfc-editor.org/rfc/rfc8446"
+      ],
+      "steps": [
+        "Prefer TLS 1.3; restrict connections to TLS 1.3 when all peers support it. Disable TLS 1.0 and 1.1.",
+        "Retain securely configured TLS 1.2 only where interoperability requires it, and record the compatibility reason.",
+        "Prefer ECDHE today and plan hybrid KEM suites for next phase.",
+        "Continuously test interoperability across clients and load balancers."
+      ],
+      "title": "Prefer TLS 1.3 and review legacy key exchange"
+    },
+    "cases": [
+      "supp-middleware-k8s-True",
+      "supp-middleware-nginx-True",
+      "supp-middleware-httpd-True",
+      "supp-middleware-envoy-True",
+      "supp-middleware-istio-True",
+      "supp-middleware-haproxy-True",
+      "supp-middleware-traefik-True",
+      "supp-middleware-unknown-True"
+    ]
+  },
+  "9201bdb48108949cab37c8709b214dffb04877a9bd85c6fd2442e597fb129d56": {
+    "action": {
+      "action_id": "tls.k8s-ingress-hardening",
+      "priority": "near-term",
+      "rationale": "Kubernetes edge resources are frequent concentration points for legacy TLS policy.",
+      "references": [
+        "https://kubernetes.io/docs/concepts/services-networking/ingress/"
+      ],
+      "steps": [
+        "Prefer TLS 1.3 in ingress controller settings; retain TLS 1.2 only where interoperability requires it.",
+        "Use policy-as-code checks to block reintroduction of legacy suites."
+      ],
+      "title": "Update Kubernetes ingress/gateway TLS policy"
+    },
+    "cases": [
+      "supp-middleware-k8s-True"
+    ]
+  },
+  "03c499ba2e5d2ddf5c2deda16b4df6194cfe07ed036a172cdef404b9075c5bde": {
+    "action": {
+      "action_id": "nginx.pqc-signature-readiness-note",
+      "priority": "advisory",
+      "rationale": "nginx relies on TLS library behavior; hybrid KEM support and PQC certificate-signature interoperability can differ by OpenSSL/provider build and client ecosystem.",
+      "references": [
+        "https://nginx.org/en/docs/http/ngx_http_ssl_module.html",
+        "https://openssl-library.org/post/2025-04-08-openssl-3.5-final/"
+      ],
+      "steps": [
+        "Keep TLS 1.2+/1.3 hardening as baseline and pilot hybrid KEM first.",
+        "Test ML-DSA/SLH-DSA certificate-chain interoperability across nginx, upstream TLS endpoints, and client stacks.",
+        "Roll out behind canary and keep fallback policy until interoperability evidence is complete."
+      ],
+      "title": "Validate nginx/OpenSSL PQC signature interoperability before rollout"
+    },
+    "cases": [
+      "supp-middleware-nginx-True"
+    ]
+  },
+  "1e9036fec607c162e02e7f9050e6f497dda4f792f05c8092381dd29384adb051": {
+    "action": {
+      "action_id": "tls.nginx-hardening",
+      "priority": "near-term",
+      "rationale": "nginx config was detected and can be remediated with explicit protocol and cipher policies.",
+      "references": [
+        "https://nginx.org/en/docs/http/ngx_http_ssl_module.html"
+      ],
+      "steps": [
+        "Prefer `ssl_protocols TLSv1.3;` when all peers support it; retain TLSv1.2 only for a documented interoperability need.",
+        "Remove RSA key-exchange suites and keep forward-secret suites only."
+      ],
+      "title": "Harden nginx TLS policy for migration"
+    },
+    "cases": [
+      "supp-middleware-nginx-True"
+    ]
+  },
+  "447a2f6008f2f85096d41403987f64e26c7c97a9ca4486cc03cc78aa65773230": {
+    "action": {
+      "action_id": "tls.httpd-hardening",
+      "priority": "near-term",
+      "rationale": "Apache TLS settings can be migrated safely via explicit protocol and cipher controls.",
+      "references": [
+        "https://httpd.apache.org/docs/trunk/mod/mod_ssl.html"
+      ],
+      "steps": [
+        "Prefer `SSLProtocol -all +TLSv1.3` when all peers support it; retain TLSv1.2 only for a documented interoperability need.",
+        "Review `SSLCipherSuite` and remove RSA key-exchange suites."
+      ],
+      "title": "Harden Apache httpd SSL/TLS directives"
+    },
+    "cases": [
+      "supp-middleware-httpd-True"
+    ]
+  },
+  "a333922962b5508ee1e65e129cbf133cc3a5ed7e5159ec0ec23c9bf6eec5e696": {
+    "action": {
+      "action_id": "envoy.pqc-signature-readiness-note",
+      "priority": "advisory",
+      "rationale": "Envoy TLS behavior depends on configured providers and peer capabilities; PQC signature readiness can vary between mesh edges, sidecars, and external clients.",
+      "references": [
+        "https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/security/ssl.html",
+        "https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto"
+      ],
+      "steps": [
+        "Harden min/max TLS versions and remove legacy RSA suites first.",
+        "Verify PQC certificate-signature compatibility in both downstream and upstream clusters.",
+        "Gate production rollout with staged canary tests and explicit fallback paths."
+      ],
+      "title": "Validate Envoy PQC signature compatibility in control/data planes"
+    },
+    "cases": [
+      "supp-middleware-envoy-True"
+    ]
+  },
+  "af2cb7b1822dc6633617bf4e39e06b4e3fcc75098f80e733e2054ec738ea291c": {
+    "action": {
+      "action_id": "tls.envoy-hardening",
+      "priority": "near-term",
+      "rationale": "Envoy control-plane config supports strict min/max protocol and cipher suite policy.",
+      "references": [
+        "https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto"
+      ],
+      "steps": [
+        "Prefer `tls_minimum_protocol_version: TLSv1_3`; use TLSv1_2 only when interoperability requires it.",
+        "Remove RSA-dependent suites from `cipher_suites`."
+      ],
+      "title": "Set modern TLS policy in Envoy"
+    },
+    "cases": [
+      "supp-middleware-envoy-True"
+    ]
+  },
+  "b0b359b69e8a8e00a50abd4e5fded10000c3cd6ff993446185f4abcfe3cb1975": {
+    "action": {
+      "action_id": "istio.pqc-signature-readiness-note",
+      "priority": "advisory",
+      "rationale": "Istio rollout spans gateways, sidecars, and service-to-service traffic; mesh-wide certificate-signature interoperability must be validated end-to-end.",
+      "references": [
+        "https://istio.io/latest/docs/reference/config/networking/destination-rule/",
+        "https://istio.io/latest/docs/reference/config/networking/gateway/"
+      ],
+      "steps": [
+        "Standardize TLS modernization policy in DestinationRule/Gateway resources.",
+        "Test PQC signature compatibility across ingress gateway, sidecars, and external clients.",
+        "Roll out with progressive policies and keep compatibility fallbacks during migration."
+      ],
+      "title": "Validate Istio mesh-wide PQC signature interoperability before enforcement"
+    },
+    "cases": [
+      "supp-middleware-istio-True"
+    ]
+  },
+  "1155a327daafdb19404e1c86ec5d4d21e0fcd9eb2c2861d716ac20aedffa9680": {
+    "action": {
+      "action_id": "tls.istio-hardening",
+      "priority": "near-term",
+      "rationale": "Istio DestinationRule/Gateway policies should mirror TLS modernization and hybrid-readiness goals.",
+      "references": [
+        "https://istio.io/latest/docs/reference/config/networking/destination-rule/"
+      ],
+      "steps": [
+        "Prefer TLS 1.3 in mesh and gateway resources; retain TLS 1.2 only where interoperability requires it.",
+        "Reduce classical RSA dependency in configured cipher sets."
+      ],
+      "title": "Align Istio TLS settings with PQC migration policy"
+    },
+    "cases": [
+      "supp-middleware-istio-True"
+    ]
+  },
+  "dfdba2794aa998d92fcc637efa8f25a0e8beb51affdfa0cf793e9eeb76c70e78": {
+    "action": {
+      "action_id": "haproxy.pqc-signature-readiness-note",
+      "priority": "advisory",
+      "rationale": "HAProxy TLS capabilities are tied to the linked TLS stack and runtime policy; PQC signature behavior may differ by build and client compatibility.",
+      "references": [
+        "https://www.haproxy.com/documentation/haproxy-configuration-tutorials/security/ssl-tls/"
+      ],
+      "steps": [
+        "Keep TLS 1.2+/1.3 policy and remove legacy protocol/cipher options first.",
+        "Run interoperability tests for PQC certificate signatures with all major client types.",
+        "Use phased rollout with rollback/fallback controls while collecting compatibility evidence."
+      ],
+      "title": "Validate HAProxy TLS stack PQC signature readiness before production"
+    },
+    "cases": [
+      "supp-middleware-haproxy-True"
+    ]
+  },
+  "3912a2fc0c4144415ebf9aba5dc342848f1e37924c04c28832483f174ea150c6": {
+    "action": {
+      "action_id": "traefik.pqc-signature-readiness-note",
+      "priority": "advisory",
+      "rationale": "Traefik TLS options and provider integrations can produce environment-specific PQC signature behavior that must be validated before strict enforcement.",
+      "references": [
+        "https://doc.traefik.io/traefik/https/tls/",
+        "https://doc.traefik.io/traefik/routing/routers/#tls"
+      ],
+      "steps": [
+        "Raise minimum TLS version and remove legacy suites/options as baseline.",
+        "Test PQC certificate-signature compatibility for edge traffic, internal services, and automation clients.",
+        "Apply staged rollout with explicit compatibility fallback configuration."
+      ],
+      "title": "Validate Traefik PQC signature interoperability with all entrypoints"
+    },
+    "cases": [
+      "supp-middleware-traefik-True"
+    ]
+  },
+  "b5b7a4a012526c00cd0128da8671eeec7db30721d2d9381ab7ef8d866e4dc678": {
+    "action": {
+      "action_id": "incident.private-key-rotation",
+      "priority": "immediate",
+      "rationale": "A private-key marker was found. Confirm whether complete key material is present and whether it belongs to a live exposed credential; the marker alone does not establish an incident.",
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+      ],
+      "steps": [
+        "Check whether the signal is a header reference, a synthetic test key, or complete live key material.",
+        "If a live credential is exposed, revoke or replace it and invalidate affected sessions/tokens as appropriate.",
+        "Move keys to a secret manager or HSM and enforce commit scanning in CI."
+      ],
+      "title": "Review private-key markers and rotate exposed live credentials"
+    },
+    "cases": [
+      "supp-evidence-kind-private_key"
+    ]
+  },
+  "2d6c5ccd22449f97c3a4a7e99c6129a357fc535477f570b5c12e9cd17f197c1b": {
+    "action": {
+      "action_id": "dependency.track-pqc-readiness",
+      "priority": "planned",
+      "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+      "references": [
+        "https://cyclonedx.org/",
+        "https://spdx.dev/"
+      ],
+      "steps": [
+        "Record current versions in dependency-sbom.json and define upgrade targets.",
+        "Subscribe to release notes for PQC feature availability and API changes.",
+        "Run integration tests for PQC or hybrid modes before promoting to production."
+      ],
+      "title": "Track PQC readiness of dependent libraries"
+    },
+    "cases": [
+      "supp-evidence-kind-dependency",
+      "supp-evidence-kind-sbom_dependency"
+    ]
+  }
+}

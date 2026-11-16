@@ -1,0 +1,51 @@
+from pathlib import Path
+import sys,tempfile,subprocess,json,time,hashlib,os,datetime
+sys.path.insert(0,'tests/protocol');import isolation
+root=Path('.').resolve();out=root/'tasks/056/evidence/remediation-20261115/native-r2';out.mkdir();sysroot=Path(subprocess.check_output(['rustc','--print','sysroot'],text=True).strip());python=Path(sys.executable).resolve();records=[]
+with tempfile.TemporaryDirectory(prefix='pqc056-native-') as temp:
+ base=Path(temp).resolve();scratch=base/'work';scratch.mkdir();snapshot=base/'source'
+ sys.path.insert(0,str(root/'tests/protocol'));import container_runner
+ snapshot_bindings=container_runner.snapshot(root,snapshot)
+ # Relevant documentation is read-only input; task evidence is intentionally excluded.
+ for path in sorted((root/'docs').rglob('*')):
+  if path.is_file() and not path.is_symlink() and path.suffix in {'.md','.json'}:
+   rel=path.relative_to(root);dest=snapshot/rel
+   if dest.exists():continue
+   data=path.read_bytes();dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data);dest.chmod(0o444);snapshot_bindings[str(rel)]=hashlib.sha256(data).hexdigest()
+ (scratch/'repo-target').mkdir();(snapshot/'target').symlink_to(scratch/'repo-target',target_is_directory=True)
+ env=isolation.environment(scratch,sysroot/'bin/rustc');env.update(CARGO_NET_OFFLINE='true',CARGO_BUILD_JOBS='2',CARGO_INCREMENTAL='0',GIT_CONFIG_GLOBAL='/dev/null',GIT_CONFIG_NOSYSTEM='1',PYTHONDONTWRITEBYTECODE='1',CARGO_TARGET_DIR=str(scratch/'build'),CARGO_PROFILE_DEV_DEBUG='0',CARGO_PROFILE_TEST_DEBUG='0')
+ for name in ['registry','git']:
+  cache=Path.home()/'.cargo'/name
+  if cache.exists():(scratch/'cargo'/name).symlink_to(cache,target_is_directory=True)
+ gitpath=subprocess.check_output(['xcrun','--find','git'],text=True).strip();env['PATH']=str(Path(gitpath).parent)+':'+env['PATH'];env['GIT_OPTIONAL_LOCKS']='0'
+ clang=subprocess.check_output(['xcrun','--sdk','macosx','--find','clang'],text=True).strip();sdk=subprocess.check_output(['xcrun','--sdk','macosx','--show-sdk-path'],text=True).strip();ar=subprocess.check_output(['xcrun','--sdk','macosx','--find','ar'],text=True).strip();env.update(CC=clang,CXX=clang+'++',AR=ar,SDKROOT=sdk,CARGO_TARGET_AARCH64_APPLE_DARWIN_LINKER=clang,CLANG_MODULE_CACHE_PATH=str(scratch/'clang-cache'))
+ policy=isolation.profile(snapshot,scratch,read_paths=[sysroot,python.parents[1],Path.home()/'.cargo/registry',Path.home()/'.cargo/git','/private/var/db/xcode_select_link'])
+ (out/'SNAPSHOT.json').write_text(json.dumps(snapshot_bindings,indent=2)+'\n')
+ (out/'POLICY.sb').write_text(policy);(out/'ENVIRONMENT.json').write_text(json.dumps(env,indent=2)+'\n')
+ files=sorted(set(subprocess.check_output(['git','ls-files','-co','--exclude-standard','-z','crates','rules','Cargo.toml','Cargo.lock','rust-toolchain.toml','tests/quality/judgment','tests/quality/judgment.py'],text=True).split('\0')))
+ source={f:hashlib.sha256((root/f).read_bytes()).hexdigest() for f in files if f and (root/f).is_file()};(out/'SOURCE.json').write_text(json.dumps(source,indent=2)+'\n')
+ cmds=[('report-regression',['cargo','test','--locked','--offline','-p','pqc_scan_report','--test','recommendation056','--','--nocapture']),('workspace',['cargo','test','--workspace','--locked','--offline']),('clippy',['cargo','clippy','--workspace','--all-targets','--locked','--offline','--','-D','warnings'])]
+ for name,args in cmds:
+  with (out/(name+'.log')).open('w') as log:
+   start=time.monotonic();at=datetime.datetime.now(datetime.timezone.utc).isoformat();r=isolation.run(args,cwd=snapshot,env=env,policy=policy,timeout=1200,stdout=log,stderr=subprocess.STDOUT)
+  records.append({'name':name,'command':args,'startedAt':at,'exitCode':r.returncode,'seconds':time.monotonic()-start,'log':name+'.log'});(out/'COMMANDS.json').write_text(json.dumps(records,indent=2)+'\n');print(name,'exit',r.returncode,flush=True)
+  if name in ['probe','optional-probe'] and r.returncode==0:
+   line=next(x for x in (out/(name+'.log')).read_text().splitlines() if x.startswith('QUALITY056_OBSERVATIONS:'));observations=json.loads(line.split(':',1)[1]);(out/(name+'-OBSERVATIONS.json')).write_text(json.dumps(observations,indent=2)+'\n');print('observations',len(observations),flush=True)
+  if name in ['pipeline','optional-pipeline'] and r.returncode==0:
+   line=next(x for x in (out/(name+'.log')).read_text().splitlines() if x.startswith('QUALITY056_PIPELINE:'));observations=json.loads(line.split(':',1)[1]);(out/(name+'-OBSERVATIONS.json')).write_text(json.dumps(observations,indent=2)+'\n');print('pipeline observations',len(observations),flush=True)
+  binary_rows=[]
+  for directory in [scratch/'build',scratch/'build-all']:
+   for binary in sorted(directory.glob('debug/deps/quality056*'))+sorted(directory.glob('debug/deps/recommendation056*'))+list(directory.glob('debug/pqc-scan')):
+    if binary.is_file() and binary.stat().st_mode & 0o111:
+     binary_rows.append({'path':str(binary.relative_to(scratch)),'sha256':hashlib.sha256(binary.read_bytes()).hexdigest(),'size':binary.stat().st_size})
+  (out/(name+'-BINARIES.json')).write_text(json.dumps(binary_rows,indent=2)+'\n')
+  if name=='report-regression' and r.returncode==0:
+   line=next(x for x in (out/(name+'.log')).read_text().splitlines() if x.startswith('REMEDIATION056_REPORTS:'));reports=json.loads(line.split(':',1)[1])
+   allowed={lang+'/'+file for lang in ['en','ja'] for file in ['report.html','report.md','report.json','report.sarif']}
+   assert set(reports)==allowed
+   for file,content in reports.items():
+    dest=out/'rendered-reports'/file;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_text(content)
+  if r.returncode:raise SystemExit(r.returncode)
+ assert all(hashlib.sha256((root/f).read_bytes()).hexdigest()==h for f,h in source.items())
+ assert all(hashlib.sha256((snapshot/f).read_bytes()).hexdigest()==h for f,h in snapshot_bindings.items())
+(out/'COMPLETION.json').write_text(json.dumps({'exitCode':0,'scratchRemoved':True,'limits':'Existing native macOS isolation: readonly source/cache, fresh allowlisted environment, external network denied, scratch-only writes; finite per-process CPU/files/processes and per-command wall. No aggregate Linux cgroup/memory/disk guarantee.'},indent=2)+'\n')

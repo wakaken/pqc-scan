@@ -1,0 +1,137 @@
+{
+  "status": "Complete:originalQ6-10/Q6-12 verified; both reviews accepted",
+  "head": "f07d782cd68cfac95d93585d5ace049f590160d4",
+  "baselineRelease": "v0.2.0",
+  "baselineCommit": "4ee5ceb2ca6bab3cf3336fae17fb9f42f3446d65",
+  "sourceBindings": "../native-r2/SOURCE.json",
+  "reviewSource": "../REVIEW-SOURCE.json",
+  "rows": [
+    {
+      "surface": "legacy_detector",
+      "requirement": "Q6-10",
+      "expectation": "External implementation defines onlyname/detect; default detailed/observed adapters do not invent completeness",
+      "status": "Verified",
+      "evidence": "native-r2/public-client.log"
+    },
+    {
+      "surface": "legacy_scan_calls",
+      "requirement": "Q6-10",
+      "expectation": "scan_repository/detailed/native produce identical legacy facts ignoring generated time; each scans once",
+      "status": "Verified",
+      "evidence": "native-r2/public-client.log"
+    },
+    {
+      "surface": "legacy_writer",
+      "requirement": "Q6-10",
+      "expectation": "Original write_reports signature produces six expected files; old model types remain constructible",
+      "status": "Verified",
+      "evidence": "native-r2/public-client.log"
+    },
+    {
+      "surface": "public_contract_types",
+      "requirement": "Q6-10",
+      "expectation": "Eight complete public contract modules byteequal to local v0.2.0; externalclient compiles using old fields",
+      "status": "Verified",
+      "evidence": "RELEASE-API.json"
+    },
+    {
+      "surface": "field_enum_version_ids",
+      "requirement": "Q6-10",
+      "expectation": "Twelve frozenJSONcontract files byteequal to v0.2.0; executed048positive/negative/offline schemas plus native/diff/golden/ID/enum tests",
+      "status": "Verified",
+      "evidence": "native-r2/exports.log"
+    },
+    {
+      "surface": "cli_information",
+      "requirement": "Q6-10",
+      "expectation": "Help/version/subcommands and stdout/stderr tested in default and allfeatures; installedstatic/network help actualexits0",
+      "status": "Verified",
+      "evidence": "native-r2/USER-COMMANDS.json"
+    },
+    {
+      "surface": "exit_status",
+      "requirement": "Q6-10",
+      "expectation": "ActualinstalledCLI0 success,1 invalid/missing,2 severitythreshold,3 incomplete;3 wins over2 and reports retained",
+      "status": "Verified",
+      "evidence": "native-r2/USER-COMMANDS.json"
+    },
+    {
+      "surface": "file_selection",
+      "requirement": "Q6-10",
+      "expectation": "Default6filenames and selectednative/assessment/diagnostics/CycloneDX11filenames verified; no silent extras or aliasrestoration",
+      "status": "Verified",
+      "evidence": "native-r2/USER-RESULTS.json"
+    },
+    {
+      "surface": "language_independence",
+      "requirement": "Q6-10",
+      "expectation": "ActualEN/JAlegacy findings equal and048sourcefacts/asset/ID invariants pass; native runIDs remain run-local",
+      "status": "Verified",
+      "evidence": "native-r2/USER-RESULTS.json"
+    },
+    {
+      "surface": "source_install_scan",
+      "requirement": "Q6-12",
+      "expectation": "Clean cargo install --locked --offline --root; explicit installedrules; external project fixture onlyscanned",
+      "status": "Verified",
+      "evidence": "native-r2/USER-RESULTS.json"
+    },
+    {
+      "surface": "help_api_docs",
+      "requirement": "Q6-12",
+      "expectation": "DocumentedCLI examples/options and publicRustclient exercised; bothlanguage guides describe samefile/default/gate/assurance semantics",
+      "status": "Verified",
+      "evidence": "DOCUMENT-LINKS.json"
+    },
+    {
+      "surface": "documentation_links",
+      "requirement": "Q6-12",
+      "expectation": "135local destinations and83anchors resolve;8externalHEADresponses200 with no credentials",
+      "status": "Verified",
+      "evidence": "DOCUMENT-ANCHORS.json"
+    },
+    {
+      "surface": "keyboard_offline_narrow",
+      "requirement": "Q6-12",
+      "expectation": "ActualChromeENJA1280desktop/390mobile; trustedEnter togglesdetails and search worksloaded-offline; longURL wrapping regression reproduced thenfixed",
+      "status": "Verified",
+      "evidence": "browser-green/RESULT.json"
+    },
+    {
+      "surface": "unfinished_understanding",
+      "requirement": "Q6-12",
+      "expectation": "Installedscanner diagnostics selected2/analyzed1/partial1, humanreport showsGemfile and incomplete reason; actualstrictgate3 retainsreports",
+      "status": "Verified",
+      "evidence": "native-r2/user-reports/en/diagnostics.json"
+    }
+  ],
+  "intentionalEvolution": [
+    {
+      "change": "--native-json removed; --inventory-json retained",
+      "authorization": "tasks/025/TASK-025-INVENTORY-ONLY.md explicit maintainer decision; currentrejectiontested",
+      "scope": "CLI switch only; old library write_native_json remainsavailable"
+    },
+    {
+      "change": "Detection and guidance facts maydiffer frompublicrelease",
+      "authorization": "Existingcompleted043/056 and056authorizedremediation; not new058policy",
+      "scope": "Schema/IDsafety/enum/APIshape unchanged; no identicalfindingpopulationclaim"
+    },
+    {
+      "change": "Onlystatic/network acceptedfornewpackagepreparation",
+      "authorization": "tasks/064/TASK-064-RESULTS.md prior maintainer-approved namingconsolidation",
+      "scope": "Historicalarchive verification/install remains supported; no distributionchange in058"
+    },
+    {
+      "change": "LonganchorswrapinHTML",
+      "authorization": "Original058Q6-12 permits narrow-screen usabilityrepair",
+      "scope": "CSSpresentationonly; href/linktext and machineoutputs unchanged"
+    }
+  ],
+  "limits": [
+    "Finite documented API/CLI/outputsurface coverage, not a semverproof for every downstreamclient",
+    "Sourceandlocalinstallation testedon native macOSarm64; otherplatforms belong059",
+    "No newofficialsupport,publicrelease,SDKcryptoimplementation or updatedSLA",
+    "Publishedreleaseidentity is localtagbaseline; remoteartifactsignaturevalidity not inferred fromHTTP200"
+  ],
+  "baselineTagObject": "eecbf1c04750468ce1a1552d63ab0a270b210947"
+}

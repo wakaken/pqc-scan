@@ -2,8 +2,8 @@ id: '061'
 title: 配布物の完全性・署名・生成来歴の検証を準備する
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Main agent (Evaluator)
 phase: '5'
 description: 取得後の改変検出と署名/provenance検証を試す。公開や実release署名の権限は含めない。
 quality_alias: '追加: Q6配布の信頼性'
@@ -48,3 +48,30 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+execution_record:
+  date: '2026-11-15'
+  authorization: Proceed with unfinished053 dependencies; preserve052 unfinished and053 interrupted. Preparedfixture signing only; no realrelease signing/publication.
+  plan: tasks/061/TASK-061-PLAN.md
+  baseline: tasks/061/evidence/integrity-20261115/BASELINE.json
+  transitions:
+  - from: pending
+    to: planned
+    reason: Done051/059 and originalQ6-14/15 checked; bounded trusted-key/predicate/integrity method established.
+  - from: planned
+    to: in-progress
+    reason: Immutableexisting offlinecontainer fixture preparation and signature/integrity validation started.
+  - from: in-progress
+    to: review
+    reason: Actual measurements and original-criterion evidence ready for independent implementation and test review.
+  - from: review
+    to: done
+    reason: Both stages accepted and final-source bindings verified by the main agent.
+  reviews:
+    implementation: /root/task056_implementation_review accepted; no actionable findings.
+    test: /root/task056_test_review accepted; no actionable findings.
+  completion:
+    date: '2026-11-15'
+    result: All original criteria and deliverables verified against final source; both independent review stages accepted.
+    results: tasks/061/TASK-061-RESULTS.md
+    final_evidence: tasks/061/evidence/integrity-20261115/EVIDENCE-FINAL.json
+    preserved: Task052 unfinished; task053 interrupted; no release/signing/publication authorization added.

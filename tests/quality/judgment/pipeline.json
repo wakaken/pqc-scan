@@ -1,0 +1,675 @@
+{
+  "version": 1,
+  "frozenAt": "2026-11-14T21:59:22.909790+00:00",
+  "scope": "Only source/config text is scanned; none is executed, installed, fetched or compiled. These inputs are independent of matcher truth labels.",
+  "cases": [
+    {
+      "id": "pipeline-literal",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "app.js": "const note = 'ML-KEM-768';"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/assessment/evaluation/decision",
+          "operation": "equals",
+          "expected": "indeterminate"
+        }
+      ],
+      "requirements": [
+        "Q3-01",
+        "Q3-04",
+        "Q3-09"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-dead-code",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "app.js": "const {generateKeyPairSync}=require('crypto'); if(false){generateKeyPairSync('ml-kem-768');}"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/assessment/evaluation/decision",
+          "operation": "equals",
+          "expected": "indeterminate"
+        }
+      ],
+      "requirements": [
+        "Q3-01",
+        "Q3-04",
+        "Q3-09"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-api-reference",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "app.js": "const {generateKeyPairSync}=require('crypto'); generateKeyPairSync('ml-kem-768');"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/assessment/evaluation/decision",
+          "operation": "equals",
+          "expected": "indeterminate"
+        }
+      ],
+      "requirements": [
+        "Q3-01",
+        "Q3-04",
+        "Q3-09"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-signature-reference",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "app.js": "const {generateKeyPairSync}=require('crypto'); generateKeyPairSync('ml-dsa-65');"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/assessment/evaluation/decision",
+          "operation": "equals",
+          "expected": "indeterminate"
+        }
+      ],
+      "requirements": [
+        "Q3-01",
+        "Q3-04",
+        "Q3-09"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-declaration-ordinary",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "Cargo.toml": "[package]\nname=\"synthetic\"\nversion=\"0.1.0\"\nedition=\"2021\"\n[dependencies]\nopenssl=\"0.10\"\n"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "openssl:0.10"
+        },
+        {
+          "pointer": "/summary/resolved",
+          "operation": "equals",
+          "expected": []
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-resolved-ordinary",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "Cargo.toml": "[package]\nname=\"synthetic\"\nversion=\"0.1.0\"\nedition=\"2021\"\n[dependencies]\nopenssl=\"0.10\"\n",
+          "Cargo.lock": "version=3\n[[package]]\nname=\"openssl\"\nversion=\"0.10.75\"\nsource=\"registry+https://github.com/rust-lang/crates.io-index\"\n"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "openssl:0.10"
+        },
+        {
+          "pointer": "/summary/resolved",
+          "operation": "contains",
+          "expected": "openssl:0.10.75"
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-declaration-optional",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "Cargo.toml": "[package]\nname=\"synthetic\"\nversion=\"0.1.0\"\nedition=\"2021\"\n[dependencies]\nopenssl={ version=\"0.10\", optional=true }\n"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "openssl:0.10"
+        },
+        {
+          "pointer": "/summary/resolved",
+          "operation": "equals",
+          "expected": []
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-resolved-optional",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "Cargo.toml": "[package]\nname=\"synthetic\"\nversion=\"0.1.0\"\nedition=\"2021\"\n[dependencies]\nopenssl={ version=\"0.10\", optional=true }\n",
+          "Cargo.lock": "version=3\n[[package]]\nname=\"openssl\"\nversion=\"0.10.75\"\nsource=\"registry+https://github.com/rust-lang/crates.io-index\"\n"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "openssl:0.10"
+        },
+        {
+          "pointer": "/summary/resolved",
+          "operation": "contains",
+          "expected": "openssl:0.10.75"
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-declaration-vendored",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "Cargo.toml": "[package]\nname=\"synthetic\"\nversion=\"0.1.0\"\nedition=\"2021\"\n[dependencies]\nopenssl={ version=\"0.10\", features=[\"vendored\"] }\n"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "openssl:0.10"
+        },
+        {
+          "pointer": "/summary/resolved",
+          "operation": "equals",
+          "expected": []
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-resolved-vendored",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "Cargo.toml": "[package]\nname=\"synthetic\"\nversion=\"0.1.0\"\nedition=\"2021\"\n[dependencies]\nopenssl={ version=\"0.10\", features=[\"vendored\"] }\n",
+          "Cargo.lock": "version=3\n[[package]]\nname=\"openssl\"\nversion=\"0.10.75\"\nsource=\"registry+https://github.com/rust-lang/crates.io-index\"\n"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "openssl:0.10"
+        },
+        {
+          "pointer": "/summary/resolved",
+          "operation": "contains",
+          "expected": "openssl:0.10.75"
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-declaration-disabled-defaults",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "Cargo.toml": "[package]\nname=\"synthetic\"\nversion=\"0.1.0\"\nedition=\"2021\"\n[dependencies]\nopenssl={ version=\"0.10\", default-features=false }\n"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "openssl:0.10"
+        },
+        {
+          "pointer": "/summary/resolved",
+          "operation": "equals",
+          "expected": []
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-resolved-disabled-defaults",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "Cargo.toml": "[package]\nname=\"synthetic\"\nversion=\"0.1.0\"\nedition=\"2021\"\n[dependencies]\nopenssl={ version=\"0.10\", default-features=false }\n",
+          "Cargo.lock": "version=3\n[[package]]\nname=\"openssl\"\nversion=\"0.10.75\"\nsource=\"registry+https://github.com/rust-lang/crates.io-index\"\n"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "openssl:0.10"
+        },
+        {
+          "pointer": "/summary/resolved",
+          "operation": "contains",
+          "expected": "openssl:0.10.75"
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-provider-ring",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "Cargo.toml": "[package]\nname=\"synthetic\"\nversion=\"0.1.0\"\nedition=\"2021\"\n[dependencies]\nrustls={version=\"0.23\",default-features=false,features=[\"ring\"]}\n"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "rustls:0.23"
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-provider-aws_lc_rs",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "Cargo.toml": "[package]\nname=\"synthetic\"\nversion=\"0.1.0\"\nedition=\"2021\"\n[dependencies]\nrustls={version=\"0.23\",default-features=false,features=[\"aws_lc_rs\"]}\n"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "rustls:0.23"
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-package-declared",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "package.json": "{\"dependencies\":{\"openssl\":\"^3.5.0\"},\"optionalDependencies\":{\"liboqs\":\"0.12.0\"}}"
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/declared",
+          "operation": "contains",
+          "expected": "openssl:^3.5.0"
+        },
+        {
+          "pointer": "/summary/dependencyPasses",
+          "operation": "equals",
+          "expected": 0
+        }
+      ],
+      "requirements": [
+        "Q3-05"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    },
+    {
+      "id": "pipeline-empty",
+      "kind": "pipeline",
+      "input": {
+        "files": {
+          "plain.txt": "No cryptographic source facts here."
+        }
+      },
+      "checks": [
+        {
+          "pointer": "/summary/activeUseClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/summary/verifiedTrustClaims",
+          "operation": "equals",
+          "expected": 0
+        },
+        {
+          "pointer": "/assessment/evaluation/decision",
+          "operation": "equals",
+          "expected": "indeterminate"
+        }
+      ],
+      "requirements": [
+        "Q3-02",
+        "Q3-04"
+      ],
+      "sources": [
+        "LOCAL026",
+        "CARGO",
+        "R8725"
+      ],
+      "basis": "independently_defined_source_facts"
+    }
+  ]
+}

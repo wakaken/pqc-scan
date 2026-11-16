@@ -1,0 +1,38 @@
+"""Reproduce task056 comparison and nine outputs from preserved immutable observations."""
+from pathlib import Path
+import json,sys,hashlib,collections,datetime,shutil
+sys.path.insert(0,'tests/quality');import judgment
+p=Path('tasks/056/evidence/assessment-20261115');out=p/'outputs-r6';out.mkdir(exist_ok=True)
+def load(path):return json.loads(path.read_text())
+def write(name,data):(out/name).write_text(json.dumps(data,indent=2,ensure_ascii=False,allow_nan=False)+'\n')
+base=load(Path('tests/quality/judgment/oracle.json'));supp=load(Path('tests/quality/judgment/supplement.json'));pipeline=load(Path('tests/quality/judgment/pipeline.json'));allcases=base['cases']+supp['cases'];canonical=judgment.canonical_cases(allcases);ids={c['id'] for c in canonical};observations=load(p/'native-r6/probe-OBSERVATIONS.json');obsindex={o['id']:o['actual'] for o in observations}
+raw=judgment.compare({'cases':allcases},observations);result=judgment.compare({'cases':canonical},[o for o in observations if o['id'] in ids]);pipe=load(p/'native-r6/pipeline-OBSERVATIONS.json');pipe_result=judgment.compare(pipeline,pipe)
+optional=judgment.compare({'cases':allcases},load(p/'native-r6/optional-probe-OBSERVATIONS.json'));optional_pipe=judgment.compare(pipeline,load(p/'native-r6/optional-pipeline-OBSERVATIONS.json'))
+for name,r in [('raw',raw),('canonical',result),('pipeline',pipe_result),('optional-probe',optional),('optional-pipeline',optional_pipe)]:write(name+'-comparison.json',r)
+# Guard observations against the frozen inputs actually compiled/run, including historical
+# supplement version1 retained separately. This script never treats a passing probe as gold.
+for n in ['oracle','supplement','pipeline']:
+ f='tests/quality/judgment/'+n+'.json';assert hashlib.sha256(Path(f).read_bytes()).hexdigest()==load(p/'native-r6/SOURCE.json')[f]
+assert supp['baseOracleSha256']==hashlib.sha256(Path('tests/quality/judgment/oracle.json').read_bytes()).hexdigest()
+for r in [raw,result,pipe_result,optional,optional_pipe]:assert not r['incorrect']
+semantics=load(p/'RECOMMENDATION-SEMANTICS.json');current_actions={}
+for o in observations:
+ for a in o['actual'].get('recommended_actions',[]):current_actions[hashlib.sha256(json.dumps(a,sort_keys=True).encode()).hexdigest()]=a
+assert set(current_actions)=={r['payloadSha256'] for r in semantics['rows']}
+registry=load(p/'SOURCE-REGISTER.json');assert all(s in registry for c in allcases+pipeline['cases'] for s in c['sources'])
+for source_id,entry in registry.items():
+ source=p/entry['path'] if entry['path'].startswith('official/') else Path(entry['path'])
+ assert hashlib.sha256(source.read_bytes()).hexdigest()==entry['sha256'], 'Source binding differs: '+source_id
+status={r['id']:r for r in result['rows']};full=[dict(c,actual=obsindex[c['id']],comparison=status[c['id']]) for c in canonical];pipeindex={o['id']:o['actual'] for o in pipe};pipestatus={r['id']:r for r in pipe_result['rows']};pipefull=[dict(c,actual=pipeindex[c['id']],comparison=pipestatus[c['id']]) for c in pipeline['cases']]
+common={'targetHead':'f07d782cd68cfac95d93585d5ace049f590160d4','sourceBindings':'../native-r6/SOURCE.json','inputBindings':{n:hashlib.sha256(Path('tests/quality/judgment/'+n+'.json').read_bytes()).hexdigest() for n in ['oracle','supplement','pipeline']},'sourceDate':'2026-11-15 JST','status':'Evaluation complete; measured product findings retained','scope':'Judgment validation separate from matcher truth; source-exposed main author, not blind/independent-author population. Legacy threshold preservation and routing agreement are separate from empirical validity and manual content review.','unsupportedClaims':['Population accuracy','Calibrated probability','Runtime execution or deployed provider/peer support','Mathematical/signature/chain/trust validation','Universal conformance or complete arbitrary input space']}
+write('assessment-oracle.json',dict(common,summary={k:v for k,v in result.items() if k not in ['rows','mismatches']},historicalCharacterization={'rawRows':len(allcases),'unassessedOriginal':raw['unassessed'],'reassessedIdenticalInput':len(allcases)-len(canonical),'policy':'Original results remain historical; replacement rows do not create duplicate denominators.'},cases=full))
+for name,kinds in [('risk-matrix.json',{'algorithm','policy'}),('severity-cases.json',{'severity'}),('assurance-cases.json',{'aggregate','inventory'})]:
+ rows=[c for c in full if c['kind'] in kinds];write(name,dict(common,counts=dict(collections.Counter(c['comparison']['status'] for c in rows)),cases=rows,pipelineCases=pipefull if name=='assurance-cases.json' else []))
+write('dependency-assessment.json',dict(common,cases=[c for c in full if c['id'].startswith(('presence-','supp-dependency-'))],pipelineCases=[c for c in pipefull if c['id'].startswith(('pipeline-declaration','pipeline-resolved','pipeline-provider','pipeline-package'))],conclusion='Declared constraint and resolved lock version remain distinct in actual parser output; optional/default-features/provider text and unused dependencies do not establish deployed/active PQC. No dependency asset receives primitive Pass. Features are source declarations, not a reconstructed enabled feature graph.'))
+write('certificate-assessment.json',dict(common,cases=[c for c in full if c['id'].startswith(('certificate-','supp-certificate-'))],conclusion='Signature algorithm and subject-key roles, inclusive captured interval boundaries, missing/ambiguous/wrong-kind relations and missing clock remain distinct. OID/key-bit/time parsing is neither mathematical validation nor signature/chain/trust verification.'))
+for name in ['confidence-review.md','recommendation-review.md','standards-mapping.md']:
+ # Prose is maintained alongside the evaluator and copied without regenerating conclusions.
+ source=p/'final-prose'/name;assert source.exists();shutil.copyfile(source,out/name)
+write('EVALUATION.json',dict(common,canonical={k:result[k] for k in ['correct','incorrect','unassessed','evaluated']},pipeline={k:pipe_result[k] for k in ['correct','incorrect','unassessed','evaluated']},semantic=semantics['counts'],semanticFindings=sorted({r['findingId'] for r in semantics['rows'] if r['findingId']}),defaultAndAllFeaturesAgreement=True,execution='Native probe exit0 is adapter completion; independent property comparisons exit0. Manual semantic findings are reported separately, not converted into synthetic passes.'))
+for name in ['assessment-oracle.json','assurance-cases.json','certificate-assessment.json','confidence-review.md','dependency-assessment.json','recommendation-review.md','risk-matrix.json','severity-cases.json','standards-mapping.md']:shutil.copyfile(out/name,Path('target/quality-task-056')/name)
+print(json.dumps({'canonical':{k:result[k] for k in ['correct','incorrect','unassessed']},'pipeline':{k:pipe_result[k] for k in ['correct','incorrect','unassessed']},'semantic':semantics['counts'],'requiredReviews':'accepted implementation and test stages'}))

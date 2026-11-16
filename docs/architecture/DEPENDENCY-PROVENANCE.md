@@ -101,7 +101,12 @@ paths/package names and findings from unrelated detectors retain their own polic
 
 The TOML runtime parser is pinned `toml=0.8.23` (parse only, MIT/Apache-2.0); locked support
 crates are toml_datetime 0.6.11, serde_spanned 0.6.9, toml_edit 0.22.27 and winnow
-0.7.15. Existing serde/serde_json/serde_yaml are reused. Build-time package fetching
+0.7.15. Existing serde/serde_json are reused. Task 063 replaces the archived YAML
+implementation with yaml_serde 0.10.7 under the existing serde_yaml Cargo alias;
+its maintained low-level parser is libyaml-rs 0.3.0. This addresses maintenance
+status, not a claim that translated unsafe parser code has become memory-safe.
+Compatibility comparisons and regression evidence are in
+[task 063](../../tasks/063/TASK-063-RESULTS.md). Build-time package fetching
 is distinct from scanner runtime; no runtime network resolution was added.
 
 Source semantics were checked against the official [Cargo dependency reference](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html),

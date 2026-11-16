@@ -1,0 +1,51 @@
+import json,os,subprocess,hashlib,time,traceback
+from pathlib import Path
+s=Path('/scratch');e=s/'evidence';e.mkdir();(s/'home').mkdir();(s/'tmp').mkdir();(s/'cargo').mkdir()
+(s/'cargo/registry').mkdir()
+for n in ['cache','index']:
+ (s/'cargo/registry'/n).symlink_to(Path('/cache/registry')/n,target_is_directory=True)
+(s/'cargo/registry/src').mkdir()
+result={'scope':'Current source, Linux arm64, static features, release-profile source installation with requested debug info. Not macOS distribution validation.','commands':[],'checks':{}}
+def call(args,name,env=None,timeout=700):
+ start=time.monotonic()
+ with (e/name).open('w') as f: p=subprocess.run(args,cwd='/source',env=env,stdout=f,stderr=subprocess.STDOUT,timeout=timeout)
+ result['commands'].append({'argv':args,'exit':p.returncode,'log':name,'wallSeconds':time.monotonic()-start})
+ (e/'RESULTS.json').write_text(json.dumps(result,indent=2)+'\n')
+ if p.returncode:raise RuntimeError(name+' exit '+str(p.returncode))
+ return (e/name).read_text()
+try:
+ env=dict(os.environ)
+ env.update(CARGO_PROFILE_RELEASE_DEBUG='1',RUSTFLAGS='-C debuginfo=1 --cfg pqc052_flag_probe -C link-arg=-Wl,--defsym,PQC052_RUST_LINK_FLAG=82',CFLAGS='-g1 -DPQC052_C_FLAG=1',CXXFLAGS='-g1 -DPQC052_CXX_FLAG=1',CC='/scratch/cc-probe',CXX='/scratch/cxx-probe',CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER='/scratch/cc-probe')
+ for name,compiler in [('cc-probe','/usr/bin/cc'),('cxx-probe','/usr/bin/c++')]:
+  p=s/name;p.write_text('#!/usr/bin/python3\nimport json,os,sys\nwith open("/scratch/compiler-args.jsonl","a") as f:f.write(json.dumps({"compiler":'+repr(compiler)+',"args":sys.argv[1:]})+"\\n")\nos.execv('+repr(compiler)+',['+repr(compiler)+']+sys.argv[1:])\n');p.chmod(0o755)
+ result['allowlistedEnvironment']=env
+ # Independent tiny positive/negative ELF debug controls; never product evidence.
+ (s/'control.c').write_text('int main(void){return 0;}\n')
+ call(['/usr/bin/cc','-g','/scratch/control.c','-o','/scratch/control-debug'],'control-build-debug.log',env)
+ call(['/usr/bin/cc','-g0','/scratch/control.c','-o','/scratch/control-no-debug'],'control-build-no-debug.log',env)
+ pos=call(['/usr/bin/readelf','-SW','/scratch/control-debug'],'control-debug-sections.log',env)
+ neg=call(['/usr/bin/readelf','-SW','/scratch/control-no-debug'],'control-no-debug-sections.log',env)
+ result['checks']['debugControlPositive']='.debug_info' in pos
+ result['checks']['debugControlNegative']='.debug_info' not in neg
+ call(['cargo','+1.93.1','install','--locked','--offline','--path','crates/pqc_scan_cli','--root','/scratch/install','-vv'],'cargo-install.log',env,850)
+ binary=s/'install/bin/pqc-scan';result['binarySha256']=hashlib.sha256(binary.read_bytes()).hexdigest();result['binarySize']=binary.stat().st_size
+ sections=call(['/usr/bin/readelf','-SW',str(binary)],'installed-sections.log',env)
+ symbols=call(['/usr/bin/readelf','-Ws',str(binary)],'installed-symbols.log',env)
+ result['checks']['installedDebugInfo']='.debug_info' in sections and '.debug_line' in sections
+ result['checks']['rustLinkFlagReachedInstalledBinary']='PQC052_RUST_LINK_FLAG' in symbols
+ calls=[json.loads(x) for x in (s/'compiler-args.jsonl').read_text().splitlines()]
+ result['compilerCalls']=len(calls);result['checks']['requestedCCInvoked']=any(c['compiler']=='/usr/bin/cc' and '-c' in c['args'] for c in calls)
+ result['checks']['requestedCFLAGSObserved']=any('-DPQC052_C_FLAG=1' in c['args'] for c in calls)
+ result['checks']['requestedCXXInvoked']=any(c['compiler']=='/usr/bin/c++' and '-c' in c['args'] for c in calls)
+ result['checks']['requestedCXXFLAGSObserved']=any('-DPQC052_CXX_FLAG=1' in c['args'] for c in calls)
+ result['limitations']=['Debug requested using Rust-specific RUSTFLAGS; CFLAGS/CXXFLAGS requested independently.','No C++ compilation is required if no C++ compile call is observed; do not report an unexercised variable as passed.','Generic LDFLAGS is not established by the Rust-specific linker flag check.','No binary or archive is published or promoted; no source or target caches shared with host.','This experiment does not measure macOS package installation or all-feature debug installation; the separate all-feature attempt exceeded the unchanged4GiB scratch bound.']
+ (e/'compiler-args.jsonl').write_text('\n'.join(json.dumps(c) for c in calls)+'\n')
+ assert result['checks']['debugControlPositive'] and result['checks']['debugControlNegative']
+ assert result['checks']['installedDebugInfo'] and result['checks']['rustLinkFlagReachedInstalledBinary']
+ exitcode=0
+except BaseException:
+ (e/'failure.log').write_text(traceback.format_exc());exitcode=1
+finally:
+ (e/'RESULTS.json').write_text(json.dumps(result,indent=2)+'\n')
+ (s/'status.json').write_text(json.dumps({'exit':exitcode}))
+while True:time.sleep(1)

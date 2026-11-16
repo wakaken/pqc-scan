@@ -179,3 +179,39 @@ python3 tests/quality/report.py --corpus-dir tests/quality/task043-corpus-v2 \
 Use a new directory for each run. Source selection is targeted, not random;
 seven holdout questions include correlated rules and one ambiguous control.
 These data cannot establish population accuracy or Q3–Q6 assurance.
+
+## All-axis evidence aggregation (TASK-053)
+
+The optional offline catalog mode accounts for every requirement in the v0.3
+requirements table, including missing or unfinished evidence. It reads existing
+measurements and never executes their recorded command strings. Use a fresh
+output directory:
+
+```sh
+python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-integrated
+```
+
+This produces quality-evidence-index.json, test-evidence-index.json and
+quality-assessment.md. Commands, original result status, current declared-source
+applicability and independent review adequacy are separate. Exact artifact hashes
+must match; historical source drift remains visible. A report containing product
+failures or incomplete052 facts can be generated successfully, with release
+acceptance Unknown. It does not turn completed evaluations into product passes.
+Baseline-only invocations and their output contracts are preserved; the optional
+catalog may also be supplied with --baseline to generate both views together.
+
+The catalog is a trusted, reviewed developer input, not an authentication scheme.
+Each record declares its original population, measurement context, artifact
+path/hash/purpose, JSON observation pointers, command/exit receipts and review
+references. Paths must be canonical checkout-relative regular files; symlinks,
+special files, traversal, duplicate keys and oversized inputs are rejected. No
+new tools, network access, numeric gates or application output formats are added.
+See [CI cost and retention](../../docs/quality/CI-MEASUREMENT-PLAN.md).
+
+The integration itself is also a source-bound catalog record. Its optional
+populationDigest hashes the catalog excluding that record to avoid circular
+self-hashes. A mismatch retains the original facts and marks input applicability
+and review adequacy Partial. The optional result.criteria map records distinct
+outcomes for the declared requirements; an unverified hosted CI requirement
+stays Partial even when local validation succeeds. Neither field changes
+baseline-only behavior or the full emitted catalog digest.

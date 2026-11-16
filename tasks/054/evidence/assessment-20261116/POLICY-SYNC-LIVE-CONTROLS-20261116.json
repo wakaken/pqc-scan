@@ -1,0 +1,47 @@
+{
+  "atUtc": "2026-11-16T01:33:41.471682+00:00",
+  "scope": "Read-only verification of current reporting setting, maintainer account and repository collaborators; no token values or authentication factors requested.",
+  "commands": [
+    {
+      "argv": [
+        "gh",
+        "api",
+        "--method",
+        "GET",
+        "user",
+        "--jq",
+        "{login: .login, two_factor_authentication: .two_factor_authentication}"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"login\":\"wakaken\",\"two_factor_authentication\":true}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "--method",
+        "GET",
+        "repos/wakaken/pqc-scan/collaborators",
+        "--paginate",
+        "--jq",
+        "map({login: .login, permissions: .permissions})"
+      ],
+      "exitCode": 0,
+      "stdout": "[{\"login\":\"wakaken\",\"permissions\":{\"admin\":true,\"maintain\":true,\"pull\":true,\"push\":true,\"triage\":true}}]\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "--method",
+        "GET",
+        "repos/wakaken/pqc-scan/private-vulnerability-reporting"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"enabled\":true}",
+      "stderr": ""
+    }
+  ]
+}

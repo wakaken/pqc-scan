@@ -1,0 +1,121 @@
+{
+  "date": "2026-11-15 JST",
+  "originalTask": "tasks/056/task.yaml",
+  "source": "SOURCE.json",
+  "baseline": "BASELINE.json",
+  "oracleFreeze": "ORACLE-FREEZE.json",
+  "nativeCommands": [
+    {
+      "name": "probe",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "pqc_scan_core",
+        "--test",
+        "quality056",
+        "--",
+        "--nocapture"
+      ],
+      "startedAt": "2026-11-14T21:30:43.466809+00:00",
+      "exitCode": 0,
+      "seconds": 15.712320375001582,
+      "log": "probe.log"
+    },
+    {
+      "name": "workspace",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--offline"
+      ],
+      "startedAt": "2026-11-14T21:30:59.202177+00:00",
+      "exitCode": 0,
+      "seconds": 115.7815802499972,
+      "log": "workspace.log"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "startedAt": "2026-11-14T21:32:54.985553+00:00",
+      "exitCode": 0,
+      "seconds": 15.26962820799963,
+      "log": "clippy.log"
+    },
+    {
+      "name": "python",
+      "command": [
+        "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "startedAt": "2026-11-14T21:33:10.255821+00:00",
+      "exitCode": 1,
+      "seconds": 5.231981541997811,
+      "log": "python.log"
+    }
+  ],
+  "pythonFinal": {
+    "command": [
+      "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/quality",
+      "-p",
+      "test_*.py",
+      "-v"
+    ],
+    "startedAt": "2026-11-14T21:38:31.330379+00:00",
+    "exitCode": 0,
+    "seconds": 4.724086583999451,
+    "reason": "Use actual source byte/mode inputs under OS-enforced readonly access. The synthetic snapshot omitted .github and copied source files with mode0444, which prevents existing repeated-copy fixtures from being overwritten in their own scratch. No product/test assertions changed.",
+    "supersedesFailure": [
+      "../native-r2/python.log",
+      "../python-r3/tests.log"
+    ],
+    "scope": "Python quality suite only; reuse unchanged Rust probe/workspace/clippy source-bound successes from native-r2"
+  },
+  "comparison": "outputs/EVALUATION.json",
+  "requiredOutputs": [
+    "EVALUATION.json",
+    "assessment-oracle.json",
+    "assurance-cases.json",
+    "certificate-assessment.json",
+    "confidence-review.md",
+    "dependency-assessment.json",
+    "recommendation-review.md",
+    "risk-matrix.json",
+    "severity-cases.json",
+    "standards-mapping.md"
+  ],
+  "states": "Partial; no task completion or complete judgment validity claimed",
+  "knownGaps": [
+    "320 exact threshold cases lack independent intended-policy confirmation",
+    "140 legacy recommendations characterized, not complete source-cited correctness table; known/older runtime and full provider/features remain",
+    "Incomplete observation-assurance and parser-to-inventory dependency/certificate cross products",
+    "Full requirements-to-branch/source correspondence and independent reviews pending"
+  ],
+  "reviewIds": []
+}

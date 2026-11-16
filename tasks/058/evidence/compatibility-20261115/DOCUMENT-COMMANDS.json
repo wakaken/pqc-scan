@@ -1,0 +1,481 @@
+{
+  "method": "Each documented pqc-scan command (including continued lines) checked against actual default/network help union. Placeholders are not executable targets; this checks flag spelling/exposure, not all combinations/arity or endpoint support. Real install/scans and failure gates tested separately.",
+  "rows": [
+    {
+      "document": "README.md",
+      "command": "pqc-scan scan /path/to/your-product --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--format",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "README.ja.md",
+      "command": "pqc-scan scan /path/to/your-product --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--format",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/PROBING.md",
+      "command": "pqc-scan probe tls service.example --port 443 --out-dir /path/to/new-tls-report",
+      "flags": [
+        "--out-dir",
+        "--port"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/PROBING.md",
+      "command": "pqc-scan probe tls 127.0.0.1 --port 8443 --allow-cidr 127.0.0.1/32 --server-name localhost --ca-file /path/to/public-ca.pem --out-dir /path/to/new-local-tls-report",
+      "flags": [
+        "--allow-cidr",
+        "--ca-file",
+        "--out-dir",
+        "--port",
+        "--server-name"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/PROBING.md",
+      "command": "pqc-scan probe ssh service.example --port 22 --out-dir /path/to/new-ssh-report",
+      "flags": [
+        "--out-dir",
+        "--port"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/PROBING.md",
+      "command": "pqc-scan probe ssh-kex service.example --port 22 --host-key-file /path/to/trusted-host.pub --out-dir /path/to/new-ssh-kex-report",
+      "flags": [
+        "--host-key-file",
+        "--out-dir",
+        "--port"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.md",
+      "command": "pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--include-non-scannable] [--cyclonedx-17] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]",
+      "flags": [
+        "--assessment-context",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--fail-on",
+        "--format",
+        "--include-non-scannable",
+        "--inventory-json",
+        "--lang",
+        "--out-dir",
+        "--policy-profile",
+        "--repository-scope",
+        "--require-complete",
+        "--rules-dir",
+        "--threads"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.md",
+      "command": "pqc-scan rules list [--rules-dir ./rules]",
+      "flags": [
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.md",
+      "command": "pqc-scan rules show <rule-id> [--rules-dir ./rules]",
+      "flags": [
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.md",
+      "command": "pqc-scan diff <before-inventory> <after-inventory> --repository-scope ID --out-dir DIR",
+      "flags": [
+        "--out-dir",
+        "--repository-scope"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.md",
+      "command": "pqc-scan scan . --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--format",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.md",
+      "command": "pqc-scan scan . --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--format",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.md",
+      "command": "pqc-scan scan . --format sarif --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--format",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.md",
+      "command": "pqc-scan scan . --fail-on high --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--fail-on",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.md",
+      "command": "pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.md",
+      "command": "pqc-scan scan . --diagnostics --require-complete --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--diagnostics",
+        "--out-dir",
+        "--require-complete",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.ja.md",
+      "command": "pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--include-non-scannable] [--cyclonedx-17] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]",
+      "flags": [
+        "--assessment-context",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--fail-on",
+        "--format",
+        "--include-non-scannable",
+        "--inventory-json",
+        "--lang",
+        "--out-dir",
+        "--policy-profile",
+        "--repository-scope",
+        "--require-complete",
+        "--rules-dir",
+        "--threads"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.ja.md",
+      "command": "pqc-scan rules list [--rules-dir ./rules]",
+      "flags": [
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.ja.md",
+      "command": "pqc-scan rules show <rule-id> [--rules-dir ./rules]",
+      "flags": [
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.ja.md",
+      "command": "pqc-scan diff <before-inventory> <after-inventory> --repository-scope ID --out-dir DIR",
+      "flags": [
+        "--out-dir",
+        "--repository-scope"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.ja.md",
+      "command": "pqc-scan scan . --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--format",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.ja.md",
+      "command": "pqc-scan scan . --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--format",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.ja.md",
+      "command": "pqc-scan scan . --format sarif --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--format",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.ja.md",
+      "command": "pqc-scan scan . --fail-on high --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--fail-on",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.ja.md",
+      "command": "pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/SCANNING.ja.md",
+      "command": "pqc-scan scan . --diagnostics --require-complete --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--diagnostics",
+        "--out-dir",
+        "--require-complete",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.md",
+      "command": "pqc-scan scan . --lang ja --format all --out-dir /path/to/reports/product-scan-ja --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--format",
+        "--lang",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.md",
+      "command": "pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang en --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--format",
+        "--inventory-json",
+        "--lang",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.md",
+      "command": "pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules",
+      "flags": [
+        "--inventory-json",
+        "--repository-scope",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.md",
+      "command": "pqc-scan scan . --cyclonedx-17 --rules-dir /path/to/pqc-scan/rules --out-dir /path/to/new-output",
+      "flags": [
+        "--cyclonedx-17",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.md",
+      "command": "pqc-scan diff /path/to/before/scan.inventory.v1.json /path/to/after/scan.inventory.v1.json --repository-scope team/project --out-dir /path/to/new-diff",
+      "flags": [
+        "--out-dir",
+        "--repository-scope"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.md",
+      "command": "pqc-scan scan . --inventory-json --policy-profile migration-review-v1 --rules-dir ./rules",
+      "flags": [
+        "--inventory-json",
+        "--policy-profile",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/PROBING.ja.md",
+      "command": "pqc-scan probe tls service.example --port 443 --out-dir /path/to/new-tls-report",
+      "flags": [
+        "--out-dir",
+        "--port"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/PROBING.ja.md",
+      "command": "pqc-scan probe tls 127.0.0.1 --port 8443 --allow-cidr 127.0.0.1/32 --server-name localhost --ca-file /path/to/public-ca.pem --out-dir /path/to/new-local-tls-report",
+      "flags": [
+        "--allow-cidr",
+        "--ca-file",
+        "--out-dir",
+        "--port",
+        "--server-name"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/PROBING.ja.md",
+      "command": "pqc-scan probe ssh service.example --port 22 --out-dir /path/to/new-ssh-report",
+      "flags": [
+        "--out-dir",
+        "--port"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/PROBING.ja.md",
+      "command": "pqc-scan probe ssh-kex service.example --port 22 --host-key-file /path/to/trusted-host.pub --lang ja --out-dir /path/to/new-ssh-kex-report",
+      "flags": [
+        "--host-key-file",
+        "--lang",
+        "--out-dir",
+        "--port"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/DISTRIBUTION.ja.md",
+      "command": "pqc-scan rules list --rules-dir /absolute/path/to/pqc-scan/rules/default",
+      "flags": [
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/DISTRIBUTION.ja.md",
+      "command": "pqc-scan scan /absolute/path/to/authorized/repository --rules-dir /absolute/path/to/pqc-scan/rules/default --format all --out-dir /absolute/path/outside/repository/reports",
+      "flags": [
+        "--format",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.ja.md",
+      "command": "pqc-scan scan . --lang ja --format all --out-dir /path/to/reports/product-scan-ja --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--format",
+        "--lang",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.ja.md",
+      "command": "pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang ja --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules",
+      "flags": [
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--format",
+        "--inventory-json",
+        "--lang",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.ja.md",
+      "command": "pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules",
+      "flags": [
+        "--inventory-json",
+        "--repository-scope",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.ja.md",
+      "command": "pqc-scan scan . --cyclonedx-17 --rules-dir /path/to/pqc-scan/rules --out-dir /path/to/new-output",
+      "flags": [
+        "--cyclonedx-17",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.ja.md",
+      "command": "pqc-scan diff /path/to/before/scan.inventory.v1.json /path/to/after/scan.inventory.v1.json --repository-scope team/project --out-dir /path/to/new-diff",
+      "flags": [
+        "--out-dir",
+        "--repository-scope"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/REPORTS.ja.md",
+      "command": "pqc-scan scan . --inventory-json --policy-profile migration-review-v1 --rules-dir ./rules",
+      "flags": [
+        "--inventory-json",
+        "--policy-profile",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/DISTRIBUTION.md",
+      "command": "pqc-scan rules list --rules-dir /absolute/path/to/pqc-scan/rules/default",
+      "flags": [
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    },
+    {
+      "document": "docs/user/DISTRIBUTION.md",
+      "command": "pqc-scan scan /absolute/path/to/authorized/repository --rules-dir /absolute/path/to/pqc-scan/rules/default --format all --out-dir /absolute/path/outside/repository/reports",
+      "flags": [
+        "--format",
+        "--out-dir",
+        "--rules-dir"
+      ],
+      "notInActualHelp": []
+    }
+  ],
+  "unresolved": []
+}

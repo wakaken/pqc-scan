@@ -1,0 +1,30 @@
+from pathlib import Path
+import json,hashlib
+p=Path('tasks/056/evidence/assessment-20261115');datasets={n:json.loads(Path('tests/quality/judgment/'+n+'.json').read_text())['cases'] for n in ['oracle','supplement','pipeline']};cases=sum(datasets.values(),[])
+groups=[
+('algorithm_names_oids_purposes','assessment::assess_algorithm',['algorithm-','encoding-','supp-oid-'],['S203','S204','S205','CSOR']),
+('families_drafts_hybrid_unknown','assessment::assess_algorithm',['family-','draft-','unknown-'],['LOCAL026','S203','S204','S205']),
+('classical_quantum_separation','assessment::assess_algorithm',['classical-','symmetric-','hash-'],['S131A2','NIST-PQ-FAQ','BHT1997','R6151']),
+('key_parameters_boundaries_curve_caps','assessment::assess_algorithm',['key-','supp-curve-','supp-parser-cap-','supp-uninterpreted-'],['S131A2','R4055','LOCAL026']),
+('namespace_and_typed_relationships','assessment::from_asset/related/key_assessment',['namespace-','supp-certificate-ambiguous','supp-certificate-wrong'],['LOCAL026','CSOR','R5280']),
+('certificate_components_times_unknown','assessment::evaluate_inventory',['certificate-','supp-certificate-'],['R5280','S203','S204','S205']),
+('assurance_vocabulary_and_absent_unknown','assessment::evaluate_inventory; policy::evaluate',['supp-assurance-','presence-'],['LOCAL026']),
+('static_reference_not_runtime_execution','CLI scan -> inventory -> assessment',['pipeline-literal','pipeline-dead','pipeline-api','pipeline-signature','pipeline-empty'],['LOCAL026','R8725']),
+('declared_resolved_optional_provider_features_unused','CLI scan -> dependency inventory',['supp-dependency-','pipeline-declaration-','pipeline-resolved-','pipeline-provider-','pipeline-package-'],['CARGO','RUSTLS','LOCAL026']),
+('applicability_and_required_support','policy::assess_primitive_policy',['policy-','supp2-support-'],['LOCAL026']),
+('collision_context','policy::assess_primitive_policy',['supp-hash-context-'],['R6151','S131A2','LOCAL026']),
+('purpose_candidates_prerequisites_jose_pki','policy::candidates/prerequisites',['purpose-','policy-','supp2-support-'],['S203','S204','R8725','LOCAL026']),
+('aggregate_fail_unknown_empty_completeness_exclusion','policy::summarize/evaluate',['aggregate-','supp-aggregate-','supp-assurance-'],['LOCAL026']),
+('priority_long_lived_confidentiality','policy::evaluate',['supp2-priority-'],['LOCAL026']),
+('severity_category_risk_private_marker_saturation_threshold','risk::adjusted_severity/bump_severity',['severity-','supp-severity-'],['ARCH','MAINTAINER-20261115']),
+('recommendation_category_risk_dependency','recommendation::recommend_for_finding',['recommendation-','supp-recommendation-'],['LOCAL026','RUNTIME']),
+('runtime_old_current_unknown_and_java_bc','recommendation::add_java_actions/add_jwt_actions',['supp-version-','supp-java-','supp-runtime-'],['JEP496','JEP497','BC','RUNTIME']),
+('special_rule_reference_override_middleware_locality_language','recommendation::recommend_for_finding/add_tls_actions',['supp-reference-','supp-override-','supp-middleware-','supp-language-','supp-evidence-','supp-extension-'],['LOCAL026','R8422','R9325']),
+]
+# Resolve prefixes against the actual frozen IDs. Avoid declaring empty groups covered.
+rows=[]
+for label,fn,prefixes,sources in groups:
+ selected=[c['id'] for c in cases if any(c['id'].startswith(x) for x in prefixes)]
+ rows.append(dict(decisionClass=label,functions=fn,caseIds=selected,sourceIds=sources,caseCount=len(selected),coverage='Measured' if selected else 'Missing'))
+(p/'DECISION-COVERAGE.json').write_text(json.dumps({'method':'Main-agent source inspection maps finite semantic decision equivalence classes to explicit case IDs. This is not instrumented line/branch coverage, an exhaustive Cartesian product, a cryptographic proof, or a random population sample. Recommendation content validity is evaluated separately by full payload hash. Parser syntax/security/invalid-schema coverage uses existing workspace tests, not a new normative judgment.', 'sourceBindings':'native-r6/SOURCE.json','classes':rows},indent=2)+'\n')
+for r in rows:print(r['decisionClass'],r['caseCount'])

@@ -1,0 +1,342 @@
+{
+  "image": "sha256:fb9f52cb47395d6df41d5b79e11940000654797f000160f557f8b7027d9a275f",
+  "command": [
+    "docker",
+    "run",
+    "--rm",
+    "--network",
+    "none",
+    "--read-only",
+    "--user",
+    "65534:65534",
+    "--cap-drop",
+    "ALL",
+    "--security-opt",
+    "no-new-privileges",
+    "--memory",
+    "1g",
+    "--memory-swap",
+    "1g",
+    "--cpus",
+    "2",
+    "--pids-limit",
+    "64",
+    "--tmpfs",
+    "/scratch:rw,exec,nosuid,nodev,size=1g,mode=1777",
+    "--ulimit",
+    "cpu=180:180",
+    "--ulimit",
+    "fsize=134217728:134217728",
+    "--ulimit",
+    "nofile=256:256",
+    "--mount",
+    "type=bind,src=/Users/waka/development/pqc/pqc-scan/target/quality-task-063/yaml-probe,dst=/probe,readonly",
+    "--mount",
+    "type=bind,src=/tmp/pqc-yaml-corpus-1wcwio1g,dst=/corpus,readonly",
+    "--entrypoint",
+    "/usr/bin/env",
+    "sha256:fb9f52cb47395d6df41d5b79e11940000654797f000160f557f8b7027d9a275f",
+    "-i",
+    "PATH=/usr/local/cargo/bin:/usr/bin:/bin",
+    "HOME=/scratch/home",
+    "TMPDIR=/scratch/tmp",
+    "CARGO_HOME=/scratch/cargo",
+    "RUSTUP_HOME=/usr/local/rustup",
+    "CARGO_NET_OFFLINE=true",
+    "/bin/sh",
+    "-c",
+    "mkdir -p /scratch/home /scratch/tmp /scratch/cargo; ln -s /usr/local/cargo/registry /scratch/cargo/registry; cargo build --manifest-path /probe/Cargo.toml --target-dir /scratch/target --locked --offline 1>&2 && /scratch/target/debug/pqc_yaml_probe /corpus/*.yaml"
+  ],
+  "exit": 0,
+  "corpus": {
+    "0000.yaml": {
+      "path": "rules/default/cert.yml",
+      "sha256": "4b508af4b18cdfb8bb0b811bc021c24b0837d667b19a3d136e6f6dc9e808a75b"
+    },
+    "0001.yaml": {
+      "path": "rules/default/crypto_api.yml",
+      "sha256": "84f672787e883cbd2c2dd790ada8076c8a4c3f0628f3bc26aeb2b5bf4f7ea10a"
+    },
+    "0002.yaml": {
+      "path": "rules/default/jwt.yml",
+      "sha256": "580a9f4f263b9e441757619c7f655a38b8496edeb570807cbb6bff5070b87a51"
+    },
+    "0003.yaml": {
+      "path": "rules/default/middleware.yml",
+      "sha256": "58cca7b8dd25144a1f40a306d46ec5619fbf7da4504140b2607af7b34404b145"
+    },
+    "0004.yaml": {
+      "path": "rules/default/pqc.yml",
+      "sha256": "acde689dc784a1866c738014fe47cb071948f7e452c3bdf32722b83082f824d2"
+    },
+    "0005.yaml": {
+      "path": "rules/default/ssh.yml",
+      "sha256": "e4d8745770860f74fb9d79d842e4636ac52ccfbb762aa11debf88d07a1b7fcb4"
+    },
+    "0006.yaml": {
+      "path": "rules/default/tls.yml",
+      "sha256": "87d9e3940b476b79612d4c864541867336d1afff985ad5c938d28980d39ed511"
+    },
+    "0007.yaml": {
+      "path": "rules/default/tree_sitter.yml",
+      "sha256": "9e3ee8bd1442bd99562565ab08f28e7c624f6100dcc858054f789d4a861d0edf"
+    },
+    "0008.yaml": {
+      "path": "tasks/001/task.yaml",
+      "sha256": "93efbe81ae22bd9822d6f3a24cf18882a4e2751d86ef89d3afd45af7bf6fe3f6"
+    },
+    "0009.yaml": {
+      "path": "tasks/002/task.yaml",
+      "sha256": "73b9ec01f2fa391357d6de99cb1657908ad2be3511dc9baf608c9d0f6b934d47"
+    },
+    "0010.yaml": {
+      "path": "tasks/003/task.yaml",
+      "sha256": "86d00837036feb7ce67d536aefcca74936ab73bb99a6cfd6907e5c8861497e16"
+    },
+    "0011.yaml": {
+      "path": "tasks/004/task.yaml",
+      "sha256": "fd7fca7b45fabb9eb9dad06240bef0d0be770ce77365507825f3c210d3a7c37d"
+    },
+    "0012.yaml": {
+      "path": "tasks/005/task.yaml",
+      "sha256": "414510176d78c53fc614828dbe28e47c93b4df4bbd454f4b275318fd3294d148"
+    },
+    "0013.yaml": {
+      "path": "tasks/006/task.yaml",
+      "sha256": "93158da3cc8b23da6198ccd353f67fbf00453efa6698a1236de1f19c4ccf7b06"
+    },
+    "0014.yaml": {
+      "path": "tasks/007/task.yaml",
+      "sha256": "8d66e07bb9189d75813e4e8d3d0ffe7efb28628888848919ccf8eb7011cac66b"
+    },
+    "0015.yaml": {
+      "path": "tasks/008/task.yaml",
+      "sha256": "2984a9af3605c39acb1641fca7e86a1d412ddd1f666fcd2315f8ad7d37b8396c"
+    },
+    "0016.yaml": {
+      "path": "tasks/009/task.yaml",
+      "sha256": "e6271fa2672a3cc5d56af41811bdf8e8826a89a30359954bfedea5e2be1c8be3"
+    },
+    "0017.yaml": {
+      "path": "tasks/010/task.yaml",
+      "sha256": "82d377bc1cfb903f2fd5175e88e3fa885ee1ab56321fccbc7abeec29cbeabd9b"
+    },
+    "0018.yaml": {
+      "path": "tasks/011/task.yaml",
+      "sha256": "99fd5304e2607b16a9fd709ecfc89dd2d4199764be3032869f3681d096b05e78"
+    },
+    "0019.yaml": {
+      "path": "tasks/012/task.yaml",
+      "sha256": "ff9a9683f404ede04c738c41ecc19daedcd8bebac1638e89604a6cb9a2a1bee0"
+    },
+    "0020.yaml": {
+      "path": "tasks/013/task.yaml",
+      "sha256": "932fb4fad443b51972dca4a06b9882c2680167ff8378f85b526987927bea361b"
+    },
+    "0021.yaml": {
+      "path": "tasks/014/task.yaml",
+      "sha256": "b822126c622d626701502e409f4157571bfe221d5a4ef3d6b417312ea71f83a7"
+    },
+    "0022.yaml": {
+      "path": "tasks/015/task.yaml",
+      "sha256": "af7652f79532279960b02ca3e8277a51d512870b540da5d7c825eee57aa9a731"
+    },
+    "0023.yaml": {
+      "path": "tasks/016/task.yaml",
+      "sha256": "890f30daf955ee341cfa4fc3d5102acd0cbada2b37f4d666bd505b6cde2a6dcc"
+    },
+    "0024.yaml": {
+      "path": "tasks/017/task.yaml",
+      "sha256": "e2301ee39fef6fa71ea03baaebf6e03aada47b9faf414fdf3784e2eab16f77a1"
+    },
+    "0025.yaml": {
+      "path": "tasks/018/task.yaml",
+      "sha256": "55eab49e97e5bb5450752686ed804495e39517ea6bcedd350288b2a01a49cca2"
+    },
+    "0026.yaml": {
+      "path": "tasks/019/task.yaml",
+      "sha256": "6748072ac62e29f0bb092308295ea79843aea241e39caa01d5539d8b038e9db0"
+    },
+    "0027.yaml": {
+      "path": "tasks/020/task.yaml",
+      "sha256": "484b7cd2adcefb61c987d8210f8f4368f96d24d93af6711835f27b88d9c12b22"
+    },
+    "0028.yaml": {
+      "path": "tasks/021/task.yaml",
+      "sha256": "d0fa57cb216a7627f8d3c9da3cb6c4b02060b54d86d3a5e3c9a3f423cfed9f15"
+    },
+    "0029.yaml": {
+      "path": "tasks/022/task.yaml",
+      "sha256": "5647d580d72428af14385b5bf76a44d0627bf0370feb6cf8fb398e5a42d8a163"
+    },
+    "0030.yaml": {
+      "path": "tasks/023/task.yaml",
+      "sha256": "37455c7aa2ec18dc4095cf5cce373e843ffcf3eaeba966305118a76b38c657ac"
+    },
+    "0031.yaml": {
+      "path": "tasks/024/task.yaml",
+      "sha256": "87b1f1fe872aea6261bf87032b1fdc9ff25cc65c4aed7a0ad3323280ea762b75"
+    },
+    "0032.yaml": {
+      "path": "tasks/025/task.yaml",
+      "sha256": "aeefde0de7a4092ee8fa01b9e12720b354cf00ba1dee665978387805d6e281de"
+    },
+    "0033.yaml": {
+      "path": "tasks/026/task.yaml",
+      "sha256": "57240b463b7aa5f6abba86e9311377bf18dd12553d3fab0d904d17c335b3cd0c"
+    },
+    "0034.yaml": {
+      "path": "tasks/027/task.yaml",
+      "sha256": "52d102dc1e5f38d90762b15a66c4d9a81f5b7eec99984105d3cec841e5b2a268"
+    },
+    "0035.yaml": {
+      "path": "tasks/028/task.yaml",
+      "sha256": "23b243f6e028193d4eee762f007f4d1c570cfc78f12547a0dcc20acafd051c69"
+    },
+    "0036.yaml": {
+      "path": "tasks/029/task.yaml",
+      "sha256": "4c1a3137b7f0334ebbed180c1bb35395967cbca03d071976ff1946e5cedf2929"
+    },
+    "0037.yaml": {
+      "path": "tasks/030/task.yaml",
+      "sha256": "f25f1b1080f9829426c5b80b19f181fccfdcf44c43993e9035798afc9ee6a81b"
+    },
+    "0038.yaml": {
+      "path": "tasks/031/task.yaml",
+      "sha256": "069cedfc6a77b4779bd96bfff75e232947b2673c8180960ccf6e622c8bb067da"
+    },
+    "0039.yaml": {
+      "path": "tasks/032/task.yaml",
+      "sha256": "f6e29c36fc841443c9db535580716dc1bc857f3e95dcdb11a60a281a27ce0c06"
+    },
+    "0040.yaml": {
+      "path": "tasks/033/task.yaml",
+      "sha256": "f5c470ad1c416857c3b92f8bed2a45a631b01e9c1a5973cdbbf6a508e4913902"
+    },
+    "0041.yaml": {
+      "path": "tasks/034/task.yaml",
+      "sha256": "9136ae644e28b48c6df2daa423c79e514bc1a13b68a2d2882188cad554b13079"
+    },
+    "0042.yaml": {
+      "path": "tasks/035/task.yaml",
+      "sha256": "1fae2acc73dc30de50ac33b964cc7cf375717ae32cdada298234cea2df6b4638"
+    },
+    "0043.yaml": {
+      "path": "tasks/036/task.yaml",
+      "sha256": "bb8296b11c0048638a00d21313b02ac75d6e47270d24b15efd222e9c21ba02f2"
+    },
+    "0044.yaml": {
+      "path": "tasks/037/task.yaml",
+      "sha256": "8ce1fe7be8e28ec79400e91031afa444ccb65198da7e702b61b8c38cc56ac998"
+    },
+    "0045.yaml": {
+      "path": "tasks/038/task.yaml",
+      "sha256": "68a970a4a6bbe4b3dc5d672037f681cde4d0d56de949a5a1a87709a83e2ed41a"
+    },
+    "0046.yaml": {
+      "path": "tasks/039/task.yaml",
+      "sha256": "f624d5358b239a2a0585e18aacfba16a781533b1b16a0109fba4cf5f71669ff2"
+    },
+    "0047.yaml": {
+      "path": "tasks/040/task.yaml",
+      "sha256": "1bd48896301afb12224ee8cd18fff96e68eea61d7e8da6eaf52879553b2e7285"
+    },
+    "0048.yaml": {
+      "path": "tasks/041/task.yaml",
+      "sha256": "45fffe587a575be308a9a8b4743b2ac728e634b22588d02f91870bcdf8dd3174"
+    },
+    "0049.yaml": {
+      "path": "tasks/042/task.yaml",
+      "sha256": "be5d46080fa5b532a92992641679d4166abc52bb15890543205549e7378b3b74"
+    },
+    "0050.yaml": {
+      "path": "tasks/043/task.yaml",
+      "sha256": "5ceaa4a3ae1840662dc395ebe11cd95d2a80d749f22e0f08755a848f07cde3b1"
+    },
+    "0051.yaml": {
+      "path": "tasks/044/task.yaml",
+      "sha256": "9b20cdb51b5fb5ac5932e2f000998c8490ee5499638cc9de1e4280f5c0088122"
+    },
+    "0052.yaml": {
+      "path": "tasks/045/task.yaml",
+      "sha256": "ca5f34c0b1f8c1bf38e8f5a6dc2093428d595e035dfe4f22052e621ce7993582"
+    },
+    "0053.yaml": {
+      "path": "tasks/046/task.yaml",
+      "sha256": "94d453ee0aaa4b054a9868bb7691a5f13a9fb45d9615bce2f1e77e7126f3ef3f"
+    },
+    "0054.yaml": {
+      "path": "tasks/047/task.yaml",
+      "sha256": "4cf01fc015d5b70daf5ef995c0e0b255bb923f3f42622f6025b0439ab40c0e5d"
+    },
+    "0055.yaml": {
+      "path": "tasks/048/task.yaml",
+      "sha256": "9289b4d7af1121b1b50f153d0925730bfb85bd283370bd7fe0fa96a46ec717eb"
+    },
+    "0056.yaml": {
+      "path": "tasks/049/task.yaml",
+      "sha256": "3424b5de25ba39e5218c8f03275f3dd4e1799402c6e5daee1772b6c5a4434462"
+    },
+    "0057.yaml": {
+      "path": "tasks/050/task.yaml",
+      "sha256": "6afb80a1ae1349ca8c2e8fb79e340e2de92399f5c774e1cac4fc1931ace5243d"
+    },
+    "0058.yaml": {
+      "path": "tasks/051/task.yaml",
+      "sha256": "9e1f404e379304e274cdf0cec0c828c669353434f60d7913b0c1a168a1bfd1e8"
+    },
+    "0059.yaml": {
+      "path": "tasks/052/task.yaml",
+      "sha256": "c7e3f1a2c42ffe2369bc57d6ed29a8bd6398dbefcbbccab7338c0afd31a5f716"
+    },
+    "0060.yaml": {
+      "path": "tasks/053/task.yaml",
+      "sha256": "0b3103a545923776919a3b08698ff58731ad175023f7a0f013fe8f920ec0423e"
+    },
+    "0061.yaml": {
+      "path": "tasks/054/task.yaml",
+      "sha256": "52fa5832fec4522e7229bbb7a15e7fb588def32fa35ef6ef151551736c3b47e3"
+    },
+    "0062.yaml": {
+      "path": "tasks/055/task.yaml",
+      "sha256": "f5b7dbc3526822be5c4c7bf51c895a91cdff9d3980938a930b13b3cf00164dcd"
+    },
+    "0063.yaml": {
+      "path": "tasks/056/task.yaml",
+      "sha256": "55856b1cc031f373db6b3decf7ac64467f5730328922f23dcb8e93a4d753d956"
+    },
+    "0064.yaml": {
+      "path": "tasks/057/task.yaml",
+      "sha256": "0f3c6456176950aaf92606954e25545cebcfd515c8d83651c5536bafec51516e"
+    },
+    "0065.yaml": {
+      "path": "tasks/058/task.yaml",
+      "sha256": "e2a2315f7d2fefb83d692fc7d616b7bac33face91d2728cc3d1e5a97cb95d6da"
+    },
+    "0066.yaml": {
+      "path": "tasks/059/task.yaml",
+      "sha256": "ebac563cf6e4deed8ae64ccb24524d6d8517365c4ae44889e191b84abe8e3d9f"
+    },
+    "0067.yaml": {
+      "path": "tasks/060/task.yaml",
+      "sha256": "a73c3649f6a80dcd7a7a51b46d600d433f8c07bca59c68129428638588ed0c53"
+    },
+    "0068.yaml": {
+      "path": "tasks/061/task.yaml",
+      "sha256": "08e35d20344793fd996e9123ae337c51584c835584d9ed1cf72bd22ff24ceddf"
+    },
+    "0069.yaml": {
+      "path": "tasks/062/task.yaml",
+      "sha256": "3a3e03e400426878d9c650379ca0d1819cc68ec1c3e46ffa9e43367be1eacaca"
+    },
+    "0070.yaml": {
+      "path": "tasks/063/task.yaml",
+      "sha256": "7ce0194fba743e0d1b327bf30ff522915e5c915b3d048bceebea3f6b10a6a4c1"
+    }
+  },
+  "source": {
+    "Cargo.toml": "f4e44f217366f670012fc7be9b5a311643648c1bb30a789dc44997c4075501ed",
+    "Cargo.lock": "be5fea64d0e1d20ef2882d9517a3369a826b666ec652d227cdc40f71f303e759",
+    "main.rs": "da36fd7a0e15ea1f2cf574a316f67f87dfede61360087c6f759407da23e0bfa2"
+  }
+}

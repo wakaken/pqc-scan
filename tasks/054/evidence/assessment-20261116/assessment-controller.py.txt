@@ -1,0 +1,61 @@
+from pathlib import Path
+import json,hashlib,subprocess,shutil,re,os,collections
+root=Path.cwd(); e=root/'tasks/054/evidence/assessment-20261116'; H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def write(p,d):p.write_text(json.dumps(d,indent=2,ensure_ascii=False)+'\n')
+base=json.loads((e/'BASELINE.json').read_text()); tasks=json.loads((e/'TASK-DEFINITIONS.json').read_text()); bytask={t['id']:t for t in tasks}
+# Retain existing missing primary evidence with explicit origin, never overwrite originals.
+src=Path('/Users/waka/development/pqc/pqc-scan/tasks/063/evidence/remediation-20261114'); dest=e/'support/task063-remediation'
+if not dest.exists():shutil.copytree(src,dest)
+origin={str(p.relative_to(src)):H(p) for p in src.rglob('*') if p.is_file()}
+assert all(H(dest/p)==v for p,v in origin.items())
+write(e/'EXTERNAL-EVIDENCE.json',{'origin':str(src),'destination':str(dest.relative_to(root)),'files':origin,'allCopiedBytesMatch':True})
+agg=root/'target/quality-task-054/integration-check'; frozen=e/'integration-check'
+if not frozen.exists():shutil.copytree(agg,frozen)
+x=json.loads((frozen/'quality-evidence-index.json').read_text()); records={r['id']:r for r in x['records']}
+# Distinguish matching bytes at a new path from a changed semantic input.
+tracked=subprocess.check_output(['git','ls-files','-z']).decode().split('\0'); hashpaths=collections.defaultdict(list)
+for f in tracked:
+ p=root/f
+ if f and p.is_file():hashpaths[H(p)].append(f)
+reuse=[]
+for r in x['records']:
+ bindings=r['sourceBindings']; items=bindings if isinstance(bindings,list) else [{'path':k,'sha256':v} for k,v in bindings.items()]
+ mismatches=[]
+ for a in items:
+  if a['path'] in r['sourceApplicability'].get('mismatched',[]):
+   mismatches.append({'path':a['path'],'expected':a['sha256'],'sameBytesAt':hashpaths.get(a['sha256'],[])})
+ reuse.append({'task':r['task'],'sourceApplicability':r['sourceApplicability'],'inputApplicability':r['inputApplicability'],'changedBindingResolution':mismatches,'reuseDecision':'Retain original bounded observation; no automatic current-target criterion pass. A same-byte relocation does not validate dependencies or execution context.'})
+write(e/'SOURCE-APPLICABILITY.json',reuse)
+follow={}
+for key,p,field in [('056',root/'tasks/056/evidence/remediation-20261115/EVIDENCE-FINAL.json','source'),('063',dest/'FINAL-CHECKS.json','source_inputs')]:
+ d=json.loads(p.read_text());checks={f:{'expected':v,'actual':H(root/f) if (root/f).is_file() else None} for f,v in d[field].items()};follow[key]={'receipt':str(p.relative_to(root)),'sha256':H(p),'sourceChecks':checks,'allDeclaredMatch':all(a['expected']==a['actual'] for a in checks.values()),'scope':'Declared source only; original full measurement, input and environment scope retained.'}
+write(e/'FOLLOWUP-SOURCE.json',follow)
+# Complete original row coverage; original Japanese acceptance is quoted source material.
+original={}
+for line in (root/'docs/roadmap/v0.3/REQUIREMENTS.md').read_text().splitlines():
+ if re.match(r'\| Q[1-6]-\d\d ',line):
+  c=[v.strip() for v in line.split('|')[1:-1]]; q=re.search(r'Q[1-6]-\d\d',c[0]).group(); original[q]={'title':c[0],'acceptanceQuote':c[4],'plannedArtifactsQuote':c[5]}
+assert len(original)==73
+special={
+'Q1-08':'All44 authorized repairs were accepted in043; old annotation differences and old023 failure remain historical. Current target applicability is bounded by the later source comparisons, not inferred from done.',
+'Q4-14':'045 measured14 caught/6 missed, including1 equivalent.057 added unknown-position privacy tests addressing M13/M14;056 covers severity/confidence properties. No new20-mutant execution establishes a new score or proves M03/M04/M09 killed. Not an observed secret leak.',
+'Q3-10':'All5 guidance findings were repaired by056 follow-up; original38-payload assessment is historical. Final39-payload guidance and unchanged0.45 remain bounded by follow-up receipt and reviews.',
+'Q6-03':'051 four historical RustSec findings were remediated by063; same advisory snapshot reports zero in current recorded closure. Zero is not proof against new advisories.',
+'Q6-04':'063 resolves russh-util flag; notice review flags remain0/4/4 across static/combined/all-probes. Four objc2 licensing questions and explicit network publication hold remain; no waiver.',
+'Q6-11':'059/063 actual native build/install scope is macOS Apple Silicon, three variants. Linux hosted tests do not extend this distribution claim; Windows is not newly required.',
+'Q6-13':'060 four clean builds on one macOS host; binary equality is distinct from archive reproducibility and multi-host/platform certification.',
+'Q6-17':'054 assessment remains unfinished: required052 operational truth is unavailable. This report inventories all rows but does not certify all current-target evidence or grant release acceptance.'}
+for q in ['Q5-01','Q5-02','Q5-03','Q5-04','Q5-05','Q5-06','Q5-07','Q5-08','Q5-09']:special[q]='050 observed144 successful resource samples and24 intentional failures. Old023-v2 TP28/FP4/FN2/TN19 and numeric Failed remain;043 explains annotation mismatch without waiving the gate.18 same-condition cells have no2x signal;72 differ in conditions. Cold-cache/controlled multi-day not measured.'
+rows=[]
+for rr in x['requirements']:
+ q=rr['id']; rec=[records[r] for r in rr['records']]; t=bytask[rr['ownerTask']]
+ rows.append(dict(original[q],id=q,ownerTask=rr['ownerTask'],taskStatusAtEntry=t['status'],originalTaskAcceptance=t['acceptance'],target={'head':base['head'],'dirtyManifest':'BASELINE.json','scope':'v0.3 quality assessment of current0.2.0 implementation; not release1.0'},implementation=t.get('target_components',[]),catalogResult=rr['status'],result=rr['status'] if q!='Q6-17' else 'Partial',reason=rr['reason'],measurements=[{'record':r['id'],'measurement':r['measurement'],'artifacts':r['artifacts'],'reviews':r['reviews'],'sourceApplicability':r['sourceApplicability'],'inputApplicability':r['inputApplicability']} for r in rec],residualRisks=[v for r in rec for v in r['limitations']],followup=special.get(q,'Original study and finite population retained. A conservative catalog Partial does not itself demonstrate a current product defect or satisfy original acceptance.'),acceptanceDecision='Not accepted for overall release; retain bounded evidence pending complete original-criterion validation.' if rr['status']!='Passed' else 'Passed for053 integration scope only; no whole-target hosted-CI claim.'))
+write(e/'REQUIREMENT-ASSESSMENT.json',{'status':'Partial','requirements':rows,'originalCount':73,'releaseDecision':'Unknown','assessmentComplete':False})
+status={t:bytask[t]['status'] for t in [f'{i:03}' for i in range(41,65)]};write(e/'ROADMAP-RECONCILIATION.json',{'entryStatuses':status,'scope042to061':dict(collections.Counter(status[f'{i:03}'] for i in range(42,62))),'assessment':'Unfinished','blockers':['Q6-05/Q6-07/Q6-09 require factual ownership/operational evidence; Q6-06 MFA cannot be inferred.052 remains blocked.','054 must complete final-target criterion/evidence validity; inventory and catalog success alone do not close Q6-17.'],'product':'No overall pass; old numeric Failed and unresolved licensing hold retained.','publication':'Static preparation is not publication approval. Both network variants remain on hold.'})
+lines=['# Task054 release assessment — partial','', 'Task054 and the v0.3 roadmap remain unfinished. Required ownership and operational truth from052 is unavailable. All73 original rows are inventoried below; this is a provisional assessment, not a claim that all current-target validation is complete.','',f'Target HEAD: `{base["head"]}` plus the dirty source manifest in `BASELINE.json`. Product implementation remains0.2.0; v0.3 names the quality roadmap. No version1.0 publication is authorized.','', '## Evidence and reuse','', 'The existing offline report command exited0 and infrastructureStatus is Verified; releaseDecision is Unknown. Its73 rows are Passed4, Partial63, Unknown5, Not Tested1. Those are conservative catalog labels, not63 proven product defects. The detailed machine assessment retains measurement source, commands/exits, features, tools/environment, artifact hashes, reviews and final-source comparison per row.','', 'Hosted run43763572932 validates6074a6d and its original inputs. The merge to5425f85 changes guidance/records only; product and workflow are unchanged. It does not validate the merged HEAD as a new hosted run. Repository self-scan input includes added docs and records, so old self-scan results are historical for their exact population; current full repository self-scan acceptance is not asserted. No public CI dispatch is authorized by054.','', '## Historical failures and subsequent evidence','', '043 repaired all44 authorized observations; original labels and old numeric failures are preserved. 045 measured14 caught/6 missed (one equivalent);057 added location-unknown privacy tests, but a new mutation score is not available. 050 old023-v2 numeric Failed remains distinct from performance evaluation completion. 051 four dependency findings are superseded for the recorded closure by063 zero findings using the same advisory snapshot. Four objc2 conditions remain unresolved. 056 all five recommendation repairs are complete; threshold0.45 and action routing remain unchanged.','', '## Roadmap and decision boundaries','', 'Entry:042–061 has18 done,052 blocked,054 pending.041 and062–064 are done.054 is now in progress;052/053 records are preserved. The roadmap is unfinished under its original criteria. No unknown is accepted as a pass and no condition is excluded.','', '052 needs existing dated records or factual maintainer confirmation for primary/backup ownership, private-report response/fix-notification populations, developer knowledge and account MFA facts. New settings or operational changes are not a substitute. Reopening052, product repairs, new tasks, scope/threshold changes, commit/push/PR/merge/tag/signing/publication need their applicable authorization.','', 'Static build/install preparation has bounded macOS Apple Silicon evidence;059/060 do not certify all OS. Network variants retain notice flags4/4 and publication hold. Linux hosted evidence is separately scoped.','', '## All original requirements','']
+for r in rows:
+ lines += [f'### {r["id"]} — {r["result"]}', '', f'Owner task `{r["ownerTask"]}` (entry `{r["taskStatusAtEntry"]}`). Original acceptance (quoted):', '', '> '+r['acceptanceQuote'], '', r['followup'], '', 'Measurement scope: '+('; '.join(f'`{m["record"]}`: {m["measurement"].get("head","Unknown")}; {m["measurement"].get("environment","Unknown")}' for m in r['measurements']) or 'No upstream measurement; current054 assessment is partial.'), '', 'Evidence: '+('; '.join('`'+a['path']+'` SHA-256 `'+a['sha256']+'`' for m in r['measurements'] for a in m['artifacts'][:2]) or '`REQUIREMENT-ASSESSMENT.json`, `BASELINE.json`, original054 definition.'), '', 'Decision: '+r['acceptanceDecision'], '']
+lines += ['## Remaining work','', 'Complete current-target applicability analysis for changed study bindings, required acceptance cases and repository self-scan inputs; run affected checks where reuse is not established. Obtain unavailable052 facts without treating their absence as safety. Complete final-source evidence validation before reconsidering054 completion. No upstream task is reopened by this assessment.','', 'No executable behavior changed; no automatic implementation/test reviewers are required for this research/prose/evidence scope. Current review template is docs/agent/REVIEWER.md. Rust checks and new browser acceptance were not run for this documentation-only assessment; historical executed checks are explicitly scoped in the machine evidence.']
+report='\n'.join(lines)+'\n';(e/'release-assessment.md').write_text(report);(root/'target/quality-task-054/release-assessment.md').write_text(report)
+shutil.copyfile('/tmp/pqc054-assess.py',e/'assessment-controller.py.txt')
+print('73-row provisional assessment and follow-up source checks written', {k:v['allDeclaredMatch'] for k,v in follow.items()})

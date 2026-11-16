@@ -1,0 +1,69 @@
+[
+  {
+    "mode": "all-features",
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--locked",
+      "--offline",
+      "--all-features"
+    ],
+    "exit": 0,
+    "seconds": 51.60594752399993
+  },
+  {
+    "mode": "all-features",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--offline",
+      "--all-features"
+    ],
+    "exit": 0,
+    "seconds": 95.20722958500005
+  },
+  {
+    "mode": "all-features",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0,
+    "seconds": 17.30422925699986
+  },
+  {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/distribution",
+      "-v"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "python3",
+      "tests/protocol/ssh-kex-product.py",
+      "--inside",
+      "--binary",
+      "/scratch/build-all-features/debug/pqc-scan",
+      "--out-dir",
+      "/scratch/evidence/ssh-kex"
+    ],
+    "exit": 0
+  }
+]

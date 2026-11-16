@@ -1,0 +1,114 @@
+{
+  "status": "Complete:originalQ6-11 verified; both reviews accepted",
+  "head": "f07d782cd68cfac95d93585d5ace049f590160d4",
+  "source": "tasks/059/evidence/platform-20261115/package-r2/SOURCE.json",
+  "targetSelection": {
+    "authority": [
+      "docs/user/DISTRIBUTION.md",
+      "docs/user/DISTRIBUTION.ja.md",
+      "tasks/064/TASK-064-RESULTS.md"
+    ],
+    "policy": "Existingmaintainer-selected macOSAppleSilicon staticpublic/networkunpublished. No OS/CPU/platform promise added.",
+    "observedHost": {
+      "uname": "Darwin arm64",
+      "sw_vers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2.1\nBuildVersion:\t\t26B131\n",
+      "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+      "target": "aarch64-apple-darwin",
+      "notEvaluated": [
+        "OtherOS",
+        "OtherCPU",
+        "OtherOSversions"
+      ],
+      "formalSupport": "Existingpolicy unchanged; no new guarantee inferred"
+    }
+  },
+  "rows": [
+    {
+      "platform": "macOS",
+      "observedVersion": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2.1\nBuildVersion:\t\t26B131\n",
+      "architecture": "arm64",
+      "target": "aarch64-apple-darwin",
+      "variant": "static",
+      "status": "Verified",
+      "build": {
+        "evidence": "tasks/058/evidence/compatibility-20261115/native-r2/BINARY-BINDINGS.json",
+        "exactProductSourceReuse": "tasks/059/evidence/platform-20261115/package-r2/BUILD-REUSE.json"
+      },
+      "test": {
+        "evidence": "tasks/058/evidence/compatibility-20261115/native-r2/workspace.log",
+        "passed": 555,
+        "failed": 0,
+        "ignored": 3
+      },
+      "archive": "tasks/059/evidence/platform-20261115/package-r2/packages/static/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz",
+      "archiveSha256": "d077655021bc7d1102ad72c44378138760050d01701dd9adb5b10a401c7a5946",
+      "binarySha256": "68cc6562c4c3991fe935eb1e8c47499275f82cdc69ef74d2fbbad11b545c2de3",
+      "cleanInstall": {
+        "evidence": "tasks/059/evidence/platform-20261115/package-r2/packages/static/INSTALL-RESULTS.json",
+        "allCommandsExit0": true,
+        "installedRulesActualScanFindings": 3,
+        "prefixRemoved": true
+      },
+      "noticeReviewRequired": [],
+      "publication": "Localdevelopment preparation; not a newlypublishedrelease"
+    },
+    {
+      "platform": "macOS",
+      "observedVersion": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2.1\nBuildVersion:\t\t26B131\n",
+      "architecture": "arm64",
+      "target": "aarch64-apple-darwin",
+      "variant": "network",
+      "status": "Verified",
+      "build": {
+        "evidence": "tasks/058/evidence/compatibility-20261115/native-r2/BINARY-BINDINGS.json",
+        "exactProductSourceReuse": "tasks/059/evidence/platform-20261115/package-r2/BUILD-REUSE.json"
+      },
+      "test": {
+        "evidence": "tasks/059/evidence/platform-20261115/native-r1/network-workspace.log",
+        "passed": 614,
+        "failed": 0,
+        "ignored": 5
+      },
+      "archive": "tasks/059/evidence/platform-20261115/package-r2/packages/network/pqc-scan-0.2.0-aarch64-apple-darwin-network.tar.gz",
+      "archiveSha256": "fe68bd004d1e603a64eea34a70f8bbdbd231111c3db2bd32a10abc1d98af8c95",
+      "binarySha256": "3e93e8b8e089340bde88a6a38e456cfc0b369b86cdc3f626c88bb2e5726f4c61",
+      "cleanInstall": {
+        "evidence": "tasks/059/evidence/platform-20261115/package-r2/packages/network/INSTALL-RESULTS.json",
+        "allCommandsExit0": true,
+        "installedRulesActualScanFindings": 3,
+        "prefixRemoved": true
+      },
+      "noticeReviewRequired": [
+        {
+          "name": "block2",
+          "version": "0.6.2"
+        },
+        {
+          "name": "dispatch2",
+          "version": "0.3.1"
+        },
+        {
+          "name": "objc2-encode",
+          "version": "4.1.0"
+        },
+        {
+          "name": "objc2",
+          "version": "0.6.5"
+        }
+      ],
+      "publication": "No publicationperformed; existingnetworkhold preserved"
+    }
+  ],
+  "notInDeclaredScope": [
+    "OtherOS",
+    "OtherCPUarchitecture",
+    "OtherOSversion execution"
+  ],
+  "supportInterpretation": "Operational build/test/install/rules measurement on exacthost only. Existingrelease policy is not broadened by buildsuccess; untested platforms are not labeled supported.",
+  "confinement": "Existingnative readonlysource/cache, scratchonly writes, noegress. Adaptedchecker removes only redundant nestedlauncher and uses a stronger inherited sandbox denying all network; all existing install/verifier assertions unchanged.",
+  "failuresPreserved": [
+    "tasks/059/evidence/platform-20261115/INITIAL-RUN.json",
+    "tasks/059/evidence/platform-20261115/native-r1/static-install.log"
+  ],
+  "originalCriterion": "Q6-11"
+}

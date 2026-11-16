@@ -48,20 +48,13 @@ jobs:
             gh attestation verify "$archive" --repo "$SOURCE_REPOSITORY" --signer-workflow "$SOURCE_REPOSITORY/.github/workflows/release.yml" --source-digest "$SOURCE_COMMIT"
           done
           cp "$ATTESTATION_BUNDLE" target/task-038/static-first/build-provenance.jsonl
-      - name: Build and prepare combined probe snapshot
+      - name: Build and prepare network diagnostics snapshot
         run: |
-          cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh --target-dir target/probe-release-build
-          python3 scripts/package-release.py --binary target/probe-release-build/release/pqc-scan --variant combined-probes --out-dir target/task-038/combined-first
-          python3 scripts/package-release.py --binary target/probe-release-build/release/pqc-scan --variant combined-probes --out-dir target/task-038/combined-second
-          cmp target/task-038/combined-first/*.tar.gz target/task-038/combined-second/*.tar.gz
-          python3 tests/distribution/check-install.py target/task-038/combined-first/*.tar.gz --out-dir target/task-038/combined-install
-      - name: Build and prepare all probes including SSH KEX
-        run: |
-          cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/all-probes-release-build
-          python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all-first
-          python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all-second
-          cmp target/task-038/all-first/*.tar.gz target/task-038/all-second/*.tar.gz
-          python3 tests/distribution/check-install.py target/task-038/all-first/*.tar.gz --out-dir target/task-038/all-install
+          cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/network-release-build
+          python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network-first
+          python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network-second
+          cmp target/task-038/network-first/*.tar.gz target/task-038/network-second/*.tar.gz
+          python3 tests/distribution/check-install.py target/task-038/network-first/*.tar.gz --out-dir target/task-038/network-install
       - name: Retain preparation artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

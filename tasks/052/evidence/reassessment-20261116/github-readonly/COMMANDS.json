@@ -1,0 +1,122 @@
+[
+  {
+    "name": "repo",
+    "argv": [
+      "gh",
+      "api",
+      "--method",
+      "GET",
+      "repos/wakaken/pqc-scan",
+      "--jq",
+      "{default_branch:.default_branch,permissions:.permissions,security_and_analysis:.security_and_analysis,private:.private}"
+    ],
+    "exitCode": 0,
+    "atUtc": "2026-11-16T02:04:39.410605+00:00",
+    "stdout": "repo.json",
+    "stderr": "repo.stderr"
+  },
+  {
+    "name": "user",
+    "argv": [
+      "gh",
+      "api",
+      "--method",
+      "GET",
+      "user",
+      "--jq",
+      "{login:.login,two_factor_authentication:.two_factor_authentication}"
+    ],
+    "exitCode": 0,
+    "atUtc": "2026-11-16T02:04:39.353538+00:00",
+    "stdout": "user.json",
+    "stderr": "user.stderr"
+  },
+  {
+    "name": "collaborators",
+    "argv": [
+      "gh",
+      "api",
+      "--method",
+      "GET",
+      "repos/wakaken/pqc-scan/collaborators",
+      "--jq",
+      "map({login:.login,permissions:.permissions})"
+    ],
+    "exitCode": 0,
+    "atUtc": "2026-11-16T02:04:39.349769+00:00",
+    "stdout": "collaborators.json",
+    "stderr": "collaborators.stderr"
+  },
+  {
+    "name": "branches",
+    "argv": [
+      "gh",
+      "api",
+      "--method",
+      "GET",
+      "repos/wakaken/pqc-scan/branches",
+      "--jq",
+      "map({name:.name,protected:.protected,sha:.commit.sha})"
+    ],
+    "exitCode": 0,
+    "atUtc": "2026-11-16T02:04:40.220735+00:00",
+    "stdout": "branches.json",
+    "stderr": "branches.stderr"
+  },
+  {
+    "name": "rulesets",
+    "argv": [
+      "gh",
+      "api",
+      "--method",
+      "GET",
+      "repos/wakaken/pqc-scan/rulesets"
+    ],
+    "exitCode": 0,
+    "atUtc": "2026-11-16T02:04:40.197084+00:00",
+    "stdout": "rulesets.json",
+    "stderr": "rulesets.stderr"
+  },
+  {
+    "name": "develop-rules",
+    "argv": [
+      "gh",
+      "api",
+      "--method",
+      "GET",
+      "repos/wakaken/pqc-scan/rules/branches/develop"
+    ],
+    "exitCode": 0,
+    "atUtc": "2026-11-16T02:04:40.218842+00:00",
+    "stdout": "develop-rules.json",
+    "stderr": "develop-rules.stderr"
+  },
+  {
+    "name": "workflow-permissions",
+    "argv": [
+      "gh",
+      "api",
+      "--method",
+      "GET",
+      "repos/wakaken/pqc-scan/actions/permissions/workflow"
+    ],
+    "exitCode": 0,
+    "atUtc": "2026-11-16T02:04:41.061345+00:00",
+    "stdout": "workflow-permissions.json",
+    "stderr": "workflow-permissions.stderr"
+  },
+  {
+    "name": "private-reporting",
+    "argv": [
+      "gh",
+      "api",
+      "--method",
+      "GET",
+      "repos/wakaken/pqc-scan/private-vulnerability-reporting"
+    ],
+    "exitCode": 0,
+    "atUtc": "2026-11-16T02:04:41.082914+00:00",
+    "stdout": "private-reporting.json",
+    "stderr": "private-reporting.stderr"
+  }
+]

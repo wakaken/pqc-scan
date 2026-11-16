@@ -1,0 +1,197 @@
+{
+  "observedDateJst": "2026-11-15",
+  "repository": "wakaken/pqc-scan",
+  "remoteDefaultBranch": "develop",
+  "remoteDefaultCommit": "f07d782cd68cfac95d93585d5ace049f590160d4",
+  "localBaseline": "../BASELINE.json",
+  "settingChangesPerformed": false,
+  "transports": {
+    "connector": "Managed GitHub App; protection endpoints returned 403 despite repository permissions.admin=true",
+    "fallback": "Existing gh OAuth keyring, GET only. Existing scopes repo,user,workflow,read:org,gist; broader than needed, no grants changed. Account role does not prove integration-token authority.",
+    "rawEvidence": [
+      "../CONNECTOR.json",
+      "../CONNECTOR-DETAILS.json",
+      "../github-cli/COMMANDS.json",
+      "../github-cli/COMMANDS-2.json",
+      "../github-cli/COMMANDS-3.json"
+    ]
+  },
+  "observations": [
+    {
+      "control": "classic_branch_protection",
+      "branches": [
+        "develop",
+        "main"
+      ],
+      "connectorStatus": "Unknown",
+      "connectorReason": "403 Resource not accessible by integration",
+      "fallbackStatus": "Observed disabled",
+      "fallbackReason": "404 Branch not protected; branches list protected=false; rulesets and effective rules empty",
+      "requiredReviews": "No observed enforcement",
+      "requiredStatusChecks": "No observed enforcement",
+      "raw": [
+        "../github-cli/develop-protection.json",
+        "../github-cli/main-protection.json",
+        "../github-cli/develop-effective-rules.json",
+        "../github-cli/main-effective-rules.json"
+      ]
+    },
+    {
+      "control": "rulesets",
+      "status": "Observed",
+      "value": [],
+      "scope": "Repository rulesets including parents, 21 observed branches on first page (<100); default/main effective rules also empty. Not an account-wide governance claim."
+    },
+    {
+      "control": "actions_repository",
+      "status": "Observed",
+      "value": {
+        "enabled": true,
+        "allowed_actions": "all",
+        "sha_pinning_required": false
+      },
+      "raw": "../github-cli/actions-permissions.json"
+    },
+    {
+      "control": "actions_default_token",
+      "status": "Observed",
+      "value": {
+        "default_workflow_permissions": "read",
+        "can_approve_pull_request_reviews": false
+      },
+      "raw": "../github-cli/workflow-permissions.json"
+    },
+    {
+      "control": "workflow_job_permissions",
+      "status": "Source inspected",
+      "value": {
+        "pqc-scan_top": "contents:read",
+        "scan_job": "contents:read; security-events:write; uploads SARIF using codeql-action/upload-sarif",
+        "release_prepare": "contents:read,id-token:write,attestations:write",
+        "checkout_credentials": "persist-credentials:false for protocols/release; default checkout credential persistence in quality/baseline/scan"
+      },
+      "scope": "Local source; pqc-scan workflow matches HEAD; release workflow has task064 changes not remotely measured",
+      "limitation": "Scorecard Token-Permissions=10 describes remote tool heuristics, not absence of write grants or proof every permission is necessary. Local scan requires security-events:write for SARIF upload; preparation declares id-token/attestations write. Both workflows are inspected independently of the score."
+    },
+    {
+      "control": "repository_access",
+      "status": "Observed",
+      "value": [
+        {
+          "login": "wakaken",
+          "role": "admin"
+        }
+      ],
+      "raw": "../github-cli/collaborators.json",
+      "limitation": "One collaborator returned (<100); this is observed access, not a confirmed security-response appointment, continuity arrangement or account-token scope."
+    },
+    {
+      "control": "private_vulnerability_reporting",
+      "status": "Observed disabled",
+      "value": false,
+      "raw": "../github-cli/private-reporting.json"
+    },
+    {
+      "control": "security_analysis",
+      "status": "Observed",
+      "value": {
+        "secret_scanning": {
+          "status": "enabled"
+        },
+        "secret_scanning_push_protection": {
+          "status": "enabled"
+        },
+        "dependabot_security_updates": {
+          "status": "disabled"
+        },
+        "secret_scanning_non_provider_patterns": {
+          "status": "disabled"
+        },
+        "secret_scanning_validity_checks": {
+          "status": "disabled"
+        }
+      },
+      "raw": "../github-cli/security-analysis.json"
+    },
+    {
+      "control": "dependabot_alerts",
+      "status": "Observed disabled",
+      "httpStatus": 403,
+      "reason": "API explicitly says Dependabot alerts are disabled for this repository",
+      "raw": "../github-cli/dependabot-alerts.response",
+      "distinction": "This 403 explicitly reports a disabled feature; do not apply this interpretation to the connector protection 403."
+    },
+    {
+      "control": "codeql_default_setup",
+      "status": "Observed not-configured",
+      "raw": "../github-cli/code-scanning-default.response",
+      "limitation": "Does not imply absence of all SAST; clippy and self-scan workflows are separate."
+    },
+    {
+      "control": "code_security_configuration",
+      "status": "No associated configuration returned",
+      "raw": "../github-cli/code-security-config.json",
+      "limitation": "Successful request with empty body; not proof of disabled individual security features."
+    },
+    {
+      "control": "environments",
+      "status": "Observed",
+      "value": {
+        "total_count": 0,
+        "environments": []
+      },
+      "raw": "../github-cli/environments.json"
+    },
+    {
+      "control": "account_2fa_and_continuity",
+      "status": "Unknown",
+      "reason": "Public repository/permissions APIs do not establish account MFA mechanisms, enforcement or succession; no sensitive account access attempted."
+    }
+  ],
+  "recommendationsOnly": [
+    {
+      "priority": "high",
+      "proposal": "Consider protection/rulesets for develop and release branch, with non-author review and required checks",
+      "prerequisite": "Maintainer approval and chosen branch/check/bypass policy; replace workflow-level path filtering with job-level gating before requiring checks",
+      "changesMade": false
+    },
+    {
+      "priority": "high",
+      "proposal": "Establish a verified private security contact and explicit response ownership",
+      "prerequisite": "Maintainer-selected channel and responsibilities; do not invent an address, SLA or enable a setting",
+      "changesMade": false
+    },
+    {
+      "priority": "medium",
+      "proposal": "Consider restricting allowed Actions and requiring immutable SHA references server-side",
+      "prerequisite": "Assess effects on existing workflows and approve policy",
+      "changesMade": false
+    },
+    {
+      "priority": "medium",
+      "proposal": "Consider scheduled dependency monitoring and review any alert-service enablement",
+      "prerequisite": "Agree scope/frequency/cost and distinguish fixture/evidence locks from shipped dependencies",
+      "changesMade": false
+    },
+    {
+      "priority": "medium",
+      "proposal": "Consider separating static attestation into a job with OIDC/attestation write grants only there",
+      "prerequisite": "Assess workflow boundaries and approve implementation; current job also builds the unpublished network bundle",
+      "changesMade": false
+    },
+    {
+      "priority": "medium",
+      "proposal": "Consider persist-credentials:false in quality/baseline/scan checkouts if subsequent authenticated Git operations are unnecessary",
+      "prerequisite": "Confirm required checkout behavior and approve implementation; no current change",
+      "changesMade": false
+    }
+  ],
+  "notPerformed": [
+    "settings mutation",
+    "workflow dispatch",
+    "push",
+    "release",
+    "badge registration",
+    "external report or message"
+  ]
+}

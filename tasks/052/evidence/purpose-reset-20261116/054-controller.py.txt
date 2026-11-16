@@ -1,0 +1,39 @@
+from pathlib import Path
+import json,hashlib,shutil,re,collections
+r=Path.cwd();e=r/'tasks/052/evidence/purpose-reset-20261116';p=r/'tasks/054/evidence/assessment-20261116/REQUIREMENT-ASSESSMENT.json';d=json.loads(p.read_text());H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();m=json.loads((e/'ACCEPTANCE-MATRIX.json').read_text());reasons={x['id']:x['reason'] for x in m['requirements']}
+for x in d['requirements']:
+ if x['ownerTask']=='052':
+  x.setdefault('priorPurposeReset',{}).update({k:x[k] for k in ['result','reason','acceptanceDecision','residualRisks','followup'] if k in x})
+  x.setdefault('priorReassessmentSnapshots',[]).append(x['reassessment20261116'])
+  x['result']='Passed';x['reason']=reasons[x['id']];x['acceptanceDecision']='Original task052assessment criterion satisfied; not a positive conclusion for every underlying OpenSSFpractice or release.'
+  x['residualRisks']=['Conformance limits remain71Met/43Partial/10Unknown/3conditionalN/A/18Unmet; no badge award.','No source-statement or semantic six-month regression rate established.','Public root/archive differs from corrected local source; local bilingual SECURITYdraft not published; no new settings/publication authorized.']
+  x['followup']='052purpose correction removes extra implementation demands; original145item evidence evaluation is complete.054must still finish its own final-source assessment.'
+  x['reassessment20261116']={'source':'tasks/052/TASK-052-REASSESSMENT-20261116.md','sourceSha256':H(r/'tasks/052/TASK-052-REASSESSMENT-20261116.md'),'criteria':'tasks/052/evidence/reassessment-20261116/outputs/best-practices-assessment.json','criteriaSha256':H(r/'tasks/052/evidence/reassessment-20261116/outputs/best-practices-assessment.json'),'validation':'tasks/052/evidence/purpose-reset-20261116/VALIDATION.json','state':'Original052assessment criteria complete subject to final validation; product conformance limits unchanged.'}
+d['purposeReset052']={'date':'2026-11-16','scope':'Only052assessment outcome updated. Historical catalog and original73conditions unchanged.','matrix':'tasks/052/evidence/purpose-reset-20261116/ACCEPTANCE-MATRIX.json'}
+p.write_text(json.dumps(d,indent=2,ensure_ascii=False)+'\n')
+p=r/'tasks/054/evidence/assessment-20261116/release-assessment.md';s=p.read_text();s=s.replace('Task054 and the v0.3 roadmap remain unfinished. Required ownership and operational truth from052 is unavailable. All73 original rows are inventoried below; this is a provisional assessment, not a claim that all current-target validation is complete.','Task054 and the v0.3roadmap remain unfinished. The original052assessment has now been reconciled under its purpose-correction record; ownership/MFA/reporting facts are no longer the outstanding upstream blocker. All73original rows remain inventoried; current-target validation for054is not claimed complete.')
+start=s.index('Entry:042–061');end=s.index('Static build/install',start)
+s=s[:start]+'''At entry,042–061had18done,052blocked and054pending. The052purpose correction
+separates completed assessment work from remaining OpenSSFconformance limits.
+Its current acceptance matrix covers all five original conditions; no practice is
+promoted toMet by the correction. The final closure receipt and taskYAML own its
+current status.054still needs complete final-target evidence applicability and
+affected repository self-scan validation; no further product task is reopened.
+
+'''+s[end:]
+# Update the active052requirement sections without altering other original rows.
+for x in d['requirements']:
+ if x['ownerTask']=='052':
+  pat=r'### '+re.escape(x['id'])+r' — .*?(?=\n### |\n## |\Z)'
+  repl='### '+x['id']+' — Passed\n\nOriginal acceptance (quoted):\n\n> '+x['acceptanceQuote']+'\n\n'+x['reason']+'\n\nEvidence: `'+x['reassessment20261116']['source']+'` SHA-256 `'+x['reassessment20261116']['sourceSha256']+'`; criterion JSON SHA-256 `'+x['reassessment20261116']['criteriaSha256']+'`. Final validation: `tasks/052/evidence/purpose-reset-20261116/VALIDATION.json`.\n\nDecision: Original assessment requirement satisfied, with explicit unsupported underlying conformance claims. This is not product release acceptance.\n'
+  s,n=re.subn(pat,lambda _:repl,s,count=1,flags=re.S);assert n==1,x['id']
+# Older appended follow-ups remain historical, explicitly superseded.
+needle='## '
+idx=s.find('\n## ',s.index('### Q6-18') if '### Q6-18' in s else len(s))
+if idx!=-1:s=s[:idx]+'\n## Historical follow-ups\n\nThe following dated entries preserve earlier052states. Current052decisions are above and in the purpose-reset receipt; earlier blocked/gap assertions are superseded only within that scope.\n'+s[idx:]
+p.write_text(s);shutil.copyfile(p,r/'target/quality-task-054/release-assessment.md')
+with (r/'tasks/054/TASK-054-RESULTS.md').open('a') as f:f.write('''\n## Task052 original-purpose correction — 2026-11-16\n\nThe earlier extra statement-tool/bug-ledger demands are superseded by the maintainer-approved scope correction. All five052assessment conditions now have complete evidence adjudications, pending the purpose-reset final validation. Unknown/Partial conformance is not promoted; the fixed measurement requirement remains actually executed. Earlier missing role/MFA/reporting statements are historical.054still has unfinished final-target applicability/self-scan work; no release acceptance, catalog rewrite or public action follows. See tasks/052/evidence/purpose-reset-20261116/ACCEPTANCE-MATRIX.json and VALIDATION.json.\n''')
+# Add current state note, keeping earlier blocker history unchanged.
+with (r/'tasks/054/task.yaml').open('a') as f:f.write('''\n  task052_purpose_correction_20261116:\n    evidence: tasks/052/evidence/purpose-reset-20261116/ACCEPTANCE-MATRIX.json\n    current_upstream: Original052assessment conditions reconciled; final closure receipt records validation. Earlier role/MFA/reporting blockers are historical.\n    remaining_054: Complete current-target evidence applicability and affected repository self-scan validation for Q6-17; no automatic product pass or roadmap closure.\n''')
+shutil.copyfile('/tmp/pqc052-purpose-054.py',e/'054-controller.py.txt')
+print(json.dumps({'054requirementCounts':dict(collections.Counter(x['result'] for x in d['requirements'])),'054assessmentComplete':d['assessmentComplete'],'releaseDecision':d['releaseDecision']}))

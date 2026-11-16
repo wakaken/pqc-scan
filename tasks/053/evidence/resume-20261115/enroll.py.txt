@@ -1,0 +1,173 @@
+"""Freeze existing public measurements; never run their commands or rewrite them."""
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+
+ROOT = Path.cwd()
+sys.path.insert(0, str(ROOT/'tests/quality'))
+import evidence
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def load(path):
+    return json.loads(path.read_text())
+
+# Each path is an intentionally selected existing study, not a new measurement.
+STUDIES = {
+ '042': ('task042-reopen-20261112', 'MEASUREMENT.json', 'ENTRY.json', 'Source-audited detection corpora; original RustCrypto holdout0TP/4FN and annotation errors remain historical; tuning/holdout populations stay separate.'),
+ '043': ('task043-fixes-20261112', 'METRICS.json', 'FINAL-SOURCE.json', 'Error triage and repaired detection; legacy annotation disagreement is not silently relabeled.'),
+ '044': ('task044-20261113', 'MEASUREMENTS.json', 'REVIEW-SOURCE-R3.json', 'Stable/nightly coverage and feasibility; branch versus region, ambiguity and Miri limits remain distinct.'),
+ '045': ('task045-20261113', 'RESULTS.json', 'SOURCE.json', '20 nominated mutations: 14 caught, 6 missed including one equivalent; not a population quality rate.'),
+ '046': ('task046-20261113', 'property-results.json', 'SOURCE.json', 'Property/metamorphic tests of bounded declared invariants, not a proof over every input.'),
+ '047': ('task047-20261113', 'fuzz-results.json', 'SOURCE.json', 'Finite fuzz inputs and retained regressions; no universal absence-of-defects claim.'),
+ '048': ('task048-20261114', 'output-semantics.json', 'FINAL-SOURCE.json', 'Schema and report semantic/security checks; source drift stays historical.'),
+ '049': ('task049-20261114', 'protocol-assurance.json', 'FINAL-SOURCE.json', 'Isolated TLS/SSH peer matrices; observed protocol assurance is scoped to measured profiles.'),
+ '050': ('task050-20261114', 'SUMMARY.json', 'FINAL-SOURCE.json', '144 successful resource samples and 24 intentional failures; old numeric accuracy comparison remains Failed.'),
+ '051': ('dependency-20261114', 'FINAL-VERIFICATION.json', 'final-run/artifacts/review/dependency-review.json', 'Dependency/license evaluation is complete, but findings and network publication hold remain.'),
+ '052': ('assessment-20261115', 'outputs/scorecard-assessment.json', None, 'Unfinished: ownership/backup and operational facts remain Unknown. Scorecard 4.3 is remote repository/process evidence, not detection accuracy.'),
+ '055': ('task055-20261113', 'coverage-denominators.json', 'SOURCE.json', 'Inspection denominators and format/detector outcomes; unknown repository population is not safe or fully inspected.'),
+ '056': ('remediation-20261115', 'COMPARISON-SUMMARY.json', 'EVIDENCE-FINAL.json', 'Recorded routing agreement and five recommendation repairs; 0.45 unchanged; agreement is not universal judgment validity.'),
+ '057': ('task057-20261113', 'failure-matrix.json', 'SOURCE.json', 'Privacy, failure retention, filesystem/network/resource boundaries in the documented finite scope.'),
+ '058': ('compatibility-20261115', 'outputs/compatibility-matrix.json', 'native-r2/SOURCE.json', 'API/CLI/output compatibility and actual bilingual desktop/mobile/keyboard user flows.'),
+ '059': ('platform-20261115', 'platform-matrix.json', None, 'Actual macOS Apple Silicon static/network build/install checks; no other platform support claim.'),
+ '060': ('rebuild-20261115', 'rebuild-comparison.json', 'native-r1/SOURCE.json', 'Four independent clean builds on one host; both raw binary pairs match under recorded normalization.'),
+ '061': ('integrity-20261115', 'artifact-integrity.json', None, 'Local prepared fixture signatures: 2 valid accepts, 30 invalid rejects; not production signing or SLSA certification.'),
+}
+
+def hash_map(data):
+    if not isinstance(data,dict):
+        return {}
+    for key in ['source_inputs','source','files','protectedBindings','bindings','sourceBindings']:
+        value=data.get(key)
+        if isinstance(value,dict):
+            found={p:h for p,h in value.items() if isinstance(p,str) and isinstance(h,str) and re.fullmatch('[0-9a-f]{64}',h)}
+            if found:
+                return found
+    if data and all(isinstance(h,str) and re.fullmatch('[0-9a-f]{64}',h) for h in data.values()):
+        return data
+    return {}
+
+def commands(value):
+    found=[]
+    if isinstance(value,dict):
+        argv=value.get('argv', value.get('command'))
+        code=value.get('exitCode',value.get('exit',value.get('returncode')))
+        if isinstance(argv,str) and type(code) is int:
+            found.append({'argv':['sh','-c',argv], 'exitCode':code})
+        elif isinstance(argv,list) and argv and all(isinstance(x,str) for x in argv) and type(code) is int:
+            found.append({'argv':argv,'exitCode':code})
+        for item in value.values():found.extend(commands(item))
+    elif isinstance(value,list):
+        for item in value:found.extend(commands(item))
+    return found
+
+owners=evidence.requirements((ROOT/'docs/roadmap/v0.3/REQUIREMENTS.md').read_bytes())
+records=[]
+for task,(directory,primary,source_name,summary) in STUDIES.items():
+    base=ROOT/'tasks'/task/'evidence'/directory
+    results=ROOT/'tasks'/task/f'TASK-{task}-RESULTS.md'
+    if task=='042':results=ROOT/'tasks/042/TASK-042-REOPEN-RESULTS.md'
+    if task=='043':results=ROOT/'tasks/043/TASK-043-FIXES-RESULTS.md'
+    selected={base/primary,results}
+    # Preserve each study's direct metadata, command receipts, reviews and prose;
+    # raw archives/binaries are represented by their original hash manifests.
+    for path in base.iterdir():
+        if path.is_file() and path.suffix.lower() in {'.json','.md'} and path.stat().st_size<300000:
+            if path.name not in {'BASELINE.json','ENTRY.json','PRESERVED-TASKS.json'}:
+                selected.add(path)
+    for sub in ['outputs','v2-report','lock-controls-report','native-r1','native-r2','container-r2']:
+        if (base/sub).is_dir():
+            for path in (base/sub).iterdir():
+                if path.is_file() and path.suffix.lower() in {'.json','.md'} and path.stat().st_size<300000:
+                    selected.add(path)
+    for path in (ROOT/'tasks'/task).glob('*REVIEW*.md'):selected.add(path)
+    source=base/source_name if source_name else None
+    if task in {'059','061'}:source=ROOT/'tasks/059/evidence/platform-20261115/package-r2/SOURCE.json'
+    if source:selected.add(source)
+    original_review_bindings={}
+    if task in {'058','059','060','061'}:
+        original_review_bindings=load(base/'REVIEW-SOURCE.json')
+        selected.add(base/'REVIEW-SOURCE.json')
+        for reviewed_path in original_review_bindings:
+            selected.add(ROOT/reviewed_path)
+
+    # Extra current056 evaluation history is retained beside the later remediation.
+    if task=='056':
+        selected.update([ROOT/'tasks/056/evidence/assessment-20261115/outputs-r6/risk-matrix.json',ROOT/'tasks/056/evidence/assessment-20261115/outputs-r6/severity-cases.json',ROOT/'tasks/056/evidence/assessment-20261115/EVIDENCE-FINAL.json'])
+    if task=='051':selected.add(base/'final-run/artifacts/review/dependency-review.json')
+    if task=='052':selected.add(base/'scorecard/FINAL-RUN.json')
+    if len(selected)>128:raise ValueError('Too many selected references')
+    artifacts=[];observations=[];actual_commands=[]
+    for path in sorted(selected):
+        assert path.is_file(),path
+        name=path.relative_to(ROOT).as_posix()
+        artifacts.append({'path':name,'sha256':digest(path),'purpose':'Frozen original measurement, source/command/review context or result; see scope and limitations'})
+        if path.suffix.lower()=='.json':
+            data=load(path);actual_commands.extend(commands(data))
+            if isinstance(data,dict) and path==base/primary:
+                for key,value in data.items():
+                    if len(json.dumps(value))<12000:
+                        observations.append({'label':key,'artifact':name,'pointer':'/'+key.replace('~','~0').replace('/','~1')})
+    bindings=hash_map(load(source)) if source else {}
+    raw=load(base/primary)
+    head=next((raw[k] for k in ['head','baseHead','source_head','sourceCommit'] if k in raw),'Historical revision identified in bound result/source records')
+    source_data=load(source) if source else {}
+    if isinstance(source_data,dict):
+        head=next((source_data[k] for k in ['head','baseHead','source_head'] if k in source_data),head)
+    ctx=results.read_text()
+    limitations=[summary,'Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.','Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.','Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.']
+    concerns=[]
+    if task in {'042','045','050','051','052'}:concerns=[{'priority':'high','text':summary}]
+    if not actual_commands:actual_commands=[{'argv':['original-command-receipts',str(results.relative_to(ROOT))],'exitCode':None,'reason':'No normalized command+exit pair extracted; inspect bound original result/command receipts. This is a reference, not an executed command.'}]
+    # Commands remain data. Their original negative-control exits are not job failures.
+    actual_commands=list({json.dumps(x,sort_keys=True):x for x in actual_commands}.values())
+    normalized_reviews=[]
+    if task in {'058','059','060','061'}:
+        review_path=ROOT/'tasks'/task/f'TASK-{task}-REVIEWS.md'
+        review_bindings=dict(bindings, **original_review_bindings)
+        for stage,reviewer in [('implementation','/root/task056_implementation_review'),('test','/root/task056_test_review')]:
+            normalized_reviews.append({'stage':stage,'reviewer':reviewer,'status':'accepted',
+                'artifact':str(review_path.relative_to(ROOT)),
+                'sourceDigest':evidence.binding_digest(review_bindings),'sourceBindings':review_bindings,
+                'scope':'Original accepted measurement and declared source population only; current applicability is checked separately'})
+    record={'id':'task'+task+'-recorded-study','task':task,'requirements':[q for q,t in owners.items() if t==task],
+      'result':{'status':'Unknown' if task=='052' else 'Partial','summary':summary,'originalOutcome':raw.get('status',raw.get('assessment','See immutable original observations/results; no overall product pass inferred')),'classification':'Conservative catalog assessment, distinct from original observed outcome and task completion'},
+      'measurement':{'head':head,'version':'0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records',
+        'features':['Original static/default/optional configurations are separate in original artifacts; no cross-feature extrapolation'],
+        'standards':['Original study references retained; schema validity, semantics and process scores remain distinct'],
+        'method':'Offline enrollment of actual original measurements and reviewer artifacts; no command replay',
+        'environment':'Original host/container/tool/limit records are bound; aggregation host does not replace measurement environment',
+        'date':'2026-11-15 enrollment; original measurement dates retained in bound artifacts',
+        'comparison':summary,'executionStatus':'Unknown','commands':actual_commands},
+      'sourceBindings':bindings,'artifacts':artifacts,'observations':observations,'reviews':normalized_reviews,
+      'limitations':limitations,'concerns':concerns}
+    # Context refers to observed configurations; no missing version is guessed.
+    config={
+      '042':('default static; legacy/v1/v2/lock-control corpora separately','macOS native; exact runtime/source in MEASUREMENT and command receipts','Frozen source-only labels and rule inventory'),
+      '043':('default static; before/after fixed corpus and fresh controls','Native local tests; exact execution context in VALIDATION','Recorded detector contract, immutable corpus and source-only labels'),
+      '044':('default and all-features; stable coverage plus pinned nightly branch/Miri','Linux arm64 resource-confined; Rust1.93.1 and separately pinned nightly','LLVM line/region/branch semantics; Miri applicability, not formal proof'),
+      '045':('all-features; 20 nominated mutations and unmutated controls','Linux arm64; Rust1.93.1, no external network, nonroot/resource bounds','Caught/missed/timeout/unviable; equivalence disclosed'),
+      '046':('default/all-features; fixed seeds and finite generated states','Linux arm64; Rust1.93.1 isolated bounded execution','Property/metamorphic relations as declared in original result'),
+      '047':('normal fuzz workers plus separate instrumented coverage','Linux arm64; Rust1.93.1 isolated finite execution','Fuzz corpus/reproducer identity; line/region not branch coverage'),
+      '048':('default/all-features and bilingual rendering/schema fixtures','Isolated Linux and recorded real-browser observations','SARIF2.1.0/CycloneDX1.7 schema plus independent semantic checks'),
+      '049':('probe-tls,probe-ssh,probe-ssh-kex and static controls','Linux arm64; pinned local peers, no external network, bounded container','TLS1.2/1.3 and SSH no-authentication packet/assurance distinctions'),
+      '050':('macOS default; Linux default/all-features; 1/2threads','144 successes/24 intentional failures; separate OS/environment conditions','Wall/CPU/RSS units; run-specific IDs and descriptive2x investigation'),
+      '051':('static and separately enumerated probe variants','Pinned advisory database/tool receipt, local prepared artifacts','RustSec advisories and package-specific license/notices, not publication approval'),
+      '052':('Remote default-branch source and live repository settings','Scorecardv5.6.0; tool commit61e84743356275f6ffca23b1b2f2cb945e19eb96; observed2026-11-15','OpenSSF passing/silver/gold145items and Scorecard18checks; no badge application'),
+      '055':('default/all-features; fixed selected/excluded/partial/failed inputs','Linux arm64; Rust1.93.1, isolated finite-resource execution','Inspection arithmetic partitions; unenumerated populations remain unknown'),
+      '056':('default and optional probes;1,531 judgments and16CLI cases each','Rust1.93.1/macOS plus recorded bilingual browser checks','Frozen independent decision classes; characterization0.45 is not newly validated truth'),
+      '057':('default/all-features; synthetic privacy/failure/race cases','Linux arm64 and focused macOSarm64; Rust1.93.1; bounded isolation','Documented privacy/no-auth/network boundaries, not universal secret detection'),
+      '058':('static and optional probes; installed EN/JA reports','macOS27.2.1arm64; Rust1.93.1; Chrome157 at1280/390px','v0.2.0 public API/CLI/schema compatibility and actual keyboard/mobile flow'),
+      '059':('static public preparation and network unpublished preparation','macOS27.2.1arm64/aarch64-apple-darwin; Rust1.93.1','Existing maintainer-selected platform only; network four-notice hold'),
+      '060':('static and network(probe-tls,probe-ssh,probe-ssh-kex)','Same macOSarm64 host/SDK; Rust1.93.1; four independent target roots','Raw binary reproducibility under identical remapped paths/fixed epoch'),
+      '061':('static/network prepared archives;32 signature/integrity cases','Pinned immutable offline Linuxarm64 container; OpenSSL3.0.22; nonroot/resource bounds','Local Ed25519 fixture policy; no SLSA/GitHub production identity claim'),
+    }[task]
+    record['measurement'].update(features=config[0],environment=config[1],standards=config[2],method=summary)
+    records.append(record)
+req=ROOT/'docs/roadmap/v0.3/REQUIREMENTS.md'
+catalog={'version':1,'requirements':{'path':str(req.relative_to(ROOT)),'sha256':digest(req)},'records':records}
+p=ROOT/'docs/quality/EVIDENCE-CATALOG.json';p.write_text(json.dumps(catalog,indent=2,ensure_ascii=False)+'\n')
+print(json.dumps({'records':len(records),'requirements':len(owners),'artifactReferences':sum(len(r['artifacts']) for r in records),'commandReferences':sum(len(r['measurement']['commands']) for r in records)},indent=2))

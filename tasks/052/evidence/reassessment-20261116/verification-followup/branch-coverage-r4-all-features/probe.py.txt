@@ -1,0 +1,22 @@
+from pathlib import Path
+import runpy,sys,time,json,traceback,contextlib,gzip,shutil
+s=Path('/scratch');e=s/'evidence'
+for p in [e,s/'home',s/'tmp',s/'test-target',s/'cargo']:p.mkdir(exist_ok=True)
+for n in ['registry','git']:
+ p=Path('/usr/local/cargo')/n
+ if p.exists():(s/'cargo'/n).symlink_to(p,target_is_directory=True)
+status={'exit':0}
+with (e/'entry.log').open('w') as log,contextlib.redirect_stdout(log),contextlib.redirect_stderr(log):
+ try:
+  ns=runpy.run_path('/source/tests/quality/task044/entry.py',run_name='pqc052_existing044_measure')
+  ns['write']('checks.json',ns['boundary']());ns['smoke']();ns['run'](['rustc','+'+ns['NIGHTLY'],'-Vv'],'nightly.log')
+  (e/'branch-default').mkdir()
+  (e/'branch-default/binaries-before.json').write_text(json.dumps({'binaries':{},'scope':'Actual empty prior-binary inventory in a fresh all-feature-only container; not a default measurement result.'}))
+  ns['measure']('branch-all-features',nightly=True,all_features=True)
+ except BaseException:traceback.print_exc();status={'exit':1}
+ for p in e.rglob('*'):
+  if p.is_file() and p.stat().st_size>2*1024**2 and p.suffix!='.gz':
+   with p.open('rb') as src,gzip.open(str(p)+'.gz','wb') as dst:shutil.copyfileobj(src,dst)
+   p.unlink()
+(s/'status.json').write_text(json.dumps(status))
+while True:time.sleep(1)

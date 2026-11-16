@@ -117,4 +117,4 @@ Unixではシンボリックリンクや通常ファイル以外の入力も拒�
 HTMLは結果と理由を先に示し、技術情報は閉じた状態にします。
 既存の `probe ssh` は提示方式の収集のままで、従来の出力形式も維持します。
 全コマンドが必要なら `probe-tls,probe-ssh,probe-ssh-kex` を有効にしてください。
-`static`はprobeなし、`combined-probes`はTLS・SSH提示方式、`all-probes`はそれらとSSH KEXを含みます。v0.2候補では3構成の作成と導入を検証済みですが、probe同梱版の公開承認とは別です。
+新しい配布物は`static`（probeなし）と`network`（静的スキャンに加え、TLS・SSH提示方式・SSH KEX）の2構成です。内部のfeatureは個別ビルド用に残します。過去のv0.2候補は3構成でしたが、その検証は`network`の公開承認とは別です。[配布構成と確認事項](DISTRIBUTION.ja.md#release-status)を参照してください。

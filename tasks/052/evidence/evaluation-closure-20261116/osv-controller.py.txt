@@ -1,0 +1,19 @@
+from pathlib import Path
+import json,re,urllib.request,concurrent.futures,hashlib,time,tomllib,datetime
+r=Path.cwd();out=r/'tasks/052/evidence/evaluation-closure-20261116/osv-attribution';out.mkdir(exist_ok=False)
+source=r/'tasks/052/evidence/reassessment-20261116/scorecard/stdout.json';d=json.loads(source.read_text());check=next(x for x in d['checks'] if x['name']=='Vulnerabilities');ids=[x.rsplit('/',1)[-1] for x in check['details']];assert len(ids)==len(set(ids))==48
+packages={p['name']:p['version'] for p in tomllib.loads((r/'Cargo.lock').read_text())['package']}
+def get(identifier):
+ url='https://api.osv.dev/v1/vulns/'+identifier;start=time.monotonic();rec={'id':identifier,'url':url,'method':'GET','atUtc':datetime.datetime.now(datetime.timezone.utc).isoformat()}
+ try:
+  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'pqc-scan-task052-readonly-assessment'}),timeout=20) as response:
+   body=response.read(2*1024*1024+1);assert len(body)<=2*1024*1024
+   obj=json.loads(body);assert obj['id']==identifier
+   path=out/(identifier+'.json');path.write_bytes(body);rec.update(httpStatus=response.status,sha256=hashlib.sha256(body).hexdigest(),response=path.name)
+   rec['affected']=[{'package':a.get('package'),'lockedVersion':packages.get(a.get('package',{}).get('name')) if a.get('package',{}).get('ecosystem')=='crates.io' else None,'ranges':a.get('ranges',[]),'versions':a.get('versions',[])} for a in obj.get('affected',[])]
+   rec['withdrawn']=obj.get('withdrawn');rec['aliases']=obj.get('aliases',[])
+ except Exception as err:rec['error']=type(err).__name__+': '+str(err)
+ rec['seconds']=time.monotonic()-start;return rec
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:rows=list(pool.map(get,ids))
+(out/'FETCH.json').write_text(json.dumps({'sourceScorecardSha256':hashlib.sha256(source.read_bytes()).hexdigest(),'scope':'Read-only OSVadvisory retrieval for existing48remote observations; no dependency or target-code execution. Package membership alone is not version applicability or exploitability.','rows':rows},indent=2)+'\n')
+print(json.dumps({'successful':sum(x.get('httpStatus')==200 for x in rows),'failed':[(x['id'],x.get('error')) for x in rows if x.get('error')],'affectedPackages':[(x['id'],[(a['package'],a['lockedVersion']) for a in x.get('affected',[])]) for x in rows]},indent=2))

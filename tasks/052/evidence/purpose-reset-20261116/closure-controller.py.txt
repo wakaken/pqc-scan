@@ -1,0 +1,50 @@
+from pathlib import Path
+import json,hashlib,shutil
+r=Path.cwd();e=r/'tasks/052/evidence/purpose-reset-20261116';J=lambda p:json.loads(p.read_text());H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def save(p,d):p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
+v=J(e/'VALIDATION.json');assert len(v['checksPassed'])==865 and all(x['exitCode']==0 for x in v['commands']);shutil.copyfile(e/'VALIDATION.json',e/'PRE-CLOSURE-VALIDATION.json')
+p=r/'tasks/052/task.yaml';s=p.read_text();assert '\nstatus: review\n' in s;s=s.replace('\nstatus: review\n','\nstatus: done\n',1);s+='''
+  completion:
+    date: '2026-11-16'
+    from: review
+    to: done
+    reason: All five original assessment conditions verified after criterion-specific evidence review and865pre-closure checks. No underlying practice promoted toMet.
+    evidence: tasks/052/evidence/purpose-reset-20261116/VALIDATION.json
+    pre_closure_evidence: tasks/052/evidence/purpose-reset-20261116/PRE-CLOSURE-VALIDATION.json
+    original_scope: Preserved; actual fixedScorecard measurement and145item grounded assessment complete. Unsubstantiated practice claims are recorded as such, not new implementation deliverables.
+    remaining_practice_limits: See reassessment-20261116/REMAINING.json; no product quality, badge or publication acceptance.
+    supersedes: Prior blocked decisions only where they imposed additional implementation/measurement demands beyond the original assessment purpose; historical records remain intact.
+''';p.write_text(s)
+m=J(e/'ACCEPTANCE-MATRIX.json');m['done']=True;m['preClosureValidation']='PRE-CLOSURE-VALIDATION.json';save(e/'ACCEPTANCE-MATRIX.json',m)
+p=r/'tasks/052/TASK-052-REASSESSMENT-20261116.md';s=p.read_text();s=s.replace('## Purpose and decision\n','## Purpose and decision\n\nTask052 is done as an original-purpose assessment, after the final validation\nrecorded in evidence/purpose-reset-20261116/VALIDATION.json. This is not a\nproduct-quality pass, a badge award or release/publication authorization.\n');s=s.replace('Task054and the v0.3roadmap remain separately','Task054and the v0.3roadmap remain separately');p.write_text(s)
+# Resolve the old upstream stop;054still has authorized assessment work to do.
+p=r/'tasks/054/task.yaml';s=p.read_text();assert '\nstatus: blocked\n' in s;s=s.replace('\nstatus: blocked\n','\nstatus: in-progress\n',1);s+='''
+    transition:
+      from: blocked
+      to: in-progress
+      reason: Original052assessment completed; resume already authorized054final-source requirement reconciliation. Old upstream ownership/MFA uncertainty is resolved.
+    upstream_status: Task052done as an assessment only; product and roadmap acceptance remain unestablished.
+''';p.write_text(s)
+p=r/'tasks/054/evidence/assessment-20261116/REQUIREMENT-ASSESSMENT.json';d=J(p)
+for x in d['requirements']:
+ if x['ownerTask']=='052':
+  x['reassessment20261116']['sourceSha256']=H(r/x['reassessment20261116']['source']);x['reassessment20261116']['state']='Task052done: all original assessment criteria verified, with underlying conformance gaps explicit. No product pass or badge.'
+d['purposeReset052']['task052Status']='done';d['purposeReset052']['task054Status']='in-progress';save(p,d)
+p=r/'tasks/054/evidence/assessment-20261116/release-assessment.md';s=p.read_text().replace('# Task054 release assessment — partial','# Task054 release assessment — in progress',1)
+s=s.replace('Its current acceptance matrix covers all five original conditions; no practice is','Task052is done after its original-purpose acceptance validation. Its current acceptance matrix covers all five original conditions; no practice is')
+s=s.replace('Its current acceptance matrix covers all five original conditions; no practice is','Its current acceptance matrix covers all five original conditions; no practice is',1)
+s=s.replace('The final closure receipt and taskYAML own its\ncurrent status.054still needs','The final closure receipt and taskYAML own its\ncurrent status.054has resumedin-progressand still needs')
+# Refresh current report SHA after final status prose changed.
+for x in d['requirements']:
+ if x['ownerTask']=='052':
+  prior=x['priorReassessmentSnapshots'][-1]['sourceSha256'];s=s.replace('`'+prior+'`','`'+x['reassessment20261116']['sourceSha256']+'`')
+# Earlier purpose-reset draft hash may differ from historical descriptor; replace explicit current052section hashes.
+import re
+for x in d['requirements']:
+ if x['ownerTask']=='052':
+  start=s.index('### '+x['id']+' — Passed');end=s.find('\n### ',start+1);end=len(s) if end<0 else end
+  seg=s[start:end];seg=re.sub(r'(Evidence: `tasks/052/TASK-052-REASSESSMENT-20261116.md` SHA-256 `)[0-9a-f]{64}',lambda m:m[1]+x['reassessment20261116']['sourceSha256'],seg);s=s[:start]+seg+s[end:]
+p.write_text(s);shutil.copyfile(p,r/'target/quality-task-054/release-assessment.md')
+with (r/'tasks/054/TASK-054-RESULTS.md').open('a') as f:f.write('\nTask052final validation now passes and its task status isdone. The former upstream stop is resolved;054returns toin-progressfor its already authorized final-source evidence reconciliation. This does not accept the product or complete the roadmap.\n')
+shutil.copyfile('/tmp/pqc052-purpose-close.py',e/'closure-controller.py.txt')
+print('Recorded052review→done;054blocked→in-progress. Final-source revalidation next.')

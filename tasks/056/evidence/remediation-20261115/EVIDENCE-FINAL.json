@@ -1,0 +1,233 @@
+{
+  "status": "Complete:five authorized recommendation repairs",
+  "at": "2026-11-15T01:12:19.055568+00:00",
+  "head": "f07d782cd68cfac95d93585d5ace049f590160d4",
+  "source": {
+    "crates/pqc_scan_core/src/recommendation.rs": "8f5f1e06441cf474f10101121eb3331402dc97da0ea2bb79ebea43db83f26ac6",
+    "crates/pqc_scan_report/src/japanese.rs": "6e53a3a325f2269fd837cd5b06b5ef819c0a2bb81d984c7a08d13cb854db6daa",
+    "crates/pqc_scan_core/tests/recommendation056.rs": "d270480f34e00384014a9065a6017379e6eaa0672c81c89bb754693f29e9ea53",
+    "crates/pqc_scan_report/tests/recommendation056.rs": "82d6c448a44f732feb5d605c4499dc28d9d0b5bb8d5ec6b177eec14bfaaeceb7",
+    "docs/user/REPORTS.md": "2f808bc124360ab2efde21bdb810d1810c25121cb1e29b0a4de3ec51b4a20cf6",
+    "docs/user/REPORTS.ja.md": "39d512b0c9648ea0482c66432539abf4993d42b5414b237e60d0c191342c423a",
+    "tasks/056/TASK-056-FOLLOWUP.md": "c93c030eb66cefea7f054c5471961e80fd0f833ec76d9225b831febe8b61ec78"
+  },
+  "baselineChangedFiles": [
+    "crates/pqc_scan_core/src/recommendation.rs",
+    "crates/pqc_scan_report/src/japanese.rs",
+    "docs/user/REPORTS.ja.md",
+    "docs/user/REPORTS.md"
+  ],
+  "finalNativeSourceMatches": true,
+  "r1ApplicabilityDelta": [
+    "crates/pqc_scan_report/tests/recommendation056.rs"
+  ],
+  "testTempPathChangeOnly": true,
+  "finalCommands": [
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/056/evidence/remediation-20261115/compare.py.txt"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"probe\": {\"correct\": 1531, \"incorrect\": 0, \"unassessed\": 0}, \"optional-probe\": {\"correct\": 1531, \"incorrect\": 0, \"unassessed\": 0}, \"pipeline\": {\"correct\": 16, \"incorrect\": 0, \"unassessed\": 0}, \"optional-pipeline\": {\"correct\": 16, \"incorrect\": 0, \"unassessed\": 0}, \"recommendationPayloads\": {\"before\": 38, \"after\": 39, \"changed\": 6, \"interpretation\": \"The additional distinct payload separates unknown Java from an observed older version. Original labels/measurements remain unchanged. Guidance content repairs are assessed separately from routing agreement.\"}}\n",
+      "stderr": ""
+    }
+  ],
+  "preservedTasks": {
+    "tasks/052/task.yaml": "1891601068002ddd5627d385e617885c93a672f94449b8253eaa6c7e9e409b09",
+    "tasks/053/task.yaml": "4ed707facfe69ba3cb4af678f8a89933786b534cc1ad4fae050ddb2be1fe236c",
+    "tasks/056/task.yaml": "d65c3c0d9d583efcfeea9195551b98dcad8a980ba76c4e1666aff47541bff209"
+  },
+  "allHistoricalBaselineFilesPreservedExceptFourAuthorizedProductDocFiles": true,
+  "reviewers": {
+    "implementation": "/root/task056_implementation_review:accepted",
+    "test": "/root/task056_test_review:accepted"
+  },
+  "nativeChecks": "native-r1/COMMANDS.json + native-r2/COMMANDS.json; all0",
+  "workspace": {
+    "passed": 554,
+    "failed": 0,
+    "ignored": 3
+  },
+  "judgmentComparison": "COMPARISON-SUMMARY.json default/allfeatures1531+16 match; no gold changed",
+  "toolHashesMatchPriorMeasurement": {
+    "recordedAt": "2026-11-14T22:17:42.903935+00:00",
+    "tools": [
+      {
+        "binary": "/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/rustc",
+        "sha256": "34a8f7034eeb844189a3c36ebb3fe36c2193fdb47b60028eb7f9392cb1f62484",
+        "command": [
+          "/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/rustc",
+          "-vV"
+        ],
+        "exitCode": 0,
+        "stdout": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+        "stderr": ""
+      },
+      {
+        "binary": "/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/cargo",
+        "sha256": "2be8a4e73901a99470d15b793e5ee814005c3b9ebbd3815ccbf9cf0f292238e7",
+        "command": [
+          "/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/cargo",
+          "--version"
+        ],
+        "exitCode": 0,
+        "stdout": "cargo 1.93.1 (083ac5135 2025-12-15)\n",
+        "stderr": ""
+      },
+      {
+        "binary": "/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/clippy-driver",
+        "sha256": "1825b12644084b879d4cc43c20a95f750929796ad7b30a444cc54e570cf4de28",
+        "command": [
+          "/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/clippy-driver",
+          "--version"
+        ],
+        "exitCode": 0,
+        "stdout": "clippy 0.1.93 (01f6ddf758 2026-02-11)\n",
+        "stderr": ""
+      },
+      {
+        "binary": "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+        "sha256": "81f3e43043ccf6feab8d50bf6b3b6181f265295bffd46cf5092077f938c4fc52",
+        "command": [
+          "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+          "--version"
+        ],
+        "exitCode": 0,
+        "stdout": "Python 3.12.7\n",
+        "stderr": ""
+      }
+    ],
+    "executionBindings": "native-r6/ENVIRONMENT.json and python-r6/ENVIRONMENT.json bind these exact installed tool paths. Registry caches were readonly/offline; Cargo.lock is in native-r6/SOURCE.json."
+  },
+  "browserTool": {
+    "version": "Google Chrome 157.0.8103.51",
+    "binary": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "sha256": "c9a0f292a25c3771f1895ec3397d2cbbee3ce07ce967acd35f34a38978b4aacd",
+    "hashTiming": "Recorded after browser acceptance; version rechecked equal. Browser flags/profile/actual runtime observations are in browser-r2/RESULT.json."
+  },
+  "browserResult": "browser-r2/RESULT.json; six screenshots viewed and limitations disclosed in BROWSER-INSPECTION.json",
+  "artifacts": {
+    "BASELINE.json": "f16b915c29ff4c9fb15b54288b1b3b36b0e286c297974b359f18728575b32668",
+    "BROWSER-INSPECTION.json": "ec42c39bcc001aae93a089fac7f2773bd2202082363a1036c1d0d14f46f18113",
+    "CHANGED-ACTION-PAYLOADS.json": "5ffe932cf7ad1f3a834e333fe64db3916cbcf877954c02a2bb7071a53f5b7582",
+    "COMPARISON-SUMMARY.json": "25a397d1fc31d2cb1bb35ca634bd39401ab8027778e00b79bc8db0f66fe698c3",
+    "COMPATIBILITY.json": "05ef2e9806d5887f5f4f2e176ac1c08c14ef9d04fe1786f297ec7020664ad3f9",
+    "CONTENT-REVIEW.json": "934e6b23d7460ea7c4cc078dcb4d1056ba5b5a9fd95446058cf7a1c414e95ea9",
+    "FORMAT-CORRECTION.json": "39c75bdc3979832dd8611f5ccac8cfd08337f6206a61fc8b4950d3ff853d8e7a",
+    "IMPLEMENTATION.diff": "2c5f2ea30619f328c60875d345b40e487a655c3623308940f0ea99d72943a2b2",
+    "PREEXISTING.diff": "9805255a90cdc514c5f3118944d78417e216e07caaedf8064fadd02f497b9d7f",
+    "RENDERED-PARITY.json": "98b1577837705c45f36d3816f6ac9fb4cb43006dc324e0389ea2aa6e794fe6a0",
+    "REVIEW-SOURCE-v1.json": "81d5ee7d1be963a65289ceedf6683f803c51d39b18606fbe1321a5a0d657a664",
+    "REVIEW-SOURCE.json": "7e4aeef262a376e9ce515e5e8e0a9e917f82ef6fa82d705958bc68071930677e",
+    "SOURCES.json": "a74aedc3ff7d630d225d7093663d730c9d06f1993579980bb2203edbe442e9c4",
+    "browser-check-r2.mjs.txt": "4381a29532fd0c85ee3e1acdeb8553ec82c7e594e41c52ea7c9e7c10d69c976d",
+    "browser-check.mjs.txt": "81de56144100578c09ad0d8aa39dbeee86c5a258833acee743cba207698ce6f6",
+    "browser-r1/FAILURE.json": "7e6a6a5133298cdeb7b64757a7968e890a3f5d120042af21ffac758b69c158da",
+    "browser-r1/chrome.log": "f13c33f6197f6f44bbc7d1bebb3341624a8280b98ceea5976f85ea5333b19b1b",
+    "browser-r1/en-desktop.png": "ecd2d82995b13934e77c18a8191e98011b95afbc96d9ae70ebd448e64f531329",
+    "browser-r2/RESULT.json": "d9b49800e4c5fd020d06b7e6abcc23739d5709f063792113ad113eaad3cfcd4b",
+    "browser-r2/chrome.log": "d1db3eda46c2f96d20cf29c85bf243c4fcc012ad061d45f2e625f3961a2b3f50",
+    "browser-r2/en-desktop.png": "ecd2d82995b13934e77c18a8191e98011b95afbc96d9ae70ebd448e64f531329",
+    "browser-r2/en-key-guidance.png": "461c280f43f74b8115a54c8bcf5a266b1c354a796b339c45b626f00e24ef3191",
+    "browser-r2/en-keyboard.json": "7a55581f3a2bc145bbc7b8c5cf5709f113551fe5f7a3a83495ccaed8f21fef3a",
+    "browser-r2/en-mobile.png": "2324194ae865cd5375c7adf992b533e4ff3983e6a3c6d9eba8bd891d02a31490",
+    "browser-r2/ja-desktop.png": "12b97e94e3d0a1de8c26e2b5bf6974d31aa691138a4915132939a72c02c5a72e",
+    "browser-r2/ja-key-guidance.png": "35cd593b1369d53649208352e86a19bac4771a1315df91d9e4adcb940f2399ca",
+    "browser-r2/ja-keyboard.json": "7a55581f3a2bc145bbc7b8c5cf5709f113551fe5f7a3a83495ccaed8f21fef3a",
+    "browser-r2/ja-mobile.png": "9a01da19f3aec094d40b69d16ce66487937f68b44cb56d605470bbe4a1548c43",
+    "compare.py.txt": "eefaf985144a26a5dc2214ffa91d70a0c0d56394581e89a98eabc94eb9e35dd7",
+    "native-r1/COMMANDS.json": "b4fe335fe664079821230dff513a03e5bc819b77189f726f728208fd4e8c891c",
+    "native-r1/COMPLETION.json": "1faced98618ec2b0e5cb8c06ada0d68b03787a2afa61e63b4fb0201aaa3cde5d",
+    "native-r1/ENVIRONMENT.json": "a1a705d2edd8f99773b92b719921da7b650dec73200014f94613ae29ac950a7a",
+    "native-r1/POLICY.sb": "1399fe4d7e95704b77c0f6ce268b17ecc90d53de5ef3de4ffadeac7a6ded3ee4",
+    "native-r1/SNAPSHOT.json": "924794aaf0aa44805e536f909ea2149da7e85de6faa7adc1915dc9bcdd31e87d",
+    "native-r1/SOURCE.json": "95ea80167ee5bdd397755cd31e9f469298dd8dfc89a791ae09a4272a6e473fd1",
+    "native-r1/build-BINARIES.json": "9cd6b6c55a2e094e08c44a47115a9439a324d013155c8abfbd01ad124fe3c94d",
+    "native-r1/build.log": "5a75695cb251de396ae11080ec0e72d406e88a6839a063113abbbeaeebde422e",
+    "native-r1/clippy-BINARIES.json": "b00417efc8b69017d9b0efd6146544a34477f59316c5aa2ffc13e0a71f2cb6ae",
+    "native-r1/clippy.log": "07609ad7834be46c65496b3fe8e42e9b0aaec7a23c5c3c13df16bfeec09ceb8d",
+    "native-r1/core-regression-BINARIES.json": "4b901e1b63d6a1645bc07080a68d4aff03ff7e50d7963d7d82b0b7625a050df2",
+    "native-r1/core-regression.log": "e43f3b6d9c78f59757f90da6814d9d1f370affb2dc3619c57fdf3c64ea1b7ed3",
+    "native-r1/optional-clippy-BINARIES.json": "d09bbd7be06b10371d80f751689d0d10e90807f5a4db626db3f5ffe554048e92",
+    "native-r1/optional-clippy.log": "037aa556b381fff7f9891524afcc22cc0cac5530f5631d579bcb6885cb38de32",
+    "native-r1/optional-pipeline-BINARIES.json": "d09bbd7be06b10371d80f751689d0d10e90807f5a4db626db3f5ffe554048e92",
+    "native-r1/optional-pipeline-OBSERVATIONS.json": "63ff70675da1a69a45cac3c3ade20b8afc5e33493e7482cf31d3f6d86f0d94e3",
+    "native-r1/optional-pipeline.log": "566d4d1bf4b4b53e57db57d10798e6daf74e4af0b0cfaa079bbf041c4acaf1c2",
+    "native-r1/optional-probe-BINARIES.json": "04d9f538b6ca425f2cca9386ecd6e8e9b3cb84b0d31daa134cf12e1ef6dffe60",
+    "native-r1/optional-probe-OBSERVATIONS.json": "6eaa2105ea593b9456efc35ddde3a635b8d118b614e0519a53025d13e60a8eed",
+    "native-r1/optional-probe.log": "8fcd943ceb4cf5259e0338af2fc97a288de257e93c57c7dcbb75d2f916ed253b",
+    "native-r1/pipeline-BINARIES.json": "f13e58003ce8ccab8a3ba1b0e54a3eb4fcc1952831cd83fb96924bcdcc55cab2",
+    "native-r1/pipeline-OBSERVATIONS.json": "e9995c5ffc35ec3f3f60c55f046c0e00813765176686eaddc086cd068b36e28f",
+    "native-r1/pipeline.log": "52a028caae35c3f2674046f0e2b89ff479dac74afff9f703ba42b0efee80bc97",
+    "native-r1/probe-BINARIES.json": "08aef4382a52677c6a30b26594b68476bd846c32841910537a2f3a7490acce58",
+    "native-r1/probe-OBSERVATIONS.json": "6eaa2105ea593b9456efc35ddde3a635b8d118b614e0519a53025d13e60a8eed",
+    "native-r1/probe.log": "63b6ec0ed2b580b14454e03e7177304d4bf24a7c8986e4ba4b2f0b2c688b522b",
+    "native-r1/rendered-reports/en/report.html": "e7c688f902c0a17d6a67b8b3bf491215c0f9584c5ad052ae94c19c382b8da086",
+    "native-r1/rendered-reports/en/report.json": "1d5e1a6e78cae595cb1e75d4574278df7d5ca5076d60a0598657b44c36ae56c9",
+    "native-r1/rendered-reports/en/report.md": "90f67d068304f1c2ab87e0f87f27900b31e5b9dc5e7592565fccbb5a33aacd5e",
+    "native-r1/rendered-reports/en/report.sarif": "047c829c6dbfb46f7e3f198b9a8e5cda2fcff62053b4e393fcda4b6f4cf581d0",
+    "native-r1/rendered-reports/ja/report.html": "ad119577afa97bda65d9fb7cc30345bbf674a15e4b2aa9713e6e31959481f4d8",
+    "native-r1/rendered-reports/ja/report.json": "1d5e1a6e78cae595cb1e75d4574278df7d5ca5076d60a0598657b44c36ae56c9",
+    "native-r1/rendered-reports/ja/report.md": "7e35250db604e5ffa5fdd8b55603f372dfa4e85ab0e34d0f21d99636f42f11e0",
+    "native-r1/rendered-reports/ja/report.sarif": "047c829c6dbfb46f7e3f198b9a8e5cda2fcff62053b4e393fcda4b6f4cf581d0",
+    "native-r1/report-regression-BINARIES.json": "78362e2493f6432ee7b2e72ed3616ed884fed2008adac3abfcd9cc18bece241f",
+    "native-r1/report-regression.log": "d3eac3129a45d3d72843a5381a7d2e589041b985e3210d55dd817a743f5c4257",
+    "native-r1/workspace-BINARIES.json": "b00417efc8b69017d9b0efd6146544a34477f59316c5aa2ffc13e0a71f2cb6ae",
+    "native-r1/workspace.log": "cc494f71aa79a2b16e824a33cd7182f7d1bb471b72ac695030a99483f9ff54af",
+    "native-r2/COMMANDS.json": "bfac8f69846a1d6548b997f35ffa8bc383bbae0da6c01d97b2da9907daffeedc",
+    "native-r2/COMPLETION.json": "1faced98618ec2b0e5cb8c06ada0d68b03787a2afa61e63b4fb0201aaa3cde5d",
+    "native-r2/ENVIRONMENT.json": "364f4e6b7a5cf7d331a03e87303843a219e81a2a74563953e176ea0a1c4e2b86",
+    "native-r2/POLICY.sb": "7e439390566e9da445197d9c709877221cf2cfe62d9df614c371e4206c3394b9",
+    "native-r2/SNAPSHOT.json": "b26b3fa8e4d34ae66cbae394c82a15bbd8340345405d7abfda4856475b73a0ec",
+    "native-r2/SOURCE.json": "c632495d7e64454119c55b0a3e7b95678c0697566b7f7ebab6ff4bbdf7b6110d",
+    "native-r2/clippy-BINARIES.json": "b620259e5f60593a02f8fde5066999f593d8c768d4aa87811ce0a9896ab98e1f",
+    "native-r2/clippy.log": "12428f69853c18d83dbca4b6420686b5f79f8fe90576763b1c5e540c55092413",
+    "native-r2/rendered-reports/en/report.html": "e7c688f902c0a17d6a67b8b3bf491215c0f9584c5ad052ae94c19c382b8da086",
+    "native-r2/rendered-reports/en/report.json": "1d5e1a6e78cae595cb1e75d4574278df7d5ca5076d60a0598657b44c36ae56c9",
+    "native-r2/rendered-reports/en/report.md": "90f67d068304f1c2ab87e0f87f27900b31e5b9dc5e7592565fccbb5a33aacd5e",
+    "native-r2/rendered-reports/en/report.sarif": "047c829c6dbfb46f7e3f198b9a8e5cda2fcff62053b4e393fcda4b6f4cf581d0",
+    "native-r2/rendered-reports/ja/report.html": "ad119577afa97bda65d9fb7cc30345bbf674a15e4b2aa9713e6e31959481f4d8",
+    "native-r2/rendered-reports/ja/report.json": "1d5e1a6e78cae595cb1e75d4574278df7d5ca5076d60a0598657b44c36ae56c9",
+    "native-r2/rendered-reports/ja/report.md": "7e35250db604e5ffa5fdd8b55603f372dfa4e85ab0e34d0f21d99636f42f11e0",
+    "native-r2/rendered-reports/ja/report.sarif": "047c829c6dbfb46f7e3f198b9a8e5cda2fcff62053b4e393fcda4b6f4cf581d0",
+    "native-r2/report-regression-BINARIES.json": "0f9cbc235e476b1ebe039cdf8fd79298e326e179c0baab5c29d7e4c398bca284",
+    "native-r2/report-regression.log": "fe1e741d8ced4585dd9b697dba4f80249f8e4d8bc4cb83b224e33220f495a655",
+    "native-r2/workspace-BINARIES.json": "b620259e5f60593a02f8fde5066999f593d8c768d4aa87811ce0a9896ab98e1f",
+    "native-r2/workspace.log": "9f19b0fb464a3ba3e38fc9b7bacaa65cef37534a05bb9a56fb2eef2132035fac",
+    "optional-pipeline-COMPARISON.json": "605d80368fdab8d8814c2b43764a974e379fb04cd543b5bbb04d71b8270f5445",
+    "optional-probe-COMPARISON.json": "46f4dd9dcfd71b0ba1389e129d55ff66fff879e1bb1d2d961df3424214f89e39",
+    "pipeline-COMPARISON.json": "605d80368fdab8d8814c2b43764a974e379fb04cd543b5bbb04d71b8270f5445",
+    "probe-COMPARISON.json": "46f4dd9dcfd71b0ba1389e129d55ff66fff879e1bb1d2d961df3424214f89e39",
+    "red-r1/COMMANDS.json": "f987e35ef6ea4a9c6d9a5f785a1b6397fc465d2478893973a093e44f9d78dea1",
+    "red-r1/ENVIRONMENT.json": "2afc93109524efdffa009954e6df2bd5381361971520a63333dfdd24e22d6417",
+    "red-r1/POLICY.sb": "309df934584a309be8cfccf236daec9fc8edcc7c9539d00118060310d74fde7c",
+    "red-r1/SNAPSHOT.json": "950d1e468ae23bf4f27080ead80404d4358cfc1b84b0988673ebcbbf3a608554",
+    "red-r1/SOURCE.json": "e1d2ad9bf54c5b153b39f2bdec1796c392f4bf8a57511675c2d03d77939f354a",
+    "red-r1/regression-BINARIES.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "red-r1/regression.log": "d982d7792fee7305c3d75d9fe10b09c5e4b9049bcb58770da6f8abe0e9e6b127",
+    "red-report-r1/COMMANDS.json": "a18441a25f757d4eb868c91f1b2af1b3caf5f9c6b9249c10c9039aa1b30699c5",
+    "red-report-r1/ENVIRONMENT.json": "e4a8e3bf65ca78ec6028a2d9402d5240c993ec5808e09e2dd4476e46ffec7ae9",
+    "red-report-r1/POLICY.sb": "4b55cccd95e593cbe08040bd2ec22f3d54d82fa38c1d9390499159041b68b98a",
+    "red-report-r1/SNAPSHOT.json": "950d1e468ae23bf4f27080ead80404d4358cfc1b84b0988673ebcbbf3a608554",
+    "red-report-r1/SOURCE.json": "e1d2ad9bf54c5b153b39f2bdec1796c392f4bf8a57511675c2d03d77939f354a",
+    "red-report-r1/regression-BINARIES.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "red-report-r1/regression.log": "13d45c8cc570185ab6c3fce5642fb84f87315d5379836056f2865be1edce4e5e",
+    "run-final-tests.py.txt": "d70aba5be42170520abf0e961e75dee4f7ac14db1535ae242ef9dd6cb2cd95b1",
+    "run-native.py.txt": "1980faabf914f33ca8bc181dccb7a7d8536c99eb80a84526c703ff80cee15d98",
+    "run-red-report.py.txt": "08d5cb6673da888f0c1ee0fe0cd0389bc4a51296c46504ff49a23a97d4094f98",
+    "run-red.py.txt": "79aad4d4c797ac7d7f684e7d3a61c5d43fbaea66266a9de6f9bc3e348e32bad8"
+  }
+}

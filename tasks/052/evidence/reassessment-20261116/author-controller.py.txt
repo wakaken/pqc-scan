@@ -1,0 +1,131 @@
+from pathlib import Path
+import json,hashlib,subprocess,shutil,collections,re
+r=Path.cwd();out=r/'tasks/052/evidence/reassessment-20261116';out.mkdir(exist_ok=True);H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();origdir=Path('/Users/waka/development/pqc/pqc-scan/tasks/052/evidence/assessment-20261115');historical=r/'tasks/052/evidence/assessment-20261115';copied=[]
+for src in origdir.rglob('*'):
+ if not src.is_file() or src.is_symlink():continue
+ dst=historical/src.relative_to(origdir)
+ if dst.exists():assert H(dst)==H(src),str(dst)
+ else:dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dst);copied.append({'path':str(dst.relative_to(r)),'sha256':H(dst)})
+(out/'HISTORICAL-EVIDENCE-RECOVERY.json').write_text(json.dumps({'source':str(origdir),'copyOnlyMissing':True,'existingBytesAllMatch':True,'copied':copied},indent=2)+'\n')
+old=json.load(open(historical/'outputs/best-practices-assessment.json'));follow=json.load(open(r/'tasks/054/evidence/assessment-20261116/TASK052-CRITERION-FOLLOWUP-20261116.json'));updates={c['key']:c for c in follow['criteria']};official=json.load(open(historical/'official/CRITERIA-EXTRACT.json'));off={c['level']+'.'+c['id']:c for c in official};refs=json.load(open(historical/'outputs/EVIDENCE-REFERENCES.json'));oldsrc=json.load(open(historical/'SOURCE.json'));source=[]
+for f,v in oldsrc['files'].items():source.append({'path':f,'originalSha256':v,'currentSha256':H(r/f) if (r/f).is_file() else None,'currentPath':('docs/agent/REVIEWER.md' if f=='prompts/REVIEWER.md' else f)})
+(out/'SOURCE-APPLICABILITY.json').write_text(json.dumps(source,indent=2)+'\n')
+# Current references resolve to current paths; old paths remain in original evidence.
+refs['AGENT']=[('docs/agent/REVIEWER.md' if p=='prompts/REVIEWER.md' else p) for p in refs['AGENT']];refs['SC']=['tasks/052/evidence/reassessment-20261116/scorecard/stdout.json','tasks/052/evidence/reassessment-20261116/scorecard/RUN.json'];refs['FACTS']=['tasks/054/evidence/assessment-20261116/'+x for x in ['PRIMARY-RESPONDER-DECISION-20261116.json','BACKUP-RESPONDER-FACT-20261116.json','UNAVAILABILITY-POLICY-DECISION-20261116.json','VULNERABILITY-REPORT-HISTORY-20261116.json','EXTERNAL-FEEDBACK-HISTORY-20261116.json','TWO-FACTOR-STATUS-CORRECTION-20261116.json','RECOVERY-CODE-CUSTODY-20261116.json','SECURE-DESIGN-KNOWLEDGE-CONFIRMATION-20261116.json','COMMON-ERRORS-KNOWLEDGE-CONFIRMATION-20261116.json','SECURITY-FIX-DISCLOSURE-POLICY-20261116.json','SECURITY-NOTIFICATIONS-EMAIL-20261116.json']];refs['REBUILD']=['tasks/060/evidence/rebuild-20261115/rebuild-comparison.json','tasks/060/evidence/rebuild-20261115/native-r1/SOURCE.json','tasks/060/TASK-060-REVIEWS.md','tasks/052/evidence/reassessment-20261116/TASK060-SOURCE-REUSE.json'];refs['LIVE']=['tasks/052/evidence/reassessment-20261116/github-readonly/COMMANDS.json']
+# Old reference families with paths not present are explicitly unresolved, not invented.
+resolved={k:[{'path':p,'exists':(r/p).is_file(),'sha256':H(r/p) if (r/p).is_file() else None} for p in ps] for k,ps in refs.items()}
+(out/'EVIDENCE-REFERENCES.json').write_text(json.dumps(resolved,indent=2)+'\n')
+rows=[]
+for c in old['criteria']:
+ n=dict(c);u=updates[c['key']];n['originalStatus']=c['status'];n['originalAssessment']=c['assessment'];n['scope']='Current054/052source plus separately dated remote/live/historical measurements; no universal product guarantee.';n['evidenceApplicability']=[{'key':k,'references':resolved[k]} for k in c['evidence'] if k in resolved]
+ if u['followupStatus']:
+  n['status']=u['followupStatus'];n['assessment']=u['followupAssessment'];n['followupEvidence']=u['followupEvidence'];n['owner']='Sole primary maintainer, explicitly confirmed in current chat'
+ else:n['assessment']=c['assessment']+' Historical conclusion carried forward only within its recorded scope; source/reference comparisons are explicit and missing final measurements are not passed.'
+ if n['key']=='2.contributors_unassociated':n.update(status='Unmet',assessment='Maintainer confirms a solo project/no backup; Git history has142commits under one author name. No second unassociated significant contributor is established; this is recorded as a current missing practice, not a badge exemption.',followupEvidence=['tasks/054/evidence/assessment-20261116/BACKUP-RESPONDER-FACT-20261116.json'])
+ if n['key']=='1.build_repeatable':n.update(status='Met',assessment='Later060actually independently builds static/network twice from clean source/target/HOME/Cargo roots. Both raw binary pairs match under recorded same-host/compiler/SDK/path/epoch. All199declared source bindings match this checkout. This is bounded repeatability, not multi-party certification.',evidence=c['evidence']+['REBUILD'])
+ if n['key']=='2.build_reproducible':n.update(status='Partial',assessment='060replaces the old archive-only limitation with actual independent clean-build equality;199source bindings match. Multiple-party reproduction/public MetURL remains unverified, so the strongerGoldcondition is not automatically passed.',evidence=c['evidence']+['REBUILD'])
+ if n['key'] in ['1.test_statement_coverage80','2.test_statement_coverage90']:n['assessment']='044measures line/region and LLVM branch counters; these are not source statement coverage. Later tests and hostedCI do not establish current statement denominators. Required valid statement measurement is missing; no threshold substitution.'
+ if n['key']=='2.test_branch_coverage80':n['assessment']='044historical all-feature LLVMbranch result is4077/5534, below80% for that recorded population. Later code/source/coverage infrastructure changed; no current final-target branch measurement has been run here. Preserve historical Failed, current Unknown.'
+ if n['key'] in ['1.build_standard_variables','1.build_preserve_debug']:n['assessment']='060records actual compiler/path-remapping flags and exact binary copies. It does not independently test all relevant user-supplied flag pass-through or requested debug preservation. Current scripts show no new strip action, but source inspection alone is not a complete conformance matrix.'
+ rows.append(n)
+assert len(rows)==len({c['key'] for c in rows})==145
+unknown=[c for c in rows if c['status']=='Unknown'];bycounts=dict(collections.Counter(c['status'] for c in rows));target={'head':subprocess.check_output(['git','rev-parse','HEAD']).decode().strip(),'baseline':'BASELINE.json','dirtyScope':'Preexisting053/054 plus approvedSECURITY.md and052reassessment metadata; original measurements unchanged.'}
+score=json.load(open(out/'scorecard/stdout.json'));scoreRun=json.load(open(out/'scorecard/RUN.json'));assert scoreRun['exitCode']==0 and len(score['checks'])==18
+outputs=out/'outputs';outputs.mkdir(exist_ok=True)
+assessment={'observedDateJst':'2026-11-16','scope':'Unfinished source-bound052reassessment; no badge submission or original criterion changes','officialCatalogueCommit':old['officialCatalogueCommit'],'source':target,'countsByStatus':bycounts,'application':old['application'],'criteria':rows,'complete':False,'knownUnmetDistinctFromUnknown':True};(outputs/'best-practices-assessment.json').write_text(json.dumps(assessment,ensure_ascii=False,indent=2)+'\n')
+header=['# Task052 Best Practices reassessment','','Unfinished. All145original criteria are reconciled below without applying for a badge. Met labels are bounded to cited source/measurement scope; Partial/Unknown/Unmet are not passes. Historical evidence, current local draft, remote source and live settings remain separate.','','Catalogue:OpenSSF Best Practices badge contributors, pinned commit `'+old['officialCatalogueCommit']+'`; original definitions/license metadata remain in preserved official receipts.','','Target local HEAD `'+target['head']+'` plus dirty baseline. Current Scorecard measured remote `'+score['repo']['commit']+'`,18checks,4.3/10. No scan of local draft source or refreshed detector score is inferred.','','Counts:'+json.dumps(bycounts)+'. These are assessment labels, not a badge percentage.','','| Criterion | Result | Evidence/scope and remaining work |','|---|---|---|']
+for c in rows:header.append('| ['+c['key']+']('+c['officialUrl']+') | '+c['status']+' | '+c['assessment'].replace('|','/')+' |')
+(outputs/'best-practices.md').write_text('\n'.join(header)+'\n');(outputs/'scorecard.json').write_bytes((out/'scorecard/stdout.json').read_bytes());(outputs/'scorecard-assessment.json').write_text(json.dumps({'tool':scoreRun['toolVersion'],'target':score['repo'],'score':score['score'],'checks':score['checks'],'scope':scoreRun['limitations'],'notDetectionAccuracy':True,'run':'../scorecard/RUN.json'},indent=2)+'\n')
+controls={'observedDateJst':'2026-11-16','repository':'wakaken/pqc-scan','scope':'Read-only current controls plus separately authorized earlier reporting/notification changes; no settings changed during reassessment.','raw':{p.stem:json.loads(p.read_text()) for p in (out/'github-readonly').glob('*.json') if p.name!='COMMANDS.json'},'commandLedger':'../github-readonly/COMMANDS.json','priorTransportFailure':'Original GitHub connector administration endpoints403 retained; existingghGETfallback succeeds. No new scopes granted.','localPublicPolicy':'SECURITY.md updated locally only; not pushed/published.'};(outputs/'github-controls.json').write_text(json.dumps(controls,indent=2)+'\n')
+(outputs/'security-process.md').write_text('''# Security process reassessment
+
+Unfinished against original Q6-07. Sole primary maintainer/no backup, best-effort
+latest verified0.2.x, no fixed deadline/backport guarantee, experimental probes.
+Private reporting is enabled; Security alerts and existing requested-email delivery
+preferences are verified in dated browser evidence. Actual intake/email arrival
+is not tested. The maintainer confirms zero external vulnerability reports ever;
+initial response criterion is conditional N/A on its permitted six-month empty
+population, not100% compliance. The approved absence, investigation and advisory/
+release-note disclosure procedure is in local bilingual SECURITY.md. The current
+public remote policy remains older; publication was not authorized.
+
+The original reporting/setting observations remain preserved as historical. New
+MFA/source/account data and developer self-attestations are in054receipts. This
+reassessment does not invent historical incidents, demonstrate every product
+control, or require a new incident exercise as a substitute for missing facts.
+Complete internal known-vulnerability/fix/credit populations remain unverified;
+no external report does not mean no internal/dependency finding. The user was
+asked whether additional unrecorded history exists. Network notice flags and
+publication hold remain. No actual advisory, external message or release created.
+''')
+(outputs/'process-review.md').write_text('''# Development and maintenance reassessment
+
+Unfinished against original Q6-05/Q6-09. The145-row assessment separates written
+policy, actual evidence, source applicability and recommendations. Current human
+ownership, absent backup, MFA and two developer-knowledge criteria are established
+within their stated evidence basis. Solo-maintainer continuity/bus-factor and the
+absence of a second independent significant contributor are assessed Unmet.
+AIreview stages do not establish non-author human review or its full denominator.
+
+All199task060source bindings match current bytes: the later clean-source rebuilds
+establish actual binary repeatability, beyond old archive reuse. The stronger
+multiple-partyGoldcondition is still Partial. Task063supersedes the four historical
+dependency findings for its dated DB/closure, with0/4/4notice flags; it is not
+current remoteScorecard vulnerability clearance. The new remoteScorecard sees48
+OSVidentifiers without file/package attribution; no48shipped product-flaw claim.
+
+The remaining Unknown criteria are listed in REMAINING.json with sources and
+concrete required evidence. Statement coverage cannot be replaced by line/region
+rates; the old branch result remains historical and below80%. Full fix/review
+cohorts, all requested build flag/debug behavior and obsoleteAPI coverage remain
+unverified. No product fix, new tools, changed thresholds, setting mutation,
+badge application, commit, push, PR, merge, tag or publication occurred.
+''')
+remaining={'unknownCriteria':[{'key':c['key'],'reason':c['assessment']} for c in unknown],'count':len(unknown),'publication':'Current public SECURITY policy is not synchronized; local draft ready but no publication authorization.','assessmentValidity':'Original required truth/measurements remain incomplete. Known Unmet practices are measured findings, not a reason to invent improvements or narrow criteria.','pendingMaintainerQuestion':'Whether any internal vulnerability/fix records exist outside GitHub/repository documents.','nextSteps':['Inspect complete available vulnerability/fix/review populations; obtain missing off-repository truth only where necessary.','Use bounded existing-tool checks for flag/debug and coverage gaps only after confirming original-criterion applicability; no tool installation or invented statement measurement.','Keep strongerGoldmultiple-party/review and known continuity findings distinct from later060bounded repeats.','Do not mark052done; final assessment and054source-applicability/self-scan remain unfinished.']};(out/'REMAINING.json').write_text(json.dumps(remaining,indent=2)+'\n')
+# Required target names have no prior bytes in this checkout; preserve any that exist.
+targetdir=r/'target/quality-task-052';targetdir.mkdir(exist_ok=True,parents=True)
+for name in ['best-practices.md','github-controls.json','process-review.md','scorecard.json','security-process.md']:
+ dst=targetdir/name
+ if dst.exists() and H(dst)!=H(outputs/name):
+  before=out/'prior-target';before.mkdir(exist_ok=True);shutil.copyfile(dst,before/name)
+ shutil.copyfile(outputs/name,dst)
+(out/'SOURCE-FINAL.json').write_text(json.dumps({'head':target['head'],'files':{p:H(r/p) for p in sorted(set(oldsrc['files'])|{'docs/agent/REVIEWER.md'}) if (r/p).is_file()},'note':'Current source bytes, not retroactive changes to the prior052source receipt.'},indent=2)+'\n');shutil.copyfile('/tmp/pqc052-reassessment-author.py',out/'author-controller.py.txt')
+(r/'tasks/052/TASK-052-REASSESSMENT-20261116.md').write_text('''# Task052 reassessment —2026-11-16
+
+Status:unfinished. Explicit maintainer authorization resumed052from blocked to
+in-progress, preserving original Q6-05–09, definitions and all old outputs.
+Current source is5425f85aa870ede6d3e5bdd8723b9a52c57701d7 plus the baseline dirty
+source. New evidence is under evidence/reassessment-20261116/; the five original
+requested output names have byte-identical current target copies.
+
+A fresh fixed Scorecard5.6.0run exits0:18checks,4.3/10, remote54cc42a. It does
+not measure the local corrected lock/draft. Public remote findings48OSVIDs have
+no path attribution; do not label them current shipped flaws. Current read-only
+GitHub requests all exit0. Existing OAuth scopes were not changed. No settings,
+external messages, badges, publication or Git operations were performed.
+
+All145criterion rows have current references and explicit inherited/new scope.
+Later060actual independent clean rebuilds replace the former archive-only gap;
+all199declared source bytes match.034matched/11changed/1missing historical source
+reference is tracked separately; the old reviewer-template path is retained only
+as history and resolves to current docs/agent/REVIEWER.md in new references.
+The old8.7MB052raw evidence missing from this checkout was recovered byte-for-byte
+from the explicitly permitted original checkout without overwriting existing files.
+
+Current maintainer/backup, channel/notification, MFA/recovery and two human
+knowledge confirmations are incorporated from054receipts. No backup and no
+second significant contributor are known limitations, not Unknown facts.
+Required historical/technical truth remains missing; REMAINING.json lists it.
+New policies are local drafts only. The source review cannot replace statement/
+branch measurement, full fix/review populations or all build-variable/debug tests.
+No Rust implementation/tests, shared scripts, executable examples, packaging or
+CIbehavior changed. Automatic two-stage reviewers therefore do not apply under
+current review policy; no identity started. Required task-specific assessment
+checks are recorded separately and do not establish complete evaluation validity.
+
+The132/13initial054triage counts are historical. This resumed assessment is a
+separate dated snapshot with its own counts.052and054remain unfinished; the
+v0.3roadmap and product/publication acceptance remain separate. No original
+criterion is weakened or moved elsewhere to claim done.
+''')
+print(json.dumps({'criteria':len(rows),'counts':bycounts,'unknowns':len(unknown),'recoveredRawFiles':len(copied),'outputs':5,'state':'unfinished'}))

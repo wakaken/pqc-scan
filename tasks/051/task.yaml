@@ -2,8 +2,8 @@ id: '051'
 title: 依存脆弱性・供給元・ライセンスを評価する
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Evaluator
 phase: '5'
 description: 工具とDBを固定し、配布variantごとの依存・notice・未解決事項を追跡する。
 quality_alias: QAM-09の依存部分
@@ -48,3 +48,33 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+execution_record:
+  baseline: f07d782cd68cfac95d93585d5ace049f590160d4
+  branch: codex/task051-dependency-supply-chain-review
+  plan: tasks/051/TASK-051-PLAN.md
+  scope: Evaluate the three declared macOS arm64 distribution variants without changing dependencies, publication policy or scanner behavior.
+  evidence: tasks/051/evidence/dependency-20261114/
+  results: tasks/051/TASK-051-RESULTS.md
+  reviews: tasks/051/TASK-051-REVIEWS.md
+  reviewers:
+    implementation:
+      id: /root/dependency051_implementation_review
+      source_binding: tasks/051/evidence/dependency-20261114/final-run/RUN.json
+      outcome: Accepted after fixing partial notice omission; no further actionable findings.
+    test:
+      id: /root/dependency051_test_review
+      source_binding: tasks/051/evidence/dependency-20261114/final-run/RUN.json
+      outcome: Accepted; 21 tests and independent raw metadata, findings, DB and artifact checks establish evaluation adequacy.
+final_acceptance:
+  date: '2026-11-14'
+  source_head: f07d782cd68cfac95d93585d5ace049f590160d4
+  source_scope: Baseline plus task-051 executable/test changes bound in final-run/RUN.json; final prose and task-state reconciliation do not change measured inputs.
+  requirements:
+    Q6-03: Recorded exact versions/features/sources, tool and DB acquisition identities/hashes, four findings, proposed actions and explicitly unapproved exceptions with no invented expiry.
+    Q6-04: Mapped all three macOS arm64 variants and every selected dependency to exact license/notice bytes; retained all publication review flags without accepting unresolved issues.
+  outputs:
+  - target/quality-task-051/dependency-review.json
+  - target/quality-task-051/license-review.md
+  verification: Distribution Python suite 21 passed with no skips; offline evaluation exit 0; raw audit exit 1 correctly retained as findings; final-source/notice/DB/output bindings and both independent reviews accepted.
+  product_quality: Findings require action. No vulnerability, maintenance, license or source-provenance issue was waived, and no publication approval was granted.
+  limitations: RustSec snapshot assessment and resolved normal/build metadata for the three declared variants; no exploitability proof, registry yanked checks, exact linkage, cross-build or new platform certification.

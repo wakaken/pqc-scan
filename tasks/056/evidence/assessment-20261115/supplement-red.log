@@ -1,0 +1,24 @@
+test_empty_gold_has_no_manufactured_perfect_rate (test_judgment.JudgmentTests.test_empty_gold_has_no_manufactured_perfect_rate) ... ok
+test_equal_wrong_unknown_and_characterization_have_separate_denominators (test_judgment.JudgmentTests.test_equal_wrong_unknown_and_characterization_have_separate_denominators) ... ok
+test_float_transport_tolerance_does_not_accept_wrong_judgment (test_judgment.JudgmentTests.test_float_transport_tolerance_does_not_accept_wrong_judgment) ... ok
+test_missing_duplicate_and_extra_observations_are_rejected (test_judgment.JudgmentTests.test_missing_duplicate_and_extra_observations_are_rejected) ... ok
+test_missing_property_is_incorrect_not_null_equivalence (test_judgment.JudgmentTests.test_missing_property_is_incorrect_not_null_equivalence) ... ok
+test_absence_and_exclusion_do_not_treat_present_null_as_absent (test_judgment.SupplementalControls.test_absence_and_exclusion_do_not_treat_present_null_as_absent) ... ERROR
+test_booleans_and_numbers_are_distinct_and_invalid_assertions_fail_closed (test_judgment.SupplementalControls.test_booleans_and_numbers_are_distinct_and_invalid_assertions_fail_closed) ... ok
+
+======================================================================
+ERROR: test_absence_and_exclusion_do_not_treat_present_null_as_absent (test_judgment.SupplementalControls.test_absence_and_exclusion_do_not_treat_present_null_as_absent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/test_judgment.py", line 33, in test_absence_and_exclusion_do_not_treat_present_null_as_absent
+    self.assertEqual(judgment.compare(oracle,[{'id':'a','actual':{'actions':['review']}}])['correct'],1)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/judgment.py", line 45, in compare
+    else:raise ValueError('Unsupported oracle operation')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Unsupported oracle operation
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+FAILED (errors=1)

@@ -2,8 +2,8 @@ id: '056'
 title: 暗号分類・Severity・Confidence・移行推奨を独立に検証する
 type: improvement
 priority: high
-status: pending
-owner: Planner Agent
+status: done
+owner: Main agent (Evaluator)
 phase: '2'
 description: 検出一致とは別の正解表を用い、用途・規格・来歴・保証の強さと推奨内容を検証する。
 quality_alias: QAM-02の判断検証部分を独立
@@ -77,3 +77,47 @@ planning_record:
   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+execution_record:
+  date: '2026-11-15'
+  plan: tasks/056/TASK-056-PLAN.md
+  baseline: tasks/056/evidence/assessment-20261115/BASELINE.json
+  authorization: User authorized remaining task056 validation with0.45 unchanged; task052 remains unfinished and task053 remains interrupted.
+  transitions:
+  - from: pending
+    to: planned
+    reason: Task042 completion, original nine criteria, local profile and normative reference scope inspected.
+  - from: planned
+    to: in-progress
+    reason: Froze source-cited oracle before product observations and added measurement adapter plus independent evaluator controls.
+  threshold_review:
+    maintainer_response: After requesting analysis, the maintainer explicitly selected preserving0.45 while continuing validation on2026-11-15; no claim of calibration or optimality was approved.
+    analysis: tasks/056/THRESHOLD-ANALYSIS.md
+    study: tasks/056/evidence/assessment-20261115/THRESHOLD-STUDY.json
+    recommendation: Preserve legacy behavior as an explicit compatibility requirement; keep empirical optimality unassessed. A policy redesign remains outside scope.
+    product_change: false
+  required_reviews:
+    implementation: /root/task056_implementation_review; accepted after scoped P2 fix confirmation; see TASK-056-REVIEWS.md.
+    test: /root/task056_test_review; accepted; no actionable or material coverage findings.
+  validation_continuation:
+    source_head: f07d782cd68cfac95d93585d5ace049f590160d4
+    source_manifest: tasks/056/evidence/assessment-20261115/REVIEW-SOURCE.json
+    native: tasks/056/evidence/assessment-20261115/native-r6
+    python: tasks/056/evidence/assessment-20261115/python-r6
+    canonical_property_cases: 1531
+    cli_fact_cases: 16
+    property_mismatches: 0
+    semantic_payloads: 38
+    semantic_findings: 5 distinct findings in6 payloads; no product fix authorized.
+    outputs: tasks/056/evidence/assessment-20261115/outputs-r6
+    completion: All nine original criteria verified; both reviews accepted; final source and artifact checks passed. Five measured product findings remain unfixed within validation-only scope.
+  completion_record:
+    date: '2026-11-15'
+    results: tasks/056/TASK-056-RESULTS.md
+    reviews: tasks/056/TASK-056-REVIEWS.md
+    evidence: tasks/056/evidence/assessment-20261115/EVIDENCE-FINAL.json
+    decision: Evaluation complete; property agreement is distinct from measured recommendation quality.
+    transition:
+      from: review
+      to: done
+      reason: All original deliverables and nine criteria validated with final-source bindings and accepted independent implementation/test reviews.
+    preserved_states: Task052 unfinished; task053 interrupted; neither resumed.

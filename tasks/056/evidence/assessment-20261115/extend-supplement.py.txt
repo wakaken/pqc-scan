@@ -1,0 +1,21 @@
+from pathlib import Path
+import json,datetime,hashlib,copy
+p=Path('tests/quality/judgment/supplement.json');old=p.read_bytes();e=Path('tasks/056/evidence/assessment-20261115/supplement-20261115');(e/'SUPPLEMENT-v1.json').write_bytes(old);d=json.loads(old);rows=[]
+def check(path,value,op='equals'):return dict(pointer=path,operation=op,expected=value)
+def add(id,kind,input,checks,req):rows.append(dict(id='supp2-'+id,kind=kind,input=input,checks=checks,requirements=req,sources=['LOCAL026'],basis='published_local_policy_not_deployment_assurance'))
+# Public local policy: classical violations high; quantum vulnerable medium, high only
+# when long-lived confidentiality is explicitly true; other values retain review.
+for alg,params,normal in [('RSA',{'key_bits':'2048'},'medium'),('RSA',{'key_bits':'1024'},'high'),('ML-KEM-768',{},'review'),('UNKNOWN_SYNTHETIC',{},'review')]:
+ for flag in [None,False,True]:
+  asset={'tag':'priority','kind':'algorithm','attributes':{'namespace':'named','identifier':alg,'parameters':params},'relations':[]}
+  high='high' if normal=='high' or normal=='medium' and flag is True else normal
+  add(f'priority-{alg}-{params.get("key_bits","none")}-{flag}','inventory',{'assets':[asset],'context':{'version':1,'long_lived_confidentiality':flag}},[check('/asset_policies/0/priority',high)],['Q3-02','Q3-08'])
+# Every declared prerequisite can independently prevent the bounded local Pass.
+all_support={k:True for k in ['runtime','provider','parameters','peer','protocol','jose','verifiers','pki']}
+for use,alg in [('jwt','ML-DSA-65'),('pki','ML-DSA-65'),('key_establishment','ML-KEM-768')]:
+ keys=['runtime','provider','parameters','peer','protocol']+(['jose','verifiers'] if use=='jwt' else ['pki'] if use=='pki' else [])
+ for key in keys:
+  for value in [None,False]:
+   support=dict(all_support);support[key]=value
+   add(f'support-{use}-{key}-{value}','policy',{'identifier':alg,'parameters':{},'context':{'version':1,'use_case':use,'support':support}},[check('/policy/decision','indeterminate')],['Q3-01','Q3-10'])
+d['version']=2;d['previousSha256']=hashlib.sha256(old).hexdigest();d['frozenAt']=datetime.datetime.now(datetime.timezone.utc).isoformat();d['cases']+=rows;p.write_text(json.dumps(d,indent=2)+'\n');(e/'FREEZE-v2.json').write_text(json.dumps({'frozenAt':d['frozenAt'],'path':str(p),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'newCases':len(rows),'totalCases':len(d['cases']),'reason':'Complete local priority and each independently missing/false runtime/provider/peer/encoding prerequisite before new observations; previous source-based expectations and original results preserved.'},indent=2)+'\n');print('added',len(rows))

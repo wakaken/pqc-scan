@@ -25,9 +25,12 @@ map source paths to archive members in `DEPENDENCY-LICENSES.json`. The source
 manifest is retained for provenance; the original `texts/` tree is not duplicated
 inside the binary archive.
 
-The all-probes variant additionally includes exact-version upstream license texts
+The network variant additionally includes exact-version upstream license texts
 for russh0.65.1,russh-util0.52.0,russh-cryptovec0.62.0 and delegate0.13.5.
 Registry checksums, recorded VCS revisions and file hashes bind each fallback.
-russh-util retains a publication-review flag because its archive VCS record is
-dirty=true; the pinned revision identifies the license source, not an identical
-archive source tree. Existing four objc-family review flags are unchanged.
+Task 063 resolved russh-util's source-difference flag: the checksum-bound archive's
+three Rust files match its recorded upstream revision, and Cargo.toml.orig differs
+only by the package version (0.51.0 to 0.52.0). Its normalized dependency declarations
+match the upstream workspace. The archived dirty=true record is retained; source
+comparison does not imply publication approval. The four objc-family review flags
+remain unresolved. See [the follow-up record](../../tasks/063/TASK-063-RESULTS.md).

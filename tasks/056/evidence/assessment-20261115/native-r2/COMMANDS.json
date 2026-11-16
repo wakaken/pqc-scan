@@ -1,0 +1,71 @@
+[
+  {
+    "name": "probe",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "pqc_scan_core",
+      "--test",
+      "quality056",
+      "--",
+      "--nocapture"
+    ],
+    "startedAt": "2026-11-14T21:30:43.466809+00:00",
+    "exitCode": 0,
+    "seconds": 15.712320375001582,
+    "log": "probe.log"
+  },
+  {
+    "name": "workspace",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--offline"
+    ],
+    "startedAt": "2026-11-14T21:30:59.202177+00:00",
+    "exitCode": 0,
+    "seconds": 115.7815802499972,
+    "log": "workspace.log"
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--offline",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "startedAt": "2026-11-14T21:32:54.985553+00:00",
+    "exitCode": 0,
+    "seconds": 15.26962820799963,
+    "log": "clippy.log"
+  },
+  {
+    "name": "python",
+    "command": [
+      "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/quality",
+      "-p",
+      "test_*.py",
+      "-v"
+    ],
+    "startedAt": "2026-11-14T21:33:10.255821+00:00",
+    "exitCode": 1,
+    "seconds": 5.231981541997811,
+    "log": "python.log"
+  }
+]

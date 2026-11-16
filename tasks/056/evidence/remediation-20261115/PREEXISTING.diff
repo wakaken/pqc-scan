@@ -1,0 +1,946 @@
+diff --git a/.github/workflows/release.yml b/.github/workflows/release.yml
+index 97fbe1d..558cdad 100644
+--- a/.github/workflows/release.yml
++++ b/.github/workflows/release.yml
+@@ -48,20 +48,13 @@ jobs:
+             gh attestation verify "$archive" --repo "$SOURCE_REPOSITORY" --signer-workflow "$SOURCE_REPOSITORY/.github/workflows/release.yml" --source-digest "$SOURCE_COMMIT"
+           done
+           cp "$ATTESTATION_BUNDLE" target/task-038/static-first/build-provenance.jsonl
+-      - name: Build and prepare combined probe snapshot
++      - name: Build and prepare network diagnostics snapshot
+         run: |
+-          cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh --target-dir target/probe-release-build
+-          python3 scripts/package-release.py --binary target/probe-release-build/release/pqc-scan --variant combined-probes --out-dir target/task-038/combined-first
+-          python3 scripts/package-release.py --binary target/probe-release-build/release/pqc-scan --variant combined-probes --out-dir target/task-038/combined-second
+-          cmp target/task-038/combined-first/*.tar.gz target/task-038/combined-second/*.tar.gz
+-          python3 tests/distribution/check-install.py target/task-038/combined-first/*.tar.gz --out-dir target/task-038/combined-install
+-      - name: Build and prepare all probes including SSH KEX
+-        run: |
+-          cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/all-probes-release-build
+-          python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all-first
+-          python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all-second
+-          cmp target/task-038/all-first/*.tar.gz target/task-038/all-second/*.tar.gz
+-          python3 tests/distribution/check-install.py target/task-038/all-first/*.tar.gz --out-dir target/task-038/all-install
++          cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/network-release-build
++          python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network-first
++          python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network-second
++          cmp target/task-038/network-first/*.tar.gz target/task-038/network-second/*.tar.gz
++          python3 tests/distribution/check-install.py target/task-038/network-first/*.tar.gz --out-dir target/task-038/network-install
+       - name: Retain preparation artifacts
+         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+         with:
+diff --git a/Cargo.lock b/Cargo.lock
+index 19c31ee..f96f985 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -123,9 +123,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "anyhow"
+-version = "1.0.102"
++version = "1.0.103"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
++checksum = "2a4385e2e34eb35d6b3efe798b9eb88096925d87726c0798709bf56d9ed84af3"
+ 
+ [[package]]
+ name = "argon2"
+@@ -535,9 +535,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "crossbeam-epoch"
+-version = "0.9.18"
++version = "0.9.20"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5b82ac4a3c2ca9c3460964f020e1402edd5753411d7737aa39c3714ad1b5420e"
++checksum = "2d6914041f254d6e9176c01941b21115dcfb7089e55135a35411081bd106ef3f"
+ dependencies = [
+  "crossbeam-utils",
+ ]
+@@ -1402,6 +1402,12 @@ version = "0.2.191"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
+ 
++[[package]]
++name = "libyaml-rs"
++version = "0.3.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "2e126dda6f34391ab7b444f9922055facc83c07a910da3eb16f1e4d9c45dc777"
++
+ [[package]]
+ name = "litemap"
+ version = "0.8.3"
+@@ -1912,11 +1918,11 @@ dependencies = [
+  "regex",
+  "serde",
+  "serde_json",
+- "serde_yaml",
+  "sha2 0.10.9",
+  "socket2",
+  "thiserror",
+  "walkdir",
++ "yaml_serde",
+ ]
+ 
+ [[package]]
+@@ -1933,7 +1939,6 @@ dependencies = [
+  "roxmltree",
+  "serde",
+  "serde_json",
+- "serde_yaml",
+  "sha2 0.10.9",
+  "syn 3.0.10",
+  "toml",
+@@ -1946,6 +1951,7 @@ dependencies = [
+  "tree-sitter-rust",
+  "tree-sitter-typescript",
+  "x509-parser",
++ "yaml_serde",
+ ]
+ 
+ [[package]]
+@@ -2005,9 +2011,9 @@ dependencies = [
+  "regex",
+  "serde",
+  "serde_json",
+- "serde_yaml",
+  "sha2 0.10.9",
+  "walkdir",
++ "yaml_serde",
+ ]
+ 
+ [[package]]
+@@ -2486,19 +2492,6 @@ dependencies = [
+  "serde",
+ ]
+ 
+-[[package]]
+-name = "serde_yaml"
+-version = "0.9.34+deprecated"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
+-dependencies = [
+- "indexmap",
+- "itoa",
+- "ryu",
+- "serde",
+- "unsafe-libyaml",
+-]
+-
+ [[package]]
+ name = "serdect"
+ version = "0.4.3"
+@@ -2806,9 +2799,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "tokio"
+-version = "1.49.0"
++version = "1.51.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "72a2903cd7736441aac9df9d7688bd0ce48edccaadf181c3b90be801e81d3d86"
++checksum = "a13e32eacd0222f9658be2ccbd83b718bfd9bfb0d54b5921913c184cb86124a5"
+ dependencies = [
+  "bytes",
+  "libc",
+@@ -2821,13 +2814,13 @@ dependencies = [
+ 
+ [[package]]
+ name = "tokio-macros"
+-version = "2.6.1"
++version = "2.7.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5c55a2eff8b69ce66c84f85e1da1c233edc36ceb85a2058d11b0d6a3c7e7569c"
++checksum = "78773a2a397f451582ce068015985c33193cf6dea8b74d2a639fe457b2f07b0e"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+- "syn 2.0.117",
++ "syn 3.0.10",
+ ]
+ 
+ [[package]]
+@@ -2976,12 +2969,6 @@ dependencies = [
+  "ctutils",
+ ]
+ 
+-[[package]]
+-name = "unsafe-libyaml"
+-version = "0.2.11"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "673aac59facbab8a9007c7f6108d11f63b603f7cabff99fabf650fea5c32b861"
+-
+ [[package]]
+ name = "untrusted"
+ version = "0.7.1"
+@@ -3403,6 +3390,19 @@ dependencies = [
+  "time",
+ ]
+ 
++[[package]]
++name = "yaml_serde"
++version = "0.10.7"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "33b729a08a9a6be689bbad3e2bf8015926db54b6622cc89c3a5f7dc174b9e918"
++dependencies = [
++ "indexmap",
++ "itoa",
++ "libyaml-rs",
++ "ryu",
++ "serde",
++]
++
+ [[package]]
+ name = "yasna"
+ version = "0.5.2"
+diff --git a/Cargo.toml b/Cargo.toml
+index e0a0110..be95208 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -17,12 +17,13 @@ license = "MIT"
+ authors = ["pqc-scan contributors"]
+ 
+ [workspace.dependencies]
+-anyhow = "1.0.102"
++anyhow = "1.0.103"
+ thiserror = "2.0.18"
+ clap = { version = "4.5.60", features = ["derive"] }
+ serde = { version = "1.0.228", features = ["derive"] }
+ serde_json = "1.0.149"
+-serde_yaml = "0.9.34"
++# Preserve the serde_yaml import/API while using the maintained YAML organization fork.
++serde_yaml = { package = "yaml_serde", version = "=0.10.7" }
+ regex = "1.12.3"
+ aho-corasick = "1.1.4"
+ rayon = "1.11.0"
+diff --git a/README.ja.md b/README.ja.md
+index 72ebe87..b8cc893 100644
+--- a/README.ja.md
++++ b/README.ja.md
+@@ -71,6 +71,8 @@ cd /path/to/pqc-scan
+ cargo install --locked --path crates/pqc_scan_cli
+ ```
+ 
++この開発版で準備する配布物は、`static`（ローカルの静的スキャン）と`network`（静的スキャン＋TLS・SSHの接続先診断）の2構成です。`network`は実験的機能を含む未公開の構成です。内部の機能スイッチは、個別ビルド用に残しています。
++
+ アーカイブの検証と導入方法は[インストールガイド](docs/user/DISTRIBUTION.ja.md)を参照してください。v0.2の配布バイナリはmacOS Apple Silicon向けの静的版です。[GitHub Releases](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0)から取得できます。probe同梱版は公開前の確認が残っています。
+ 
+ インストール後も、このリポジトリの `rules` ディレクトリを参照できる場所に残してください。
+diff --git a/README.md b/README.md
+index 0e7e2d9..56825f0 100644
+--- a/README.md
++++ b/README.md
+@@ -70,6 +70,8 @@ cd /path/to/pqc-scan
+ cargo install --locked --path crates/pqc_scan_cli
+ ```
+ 
++This development checkout prepares two archive configurations: `static` (local scanning) and `network` (static scanning plus TLS/SSH diagnostics). `network` remains experimental and unpublished. Internal feature switches remain available for custom source builds.
++
+ For archive verification and installation, see the [installation guide](docs/user/DISTRIBUTION.md). The v0.2 binary is the static macOS Apple Silicon variant, available from [GitHub Releases](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0); probe bundles are not yet cleared for public distribution.
+ 
+ Keep the checkout's `rules` directory available after installation. The binary does not bundle that directory; use an absolute `--rules-dir` path when scanning another project.
+diff --git a/crates/pqc_scan_probe_ssh/Cargo.toml b/crates/pqc_scan_probe_ssh/Cargo.toml
+index 6dc88a9..2523003 100644
+--- a/crates/pqc_scan_probe_ssh/Cargo.toml
++++ b/crates/pqc_scan_probe_ssh/Cargo.toml
+@@ -14,7 +14,7 @@ runtime = ["pqc_scan_core/probe-transport", "dep:getrandom"]
+ libc = { version = "0.2", optional = true }
+ aws-lc-rs = { version = "=1.18.0", default-features = false, features = ["aws-lc-sys", "prebuilt-nasm"], optional = true }
+ russh = { version = "=0.65.1", default-features = false, features = ["aws-lc-rs"], optional = true }
+-tokio = { version = "=1.49.0", features = ["rt", "time", "io-util"], optional = true }
++tokio = { version = "=1.51.6", features = ["rt", "time", "io-util"], optional = true }
+ anyhow = { workspace = true, optional = true }
+ serde.workspace = true
+ pqc_scan_core = { path = "../pqc_scan_core" }
+diff --git a/crates/pqc_scan_rules/tests/validation.rs b/crates/pqc_scan_rules/tests/validation.rs
+index 9a927f5..337fd47 100644
+--- a/crates/pqc_scan_rules/tests/validation.rs
++++ b/crates/pqc_scan_rules/tests/validation.rs
+@@ -16,6 +16,30 @@ impl Drop for Pack {
+         let _ = fs::remove_dir_all(&self.0);
+     }
+ }
++
++#[test]
++fn yaml_aliases_multiline_and_yaml12_strings_preserve_custom_rule_values() {
++    let p = Pack::new("yaml063");
++    fs::write(p.0.join("rule.yml"), "id: CUSTOM_YAML\nkind: treesitter\ncategory: custom\nseverity: low\nrisk: quantum-uncertain\nconfidence: 0.5\nmigration_hint: &text '日本語: review'\ndescription: *text\npattern: |-\n  first\n  second\nscope: on\n").unwrap();
++    let set = RuleSet::load_from_dir(&p.0).unwrap();
++    let rule = set.get("CUSTOM_YAML").unwrap();
++    assert_eq!(rule.kind, pqc_scan_rules::RuleKind::TreeSitter);
++    assert_eq!(rule.scope, "on");
++    assert_eq!(rule.pattern, "first\nsecond");
++    assert_eq!(rule.migration_hint, "日本語: review");
++    assert_eq!(rule.description.as_deref(), Some("日本語: review"));
++}
++
++#[test]
++fn duplicate_keys_and_multiple_rule_documents_remain_rejected() {
++    let p = Pack::new("yaml063-rejected");
++    p.write("CUSTOM", "0.5", "code");
++    let original = fs::read_to_string(p.0.join("rule.yml")).unwrap();
++    for suffix in ["confidence: 0.8\n", "---\n{}\n"] {
++        fs::write(p.0.join("rule.yml"), format!("{original}{suffix}")).unwrap();
++        assert!(RuleSet::load_from_dir(&p.0).is_err());
++    }
++}
+ #[test]
+ fn blank_ids_are_rejected_without_trimming_valid_custom_ids() {
+     let p = Pack::new("ids");
+diff --git a/docs/architecture/DEPENDENCY-PROVENANCE.md b/docs/architecture/DEPENDENCY-PROVENANCE.md
+index 135e1b8..a6b897e 100644
+--- a/docs/architecture/DEPENDENCY-PROVENANCE.md
++++ b/docs/architecture/DEPENDENCY-PROVENANCE.md
+@@ -101,7 +101,12 @@ paths/package names and findings from unrelated detectors retain their own polic
+ 
+ The TOML runtime parser is pinned `toml=0.8.23` (parse only, MIT/Apache-2.0); locked support
+ crates are toml_datetime 0.6.11, serde_spanned 0.6.9, toml_edit 0.22.27 and winnow
+-0.7.15. Existing serde/serde_json/serde_yaml are reused. Build-time package fetching
++0.7.15. Existing serde/serde_json are reused. Task 063 replaces the archived YAML
++implementation with yaml_serde 0.10.7 under the existing serde_yaml Cargo alias;
++its maintained low-level parser is libyaml-rs 0.3.0. This addresses maintenance
++status, not a claim that translated unsafe parser code has become memory-safe.
++Compatibility comparisons and regression evidence are in
++[task 063](../../tasks/063/TASK-063-RESULTS.md). Build-time package fetching
+ is distinct from scanner runtime; no runtime network resolution was added.
+ 
+ Source semantics were checked against the official [Cargo dependency reference](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html),
+diff --git a/docs/roadmap/v0.3/REQUIREMENTS.md b/docs/roadmap/v0.3/REQUIREMENTS.md
+index 2872177..328fde0 100644
+--- a/docs/roadmap/v0.3/REQUIREMENTS.md
++++ b/docs/roadmap/v0.3/REQUIREMENTS.md
+@@ -40,6 +40,17 @@ E44は[到達率と追加検証の適用判断](../../../tasks/044/TASK-044-RESU
+ 
+ E55は[検査範囲と統計の集計](../../../tasks/055/TASK-055-RESULTS.md)です。試験用に制御した8状態、内容が既知の9ファイル、74入力×5検出器、境界試験でQ2-01〜08を検証しました。母数が不明であることと検査の不完全性を保持し、製品全体の網羅性には一般化しません。
+ 
++E51 is the [dependency and license assessment](../../../tasks/051/TASK-051-RESULTS.md):
++a pinned cargo-audit/RustSec snapshot, exact archive/notice bindings for all three
++declared macOS arm64 variants, four findings, retained publication review flags
++and two accepted independent review stages. No unresolved issue was accepted.
++
++E63 is the authorized [dependency remediation follow-up](../../../tasks/063/TASK-063-RESULTS.md):
++the same RustSec snapshot now reports zero findings after compatible updates and
++a validated maintained YAML replacement. Current notice flags are 0/4/4; the
++russh-util investigation is resolved and the four objc2 conditions remain on hold
++by explicit maintainer choice. E51 remains the original historical assessment.
++
+ ## Q1: 検出精度
+ 
+ | 要求項目 | 既存実装と証拠 | 不足 | 担当タスク | 受入条件 | 必須成果物（予定） |
+@@ -127,8 +138,8 @@ E55は[検査範囲と統計の集計](../../../tasks/055/TASK-055-RESULTS.md)
+ |---|---|---|---|---|---|
+ | Q6-01 CI品質・PRと定期/手動実行の分担 | EC/E41: 既存の4ジョブと報告追加 | 追加測定の費用・頻度・実行枠 | [053](../../../tasks/053/task.yaml) | 既存のジョブを再利用し、PRの軽量検証と高コスト測定を分け、全軸の証拠を保存 | `ci-measurement-plan.md` |
+ | Q6-02 テスト品質・評価器の独立レビュー | E41: 実装/試験妥当性の二段階レビュー | 追加検証の実測とレビューの結合 | [053](../../../tasks/053/task.yaml) | 最終ソースに対応する結果を保存し、ログ上の成功だけで試験妥当性を合格にしない | `test-evidence-index.json` |
+-| Q6-03 依存関係・脆弱性管理 | E41: ロックファイルを固定。最新の脆弱性監査は未実行 | ツール・脆弱性情報データベースの取得と定期確認 | [051](../../../tasks/051/task.yaml) | 版/機能構成/供給元とデータベースの取得日・ハッシュ、脆弱性・未保守・例外期限・対処を記録 | `dependency-review.json` |
+-| Q6-04 ライセンス管理・告知事項 | ED/ER: 既存の告知事項と5件の要確認事項 | 公開前の調査と許容判断 | [051](../../../tasks/051/task.yaml) | 全ての配布構成の依存とライセンス・告知事項を対応付け、未解決事項を許容する場合は維持者の判断を残す | `license-review.md` |
++| Q6-03 依存関係・脆弱性管理 | E51: pinned tool/DB and all three variant inventories assessed; four findings retained | Remediation and any future exception require explicit assessment/maintainer decisions; no waiver granted | [051](../../../tasks/051/task.yaml) | 版/機能構成/供給元とデータベースの取得日・ハッシュ、脆弱性・未保守・例外期限・対処を記録 | `dependency-review.json` |
++| Q6-04 ライセンス管理・告知事項 | E51: exact license/notice bytes mapped to all variants; existing flags 0/4/5 retained | Publication reviews remain open; only a maintainer may accept unresolved conditions | [051](../../../tasks/051/task.yaml) | 全ての配布構成の依存とライセンス・告知事項を対応付け、未解決事項を許容する場合は維持者の判断を残す | `license-review.md` |
+ | Q6-05 開発プロセス・コードレビュー・保守担当者向け文書 | EG/EU: エージェントの作業手順等あり | 貢献・変更・保守手順の実態確認 | [052](../../../tasks/052/task.yaml) | Best Practicesの各項目に根拠と担当を示し、文書の存在と実行実績を区別 | `process-review.md` |
+ | Q6-06 GitHubのブランチ保護・必須チェック・最小権限 | E41/EC: 読み取り権限を確認。ブランチ保護設定の取得は403 | 管理設定と実効権限の確認 | [052](../../../tasks/052/task.yaml) | 取得できた設定と推奨変更を分け、権限不足は不明（Unknown）。設定変更は別承認 | `github-controls.json` |
+ | Q6-07 セキュリティ報告・脆弱性対応 | EU: SECURITY.mdへの案内あり | 受付・対応・修正版案内の手順確認 | [052](../../../tasks/052/task.yaml) | 公開窓口/対応範囲/担当/連絡経路を確認し、未運用部分を明記 | `security-process.md` |
+diff --git a/docs/roadmap/v0.3/ROADMAP.md b/docs/roadmap/v0.3/ROADMAP.md
+index 1c668bd..ea3e2ad 100644
+--- a/docs/roadmap/v0.3/ROADMAP.md
++++ b/docs/roadmap/v0.3/ROADMAP.md
+@@ -120,3 +120,17 @@ GitHub管理設定、ライセンス等の告知事項の許容判断、公開
+ 049は[TLS/SSHの観測・失敗・認証境界](../../../tasks/049/TASK-049-RESULTS.md)で、元のQ3-06・Q4-08〜12と二段階レビューを確認し、完了（done）としました。固定した接続設定によるTLSの21記録、SSHの生パケットを扱う対向実装の26試験枠、OpenSSHの7試験枠を隔離測定し、実際に交渉されたグループ・検証失敗・未知・認証禁止・上限・中止・後始末を照合しています。RFC9846は[差分対応表](../../../tasks/049/TASK-049-TLS-PROFILE.md)で適用範囲を明示し、全面適合の認定とは区別します。
+ 
+ 050は[性能・再現性の評価](../../../tasks/050/TASK-050-RESULTS.md)で、元のQ5-01〜09と9成果物・二段階レビューを照合して完了（done）としました。6つの測定で成功標本144件・意図的な失敗24ケースを取得し、同じ条件の18比較区分では2倍超過の調査条件に該当せず、条件が異なる72比較区分には比較できない理由を残しています。旧023-v2精度条件の不合格（Failed）と実行固有IDの変化を合格へ読み替えず、キャッシュが温まっていない状態・条件を制御した複数日・Windows等の未実測範囲を明示しました。
++
++Task 051 is done for the [dependency and license evaluation](../../../tasks/051/TASK-051-RESULTS.md)
++against Q6-03/Q6-04, with both independent reviews accepted. The three declared
++macOS arm64 variants map 139/168/271 packages to exact notice bytes. Four RustSec
++findings and the existing 0/4/5 notice-review flags remain explicit; evaluation
++completion does not grant remediation acceptance or publication clearance.
++
++The user-authorized [task 063 follow-up](../../../tasks/063/TASK-063-RESULTS.md)
++remediated those four dependency findings, validated the maintained YAML
++replacement and resolved the russh-util source-difference flag. All three Rust
++configurations and native macOS package/install checks passed, with both review
++stages accepted. Four objc2 notice questions remain: the user selected continued
++probe-publication hold and an unsent upstream clarification draft. Task 051's
++original measurements are preserved; no release or publication was performed.
+diff --git a/docs/user/DISTRIBUTION.ja.md b/docs/user/DISTRIBUTION.ja.md
+index d9bab36..56df26f 100644
+--- a/docs/user/DISTRIBUTION.ja.md
++++ b/docs/user/DISTRIBUTION.ja.md
+@@ -17,15 +17,15 @@ v0.2候補では、macOS arm64向けの3構成すべてでホスト型CI、同
+ | 構成 | 追加コマンド | 公開までの状況 |
+ |---|---|---|
+ | `static` | なし | v0.2の配布対象。ホスト型ビルド来歴を検証する |
+-| `combined-probes` | `probe tls`、`probe ssh` | 技術検証済み。依存パッケージ4件の通知文・再配布条件の確認が残る |
+-| `all-probes` | 上記と `probe ssh-kex` | 技術検証済み。上記4件と、配布ソースの来歴1件の確認が残る |
++| `network`（接続先診断付き） | 静的スキャンに加え、`probe tls`、`probe ssh`、`probe ssh-kex` | 未公開。依存パッケージ4件の通知文・再配布条件の確認が残る |
+ 
+ 確認対象は、[版を固定した通知文の記録](../../third_party/notices/manifest.json)に残しています。
+ 
+ | 依存パッケージ | 該当する構成 | 公開前に行うこと |
+ |---|---|---|
+-| `block2 0.6.2`、`dispatch2 0.3.1`、`objc2-encode 4.1.0`、`objc2 0.6.5` | probe同梱の2構成 | 収集済みの上流文書には、許諾文へのリンクとApple SDK由来部分に関する疑問が記載されている。この版に適用する許諾文の全文と著作権表示を揃え、再配布条件を確認し、根拠と公開判断を記録する |
+-| `russh-util 0.52.0` | `all-probes` | レジストリ配布物のCargo VCS情報が `dirty=true` となっている。記録された上流リビジョンと実際の配布ソースを比較し、差分の由来・通知文を確認して結果を記録する。Apache-2.0本文の同梱だけでは、ソースの一致は証明できない |
++| `block2 0.6.2`、`dispatch2 0.3.1`、`objc2-encode 4.1.0`、`objc2 0.6.5` | `network` | 収集済みの上流文書には、許諾文へのリンクとApple SDK由来部分に関する疑問が記載されている。この版に適用する許諾文の全文と著作権表示を揃え、再配布条件を確認し、根拠と公開判断を記録する |
++
++`russh-util 0.52.0` のソースを比較し、Rustファイル3件は記録された上流リビジョンと一致し、元のマニフェストの差はパッケージの版番号だけであることを確認しました。配布物の `dirty=true` の記録は保持し、Apache-2.0本文も固定リビジョンに対応付けています。この技術的な確認フラグは解消しましたが、公開を許可するものではありません。`network`は、上記4件の通知文確認が残るため公開保留を維持します。[追加調査の記録](../../tasks/063/TASK-063-RESULTS.md)を参照してください。
+ 
+ これらは通知文とソースの由来についての未確認事項です。probeの故障や依存パッケージの違法性が判明したという意味ではありません。根拠を揃えるまでは確認フラグを残します。依存パッケージを差し替えたり更新したりする場合は、機能構成・プロトコル・梱包・導入を再検証してください。
+ 
+@@ -54,7 +54,7 @@ pqc-scan scan /absolute/path/to/authorized/repository --rules-dir /absolute/path
+ ## ローカルアーカイブを準備する
+ 
+ 生成物は未署名・未公開の配布準備用アーカイブです。正式リリースではありません。
+-`static`は実接続probeを含まず、`combined-probes`は`probe-tls,probe-ssh`を有効にします。
++`static`は実接続probeを含まず、`network`は`probe-tls,probe-ssh,probe-ssh-kex`を有効にします。
+ probeは明示コマンドと接続許可が必要です。実行前に同梱の
+ [probeの許可条件と使い方](PROBING.ja.md)を確認してください。ルールは常に`--rules-dir`で指定します。
+ 展開だけではPATHやルール探索の設定は変わりません。
+@@ -62,8 +62,8 @@ probeは明示コマンドと接続許可が必要です。実行前に同梱の
+ ```sh
+ cargo build --locked --release --package pqc_scan_cli
+ python3 scripts/package-release.py --binary target/release/pqc-scan --variant static --out-dir target/task-038/static
+-cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh --target-dir target/probe-release-build
+-python3 scripts/package-release.py --binary target/probe-release-build/release/pqc-scan --variant combined-probes --out-dir target/task-038/combined
++cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/network-release-build
++python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network
+ python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz
+ ```
+ 
+@@ -106,17 +106,22 @@ featureとツールの版を記録します。記録したソースからその
+ 静的版で補完する通知文には、元の著作権表示を含む上流のライセンス全文を同梱します。
+ objc2系4組の上流資料は、ライセンス本文へのリンクとApple SDK由来部分の注意書きです。本文や公開許諾を確認したことにはならないため、`review_required` を残します。[版を固定した資料一覧](../../third_party/notices/README.md)を参照してください。
+ 
+-## SSH KEXを含む構成
++## 接続先診断付きの構成と個別ビルド
++
++新しく準備する配布物は、`static`と`network`の2構成です。従来の`all-probes`は
++`network`へ改名し、`combined-probes`の配布物は新規作成しません。準備コマンドでは
++旧名2つを受け付けませんが、過去のアーカイブの検証・導入は引き続き可能です。
++過去の記録は旧名のまま保持します。前述のv0.2の3構成の検証は、当時の候補についての記録です。
+ 
+-`all-probes`は`probe-tls,probe-ssh,probe-ssh-kex`を有効にします。既存の2構成は維持します。
++内部のCargo featureは個別に残します。ソースからは、例えば
++`--features probe-tls,probe-ssh`だけを選んでビルドできます。これは3つ目の配布構成ではありません。
++`network`にはSSHの提示方式収集と、公開鍵を指定して行うハイブリッド鍵交換の両方を含みます。
+ 
+ ```sh
+-cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/all-probes-release-build
+-python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all
+-python3 tests/distribution/check-install.py target/task-038/all/*.tar.gz --out-dir target/task-038/all-install
++python3 tests/distribution/check-install.py target/task-038/network/*.tar.gz --out-dir target/task-038/network-install
+ ```
+ 
+-依存noticeとprovenanceも同じfeature構成から生成します。インストール検証は`tls`・`ssh`・`ssh-kex`の過不足と公開鍵pinオプションを確認します。既存のobjc2系4件に加え、この構成ではrussh-utilのCargo VCS記録がdirty=trueのため、上流リビジョンと配布ソースの差の公開前確認を残します。固定リビジョンのライセンス原文は同梱します。これは未署名・未公開の技術的な配布準備です。
++依存noticeとprovenanceも同じfeature構成から生成します。インストール検証は`tls`・`ssh`・`ssh-kex`の過不足と公開鍵pinオプションを確認します。既存のobjc2系4件の確認フラグは維持します。russh-utilのソース差分調査は前述のとおり解消しましたが、配布物のdirty=trueの記録は保持します。固定リビジョンのライセンス原文は同梱します。これは未署名・未公開の技術的な配布準備です。
+ 
+ ## ホスト型ビルドの来歴を検証する
+ 
+diff --git a/docs/user/DISTRIBUTION.md b/docs/user/DISTRIBUTION.md
+index 366e7ad..37a3252 100644
+--- a/docs/user/DISTRIBUTION.md
++++ b/docs/user/DISTRIBUTION.md
+@@ -10,7 +10,7 @@ published Release. See the [v0.2 release notes](../releases/v0.2.0.md).
+ 
+ Maintenance is best-effort for the latest verified 0.2.x snapshot. No SLA or
+ older-version backport guarantee is declared. Probes remain experimental;
+-combined/all-probes packages are technical preparation and retain their notice
++the `network` package is technical preparation and retains its notice
+ review flags. Other binary platforms and crates.io publication are outside this
+ release scope. See [security reporting](../../SECURITY.md).
+ 
+@@ -26,16 +26,21 @@ for published assets. The probe bundles below are not part of that release.
+ | Variant | Optional commands | Public distribution status |
+ |---|---|---|
+ | `static` | None | v0.2 distribution target; verify hosted build provenance |
+-| `combined-probes` | `probe tls`, `probe ssh` | Technical validation completed; four dependency notice reviews remain |
+-| `all-probes` | All above plus `probe ssh-kex` | Technical validation completed; those four reviews plus one source-provenance review remain |
++| `network` (network diagnostics included) | `probe tls`, `probe ssh`, `probe ssh-kex`, plus static scanning | Unpublished; four dependency notice reviews remain |
+ 
+ The unresolved dependency checks are recorded in the
+ [exact-version notice manifest](../../third_party/notices/manifest.json):
+ 
+ | Dependency | Affected bundles | What must be checked before publication |
+ |---|---|---|
+-| `block2 0.6.2`, `dispatch2 0.3.1`, `objc2-encode 4.1.0`, `objc2 0.6.5` | Both probe variants | The collected upstream statements link permission texts and raise Apple SDK-derived-work questions. Collect the applicable complete texts/attributions, review the redistribution conditions for these exact versions, and record a supported publication decision. |
+-| `russh-util 0.52.0` | `all-probes` | Its registry archive records `dirty=true` in Cargo VCS metadata. Compare that exact archive with the recorded upstream revision, account for the source differences and their notices, and record the result. The bundled Apache-2.0 text alone does not prove source identity. |
++| `block2 0.6.2`, `dispatch2 0.3.1`, `objc2-encode 4.1.0`, `objc2 0.6.5` | The network variant | The collected upstream statements link permission texts and raise Apple SDK-derived-work questions. Collect the applicable complete texts/attributions, review the redistribution conditions for these exact versions, and record a supported publication decision. |
++
++The `russh-util 0.52.0` source comparison found that all three Rust files match
++the recorded revision and the original manifest differs only in the package
++version. Its `dirty=true` archive record is preserved, and the Apache-2.0 text
++remains bound to that revision. This resolves that technical review flag; it does
++not approve publication. The network variant remain on hold for the four notice
++reviews above. See the [follow-up evidence](../../tasks/063/TASK-063-RESULTS.md).
+ 
+ These are open notice/source-origin reviews, not evidence that a probe is broken
+ or that a dependency is unlawful. Preserve the flags until the checks are
+@@ -75,8 +80,8 @@ and endpoint metadata; review them before sharing.
+ ## Local archive preparation
+ 
+ This produces unsigned, unpublished preparation artifacts, not an official release.
+-The `static` variant has no optional runtime probes. `combined-probes` enables
+-`probe-tls,probe-ssh`; probes require separate explicit commands and authorization.
++The `static` variant has no optional runtime probes. `network` enables
++`probe-tls,probe-ssh,probe-ssh-kex`; probes require separate explicit commands and authorization.
+ Read the bundled [probe authorization and usage guide](PROBING.md) before using
+ optional network commands. Rules are always selected explicitly with `--rules-dir`; unpacking does not change
+ rule discovery or configure your PATH.
+@@ -84,8 +89,8 @@ rule discovery or configure your PATH.
+ ```sh
+ cargo build --locked --release --package pqc_scan_cli
+ python3 scripts/package-release.py --binary target/release/pqc-scan --variant static --out-dir target/task-038/static
+-cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh --target-dir target/probe-release-build
+-python3 scripts/package-release.py --binary target/probe-release-build/release/pqc-scan --variant combined-probes --out-dir target/task-038/combined
++cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/network-release-build
++python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network
+ python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz
+ ```
+ 
+@@ -132,24 +137,29 @@ custom rules. Keep your scan configuration and reports for comparison. Automatic
+ separately as described below; a locally packaged archive has no such attestation
+ by default.
+ 
+-## Variant including SSH KEX
++## Network diagnostics and custom source builds
++
++New archives use exactly two names: `static` and `network`. The former
++`all-probes` distribution is now `network`; `combined-probes` is no longer
++prepared. The preparer rejects both old selectors. Archive verification and
++installation checks still accept historical archives; past records retain their
++original names. The v0.2 three-variant checks above describe that historical candidate.
+ 
+-`all-probes` enables `probe-tls,probe-ssh,probe-ssh-kex`. The existing two variants
+-retain their command surfaces.
++Internal Cargo feature switches remain independent. Custom source builds can
++still select, for example, `--features probe-tls,probe-ssh`; this is not a third
++distribution configuration. `network` includes SSH advertisement collection and
++the separate pinned hybrid SSH key exchange command.
+ 
+ ```sh
+-cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/all-probes-release-build
+-python3 scripts/package-release.py --binary target/all-probes-release-build/release/pqc-scan --variant all-probes --out-dir target/task-038/all
+-python3 tests/distribution/check-install.py target/task-038/all/*.tar.gz --out-dir target/task-038/all-install
++python3 tests/distribution/check-install.py target/task-038/network/*.tar.gz --out-dir target/task-038/network-install
+ ```
+ 
+ Dependency notices and provenance use the same feature set. Installation validation
+ checks exact TLS/SSH/SSH KEX command availability and the public host-key pin option.
+-The four existing objc2-family review flags remain. This variant also flags
+-russh-util: its Cargo archive VCS metadata records dirty=true, so the difference
+-from its recorded upstream revision needs publication review. Full license text
+-from that fixed revision is bundled. This remains unsigned, unpublished technical
+-preparation.
++The four existing objc2-family review flags remain. The russh-util source
++comparison is resolved as described above; its archived dirty=true fact is
++preserved. Full license text from the fixed revision is bundled. This remains
++unsigned, unpublished technical preparation.
+ 
+ ## Verify hosted build identity
+ 
+diff --git a/docs/user/PROBING.ja.md b/docs/user/PROBING.ja.md
+index cda04d7..24305d4 100644
+--- a/docs/user/PROBING.ja.md
++++ b/docs/user/PROBING.ja.md
+@@ -117,4 +117,4 @@ Unixではシンボリックリンクや通常ファイル以外の入力も拒
+ HTMLは結果と理由を先に示し、技術情報は閉じた状態にします。
+ 既存の `probe ssh` は提示方式の収集のままで、従来の出力形式も維持します。
+ 全コマンドが必要なら `probe-tls,probe-ssh,probe-ssh-kex` を有効にしてください。
+-`static`はprobeなし、`combined-probes`はTLS・SSH提示方式、`all-probes`はそれらとSSH KEXを含みます。v0.2候補では3構成の作成と導入を検証済みですが、probe同梱版の公開承認とは別です。
++新しい配布物は`static`（probeなし）と`network`（静的スキャンに加え、TLS・SSH提示方式・SSH KEX）の2構成です。内部のfeatureは個別ビルド用に残します。過去のv0.2候補は3構成でしたが、その検証は`network`の公開承認とは別です。[配布構成と確認事項](DISTRIBUTION.ja.md#release-status)を参照してください。
+diff --git a/docs/user/PROBING.md b/docs/user/PROBING.md
+index 4475e1a..41e078d 100644
+--- a/docs/user/PROBING.md
++++ b/docs/user/PROBING.md
+@@ -138,7 +138,8 @@ folder `./pqc-probe/ssh-kex`. JSON contract:
+ failed/partial observations. HTML presents the result/reason first, with technical
+ details closed. Existing `probe ssh` remains advertisement-only; no existing
+ static/TLS/SSH-offer output format changes. Enable `probe-tls,probe-ssh,probe-ssh-kex`
+-for all three commands. The `static` archive has no probes; `combined-probes` includes TLS and SSH offers;
+-`all-probes` also includes SSH KEX. All three variants have been prepared and
+-installation-tested for the v0.2 candidate; this does not clear the probe bundles
+-for publication.
++for all three commands. New distribution archives use `static` (no probes) and
++`network` (TLS, SSH offers and SSH KEX, plus static scanning). Individual feature
++switches remain available for custom source builds. The historical v0.2 candidate
++used three variants; its validation does not clear `network` for publication.
++See the [distribution guide](DISTRIBUTION.md#release-status).
+diff --git a/scripts/package-release.py b/scripts/package-release.py
+index d679314..2a98565 100644
+--- a/scripts/package-release.py
++++ b/scripts/package-release.py
+@@ -13,6 +13,11 @@ import tarfile
+ import tomllib
+ from urllib.parse import urlsplit, unquote
+ 
++VARIANT_FEATURES = {
++    'static': [],
++    'network': ['probe-tls', 'probe-ssh', 'probe-ssh-kex'],
++}
++
+ 
+ def digest(data):
+     return hashlib.sha256(data).hexdigest()
+@@ -234,11 +239,15 @@ def validate_installed_scan(report):
+         raise ValueError('synthetic finding is attached to the wrong file or line')
+ 
+ 
+-def validate_command_surface(variant, top_help, probe_help):
++def validate_command_surface(variant, top_help, probe_help, *, allow_legacy=False):
+     def names(text):
+         return {line.split()[0] for line in text.splitlines() if line.startswith('  ') and line.split()}
+-    expected = {'static': set(), 'combined-probes': {'tls', 'ssh'},
+-                'all-probes': {'tls', 'ssh', 'ssh-kex'}}[variant]
++    surfaces = {'static': set(), 'network': {'tls', 'ssh', 'ssh-kex'}}
++    if allow_legacy:
++        surfaces.update({'combined-probes': {'tls', 'ssh'}, 'all-probes': surfaces['network']})
++    if variant not in surfaces:
++        raise ValueError('unknown distribution variant; prepare static or network')
++    expected = surfaces[variant]
+     if ('probe' in names(top_help)) != bool(expected):
+         raise ValueError('binary command surface differs from declared package variant')
+     if names(probe_help) & {'tls', 'ssh', 'ssh-kex'} != expected:
+@@ -249,8 +258,9 @@ def prepare(args):
+     root = args.source_root.resolve()
+     binary = args.binary.resolve(strict=True)
+     target = args.target
+-    features = {'static': [], 'combined-probes': ['probe-tls', 'probe-ssh'],
+-                'all-probes': ['probe-tls', 'probe-ssh', 'probe-ssh-kex']}[args.variant]
++    if args.variant not in VARIANT_FEATURES:
++        raise ValueError('unknown distribution variant; prepare static or network')
++    features = VARIANT_FEATURES[args.variant]
+     metadata_command = ['cargo', 'metadata', '--locked', '--offline', '--format-version', '1', '--filter-platform', target]
+     if features:
+         metadata_command += ['--features', ','.join('pqc_scan_cli/'+f for f in features)]
+@@ -330,7 +340,8 @@ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('--verify', type=Path)
+     parser.add_argument('--binary', type=Path)
+-    parser.add_argument('--variant', choices=['static', 'combined-probes', 'all-probes'])
++    parser.add_argument('--variant', choices=list(VARIANT_FEATURES),
++                        help='static: local scanning; network: scanning plus TLS, SSH offers and SSH key exchange')
+     parser.add_argument('--target', default='aarch64-apple-darwin', choices=['aarch64-apple-darwin'])
+     parser.add_argument('--source-root', type=Path, default=Path(__file__).resolve().parents[1])
+     parser.add_argument('--out-dir', type=Path)
+diff --git a/tasks/051/task.yaml b/tasks/051/task.yaml
+index be22213..6c9de71 100644
+--- a/tasks/051/task.yaml
++++ b/tasks/051/task.yaml
+@@ -2,8 +2,8 @@ id: '051'
+ title: 依存脆弱性・供給元・ライセンスを評価する
+ type: improvement
+ priority: high
+-status: pending
+-owner: Planner Agent
++status: done
++owner: Evaluator
+ phase: '5'
+ description: 工具とDBを固定し、配布variantごとの依存・notice・未解決事項を追跡する。
+ quality_alias: QAM-09の依存部分
+@@ -48,3 +48,33 @@ planning_record:
+   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
++execution_record:
++  baseline: f07d782cd68cfac95d93585d5ace049f590160d4
++  branch: codex/task051-dependency-supply-chain-review
++  plan: tasks/051/TASK-051-PLAN.md
++  scope: Evaluate the three declared macOS arm64 distribution variants without changing dependencies, publication policy or scanner behavior.
++  evidence: tasks/051/evidence/dependency-20261114/
++  results: tasks/051/TASK-051-RESULTS.md
++  reviews: tasks/051/TASK-051-REVIEWS.md
++  reviewers:
++    implementation:
++      id: /root/dependency051_implementation_review
++      source_binding: tasks/051/evidence/dependency-20261114/final-run/RUN.json
++      outcome: Accepted after fixing partial notice omission; no further actionable findings.
++    test:
++      id: /root/dependency051_test_review
++      source_binding: tasks/051/evidence/dependency-20261114/final-run/RUN.json
++      outcome: Accepted; 21 tests and independent raw metadata, findings, DB and artifact checks establish evaluation adequacy.
++final_acceptance:
++  date: '2026-11-14'
++  source_head: f07d782cd68cfac95d93585d5ace049f590160d4
++  source_scope: Baseline plus task-051 executable/test changes bound in final-run/RUN.json; final prose and task-state reconciliation do not change measured inputs.
++  requirements:
++    Q6-03: Recorded exact versions/features/sources, tool and DB acquisition identities/hashes, four findings, proposed actions and explicitly unapproved exceptions with no invented expiry.
++    Q6-04: Mapped all three macOS arm64 variants and every selected dependency to exact license/notice bytes; retained all publication review flags without accepting unresolved issues.
++  outputs:
++  - target/quality-task-051/dependency-review.json
++  - target/quality-task-051/license-review.md
++  verification: Distribution Python suite 21 passed with no skips; offline evaluation exit 0; raw audit exit 1 correctly retained as findings; final-source/notice/DB/output bindings and both independent reviews accepted.
++  product_quality: Findings require action. No vulnerability, maintenance, license or source-provenance issue was waived, and no publication approval was granted.
++  limitations: RustSec snapshot assessment and resolved normal/build metadata for the three declared variants; no exploitability proof, registry yanked checks, exact linkage, cross-build or new platform certification.
+diff --git a/tasks/052/task.yaml b/tasks/052/task.yaml
+index 6e35bcf..7494e6f 100644
+--- a/tasks/052/task.yaml
++++ b/tasks/052/task.yaml
+@@ -2,8 +2,8 @@ id: '052'
+ title: OpenSSFとGitHub設定・保守手順を根拠付きで評価する
+ type: improvement
+ priority: high
+-status: pending
+-owner: Planner Agent
++status: blocked
++owner: Main agent (Evaluator)
+ phase: '5'
+ description: 実設定・実行実績と推奨変更を分け、権限不足や未運用を隠さない。
+ quality_alias: QAM-09のOSS運用部分
+@@ -61,3 +61,43 @@ planning_record:
+   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
++execution_record:
++  resumed_date: '2026-11-15'
++  plan: tasks/052/TASK-052-PLAN.md
++  baseline: tasks/052/evidence/assessment-20261115/BASELINE.json
++  transitions:
++  - from: pending
++    to: planned
++    reason: Original scope and handoff verified; assessment plan recorded without changing criteria.
++  - from: planned
++    to: in-progress
++    reason: Started read-only controls inspection and fixed-tool acquisition.
++  - from: in-progress
++    to: blocked
++    reason: Fixed-tool measurement and full criterion table exist, but required ownership and operational truth remain unverified; original criteria are unchanged.
++  results: tasks/052/TASK-052-RESULTS.md
++  evidence: tasks/052/evidence/assessment-20261115/
++  required_outputs: target/quality-task-052/
++  scorecard:
++    version: v5.6.0
++    tool_commit: 61e84743356275f6ffca23b1b2f2cb945e19eb96
++    remote_target_commit: f07d782cd68cfac95d93585d5ace049f590160d4
++    exit_code: 0
++    checks: 18
++    score: 4.3
++    scope: Remote committed source plus live repository/service metadata; not the dirty local checkout or detection accuracy.
++  best_practices:
++    passing_items: 67
++    silver_items: 55
++    gold_items: 23
++    application_submitted: false
++    complete_evidence_verification: false
++  blocker:
++    dependency: Formal human ownership/backup and operational facts are not established by public source or API evidence; other criterion-specific missing truth is explicit in the assessment.
++    attempts: Read current and prior records, official criteria and APIs; used connector and GET-only CLI fallback; measured fixed Scorecard; mapped all 145 medal criteria; asked for factual maintainer input without inferring facts from the clarification reply.
++    unmet_criteria:
++    - Q6-05
++    - Q6-07
++    - Q6-09
++    next_action: Supply existing dated records or factual maintainer confirmation for applicable Unknown items; obtain separately scoped evidence where necessary. Missing truth remains unfinished unless the maintainer explicitly changes acceptance criteria.
++  review_scope: Research and prose/evidence only; no executable repository behavior changed, so no independent implementation/test review identities were created under the current policy.
+diff --git a/tasks/053/task.yaml b/tasks/053/task.yaml
+index 3ad06c4..69f21a6 100644
+--- a/tasks/053/task.yaml
++++ b/tasks/053/task.yaml
+@@ -2,8 +2,8 @@ id: '053'
+ title: 全軸の証拠集約と費用に応じたCI測定を統合する
+ type: improvement
+ priority: medium
+-status: pending
+-owner: Planner Agent
++status: blocked
++owner: Main agent (Executor)
+ phase: '5'
+ description: 既存CIとreport.pyを再利用し、全要求の状態・証拠を継続的に確認できるようにする。
+ quality_alias: QAM-10
+@@ -71,3 +71,23 @@ planning_record:
+   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
++execution_record:
++  date: '2026-11-15'
++  plan: tasks/053/TASK-053-PLAN.md
++  baseline: tasks/053/evidence/integration-20261115/BASELINE.json
++  authorization: User requested task053 while keeping task052 unfinished; no other pending task is authorized.
++  transitions:
++  - from: pending
++    to: planned
++    reason: Original criteria and pending dependencies inspected; minimal integration design recorded.
++  - from: planned
++    to: in-progress
++    reason: Added initial evidence aggregation and 13 targeted tests; no catalog enrollment, CI integration or independent reviews completed.
++  - from: in-progress
++    to: blocked
++    reason: User interrupted task053 and requested prerequisite tasks first. Saved executable WIP outside test inputs and restored verified entry source.
++  suspension: tasks/053/evidence/integration-20261115/SUSPENSION.json
++  blocker:
++    dependency: Prerequisite tasks 056 and 058-061 must be addressed before resuming task053 under the latest user instruction; 052 remains unfinished by explicit instruction.
++    next_action: Address authorized prerequisites, then reconcile preserved task053 source with intervening changes before resumption.
++  reviews_started: []
+diff --git a/tasks/056/task.yaml b/tasks/056/task.yaml
+index c0ae4ae..bebe4c4 100644
+--- a/tasks/056/task.yaml
++++ b/tasks/056/task.yaml
+@@ -2,8 +2,8 @@ id: '056'
+ title: 暗号分類・Severity・Confidence・移行推奨を独立に検証する
+ type: improvement
+ priority: high
+-status: pending
+-owner: Planner Agent
++status: done
++owner: Main agent (Evaluator)
+ phase: '2'
+ description: 検出一致とは別の正解表を用い、用途・規格・来歴・保証の強さと推奨内容を検証する。
+ quality_alias: QAM-02の判断検証部分を独立
+@@ -77,3 +77,47 @@ planning_record:
+   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
++execution_record:
++  date: '2026-11-15'
++  plan: tasks/056/TASK-056-PLAN.md
++  baseline: tasks/056/evidence/assessment-20261115/BASELINE.json
++  authorization: User authorized remaining task056 validation with0.45 unchanged; task052 remains unfinished and task053 remains interrupted.
++  transitions:
++  - from: pending
++    to: planned
++    reason: Task042 completion, original nine criteria, local profile and normative reference scope inspected.
++  - from: planned
++    to: in-progress
++    reason: Froze source-cited oracle before product observations and added measurement adapter plus independent evaluator controls.
++  threshold_review:
++    maintainer_response: After requesting analysis, the maintainer explicitly selected preserving0.45 while continuing validation on2026-11-15; no claim of calibration or optimality was approved.
++    analysis: tasks/056/THRESHOLD-ANALYSIS.md
++    study: tasks/056/evidence/assessment-20261115/THRESHOLD-STUDY.json
++    recommendation: Preserve legacy behavior as an explicit compatibility requirement; keep empirical optimality unassessed. A policy redesign remains outside scope.
++    product_change: false
++  required_reviews:
++    implementation: /root/task056_implementation_review; accepted after scoped P2 fix confirmation; see TASK-056-REVIEWS.md.
++    test: /root/task056_test_review; accepted; no actionable or material coverage findings.
++  validation_continuation:
++    source_head: f07d782cd68cfac95d93585d5ace049f590160d4
++    source_manifest: tasks/056/evidence/assessment-20261115/REVIEW-SOURCE.json
++    native: tasks/056/evidence/assessment-20261115/native-r6
++    python: tasks/056/evidence/assessment-20261115/python-r6
++    canonical_property_cases: 1531
++    cli_fact_cases: 16
++    property_mismatches: 0
++    semantic_payloads: 38
++    semantic_findings: 5 distinct findings in6 payloads; no product fix authorized.
++    outputs: tasks/056/evidence/assessment-20261115/outputs-r6
++    completion: All nine original criteria verified; both reviews accepted; final source and artifact checks passed. Five measured product findings remain unfixed within validation-only scope.
++  completion_record:
++    date: '2026-11-15'
++    results: tasks/056/TASK-056-RESULTS.md
++    reviews: tasks/056/TASK-056-REVIEWS.md
++    evidence: tasks/056/evidence/assessment-20261115/EVIDENCE-FINAL.json
++    decision: Evaluation complete; property agreement is distinct from measured recommendation quality.
++    transition:
++      from: review
++      to: done
++      reason: All original deliverables and nine criteria validated with final-source bindings and accepted independent implementation/test reviews.
++    preserved_states: Task052 unfinished; task053 interrupted; neither resumed.
+diff --git a/tests/distribution/check-install.py b/tests/distribution/check-install.py
+index 2abd85f..b7c385e 100644
+--- a/tests/distribution/check-install.py
++++ b/tests/distribution/check-install.py
+@@ -49,8 +49,8 @@ with tempfile.TemporaryDirectory(prefix='pqc-clean-install-') as directory:
+     if any(results[name]['stderr'] for name in ['help','version']):
+         raise RuntimeError('informational command unexpectedly wrote errors')
+     package.validate_command_surface(provenance['variant'], results['help']['stdout'],
+-                                     results.get('probe-help', {}).get('stdout', ''))
+-    if provenance['variant'] == 'all-probes':
++                                     results.get('probe-help', {}).get('stdout', ''), allow_legacy=True)
++    if provenance['variant'] in ('network', 'all-probes'):
+         result = subprocess.run(sandbox+[str(binary), 'probe', 'ssh-kex', '--help'], cwd=base, capture_output=True, text=True)
+         if result.returncode or '--host-key-file' not in result.stdout or result.stderr:
+             raise RuntimeError('installed SSH KEX pin interface unavailable')
+diff --git a/tests/distribution/test_package.py b/tests/distribution/test_package.py
+index 893907d..d7081fb 100644
+--- a/tests/distribution/test_package.py
++++ b/tests/distribution/test_package.py
+@@ -41,16 +41,36 @@ class PackageTests(unittest.TestCase):
+         both = "Commands:\n  tls  TLS\n  ssh  SSH\n  help  Help\n"
+         all_commands = both + "  ssh-kex  KEX\n"
+         self.mod.validate_command_surface('static', "Commands:\n  scan  Scan\n", '')
+-        self.mod.validate_command_surface('combined-probes', top, both)
+-        self.mod.validate_command_surface('all-probes', top, all_commands)
+-        for variant, main, sub in [('all-probes', top, both),
+-                                   ('combined-probes', top, all_commands),
++        self.mod.validate_command_surface('network', top, all_commands)
++        for variant, main, sub in [('network', top, both),
++                                   ('network', top, both + "  other  Other\n"),
+                                    ('static', top, both),
+-                                   ('all-probes', 'Commands:\n  scan  Scan\n', all_commands)]:
++                                   ('network', 'Commands:\n  scan  Scan\n', all_commands)]:
+             with self.subTest(variant=variant, sub=sub), self.assertRaises(ValueError):
+                 self.mod.validate_command_surface(variant, main, sub)
++        # Historic labels remain readable, but cannot be used to prepare new packages.
++        self.mod.validate_command_surface('combined-probes', top, both, allow_legacy=True)
++        self.mod.validate_command_surface('all-probes', top, all_commands, allow_legacy=True)
++        for legacy in ['combined-probes', 'all-probes']:
++            with self.subTest(legacy=legacy), self.assertRaises(ValueError):
++                self.mod.validate_command_surface(legacy, top, all_commands)
+ 
+-    def test_all_probes_binds_features_metadata_and_dependency_notices(self):
++    def test_preparation_cli_exposes_two_names_and_rejects_removed_selectors(self):
++        import contextlib
++        for name in ['combined-probes', 'all-probes', 'unknown']:
++            with self.subTest(name=name), patch('sys.argv', ['package-release', '--variant', name]), contextlib.redirect_stderr(io.StringIO()):
++                with self.assertRaises(SystemExit) as failure:
++                    self.mod.main()
++                self.assertEqual(failure.exception.code, 2)
++        with patch('sys.argv', ['package-release', '--help']), contextlib.redirect_stdout(io.StringIO()) as output:
++            with self.assertRaises(SystemExit) as result:
++                self.mod.main()
++        self.assertEqual(result.exception.code, 0)
++        self.assertIn('{static,network}', output.getvalue())
++        self.assertNotIn('combined-probes', output.getvalue())
++        self.assertNotIn('all-probes', output.getvalue())
++
++    def test_network_binds_features_metadata_and_dependency_notices(self):
+         with tempfile.TemporaryDirectory() as tmp:
+             root = pathlib.Path(tmp)
+             required = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md',
+@@ -81,7 +101,7 @@ class PackageTests(unittest.TestCase):
+                 return 'fixture'
+             with patch.object(self.mod, 'run', side_effect=run), patch.object(self.mod.subprocess, 'check_output', return_value=b''):
+                 self.mod.prepare(argparse.Namespace(source_root=root, binary=binary,
+-                    target='aarch64-apple-darwin', variant='all-probes', out_dir=root/'output'))
++                    target='aarch64-apple-darwin', variant='network', out_dir=root/'output'))
+             metadata, = [c for c in calls if c[:2] == ('cargo', 'metadata')]
+             self.assertEqual(metadata[metadata.index('--features') + 1],
+                              'pqc_scan_cli/probe-tls,pqc_scan_cli/probe-ssh,pqc_scan_cli/probe-ssh-kex')
+@@ -94,7 +114,7 @@ class PackageTests(unittest.TestCase):
+                 prefix = archive.name.removesuffix('.tar.gz')
+                 provenance = json.load(tar.extractfile(prefix+'/PROVENANCE.json'))
+                 notices = json.load(tar.extractfile(prefix+'/DEPENDENCY-LICENSES.json'))
+-            self.assertEqual(provenance['variant'], 'all-probes')
++            self.assertEqual(provenance['variant'], 'network')
+             self.assertEqual(provenance['features'], ['probe-tls', 'probe-ssh', 'probe-ssh-kex'])
+             self.assertIn('negotiation', [p['name'] for p in notices['packages']])
+             self.assertTrue(all(p['notices'] for p in notices['packages']))
+diff --git a/third_party/notices/README.md b/third_party/notices/README.md
+index 55f606b..9fa2859 100644
+--- a/third_party/notices/README.md
++++ b/third_party/notices/README.md
+@@ -25,9 +25,12 @@ map source paths to archive members in `DEPENDENCY-LICENSES.json`. The source
+ manifest is retained for provenance; the original `texts/` tree is not duplicated
+ inside the binary archive.
+ 
+-The all-probes variant additionally includes exact-version upstream license texts
++The network variant additionally includes exact-version upstream license texts
+ for russh0.65.1,russh-util0.52.0,russh-cryptovec0.62.0 and delegate0.13.5.
+ Registry checksums, recorded VCS revisions and file hashes bind each fallback.
+-russh-util retains a publication-review flag because its archive VCS record is
+-dirty=true; the pinned revision identifies the license source, not an identical
+-archive source tree. Existing four objc-family review flags are unchanged.
++Task 063 resolved russh-util's source-difference flag: the checksum-bound archive's
++three Rust files match its recorded upstream revision, and Cargo.toml.orig differs
++only by the package version (0.51.0 to 0.52.0). Its normalized dependency declarations
++match the upstream workspace. The archived dirty=true record is retained; source
++comparison does not imply publication approval. The four objc-family review flags
++remain unresolved. See [the follow-up record](../../tasks/063/TASK-063-RESULTS.md).
+diff --git a/third_party/notices/manifest.json b/third_party/notices/manifest.json
+index 54e9df4..526f466 100644
+--- a/third_party/notices/manifest.json
++++ b/third_party/notices/manifest.json
+@@ -216,8 +216,8 @@
+       "upstream_repository": "https://github.com/warp-tech/russh",
+       "upstream_revision": "3d09c20c52a542ffa327723d3a44cb1edd9b0ca4",
+       "path_in_vcs": "russh-util",
+-      "review_required": true,
+-      "review_note": "Pinned upstream license text. Cargo archive VCS records dirty=true; upstream revision is license provenance, not proof of an identical source tree.",
++      "review_required": false,
++      "review_note": "Task 063 compared the checksum-bound registry archive to the recorded upstream revision: all three Rust source files are identical; Cargo.toml.orig differs only in package version 0.51.0 -> 0.52.0. Cargo normalization preserves the upstream dependency declarations. The Apache-2.0 text remains bound to that revision. dirty=true is retained as a historical archive fact; this resolves the source-difference investigation, not publication approval.",
+       "files": [
+         {
+           "path": "texts/russh-util-0.52.0/LICENSE-2.0.txt",

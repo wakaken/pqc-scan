@@ -1,0 +1,50 @@
+from pathlib import Path
+import json,hashlib,shutil,collections,subprocess
+r=Path.cwd();e=r/'tasks/052/evidence/dependency-monitoring-fact-20261116';e.mkdir();(e/'before').mkdir();cur=r/'tasks/052/evidence/reassessment-20261116';out=cur/'outputs';H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();J=lambda p:json.loads(p.read_text())
+def save(p,d):p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
+paths=[out/'best-practices-assessment.json',out/'best-practices.md',out/'process-review.md',out/'security-process.md',cur/'EVIDENCE-REFERENCES.json',cur/'REMAINING.json',r/'tasks/052/TASK-052-REASSESSMENT-20261116.md',r/'tasks/054/evidence/assessment-20261116/REQUIREMENT-ASSESSMENT.json',r/'tasks/054/evidence/assessment-20261116/release-assessment.md']
+for p in paths:shutil.copyfile(p,e/'before'/p.name)
+base=J(r/'tasks/052/evidence/purpose-reset-20261116/BASELINE.json')
+assert all(H(r/p)==h for p,h in base['protected'].items())
+fact={'dateJst':'2026-11-16','source':'Direct maintainer answer to outstanding factual inquiry','questionScope':'Routine dependency vulnerability monitoring outside this assessment, including method/frequency','answerQuote':'していない','routineMonitoringImplemented':False,'method':None,'frequency':None,'interpretation':'A confirmed absent routine operation. Earlier dated audit/remediation executions remain real. No schedule or automation is introduced. Assessment completion remains distinct from practice conformance.'};save(e/'MAINTAINER-FACT.json',fact)
+refs=J(cur/'EVIDENCE-REFERENCES.json');refs['MONITORING_FACT']=[{'path':str((e/'MAINTAINER-FACT.json').relative_to(r)),'exists':True,'sha256':H(e/'MAINTAINER-FACT.json')}];save(cur/'EVIDENCE-REFERENCES.json',refs)
+a=J(out/'best-practices-assessment.json');x=next(x for x in a['criteria'] if x['key']=='1.dependency_monitoring');old=x['assessment'];x['priorMonitoringFact']={k:x[k] for k in ['status','assessment','executionEvidence','evaluation']};x['assessment']='Dated audits/remediation and OSVresponses were inspected. The maintainer now explicitly confirms no routine dependency vulnerability monitoring outside this assessment. Point-in-time checks and local fixes remain evidenced, but an ongoing monitoring/check-and-handle practice is not established. Conformance remains Partial; no new operation or automation is authorized.';x['executionEvidence']='Historical RustSec/OSVchecks and task063local remediation are evidenced. Maintainer confirms2026-11-16that routine monitoring is not implemented; method/frequency not applicable to an absent operation.';x['evaluation']['basis']=x['assessment'];x['evidence'].append('MONITORING_FACT');x['evidenceApplicability']=[{'key':k,'references':refs[k]} for k in x['evidence']];save(out/'best-practices-assessment.json',a)
+p=out/'best-practices.md';s=p.read_text();assert old in s;s=s.replace(old,x['assessment']);p.write_text(s)
+for p,oldtext,newtext in [(out/'process-review.md','Routine monitoring remains unconfirmed.','The maintainer confirms no routine dependency vulnerability monitoring outside this assessment.'),(r/'tasks/052/TASK-052-REASSESSMENT-20261116.md','monitoring is unconfirmed. No unanswered fact is silently inferred.','monitoring is not implemented, explicitly confirmed by the maintainer on2026-11-16. Earlier point-in-time audits remain distinct from routine operation.')]:
+ s=p.read_text();assert oldtext in s;p.write_text(s.replace(oldtext,newtext))
+p=out/'security-process.md';s=p.read_text();s+='\nRoutine dependency vulnerability monitoring outside this assessment is not implemented, per explicit maintainer confirmation2026-11-16. This is a practice gap, not an unanswered inquiry; no new monitoring operation is started.\n';p.write_text(s)
+p=cur/'REMAINING.json';d=J(p);d['priorOptionalFactPending']=d.pop('optionalFactPending');d['dependencyMonitoringFact']=fact
+for row in d['unsupportedOrPartialConformance']:
+ if row['key']=='1.dependency_monitoring':row['reason']=x['assessment']
+save(p,d)
+for name in ['best-practices.md','github-controls.json','process-review.md','scorecard.json','security-process.md']:shutil.copyfile(out/name,r/'target/quality-task-052'/name)
+p=r/'tasks/054/evidence/assessment-20261116/REQUIREMENT-ASSESSMENT.json';d=J(p);oldhashes=set()
+for row in d['requirements']:
+ if row['ownerTask']=='052':
+  desc=row['reassessment20261116'];oldhashes.add(desc['sourceSha256']);row.setdefault('priorReassessmentSnapshots',[]).append(dict(desc));desc['sourceSha256']=H(r/desc['source']);desc['criteriaSha256']=H(r/desc['criteria']);desc['validation']=str((e/'VALIDATION.json').relative_to(r));row['dependencyMonitoringFact']={'implemented':False,'source':str((e/'MAINTAINER-FACT.json').relative_to(r))}
+save(p,d)
+p=r/'tasks/054/evidence/assessment-20261116/release-assessment.md';s=p.read_text()
+for h in oldhashes:s=s.replace(h,H(r/'tasks/052/TASK-052-REASSESSMENT-20261116.md'))
+oldcriteria=J(e/'before/best-practices-assessment.json');oldcriteriahash=H(e/'before/best-practices-assessment.json');s=s.replace(oldcriteriahash,H(out/'best-practices-assessment.json'))
+s=s.replace('Final validation: `tasks/052/evidence/purpose-reset-20261116/VALIDATION.json`.','Original completion validation: `tasks/052/evidence/purpose-reset-20261116/VALIDATION.json`. Current fact-update validation: `tasks/052/evidence/dependency-monitoring-fact-20261116/VALIDATION.json`.')
+s+='\n## Dependency monitoring factual clarification — 2026-11-16\n\nThe maintainer confirms no routine dependency vulnerability monitoring outside the assessment. Item1.dependency_monitoring remains Partial with dated audits/remediation distinguished.052stays done as an assessment;054and product/roadmap acceptance remain unfinished. No new monitoring operation is authorized or started.\n';p.write_text(s);shutil.copyfile(p,r/'target/quality-task-054/release-assessment.md')
+# No historical completion validation, facts, criteria or task-state records rewritten.
+checks=[]
+def ck(label,value):assert value,label;checks.append(label)
+for k,rs in refs.items():
+ for v in rs:ck('reference '+v['path'],H(r/v['path'])==v['sha256'])
+ck('all145IDs and conformance preserved',[(v['key'],v['status']) for v in a['criteria']]==[(v['key'],v['status']) for v in oldcriteria['criteria']])
+ck('changed only dependency monitoring criterion',[v['key'] for v,w in zip(a['criteria'],oldcriteria['criteria']) if v!=w]==['1.dependency_monitoring'])
+for row in a['criteria']:ck('criterion refs '+row['key'],row['evidenceApplicability']==[{'key':k,'references':refs[k]} for k in row['evidence']])
+for p,h in base['protected'].items():ck('protected '+p,H(r/p)==h)
+for name in ['best-practices.md','github-controls.json','process-review.md','scorecard.json','security-process.md']:ck('required mirror '+name,H(out/name)==H(r/'target/quality-task-052'/name))
+ck('054report mirror',H(r/'tasks/054/evidence/assessment-20261116/release-assessment.md')==H(r/'target/quality-task-054/release-assessment.md'))
+ck('054all73original conditions unchanged',[(z['id'],z['acceptanceQuote'],z['originalTaskAcceptance']) for z in d['requirements']]==[(z['id'],z['acceptanceQuote'],z['originalTaskAcceptance']) for z in J(e/'before/REQUIREMENT-ASSESSMENT.json')['requirements']])
+for row in d['requirements']:
+ if row['ownerTask']=='052':ck('054current binding '+row['id'],H(r/row['reassessment20261116']['source'])==row['reassessment20261116']['sourceSha256'] and H(r/row['reassessment20261116']['criteria'])==row['reassessment20261116']['criteriaSha256'])
+cmds=[]
+for argv in [['git','diff','--check'],['ruby','-ryaml','-e','abort unless YAML.load_file("tasks/052/task.yaml")["status"]=="done" && YAML.load_file("tasks/054/task.yaml")["status"]=="in-progress";puts "052done /054in-progress unchanged"']]:
+ v=subprocess.run(argv,capture_output=True,text=True);cmds.append({'argv':argv,'exitCode':v.returncode,'stdout':v.stdout,'stderr':v.stderr});ck('command '+argv[0],v.returncode==0)
+shutil.copyfile('/tmp/pqc052-monitoring-fact.py',e/'update-and-validation.py.txt')
+save(e/'VALIDATION.json',{'head':base['head'],'checksPassed':checks,'commands':cmds,'scope':'Documentation/evidence factual update only. No new Rust execution required/claimed. Original completion receipt remains historical; no conformance promotion, settings change or automation.','artifactHashes':{str(p.relative_to(r)):H(p) for p in paths+[e/'MAINTAINER-FACT.json',e/'update-and-validation.py.txt']}})
+print(json.dumps({'fact':'routine monitoring not implemented','criterion':'Partial unchanged','checksPassed':len(checks),'commandsExit0':True,'task052':'done unchanged','task054':'in-progress unchanged'}))

@@ -1,0 +1,50 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 303B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/pqc-protocol-tools:0c6c3fe80e721fbe538a14362f54dcd432f9acbe29d58eb835ae3ff5c414732b
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/5] FROM docker.io/library/pqc-protocol-tools:0c6c3fe80e721fbe538a14362f54dcd432f9acbe29d58eb835ae3ff5c414732b
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 95.04kB done
+#5 DONE 0.0s
+
+#6 [2/5] RUN rustup component add --toolchain 1.93.1 clippy rustfmt
+#6 0.108 info: component 'clippy' for target 'aarch64-unknown-linux-gnu' is up to date
+#6 0.156 info: component 'rustfmt' for target 'aarch64-unknown-linux-gnu' is up to date
+#6 DONE 0.2s
+
+#7 [3/5] COPY manifests /tool-manifests
+#7 DONE 0.0s
+
+#8 [4/5] RUN cargo fetch --manifest-path /tool-manifests/Cargo.toml --locked
+#8 0.083     Updating crates.io index
+#8 1.979 error: cannot update the lock file /tool-manifests/Cargo.lock because --locked was passed to prevent this
+#8 1.979 help: to generate the lock file without accessing the network, remove the --locked flag and use --offline instead.
+#8 ERROR: process "/bin/sh -c cargo fetch --manifest-path /tool-manifests/Cargo.toml --locked" did not complete successfully: exit code: 101
+------
+ > [4/5] RUN cargo fetch --manifest-path /tool-manifests/Cargo.toml --locked:
+0.083     Updating crates.io index
+1.979 error: cannot update the lock file /tool-manifests/Cargo.lock because --locked was passed to prevent this
+1.979 help: to generate the lock file without accessing the network, remove the --locked flag and use --offline instead.
+------
+Dockerfile:5
+--------------------
+   3 |     RUN rustup component add --toolchain 1.93.1 clippy rustfmt
+   4 |     COPY manifests /tool-manifests
+   5 | >>> RUN cargo fetch --manifest-path /tool-manifests/Cargo.toml --locked
+   6 |     WORKDIR /source
+   7 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c cargo fetch --manifest-path /tool-manifests/Cargo.toml --locked" did not complete successfully: exit code: 101
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/p86a6azy8txvdq28r250sis9a

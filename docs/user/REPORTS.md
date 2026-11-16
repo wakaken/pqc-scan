@@ -37,7 +37,7 @@ rule, then a location, to see its source context and applicable actions. Identic
 shared guidance is linked instead of repeating it at every location. Different
 recommendations sharing an action ID remain distinct. Without JavaScript, all
 records remain available through native expandable details. No external scripts
-or network connection are required. Markdown provides a linked rule/location index.
+or network connection are required. Long reference URLs wrap within the report, including on narrow screens. Markdown provides a linked rule/location index.
 Source excerpts and code examples normalize CRLF and CR line endings and indent
 every line so embedded markup remains code when rendered as Markdown.
 
@@ -94,6 +94,14 @@ Selected built-in rules use [bounded local source analysis](COVERAGE.md#source-f
 These references can appear as informational findings in CBOM and SARIF too. Read `quantum-safe` as a classification of the primitive, not “migration complete.” Dependency findings remain `quantum-uncertain`.
 Node crypto/WebCrypto, browser and TypeScript runtime support must be checked individually; their version requirements differ. JWT signature changes also need compatible JOSE formats, libraries and verifiers.
 See [static examples and references](../../examples/pqc-readiness/README.md) for specific patterns.
+
+Before applying migration guidance:
+
+- If the Java version is unknown, check the deployed runtime; do not infer that it is old. Standard ML-KEM/ML-DSA APIs start at JDK 24.
+- Generate a new key pair for the selected signature algorithm and parameter set, then provision its public key and JOSE/PKI encoding to verifiers. An RSA key cannot be reused for ML-DSA.
+- The BC example is scoped to BC Java 1.85 and the `BC` provider, not `BCPQC`. Verify the resolved library release, deployed JDK and algorithm support before using it.
+- For certificate migration, choose the exact construction and encoding and confirm provider, CA, client and trust-store support before a nonproduction pilot. FIPS 204/205 specify signature primitives, not a universal hybrid certificate format.
+- Envoy `cipher_suites` applies to TLS 1.0–1.2, not TLS 1.3. Retiring static RSA key exchange differs from removing RSA authentication in ECDHE_RSA suites; check certificate and peer compatibility separately.
 
 <a id="choose-report"></a>
 

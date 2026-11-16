@@ -1,0 +1,1276 @@
+# Integrated quality assessment
+
+73 requirements accounted for; 19 evidence records. Release decision: **Unknown**.
+
+| Requirement | Status | Owner task | Evidence records | Reason |
+|---|---|---|---|---|
+| Q1-01 | Partial | 042 | task042-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q1-02 | Partial | 042 | task042-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q1-03 | Partial | 042 | task042-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q1-04 | Partial | 042 | task042-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q1-05 | Partial | 042 | task042-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q1-06 | Partial | 042 | task042-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q1-07 | Partial | 042 | task042-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q1-08 | Partial | 043 | task043-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q1-09 | Partial | 042 | task042-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q1-10 | Partial | 042 | task042-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q2-01 | Partial | 055 | task055-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q2-02 | Partial | 055 | task055-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q2-03 | Partial | 055 | task055-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q2-04 | Partial | 055 | task055-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q2-05 | Partial | 055 | task055-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q2-06 | Partial | 055 | task055-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q2-07 | Partial | 055 | task055-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q2-08 | Partial | 055 | task055-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-01 | Partial | 056 | task056-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-02 | Partial | 056 | task056-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-03 | Partial | 056 | task056-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-04 | Partial | 056 | task056-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-05 | Partial | 056 | task056-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-06 | Partial | 049 | task049-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-07 | Partial | 056 | task056-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-08 | Partial | 056 | task056-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-09 | Partial | 056 | task056-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-10 | Partial | 056 | task056-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-11 | Partial | 048 | task048-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q3-12 | Partial | 048 | task048-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-01 | Partial | 057 | task057-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-02 | Partial | 057 | task057-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-03 | Partial | 047 | task047-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-04 | Partial | 057 | task057-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-05 | Partial | 048 | task048-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-06 | Partial | 057 | task057-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-07 | Partial | 057 | task057-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-08 | Partial | 049 | task049-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-09 | Partial | 049 | task049-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-10 | Partial | 049 | task049-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-11 | Partial | 049 | task049-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-12 | Partial | 049 | task049-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-13 | Partial | 044 | task044-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-14 | Partial | 045 | task045-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-15 | Partial | 046 | task046-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q4-16 | Partial | 044 | task044-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q5-01 | Partial | 050 | task050-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q5-02 | Partial | 050 | task050-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q5-03 | Partial | 050 | task050-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q5-04 | Partial | 050 | task050-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q5-05 | Partial | 050 | task050-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q5-06 | Partial | 050 | task050-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q5-07 | Partial | 050 | task050-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q5-08 | Partial | 050 | task050-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q5-09 | Partial | 050 | task050-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q6-01 | Partial | 053 | task053-integration-validation | Source-scoped observations; command execution, result and review adequacy remain separate |
+| Q6-02 | Passed | 053 | task053-integration-validation | Source-scoped observations; command execution, result and review adequacy remain separate |
+| Q6-03 | Partial | 051 | task051-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q6-04 | Partial | 051 | task051-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q6-05 | Unknown | 052 | task052-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q6-06 | Unknown | 052 | task052-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q6-07 | Unknown | 052 | task052-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q6-08 | Unknown | 052 | task052-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q6-09 | Unknown | 052 | task052-recorded-study | Only historical, changed-input or unbound-source evidence is available; original outcomes are retained |
+| Q6-10 | Partial | 058 | task058-recorded-study | Source-scoped observations; command execution, result and review adequacy remain separate |
+| Q6-11 | Partial | 059 | task059-recorded-study | Source-scoped observations; command execution, result and review adequacy remain separate |
+| Q6-12 | Partial | 058 | task058-recorded-study | Source-scoped observations; command execution, result and review adequacy remain separate |
+| Q6-13 | Partial | 060 | task060-recorded-study | Source-scoped observations; command execution, result and review adequacy remain separate |
+| Q6-14 | Partial | 061 | task061-recorded-study | Source-scoped observations; command execution, result and review adequacy remain separate |
+| Q6-15 | Partial | 061 | task061-recorded-study | Source-scoped observations; command execution, result and review adequacy remain separate |
+| Q6-16 | Passed | 053 | task053-integration-validation | Source-scoped observations; command execution, result and review adequacy remain separate |
+| Q6-17 | Not Tested | 054 |  | No registered evidence for this requirement; upstream work remains unfinished/unavailable |
+| Q6-18 | Passed | 053 | task053-integration-validation | Source-scoped observations; command execution, result and review adequacy remain separate |
+
+## Axis accounting
+
+- Q1: Partial; 10 requirements
+- Q2: Partial; 8 requirements
+- Q3: Partial; 12 requirements
+- Q4: Partial; 16 requirements
+- Q5: Partial; 9 requirements
+- Q6: Partial; 18 requirements
+
+## Measurement details and concerns
+
+### task042-recorded-study
+
+**Partial**: Source-audited detection corpora; original RustCrypto holdout0TP/4FN and annotation errors remain historical; tuning/holdout populations stay separate.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: default static; legacy/v1/v2/lock-control corpora separately. Standards: Frozen source-only labels and rule inventory.
+Method: Source-audited detection corpora; original RustCrypto holdout0TP/4FN and annotation errors remain historical; tuning/holdout populations stay separate.. Environment: macOS native; exact runtime/source in MEASUREMENT and command receipts.
+Comparison: Source-audited detection corpora; original RustCrypto holdout0TP/4FN and annotation errors remain historical; tuning/holdout populations stay separate..
+
+- head: `"0a281e90d4e7e0402e2dd5d0aa19a7249c5373bf"`
+- branch: `"codex/quality-assessment-model"`
+- worktree: `"Uncommitted current change plus preserved prior work; not a clean release commit"`
+- datasets: `{"legacy": {"tp": 25, "fp": 3, "fn": 5, "tn": 17, "positive": 30, "negative": 20, "ambiguous": 2, "unsupported": 5, "eligible": 50, "annotationInterpretation": null, "comparison": {"status": "Passed", "deltas": {"holdout/source_api": {"tp": 0, "fp": 0, "fn": 0}, "holdout/draft": {"tp": 0, "fp": 0, "fn": 0}, "holdout/config": {"tp": 0, "fp": 0, "fn": 0}, "holdout/dependency": {"tp": 0, "fp": 0, "fn": 0}, "holdout/certificate": {"tp": 0, "fp": 0, "fn": 0}, "holdout/key": {"tp": 0, "fp": 0, "fn": 0}, "tuning/source_api": {"tp": 0, "fp": 0, "fn": 0}, "tuning/draft": {"tp": 0, "fp": 0, "fn": 0}, "tuning/config": {"tp": 0, "fp": 0, "fn": 0}, "tuning/dependency": {"tp": 0, "fp": 0, "fn": 0}, "tuning/certificate": {"tp": 0, "fp": 0, "fn": 0}, "tuning/key": {"tp": 0, "fp": 0, "fn": 0}}, "regressedGroups": [], "policy": "TASK-023 approved split/family nonregression; descriptive report, no numeric CI enforcement"}, "repeatability": {"repeats": 3, "semanticStable": true, "diagnosticStable": true, "rawOrderStable": true, "scoreStable": true}, "source": {"corpus": "d6fa706b8f2c2c1267e9e1f0383d6318f4c11b2761f8785b6d7865797ee2afb6", "truth": "9604ed3298d2b120d0337b013f9a13273b666253f29a8cb700807b39dbb9579c"}, "report": "docs/quality/task042-reopen-20261112/legacy-report/quality.json"}, "v1": {"tp": 36, "fp": 10, "fn": 24, "tn": 55, "positive": 60, "negative": 58, "ambiguous": 4, "unsupported": 34, "eligible": 118, "annotationInterpretation": {"status": "Partial", "sourceAuditStatus": "Partial", "predictionAttributionStatus": "Partial", "matchedNegativePredictionCount": 3, "duplicatePositivePredictionCount": 0, "unattributedPredictionCount": 7, "scope": "Precision/F1 measure agreement with frozen nominated annotations. Unattributed FP can be legitimate unannotated facts, not established product false positives.", "followup": "Source-based triage required; preserve this truth/results. Any corrected annotation version is post-observation tuning, not a fresh independent holdout evaluation."}, "comparison": {"status": "Passed", "deltas": {"holdout/source_api": {"tp": 0, "fp": 0, "fn": 0}, "holdout/draft": {"tp": 0, "fp": 0, "fn": 0}, "holdout/config": {"tp": 0, "fp": 0, "fn": 0}, "holdout/dependency": {"tp": 0, "fp": 0, "fn": 0}, "holdout/key": {"tp": 0, "fp": 0, "fn": 0}, "holdout/certificate": {"tp": 0, "fp": 0, "fn": 0}, "tuning/source_api": {"tp": 0, "fp": 0, "fn": 0}, "tuning/draft": {"tp": 0, "fp": 0, "fn": 0}, "tuning/config": {"tp": 0, "fp": 0, "fn": 0}, "tuning/dependency": {"tp": 0, "fp": 0, "fn": 0}, "tuning/key": {"tp": 0, "fp": 0, "fn": 0}, "tuning/certificate": {"tp": 0, "fp": 0, "fn": 0}}, "regressedGroups": [], "policy": "TASK-023 approved split/family nonregression; descriptive report, no numeric CI enforcement"}, "repeatability": {"repeats": 3, "semanticStable": true, "diagnosticStable": true, "rawOrderStable": true, "scoreStable": true}, "source": {"corpus": "defcedb55fd4965d78e56bbcee8ee8c7ee5dccd83cf7d824d62f91060901b92b", "truth": "d4e5e675b10298c0397ef1c8edb0580b3375c604766a236d2bc8ff77666a93f9"}, "report": "docs/quality/task042-reopen-20261112/v1-report/quality.json"}, "v2": {"tp": 58, "fp": 4, "fn": 44, "tn": 89, "positive": 102, "negative": 93, "ambiguous": 4, "unsupported": 47, "eligible": 195, "annotationInterpretation": {"status": "Verified", "sourceAuditStatus": "Verified", "predictionAttributionStatus": "Verified", "matchedNegativePredictionCount": 4, "duplicatePositivePredictionCount": 0, "unattributedPredictionCount": 0, "scope": "Precision/F1 measure agreement with frozen nominated annotations. Unattributed FP can be legitimate unannotated facts, not established product false positives.", "followup": "Preserve this bounded source-audited truth/results; retain detector FP/FN for triage."}, "comparison": {"status": "Not Applicable", "reason": "Different truth, corpus, input or evaluated groups"}, "repeatability": {"repeats": 3, "semanticStable": true, "diagnosticStable": true, "rawOrderStable": true, "scoreStable": true}, "source": {"corpus": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b", "truth": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0"}, "report": "docs/quality/task042-reopen-20261112/v2-report/quality.json", "supportedScope": {"tp": 58, "fp": 4, "fn": 40, "tn": 87, "positive": 98, "negative": 91, "ambiguous": 4, "unsupported": 53, "eligible": 189}}, "lock-controls": {"tp": 2, "fp": 0, "fn": 0, "tn": 0, "positive": 2, "negative": 0, "ambiguous": 0, "unsupported": 0, "eligible": 2, "annotationInterpretation": {"status": "Verified", "sourceAuditStatus": "Verified", "predictionAttributionStatus": "Verified", "matchedNegativePredictionCount": 0, "duplicatePositivePredictionCount": 0, "unattributedPredictionCount": 0, "scope": "Precision/F1 measure agreement with frozen nominated annotations. Unattributed FP can be legitimate unannotated facts, not established product false positives.", "followup": "Preserve this bounded source-audited truth/results; retain detector FP/FN for triage."}, "comparison": null, "repeatability": {"repeats": 3, "semanticStable": true, "diagnosticStable": true, "rawOrderStable": true, "scoreStable": true}, "source": {"corpus": "55d668218071458baadd4857f8bac3043b1f5a4b48e583a0a08722b580cd5f73", "truth": "a3c909060509b4d7f57544f3f854d3c3fe13bbbb977fc0ff76171ed77e214f2c"}, "report": "docs/quality/task042-reopen-20261112/lock-controls-report/quality.json"}}`
+- rawArchive: `"RAW-MEASUREMENTS.tar.gz"`
+- actualFinalCommands: `"CHECK-COMMANDS.json"`
+- applicability: `"tests/quality/applicability-042-v2/assessment.json"`
+- Concern (high): Source-audited detection corpora; original RustCrypto holdout0TP/4FN and annotation errors remain historical; tuning/holdout populations stay separate.
+- Limitation: Source-audited detection corpora; original RustCrypto holdout0TP/4FN and annotation errors remain historical; tuning/holdout populations stay separate.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/042/TASK-042-REOPEN-RESULTS.md`; SHA-256 `898b318ce63ec4014fb2ea131de835b69ffa7e6b5acb9c11a4482270bbb632ca`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/043-FOLLOWUP.json`; SHA-256 `a024da55bbbf83ef900111e28a9821b2353ba82d5faf14519cff3d1ccfe8e92e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/ACCEPTANCE-MATRIX.md`; SHA-256 `55d5c8b231d6586a8402fa0ce43a62ab272e50fe0eee8deb7af86a65ddc7666c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/ACCEPTANCE.json`; SHA-256 `4bf32e0455196a68e801d1ff4680839f2c903de4aa85be876101c6cb7f649891`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/ALGORITHM-MATRIX.json`; SHA-256 `919cb8d5f42a888ffbaa2c18a7f35d17cd8ac53d9b9299eba486ce62a5261b12`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/ALGORITHM-MATRIX.md`; SHA-256 `28587b3111abe39fd19901316883bbf0e1ae4c03c020da2e49c797b472f272f3`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/CASE-MATRIX.json`; SHA-256 `885612a2f5546eefb4f03b97dc0cf25ff4515bb55bc865754dd95a58a2088abb`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/CHECK-COMMANDS.json`; SHA-256 `8bf8a25d90f21a0f705578a77a55e35b0bb721c25e842562ec58ed43cbd97b9f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/ENTRY.json`; SHA-256 `2c1aedb0f36fadf72e0e93cb832656f51bf0dba164133e9eaa006a1276571e80`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/EVIDENCE-INDEX.json`; SHA-256 `5e090a1b2d247ccbcedee46da22fd4faba04cda9b68a78e715ba882f75ac7377`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/FINAL-REPORT-COMMANDS.json`; SHA-256 `087bc81e54b8db8e917b55ff8b18d3c746610af9728609446c5f9bc8c84dac41`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/FINAL-STATE-CHECKS.json`; SHA-256 `523667a113730b61dc52f14d856c95ea24f49f28cfd7d6eecde73ee73599d196`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/FINAL-VALIDATION.json`; SHA-256 `f049134e86fc675bafebe0c928d348346043faafd772a2f41c59c1f48b14cf4a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/FORMAT-MATRIX.json`; SHA-256 `7b7ef92412d25b853701553aa43f41fdec3dea39631020c3a8f49f4089865137`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/FORMAT-MATRIX.md`; SHA-256 `67a20cc194465d739129ead1218da09ec1851d2ea2dad2d293fc17875bcec2be`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/FREEZE.json`; SHA-256 `3222d26a9ef1e59756364898a3fbd39f545b9a782029b8cc52427083a65f2c26`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/IMMUTABILITY.json`; SHA-256 `1ef87220c44c7f0cd9bbb8fba0a3f8854262015dad4e7695b45a5d994f0cd3b0`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/IMPLEMENTATION-REVIEW.md`; SHA-256 `5fcacbc7effb27b7fc0ebc3b3bb3cc8af0f1cea954e79688f73a122ade1801b3`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/LABEL-REVIEW.md`; SHA-256 `2af97e3465c5d01ef8daa3e209bb200c71f6be5df733157464c7eeed9f3ebeed`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/LOCK-FREEZE.json`; SHA-256 `2d633d22bb30641cb5e5e613f87474a9f460550ba0ee0e8aeceacb4f9572d86a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/MEASURE-COMMANDS.json`; SHA-256 `d6a2143a2be4761213e5947e07d0412b439599428a523dd51930c50d2e8784f4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/MEASUREMENT.json`; SHA-256 `cffadd7dffcdcaedfb80dd307de4f54ffa4be164624c9dcc3f9cad6f1ab9c18d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/NATIVE-COMMANDS.json`; SHA-256 `76e1e4d4b37b40241f22f108c23ab31ac930abfb20553ec5f7c4f20d343520ff`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/PARSER-COMMAND.json`; SHA-256 `bb6aee6b474da07446bf6ed1f41609aed3ec7cea0a2e2608fce6dc1cdf4362fb`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/PARSER-DIAGNOSTIC.md`; SHA-256 `5bcb934706fc31565a58e130946788b1796d6c2c5ac03299c31c131caf6da2c0`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/RULE-INVENTORY.json`; SHA-256 `079ce44dc81d87f9bc178eb0328e6748291cddf9915f6cf9a3ab3660cea8cf55`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/SELF-SCAN-COMMAND.json`; SHA-256 `f3cd4004dc38af6945ff3d7b9cdfd455ac141bfb6fdc26b2b47d4894bdd15991`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/SELF-SCAN-EXPECTATIONS-PROPOSAL.json`; SHA-256 `4055cc15bfec3d220e40ca89f8c71480dc35ef47a200456118f0bbe5eeade27c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/TEST-REVIEW.md`; SHA-256 `f34ab3756b3f667769f8748cb034058a0fe21b410c1250ce6928fd41f85eba6c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/UNIT-LEDGER.json`; SHA-256 `2e327c67ce7617de1aac6f5787b10ae4e45a9833921dedd7d62fa1f56137a4d8`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/VERIFIED-REPORT-COMMANDS.json`; SHA-256 `77738aaeb8d1f4ca0b40afc7c963a2adaa94b44e3dec6957e25a0ee2f0cea460`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/lock-controls-report/adversarial-cases.json`; SHA-256 `4a8117e5239e7aa143579a726c7c059d3dbca6aefb5cb78efd73cbc142df8e8d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/lock-controls-report/algorithm-truth.json`; SHA-256 `45fd958d4290ac5c8af8349c13afa27a12e2f4820d76da6a8a6a18872381548d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/lock-controls-report/artifact-metrics.json`; SHA-256 `961a02a622d957e227df116e3ba168a20fe669ff4b75c23c3b6685d55d2cc5e6`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/lock-controls-report/case-coverage.json`; SHA-256 `a897ddfd97967f3a1632f78132133ecdefe2e5d907884c28eb367c4f23e33bda`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/lock-controls-report/comparison.json`; SHA-256 `6e5793427c1d01de00cf24b2620d68f0ca40343cf9ccfb89215c65993438c481`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/lock-controls-report/metrics.json`; SHA-256 `f4191aef0208e660c6e28cac24c0c56f38b3af74f720cf45a63e00f93df12d77`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/lock-controls-report/quality.json`; SHA-256 `87b77d1fdf4a5abf803b14da64508cca08765e62546edb22a0edb12f65b00e6b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/lock-controls-report/quality.md`; SHA-256 `3f01da735ef53811cb9599f1d821c3e63191b004a377c69dbcccbc7999ed6dc4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/lock-controls-report/usage-truth.json`; SHA-256 `2c07a387685d36454d70496298890137039aa3173123895f612232d6a4a51885`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/v2-report/adversarial-cases.json`; SHA-256 `6261c5727f23f3274412f6e4fa72f3f1b40bdf8693aeb344879ad9be162a7f40`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/v2-report/algorithm-truth.json`; SHA-256 `8e8e13f28cc9c9740b3bd33c52efb2b9af38ad3329049ec97bd65687ba9fcc8d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/v2-report/artifact-metrics.json`; SHA-256 `b6e394f32edd653a037daf3443cc0324cfe03b4e60bdf2d6a422a9c73e6624a8`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/v2-report/case-coverage.json`; SHA-256 `a5fb2af794cf8181b33e7fdf80395a438c7f0b1aaa07f5057506745ab90cf178`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/v2-report/comparison.json`; SHA-256 `c076e0de736086e9d1689ce2458d350ce73e18d62db8d9ae35bef2def7a1eeef`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/v2-report/metrics.json`; SHA-256 `80610ba59a2055b58f1c7082ed1672c259f5018f50d5d7dda427da57607c905d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/v2-report/quality.md`; SHA-256 `e3aab144c80c8709552f7a587094a797b5c811621cfa01f48d61fd705650b264`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/v2-report/supported-scope.json`; SHA-256 `3cea6a5f0cd9c824f03870581820f6805227a2cdab0cb9a0c950040975a890db`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/042/evidence/task042-reopen-20261112/v2-report/usage-truth.json`; SHA-256 `d0d3ff43557ece450c584b11ea28e6685bcd809f6b5f76428dd9691be171e542`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["target/release/pqc-scan", "scan", ".", "--format", "sarif", "--rules-dir", "./rules", "--out-dir", "target/quality-task-042-reopen-20261112/self-scan-final"]`; exit `0`
+- Command: `["node", "shell/prepare-code-scanning.cjs", "--input", "target/quality-task-042-reopen-20261112/self-scan-final/report.sarif", "--expectations", "docs/quality/SELF-SCAN-EXPECTATIONS.json", "--root", ".", "--output", "target/quality-task-042-reopen-20261112/self-scan-final/code-scanning.sarif", "--audit", "target/quality-task-042-reopen-20261112/self-scan-final/code-scanning-audit.json"]`; exit `0`
+- Command: `["python3", "-m", "unittest", "discover", "-s", "tests/quality", "-p", "test_*.py"]`; exit `0`
+- Command: `["node", "--test", "shell/compact-report.test.cjs", "shell/final-gap-self-scan.test.cjs", "shell/prepare-code-scanning.test.cjs", "shell/self-scan-backlog.test.cjs", "shell/self-scan-policy.test.cjs"]`; exit `0`
+- Command: `["ruby", "-r", "yaml", "-e", "YAML.load_file(ARGV.fetch(0)); puts \"Workflow YAML parsed\"", ".github/workflows/pqc-scan.yml"]`; exit `0`
+- Command: `["git", "diff", "--check"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality", "--baseline", "target/quality-task-042-reopen-20261112/legacy", "--out-dir", "target/quality-task-042-reopen-20261112/legacy-report-complete", "--reference", "target/quality-task-042/legacy-regression-02/summary.json"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded", "--baseline", "target/quality-task-042-reopen-20261112/v1", "--out-dir", "target/quality-task-042-reopen-20261112/v1-report-complete", "--reference", "target/quality-task-042/expanded-accepted/summary.json"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded-v2", "--baseline", "target/quality-task-042-reopen-20261112/v2", "--out-dir", "target/quality-task-042-reopen-20261112/v2-report-complete", "--reference", "target/quality-task-042/expanded-accepted/summary.json", "--applicability", "tests/quality/applicability-042-v2/assessment.json"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded-v2-lock-controls", "--baseline", "target/quality-task-042-reopen-20261112/lock-controls", "--out-dir", "target/quality-task-042-reopen-20261112/lock-controls-report-complete"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--corpus-dir", "tests/quality/expanded-v2-lock-controls", "--binary", "target/release/pqc-scan", "--build-profile", "release", "--out-dir", "target/quality-task-042-reopen-20261112/lock-controls", "--repeats", "3", "--skip-benchmarks"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality", "--baseline", "target/quality-task-042-reopen-20261112/legacy", "--out-dir", "target/quality-task-042-reopen-20261112/legacy-report-final", "--reference", "target/quality-task-042/legacy-regression-02/summary.json"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded", "--baseline", "target/quality-task-042-reopen-20261112/v1", "--out-dir", "target/quality-task-042-reopen-20261112/v1-report-final", "--reference", "target/quality-task-042/expanded-accepted/summary.json"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded-v2", "--baseline", "target/quality-task-042-reopen-20261112/v2", "--out-dir", "target/quality-task-042-reopen-20261112/v2-report-final", "--reference", "target/quality-task-042/expanded-accepted/summary.json"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded-v2-lock-controls", "--baseline", "target/quality-task-042-reopen-20261112/lock-controls", "--out-dir", "target/quality-task-042-reopen-20261112/lock-controls-report-final"]`; exit `0`
+- Command: `["cargo", "test", "-p", "pqc_scan_core", "--test", "task_ids", "--locked", "--offline"]`; exit `0`
+- Command: `["python3", "/Users/waka/development/pqc/pqc-scan/docs/quality/task042-reopen-20261112/validate-evidence.py"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--corpus-dir", "tests/quality", "--binary", "target/release/pqc-scan", "--build-profile", "release", "--out-dir", "target/quality-task-042-reopen-20261112/legacy", "--repeats", "3", "--skip-benchmarks"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality", "--baseline", "target/quality-task-042-reopen-20261112/legacy", "--reference", "target/quality-task-042/legacy-regression-02/summary.json", "--out-dir", "target/quality-task-042-reopen-20261112/legacy-report"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--corpus-dir", "tests/quality/expanded", "--binary", "target/release/pqc-scan", "--build-profile", "release", "--out-dir", "target/quality-task-042-reopen-20261112/v1", "--repeats", "3", "--skip-benchmarks"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded", "--baseline", "target/quality-task-042-reopen-20261112/v1", "--reference", "target/quality-task-042/expanded-accepted/summary.json", "--out-dir", "target/quality-task-042-reopen-20261112/v1-report"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--corpus-dir", "tests/quality/expanded-v2", "--binary", "target/release/pqc-scan", "--build-profile", "release", "--out-dir", "target/quality-task-042-reopen-20261112/v2", "--repeats", "3", "--skip-benchmarks"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded-v2", "--baseline", "target/quality-task-042-reopen-20261112/v2", "--reference", "target/quality-task-042/expanded-accepted/summary.json", "--out-dir", "target/quality-task-042-reopen-20261112/v2-report"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "fmt", "--all", "--", "--check"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "run", "--manifest-path", "target/quality-task-042-reopen-20261112/parser-diagnostic/Cargo.toml", "--locked", "--offline", "--", "tests/quality/corpus/holdout/broken.py", "tests/quality/expanded/inputs/tuning/java/Broken.java", "tests/quality/expanded/inputs/tuning/python/broken.py"]`; exit `0`
+- Command: `["target/release/pqc-scan", "scan", ".", "--format", "sarif", "--rules-dir", "./rules", "--out-dir", "target/quality-task-042-reopen-20261112/self-scan"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality", "--baseline", "target/quality-task-042-reopen-20261112/legacy", "--out-dir", "target/quality-task-042-reopen-20261112/legacy-report-verified", "--reference", "target/quality-task-042/legacy-regression-02/summary.json"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded", "--baseline", "target/quality-task-042-reopen-20261112/v1", "--out-dir", "target/quality-task-042-reopen-20261112/v1-report-verified", "--reference", "target/quality-task-042/expanded-accepted/summary.json"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded-v2", "--baseline", "target/quality-task-042-reopen-20261112/v2", "--out-dir", "target/quality-task-042-reopen-20261112/v2-report-verified", "--reference", "target/quality-task-042/expanded-accepted/summary.json", "--applicability", "tests/quality/applicability-042-v2/assessment.json"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/expanded-v2-lock-controls", "--baseline", "target/quality-task-042-reopen-20261112/lock-controls", "--out-dir", "target/quality-task-042-reopen-20261112/lock-controls-report-verified"]`; exit `0`
+- Command: `["/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "--version"]`; exit `0`
+- Command: `["git", "rev-parse", "HEAD"]`; exit `0`
+- Command: `["git", "branch", "--show-current"]`; exit `0`
+- Command: `["git", "status", "--short"]`; exit `0`
+- Command: `["rustc", "-Vv"]`; exit `0`
+- Command: `["cargo", "-V"]`; exit `0`
+- Command: `["sysctl", "-n", "machdep.cpu.brand_string"]`; exit `0`
+- Command: `["sysctl", "-n", "hw.memsize"]`; exit `0`
+- Command: `["sysctl", "-n", "hw.ncpu"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task043-recorded-study
+
+**Partial**: Error triage and repaired detection; legacy annotation disagreement is not silently relabeled.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `Historical revision identified in bound result/source records`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: default static; before/after fixed corpus and fresh controls. Standards: Recorded detector contract, immutable corpus and source-only labels.
+Method: Error triage and repaired detection; legacy annotation disagreement is not silently relabeled.. Environment: Native local tests; exact execution context in VALIDATION.
+Comparison: Error triage and repaired detection; legacy annotation disagreement is not silently relabeled..
+
+- corpusVersion: `"043-v2"`
+- inputFiles: `206`
+- totalUnits: `255`
+- eligibleUnits: `197`
+- comparison: `{"before": {"holdout": {"tp": 3, "fp": 0, "fn": 0, "tn": 3, "positive": 3, "negative": 3, "ambiguous": 1, "unsupported": 0}, "tuning": {"tp": 58, "fp": 4, "fn": 42, "tn": 87, "positive": 100, "negative": 91, "ambiguous": 4, "unsupported": 53}}, "after": {"holdout": {"tp": 3, "fp": 0, "fn": 0, "tn": 3, "positive": 3, "negative": 3, "ambiguous": 1, "unsupported": 0}, "tuning": {"tp": 100, "fp": 0, "fn": 0, "tn": 91, "positive": 100, "negative": 91, "ambiguous": 4, "unsupported": 53}}}`
+- originalTargets: `{"fpFixed": 4, "fnFixed": 40, "remaining": 0}`
+- before: `{"binarySha256": "ce604d8348a474125b9cd12747554136de7614c13ca83ab22ea56e9c9581930c", "runtimeSourceDigest": "3906919c729ac100b0ce2ffb5a65ea57e76f7909cfec94916ce1a329434a009d"}`
+- after: `{"binarySha256": "cfb12f4b8751915b9c2a5d23be5e83e872358704e20e0b19d3273236aa4c288f", "runtimeSourceDigest": "5a337275b498233c1d45c67d83e7c3536bb692226c120fb835c6d8212e26edc6"}`
+- harnessDigest: `"41474d4fba6ff7aea6371d77e8047ca78fcd679df305c2faf1511bed11407654"`
+- corpusSha256: `"f8734fbadec003d6c74f5a0920422f675c0419fea6f6b795a857b7fb3c17cf07"`
+- truthSha256: `"78cec4a2a1e63568d3ff9e4946421230dc3f2cff68ee8ede08d89619b9393c42"`
+- repeatability: `{"repeats": 3, "semanticStable": true, "diagnosticStable": true, "rawOrderStable": true, "scoreStable": true}`
+- metadataCorrection: `"This is a replay of independently frozen labels, not another independent trial."`
+- performance: `"Not Tested: accuracy-only --skip-benchmarks; observed times/resources are incidental and not a speed regression conclusion."`
+- Limitation: Error triage and repaired detection; legacy annotation disagreement is not silently relabeled.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/043/TASK-043-FIXES-RESULTS.md`; SHA-256 `495488364d96cd53044d0ca1a7b2796ecd5065672fa91f21638a8f2abb844ed3`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/ACCEPTANCE.json`; SHA-256 `f095af241a4cd7c6dabce584988b17bcc76bc6fbd6d19c9cc0b1bfa22f5133d9`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/BEFORE-BASELINE-MATCH.json`; SHA-256 `46b9b3aa654d5c62a86da3bf4c4c0c330c1e4df45416c9785254f61f34f70619`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/BEFORE-SNAPSHOT.json`; SHA-256 `fcb25d478d5a96d8fd11656b71b2638b073a967d26ce1f347d45d32c86a6deb4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/COMPLETE-AFTER-COMMANDS.json`; SHA-256 `bd77dd6a99a6f32704718edca1faa1500aa770cd6bf65a6def7578f419a27646`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/COMPLETE-BEFORE-COMMANDS.json`; SHA-256 `57d32b5614498f7866fea1d716df9c50a1aec5d95e63b20534f3c51e409940ed`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/COMPLETION-CHECKS.json`; SHA-256 `3b2672fb9aafe7c8fef14c200d71e47b307e459694e284589cacca7c7f174093`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/EVIDENCE-INDEX.json`; SHA-256 `fc6f9beb728fed0b24ac2269306352929ce518c4081d6b72499fa86065e15811`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINAL-SOURCE-MATCH.json`; SHA-256 `a0bb274114e6de5184c4fea5c7ee060cf1ceef58b4199cee79a4b37ad06bb0fa`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINAL-SOURCE.json`; SHA-256 `2d8b5fe3f34b8f9282858c48df3ac6f55116791f6ebff96080e12a84ba28db90`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINAL-adversarial-cases.json`; SHA-256 `cc5c90fee24749e45822fb59da2cfdc5759dadde3df76d27d40aca74cf37e4be`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINAL-algorithm-truth.json`; SHA-256 `36692d41da8c3a71f99a1bbcb8ac62acd50a6fae4861ecda71f16d9990b351ef`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINAL-artifact-metrics.json`; SHA-256 `f254e68a00a403202811d8842327ef3622e3b86a8353e97e2e36675ad155054a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINAL-case-coverage.json`; SHA-256 `bbccbdb7f74122068a6cf3c203fcdadd007d745f3164d35044ad2354f10eface`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINAL-comparison.json`; SHA-256 `f48008dc7fb499ce0e6a4e4f3081737aaf03bdc4a5d5069614b396febb8a0f1e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINAL-metrics.json`; SHA-256 `05f34a393c547ce00163f7ec4ed5fd801215b64796e48e91d7c56e4baa418a29`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINAL-quality.md`; SHA-256 `7d685dd4e4f2ca014eb45819797a32d04b64a67e00d23499b7d71810ed06020c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINAL-usage-truth.json`; SHA-256 `646eaf94ce08b8a7db9781fe9f29ebaa8c52a05ad578975730893cd9a0112e60`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FINALIZATION.json`; SHA-256 `154f1d728c176a80c727a4167a93c44c4bf2e2a3df6e20d45118a1bf9bb13f94`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/FROZEN-EVIDENCE.json`; SHA-256 `27e23793e6c28c7afd5f1fb0349c056cbf586c0ba2209eb5122921d249f3fdc3`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/IMPLEMENTATION-REVIEW-COMBINED-APPROVAL.json`; SHA-256 `6916b8c3cc35cbe545eda30b9331fbfad1d54a3a6830bc272f2171e831ce0cb9`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/IMPLEMENTATION-REVIEW-FINAL.json`; SHA-256 `57960875cd36dc41943a9e8e570309399488c4f7016916a6b43ae135c6c45299`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/IMPLEMENTATION-REVIEW-HARNESS-R4.json`; SHA-256 `e41b76350509e0c992d911b2e49a0a543e162b914db0dbbdaebeee03fc7f9135`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/IMPLEMENTATION-REVIEW-SOURCE-R3.json`; SHA-256 `77505b7a95d18267ae41b61df0193437fb6629240f94876970addfa4d56de4ed`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/IMPLEMENTATION-REVIEW-SOURCE.json`; SHA-256 `c47a405f13a0e2282249a970cc3eb353f0f22309f353ffc25634cd1eb16e1c41`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/IMPLEMENTATION-REVIEW.md`; SHA-256 `82b44dec4cde8f1729bea2debda118ab211c024f2c14f0f03af3f63d4ba935ea`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/METRICS.json`; SHA-256 `90aa25a4fd5a3d03f4c988a81f0b4daf5d3bb79dc0a29fb8d6238dbc1d8f401a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/PRODUCT-DELTA.json`; SHA-256 `6ba3572d901bafd268b6df08cd51b7a9f12e553ce0ab8176f6cc8c7766cdc8cd`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/REPAIRS.json`; SHA-256 `f090a6458e6721997fa510b1d6a744fe9bdffb0e45806c532672441429c0596a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/REPAIRS.md`; SHA-256 `45b1467550e791c374bdc7d597c8b631781405785f6d31afba55525de884ec1e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/SELF-SCAN-POLICY-UPDATE-FINAL.json`; SHA-256 `14ef801a3b462d5fa2864505b5dd0083a88582bb532953bdebc2925b13b6e311`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/SELF-SCAN-POLICY-UPDATE.json`; SHA-256 `27a35b80f269733fc738ea96cbe99fea5eb4425ad7f783832afa48e4b2836e38`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/TEST-REVIEW-FINAL-SOURCE.json`; SHA-256 `2016726a8cc2dee2e6616f28db408b0f8116e9472497bf11141ed7aeb2272716`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/TEST-REVIEW-FINAL-VERIFICATION.json`; SHA-256 `8e7e4d9ef5912f6bbc1912f7a1bc285f83cec449a1a87d36bea4220b11752995`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/TEST-REVIEW.md`; SHA-256 `a46a5028b1b3b9bf98b81bcbba2d5c16decb1e7a18905914f1e6f78c81684840`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/UPSTREAM-HASH-VERIFICATION.json`; SHA-256 `19c0c7c572726da200e52425c6ead5bc7deaf4e6e1953658f20fbbae8b761ff8`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/043/evidence/task043-fixes-20261112/VALIDATION.json`; SHA-256 `a0c4e885ca649d408a93f53a6e8bb4923ba74a61df0d1b3033f25efaf8f6258c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["python3", "tests/quality/run.py", "--out-dir", "target/quality-task-043-fixes-20261112/complete-after-v3", "--build-profile", "release", "--repeats", "3", "--skip-benchmarks", "--corpus-dir", "tests/quality/task043-corpus-v2"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--baseline", "target/quality-task-043-fixes-20261112/complete-after-v3", "--out-dir", "target/quality-task-043-fixes-20261112/complete-after-v3-report", "--corpus-dir", "tests/quality/task043-corpus-v2", "--reference", "/Users/waka/development/pqc/pqc-scan/target/quality-task-043-fixes-20261112/before-checkout/target/before-complete/summary.json"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--out-dir", "target/quality-task-043-fixes-20261112/complete-after-v2", "--build-profile", "release", "--repeats", "3", "--skip-benchmarks", "--corpus-dir", "tests/quality/expanded-v2"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--baseline", "target/quality-task-043-fixes-20261112/complete-after-v2", "--out-dir", "target/quality-task-043-fixes-20261112/complete-after-v2-report", "--corpus-dir", "tests/quality/expanded-v2", "--applicability", "tests/quality/applicability-042-v2/assessment.json"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--out-dir", "target/quality-task-043-fixes-20261112/complete-after-v1", "--build-profile", "release", "--repeats", "3", "--skip-benchmarks", "--corpus-dir", "tests/quality/expanded"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--baseline", "target/quality-task-043-fixes-20261112/complete-after-v1", "--out-dir", "target/quality-task-043-fixes-20261112/complete-after-v1-report", "--corpus-dir", "tests/quality/expanded"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--out-dir", "target/quality-task-043-fixes-20261112/complete-after-lock", "--build-profile", "release", "--repeats", "3", "--skip-benchmarks", "--corpus-dir", "tests/quality/expanded-v2-lock-controls"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--baseline", "target/quality-task-043-fixes-20261112/complete-after-lock", "--out-dir", "target/quality-task-043-fixes-20261112/complete-after-lock-report", "--corpus-dir", "tests/quality/expanded-v2-lock-controls"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--out-dir", "target/quality-task-043-fixes-20261112/complete-after-original", "--build-profile", "release", "--repeats", "3", "--skip-benchmarks"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--baseline", "target/quality-task-043-fixes-20261112/complete-after-original", "--out-dir", "target/quality-task-043-fixes-20261112/complete-after-original-report", "--reference", "docs/quality/task023/BASELINE.json"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--corpus-dir", "tests/quality/task043-corpus-v2", "--out-dir", "target/before-complete", "--build-profile", "release", "--repeats", "3", "--skip-benchmarks"]`; exit `0`
+- Command: `["python3", "tests/quality/report.py", "--corpus-dir", "tests/quality/task043-corpus-v2", "--baseline", "target/before-complete", "--out-dir", "target/before-complete-report"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--release", "--offline", "--locked"]`; exit `0`
+- Command: `["cargo", "fmt", "--all", "--", "--check"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--offline", "--locked"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--offline", "--locked", "--", "-D", "warnings"]`; exit `0`
+- Command: `["python3", "-m", "unittest", "discover", "-s", "tests/quality", "-p", "test_*.py"]`; exit `0`
+- Command: `["python3", "-m", "unittest", "discover", "-s", "tests/protocol", "-p", "test_*.py"]`; exit `0`
+- Command: `["python3", "-m", "unittest", "discover", "-s", "tests/distribution"]`; exit `0`
+- Command: `["node", "--test", "shell/compact-report.test.cjs", "shell/final-gap-self-scan.test.cjs", "shell/prepare-code-scanning.test.cjs", "shell/self-scan-backlog.test.cjs", "shell/self-scan-policy.test.cjs"]`; exit `1`
+- Command: `["/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "--version"]`; exit `0`
+- Command: `["git", "rev-parse", "HEAD"]`; exit `0`
+- Command: `["git", "branch", "--show-current"]`; exit `0`
+- Command: `["git", "status", "--short"]`; exit `0`
+- Command: `["rustc", "-Vv"]`; exit `0`
+- Command: `["cargo", "-V"]`; exit `0`
+- Command: `["sysctl", "-n", "machdep.cpu.brand_string"]`; exit `0`
+- Command: `["sysctl", "-n", "hw.memsize"]`; exit `0`
+- Command: `["sysctl", "-n", "hw.ncpu"]`; exit `0`
+- Command: `["sh", "-c", "git diff --check"]`; exit `0`
+- Command: `["sh", "-c", "cargo test -p pqc_scan_core --test task_ids --offline --locked"]`; exit `0`
+- Command: `["node", "--test", "shell/*.test.cjs"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task044-recorded-study
+
+**Partial**: Stable/nightly coverage and feasibility; branch versus region, ambiguity and Miri limits remain distinct.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `f8aff1888525f0f3e350a734166c12c6de3e71ed`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: default and all-features; stable coverage plus pinned nightly branch/Miri. Standards: LLVM line/region/branch semantics; Miri applicability, not formal proof.
+Method: Stable/nightly coverage and feasibility; branch versus region, ambiguity and Miri limits remain distinct.. Environment: Linux arm64 resource-confined; Rust1.93.1 and separately pinned nightly.
+Comparison: Stable/nightly coverage and feasibility; branch versus region, ambiguity and Miri limits remain distinct..
+
+- baseHead: `"f8aff1888525f0f3e350a734166c12c6de3e71ed"`
+- branch: `"codex/quality-assessment-model"`
+- records: `{"default": {"phase": "stable", "tests": {"passed": 514, "ignored": 0}, "rawLlvmTotals": {"lines": {"count": 21265, "covered": 19549, "percent": 91.93040206912768}, "regions": {"count": 34661, "covered": 31626, "percent": 91.24376099939413}, "functions": {"count": 1750, "covered": 1624, "percent": 92.8}, "branches": {"count": 0, "covered": 0, "percent": null, "status": "Not Measured"}}, "mappingSubsetTotals": {"lines": {"covered": 19549, "count": 21265, "percent": 91.93040206912768, "status": "Measured"}, "regions": {"covered": 31626, "count": 34661, "percent": 91.24376099939413, "status": "Measured"}, "functions": {"covered": 1624, "count": 1750, "percent": 92.8, "status": "Measured"}, "branches": {"covered": 0, "count": 0, "percent": null, "status": "Not Measured"}}, "excludedFromSubset": [], "unmappedSourceFiles": ["crates/pqc_scan_cli/src/probe_command.rs", "crates/pqc_scan_cli/src/probe_resolver.rs", "crates/pqc_scan_core/src/error.rs", "crates/pqc_scan_core/src/probe_transport.rs", "crates/pqc_scan_probe_ssh/src/lib.rs", "crates/pqc_scan_probe_ssh/src/negotiated.rs", "crates/pqc_scan_probe_ssh/src/runtime.rs", "crates/pqc_scan_probe_tls/src/lib.rs", "crates/pqc_scan_probe_tls/src/runtime.rs"], "sourceFileCount": 73}, "all-features": {"phase": "stable", "tests": {"passed": 565, "ignored": 1}, "rawLlvmTotals": {"lines": {"count": 22585, "covered": 20782, "percent": 92.01682532654416}, "regions": {"count": 36882, "covered": 33578, "percent": 91.04170055853804}, "functions": {"count": 1875, "covered": 1734, "percent": 92.48}, "branches": {"count": 0, "covered": 0, "percent": null, "status": "Not Measured"}}, "mappingSubsetTotals": {"lines": {"covered": 20671, "count": 22464, "percent": 92.01834045584046, "status": "Measured"}, "regions": {"covered": 33409, "count": 36683, "percent": 91.07488482403294, "status": "Measured"}, "functions": {"covered": 1724, "count": 1865, "percent": 92.4396782841823, "status": "Measured"}, "branches": {"covered": 0, "count": 0, "percent": null, "status": "Not Measured"}}, "excludedFromSubset": ["crates/pqc_scan_cli/src/probe_resolver.rs"], "unmappedSourceFiles": ["crates/pqc_scan_core/src/error.rs", "crates/pqc_scan_probe_ssh/src/lib.rs", "crates/pqc_scan_probe_tls/src/lib.rs"], "sourceFileCount": 79}, "branch-default": {"phase": "branch", "tests": {"passed": 514, "ignored": 0}, "rawLlvmTotals": {"lines": {"count": 21265, "covered": 19549, "percent": 91.93040206912768}, "regions": {"count": 34661, "covered": 31626, "percent": 91.24376099939413}, "functions": {"count": 1750, "covered": 1624, "percent": 92.8}, "branches": {"count": 5334, "covered": 3938, "percent": 73.82827146606674, "status": "Measured"}}, "mappingSubsetTotals": {"lines": {"covered": 19549, "count": 21265, "percent": 91.93040206912768, "status": "Measured"}, "regions": {"covered": 31626, "count": 34661, "percent": 91.24376099939413, "status": "Measured"}, "functions": {"covered": 1624, "count": 1750, "percent": 92.8, "status": "Measured"}, "branches": {"covered": 3938, "count": 5334, "percent": 73.82827146606674, "status": "Measured"}}, "excludedFromSubset": [], "unmappedSourceFiles": ["crates/pqc_scan_cli/src/probe_command.rs", "crates/pqc_scan_cli/src/probe_resolver.rs", "crates/pqc_scan_core/src/error.rs", "crates/pqc_scan_core/src/probe_transport.rs", "crates/pqc_scan_probe_ssh/src/lib.rs", "crates/pqc_scan_probe_ssh/src/negotiated.rs", "crates/pqc_scan_probe_ssh/src/runtime.rs", "crates/pqc_scan_probe_tls/src/lib.rs", "crates/pqc_scan_probe_tls/src/runtime.rs"], "sourceFileCount": 73}, "branch-all-features": {"phase": "branch", "tests": {"passed": 565, "ignored": 1}, "rawLlvmTotals": {"lines": {"count": 22585, "covered": 20749, "percent": 91.87071064866062}, "regions": {"count": 36882, "covered": 33534, "percent": 90.92240117130308}, "functions": {"count": 1875, "covered": 1732, "percent": 92.37333333333333}, "branches": {"count": 5534, "covered": 4077, "percent": 73.67184676544994, "status": "Measured"}}, "mappingSubsetTotals": {"lines": {"covered": 20671, "count": 22464, "percent": 92.01834045584046, "status": "Measured"}, "regions": {"covered": 33409, "count": 36683, "percent": 91.07488482403294, "status": "Measured"}, "functions": {"covered": 1724, "count": 1865, "percent": 92.4396782841823, "status": "Measured"}, "branches": {"covered": 4063, "count": 5514, "percent": 73.68516503445774, "status": "Measured"}}, "excludedFromSubset": ["crates/pqc_scan_cli/src/probe_resolver.rs"], "unmappedSourceFiles": ["crates/pqc_scan_core/src/error.rs", "crates/pqc_scan_probe_ssh/src/lib.rs", "crates/pqc_scan_probe_tls/src/lib.rs"], "sourceFileCount": 79}}`
+- knownAmbiguousFile: `"crates/pqc_scan_cli/src/probe_resolver.rs"`
+- mappingSubsetReason: `"Same source compiled as CLI module and #[path] integration-test module; observed counters disagree with passed execution and differ across compiler configurations. Raw totals remain unchanged. env_clear also prevents child profile collection."`
+- miri: `{"miriIdentityExit": "Not repeated; see measurement-07/miri-identity.log", "miriScopeExit": 0, "miriControlPositiveExit": 0, "miriControlNegativeExit": 1, "miriNegativeDetectedUndefinedBehavior": true, "formalPlatform": "aarch64-unknown-linux-gnu", "kaniPrebuiltForThisPlatform": false, "scope": "Exact safe_token/valid_scope source fragment in an isolated std-only crate; three tests, not the whole identity module or unsafe code"}`
+- coreMiriAttempt: `101`
+- Limitation: Stable/nightly coverage and feasibility; branch versus region, ambiguity and Miri limits remain distinct.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/044/TASK-044-RESULTS.md`; SHA-256 `251d150b93730b854cbbaac726f9145c283f7b450f0d784fcd3867323f838e90`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/ACCEPTANCE.json`; SHA-256 `711885ee0969d58be4b029034a5cef34f4e7faadf2c657bc7979b6c477c67d44`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/CLOSURE-CHECK.json`; SHA-256 `a2613277667dee6b9e0fc7cb8faa4c6c0bfb15925f93c89b8f8fa3488025ab7f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/COMPLETION-SOURCE.json`; SHA-256 `1c4eb238bf2ef30a56af79c91ee72e841cd5f2ed7b6fd7c2ec8acec3bdd80eab`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/COVERAGE-REVIEW.md`; SHA-256 `9fda544ddf0961ddf8e8e27a2a4aebca5549a61fb144875338b95bba7140d226`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/EVIDENCE-INDEX-R1.json`; SHA-256 `c85e4146bf64ae3dafdc56e5c3286a02e709d970ac5a3ebf659ab5e9ac14baf6`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/EVIDENCE-INDEX-REVIEWED.json`; SHA-256 `4c5764b35fe302b72c8f21539e52b63ea2fc7289195024ea59354e0918d31628`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/EVIDENCE-INDEX.json`; SHA-256 `d839fe5669cf8a57ea6d4e9db76c8729628d846f4dde557e785d503bca7335ab`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/IMPLEMENTATION-REVIEW.md`; SHA-256 `73a773b40cc05d7f7d46debb29c7ebb82ee2318defc711ea22f59fa8c22b727b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/MEASUREMENTS.json`; SHA-256 `3b0b45afb50c507622e884d6b606951369604692b89e83570b61a5612fa7aa2b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/REVIEW-SOURCE-R2.json`; SHA-256 `5cf7a7332b63498edcfc9f48031b91aa27443426a0609b5b4901381b236106a5`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/REVIEW-SOURCE-R3.json`; SHA-256 `fe763a1743157c572ccb4f1915067c00c2a0def70408ec44c793c13f45bcc454`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/REVIEW-SOURCE.json`; SHA-256 `30c6dc66b83eda12b108bb58c17dbce1da68900a9d89bd418d67640627e55681`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/SOURCE-MATCH.json`; SHA-256 `992c7cf381c7f9477ab2617e25e6104a93bde9eeb2e784c9f1300e1d266ec87e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/TEST-REVIEW.md`; SHA-256 `41c280e3881976bc048f198a46f0a139f025c86cedbc6276ebbfa1b53c1e017b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/VALIDATION.json`; SHA-256 `f554d6937662b96c3d92499e35f3b60d2bd7cac76f13a88680588f6b2b8754cf`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/044/evidence/task044-20261113/VERIFICATION-FEASIBILITY.md`; SHA-256 `925807fa57bc1be0f476c1d7dd1c8111665275fbfca37338a0fe077ba804f7e1`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["sh", "-c", "python3 -m unittest discover -s tests/quality -p 'test_*.py'"]`; exit `0`
+- Command: `["sh", "-c", "node --test shell/*.test.cjs"]`; exit `0`
+- Command: `["sh", "-c", "python3 -m unittest discover -s tests/distribution -v"]`; exit `0`
+- Command: `["sh", "-c", "python3 -m unittest discover -s tests/protocol -p 'test_*.py'"]`; exit `0`
+- Command: `["sh", "-c", "cargo fmt --all --check"]`; exit `0`
+- Command: `["sh", "-c", "git diff --check"]`; exit `0`
+- Command: `["sh", "-c", "Ruby YAML parse/original mapping; Python py_compile; local Markdown links; evidence SHA-256 audit"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task045-recorded-study
+
+**Partial**: 20 nominated mutations: 14 caught, 6 missed including one equivalent; not a population quality rate.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `34b763d188bfc8ada49876c18b15f5406b6628b3`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: all-features; 20 nominated mutations and unmutated controls. Standards: Caught/missed/timeout/unviable; equivalence disclosed.
+Method: 20 nominated mutations: 14 caught, 6 missed including one equivalent; not a population quality rate.. Environment: Linux arm64; Rust1.93.1, no external network, nonroot/resource bounds.
+Comparison: 20 nominated mutations: 14 caught, 6 missed including one equivalent; not a population quality rate..
+
+- rawCounts: `{"caught": 14, "missed": 6, "timeout": 0, "unviable": 0}`
+- rawScorePercent: `70.0`
+- equivalentMutations: `["M20"]`
+- nonEquivalentScore: `{"caught": 14, "missed": 5, "denominator": 19, "percent": 73.6842105263158}`
+- scope: `"Linux aarch64, Rust1.93.1, all-features; fixed 20 mutations; not product-wide score"`
+- unverified: `"default-feature-only configuration, doctests, other platforms and unselected mutations"`
+- sourceBeforeAfterMatch: `true`
+- containerRemoved: `true`
+- image: `"sha256:2e97b36b3a9d0a006b8dae8812889ea39fa29d03530292d3661575ba6a1a464d"`
+- baselines: `{"baseline-workspace": {"passed": 578, "failed": 0, "ignored": 1, "binaries": 64}, "restored-workspace": {"passed": 578, "failed": 0, "ignored": 1, "binaries": 64}}`
+- recordedCommandWallSeconds: `864.5808482199973`
+- recordedCommands: `689`
+- Concern (high): 20 nominated mutations: 14 caught, 6 missed including one equivalent; not a population quality rate.
+- Limitation: 20 nominated mutations: 14 caught, 6 missed including one equivalent; not a population quality rate.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/045/TASK-045-RESULTS.md`; SHA-256 `be71b7cc8499faef7477e8286086477dc823b32b33f21f29352d977278e4f71b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/045/evidence/task045-20261113/CLOSURE.json`; SHA-256 `ed15ae22c2c24c75bb138ee65e741570527b1d3bfb03367704d55763afcdea09`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/045/evidence/task045-20261113/EVIDENCE-INDEX.json`; SHA-256 `780cef4a2a72897f2a97169f2f833d3126f42b69f98fd84434b569019905667c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/045/evidence/task045-20261113/RESULTS.json`; SHA-256 `5a24c6422c60f7f34d0789eae6586794131dd035381b62fdc6485987cb5cb9e4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/045/evidence/task045-20261113/REVIEW-SOURCE-R2.json`; SHA-256 `1f012350b4300e46591a4b7d7b36e622c1662f75f18b37b54421709e8c677d2d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/045/evidence/task045-20261113/REVIEWS.md`; SHA-256 `08af62d711374cb27bd9814cc41f538937c057e7cdd0c2db298e7336d3f3ddeb`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/045/evidence/task045-20261113/SOURCE.json`; SHA-256 `44e25041fe4ae3aabf8eafef65e3d9f27d13a0a3fdde0a9ab88d5c08cda79f05`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/045/evidence/task045-20261113/VALIDATION.json`; SHA-256 `556c98fefe804a004cf5a806b1e62a9f793732c57d9c645537f64de68e5ec0cd`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["python3", "-m", "unittest", "discover", "-s", "tests/quality", "-p", "test_*.py"]`; exit `0`
+- Command: `["python3", "-m", "py_compile", "tests/quality/task045/entry.py", "tests/quality/task045/study.py", "tests/quality/test_mutation045.py", "tests/protocol/container_entry.py", "tests/protocol/container_runner.py"]`; exit `0`
+- Command: `["cargo", "fmt", "--all", "--check"]`; exit `0`
+- Command: `["git", "diff", "--check"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task046-recorded-study
+
+**Partial**: Property/metamorphic tests of bounded declared invariants, not a proof over every input.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `34b763d188bfc8ada49876c18b15f5406b6628b3`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: default/all-features; fixed seeds and finite generated states. Standards: Property/metamorphic relations as declared in original result.
+Method: Property/metamorphic tests of bounded declared invariants, not a proof over every input.. Environment: Linux arm64; Rust1.93.1 isolated bounded execution.
+Comparison: Property/metamorphic tests of bounded declared invariants, not a proof over every input..
+
+- task: `"046"`
+- requirement: `"Q4-15"`
+- sourceScopeSha256: `"1a2c8999fd1c879104c27055fa0527bf0a1aaa2ec3492ff2a8eaf108f68d8287"`
+- seeds: `[46, 20261113, 1592642302]`
+- properties: `{"semanticReplay": "verified", "failuresNotSuccess": "verified", "unknownNotFabricated": "verified", "inspectionStatistics": "verified", "stableUniqueFramedIds": "verified", "generationAndShrinking": "verified"}`
+- scope: `"Rust1.93.1 Linux arm64 default/all-features, finite generated inputs; no claim of all inputs or product-wide correctness"`
+- failures: `"No product invariant violation found in final runs. Early development comparison incorrectly required run-scoped observation IDs to match; corrected against existing Inventory v1 contract. Logs retained as development evidence, not product findings."`
+- Limitation: Property/metamorphic tests of bounded declared invariants, not a proof over every input.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/046/TASK-046-RESULTS.md`; SHA-256 `a779a23d00306cf7f7240c967287f2cc7e07a5fdae9166db8061674569413ef8`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/046/evidence/task046-20261113/CLOSURE.json`; SHA-256 `3f1aa6d7dcc30fcd50345e49cf64d6e293a0741b3d5179c637aa66a22ac25d0d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/046/evidence/task046-20261113/EVIDENCE-INDEX.json`; SHA-256 `b144c5fa3d111e5c2cff314348e09743a87db440fee313c52227b4f6f1c6955c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/046/evidence/task046-20261113/FINAL-CHECK.json`; SHA-256 `cd1f9383236ceb8476a3e80e1b6b40b65882b0d04878007fb06dea96550e8f5e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/046/evidence/task046-20261113/REVIEW-SOURCE-R2.json`; SHA-256 `2a6f0fb7c789841c5740d01a98dedf18276e0f00005ea092f4593ef1487b3523`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/046/evidence/task046-20261113/REVIEWS.md`; SHA-256 `086cbcd1bab9c2f7e11877885ce745ed1bb852b91a3a2e4d04ab45ea8df3569d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/046/evidence/task046-20261113/SOURCE.json`; SHA-256 `a5cbb0cf61bf19ce5e027be93e6ee01f05c6d4a434f22d15ee56fa1b524a3869`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/046/evidence/task046-20261113/VALIDATION.json`; SHA-256 `5177ce9d0bfb2467bdee74b2903962a62855633cc15bf72f1b799dbde615f8c1`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/046/evidence/task046-20261113/property-results.json`; SHA-256 `6048b877ff0a9039f203b30280937aeaddf0e2b9ac27167970a3a532c4637d3d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["python3", "-m", "unittest", "discover", "-s", "tests/quality", "-p", "test_*.py"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--all-features", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task047-recorded-study
+
+**Partial**: Finite fuzz inputs and retained regressions; no universal absence-of-defects claim.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `34b763d188bfc8ada49876c18b15f5406b6628b3`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: normal fuzz workers plus separate instrumented coverage. Standards: Fuzz corpus/reproducer identity; line/region not branch coverage.
+Method: Finite fuzz inputs and retained regressions; no universal absence-of-defects claim.. Environment: Linux arm64; Rust1.93.1 isolated finite execution.
+Comparison: Finite fuzz inputs and retained regressions; no universal absence-of-defects claim..
+
+- scope: `"public/synthetic fixed seeds, finite deterministic byte mutations; not coverage-guided and not proof of all inputs"`
+- productFailures: `0`
+- totalInputs: `14547`
+- distinctTargetNameInputs: `12133`
+- distinctByteInputs: `11667`
+- preparationImage: `"sha256:2e97b36b3a9d0a006b8dae8812889ea39fa29d03530292d3661575ba6a1a464d"`
+- sourceBeforeAfterMatch: `true`
+- containerRemoved: `true`
+- replayValidation: `"every recorded input regenerated and SHA-256 checked; all saved seeds exercised in each mode"`
+- control: `{"target": "synthetic-panic-control", "command": ["/usr/bin/python3", "-c", "import os;from pathlib import Path;d=Path(os.environ['PQC_FUZZ_INPUT']).read_bytes();print('PQC047:{}');raise SystemExit(42 if b'CRASH' in d else 0)"], "seed": 47, "seedCount": 1, "seedHashes": ["b2162607b7be4bd6c05992a1918960281d605c8a038e92f071e5b9685bd189bb"], "configuredSeconds": 5, "wallSeconds": 0.3542350830000487, "inputLimitBytes": 1048576, "perInputWallSeconds": 2, "perInputCpuSeconds": 2, "maxCases": 1, "executed": 1, "statuses": {"panic": 1}, "reachedStates": {}, "failures": [{"recipe": {"index": 0, "seed": 47, "selectedSeed": 0, "name": "control", "sha256": "b2162607b7be4bd6c05992a1918960281d605c8a038e92f071e5b9685bd189bb", "bytes": 16}, "signature": ["panic", "42"], "originalBytes": 16, "minimalBytes": 5, "minimalSha256": "6f93481fe2c111b1c44176bfa27e6461bf26668e0c6c31fab4a32fa8a4f663e5", "reductionCalls": 18, "minimality": "single-byte deletion minimal; not globally smallest"}], "stopReason": "failure", "engine": "deterministic byte mutation, not coverage-guided", "reachability": "observed entrypoint outcome counts; no line/branch percentage claimed"}`
+- supplementalScope: `"populated native-v1 golden, broken references and future vocabulary; exact input-only measurement recipe archived"`
+- limitAdjustment: `"initial short &lt;=30s/256cases and long &lt;=120s/2048cases per target; earlier 30min/target was a planning proposal"`
+- lineRegionCoverage: `{"profiledInputs": 255, "totals": {"lines": {"count": 18975, "covered": 6080, "percent": 32.042160737812914}, "regions": {"count": 30312, "covered": 9371, "percent": 30.915149115861706}, "functions": {"count": 1568, "covered": 506, "percent": 32.27040816326531}, "branches": {"count": 0, "covered": 0, "percent": null, "status": "Not Measured"}}, "scope": "linked Rust source only; source-located cfg(test) blocks included; no dependency/FFI C/whole-product claim", "artifact": "coverage-summary.json"}`
+- branchCoverage: `"Not Measured; no percent inferred from regions"`
+- processingStates: `"reachedStates describe observed processing outcomes; source coverage is a separate255-input replay"`
+- Limitation: Finite fuzz inputs and retained regressions; no universal absence-of-defects claim.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/047/TASK-047-RESULTS.md`; SHA-256 `0b920451b9a2cfd46f528c1c4f9d6b8675b5b8dae525921fd80511fddf786df4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/047/evidence/task047-20261113/CLOSURE.json`; SHA-256 `1c566b571ade67bc62966bf584b527407314588879a48a6a18f330a8434c4c00`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/047/evidence/task047-20261113/EVIDENCE-INDEX.json`; SHA-256 `ef3e7fee507436ba84cd15d672621fe957ea82a7ee9e259325f25f4c33c36961`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/047/evidence/task047-20261113/FINAL-CHECK.json`; SHA-256 `cb4fbb0d15506c73eea2cbe86c009a701cd9b274e98bdc29745b3ec00028d06a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/047/evidence/task047-20261113/REVIEWS.md`; SHA-256 `392f717b90699fa4747906cbfedac3a336ee0b066d7944908bf123caaf889cd6`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/047/evidence/task047-20261113/SOURCE.json`; SHA-256 `bc33b5258803ac349b8aa0dc34bfddc96b43f4164a61491e57a65180646ec159`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/047/evidence/task047-20261113/VALIDATION.json`; SHA-256 `9181c3b5d85fc33f5969f6feb2e0e8c75716913cb0e1f7d8f43b08cf4e0a9b63`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/047/evidence/task047-20261113/coverage-summary.json`; SHA-256 `491de371b16866a19ab77e350572b0dc8b5c6367152814475b0d0757727892ee`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/047/evidence/task047-20261113/fuzz-results.json`; SHA-256 `0f587b38cb519c947a9920a569732107359eb8d6fb4e04406e639fb9fc828ede`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--all-features", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Command: `["cargo", "test", "-p", "pqc_scan_detectors", "-p", "pqc_scan_report", "-p", "pqc_scan_probe_ssh", "--test", "quality047", "--all-features", "--no-run", "--locked", "--offline", "--message-format=json"]`; exit `0`
+- Command: `["cargo", "test", "-p", "pqc_scan_probe_tls", "--lib", "--all-features", "--no-run", "--locked", "--offline", "--message-format=json"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task048-recorded-study
+
+**Partial**: Schema and report semantic/security checks; source drift stays historical.
+Original recorded outcome: "Passed".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `c1bc58e59baffdee73beae73f79b1f9a68804bd2`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: default/all-features and bilingual rendering/schema fixtures. Standards: SARIF2.1.0/CycloneDX1.7 schema plus independent semantic checks.
+Method: Schema and report semantic/security checks; source drift stays historical.. Environment: Isolated Linux and recorded real-browser observations.
+Comparison: Schema and report semantic/security checks; source drift stays historical..
+
+- requirement: `"Q3-12"`
+- status: `"Passed"`
+- runs: `[{"language": "en", "findings": 14, "sarifResults": 14, "legacyCbom": 14, "assetKinds": {"algorithm": 3, "certificate": 1, "dependency": 2, "public_key": 1, "usage": 15}, "cryptoComponents": 5, "softwareComponents": 2, "cryptoProvenanceRows": 9, "softwareProvenanceRows": 8, "legacyIsNotCycloneDX": true}, {"language": "ja", "findings": 14, "sarifResults": 14, "legacyCbom": 14, "assetKinds": {"algorithm": 3, "certificate": 1, "dependency": 2, "public_key": 1, "usage": 15}, "cryptoComponents": 5, "softwareComponents": 2, "cryptoProvenanceRows": 9, "softwareProvenanceRows": 8, "legacyIsNotCycloneDX": true}]`
+- assertionEvidence: `"crates/pqc_scan_cli/tests/output_contracts048.rs; crates/pqc_scan_report/tests/cyclonedx_17.rs; sarif_contract.rs; inspection.rs; evidence_privacy.rs"`
+- contracts: `["distinct algorithm/certificate/public key/usage", "literal certificate DER digest and RSA2048", "two RSA source occurrences at lines 2/3", "unique finding/asset IDs and resolving observation associations", "same finding IDs/assets after relocation and localization", "manifest constraint is not lock resolution or installation", "private marker remains lexical/unknown, no private key object", "export losses and omitted usage objects remain explicit", "SARIF/HTML/Markdown are projections; not full Inventory copies"]`
+- limits: `["duplicate weak anchors remain unresolved in diff", "legacy CBOM carries source findings, not distinct parsed assets", "HTML intentionally omits native asset/observation tables; Markdown retains details", "not an assessment of all possible inputs or scanner accuracy"]`
+- Limitation: Schema and report semantic/security checks; source drift stays historical.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/048/TASK-048-RESULTS.md`; SHA-256 `bcaad03c4b6facc0fc88c4617d9f9b113fd372de99cc702ed81f664b494ee80c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/ADMINISTRATIVE-CHECK.json`; SHA-256 `9159bc688682f78df63c64e00084104f3afe69367d4a6b96a0330b54e8417c68`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/APPLICABILITY.json`; SHA-256 `ea6076db14f5a8130f99eb4bd439daeb4a92c6eb81cdd224d5d13f1985cf998e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/COUNTS.json`; SHA-256 `0154f154f01365c53ba98f5fd1ce36a7aa6d1a1f76d3be5d433021d4e4c6b2d2`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/EVIDENCE-INDEX.json`; SHA-256 `87a7fff53b03ac24b81393365e8914bce4d81366cb7cf6c3d6e375869c4f972b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/FINAL-CHECK.json`; SHA-256 `15664e4bfdcc6cc4b7b6caa66ed4fa2a48a854cc96675d4b8045ae3b83486253`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/FINAL-SOURCE.json`; SHA-256 `ed53e2734ab93dbdeceb01487c0dbaafec724357d1742308473a90c4ffc2a421`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/PUBLIC-TRUTH.json`; SHA-256 `cb698a78fce9b60db04be079e87ec6ba740e1b484b559d258fa867d325475a61`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/REVIEWS.md`; SHA-256 `2c5be1f125b1786ee20b2d24fc67f65890ec4de23acf61acfde64095e15904f2`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/SOURCE.json`; SHA-256 `c58df0431ea17f37e0034e6b3bcfabc81dc506fcaf6ecf93a240c836502d7574`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/VALIDATION.json`; SHA-256 `5b14318d8aec72be8652984f42ba1bea03c167c5fdf3a0223a9ed12da22fbc35`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/output-semantics.json`; SHA-256 `0b84926582cffc36e867bfb654dd9e33fc3092e55135debb82038ef49e30dece`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/render-security.md`; SHA-256 `8dfd45317cb531d7b2c3153b400ed2aec83372b7102667b5410dc512a7420ee5`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/render-structural.json`; SHA-256 `08e049176eae668fb4ecd8bc4f386bd9562989985a61b181de8d098474ee9b18`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/048/evidence/task048-20261114/schema-results.json`; SHA-256 `6b3ff730abc5169bbcc6cb5496838cf6231cd13f61f48ea052319e0b974bcc4f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["openssl", "x509", "-inform", "DER", "-in", "crates/pqc_scan_detectors/tests/fixtures/certificates/rsa2048.der", "-noout", "-text"]`; exit `0`
+- Command: `["cargo", "fmt", "--all", "--check"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--all-features", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Command: `["/Users/waka/.pyenv/versions/3.12.7/bin/python3", "-m", "unittest", "discover", "-s", "tests/quality", "-p", "test_*.py"]`; exit `0`
+- Command: `["node", "--test", "shell/compact-report.test.cjs"]`; exit `0`
+- Command: `["/Users/waka/.pyenv/versions/3.12.7/bin/python3", "tests/quality/task048/contracts.py", "--raw", "/Users/waka/development/pqc/pqc-scan/target/quality-task-048/raw", "--out", "/Users/waka/development/pqc/pqc-scan/target/quality-task-048"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task049-recorded-study
+
+**Partial**: Isolated TLS/SSH peer matrices; observed protocol assurance is scoped to measured profiles.
+Original recorded outcome: "Passed".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `b0e386e9d8503cf422c310e85fbb2a429bfb57d2`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: probe-tls,probe-ssh,probe-ssh-kex and static controls. Standards: TLS1.2/1.3 and SSH no-authentication packet/assurance distinctions.
+Method: Isolated TLS/SSH peer matrices; observed protocol assurance is scoped to measured profiles.. Environment: Linux arm64; pinned local peers, no external network, bounded container.
+Comparison: Isolated TLS/SSH peer matrices; observed protocol assurance is scoped to measured profiles..
+
+- requirement: `"Q3-06"`
+- status: `"Passed"`
+- observations: `{"sshOffers": "unauthenticated_advertisement, no negotiated or verified fields", "sshKex": "only trusted pin + signature + completed initial KEX yields verified MLKEM+X25519; Ed25519 host authentication remains classical", "tls": "verified version/suite/group distinct from incomplete collection; failed certificate verification never yields verified negotiation"}`
+- scope: `{"classicalVsHybrid": "TLS1.2 X25519; TLS1.3 X25519/P256/MLKEM; SSH unauthenticated classical/hybrid/unknown and pinned MLKEM KEX", "profile": "existing fixed provider aws_lc_rs 1.18.0 / rustls 0.23.46; no provider swap", "unknownGroup": "unit-controlled post-verification accessor, not an unsupported real network handshake", "bounds": "parser exact/over-limit and malformed lists, real IO truncation/budgets/deadline/cancellation, single target/attempt; existing core transport tests bind DNS/pinning", "limits": ["finite controlled local peers", "no whole-protocol conformance or formal support expansion", "Windows not executed", "CI protocols remains paused"]}`
+- inputHashes: `{"raw/openssh-offers/classical.json": "a4aeb8b812c636fc5075385e19c4b9f255d00c223440635b007e53a8aa90f614", "raw/openssh-offers/hybrid.json": "209f2dde1bc5789f79a760e2572b713c0083b260a8cb9be58edd0a85c117fc7a", "raw/ssh/kex-cancelled.json": "2c7391f863bd0e2a1a064b243155e6200dec730fa23099b711b2cedb561e57d1", "raw/ssh/kex-classical.json": "c0b617783cbf2829daaf5c2686fe779a2ec74b4541deee1a162f3ee81914c058", "raw/ssh/kex-disconnect.json": "03fa43829385598d81438a2319adb890714ce491e817b2958507e842c631d521", "raw/ssh/kex-fragmented.json": "30654167395013ed5e89b2fcce773ecab9f24b51c329fb79464b34a98e8a0561", "raw/ssh/kex-hybrid.json": "f749cd755321cb17c99504fd9644893ea5162e6901069ecac75fd491a507b139", "raw/ssh/kex-oversized.json": "cd5a964ca374c9a174d95ce9156bc8e283fa67ce8b497992787286fcc1447fd5", "raw/ssh/kex-receive-limit.json": "82df4c554706db1758f134051d5e7c88e60bcc0d5c5a7e961453f172216a8ad8", "raw/ssh/kex-refused.json": "47ea67157a50235fc2afcfbd802cad47679331bb0e62be7713b0eede32616e89", "raw/ssh/kex-send-limit.json": "6cd7a833e392b33258b974443ba5edb03773406b3c739ff7aae12ce39e371264", "raw/ssh/kex-timeout.json": "0386449c7babc16b3e1114962d580e7c24ddd0c2fe0b3d1a6dec9fbc6e01afc7", "raw/ssh/kex-truncated.json": "724da6fc869770fc7a235c5b717b50ceadf73469f44dec448978ff35d5889d74", "raw/ssh/kex-unexpected-auth.json": "dde7d4bfe5512f225b42ddcc5449bdae7b697806edd316bd86d55eb5f142a2ed", "raw/ssh/kex-unknown.json": "eb20f1b16da99eb80550f6fda8c326091f289c485f15ea9f67f730711253328d", "raw/ssh/offers-cancelled.json": "2d0ec344c2f57b216aec6ea3162256a9be6d8b3f0e94955933718a5deb48447a", "raw/ssh/offers-classical.json": "cb61aa861419024aee7f1f6f43c09c76dd96f3d2118a07a4d4766321806e36e4", "raw/ssh/offers-disconnect.json": "f43e3c3f860e3b749b1a609946a5b895d4cb4e62b49eeaec502fef1809347453", "raw/ssh/offers-fragmented.json": "add907b35982ae1d74fcd74ea83d819b4f2bf80ead4dfd0c5b03939ba1005c6d", "raw/ssh/offers-hybrid.json": "d53ad07d84f803bc220d54b2f7790385c3d99ec5c4121d847608f33ae9e5a2e0", "raw/ssh/offers-oversized.json": "40e35142032113b928665315d26cef23fb7e981787d1b3d5e5e8366ca8652842", "raw/ssh/offers-receive-limit.json": "a712c75215e521d551cf9615765f6a762cf7f75d181db6952ebd77c929fcd6d6", "raw/ssh/offers-refused.json": "d5a2f7f1c9e09fd25417c6d4237f669b6306ebf7962bc3a76e6b856bc6888916", "raw/ssh/offers-send-limit.json": "da67f7709bec3e557588d96f298b7725d4755b07a3052104d5d5a09df7c1792c", "raw/ssh/offers-timeout.json": "b37b0e414dbf84e9b0d9aa028e7752db48fd6088e5aa2274bdaf3639fe1d4d94", "raw/ssh/offers-truncated.json": "942ec1befff3a05b75bb0533603fde4fd2982743014a0bcdbfd5fcabfbac5a90", "raw/ssh/offers-unexpected-auth.json": "fd75a77e7d864bfa727ab6a571e2fdad0f4cd3fd4141fdae2692441e018e8f3e", "raw/ssh/offers-unknown.json": "f0393feb290d61ea467681af99f0077369aacd65547d81ff8dde0f7486904adc", "raw/tls/absent-group.json": "b4d3f46253e5b158c09b3982aa2f6a299f290ed4c67dda06bffbf5fa019ed635", "raw/tls/cancelled.json": "16375216ef006eeb1e1b8749f0277bd0a9dc74660f220bd646b67dce93790af1", "raw/tls/chain-limit.json": "97c9340563b321aaf4b30e012c7b346a8bc45e7b48e5425787c788bc0d675050", "raw/tls/expired.json": "54040b5b321389496806f452506a21f52ba4e894861284081078bd9c908cbb4d", "raw/tls/freshness.json": "481505ee172f371722c6a627a9f0f8570cb5612064c6ddccbce5fd2bd55b54b8", "raw/tls/message-limit.json": "3f66b064ae8e83c63eff871b515d89f8122e1d3dd9a47336ba3eea7e4ee28b86", "raw/tls/mtls.json": "eb574cfcea8dbe711653d63a0713b2dd4f8719592fb9e8a8ff040777c08bb64f", "raw/tls/not-yet-valid.json": "8d5a766c44088037aa112315b36edb137503d489f0606245914b2fb32c7114f6", "raw/tls/oversized-record.json": "cc54703f7f8efbaffc6902a479a19c92fb8e66a24e832a5c33f50d4774cff920", "raw/tls/profile-no-overlap.json": "6d1a97afbad97826c80839aece98afecf666ee47ef1445aabbc532e981256d97", "raw/tls/refused.json": "a3b8042e1b0875ea1ac079561b1ed3b2ef24f38297fdaba7dada31a8ddc7f1cf", "raw/tls/timeout.json": "8441256f042775b88e16ac5d5da09a41c73177da7bfd91f08f930d634748fa20", "raw/tls/tls12-x25519.json": "7aa5361e6b291dfff32db95a885e7f7870bc9bb4f118cf01c6d67911fb2bd96f", "raw/tls/tls13-hybrid-hrr.json": "58dee8ccc48dfe33a5fbbde3a1dbb69a6a83c5f25d79b15928340468913c2993", "raw/tls/tls13-p256.json": "e1737ef5b7d5823185aeb381beb5f7b72a07c1b6a0b8d96922ea5102424490e8", "raw/tls/tls13-p384.json": "568e8e9ae4ecb2a664d0bf7b90752a2aaa8afda20eb542ba4debe40af6d1deb1", "raw/tls/tls13-x25519.json": "caf3cc00256104bcd007953333f9a10fae1bfa61cdbee1f67098d08d7e0c4e5e", "raw/tls/truncated-record.json": "55c8a1f071276c30c9b3ee61afde068ddc6fa1c746a1510cb9d89c6201cf535f", "raw/tls/unknown-group.json": "00c47ca7dd830d64652580939b01a40340d91b84cea089db2dabc576f329ee48", "raw/tls/untrusted.json": "3bfd88ca1a409632d8619f95930d1e480e2e98f8f3a1d197c6f3fdab5f78e3ec", "raw/tls/wrong-name.json": "d940313ecbaca2dd63e38fe76e59d3238ca9c03bad98796220e81940c471d877"}`
+- Limitation: Isolated TLS/SSH peer matrices; observed protocol assurance is scoped to measured profiles.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/049/TASK-049-RESULTS.md`; SHA-256 `93a4d4c71cf9268e07662900b96803a42765bf9db2ec0f3fbbde6734e50bd5fc`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/ADMINISTRATIVE-CHECK.json`; SHA-256 `71052d582642cc194520b1e00845cd2b19d779e2533aa23fc586aeaa35eb12a9`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/BINARIES.json`; SHA-256 `713d3c24dc1ada9e610bca20713db2724f28cc26eb077434f4c2bd3862f6deb5`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/COUNTS.json`; SHA-256 `6d4b2827aaee9b87ac2e1d090b0320f6b0ffdd1be45cf8971337803bba92c25d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/EVIDENCE-INDEX.json`; SHA-256 `039025b60722b327166541c65a4dc5762f540f2c2e365b057cd4bf2d3caf64ee`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/FINAL-CHECK.json`; SHA-256 `38fc9a64a533253ea4133acbc7d45592edd87f5389af0943ec43cab4757e8501`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/FINAL-EXECUTION.json`; SHA-256 `b95fe0d6332c57cb3f9d255e36fdd6723715df3d60b6c0badd1badb98acdefe7`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/FINAL-SOURCE.json`; SHA-256 `63d4813d01dca91e02cb6b2fd6c80a6038c7bbfd43424cda960372a6f244ca7a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/HOST-RESULTS.json`; SHA-256 `099ef7f9985677c84cd80ae531b106c93dab21402e251f9503ceb19798819693`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/REVIEWS.md`; SHA-256 `d6f709bcff14487791c8bf87ef2ebbdc8a1cee6311b5aff86efc7fc2906cf73b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/SOURCE.json`; SHA-256 `e8da37ab3df6a92f9274d916515623afc8965be39485510ad301cfa50898118d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/TEST-BINARIES.json`; SHA-256 `640e4107d8a9764e8028ae6d316905f9b5dc3c773f056713229f8ce1efd126f1`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/VALIDATION.json`; SHA-256 `a378c7b652df0e5f6cd37c3526f120b12f63928dcfbbc17791aa230c4980e226`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/checks.json`; SHA-256 `b9bf087af2e5f7906fc630fb1d66f1c6f491aaf98163d9e718d2e9dadddf9113`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/protocol-assurance.json`; SHA-256 `44c63581d62cb24bc861fadcfb039bede5899aaa20f9b1d1e6491f9d5025275c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/ssh-failures.json`; SHA-256 `c08599225700cc4e89246efe7b2714233d5d4905852a0d47edea2f4e0c49a2a8`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/ssh-matrix.json`; SHA-256 `688cb19a8737a5091e870a6087cbfbf72049562c635bbf192df7bd0852430b08`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/ssh-no-auth.json`; SHA-256 `469755f7ba3a8d6bdb23ff8ed185f600d79aca05fb325152b0e59f82f4652557`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/tls-failures.json`; SHA-256 `3916ac780bd4935081b7b8954213a37d364643a4254d3701b7723a6f15568944`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/049/evidence/task049-20261114/tls-matrix.json`; SHA-256 `adb3a9ddcc173ab2d8402c0613606e4cf8e4e560d000029a4bdc02d60c1a9258`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_probe_tls", "-p", "pqc_scan_probe_ssh", "--all-features", "049", "--", "--nocapture"]`; exit `0`
+- Command: `["cargo", "fmt", "--all", "--check"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--all-features", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_probe_ssh", "--all-features", "--test", "openssh", "--", "--ignored", "--nocapture"]`; exit `0`
+- Command: `["/usr/bin/python3", "/source/tests/protocol/ssh-kex-product.py", "--inside", "--binary", "/scratch/target/debug/pqc-scan", "--out-dir", "/scratch/evidence/ssh-kex"]`; exit `0`
+- Command: `["sh", "-c", "rustc -Vv; cargo -V; /usr/sbin/sshd -V 2&gt;&amp;1; /opt/openssh/sbin/sshd -V 2&gt;&amp;1; python3 -V"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--all-features", "--locked", "--offline", "--no-run", "--message-format=json"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task050-recorded-study
+
+**Partial**: 144 successful resource samples and 24 intentional failures; old numeric accuracy comparison remains Failed.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `9e820669df04d0eb20efadc5786dc5a847e08174`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: macOS default; Linux default/all-features; 1/2threads. Standards: Wall/CPU/RSS units; run-specific IDs and descriptive2x investigation.
+Method: 144 successful resource samples and 24 intentional failures; old numeric accuracy comparison remains Failed.. Environment: 144 successes/24 intentional failures; separate OS/environment conditions.
+Comparison: 144 successful resource samples and 24 intentional failures; old numeric accuracy comparison remains Failed..
+
+- successSamples: `144`
+- intentionalFailureSamples: `24`
+- perRunInputComparisons: `144`
+- formatSemanticUnchanged: `{"report.json": 144, "report.sarif": 144, "report.html": 144, "report.md": 18, "cbom.json": 144, "dependency-sbom.json": 144, "diagnostics.json": 144, "scan.inventory.v1.json": 18, "scan.assessment.v1.json": 18, "cbom.cdx-1.7.json": 18, "dependency-sbom.cdx-1.7.json": 18}`
+- formatOrderUnchanged: `{"report.json": 144, "report.sarif": 144, "report.html": 144, "report.md": 18, "cbom.json": 144, "dependency-sbom.json": 144, "diagnostics.json": 144, "scan.inventory.v1.json": 18, "scan.assessment.v1.json": 18, "cbom.cdx-1.7.json": 18, "dependency-sbom.cdx-1.7.json": 18}`
+- stableFacts: `{"findingIdMultisetStable": true, "assetIdMultisetStable": true, "occurrenceKeyMultisetStable": true}`
+- runScopedIdStableSamples: `18`
+- referenceCaveat: `"18 of 144 comparisons are each scale reference compared to itself; other 126 compare actual distinct scans. Run/observation IDs are contractually run-scoped and deliberately retained, not normalized away."`
+- productAccuracyGate: `"Failed; immutable old annotation mismatch preserved, not product acceptance"`
+- sameConditionPerformanceSignals: `0`
+- measurementFunctionBodiesFinalMatch: `true`
+- fullMeasuredHarnessMatchesFinalBytes: `false`
+- postprocessingFinalSourceReexecuted: `true`
+- applicability: `"MEASUREMENT-APPLICABILITY.json; only comparison allowlist and its test controls changed after measurements"`
+- Concern (high): 144 successful resource samples and 24 intentional failures; old numeric accuracy comparison remains Failed.
+- Limitation: 144 successful resource samples and 24 intentional failures; old numeric accuracy comparison remains Failed.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/050/TASK-050-RESULTS.md`; SHA-256 `396ec3142a5121931f8b079fa4450c104893ba9914cf7c1ae0846b4b43078af6`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/ACCURACY-COMPARISON.json`; SHA-256 `6e141552c6baa7888e31c2b9f53607145a3363ac91aa7b82aab63356402a59dd`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/CODE-SOURCE.json`; SHA-256 `c487da348ab39a2136c8633b33e95e25cc4c56d650a1c2802ecbce1c01808b3d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/CONTAINER-HOST-RESULTS.json`; SHA-256 `04c540553d1a1ad438a7c03a5474d6461bd7df7b67eb31308a6b3c8dd87407f4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/CONTAINER-VALIDATION.json`; SHA-256 `0bfd576dbe06f70ddf6c550bce8629dcf41a54a100d2718671b111450ea059ba`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/CONTAINER-checks.json`; SHA-256 `b9bf087af2e5f7906fc630fb1d66f1c6f491aaf98163d9e718d2e9dadddf9113`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/EVIDENCE-INDEX.json`; SHA-256 `90d710413c9d6ef8f910aefc232824cb566525cb6b663ffbee29287387e7dee6`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/FAILURE-INPUT.json`; SHA-256 `0572243aa76111ca0035306f50300a32461ef89dca2b9d055b168991654d90c2`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/FINAL-CHECK.json`; SHA-256 `8c630b4f672be7f992958d21b3eafbe61d101ecb09a9a14f95f055ec08f7d610`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/FINAL-SOURCE.json`; SHA-256 `e7599c25d2d08110ff28724e66371c17b2420dd4f1a1efb1502ec808689f5acb`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/HOST-VALIDATION.json`; SHA-256 `5dd0095b22460a3aa2041eac1d2bf005392c84f2e7910ad8df7079912f261955`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/IMAGE.json`; SHA-256 `58822c58bf0beb2f528c6532e7221ca950027ba8ce7bc9b52e79fa278aeb5955`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/MEASUREMENT-APPLICABILITY.json`; SHA-256 `cdad675e78443ae1fea7a4b1651699e6a50445fc7fc97772fd347bb136e195db`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/REVIEWS.md`; SHA-256 `a92927201324c090af30ecc6bf8e1930814661d8c8b158105917edb8b55b5645`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/SUMMARY.json`; SHA-256 `bd94b1e331910e2b879458dc365d3de5f8efc123053a1b0bb9c7cfcd6aa4f6da`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/failure-resources.json`; SHA-256 `fa9b5ae52b43b046bdffd9c3d773dd1d5806137825b9285159cbed13a6ed713d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/noise-study.md`; SHA-256 `a17fd534022e804472f5b14bee07752adc3e538f223a7d7a163fc2ab5e48af6a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/ordering.json`; SHA-256 `2fe53c4d62aa69dd6f87537cd45438a5218d2cfcb0001d898a32318a2929eff7`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/regression-review.md`; SHA-256 `5ac88ac92b0d3084a21859bf57c75115dc817157f28ad508915fbf5b52468bda`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/semantic-reproducibility.json`; SHA-256 `ce357ca2dbea4d4602c4b9580c8034d480b117c27c04559a1357f4f8030bec5d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/050/evidence/task050-20261114/throughput.json`; SHA-256 `8df69704402adf2ec09a221d76a9f3872a8433514b6470eb28bbdd66d549392c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["cargo", "build", "--release", "--locked", "--offline", "-p", "pqc_scan_cli"]`; exit `0`
+- Command: `["/usr/bin/python3", "/source/tests/quality/run.py", "--performance-study", "--binary", "/scratch/build-default/release/pqc-scan", "--build-profile", "release", "--features-label", "default", "--out-dir", "/scratch/evidence/default-1"]`; exit `0`
+- Command: `["/usr/bin/python3", "/source/tests/quality/run.py", "--performance-study", "--binary", "/scratch/build-default/release/pqc-scan", "--build-profile", "release", "--features-label", "default", "--out-dir", "/scratch/evidence/default-2"]`; exit `0`
+- Command: `["cargo", "build", "--release", "--locked", "--offline", "-p", "pqc_scan_cli", "--all-features"]`; exit `0`
+- Command: `["/usr/bin/python3", "/source/tests/quality/run.py", "--performance-study", "--binary", "/scratch/build-all-features/release/pqc-scan", "--build-profile", "release", "--features-label", "all-features", "--out-dir", "/scratch/evidence/all-features-1"]`; exit `0`
+- Command: `["/usr/bin/python3", "/source/tests/quality/run.py", "--performance-study", "--binary", "/scratch/build-all-features/release/pqc-scan", "--build-profile", "release", "--features-label", "all-features", "--out-dir", "/scratch/evidence/all-features-2"]`; exit `0`
+- Command: `["cargo", "build", "--release", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "build", "--release", "--workspace", "--all-features", "--locked", "--offline", "--target-dir", "target/quality-task-050/build-host-all"]`; exit `0`
+- Command: `["env", "PQC050_BINARY=/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "python3", "-m", "unittest", "discover", "-s", "tests/quality", "-p", "test_*.py"]`; exit `0`
+- Command: `["cargo", "fmt", "--all", "--check"]`; exit `0`
+- Command: `["python3", "-m", "unittest", "discover", "-s", "tests/protocol", "-p", "test_container_runner.py"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--performance-study", "--binary", "target/release/pqc-scan", "--build-profile", "release", "--out-dir", "target/quality-task-050/host-default-final-2"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--performance-study", "--binary", "target/release/pqc-scan", "--build-profile", "release", "--out-dir", "target/quality-task-050/host-default-final-3"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--skip-benchmarks", "--binary", "target/release/pqc-scan", "--build-profile", "release", "--out-dir", "target/quality-task-050/accuracy-default"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--skip-benchmarks", "--binary", "target/quality-task-050/build-host-all/release/pqc-scan", "--build-profile", "release", "--features-label", "all-features", "--out-dir", "target/quality-task-050/accuracy-all"]`; exit `0`
+- Command: `["python3", "tests/quality/run.py", "--skip-benchmarks", "--binary", "target/release/pqc-scan", "--build-profile", "release", "--out-dir", "target/quality-task-050/accuracy-default-final"]`; exit `0`
+- Command: `["python3", "tests/quality/task050/compare.py", "--runs", "target/quality-task-050/host-default-final-2", "target/quality-task-050/host-default-final-3", "target/quality-task-050/confined-final/default-1", "target/quality-task-050/confined-final/default-2", "target/quality-task-050/confined-final/all-features-1", "target/quality-task-050/confined-final/all-features-2", "--out", "target/quality-task-050/aggregate-r4"]`; exit `0`
+- Command: `["/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "scan", "/tmp/pqc050-8x1ndwb_/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/Users/waka/development/pqc/pqc-scan/rules", "--out-dir", "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-2/failure-threshold", "--fail-on", "high"]`; exit `2`
+- Command: `["/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "scan", "/tmp/pqc050-8x1ndwb_/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/Users/waka/development/pqc/pqc-scan/rules", "--out-dir", "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-2/failure-incomplete", "--require-complete"]`; exit `3`
+- Command: `["/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "scan", "/tmp/pqc050-8x1ndwb_/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/tmp/pqc050-8x1ndwb_/absent-rules", "--out-dir", "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-2/failure-invalid-rules"]`; exit `1`
+- Command: `["/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "scan", "/tmp/pqc050-8x1ndwb_/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/Users/waka/development/pqc/pqc-scan/rules", "--out-dir", "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-2/failure-deadline"]`; exit `-9`
+- Command: `["/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "scan", "/tmp/pqc050-tdc5jlrs/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/Users/waka/development/pqc/pqc-scan/rules", "--out-dir", "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-3/failure-threshold", "--fail-on", "high"]`; exit `2`
+- Command: `["/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "scan", "/tmp/pqc050-tdc5jlrs/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/Users/waka/development/pqc/pqc-scan/rules", "--out-dir", "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-3/failure-incomplete", "--require-complete"]`; exit `3`
+- Command: `["/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "scan", "/tmp/pqc050-tdc5jlrs/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/tmp/pqc050-tdc5jlrs/absent-rules", "--out-dir", "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-3/failure-invalid-rules"]`; exit `1`
+- Command: `["/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan", "scan", "/tmp/pqc050-tdc5jlrs/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/Users/waka/development/pqc/pqc-scan/rules", "--out-dir", "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-3/failure-deadline"]`; exit `-9`
+- Command: `["/scratch/build-default/release/pqc-scan", "scan", "/scratch/tmp/pqc050-aswaorcp/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/default-1/failure-threshold", "--fail-on", "high"]`; exit `2`
+- Command: `["/scratch/build-default/release/pqc-scan", "scan", "/scratch/tmp/pqc050-aswaorcp/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/default-1/failure-incomplete", "--require-complete"]`; exit `3`
+- Command: `["/scratch/build-default/release/pqc-scan", "scan", "/scratch/tmp/pqc050-aswaorcp/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/scratch/tmp/pqc050-aswaorcp/absent-rules", "--out-dir", "/scratch/evidence/default-1/failure-invalid-rules"]`; exit `1`
+- Command: `["/scratch/build-default/release/pqc-scan", "scan", "/scratch/tmp/pqc050-aswaorcp/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/default-1/failure-deadline"]`; exit `-9`
+- Command: `["/scratch/build-default/release/pqc-scan", "scan", "/scratch/tmp/pqc050-19eo7hl7/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/default-2/failure-threshold", "--fail-on", "high"]`; exit `2`
+- Command: `["/scratch/build-default/release/pqc-scan", "scan", "/scratch/tmp/pqc050-19eo7hl7/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/default-2/failure-incomplete", "--require-complete"]`; exit `3`
+- Command: `["/scratch/build-default/release/pqc-scan", "scan", "/scratch/tmp/pqc050-19eo7hl7/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/scratch/tmp/pqc050-19eo7hl7/absent-rules", "--out-dir", "/scratch/evidence/default-2/failure-invalid-rules"]`; exit `1`
+- Command: `["/scratch/build-default/release/pqc-scan", "scan", "/scratch/tmp/pqc050-19eo7hl7/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/default-2/failure-deadline"]`; exit `-9`
+- Command: `["/scratch/build-all-features/release/pqc-scan", "scan", "/scratch/tmp/pqc050-xpsyc7ho/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/all-features-1/failure-threshold", "--fail-on", "high"]`; exit `2`
+- Command: `["/scratch/build-all-features/release/pqc-scan", "scan", "/scratch/tmp/pqc050-xpsyc7ho/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/all-features-1/failure-incomplete", "--require-complete"]`; exit `3`
+- Command: `["/scratch/build-all-features/release/pqc-scan", "scan", "/scratch/tmp/pqc050-xpsyc7ho/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/scratch/tmp/pqc050-xpsyc7ho/absent-rules", "--out-dir", "/scratch/evidence/all-features-1/failure-invalid-rules"]`; exit `1`
+- Command: `["/scratch/build-all-features/release/pqc-scan", "scan", "/scratch/tmp/pqc050-xpsyc7ho/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/all-features-1/failure-deadline"]`; exit `-9`
+- Command: `["/scratch/build-all-features/release/pqc-scan", "scan", "/scratch/tmp/pqc050-upz_ab00/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/all-features-2/failure-threshold", "--fail-on", "high"]`; exit `2`
+- Command: `["/scratch/build-all-features/release/pqc-scan", "scan", "/scratch/tmp/pqc050-upz_ab00/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/all-features-2/failure-incomplete", "--require-complete"]`; exit `3`
+- Command: `["/scratch/build-all-features/release/pqc-scan", "scan", "/scratch/tmp/pqc050-upz_ab00/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/scratch/tmp/pqc050-upz_ab00/absent-rules", "--out-dir", "/scratch/evidence/all-features-2/failure-invalid-rules"]`; exit `1`
+- Command: `["/scratch/build-all-features/release/pqc-scan", "scan", "/scratch/tmp/pqc050-upz_ab00/failures", "--format", "all", "--diagnostics", "--threads", "1", "--rules-dir", "/source/rules", "--out-dir", "/scratch/evidence/all-features-2/failure-deadline"]`; exit `-9`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task051-recorded-study
+
+**Partial**: Dependency/license evaluation is complete, but findings and network publication hold remain.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `f07d782cd68cfac95d93585d5ace049f590160d4`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: static and separately enumerated probe variants. Standards: RustSec advisories and package-specific license/notices, not publication approval.
+Method: Dependency/license evaluation is complete, but findings and network publication hold remain.. Environment: Pinned advisory database/tool receipt, local prepared artifacts.
+Comparison: Dependency/license evaluation is complete, but findings and network publication hold remain..
+
+- source_head: `"f07d782cd68cfac95d93585d5ace049f590160d4"`
+- reviewed_executable_sources_unchanged: `true`
+- task_links_exist: `true`
+- commands: `[{"command": ["git", "diff", "--check"], "exit": 0, "stdout": "", "stderr": ""}, {"command": ["ruby", "-r", "yaml", "-e", "t=YAML.load_file(\"tasks/051/task.yaml\"); abort \"wrong status\" unless t[\"id\"] == \"051\" &amp;&amp; t[\"status\"] == \"done\"; puts \"051 done\""], "exit": 0, "stdout": "051 done\n", "stderr": ""}]`
+- final_worktree_files: `{"scripts/review-dependencies.py": "ee41188ecd86d5737fd18df1c5e27caf7b85f5ddaea037e4a63a2e6b7e82a8fd", "scripts/run-dependency-review.py": "1413624294266ff4bb0ee7e1d4219b5b864082a91488388b6656b056e2e88599", "tests/distribution/test_dependency_review.py": "3549897f9b69680eb29ab33d96655fa96170145d895d1e9537e5966b84b4ad8f", "tasks/051/task.yaml": "9e1f404e379304e274cdf0cec0c828c669353434f60d7913b0c1a168a1bfd1e8", "tasks/051/TASK-051-PLAN.md": "45a4d94d4913d4ad280c376261bc6810f51189e3eb80aed519a4520631f96333", "tasks/051/TASK-051-RESULTS.md": "e4ed368ca941601090cd65702433a5b66ed6ae1fbbc1fb9c548c8fa556e10624", "tasks/051/TASK-051-REVIEWS.md": "8945c52b5fb46aac1d1903d6aedf55b8755dcfc8cc4d6f164d46102f3fcff37c", "docs/roadmap/v0.3/ROADMAP.md": "cd8a18f870ef88ab4934c3314e02397e8348bbfee054ee3bd432a01ab0afb498", "docs/roadmap/v0.3/REQUIREMENTS.md": "73819b90f1f2889cfb65d127ad858fef8e04d34b74f1053396d159af85d87bd6"}`
+- note: `"Final task/roadmap prose and done-state reconciliation follow the accepted executable assessment. Source inputs were not changed after r6; no Rust/Cargo/CI/package implementation changes."`
+- Concern (high): Dependency/license evaluation is complete, but findings and network publication hold remain.
+- Limitation: Dependency/license evaluation is complete, but findings and network publication hold remain.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/051/TASK-051-RESULTS.md`; SHA-256 `e4ed368ca941601090cd65702433a5b66ed6ae1fbbc1fb9c548c8fa556e10624`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/051/TASK-051-REVIEWS.md`; SHA-256 `8945c52b5fb46aac1d1903d6aedf55b8755dcfc8cc4d6f164d46102f3fcff37c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/051/evidence/dependency-20261114/ARTIFACTS.json`; SHA-256 `d769c16e13392fc561c5a9e3cd6d24304ec7da1b46df8c6a074c4fd280079d7a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/051/evidence/dependency-20261114/ATTEMPTS.json`; SHA-256 `54599a243e647592088cdcfebab82ca1166bdb244a43565ed8264937777fccc9`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/051/evidence/dependency-20261114/FINAL-VERIFICATION.json`; SHA-256 `43940639f6d6e22af0f5fe0c69ecb40e074e4afe7c019ef6f2117e63073f3150`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/051/evidence/dependency-20261114/VERIFICATION.json`; SHA-256 `4acf59e1f2573f4e3d9426310d98c94cffe4bab4429eff32986f5f8448797af3`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/051/evidence/dependency-20261114/final-run/artifacts/review/dependency-review.json`; SHA-256 `b9888df255c4877cdce4d59c64a0a2ddaa7fbcb64b7372e03fcab3e17b6b61b2`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["git", "diff", "--check"]`; exit `0`
+- Command: `["ruby", "-r", "yaml", "-e", "t=YAML.load_file(\"tasks/051/task.yaml\"); abort \"wrong status\" unless t[\"id\"] == \"051\" &amp;&amp; t[\"status\"] == \"done\"; puts \"051 done\""]`; exit `0`
+- Command: `["sh", "-c", "Python ast.parse on package-release.py, review-dependencies.py, run-dependency-review.py and test_dependency_review.py"]`; exit `0`
+- Command: `["sh", "-c", "git diff --check"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task052-recorded-study
+
+**Unknown**: Unfinished: ownership/backup and operational facts remain Unknown. Scorecard 4.3 is remote repository/process evidence, not detection accuracy.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Unknown**; head `Historical revision identified in bound result/source records`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: Remote default-branch source and live repository settings. Standards: OpenSSF passing/silver/gold145items and Scorecard18checks; no badge application.
+Method: Unfinished: ownership/backup and operational facts remain Unknown. Scorecard 4.3 is remote repository/process evidence, not detection accuracy.. Environment: Scorecardv5.6.0; tool commit61e84743356275f6ffca23b1b2f2cb945e19eb96; observed2026-11-15.
+Comparison: Unfinished: ownership/backup and operational facts remain Unknown. Scorecard 4.3 is remote repository/process evidence, not detection accuracy..
+
+- raw: `"scorecard.json"`
+- commandEvidence: `"../scorecard/FINAL-RUN.json"`
+- toolReceipt: `"../official/RECEIPTS-3.json"`
+- scope: `"Remote default-branch HEAD and live repository metadata; not local dirty source, cryptographic correctness or detection accuracy"`
+- tool: `{"version": "v5.6.0", "commit": "61e84743356275f6ffca23b1b2f2cb945e19eb96"}`
+- target: `{"name": "github.com/wakaken/pqc-scan", "commit": "f07d782cd68cfac95d93585d5ace049f590160d4"}`
+- date: `"2026-11-15T05:49:50+09:00"`
+- score: `4.3`
+- interpretation: `{"Packaging": "-1 is not zero. Current remote workflow prepares artifacts but does not publish a package; v0.2.0 release exists. Do not infer no distribution.", "Signed-Releases": "Tool score 0 is preserved. Release assets include build-provenance.jsonl and an existing distribution verification process. Scorecard recognition and actual cryptographic verification are separate; do not treat 0 as proof of absent provenance.", "Code-Review": "0/10 GitHub-approved changesets; independent AI task reviews are documented separately and do not prove non-author human approval.", "Fuzzing": "0 is integration-detection output, not proof of no fuzz testing. Local task047 has measured bounded mutational fuzzing.", "Vulnerabilities": "48 OSV IDs are remote whole-repository detections. The repository includes archived evaluation inputs and dependency fixtures, which may contribute; path attribution is not supplied by this output. No claim of 48 shipped-product vulnerabilities or current local closure. Remote lock predates task063 remediation. No suppression, accepted exception or new remediation task.", "Contributors": "Organizations heuristic; not a count of human capability or an assessment of owner expertise."}`
+- limitations: `["OSV backend/database are live; no immutable OSV DB snapshot supplied by Scorecard. Date, IDs and exact tool output retained; later reruns can differ.", "Live branch/release/PR/settings metadata is not frozen by pinning the repository commit.", "Remote archived/fixture inputs may contribute to vulnerability findings; full reachability and path attribution is not part of this output.", "Native acquisition/run boundaries and failed attempts are retained separately."]`
+- priorInvalidAttempt: `"../scorecard/authenticated.stdout"`
+- priorInvalidReason: `"Archive hit 64MiB file cap; source-dependent checks unreliable; OSV tried to read local parent .gitignore. Prior overall 2.9 must not be used as valid product score."`
+- Concern (high): Unfinished: ownership/backup and operational facts remain Unknown. Scorecard 4.3 is remote repository/process evidence, not detection accuracy.
+- Limitation: Unfinished: ownership/backup and operational facts remain Unknown. Scorecard 4.3 is remote repository/process evidence, not detection accuracy.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/052/TASK-052-RESULTS.md`; SHA-256 `a695e2a16dcce831c4b0b3ce1d6bbf66a06951e1a80f1500e62edd347a45178a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/ARTIFACTS.json`; SHA-256 `188a0ef49925b1f2dc559d75aefeae02725187894103a2e985e84a3a60188513`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/CONNECTOR.json`; SHA-256 `523877b4dc572e5b81391ba0e81b54652c334196771e741dde0707e70708907d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/ENVIRONMENT.json`; SHA-256 `9c5fce9b8aad9e66a02b307095f1796fa67e4f041cd2985d8f6c23048f4bd19b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/FINAL-CHECKS.json`; SHA-256 `fa68d5b2aa63d5df96198e6f93f6757f6e9d4963430c5802ee0734a696abcdc8`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/FINAL-SOURCE.json`; SHA-256 `d4ad74d5a97a2e1eefb37a2a65b4343d9f472af82f7d078a1196d01a4e3733bd`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/SCRATCH-CLEANUP.json`; SHA-256 `b823492a9db2a65bebb58cfde8cf0f304f82cfab871f0a85fe7b1dc4b2051bc9`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/SOURCE.json`; SHA-256 `a8bcfcd6b6a16229a1b9c1d6aa47014a05ba694963db9b49d7f98909f3950df4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/VALIDATION-r2.json`; SHA-256 `807c6f759339b14acdf218f35246651393fb448513249e0f0ececb9b28e268e4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/VALIDATION.json`; SHA-256 `38e6ff50e45431ed21bcc915b6e89bdf7f5ea13f7450dc097fa0e2d79b797c8b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/outputs/EVIDENCE-REFERENCES.json`; SHA-256 `aae771274a5ea38139932d3ee75f6cd4d09c93f00cc3979f36980a43e9de0183`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/outputs/best-practices-assessment.json`; SHA-256 `ab8249bf78419b197035634e108528c729e453cf6846b443c2e4440e3b61ac97`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/outputs/best-practices.md`; SHA-256 `701707c2a10c12857fae8b114f02a9a91a087f1aed2d17ecb4b7b4592e101ce9`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/outputs/github-controls.json`; SHA-256 `33734938b2ccee3389b24c8d49962d38bba379d083eb2cacf5b4ae759d1601aa`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/outputs/process-review.md`; SHA-256 `a2eecc8c1fcee24299db6bced00e635eacdc7414287b17f7a399cb635c9e4e7c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/outputs/scorecard-assessment.json`; SHA-256 `0d635e3cef6562bbdbb541ef22577bcc3e254fe8d339453cce7e0acbc8d08bce`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/outputs/scorecard.json`; SHA-256 `a82f79831560d663fd85f72fea4017cd4c5df2966c0809c61cfcf765683b0ff2`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/outputs/security-process.md`; SHA-256 `d6531b421da7bf52c6579d2705d3e1178f02fba77a646b5d287973f868934349`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/052/evidence/assessment-20261115/scorecard/FINAL-RUN.json`; SHA-256 `32abf2967a82676154c5a64c39f82755e6d4b695f4edd707dfde1c85f9cf9685`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["git", "diff", "--check"]`; exit `0`
+- Command: `["python3", "target/quality-task-052/validate-assessment.py"]`; exit `0`
+- Command: `["/usr/bin/sandbox-exec", "-f", "/Users/waka/development/pqc/pqc-scan/tasks/052/evidence/assessment-20261115/scorecard/final-sandbox.sb", "/Users/waka/development/pqc/pqc-scan/target/quality-task-052/tools/scorecard", "--repo=github.com/wakaken/pqc-scan", "--format=json", "--show-details"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task055-recorded-study
+
+**Partial**: Inspection denominators and format/detector outcomes; unknown repository population is not safe or fully inspected.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `34b763d188bfc8ada49876c18b15f5406b6628b3`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: default/all-features; fixed selected/excluded/partial/failed inputs. Standards: Inspection arithmetic partitions; unenumerated populations remain unknown.
+Method: Inspection denominators and format/detector outcomes; unknown repository population is not safe or fully inspected.. Environment: Linux arm64; Rust1.93.1, isolated finite-resource execution.
+Comparison: Inspection denominators and format/detector outcomes; unknown repository population is not safe or fully inspected..
+
+- controlled: `{"enumeration": {"numerator": 8, "denominator": 8, "percent": 100.0}, "applicability": {"numerator": 4, "denominator": 7, "percent": 57.142857142857146}, "completion": {"numerator": 1, "denominator": 4, "percent": 25.0}}`
+- unknownRepositoryPopulation: `{"enumeration": {"numerator": 8, "denominator": null, "percent": null}, "applicability": {"numerator": 4, "denominator": 7, "percent": 57.142857142857146}, "completion": {"numerator": 1, "denominator": 4, "percent": 25.0}}`
+- unknownApplicabilityAmongReadFiles: `1`
+- definitions: `{"enumeration": "observed selected + enumerated excluded / independently known file population; null when population unknown", "applicability": "known applicable files from controlled input truth / read files; unknown applicability remains separate", "completion": "analyzed / known applicable files, including applicable failures in denominator"}`
+- controlledSelection: `{"known": 9, "enumerated": 8, "selected": 3, "excluded": 5, "notEnumeratedKnown": 1}`
+- Limitation: Inspection denominators and format/detector outcomes; unknown repository population is not safe or fully inspected.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/055/TASK-055-RESULTS.md`; SHA-256 `c193c738850fcc1b67905e8685f0dd89835ac4e91a8e76627c8bc0d7043a5584`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/CLOSURE.json`; SHA-256 `47db1bcc47440756a47c545e2ae3f9fa8146c8bfd5f80dce048cb8da1f57947d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/EVIDENCE-INDEX.json`; SHA-256 `21eaea0e6b4779559f65dd1dba38262e5f443dbbdab874d27e5f0f8f8fec6188`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/REVIEW-SOURCE-R2.json`; SHA-256 `d4a81b679fffafca2b3094b388c5c7ba93119886e7ce7eaec063f12b2078b324`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/REVIEWS.md`; SHA-256 `b62bb7e9bcbb9dfb2c3fd69a522d06d27a410b01bc7dffb16339fd90e1294dab`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/SOURCE.json`; SHA-256 `61a4cfae9bbf7e0c0e37ee6dfd658fcb3a4740c12f25e3e30f224b040d27b1f1`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/VALIDATION.json`; SHA-256 `65837ccbefd3a2fd23f668911e0b1bfb46f9dab3c74053e6d3205112afb2df88`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/coverage-denominators.json`; SHA-256 `46d66950cd8e963a6a1838ee5b1efff54d3a2a24df4c57b6e5f1d0b21f80952b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/detector-coverage.json`; SHA-256 `6619ff5b1b75570f82d3581ae2f3710a8660f6a596632315e77568272a80e409`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/enumeration-review.md`; SHA-256 `a101c1f9d89e7490855095f2dcddac3eb5d5a1a6c53c8292210b7d54d097b19e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/exclusions.json`; SHA-256 `b98145ceddaab04c68f3d1b4da1af32be1787f0f8e6244bb09f1d18947f19b9f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/failure-retention.json`; SHA-256 `cb901f375d2e2eca806d49517c80b9a73512a083a07fc044da17b0f504bf410c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/file-outcomes.json`; SHA-256 `873823b2770d0c9fa641495149ba17e82ce3d76bea7e9b0a22084871c0c7e473`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/format-coverage.json`; SHA-256 `f3e15d3328edcb6e756bcd1edafc4c4e36d26cac5ff1006d5227a967e0d537ce`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/055/evidence/task055-20261113/limit-outcomes.json`; SHA-256 `7331676a83992bddf7fef90ab9ebbe46b906b41fb4ca936c2e1300d54b658a49`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--all-features", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task056-recorded-study
+
+**Partial**: Recorded routing agreement and five recommendation repairs; 0.45 unchanged; agreement is not universal judgment validity.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `f07d782cd68cfac95d93585d5ace049f590160d4`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: default and optional probes;1,531 judgments and16CLI cases each. Standards: Frozen independent decision classes; characterization0.45 is not newly validated truth.
+Method: Recorded routing agreement and five recommendation repairs; 0.45 unchanged; agreement is not universal judgment validity.. Environment: Rust1.93.1/macOS plus recorded bilingual browser checks.
+Comparison: Recorded routing agreement and five recommendation repairs; 0.45 unchanged; agreement is not universal judgment validity..
+
+- probe: `{"correct": 1531, "incorrect": 0, "unassessed": 0}`
+- optional-probe: `{"correct": 1531, "incorrect": 0, "unassessed": 0}`
+- pipeline: `{"correct": 16, "incorrect": 0, "unassessed": 0}`
+- optional-pipeline: `{"correct": 16, "incorrect": 0, "unassessed": 0}`
+- recommendationPayloads: `{"before": 38, "after": 39, "changed": 6, "interpretation": "The additional distinct payload separates unknown Java from an observed older version. Original labels/measurements remain unchanged. Guidance content repairs are assessed separately from routing agreement."}`
+- Limitation: Recorded routing agreement and five recommendation repairs; 0.45 unchanged; agreement is not universal judgment validity.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/056/TASK-056-RESULTS.md`; SHA-256 `1e08ec56c4784b2798a73f3cc034ead641d1b1848bb00df546773d53831cc76d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/TASK-056-REVIEWS.md`; SHA-256 `d1f7d5e47c0e36988c48e14e2a7d6fe2ff8b7252a5b82250b2aaff01b327f7fd`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/assessment-20261115/EVIDENCE-FINAL.json`; SHA-256 `88011b996960d72e3c3357cc1d194e25ce0c8a22faf72210a22c9eea37274aee`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/assessment-20261115/outputs-r6/risk-matrix.json`; SHA-256 `7838d9a53a42a412b15b2a76bd6e6cc6124804353f6e4e3ff8a403f3328df7a0`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/assessment-20261115/outputs-r6/severity-cases.json`; SHA-256 `86ec13249eb05f3f7b21b96a0e1543fc71ec3f128d8e1d4f0ac40ece633fd839`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/BROWSER-INSPECTION.json`; SHA-256 `ec42c39bcc001aae93a089fac7f2773bd2202082363a1036c1d0d14f46f18113`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/CHANGED-ACTION-PAYLOADS.json`; SHA-256 `5ffe932cf7ad1f3a834e333fe64db3916cbcf877954c02a2bb7071a53f5b7582`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/COMPARISON-SUMMARY.json`; SHA-256 `25a397d1fc31d2cb1bb35ca634bd39401ab8027778e00b79bc8db0f66fe698c3`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/COMPATIBILITY.json`; SHA-256 `05ef2e9806d5887f5f4f2e176ac1c08c14ef9d04fe1786f297ec7020664ad3f9`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/CONTENT-REVIEW.json`; SHA-256 `934e6b23d7460ea7c4cc078dcb4d1056ba5b5a9fd95446058cf7a1c414e95ea9`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/EVIDENCE-FINAL.json`; SHA-256 `d903ca069a9485640cdab0845b27199a013a48ee56b7ca9bef53a66334c075a0`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/FORMAT-CORRECTION.json`; SHA-256 `39c75bdc3979832dd8611f5ccac8cfd08337f6206a61fc8b4950d3ff853d8e7a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/RENDERED-PARITY.json`; SHA-256 `98b1577837705c45f36d3816f6ac9fb4cb43006dc324e0389ea2aa6e794fe6a0`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/REVIEW-SOURCE-v1.json`; SHA-256 `81d5ee7d1be963a65289ceedf6683f803c51d39b18606fbe1321a5a0d657a664`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/REVIEW-SOURCE.json`; SHA-256 `7e4aeef262a376e9ce515e5e8e0a9e917f82ef6fa82d705958bc68071930677e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/SOURCES.json`; SHA-256 `a74aedc3ff7d630d225d7093663d730c9d06f1993579980bb2203edbe442e9c4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/COMMANDS.json`; SHA-256 `b4fe335fe664079821230dff513a03e5bc819b77189f726f728208fd4e8c891c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/COMPLETION.json`; SHA-256 `1faced98618ec2b0e5cb8c06ada0d68b03787a2afa61e63b4fb0201aaa3cde5d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/ENVIRONMENT.json`; SHA-256 `a1a705d2edd8f99773b92b719921da7b650dec73200014f94613ae29ac950a7a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/SNAPSHOT.json`; SHA-256 `924794aaf0aa44805e536f909ea2149da7e85de6faa7adc1915dc9bcdd31e87d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/SOURCE.json`; SHA-256 `95ea80167ee5bdd397755cd31e9f469298dd8dfc89a791ae09a4272a6e473fd1`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/build-BINARIES.json`; SHA-256 `9cd6b6c55a2e094e08c44a47115a9439a324d013155c8abfbd01ad124fe3c94d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/clippy-BINARIES.json`; SHA-256 `b00417efc8b69017d9b0efd6146544a34477f59316c5aa2ffc13e0a71f2cb6ae`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/core-regression-BINARIES.json`; SHA-256 `4b901e1b63d6a1645bc07080a68d4aff03ff7e50d7963d7d82b0b7625a050df2`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/optional-clippy-BINARIES.json`; SHA-256 `d09bbd7be06b10371d80f751689d0d10e90807f5a4db626db3f5ffe554048e92`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/optional-pipeline-BINARIES.json`; SHA-256 `d09bbd7be06b10371d80f751689d0d10e90807f5a4db626db3f5ffe554048e92`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/optional-probe-BINARIES.json`; SHA-256 `04d9f538b6ca425f2cca9386ecd6e8e9b3cb84b0d31daa134cf12e1ef6dffe60`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/pipeline-BINARIES.json`; SHA-256 `f13e58003ce8ccab8a3ba1b0e54a3eb4fcc1952831cd83fb96924bcdcc55cab2`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/probe-BINARIES.json`; SHA-256 `08aef4382a52677c6a30b26594b68476bd846c32841910537a2f3a7490acce58`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/report-regression-BINARIES.json`; SHA-256 `78362e2493f6432ee7b2e72ed3616ed884fed2008adac3abfcd9cc18bece241f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r1/workspace-BINARIES.json`; SHA-256 `b00417efc8b69017d9b0efd6146544a34477f59316c5aa2ffc13e0a71f2cb6ae`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r2/COMMANDS.json`; SHA-256 `bfac8f69846a1d6548b997f35ffa8bc383bbae0da6c01d97b2da9907daffeedc`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r2/COMPLETION.json`; SHA-256 `1faced98618ec2b0e5cb8c06ada0d68b03787a2afa61e63b4fb0201aaa3cde5d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r2/ENVIRONMENT.json`; SHA-256 `364f4e6b7a5cf7d331a03e87303843a219e81a2a74563953e176ea0a1c4e2b86`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r2/SNAPSHOT.json`; SHA-256 `b26b3fa8e4d34ae66cbae394c82a15bbd8340345405d7abfda4856475b73a0ec`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r2/SOURCE.json`; SHA-256 `c632495d7e64454119c55b0a3e7b95678c0697566b7f7ebab6ff4bbdf7b6110d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r2/clippy-BINARIES.json`; SHA-256 `b620259e5f60593a02f8fde5066999f593d8c768d4aa87811ce0a9896ab98e1f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r2/report-regression-BINARIES.json`; SHA-256 `0f9cbc235e476b1ebe039cdf8fd79298e326e179c0baab5c29d7e4c398bca284`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/native-r2/workspace-BINARIES.json`; SHA-256 `b620259e5f60593a02f8fde5066999f593d8c768d4aa87811ce0a9896ab98e1f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/optional-pipeline-COMPARISON.json`; SHA-256 `605d80368fdab8d8814c2b43764a974e379fb04cd543b5bbb04d71b8270f5445`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/056/evidence/remediation-20261115/pipeline-COMPARISON.json`; SHA-256 `605d80368fdab8d8814c2b43764a974e379fb04cd543b5bbb04d71b8270f5445`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["cargo", "fmt", "--all", "--", "--check"]`; exit `0`
+- Command: `["python3", "tasks/056/evidence/remediation-20261115/compare.py.txt"]`; exit `0`
+- Command: `["/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/rustc", "-vV"]`; exit `0`
+- Command: `["/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/cargo", "--version"]`; exit `0`
+- Command: `["/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/clippy-driver", "--version"]`; exit `0`
+- Command: `["/Users/waka/.pyenv/versions/3.12.7/bin/python3.12", "--version"]`; exit `0`
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_core", "--test", "recommendation056", "--", "--nocapture"]`; exit `0`
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_report", "--test", "recommendation056", "--", "--nocapture"]`; exit `0`
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_core", "--test", "quality056", "--", "--nocapture"]`; exit `0`
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_cli", "--test", "quality056_pipeline", "--", "--nocapture"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_core", "--all-features", "--target-dir", "/private/tmp/pqc056-native-7ezeuaru/work/build-all", "--test", "quality056", "--", "--nocapture"]`; exit `0`
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_cli", "--all-features", "--target-dir", "/private/tmp/pqc056-native-7ezeuaru/work/build-all", "--test", "quality056_pipeline", "--", "--nocapture"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--all-features", "--locked", "--offline", "--target-dir", "/private/tmp/pqc056-native-7ezeuaru/work/build-all", "--", "-D", "warnings"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task057-recorded-study
+
+**Partial**: Privacy, failure retention, filesystem/network/resource boundaries in the documented finite scope.
+Original recorded outcome: "See immutable original observations/results; no overall product pass inferred".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Partial**; head `34b763d188bfc8ada49876c18b15f5406b6628b3`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: default/all-features; synthetic privacy/failure/race cases. Standards: Documented privacy/no-auth/network boundaries, not universal secret detection.
+Method: Privacy, failure retention, filesystem/network/resource boundaries in the documented finite scope.. Environment: Linux arm64 and focused macOSarm64; Rust1.93.1; bounded isolation.
+Comparison: Privacy, failure retention, filesystem/network/resource boundaries in the documented finite scope..
+
+- requirement: `"Q4-01"`
+- controls: `{"cases": [{"command": ["/scratch/control057", "success"], "status": "completed", "returncode": 0, "wallSeconds": 0.002331417000050351, "wallLimitSeconds": 4, "cpuLimitSeconds": 1, "fileLimitBytes": 2097152, "coreDumpBytes": 0, "groupTerminationSent": false, "stdoutBytes": 9, "stderrBytes": 0, "label": "success", "expected": "completed"}, {"command": ["/scratch/control057", "panic"], "status": "panic", "returncode": 42, "wallSeconds": 0.0021489169999995283, "wallLimitSeconds": 4, "cpuLimitSeconds": 1, "fileLimitBytes": 2097152, "coreDumpBytes": 0, "groupTerminationSent": false, "stdoutBytes": 0, "stderrBytes": 0, "label": "panic", "expected": "panic"}, {"command": ["/scratch/control057", "error"], "status": "error", "returncode": 1, "wallSeconds": 0.0021417080000674105, "wallLimitSeconds": 4, "cpuLimitSeconds": 1, "fileLimitBytes": 2097152, "coreDumpBytes": 0, "groupTerminationSent": false, "stdoutBytes": 0, "stderrBytes": 0, "label": "error", "expected": "error"}, {"command": ["/scratch/control057", "signal"], "status": "signal", "returncode": -6, "wallSeconds": 0.0017076670000051308, "wallLimitSeconds": 4, "cpuLimitSeconds": 1, "fileLimitBytes": 2097152, "coreDumpBytes": 0, "groupTerminationSent": false, "stdoutBytes": 0, "stderrBytes": 0, "label": "signal", "expected": "signal"}, {"command": ["/scratch/control057", "timeout"], "status": "timeout", "returncode": -9, "wallSeconds": 0.20439987500003554, "wallLimitSeconds": 0.2, "cpuLimitSeconds": 1, "fileLimitBytes": 2097152, "coreDumpBytes": 0, "groupTerminationSent": true, "stdoutBytes": 9, "stderrBytes": 0, "label": "timeout", "expected": "timeout"}, {"command": ["/scratch/control057", "cpu"], "status": "signal", "returncode": -24, "wallSeconds": 1.048384292000037, "wallLimitSeconds": 4, "cpuLimitSeconds": 1, "fileLimitBytes": 2097152, "coreDumpBytes": 0, "groupTerminationSent": false, "stdoutBytes": 0, "stderrBytes": 0, "label": "cpu", "expected": "signal"}], "binarySha256": "12825676ce72af9789b2acad60bec1681596dc52176e28e73947d25c1f2a74bd", "sourceSha256": "45127067abb4e956fb8dd8e3f4251ba7f3447e4d462f8d6eb449c83c1ba84df5", "scope": "synthetic supervisor controls, not product failures"}`
+- classification: `"exit42 means explicitly caught Rust panic in controlled worker; exit86 is reserved for invariant violation; arbitrary product codes are not inferred"`
+- retention: `"timeout stdout retained; following CPU and static-scan results collected; original quality055 fault rows retained in both settings"`
+- productFailuresFound: `0`
+- Limitation: Privacy, failure retention, filesystem/network/resource boundaries in the documented finite scope.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/057/TASK-057-RESULTS.md`; SHA-256 `abf3ed33de952cc239d28bb89625cc044ff647b0b7e3b6a27f3c1bf97cd1942f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/057/evidence/task057-20261113/CLOSURE.json`; SHA-256 `17da59afb203c2344bb92fdb030d29620fcb0238ddfe55e303f1a426db73beca`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/057/evidence/task057-20261113/EVIDENCE-INDEX.json`; SHA-256 `3409ce748574f2735f58ee27e149abd3e0bf526428bb16d0c2d061d0a37cfa0f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/057/evidence/task057-20261113/REVIEWS.md`; SHA-256 `441555b1a43b5aa8fc61fddf89d62e9daa70b981f169fb1265ff9720868859d4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/057/evidence/task057-20261113/SOURCE.json`; SHA-256 `fc5695165804fea5bff969caf939e3a1c17f0ae2fc2a22ff4c013377772e287a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/057/evidence/task057-20261113/VALIDATION.json`; SHA-256 `0a8fd44bb74c630cdcef2aa798be317372270fcd46374c13b738147ca8d389f4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/057/evidence/task057-20261113/failure-matrix.json`; SHA-256 `2b8b5632a92f3e9cfbe79bf239e710802a03a4ba0e7e7f8811762716ab5c1f58`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/057/evidence/task057-20261113/filesystem-safety.json`; SHA-256 `07aef79c1ac98d136b5e8e78d0b580d5d8c714f7c29341f3e1c53adbb7d7756b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/057/evidence/task057-20261113/network-boundary.json`; SHA-256 `8d07a3bcc6556eab90055b52502f06ffd55d2707c3d1b0848bfcf1081d099082`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/057/evidence/task057-20261113/privacy-matrix.json`; SHA-256 `83aa3122c60d675feff94f3ec4bfbea160694a286fe32e77a2c901dd59c5cbed`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--all-features", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline", "--all-features"]`; exit `0`
+- Command: `["/scratch/control057", "success"]`; exit `0`
+- Command: `["/scratch/control057", "panic"]`; exit `42`
+- Command: `["/scratch/control057", "error"]`; exit `1`
+- Command: `["/scratch/control057", "signal"]`; exit `-6`
+- Command: `["/scratch/control057", "timeout"]`; exit `-9`
+- Command: `["/scratch/control057", "cpu"]`; exit `-24`
+- Command: `["/scratch/target/debug/pqc-scan", "scan", "/scratch/static057", "--rules-dir", "/source/rules", "--out-dir", "/scratch/static057-output", "--format", "all", "--diagnostics", "--inventory-json", "--cyclonedx-17"]`; exit `0`
+- Execution: Unknown; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient
+
+### task058-recorded-study
+
+**Partial**: API/CLI/output compatibility and actual bilingual desktop/mobile/keyboard user flows.
+Original recorded outcome: "Complete:originalQ6-10/Q6-12 verified; both reviews accepted".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Verified**; head `f07d782cd68cfac95d93585d5ace049f590160d4`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: static and optional probes; installed EN/JA reports. Standards: v0.2.0 public API/CLI/schema compatibility and actual keyboard/mobile flow.
+Method: API/CLI/output compatibility and actual bilingual desktop/mobile/keyboard user flows.. Environment: macOS27.2.1arm64; Rust1.93.1; Chrome157 at1280/390px.
+Comparison: API/CLI/output compatibility and actual bilingual desktop/mobile/keyboard user flows..
+
+- status: `"Complete:originalQ6-10/Q6-12 verified; both reviews accepted"`
+- head: `"f07d782cd68cfac95d93585d5ace049f590160d4"`
+- baselineRelease: `"v0.2.0"`
+- baselineCommit: `"4ee5ceb2ca6bab3cf3336fae17fb9f42f3446d65"`
+- sourceBindings: `"../native-r2/SOURCE.json"`
+- reviewSource: `"../REVIEW-SOURCE.json"`
+- rows: `[{"surface": "legacy_detector", "requirement": "Q6-10", "expectation": "External implementation defines onlyname/detect; default detailed/observed adapters do not invent completeness", "status": "Verified", "evidence": "native-r2/public-client.log"}, {"surface": "legacy_scan_calls", "requirement": "Q6-10", "expectation": "scan_repository/detailed/native produce identical legacy facts ignoring generated time; each scans once", "status": "Verified", "evidence": "native-r2/public-client.log"}, {"surface": "legacy_writer", "requirement": "Q6-10", "expectation": "Original write_reports signature produces six expected files; old model types remain constructible", "status": "Verified", "evidence": "native-r2/public-client.log"}, {"surface": "public_contract_types", "requirement": "Q6-10", "expectation": "Eight complete public contract modules byteequal to local v0.2.0; externalclient compiles using old fields", "status": "Verified", "evidence": "RELEASE-API.json"}, {"surface": "field_enum_version_ids", "requirement": "Q6-10", "expectation": "Twelve frozenJSONcontract files byteequal to v0.2.0; executed048positive/negative/offline schemas plus native/diff/golden/ID/enum tests", "status": "Verified", "evidence": "native-r2/exports.log"}, {"surface": "cli_information", "requirement": "Q6-10", "expectation": "Help/version/subcommands and stdout/stderr tested in default and allfeatures; installedstatic/network help actualexits0", "status": "Verified", "evidence": "native-r2/USER-COMMANDS.json"}, {"surface": "exit_status", "requirement": "Q6-10", "expectation": "ActualinstalledCLI0 success,1 invalid/missing,2 severitythreshold,3 incomplete;3 wins over2 and reports retained", "status": "Verified", "evidence": "native-r2/USER-COMMANDS.json"}, {"surface": "file_selection", "requirement": "Q6-10", "expectation": "Default6filenames and selectednative/assessment/diagnostics/CycloneDX11filenames verified; no silent extras or aliasrestoration", "status": "Verified", "evidence": "native-r2/USER-RESULTS.json"}, {"surface": "language_independence", "requirement": "Q6-10", "expectation": "ActualEN/JAlegacy findings equal and048sourcefacts/asset/ID invariants pass; native runIDs remain run-local", "status": "Verified", "evidence": "native-r2/USER-RESULTS.json"}, {"surface": "source_install_scan", "requirement": "Q6-12", "expectation": "Clean cargo install --locked --offline --root; explicit installedrules; external project fixture onlyscanned", "status": "Verified", "evidence": "native-r2/USER-RESULTS.json"}, {"surface": "help_api_docs", "requirement": "Q6-12", "expectation": "DocumentedCLI examples/options and publicRustclient exercised; bothlanguage guides describe samefile/default/gate/assurance semantics", "status": "Verified", "evidence": "DOCUMENT-LINKS.json"}, {"surface": "documentation_links", "requirement": "Q6-12", "expectation": "135local destinations and83anchors resolve;8externalHEADresponses200 with no credentials", "status": "Verified", "evidence": "DOCUMENT-ANCHORS.json"}, {"surface": "keyboard_offline_narrow", "requirement": "Q6-12", "expectation": "ActualChromeENJA1280desktop/390mobile; trustedEnter togglesdetails and search worksloaded-offline; longURL wrapping regression reproduced thenfixed", "status": "Verified", "evidence": "browser-green/RESULT.json"}, {"surface": "unfinished_understanding", "requirement": "Q6-12", "expectation": "Installedscanner diagnostics selected2/analyzed1/partial1, humanreport showsGemfile and incomplete reason; actualstrictgate3 retainsreports", "status": "Verified", "evidence": "native-r2/user-reports/en/diagnostics.json"}]`
+- intentionalEvolution: `[{"change": "--native-json removed; --inventory-json retained", "authorization": "tasks/025/TASK-025-INVENTORY-ONLY.md explicit maintainer decision; currentrejectiontested", "scope": "CLI switch only; old library write_native_json remainsavailable"}, {"change": "Detection and guidance facts maydiffer frompublicrelease", "authorization": "Existingcompleted043/056 and056authorizedremediation; not new058policy", "scope": "Schema/IDsafety/enum/APIshape unchanged; no identicalfindingpopulationclaim"}, {"change": "Onlystatic/network acceptedfornewpackagepreparation", "authorization": "tasks/064/TASK-064-RESULTS.md prior maintainer-approved namingconsolidation", "scope": "Historicalarchive verification/install remains supported; no distributionchange in058"}, {"change": "LonganchorswrapinHTML", "authorization": "Original058Q6-12 permits narrow-screen usabilityrepair", "scope": "CSSpresentationonly; href/linktext and machineoutputs unchanged"}]`
+- limits: `["Finite documented API/CLI/outputsurface coverage, not a semverproof for every downstreamclient", "Sourceandlocalinstallation testedon native macOSarm64; otherplatforms belong059", "No newofficialsupport,publicrelease,SDKcryptoimplementation or updatedSLA", "Publishedreleaseidentity is localtagbaseline; remoteartifactsignaturevalidity not inferred fromHTTP200"]`
+- baselineTagObject: `"eecbf1c04750468ce1a1552d63ab0a270b210947"`
+- Limitation: API/CLI/output compatibility and actual bilingual desktop/mobile/keyboard user flows.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `crates/pqc_scan_report/src/compact.css`; SHA-256 `ed73d91b7ee101fb1167fccc243f53abda3620e66d51206abc977aa15b84dad8`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `crates/pqc_scan_report/tests/compatibility058.rs`; SHA-256 `776cfd072dc480eab4efb8806e066d08d5c9fc354b2b70da933efc564b1611d1`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `docs/user/REPORTS.ja.md`; SHA-256 `bc3c3fd32db6dfd70ab5336c45b9ab844e6c493ec6f7fa7ca6a1efc32b0ce427`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `docs/user/REPORTS.md`; SHA-256 `93cde2925f50b45f438b203af9f32ad38c3906fbe38c7cbb22d8f1651f09fe01`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/TASK-058-RESULTS.md`; SHA-256 `277f2404ae1846a7fbe10d49f9c254f284dfe7c527a6473baa1800830e1d2a4c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/TASK-058-REVIEWS.md`; SHA-256 `f47860f2c3a864f730d8c961bf80533d874b76454a406073bc7a6f948429e321`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/DOCUMENT-ANCHORS.json`; SHA-256 `cc073e16f5b827d7c1a81fd250f20810cb79b8ebb9ee1febbe34d3ebfcdecd7e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/DOCUMENT-COMMANDS.json`; SHA-256 `8938721eea40e8f97f8897aa09f8d1d90dd5572abc1bcae2d553eba3fc3c5700`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/DOCUMENT-LINKS.json`; SHA-256 `11d74cf756979e31b9ac67fb5ea68204e4be4ea80d5f69ee4c21623e30bfb85a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/EVIDENCE-FINAL.json`; SHA-256 `74d43c0b53edd3e25c90a86bd4b1ee1cfc061b834be204674637ec6a3b94c00e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/EXTERNAL-LINKS.json`; SHA-256 `78398c589f256f37ec5cc0210870cb1972fb6d88677ce15b538204d1f990a35d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/EXTERNAL-URL-INPUT.json`; SHA-256 `237c2b88d4457e7042531cc99a520490c7b064ef18df8c1da7f0729a51971a0d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/EXTRA-FREEZE.json`; SHA-256 `3a7b436a3083815a1183bb59b528d6db1b544a62c4290aa9a8d97c93c3dbf1e7`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/INITIAL-RUN.json`; SHA-256 `8cbe4ec8cee59bc70609064e20acbd7909c3c79c13108895ca22607d328c5e09`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/RELEASE-API-v1.json`; SHA-256 `b1c3409875a1dcd1759500fa862cc9f6e8db9f1bc38ecf1dfdb8e37395670016`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/RELEASE-API.json`; SHA-256 `53407b84963ce2db3eb4951a78f55355e4367b44979d5d2b716987f3455859b8`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/RELEASE-IDENTITY-CORRECTION.json`; SHA-256 `2784e01ba7d6ded1d4bb7e2de45bb42e3a3ae63e47f6c626ff10d7747c187d2a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/REVIEW-SOURCE.json`; SHA-256 `ebd2038a3c324dae0eb59e1bad5eb739d618afc53fe405dbee693fc187952003`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/compatibility-matrix-v1.json`; SHA-256 `7bcc450397af0666ed69c17005c3f5492227d58adaa17b6b309b1ea2d26571ff`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r1/COMMANDS.json`; SHA-256 `7474af841ee5b5cffd6b67a73d0ad286593ec0fb7cb3f772eb2ecf4b11487e48`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r1/ENVIRONMENT.json`; SHA-256 `5aa01dfa1c27d21bededbf8135f2e72ddfd17192cb79cf4a1301cc4c0b9f545f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r1/SNAPSHOT.json`; SHA-256 `afb4a8b5104b2ebc66a65616d5e92d8e138879e7275a9c793e93c71ff13105ef`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r1/SOURCE.json`; SHA-256 `cb2ab78909f273593f1fca01cc70d1f5f890e80b723e95edece811421a3175ee`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r1/exports-BINARIES.json`; SHA-256 `1abc21815222a98e7f1d3e75b6dfd175b68a53072816adc445052b93be49a321`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r1/public-client-BINARIES.json`; SHA-256 `b8ac9bd4da5f7c5b082f91f78e6cc18e5e54e0b8bc9967cff978d67f2296b455`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r1/report-regression-BINARIES.json`; SHA-256 `b8ac9bd4da5f7c5b082f91f78e6cc18e5e54e0b8bc9967cff978d67f2296b455`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r1/workspace-BINARIES.json`; SHA-256 `f8e32d37a852bf7e73bb573aa89e4d841e0eb074effe2adc578d52a09ad40c0a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/BINARY-BINDINGS.json`; SHA-256 `17df56e589d69a2afcffa52c1ea29a97d20f7841fc4a9e76631f61bbdd1135f4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/COMMANDS.json`; SHA-256 `8dc32d2386a3087474ae1a82695677081987ef60d1b553b852ba81d4a56531e6`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/COMPLETION.json`; SHA-256 `1faced98618ec2b0e5cb8c06ada0d68b03787a2afa61e63b4fb0201aaa3cde5d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/ENVIRONMENT.json`; SHA-256 `70c4565a068e8e12d48775069009cd42d15af1de2d6e6346401cb3d617888ee6`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/FIXTURE.json`; SHA-256 `a099b75b44802e0fc045921bdde9e99bde70f28a077863f34260f83bbad89dd3`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/SNAPSHOT.json`; SHA-256 `afb4a8b5104b2ebc66a65616d5e92d8e138879e7275a9c793e93c71ff13105ef`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/SOURCE.json`; SHA-256 `cb2ab78909f273593f1fca01cc70d1f5f890e80b723e95edece811421a3175ee`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/USER-COMMANDS.json`; SHA-256 `c0138931f6ca70ef43fcaefafc81934cec2fbdc122a7dcc3a0ca8626c733564d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/USER-RESULTS.json`; SHA-256 `5d16ad944e5ef794fee404825626c3bc00c265c8df25f6401360f049587b3cae`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/build-BINARIES.json`; SHA-256 `56ed4c4770b723530a56257c9bda533ab6500ab351b6d08f2fa08830a8aab51a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/clippy-BINARIES.json`; SHA-256 `567e6dffd952050af6d70fb5112394d8b0588124e95c4d3e9ba45bd4e53def7f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/exports-BINARIES.json`; SHA-256 `338df34328da171eb77de822e168474e7b8d1bac5f1d6de801a31fabe78bdcc8`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/network-release-BINARIES.json`; SHA-256 `e6d4af3c5b4087bf17efe5280f39546262a907e6f699bb75961b34647ea3c151`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/optional-clippy-BINARIES.json`; SHA-256 `e6d4af3c5b4087bf17efe5280f39546262a907e6f699bb75961b34647ea3c151`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/optional-information-BINARIES.json`; SHA-256 `e6d4af3c5b4087bf17efe5280f39546262a907e6f699bb75961b34647ea3c151`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/public-client-BINARIES.json`; SHA-256 `ec34a27696492fb37a7695b60078a943c3df9367d4d3d067cdbc65b05e14123c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/report-regression-BINARIES.json`; SHA-256 `ec34a27696492fb37a7695b60078a943c3df9367d4d3d067cdbc65b05e14123c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/source-install-BINARIES.json`; SHA-256 `56ed4c4770b723530a56257c9bda533ab6500ab351b6d08f2fa08830a8aab51a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/native-r2/workspace-BINARIES.json`; SHA-256 `567e6dffd952050af6d70fb5112394d8b0588124e95c4d3e9ba45bd4e53def7f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/outputs/compatibility-matrix.json`; SHA-256 `e09b1b93db0fb7575020d39113a62fe3afee23e36eb22e3dbbcc099cd453b372`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/058/evidence/compatibility-20261115/outputs/usability-review.md`; SHA-256 `893e4b147258def1491c97856dbf867da2dc688922dd1c7fbd6db3aed47f8998`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_report", "--test", "compatibility058", "--", "--nocapture"]`; exit `0`
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_report", "--test", "recommendation056", "--", "--nocapture"]`; exit `0`
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_cli", "--test", "output_contracts048", "--", "--nocapture"]`; exit `0`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline"]`; exit `101`
+- Command: `["cargo", "test", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--workspace", "--locked", "--offline"]`; exit `0`
+- Command: `["cargo", "install", "--locked", "--offline", "--path", "crates/pqc_scan_cli", "--root", "/private/tmp/pqc056-native-qfg2u55y/work/installed"]`; exit `0`
+- Command: `["cargo", "test", "--locked", "--offline", "-p", "pqc_scan_cli", "--all-features", "--target-dir", "/private/tmp/pqc056-native-qfg2u55y/work/build-all", "--test", "cli_information"]`; exit `0`
+- Command: `["cargo", "clippy", "--workspace", "--all-targets", "--all-features", "--locked", "--offline", "--target-dir", "/private/tmp/pqc056-native-qfg2u55y/work/build-all", "--", "-D", "warnings"]`; exit `0`
+- Command: `["cargo", "build", "--release", "--locked", "--offline", "-p", "pqc_scan_cli", "--features", "probe-tls,probe-ssh,probe-ssh-kex", "--target-dir", "/private/tmp/pqc056-native-qfg2u55y/work/release-network"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "--version"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "scan", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "rules", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "diff", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan", "--version"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan", "scan", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan", "rules", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan", "diff", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan", "probe", "tls", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan", "probe", "ssh", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan", "probe", "ssh-kex", "--help"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "--not-valid"]`; exit `1`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "scan", "/private/tmp/pqc056-native-qfg2u55y/work/user-project", "--native-json"]`; exit `1`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "rules", "list", "--rules-dir", "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "rules", "show", "TLS_RSA_KEY_EXCHANGE", "--rules-dir", "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "scan", "/private/tmp/pqc056-native-qfg2u55y/work/user-project", "--rules-dir", "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules", "--threads", "2", "--out-dir", "/private/tmp/pqc056-native-qfg2u55y/work/plain"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "scan", "/private/tmp/pqc056-native-qfg2u55y/work/user-project", "--rules-dir", "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules", "--threads", "2", "--format", "all", "--lang", "en", "--diagnostics", "--inventory-json", "--cyclonedx-17", "--policy-profile", "migration-review-v1", "--repository-scope", "public058", "--out-dir", "/private/tmp/pqc056-native-qfg2u55y/work/en"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "scan", "/private/tmp/pqc056-native-qfg2u55y/work/user-project", "--rules-dir", "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules", "--threads", "2", "--format", "all", "--lang", "ja", "--diagnostics", "--inventory-json", "--cyclonedx-17", "--policy-profile", "migration-review-v1", "--repository-scope", "public058", "--out-dir", "/private/tmp/pqc056-native-qfg2u55y/work/ja"]`; exit `0`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "scan", "/private/tmp/pqc056-native-qfg2u55y/work/user-project", "--rules-dir", "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules", "--threads", "2", "--fail-on", "high", "--diagnostics", "--out-dir", "/private/tmp/pqc056-native-qfg2u55y/work/threshold"]`; exit `2`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "scan", "/private/tmp/pqc056-native-qfg2u55y/work/user-project", "--rules-dir", "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules", "--threads", "2", "--require-complete", "--diagnostics", "--out-dir", "/private/tmp/pqc056-native-qfg2u55y/work/incomplete"]`; exit `3`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "scan", "/private/tmp/pqc056-native-qfg2u55y/work/user-project", "--rules-dir", "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules", "--threads", "2", "--require-complete", "--fail-on", "high", "--diagnostics", "--out-dir", "/private/tmp/pqc056-native-qfg2u55y/work/precedence"]`; exit `3`
+- Command: `["/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan", "scan", "/private/tmp/pqc056-native-qfg2u55y/work/nonexistent", "--rules-dir", "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules", "--out-dir", "/private/tmp/pqc056-native-qfg2u55y/work/missing-out"]`; exit `1`
+- Review: implementation; /root/task056_implementation_review; accepted; source digest `f2cdfe87b603393edab99a4bb8c580537eb8863b4174610ba0c24b14cc55222c`; artifact `tasks/058/TASK-058-REVIEWS.md`
+- Review: test; /root/task056_test_review; accepted; source digest `f2cdfe87b603393edab99a4bb8c580537eb8863b4174610ba0c24b14cc55222c`; artifact `tasks/058/TASK-058-REVIEWS.md`
+- Review source (implementation): Verified; 206 matching / 0 changed or missing declared files
+- Review source (test): Verified; 206 matching / 0 changed or missing declared files
+- Execution: Unknown; review adequacy: Verified; Two source-bound stages accepted for the declared matching source population
+
+### task059-recorded-study
+
+**Partial**: Actual macOS Apple Silicon static/network build/install checks; no other platform support claim.
+Original recorded outcome: "Complete:originalQ6-11 verified; both reviews accepted".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Verified**; head `f07d782cd68cfac95d93585d5ace049f590160d4`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: static public preparation and network unpublished preparation. Standards: Existing maintainer-selected platform only; network four-notice hold.
+Method: Actual macOS Apple Silicon static/network build/install checks; no other platform support claim.. Environment: macOS27.2.1arm64/aarch64-apple-darwin; Rust1.93.1.
+Comparison: Actual macOS Apple Silicon static/network build/install checks; no other platform support claim..
+
+- status: `"Complete:originalQ6-11 verified; both reviews accepted"`
+- head: `"f07d782cd68cfac95d93585d5ace049f590160d4"`
+- source: `"tasks/059/evidence/platform-20261115/package-r2/SOURCE.json"`
+- targetSelection: `{"authority": ["docs/user/DISTRIBUTION.md", "docs/user/DISTRIBUTION.ja.md", "tasks/064/TASK-064-RESULTS.md"], "policy": "Existingmaintainer-selected macOSAppleSilicon staticpublic/networkunpublished. No OS/CPU/platform promise added.", "observedHost": {"uname": "Darwin arm64", "sw_vers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2.1\nBuildVersion:\t\t26B131\n", "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n", "target": "aarch64-apple-darwin", "notEvaluated": ["OtherOS", "OtherCPU", "OtherOSversions"], "formalSupport": "Existingpolicy unchanged; no new guarantee inferred"}}`
+- rows: `[{"platform": "macOS", "observedVersion": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2.1\nBuildVersion:\t\t26B131\n", "architecture": "arm64", "target": "aarch64-apple-darwin", "variant": "static", "status": "Verified", "build": {"evidence": "tasks/058/evidence/compatibility-20261115/native-r2/BINARY-BINDINGS.json", "exactProductSourceReuse": "tasks/059/evidence/platform-20261115/package-r2/BUILD-REUSE.json"}, "test": {"evidence": "tasks/058/evidence/compatibility-20261115/native-r2/workspace.log", "passed": 555, "failed": 0, "ignored": 3}, "archive": "tasks/059/evidence/platform-20261115/package-r2/packages/static/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz", "archiveSha256": "d077655021bc7d1102ad72c44378138760050d01701dd9adb5b10a401c7a5946", "binarySha256": "68cc6562c4c3991fe935eb1e8c47499275f82cdc69ef74d2fbbad11b545c2de3", "cleanInstall": {"evidence": "tasks/059/evidence/platform-20261115/package-r2/packages/static/INSTALL-RESULTS.json", "allCommandsExit0": true, "installedRulesActualScanFindings": 3, "prefixRemoved": true}, "noticeReviewRequired": [], "publication": "Localdevelopment preparation; not a newlypublishedrelease"}, {"platform": "macOS", "observedVersion": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2.1\nBuildVersion:\t\t26B131\n", "architecture": "arm64", "target": "aarch64-apple-darwin", "variant": "network", "status": "Verified", "build": {"evidence": "tasks/058/evidence/compatibility-20261115/native-r2/BINARY-BINDINGS.json", "exactProductSourceReuse": "tasks/059/evidence/platform-20261115/package-r2/BUILD-REUSE.json"}, "test": {"evidence": "tasks/059/evidence/platform-20261115/native-r1/network-workspace.log", "passed": 614, "failed": 0, "ignored": 5}, "archive": "tasks/059/evidence/platform-20261115/package-r2/packages/network/pqc-scan-0.2.0-aarch64-apple-darwin-network.tar.gz", "archiveSha256": "fe68bd004d1e603a64eea34a70f8bbdbd231111c3db2bd32a10abc1d98af8c95", "binarySha256": "3e93e8b8e089340bde88a6a38e456cfc0b369b86cdc3f626c88bb2e5726f4c61", "cleanInstall": {"evidence": "tasks/059/evidence/platform-20261115/package-r2/packages/network/INSTALL-RESULTS.json", "allCommandsExit0": true, "installedRulesActualScanFindings": 3, "prefixRemoved": true}, "noticeReviewRequired": [{"name": "block2", "version": "0.6.2"}, {"name": "dispatch2", "version": "0.3.1"}, {"name": "objc2-encode", "version": "4.1.0"}, {"name": "objc2", "version": "0.6.5"}], "publication": "No publicationperformed; existingnetworkhold preserved"}]`
+- notInDeclaredScope: `["OtherOS", "OtherCPUarchitecture", "OtherOSversion execution"]`
+- supportInterpretation: `"Operational build/test/install/rules measurement on exacthost only. Existingrelease policy is not broadened by buildsuccess; untested platforms are not labeled supported."`
+- confinement: `"Existingnative readonlysource/cache, scratchonly writes, noegress. Adaptedchecker removes only redundant nestedlauncher and uses a stronger inherited sandbox denying all network; all existing install/verifier assertions unchanged."`
+- failuresPreserved: `["tasks/059/evidence/platform-20261115/INITIAL-RUN.json", "tasks/059/evidence/platform-20261115/native-r1/static-install.log"]`
+- originalCriterion: `"Q6-11"`
+- Limitation: Actual macOS Apple Silicon static/network build/install checks; no other platform support claim.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `scripts/package-release.py`; SHA-256 `61d2805c6562bbffd61eb6e9d163d8ce0ecf69dec01067106476c1b155556aa5`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/TASK-059-RESULTS.md`; SHA-256 `045d8214675bb23715e6d741f3c363866ad19c4d8efc59bde0aea8ac191ce960`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/TASK-059-REVIEWS.md`; SHA-256 `e7a0e05511325861f66a0faf96934dbba7e1b7b620ce3a984188414fef1a0684`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/EVIDENCE-FINAL.json`; SHA-256 `6e8d904abc102edc0c8c0d060efe6af716e16db8618760d482b8e05e6f59b33e`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/INITIAL-RUN.json`; SHA-256 `ee6786ffb0fbf1bde079db68244e94e567f22fd7a0bf34c9806c99d4deef808b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/REVIEW-SOURCE.json`; SHA-256 `915170927b21584e0631a7860c92e22ce14d26c2bdd16eac0936279d564ec860`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/native-r1/BUILD-REUSE.json`; SHA-256 `f8315327cf039f1cab60d56db4b40780c8029c00a44c3d35121d85c576547ebf`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/native-r1/COMMANDS.json`; SHA-256 `3de2541eeec3b9c55c7f78c1fa9a33fcfca4881af86711fd463431bb7abc6856`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/native-r1/ENVIRONMENT.json`; SHA-256 `c9fb71442bd8ac8e4a8d743b8916a5caee732e340b330a916dce2de00dc1c0c4`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/native-r1/PACKAGE-COMMANDS.json`; SHA-256 `1620f86c49b534fd2562de2bb12bee19216614ee8e346a8cd6d2f504b51d1dce`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/native-r1/SNAPSHOT.json`; SHA-256 `03594edce7a7402778f39982d4f2d6da1abc30e8d63ae473b2651d3e13515a95`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/native-r1/SOURCE.json`; SHA-256 `cb2ab78909f273593f1fca01cc70d1f5f890e80b723e95edece811421a3175ee`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/native-r1/network-workspace-BINARIES.json`; SHA-256 `007d605ce190a41820e05c13c5900c6e094b52d4797c5a83583f81dec589c753`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/package-extra.py.txt`; SHA-256 `85ca7da6a15c20306a5f882c52f049b58ed6469ed0bfda2f862c64255ca706cd`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/package-r2/SOURCE.json`; SHA-256 `cb2ab78909f273593f1fca01cc70d1f5f890e80b723e95edece811421a3175ee`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/platform-matrix.json`; SHA-256 `99ad26a35fb282bd0c799524eb2e981873f829f74b3ebb39a93396d23f9863a0`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/run-native.py.txt`; SHA-256 `014185cbb355e606204457fe06e8391f43be87ab5a5be730c759c040af0e90ef`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/run-package-r2.py.txt`; SHA-256 `a4eaac8a24d954bac149ade39d77ed1c5dd1405b869612ac37c96adb05a011d1`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tests/distribution/check-install.py`; SHA-256 `069efdbef221df47a4a3235e35a64b6999afbc866cb7c84dbfabb2ed9fdbd3c3`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["cargo", "test", "--workspace", "--all-features", "--locked", "--offline"]`; exit `0`
+- Command: `["/Users/waka/.pyenv/versions/3.12.7/bin/python3.12", "/Users/waka/development/pqc/pqc-scan/scripts/package-release.py", "--source-root", "/Users/waka/development/pqc/pqc-scan", "--binary", "/private/tmp/pqc056-native-yx8bv01m/work/static-pqc-scan", "--variant", "static", "--out-dir", "/private/tmp/pqc056-native-yx8bv01m/work/static-archive"]`; exit `0`
+- Command: `["/Users/waka/.pyenv/versions/3.12.7/bin/python3.12", "/Users/waka/development/pqc/pqc-scan/scripts/package-release.py", "--verify", "/private/tmp/pqc056-native-yx8bv01m/work/static-archive/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz"]`; exit `0`
+- Command: `["/Users/waka/.pyenv/versions/3.12.7/bin/python3.12", "/Users/waka/development/pqc/pqc-scan/tests/distribution/check-install.py", "/private/tmp/pqc056-native-yx8bv01m/work/static-archive/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz", "--out-dir", "/private/tmp/pqc056-native-yx8bv01m/work/static-install"]`; exit `1`
+- Review: implementation; /root/task056_implementation_review; accepted; source digest `2f55c012db2fa94903ced49ada3436b54528869366586be692d8d7d93af0eae3`; artifact `tasks/059/TASK-059-REVIEWS.md`
+- Review: test; /root/task056_test_review; accepted; source digest `2f55c012db2fa94903ced49ada3436b54528869366586be692d8d7d93af0eae3`; artifact `tasks/059/TASK-059-REVIEWS.md`
+- Review source (implementation): Verified; 209 matching / 0 changed or missing declared files
+- Review source (test): Verified; 209 matching / 0 changed or missing declared files
+- Execution: Unknown; review adequacy: Verified; Two source-bound stages accepted for the declared matching source population
+
+### task060-recorded-study
+
+**Partial**: Four independent clean builds on one host; both raw binary pairs match under recorded normalization.
+Original recorded outcome: "Complete; implementation and test reviews accepted".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Verified**; head `f07d782cd68cfac95d93585d5ace049f590160d4`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: static and network(probe-tls,probe-ssh,probe-ssh-kex). Standards: Raw binary reproducibility under identical remapped paths/fixed epoch.
+Method: Four independent clean builds on one host; both raw binary pairs match under recorded normalization.. Environment: Same macOSarm64 host/SDK; Rust1.93.1; four independent target roots.
+Comparison: Four independent clean builds on one host; both raw binary pairs match under recorded normalization..
+
+- status: `"Complete; implementation and test reviews accepted"`
+- head: `"f07d782cd68cfac95d93585d5ace049f590160d4"`
+- independence: `{"samePhysicalHost": true, "independentOSConfinedSourceHomeTmpCargoTargetRoots": true, "noSharedBuildArtifacts": true, "sharedReadonlyDependencyInputs": true, "sourceSnapshotsByteEqual": true, "scope": "Two clean local buildenvironments, not two hosts or every environment"}`
+- conditions: `{"target": "aarch64-apple-darwin", "rustflags": "--remap-path-prefix=/private/tmp/pqc060-rebuild-cv1ujwwp/A=/pqc-build --remap-path-prefix=/private/tmp/pqc060-rebuild-cv1ujwwp/B=/pqc-build", "cflags": "-ffile-prefix-map=/private/tmp/pqc060-rebuild-cv1ujwwp/A=/pqc-build -fdebug-prefix-map=/private/tmp/pqc060-rebuild-cv1ujwwp/A=/pqc-build -ffile-prefix-map=/private/tmp/pqc060-rebuild-cv1ujwwp/B=/pqc-build -fdebug-prefix-map=/private/tmp/pqc060-rebuild-cv1ujwwp/B=/pqc-build", "sourceDateEpoch": "1794636163", "compilerHashes": {"/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/rustc": "34a8f7034eeb844189a3c36ebb3fe36c2193fdb47b60028eb7f9392cb1f62484", "/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/cargo": "2be8a4e73901a99470d15b793e5ee814005c3b9ebbd3815ccbf9cf0f292238e7", "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12": "81f3e43043ccf6feab8d50bf6b3b6181f265295bffd46cf5092077f938c4fc52"}, "sdk": "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk", "logicalRoot": "/pqc-build", "source": "SOURCE.json"}`
+- rows: `[{"variant": "static", "A": {"path": "/Users/waka/development/pqc/pqc-scan/tasks/060/evidence/rebuild-20261115/native-r1/A-static-pqc-scan", "sha256": "a3b06cd609961511874adf7f131d1ad4d8e11d54b5ed2eb6aa46d233699ecb90", "size": 16119024, "version": "pqc-scan 0.2.0"}, "B": {"path": "/Users/waka/development/pqc/pqc-scan/tasks/060/evidence/rebuild-20261115/native-r1/B-static-pqc-scan", "sha256": "a3b06cd609961511874adf7f131d1ad4d8e11d54b5ed2eb6aa46d233699ecb90", "size": 16119024, "version": "pqc-scan 0.2.0"}, "rawBytesEqual": true, "firstDifferenceOffsets": [], "lengthDifference": 0, "interpretation": "Rawindependentlybuilt binaries match under recordednormalized conditions; no archive comparison used"}, {"variant": "network", "A": {"path": "/Users/waka/development/pqc/pqc-scan/tasks/060/evidence/rebuild-20261115/native-r1/A-network-pqc-scan", "sha256": "e1fcf82ee141e07e357ecf4f8098b32efc4b3f627189b7d251980cfeb27307e7", "size": 22196960, "version": "pqc-scan 0.2.0"}, "B": {"path": "/Users/waka/development/pqc/pqc-scan/tasks/060/evidence/rebuild-20261115/native-r1/B-network-pqc-scan", "sha256": "e1fcf82ee141e07e357ecf4f8098b32efc4b3f627189b7d251980cfeb27307e7", "size": 22196960, "version": "pqc-scan 0.2.0"}, "rawBytesEqual": true, "firstDifferenceOffsets": [], "lengthDifference": 0, "interpretation": "Rawindependentlybuilt binaries match under recordednormalized conditions; no archive comparison used"}]`
+- nativeToolchainReceipt: `"tasks/060/evidence/rebuild-20261115/native-r1/NATIVE-TOOLCHAIN.json"`
+- embeddedMetadata: `{"static": {"identicalExceptDumpArtifactPathLabel": true, "records": ["tasks/060/evidence/rebuild-20261115/native-r1/A-static-MACHO.txt", "tasks/060/evidence/rebuild-20261115/native-r1/B-static-MACHO.txt"]}, "network": {"identicalExceptDumpArtifactPathLabel": true, "records": ["tasks/060/evidence/rebuild-20261115/native-r1/A-network-MACHO.txt", "tasks/060/evidence/rebuild-20261115/native-r1/B-network-MACHO.txt"]}}`
+- interpretation: `"Two independently empty artifact environments on the same physicalhost reproduce rawbinaries under identical recordednormalized paths/epoch/toolchain. No archivebytes or postprocessedbinaries used. Otherhosts/toolchains/defaultunremapped conditions are not certified."`
+- reviews: `{"implementation": "/root/task056_implementation_review: accepted; no findings", "test": "/root/task056_test_review: accepted; no findings"}`
+- Limitation: Four independent clean builds on one host; both raw binary pairs match under recorded normalization.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `tasks/060/TASK-060-RESULTS.md`; SHA-256 `45013c97c54d3df7769cdb265784e909872e4e67cde8cd9f49dab5ccd433b95d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/TASK-060-REVIEWS.md`; SHA-256 `e015be88c746573ca00fd7e39de847546ddb9c2984051bc664c185e05ae1d75a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/EVIDENCE-FINAL.json`; SHA-256 `6428a8fb8eb98c93ec6cd515ddc2d9f0b66359233c57fb4ea1a98bb3b92a4f0b`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/REVIEW-SOURCE.json`; SHA-256 `93107f8b5819aa60c14d5c3bc78395d566f52bd8a2a0473c48fb12746c8334cb`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/native-r1/A-ENVIRONMENT.json`; SHA-256 `c014a0378b29f005f1887938ffd21f1c2eeaec063dd923a8b3e283b4958e18d3`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/native-r1/B-ENVIRONMENT.json`; SHA-256 `429d06b093ccb87b0df9cee0245820e06d61048fe7bca7f46384d59abfe374d0`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/native-r1/COMMANDS.json`; SHA-256 `77b2e17b3309e442479482bb195c1baee4b5fd0d6c728337cc3cb504153e3e79`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/native-r1/COMPARISON.json`; SHA-256 `3fbe8bb7f34c7f45a2af5ed2cc11a9b9fc46bb837ac23a0fe7efd9eda36c104f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/native-r1/COMPLETION.json`; SHA-256 `5006b4da0179531c8bff35403972c2362179c13757d809480d360ef45b52a322`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/native-r1/NATIVE-TOOLCHAIN.json`; SHA-256 `4050682f6e5f26a7d1ca7ee692e8b07e57758382400b56b5a8c76bdab7048fd7`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/native-r1/SNAPSHOT.json`; SHA-256 `c6bd5712b48330895a7f360ca07d54f372599b6641860dc2a173b55b9c583307`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/native-r1/SOURCE.json`; SHA-256 `9dfc46f72b6e492c4c74349804a92e5c96429aada796483278ec8e8d19e835a1`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/rebuild-comparison.json`; SHA-256 `bb114b720e48a39e262f7cfb134795fb59d9d1c683f7db50a9c0e51216496d2c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/060/evidence/rebuild-20261115/run-rebuild.py.txt`; SHA-256 `ffd3ee22037b49998bcfdd4e9413042731e25b62cb2325193b6196fdc28aab7f`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["cargo", "build", "--release", "--locked", "--offline", "-p", "pqc_scan_cli"]`; exit `0`
+- Command: `["cargo", "build", "--release", "--locked", "--offline", "-p", "pqc_scan_cli", "--features", "probe-tls,probe-ssh,probe-ssh-kex"]`; exit `0`
+- Review: implementation; /root/task056_implementation_review; accepted; source digest `70d9c4f9206acb4b1e3766fcb4d3267740e667b7059a283d92ce4bc5fada1ae9`; artifact `tasks/060/TASK-060-REVIEWS.md`
+- Review: test; /root/task056_test_review; accepted; source digest `70d9c4f9206acb4b1e3766fcb4d3267740e667b7059a283d92ce4bc5fada1ae9`; artifact `tasks/060/TASK-060-REVIEWS.md`
+- Review source (implementation): Verified; 200 matching / 0 changed or missing declared files
+- Review source (test): Verified; 200 matching / 0 changed or missing declared files
+- Execution: Unknown; review adequacy: Verified; Two source-bound stages accepted for the declared matching source population
+
+### task061-recorded-study
+
+**Partial**: Local prepared fixture signatures: 2 valid accepts, 30 invalid rejects; not production signing or SLSA certification.
+Original recorded outcome: "Complete; implementation and test reviews accepted".
+Catalog input applicability: **Not Applicable**; Ordinary study artifacts are individually hash-bound; no integration population declared.
+Source applicability: **Verified**; head `f07d782cd68cfac95d93585d5ace049f590160d4`; version `0.2.0 implementation / v0.3 quality roadmap; historical study identity in bound records`; date 2026-11-15 enrollment; original measurement dates retained in bound artifacts.
+Features: static/network prepared archives;32 signature/integrity cases. Standards: Local Ed25519 fixture policy; no SLSA/GitHub production identity claim.
+Method: Local prepared fixture signatures: 2 valid accepts, 30 invalid rejects; not production signing or SLSA certification.. Environment: Pinned immutable offline Linuxarm64 container; OpenSSL3.0.22; nonroot/resource bounds.
+Comparison: Local prepared fixture signatures: 2 valid accepts, 30 invalid rejects; not production signing or SLSA certification..
+
+- status: `"Complete; implementation and test reviews accepted"`
+- head: `"f07d782cd68cfac95d93585d5ace049f590160d4"`
+- originalCriteria: `["Q6-14", "Q6-15"]`
+- scope: `"Ephemeral local fixture signatures over preparedmetadata, not realrelease signing or GitHub/SLSAidentity certification"`
+- actualResult: `"tasks/061/evidence/integrity-20261115/container-r2/RESULT.json"`
+- runAndBoundaries: `"tasks/061/evidence/integrity-20261115/container-r2/RUN.json"`
+- trustedFixturePublicKeySha256: `"bf3c624cc0602805e680ce491a25d252aa6a8b768f424937c4dbf7f560a0e6ea"`
+- signatureFacts: `[{"artifactSha256": "d077655021bc7d1102ad72c44378138760050d01701dd9adb5b10a401c7a5946", "signatureBytes": 64, "signatureSha256": "e2a5cd1f9b9c8d873115defb84e1037d869d764ccc7bcc277abe72c0fc77f673", "statementSha256": "2b3a8cf74d948da5556bd9926120fcca888b8ae9312c38c11561982188a4a1d9", "trustedPublicKeySha256": "bf3c624cc0602805e680ce491a25d252aa6a8b768f424937c4dbf7f560a0e6ea", "variant": "static"}, {"artifactSha256": "fe68bd004d1e603a64eea34a70f8bbdbd231111c3db2bd32a10abc1d98af8c95", "signatureBytes": 64, "signatureSha256": "7917889554905bbaa7b3a29bfa45378fcc1b52271008b23d3bd88335cfec1312", "statementSha256": "3a82207052f54a9160e7c4257cbb4d3fecba38467f7223c186dde133c711e852", "trustedPublicKeySha256": "bf3c624cc0602805e680ce491a25d252aa6a8b768f424937c4dbf7f560a0e6ea", "variant": "network"}]`
+- cases: `[{"actualAccepted": true, "case": "static-valid", "expectedAccepted": true, "reason": "verified_fixture"}, {"actualAccepted": false, "case": "static-binary-corrupt", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "static-rules-corrupt", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "static-notice-corrupt", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "static-binary-missing", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "static-rules-missing", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "static-notice-missing", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "static-recomputed-manifest", "expectedAccepted": false, "hashOnlyVerifierAccepted": true, "reason": "subject_digest"}, {"actualAccepted": false, "case": "static-valid-signature-wrong-sourceInputsSha256", "expectedAccepted": false, "reason": "statement_policy"}, {"actualAccepted": false, "case": "static-valid-signature-wrong-builderId", "expectedAccepted": false, "reason": "statement_policy"}, {"actualAccepted": false, "case": "static-valid-signature-wrong-target", "expectedAccepted": false, "reason": "statement_policy"}, {"actualAccepted": false, "case": "static-valid-signature-wrong-variant", "expectedAccepted": false, "reason": "statement_policy"}, {"actualAccepted": false, "case": "static-valid-signature-wrong-preparationOnly", "expectedAccepted": false, "reason": "statement_policy"}, {"actualAccepted": false, "case": "static-signature-corrupt", "expectedAccepted": false, "reason": "signature"}, {"actualAccepted": false, "case": "static-mixed-binary", "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "static-wrong-trust-root", "expectedAccepted": false, "reason": "signature"}, {"actualAccepted": true, "case": "network-valid", "expectedAccepted": true, "reason": "verified_fixture"}, {"actualAccepted": false, "case": "network-binary-corrupt", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "network-rules-corrupt", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "network-notice-corrupt", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "network-binary-missing", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "network-rules-missing", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "network-notice-missing", "existingChecksumVerifierRejected": true, "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "network-recomputed-manifest", "expectedAccepted": false, "hashOnlyVerifierAccepted": true, "reason": "subject_digest"}, {"actualAccepted": false, "case": "network-valid-signature-wrong-sourceInputsSha256", "expectedAccepted": false, "reason": "statement_policy"}, {"actualAccepted": false, "case": "network-valid-signature-wrong-builderId", "expectedAccepted": false, "reason": "statement_policy"}, {"actualAccepted": false, "case": "network-valid-signature-wrong-target", "expectedAccepted": false, "reason": "statement_policy"}, {"actualAccepted": false, "case": "network-valid-signature-wrong-variant", "expectedAccepted": false, "reason": "statement_policy"}, {"actualAccepted": false, "case": "network-valid-signature-wrong-preparationOnly", "expectedAccepted": false, "reason": "statement_policy"}, {"actualAccepted": false, "case": "network-signature-corrupt", "expectedAccepted": false, "reason": "signature"}, {"actualAccepted": false, "case": "network-mixed-binary", "expectedAccepted": false, "reason": "subject_digest"}, {"actualAccepted": false, "case": "network-wrong-trust-root", "expectedAccepted": false, "reason": "signature"}]`
+- counts: `{"validAccepted": 2, "invalidRejected": 30, "unassessed": 0}`
+- privateKeyExported: `false`
+- privateKeyDeleted: `true`
+- containerRemoved: `true`
+- limitsObserved: `{"cpuMax": ["100000", "100000"], "emptyEnvironment": true, "externalNetworkDenied": true, "loopbackWorks": true, "memoryMax": 536870912, "pidsMax": 32, "rootReadonly": true, "scratchCapacity": 268435456, "sourceReadonly": true, "swapMax": 0}`
+- opensslVersion: `"OpenSSL 3.0.22 25 Aug 2026 (Library: OpenSSL 3.0.22 25 Aug 2026)"`
+- opensslSha256: `"47d16a00c9b3f43d44a19a9e3fd109ac64e9dbab78061f13e21378a1d3ea5cc1"`
+- retainedFiles: `"Only parent-constructed bounded publicmeasurement JSON; no container scratchfiles/privatekeys/signaturefiles promoted"`
+- productionAuthenticity: `"Not measured or granted:localtestroot is not GitHubidentity or a productionrelease signingpolicy. Realrelease signature/publication remains separateauthorization."`
+- networkPublicationHold: `"Unchanged; four existing noticeflags remain."`
+- priorRun: `"container-r1 preserves initial30cases; latest addsbinaryomission and per-statement/signature hashes, without relabeling or changing originalcase expectations."`
+- reviews: `{"implementation": "/root/task056_implementation_review: accepted; no findings", "test": "/root/task056_test_review: accepted; no findings"}`
+- Limitation: Local prepared fixture signatures: 2 valid accepts, 30 invalid rejects; not production signing or SLSA certification.
+- Limitation: Only declared source bindings are compared; missing or changed bindings remain unverified. Original documents define the measured population and tooling.
+- Limitation: Historical review artifacts are retained, but no machine-normalized two-stage source acceptance is inferred from prose or command exit0.
+- Limitation: Current catalog enrollment does not rerun the upstream study, change its task status, grant release acceptance or clear existing findings.
+- Artifact: `scripts/package-release.py`; SHA-256 `61d2805c6562bbffd61eb6e9d163d8ce0ecf69dec01067106476c1b155556aa5`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/059/evidence/platform-20261115/package-r2/SOURCE.json`; SHA-256 `cb2ab78909f273593f1fca01cc70d1f5f890e80b723e95edece811421a3175ee`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/TASK-061-RESULTS.md`; SHA-256 `78493dafa32b209e146f0c3dd7f475ce0fe49a7a0f526400e4326e378f84d5f6`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/TASK-061-REVIEWS.md`; SHA-256 `14eeb5199a50c9ed3a518013d4529366758d75196af1679a2b29c72af6770101`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/DEPENDENCY-STATUS.json`; SHA-256 `23167284a432cd3179b09398c95ff9930c23063a373702ea1fc14450d1c5418c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/EVIDENCE-FINAL.json`; SHA-256 `8b9394319d7fe750320103632b95d63b00ca3ad88bc71324c74dd196eb4fa795`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/FINAL-CHECK-CORRECTION.json`; SHA-256 `ef700e540b957bd85e1c1f8353091ff05c7b52ceafdbebee870917cbd8ca5ddb`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/REFERENCE-RECEIPTS.json`; SHA-256 `43836e6c84db5f57f69cff19f04585f3e5bcc374a2939cab43a89f859da1526a`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/REVIEW-SOURCE.json`; SHA-256 `2c5fee7e76333e83893c261503b6f6a302d51403748295b8d38293f3758a1551`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/artifact-integrity.json`; SHA-256 `ae410b3df32f7e7ea26b67690c1b20effb8cb26691c8953bbedff6752dd21cd7`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/container-r2/INPUTS.json`; SHA-256 `a4fe6fe14ef2a8a14f041a1d9dfddde731f37fb2bd4c1f59cf7bb65350cd9cff`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/container-r2/RESULT.json`; SHA-256 `0b679c7e750ffe7deb8c8abd104dd95be8efe97cff86e1cd5f22aad4ed08fb09`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/container-r2/RUN.json`; SHA-256 `8d47f6619ef70417383ec03088791a2651ee9702fedda863cb9b74c8bb3cb543`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/release-provenance.md`; SHA-256 `860eca394f8ea9acd45d94312f871e8ce20be73f59d79bc445007583336c0c5d`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/run-container.py.txt`; SHA-256 `f34bf5f21053574a9a4c9795ef73327993cb0c41d4f48c127a383996001f7d30`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tasks/061/evidence/integrity-20261115/worker.py.txt`; SHA-256 `8a5630a8f03bf1be162664044c9ff4f5e2dede55e45e3751c449f39084d2cfde`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Artifact: `tests/protocol/container_entry.py`; SHA-256 `8639f2a77ade3bcd3962d2ad9210e6a6b5ac58ea42b47df7ca79348bb85c659c`; Frozen original measurement, source/command/review context or result; see scope and limitations
+- Command: `["openssl", "genpkey", "-algorithm", "ED25519", "-out", "/scratch/fixture-private.pem"]`; exit `0`
+- Command: `["openssl", "pkey", "-in", "/scratch/fixture-private.pem", "-pubout", "-out", "/scratch/fixture-public.pem"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/static-statement.json", "-out", "/scratch/static-statement.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/static-statement.json", "-sigfile", "/scratch/static-statement.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/static-sourceInputsSha256.json", "-out", "/scratch/static-sourceInputsSha256.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/static-sourceInputsSha256.json", "-sigfile", "/scratch/static-sourceInputsSha256.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/static-builderId.json", "-out", "/scratch/static-builderId.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/static-builderId.json", "-sigfile", "/scratch/static-builderId.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/static-target.json", "-out", "/scratch/static-target.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/static-target.json", "-sigfile", "/scratch/static-target.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/static-variant.json", "-out", "/scratch/static-variant.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/static-variant.json", "-sigfile", "/scratch/static-variant.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/static-preparationOnly.json", "-out", "/scratch/static-preparationOnly.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/static-preparationOnly.json", "-sigfile", "/scratch/static-preparationOnly.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/static-statement.json", "-sigfile", "/scratch/static-broken.sig"]`; exit `1`
+- Command: `["openssl", "genpkey", "-algorithm", "ED25519", "-out", "/scratch/static-attacker-private.pem"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/static-attacker-private.pem", "-in", "/scratch/static-statement.json", "-out", "/scratch/static-statement.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/static-statement.json", "-sigfile", "/scratch/static-statement.json.sig"]`; exit `1`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/network-statement.json", "-out", "/scratch/network-statement.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/network-statement.json", "-sigfile", "/scratch/network-statement.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/network-sourceInputsSha256.json", "-out", "/scratch/network-sourceInputsSha256.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/network-sourceInputsSha256.json", "-sigfile", "/scratch/network-sourceInputsSha256.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/network-builderId.json", "-out", "/scratch/network-builderId.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/network-builderId.json", "-sigfile", "/scratch/network-builderId.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/network-target.json", "-out", "/scratch/network-target.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/network-target.json", "-sigfile", "/scratch/network-target.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/network-variant.json", "-out", "/scratch/network-variant.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/network-variant.json", "-sigfile", "/scratch/network-variant.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/fixture-private.pem", "-in", "/scratch/network-preparationOnly.json", "-out", "/scratch/network-preparationOnly.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/network-preparationOnly.json", "-sigfile", "/scratch/network-preparationOnly.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/network-statement.json", "-sigfile", "/scratch/network-broken.sig"]`; exit `1`
+- Command: `["openssl", "genpkey", "-algorithm", "ED25519", "-out", "/scratch/network-attacker-private.pem"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-sign", "-rawin", "-inkey", "/scratch/network-attacker-private.pem", "-in", "/scratch/network-statement.json", "-out", "/scratch/network-statement.json.sig"]`; exit `0`
+- Command: `["openssl", "pkeyutl", "-verify", "-rawin", "-pubin", "-inkey", "/scratch/fixture-public.pem", "-in", "/scratch/network-statement.json", "-sigfile", "/scratch/network-statement.json.sig"]`; exit `1`
+- Command: `["docker", "create", "--name", "pqc061-fixture-f04037ca00e3438d93100a61f205c0ae", "--network", "none", "--read-only", "--user", "65534:65534", "--log-driver", "none", "--cap-drop", "ALL", "--security-opt", "no-new-privileges", "--memory", "512m", "--memory-swap", "512m", "--cpus", "1", "--pids-limit", "32", "--shm-size", "1m", "--ulimit", "core=0:0", "--ulimit", "fsize=67108864:67108864", "--ulimit", "nofile=128:128", "--ulimit", "cpu=120:120", "--tmpfs", "/scratch:rw,exec,nosuid,nodev,size=256m,mode=1777", "--mount", "type=bind,src=/tmp/pqc061-source-jtgaj8lh/source,dst=/source,readonly", "--workdir", "/source", "--entrypoint", "/usr/bin/env", "sha256:16a329d30bd8f2b8d12353b678777392203d3e3f567505709a8ca4a408f95bb1", "-i", "PATH=/usr/local/cargo/bin:/usr/bin:/bin", "HOME=/scratch/home", "TMPDIR=/scratch/tmp", "PYTHONDONTWRITEBYTECODE=1", "LC_ALL=C", "python3", "/source/worker.py"]`; exit `0`
+- Review: implementation; /root/task056_implementation_review; accepted; source digest `5f30056bc87734482214360f8a31e0c174400668c51795dd799dc704257b5cf3`; artifact `tasks/061/TASK-061-REVIEWS.md`
+- Review: test; /root/task056_test_review; accepted; source digest `5f30056bc87734482214360f8a31e0c174400668c51795dd799dc704257b5cf3`; artifact `tasks/061/TASK-061-REVIEWS.md`
+- Review source (implementation): Verified; 208 matching / 0 changed or missing declared files
+- Review source (test): Verified; 208 matching / 0 changed or missing declared files
+- Execution: Unknown; review adequacy: Verified; Two source-bound stages accepted for the declared matching source population
+
+### task053-integration-validation
+
+**Partial**: Integration validation and independent review evidence; final-source hosted jobs/artifacts remain unverified
+Original recorded outcome: "Local validation and hosted CI are assessed separately; no release acceptance".
+Catalog input applicability: **Verified**; Catalog population excluding this record; complete catalog hash remains separate.
+Source applicability: **Verified**; head `f07d782cd68cfac95d93585d5ace049f590160d4`; version `0.2.0 source / v0.3 quality integration`; date 2026-11-16.
+Features: Offline all-axis catalog and baseline-only/combined report modes. Standards: Original Q6-01/Q6-02/Q6-16/Q6-18; no new score or release gate.
+Method: Actual unit/negative controls, local changed CI steps and independent source-bound review; no stored command execution. Environment: macOS arm64 local validation; actual hosted environment remains Not Tested.
+Comparison: Corrects original053 own-evidence omission; previous observations remain historical.
+
+- python: `{"total": 130, "passed": 129, "existingSkip": 1, "exitCode": 0}`
+- node: `{"passed": 38, "failed": 0, "exitCode": 0}`
+- localCI: `{"jobs": ["quality", "baseline"], "execution": "Changed offline aggregation steps only", "exitCode": 0, "hosted": false}`
+- hostedCI: `{"status": "Not Tested", "reason": "Current source and catalog are unpublished dirty changes; existing remote runs do not include053. Job status and artifact-byte verification remain required."}`
+- Concern (high): Final-source hosted CI and uploaded artifact bytes have not been verified.
+- Limitation: Q6-01 stays Partial until final-source hosted job/artifact evidence is verified.
+- Limitation: Record exclusion avoids a circular input self-hash; the complete emitted catalog retains its full SHA-256.
+- Limitation: This record does not change unfinished052 or start054; no overall product/release pass is asserted.
+- Artifact: `.github/workflows/pqc-scan.yml`; SHA-256 `36180dca9134a05cb987e25238cfb620ec0d8445c51c52e5d27b031e4ad5b431`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `README.ja.md`; SHA-256 `87a47e283a4ceb59f11087d10a2a2c0666946a3d4b845b6fb851c34e1a2164e2`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `README.md`; SHA-256 `53507368ee8b2da6b08514fce29a61a6c5788bc29514001d948430a611f4548f`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `docs/quality/CI-MEASUREMENT-PLAN.md`; SHA-256 `b9b28167958d99682fdc000ab9908f7b79a12827843a4ccb80986a895bb72c05`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `tasks/053/evidence/completion-20261116/IMPLEMENTATION-REVIEW.json`; SHA-256 `3b4c98bc00a4fe46d2a7fbb37b223713b9af35c015830fa6b79f46900c901a30`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `tasks/053/evidence/completion-20261116/LOCAL-CHECKS-r2.json`; SHA-256 `4c06908f15a74f82a900174e91e7ee9f4483fc93f242db79cbcc57eb8e8838e2`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `tasks/053/evidence/completion-20261116/TEST-REVIEW.json`; SHA-256 `389bb497f65873dd984253827811083e6f87435282a532a66d62a814f2e7249a`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `tasks/053/evidence/completion-20261116/before/docs/quality/EVIDENCE-CATALOG.json`; SHA-256 `5244ae39c085b5f9e0769baa5d38446aa21ed1dde160f138347295acac9aebfb`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `tasks/053/evidence/completion-20261116/enroll-integration.py.txt`; SHA-256 `3e3130855f31055ef1fb1e8e8c277aad946d0ebf881d06a132334ba5739af20f`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `tests/quality/README.md`; SHA-256 `f8fe97b606745c92ed3ab46f89de4ec4e4a2eed4e2b0ab0fe8e9cdbce67d98ce`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `tests/quality/evidence.py`; SHA-256 `9ac66080dcb4e3b46d724df1d39bc25b6f633d718197d376c0428166e3ec9135`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `tests/quality/report.py`; SHA-256 `079bbe581360fa7ea3e79fee3b83d6ff5b1ffcdd4d395df2c4a91f7a328bbc47`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `tests/quality/test_ci053.py`; SHA-256 `02e34d452f92cda1d2e3bd4f41523d509fc0e25cc77cfa8872fcc9650de5fcf4`; Actual integration source, immutable input population or detached validation/review receipt
+- Artifact: `tests/quality/test_evidence.py`; SHA-256 `e5b93c8c4111e51b2a1a1fb7ddedaab4652f2ba29c24bd5430030509d4d1dee7`; Actual integration source, immutable input population or detached validation/review receipt
+- Command: `["python3", "-m", "unittest", "discover", "-s", "tests/quality", "-p", "test_*.py", "-v"]`; exit `0`
+- Command: `["node", "--test", "shell/compact-report.test.cjs", "shell/final-gap-self-scan.test.cjs", "shell/prepare-code-scanning.test.cjs", "shell/relocated-evidence-self-scan.test.cjs", "shell/self-scan-backlog.test.cjs", "shell/self-scan-policy.test.cjs", "shell/v02-self-scan.test.cjs"]`; exit `0`
+- Command: `["bash", "-e", "-c", "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-completion-quality-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-completion-quality-r1/ci-measurement-plan.md\n"]`; exit `0`
+- Command: `["bash", "-e", "-c", "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-completion-baseline-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-completion-baseline-r1/ci-measurement-plan.md\n"]`; exit `0`
+- Review: implementation; /root/task056_implementation_review; accepted; source digest `6c5b55a9bc3d7d29329c0d445707ced233db8ab4f1f194d48931f6831ece33bd`; artifact `tasks/053/evidence/completion-20261116/IMPLEMENTATION-REVIEW.json`
+- Review: test; /root/task056_test_review; accepted; source digest `6c5b55a9bc3d7d29329c0d445707ced233db8ab4f1f194d48931f6831ece33bd`; artifact `tasks/053/evidence/completion-20261116/TEST-REVIEW.json`
+- Review source (implementation): Verified; 11 matching / 0 changed or missing declared files
+- Review source (test): Verified; 11 matching / 0 changed or missing declared files
+- Execution: Passed; review adequacy: Verified; Two source-bound stages accepted for the declared matching source population
+
+## Scope and acceptance
+
+Checkout head: `2d9f8e397081be559327da7f474be3ee25fb3cfc`. Catalog SHA-256: `ce98d2f236ed9b454f832194175c2873873b17c69d50258bfea8bf7678ba452e`.
+
+- This integration does not complete pending upstream tasks or grant release acceptance.
+- Matching declared source bindings does not expand the original measured population.
+- Historical measurements, tool failures and product findings are distinct.

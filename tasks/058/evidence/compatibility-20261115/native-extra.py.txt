@@ -1,0 +1,47 @@
+# Trusted controller continuation; evaluated binaries keep scratch-only write access.
+import shutil
+(out/'binaries').mkdir();bindings={}
+for variant,path in [('static',scratch/'installed/bin/pqc-scan'),('network',scratch/'release-network/release/pqc-scan')]:
+ assert path.is_file();target=out/'binaries'/(variant+'-pqc-scan');shutil.copyfile(path,target);target.chmod(0o755);bindings[variant]={'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'path':str(target.relative_to(root)),'buildCommand':'source-install' if variant=='static' else 'network-release'}
+(out/'BINARY-BINDINGS.json').write_text(json.dumps(bindings,indent=2)+'\n')
+shutil.copytree(scratch/'exports',out/'exports048')
+installed=scratch/'installed';shutil.copytree(snapshot/'rules',installed/'rules')
+fixture=scratch/'user-project';fixture.mkdir()
+(fixture/'app.py').write_text('cipher_suite = "TLS_RSA_WITH_AES_128_CBC_SHA"\n')
+(fixture/'Gemfile').write_text("gem ENV['DYNAMIC_DEPENDENCY']\n")
+fixture_hashes={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in fixture.iterdir()}
+(out/'FIXTURE.json').write_text(json.dumps({'files':{f.name:f.read_text() for f in fixture.iterdir()},'sha256':fixture_hashes,'scope':'Only scanned. Not compiled/executed/installed or resolved.'},indent=2)+'\n')
+public=[];binary=installed/'bin/pqc-scan'
+def command(name,args,expected,variant='static'):
+ exe=binary if variant=='static' else scratch/'release-network/release/pqc-scan'
+ with (out/(name+'.log')).open('w') as log:
+  at=datetime.datetime.now(datetime.timezone.utc).isoformat();r=isolation.run([str(exe),*map(str,args)],cwd=scratch,env=env,policy=policy,timeout=90,stdout=log,stderr=subprocess.STDOUT)
+ public.append({'name':name,'variant':variant,'binarySha256':bindings[variant]['sha256'],'command':[str(exe),*map(str,args)],'expectedExit':expected,'exitCode':r.returncode,'startedAt':at})
+ (out/'USER-COMMANDS.json').write_text(json.dumps(public,indent=2)+'\n');assert r.returncode==expected,(name,r.returncode,expected)
+for variant in ['static','network']:
+ for name,args in [('help',['--help']),('version',['--version']),('scan-help',['scan','--help']),('rules-help',['rules','--help']),('diff-help',['diff','--help'])]:command(variant+'-'+name,args,0,variant)
+ if variant=='network':
+  for sub in ['tls','ssh','ssh-kex']:command('network-'+sub+'-help',['probe',sub,'--help'],0,variant)
+command('invalid-option',['--not-valid'],1)
+command('removed-native-flag',['scan',fixture,'--native-json'],1)
+command('rules-list',['rules','list','--rules-dir',installed/'rules'],0)
+command('rules-show',['rules','show','TLS_RSA_KEY_EXCHANGE','--rules-dir',installed/'rules'],0)
+base=['scan',fixture,'--rules-dir',installed/'rules','--threads','2']
+command('default-scan',[*base,'--out-dir',scratch/'plain'],0)
+expected={'report.json','report.html','report.md','report.sarif','cbom.json','dependency-sbom.json'}
+assert {f.name for f in (scratch/'plain').iterdir()}==expected
+reports={}
+for language in ['en','ja']:
+ target=scratch/language
+ command(language+'-scan',[*base,'--format','all','--lang',language,'--diagnostics','--inventory-json','--cyclonedx-17','--policy-profile','migration-review-v1','--repository-scope','public058','--out-dir',target],0)
+ reports[language]={f.name:f.read_bytes() for f in target.iterdir()}
+ assert expected|{'diagnostics.json','scan.inventory.v1.json','scan.assessment.v1.json','cbom.cdx-1.7.json','dependency-sbom.cdx-1.7.json'}==set(reports[language])
+ dest=out/'user-reports'/language;shutil.copytree(target,dest)
+ assert json.loads(reports[language]['diagnostics.json'])['coverage']['status']!='complete_within_scope'
+ assert b'Gemfile' in reports[language]['report.html']
+assert json.loads(reports['en']['report.json'])['findings']==json.loads(reports['ja']['report.json'])['findings']
+for name,extra,expected_exit in [('threshold',['--fail-on','high'],2),('incomplete',['--require-complete'],3),('precedence',['--require-complete','--fail-on','high'],3)]:
+ command(name,[*base,*extra,'--diagnostics','--out-dir',scratch/name],expected_exit)
+ assert (scratch/name/'report.json').is_file() and (scratch/name/'diagnostics.json').is_file()
+command('missing-input',['scan',scratch/'nonexistent','--rules-dir',installed/'rules','--out-dir',scratch/'missing-out'],1)
+(out/'USER-RESULTS.json').write_text(json.dumps({'actualCommands':len(public),'defaultFiles':sorted(expected),'extendedFiles':sorted(reports['en']),'machineFindingsEqualAcrossLanguages':True,'incompleteInspectionNotSafe':True,'reportsRetainedBeforeExit2And3':True,'cleanSourceInstall':'cargo install --root fresh scratch; explicit copied installed rules; external project; offline/no-egress; prefix removed on completion','fixture':fixture_hashes},indent=2)+'\n')

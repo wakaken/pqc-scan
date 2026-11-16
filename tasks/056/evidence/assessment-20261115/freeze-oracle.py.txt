@@ -1,0 +1,85 @@
+from pathlib import Path
+import json,itertools,datetime,hashlib
+cases=[]
+def add(kind,tag,input,checks,sources,requirements,basis='normative'):
+ cases.append(dict(id=tag,kind=kind,input=input,checks=checks,sources=sources,requirements=requirements,basis=basis))
+def eq(pointer,value):return dict(pointer=pointer,operation='equals',expected=value)
+def contains(pointer,value):return dict(pointer=pointer,operation='contains',expected=value)
+# Purpose/parameter names and OID assignments come from FIPS/CSOR, not matcher labels.
+pq=[('ML-KEM-'+str(n),'2.16.840.1.101.3.4.4.'+str(i+1),'key_establishment','S203') for i,n in enumerate([512,768,1024])]
+pq += [('ML-DSA-'+str(n),'2.16.840.1.101.3.4.3.'+str(i+17),'signature','S204') for i,n in enumerate([44,65,87])]
+pq += [('SLH-DSA-'+h+'-'+str(bits)+suffix,'2.16.840.1.101.3.4.3.'+str(20+i),'signature','S205') for i,(h,bits,suffix) in enumerate(itertools.product(['SHA2','SHAKE'],[128,192,256],['s','f']))]
+for name,oid,purpose,source in pq:
+ for ident in [name,oid]:
+  add('algorithm','algorithm-'+ident,{'identifier':ident,'parameters':{}},[eq('/identifier',name),eq('/purpose',purpose),eq('/quantum','designed_resistant'),eq('/parameters_known',True),eq('/standardization','nist_final')],[source,'CSOR'],['Q3-01','Q3-02','Q3-03'])
+ for encoding in ['null','uninterpreted']:
+  add('algorithm','encoding-'+name+'-'+encoding,{'identifier':name,'parameters':{'parameters_kind':encoding}},[eq('/parameters_known',False)],['LOCAL026','CSOR'],['Q3-02','Q3-03'],'local_policy')
+for name,purpose in [('ML-KEM','key_establishment'),('ML-DSA','signature'),('SLH-DSA','signature')]:
+ add('algorithm','family-'+name,{'identifier':name,'parameters':{}},[eq('/purpose',purpose),eq('/quantum','unknown'),eq('/parameters_known',False)],['S203','S204','S205','LOCAL026'],['Q3-01','Q3-02','Q3-03'],'local_policy')
+for name in ['Kyber512','Kyber768','Kyber1024','Dilithium2','Dilithium3','Dilithium5']:
+ add('algorithm','draft-'+name,{'identifier':name,'parameters':{}},[eq('/standardization','draft'),eq('/quantum','unknown'),eq('/parameters_known',False)],['S203','S204','LOCAL026'],['Q3-01','Q3-03'],'local_policy')
+add('algorithm','draft-hybrid',{'identifier':'X25519Kyber768Draft00','parameters':{}},[eq('/construction','hybrid'),eq('/quantum','unknown'),eq('/combiner_assessment','unverified_combiner_no_resistance_inference')],['LOCAL026'],['Q3-01','Q3-03'],'local_policy')
+classical=[('RSA','unknown'),('RSA-PSS','signature'),('RS256','signature'),('RS384','signature'),('RS512','signature'),('RSA-SHA256','signature'),('RSA-SHA384','signature'),('RSA-SHA512','signature'),('RSA-SHA1','signature'),('RSA-MD5','signature'),('EC','unknown'),('ECDSA','signature'),('ECDSA-SHA1','signature'),('ECDH','key_establishment'),('DH','key_establishment'),('DSA','signature'),('DSA-SHA1','signature'),('ES256','signature'),('Ed25519','signature'),('X25519','key_establishment')]
+for name,purpose in classical:
+ add('algorithm','classical-'+name,{'identifier':name,'parameters':{}},[eq('/purpose',purpose),eq('/quantum','vulnerable')],['NIST-PQ-FAQ','R4055'],['Q3-01','Q3-02'])
+for name,threshold in [('RSA',2048),('RSA-PSS',2048),('EC',224),('ECDH',224),('ECDSA',224)]:
+ for bits in [threshold-1,threshold,threshold+1]:
+  checks=[eq('/parameters_known',True),eq('/quantum','vulnerable')]
+  checks.append(eq('/classical_concerns',['public_key_below_local_minimum'] if bits<threshold else []))
+  add('algorithm',f'key-boundary-{name}-{bits}',{'identifier':name,'parameters':{'key_bits':str(bits)}},checks,['S131A2','LOCAL026'],['Q3-02'],'local_policy')
+ for bad in ['','0','-1','NaN','infinity','99999999999999999999999999']:
+  add('algorithm',f'key-unknown-{name}-{bad or "empty"}',{'identifier':name,'parameters':{'key_bits':bad}},[eq('/parameters_known',False)],['LOCAL026'],['Q3-02'],'local_policy')
+for name,bits in [('AES-128',128),('AES-192',192),('AES-256',256)]:
+ add('algorithm','symmetric-'+name,{'identifier':name,'parameters':{}},[eq('/purpose','encryption'),eq('/quantum','generic_search'),eq('/attack_models/0/exponent_numerator',bits),eq('/attack_models/0/exponent_denominator',2),eq('/classical_concerns',[])],['NIST-PQ-FAQ'],['Q3-01','Q3-02'])
+for name,bits,weak in [('MD5',128,True),('SHA-1',160,True),('SHA-256',256,False),('SHA-384',384,False),('SHA-512',512,False)]:
+ add('algorithm','hash-'+name,{'identifier':name,'parameters':{}},[eq('/purpose','hash'),eq('/quantum','generic_search'),eq('/attack_models/0/exponent_numerator',bits),eq('/attack_models/0/exponent_denominator',2),eq('/attack_models/1/exponent_denominator',3),eq('/classical_concerns',['weak_collision_resistance'] if weak else [])],['NIST-PQ-FAQ','BHT1997','R6151'],['Q3-01','Q3-02'])
+for ident in ['UNKNOWN_SYNTHETIC','ml-kem-768','HashML-DSA-65','2.16.840.1.101.3.4.3.999','ML-KEM-999']:
+ add('algorithm','unknown-'+ident,{'identifier':ident,'parameters':{}},[eq('/identifier','unknown'),eq('/purpose','unknown'),eq('/quantum','unknown'),eq('/parameters_known',False)],['LOCAL026'],['Q3-01','Q3-02','Q3-03'],'local_policy')
+# Advisory policy is local, not a normative universal deployment decision.
+ready={k:True for k in ['runtime','provider','peer','protocol','parameters','jose','verifiers','pki']}
+for ident,purpose,use in [('ML-KEM-768','key_establishment','key_establishment'),('ML-DSA-65','signature','signature'),('AES-256','encryption','encryption'),('SHA-256','hash','hashing')]:
+ for app in ['applicable','unknown','not_applicable']:
+  for case,support,expected in [('ready',ready,'pass'),('missing',{},'indeterminate'),('denied',{k:False for k in ready},'indeterminate')]:
+   decision={'unknown':'indeterminate','not_applicable':'not_applicable'}.get(app,expected)
+   ctx={'version':1,'use_case':use,'applicability':app,'support':support}
+   add('policy',f'policy-{ident}-{app}-{case}',{'identifier':ident,'parameters':{},'context':ctx},[eq('/policy/decision',decision),eq('/candidates/0/purpose',purpose),eq('/candidates/0/status','candidate_primitive_integration_unverified')],['LOCAL026'],['Q3-01','Q3-02','Q3-10'],'local_policy')
+for use in ['jwt','pki']:
+ for claim in [None,False,True]:
+  for name in ['ML-DSA-65','ML-KEM-768']:
+   support=ready.copy()
+   for key in ['jose','verifiers'] if use=='jwt' else ['pki']:
+    if claim is None:support.pop(key)
+    else:support[key]=claim
+   add('policy',f'purpose-{name}-{use}-{claim}',{'identifier':name,'parameters':{},'context':{'version':1,'use_case':use,'support':support}},[eq('/policy/decision','pass' if name=='ML-DSA-65' and claim is True else 'indeterminate')],['LOCAL026','R8725'],['Q3-01','Q3-10'],'local_policy')
+for ident in ['RSA','RSA-PSS','X25519','UNKNOWN_SYNTHETIC','Kyber768','ML-KEM']:
+ for app in ['applicable','unknown','not_applicable']:
+  decision='fail' if ident in ['RSA','RSA-PSS','X25519'] else 'indeterminate'
+  decision={'unknown':'indeterminate','not_applicable':'not_applicable'}.get(app,decision)
+  add('policy',f'policy-unresolved-{ident}-{app}',{'identifier':ident,'parameters':{},'context':{'version':1,'applicability':app}},[eq('/policy/decision',decision)],['LOCAL026','NIST-PQ-FAQ'],['Q3-02','Q3-10'],'local_policy')
+# Existing published severity strategy: low/high confidence examples only.
+# The exact 0.45 boundary is implementation-derived characterization, not independent truth.
+for category,risk,severity,confidence,etype in itertools.product(['tls','pki','jwt','auth','authentication','TLS','cryptoapi','dependency'],['quantum-vulnerable','quantum-uncertain','quantum-safe','non-quantum-risk'],['info','low','medium','high','critical'],[0.4,0.8,0.45],['code','private_key']):
+ sensitive=category.lower() in ['tls','pki','jwt','auth','authentication']
+ expected=severity
+ if sensitive and risk=='quantum-vulnerable' and confidence==0.8:expected='critical' if etype=='private_key' else {'info':'low','low':'medium','medium':'high','high':'critical','critical':'critical'}[severity]
+ checks=[] if confidence==0.45 else [eq('/severity',expected),eq('/confidence_unchanged',confidence)]
+ add('severity',f'severity-{category}-{risk}-{severity}-{confidence}-{etype}',{'category':category,'risk':risk,'severity':severity,'confidence':confidence,'evidence_type':etype},checks,['ARCH','LOCAL026'],['Q3-08','Q3-09'],'characterization' if confidence==0.45 else 'local_policy')
+# Aggregate truth is independently stated by the local profile's explicit ordering.
+for decisions,inspection,exhaustive,expected in [([],True,True,'indeterminate'),(['pass'],True,True,'pass'),(['pass'],False,True,'indeterminate'),(['pass'],True,False,'indeterminate'),(['fail','indeterminate'],False,False,'fail'),(['pass','indeterminate'],True,True,'indeterminate'),(['not_applicable'],True,True,'indeterminate')]:
+ add('aggregate','aggregate-'+str(len(cases)),{'decisions':decisions,'inspection_complete':inspection,'native_complete':exhaustive},[eq('/decision',expected)],['LOCAL026'],['Q3-02','Q3-04'],'local_policy')
+# Vocabulary/assurance and dependency facts use synthetic assets, never a real credential.
+for kind in ['usage','dependency','unknown_kind']:
+ add('inventory','presence-'+kind,{'assets':[{'tag':'subject','kind':kind,'attributes':{'name':'openssl','declared_version':'>=3','resolved_version':'3.5.0','features':['default'],'backend':'unknown'},'relations':[]}]},[eq('/assessments/0/algorithm/quantum','unknown'),eq('/assessments/0/certainty','observed_facts_only')],['LOCAL026'],['Q3-04','Q3-05'],'local_policy')
+for namespace,ident,expected in [('named','ML-KEM-768','designed_resistant'),('draft','ML-KEM-768','unknown'),('named','2.16.840.1.101.3.4.4.2','unknown'),('oid','2.16.840.1.101.3.4.4.2','designed_resistant')]:
+ add('inventory','namespace-'+namespace+'-'+ident,{'assets':[{'tag':'a','kind':'algorithm','attributes':{'identifier':ident,'namespace':namespace,'parameters':{}},'relations':[]}]},[eq('/assessments/0/algorithm/quantum',expected)],['LOCAL026','CSOR'],['Q3-01','Q3-03'],'local_policy')
+for label,start,end,concern in [('valid',0,4102444800,None),('expired',0,1,'certificate_expired'),('future',4102444800,4102444900,'certificate_not_yet_valid'),('inverted',10,1,'invalid_certificate_validity_interval'),('unknown',None,None,'certificate_validity_unknown')]:
+ assets=[{'tag':'sig','kind':'algorithm','attributes':{'namespace':'named','identifier':'ML-DSA-65','parameters':{}},'relations':[]},{'tag':'subject-alg','kind':'algorithm','attributes':{'namespace':'named','identifier':'ML-KEM-768','parameters':{}},'relations':[]},{'tag':'key','kind':'public_key','attributes':{},'relations':[{'relationship':'algorithm','target':'subject-alg'}]},{'tag':'cert','kind':'certificate','attributes':{'not_before_unix':start,'not_after_unix':end},'relations':[{'relationship':'signature_algorithm','target':'sig'},{'relationship':'subject_key','target':'key'}]}]
+ checks=[contains('/assessments/3/limitations','trust_signatures_and_implementation_not_verified')]
+ if concern:checks.append(contains('/assessments/3/algorithm/classical_concerns',concern))
+ add('inventory','certificate-'+label,{'assets':assets},checks,['LOCAL026','R5280','S203','S204'],['Q3-02','Q3-07'],'local_policy')
+# Recommendation scope observations: no exact legacy version claim is silently treated as normative truth.
+for category,language,etype,risk in itertools.product(['jwt','tls','pki','cryptoapi','dependency'],['Java','JavaScript','Go','Python','Rust','Ruby','unknown'],['code','dependency'],['quantum-vulnerable','quantum-uncertain']):
+ add('recommendation',f'recommendation-{category}-{language}-{etype}-{risk}',{'category':category,'language':language,'evidence_type':etype,'risk':risk,'runtime_version':'unknown'},[],['LOCAL026','R8725','R5280'],['Q3-04','Q3-05','Q3-09','Q3-10'],'characterization')
+assert len({c['id'] for c in cases})==len(cases)
+out=Path('tests/quality/judgment/oracle.json');out.write_text(json.dumps({'version':1,'frozenAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'independence':'Authored from cited normative/public local-policy facts, separate from matcher labels. Main agent saw implementation for coverage; not blind or independent-author population. Characterization rows have no correctness claim.','cases':cases},indent=2)+'\n')
+raw=out.read_bytes();Path('tasks/056/evidence/assessment-20261115/ORACLE-FREEZE.json').write_text(json.dumps({'path':str(out),'sha256':hashlib.sha256(raw).hexdigest(),'cases':len(cases),'beforeProductObservations':True,'independentAssertions':sum(bool(c['checks']) for c in cases),'characterizationCases':sum(not c['checks'] for c in cases)},indent=2)+'\n');print('Frozen',len(cases),'cases;',sum(bool(c['checks']) for c in cases),'with expected judgments')

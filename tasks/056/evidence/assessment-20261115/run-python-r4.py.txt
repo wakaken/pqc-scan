@@ -1,0 +1,12 @@
+from pathlib import Path
+import sys,tempfile,subprocess,json,datetime,time
+sys.path.insert(0,'tests/protocol');import isolation
+sysroot=Path(subprocess.check_output(['rustc','--print','sysroot'],text=True).strip());root=Path('.').resolve();out=root/'tasks/056/evidence/assessment-20261115/python-r4';out.mkdir();python=Path(sys.executable).resolve()
+with tempfile.TemporaryDirectory(prefix='pqc056-python-') as temp:
+ scratch=Path(temp).resolve();env=isolation.environment(scratch,sysroot/'bin/rustc');env['PYTHONDONTWRITEBYTECODE']='1'
+ policy=isolation.profile(root,scratch,read_paths=[python.parents[1],sysroot])
+ (out/'POLICY.sb').write_text(policy);(out/'ENVIRONMENT.json').write_text(json.dumps(env,indent=2)+'\n')
+ args=[str(python),'-m','unittest','discover','-s','tests/quality','-p','test_*.py','-v'];at=datetime.datetime.now(datetime.timezone.utc).isoformat();start=time.monotonic()
+ with (out/'tests.log').open('w') as log:r=isolation.run(args,cwd=root,env=env,policy=policy,timeout=180,stdout=log,stderr=subprocess.STDOUT)
+ (out/'RUN.json').write_text(json.dumps({'command':args,'startedAt':at,'exitCode':r.returncode,'seconds':time.monotonic()-start,'reason':'Use actual source byte/mode inputs under OS-enforced readonly access. The synthetic snapshot omitted .github and copied source files with mode0444, which prevents existing repeated-copy fixtures from being overwritten in their own scratch. No product/test assertions changed.','supersedesFailure':['../native-r2/python.log','../python-r3/tests.log'],'scope':'Python quality suite only; reuse unchanged Rust probe/workspace/clippy source-bound successes from native-r2'},indent=2)+'\n');print('Python quality exit',r.returncode)
+ raise SystemExit(r.returncode)

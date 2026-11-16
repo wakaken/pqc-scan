@@ -1,0 +1,131 @@
+{
+  "scope": "Current source, Linux arm64, static features, release-profile source installation with requested debug info. Not macOS distribution validation.",
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/cc",
+        "-g",
+        "/scratch/control.c",
+        "-o",
+        "/scratch/control-debug"
+      ],
+      "exit": 0,
+      "log": "control-build-debug.log",
+      "wallSeconds": 0.0161384169999792
+    },
+    {
+      "argv": [
+        "/usr/bin/cc",
+        "-g0",
+        "/scratch/control.c",
+        "-o",
+        "/scratch/control-no-debug"
+      ],
+      "exit": 0,
+      "log": "control-build-no-debug.log",
+      "wallSeconds": 0.015535707999902115
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "-SW",
+        "/scratch/control-debug"
+      ],
+      "exit": 0,
+      "log": "control-debug-sections.log",
+      "wallSeconds": 0.0013121659999342228
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "-SW",
+        "/scratch/control-no-debug"
+      ],
+      "exit": 0,
+      "log": "control-no-debug-sections.log",
+      "wallSeconds": 0.0014173329999493944
+    },
+    {
+      "argv": [
+        "cargo",
+        "+1.93.1",
+        "install",
+        "--config",
+        "profile.release.package.\"*\".debug=0",
+        "--locked",
+        "--offline",
+        "--path",
+        "crates/pqc_scan_cli",
+        "--root",
+        "/scratch/install",
+        "-vv"
+      ],
+      "exit": 0,
+      "log": "cargo-install.log",
+      "wallSeconds": 52.54446748099997
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "-SW",
+        "/scratch/install/bin/pqc-scan"
+      ],
+      "exit": 0,
+      "log": "installed-sections.log",
+      "wallSeconds": 0.0015952910000578413
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "-Ws",
+        "/scratch/install/bin/pqc-scan"
+      ],
+      "exit": 0,
+      "log": "installed-symbols.log",
+      "wallSeconds": 0.036583042000074784
+    }
+  ],
+  "checks": {
+    "debugControlPositive": true,
+    "debugControlNegative": true,
+    "installedDebugInfo": true,
+    "rustLinkFlagReachedInstalledBinary": true,
+    "requestedCCInvoked": true,
+    "requestedCFLAGSObserved": true,
+    "requestedCXXInvoked": false,
+    "requestedCXXFLAGSObserved": false
+  },
+  "allowlistedEnvironment": {
+    "PATH": "/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "HOME": "/scratch/home",
+    "TMPDIR": "/scratch/tmp",
+    "CARGO_HOME": "/scratch/cargo",
+    "RUSTUP_HOME": "/usr/local/rustup",
+    "CARGO_NET_OFFLINE": "true",
+    "CARGO_BUILD_JOBS": "2",
+    "RUST_TEST_THREADS": "2",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_TARGET_DIR": "/scratch/target",
+    "LC_ALL": "C",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "CARGO_PROFILE_RELEASE_DEBUG": "1",
+    "RUSTFLAGS": "--cfg pqc052_flag_probe -C link-arg=-Wl,--defsym,PQC052_RUST_LINK_FLAG=82",
+    "CFLAGS": "-g1 -DPQC052_C_FLAG=1",
+    "CXXFLAGS": "-g1 -DPQC052_CXX_FLAG=1",
+    "CC": "/scratch/cc-probe",
+    "CXX": "/scratch/cxx-probe",
+    "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER": "/scratch/cc-probe"
+  },
+  "binarySha256": "87e2f231a773f2638c3bfb5abc1c1a24bd638f1b466f6aaed66809bb3896e791",
+  "binarySize": 40862248,
+  "compilerCalls": 101,
+  "limitations": [
+    "Project release debug info requested using CARGO_PROFILE_RELEASE_DEBUG=1; third-party package debug disabled explicitly using Cargo profile override to stay within the unchanged4GiB scratch budget. CFLAGS/CXXFLAGS requested independently.",
+    "No C++ compilation is required if no C++ compile call is observed; do not report an unexercised variable as passed.",
+    "Generic LDFLAGS is not established by the Rust-specific linker flag check.",
+    "No binary or archive is published or promoted; no source or target caches shared with host.",
+    "This experiment does not measure macOS package installation or all-feature debug installation; the separate all-feature attempt exceeded the unchanged4GiB scratch bound."
+  ]
+}

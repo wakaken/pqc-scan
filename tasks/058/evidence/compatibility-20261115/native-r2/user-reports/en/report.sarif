@@ -1,0 +1,138 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "columnKind": "unicodeCodePoints",
+      "tool": {
+        "driver": {
+          "name": "pqc-scan",
+          "rules": [
+            {
+              "id": "TLS_RSA_CIPHER_SUITE",
+              "shortDescription": {
+                "text": "TLS"
+              },
+              "fullDescription": {
+                "text": "RSA-based TLS cipher suite detected."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "TLS_RSA_KEY_EXCHANGE",
+              "shortDescription": {
+                "text": "TLS"
+              },
+              "fullDescription": {
+                "text": "TLS RSA key-exchange suite detected."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "TS_TLS_RSA_CIPHER_LITERAL",
+              "shortDescription": {
+                "text": "TLS"
+              },
+              "fullDescription": {
+                "text": "RSA-family TLS cipher suite literals detected in AST nodes."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "TS_TLS_RSA_CIPHER_LITERAL",
+          "level": "error",
+          "message": {
+            "text": "RSA-family TLS cipher suite literals detected in AST nodes. | migration_hint=Identify the suite role: RSA_WITH uses static RSA key exchange; ECDHE_RSA and DHE_RSA use RSA authentication. Review hybrid key agreement and PQC authentication separately. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned); Verify deployed runtime and protocol PQC capabilities (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 17
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Identify the suite role: RSA_WITH uses static RSA key exchange; ECDHE_RSA and DHE_RSA use RSA authentication. Review hybrid key agreement and PQC authentication separately.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)",
+              "Verify deployed runtime and protocol PQC capabilities (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "TLS_RSA_CIPHER_SUITE",
+          "level": "error",
+          "message": {
+            "text": "RSA-based TLS cipher suite detected. | migration_hint=Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned); Verify deployed runtime and protocol PQC capabilities (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 17
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)",
+              "Verify deployed runtime and protocol PQC capabilities (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "TLS_RSA_KEY_EXCHANGE",
+          "level": "error",
+          "message": {
+            "text": "TLS RSA key-exchange suite detected. | migration_hint=Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned); Verify deployed runtime and protocol PQC capabilities (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 17
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)",
+              "Verify deployed runtime and protocol PQC capabilities (planned)"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

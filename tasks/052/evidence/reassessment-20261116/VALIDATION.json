@@ -1,0 +1,71 @@
+{
+  "sourceHead": "5425f85aa870ede6d3e5bdd8723b9a52c57701d7",
+  "checksPassed": [
+    "145exact official IDs and resolving current evidence",
+    "reject missing",
+    "reject duplicate",
+    "reject missingScope",
+    "reject illegalNA",
+    "reject staleHash",
+    "requested target parity best-practices.md",
+    "requested target parity github-controls.json",
+    "requested target parity process-review.md",
+    "requested target parity scorecard.json",
+    "requested target parity security-process.md",
+    "18actual scorecard checks and successful execution",
+    "remote and local source separated",
+    "original145criterion study preserved",
+    "unchanged tasks/053/task.yaml",
+    "unchanged docs/quality/EVIDENCE-CATALOG.json",
+    "unchanged SECURITY.md",
+    "original052definition recoverable",
+    "original acceptance and scope unchanged",
+    "git diff check",
+    "all current JSON outputs parse"
+  ],
+  "commands": [
+    {
+      "argv": [
+        "ruby",
+        "-ryaml",
+        "-e",
+        "a=YAML.load_file(\"tasks/052/evidence/reassessment-20261116/ORIGINAL-TASK.yaml.txt\");b=YAML.load_file(\"tasks/052/task.yaml\");b.delete(\"reassessment_20261116\");b[\"status\"]=a[\"status\"];abort \"original criteria changed\" unless a==b;puts \"original052criteria unchanged\""
+      ],
+      "exitCode": 0,
+      "stdout": "original052criteria unchanged\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "task052": "in-progress;unfinished",
+  "notRun": [
+    "new product tests/builds",
+    "new statement/branch instrumentation",
+    "new hostedCI",
+    "actual notification delivery"
+  ],
+  "review": "Prose/evidence only; no automatic independent-review stages; no identities started.",
+  "artifactHashes": {
+    "tasks/052/evidence/reassessment-20261116/outputs/best-practices-assessment.json": "b085fa494aec47b2b9e9451f51a9d4a3cf85f70aa89458a10d9d81c5fe9b0c8a",
+    "tasks/052/evidence/reassessment-20261116/outputs/best-practices.md": "554cf895abc815905c4c71dca36478bbd1b05122e6ebe5ab234c32c5ef1858d4",
+    "tasks/052/evidence/reassessment-20261116/outputs/github-controls.json": "69a60ea9376cfe4b427cb88bbeca3f3d95ea931a7cba13932dab7031d2a1cb3f",
+    "tasks/052/evidence/reassessment-20261116/outputs/process-review.md": "6f134205014b7e6383c902622fa62d3b922f0ecfd3e48ba2dd8a5f6ce9aa5240",
+    "tasks/052/evidence/reassessment-20261116/outputs/scorecard-assessment.json": "c40f64bb990a84c7bf54ab3321a1f617b1eb21ea6743c34f6851a1cb3daa7d39",
+    "tasks/052/evidence/reassessment-20261116/outputs/scorecard.json": "c6fd89fcef71a177f1be89bf268608d4a790f5bb9f3668ef51396feed001bae4",
+    "tasks/052/evidence/reassessment-20261116/outputs/security-process.md": "40f5335f937e30c66dabfb10b9d18afbf0e7feb3d85f3b0e28bea0b916307940",
+    "tasks/052/evidence/reassessment-20261116/BASELINE.json": "e5b48f91ea1c9d437f1982f2ced49a3009d1f8d0453a4f3aecbcfb7233d0ea06",
+    "tasks/052/evidence/reassessment-20261116/REMAINING.json": "c771ade5387c145284274daeba035ecfba86a8cdb66fee23c504a9b04779e4ff",
+    "tasks/052/evidence/reassessment-20261116/scorecard/RUN.json": "0c358fad48dad8df5eb0fba41c55f8e6f5922adc961079509e3674e39888d1e2",
+    "tasks/052/task.yaml": "c2cc4429b98265bab47a467f434e7a6aec19b938c44dd28b95dfee6cc111163d",
+    "tasks/052/TASK-052-REASSESSMENT-20261116.md": "37149970dd74dc021011163dd78cb296bc84a48408f0f564d73a7b65ed0253a8"
+  }
+}

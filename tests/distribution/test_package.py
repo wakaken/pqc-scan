@@ -41,16 +41,36 @@ class PackageTests(unittest.TestCase):
         both = "Commands:\n  tls  TLS\n  ssh  SSH\n  help  Help\n"
         all_commands = both + "  ssh-kex  KEX\n"
         self.mod.validate_command_surface('static', "Commands:\n  scan  Scan\n", '')
-        self.mod.validate_command_surface('combined-probes', top, both)
-        self.mod.validate_command_surface('all-probes', top, all_commands)
-        for variant, main, sub in [('all-probes', top, both),
-                                   ('combined-probes', top, all_commands),
+        self.mod.validate_command_surface('network', top, all_commands)
+        for variant, main, sub in [('network', top, both),
+                                   ('network', top, both + "  other  Other\n"),
                                    ('static', top, both),
-                                   ('all-probes', 'Commands:\n  scan  Scan\n', all_commands)]:
+                                   ('network', 'Commands:\n  scan  Scan\n', all_commands)]:
             with self.subTest(variant=variant, sub=sub), self.assertRaises(ValueError):
                 self.mod.validate_command_surface(variant, main, sub)
+        # Historic labels remain readable, but cannot be used to prepare new packages.
+        self.mod.validate_command_surface('combined-probes', top, both, allow_legacy=True)
+        self.mod.validate_command_surface('all-probes', top, all_commands, allow_legacy=True)
+        for legacy in ['combined-probes', 'all-probes']:
+            with self.subTest(legacy=legacy), self.assertRaises(ValueError):
+                self.mod.validate_command_surface(legacy, top, all_commands)
 
-    def test_all_probes_binds_features_metadata_and_dependency_notices(self):
+    def test_preparation_cli_exposes_two_names_and_rejects_removed_selectors(self):
+        import contextlib
+        for name in ['combined-probes', 'all-probes', 'unknown']:
+            with self.subTest(name=name), patch('sys.argv', ['package-release', '--variant', name]), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit) as failure:
+                    self.mod.main()
+                self.assertEqual(failure.exception.code, 2)
+        with patch('sys.argv', ['package-release', '--help']), contextlib.redirect_stdout(io.StringIO()) as output:
+            with self.assertRaises(SystemExit) as result:
+                self.mod.main()
+        self.assertEqual(result.exception.code, 0)
+        self.assertIn('{static,network}', output.getvalue())
+        self.assertNotIn('combined-probes', output.getvalue())
+        self.assertNotIn('all-probes', output.getvalue())
+
+    def test_network_binds_features_metadata_and_dependency_notices(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
             required = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md',
@@ -81,7 +101,7 @@ class PackageTests(unittest.TestCase):
                 return 'fixture'
             with patch.object(self.mod, 'run', side_effect=run), patch.object(self.mod.subprocess, 'check_output', return_value=b''):
                 self.mod.prepare(argparse.Namespace(source_root=root, binary=binary,
-                    target='aarch64-apple-darwin', variant='all-probes', out_dir=root/'output'))
+                    target='aarch64-apple-darwin', variant='network', out_dir=root/'output'))
             metadata, = [c for c in calls if c[:2] == ('cargo', 'metadata')]
             self.assertEqual(metadata[metadata.index('--features') + 1],
                              'pqc_scan_cli/probe-tls,pqc_scan_cli/probe-ssh,pqc_scan_cli/probe-ssh-kex')
@@ -94,7 +114,7 @@ class PackageTests(unittest.TestCase):
                 prefix = archive.name.removesuffix('.tar.gz')
                 provenance = json.load(tar.extractfile(prefix+'/PROVENANCE.json'))
                 notices = json.load(tar.extractfile(prefix+'/DEPENDENCY-LICENSES.json'))
-            self.assertEqual(provenance['variant'], 'all-probes')
+            self.assertEqual(provenance['variant'], 'network')
             self.assertEqual(provenance['features'], ['probe-tls', 'probe-ssh', 'probe-ssh-kex'])
             self.assertIn('negotiation', [p['name'] for p in notices['packages']])
             self.assertTrue(all(p['notices'] for p in notices['packages']))

@@ -1,0 +1,50 @@
+from pathlib import Path
+import json,hashlib,collections
+p=Path('tasks/056/evidence/assessment-20261115');actions=json.loads((p/'RECOMMENDATION-ACTIONS-r5.json').read_text());rows=[]
+# Main-agent content review, explicitly distinct from pre-observation routing gold.
+judgments={
+'java.runtime-upgrade-for-pqc':('Finding','JAVA496,JAVA497,LOCAL026','Known Java 8/23 require an upgrade for the standard APIs, but unknown-version inputs emit a rationale asserting an older detected version. Unknown is not evidence of age.','F056-01'),
+'java.bouncycastle-pqc':('Finding','BC185,S204','The 1.85 BC provider registers MLDSA; the BCPQC provider algorithm list does not. The example selects ML-DSA with BCPQC without a supported-version qualification. It also does not establish matching ML-DSA key material.','F056-02'),
+'java.jca-ml-dsa-ml-kem':('Finding','JAVA496,JAVA497,S203,S204','Purpose and JDK24 boundary are correct. The before/after example retains privateKey after replacing RSA with ML-DSA, without requiring a new algorithm-compatible key pair; an RSA private key cannot initialize ML-DSA. Treat this as incomplete migration guidance, not executable validated code.','F056-03'),
+'pki.hybrid-certificate-roadmap':('Finding','S204,S205,R5280','CA, chain and relying-party compatibility is acknowledged and nonproduction pilots are required. The hybrid-chain pilot does not name an encoding/construction or require verifying its availability; FIPS204/205 standardize primitives, not a universal hybrid certificate format. Guidance is incomplete.','F056-04'),
+'envoy.pqc-signature-readiness-note':('Finding','ENVOY,R8422,R9325','Provider/peer/canary caveats are appropriate, but remove legacy RSA suites is ambiguous about RSA key exchange versus RSA authentication. ECDHE-RSA suites have ephemeral agreement; PQC certificate-signature compatibility is a separate issue.','F056-05'),
+ 'tls.envoy-hardening':('Finding','ENVOY,R8422,R9325','Remove RSA-dependent suites can remove forward-secret ECDHE-RSA authentication suites as well as static RSA key exchange. cipher_suites applies to TLS1.0-1.2, not TLS1.3. Effective version, authentication and key agreement must be distinguished.','F056-05'),
+'plan.hybrid-migration':('Verified','S8547,NIST-PQ-FAQ,LOCAL026','Conditional planning: inventory actual use and existing compositions before considering staged/hybrid modes. No concrete combiner is declared secure or interoperable.',None),
+'jwt.remove-rsa-algorithms':('Verified','R7519,R8725,S204','Requires allowed-algorithm constraints, JOSE identifiers/encoding/library support and verifier rollout before signer changes. Short-lived tokens limit exposure but do not confer quantum resistance.',None),
+'node.webcrypto.pqc':('Verified','NODECRYPTO,NODEWEB,S203,S204','Crypto minor-version boundaries differ from WebCrypto. Both payload title variants require exact runtime/algorithm and browser review, and explicitly exclude ML-KEM as a JWT-signature substitute. signWithPqc is illustrative and not an implemented library API.',None),
+'go.hybrid-kem':('Verified','GO124,GO127,S203,S204','Transport/session KEM and JWT signing transitions remain distinct; Go1.24/1.27 availability is conditional on deployed toolchain and peers. Parallel rollout is not a validated hybrid combiner.',None),
+'python.signing-gateway':('Verified','PYCRYPTO,S204,R8725','Signing abstraction and backend/version caveats are explicit; cryptography47 AWS-LC/BoringSSL versus48 OpenSSL3.5 support is correctly conditional. No JWT integration is presumed.',None),
+'rust.oqs-integration':('Verified','RUSTLS,S203,S204','Signer and KEM abstractions are separate, implementations require feature/integration tests. rustls transport groups and aws-lc-rs default changes are qualified; ring and custom groups are not presumed equivalent. Action ID is legacy, not a support claim for liboqs.',None),
+'ruby.crypto-service-boundary':('Verified','RUBYSSL,S204','Ruby version alone is insufficient. Requires gem/library/provider and signature integration checks; a provider-backed service boundary is planning advice, not proof of deployed support.',None),
+'tls.review-reference':('Verified','R8422,R9325,LOCAL026','Separates comments/tests/constants from active settings and RSA authentication from key exchange; requires peers/existing hybrid review.',None),
+'cryptoapi.abstraction-layer':('Verified','S8547,LOCAL026','Architectural planning only. Distinguishes signing/verification/keygen/key establishment and requires staged policies; no algorithm or provider is promised available.',None),
+'crypto.review-reference':('Verified','LOCAL026,R8725','Explicitly leaves actual purpose, deployment and existing hybrid composition unresolved until inspected.',None),
+'tls.review-pqc-override':('Verified','GO124,JAVA496,RUBYSSL,LOCAL026','Each of three setting-specific payloads requires inspecting local rationale and deployed library/peer support before removal; TLS1.3 alone is not PQC and no RSA use is inferred.',None),
+'incident.private-key-rotation':('Verified','LOCAL026','A marker is not a complete live credential or an incident. Exposure must be confirmed before rotation/revocation; no secret bytes are rendered by these synthetic cases.',None),
+'dependency.track-pqc-readiness':('Verified','CARGO,RUSTLS,LOCAL026','Track declared/resolved versions and integration tests; no enablement or deployment is inferred merely from a dependency name.',None),
+}
+for h,item in actions.items():
+ a=item['action'];id=a['action_id']
+ if id=='runtime.verify-pqc-capabilities':
+  language={'61821d69':'JAVA496,JAVA497','7a4f0a55':'NODECRYPTO,NODEWEB','3b776f43':'GO124,GO127','140d1a47':'PYCRYPTO','f2d1ff7a':'RUSTLS','dd8bed30':'RUBYSSL'}[h[:8]]
+  decision=('Verified',language+',LOCAL026','Exact source-edition facts and input-dependent provider/features/peer/encoding prerequisites are stated. All claims remain unverified operator/deployment claims; older/newer/unknown runtime cases do not bypass this caveat.',None)
+ elif id not in judgments and id.endswith('pqc-signature-readiness-note'):
+  decision=('Verified','S203,S204,S205,R5280,LOCAL026','This is a readiness caution, not native support certification. It requires end-to-end certificate-signature interoperability checks and staged rollout/fallback; key exchange and signatures remain distinct. No middleware executable was installed or tested.',None)
+ elif id in ['tls.remove-rsa-kex','tls.k8s-ingress-hardening','tls.nginx-hardening','tls.httpd-hardening','tls.istio-hardening']:
+  decision=('Verified','R9325,R8422,LOCAL026','Prefers TLS1.3 subject to peer compatibility, retains TLS1.2 only where needed and requires policy/interoperability checks. Static RSA exchange retirement or coordinated RSA-dependency reduction is planning; TLS1.3/ECDHE alone is not PQC.',None)
+ else:decision=judgments[id]
+ verdict,sources,rationale,finding=decision
+ rows.append(dict(payloadSha256=h,actionId=id,cases=item['cases'],verdict=verdict,sourceIds=sources.split(','),reason=rationale,findingId=finding))
+(p/'RECOMMENDATION-SEMANTICS.json').write_text(json.dumps({'method':'Main-agent manual source/content review after observation, not blind authoring or a pre-observation gold label; unique full JSON action payload hashes prevent action-ID-only coverage. Failures are measured product findings and remain unfixed. Crypto examples are assessed against documented prerequisites, never executed or treated as cryptographic implementation validation.','counts':dict(collections.Counter(r['verdict'] for r in rows)),'rows':rows},indent=2)+'\n')
+# Review every relevant RFC erratum with status preserved; rejected/reported records
+# are not silently promoted to requirements.
+err=json.loads((p/'official/RFC-ERRATA-SELECTED.json').read_text());dispositions=[]
+for x in err:
+ doc=x['doc-id'];reason={
+ 'RFC4055':'PSS/OAEP parameters, examples and ASN.1 corrections. This evaluator tests PSS purpose and unknown/uninterpreted parameters, not PSS parameter/encoding correctness. No unrestricted RSA-to-PSS equivalence is inferred.',
+ 'RFC5280':'Name/extension/path/ASN.1 details are outside the extracted signature/subject/time facts; no chain/trust/extension validation is claimed. Inclusive captured validity interval and signature-vs-subject roles remain separate.',
+ 'RFC7519':'Token validation and header/claim processing are outside static primitive review. Erratum8060 reinforces using JWS/JWE header rules, consistent with requiring JOSE encoding/library/all-verifier compatibility. No token is validated.',
+ 'RFC8422':'Handshake/signature/reference corrections do not change ECDHE_RSA RSA-authentication versus key-agreement distinction. No TLS handshake or RSA signature implementation is validated.'}[doc]
+ dispositions.append(dict(errataId=x['errata_id'],reference=doc,status=x['errata_status_code'],section=x['section'],disposition=reason))
+(p/'RFC-ERRATA-APPLICABILITY.json').write_text(json.dumps({'source':'official/rfc-errata.json','selectedSource':'official/RFC-ERRATA-SELECTED.json','retrievedSnapshotOnly':True,'records':dispositions,'zeroRecords':['RFC6151','RFC8725','RFC9325'],'policy':'Verified errata assessed for applicable claims; Held/Reported retained for review, not enacted amendments; Rejected not normative.'},indent=2)+'\n')
+print('semantic payloads',len(rows),collections.Counter(r['verdict'] for r in rows),'RFCerrata',len(dispositions))

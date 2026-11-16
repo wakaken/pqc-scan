@@ -1,0 +1,55 @@
+test_empty_gold_has_no_manufactured_perfect_rate (test_judgment.JudgmentTests.test_empty_gold_has_no_manufactured_perfect_rate) ... ERROR
+test_equal_wrong_unknown_and_characterization_have_separate_denominators (test_judgment.JudgmentTests.test_equal_wrong_unknown_and_characterization_have_separate_denominators) ... ERROR
+test_float_transport_tolerance_does_not_accept_wrong_judgment (test_judgment.JudgmentTests.test_float_transport_tolerance_does_not_accept_wrong_judgment) ... ERROR
+test_missing_duplicate_and_extra_observations_are_rejected (test_judgment.JudgmentTests.test_missing_duplicate_and_extra_observations_are_rejected) ... ERROR
+test_missing_property_is_incorrect_not_null_equivalence (test_judgment.JudgmentTests.test_missing_property_is_incorrect_not_null_equivalence) ... ERROR
+
+======================================================================
+ERROR: test_empty_gold_has_no_manufactured_perfect_rate (test_judgment.JudgmentTests.test_empty_gold_has_no_manufactured_perfect_rate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/test_judgment.py", line 27, in test_empty_gold_has_no_manufactured_perfect_rate
+    r=judgment.compare({'cases':[]},[]);self.assertIsNone(r['correctnessRate']);self.assertEqual(r['evaluated'],0)
+      ^^^^^^^^^^^^^^^^
+AttributeError: module 'judgment' has no attribute 'compare'
+
+======================================================================
+ERROR: test_equal_wrong_unknown_and_characterization_have_separate_denominators (test_judgment.JudgmentTests.test_equal_wrong_unknown_and_characterization_have_separate_denominators)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/test_judgment.py", line 12, in test_equal_wrong_unknown_and_characterization_have_separate_denominators
+    r=judgment.compare(oracle,observed)
+      ^^^^^^^^^^^^^^^^
+AttributeError: module 'judgment' has no attribute 'compare'
+
+======================================================================
+ERROR: test_float_transport_tolerance_does_not_accept_wrong_judgment (test_judgment.JudgmentTests.test_float_transport_tolerance_does_not_accept_wrong_judgment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/test_judgment.py", line 24, in test_float_transport_tolerance_does_not_accept_wrong_judgment
+    self.assertEqual(judgment.compare(oracle,[{'id':'a','actual':{'v':0.40000000596}}])['correct'],1)
+                     ^^^^^^^^^^^^^^^^
+AttributeError: module 'judgment' has no attribute 'compare'
+
+======================================================================
+ERROR: test_missing_duplicate_and_extra_observations_are_rejected (test_judgment.JudgmentTests.test_missing_duplicate_and_extra_observations_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/test_judgment.py", line 18, in test_missing_duplicate_and_extra_observations_are_rejected
+    with self.assertRaises(ValueError):judgment.compare(oracle,rows)
+                                       ^^^^^^^^^^^^^^^^
+AttributeError: module 'judgment' has no attribute 'compare'
+
+======================================================================
+ERROR: test_missing_property_is_incorrect_not_null_equivalence (test_judgment.JudgmentTests.test_missing_property_is_incorrect_not_null_equivalence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/test_judgment.py", line 21, in test_missing_property_is_incorrect_not_null_equivalence
+    r=judgment.compare(oracle,[{'id':'a','actual':{}}]);self.assertEqual(r['incorrect'],1)
+      ^^^^^^^^^^^^^^^^
+AttributeError: module 'judgment' has no attribute 'compare'
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+FAILED (errors=5)
