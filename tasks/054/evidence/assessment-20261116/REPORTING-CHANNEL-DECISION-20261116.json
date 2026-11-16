@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-16",
+  "source": "Direct maintainer decision in this chat",
+  "answerQuote": "githubの方がよい。メールはスパムとかも多いためです",
+  "decision": "Use GitHub private vulnerability reporting as the intended private reporting channel.",
+  "rationale": "The maintainer prefers GitHub because email receives substantial spam.",
+  "currentObservation": {
+    "argv": [
+      "gh",
+      "api",
+      "--method",
+      "GET",
+      "repos/wakaken/pqc-scan/private-vulnerability-reporting"
+    ],
+    "exitCode": 0,
+    "stdout": "{\"enabled\":false}",
+    "scope": "Read-only current observation; no setting changed."
+  },
+  "officialInstructions": "https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository",
+  "concretePendingAction": "Enable private vulnerability reporting only on wakaken/pqc-scan, then verify enabled=true by GET. No report submission, external message, custom form, notification setting, badge, release or public policy publication included.",
+  "approvalBoundary": "Original task052 approval_boundary requires separate explicit permission for remote settings changes. Channel selection alone is not interpreted as that permission.",
+  "taskStatus": "052 and054 remain unfinished; actual report/notification handling is not yet verified."
+}

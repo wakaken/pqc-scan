@@ -1,7 +1,22 @@
-> Current status, 2026-11-16: **unfinished / blocked**. The completion decision
-> below is historical and superseded. The own-evidence omission is repaired and
-> independently accepted locally; final-source hosted CI and artifact verification
-> remain required. See [completion correction](TASK-053-COMPLETION-20261116.md).
+# Task053 current completion — 2026-11-16
+
+**Done against all original Q6-01/Q6-02/Q6-16/Q6-18 criteria.** The earlier
+completion was reopened, the own-evidence omission repaired, and actual
+final-source hosted CI and downloaded artifact bytes verified. The two required
+independent review stages accepted final evidence; no required053 work remains.
+
+See [final completion and exact evidence](TASK-053-COMPLETION-20261116.md).
+Verified source:6074a6ddb53fdcd0192e9d920cd2e63549540962;
+[actual successful run](https://github.com/wakaken/pqc-scan/actions/runs/43763572932).
+052 remains unfinished,054 unstarted and release acceptance Unknown.
+Completion/reporting metadata were added after the run; executable11source and
+non-self18-study input population remain exactly those verified by the run.
+
+## Historical 2026-11-15 assessment — superseded completion decision
+
+The following text records the earlier local-only decision and is retained as
+history. Its hosted-unexecuted statements do not describe the final2026-11-16
+state. Exact pre-correction files are also preserved under the task evidence.
 
 # Task053 resumed evidence integration results
 

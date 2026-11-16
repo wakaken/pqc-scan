@@ -1,0 +1,120 @@
+[
+  {
+    "command": [
+      "rustc",
+      "-C",
+      "instrument-coverage",
+      "/scratch/smoke/main.rs",
+      "-o",
+      "/scratch/smoke/app"
+    ],
+    "environment": null,
+    "log": "smoke-build.log",
+    "exit": 0,
+    "wallSeconds": 0.11844050000001971,
+    "timeoutSeconds": 600
+  },
+  {
+    "command": [
+      "/scratch/smoke/app",
+      "positive"
+    ],
+    "environment": {
+      "PATH": "/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "HOME": "/scratch/home",
+      "TMPDIR": "/scratch/tmp",
+      "CARGO_HOME": "/scratch/cargo",
+      "RUSTUP_HOME": "/usr/local/rustup",
+      "CARGO_NET_OFFLINE": "true",
+      "CARGO_BUILD_JOBS": "2",
+      "RUST_TEST_THREADS": "2",
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_PROFILE_DEV_DEBUG": "0",
+      "CARGO_PROFILE_TEST_DEBUG": "0",
+      "CARGO_TARGET_DIR": "/scratch/target",
+      "LC_ALL": "C",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "LLVM_PROFILE_FILE": "/scratch/smoke/run.profraw"
+    },
+    "log": "smoke-run.log",
+    "exit": 0,
+    "wallSeconds": 0.001268874999993841,
+    "timeoutSeconds": 600
+  },
+  {
+    "command": [
+      "/usr/local/rustup/toolchains/1.93.1-aarch64-unknown-linux-gnu/lib/rustlib/aarch64-unknown-linux-gnu/bin/llvm-profdata",
+      "merge",
+      "-sparse",
+      "/scratch/smoke/run.profraw",
+      "-o",
+      "/scratch/smoke/run.profdata"
+    ],
+    "environment": null,
+    "log": "smoke-merge.log",
+    "exit": 0,
+    "wallSeconds": 0.07069124999998166,
+    "timeoutSeconds": 600
+  },
+  {
+    "command": [
+      "/usr/local/rustup/toolchains/1.93.1-aarch64-unknown-linux-gnu/lib/rustlib/aarch64-unknown-linux-gnu/bin/llvm-cov",
+      "export",
+      "-object",
+      "/scratch/smoke/app",
+      "-instr-profile=/scratch/smoke/run.profdata"
+    ],
+    "environment": null,
+    "log": "smoke.json",
+    "exit": 0,
+    "wallSeconds": 0.003846541999962483,
+    "timeoutSeconds": 600
+  },
+  {
+    "command": [
+      "rustc",
+      "+nightly-2026-02-12",
+      "-Vv"
+    ],
+    "environment": null,
+    "log": "nightly.log",
+    "exit": 0,
+    "wallSeconds": 0.11934016600002906,
+    "timeoutSeconds": 600
+  },
+  {
+    "command": [
+      "cargo",
+      "+nightly-2026-02-12",
+      "test",
+      "--workspace",
+      "--locked",
+      "--offline",
+      "--no-run",
+      "--message-format=json"
+    ],
+    "environment": {
+      "PATH": "/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "HOME": "/scratch/home",
+      "TMPDIR": "/scratch/tmp",
+      "CARGO_HOME": "/scratch/cargo",
+      "RUSTUP_HOME": "/usr/local/rustup",
+      "CARGO_NET_OFFLINE": "true",
+      "CARGO_BUILD_JOBS": "2",
+      "RUST_TEST_THREADS": "2",
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_PROFILE_DEV_DEBUG": "0",
+      "CARGO_PROFILE_TEST_DEBUG": "0",
+      "CARGO_TARGET_DIR": "/scratch/nightly-target",
+      "LC_ALL": "C",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "RUSTFLAGS": "-C instrument-coverage -Z coverage-options=branch",
+      "LLVM_PROFILE_FILE": "/scratch/raw-branch-default/%p-%m.profraw"
+    },
+    "exit": 101,
+    "wallSeconds": 26.715783095000006,
+    "timeoutSeconds": 700,
+    "log": "branch-default/build.log",
+    "artifacts": "branch-default/build.jsonl"
+  }
+]

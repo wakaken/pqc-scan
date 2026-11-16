@@ -1,0 +1,95 @@
+from pathlib import Path
+import json,hashlib,shutil,re
+r=Path.cwd();cur=r/'tasks/052/evidence/reassessment-20261116';e=r/'tasks/052/evidence/purpose-reset-20261116';out=cur/'outputs';H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def save(p,d):p.write_text(json.dumps(d,indent=2,ensure_ascii=False)+'\n')
+a=json.loads((out/'best-practices-assessment.json').read_text())
+for x in a['criteria']:
+ if x['key'] in ['0.know_secure_design','0.know_common_errors']:x['documentation']='Architecture/target-policy describe relevant principles/errors. Dated maintainer knowledge confirmations are separately indexed as FACTS.'
+ if x['key'] in ['0.release_notes_vulns','0.vulnerability_report_response']:x['executionEvidence']='Maintainer confirms no external reports ever and no known confirmed project-owned vulnerability cases; empty advisories/search results are scoped observations, not proof of no latent flaws.'
+ if x['key']=='0.report_process':x['documentation']='GitHub Issues is the ordinary bug-report route. Sensitive vulnerabilities use enabled private reporting under the approved local policy; fetched public policy is older.'
+save(out/'best-practices-assessment.json',a)
+reasons={
+'Q6-05':('All145official items have accountable owner, separate documentation/execution fields, validated evidence references and criterion-specific supported conclusions, including nonconformance and unsupported claims.','best-practices-assessment.json; process-review.md'),
+'Q6-06':('Retrieved live controls, previous permission/transport errors and recommendations are separately recorded. Private reporting true, sole-account MFA, read workflow defaults, no effective develop rules. No additional mutation.','github-controls.json'),
+'Q6-07':('Public interim policy, local approved bilingual policy, actual enabled private route, primary/no backup, supported scope and notification preference are reconciled. Intake/delivery/handling unoperated aspects and no report history are explicit.','security-process.md'),
+'Q6-08':('Official pinned Scorecard5.6.0actually ran exit0 on20261116 with tool SHA/version/commit, public target54cc42a, dates and all18checks. Per-check score/reason/details retain unavailable limitations. 4.3/10is separate from detection accuracy.','scorecard.json; ../scorecard/RUN.json'),
+'Q6-09':('Every67Passing/55Silver/23Gold item is checked against pinned official wording and acquired evidence; exact unsupported conformance claims remain Unknown/Partial. No new tooling/practice attainment is added as a closure gate. No badge achieved per maintainer, none submitted by task; exact-name search limitations explicit.','best-practices.md; best-practices-assessment.json')}
+# Original conditions are extracted with Ruby in validation; preserve the quoted original strings here.
+original=['Q6-05: Best Practicesの各項目に根拠と担当を示し、文書の存在と実行実績を区別','Q6-06: 取得できた設定と推奨変更を分け、権限不足はUnknown。設定変更は別承認','Q6-07: 公開窓口/対応範囲/担当/連絡経路を確認し、未運用部分を明記','Q6-08: commit/工具版/取得日と各check・取得不能理由を保存し、検出精度とは別表示','Q6-09: 全適用項目を根拠と照合し、申請・取得の有無を区別。badge申請は別指示']
+m={'originalTask':'tasks/052/task.yaml','scopeDecision':'ASSESSMENT-SCOPE.md','criteriaUnchanged':True,'requirements':[{'id':k,'originalAcceptanceQuote':q,'evaluation':'Complete','reason':reasons[k][0],'evidence':reasons[k][1]} for k,q in zip(reasons,original)],'productPracticeCounts':a['countsByStatus'],'evaluationCounts':a['evaluationCounts'],'eligibleForCompletion':True,'done':False,'requiredReviews':'Prose/self-assessment evidence only, no executable behavior changes. No new reviewer identities required or started. Existing053reviews preserved.'}
+save(e/'ACCEPTANCE-MATRIX.json',m)
+doc='''# Task052 original-purpose reassessment — 2026-11-16
+
+## Purpose and decision
+
+Evaluate OpenSSF practices, actual GitHub controls and maintenance/security process
+with evidence. Q6-05throughQ6-09are the original assessment deliverables; they do
+not require attaining every medal criterion. The maintainer accepted correcting
+the added implementation demands. No original condition or threshold changes.
+
+The145official items have been reconciled against pinned wording, source/evidence
+hashes and dated facts. Each has a responsible owner, documentation/execution
+separation, evidence-sufficiency adjudication and claim ceiling. Original outputs
+and prior blocked decisions remain historical; their added new-statement-tool/
+complete-new-bug-ledger demands are superseded by the approved scope correction.
+The supporting analysis is preserved, including failed measurements and limits.
+
+Conformance:71Met,43Partial,10Unknown,3conditionalNot applicable,18Unmet.
+The installation-variable item changes from unsupported Unmet toUnknown, since
+lack of DESTDIR evidence is not a witnessed failure. No item is promoted toMet
+by this purpose correction. Coverage, regression ratios, vulnerability history,
+periodic monitoring and other unsupported claims stay explicitly bounded.
+
+## Original acceptance
+
+See evidence/purpose-reset-20261116/ACCEPTANCE-MATRIX.json for all five original
+acceptance quotes and supporting facts. Its final validation/closure receipt owns
+the current completion decision. The five requested outputs are byte-mirrored
+under target/quality-task-052and evidence/reassessment-20261116/outputs.
+
+Scorecardv5.6.0/toolcommit61e84743356275f6ffca23b1b2f2cb945e19eb96ran on
+2026-11-16exit0:18checks,4.3/10. Public target54cc42ad771dcec2f7e6cfdd75c030378437e4aa
+is distinct from local HEAD5425f85aa870ede6d3e5bdd8723b9a52c57701d7plus dirty
+bindings. Scorecard is repository/process evidence, not detection accuracy.
+
+## Actual facts and remaining practice limits
+
+Sole primary maintainer, no backup, best effort0.2.xand delayed absence handling.
+Live private reporting and MFA are enabled; approved bilingual SECURITYdrafts are
+local, while fetched public guidance is older. No external reports, known confirmed
+project-owned vulnerability cases, off-repository fix records, external badges or
+other-human pre-release reviews are reported by the maintainer. No personal human
+security-boundary review has occurred. Those facts are not latent-safety proofs.
+Intake/email arrival/fix-response/disclosure remain unoperated; routine dependency
+monitoring is unconfirmed. No unanswered fact is silently inferred.
+
+Actual source-bound branch/build experiments remain useful bounded evidence.
+Statement coverage and semantic regression percentages are not established.
+No new measurement tool, bug ledger, other maintainer, human audit, signing or
+publication is imposed as an extra052implementation requirement. No badge or
+product acceptance is granted. Task054and the v0.3roadmap remain separately
+unfinished. Network notice flags4/4and publication hold remain unchanged.
+
+## Verification scope
+
+Product code, Cargo, rules, workflows, shared scripts, source-bound measurements,
+frozen catalog and053records are protected by hash manifests. This change is
+assessment prose/metadata; no new Rust run, hostedCIor review identity is claimed.
+Task metadata delta after earlier measurements is explicitly checked against the
+ID/dependency contract. Final-source validation is recorded in
+ evidence/purpose-reset-20261116/VALIDATION.json.
+'''
+(r/'tasks/052/TASK-052-REASSESSMENT-20261116.md').write_text(doc)
+# Preserve historical state and record readiness before completion validation.
+p=r/'tasks/052/task.yaml';s=p.read_text();assert '\nstatus: in-progress\n' in s;s=s.replace('\nstatus: in-progress\n','\nstatus: review\n',1);s+='''
+  readiness:
+    from: in-progress
+    to: review
+    reason: All original assessment deliverables reconciled; final artifact and evidence validation pending. No conformance pass inferred.
+    acceptance_matrix: tasks/052/evidence/purpose-reset-20261116/ACCEPTANCE-MATRIX.json
+''';p.write_text(s)
+# Preserve054report before current factual corrections.
+shutil.copyfile(r/'tasks/054/evidence/assessment-20261116/release-assessment.md',e/'before/release-assessment.md')
+# Copy analysis controller as inert evidence; no shared executable module installed.
+shutil.copyfile('/tmp/pqc052-purpose-update.py',e/'update-controller.py.txt');shutil.copyfile('/tmp/pqc052-purpose-record.py',e/'record-controller.py.txt')
+print('Five original acceptance decisions recorded; task052review pending validation.')

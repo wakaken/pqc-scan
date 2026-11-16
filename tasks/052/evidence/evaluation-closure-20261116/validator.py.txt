@@ -1,0 +1,55 @@
+from pathlib import Path
+import json,hashlib,subprocess,collections,copy,shutil
+r=Path.cwd();e=r/'tasks/052/evidence/evaluation-closure-20261116';cur=r/'tasks/052/evidence/reassessment-20261116';H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();checks=[]
+def ck(n,v):assert v,n;checks.append(n)
+a=json.loads((cur/'outputs/best-practices-assessment.json').read_text());official=json.loads((r/'tasks/052/evidence/assessment-20261115/official/CRITERIA-EXTRACT.json').read_text());ids={x['level']+'.'+x['id'] for x in official};na={x['level']+'.'+x['id'] for x in official if x['metadata'].get('na_allowed')};refs=json.loads((cur/'EVIDENCE-REFERENCES.json').read_text())
+def valid(d):
+ assert len(d['criteria'])==len({x['key'] for x in d['criteria']})==145 and {x['key'] for x in d['criteria']}==ids
+ assert dict(collections.Counter(x['status'] for x in d['criteria']))==d['countsByStatus']
+ for row in d['criteria']:
+  assert row['scope'] and row['owner'];assert row['status']!='Not applicable' or row['key'] in na
+  assert row['evidenceApplicability']==[{'key':k,'references':refs[k]} for k in row['evidence']]
+ for rs in refs.values():
+  for x in rs:assert x['exists'] and H(r/x['path'])==x['sha256']
+valid(a);checks.append('145original IDs, current reference hashes, roles and scoped labels')
+for label,change in [('missing',lambda d:d['criteria'].pop()),('duplicate',lambda d:d['criteria'].append(copy.deepcopy(d['criteria'][0]))),('scope',lambda d:d['criteria'][0].update(scope='')),('illegalNA',lambda d:d['criteria'][0].update(status='Not applicable')),('staleHash',lambda d:d['criteria'][0]['evidenceApplicability'][0]['references'][0].update(sha256='0'*64))]:
+ d=copy.deepcopy(a);change(d)
+ try:valid(d)
+ except AssertionError:checks.append('reject '+label)
+ else:raise AssertionError('invalid accepted '+label)
+ck('evaluation and compliance separate',a['evaluationCounts']['Incomplete']>0 and all('evaluation' in x for x in a['criteria']))
+for n in ['best-practices.md','github-controls.json','process-review.md','scorecard.json','security-process.md']:ck('required output parity '+n,(cur/'outputs'/n).read_bytes()==(r/'target/quality-task-052'/n).read_bytes())
+ck('054required output parity',(r/'tasks/054/evidence/assessment-20261116/release-assessment.md').read_bytes()==(r/'target/quality-task-054/release-assessment.md').read_bytes())
+base=json.loads((e/'BASELINE.json').read_text())
+for p,sha in base['protected'].items():
+ if p!='tasks/052/task.yaml':ck('protected '+p,H(r/p)==sha)
+# Every final ASTscope comes from the same source; standard rustcASTis pre-expansion, no target build.
+run=json.loads((e/'ast-scope-r3/RUN.json').read_text());scopes=json.loads((e/'ast-scope-r3/SCOPES.json').read_text());ck('isolated compilerASTrun exit0 and removed',run['exit']==0 and run['containerRemoved'])
+control=next(x for x in scopes if x['path']=='synthetic-control.rs');ck('independent scope oracle incl negative literal/sharedcfg',len(control['excludedTestScopes'])==4 and not next(x for x in control['moduleDeclarations'] if x['name']=='shared')['testOnly'])
+for x in scopes:
+ if x['path']!='synthetic-control.rs':ck('ASTsource binding '+x['path'],H(r/x['path'])==x['sourceSha256'] and x['rustcExit']==0)
+external=json.loads((e/'EXTERNAL-TEST-MODULES.json').read_text());ck('4explicit test-only external modules',len(external['rows'])==4)
+for x in external['rows']:ck('external test source '+x['target'],H(r/x['target'])==x['sha256'])
+bounds=json.loads((e/'BRANCH-PRODUCTION-BOUND-r2.json').read_text());ck('AST bound binding',H(e/'ast-scope-r3/SCOPES.json')==bounds['astScopesSha256'])
+for x in bounds['records']:
+ ck('negative observed-population bound '+x['configuration'],0<=x['observedUnionCoveredUpperBound']<=x['observedUnionCoveredUpperBound']+x['additionalHelperOutcomesAssumedCovered']<=x['productionMappedOutcomes'] and x['coverageUpperBoundPercent']<80)
+ ck('bound not exact source-statement metric '+x['configuration'],bounds['notStatementCoverage'])
+ for row in x['rows']:ck('bound source '+row['path'],H(r/row['path'])==row['sourceSha256'])
+fetch=json.loads((e/'osv-attribution/FETCH.json').read_text());ck('48actual primaryOSVresponses',len(fetch['rows'])==48 and all(x.get('httpStatus')==200 for x in fetch['rows']))
+for x in fetch['rows']:ck('OSVhash '+x['id'],H(e/'osv-attribution'/x['response'])==x['sha256'])
+root=json.loads((e/'osv-attribution/ROOT-APPLICABILITY.json').read_text());ck('local vs remote not conflated',root['localAndRemoteDiffer'] and root['publicRootNamedAdvisories']==4 and root['localRootFixedBoundaryAdvisories']==3 and H(r/'Cargo.lock')==root['rootCargoSha256']['currentLocal'])
+ck('no badge/publication from criterion counts',not a['application']['submittedByThisTask'])
+m=json.loads((e/'ACCEPTANCE-MATRIX.json').read_text());ck('completion gate remains false',not m['done'] and [x['id'] for x in m['requirements'] if x['evaluation']=='Incomplete']==['Q6-05','Q6-09'])
+m54=json.loads((r/'tasks/054/evidence/assessment-20261116/REQUIREMENT-ASSESSMENT.json').read_text());old54=json.loads((e/'PRIOR-054-REQUIREMENT-ASSESSMENT.json').read_text());ck('73IDs and original conditions preserved',len(m54['requirements'])==73 and [(x['id'],x['acceptanceQuote'],x['originalTaskAcceptance']) for x in m54['requirements']]==[(x['id'],x['acceptanceQuote'],x['originalTaskAcceptance']) for x in old54['requirements']])
+for x in m54['requirements']:
+ if x['ownerTask']=='052':ck('054current binding '+x['id'],H(r/x['reassessment20261116']['source'])==x['reassessment20261116']['sourceSha256'] and H(r/x['reassessment20261116']['criteria'])==x['reassessment20261116']['criteriaSha256'])
+commands=[]
+args=['ruby','-ryaml','-e','a=YAML.load_file("tasks/052/evidence/reassessment-20261116/ORIGINAL-TASK.yaml.txt");b=YAML.load_file("tasks/052/task.yaml");b.delete("reassessment_20261116");b.delete("closure_attempt_20261116");b["status"]=a["status"];abort "original052scope changed" unless a==b;Dir["tasks/[0-9][0-9][0-9]/task.yaml"].each{|p|t=YAML.load_file(p);abort p unless t["id"].is_a?(String)&&p.split("/")[1]==t["id"]};puts "original052scope and taskIDs unchanged"']
+for cmd in [args,['git','diff','--check']]:
+ p=subprocess.run(cmd,capture_output=True,text=True);commands.append({'argv':cmd,'exitCode':p.returncode,'stdout':p.stdout,'stderr':p.stderr});ck('command exit0 '+cmd[0],p.returncode==0)
+for p in e.rglob('*.json'):json.loads(p.read_text())
+# Final compiled/runtime source delta is task metadata only; do not rewrite old run hashes.
+old=json.loads((cur/'verification-followup/branch-coverage-r4-all-features/HOST-RESULTS.json').read_text());delta=[p for p,sha in old['sourceBindings'].items() if H(r/p)!=sha];ck('only052task metadata delta after run',delta==['tasks/052/task.yaml'])
+shutil.copyfile('/tmp/pqc052-closure-validate.py',e/'validator.py.txt')
+report={'head':base['head'],'task052':'blocked;unfinished','task054':'blocked;unfinished','checksPassed':checks,'commands':commands,'sourceDeltaAfterMeasurement':delta,'sourceDeltaInterpretation':'Only052task status/datedrecord; original IDs/dependencies and all compiled Rust/build/rules inputs remain unchanged. task_ids source checks ID/dependency contracts, not052status. No new Rust suite or hostedCI claimed.','criterionLabels':a['countsByStatus'],'evaluationCounts':a['evaluationCounts'],'notEstablished':['Validated source-statement denominator/runtime attribution','Complete semantic bug regression cohort','Historical safety-fix severity/confirmation/publication/release qualification','Remaining Partial applicability/matrix evidence','Routine monitoring fact pending'],'noNewReviewers':'Evidence/source inspection only; no product/shared executable modules changed. Prior identities/records preserved.','artifactHashes':{str(p.relative_to(r)):H(p) for p in list(e.rglob('*'))+list((cur/'outputs').glob('*'))+[cur/'EVIDENCE-REFERENCES.json',cur/'REMAINING.json',r/'tasks/052/task.yaml',r/'tasks/052/TASK-052-REASSESSMENT-20261116.md',r/'tasks/054/evidence/assessment-20261116/REQUIREMENT-ASSESSMENT.json'] if p.is_file() and p!=e/'VALIDATION.json'}}
+(e/'VALIDATION.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({'checksPassed':len(checks),'task052':report['task052'],'commandsExit0':all(x['exitCode']==0 for x in commands)}))

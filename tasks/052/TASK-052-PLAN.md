@@ -67,3 +67,17 @@ use the two required isolated review stages, at most one identity each.
    preservation of preexisting work. No Rust checks unless product inputs change.
 7. Assess final-source applicability. Mark done only when every original criterion
    is met; otherwise record the blocker, attempts and concrete next action.
+
+## Authorized bounded resumption —2026-11-16
+
+The maintainer approved the concrete052resumption scope proposed in054. Original
+criteria remain unchanged. Preserve20261115measurements and all054fact receipts;
+create a separate dated reassessment, linking explicit human confirmations and
+actual live setting evidence. Review all145criteria with original source/input/
+tool/environment scope; prioritize the16prior Unknowns. Apply060rebuild and063
+remediation evidence only where relevant. Reassess current remote applicability
+of Scorecard before reuse. Select missing measurements only after showing the
+original-criterion gap and existing-tool/isolation feasibility. No product repair,
+new task, tool installation, further settings mutation or publication is allowed.
+Both evaluation validity and actual product/practice quality remain separate.
+Keep unfinished when required truth or validation is missing; no badge application.

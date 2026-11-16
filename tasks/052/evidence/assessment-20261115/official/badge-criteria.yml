@@ -1,0 +1,1590 @@
+# This YAML file provides information about each criterion.
+# The top level key is the major (top-level) group key,
+# within that is the minor (secondary) group key,
+# and within each minor group is a set of criteria identifiers.
+# With each criterion identifiers the following keys may be inside:
+#   category: MUST|SHOULD|SUGGESTED # required
+#   future: true|false # optional, default false
+#   obsolete: true|false # optional, default false; criterion has been retired
+#   na_allowed: true|false # optional, default false
+#   na_justification_required: true|false # optional, default false
+#   met_justification_required: true|false # optional, default false
+#   met_url_required: true|false # optional, default false
+#   description: ...HTML description... # required
+#   details: ...HTML description... # optional
+#   met_placeholder: ...special met_placeholder text... # optional
+#   unmet_placeholder: ...special unmet_placeholder text... # optional
+#   na_placeholder: ...special na_placeholder text... # optional
+#   met_suppress: true|false # optional, default false. Suppress justification?
+#   unmet_suppress: true|false # optional, default false. Suppress just.
+#   rationale: ...text describing the rationale for this criterion.
+#   autofill: ...text describing *ideas* for how to autofill, in markdown
+#
+# Please note that autofill text is *not* a guarantee of how it will
+# be implemented (or even if it will be automated); it is simply a way
+# to record ideas that might be implemented.  Also, autofill is often
+# used to *guess* correct values, to help speed filling in the form;
+# we only force values if we are confident in their answer or are willing
+# to require that the information be provided in a specific way.
+# We've focused on GitHub, but where reasonable we'd like to create
+# portability layers and support other forges like SourceForge,
+# Savannah, Bitbucket, and GitLab; we'd also like to be able to support
+# standalone sites (e.g., detect use of Bugzilla and work with that).
+#
+# We use an *ordered* map (omap), because the order below is used to determine
+# the order of presentation.  In Ruby this doesn't really matter because
+# (current) Ruby hashes are ordered anyway. We use !!omap so that
+# any other tool reading this format will know to preserve the order.
+--- !!omap
+- '0': !!omap
+  - Basics: !!omap
+    - Basic project website content: !!omap
+      - description_good:
+          category: MUST
+          autofill: >
+            We could try examining the project website or README for an
+            early sentence of the form (This software|project name).
+            It's unclear how effective this would be; we could survey a number
+            of existing projects to see if there are common patterns.
+      - interact:
+          category: MUST
+          autofill: >
+            Look on the project website for words like "download|obtain",
+            "contribute|bug report|feedback|enhancement", and
+            "contribute|pull request|merge request".
+      - contribution:
+          category: MUST
+          met_url_required: true
+          autofill: >
+            Look on the project website for words like
+            "contribute|bug report|feedback|enhancement" and
+            "contribute|pull request|merge request".
+          rationale: >
+            Contributors need to understand not only how to contribute,
+            but also the overall contribution process, so that they'll
+            understand how their work could be incorporated and what
+            the expectations are after the initial submission.
+            This means that wherever the project describes how to contribute,
+            the project must include (directly or by reference) information
+            on the contribution process.  Note that criterion "interact"
+            (listed earlier) requires that the contribution information
+            be on the project website.
+      - contribution_requirements:
+          category: SHOULD
+          met_url_required: true
+          autofill: >
+            Look for a CONTRIBUTING{,.md,.txt,.html} file.
+    - FLOSS license: !!omap
+      - floss_license:
+          category: MUST
+          rationale: >
+            These criteria are designed for FLOSS projects,
+            so we need to ensure that they're only used where they apply.
+            Some projects may be mistakenly considered FLOSS even though they
+            are not (e.g., they might not have any license, in which case the
+            defaults of the country's legal system apply, or they might use a
+            non-FLOSS license).
+            We've added "produced by the project" as a clarification -
+            many projects use non-FLOSS software/services in the process of
+            creating software, or depend on them to run,
+            and that is allowed.
+          autofill: >
+            We currently use GitHub's API to request license information.
+            This API examines the LICENSE file using the gem licensee.
+            This only works on GitHub, and only in simple cases
+            (when there's a single license).
+            We could in addition look for the file LICENSE.spdx for the
+            entry 'PackageLicenseDeclared' - these aren't included often,
+            but it would let people declare *exactly* what license is in use.
+            We could add running Ben Balter's gem
+            [licensee](https://github.com/benbalter/licensee), this is the same
+            library used by GitHub but we can then apply it outside of GitHub.
+            [Licensee issue #85](https://github.com/benbalter/licensee/issues/85)
+            proposes adding LICENSE.spdx support to licensee.
+            See [&#8220;Open Source Licensing by the Numbers&#8221; by Ben Balter](https://speakerdeck.com/benbalter/open-source-licensing-by-the-numbers).
+            We could also do more specialized analysis (e.g., looking for
+            license information in various packaging formats) - this would
+            probably be best done by improving some existing library
+            like licensee.
+      - floss_license_osi:
+          category: SUGGESTED
+          met_suppress: true
+          rationale: >
+            Unusual licenses can cause long-term problems
+            for FLOSS projects and are more difficult for tools to handle.
+            That said, there are FLOSS licenses that are not OSI-approved,
+            e.g., the CC0 license is used by many projects but is not
+            OSI-approved at the time of this writing.
+            We expect that more advanced badges would set a higher bar (e.g.,
+            that it <em>must</em> be released under an OSI-approved license).
+          autofill: >
+            Currently we compare the license to see if it's on a simple list
+            from OSI.  We could add support for automatically getting the list
+            from elsewhere (e.g., OSI or SPDX), and support more complex
+            license structures (OR, AND, and WITH).
+      - license_location:
+          category: MUST
+          met_url_required: true
+          rationale: >
+            The goal is to make the license very clear and connected with
+            the project results it applies to.  It is a good idea to also
+            make the license clear on the project website, but there isn't
+            a widely-accepted way to do that today.
+          autofill: >
+            Look for files with the name LICENSE, COPYING, or COPYING-(name)
+            optionally extensions .txt or .md.  Name could include
+            GPL, LGPL, and MIT.
+    - Documentation: !!omap
+      - documentation_basics:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          rationale: >
+            Potential users need documentation so that they can learn how to
+            use the software.
+            This documentation could be provided
+            via the project website or repository, or even
+            via hyperlink to some external information, so we do not specify
+            exactly where this information is.
+          autofill: >
+            Look for the project web page,
+            or a direct links from it on the same site,
+            that includes words like "install(ation)?", "use|using",
+            and "security|secure".
+            If examining the project repo discovers a nontrivial amount of code,
+            then this should not be N/A.
+      - documentation_interface:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          autofill: >
+            Look for a "docs" or "doc" directory, or the main site, with
+            .txt, .html, .md, .tex extension and uses the word "interface".
+            If examining the project repo discovers a nontrivial amount of code,
+            then this should not be N/A.
+    - Other: !!omap
+      - sites_https:
+          category: MUST
+          autofill: >
+            Look at project, repo, and download URLs. https is okay, http is not.
+            Typically anything supporting HTTPS also supports TLS, so
+            it's probably not worth trying to detect that specifically.
+      - discussion:
+          category: MUST
+          autofill: >
+            Currently if it's on GitHub we assume they will use its mechanisms.
+            We could do the same for other forges like
+            SourceForge, GitLab, and Savannah.
+            We could also look for links from the project website that suggest
+            the use of Bugzilla, Mantis, or Trac.
+      - english:
+          category: SHOULD
+          autofill: >
+            Look at project and/or repo page.  If it's in English,
+            then clearly the project can accept English.
+            We can use more general tools to detect the natural language,
+            or simple mechanisms like using dictionaries/spellcheckers to
+            see if it's mostly English.
+      - maintained:
+          category: MUST
+          autofill: >
+            Look at the repo page.
+            To detect projects that have expressly stated that they are
+            not maintained,
+            look for “DEPRECATED” as the first heading of its README title,
+            “DEPRECATED” to the beginning of its GitHub project description
+            (if it is on GitHub), a
+            <a href="https://unmaintained.tech/“>no-maintenance-intended badge</a>
+            in its README, and/or
+            the code repository's marking system (e.g.,
+            GitHub’s <a href="https://docs.github.com/en/enterprise-server@2.21/github/creating-cloning-and-archiving-repositories/archiving-a-github-repository">”archive” setting</a>,
+            GitLab’s <a href="https://docs.gitlab.com/ee/user/project/settings/#archiving-a-project”>“archived” marking</a>,
+            Gerrit’s “readonly” status, or
+            SourceForge’s “abandoned” project status).
+            Additional discussion can be found <a href="https://medium.com/maintainer-io/how-to-deprecate-a-repository-on-github-8f0ceb9155e">here</a>.
+            To detect projects that have simply stopped being maintained,
+            look for projects more than X lines of code (or size) that
+            have had no response activity in more than Y months (in either the
+            project or badge). Creating issues & pull requests do not count
+            as responses (since they may be from those outside the project);
+            commits and releases *do* count as response activity.
+  - 'Change Control': !!omap
+    - Public version-controlled source repository: !!omap
+      - repo_public:
+          category: MUST
+          autofill: >
+            We currently assume that being on GitHub is enough.
+            Again, consider supporting other forges.
+      - repo_track:
+          category: MUST
+          autofill: >
+            If it uses git, subversion (svn), mercurial (hg), or even CVS
+            this would normally be met.
+      - repo_interim:
+          category: MUST
+          autofill: >
+            Consider checking if there are many versions.  If versions are
+            only posted once every 3+ months, there's probably a problem.
+      - repo_distributed:
+          category: SUGGESTED
+          autofill: >
+            Look for git, subversion (svn), and mercurial (hg).
+    - Unique version numbering: !!omap
+      - version_unique:
+          category: MUST
+          autofill: >
+            Look for downloads with version numbers in the filename, or
+            version tags in a git repo.
+      - version_semver:
+          category: SUGGESTED
+          rationale: >
+            SemVer is widely used to communicate what an update
+            is (e.g., if it involves incompatible API changes),
+            whether something is newer or older.  The scheme is simple,
+            supports multiple simultaneous branches, and because it uses at
+            least three numbers it can be distinguished from floating point.
+            However, many find SemVer less useful for identifying software
+            versions if only one version of the component is run (e.g.,
+            it is the code for a single website or internet service that
+            is constantly updated via continuous delivery).
+            For more discussion of the pros and cons of SemVer, see
+            <a href="https://news.ycombinator.com/item?id=13378637">Hacker News' Is Semantic Versioning an Anti-Pattern?</a> and
+            <a href="https://surfingthe.cloud/semantic-versioning-anti-pattern/">The Semantic Versioning Anti-Pattern</a>.
+          met_suppress: true
+          autofill: >
+            Look for git tags (at least on GitHub) that have version format, e.g.,
+            v?[0-9]+\.[0-9]+\.[0-9]+.*   The prefixed 'v' is
+            sometimes used in tags.
+      - version_tags:
+          category: SUGGESTED
+          autofill: >
+            Again, look for git tags (at least on GitHub) that have
+            version format, e.g., v?[0-9]+\.[0-9]+\.[0-9]+.*   The
+            prefixed 'v' is sometimes used in tags.
+    - Release notes: !!omap
+      - release_notes:
+          category: MUST
+          met_url_required: true
+          na_allowed: true
+          na_justification_required: true
+          rationale: >
+            Release notes are important because they help users decide whether
+            or not they will want to update, and what the impact would be (e.g.,
+            if the new release fixes vulnerabilities).  We realize this may not
+            apply to projects whose main results are continuously updated and
+            are deployed to primarily one place and so allow "N/A" from
+            such projects.
+          autofill: >
+            Look for version-controlled files named NEWS, CHANGELOG, or ChangeLog
+            (optionally with an extension .txt, .md, or .html).
+            Also check to see if it uses a GitHub Releases workflow.
+      - release_notes_vulns:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          autofill: >
+            Examine the release notes (per above) to see if they include
+            CVE identifiers.  Also,
+            use a vulnerability database such as the
+            National Vulnerability Database (NVD) to try to identify
+            publicly known vulnerabilities in this software, and see if all of
+            them are mentioned in the release notes.
+  - Reporting: !!omap
+    - Bug-reporting process: !!omap
+      - report_process:
+          category: MUST
+          met_url_required: true
+          autofill: >
+            On GitHub we presume that at least issue trackers can be used.
+            Search CONTRIBUTING (if it exists) for a phrase like "bug reports".
+      - report_tracker:
+          category: SHOULD
+          autofill: >
+            On GitHub we presume that at least issue trackers can be used.
+            Search CONTRIBUTING (if it exists) for a phrase like "issue tracker".
+      - report_responses:
+          category: MUST
+          autofill: >
+            Examine issue tracker, and see what is marked as a "bug".
+            Exclude the top contributor(s) as reported by the repo changes.
+            Then examine the responses for the rest.
+            Measuring "top contributors" is tricky; one potential rule is
+            those who contribute more than 10% of the system, or, when you
+            sort people by their contributions, the ones who cumulatively wrote
+            2/3s of the system.  However,
+            these measures may be difficult to obtain
+            in a short time - perhaps just exclude anyone listed in AUTHORS or
+            CREDITS, or someone listed in the last X commits?
+      - enhancement_responses:
+          category: SHOULD
+          autofill: >
+            Examine issue tracker, and see what is marked as an "enhancement".
+            Exclude the top contributor(s) as reported by the repo changes.
+            Then examine the responses for the rest.
+      - report_archive:
+          category: MUST
+          met_url_required: true
+          autofill: >
+            If on GitHub, Savannah, SourceForge, GitLab, this is probably fine.
+    - Vulnerability report process: !!omap
+      - vulnerability_report_process:
+          category: MUST
+          met_url_required: true
+          autofill: >
+            Look for phrase like "vulnerability reporting" or
+            "how to report vulnerabilities" in various documents
+            like README, CONTRIBUTING, or a doc/* file.
+      - vulnerability_report_private:
+          category: MUST
+          na_allowed: true
+          met_url_required: true
+          autofill: >
+            Look for a phrase like "private vulnerability reporting" or
+            "how to report private vulnerabilities" in various documents
+            like README, CONTRIBUTING, or a doc/* file, and *also*
+            look for an OpenPGP key to use for encrypting the information.
+            Sadly, while Bugzilla easily supports this,
+            GitHub doesn't currently support this in its issue tracker, see
+            https://github.com/isaacs/github/issues/37
+      - vulnerability_report_response:
+          category: MUST
+          na_allowed: true
+          autofill: >
+            If GitHub is used, and the issue tracker has something marked
+            "security" or "vulnerability", measure the appropriate times.
+            GitHub doesn't support private reports, though, so a lot of people
+            won't use this.
+            If Bugzilla is used, grab the information publicly available and
+            track this.
+  - Quality: !!omap
+    - Working build system: !!omap
+      - build:
+          category: MUST
+          na_allowed: true
+          rationale: >
+            If a project needs to be built but there is no
+            working build system, then potential co-developers will not be
+            able to easily contribute and many security analysis tools will be
+            ineffective.
+            This is related to
+            <a href="https://www.joelonsoftware.com/2000/08/09/the-joel-test-12-steps-to-better-code/">Joel Test</a>
+            point 2, "Can you make a build in one step?"
+          autofill: >
+            See build_common_tools.
+      - build_common_tools:
+          category: SUGGESTED
+          na_allowed: true
+          autofill: >
+            Look for files that suggest the use of a common build systems, e.g.:
+            the autotools (configure.ac, makefile.am),
+            traditional make (Makefile, makefile),
+            cmake, rake, ant, maven, etc.
+            See http://www.dwheeler.com/essays/releasing-floss-software.html
+      - build_floss_tools:
+          category: SHOULD
+          na_allowed: true
+          autofill: >
+            If it's packaged in a Linux distribution repo that is FLOSS-only,
+            then this is met.  That includes official Debian distribution
+            (but not contrib or non-free) or Fedora's official distribution.
+            If it's only source code file extensions that don't normally require
+            building (.py, .rb, etc.), then it is likely NA.
+            If the build_common_tools answers are themselves FLOSS, then this
+            is more likely to *also* be true.  The only *real* way to check this
+            is to install and build on a system that only has FLOSS, and we
+            won't have the time to do that ourselves.
+    - Automated test suite: !!omap
+      - test:
+          category: MUST
+          rationale: >
+            Automated test suites immediately help detect a
+            variety of problems.  A large test suite can find more problems, but
+            even a small test suite can detect problems and provide a framework
+            to build on.
+            E.g., "Tip #62: Test Early, Test Often, Test Automatically"
+            ("The Pragmatic Programmer" by Andrew Hunt and David Thomas,
+            p. 237)
+          autofill: >
+            See test_invocation, and use its value here also.
+      - test_invocation:
+          category: SHOULD
+          autofill: >
+            Look in the build scripts for a non-empty test command.
+            E.g., look for a Makefile (including Makefile.am) with a non-empty
+            "check" or "test" entry.  Similarly look for an entry for
+            maven (mvn test) or rake (rake test).
+      - test_most:
+          category: SUGGESTED
+          autofill: >
+            We could run a test suite with coverage enabled, but that would
+            take far too long for our time budget.
+            However, we *could* look for a Coveralls or Codecov badge
+            (a link to a badge under <https://coveralls.io>) and pull in
+            *that* data (since that would be the final result).
+            Coveralls or Code prefer 90% or more statement coverage.
+      - test_continuous_integration:
+          category: SUGGESTED
+          rationale: >
+            See
+            <a href="http://martinfowler.com/articles/continuousIntegration.html">Martin Fowler</a>
+            There has been some shift in the meaning of the term
+            continuous integration. Historically the term continuous
+            integration focused on the first part - the frequent
+            integration - and not on its testing.  However, over time the
+            emphasis has shifted to include the notion of running automated
+            tests as soon as the code is integrated.  We realize that this
+            can be difficult for some projects to apply, which is why it
+            is only SUGGESTED at the passing level.
+          autofill: >
+            Look for a .travis.yml or circle.yml file.
+            We also see if it has a badge from CircleCI or Travis.
+            Extra points: We could ask Travis or CircleCI if it's enabled.
+            We could look for evidence of pulls each of which are "relatively"
+            small (instead of rare massive changes being the norm), though
+            that by itself would give less confidence.
+            Also, make this depend on the "test" or "test_invocation" criterion.
+    - New functionality testing: !!omap
+      - test_policy:
+          category: MUST
+          autofill: >
+            Look for text patterns hinting at this in README, CONTRIBUTING,
+            or the doc/* directory.
+            Also, make this depend on the "test" or "test_invocation" criterion.
+      - tests_are_added:
+          category: MUST
+          autofill: >
+            Look for evidence that new tests are created.
+            E.G., do at least some contributions include new tests
+            (e.g., changes to contents in a directory whose full pathname
+            contains the phrase "test").
+      - tests_documented_added:
+          category: SUGGESTED
+          autofill: >
+            Look in CONTRIBUTING and README.  See also test_policy.
+    - Warning flags: !!omap
+      - warnings:
+          category: MUST
+          na_allowed: true
+          autofill: >
+            See the "details" - search the build script and source code
+            for these.
+          rationale: >
+            "We routinely set compiler warning levels as high as possible.
+            It doesn't make sense to waste time trying to find a problem
+            that the compiler could find for you!
+            We need to concentrate on the harder problems at hand."
+            ("The Pragmatic Programmer" by Andrew Hunt and David Thomas,
+            p. 91-92)
+            "Tip #23: Always use Source Code Control.
+            Always. Even if you are a single-person team on
+            a one-week project."
+            ("The Pragmatic Programmer" by Andrew Hunt and David Thomas,
+            p. 88)
+      - warnings_fixed:
+          category: MUST
+          na_allowed: true
+          autofill: >
+            The only good way to do this is to actually do a build.
+            If it uses CircleCI we could look at that.
+      - warnings_strict:
+          category: SUGGESTED
+          na_allowed: true
+          autofill: >
+            If we find "-Wall -Wextra" in the build that's pretty strict.
+  - Security: !!omap
+    - Secure development knowledge: !!omap
+      - know_secure_design:
+          category: MUST
+          autofill: >
+            We could try to search the documentation for evidence of phrases
+            that suggest security knowledge, such as the phrases listed above.
+      - know_common_errors:
+          category: MUST
+          autofill: >
+            We could try to search the documentation for evidence of phrases
+            that suggest security knowledge, such as the phrases for common
+            types of vulnerabilities such as CWE/SANS top 25 or OWASP top 10.
+            Simply mentioning those could also be an indicator.
+    - Use basic good cryptographic practices: !!omap
+      - crypto_published:
+          category: MUST
+          na_allowed: true
+          # autofill: TODO
+      - crypto_call:
+          category: SHOULD
+          na_allowed: true
+          # autofill: TODO
+      - crypto_floss:
+          category: MUST
+          na_allowed: true
+          rationale: >
+            Software must interoperate with other software. If the
+            functionality cannot be implemented with FLOSS, e.g., because
+            of patents, then this can set a trap for others who depend on
+            the software.
+          # autofill: TODO
+      - crypto_keylength:
+          category: MUST
+          na_allowed: true
+          # autofill: TODO
+      - crypto_working:
+          category: MUST
+          na_allowed: true
+          rationale: >
+            If a cryptographic algorithm or mode is completely broken,
+            then it cannot provide a useful cryptographic service.
+            This is different from having a weakness;
+            many cryptographic algorithms have some weaknesses, yet for
+            backwards-compatibility it may sometimes be appropriate to use
+            the algorithm anyway.
+            "EAX" appears to be a name, not an abbreviation.
+            The paper describing EAX,
+            <a href="http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/eax/eax-spec.pdf">"A
+            Conventional Authenticated-Encryption Mode" by
+            M. Bellare, P.  Rogaway D.  Wagner (April 13, 2003)</a>,
+            does not give an expansion.
+          # autofill: TODO
+      - crypto_weaknesses:
+          category: SHOULD
+          na_allowed: true
+          rationale: >
+            SHA-1 has been known to be weak for many years;
+            <a href="https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html">In February 2017 Google demonstrated a SHA-1 collision</a>.
+            There are a number of alternatives to SHA-1 that are not
+            patent-encumbered, such as the
+            SHA-2 suite (including SHA-256 and SHA-512) and SHA-3.
+            There is some disagreement on how important it is to avoid
+            CBC mode in SSH.  The
+            <a href="http://www.openssh.com/txt/cbc.adv">OpenSSH cbc.adv</a>
+            page argues that the attack on SSH CBC is not a practical attack.
+            However, others clearly think it's more important; CERT notes it,
+            as does
+            <a href="https://developer.ibm.com/answers/questions/187318/faq-how-do-i-disable-cipher-block-chaining-cbc-mod.html">FAQ: Disable CBC in SSH</a>.
+            It is also easy to use a different mode than CBC; generally
+            when there are safer widely-available options, you should use
+            the safe ones instead.
+            This is a SHOULD, not a MUST; sometimes these weaker
+            mechanisms need to be used for backwards compatibility.
+          # autofill: TODO
+      - crypto_pfs:
+          category: SHOULD
+          na_allowed: true
+          # autofill: TODO
+      - crypto_password_storage:
+          category: MUST
+          na_allowed: true
+          rationale: >
+            This is a bare minimum today when storing passwords.
+            Sometimes software needs to have a credential, such as a password,
+            to authenticate it to other systems; those are intentionally
+            out of scope for this criterion, because in many cases it's not
+            possible to store them as iterated hashes using per-user salt.
+          # autofill: TODO
+      - crypto_random:
+          category: MUST
+          na_allowed: true
+          # autofill: TODO
+    - Secured delivery against man-in-the-middle (MITM) attacks: !!omap
+      - delivery_mitm:
+          category: MUST
+          autofill: >
+            Look for a download site using https.
+      - delivery_unsigned:
+          category: MUST
+          autofill: >
+            Again, look for a download site using https.
+    - Publicly known vulnerabilities fixed: !!omap
+      - vulnerabilities_fixed_60_days:
+          category: MUST
+          rationale: >
+            We intentionally chose to start measurement from the
+            time of public knowledge,
+            and not from the time reported to the project, because this is much
+            easier to measure and
+            verify by those outside the project.
+          autofill: >
+            Look at vulnerability databases (such as NVD),
+            pull out unpatched ones, and look at days since report.
+      - vulnerabilities_critical_fixed:
+          category: SHOULD
+          autofill: >
+             Look at vulnerability databases for say the last 2 years, and
+             find the worst-case time for response to any
+             critical vulnerabilities.
+             More than 60 days is not a good sign.
+    - Other security issues: !!omap
+      - no_leaked_credentials:
+          category: MUST
+          autofill: >
+            Search repo for filenames that suggest credential leaking, e.g.,
+            id_dsa (SSH private key).  Could also look at file contents for
+            things like Amazon keys or Heroku keys.
+            Could look at .env file, though "SECRETS" there might not really
+            be secrets.
+  - Analysis: !!omap
+    - Static code analysis: !!omap
+      - static_analysis:
+          category: MUST
+          na_allowed: true
+          met_justification_required: true
+          na_justification_required: true
+          autofill: >
+            Look in build scripts for execution of common tools, and in
+            documentation for names of tools and the URL of a Coverity scan entry.
+      - static_analysis_common_vulnerabilities:
+          category: SUGGESTED
+          na_allowed: true
+          rationale: >
+            We'd like all projects to use this kind of static analysis tool,
+            but there may not be one in the chosen language, or it may only be
+            proprietary (and some developers will therefore not use it).
+          autofill: >
+            We might start by looking primarily for tools that also meet this.
+            E.g., brakeman for Ruby on Rails.
+      - static_analysis_fixed:
+          category: MUST
+          na_allowed: true
+          # autofill: TODO
+      - static_analysis_often:
+          category: SUGGESTED
+          na_allowed: true
+          autofill: >
+            Look for commit hooks or continuous integration tools like CircleCI
+            that would meet this.
+    - Dynamic code analysis: !!omap
+      - dynamic_analysis:
+          category: SUGGESTED
+          rationale: >
+            Static source code analysis and dynamic analysis tend
+            to find different kinds of defects (including defects that lead to
+            vulnerabilities), so combining them is more likely to be effective.
+            For example,
+            <a href="https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1513352.html">Linus Torvalds' "Linux 4.14-rc5" announcement
+            (October 15, 2017)</a>
+            notes that "(people are doing) random fuzzing...
+            and it's finding things...  Very nice to see."
+          autofill: >
+            Look in documentation for references to such tools.
+      - dynamic_analysis_unsafe:
+          category: SUGGESTED
+          na_allowed: true
+          autofill: >
+            Look in build/test script for reference to invocation of
+            valgrind or ASAN.
+      - dynamic_analysis_enable_assertions:
+          category: SUGGESTED
+          autofill: >
+            Perhaps look in source code for many asserts.
+          rationale: >
+            Assertions make dynamic analysis more effective, because they
+            increase the number of problems (including vulnerabilities)
+            that dynamic analysis can detect.
+            Other sources also recommend the use of assertions.
+            "Tip #33: If it Can't happen,
+            use assertions to ensure that it won't."
+            ("The Pragmatic Programmer" by Andrew Hunt and David Thomas,
+            p. 122)
+            The paper <a href="https://www.microsoft.com/en-us/research/publication/assessing-the-relationship-between-software-assertions-and-code-qualityan-empirical-investigation">"Assessing the Relationship between Software Assertions
+            and Code Quality: An Empirical Investigation" by
+            Gunnar Kudrjavets, Nachi Nagappan, and Tom Ball, May 1, 2006,
+            Technical report MSR-TR-2006-54</a>, presented
+            "... an empirical case study of two commercial software
+            components at Microsoft Corporation. The developers of these
+            components systematically employed assertions, which allowed
+            us to investigate the relationship between software assertions
+            and code quality... with an increase in the assertion density
+            in a file there is a statistically significant decrease in
+            fault density. Further, the usage of software assertions in
+            these components found a large percentage of the faults in
+            the bug database."
+      - dynamic_analysis_fixed:
+          category: MUST
+          na_allowed: true
+          # autofill: TODO
+- '1': !!omap
+  - Basics: !!omap
+    - Prerequisites: !!omap
+      - achieve_passing:
+          category: MUST
+    - Basic project website content: !!omap
+      - contribution_requirements:
+          category: MUST
+          met_url_required: true
+          autofill: >
+            Look for a CONTRIBUTING{,.md,.txt,.html} file.
+    - Project oversight: !!omap
+      - dco:
+          category: SHOULD
+          met_url_required: true
+          #autofill: TODO
+      - governance:
+          category: MUST
+          met_url_required: true
+          rationale: >
+            There are many different governance models used by a wide array of
+            successful projects.  Therefore, we do not believe that we should
+            specify a particular governance model.  However, we do think
+            it is important to have a governance model, and clearly define
+            it, so that all participants and potential participants will
+            know how decisions will be made. This was inspired by the
+            <a href="https://web.archive.org/web/20171123114606/https://projects.ow2.org/bin/view/ow2/OMM">OW2 Open-source Maturity Model</a>,
+            in particular RDMP-1 and STK-1.
+          #autofill: TODO
+      - code_of_conduct:
+          category: MUST
+          met_url_required: true
+          rationale: >
+            Suggested in
+            <a href="https://github.com/ossf/best-practices-badge/issues/608">issue#608</a>
+            by Dan Kohn and in the NYC 2016 brainstorm session.
+          #autofill: TODO
+      - roles_responsibilities:
+          category: MUST
+          met_url_required: true
+          rationale: >
+            Much knowledge about the project roles builds up
+            over the years, and is not sufficiently passed down to new people.
+            Documenting the roles can help recruit, train, and mentor new
+            project members.  Projects may choose document the roles
+            and responsibilities in one place, and identify who has the roles
+            separately, so that the project doesn't need to update the role
+            information when people change roles.
+            The goal is to make underlying assumptions clear.
+          #autofill: TODO
+      - access_continuity:
+          category: MUST
+          met_url_required: true
+          #autofill: TODO
+      - bus_factor:
+          category: SHOULD
+          met_url_required: true
+          #autofill: TODO
+    - Documentation: !!omap
+      - documentation_roadmap:
+          category: MUST
+          met_url_required: true
+          #autofill: TODO
+      - documentation_architecture:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_url_required: true
+          rationale: >
+            Documenting the basic design makes it easier for potential
+            new developers to understand its basics.
+            This is related to know_secure_design, as well
+            as implement_secure_design and proposed documentation_security.
+          #autofill: TODO
+      - documentation_security:
+          category: MUST
+          na_allowed: true
+          met_url_required: true
+          rationale: >
+            Writing the specification helps the developers think about the
+            interface (including the API) the developers are providing, as well
+            letting any user or researcher know what to expect.
+      - documentation_quick_start:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_url_required: true
+          rationale: >
+            This is based on a conversation with Mike Milinkovich,
+            Executive Director of the Eclipse Foundation, about the OSS project
+            criteria and "what is important".
+            He believes, based on his long experience, that it is critically
+            important that any project have some sort of "quick start" guide to
+            help someone get started and do something with the software;
+            this feeling of accomplishment and demonstration that it works
+            builds understanding and confidence in the user. See
+            <a href="https://github.com/ossf/best-practices-badge/issues/645">issue#645</a>.
+      - documentation_current:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            It's difficult to keep documentation up-to-date, so the
+            criterion is worded this way to make it more practical.
+            Information on differences or changes between versions of the
+            software helps users of older versions
+            and users who are transitioning from older versions.
+          #autofill: TODO
+      - documentation_achievements:
+          category: MUST
+          met_url_required: true
+          rationale: >
+            Users and potential co-developers need to be able to
+            see what achievements have been attained by a project they are
+            considering using or contributing to.  This information can
+            help them determine if they should.  In addition, if projects
+            identify their achievements, other projects will be encouraged to
+            follow suit and also make those achievements, benefitting everyone.
+          #autofill: TODO
+    - Accessibility and internationalization: !!omap
+      - accessibility_best_practices:
+          category: SHOULD
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          #autofill:TODO
+      - internationalization:
+          category: SHOULD
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            When software is internationalized, the software can be used by far
+            more people.  By itself, that's valuable.
+            In addition, software that can be used by far more people is more
+            likely to lead to larger communities, which increases the
+            likelihood of contributions and reviews.
+          #autofill:TODO
+    - Other: !!omap
+      - sites_password_security:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          #autofill:TODO
+  - 'Change Control': !!omap
+    - Previous versions: !!omap
+      - maintenance_or_update:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            This was inspired by
+            <a href="https://web.archive.org/web/20171123114606/https://projects.ow2.org/bin/view/ow2/OMM">DFCT-1.2</a>
+          #autofill:TODO
+  - Reporting: !!omap
+    - Bug-reporting process: !!omap
+      - report_tracker:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          autofill: >
+            On GitHub we presume that at least issue trackers can be used.
+            Search CONTRIBUTING (if it exists) for a phrase like "issue tracker".
+    - Vulnerability report process: !!omap
+      - vulnerability_report_credit:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_url_required: true
+          rationale: >
+            It is only fair to credit those who provide vulnerability
+            reports.  In many cases, the only reporter requirement is that
+            they receive credit.  This is also important long-term, because
+            giving credit encourages additional reporting.
+            This was recommended in the
+            <a href="https://github.com/ossf/best-practices-badge/issues/473">NYC 2016 brainstorming session</a>.
+          #autofill:TODO
+      - vulnerability_response_process:
+          category: MUST
+          met_url_required: true
+          rationale: >
+            This is inspired by
+            <a href="http://community.apache.org/apache-way/apache-project-maturity-model.html">Apache Project Maturity Model</a>
+            QU30.
+          #autofill: TODO
+  - Quality: !!omap
+    - Coding standards: !!omap
+      - coding_standards:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_url_required: true
+          #autofill: TODO
+      - coding_standards_enforced:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          #autofill: TODO
+    - Working build system: !!omap
+      - build_standard_variables:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            See
+            <a href="https://github.com/ossf/best-practices-badge/issues/453">Build system should honor CC, CFLAGS, CXX, CXXFLAGS</a>
+      - build_preserve_debug:
+          category: SHOULD
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          #autofill: TODO
+      - build_non_recursive:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            For more information, see
+            <a href="https://web.archive.org/web/20200209034547/http://aegis.sourceforge.net/auug97.pdf">"Recursive Make Considered Harmful" by Peter Miller</a>
+            (note that this incorrect approach can be used in any build system,
+            not just <em>make</em>).
+            Note that
+            <a href="http://research.microsoft.com/en-us/um/people/simonpj/papers/ghc-shake/ghc-shake.pdf">"Non-recursive Make Considered Harmful"</a>
+            agrees that recursive builds are bad; its argument is that
+            for large projects you should use a tool other than make.
+            In many cases it is better to automatically determine the
+            dependencies, but this is not always accurate or practical,
+            so we did not require that dependencies be automatically generated.
+          #autofill: TODO
+      - build_repeatable:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            This is a step towards having a
+            <a href="https://reproducible-builds.org/">reproducible build</a>.
+            This criterion is much easier to meet, because it does not require
+            that external parties be able to reproduce the results - merely
+            that the project can.
+            Supporting full reproducible builds requires that projects provide
+            external parties enough information about their
+            build environment(s), which can be harder to do - so we have
+            split this requirement up.
+          #autofill: TODO
+    - Installation system: !!omap
+      - installation_common:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          autofill: >
+            Look for a standard install format, or a build instruction for one.
+      - installation_standard_variables:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            This supports capturing the artifacts (e.g., for analysis)
+            without interfering with the build or installation system due to
+            system-wide changes. See
+            <a href="https://github.com/ossf/best-practices-badge/issues/455">DESTDIR honored at install time</a>
+            This doesn't apply when there's no "installation" process, or
+            when POSIX filesystems aren't supported during installation (e.g.,
+            Windows-only programs).  See
+            <a href="https://github.com/ossf/best-practices-badge/issues/453">Build system should honor CC, CFLAGS, CXX, CXXFLAGS</a>
+          #autofill: TODO
+      - installation_development_quick:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            Recommended in the
+            <a href="https://github.com/ossf/best-practices-badge/issues/473">NYC 2016 brainstorming session</a>.
+          #autofill: TODO
+    - Externally-maintained components: !!omap
+      - external_dependencies:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          met_url_required: true
+          rationale: >
+            Inspired by the
+            <a href="https://github.com/ossf/best-practices-badge/issues/473">NYC 2016 brainstorming session</a>.
+          #autofill: TODO
+      - dependency_monitoring:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            This must be monitored or periodically checked, because
+            new vulnerabilities are continuously being discovered.
+          #autofill: TODO
+      - updateable_reused_components:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            A very common problem is to have obsolete components with
+            known vulnerabilities.  This is OWASP Top 10 (2013) number A9
+            (using known vulnerable components).  See also
+            <a href="http://www.aspectsecurity.com/research-presentations/the-unfortunate-reality-of-insecure-libraries">The Unfortunate Reality of Insecure Libraries</a>.
+          #autofill: TODO
+      - interfaces_current:
+          category: SHOULD
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          #autofill: TODO
+    - Automated test suite: !!omap
+      - automated_integration_testing:
+          category: MUST
+          met_justification_required: true
+          rationale: >
+            This is inspired by continuous integration.
+            Continuous integration provides much more rapid feedback
+            on whether or not changes will cause test failures,
+            including regressions.  The term "continuous integration" (CI)
+            is defined in Wikipedia as "merging all developer working copies
+            to a shared mainline several times a day".
+            <a href="http://martinfowler.com/articles/continuousIntegration.html">Martin Fowler</a>
+            says that
+            "Continuous Integration is a software development practice where
+            members of a team integrate their work frequently, usually each
+            person integrates at least daily - leading to multiple integrations
+            per day. Each integration is verified by an automated build
+            (including ) to detect integration errors as quickly as possible.
+            Many teams find that this approach leads to significantly
+            reduced integration problems and allows a team to develop
+            cohesive software more rapidly."  However, while merging all
+            developer working copies at this pace can be very useful, in
+            practice many projects do not or cannot always do this.
+            In practice, many developers maintain at least some branches that
+            are not merged for longer than a day.
+          #autofill: TODO
+      - regression_tests_added50:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            Regression tests prevent undetected resurfacing of
+            defects.  If a defect has happened before, there is an increased
+            likelihood that it will happen again.  We only require 50% of
+            bugs to have regression tests; not all bugs are equally likely
+            to recur, and in some cases it is extremely difficult to build
+            robust tests for them.  Thus, there is a diminishing point of
+            return for adding regression tests.  The 50% value could be
+            argued as being arbitrary, however, requiring less than 50% would
+            mean that projects could get the badge even if a majority of their
+            bugs in the time frame would not have regression tests.
+            Projects may, of course, choose to have much larger percentages.
+            We choose six months, as with other requirements, so that projects
+            that have done nothing in the past (or recorded nothing in
+            the past) can catch up in a reasonable period of time.
+          #autofill: TODO
+      - test_statement_coverage80:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: |
+            Statement coverage is widely used as a test quality measure;
+            it's often a first "starter" measure for test quality.
+            It's well-supported, including by gcov/lcov and codecov.io.
+            Bad test suites could also meet this requirement, but it's generally
+            agreed that any good test suite will meet this requirement, so it
+            provides a useful way to filter out clearly-bad test suites.
+            After all, if your tests aren't even *running* many of the program's
+            statements, you don't have very good tests.
+            Only FLOSS test suites are considered, to ensure that the test
+            suite can be examined and improved over time.
+
+            A good automated test suite enables rapid response
+            to vulnerability reports.  If a vulnerability is reported to a project,
+            the project may be able to quickly repair it, but that is not enough.
+            A good automated test suite is necessary so the project can rapidly
+            gain confidence that the repair doesn't break anything else so it can
+            field the update.
+
+            It could be argued that anything less than 100% is unacceptable, but
+            this is not a widely held belief.
+            There are many ways to determine if a program is correct -
+            testing is only one of them.  Some conditions are hard to create
+            during testing, and the return-on-investment to get those last few
+            percentages is arguably not worth it.  The time working to get 100%
+            statement coverage might be much better spent on checking the results
+            more thoroughly (which statement coverage does *not* measure).
+
+            The 80% suggested here is supported by various sources.
+            The defaults of
+            <a href="http://docs.codecov.io/docs/coverage-configuration">codecov.io</a>.  They define
+            70% and below as red, 100% as perfectly green, and anything between
+            70..100 as a range between red and green. This renders ~80% as yellow,
+            and somewhere between ~85% and 90% it starts looking pretty green.
+
+            The paper
+            <a href="http://www.bullseye.com/minimum.html">"Minimum Acceptable Code Coverage" by Steve Cornett</a>
+            claims, "Code
+            coverage of 70-80% is a reasonable goal for system test of most
+            projects with most coverage metrics. Use a higher goal for projects
+            specifically organized for high testability or that have high failure
+            costs. Minimum code coverage for unit testing can be 10-20% higher
+            than for system testing... Empirical studies of real projects found
+            that increasing code coverage above 70-80% is time consuming and
+            therefore leads to a relatively slow bug detection rate. Your goal
+            should depend on the risk assessment and economics of the project...
+            Although 100% code coverage may appear like a best possible effort,
+            even 100% code coverage is estimated to only expose about half the
+            faults in a system. Low code coverage indicates inadequate testing,
+            but high code coverage guarantees nothing."
+
+            <a href="http://martinfowler.com/bliki/TestCoverage.html">"TestCoverage" by Martin Fowler (17 April 2012)</a>
+            points out the
+            problems with coverage measures.  he states that "Test coverage is
+            a useful tool for finding untested parts of a codebase. Test coverage
+            is of little use as a numeric statement of how good your tests are...
+            The trouble is that high coverage numbers are too easy to reach with
+            low quality testing... If you are testing thoughtfully and well,
+            I would expect a coverage percentage in the upper 80s or 90s. I
+            would be suspicious of anything like 100%... Certainly low coverage
+            numbers, say below half, are a sign of trouble. But high numbers don't
+            necessarily mean much, and lead to ignorance-promoting dashboards."
+    - New functionality testing: !!omap
+      - test_policy_mandated:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            This ensures that major new functionality is tested.
+            This is related to the criterion test_policy, but is rewritten
+            to be stronger.
+          #autofill: TODO
+      - tests_documented_added:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          autofill: >
+            Look in CONTRIBUTING and README.  See also test_policy.
+    - Warning flags: !!omap
+      - warnings_strict:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          autofill: >
+            If we find "-Wall -Wextra" in the build that's pretty strict.
+  - Security: !!omap
+    - Secure development knowledge: !!omap
+      - implement_secure_design:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            This was inspired by the
+            <a href="https://github.com/ossf/best-practices-badge/issues/473">NYC 2016 brainstorming session</a>.
+          #autofill: TODO
+    - Use basic good cryptographic practices: !!omap
+      - crypto_weaknesses:
+          category: MUST
+          na_allowed: true
+          met_justification_required: true
+          rationale: >
+            SHA-1 has been known to be weak for many years;
+            <a href="https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html">In February 2017 Google demonstrated a SHA-1 collision</a>.
+            There are a number of alternatives to SHA-1 that are not
+            patent-encumbered, such as the
+            SHA-2 suite (including SHA-256 and SHA-512) and SHA-3.
+            There is some disagreement on how important it is to avoid
+            CBC mode in SSH.  The
+            <a href="http://www.openssh.com/txt/cbc.adv">OpenSSH cbc.adv</a>
+            page argues that the attack on SSH CBC is not a practical attack.
+            However, others clearly think it's more important; CERT notes it,
+            as does
+            <a href="https://developer.ibm.com/answers/questions/187318/faq-how-do-i-disable-cipher-block-chaining-cbc-mod.html">FAQ: Disable CBC in SSH</a>.
+            It is also easy to use a different mode than CBC; generally
+            when there are safer widely-available options, you should use
+            the safe ones instead.
+            This is a SHOULD, not a MUST; sometimes these weaker
+            mechanisms need to be used for backwards compatibility.
+          # autofill: TODO
+      - crypto_algorithm_agility:
+          category: SHOULD
+          na_allowed: true
+          met_justification_required: true
+          rationale: >
+            The advantage of crypto agility is that if one crypto algorithm is
+            broken, other algorithms can be used instead.
+            Many protocols, including TLS and IPSEC, are specifically designed
+            to support crypto agility.
+            There is disagreement by some experts who argue that this
+            negotiation can itself be a point of attack, and that people
+            should instead simply choose and stay with with one good algorithm.
+            The problem with this position is that no one can be certain about
+            what that "one good algorithm" is; a new attack could be found
+            at any time. See the discussion at
+            <a href="https://github.com/ossf/best-practices-badge/issues/215">Remove requirement for supporting alternative crypto algorithms (crypto_alternatives)?</a>
+          #autofill: TODO
+      - crypto_credential_agility:
+          category: MUST
+          na_allowed: true
+          met_justification_required: true
+          #autofill: TODO
+      - crypto_used_network:
+          category: SHOULD
+          na_allowed: true
+          met_justification_required: true
+          # autofill: TODO
+      - crypto_tls12:
+          category: SHOULD
+          na_allowed: true
+          met_justification_required: true
+          # autofill: TODO
+      - crypto_certificate_verification:
+          category: MUST
+          na_allowed: true
+          met_justification_required: true
+          # autofill: TODO
+      - crypto_verification_private:
+          category: MUST
+          na_allowed: true
+          met_justification_required: true
+          # autofill: TODO
+    - Secure release: !!omap
+      - signed_releases:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            This provides protection from compromised distribution systems.
+            The public key must be accessible so that recipients can check the
+            signature.  The private key must not be on sites(s) distributing the
+            software to the public; that way, even if those sites are
+            compromised, the signature cannot be altered.
+            This is sometimes called "code signing".
+            A common way to implement this is by using GPG to sign the code,
+            for example, the GPG keys of every person who signs releases
+            could be in the project README.
+            Node.js implements this via GPG keys in the README, but note that
+            in the criterion we are intentionally more general:
+            <a href="https://github.com/nodejs/node#release-team">Node.js Release Team</a>
+          # autofill: TODO
+      - version_tags_signed:
+          category: SUGGESTED
+          met_justification_required: true
+          rationale: >
+            This was suggested by Kevin W. Wall (@kwwall)in
+            <a href="https://github.com/ossf/best-practices-badge/issues/709">issue #709</a>.
+          # autofill: TODO
+    - Other security issues: !!omap
+      - input_validation:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          #autofill: TODO
+      - hardening:
+          category: SHOULD
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          autofill: >
+            Look for gems like secure_headers, and
+            relevant compiler flags in build files.
+      - assurance_case:
+          category: MUST
+          met_url_required: true
+          rationale: >
+            Many sources discuss the rationale for an "assurance case".
+            This was inspired by
+            <a href="https://github.com/ossf/best-practices-badge/issues/502">Security specification and facilitation of bug bounties</a>
+            and by the
+            <a href="https://github.com/ossf/best-practices-badge/issues/473">NYC 2016 brainstorming session</a>.
+          #autofill: TODO
+  - Analysis: !!omap
+    - Static code analysis: !!omap
+      - static_analysis_common_vulnerabilities:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            We'd like all projects to use this kind of static analysis tool,
+            but there may not be one in the chosen language, or it may only be
+            proprietary (and some developers will therefore not use it).
+          autofill: >
+            We might start by looking primarily for tools that also meet this.
+            E.g., brakeman for Ruby on Rails.
+    - Dynamic code analysis: !!omap
+      - dynamic_analysis_unsafe:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            This would mean that C/C++ would be required to use something like
+            ASAN during some testing and/or fuzz testing. See:
+            <a href="https://github.com/ossf/best-practices-badge/issues/256">consider giving links to asan/msan/tsan/ubsan and libFuzzer</a>
+          autofill: >
+            Look in build/test script for reference to invocation of
+            valgrind or ASAN.
+- '2': !!omap
+  - Basics: !!omap
+    - Prerequisites: !!omap
+      - achieve_silver:
+          category: MUST
+    - Project oversight: !!omap
+      - bus_factor:
+          category: MUST
+          met_url_required: true
+          #autofill: TODO
+      - contributors_unassociated:
+          category: MUST
+          met_url_required: true
+          rationale: >
+            This reduces the risk of non-support if a single organization
+            stops supporting the project as FLOSS. It also reduces the risk of
+            malicious code insertion, since there is more independence between
+            contributors. This covers the case where "two people work for
+            company X, but only one is paid to work on this project" (because
+            the non-paid person could still have many of the same incentives).
+            It also covers the case where "two people got paid working for Red
+            Cross for a day, but Red Cross doesn't use the project".
+    - Other: !!omap
+      - copyright_per_file:
+          category: MUST
+          met_justification_required: true
+          rationale: >
+            This isn't legally required in most jurisdictions, per the Berne
+            Convention.  For example, copyright notices have not been required
+            in the US since 1979. On the other hand, this is not hard to add.
+            <a href="http://ben.balter.com/2015/06/03/copyright-notices-for-websites-and-open-source-projects/">Ben Balter's "Copyright notices for open source projects"</a>
+            provides some good arguments for why it *should* be included:
+            "First, someone may want to use your work in ways not allowed by
+            your license; notices help them determine who to ask for
+            permission. Explicit notices can help you prove that you and your
+            collaborators really are the copyright holders. They can serve to
+            put a potential infringer on notice by providing an informal sniff
+            test to counter the 'Oh yeah, well I didn’t know it was
+            copyrighted' defense. For some users the copyright notice may
+            suggest higher quality, as they expect that good software will
+            include a notice... Git can track these things, but people may
+            receive software outside of git or where the git history has not
+            been retained." In addition, we have been informed by the Linux
+            Foundation's SPDX community that having this information is
+            extremely valuable for relicensing and for checking to determine
+            if a copyrighted work is derived from another.  While version
+            control systems do track versioning within a project, when files
+            are copied between projects this information is often lost. Having
+            the copyright notice information helps those researching sources,
+            e.g., if they wish to try to relicense something.
+      - license_per_file:
+          category: MUST
+          met_justification_required: true
+          rationale: >
+            Files are sometimes individually copied from one project into
+            another.  Per-file license information increases the likelihood
+            that the original license will be honored. SPDX provides a simple
+            standard way to identify common licenses, without having to embed
+            the full license text in each file; since this makes the criterion
+            easier to do, we specifically mention it. Technically, the text
+            after "SPDX-License-Identifier" is a SPDX license expression, not
+            an identifier, but the tag "SPDX-License-Identifier" is what is
+            used for backwards-compatibility.
+  - 'Change Control': !!omap
+    - Public version-controlled source repository: !!omap
+      - repo_distributed:
+          category: MUST
+          met_justification_required: true
+          autofill: >
+            Look for git, subversion (svn), and mercurial (hg).
+      - small_tasks:
+          category: MUST
+          met_url_required: true
+          rationale: >
+            Identified small tasks make it easier for new potential
+            contributors to become involved in a project, and projects with
+            more contributors have an increased likelihood of continuing.
+            <a href="http://www.alluxio.org/docs/master/en/Contributing-to-Alluxio.html">Alluxio uses SMALLFIX</a>
+            and
+            <a href="https://github.com/zaproxy/zaproxy/issues?q=is%3Aopen+is%3Aissue+label%3AIdealFirstBug">ZAP uses IdealFirstBug</a>.
+            This is related to criterion installation_development_quick.
+      - require_2FA:
+          category: MUST
+          met_justification_required: true
+          rationale: >
+            2FA is used by Node.js and the Linux kernel projects.
+            See
+            <a href="https://www.linux.com/blog/linux-kernel-git-repositories-add-2-factor-authentication">"Linux Kernel Git Repositories Add 2-Factor Authentication" by Kontin Ryabitsev</a>
+            and
+            <a href="http://www.securityweek.com/linux-foundation-protects-kernel-git-repositories-2fa">"Linux Foundation Protects Kernel Git Repositories With 2FA" by Eduard Kovacs</a>.
+      - secure_2FA:
+          category: SHOULD
+          met_justification_required: true
+          rationale: >
+            SMS is easier and lower cost for many people, but it also provides
+            much weaker security.  It has been argued that SMS isn't really
+            2FA at all; we permit it, because it's better than nothing, but we
+            don't recommend it because of its weaknesses.
+            <a href="https://www.wired.com/2016/06/hey-stop-using-texts-two-factor-authentication/">So Hey You Should Stop Using Texts for Two-Factor Authentication</a>
+  - Quality: !!omap
+    - Coding standards: !!omap
+      - code_review_standards:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_url_required: true
+          rationale: >
+            Code review is a cornerstone of quality and secure coding
+            practices. Projects often seek new contributors but lack training
+            and documentation to increase the number of reviewers. An increase
+            in code reviewers lowers maintainer workload while aiding in
+            meeting the badge requirement two_person_review. See
+            <a href="https://github.com/ossf/best-practices-badge/issues/699">issue 699</a>
+            from GeorgLink.
+      - two_person_review:
+          category: MUST
+          met_justification_required: true
+          rationale: >
+            Review can counter many problems. The percentage here could be
+            changed; 100% would be great but untenable for many projects.  We
+            have selected 50%, because anything less than 50% would mean that
+            most changes could go unreviewed. See, for example, the
+            <a href="https://www.kernel.org/doc/Documentation/SubmittingPatches">Linux Kernel's "Reviewer's statement of oversight"</a>.
+            Note that the set of criteria allow people within the same
+            organization to review each others' work; it is better to require
+            different organizations to review each others' work, but in many
+            situations that is not practical.
+    - Working build system: !!omap
+      - build_reproducible:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_url_required: true
+          rationale: >
+            If a project needs to be built but there is no working build
+            system, then potential co-developers will not be able to easily
+            contribute and many security analysis tools will be ineffective.
+            Reproduceable builds counter malicious attacks that generate
+            malicious executables, by making it easy to recreate the
+            executable to determine if the result is correct. By itself,
+            reproducible builds do not counter malicious compilers, but they
+            can be extended to counter malicious compilers using processes
+            such as diverse double-compiling (DDC).
+    - Automated test suite: !!omap
+      - test_invocation:
+          category: MUST
+          met_url_required: true
+          autofill: >
+            Look in the build scripts for a non-empty test command.
+            E.g., look for a Makefile (including Makefile.am) with a non-empty
+            "check" or "test" entry.  Similarly look for an entry for
+            maven (mvn test) or rake (rake test).
+      - test_continuous_integration:
+          category: MUST
+          # No N/A, you can always have some sort of CI
+          met_url_required: true
+          rationale: >
+            See
+            <a href="http://martinfowler.com/articles/continuousIntegration.html">Martin Fowler</a>
+            There has been some shift in the meaning of the term
+            continuous integration. Historically the term continuous
+            integration focused on the first part - the frequent
+            integration - and not on its testing.  However, over time the
+            emphasis has shifted to include the notion of running automated
+            tests as soon as the code is integrated.  This criterion is merely
+            SUGGESTED at passing level.
+            A subset of this criterion is required for passing+1; see
+            <a href="#automated_integration_testing">automated_integration_testing</a>.
+            Here, we require both the continuous check-in
+            <em>and</em> its testing.
+          autofill: >
+            Look for a .travis.yml or circle.yml file.
+            We also see if it has a badge from CircleCI or Travis.
+            Extra points: We could ask Travis or CircleCI if it's enabled.
+            We could look for evidence of pulls each of which are "relatively"
+            small (instead of rare massive changes being the norm), though
+            that by itself would give less confidence. Also, make this depend
+            on the "test" or "test_invocation" criterion.
+      - test_statement_coverage90:
+          category: MUST
+          # There may not be any tools that can do this measurement
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            This increases the statement coverage requirement from the
+            previous badge level, thus requiring even more thorough testing
+            (by this measure).
+      - test_branch_coverage80:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            This adds another test coverage requirement, again requiring more
+            thorough testing. A program with many one-armed "if" statements
+            could achieve 100% statement coverage but only 50% branch coverage
+            (if the tests only checked the "true" branches). Branch coverage
+            is probably the second most common test coverage measure (after
+            statement coverage), and is often added when a stricter measure of
+            tests is used. Branch coverage is widely (but not universally)
+            implemented.
+  - Security: !!omap
+    - Use basic good cryptographic practices: !!omap
+      - crypto_used_network:
+          category: MUST
+          na_allowed: true
+          met_justification_required: true
+          # autofill: TODO
+      - crypto_tls12:
+          category: MUST
+          na_allowed: true
+          met_justification_required: true
+          # autofill: TODO
+    - Secured delivery against man-in-the-middle (MITM) attacks: !!omap
+      - hardened_site: # After delivery_mitm?
+          category: MUST
+          met_url_required: true
+          autofill: >
+            Load the URLs and look for those HTTP headers. In the future, we
+            may want to specify certain disallowed content security policies.
+            See http://content-security-policy.com/.
+    - Other security issues: !!omap
+      - security_review:
+          category: MUST
+          met_justification_required: true
+          rationale: >
+            Security review is important, because security problems often come
+            from subtle interactions of components.  Reviewing the system as a
+            whole can help find these problems. Ideally this would be
+            independent, but that often requires a lot of money, and we would
+            rather have some review than none at all. We do not require a
+            specific level of review; this is difficult to quantify given the
+            different environments, requirements, and sizes of various
+            projects. Kevin Wall noted, "If passing+2 is going to be the
+            highest back level, I'd also like to see some sort of mandatory
+            code inspection (possibly SAST assisted), and when applicable,
+            some sort of DAST (for APIs, probably just fuzzing), where failed
+            tests would have to be added to the regression test suite." It's
+            difficult to get agreement on the details of what a security
+            review must include, but we believe that the stated criteria would
+            be agreed on.
+      - hardening:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_url_required: true
+          autofill: >
+            Look for gems like secure_headers, and
+            relevant compiler flags in build files.
+  - Analysis: !!omap
+    - Dynamic code analysis: !!omap
+      - dynamic_analysis:
+          category: MUST
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          rationale: >
+            Static source code analysis and dynamic analysis tend
+            to find different kinds of defects (including defects that lead to
+            vulnerabilities), so combining them is more likely to be effective.
+          autofill: >
+            Look in documentation for references to such tools.
+      - dynamic_analysis_enable_assertions:
+          category: SHOULD
+          na_allowed: true
+          na_justification_required: true
+          met_justification_required: true
+          autofill: >
+            Perhaps look in source code for many asserts.

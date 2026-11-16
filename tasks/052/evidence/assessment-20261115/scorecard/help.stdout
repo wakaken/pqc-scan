@@ -1,0 +1,35 @@
+A program that shows the OpenSSF scorecard for an open source software.
+
+Usage:
+  ./scorecard (--repo=<repo> | --local=<folder> | --org=<organization> | --{npm,pypi,rubygems,nuget}=<package_name>) [--checks=check1,...] [--show-details] [--show-annotations] [flags]
+  ./scorecard [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  serve       Serve the scorecard program over http
+  version     Prints the version
+
+Flags:
+      --checks strings     Checks to run. Possible values are: CI-Tests,Pinned-Dependencies,Signed-Releases,CII-Best-Practices,Security-Policy,Dangerous-Workflow,Fuzzing,SAST,Vulnerabilities,Token-Permissions,Code-Review,License,Maintained,Contributors,Dependency-Update-Tool,Branch-Protection,Packaging,Binary-Artifacts
+      --commit string      commit to analyze (default "HEAD")
+      --commit-depth int   number of commits to check, commits begin backwards from the HEAD
+      --file-mode string   mode to fetch repository files: archive, git (default "archive")
+      --format string      output format. Possible values are: default, json, probe, intoto (default "default")
+  -h, --help               help for ./scorecard
+      --local string       local folder to check
+      --metadata strings   metadata for the project. It can be multiple separated by commas
+      --npm string         npm package to check, given that the npm package has a GitHub repository
+      --nuget string       nuget package to check, given that the nuget package has a GitHub repository
+      --org string         scans all non-archived repositories in an organization. Currently only supports GitHub, e.g., 'github.com/ossf' or 'ossf'
+  -o, --output string      output file
+      --probes strings     Probes to run.
+      --pypi string        pypi package to check, given that the pypi package has a GitHub repository
+      --repo string        repository to check (valid inputs: "owner/repo", "github.com/owner/repo", "https://github.com/repo")
+      --repos strings      repositories to check (<repo1>,<repo2>, ...). Each repo must be one of: "owner/repo", "github.com/owner/repo", "https://github.com/repo"
+      --rubygems string    rubygems package to check, given that the rubygems package has a GitHub repository
+      --show-annotations   show maintainers annotations for checks
+      --show-details       show extra details about each check
+      --verbosity string   Set the log level. Possible values are: 'info', 'debug', 'warn'. Add --show-details to see the results. (default "info")
+
+Use "./scorecard [command] --help" for more information about a command.

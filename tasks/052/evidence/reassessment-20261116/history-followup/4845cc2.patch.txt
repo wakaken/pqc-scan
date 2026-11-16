@@ -1,0 +1,691 @@
+diff --git a/crates/pqc_scan_cli/src/main.rs b/crates/pqc_scan_cli/src/main.rs
+index 1259939..ae96f79 100644
+--- a/crates/pqc_scan_cli/src/main.rs
++++ b/crates/pqc_scan_cli/src/main.rs
+@@ -771 +771 @@ mod tests {
+-        assert_eq!(json["summary"]["total_findings"], 10);
++        assert_eq!(json["summary"]["total_findings"], 15);
+@@ -815 +815 @@ mod tests {
+-        assert_eq!(hits.len(), 10);
++        assert_eq!(hits.len(), 15);
+@@ -820 +820 @@ mod tests {
+-            7
++            12
+@@ -822 +822,3 @@ mod tests {
+-        assert!(hits
++        // The former API-negative fixture contains a real hybrid group name;
++        // it is now a nominal inventory reference, never an API execution hit.
++        let nominal = hits
+@@ -824 +826,4 @@ mod tests {
+-            .all(|hit| hit["location"]["file"] != "negative.js"));
++            .filter(|hit| hit["location"]["file"] == "negative.js")
++            .collect::<Vec<_>>();
++        assert_eq!(nominal.len(), 1);
++        assert_eq!(nominal[0]["rule_id"], "PQC_STANDARD_REFERENCE");
+@@ -832 +837 @@ mod tests {
+-        assert_eq!(cbom.as_array().unwrap().len(), 10);
++        assert_eq!(cbom.as_array().unwrap().len(), 15);
+diff --git a/crates/pqc_scan_cli/tests/audit_remediation.rs b/crates/pqc_scan_cli/tests/audit_remediation.rs
+new file mode 100644
+index 0000000..ca73781
+--- /dev/null
++++ b/crates/pqc_scan_cli/tests/audit_remediation.rs
+@@ -0,0 +1,293 @@
++//! Observable controls for the user-approved develop audit repairs.
++use serde_json::Value;
++use std::{
++    path::{Path, PathBuf},
++    process::Command,
++    sync::atomic::{AtomicUsize, Ordering},
++};
++static NEXT: AtomicUsize = AtomicUsize::new(0);
++struct Scan {
++    root: PathBuf,
++    report: Value,
++}
++impl Drop for Scan {
++    fn drop(&mut self) {
++        let _ = std::fs::remove_dir_all(&self.root);
++    }
++}
++impl Scan {
++    fn new(files: &[(&str, &str)], lang: &str) -> Self {
++        let root = std::env::temp_dir().join(format!(
++            "pqc-audit-regression-{}-{}",
++            std::process::id(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        let input = root.join("input");
++        std::fs::create_dir_all(&input).unwrap();
++        for (name, text) in files {
++            let p = input.join(name);
++            std::fs::create_dir_all(p.parent().unwrap()).unwrap();
++            std::fs::write(p, text).unwrap();
++        }
++        let r = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++            .arg("scan")
++            .arg(&input)
++            .args([
++                "--format",
++                "all",
++                "--diagnostics",
++                "--inventory-json",
++                "--lang",
++                lang,
++                "--rules-dir",
++            ])
++            .arg(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules"))
++            .arg("--out-dir")
++            .arg(root.join("report"))
++            .output()
++            .unwrap();
++        assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
++        let report =
++            serde_json::from_slice(&std::fs::read(root.join("report/report.json")).unwrap())
++                .unwrap();
++        Self { root, report }
++    }
++    fn findings(&self) -> &[Value] {
++        self.report["findings"].as_array().unwrap()
++    }
++    fn hits(&self, file: &str, rule: &str) -> Vec<&Value> {
++        self.findings()
++            .iter()
++            .filter(|f| f["location"]["file"] == file && f["rule_id"] == rule)
++            .collect()
++    }
++    fn text(&self, file: &str) -> String {
++        std::fs::read_to_string(self.root.join("report").join(file)).unwrap()
++    }
++}
++#[test]
++fn rsa_sizes_require_rsa_context_not_pqc_names_or_usage_counts() {
++    let scan = Scan::new(&[
++        ("Params.java", "class Params { void f() { addKeyFactoryAlgorithm(provider, \"ML-KEM-1024\", PREFIX + \"MLKEMKeyFactorySpi\"); addKeyFactoryAlgorithm(provider, \"FALCON-1024\", PREFIX + \"FalconKeyFactorySpi\"); assertEquals(1024, privKey.getUsagesRemaining()); read(\"keyGen_ML-KEM-1024.txt\"); }}"),
++        ("rsa.rb", "OpenSSL::PKey::RSA.new(1024)\nOpenSSL::PKey::RSA.new(2048)\nOpenSSL::PKey::RSA.new(3072)\n"),
++    ], "en");
++    assert!(scan
++        .hits("Params.java", "TS_RSA_KEY_SIZE_LITERAL")
++        .is_empty());
++    assert_eq!(scan.hits("rsa.rb", "TS_RSA_KEY_SIZE_LITERAL").len(), 3);
++}
++#[test]
++fn tls_references_do_not_claim_effective_configuration_or_static_rsa_exchange() {
++    let scan = Scan::new(&[
++        ("table.rs", "const A: &str = \"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256\";\nconst B: &str = \"TLS_DHE_RSA_WITH_AES_128_GCM_SHA256\";\nconst C: &str = \"TLS_RSA_WITH_AES_128_GCM_SHA256\";\n"),
++        ("table.c", "const char *x = \"Stopped a TLSv1 heartbeat attack\";\n/* TLSv1 minimum */\n"),
++        ("active.conf", "ssl_protocols TLSv1;\n"),
++        ("comment.conf", "# ssl_protocols TLSv1;\n# ssl_ciphers RSA;\n"),
++    ], "en");
++    assert!(scan
++        .findings()
++        .iter()
++        .all(|f| f["location"]["file"] != "comment.conf"));
++    assert_eq!(
++        scan.hits("active.conf", "NGINX_SSL_PROTOCOLS_LEGACY").len(),
++        1
++    );
++    for f in scan.hits("table.c", "TLS_VERSION_1_0") {
++        assert!(!f["description"]
++            .as_str()
++            .unwrap()
++            .contains("configuration detected"));
++        assert!(!f["recommended_actions"]
++            .to_string()
++            .contains("config was detected"));
++    }
++    let tls = scan.hits("table.rs", "TS_TLS_RSA_CIPHER_LITERAL");
++    assert_eq!(tls.len(), 3);
++    for f in tls.iter().filter(|f| f["location"]["line"] != 3) {
++        assert!(!f["migration_hint"]
++            .as_str()
++            .unwrap()
++            .contains("containing RSA key exchange"));
++        assert!(f["recommended_actions"]
++            .to_string()
++            .contains("authentication"));
++    }
++    assert_eq!(scan.hits("table.rs", "TLS_RSA_KEY_EXCHANGE").len(), 1);
++}
++#[test]
++fn reference_guidance_does_not_assert_exposure_jwt_issuance_or_missing_hybrid() {
++    let scan = Scan::new(&[
++        ("Marker.c", "/* -----BEGIN RSA PRIVATE KEY-----\n * [...] */\n"),
++        ("Composite.java", "class Composite { void f() { checkLength(\"EdDSA public key\", 32); Cipher.getInstance(\"RSA/NONE/OAEPPadding\"); }}"),
++        ("rsa.js", "const crypto = require('crypto'); crypto.generateKeyPairSync('rsa', {modulusLength: 2048});"),
++    ], "en");
++    let marker = scan.hits("Marker.c", "PRIVATE_KEY_RSA_HEADER");
++    assert_eq!(marker.len(), 1);
++    assert!(marker[0]["migration_hint"].as_str().unwrap().contains("If"));
++    for f in scan.findings() {
++        let guidance = format!("{} {}", f["migration_hint"], f["recommended_actions"]);
++        assert!(!guidance.contains("Stop issuing new JWTs"));
++        assert!(!guidance.contains("Migrate Node.js RSA signing/verification logic"));
++        assert!(!guidance.contains("Migrate to hybrid KEM+AEAD cryptographic design"));
++        assert!(!guidance.contains("Replace Java RSA API usage"));
++    }
++    let ed = scan.hits("Composite.java", "TS_JWT_EDDSA_ALG");
++    assert_eq!(ed.len(), 1);
++    assert!(!ed[0]["recommended_actions"]
++        .to_string()
++        .contains("jwt.remove-rsa-algorithms"));
++}
++#[test]
++fn standard_pqc_names_and_registrations_are_inventoried_without_execution_claims() {
++    let scan = Scan::new(&[
++        ("schemes.go", "package schemes\nfunc Name() string { return \"ML-KEM-768\" }\nvar schemes = []interface{}{mlkem512.Scheme(), hybrid.X25519MLKEM768()}\nvar params = \"SLH-DSA-SHA2-128s\"\n"),
++        ("algs.ts", "type Alg = 'RS256' | 'ML-DSA-44' | 'ML-DSA-65' | 'ML-DSA-87';\n"),
++        ("groups.rs", "enum Group { MLKEM512, MLKEM768, MLKEM1024, X25519MLKEM768 }\n"),
++        ("negative.go", "package schemes\nvar x = \"Kyber512\"\nvar y = \"NOTMLKEM768\"\n"),
++    ], "en");
++    for (file, count) in [("schemes.go", 4), ("algs.ts", 3), ("groups.rs", 4)] {
++        let hits = scan.hits(file, "PQC_STANDARD_REFERENCE");
++        assert_eq!(hits.len(), count, "{file}");
++        for f in hits {
++            assert_eq!(f["severity"], "info");
++            assert_eq!(f["risk"], "quantum-safe");
++            assert!(f["evidence"]["metadata"]["reference_kind"].is_string());
++        }
++    }
++    for f in scan.hits("schemes.go", "PQC_STANDARD_REFERENCE") {
++        let expected = match f["location"]["line"].as_u64().unwrap() {
++            2 | 4 => "name_literal",
++            _ => "call_reference",
++        };
++        assert_eq!(f["evidence"]["metadata"]["reference_kind"], expected);
++    }
++    for f in scan.hits("algs.ts", "PQC_STANDARD_REFERENCE") {
++        assert_eq!(f["evidence"]["metadata"]["reference_kind"], "name_literal");
++    }
++    for f in scan.hits("groups.rs", "PQC_STANDARD_REFERENCE") {
++        assert_eq!(
++            f["evidence"]["metadata"]["reference_kind"],
++            "symbol_reference"
++        );
++    }
++    assert!(scan
++        .hits("negative.go", "PQC_STANDARD_REFERENCE")
++        .is_empty());
++    assert_eq!(scan.hits("negative.go", "PQC_DRAFT_ALGORITHM").len(), 1);
++}
++#[test]
++fn gradle_map_declarations_preserve_constraints_without_resolving_variables() {
++    let scan = Scan::new(&[("build.gradle", "dependencies {\n implementation group: 'javax.mail', name: 'mail', version: '1.4'\n testImplementation group: 'junit', name: 'junit', version: '4.13.2'\n implementation group: 'io.grpc', name: 'grpc-stub', version: grpcVersion\n // implementation group: 'bad', name: 'comment', version: '1.0'\n implementation \"io.grpc:grpc-api:${grpcVersion}\"\n compileOnly group: 'org.test', name: 'no-version'\n}\n")], "en");
++    let sbom: Value = serde_json::from_str(&scan.text("dependency-sbom.json")).unwrap();
++    let rows = sbom.as_array().unwrap();
++    assert_eq!(rows.len(), 5);
++    for (name, version) in [
++        ("javax.mail:mail", "1.4"),
++        ("junit:junit", "4.13.2"),
++        ("io.grpc:grpc-stub", "unknown"),
++        ("io.grpc:grpc-api", "unknown"),
++        ("org.test:no-version", "unknown"),
++    ] {
++        let row = rows.iter().find(|r| r["name"] == name).unwrap();
++        assert_eq!(row["version"], version);
++        assert!(!row["purl"].as_str().unwrap().contains('@'));
++    }
++    let native: Value = serde_json::from_str(&scan.text("scan.inventory.v1.json")).unwrap();
++    let mail = native["assets"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .find(|a| a["attributes"]["name"] == "javax.mail:mail")
++        .unwrap();
++    assert_eq!(mail["attributes"]["declared_constraint"], "1.4");
++    assert!(mail["attributes"]["resolved_version"].is_null());
++}
++#[test]
++fn human_headers_omit_internal_explanations_but_keep_findings_and_inspection_status() {
++    for lang in ["en", "ja"] {
++        let scan = Scan::new(
++            &[("algorithm.ts", "const alg = 'RS256';\nfunction broken( {\n")],
++            lang,
++        );
++        let html = scan.text("report.html");
++        let md = scan.text("report.md");
++        for unwanted in [
++            "Unique candidate locations",
++            "Candidate findings with unknown positions",
++            "Uninspected or truncated results are not counted",
++            "Inspection is incomplete or unknown",
++            "Expand a rule, then a location",
++            "not a runtime or migration-completion guarantee",
++            "Static evidence does not prove runtime use or completed PQC migration",
++            "対応候補の重複を除いた位置数",
++            "位置不明の対応候補所見数",
++            "検査は未完了または不明です",
++            "未検査・打ち切り分は件数に含みません",
++            "PQCへの対応完了を保証するものではありません",
++            "ルール、検出箇所の順に開くと",
++            "実際の利用やPQC対応完了を保証するものではありません",
++        ] {
++            assert!(!html.contains(unwanted), "HTML: {lang}: {unwanted}");
++            assert!(!md.contains(unwanted), "Markdown: {lang}: {unwanted}");
++        }
++        assert_eq!(
++            html.matches("data-finding-id=").count(),
++            scan.findings().len()
++        );
++        assert!(html.contains("data-inspection-status=\"partial\""));
++        assert!(md.contains("partial"));
++        assert!(html.contains("JWT_RS256"));
++        assert!(md.contains("JWT_RS256"));
++        let heading = if lang == "en" {
++            "Inspection scope and completion"
++        } else {
++            "検査範囲と完了状況"
++        };
++        assert!(html.contains(heading));
++    }
++}
++
++#[test]
++fn gradle_never_promotes_dynamic_fragments_to_literal_facts() {
++    let scan = Scan::new(&[("build.gradle", "dependencies {\n implementation group: 'org.example' + suffix, name: 'bad', version: '1.' + minor\n implementation group: 'org.example', name: 'lib', version: '1.4' + patch\n implementation group: 'org.example', name: 'other' + suffix, version: '2.0'\n}\n")], "en");
++    let rows: Value = serde_json::from_str(&scan.text("dependency-sbom.json")).unwrap();
++    let rows = rows.as_array().unwrap();
++    assert_eq!(rows.len(), 1);
++    assert_eq!(rows[0]["name"], "org.example:lib");
++    assert_eq!(rows[0]["version"], "unknown");
++    assert!(!rows[0]["purl"].as_str().unwrap().contains('@'));
++    let native: Value = serde_json::from_str(&scan.text("scan.inventory.v1.json")).unwrap();
++    let lib = native["assets"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .find(|a| a["attributes"]["name"] == "org.example:lib")
++        .unwrap();
++    assert!(lib["attributes"]["declared_constraint"].is_null());
++    assert!(lib["attributes"]["resolved_version"].is_null());
++}
++
++#[test]
++fn jwt_algorithm_names_do_not_claim_active_signing() {
++    let scan = Scan::new(&[("types.ts", "type Algorithms = 'RS256' | 'RS384' | 'RS512' | 'PS256' | 'PS384' | 'PS512' | 'ES256';\n")], "en");
++    for f in scan.findings().iter().filter(|f| f["category"] == "JWT") {
++        assert!(!f["description"].as_str().unwrap().contains("is in use"));
++        assert!(f["migration_hint"].as_str().unwrap().contains("Confirm"));
++        assert!(!f["recommended_actions"]
++            .to_string()
++            .contains("Stop issuing new JWTs"));
++    }
++}
++
++#[test]
++fn gradle_quoted_commas_do_not_drop_dependency_identity() {
++    let scan = Scan::new(&[("build.gradle", "dependencies {\n implementation group: 'org.example', name: 'map-lib', version: '[1.0,2.0)'\n implementation 'org.example:coordinate-lib:[1.0,2.0)'\n}\n")], "en");
++    let rows: Value = serde_json::from_str(&scan.text("dependency-sbom.json")).unwrap();
++    let rows = rows.as_array().unwrap();
++    assert_eq!(rows.len(), 2);
++    for name in ["org.example:map-lib", "org.example:coordinate-lib"] {
++        let row = rows.iter().find(|r| r["name"] == name).unwrap();
++        assert_eq!(row["version"], "unknown");
++        assert!(!row["purl"].as_str().unwrap().contains('@'));
++    }
++}
+diff --git a/crates/pqc_scan_core/src/recommendation.rs b/crates/pqc_scan_core/src/recommendation.rs
+index 49fa000..95821b1 100644
+--- a/crates/pqc_scan_core/src/recommendation.rs
++++ b/crates/pqc_scan_core/src/recommendation.rs
+@@ -161 +161,16 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
+-    add_middleware_pqc_signature_notes(&mut actions, finding);
++    if category == "middleware"
++        || finding
++            .evidence
++            .metadata
++            .get("scope")
++            .is_some_and(|v| v == "config")
++    {
++        add_middleware_pqc_signature_notes(&mut actions, finding);
++    }
++    if matches!(
++        finding.rule_id.as_str(),
++        "TS_JWT_EDDSA_ALG" | "API_CIPHER_RSA" | "TS_JAVA_RSA_API"
++    ) {
++        push_action(&mut actions, reference_action());
++        return actions;
++    }
+@@ -198 +213 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
+-                    "Introduce dual-stack or hybrid mode (classical + PQC) before hard cut-over.".to_string(),
++                    "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.".to_string(),
+@@ -259,0 +275,12 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
++fn reference_action() -> RecommendedAction {
++    RecommendedAction {
++        action_id: "crypto.review-reference".into(),
++        title: "Review the cryptographic reference and its actual purpose".into(),
++        priority: "planned".into(),
++        rationale: "A source reference does not establish active signing, JWT issuance, or the absence of an existing PQC/hybrid composition.".into(),
++        steps: vec!["Identify key generation, signing, verification, encryption or key establishment and separate tests/examples from deployed use.".into(), "Check existing PQC or hybrid components, provider support and protocol compatibility before selecting a change.".into()],
++        references: vec!["https://www.nist.gov/itl/post-quantum-cryptography".into()],
++        code_examples: Vec::new(),
++    }
++}
++
+@@ -444 +471 @@ fn add_jwt_actions(
+-            title: "Stop issuing new JWTs with RSA/PKCS#1/ECDSA-only algorithms".to_string(),
++            title: "Review whether the JOSE reference is used for signing, verification, tests or documentation".to_string(),
+@@ -669,0 +697,17 @@ fn add_tls_actions(
++    if finding
++        .evidence
++        .metadata
++        .get("scope")
++        .is_none_or(|v| v != "config")
++    {
++        push_action(actions, RecommendedAction {
++            action_id: "tls.review-reference".into(),
++            title: "Review the TLS reference before changing effective settings".into(),
++            priority: "planned".into(),
++            rationale: "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.".into(),
++            steps: vec!["Distinguish constants, comments, tests and active settings.".into(), "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration.".into()],
++            references: vec!["https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2".into()],
++            code_examples: Vec::new(),
++        });
++        return;
++    }
+@@ -1105,0 +1150 @@ mod tests {
++        f.evidence.metadata.insert("scope".into(), "config".into());
+@@ -1116,0 +1162,3 @@ mod tests {
++            if rule == "HTTPD_SSLPROTOCOL_LEGACY" {
++                f.evidence.metadata.insert("scope".into(), "config".into());
++            }
+@@ -1118 +1166 @@ mod tests {
+-            assert!(
++            assert_eq!(
+@@ -1121,0 +1170 @@ mod tests {
++                rule == "HTTPD_SSLPROTOCOL_LEGACY",
+@@ -1145 +1194,2 @@ mod tests {
+-        let mut f = make_finding("TLS_VERSION_1_0", "TLS", "tls.conf");
++        let mut f = make_finding("NGINX_SSL_PROTOCOLS_LEGACY", "TLS", "tls.conf");
++        f.evidence.metadata.insert("scope".into(), "config".into());
+diff --git a/crates/pqc_scan_core/tests/task_ids.rs b/crates/pqc_scan_core/tests/task_ids.rs
+index 82c0796..e9de6fa 100644
+--- a/crates/pqc_scan_core/tests/task_ids.rs
++++ b/crates/pqc_scan_core/tests/task_ids.rs
+@@ -31 +31 @@ fn task_ids_are_exact_unique_strings_and_dependencies_resolve() {
+-    assert_eq!(tasks.len(), 40);
++    assert_eq!(tasks.len(), 41);
+diff --git a/crates/pqc_scan_detectors/src/comment_filter.rs b/crates/pqc_scan_detectors/src/comment_filter.rs
+index dd150a2..6acd73e 100644
+--- a/crates/pqc_scan_detectors/src/comment_filter.rs
++++ b/crates/pqc_scan_detectors/src/comment_filter.rs
+@@ -38,0 +39 @@ fn detect_language(path: &Path) -> Option<&'static str> {
++        "conf" | "cfg" => Some("config"),
+@@ -66 +67 @@ fn is_comment_only_line(language: &str, line: &str) -> bool {
+-        "python" => trimmed.starts_with('#'),
++        "python" | "config" => trimmed.starts_with('#'),
+diff --git a/crates/pqc_scan_detectors/src/dependency_detector/lexical.rs b/crates/pqc_scan_detectors/src/dependency_detector/lexical.rs
+index e3e0e57..a36ae62 100644
+--- a/crates/pqc_scan_detectors/src/dependency_detector/lexical.rs
++++ b/crates/pqc_scan_detectors/src/dependency_detector/lexical.rs
+@@ -194,0 +195,26 @@ pub(super) fn parse_pom_xml(text: &str) -> Vec<DependencyItem> {
++// Split map fields outside quoted literals. Escapes keep a quoted comma from
++// becoming syntax; literal contents are still validated by the shared policy.
++fn gradle_fields(body: &str) -> impl Iterator<Item = &str> {
++    let mut quote = None;
++    let mut escaped = false;
++    body.split(move |ch| {
++        if escaped {
++            escaped = false;
++            return false;
++        }
++        if quote.is_some() && ch == '\\' {
++            escaped = true;
++            return false;
++        }
++        if quote == Some(ch) {
++            quote = None;
++            return false;
++        }
++        if quote.is_none() && matches!(ch, '\'' | '"') {
++            quote = Some(ch);
++            return false;
++        }
++        quote.is_none() && ch == ','
++    })
++}
++
+@@ -195,0 +222,12 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
++    static DECL: LazyLock<Regex> = LazyLock::new(|| {
++        Regex::new(
++        r"^\s*(?:implementation|api|compileOnly|runtimeOnly|testImplementation|testRuntimeOnly)\s+(.+)"
++    ).expect("Gradle declaration")
++    });
++    static COORD: LazyLock<Regex> = LazyLock::new(|| {
++        Regex::new(r#"^["']([^:"']+):([^:"']+):([^"']+)["']"#).expect("Gradle coordinate")
++    });
++    static FIELD: LazyLock<Regex> = LazyLock::new(|| {
++        Regex::new(r#"^\s*(group|name|version)\s*:\s*(?:'([^']*)'|"([^"\n]*)"|(.+?))\s*$"#)
++            .expect("Gradle map field")
++    });
+@@ -197,14 +235,40 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
+-    let re = match Regex::new(
+-        r#"(?m)^\s*(implementation|api|compileOnly|runtimeOnly|testImplementation|testRuntimeOnly)\s+['"]([^:'"]+):([^:'"]+):([^'"]+)['"]"#,
+-    ) {
+-        Ok(v) => v,
+-        Err(_) => return out,
+-    };
+-
+-    for caps in re.captures_iter(text).take(10001) {
+-        let group = caps.get(2).map(|m| m.as_str()).unwrap_or("unknown");
+-        let artifact = caps.get(3).map(|m| m.as_str()).unwrap_or("unknown");
+-        let version = caps.get(4).map(|m| m.as_str()).unwrap_or("unknown");
+-        let name = format!("{}:{}", group, artifact);
+-        let line = line_col_for_offset(text, caps.get(0).map(|m| m.start()).unwrap_or(0)).0;
+-
++    // Single-line lexical subset. Scripts, closures, interpolation and variables
++    // are never evaluated; the existing heuristic outcome stays NotReported.
++    for (idx, raw) in text.lines().enumerate() {
++        let Some(decl) = DECL.captures(raw) else {
++            continue;
++        };
++        let body = &decl[1];
++        let (group, artifact, version) = if let Some(c) = COORD.captures(body) {
++            (c[1].to_string(), c[2].to_string(), c[3].to_string())
++        } else {
++            let mut fields = std::collections::BTreeMap::new();
++            let mut duplicate = false;
++            for field in gradle_fields(body.trim_end_matches(';')) {
++                let Some(c) = FIELD.captures(field) else {
++                    duplicate = true;
++                    break;
++                };
++                let value = c.get(2).or_else(|| c.get(3)).map(|m| m.as_str());
++                if fields.insert(c[1].to_string(), value).is_some() {
++                    duplicate = true;
++                }
++            }
++            if duplicate {
++                continue;
++            }
++            let (Some(Some(group)), Some(Some(name))) = (fields.get("group"), fields.get("name"))
++            else {
++                continue;
++            };
++            (
++                group.to_string(),
++                name.to_string(),
++                fields
++                    .get("version")
++                    .and_then(|v| *v)
++                    .unwrap_or("unknown")
++                    .to_string(),
++            )
++        };
++        let name = format!("{group}:{artifact}");
+@@ -214 +278 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
+-            version: sanitize_version(version),
++            version: sanitize_version(&version),
+@@ -216,2 +280,2 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
+-            purl: make_purl("maven", &name, version),
+-            line,
++            purl: make_purl("maven", &name, &version),
++            line: idx + 1,
+@@ -220,0 +285,3 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
++        if out.len() == 10001 {
++            break;
++        }
+@@ -222 +288,0 @@ pub(super) fn parse_build_gradle(text: &str) -> Vec<DependencyItem> {
+-
+diff --git a/crates/pqc_scan_detectors/src/dependency_detector/parse.rs b/crates/pqc_scan_detectors/src/dependency_detector/parse.rs
+index 50a0213..e6800e4 100644
+--- a/crates/pqc_scan_detectors/src/dependency_detector/parse.rs
++++ b/crates/pqc_scan_detectors/src/dependency_detector/parse.rs
+@@ -1333,0 +1334,3 @@ pub(super) fn heuristic(name: &str, text: &str) -> anyhow::Result<Parsed> {
++        if matches!(name, "build.gradle" | "build.gradle.kts") {
++            declared = (item.version != "unknown").then(|| item.version.clone());
++        }
+diff --git a/crates/pqc_scan_detectors/src/tree_sitter_detector.rs b/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+index 0687052..6b5a344 100644
+--- a/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
++++ b/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+@@ -286,0 +287,10 @@ impl TreeSitterDetector {
++                    if rule.id == "PQC_STANDARD_REFERENCE" {
++                        let kind = if candidate.kind.contains("string") {
++                            "name_literal"
++                        } else if candidate.kind.contains("call") {
++                            "call_reference"
++                        } else {
++                            "symbol_reference"
++                        };
++                        metadata.insert("reference_kind".into(), kind.into());
++                    }
+diff --git a/crates/pqc_scan_detectors/tests/pqc_readiness.rs b/crates/pqc_scan_detectors/tests/pqc_readiness.rs
+index e7f03e3..a629bee 100644
+--- a/crates/pqc_scan_detectors/tests/pqc_readiness.rs
++++ b/crates/pqc_scan_detectors/tests/pqc_readiness.rs
+@@ -41,5 +41,4 @@ fn checked_in_seven_language_fixtures_match_the_documented_rules() {
+-    assert!(TreeSitterDetector
+-        .detect(&file, &rules)
+-        .unwrap()
+-        .iter()
+-        .all(|hit| !hit.rule_id.starts_with("PQC_")));
++    let hits = TreeSitterDetector.detect(&file, &rules).unwrap();
++    assert_eq!(hits.len(), 1);
++    assert_eq!(hits[0].rule_id, "PQC_STANDARD_REFERENCE");
++    assert_eq!(hits[0].location.line, 3);
+diff --git a/crates/pqc_scan_report/src/compact.rs b/crates/pqc_scan_report/src/compact.rs
+index 56a3340..0b325db 100644
+--- a/crates/pqc_scan_report/src/compact.rs
++++ b/crates/pqc_scan_report/src/compact.rs
+@@ -39 +39 @@ fn text(finding: &Finding, lang: ReportLanguage) -> Finding {
+-    if lang == ReportLanguage::Ja {
++    let mut display = if lang == ReportLanguage::Ja {
+@@ -42,5 +42,4 @@ fn text(finding: &Finding, lang: ReportLanguage) -> Finding {
+-        let mut display = finding.clone();
+-        if protocol_rule(&finding.rule_id) {
+-            display.migration_hint="Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.".into();
+-        }
+-        display
++        finding.clone()
++    };
++    if lang == ReportLanguage::En && protocol_rule(&finding.rule_id) {
++        display.migration_hint = "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.".into();
+@@ -47,0 +47,7 @@ fn text(finding: &Finding, lang: ReportLanguage) -> Finding {
++    if matches!(
++        finding.rule_id.as_str(),
++        "TLS_VERSION_1_0" | "TLS_VERSION_1_1" | "TS_TLS_LEGACY_VERSION_LITERAL"
++    ) {
++        display.migration_hint = format!("{} {}", label(lang, "First distinguish constants, comments and test references from effective configuration.", "まず定数・コメント・テストの参照と有効な設定を区別してください。"), display.migration_hint);
++    }
++    display
+@@ -48,0 +55 @@ fn text(finding: &Finding, lang: ReportLanguage) -> Finding {
++
+@@ -142 +149,11 @@ pub(crate) fn html_report_with_context(
+-    writeln!(out,"<header class=\"top\"><h1>{title}</h1><p class=\"meta\">{}: {}</p><p>{}</p></header>",label(lang,"Generated","作成日時"),result.generated_at,label(lang,"Static evidence, not a runtime or migration-completion guarantee. Expand a rule, then a location, to inspect its next steps.","コードや設定の手掛かりをまとめた調査結果です。PQCへの対応完了を保証するものではありません。ルール、検出箇所の順に開くと、その箇所の対応を確認できます。"))?;
++    writeln!(
++        out,
++        "<header class=\"top\"><h1>{title}</h1><p class=\"meta\">{}: {}</p><p>{}</p></header>",
++        label(lang, "Generated", "作成日時"),
++        result.generated_at,
++        label(
++            lang,
++            "Cryptographic references found in source code and configuration.",
++            "コードや設定の手掛かりをまとめた調査結果です。"
++        )
++    )?;
+@@ -173,0 +191 @@ pub(crate) fn html_report_with_context(
++    writeln!(out, "</section>")?;
+@@ -176 +194 @@ pub(crate) fn html_report_with_context(
+-        "</section><p>{}</p><p>",
++        "<p>{}</p><p>",
+@@ -446,2 +464,2 @@ pub(crate) fn markdown_report_with_context(
+-            "Static evidence does not prove runtime use or completed PQC migration.",
+-            "コードや設定の手掛かりであり、実際の利用やPQC対応完了を保証するものではありません。"
++            "Cryptographic references found in source code and configuration.",
++            "コードや設定の手掛かりをまとめた調査結果です。"
+diff --git a/crates/pqc_scan_report/src/html_report.rs b/crates/pqc_scan_report/src/html_report.rs
+index 340871a..85ca339 100644
+--- a/crates/pqc_scan_report/src/html_report.rs
++++ b/crates/pqc_scan_report/src/html_report.rs
+@@ -430,0 +431,29 @@ mod tests {
++    #[test]
++    fn concise_header_keeps_all_certificate_facts_and_unknown_locations() {
++        let mut result = sample_result();
++        let mut attribute = result.findings[0].clone();
++        attribute.finding_id = "attribute".into();
++        attribute.rule_id = "CERT_SHA1_SIGNATURE".into();
++        let mut unknown_line = attribute.clone();
++        unknown_line.finding_id = "unknown-line".into();
++        unknown_line.location.line = 0;
++        let mut unknown_column = attribute.clone();
++        unknown_column.finding_id = "unknown-column".into();
++        unknown_column.location.column = 0;
++        let mut info = attribute.clone();
++        info.finding_id = "info".into();
++        info.severity = Severity::Info;
++        info.risk = Risk::QuantumSafe;
++        info.location.line = 99;
++        result
++            .findings
++            .extend([attribute, unknown_line, unknown_column, info]);
++        let path = temp_file("position-summary", "html");
++        write_html_report(&result, &path).unwrap();
++        let html = fs::read_to_string(&path).unwrap();
++        assert!(!html.contains("data-candidate-locations="));
++        assert!(!html.contains("Candidate findings with unknown positions"));
++        assert_eq!(html.matches("data-finding-id=").count(), 6);
++        assert!(html.contains("CERT_SHA1_SIGNATURE"));
++        fs::remove_file(path).unwrap();
++    }
+diff --git a/crates/pqc_scan_report/src/japanese.rs b/crates/pqc_scan_report/src/japanese.rs
+index 1b9f7a0..940b7c7 100644
+--- a/crates/pqc_scan_report/src/japanese.rs
++++ b/crates/pqc_scan_report/src/japanese.rs
+@@ -19 +19 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
+-        "API_CIPHER_RSA" => ("JavaのRSA暗号化APIの参照が見つかりました。", "鍵の共有にはKEM、データの暗号化には認証付き暗号を使う構成を検討し、互換性を確認してください。"),
++        "API_CIPHER_RSA" => ("JavaのRSA暗号化APIの参照が見つかりました。", "既存のPQCとの複合構成や鍵の用途を確認し、必要な変更と互換性を検討してください。"),
+@@ -21 +21 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
+-        "TS_NODE_RSA_USAGE" | "API_NODE_CRYPTO_SIGN_RSA" => ("Node.jsのRSA署名・鍵処理APIの参照が見つかりました。", "実行環境の版と検証側の対応を確認し、PQC署名への移行計画を立ててください。"),
++        "TS_NODE_RSA_USAGE" | "API_NODE_CRYPTO_SIGN_RSA" => ("Node.jsのRSA関連API・方式名の参照が見つかりました。", "鍵生成・署名・検証・暗号化のどの用途か確認し、実行環境と通信相手が対応する移行方法を検討してください。"),
+@@ -27 +27 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
+-        "TS_JWT_EDDSA_ALG" => ("EdDSAを使うJWT署名方式の記述が見つかりました。", "署名側と検証側の対応を確認し、PQC署名への移行計画を立ててください。"),
++        "TS_JWT_EDDSA_ALG" => ("EdDSA署名方式の参照が見つかりました。", "参照先の用途と通信規約を確認してください。名称だけではJWTの利用や署名の実行を判断できません。"),
+@@ -32 +32 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
+-        "TLS_RSA_KEY_EXCHANGE" | "TLS_RSA_CIPHER_SUITE" | "TS_TLS_RSA_CIPHER_LITERAL" => ("RSAに依存するTLS暗号スイートの記述が見つかりました。", "接続相手との互換性を確認し、X25519MLKEM768などのハイブリッド鍵共有を検討してください。旧Kyber方式とは通信形式が異なります。"),
++        "TLS_RSA_KEY_EXCHANGE" | "TLS_RSA_CIPHER_SUITE" | "TS_TLS_RSA_CIPHER_LITERAL" => ("RSAに関係するTLS暗号スイートの参照が見つかりました。", "RSA_WITHのRSA鍵交換と、ECDHE_RSA・DHE_RSAのRSA認証を区別してください。実際の利用を確認し、ハイブリッド鍵共有とPQC認証を別々に検討してください。"),
+@@ -62,0 +63 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
++        "PQC_STANDARD_REFERENCE" => ("標準PQC方式名またはハイブリッドグループ名の参照が見つかりました。", "文字列・識別子・登録・呼出しの文脈と実装を確認してください。実行成功、有効化、FIPS適合や製品全体の安全性は保証しません。"),
+@@ -142,0 +144,2 @@ fn action_text(id: &str) -> Option<(&'static str, &'static str, &'static [&'stat
++        "crypto.review-reference" => ("暗号方式の参照と実際の用途を確認する", "参照だけでは署名の実行、JWT発行、既存のPQC・複合構成の有無を判断できません。", &["鍵生成・署名・検証・暗号化・鍵共有の用途を調べ、テストや例と稼働中の処理を区別してください。", "既存のPQCやハイブリッド構成と、プロバイダー・通信相手の対応を確認して変更を選んでください。"]),
++        "tls.review-reference" => ("TLSの参照と実際の設定を確認する", "方式名や表の参照だけでは、有効な設定や接続結果を判断できません。ECDHE_RSA・DHE_RSAはRSA認証であり、RSA鍵交換ではありません。", &["定数・コメント・テスト・有効な設定を区別してください。", "鍵共有・認証・TLSバージョンを別々に調べ、既存のハイブリッド対応と通信相手の互換性を確認してください。"]),
+@@ -145 +148 @@ fn action_text(id: &str) -> Option<(&'static str, &'static str, &'static [&'stat
+-        "plan.hybrid-migration" => ("既存方式とPQCを併用し、段階的に移行する", "検出した方式には、量子計算による将来のリスクがあります。接続相手との互換性を確かめながら移行を進めてください。", &["利用箇所と担当チームを洗い出してください。", "既存方式とPQCの併用を試し、一括切替の前に影響を確認してください。", "旧方式を廃止する条件と時期を決めてください。"]),
++        "plan.hybrid-migration" => ("既存方式とPQCを併用し、段階的に移行する", "検出した方式には、量子計算による将来のリスクがあります。接続相手との互換性を確かめながら移行を進めてください。", &["利用箇所と担当チームを洗い出してください。", "既存のPQC・複合構成を確認し、移行が必要なら新旧方式の併用を試してください。", "旧方式を廃止する条件と時期を決めてください。"]),
+diff --git a/crates/pqc_scan_rules/tests/quality_metadata.rs b/crates/pqc_scan_rules/tests/quality_metadata.rs
+index 7fe7142..a2a3b63 100644
+--- a/crates/pqc_scan_rules/tests/quality_metadata.rs
++++ b/crates/pqc_scan_rules/tests/quality_metadata.rs
+@@ -9 +9 @@ fn every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls() {
+-        &fs::read(root.join("docs/quality/RULE-QUALITY-METADATA.json")).unwrap(),
++        &fs::read(root.join("docs/quality/AUDIT-RULE-QUALITY-METADATA.json")).unwrap(),
+@@ -22 +22 @@ fn every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls() {
+-    assert_eq!(rules.len(), 122);
++    assert_eq!(rules.len(), 123);
+diff --git a/tests/quality/test_task_queue.py b/tests/quality/test_task_queue.py
+index ad3a2b3..f9de395 100644
+--- a/tests/quality/test_task_queue.py
++++ b/tests/quality/test_task_queue.py
+@@ -23 +23 @@ class TaskQueueTests(unittest.TestCase):
+-        self.assertEqual(len(tasks), 40)
++        self.assertEqual(len(tasks), 41)

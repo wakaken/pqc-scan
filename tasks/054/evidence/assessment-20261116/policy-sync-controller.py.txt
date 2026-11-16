@@ -1,0 +1,82 @@
+from pathlib import Path
+import json,hashlib,subprocess,shutil,datetime,collections,re
+r=Path.cwd();e=r/'tasks/054/evidence/assessment-20261116';h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+# Preserve the original study and source, before writing a detached follow-up.
+origpath=r/'tasks/052/evidence/assessment-20261115/outputs/best-practices-assessment.json';orig=json.loads(origpath.read_text());base=json.loads((e/'BASELINE.json').read_text());originalSecurity=subprocess.check_output(['git','show',base['head']+':SECURITY.md']);assert hashlib.sha256(originalSecurity).hexdigest()==base['files']['SECURITY.md']
+(e/'SECURITY-before-policy-sync.md').write_bytes(originalSecurity)
+cp=e/'support/task052-criteria';cp.mkdir(exist_ok=True)
+for f in ['CRITERIA-EXTRACT.json','badge-head.json','badge-api-pinned.md']:
+ src=Path('/Users/waka/development/pqc/pqc-scan/tasks/052/evidence/assessment-20261115/official')/f;dst=cp/f
+ if not dst.exists():shutil.copyfile(src,dst)
+ assert h(src)==h(dst)
+criteria=json.loads((cp/'CRITERIA-EXTRACT.json').read_text());official={c['level']+'.'+c['id']:c for c in criteria};assert len(official)==145
+live=json.loads((e/'POLICY-SYNC-LIVE-CONTROLS-20261116.json').read_text());assert all(c['exitCode']==0 for c in live['commands']);u=json.loads(live['commands'][0]['stdout']);cs=json.loads(live['commands'][1]['stdout']);assert u=={'login':'wakaken','two_factor_authentication':True};assert [a['login'] for a in cs]==['wakaken'];assert json.loads(live['commands'][2]['stdout'])['enabled'] is True
+updates={
+'0.vulnerability_report_process':('Partial','The approved current process is now in local bilingual SECURITY.md. The previously published interim policy remains on GitHub until a separately authorized publication; no current public-policy update is claimed.',['SECURITY.md','REPORTING-CHANNEL-DECISION-20261116.json']),
+'0.vulnerability_report_private':('Partial','Private reporting is now supported and enabled, so the old conditional N/A no longer applies. The correct channel is documented locally; published policy synchronization remains outstanding.',['PRIVATE-REPORTING-ENABLEMENT-20261116.json','SECURITY.md']),
+'0.vulnerability_report_response':('Not applicable','Official criterion explicitly allows N/A when no vulnerability reports were received in the last6months. Maintainer states none ever received; no response-time or100% rate inferred.',['VULNERABILITY-REPORT-HISTORY-20261116.json']),
+'0.report_responses':('Partial','Maintainer confirms no external bug reports ever received, including any2–12month window. Population is known empty; the pinned criterion has no explicit N/A permission. No majority/100% pass inferred; empty-population acceptance remains unresolved.',['EXTERNAL-FEEDBACK-HISTORY-20261116.json']),
+'0.enhancement_responses':('Partial','Maintainer confirms no external enhancement requests ever received. Empty denominator yields no response rate; explicit conditional N/A is not present in the pinned criterion. No automatic pass.',['EXTERNAL-FEEDBACK-HISTORY-20261116.json']),
+'1.vulnerability_response_process':('Partial','Primary responder, absence handling, private investigation and fix/disclosure procedure are approved and documented locally. Public process URL still serves old guidance; past execution is not manufactured.',['PRIMARY-RESPONDER-DECISION-20261116.json','UNAVAILABILITY-POLICY-DECISION-20261116.json','SECURITY-FIX-DISCLOSURE-POLICY-20261116.json','SECURITY.md']),
+'1.access_continuity':('Unmet','Solo maintainer, no backup, and agreed absence handling waits for their return. This process does not provide the required one-week continuity on permanent loss of the sole maintainer. No credential handover or staffing action requested.',['BACKUP-RESPONDER-FACT-20261116.json','UNAVAILABILITY-POLICY-DECISION-20261116.json']),
+'1.bus_factor':('Unmet','Maintainer confirms solo project and no backup. There is no second knowledgeable maintainer; the at-least2 recommendation is not met.',['BACKUP-RESPONDER-FACT-20261116.json']),
+'2.bus_factor':('Unmet','Solo maintainer/no backup does not meet the at-least2 condition. This is an assessed missing practice, not missing truth or an exclusion.',['BACKUP-RESPONDER-FACT-20261116.json']),
+'2.require_2FA':('Met','Current API returns only developer/collaborator wakaken and their2FA=true; supplied screenshot also states GitHub requires2FA for that account. Bounded to this observed single human developer and current GitHub setting, not token-per-request2FA or future collaborators.',['POLICY-SYNC-LIVE-CONTROLS-20261116.json','TWO-FACTOR-STATUS-CORRECTION-20261116.json']),
+'2.secure_2FA':('Met','The sole observed developer has live2FA enabled and screenshot shows TOTP app configured, preferred Passkeys. This establishes the current cryptographic-method condition for that developer; no secret or live authentication challenge collected.',['POLICY-SYNC-LIVE-CONTROLS-20261116.json','TWO-FACTOR-STATUS-CORRECTION-20261116.json']),
+'0.know_secure_design':('Unknown','The maintainer requests explanation of the10design principles before answering. No knowledge attestation or completion inferred from receiving guidance.',['MAINTAINER-KNOWLEDGE-FOLLOWUP-20261116.json']),
+'0.know_common_errors':('Unknown','No primary-developer factual confirmation covering applicable common vulnerability classes and mitigations yet. Tool reviews andAI knowledge cannot substitute for the human criterion.',[])
+}
+knowledge={'date':'2026-11-16','questionScope':'Primary developer understanding of all10secure-design principles, criterion0.know_secure_design','answerQuote':'もう一度10項目について詳しく教えてほしい','interpretation':'Requests explanation; neither knows nor lacks the required knowledge is established.','status':'Unknown','nextAction':'Explain the principles with clearly hypothetical product examples; obtain factual confirmation only after the explanation, without inferring it.'};(e/'MAINTAINER-KNOWLEDGE-FOLLOWUP-20261116.json').write_text(json.dumps(knowledge,ensure_ascii=False,indent=2)+'\n')
+rows=[]
+for old in orig['criteria']:
+ key=old['key'];off=official[key];current=updates.get(key)
+ row={'key':key,'originalStatus':old['status'],'originalAssessment':old['assessment'],'officialUrl':old['officialUrl'],'officialCategory':off['category'],'originalCriterionSource':'support/task052-criteria/CRITERIA-EXTRACT.json','originalNaAllowed':bool(off['metadata'].get('na_allowed') or off['metadata'].get('na_justification_required')),'followupStatus':current[0] if current else None,'followupAssessment':current[1] if current else 'No new criterion-level conclusion in this follow-up; retain original source/date/limitations and do not infer current acceptance.','followupEvidence':current[2] if current else [],'reviewClass':'new-criterion-assessment' if current else 'prior-evidence-needs-final-scope-reconciliation'}
+ if row['followupStatus']=='Not applicable':assert off['metadata'].get('na_allowed') is True
+ rows.append(row)
+assert len(rows)==len({a['key'] for a in rows})==145
+out={'date':'2026-11-16','scope':'Detached054 follow-up of new maintainer facts and approved local policy; not a task052 resumption/completion or badge application.','originalAssessment':str(origpath.relative_to(r)),'originalSha256':h(origpath),'officialCatalogueCommit':orig['officialCatalogueCommit'],'attribution':'OpenSSF Best Practices badge contributors; pinned official descriptions and source licensing retained in original badge API document.','currentSecurityPolicy':{'path':'SECURITY.md','sha256':h(r/'SECURITY.md'),'publication':'Local only; no commit/push/PR/merge/publication'},'criteria':rows,'counts':{'total':145,'newCriterionAssessments':len(updates),'newStatusCounts':dict(collections.Counter(a[0] for a in updates.values())),'remainingWithoutNewCriterionConclusion':145-len(updates)},'assessmentComplete':False,'badgeApplication':False}
+(e/'TASK052-CRITERION-FOLLOWUP-20261116.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n')
+md=['# Task052 facts and remaining acceptance —054 follow-up','','This is an unfinished assessment under the original criteria. Task052 remains blocked; its historical records are preserved. New facts and local documentation are assessed here without reopening052 or granting a badge/release.','','## Scope and new conclusions','','All145 official criteria map to the original145-row assessment and pinned catalogue. Only13 rows receive new criterion-level conclusions in this follow-up. The other132 retain historical evidence and limitations, with no new final-target acceptance inferred.','','| Criterion | New result | Basis / remaining work |','|---|---|---|']
+for key,(status,why,_) in updates.items():md.append('| `'+key+'` | '+status+' | '+why.replace('|','/')+' |')
+md+=['','## Original task requirement reconciliation','','| Requirement | Progress and remaining work |','|---|---|','| Q6-05 | Primary/security ownership is confirmed; no-backup/continuity is an assessed limitation. Complete review/fix populations and developer knowledge remain unverified; approved process is local documentation. |','| Q6-06 | Fresh read-only2FA/collaborator/reporting observations supplement historical controls. No branch protection/permission changes. Current observations have exact command exits; reporting and notification changes have separate user authorization. |','| Q6-07 | Channel enabled, current sole primary identified, absence/disclosure/support policy approved and documented locally; no external reports per maintainer. Publication is outstanding. Actual private-report intake/email arrival not tested or represented as passing; any need for a separate exercise must be justified from original scope, not invented. |','| Q6-08 | Original fixed-tool Scorecard run remains evidence for its recorded remote commit/date only. No new Scorecard score and no refreshed rating inferred from these local changes. |','| Q6-09 |145-row follow-up preserves official applicability distinctions, conditional N/A, new known Unmet findings and remaining unknowns. No application or award. Some lower historical conclusions need later060/063 evidence and current source/measurement reconciliation. |','','## Separate unresolved work','','- Human facts: explain then confirm primary-developer secure-design knowledge and applicable common vulnerability/mitigation knowledge. Do not substitute AI output for the required human fact.','- Technical/source evidence: current statement/branch coverage, original all-fix and all-modification denominators, API/build-variable/debug preservation, applicable cryptographic/security review, provenance and assessment validity remain separate. Existing finite line/region, archive or test counts do not establish these.','- Known unmet practices: solo-maintainer continuity/bus-factor, missing badge levels, per-file notices and signing/automation observations are not unknowns to hide or new tasks to create automatically. Recheck final applicability before a new product-quality conclusion.','- Empty bug/enhancement populations: no rate or automatic pass; unlike the six-month vulnerability-response criterion, the pinned rows provide no explicit N/A permission. Preserve original criteria and seek authoritative criterion interpretation if needed.','- Public synchronization: SECURITY.md is updated only in this checkout. Publication needs its own permission; no report/advisory/release is created by policy approval.','- Roadmap and054: remain unfinished. Current full repository self-scan and final-target evidence applicability are still outstanding, in addition to052 completion. No mandatory work is removed or moved to claim done.','','## Current approved policy summary','','Primary responder: the maintainer; backup: none. Best-effort latest verified0.2.x, no fixed deadline or old-version backport guarantee, experimentalTLS/SSH. GitHub private reporting is enabled, Security alerts selected, requested existing email delivery preferences verified. Normally validate/prepare the fix before disclosure through advisory plus release notes, coordinate with reporter, judge early warnings individually. Personal address and authentication secrets are omitted from public policy.','','Review applicability: prose/evidence only, no executable examples or behavior changed. Under current docs/agent/REVIEWS.md, automatic implementation/test review stages do not apply; no reviewer identity started. Documentation verification does not replace task-specific measurements or human facts.']
+(e/'TASK052-REMAINING-20261116.md').write_text('\n'.join(md)+'\n')
+# Record new authorized preparation without changing the frozen task052 definition.
+p=r/'tasks/054/TASK-054-PLAN.md';p.write_text(p.read_text()+'''\n## Authorized policy synchronization follow-up —2026-11-16\n\nThe maintainer approved the individual response/support/disclosure decisions and\nrequested continuing the proposed local SECURITY.md synchronization and remaining\ncriterion reconciliation. Earlier separately authorized private-reporting and email\nsubscription changes are retained in their dated receipts. This extends the initial\nassessment-only plan only to those explicit authorizations;052 stays unfinished\nand is not reopened. Prepare bilingual local policy, validate parity/links/source\nconsistency and preserve a145-criterion follow-up plus remaining blockers. No new\nproduct work, public publication, push or other setting mutation is authorized.\n''')
+note='''
+## Local policy synchronization and original052 reconciliation —2026-11-16
+
+The maintainer requested continuing the proposed work. SECURITY.md now contains
+matching English/Japanese current reporting instructions, sole-responder/no-backup
+facts, approved absence/support/disclosure policies and unchanged distribution
+verification guidance. The previous file is retained in SECURITY-before-policy-
+sync.md. It is a local draft, not a published policy update. No personal email,
+OTP, QR secret, recovery code or password is included.
+
+TASK052-CRITERION-FOLLOWUP-20261116.json maps all145 original criteria, with13 new
+criterion-level conclusions; TASK052-REMAINING-20261116.md reconciles all five
+original task052 requirements and the remaining human/technical/publication gaps.
+The six-month vulnerability-response row is conditionally Not applicable on the
+maintainer-confirmed empty population; generic bug/enhancement response rates
+are not invented. Solo-maintainer continuity/bus-factor rows are known Unmet.
+Current sole-human2FA is verified through fresh authenticated GET/collaborator data
+and the supplied method screenshot, without extending that result to future users
+or token-per-requestMFA. Developer knowledge remains Unknown pending explanation
+and factual confirmation; requesting an explanation is not an affirmative answer.
+
+All original052 records and053 completion evidence remain unchanged. The root
+catalog retains its frozen historical facts; this detached follow-up must be
+considered separately.052/054 andv0.3 remain unfinished. Actual notification
+arrival, full final-target assessment and repository self-scan are not claimed.
+'''
+p=r/'tasks/054/TASK-054-RESULTS.md';p.write_text(p.read_text()+note)
+p=e/'release-assessment.md';p.write_text(p.read_text()+note);(r/'target/quality-task-054/release-assessment.md').write_bytes(p.read_bytes())
+p=r/'tasks/054/task.yaml';p.write_text(p.read_text()+'''  policy_sync_followup:
+    date: '2026-11-16'
+    authorization: Maintainer requested continuing approved local policy synchronization and remaining criterion reconciliation; no052 reopening or publication.
+    policy: SECURITY.md
+    criterion_followup: tasks/054/evidence/assessment-20261116/TASK052-CRITERION-FOLLOWUP-20261116.json
+    remaining: tasks/054/evidence/assessment-20261116/TASK052-REMAINING-20261116.md
+    current_blocker: Required developer knowledge and technical/final-source assessment remain unverified; new approved facts supersede earlier unknown role/channel/MFA assertions only in their stated scope.
+''')
+shutil.copyfile('/tmp/pqc054-policy-sync.py',e/'policy-sync-controller.py.txt')
+print(json.dumps(out['counts']))

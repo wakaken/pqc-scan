@@ -1,0 +1,1039 @@
+diff --git a/crates/pqc_scan_cli/tests/evidence_privacy.rs b/crates/pqc_scan_cli/tests/evidence_privacy.rs
+new file mode 100644
+index 0000000..588d1c9
+--- /dev/null
++++ b/crates/pqc_scan_cli/tests/evidence_privacy.rs
+@@ -0,0 +1,187 @@
++use serde_json::{json, Value};
++use std::collections::BTreeMap;
++use std::{fs, process::Command};
++#[test]
++fn private_bodies_and_inline_credentials_never_survive_cli_report_paths() {
++    let root = std::env::temp_dir().join(format!("pqc029-cli-{}", std::process::id()));
++    fs::create_dir_all(root.join("input")).unwrap();
++    fs::create_dir_all(root.join("rules")).unwrap();
++    let fields = json!([{"id":"BODY_CONTROL","kind":"regex","category":"Control","severity":"low","risk":"quantum-uncertain","confidence":0.5,"migration_hint":"Review","pattern":"LEAK029[A-Z0-9_]+","scope":"code"},{"id":"TECH_CONTROL","kind":"regex","category":"JWT","severity":"high","risk":"quantum-vulnerable","confidence":0.75,"migration_hint":"Preserve facts","pattern":"RS256","scope":"code"}]);
++    fs::write(root.join("rules/control.yml"), fields.to_string()).unwrap();
++    for (i, label) in [
++        "RSA PRIVATE KEY",
++        "PRIVATE KEY",
++        "OPENSSH PRIVATE KEY",
++        "EC PRIVATE KEY",
++        "DSA PRIVATE KEY",
++        "ENCRYPTED PRIVATE KEY",
++    ]
++    .iter()
++    .enumerate()
++    {
++        fs::write(root.join(format!("input/key{i}.txt")),format!("RS256\n-----BEGIN {label}-----\nLEAK029A_SYNTHETIC_BODY_NOT_KEY_MATERIAL_Z029ZZ\n-----END {label}-----\n")).unwrap();
++    }
++    fs::write(
++        root.join("input/unterminated.txt"),
++        "RS256\n-----BEGIN EC PRIVATE KEY-----\nLEAK029B_SYNTHETIC_UNTERMINATED_BODY_Z029ZZ\n",
++    )
++    .unwrap();
++    fs::write(root.join("input/設定.conf"),"RS256\npassword = \"LEAK029C_SYNTHETIC_CREDENTIAL_Z029ZZ\"\nurl = \"https://user:LEAK029D_SYNTHETIC_USERINFO_Z029ZZ@example.invalid/path?access_token=LEAK029E_SYNTHETIC_QUERY_Z029ZZ&mode=read\"\n").unwrap();
++    // The old surrounding preview retained a middle fragment after truncation.
++    let long_value = "MID029".repeat(30);
++    fs::write(root.join("input/preview.txt"), format!("RS256 password=\"{long_value}\"\nhttps://example.invalid/?token=LEAK029F.jwt%21&mode=read\n")).unwrap();
++    let mut expected_machine: Option<Vec<Value>> = None;
++    for lang in ["en", "ja"] {
++        let out = root.join(lang);
++        let result = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++            .arg("scan")
++            .arg(root.join("input"))
++            .args([
++                "--format",
++                "all",
++                "--diagnostics",
++                "--inventory-json",
++                "--repository-scope",
++                "synthetic/privacy",
++                "--policy-profile",
++                "migration-review-v1",
++                "--lang",
++                lang,
++                "--rules-dir",
++            ])
++            .arg(root.join("rules"))
++            .arg("--out-dir")
++            .arg(&out)
++            .output()
++            .unwrap();
++        assert!(result.status.success());
++        for stream in [&result.stdout, &result.stderr] {
++            assert!(!String::from_utf8_lossy(stream).contains("LEAK029"));
++        }
++        let mut count = 0;
++        for entry in fs::read_dir(&out).unwrap() {
++            let path = entry.unwrap().path();
++            let text = fs::read_to_string(&path).unwrap();
++            assert!(
++                !text.contains("LEAK029"),
++                "canary survived in {}",
++                path.file_name().unwrap().to_string_lossy()
++            );
++            assert!(!text.contains("Z029ZZ"), "partial canary survived");
++            assert!(!text.contains("MID029"), "middle canary fragment survived");
++            count += 1;
++        }
++        assert_eq!(count, 9);
++        let mut native: Value =
++            serde_json::from_slice(&fs::read(out.join("scan.inventory.v1.json")).unwrap()).unwrap();
++        let mut map: BTreeMap<String, String> = std::iter::once((
++            native["run"]["id"].as_str().unwrap().to_string(),
++            "RUN".into(),
++        ))
++        .chain(
++            native["observations"]
++                .as_array()
++                .unwrap()
++                .iter()
++                .enumerate()
++                .map(|(i, o)| (o["id"].as_str().unwrap().to_string(), format!("OBS-{i}"))),
++        )
++        .collect();
++        assert!(native["legacy_associations"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .all(|a| !a["observation_ids"].as_array().unwrap().is_empty()));
++        let mut assessment: Value =
++            serde_json::from_slice(&fs::read(out.join("scan.assessment.v1.json")).unwrap())
++                .unwrap();
++        for (i, a) in assessment["assessments"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .enumerate()
++        {
++            map.insert(
++                a["id"].as_str().unwrap().to_string(),
++                format!("ASSESSMENT-{i}"),
++            );
++        }
++        for (payload, schema) in [
++            (
++                &native,
++                include_str!("../../../schemas/native-scan-v1.schema.json"),
++            ),
++            (
++                &assessment,
++                include_str!("../../../schemas/assessment-v1.schema.json"),
++            ),
++        ] {
++            let schema: Value = serde_json::from_str(schema).unwrap();
++            let validator = jsonschema::options()
++                .with_draft(jsonschema::Draft::Draft7)
++                .build(&schema)
++                .unwrap();
++            assert!(validator.is_valid(payload));
++        }
++        fn normalize(v: &mut Value, ids: &BTreeMap<String, String>) {
++            match v {
++                Value::String(s) => {
++                    if let Some(id) = ids.get(s) {
++                        *s = id.clone();
++                    }
++                }
++                Value::Array(a) => {
++                    for x in a {
++                        normalize(x, ids);
++                    }
++                }
++                Value::Object(o) => {
++                    for x in o.values_mut() {
++                        normalize(x, ids);
++                    }
++                }
++                _ => {}
++            }
++        }
++        native["run"]["generated_at"] = json!("TIME");
++        normalize(&mut native, &map);
++        normalize(&mut assessment, &map);
++        let mut machine = vec![native, assessment];
++        for file in [
++            "report.json",
++            "report.sarif",
++            "cbom.json",
++            "dependency-sbom.json",
++            "diagnostics.json",
++        ] {
++            let mut v: Value = serde_json::from_slice(&fs::read(out.join(file)).unwrap()).unwrap();
++            if let Some(object) = v.as_object_mut() {
++                object.remove("generated_at");
++            }
++            machine.push(v);
++        }
++        if let Some(expected) = &expected_machine {
++            for (i, (actual, expected)) in machine.iter().zip(expected.iter()).enumerate() {
++                assert!(
++                    actual == expected,
++                    "technical machine facts differ in artifact index {i}"
++                );
++            }
++        } else {
++            expected_machine = Some(machine);
++        }
++
++        let report: serde_json::Value =
++            serde_json::from_slice(&fs::read(out.join("report.json")).unwrap()).unwrap();
++        assert_eq!(
++            report["findings"]
++                .as_array()
++                .unwrap()
++                .iter()
++                .filter(|f| f["rule_id"] == "TECH_CONTROL")
++                .count(),
++            9
++        );
++    }
++    fs::remove_dir_all(root).unwrap();
++}
+diff --git a/crates/pqc_scan_core/Cargo.toml b/crates/pqc_scan_core/Cargo.toml
+index b7da5c8..1d427f9 100644
+--- a/crates/pqc_scan_core/Cargo.toml
++++ b/crates/pqc_scan_core/Cargo.toml
+@@ -14,0 +15 @@ rayon.workspace = true
++regex.workspace = true
+diff --git a/crates/pqc_scan_core/src/diagnostic.rs b/crates/pqc_scan_core/src/diagnostic.rs
+index d7e5f2c..6937161 100644
+--- a/crates/pqc_scan_core/src/diagnostic.rs
++++ b/crates/pqc_scan_core/src/diagnostic.rs
+@@ -364,0 +365,4 @@ impl ScanDocument {
++    pub(crate) fn legacy_mut(&mut self) -> &mut ScanResult {
++        &mut self.legacy
++    }
++
+diff --git a/crates/pqc_scan_core/src/lib.rs b/crates/pqc_scan_core/src/lib.rs
+index 0a514b4..6309969 100644
+--- a/crates/pqc_scan_core/src/lib.rs
++++ b/crates/pqc_scan_core/src/lib.rs
+@@ -11,0 +12 @@ pub mod policy;
++pub mod privacy;
+diff --git a/crates/pqc_scan_core/src/pipeline.rs b/crates/pqc_scan_core/src/pipeline.rs
+index 36438cf..6785c1e 100644
+--- a/crates/pqc_scan_core/src/pipeline.rs
++++ b/crates/pqc_scan_core/src/pipeline.rs
+@@ -107,0 +108 @@ where
++                            privacy: None,
+@@ -119,0 +121 @@ where
++    let mut privacy_by_file = HashMap::new();
+@@ -120,0 +123,3 @@ where
++        if let Some((path, privacy)) = outcome.privacy {
++            privacy_by_file.insert(path, privacy);
++        }
+@@ -144 +149 @@ where
+-    attach_source_snippets(&config.root, &mut findings);
++    attach_source_snippets(&config.root, &mut findings, &privacy_by_file);
+@@ -171,0 +177,32 @@ where
++    let sensitive_ids = findings
++        .iter()
++        .filter(|f| {
++            privacy_by_file.get(&f.location.file).is_some_and(|p| {
++                p.sensitive_match(
++                    f.location.line,
++                    f.location.column,
++                    f.evidence.metadata.get("detector").is_none_or(|d| {
++                        !matches!(
++                            d.as_str(),
++                            "regex_detector"
++                                | "key_detector"
++                                | "certificate_detector"
++                                | "dependency_detector"
++                        )
++                    }),
++                    &f.evidence.r#match,
++                )
++            })
++        })
++        .map(|f| f.finding_id.clone())
++        .collect();
++    // A detector may truncate a surrounding preview before we see it. Once
++    // syntax is lost, protect the entire preview for files with known context.
++    for f in &mut findings {
++        if privacy_by_file
++            .get(&f.location.file)
++            .is_some_and(|p| p.protects_preview())
++        {
++            f.evidence.snippet_preview = "[masked-sensitive-content]".into();
++        }
++    }
+@@ -191,0 +229 @@ where
++    crate::privacy::sanitize_with_context(document.legacy_mut(), &sensitive_ids);
+@@ -210,0 +249 @@ struct FileOutcome {
++    privacy: Option<(String, crate::privacy::SourcePrivacy)>,
+@@ -219,0 +259,6 @@ fn inspect_file(
++    let privacy = file
++        .text
++        .as_deref()
++        .map(crate::privacy::SourcePrivacy::from_text)
++        .filter(|p| !p.is_empty())
++        .map(|p| (relative.to_string(), p));
+@@ -302,0 +348 @@ fn inspect_file(
++        privacy,
+@@ -495 +541,5 @@ pub fn exceeds_fail_threshold(findings: &[Finding], threshold: Severity) -> bool
+-fn attach_source_snippets(root: &std::path::Path, findings: &mut [Finding]) {
++fn attach_source_snippets(
++    root: &std::path::Path,
++    findings: &mut [Finding],
++    privacy: &HashMap<String, crate::privacy::SourcePrivacy>,
++) {
+@@ -511,3 +561,7 @@ fn attach_source_snippets(root: &std::path::Path, findings: &mut [Finding]) {
+-        let source = text_cache
+-            .entry(rel_file.clone())
+-            .or_insert_with(|| load_snippet_source(&root.join(&rel_file)));
++        let source = text_cache.entry(rel_file.clone()).or_insert_with(|| {
++            if privacy.get(&rel_file).is_some_and(|p| p.private_marker) {
++                CachedSnippetSource::MaskedSensitiveFile
++            } else {
++                load_snippet_source(&root.join(&rel_file))
++            }
++        });
+@@ -604 +658 @@ fn sanitize_source_line(line: &str) -> String {
+-    let mut out = line.replace('\r', "");
++    let mut out = crate::privacy::redact_text(line).replace('\r', "");
+diff --git a/crates/pqc_scan_core/src/privacy.rs b/crates/pqc_scan_core/src/privacy.rs
+new file mode 100644
+index 0000000..4baca80
+--- /dev/null
++++ b/crates/pqc_scan_core/src/privacy.rs
+@@ -0,0 +1,460 @@
++//! Bounded, known-syntax export redaction. This is not a universal secret detector.
++use crate::{Finding, ScanResult};
++use regex::Regex;
++use std::{
++    borrow::Cow,
++    collections::{BTreeMap, HashMap, HashSet},
++    sync::OnceLock,
++};
++const PRIVATE: &str = "[masked-private-key-material]";
++const SENSITIVE: &str = "[masked-sensitive-content]";
++const VALUE: &str = "[masked-sensitive-value]";
++const LABELS: &[&str] = &[
++    "RSA PRIVATE KEY",
++    "PRIVATE KEY",
++    "OPENSSH PRIVATE KEY",
++    "EC PRIVATE KEY",
++    "DSA PRIVATE KEY",
++    "ENCRYPTED PRIVATE KEY",
++];
++const NAMES: &[&str] = &[
++    "password",
++    "passwd",
++    "secret",
++    "token",
++    "api_key",
++    "apikey",
++    "api_token",
++    "access_token",
++    "client_secret",
++    "private_key",
++    "key_material",
++    "authorization",
++    "secret_key",
++    "secret_access_key",
++];
++fn assignment() -> &'static Regex {
++    static RE: OnceLock<Regex> = OnceLock::new();
++    RE.get_or_init(|| {
++        let names=NAMES.iter().map(|n|regex::escape(n).replace('_',"[_-]")).collect::<Vec<_>>().join("|");
++        let pattern=format!(r#"(?i)(?P<prefix>["']?\b(?:[a-z0-9]+[_-])*(?:{names})\b["']?\s*[:=]\s*)(?P<value>"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|(?:Bearer|Basic)\s+[a-z0-9._~+/=-]+|[a-z0-9_+/=-]+)(?P<end>$|[\s,;&<>\]\}}\)])"#);
++        Regex::new(&pattern).expect("fixed credential redaction regex")
++    })
++}
++fn query_value() -> &'static Regex {
++    static RE: OnceLock<Regex> = OnceLock::new();
++    RE.get_or_init(|| {
++        let names = NAMES
++            .iter()
++            .map(|n| regex::escape(n).replace('_', "[_-]"))
++            .collect::<Vec<_>>()
++            .join("|");
++        Regex::new(&format!(
++            r#"(?i)(?P<prefix>[?&](?:[a-z0-9]+[_-])*(?:{names})=)(?P<value>[^&#\s"'<>]+)"#
++        ))
++        .expect("fixed query redaction regex")
++    })
++}
++fn userinfo() -> &'static Regex {
++    static RE: OnceLock<Regex> = OnceLock::new();
++    RE.get_or_init(|| {
++        Regex::new(r#"(?i)(?P<scheme>https?://)(?P<userinfo>[^/\s"'<>?#]+)@"#)
++            .expect("fixed URL redaction regex")
++    })
++}
++fn secret_name(name: &str) -> bool {
++    let n = name.to_ascii_lowercase().replace('-', "_");
++    NAMES
++        .iter()
++        .any(|key| n == *key || n.ends_with(&format!("_{key}")))
++}
++fn literal(value: &str) -> bool {
++    // Preserve code expressions/keywords: these are not observed credential values.
++    !matches!(
++        value.to_ascii_lowercase().as_str(),
++        "await" | "new" | "true" | "false" | "null" | "none" | "undefined"
++    )
++}
++fn masked_value(value: &str) -> String {
++    if value.starts_with('"') && value.ends_with('"') {
++        format!("\"{VALUE}\"")
++    } else if value.starts_with('\'') && value.ends_with('\'') {
++        format!("'{VALUE}'")
++    } else if value.to_ascii_lowercase().starts_with("bearer ")
++        || value.to_ascii_lowercase().starts_with("basic ")
++    {
++        format!("{} {VALUE}", value.split_whitespace().next().unwrap_or(""))
++    } else {
++        VALUE.into()
++    }
++}
++pub(crate) fn has_private_marker(text: &str) -> bool {
++    if !text
++        .as_bytes()
++        .windows(11)
++        .any(|s| s.eq_ignore_ascii_case(b"PRIVATE KEY"))
++    {
++        return false;
++    }
++    let upper = text.to_ascii_uppercase();
++    LABELS.iter().any(|label| {
++        upper.contains(&format!("BEGIN {label}")) || upper.contains(&format!("END {label}"))
++    })
++}
++fn base64_like(text: &str) -> bool {
++    let t = text.trim();
++    t.len() >= 64
++        && t.bytes()
++            .all(|b| b.is_ascii_alphanumeric() || b"+/=-_".contains(&b))
++        && (t.starts_with("MII") || t.ends_with('='))
++}
++/// Redact recognized markers/credential literals while retaining benign text.
++/// Operator identifiers/paths and arbitrary opaque strings are outside this policy.
++pub fn redact_text(input: &str) -> String {
++    redact(input).into_owned()
++}
++fn redact(input: &str) -> Cow<'_, str> {
++    if has_private_marker(input) {
++        return Cow::Borrowed(PRIVATE);
++    }
++    if base64_like(input) {
++        return Cow::Borrowed(SENSITIVE);
++    }
++    if !input.contains(['=', ':']) {
++        return Cow::Borrowed(input);
++    }
++    let urls = if input.contains('@') && input.contains("://") {
++        userinfo().replace_all(input, "${scheme}[masked-userinfo]@")
++    } else {
++        Cow::Borrowed(input)
++    };
++    let queries = query_value().replace_all(&urls, "${prefix}[masked-sensitive-value]");
++    let replaced = assignment().replace_all(&queries, |c: &regex::Captures<'_>| {
++        let value = &c["value"];
++        if !literal(value) {
++            return c[0].to_string();
++        }
++        format!("{}{}{}", &c["prefix"], masked_value(value), &c["end"])
++    });
++    match replaced {
++        Cow::Owned(text) => Cow::Owned(text),
++        Cow::Borrowed(_) => match queries {
++            Cow::Owned(text) => Cow::Owned(text),
++            Cow::Borrowed(_) => urls,
++        },
++    }
++}
++fn field(value: &mut String) {
++    let replacement = redact(value);
++    if replacement.as_ref() != value {
++        *value = replacement.into_owned();
++    }
++}
++
++fn evidence_field(value: &mut String) {
++    // Retain the legacy writer's broader protection for evidence fragments,
++    // including markers whose BEGIN/END prefix was lost before export.
++    if value.to_ascii_uppercase().contains("PRIVATE KEY") {
++        *value = PRIVATE.into();
++    } else {
++        field(value);
++    }
++}
++fn already_masked(value: &str) -> bool {
++    matches!(
++        value,
++        "[masked-private-key]" | PRIVATE | SENSITIVE | VALUE | "[masked-sensitive-file-content]"
++    )
++}
++fn sanitize_finding(finding: &mut Finding, sensitive: bool) {
++    if sensitive && !already_masked(&finding.evidence.r#match) {
++        finding.evidence.r#match = SENSITIVE.into();
++    }
++    evidence_field(&mut finding.evidence.r#match);
++    if sensitive {
++        finding.evidence.snippet_preview = SENSITIVE.into();
++    }
++    evidence_field(&mut finding.evidence.snippet_preview);
++    for (key, value) in &mut finding.evidence.metadata {
++        if secret_name(key) {
++            *value = masked_value(value);
++        } else {
++            field(value);
++        }
++    }
++    field(&mut finding.description);
++    field(&mut finding.migration_hint);
++    if let Some(snippet) = &mut finding.source_snippet {
++        for line in &mut snippet.lines {
++            evidence_field(&mut line.text);
++        }
++    }
++    for action in &mut finding.recommended_actions {
++        field(&mut action.title);
++        field(&mut action.rationale);
++        for s in &mut action.steps {
++            field(s);
++        }
++        for s in &mut action.references {
++            field(s);
++        }
++        for example in &mut action.code_examples {
++            field(&mut example.before);
++            field(&mut example.after);
++        }
++    }
++}
++/// Defense in depth for caller-provided legacy results; structural fields stay intact.
++pub fn sanitize_scan_result(result: &mut ScanResult) {
++    sanitize_with_context(result, &HashSet::new());
++}
++pub(crate) fn sanitize_with_context(result: &mut ScanResult, sensitive_ids: &HashSet<String>) {
++    // Preserve original CBOM rows/order. A sensitive occurrence always wins a
++    // column-less legacy collision; later benign occurrences cannot unmask it.
++    let mut replacements = HashMap::new();
++    for f in &mut result.findings {
++        let sensitive = sensitive_ids.contains(&f.finding_id) || f.evidence.r#type == "private_key";
++        let key = (
++            format!("{}:{}", f.location.file, f.location.line),
++            f.category.clone(),
++            f.evidence.r#match.clone(),
++        );
++        sanitize_finding(f, sensitive);
++        if sensitive {
++            replacements.insert(key, f.evidence.r#match.clone());
++        }
++    }
++    for row in &mut result.cbom {
++        if let Some(replacement) = replacements.get(&(
++            row.location.clone(),
++            row.usage_type.clone(),
++            row.algorithm.clone(),
++        )) {
++            row.algorithm = replacement.clone();
++        }
++        field(&mut row.algorithm);
++        field(&mut row.migration_hint);
++    }
++    for row in &mut result.dependency_sbom {
++        field(&mut row.name);
++        field(&mut row.version);
++        field(&mut row.ecosystem);
++        field(&mut row.source_type);
++        field(&mut row.purl);
++    }
++}
++#[derive(Debug, Default)]
++pub(crate) struct SourcePrivacy {
++    pub(crate) private_marker: bool,
++    private_lines: Vec<(usize, usize)>,
++    // Only positions survive collection. Never retain payloads or secret digests.
++    credentials: BTreeMap<usize, Vec<(usize, usize, usize, usize)>>,
++}
++impl SourcePrivacy {
++    pub(crate) fn from_text(text: &str) -> Self {
++        let mut out = Self::default();
++        let mut active: Option<(usize, &str)> = None;
++        let mut last = 0;
++        for (index, line) in text.lines().enumerate() {
++            let number = index + 1;
++            last = number;
++            if has_private_marker(line) {
++                let upper = line.to_ascii_uppercase();
++                if active.is_none() {
++                    for &label in LABELS {
++                        if upper.contains(&format!("BEGIN {label}")) {
++                            active = Some((number, label));
++                            out.private_marker = true;
++                            break;
++                        }
++                    }
++                }
++                let was_active = active.is_some();
++                if let Some((start, label)) = active {
++                    if upper.contains(&format!("END {label}")) {
++                        out.private_lines.push((start, number));
++                        active = None;
++                    }
++                }
++                if LABELS
++                    .iter()
++                    .any(|label| upper.contains(&format!("END {label}")))
++                {
++                    out.private_marker = true;
++                    if !was_active {
++                        let start = out.private_lines.last().map_or(1, |r| r.1 + 1);
++                        out.private_lines.push((start, number));
++                    }
++                }
++            }
++            let mut ranges: Vec<_> = assignment()
++                .captures_iter(line)
++                .filter(|c| literal(&c["value"]))
++                .map(|c| {
++                    let m = c.name("value").unwrap();
++                    (m.start(), m.end())
++                })
++                .collect();
++            ranges.extend(query_value().captures_iter(line).map(|c| {
++                let m = c.name("value").unwrap();
++                (m.start(), m.end())
++            }));
++            ranges.extend(userinfo().captures_iter(line).map(|c| {
++                let m = c.name("userinfo").unwrap();
++                (m.start(), m.end())
++            }));
++            ranges.sort_unstable();
++            let mut merged: Vec<(usize, usize)> = Vec::new();
++            for (a, b) in ranges {
++                if let Some(last) = merged.last_mut() {
++                    if a <= last.1 {
++                        last.1 = last.1.max(b);
++                        continue;
++                    }
++                }
++                merged.push((a, b));
++            }
++            let (mut offset, mut column) = (0, 1);
++            let mut columns = Vec::new();
++            for (a, b) in merged {
++                column += line[offset..a].chars().count();
++                let start = column;
++                column += line[a..b].chars().count();
++                columns.push((start, column, a + 1, b + 1));
++                offset = b;
++            }
++            if !columns.is_empty() {
++                out.credentials.insert(number, columns);
++            }
++        }
++        if let Some((start, _)) = active {
++            out.private_lines.push((start, last));
++        }
++        out
++    }
++    pub(crate) fn sensitive(&self, line: usize, column: usize, mixed_ast: bool) -> bool {
++        if line == 0 {
++            return self.private_marker || !self.credentials.is_empty();
++        }
++        let i = self.private_lines.partition_point(|r| r.1 < line);
++        if self.private_lines.get(i).is_some_and(|r| r.0 <= line) {
++            return true;
++        }
++        self.credentials.get(&line).is_some_and(|ranges| {
++            if column == 0 {
++                return true;
++            }
++            let i = ranges.partition_point(
++                |&(_, end, _, byte_end)| if mixed_ast { byte_end } else { end } <= column,
++            );
++            ranges
++                .get(i)
++                .is_some_and(|&(start, _, _, _)| column >= start)
++        })
++    }
++    pub(crate) fn protects_preview(&self) -> bool {
++        self.private_marker || !self.credentials.is_empty()
++    }
++    pub(crate) fn sensitive_match(
++        &self,
++        line: usize,
++        column: usize,
++        mixed: bool,
++        value: &str,
++    ) -> bool {
++        self.sensitive(line, column, mixed)
++            || self.credentials.get(&line).is_some_and(|ranges| {
++                value.contains("***")
++                    || ranges.iter().any(|&(start, _, _, _)| {
++                        column <= start && start < column.saturating_add(value.chars().count())
++                    })
++            })
++    }
++    pub(crate) fn is_empty(&self) -> bool {
++        !self.private_marker && self.credentials.is_empty()
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn known_literals_keys_urls_and_encoded_value_strings_are_redacted() {
++        for text in [
++            "password='LEAK029A'",
++            r#"api_key="LEAK029A\"TAIL""#,
++            "Authorization: Bearer LEAK029A",
++            "https://u:LEAK029A@example.invalid/path?token=LEAK029B&mode=read",
++            "AWS_SECRET_ACCESS_KEY=LEAK029A",
++            "https://example.invalid/?token=LEAK029A.jwt%21&mode=read",
++        ] {
++            assert!(!redact_text(text).contains("LEAK029"));
++        }
++        let mut fragment = "PRIVATE KEY legacy fragment".to_string();
++        evidence_field(&mut fragment);
++        assert_eq!(fragment, PRIVATE);
++        for name in NAMES {
++            assert!(secret_name(name));
++            assert!(secret_name(&format!("PREFIX_{name}")));
++        }
++    }
++    #[test]
++    fn benign_technical_facts_expressions_and_public_urls_stay_exact() {
++        for text in [
++            "RS256",
++            "1.2.840.113549.1.1.11",
++            "key_bits=2048",
++            "private_key_algorithm=RSA",
++            r#"const token = jwt.sign(payload, privateKey, { algorithm: "RS256" });"#,
++            "const token = await signWithPqc(payload);",
++            "https://example.invalid/docs?version=1.2.3",
++            "PUBLIC_OPAQUE_IDENTIFIER_abcdefghijklmnopqrstuvwxyz0123456789_ABCDEFGHIJKLMN",
++        ] {
++            assert_eq!(redact_text(text), text);
++        }
++    }
++    #[test]
++    fn private_formats_and_unicode_credential_positions_have_bounded_context() {
++        for label in LABELS {
++            let text =
++                format!("RS256\n-----BEGIN {label}-----\nopaque\n-----END {label}-----\nRS256\n");
++            let p = SourcePrivacy::from_text(&text);
++            assert!(!p.sensitive(1, 1, false));
++            assert!(p.sensitive(3, 1, false));
++            assert!(!p.sensitive(5, 1, false));
++        }
++        let line = "🔐 password = \"LEAK029A\"; RS256";
++        let p = SourcePrivacy::from_text(line);
++        let start = line[..line.find("LEAK029A").unwrap()].chars().count() + 1;
++        assert!(p.sensitive(1, start, false));
++        assert!(!p.sensitive(1, 1, false));
++        let public = line[..line.find("RS256").unwrap()].chars().count() + 1;
++        assert!(!p.sensitive(1, public, false));
++        let unterminated =
++            SourcePrivacy::from_text("-----BEGIN EC PRIVATE KEY-----\nopaque\nother\n");
++        assert!(unterminated.sensitive(3, 1, false));
++    }
++    #[test]
++    fn cbom_collision_cannot_unmask_a_sensitive_occurrence_or_collapse_rows() {
++        fn finding(id: &str, col: usize) -> Finding {
++            serde_json::from_value(serde_json::json!({"finding_id":id,"rule_id":"CONTROL","category":"Control","risk":"quantum-uncertain","severity":"low","confidence":0.5,"description":"Control","migration_hint":"Review","location":{"file":"a.txt","line":2,"column":col},"evidence":{"type":"regex_match","match":"opaque","snippet_preview":"public","metadata":{}}})).unwrap()
++        }
++        for reversed in [false, true] {
++            let mut findings = vec![finding("safe", 1), finding("sensitive", 20)];
++            if reversed {
++                findings.reverse();
++            }
++            let mut result:ScanResult=serde_json::from_value(serde_json::json!({"generated_at":"2026-11-10T00:00:00Z","findings":findings,"cbom":[{"component":"service","algorithm":"opaque","usage_type":"Control","location":"a.txt:2","quantum_risk":"quantum-uncertain","migration_hint":"Review"},{"component":"service","algorithm":"RS256","usage_type":"Control","location":"a.txt:3","quantum_risk":"quantum-uncertain","migration_hint":"Review"}],"dependency_sbom":[],"summary":{"total_findings":2,"by_severity":{},"by_risk":{},"scanned_files":1,"skipped_files":0}})).unwrap();
++            sanitize_with_context(&mut result, &HashSet::from(["sensitive".into()]));
++            assert_eq!(result.cbom.len(), 2);
++            assert_eq!(result.cbom[0].algorithm, SENSITIVE);
++            assert_eq!(result.cbom[1].algorithm, "RS256");
++        }
++    }
++    #[test]
++    fn trailing_marker_without_header_is_conservatively_private_context() {
++        let p = SourcePrivacy::from_text("opaque\n-----END RSA PRIVATE KEY-----\npublic\n");
++        assert!(p.sensitive(1, 1, false));
++        assert!(!p.sensitive(3, 1, false));
++    }
++}
+diff --git a/crates/pqc_scan_core/tests/evidence_privacy.rs b/crates/pqc_scan_core/tests/evidence_privacy.rs
+new file mode 100644
+index 0000000..4412fa6
+--- /dev/null
++++ b/crates/pqc_scan_core/tests/evidence_privacy.rs
+@@ -0,0 +1,156 @@
++use pqc_scan_core::{
++    scan_repository_native, Detection, Detector, Evidence, Location, NativeOptions, ScanConfig,
++    ScannableFile,
++};
++use pqc_scan_rules::RuleSet;
++use std::{collections::BTreeMap, fs, path::PathBuf, sync::Arc};
++struct Fixture(PathBuf);
++impl Fixture {
++    fn new(tag: &str) -> Self {
++        let p = std::env::temp_dir().join(format!("pqc029-core-{}-{tag}", std::process::id()));
++        fs::create_dir_all(p.join("input")).unwrap();
++        fs::create_dir_all(p.join("rules")).unwrap();
++        fs::write(p.join("rules/control.yml"),"id: CONTROL\nkind: regex\ncategory: Control\nseverity: low\nrisk: quantum-uncertain\nconfidence: 0.5\nmigration_hint: Review\npattern: CONTROL\nscope: code\n").unwrap();
++        Self(p)
++    }
++    fn scan(&self, erase: bool, fail: bool) -> pqc_scan_core::ScanDocument {
++        let rules = RuleSet::load_from_dir(&self.0.join("rules")).unwrap();
++        let c = ScanConfig {
++            root: self.0.join("input"),
++            threads: 1,
++            ..Default::default()
++        };
++        let mut detectors: Vec<Arc<dyn Detector>> = vec![Arc::new(Body { erase })];
++        if fail {
++            detectors.push(Arc::new(Failure));
++        }
++        scan_repository_native(
++            &c,
++            &rules,
++            &detectors,
++            &NativeOptions::new(Some("synthetic/privacy")).unwrap(),
++        )
++        .unwrap()
++    }
++}
++impl Drop for Fixture {
++    fn drop(&mut self) {
++        let _ = fs::remove_dir_all(&self.0);
++    }
++}
++struct Body {
++    erase: bool,
++}
++impl Detector for Body {
++    fn name(&self) -> &'static str {
++        "synthetic_body"
++    }
++    fn detect(&self, file: &ScannableFile, _: &RuleSet) -> anyhow::Result<Vec<Detection>> {
++        if self.erase {
++            fs::write(&file.path, "header removed after inspection\npublic text\n")?;
++        }
++        Ok(vec![Detection {
++            rule_id: "CONTROL".into(),
++            location: Location {
++                file: file.path.to_string_lossy().into(),
++                line: 2,
++                column: 1,
++            },
++            evidence: Evidence {
++                r#type: "regex_match".into(),
++                r#match: "LEAK029A_OPAQUE_BODY_Z029ZZ".into(),
++                snippet_preview: "opaque preview".into(),
++                metadata: BTreeMap::from([
++                    ("key_bits".into(), "2048".into()),
++                    ("signature_oid".into(), "1.2.840.113549.1.1.11".into()),
++                ]),
++            },
++        }])
++    }
++}
++struct Failure;
++impl Detector for Failure {
++    fn name(&self) -> &'static str {
++        "synthetic_failure"
++    }
++    fn detect(&self, _: &ScannableFile, _: &RuleSet) -> anyhow::Result<Vec<Detection>> {
++        anyhow::bail!("LEAK029E_SYNTHETIC_ERROR_NOT_SECRET_Z029ZZ")
++    }
++}
++#[test]
++fn redaction_preserves_legacy_ids_native_associations_cbom_rows_and_technical_metadata() {
++    let f = Fixture::new("links");
++    let input = f.0.join("input/body.txt");
++    fs::write(
++        &input,
++        "public opaque control\nLEAK029A_OPAQUE_BODY_Z029ZZ\n",
++    )
++    .unwrap();
++    let before = f.scan(false, false);
++    fs::write(&input,"-----BEGIN EC PRIVATE KEY-----\nLEAK029A_OPAQUE_BODY_Z029ZZ\n-----END EC PRIVATE KEY-----\n").unwrap();
++    let after = f.scan(false, false);
++    assert_eq!(
++        before.legacy().findings[0].finding_id,
++        after.legacy().findings[0].finding_id
++    );
++    assert_eq!(
++        before.legacy().findings.len(),
++        after.legacy().findings.len()
++    );
++    assert_eq!(before.legacy().cbom.len(), after.legacy().cbom.len());
++    assert!(!serde_json::to_string(after.legacy())
++        .unwrap()
++        .contains("LEAK029"));
++    assert_eq!(
++        after.legacy().findings[0].evidence.metadata["key_bits"],
++        "2048"
++    );
++    assert_eq!(
++        after.legacy().findings[0].evidence.metadata["signature_oid"],
++        "1.2.840.113549.1.1.11"
++    );
++    let native = serde_json::to_value(after.native().unwrap()).unwrap();
++    assert_eq!(
++        native["legacy_associations"][0]["legacy_id"],
++        after.legacy().findings[0].finding_id
++    );
++    assert_eq!(
++        native["legacy_associations"][0]["observation_ids"]
++            .as_array()
++            .unwrap()
++            .len(),
++        1
++    );
++    assert!(after.native().unwrap().validate().is_ok());
++}
++#[test]
++fn initial_source_snapshot_masks_body_even_if_a_detector_changes_the_file() {
++    let f = Fixture::new("snapshot");
++    fs::write(f.0.join("input/body.txt"),"-----BEGIN DSA PRIVATE KEY-----\nLEAK029A_OPAQUE_BODY_Z029ZZ\n-----END DSA PRIVATE KEY-----\n").unwrap();
++    let document = f.scan(true, false);
++    assert!(!serde_json::to_string(document.legacy())
++        .unwrap()
++        .contains("LEAK029"));
++    assert!(!serde_json::to_string(document.native().unwrap())
++        .unwrap()
++        .contains("LEAK029"));
++}
++#[test]
++fn detector_error_content_is_not_exported_by_diagnostics_or_inventory() {
++    let f = Fixture::new("diagnostics");
++    fs::write(
++        f.0.join("input/body.txt"),
++        "-----BEGIN ENCRYPTED PRIVATE KEY-----\nLEAK029A_OPAQUE_BODY_Z029ZZ\n",
++    )
++    .unwrap();
++    let d = f.scan(false, true);
++    assert!(!serde_json::to_string(&d.diagnostics_report())
++        .unwrap()
++        .contains("LEAK029"));
++    assert!(!serde_json::to_string(d.native().unwrap())
++        .unwrap()
++        .contains("LEAK029"));
++    assert!(!serde_json::to_string(d.legacy())
++        .unwrap()
++        .contains("LEAK029"));
++}
+diff --git a/crates/pqc_scan_report/src/lib.rs b/crates/pqc_scan_report/src/lib.rs
+index ecb8ca2..cd6bb43 100644
+--- a/crates/pqc_scan_report/src/lib.rs
++++ b/crates/pqc_scan_report/src/lib.rs
+@@ -157,42 +157 @@ fn sanitize_scan_result(result: &mut ScanResult) {
+-    for finding in &mut result.findings {
+-        finding.evidence.r#match = sanitize_text_fragment(&finding.evidence.r#match);
+-        finding.evidence.snippet_preview =
+-            sanitize_text_fragment(&finding.evidence.snippet_preview);
+-
+-        if let Some(snippet) = finding.source_snippet.as_mut() {
+-            for line in &mut snippet.lines {
+-                line.text = sanitize_text_fragment(&line.text);
+-            }
+-        }
+-    }
+-}
+-
+-fn sanitize_text_fragment(input: &str) -> String {
+-    if looks_like_private_key_text(input) {
+-        return "[masked-private-key-material]".to_string();
+-    }
+-    if looks_like_base64_secret(input) {
+-        return "[masked-sensitive-content]".to_string();
+-    }
+-    input.to_string()
+-}
+-
+-fn looks_like_private_key_text(text: &str) -> bool {
+-    let upper = text.to_ascii_uppercase();
+-    upper.contains("PRIVATE KEY")
+-}
+-
+-fn looks_like_base64_secret(text: &str) -> bool {
+-    let trimmed = text.trim();
+-    if trimmed.len() < 64 || trimmed.chars().any(char::is_whitespace) {
+-        return false;
+-    }
+-
+-    if !trimmed
+-        .chars()
+-        .all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '/' | '=' | '-' | '_'))
+-    {
+-        return false;
+-    }
+-
+-    trimmed.starts_with("MII") || trimmed.ends_with('=')
++    pqc_scan_core::privacy::sanitize_scan_result(result);
+diff --git a/crates/pqc_scan_report/tests/evidence_privacy.rs b/crates/pqc_scan_report/tests/evidence_privacy.rs
+new file mode 100644
+index 0000000..70f017c
+--- /dev/null
++++ b/crates/pqc_scan_report/tests/evidence_privacy.rs
+@@ -0,0 +1,61 @@
++use pqc_scan_core::ScanResult;
++use pqc_scan_report::{write_reports_with_language, ReportFormat, ReportLanguage};
++use serde_json::{json, Value};
++use std::fs;
++fn result() -> ScanResult {
++    let secret = "LEAK029A_SYNTHETIC_NOT_A_SECRET_Z029ZZ";
++    serde_json::from_value(json!({
++      "generated_at":"2026-11-10T00:00:00Z",
++      "findings":[{"finding_id":"stable-id","rule_id":"SYNTHETIC","category":"TLS","risk":"quantum-vulnerable","severity":"high","confidence":0.75,
++        "description":"Technical RS256 / 2048-bit reference",
++        "migration_hint":format!("Preserve 2048 and version1.2.3; client_secret='{secret}'"),
++        "location":{"file":"安全.conf","line":4,"column":2},
++        "evidence":{"type":"regex_match","match":"RS256","snippet_preview":format!("password=\"{secret}\""),"metadata":{"key_bits":"2048","signature_oid":"1.2.840.113549.1.1.11","access_token":secret,"context":format!("-----BEGIN EC PRIVATE KEY-----\n{secret}\n-----END EC PRIVATE KEY-----")}},
++        "recommended_actions":[{"action_id":"same-action","title":"Keep technical guidance","priority":"high","rationale":format!("password='{secret}'"),"steps":["Keep RSA2048 as observed, not a PQC fix",format!("Authorization: Bearer {secret}")],"references":[format!("https://user:{secret}@example.invalid/path?token={secret}&mode=read"),"javascript:<img src=x onerror=alert(1)>"],"code_examples":[{"language":"javascript","before":format!("const api_key=\"{secret}\"; const alg='RS256';"),"after":"const alg='RS256';"}]}],
++        "source_snippet":{"lines":[{"line":4,"text":format!("api_key='{secret}'"),"highlighted":true}]}}],
++      "cbom":[{"component":"service","algorithm":format!("password={secret}"),"usage_type":"TLS","location":"安全.conf:4","quantum_risk":"quantum-vulnerable","migration_hint":"Preserve technical policy"}],
++      "dependency_sbom":[{"name":"public-package","version":"1.2.3","ecosystem":"generic","source_file":"package.json","source_type":"manifest","purl":format!("pkg:generic/public-package@1.2.3?token={secret}")}],
++      "summary":{"total_findings":1,"by_severity":{"high":1},"by_risk":{"quantum-vulnerable":1},"scanned_files":1,"skipped_files":0}})).unwrap()
++}
++#[test]
++fn known_secret_syntax_is_omitted_in_all_legacy_formats_and_both_languages() {
++    for (name, lang) in [("en", ReportLanguage::En), ("ja", ReportLanguage::Ja)] {
++        let root =
++            std::env::temp_dir().join(format!("pqc029-report-{}-{name}", std::process::id()));
++        fs::create_dir_all(&root).unwrap();
++        let input = result();
++        let before = serde_json::to_value(&input).unwrap();
++        let paths = write_reports_with_language(&input, &root, ReportFormat::All, lang).unwrap();
++        assert_eq!(paths.len(), 6);
++        for path in paths {
++            let text = fs::read_to_string(&path).unwrap();
++            assert!(
++                !text.contains("LEAK029"),
++                "canary survived in {}",
++                path.file_name().unwrap().to_string_lossy()
++            );
++        }
++        assert_eq!(
++            serde_json::to_value(&input).unwrap(),
++            before,
++            "writer must not mutate its caller"
++        );
++        let out: Value =
++            serde_json::from_slice(&fs::read(root.join("report.json")).unwrap()).unwrap();
++        assert_eq!(out["findings"][0]["finding_id"], "stable-id");
++        assert_eq!(out["findings"][0]["evidence"]["match"], "RS256");
++        assert_eq!(
++            out["findings"][0]["evidence"]["metadata"]["key_bits"],
++            "2048"
++        );
++        assert_eq!(
++            out["findings"][0]["evidence"]["metadata"]["signature_oid"],
++            "1.2.840.113549.1.1.11"
++        );
++        assert_eq!(out["dependency_sbom"][0]["version"], "1.2.3");
++        let html = fs::read_to_string(root.join("report.html")).unwrap();
++        assert!(!html.contains("<img src=x"));
++        assert!(!html.contains("href=\"javascript:"));
++        fs::remove_dir_all(root).unwrap();
++    }
++}

@@ -1,0 +1,11 @@
+{
+  "source": "crates/pqc_scan_probe_tls/src/runtime.rs",
+  "sha256": "d6c9b041d50766897f599d5115b37083dcb563bbbae2ded683dfa0cd2d178cce",
+  "pinnedDependency": "rustls-0.23.46",
+  "dependencySourceSha256": "08ddfada2a3473d853cbe7634e65c2c26e5545eff7902a7fca70b536dc2b94a6",
+  "sourceObserved": "tls_diagnostic matches the deprecated CertificateError::UnsupportedSignatureAlgorithm as well as its Context replacement under an explicit allow(deprecated).",
+  "dependencyDeclaration": "ithm.\n    #[deprecated(\n        since = \"0.23.29\",\n        note = \"use `UnsupportedSignatureAlgorithmContext` instead\"\n    )]\n    UnsupportedSignatureAlgorithm,\n\n    /// A signature inside a certificate or on a handshake was made with an unsupported algorithm.\n    UnsupportedSignatureAlgorithmContext {\n        /// The signature algorithm OID that was unsupported.\n        signature_algorithm_id: Vec<u8>,\n        /// Supported algorithms that were available for signature verification.\n        supported_algorithms: Vec<AlgorithmIdentifier>,\n    },\n\n    /// A signature was made with an algorithm that doesn't match the relevant public key.\n    UnsupportedSignatureAlgorithmForP",
+  "interpretation": "Explicit compatibility handling is documented; replacement-only matching would lose classification of the retained old variant. Do not label this a shipped vulnerability. A text/compiler search is not an exhaustive all-stack/supported-user API-currency proof.",
+  "status": "Partial",
+  "remaining": "Source-bound currency review beyond the identified Rust exception and declared maintained YAML replacement; no product repair authorized."
+}

@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/Users/waka/development/pqc/pqc-scan/tasks/052/evidence/assessment-20261115/scorecard/boundary-probe-r2.sb",
+    "/bin/bash",
+    "--noprofile",
+    "--norc",
+    "-c",
+    "set -eu\n: > \"/private/tmp/pqc-task052-scorecard-oufker83/allowed-canary\"\nprintf '%s\\n' PASS_scratch_write\nif (: > \"/Users/waka/development/pqc/pqc-scan/target/quality-task-052/forbidden-write-canary\") 2>/dev/null; then exit 21; fi\nprintf '%s\\n' PASS_outside_write_denied\nif (IFS= read -r value < \"/Users/waka/development/pqc/pqc-scan/README.md\") 2>/dev/null; then exit 22; fi\nprintf '%s\\n' PASS_repository_data_read_denied\nif (IFS= read -r value < \"/Users/waka/development/pqc/pqc-scan/.git/config\") 2>/dev/null; then exit 23; fi\nprintf '%s\\n' PASS_git_config_read_denied\n"
+  ],
+  "exitCode": 0,
+  "stdout": "PASS_scratch_write\nPASS_outside_write_denied\nPASS_repository_data_read_denied\nPASS_git_config_read_denied\n",
+  "stderr": "",
+  "observedAt": "2026-11-14T21:01:48.964913+00:00",
+  "profileSha256": "15078d9e11fb4dbd71f7d85c05f86284fcd339a220a3ff2f001783886d5659eb",
+  "scope": "Final filesystem rules plus explicit bash exec only for synthetic no-credential probe",
+  "priorFailure": "BOUNDARY-PROBE.json: macOS /bin/sh reexecs /bin/bash; original probe exec allowlist omitted it",
+  "outsideFileAbsentAfter": true
+}

@@ -1,0 +1,93 @@
+{
+  "authorization": {
+    "source": "Direct user instruction in this chat",
+    "quote": "ok. 問題ない。では先ほどの非公開脆弱性報告機能の設定を再開してほしい。",
+    "scope": "Enable only GitHub private vulnerability reporting for wakaken/pqc-scan and verify state; no other settings, publication, advisory submission, notifications or task052 resumption."
+  },
+  "officialReference": "https://docs.github.com/en/rest/repos/repos#enable-private-vulnerability-reporting-for-a-repository",
+  "startedAtUtc": "2026-11-16T01:00:44.152300+00:00",
+  "sourceHead": "5425f85aa870ede6d3e5bdd8723b9a52c57701d7",
+  "commands": [
+    {
+      "argv": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "-H",
+        "Accept: application/vnd.github+json",
+        "-H",
+        "X-GitHub-Api-Version: 2022-11-28",
+        "--method",
+        "GET",
+        "repos/wakaken/pqc-scan/private-vulnerability-reporting"
+      ],
+      "exitCode": 0,
+      "atUtc": "2026-11-16T01:00:45.199438+00:00",
+      "stderr": "",
+      "stdout": "{\"enabled\":false}"
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "-H",
+        "Accept: application/vnd.github+json",
+        "-H",
+        "X-GitHub-Api-Version: 2022-11-28",
+        "--method",
+        "PUT",
+        "--include",
+        "repos/wakaken/pqc-scan/private-vulnerability-reporting"
+      ],
+      "exitCode": 0,
+      "atUtc": "2026-11-16T01:00:46.262786+00:00",
+      "stderr": "",
+      "httpStatusLines": [
+        "HTTP/2.0 204 No Content"
+      ]
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "--hostname",
+        "github.com",
+        "-H",
+        "Accept: application/vnd.github+json",
+        "-H",
+        "X-GitHub-Api-Version: 2022-11-28",
+        "--method",
+        "GET",
+        "repos/wakaken/pqc-scan/private-vulnerability-reporting"
+      ],
+      "exitCode": 0,
+      "atUtc": "2026-11-16T01:00:47.121876+00:00",
+      "stderr": "",
+      "stdout": "{\"enabled\":true}"
+    }
+  ],
+  "before": {
+    "enabled": false
+  },
+  "mutation": "Enabled with explicit maintainer permission",
+  "after": {
+    "enabled": true
+  },
+  "verifiedEnabled": true,
+  "finishedAtUtc": "2026-11-16T01:00:47.122583+00:00",
+  "protectedSourceHashes": {
+    "tasks/052/task.yaml": "1891601068002ddd5627d385e617885c93a672f94449b8253eaa6c7e9e409b09",
+    "tasks/053/task.yaml": "06349fa2001f10d65c03f3a9ff00f51075f10a1cc4d564f8a6ac84c0bbdb8d1c",
+    "docs/quality/EVIDENCE-CATALOG.json": "8038d341e281dadd01e7add09df8f4c4fa254157809614e80d04886bf8f2ba7c",
+    "SECURITY.md": "813c78fbf67c95e45cd550cc3439309134844b6c9160cb9be69f3ab6ca93bc33"
+  },
+  "protectedRecordsAndPublicPolicyUnchanged": true,
+  "limitations": [
+    "Does not establish successful private report intake or notification delivery.",
+    "Existing dated052 observations remain historical;052 and054 stay unfinished.",
+    "Public SECURITY.md policy has not been updated or published by this narrowly authorized setting action."
+  ]
+}

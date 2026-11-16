@@ -2,8 +2,8 @@ id: '053'
 title: 全軸の証拠集約と費用に応じたCI測定を統合する
 type: improvement
 priority: medium
-status: blocked
-owner: Main agent (Executor)
+status: done
+owner: Main agent (Evaluator)
 phase: '5'
 description: 既存CIとreport.pyを再利用し、全要求の状態・証拠を継続的に確認できるようにする。
 quality_alias: QAM-10
@@ -142,3 +142,44 @@ completion_correction:
     implementation_review: tasks/053/evidence/completion-20261116/IMPLEMENTATION-REVIEW.json
     test_review: tasks/053/evidence/completion-20261116/TEST-REVIEW.json
     local_checks: tasks/053/evidence/completion-20261116/LOCAL-CHECKS-r2.json
+hosted_execution:
+  date: '2026-11-16'
+  authorization: User explicitly approved publishing the prepared candidate and executing quality/baseline/scan including Code Scanning upload.
+  transition:
+    from: blocked
+    to: in-progress
+    reason: Approved candidate exactly materialized in an isolated worktree; remote execution gate is now being performed.
+  source_worktree_preserved: true
+  verification_worktree: /Users/waka/.codex/worktrees/task053-ci-verification/pqc-scan
+  branch: codex/task053-ci-verification-20261116
+  initial_candidate_commit: 2d9f8e397081be559327da7f474be3ee25fb3cfc
+  candidate_tree: bd93dfa42bd2827aa3529558e3354ea19bee39c6
+  candidate_manifest: tasks/053/evidence/completion-20261116/CI-CANDIDATE.json
+  approval_receipt: tasks/053/evidence/completion-20261116/REMOTE-AUTHORIZATION.json
+  exclusions: No merge,release,real signing,tag,settings;052 unfinished and054 unstarted.
+  final_validation:
+    final_commit: 6074a6ddb53fdcd0192e9d920cd2e63549540962
+    final_tree: 375e2ca7429c0cc690f7b0dfd908857afadc1068
+    run_id: 43763572932
+    run_url: https://github.com/wakaken/pqc-scan/actions/runs/43763572932
+    transition:
+      from: in-progress
+      to: review
+      reason: Final-source enabled jobs and all steps succeeded;4downloadedZIPdigests/factual/source parity verified. Final independent test review pending.
+    proof: tasks/053/evidence/completion-20261116/hosted-run-43763572932/HOSTED-VERIFICATION.json
+    source_digest: eabb81302632ad95324dd5b306cf6ed402e6d431eb3adea1d477aef976927646
+    population_digest: 9e0d40891936a5b895b98aa89dfd81d07ae267bedd24448bb801a94dab019774
+  completion:
+    date: '2026-11-16'
+    transition:
+      from: review
+      to: done
+      reason: All originalQ6-01/02/16/18 now have actual final-source results,4downloadedZIP/API digest and data verification, both final independent acceptances, and matching required deliverables.
+    verified_commit: 6074a6ddb53fdcd0192e9d920cd2e63549540962
+    verified_run: https://github.com/wakaken/pqc-scan/actions/runs/43763572932
+    final_implementation_review: tasks/053/evidence/completion-20261116/FINAL-IMPLEMENTATION-REVIEW.json
+    final_test_review: tasks/053/evidence/completion-20261116/FINAL-TEST-REVIEW.json
+    final_evidence: tasks/053/evidence/completion-20261116/FINAL-COMPLETION.json
+    results: tasks/053/TASK-053-COMPLETION-20261116.md
+    required_work_remaining: none for original053 criteria
+    preserved: Task052 unfinished; task054 unstarted; upstream quality uncertainty and releaseDecisionUnknown remain accurately reported.

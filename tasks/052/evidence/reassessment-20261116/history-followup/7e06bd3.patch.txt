@@ -1,0 +1,450 @@
+diff --git a/crates/pqc_scan_cli/src/main.rs b/crates/pqc_scan_cli/src/main.rs
+index 97db2be..d7519dc 100644
+--- a/crates/pqc_scan_cli/src/main.rs
++++ b/crates/pqc_scan_cli/src/main.rs
+@@ -383,0 +384,2 @@ fn scan_cmd<WOut: Write, WErr: Write>(
++    write_scope_note(document.coverage().not_enumerated_population(), stderr)?;
++
+@@ -408,0 +411,7 @@ fn scan_cmd<WOut: Write, WErr: Write>(
++fn write_scope_note<W: Write>(not_enumerated: bool, stderr: &mut W) -> std::io::Result<()> {
++    if not_enumerated {
++        writeln!(stderr, "note: ignore and traversal policies may leave files unenumerated; inspection completeness applies within scope. Zero findings does not establish repository-wide safety.")?;
++    }
++    Ok(())
++}
++
+@@ -505,0 +515,61 @@ mod tests {
++    #[test]
++    fn explicit_regular_file_scan_retains_findings_and_strict_success() {
++        let repo = temp_dir("single-file");
++        let out = temp_dir("single-file-output");
++        write_file(&repo, "input.js", "const algorithm = 'RS256';\n");
++        let (result, stdout, stderr) = run_cli_test(vec![
++            "pqc-scan".into(),
++            "scan".into(),
++            repo.join("input.js").display().to_string(),
++            "--rules-dir".into(),
++            rules_dir().display().to_string(),
++            "--out-dir".into(),
++            out.display().to_string(),
++            "--require-complete".into(),
++        ]);
++        assert_eq!(result.unwrap().code(), 0);
++        let report: serde_json::Value =
++            serde_json::from_slice(&fs::read(out.join("report.json")).unwrap()).unwrap();
++        assert!(report["findings"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .any(|f| f["rule_id"] == "JWT_RS256"));
++        assert!(stdout.contains("scanned files: 1"));
++        assert!(!stderr.contains("require-complete:"));
++        fs::remove_dir_all(repo).unwrap();
++        fs::remove_dir_all(out).unwrap();
++    }
++
++    #[test]
++    fn no_scope_note_when_population_is_enumerated() {
++        let mut stderr = Vec::new();
++        write_scope_note(false, &mut stderr).unwrap();
++        assert!(stderr.is_empty());
++    }
++
++    #[test]
++    fn ignored_crypto_warns_about_scope_without_changing_strict_exit() {
++        let repo = temp_dir("scope-note");
++        let out = temp_dir("scope-note-output");
++        write_file(&repo, ".gitignore", "hidden.js\n");
++        write_file(&repo, "hidden.js", "const algorithm = 'RS256';\n");
++        let (result, stdout, stderr) = run_cli_test(vec![
++            "pqc-scan".into(),
++            "scan".into(),
++            repo.display().to_string(),
++            "--rules-dir".into(),
++            rules_dir().display().to_string(),
++            "--out-dir".into(),
++            out.display().to_string(),
++            "--require-complete".into(),
++        ]);
++        assert_eq!(result.unwrap().code(), 0);
++        assert!(stdout.contains("total findings: 0"));
++        assert!(stderr.contains("unenumerated"));
++        assert!(stderr.contains("repository-wide safety"));
++        assert!(!stderr.contains("require-complete:"));
++        fs::remove_dir_all(repo).unwrap();
++        fs::remove_dir_all(out).unwrap();
++    }
++
+@@ -529 +599 @@ mod tests {
+-        assert!(stderr.is_empty(), "{stderr}");
++        assert!(stderr.contains("unenumerated"), "{stderr}");
+@@ -618 +688 @@ mod tests {
+-        assert!(stderr.is_empty());
++        assert!(stderr.contains("unenumerated"));
+@@ -680 +750 @@ mod tests {
+-        assert!(stderr.is_empty(), "{stderr}");
++        assert!(stderr.contains("unenumerated"), "{stderr}");
+@@ -730 +800 @@ mod tests {
+-        assert!(stderr.is_empty(), "{stderr}");
++        assert!(stderr.contains("unenumerated"), "{stderr}");
+@@ -789 +859 @@ mod tests {
+-        assert!(stderr.is_empty(), "{stderr}");
++        assert!(stderr.contains("unenumerated"), "{stderr}");
+@@ -871 +941 @@ mod tests {
+-        assert!(stderr.is_empty(), "{stderr}");
++        assert!(stderr.contains("unenumerated"), "{stderr}");
+diff --git a/crates/pqc_scan_core/Cargo.toml b/crates/pqc_scan_core/Cargo.toml
+index 7e6237e..8021cab 100644
+--- a/crates/pqc_scan_core/Cargo.toml
++++ b/crates/pqc_scan_core/Cargo.toml
+@@ -10 +10 @@ default = []
+-probe-transport = ["dep:socket2", "dep:libc"]
++probe-transport = ["dep:socket2"]
+@@ -27 +27 @@ socket2 = { version = "=0.6.4", optional = true }
+-libc = { version = "0.2", optional = true }
++libc = "0.2"
+diff --git a/crates/pqc_scan_core/src/lib.rs b/crates/pqc_scan_core/src/lib.rs
+index 4a7c2ec..3acf530 100644
+--- a/crates/pqc_scan_core/src/lib.rs
++++ b/crates/pqc_scan_core/src/lib.rs
+@@ -16,0 +17 @@ pub mod risk;
++mod safe_read;
+diff --git a/crates/pqc_scan_core/src/pipeline.rs b/crates/pqc_scan_core/src/pipeline.rs
+index abf6cef..3709be9 100644
+--- a/crates/pqc_scan_core/src/pipeline.rs
++++ b/crates/pqc_scan_core/src/pipeline.rs
+@@ -2 +1,0 @@ use std::collections::{BTreeMap, HashMap, HashSet};
+-use std::fs;
+@@ -33 +32,3 @@ pub fn scan_repository_detailed(
+-    scan_with_reader(config, rules, detectors, &|path| fs::read(path))
++    scan_with_reader(config, rules, detectors, &|path| {
++        crate::safe_read::read(&config.root, path, config.max_file_size_bytes)
++    })
+@@ -47 +48 @@ pub fn scan_repository_native(
+-        &|path| fs::read(path),
++        &|path| crate::safe_read::read(&config.root, path, config.max_file_size_bytes),
+@@ -145,2 +146,6 @@ where
+-    let runtime_profile =
+-        recommendation::RuntimeProfile::from_repository(&config.root, &files, &dependency_sbom);
++    let runtime_profile = recommendation::RuntimeProfile::from_repository_limited(
++        &config.root,
++        &files,
++        &dependency_sbom,
++        config.max_file_size_bytes,
++    );
+@@ -149 +154,6 @@ where
+-    attach_source_snippets(&config.root, &mut findings, &privacy_by_file);
++    attach_source_snippets(
++        &config.root,
++        config.max_file_size_bytes,
++        &mut findings,
++        &privacy_by_file,
++    );
+@@ -542,0 +553 @@ fn attach_source_snippets(
++    max_bytes: usize,
+@@ -565 +576 @@ fn attach_source_snippets(
+-                load_snippet_source(&root.join(&rel_file))
++                load_snippet_source(root, &root.join(&rel_file), max_bytes)
+@@ -594 +605,5 @@ enum CachedSnippetSource {
+-fn load_snippet_source(path: &std::path::Path) -> CachedSnippetSource {
++fn load_snippet_source(
++    root: &std::path::Path,
++    path: &std::path::Path,
++    max_bytes: usize,
++) -> CachedSnippetSource {
+@@ -602 +617 @@ fn load_snippet_source(path: &std::path::Path) -> CachedSnippetSource {
+-    let bytes = match fs::read(path) {
++    let bytes = match crate::safe_read::read(root, path, max_bytes) {
+@@ -1119 +1134 @@ mod tests {
+-        match load_snippet_source(&file) {
++        match load_snippet_source(&root, &file, 2 * 1024 * 1024) {
+@@ -1139,0 +1155 @@ mod opaque_container_snippet_tests {
++    use std::fs;
+@@ -1148 +1164 @@ mod opaque_container_snippet_tests {
+-                load_snippet_source(&path),
++                load_snippet_source(&root, &path, 2 * 1024 * 1024),
+diff --git a/crates/pqc_scan_core/src/recommendation.rs b/crates/pqc_scan_core/src/recommendation.rs
+index a2d9685..b44689d 100644
+--- a/crates/pqc_scan_core/src/recommendation.rs
++++ b/crates/pqc_scan_core/src/recommendation.rs
+@@ -2 +1,0 @@ use std::collections::BTreeSet;
+-use std::fs;
+@@ -25,0 +25,9 @@ impl RuntimeProfile {
++    ) -> Self {
++        Self::from_repository_limited(root, files, dependency_sbom, usize::MAX)
++    }
++
++    pub(crate) fn from_repository_limited(
++        root: &Path,
++        files: &[PathBuf],
++        dependency_sbom: &[DependencySbomEntry],
++        max_bytes: usize,
+@@ -64 +72 @@ impl RuntimeProfile {
+-                    if let Some(text) = read_text_limited(path, 256 * 1024) {
++                    if let Some(text) = read_text_limited(root, path, max_bytes.min(256 * 1024)) {
+@@ -69 +77 @@ impl RuntimeProfile {
+-                    if let Some(text) = read_text_limited(path, 256 * 1024) {
++                    if let Some(text) = read_text_limited(root, path, max_bytes.min(256 * 1024)) {
+@@ -74 +82 @@ impl RuntimeProfile {
+-                    if let Some(text) = read_text_limited(path, 512 * 1024) {
++                    if let Some(text) = read_text_limited(root, path, max_bytes.min(512 * 1024)) {
+@@ -79 +87 @@ impl RuntimeProfile {
+-                    if let Some(text) = read_text_limited(path, 128 * 1024) {
++                    if let Some(text) = read_text_limited(root, path, max_bytes.min(128 * 1024)) {
+@@ -84 +92 @@ impl RuntimeProfile {
+-                    if let Some(text) = read_text_limited(path, 256 * 1024) {
++                    if let Some(text) = read_text_limited(root, path, max_bytes.min(256 * 1024)) {
+@@ -89 +97 @@ impl RuntimeProfile {
+-                    if let Some(text) = read_text_limited(path, 128 * 1024) {
++                    if let Some(text) = read_text_limited(root, path, max_bytes.min(128 * 1024)) {
+@@ -94 +102 @@ impl RuntimeProfile {
+-                    if let Some(text) = read_text_limited(path, 16 * 1024) {
++                    if let Some(text) = read_text_limited(root, path, max_bytes.min(16 * 1024)) {
+@@ -99 +107 @@ impl RuntimeProfile {
+-                    if let Some(text) = read_text_limited(path, 256 * 1024) {
++                    if let Some(text) = read_text_limited(root, path, max_bytes.min(256 * 1024)) {
+@@ -104 +112 @@ impl RuntimeProfile {
+-                    if let Some(text) = read_text_limited(path, 32 * 1024) {
++                    if let Some(text) = read_text_limited(root, path, max_bytes.min(32 * 1024)) {
+@@ -864,6 +872,2 @@ fn push_action(actions: &mut Vec<RecommendedAction>, action: RecommendedAction)
+-fn read_text_limited(path: &Path, max_bytes: usize) -> Option<String> {
+-    let meta = fs::metadata(path).ok()?;
+-    if meta.len() as usize > max_bytes {
+-        return None;
+-    }
+-    fs::read_to_string(path).ok()
++fn read_text_limited(root: &Path, path: &Path, max_bytes: usize) -> Option<String> {
++    String::from_utf8(crate::safe_read::read(root, path, max_bytes).ok()?).ok()
+diff --git a/crates/pqc_scan_core/src/safe_read.rs b/crates/pqc_scan_core/src/safe_read.rs
+new file mode 100644
+index 0000000..259dc58
+--- /dev/null
++++ b/crates/pqc_scan_core/src/safe_read.rs
+@@ -0,0 +1,178 @@
++//! Bounded reads of repository files; never follow in-tree symbolic links.
++use std::fs::File;
++use std::io::{self, Read};
++use std::path::{Component, Path};
++
++pub(crate) fn read(root: &Path, path: &Path, max: usize) -> io::Result<Vec<u8>> {
++    let relative = path.strip_prefix(root).map_err(|_| invalid())?;
++    let parts: Vec<_> = relative.components().collect();
++    if parts.iter().any(|c| !matches!(c, Component::Normal(_))) {
++        return Err(invalid());
++    }
++    let file = open(root, &parts)?;
++    if !file.metadata()?.is_file() || file.metadata()?.len() > max as u64 {
++        return Err(invalid());
++    }
++    read_bounded(file, max)
++}
++
++fn read_bounded(reader: impl Read, max: usize) -> io::Result<Vec<u8>> {
++    let mut bytes = Vec::new();
++    reader
++        .take((max as u64).saturating_add(1))
++        .read_to_end(&mut bytes)?;
++    if bytes.len() > max {
++        return Err(invalid());
++    }
++    Ok(bytes)
++}
++
++fn invalid() -> io::Error {
++    io::Error::new(
++        io::ErrorKind::InvalidData,
++        "repository input is not a bounded regular file",
++    )
++}
++
++#[cfg(unix)]
++fn open(root: &Path, parts: &[Component<'_>]) -> io::Result<File> {
++    use std::ffi::CString;
++    use std::os::fd::{AsRawFd, FromRawFd};
++    use std::os::unix::{ffi::OsStrExt, fs::OpenOptionsExt};
++    if parts.is_empty() {
++        return std::fs::OpenOptions::new()
++            .read(true)
++            .custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK | libc::O_CLOEXEC)
++            .open(root);
++    }
++    // The explicitly selected root may itself be a link (e.g. /tmp on macOS).
++    // Subsequent components are resolved relative to held directory handles.
++    let mut file = std::fs::OpenOptions::new()
++        .read(true)
++        .custom_flags(libc::O_DIRECTORY | libc::O_NONBLOCK | libc::O_CLOEXEC)
++        .open(root)?;
++    for (index, part) in parts.iter().enumerate() {
++        let name = CString::new(part.as_os_str().as_bytes()).map_err(|_| invalid())?;
++        let directory = if index + 1 < parts.len() {
++            libc::O_DIRECTORY
++        } else {
++            0
++        };
++        // SAFETY: valid held parent fd and a NUL-terminated single path component.
++        let fd = unsafe {
++            libc::openat(
++                file.as_raw_fd(),
++                name.as_ptr(),
++                libc::O_RDONLY | libc::O_NOFOLLOW | libc::O_NONBLOCK | libc::O_CLOEXEC | directory,
++            )
++        };
++        if fd < 0 {
++            return Err(io::Error::last_os_error());
++        }
++        // SAFETY: openat returned an owned fd; File closes it exactly once.
++        file = unsafe { File::from_raw_fd(fd) };
++    }
++    Ok(file)
++}
++
++#[cfg(windows)]
++fn open(root: &Path, parts: &[Component<'_>]) -> io::Result<File> {
++    use std::os::windows::ffi::OsStringExt;
++    use std::os::windows::{fs::OpenOptionsExt, io::AsRawHandle};
++    #[link(name = "kernel32")]
++    unsafe extern "system" {
++        fn GetFinalPathNameByHandleW(
++            handle: *mut std::ffi::c_void,
++            buffer: *mut u16,
++            size: u32,
++            flags: u32,
++        ) -> u32;
++    }
++    let canonical_root = root.canonicalize()?;
++    let mut path = root.to_path_buf();
++    for part in parts {
++        path.push(part);
++        if std::fs::symlink_metadata(&path)?.file_type().is_symlink() {
++            return Err(invalid());
++        }
++    }
++    let file = std::fs::OpenOptions::new()
++        .read(true)
++        .custom_flags(0x00200000) // FILE_FLAG_OPEN_REPARSE_POINT
++        .open(path)?;
++    if !file.metadata()?.is_file() {
++        return Err(invalid());
++    }
++    let mut buffer = vec![0u16; 32768];
++    // SAFETY: valid owned file handle and writable buffer of the advertised length.
++    let len = unsafe {
++        GetFinalPathNameByHandleW(
++            file.as_raw_handle(),
++            buffer.as_mut_ptr(),
++            buffer.len() as u32,
++            0,
++        )
++    };
++    if len == 0 || len as usize >= buffer.len() {
++        return Err(invalid());
++    }
++    let actual = std::path::PathBuf::from(std::ffi::OsString::from_wide(&buffer[..len as usize]));
++    if !actual.starts_with(canonical_root) {
++        return Err(invalid());
++    }
++    Ok(file)
++}
++
++#[cfg(not(any(unix, windows)))]
++fn open(_root: &Path, _parts: &[Component<'_>]) -> io::Result<File> {
++    Err(io::Error::new(
++        io::ErrorKind::Unsupported,
++        "link-safe repository reads are unsupported on this platform",
++    ))
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn growing_input_is_stopped_at_limit_plus_one() {
++        let mut reader = std::io::Cursor::new(b"abcdeMORE".to_vec());
++        assert!(read_bounded(&mut reader, 4).is_err());
++        assert_eq!(reader.position(), 5);
++        assert_eq!(
++            read_bounded(std::io::Cursor::new(b"abcd"), 4).unwrap(),
++            b"abcd"
++        );
++        assert!(read_bounded(std::io::Cursor::new(b"x"), 0).is_err());
++        assert!(read_bounded(std::io::Cursor::new(b""), 0)
++            .unwrap()
++            .is_empty());
++    }
++
++    #[cfg(unix)]
++    #[test]
++    fn read_bounds_and_rejects_replaced_files_and_parent_links() {
++        use std::os::unix::fs::symlink;
++        let root = std::env::temp_dir().join(format!("pqc-safe-read-{}", std::process::id()));
++        std::fs::create_dir_all(root.join("nested")).unwrap();
++        std::fs::write(root.join("nested/file"), b"abcd").unwrap();
++        let path = root.join("nested/file");
++        assert_eq!(read(&root, &path, 4).unwrap(), b"abcd");
++        assert_eq!(read(&path, &path, 4).unwrap(), b"abcd");
++        assert!(read(&root, &path, 3).is_err());
++        assert!(read(&root, &root.join("nested/../nested/file"), 4).is_err());
++        std::fs::rename(root.join("nested"), root.join("moved")).unwrap();
++        symlink(root.join("moved"), root.join("nested")).unwrap();
++        assert!(read(&root, &path, 4).is_err());
++        std::fs::remove_file(root.join("nested")).unwrap();
++        symlink(root.join("moved/file"), root.join("link")).unwrap();
++        assert!(read(&root, &root.join("link"), 4).is_err());
++        assert!(std::process::Command::new("mkfifo")
++            .arg(root.join("pipe"))
++            .status()
++            .unwrap()
++            .success());
++        assert!(read(&root, &root.join("pipe"), 4).is_err());
++        std::fs::remove_dir_all(root).unwrap();
++    }
++}
+diff --git a/crates/pqc_scan_core/src/walker.rs b/crates/pqc_scan_core/src/walker.rs
+index 2d10c3b..7b453ec 100644
+--- a/crates/pqc_scan_core/src/walker.rs
++++ b/crates/pqc_scan_core/src/walker.rs
+@@ -86,0 +87,11 @@ fn collect_entries(
++        if !entry.file_type().is_some_and(|t| t.is_file()) {
++            stats.skipped += 1;
++            failed_entries += 1;
++            diagnostics.push(ScanDiagnostic::new(
++                DiagnosticCode::ReadFailed,
++                Some(relative_path(root, path)),
++                None,
++            ));
++            continue;
++        }
++
+@@ -165,0 +177,32 @@ mod tests {
++    #[cfg(unix)]
++    #[test]
++    fn special_entries_are_failed_without_selecting_or_following_them() {
++        use std::os::unix::fs::symlink;
++        let root = temp_dir("walker-special");
++        let outside = temp_dir("walker-outside");
++        fs::write(outside.join("large.txt"), vec![b'x'; 4096]).unwrap();
++        symlink(outside.join("large.txt"), root.join("link.txt")).unwrap();
++        symlink(outside.join("missing"), root.join("broken.txt")).unwrap();
++        let fifo = root.join("pipe");
++        assert!(std::process::Command::new("mkfifo")
++            .arg(&fifo)
++            .status()
++            .unwrap()
++            .success());
++        fs::write(root.join("ok.txt"), "ok").unwrap();
++        let result = walk_repository_detailed(&root, 128).unwrap();
++        assert_eq!(result.files, vec![root.join("ok.txt")]);
++        assert_eq!(result.failed_entries, 3);
++        assert_eq!(result.stats.skipped, 3);
++        assert_eq!(
++            result
++                .diagnostics
++                .iter()
++                .filter(|d| d.code() == DiagnosticCode::ReadFailed)
++                .count(),
++            3
++        );
++        fs::remove_dir_all(root).unwrap();
++        fs::remove_dir_all(outside).unwrap();
++    }
++

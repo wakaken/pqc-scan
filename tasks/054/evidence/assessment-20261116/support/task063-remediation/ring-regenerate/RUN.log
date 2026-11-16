@@ -1,0 +1,235 @@
+     Locking 3 packages to latest compatible versions
+   Compiling find-msvc-tools v0.1.9
+   Compiling shlex v1.3.0
+   Compiling cc v1.2.56
+   Compiling pqc_ring_regenerate v0.0.0 (/scratch/probe)
+warning: constant `WASM32` is never used
+  --> src/main.rs:51:7
+   |
+51 | const WASM32: &str = "wasm32";
+   |       ^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `RING_TEST_SRCS` is never used
+   --> src/main.rs:123:7
+    |
+123 | const RING_TEST_SRCS: &[&str] = &[("crypto/constant_time_test.c")];
+    |       ^^^^^^^^^^^^^^
+
+warning: constant `PREGENERATED` is never used
+   --> src/main.rs:125:7
+    |
+125 | const PREGENERATED: &str = "pregenerated";
+    |       ^^^^^^^^^^^^
+
+warning: function `cpp_flags` is never used
+   --> src/main.rs:127:4
+    |
+127 | fn cpp_flags(compiler: &cc::Tool) -> &'static [&'static str] {
+    |    ^^^^^^^^^
+
+warning: field `oss` is never read
+   --> src/main.rs:227:5
+    |
+225 | struct AsmTarget {
+    |        --------- field in this struct
+226 |     /// Operating systems.
+227 |     oss: &'static [&'static str],
+    |     ^^^
+
+warning: function `original_main` is never used
+   --> src/main.rs:268:4
+    |
+268 | fn original_main() {
+    |    ^^^^^^^^^^^^^
+
+warning: function `ring_build_rs_main` is never used
+   --> src/main.rs:303:4
+    |
+303 | fn ring_build_rs_main(c_root_dir: &Path, core_name_and_version: &str) {
+    |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `pregenerate_asm_main` is never used
+   --> src/main.rs:371:4
+    |
+371 | fn pregenerate_asm_main(c_root_dir: &Path, core_name_and_version: &str) {
+    |    ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `generate_sources_and_preassemble` is never used
+   --> src/main.rs:382:4
+    |
+382 | fn generate_sources_and_preassemble<'a>(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `Target` is never constructed
+   --> src/main.rs:408:8
+    |
+408 | struct Target {
+    |        ^^^^^^
+
+warning: function `build_c_code` is never used
+   --> src/main.rs:422:4
+    |
+422 | fn build_c_code(
+    |    ^^^^^^^^^^^^
+
+warning: function `new_build` is never used
+   --> src/main.rs:507:4
+    |
+507 | fn new_build(target: &Target, c_root_dir: &Path, include_dir: &Path) -> cc::Build {
+    |    ^^^^^^^^^
+
+warning: function `build_library` is never used
+   --> src/main.rs:513:4
+    |
+513 | fn build_library<'a>(
+    |    ^^^^^^^^^^^^^
+
+warning: function `obj_path` is never used
+   --> src/main.rs:551:4
+    |
+551 | fn obj_path(out_dir: &Path, src: &Path) -> PathBuf {
+    |    ^^^^^^^^
+
+warning: function `configure_cc` is never used
+   --> src/main.rs:560:4
+    |
+560 | fn configure_cc(c: &mut cc::Build, target: &Target, c_root_dir: &Path, include_dir: &Path) {
+    |    ^^^^^^^^^^^^
+
+warning: function `nasm` is never used
+   --> src/main.rs:610:4
+    |
+610 | fn nasm(file: &Path, arch: &str, include_dir: &Path, out_dir: &Path, c_root_dir: &Path) {
+    |    ^^^^
+
+warning: function `asm_srcs` is never used
+   --> src/main.rs:692:4
+    |
+692 | fn asm_srcs(perlasm_src_dsts: Vec<(PathBuf, PathBuf)>) -> Vec<PathBuf> {
+    |    ^^^^^^^^
+
+warning: function `emit_rerun_if_changed` is never used
+   --> src/main.rs:748:4
+    |
+748 | fn emit_rerun_if_changed() {
+    |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `walk_dir` is never used
+   --> src/main.rs:764:4
+    |
+764 | fn walk_dir(dir: &Path, cb: &impl Fn(&DirEntry)) {
+    |    ^^^^^^^^
+
+warning: function `var` is never used
+  --> src/main.rs:42:12
+   |
+42 |     pub fn var(name: &'static str) -> Option<String> {
+   |            ^^^
+
+warning: `pqc_ring_regenerate` (bin "pqc_ring_regenerate") generated 20 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.59s
+cargo:rerun-if-env-changed=PERL_EXECUTABLE
+running "perl" "//scratch/ring/crypto/chacha/asm/chacha-armv8.pl" "linux64" "//scratch/ring/pregenerated/chacha-armv8-linux64.S"
+running "perl" "//scratch/ring/crypto/cipher/asm/chacha20_poly1305_armv8.pl" "linux64" "//scratch/ring/pregenerated/chacha20_poly1305_armv8-linux64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesv8-armx.pl" "linux64" "//scratch/ring/pregenerated/aesv8-armx-linux64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesv8-gcm-armv8.pl" "linux64" "//scratch/ring/pregenerated/aesv8-gcm-armv8-linux64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghash-neon-armv8.pl" "linux64" "//scratch/ring/pregenerated/ghash-neon-armv8-linux64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghashv8-armx.pl" "linux64" "//scratch/ring/pregenerated/ghashv8-armx-linux64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/vpaes-armv8.pl" "linux64" "//scratch/ring/pregenerated/vpaes-armv8-linux64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/armv8-mont.pl" "linux64" "//scratch/ring/pregenerated/armv8-mont-linux64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/ec/asm/p256-armv8-asm.pl" "linux64" "//scratch/ring/pregenerated/p256-armv8-asm-linux64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-armv8.pl" "linux64" "//scratch/ring/pregenerated/sha512-armv8-linux64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-armv8.pl" "linux64" "//scratch/ring/pregenerated/sha256-armv8-linux64.S"
+cargo:rerun-if-env-changed=PERL_EXECUTABLE
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/bsaes-armv7.pl" "linux32" "//scratch/ring/pregenerated/bsaes-armv7-linux32.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghash-armv4.pl" "linux32" "//scratch/ring/pregenerated/ghash-armv4-linux32.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/vpaes-armv7.pl" "linux32" "//scratch/ring/pregenerated/vpaes-armv7-linux32.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/armv4-mont.pl" "linux32" "//scratch/ring/pregenerated/armv4-mont-linux32.S"
+running "perl" "//scratch/ring/crypto/chacha/asm/chacha-armv4.pl" "linux32" "//scratch/ring/pregenerated/chacha-armv4-linux32.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha256-armv4.pl" "linux32" "//scratch/ring/pregenerated/sha256-armv4-linux32.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-armv4.pl" "linux32" "//scratch/ring/pregenerated/sha512-armv4-linux32.S"
+cargo:rerun-if-env-changed=PERL_EXECUTABLE
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesni-x86.pl" "elf" "-fPIC" "//scratch/ring/pregenerated/aesni-x86-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghash-x86.pl" "elf" "-fPIC" "//scratch/ring/pregenerated/ghash-x86-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/vpaes-x86.pl" "elf" "-fPIC" "//scratch/ring/pregenerated/vpaes-x86-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/x86-mont.pl" "elf" "-fPIC" "//scratch/ring/pregenerated/x86-mont-elf.S"
+running "perl" "//scratch/ring/crypto/chacha/asm/chacha-x86.pl" "elf" "-fPIC" "//scratch/ring/pregenerated/chacha-x86-elf.S"
+cargo:rerun-if-env-changed=PERL_EXECUTABLE
+running "perl" "//scratch/ring/crypto/chacha/asm/chacha-x86_64.pl" "elf" "//scratch/ring/pregenerated/chacha-x86_64-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aes-gcm-avx2-x86_64.pl" "elf" "//scratch/ring/pregenerated/aes-gcm-avx2-x86_64-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesni-gcm-x86_64.pl" "elf" "//scratch/ring/pregenerated/aesni-gcm-x86_64-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesni-x86_64.pl" "elf" "//scratch/ring/pregenerated/aesni-x86_64-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghash-x86_64.pl" "elf" "//scratch/ring/pregenerated/ghash-x86_64-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/vpaes-x86_64.pl" "elf" "//scratch/ring/pregenerated/vpaes-x86_64-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/x86_64-mont.pl" "elf" "//scratch/ring/pregenerated/x86_64-mont-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/x86_64-mont5.pl" "elf" "//scratch/ring/pregenerated/x86_64-mont5-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/ec/asm/p256-x86_64-asm.pl" "elf" "//scratch/ring/pregenerated/p256-x86_64-asm-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-x86_64.pl" "elf" "//scratch/ring/pregenerated/sha512-x86_64-elf.S"
+running "perl" "//scratch/ring/crypto/cipher/asm/chacha20_poly1305_x86_64.pl" "elf" "//scratch/ring/pregenerated/chacha20_poly1305_x86_64-elf.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-x86_64.pl" "elf" "//scratch/ring/pregenerated/sha256-x86_64-elf.S"
+cargo:rerun-if-env-changed=PERL_EXECUTABLE
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/bsaes-armv7.pl" "linux32" "//scratch/ring/pregenerated/bsaes-armv7-linux32.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghash-armv4.pl" "linux32" "//scratch/ring/pregenerated/ghash-armv4-linux32.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/vpaes-armv7.pl" "linux32" "//scratch/ring/pregenerated/vpaes-armv7-linux32.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/armv4-mont.pl" "linux32" "//scratch/ring/pregenerated/armv4-mont-linux32.S"
+running "perl" "//scratch/ring/crypto/chacha/asm/chacha-armv4.pl" "linux32" "//scratch/ring/pregenerated/chacha-armv4-linux32.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha256-armv4.pl" "linux32" "//scratch/ring/pregenerated/sha256-armv4-linux32.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-armv4.pl" "linux32" "//scratch/ring/pregenerated/sha512-armv4-linux32.S"
+cargo:rerun-if-env-changed=PERL_EXECUTABLE
+running "perl" "//scratch/ring/crypto/chacha/asm/chacha-armv8.pl" "ios64" "//scratch/ring/pregenerated/chacha-armv8-ios64.S"
+running "perl" "//scratch/ring/crypto/cipher/asm/chacha20_poly1305_armv8.pl" "ios64" "//scratch/ring/pregenerated/chacha20_poly1305_armv8-ios64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesv8-armx.pl" "ios64" "//scratch/ring/pregenerated/aesv8-armx-ios64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesv8-gcm-armv8.pl" "ios64" "//scratch/ring/pregenerated/aesv8-gcm-armv8-ios64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghash-neon-armv8.pl" "ios64" "//scratch/ring/pregenerated/ghash-neon-armv8-ios64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghashv8-armx.pl" "ios64" "//scratch/ring/pregenerated/ghashv8-armx-ios64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/vpaes-armv8.pl" "ios64" "//scratch/ring/pregenerated/vpaes-armv8-ios64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/armv8-mont.pl" "ios64" "//scratch/ring/pregenerated/armv8-mont-ios64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/ec/asm/p256-armv8-asm.pl" "ios64" "//scratch/ring/pregenerated/p256-armv8-asm-ios64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-armv8.pl" "ios64" "//scratch/ring/pregenerated/sha512-armv8-ios64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-armv8.pl" "ios64" "//scratch/ring/pregenerated/sha256-armv8-ios64.S"
+cargo:rerun-if-env-changed=PERL_EXECUTABLE
+running "perl" "//scratch/ring/crypto/chacha/asm/chacha-x86_64.pl" "macosx" "//scratch/ring/pregenerated/chacha-x86_64-macosx.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aes-gcm-avx2-x86_64.pl" "macosx" "//scratch/ring/pregenerated/aes-gcm-avx2-x86_64-macosx.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesni-gcm-x86_64.pl" "macosx" "//scratch/ring/pregenerated/aesni-gcm-x86_64-macosx.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesni-x86_64.pl" "macosx" "//scratch/ring/pregenerated/aesni-x86_64-macosx.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghash-x86_64.pl" "macosx" "//scratch/ring/pregenerated/ghash-x86_64-macosx.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/vpaes-x86_64.pl" "macosx" "//scratch/ring/pregenerated/vpaes-x86_64-macosx.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/x86_64-mont.pl" "macosx" "//scratch/ring/pregenerated/x86_64-mont-macosx.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/x86_64-mont5.pl" "macosx" "//scratch/ring/pregenerated/x86_64-mont5-macosx.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/ec/asm/p256-x86_64-asm.pl" "macosx" "//scratch/ring/pregenerated/p256-x86_64-asm-macosx.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-x86_64.pl" "macosx" "//scratch/ring/pregenerated/sha512-x86_64-macosx.S"
+running "perl" "//scratch/ring/crypto/cipher/asm/chacha20_poly1305_x86_64.pl" "macosx" "//scratch/ring/pregenerated/chacha20_poly1305_x86_64-macosx.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-x86_64.pl" "macosx" "//scratch/ring/pregenerated/sha256-x86_64-macosx.S"
+cargo:rerun-if-env-changed=PERL_EXECUTABLE
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesni-x86.pl" "win32n" "-fPIC" "//scratch/ring/pregenerated/aesni-x86-win32n.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghash-x86.pl" "win32n" "-fPIC" "//scratch/ring/pregenerated/ghash-x86-win32n.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/vpaes-x86.pl" "win32n" "-fPIC" "//scratch/ring/pregenerated/vpaes-x86-win32n.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/x86-mont.pl" "win32n" "-fPIC" "//scratch/ring/pregenerated/x86-mont-win32n.asm"
+running "perl" "//scratch/ring/crypto/chacha/asm/chacha-x86.pl" "win32n" "-fPIC" "//scratch/ring/pregenerated/chacha-x86-win32n.asm"
+cargo:rerun-if-env-changed=PERL_EXECUTABLE
+running "perl" "//scratch/ring/crypto/chacha/asm/chacha-x86_64.pl" "nasm" "//scratch/ring/pregenerated/chacha-x86_64-nasm.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aes-gcm-avx2-x86_64.pl" "nasm" "//scratch/ring/pregenerated/aes-gcm-avx2-x86_64-nasm.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesni-gcm-x86_64.pl" "nasm" "//scratch/ring/pregenerated/aesni-gcm-x86_64-nasm.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesni-x86_64.pl" "nasm" "//scratch/ring/pregenerated/aesni-x86_64-nasm.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghash-x86_64.pl" "nasm" "//scratch/ring/pregenerated/ghash-x86_64-nasm.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/vpaes-x86_64.pl" "nasm" "//scratch/ring/pregenerated/vpaes-x86_64-nasm.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/x86_64-mont.pl" "nasm" "//scratch/ring/pregenerated/x86_64-mont-nasm.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/x86_64-mont5.pl" "nasm" "//scratch/ring/pregenerated/x86_64-mont5-nasm.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/ec/asm/p256-x86_64-asm.pl" "nasm" "//scratch/ring/pregenerated/p256-x86_64-asm-nasm.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-x86_64.pl" "nasm" "//scratch/ring/pregenerated/sha512-x86_64-nasm.asm"
+running "perl" "//scratch/ring/crypto/cipher/asm/chacha20_poly1305_x86_64.pl" "nasm" "//scratch/ring/pregenerated/chacha20_poly1305_x86_64-nasm.asm"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-x86_64.pl" "nasm" "//scratch/ring/pregenerated/sha256-x86_64-nasm.asm"
+cargo:rerun-if-env-changed=PERL_EXECUTABLE
+running "perl" "//scratch/ring/crypto/chacha/asm/chacha-armv8.pl" "win64" "//scratch/ring/pregenerated/chacha-armv8-win64.S"
+running "perl" "//scratch/ring/crypto/cipher/asm/chacha20_poly1305_armv8.pl" "win64" "//scratch/ring/pregenerated/chacha20_poly1305_armv8-win64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesv8-armx.pl" "win64" "//scratch/ring/pregenerated/aesv8-armx-win64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/aesv8-gcm-armv8.pl" "win64" "//scratch/ring/pregenerated/aesv8-gcm-armv8-win64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghash-neon-armv8.pl" "win64" "//scratch/ring/pregenerated/ghash-neon-armv8-win64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/ghashv8-armx.pl" "win64" "//scratch/ring/pregenerated/ghashv8-armx-win64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/aes/asm/vpaes-armv8.pl" "win64" "//scratch/ring/pregenerated/vpaes-armv8-win64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/bn/asm/armv8-mont.pl" "win64" "//scratch/ring/pregenerated/armv8-mont-win64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/ec/asm/p256-armv8-asm.pl" "win64" "//scratch/ring/pregenerated/p256-armv8-asm-win64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-armv8.pl" "win64" "//scratch/ring/pregenerated/sha512-armv8-win64.S"
+running "perl" "//scratch/ring/crypto/fipsmodule/sha/asm/sha512-armv8.pl" "win64" "//scratch/ring/pregenerated/sha256-armv8-win64.S"

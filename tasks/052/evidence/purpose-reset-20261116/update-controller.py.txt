@@ -1,0 +1,178 @@
+from pathlib import Path
+import json,hashlib,collections,shutil
+r=Path.cwd();e=r/'tasks/052/evidence/purpose-reset-20261116';cur=r/'tasks/052/evidence/reassessment-20261116';out=cur/'outputs'
+J=lambda p:json.loads(p.read_text());H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def save(p,d):p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
+a=J(e/'before/best-practices-assessment.json');refs=J(cur/'EVIDENCE-REFERENCES.json');official={x['level']+'.'+x['id']:x for x in J(r/'tasks/052/evidence/assessment-20261115/official/CRITERIA-EXTRACT.json')}
+notes={
+'0.interact':'README provides source installation/download and GitHub exposes Issues and Pull requests. The visitor-facing contribution entry remains less explicit than the obtain/use information; inspected evidence supports mechanisms, not an unqualified documentation claim.',
+'0.contribution_requirements':'AGENTS and BEST-PRACTICES identify testing, review, compatibility and Rust style requirements. Task063 records use. General contributor discovery is less explicit; no new CONTRIBUTING file is imposed as a completion requirement.',
+'1.contribution_requirements':'Public change guidance states testing/style/review expectations and recent task063 applies them. The evidence is strongest for agent-mediated changes; the visitor-facing general contribution presentation is not claimed fully established.',
+'0.report_responses':'The maintainer confirms zero external bug reports ever; public issues and all31PR histories were inspected. There is no nonzero2–12-month denominator. Record no substantiated majority-response claim; do not manufacture a response exercise or an unauthorized N/A.',
+'0.enhancement_responses':'The maintainer confirms no external enhancement requests ever. Empty issue history agrees within its scope. With no observed requests, >50% responsiveness is not evidenced; no numerical rate or invented N/A.',
+'0.vulnerability_report_process':'Approved bilingual local SECURITY policies specify GitHub private reporting. The live feature is enabled, but the fetched public policy is the older interim version. This factual publication gap keeps conformance Partial; publishing is separate from this assessment.',
+'0.vulnerability_report_private':'GitHub private reporting is enabled and the local policy gives that private channel. The fetched public policy still says it is unavailable. The assessment establishes the actual channel and the public/local discrepancy, without sending a report.',
+'1.governance':'AGENTS documents agent roles and maintainer approval boundaries. The sole maintainer has confirmed ownership and no backup; that does not supply a complete publicly documented human governance model.',
+'1.roles_responsibilities':'The sole primary responder is confirmed in dated human receipts and local SECURITY. Public GitHub lists one collaborator; agent responsibilities alone do not constitute a complete public allocation of human roles.',
+'1.documentation_current':'Paired guides and recent updates show maintenance effort. A specific known gap remains: current local reporting policy and live enabled reporting differ from the older fetched public policy. No exhaustive documentation audit or publication claim.',
+'1.accessibility_best_practices':'Browser guidance and earlier scoped keyboard/mobile evidence establish some accessibility work. There is no complete applicable site/report/CLI accessibility assessment in the inspected records; no general conformance claim follows.',
+'1.vulnerability_response_process':'Local SECURITY defines primary responder, no backup, absence handling and investigation/fix/disclosure. No report has been received, so execution is unoperated. The older public policy lacks this full current procedure; document both facts without requiring a staged incident.',
+'1.coding_standards_enforced':'The workflow automatically runs rustfmt and strict Clippy for eligible Rust changes. It is not a merge-protected guarantee and event filters exist. These limits are recorded, without treating branch protection as a new criterion requirement or asserting all paths are enforced.',
+'1.build_standard_variables':'The source-install run observes requested CC/CFLAGS, Rust compiler/linker settings and an ELF marker. It does not exercise CXX/CXXFLAGS or establish generic LDFLAGS behavior for all native paths. Positive tested cases and unverified variables remain separate.',
+'1.build_preserve_debug':'The static Linux source-install experiment retains project .debug_info/.debug_line with explicitly disabled third-party debug to fit4GiB. Independent debug/no-debug controls pass. This supports that configuration only; no all-dependency, macOS archive or all-feature debug claim.',
+'1.installation_common':'Cargo source installation is documented and actually exercised; archive installation is also tested in task064. The inspected package guide does not fully describe the common uninstall route, so the paired install/uninstall presentation is only partially evidenced. No custom uninstaller is required by052.',
+'1.installation_standard_variables':'Inspected Cargo/archive instructions and existing prefix verification do not establish POSIX DESTDIR behavior. Absence of proof is Unknown, not an observed failed install and not a Rust exemption. No new installer implementation is required for this assessment.',
+'1.dependency_monitoring':'Dated RustSec audits/remediation and48actual OSVresponses are available. Public root and corrected local root differ; three local matching names are at fixed boundaries and unsafe-libyaml is removed. A recurring monitoring operation is not established; the optional unanswered factual inquiry remains unconfirmed.',
+'1.interfaces_current':'Task063 replaces deprecated YAML. API-CURRENCY identifies a pinned-rustls deprecated error variant retained alongside its Context replacement. This is a concrete bounded compatibility exception; no all-stack obsolete-API or vulnerability-free claim.',
+'1.regression_tests_added50':'All129ancestry commits were discovery-classified and59patches yielded candidate test/fix links. They do not define semantic individual bugs and a six-month numerator/denominator. The >=50% claim is unsupported; no new bug management system or percentage is invented.',
+'1.crypto_algorithm_agility':'TLS exposes bounded provider/group choices while verified SSH intentionally pins a particular hybrid KEX. The inspected runtime and protocol tests do not establish general user-switchable cryptographic agility; no algorithm policy is changed.',
+'1.crypto_credential_agility':'Probes perform no user authentication and SSH pin files contain public keys. Scanner inputs can contain private-key markers. Therefore a blanket never-processes-private-keys exemption is unsupported; credential storage/rotation applicability remains bounded and unclaimed.',
+'1.implement_secure_design':'Architecture, target-policy/bounded reads and task049/063 failure tests demonstrate selected principles. They do not supply a complete principle-by-principle argument over all interfaces. Maintainer knowledge attestation is separate from implemented conformance.',
+'1.input_validation':'Architecture and task049/063 exercise selected untrusted input rejection, bounded reads and fail-closed behavior. A full input inventory/allowlist trace for every interface is not in the inspected records; selected tests cannot substantiate the universal claim.',
+'1.assurance_case':'Threat/boundary documents, residual risks and historical tests exist. No single complete requirements-to-threats-to-argument-to-evidence assurance case is established for final source; this is an assessed evidence limit, not a request to design a new case.',
+'2.build_reproducible':'Task060 actually builds static/network binaries twice in clean environments;199declared source bindings match. Equality is demonstrated under recorded same-host/compiler/SDK/path/epoch conditions. Independent-party reproduction/public-recipe conformance is not established.',
+'2.test_branch_coverage80':'AST controls and source module declarations remove known test-only regions from the measured Rust workspace population. Optimistic production bounds remain below80%: default76.38162808065721%, all-features76.31484149855908%. Other automated assets are not fully unified; no exact or global product rate follows.',
+'0.test_most':'Default and all-feature Rust tests were measured separately on hash-bound source. Production branch upper bounds for that workspace population are below80%; broad input-field/functionality coverage is not quantified. This gives partial evidence without a universal claim.',
+'0.no_leaked_credentials':'Source-bound privacy controls and live secret scanning/push protection establish prevention and selected checks. They are not an exhaustive current/all-history proof of absence of live credentials. No actual secret contents were collected.',
+}
+# Related criteria share evidence, but each receives its exact official wording and a distinct key-bound adjudication.
+for k in ['0.crypto_published','0.crypto_keylength','0.crypto_working','0.crypto_weaknesses','0.crypto_pfs','0.crypto_random','1.crypto_weaknesses']:
+ notes[k]='Identity hashing, TLS/SSH runtime/provider declarations and task049 protocol tests were inspected. They establish selected mechanisms, not an exhaustive algorithm/keylength/mode/forward-secrecy/randomness inventory for every optional path. For this exact criterion, no unconditional conformance claim is supported; examples containing weak crypto are not runtime use.'
+for k in ['0.static_analysis_common_vulnerabilities','1.static_analysis_common_vulnerabilities']:
+ notes[k]='Clippy and self-scan execute in eligible quality jobs; fresh Scorecard SAST says not all commits use static analysis. No complete Rust common-vulnerability rule applicability is established by the inspected configuration. Cryptographic-usage scanning is not a general vulnerability analyzer.'
+for k in ['0.dynamic_analysis','2.dynamic_analysis']:
+ notes[k]='Task047 records bounded mutational fuzzing and task044/current052 record instrumented test execution. Complete pre-release application to every applicable proposed major release is not established. These observations are not silently generalized to all releases.'
+for k in ['0.dynamic_analysis_unsafe','1.dynamic_analysis_unsafe']:
+ notes[k]='Unsafe/FFI/native dependency paths exist. Bounded fuzzing and limited/retired Miri evidence do not establish routine memory-error detection for those paths. Rust as the primary language does not justify an unconditional N/A.'
+for k in ['1.hardening','2.hardening']:
+ notes[k]='Native package/protocol records and architecture describe selected binary and fail-closed defenses. There is no complete hardening-mechanism/configuration applicability matrix in the inspected evidence. Concrete controls remain evidenced; full criterion conformance remains Partial.'
+for k in ['0.release_notes_vulns','0.vulnerabilities_fixed_60_days','0.vulnerabilities_critical_fixed','0.static_analysis_fixed','0.dynamic_analysis_fixed','1.vulnerability_report_credit']:
+ notes[k]={
+ '0.release_notes_vulns':'Release notes, empty advisories/NVD exact-name results, repository safety-fix reconciliation and maintainer no-known-confirmed-case/no-off-repository-records attestations were checked. They do not independently qualify every historical safety fix as an identified project vulnerability at release. No complete release-note vulnerability claim or N/A is inferred; dependencies are separate.',
+ '0.vulnerabilities_fixed_60_days':'Public root dependency advisories and corrected local root differ;48OSVrecords were fetched. Medium severity, exploitability, public-knowledge date and shipped-version linkage are not all established. User knows no confirmed project-owned cases, but that does not prove the no->60-day condition. Unknown is a substantive bounded self-assessment.',
+ '0.vulnerabilities_critical_fixed':'Maintainer knows no confirmed project-owned vulnerability cases; no external reports were received. Internal safety fixes and dependency advisories lack a complete critical-severity/response-time classification. No rapid-fix rate or zero-critical-vulnerability assertion is supported.',
+ '0.static_analysis_fixed':'Selected static-analysis findings/fixes and safety-change history were checked. No complete confirmed medium-or-higher exploitable finding population with confirmation/fix timing is present. Knowledge of no confirmed cases is recorded without upgrading it to universal timely remediation.',
+ '0.dynamic_analysis_fixed':'Selected dynamic tests/fuzz findings and fixes were checked against recorded source/history. No complete confirmed medium-or-higher exploitable finding population and response timing is established. No unobserved bug is assigned a retrospective vulnerability severity.',
+ '1.vulnerability_report_credit':'No external reports ever and no known confirmed project-owned cases are attested; advisories are empty. The reconciled safety-fix history does not substantiate a complete resolved-vulnerability/reporter/anonymity population for12months. Do not automatically assign N/A or claim all reporters credited.'}[k]
+for k in ['1.test_statement_coverage80','2.test_statement_coverage90']:
+ notes[k]='Official tool definitions, historical LLVM metrics and AST measurement applicability were inspected. They do not yield a validated source-statement denominator/runtime mapping. Line, region and branch figures cannot be substituted for this exact threshold. Conformance is Unknown, not N/A; developing a new measurement tool is outside the original assessment deliverables.'
+notes['1.installation_development_quick']='Cargo workspace builds, documented source installation and task060clean builds provide a development entry. The inspected recipe does not establish a complete quick setup for every optional native prerequisite. No one-command bootstrap or new development tooling is required for this assessment.'
+missing=[x['key'] for x in a['criteria'] if x['evaluation']['state']=='Incomplete' and x['key'] not in notes];assert not missing,missing
+# Capture reference bytes first; every row gets actual byte validation, not a manifest-only claim.
+for rs in refs.values():
+ for x in rs:assert x['exists'] and H(r/x['path'])==x['sha256'],x['path']
+for row in a['criteria']:
+ key=row['key'];prior={k:row[k] for k in ['status','documentation','executionEvidence','assessment','evaluation']};row['priorPurposeReset']=prior
+ if key in notes:row['assessment']=notes[key]
+ else:row['assessment']=row['assessment'].split(' Historical conclusion carried forward only')[0]
+ row['documentation']='Inspected documentation: '+prior['documentation']
+ row['executionEvidence']='Inspected execution evidence: '+prior['executionEvidence']
+ if '29 closed PRs' in row['executionEvidence']:row['executionEvidence']=row['executionEvidence'].replace('29 closed PRs','31 PRs in20261116history (29closedPRs was the older20261115snapshot)')
+ row['executionEvidence']=row['executionEvidence'].replace('21 branches','23 branches in20261116snapshot (21in prior snapshot)')
+ if 'Private reporting' in row['executionEvidence'] or key in ['0.vulnerability_report_process','0.vulnerability_report_private','1.vulnerability_response_process']:
+  row['documentation']='Current local SECURITY.md/SECURITY.ja.md define approved private reporting and handling; fetched public SECURITY remains the old interim policy.'
+  row['executionEvidence']='Dated live GET confirms private reporting enabled=true. Actual intake/response/email arrival has not been tested or historically operated; no external report ever per maintainer.'
+ if key in ['0.know_secure_design','0.know_common_errors']:
+  row['executionEvidence']='Dated maintainer confirmation after explanation establishes self-attested knowledge; not an implementation audit.'
+ if key in ['2.require_2FA','2.secure_2FA']:
+  row['documentation']='GitHub account screenshot states2FArequired/enabled, TOTP configured and preferred Passkeys; only one developer/collaborator observed.'
+  row['executionEvidence']='Live authenticated account API confirms wakaken two_factor_authentication=true. Recovery custody separately attested; no secret contents collected.'
+ if key in ['1.access_continuity','1.bus_factor','2.bus_factor']:
+  row['executionEvidence']='Sole maintainer explicitly confirms no backup; absence policy waits for return. One admin collaborator observed.'
+ if key in ['1.build_repeatable','2.build_reproducible']:
+  row['executionEvidence']='Task060 clean-source static/network builds produce identical raw binary pairs in recorded same-host conditions; all199declared source bindings match. Task064archive-only test is older separate evidence.'
+ if key in ['1.build_standard_variables','1.build_preserve_debug']:
+  row['executionEvidence']='Fresh offline static Linux source installation exit0: CC/CFLAGS and Rust marker observed; installed ELF retains requested project debug. CXXunexercised; genericLDFLAGSnot established; bounded4GiBprofile.'
+ if key in ['0.test_most','2.test_branch_coverage80','1.test_statement_coverage80','2.test_statement_coverage90']:
+  row['executionEvidence']='Fresh default555passed/3ignored and all-features614passed/5ignored. RawLLVMbranch totals include tests; AST-corrected optimistic production bounds below80% apply only to recorded Rustworkspace population. No valid source-statement rate.'
+ if key in ['0.static_analysis_common_vulnerabilities','1.static_analysis_common_vulnerabilities','0.static_analysis_often']:
+  row['executionEvidence']='Fresh pinned Scorecard SAST0: not all commits analyzed, on public54cc42a. Earlier5/30statement belongs to20261115snapshot; eligible CI job successes are separately source-bound.'
+ if key=='1.vulnerability_report_credit':row['executionEvidence']='Maintainer confirms no external reports or known confirmed project-owned cases; fetched advisories are empty. Internal safety-change qualification remains unproven.'
+ if key=='1.documentation_achievements':row['executionEvidence']='Maintainer confirms no externally recognized achievement ever attained; exact-repository badge lookup is separately empty.'
+ if key=='1.installation_standard_variables':row['status']='Unknown'
+ for family in ['FACTS','LIVE','VERIFY052','CLOSURE052']:
+  if family not in row['evidence']:row['evidence'].append(family)
+ row['evidenceApplicability']=[{'key':k,'references':refs[k]} for k in row['evidence']]
+ row['scope']='20261116local source-bound assessment; public54cc42a/0.2.0and live settings remain separately dated. Historical results keep their own source/input/environment scopes.'
+ row['officialWording']={'description':official[key]['pinnedDescription'],'details':official[key].get('pinnedDetails',''),'source':'tasks/052/evidence/assessment-20261115/official/CRITERIA-EXTRACT.json','sourceSha256':H(r/'tasks/052/evidence/assessment-20261115/official/CRITERIA-EXTRACT.json')}
+ row['evaluation']={'state':'Complete within cited scope','basis':row['assessment'],'criterionReviewed':key,'referenceBytesVerified':True,'claimCeiling':row['status']+' for the recorded evidence; no overall product safety, badge award or future operation guarantee.'}
+a['countsByStatus']=dict(collections.Counter(x['status'] for x in a['criteria']));a['evaluationCounts']=dict(collections.Counter(x['evaluation']['state'] for x in a['criteria']));a['complete']=True;a['scope']='Evidence-grounded self-assessment completed against original052purpose; conformance gaps remain explicit. Not a badge or product-quality pass.';a['currentFollowup']='Purpose reset supersedes added implementation demands; see purpose-reset-20261116/ASSESSMENT-SCOPE.md and ACCEPTANCE-MATRIX.json.'
+save(out/'best-practices-assessment.json',a)
+text=['# Best Practices assessment — 2026-11-16','', 'Assessment work is complete for all145official catalogue items (67Passing,55Silver,23Gold). This is not a claim of badge eligibility or product acceptance. Original Q6-05/Q6-09require a grounded self-assessment, not attaining every practice.','', 'Source: local HEAD5425f85 with separately recorded dirty source bindings. Scorecard measures public54cc42a; live controls and historical results are separately dated. Official catalogue pinned at31325acd7963e0c9203da0ff798802a766237517.','', 'Conformance counts: '+', '.join(f'{k} {v}' for k,v in a['countsByStatus'].items())+'. Unknown/Partial are not positive claims.','', 'Accountable owner for every item: sole primary maintainer, confirmed2026-11-16; main agent performs this evidence evaluation. No backup exists. Documentation and observed execution are separate columns in the full JSON. No external badge achievement per maintainer; none applied for by this task. Exact repository URL search cannot rule out registration under another name.','', 'Full official wording, reference SHA256s, dated execution facts, criterion-specific adjudications and claim ceilings: [best-practices-assessment.json](best-practices-assessment.json). [Evidence index](../EVIDENCE-REFERENCES.json).','', '| Criterion | Conformance | Evidence-based adjudication |','|---|---|---|']
+for x in a['criteria']:text.append('| '+x['key']+' | '+x['status']+' | '+x['assessment'].replace('|','/')+' |')
+(out/'best-practices.md').write_text('\n'.join(text)+'\n')
+(out/'process-review.md').write_text('''# Development and maintenance assessment — 2026-11-16
+
+The original052assessment is complete; attainment of every practice is not claimed.
+The145-item JSON records the sole accountable maintainer, official wording,
+documentation, observed execution, reference hashes and claim ceiling per item.
+AGENTS/verification/review guidance establishes a change process; actual scoped
+AI reviews and tests are separate evidence. They are not other-human review.
+The maintainer confirms no other-human pre-release review and no personal human
+security-requirement/trust-boundary review; the corresponding criteria are Unmet.
+Solo-maintainer continuity/bus-factor criteria are also Unmet, not facts to invent.
+
+Task060 independently rebuilds static/network binaries twice in clean same-host
+environments. All199declared source bindings match; multi-party reproducibility
+is not established. The new Linux source-install experiment observes CC/CFLAGS,
+Rust flags and project debug retention; CXX/LDFLAGS/full-feature/macOS behavior
+remains unverified. Failed bounded attempts are preserved, not counted as passes.
+
+Rust workspace default/all-feature tests ran with555/614passing respectively.
+Raw LLVMbranch totals include test code. CompilerASTcontrols/source declarations
+support optimistic production bounds below80% for that measured population only.
+No valid source-statement rate is available. No line/region substitution is used.
+The six-month semantic individual-bug regression percentage is also unsubstantiated
+by the129commit/59patch discovery evidence. These are conformance evidence limits,
+not a requirement to build a new coverage tool or bug-management system for052.
+
+Task063 fixes the dated local dependency closure. The public54cc42a root and0.2.0
+archive remain older.48actual OSVrecords were fetched; four advisory names belong
+to the public root, three matching local names are at fixed boundaries and the
+fourth package was removed.44other IDs are not rootRustpackage names; exact
+scanner path attribution is not established. Neither48shipped flaws nor a fresh
+complete dependency clearance is claimed. Routine monitoring remains unconfirmed.
+
+No product/source, shared runner, Cargo, workflow or executable behavior changed
+in this purpose correction. No badge, settings mutation, publication or new
+review identities. The preserved evidence and final acceptance matrix distinguish
+completed assessment work from unsupported product conformance.
+''')
+(out/'security-process.md').write_text('''# Security process assessment — 2026-11-16
+
+Q6-07assessment is complete: primary responder is the sole maintainer wakaken;
+there is no backup. Absence handling is best effort, waiting for the maintainer's
+return, without an SLA. Latest verified0.2.x is the supported best-effort scope;
+no older-version backport guarantee. Optional network probes remain experimental.
+
+The approved local English SECURITY.md and Japanese SECURITY.ja.md specify GitHub
+private vulnerability reporting, investigation, fix validation and advisory/release
+note coordination. Live reporting is enabled. The fetched public policy remains
+the older interim guidance, so publication/documentation conformance is Partial.
+This assessment does not authorize publishing the draft or any vulnerability.
+
+Security notification settings were observed after separately authorized changes.
+Actual intake/email delivery and response/fix/disclosure have not been exercised.
+Maintainer confirms no external vulnerability reports ever. The official initial
+response item expressly permits N/A for that six-month empty population; no100%
+response rate is inferred. The maintainer also reports no off-repository records
+or known confirmed project-owned vulnerability cases. Internal safety fixes and
+dependency warnings are distinct; absence of confirmed cases is not safety proof.
+Credit/timeliness/severity/release populations remain unsupported where indicated
+in the full self-assessment. No synthetic report or retrospective severity invented.
+
+MFA is confirmed by live account API and supplied screenshot for the sole observed
+human collaborator; TOTP configured and preferred Passkeys. Recovery-code custody
+is self-attested; no secret contents inspected. Two developer-knowledge items are
+explicit human self-attestations after explanation, not implementation audits.
+
+Network distribution notice flags/publication hold remain unchanged. No advisory,
+external message, release, setting mutation or credential access occurred here.
+Dated fact receipts are indexed in ../EVIDENCE-REFERENCES.json.
+''')
+g=J(out/'github-controls.json');g['latestAssessment']='tasks/052/evidence/purpose-reset-20261116/ACCEPTANCE-MATRIX.json';save(out/'github-controls.json',g)
+# Required measured JSON is untouched. Refresh all required delivery mirrors.
+for name in ['best-practices.md','github-controls.json','process-review.md','scorecard.json','security-process.md']:shutil.copyfile(out/name,r/'target/quality-task-052'/name)
+# Separate unsupported practice claims from assessment work still to do.
+save(cur/'REMAINING.json',{'assessmentWorkRemaining':[],'unsupportedOrPartialConformance':[{'key':x['key'],'status':x['status'],'reason':x['assessment']} for x in a['criteria'] if x['status'] in ['Partial','Unknown','Unmet']],'scope':'These are measured/assessed practice limits, not automatically authorized implementation tasks. No Unknown promoted to Met.','optionalFactPending':'Routine dependency monitoring method/frequency; no answer inferred.','supersedes':'The prior remaining-work snapshot is preserved in purpose-reset-20261116/before.'})
+print(json.dumps({'criteria':len(a['criteria']),'conformance':a['countsByStatus'],'assessment':a['evaluationCounts']}))

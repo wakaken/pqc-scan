@@ -10648,25 +10648,25 @@
         "Q6-18"
       ],
       "result": {
-        "status": "Partial",
+        "status": "Passed",
         "criteria": {
-          "Q6-01": "Partial",
+          "Q6-01": "Passed",
           "Q6-02": "Passed",
           "Q6-16": "Passed",
           "Q6-18": "Passed"
         },
-        "summary": "Integration validation and independent review evidence; final-source hosted jobs/artifacts remain unverified",
-        "originalOutcome": "Local validation and hosted CI are assessed separately; no release acceptance"
+        "summary": "All four integration criteria verified against matching executable/input bindings and actual final-source hosted jobs/artifacts; product release acceptance remains Unknown",
+        "originalOutcome": "Local correction accepted, followed by final-source run43763572932 and independently verified artifact bytes"
       },
       "measurement": {
-        "head": "f07d782cd68cfac95d93585d5ace049f590160d4",
+        "head": "6074a6ddb53fdcd0192e9d920cd2e63549540962",
         "version": "0.2.0 source / v0.3 quality integration",
         "features": "Offline all-axis catalog and baseline-only/combined report modes",
         "standards": "Original Q6-01/Q6-02/Q6-16/Q6-18; no new score or release gate",
-        "method": "Actual unit/negative controls, local changed CI steps and independent source-bound review; no stored command execution",
-        "environment": "macOS arm64 local validation; actual hosted environment remains Not Tested",
+        "method": "Independent local validation/reviews plus actual exact-source GitHub quality/baseline/scan execution and downloaded ZIP/data verification",
+        "environment": "macOS arm64 local validation plus actual GitHub-hosted ubuntu-latest jobs against the recorded commit; runtime/tool details retained in job logs",
         "date": "2026-11-16",
-        "comparison": "Corrects original053 own-evidence omission; previous observations remain historical",
+        "comparison": "Supersedes the own-evidence omission and prior pending hosted gate. Prior130-test run43762371995 remains historical; the final132-test source was rerun successfully.",
         "executionStatus": "Passed",
         "commands": [
           {
@@ -10727,7 +10727,13 @@
             "log": "tasks/053/evidence/completion-20261116/ci-baseline.log"
           }
         ],
-        "populationDigest": "9e0d40891936a5b895b98aa89dfd81d07ae267bedd24448bb801a94dab019774"
+        "populationDigest": "9e0d40891936a5b895b98aa89dfd81d07ae267bedd24448bb801a94dab019774",
+        "hostedCI": {
+          "status": "Verified",
+          "verificationArtifact": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/HOSTED-VERIFICATION.json",
+          "runId": 43763572932,
+          "commit": "6074a6ddb53fdcd0192e9d920cd2e63549540962"
+        }
       },
       "sourceBindings": {
         ".github/workflows/pqc-scan.yml": "36180dca9134a05cb987e25238cfb620ec0d8445c51c52e5d27b031e4ad5b431",
@@ -10812,6 +10818,76 @@
           "path": "tests/quality/test_evidence.py",
           "sha256": "637375ebbaa276c5ec341c893b456a4fe0185ee72ae3aa4d8fbdae661f381fce",
           "purpose": "Actual integration source, immutable input population or detached validation/review receipt"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/HOSTED-VERIFICATION.json",
+          "sha256": "e545232b8d07a81f38cf6f784ecf7c77c67fcdf2b1925c1837891e5c83729c95",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/RUN-final.json",
+          "sha256": "927f25a3a68273909d930082722f789a2c174f3c3e60183a69e19dfafeb505e1",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/JOBS-final.json",
+          "sha256": "38850c9e020c222d7fbae7c9aae84ca31ca0af6984ab43a92c25d909e017743e",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/ARTIFACTS-final.json",
+          "sha256": "d362e0e8abf0e8ce1b513b4e2dbd3d8af1febfc52bde9aa55c565fed5813ae45",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/REMOTE-COMMIT.json",
+          "sha256": "9f1ea2e6339036bc546f93e043199ac7ffc823e98f1435bc8179e6842586bfbe",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/RUN-INPUT-CATALOG.json",
+          "sha256": "bbdd07609916cf1f73931f60000cbe9cc007e509f40785ac346a71b29d9adc2e",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/QUALITY-COUNTS.json",
+          "sha256": "02baf1bef57154751f2b8fbf976393c187d902eef53c533fe9e51ea79c77f585",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/pqc-quality-integrated-pr.zip",
+          "sha256": "855ffca7909549efc8e0fa50366a9b952aa9973b764b5d42e885978db8d32382",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/pqc-quality-baseline.zip",
+          "sha256": "463ef028ad98cd26b2181acd41a3528de4d8035a7157067f48aa0eaea4e37429",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/pqc-self-scan-evidence.zip",
+          "sha256": "9f96ae6fe2ef0713f7dce8425bba34a7882b9129fab32131ff1a57548e3c1e0d",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/pqc-dependency-sbom.zip",
+          "sha256": "b757b3f3992413ff4c1edbe176c94f3ed0f2f9f1d90cdb8088dd9fdfd722612f",
+          "purpose": "Actual final-source hosted run, source, job/step, artifact digest or downloaded ZIP evidence"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/FINAL-IMPLEMENTATION-REVIEW.json",
+          "sha256": "f3126371d43ebc2fbf92dd49e9c96e94760a3c074191a8ddd5d20424cf7811e5",
+          "purpose": "Final independent evidence acceptance or reviewed bounded hosted verification controller"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/FINAL-TEST-REVIEW.json",
+          "sha256": "b8f6a996994d080962aa669650293471559f011f71f8da046fe63fe070ad6242",
+          "purpose": "Final independent evidence acceptance or reviewed bounded hosted verification controller"
+        },
+        {
+          "path": "tasks/053/evidence/completion-20261116/verify-final-hosted.py.txt",
+          "sha256": "88f231ef7f4c02c21c1c211db3120818bd0d37c56db2f94a600f535c1d4c13af",
+          "purpose": "Final independent evidence acceptance or reviewed bounded hosted verification controller"
         }
       ],
       "observations": [
@@ -10831,9 +10907,14 @@
           "pointer": "/localCI"
         },
         {
-          "label": "hostedCI",
+          "label": "Historical hosted state before final rerun",
           "artifact": "tasks/053/evidence/completion-20261116/LOCAL-CHECKS-r3.json",
           "pointer": "/hostedCI"
+        },
+        {
+          "label": "Verified final-source hosted execution and downloaded artifacts",
+          "artifact": "tasks/053/evidence/completion-20261116/hosted-run-43763572932/HOSTED-VERIFICATION.json",
+          "pointer": ""
         }
       ],
       "reviews": [
@@ -10853,13 +10934,17 @@
             "README.md": "53507368ee8b2da6b08514fce29a61a6c5788bc29514001d948430a611f4548f",
             "README.ja.md": "87a47e283a4ceb59f11087d10a2a2c0666946a3d4b845b6fb851c34e1a2164e2",
             "tasks/053/evidence/completion-20261116/enroll-integration.py.txt": "3e3130855f31055ef1fb1e8e8c277aad946d0ebf881d06a132334ba5739af20f",
-            "tasks/053/evidence/completion-20261116/before/docs/quality/EVIDENCE-CATALOG.json": "5244ae39c085b5f9e0769baa5d38446aa21ed1dde160f138347295acac9aebfb"
+            "tasks/053/evidence/completion-20261116/before/docs/quality/EVIDENCE-CATALOG.json": "5244ae39c085b5f9e0769baa5d38446aa21ed1dde160f138347295acac9aebfb",
+            "tasks/053/evidence/completion-20261116/verify-final-hosted.py.txt": "88f231ef7f4c02c21c1c211db3120818bd0d37c56db2f94a600f535c1d4c13af"
           },
-          "sourceDigest": "eabb81302632ad95324dd5b306cf6ed402e6d431eb3adea1d477aef976927646",
+          "sourceDigest": "58d0fa9294b68b4aa4f7cb0fac525d2f77543f55bc1d1a8c7d5e075d371be6b6",
           "populationDigest": "9e0d40891936a5b895b98aa89dfd81d07ae267bedd24448bb801a94dab019774",
-          "scope": "Test-only actual-hosted receipt assertions and independent positive/negative controls; earlier successful CI is not final-source proof after this test change",
+          "scope": "Final target11source plus separately reviewed actual-hosted measurement verifier; originalQ6-01/02/16/18 verified. No pending required work;052 unfinished054 unstarted.",
+          "hostedCommit": "6074a6ddb53fdcd0192e9d920cd2e63549540962",
+          "hostedRunId": 43763572932,
+          "hostedVerificationSha256": "e545232b8d07a81f38cf6f784ecf7c77c67fcdf2b1925c1837891e5c83729c95",
           "findings": [],
-          "artifact": "tasks/053/evidence/completion-20261116/IMPLEMENTATION-REVIEW-r2.json"
+          "artifact": "tasks/053/evidence/completion-20261116/FINAL-IMPLEMENTATION-REVIEW.json"
         },
         {
           "stage": "test",
@@ -10877,26 +10962,25 @@
             "README.md": "53507368ee8b2da6b08514fce29a61a6c5788bc29514001d948430a611f4548f",
             "README.ja.md": "87a47e283a4ceb59f11087d10a2a2c0666946a3d4b845b6fb851c34e1a2164e2",
             "tasks/053/evidence/completion-20261116/enroll-integration.py.txt": "3e3130855f31055ef1fb1e8e8c277aad946d0ebf881d06a132334ba5739af20f",
-            "tasks/053/evidence/completion-20261116/before/docs/quality/EVIDENCE-CATALOG.json": "5244ae39c085b5f9e0769baa5d38446aa21ed1dde160f138347295acac9aebfb"
+            "tasks/053/evidence/completion-20261116/before/docs/quality/EVIDENCE-CATALOG.json": "5244ae39c085b5f9e0769baa5d38446aa21ed1dde160f138347295acac9aebfb",
+            "tasks/053/evidence/completion-20261116/verify-final-hosted.py.txt": "88f231ef7f4c02c21c1c211db3120818bd0d37c56db2f94a600f535c1d4c13af"
           },
-          "sourceDigest": "eabb81302632ad95324dd5b306cf6ed402e6d431eb3adea1d477aef976927646",
+          "sourceDigest": "58d0fa9294b68b4aa4f7cb0fac525d2f77543f55bc1d1a8c7d5e075d371be6b6",
           "populationDigest": "9e0d40891936a5b895b98aa89dfd81d07ae267bedd24448bb801a94dab019774",
-          "scope": "Independent acceptance of actual-hosted receipt positive/negative assertions;132 local tests against exact11source/population. Final-source rerun/artifact validation remains required.",
+          "scope": "Final target11source plus separately reviewed actual-hosted measurement verifier; originalQ6-01/02/16/18 verified. No pending required work;052 unfinished054 unstarted.",
+          "hostedCommit": "6074a6ddb53fdcd0192e9d920cd2e63549540962",
+          "hostedRunId": 43763572932,
+          "hostedVerificationSha256": "e545232b8d07a81f38cf6f784ecf7c77c67fcdf2b1925c1837891e5c83729c95",
           "findings": [],
-          "artifact": "tasks/053/evidence/completion-20261116/TEST-REVIEW-r2.json"
+          "artifact": "tasks/053/evidence/completion-20261116/FINAL-TEST-REVIEW.json"
         }
       ],
       "limitations": [
-        "Q6-01 stays Partial until final-source hosted job/artifact evidence is verified.",
+        "Hosted validation applies only to commit6074a6ddb53fdcd0192e9d920cd2e63549540962 and matching source/population; future changes require renewed applicability checks.",
         "Record exclusion avoids a circular input self-hash; the complete emitted catalog retains its full SHA-256.",
         "This record does not change unfinished052 or start054; no overall product/release pass is asserted."
       ],
-      "concerns": [
-        {
-          "priority": "high",
-          "text": "Final-source hosted CI and uploaded artifact bytes have not been verified."
-        }
-      ]
+      "concerns": []
     }
   ]
 }

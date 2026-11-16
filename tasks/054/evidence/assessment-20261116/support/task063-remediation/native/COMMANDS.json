@@ -1,0 +1,147 @@
+[
+  {
+    "variant": "static",
+    "name": "build",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--release",
+      "--package",
+      "pqc_scan_cli",
+      "--target-dir",
+      "/private/tmp/pqc063-native-h14hgwfo/build-static"
+    ],
+    "exit": 0,
+    "seconds": 71.27472474996466
+  },
+  {
+    "variant": "static",
+    "name": "package",
+    "command": [
+      "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+      "scripts/package-release.py",
+      "--binary",
+      "/private/tmp/pqc063-native-h14hgwfo/build-static/release/pqc-scan",
+      "--variant",
+      "static",
+      "--out-dir",
+      "/private/tmp/pqc063-native-h14hgwfo/package-static"
+    ],
+    "exit": 0,
+    "seconds": 1.9030534169869497
+  },
+  {
+    "variant": "static",
+    "name": "install",
+    "command": [
+      "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+      "tests/distribution/check-install.py",
+      "/private/tmp/pqc063-native-h14hgwfo/package-static/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/quality-task-063/native-r3/static-install"
+    ],
+    "exit": 0,
+    "binary_sha256": "5c3f38cd09b8855e3a971c6ee477a43393f0649b7072133d8bb3ef5d0a8c96fa",
+    "archive_sha256": "624ea23580a74f101ebe88a171b1d3ddc0f04452029b97ba69e3f4064f7eaa01"
+  },
+  {
+    "variant": "combined-probes",
+    "name": "build",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--release",
+      "--package",
+      "pqc_scan_cli",
+      "--target-dir",
+      "/private/tmp/pqc063-native-h14hgwfo/build-combined-probes",
+      "--features",
+      "probe-tls,probe-ssh"
+    ],
+    "exit": 0,
+    "seconds": 105.94076591701014
+  },
+  {
+    "variant": "combined-probes",
+    "name": "package",
+    "command": [
+      "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+      "scripts/package-release.py",
+      "--binary",
+      "/private/tmp/pqc063-native-h14hgwfo/build-combined-probes/release/pqc-scan",
+      "--variant",
+      "combined-probes",
+      "--out-dir",
+      "/private/tmp/pqc063-native-h14hgwfo/package-combined-probes"
+    ],
+    "exit": 0,
+    "seconds": 2.3572679579956457
+  },
+  {
+    "variant": "combined-probes",
+    "name": "install",
+    "command": [
+      "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+      "tests/distribution/check-install.py",
+      "/private/tmp/pqc063-native-h14hgwfo/package-combined-probes/pqc-scan-0.2.0-aarch64-apple-darwin-combined-probes.tar.gz",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/quality-task-063/native-r3/combined-probes-install"
+    ],
+    "exit": 0,
+    "binary_sha256": "f7cbc4ebdc28a1446138fab5f7fca16ffc636ee9c09a3949b04baf5747d88649",
+    "archive_sha256": "16c5a47aacd4b8a683d3567dfa76854cbffbd661aea6dfd1b4a60028f27bb5f2"
+  },
+  {
+    "variant": "all-probes",
+    "name": "build",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--release",
+      "--package",
+      "pqc_scan_cli",
+      "--target-dir",
+      "/private/tmp/pqc063-native-h14hgwfo/build-all-probes",
+      "--features",
+      "probe-tls,probe-ssh,probe-ssh-kex"
+    ],
+    "exit": 0,
+    "seconds": 135.1875962499762
+  },
+  {
+    "variant": "all-probes",
+    "name": "package",
+    "command": [
+      "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+      "scripts/package-release.py",
+      "--binary",
+      "/private/tmp/pqc063-native-h14hgwfo/build-all-probes/release/pqc-scan",
+      "--variant",
+      "all-probes",
+      "--out-dir",
+      "/private/tmp/pqc063-native-h14hgwfo/package-all-probes"
+    ],
+    "exit": 0,
+    "seconds": 3.0110081669990905
+  },
+  {
+    "variant": "all-probes",
+    "name": "install",
+    "command": [
+      "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+      "tests/distribution/check-install.py",
+      "/private/tmp/pqc063-native-h14hgwfo/package-all-probes/pqc-scan-0.2.0-aarch64-apple-darwin-all-probes.tar.gz",
+      "--out-dir",
+      "/Users/waka/development/pqc/pqc-scan/target/quality-task-063/native-r3/all-probes-install"
+    ],
+    "exit": 0,
+    "binary_sha256": "5c6bd76c6826811b603582f6f9ac7e5c4ea1c46fa4ea16b3d558b6c65c364b42",
+    "archive_sha256": "98bf6272ac0df4b0159a29cbf08df4eefceab1b28128d83dda685740dbefc999"
+  }
+]

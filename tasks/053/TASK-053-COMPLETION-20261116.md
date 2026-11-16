@@ -1,64 +1,95 @@
-# Task053 completion correction — 2026-11-16
+# Task053 final completion — 2026-11-16
 
-**Unfinished / blocked.** The original completion decision was reopened at the
-user's explicit request. The local omission is repaired, but final-source hosted
-CI and uploaded artifact verification are still required for Q6-01.052 stays
-unfinished;054 is unstarted. Earlier results and reviews remain historical.
+**Done.** All original Q6-01, Q6-02, Q6-16 and Q6-18 criteria and four required
+deliverables are now verified. The previous premature completion was reopened;
+local and hosted gaps were resolved without weakening the original criteria.
+052 remains unfinished;054 has not started. Overall release acceptance remains
+Unknown and historical upstream product uncertainties are still explicit.
 
-## Corrected behavior and actual verification
+## Final behavior and acceptance
 
-053 now has its own source-bound catalog record with actual command/exit results
-and two independently accepted review receipts. The detached integration proof
-hashes the immutable18-study catalog population excluding only itself, while the
-complete emitted catalog retains its own hash. Changing upstream input makes old
-integration evidence Partial. Per-criterion outcomes distinguish local acceptance
-from unverified hosted execution; no missing evidence was relabeled as success.
+The integrated report accounts for73 requirements and19 source-bound records,
+including053 itself. The source and original18-study input population are checked
+separately from its detached integration results, avoiding circular self-hashes.
+Original outcomes, current applicability, tool failure, product findings and review
+adequacy remain distinct. All four053 rows are Passed; unfinished052 stays
+Unknown and unstarted054 stays Not Tested. No product quality or release pass is
+inferred from completing the reporting integration.
 
-The report accounts for73 requirements across19 records.053 now has direct
-artifact/hash/source/review references in both machine indexes and Markdown.
-Q6-02, Q6-16 and Q6-18 are Passed against the11 matching source/input bindings and
-both accepted reviews. Q6-01 is Partial; hosted execution and artifact bytes are
-explicitly Not Tested. The release decision remains Unknown,052 facts Unknown
-and054 Not Tested. No product quality pass or broader platform support is inferred.
+| Original criterion | Final verification |
+|---|---|
+| Q6-01 | Existing quality/baseline jobs retain cost/event separation. Actual manual quality, baseline and scan jobs and every required step succeeded. Integrated artifact retention is30days. Four downloaded ZIP sizes/hashes match GitHub API; quality/baseline integrated outputs are byte-identical. Protocols remains intentionally disabled. |
+| Q6-02 | Actual executable/input bindings and independent review bindings are compared separately. Controller/input drift and incomplete reviews cannot produce current acceptance. Both reused reviewer identities accepted final implementation and test/evidence stages. |
+| Q6-16 | All73 IDs have explicit outcomes and references;053's former missing own references now link actual source, commands, run/job/step, downloaded ZIP and reviewer evidence. Tool failures are distinct from measured product failures and historical drift. |
+| Q6-18 | Exact commit, source scope, tool/environment, observations, standards, limitations, priorities and comparisons link to immutable evidence. JSON/Markdown/test views agree; current four deliverables match durable copies. |
 
-The actual commands and tooling are bound in
-[LOCAL-CHECKS-r2.json](evidence/completion-20261116/LOCAL-CHECKS-r2.json):
-Python130 tests (129passed,1existing explicit-CLI skip), Node38passed and both
-changed offline quality/baseline CI steps exit0. The final Python run is
-quality-r3.log. Node and CI results remain applicable because their relevant
-code is unchanged after the strengthened Python criterion boundary test.
-POPULATION and ENROLLMENT red/green logs preserve the original failures. The
-source-drift rejection in quality-r2.log is recorded separately; current-source
-re-enrollment and the final full suite succeeded. No failing attempt was erased.
+## Exact source and actual hosted results
 
-Both existing reviewer identities accepted the local correction:
-[implementation](evidence/completion-20261116/IMPLEMENTATION-REVIEW.json) and
-[test](evidence/completion-20261116/TEST-REVIEW.json). No additional agents were
-created. Main-agent investigation, implementation and tests were not delegated.
-The active source remains HEAD f07d782cd68cfac95d93585d5ace049f590160d4 plus the
-11 exact source bindings in those receipts; the complete current catalog is
-separately bound by its emitted hash. Candidate tree and diff manifests distinguish
-all uncommitted prerequisite changes from a clean committed source revision.
+The user explicitly approved publishing the reviewed candidate, including its
+uncommitted prerequisites, and running the existing workflow. The original
+shared worktree and its branch were preserved. The verification branch is
+`codex/task053-ci-verification-20261116`; no PR, merge, tag, release, real release
+signing or repository setting change was performed.
 
-## Remaining completion gate
+Final commit:`6074a6ddb53fdcd0192e9d920cd2e63549540962`.
+Final tree:`375e2ca7429c0cc690f7b0dfd908857afadc1068`.
+[Final run43763572932](https://github.com/wakaken/pqc-scan/actions/runs/43763572932)
+completed quality/baseline/scan successfully, including every required step;
+protocols was skipped under its existing explicit disabled policy. No skipped
+required work is counted as success.
 
-[Remote baseline runs](evidence/completion-20261116/REMOTE-RUNS-BASELINE.json)
-contain old committed source, not the unpublished053 changes. They cannot satisfy
-the missing gate. The existing workflow must run against the exact reviewed
-candidate, and its run commit, enabled job results, artifact metadata, downloaded
-bytes, report/catalog/source bindings and factual parity must be checked.
-Current local replay proves neither GitHub execution nor upload success.
+The final quality job observed Rust555 passed,0failed,3existing ignored; Node38
+passed; Python132 total,131passed,1existing explicit-CLI skip. Formatting and
+clippy succeeded. The real baseline measurements and source-bound reports ran;
+scan and Code Scanning/SBOM uploads succeeded. Linux hosted execution does not
+expand059/060 platform/install/rebuild guarantees or establish Windows support.
 
-The source candidate and proposed remote action are documented in
-[CI readiness](evidence/completion-20261116/CI-READINESS.md). Publication of the
-candidate and workflow execution have not occurred. The candidate necessarily
-includes prerequisite source/evidence changes already present in this shared
-worktree; they must not be pushed under an assumption that only053 is changed.
-No commit, push, PR, remote workflow dispatch, release, real signing, tag or
-repository setting change was performed by this correction.
+Four artifact ZIPs were downloaded through the GitHub connector. Their actual
+bytes match API SHA-256 and sizes, source commit and run. Both integrated artifacts
+expire after30days. Original pathological benchmark reports total about600MB
+unpacked, so the verifier safely inventories names/types and reads only the four
+required integrated files under64MiB perfile/32MiB selected-total limits. It never
+extracts unneeded benchmark files or follows archive links. Raw ZIPs are retained.
 
-The corrected four deliverables are preserved under
-[evidence/completion-20261116/outputs-final/](evidence/completion-20261116/outputs-final/).
-Old053 outputs remain immutable historical evidence; the required target path
-will be refreshed to the latest corrected outputs after preserving its prior copy.
-Do not mark done or begin054 before the remaining gate is verified.
+The [hosted verification receipt](evidence/completion-20261116/hosted-run-43763572932/HOSTED-VERIFICATION.json)
+binds actual run/job/step metadata, source Git blobs, frozen run-input catalog,
+all artifact digests,73 rows and full machine-fact equality. The separately
+reviewed [verification controller](evidence/completion-20261116/verify-final-hosted.py.txt)
+can be replayed using --worktree /Users/waka/development/pqc/pqc-scan, because the
+published commit objects are in the shared Git repository. It preserves the
+commit-time catalog input while allowing this report's own detached post-run
+assessment facts. The final executable11source and non-self18-study population
+remain unchanged; final task/report/review metadata is a dated post-run assessment.
+
+## Repairs, failures and independent review
+
+The first run43762371995 succeeded, but actual hosted evidence exposed a test
+that permanently expected Q6-01 Partial. The expectation was repaired with
+source/population/job/step/artifact-bound positive and negative receipt controls.
+Both reviewer stages accepted that test-only change. The changed final source
+was then rerun as43763572932; the old run was not reused to certify changed code.
+The actual old-source rejection is retained in OLD-RUN-REJECTION-r2.log.
+
+The initial ignored-path staging error produced an unpublished incomplete commit.
+Exactly one approved historical helper was added before publication; all1656 tree
+blobs then matched the approved manifest. The initial conservative ZIP inventory
+limit rejection and source-drift/red test failures also remain in dated evidence.
+None was hidden or counted as a product failure or successful final check.
+
+[Final implementation acceptance](evidence/completion-20261116/FINAL-IMPLEMENTATION-REVIEW.json)
+and [final test acceptance](evidence/completion-20261116/FINAL-TEST-REVIEW.json)
+cover the exact target11sources plus the separately reviewed measurement verifier.
+Both IDs were reused throughout; no additional agents or main-work delegation.
+The final post-hosted data passed the132-test local suite and all report/receipt
+comparisons. No required work remains for the original053 integration criteria.
+
+## Deliverables, preservation and remaining product work
+
+Latest required target/quality-task-053 outputs match the durable
+[evidence/completion-20261116/outputs-complete/](evidence/completion-20261116/outputs-complete/):
+ci-measurement-plan.md, quality-assessment.md, quality-evidence-index.json and
+test-evidence-index.json. Earlier measurements, partial outputs and acceptance
+records are retained unchanged. [Final audit](evidence/completion-20261116/FINAL-COMPLETION.json)
+records current source/output hashes, exact CI scope, command results and
+preservation of052/054 and other preexisting work.053 is done;052 remains blocked
+and054 pending. This does not authorize starting054 or changing release policy.

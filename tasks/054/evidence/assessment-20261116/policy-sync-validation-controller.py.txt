@@ -1,0 +1,43 @@
+from pathlib import Path
+import json,hashlib,re,subprocess,copy,shutil
+r=Path.cwd();e=r/'tasks/054/evidence/assessment-20261116';h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();base=json.loads((e/'BASELINE.json').read_text());checks=[]
+def check(name,ok):
+ if not ok:raise AssertionError(name)
+ checks.append({'check':name,'result':'Passed'})
+sec=(r/'SECURITY.md').read_text();en,ja=sec.split('## 日本語での連絡',1);en=' '.join(en.split())
+pairs=[('support','latest verified 0.2.x','最新の検証済み0.2.x'),('best effort','best-effort','可能な範囲'),('old versions','old-version backport guarantee','旧版への修正適用は保証しません'),('experimental','probes remain experimental','診断は実験的機能'),('primary','primary vulnerability-report responder','脆弱性報告の一次担当'),('no backup','no backup responder','代替担当はいません'),('absence','checked in order after their return','復帰後に順次確認'),('no immediate guarantee','Immediate responses','即時対応'),('private channel','Report a vulnerability','Report a vulnerability'),('fix validation','fix is validated','修正を検証'),('reporter coordination','disclosure timing is discussed','公開時期を相談'),('early warning','warning needed before a fix','修正前に注意喚起'),('notices','GitHub Security Advisories and release','GitHub Security Advisoryとリリースノート'),('versions','affected versions','影響する版'),('update steps','update instructions','更新方法'),('confidentiality','sensitive reports in a public issue','公開Issueには'),('rollback','retain the previous verified bundle','前の検証済み一式')]
+for name,a,b in pairs:check('bilingual '+name,a in en and b in ja)
+check('no stale disabled/interim instruction','is disabled' not in sec and '報告は無効' not in sec)
+check('no personal email or authentication secrets',not re.search(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}',sec) and 'otpauth://' not in sec and 'BEGIN PRIVATE KEY' not in sec)
+for dest in re.findall(r'\]\(([^)]+)\)',sec):
+ if not dest.startswith('https://'):check('local link '+dest,(r/dest).is_file())
+check('matched public channel links',en.count('https://github.com/wakaken/pqc-scan/security/advisories')==ja.count('https://github.com/wakaken/pqc-scan/security/advisories')==1)
+check('support scope unchanged','No response SLA or old-version backport guarantee' in en)
+for f in ['tasks/052/task.yaml','tasks/053/task.yaml','docs/quality/EVIDENCE-CATALOG.json']:check('preserved '+f,h(r/f)==base['files'][f])
+changed=[f for f,v in base['files'].items() if not f.startswith('tasks/054/') and f!='SECURITY.md' and (not (r/f).is_file() or h(r/f)!=v)];check('preexisting unrelated bytes preserved',not changed)
+follow=json.loads((e/'TASK052-CRITERION-FOLLOWUP-20261116.json').read_text());off={a['level']+'.'+a['id']:a for a in json.loads((e/'support/task052-criteria/CRITERIA-EXTRACT.json').read_text())}
+def validate(d):
+ ids=[a['key'] for a in d['criteria']]
+ if len(ids)!=145 or len(set(ids))!=145 or set(ids)!=set(off):raise ValueError('criterion population')
+ for a in d['criteria']:
+  if a['followupStatus']=='Not applicable' and off[a['key']]['metadata'].get('na_allowed') is not True:raise ValueError('unauthorized N/A')
+  for f in a['followupEvidence']:
+   if not ((e/f).is_file() or (r/f).is_file()):raise ValueError('missing evidence')
+validate(follow);check('145 original criteria and all new references',True)
+for kind in ['duplicate','missing','illegalNA','missingEvidence']:
+ d=copy.deepcopy(follow)
+ if kind=='duplicate':d['criteria'][1]['key']=d['criteria'][0]['key']
+ elif kind=='missing':d['criteria'].pop()
+ elif kind=='illegalNA':next(a for a in d['criteria'] if a['key']=='0.report_responses')['followupStatus']='Not applicable'
+ else:d['criteria'][0]['followupEvidence']=['does-not-exist.json']
+ try:validate(d)
+ except ValueError:check('negative rejects '+kind,True)
+ else:raise AssertionError(kind)
+check('requested artifact parity',h(e/'release-assessment.md')==h(r/'target/quality-task-054/release-assessment.md'))
+commands=[]
+for args in [['git','diff','--check'],['ruby','-ryaml','-e','ts=Dir.glob("tasks/[0-9][0-9][0-9]/task.yaml").map{|p|t=YAML.load_file(p);abort p unless t["id"].is_a?(String)&&t["id"]==File.basename(File.dirname(p));t};by=ts.to_h{|t|[t["id"],t]};abort "duplicate" unless by.size==ts.size;ts.each{|t|t.fetch("depends_on",[]).each{|dep|abort "dependency" unless dep.is_a?(String)&&by.key?(dep)&&dep!=t["id"]}};abort "state" unless by["052"]["status"]=="blocked"&&by["053"]["status"]=="done"&&by["054"]["status"]=="blocked";puts "64 definitions valid;052/054 blocked,053 done"']]:
+ c=subprocess.run(args,capture_output=True,text=True);commands.append({'argv':args,'exitCode':c.returncode,'stdout':c.stdout,'stderr':c.stderr});check('exit0 '+args[0],c.returncode==0)
+shutil.copyfile('/tmp/pqc054-policy-validate.py',e/'policy-sync-validation-controller.py.txt')
+artifacts=['SECURITY.md','tasks/054/task.yaml','tasks/054/TASK-054-PLAN.md','tasks/054/TASK-054-RESULTS.md']+[str(p.relative_to(r)) for p in e.glob('TASK052-*20261116.*')]+[str(e.relative_to(r))+'/'+f for f in ['POLICY-SYNC-LIVE-CONTROLS-20261116.json','MAINTAINER-KNOWLEDGE-FOLLOWUP-20261116.json','release-assessment.md','policy-sync-controller.py.txt','policy-sync-validation-controller.py.txt']]
+out={'head':subprocess.check_output(['git','rev-parse','HEAD']).decode().strip(),'dirtySource':'Preexisting053/054 plus approved SECURITY.md update; baseline and current hashes distinguish tested source.','changeClass':'Prose/evidence only; no executable examples or behavior changed.','checks':checks,'commands':commands,'manualReview':'Compared all English/Japanese policy facts and combined diff with approved decisions. No SLA, support expansion, email publication, waiver or posting added.','priorFailure':{'exitCode':1,'message':'AssertionError: bilingual update steps','reason':'Initial English literal comparison did not allow Markdown line wrapping; whitespace normalized in validator, without changing policy text or meaning.'},'artifactHashes':{f:h(r/f) for f in artifacts},'reviewStages':'Not required for prose-only scope under docs/agent/REVIEWS.md; no reviewer identity started.','notRun':['Rust build/test/clippy/fmt:no executable changes','new hostedCI','full repository self-scan','statement/branch measurements','actual intake or email delivery'],'completion':{'localPolicySync':'Verified','task052':'unfinished;blocked','task054':'unfinished;blocked','v03':'unfinished','publication':'Not performed'}}
+(e/'POLICY-SYNC-VALIDATION-20261116.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps({'checksPassed':len(checks),'commandExits':[a['exitCode'] for a in commands],'coverage':follow['counts'],'source':out['head'],'publication':'Not performed'}))

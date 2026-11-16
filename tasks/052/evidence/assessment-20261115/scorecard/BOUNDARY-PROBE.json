@@ -1,0 +1,17 @@
+{
+  "observedAt": "2026-11-14T21:01:31.014895+00:00",
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/Users/waka/development/pqc/pqc-scan/tasks/052/evidence/assessment-20261115/scorecard/boundary-probe.sb",
+    "/bin/sh",
+    "-c",
+    "set -eu\n: > \"/private/tmp/pqc-task052-scorecard-oufker83/allowed-canary\"\nprintf '%s\\n' PASS_scratch_write\nif (: > \"/Users/waka/development/pqc/pqc-scan/target/quality-task-052/forbidden-write-canary\") 2>/dev/null; then exit 21; fi\nprintf '%s\\n' PASS_outside_write_denied\nif (IFS= read -r value < \"/Users/waka/development/pqc/pqc-scan/README.md\") 2>/dev/null; then exit 22; fi\nprintf '%s\\n' PASS_repository_data_read_denied\nif (IFS= read -r value < \"/Users/waka/development/pqc/pqc-scan/.git/config\") 2>/dev/null; then exit 23; fi\nprintf '%s\\n' PASS_git_config_read_denied\n"
+  ],
+  "exitCode": 1,
+  "stdout": "",
+  "stderr": "Failed to exec /bin/bash as variant for /bin/sh (1: Operation not permitted).\n",
+  "profileSha256": "6b1e7a6b601a23f7502fb37db5f5a07715e5c10107c2cad3676b5b6afaebe644",
+  "scope": "Final filesystem rules plus explicit /bin/sh exec permission solely for this synthetic no-credential probe. Does not test aggregate limits or claim identical process restrictions.",
+  "outsideFileAbsentAfter": true
+}

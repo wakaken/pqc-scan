@@ -1,0 +1,51 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SSHハイブリッド鍵交換の確認結果</title><style>body{font:16px/1.6 system-ui,sans-serif;color:#15243b;background:#f5f7fb;margin:0}main{max-width:1100px;margin:auto;padding:24px}dt,dd,p{overflow-wrap:anywhere}section{background:white;padding:16px 20px;margin:16px 0;border-radius:8px}dt{font-weight:600}dd{margin:0 0 12px}table{width:100%;table-layout:fixed;border-collapse:collapse;background:white}th,td{text-align:left;vertical-align:top;padding:12px;border:1px solid #c9d2df;overflow-wrap:anywhere;word-break:break-word}th{width:48%}code{display:block;font-size:.8em;overflow-wrap:anywhere}summary{cursor:pointer;padding:12px;font-weight:600}summary:focus-visible{outline:3px solid #1c60b9;outline-offset:2px}.loss{border-left:4px solid #a63d00;padding:12px;background:#fff4e8}@media(max-width:600px){main{padding:12px}th,td{padding:8px}}</style></head><body><main><h1>SSHハイブリッド鍵交換の確認結果</h1><p>接続先に対する、上限を設けた1回の観測です。全記録は技術情報で確認できます。</p>
+<section><h2>観測の概要</h2><dl>
+<dt>観測の完了状況</dt><dd>要求した観測を完了できませんでした (failed)</dd>
+<dt>実際の接続相手</dt><dd>127.0.0.1:34125</dd>
+<dt>要求したホスト</dt><dd>127.0.0.1</dd>
+<dt>要求したポート</dt><dd>34125</dd>
+</dl></section>
+<section><h2>今回わかったこと</h2>
+<p>ハイブリッド鍵交換と接続先の検証を完了できませんでした。下の理由を確認してください。この結果だけでサーバー全体の非対応を示すものではありません。</p>
+<p>ホスト認証は従来方式のEd25519です。ハイブリッド鍵交換の成立は、ホスト署名のPQC対応を意味しません。</p>
+</section><section><h2>確認範囲と未完了の理由</h2>
+<p>1つのクライアント設定による1接続先の観測です。サーバーの全対応方式やPQC移行完了を確認するものではありません。</p>
+<p>接続先のホスト鍵が、指定した信頼済み公開鍵と一致しませんでした。</p>
+</section><section><h2>次に確認すること</h2>
+<p>別経路で入手した公開鍵と、サーバーのML-KEM768＋X25519／Ed25519設定を確認してください。成功させるために未知の鍵を受け入れたり、検証を無効化したりしないでください。</p>
+</section>
+<details id="technical-details"><summary>技術情報 — 記録した全項目</summary><table><caption>元の機械項目パスと対応する事実</caption><thead><tr><th scope="col">項目</th><th scope="col">内容</th></tr></thead><tbody>
+<tr data-field="/attempt_id"><th scope="row">今回の実行内の試行番号<code>/attempt_id</code></th><td>1</td></tr>
+<tr data-field="/details/handshake_complete"><th scope="row">ハンドシェイク完了<code>/details/handshake_complete</code></th><td>false</td></tr>
+<tr data-field="/details/host_authentication_pqc"><th scope="row">ホスト認証のPQC対応<code>/details/host_authentication_pqc</code></th><td>false</td></tr>
+<tr data-field="/details/host_identity_verified"><th scope="row">信頼済みホスト鍵と署名の検証<code>/details/host_identity_verified</code></th><td>false</td></tr>
+<tr data-field="/details/host_signature"><th scope="row">検証済みホスト署名方式<code>/details/host_signature</code></th><td>null</td></tr>
+<tr data-field="/details/negotiated_kex"><th scope="row">検証済みの鍵交換方式<code>/details/negotiated_kex</code></th><td>null</td></tr>
+<tr data-field="/details/offered_host_key"><th scope="row">提示した固定のホスト鍵方式<code>/details/offered_host_key</code></th><td>ssh-ed25519</td></tr>
+<tr data-field="/details/offered_kex"><th scope="row">提示した固定の鍵交換方式<code>/details/offered_kex</code></th><td>mlkem768x25519-sha256</td></tr>
+<tr data-field="/details/provider_version"><th scope="row">プロバイダーの版<code>/details/provider_version</code></th><td>1.18.0</td></tr>
+<tr data-field="/details/russh_version"><th scope="row">russhの版<code>/details/russh_version</code></th><td>0.65.1</td></tr>
+<tr data-field="/details/trust_source"><th scope="row">信頼元<code>/details/trust_source</code></th><td>explicit_endpoint_public_key</td></tr>
+<tr data-field="/details/user_authentication_attempted"><th scope="row">ユーザー認証の実施<code>/details/user_authentication_attempted</code></th><td>false</td></tr>
+<tr data-field="/diagnostics/0"><th scope="row">診断コード<code>/diagnostics/0</code></th><td>host_key_untrusted</td></tr>
+<tr data-field="/generated_at"><th scope="row">作成日時<code>/generated_at</code></th><td>2026-11-14T07:12:39.502263505+00:00</td></tr>
+<tr data-field="/limits/dns_timeout_ns"><th scope="row">名前解決の制限時間（ナノ秒）<code>/limits/dns_timeout_ns</code></th><td>5000000000</td></tr>
+<tr data-field="/limits/max_dns_answers"><th scope="row">名前解決結果の上限<code>/limits/max_dns_answers</code></th><td>8</td></tr>
+<tr data-field="/limits/max_received_bytes"><th scope="row">受信上限（バイト）<code>/limits/max_received_bytes</code></th><td>524288</td></tr>
+<tr data-field="/limits/max_sent_bytes"><th scope="row">送信上限（バイト）<code>/limits/max_sent_bytes</code></th><td>65536</td></tr>
+<tr data-field="/limits/overall_timeout_ns"><th scope="row">全体の制限時間（ナノ秒）<code>/limits/overall_timeout_ns</code></th><td>15000000000</td></tr>
+<tr data-field="/limits/protocol_timeout_ns"><th scope="row">プロトコル処理の制限時間（ナノ秒）<code>/limits/protocol_timeout_ns</code></th><td>5000000000</td></tr>
+<tr data-field="/limits/tcp_timeout_ns"><th scope="row">TCP接続の制限時間（ナノ秒）<code>/limits/tcp_timeout_ns</code></th><td>3000000000</td></tr>
+<tr data-field="/outcome"><th scope="row">観測の完了状況<code>/outcome</code></th><td>要求した観測を完了できませんでした (failed)</td></tr>
+<tr data-field="/protocol"><th scope="row">観測方法<code>/protocol</code></th><td>ssh_kex</td></tr>
+<tr data-field="/redaction_applied"><th scope="row">秘密情報に見える文字列の省略<code>/redaction_applied</code></th><td>false</td></tr>
+<tr data-field="/scanner_version"><th scope="row">スキャナーの版<code>/scanner_version</code></th><td>0.2.0</td></tr>
+<tr data-field="/schema_version"><th scope="row">スキーマの版<code>/schema_version</code></th><td>1</td></tr>
+<tr data-field="/target/connected_peer"><th scope="row">実際の接続相手<code>/target/connected_peer</code></th><td>127.0.0.1:34125</td></tr>
+<tr data-field="/target/host"><th scope="row">要求したホスト<code>/target/host</code></th><td>127.0.0.1</td></tr>
+<tr data-field="/target/pinned_address"><th scope="row">固定した接続先<code>/target/pinned_address</code></th><td>127.0.0.1:34125</td></tr>
+<tr data-field="/target/port"><th scope="row">要求したポート<code>/target/port</code></th><td>34125</td></tr>
+<tr data-field="/target/resolved_addresses/0"><th scope="row">確認した名前解決結果<code>/target/resolved_addresses/0</code></th><td>127.0.0.1</td></tr>
+<tr data-field="/traffic/received_bytes"><th scope="row">ソケットで受信したバイト数<code>/traffic/received_bytes</code></th><td>2150</td></tr>
+<tr data-field="/traffic/sent_bytes"><th scope="row">ソケットで送信したバイト数<code>/traffic/sent_bytes</code></th><td>1726</td></tr>
+</tbody></table><p>事前に信頼したホスト公開鍵との照合と、サーバー署名の検証を行います。ML-KEM768とX25519のハイブリッド鍵交換を調べ、ホスト認証には従来方式のEd25519を使います。ユーザー認証・ログインは行いません。失敗だけでサーバー全体の非対応を断定することはできません。</p></details></main></body></html>

@@ -1,0 +1,28 @@
+from pathlib import Path
+import json,gzip,hashlib
+r=Path.cwd();e=r/'tasks/052/evidence/evaluation-closure-20261116';ast=e/'ast-scope-r3/SCOPES.json';rs=json.loads(ast.read_text());scopes={x['path']:[t['span'] for t in x['excludedTestScopes']] for x in rs if x['path']!='synthetic-control.rs'};out=[]
+external={x['target'] for x in json.loads((e/'EXTERNAL-TEST-MODULES.json').read_text())['rows']}
+for config,folder in [('default','branch-coverage-r2'),('all-features','branch-coverage-r4-all-features')]:
+ p=r/'tasks/052/evidence/reassessment-20261116/verification-followup'/folder/('branch-'+config)/'coverage.json';raw=p.read_bytes() if p.exists() else gzip.decompress(Path(str(p)+'.gz').read_bytes());d=json.loads(raw);rows=[];num=den=helper_extra=excluded=collision_extra=0
+ for f in d['data'][0]['files']:
+  if not f['filename'].startswith('/source/crates/') or '/src/' not in f['filename']:continue
+  name=f['filename'].removeprefix('/source/');g={}
+  for b in f['branches']:
+   k=tuple(b[:4]);v=g.setdefault(k,[False,False]);v[0]|=b[4]>0;v[1]|=b[5]>0
+  deficit=f['summary']['branches']['count']-len(g)*2
+  assert deficit>=0 and deficit%2==0,(name,deficit)
+  kept={};removed=[]
+  for k,v in g.items():
+   tests=[s for s in scopes.get(name,[]) if (s[0],s[1]) <= (k[0],k[1]) and (k[2],k[3]) <= (s[2],s[3])]
+   if tests or name in external:removed.append(k)
+   else:kept[k]=v
+  # OR across observed instantiations is optimistic; never called an exact rate.
+  # Any summary/detail collision deficit is assumed production and fully covered.
+  n=sum(sum(v) for v in kept.values())+deficit;nmax=len(kept)*2+deficit
+  extra=nmax-n if name.startswith('crates/pqc_scan_cli/') or name.endswith('/target_policy.rs') else 0
+  num+=n;den+=nmax;helper_extra+=extra;excluded+=len(removed)*2;collision_extra+=deficit
+  rows.append({'path':name,'sourceSha256':hashlib.sha256((r/name).read_bytes()).hexdigest(),'rawSummary':f['summary']['branches'],'uniqueConditionCount':len(g),'removedTestConditionSpans':[list(k) for k in removed],'summaryCollisionDeficitAssumedCovered':deficit,'productionOutcomes':nmax,'observedUnionCoveredUpperBound':n,'unobservedHelperMaximumAdditionalOutcomes':extra})
+ assert 0<=num<=num+helper_extra<=den
+ out.append({'configuration':config,'productionMappedOutcomes':den,'observedUnionCoveredUpperBound':num,'additionalHelperOutcomesAssumedCovered':helper_extra,'summaryCollisionOutcomesAssumedCovered':collision_extra,'coverageUpperBoundPercent':100*(num+helper_extra)/den,'removedInlineTestOutcomes':excluded,'rows':rows})
+result={'method':'Exclude compiler-AST-proven test-only scopes and source-bound external test-only modules. Deduplicate existing LLVM source-condition spans and OR positive outcome counts only as an optimistic upper bound. Where summary cardinality exceeds unique detail, assign every additional outcome to production and assume it covered. Grant every remaining CLI/target_policy outcome as covered to overapproximate env-cleared-helper reachability. This is a bound, not a reconstructed exact rate.','astScopeEvidence':'ast-scope-r3/SCOPES.json','astScopesSha256':hashlib.sha256(ast.read_bytes()).hexdigest(),'records':out,'notStatementCoverage':True,'scopeLimit':'Handwritten mapped production Rust under existing044compiler/feature/expansion scope. Unmapped error/lib shim files contain no handwritten executable branches; generated macro/library branches are not added to the original metric.','exactAggregationAttempt':'Coordinate-only aggregation cannot reproduce exact summary:recommendation.rs and dependency_detector/parse.rs each contain2additional summary outcomes; several covered summaries differ from observed-instantiation union. Their ambiguity is overapproximated, not silently repaired.'}
+(e/'BRANCH-PRODUCTION-BOUND-r2.json').write_text(json.dumps(result,indent=2)+'\n');print([(x['configuration'],x['productionMappedOutcomes'],x['observedUnionCoveredUpperBound'],x['additionalHelperOutcomesAssumedCovered'],x['coverageUpperBoundPercent']) for x in out])

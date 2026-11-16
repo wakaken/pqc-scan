@@ -1,0 +1,65 @@
+from pathlib import Path
+import json,hashlib,collections,shutil,subprocess,gzip,re
+r=Path('/Users/waka/.codex/worktrees/task053-ci-verification/pqc-scan');e=r/'tasks/052/evidence/reassessment-20261116';f=e/'verification-followup'
+H=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def write(p,d):p.write_text(json.dumps(d,indent=2,ensure_ascii=False)+'\n')
+# Do not run until the isolated all-feature measurement has concluded.
+cov=f/'branch-coverage-r4-all-features';host=json.loads((cov/'HOST-RESULTS.json').read_text());assert host['containerRemoved']
+prior=f/'before-integration';prior.mkdir(exist_ok=False)
+for p in list((e/'outputs').glob('*'))+[e/'EVIDENCE-REFERENCES.json',e/'REMAINING.json',e/'SOURCE-FINAL.json',r/'tasks/052/TASK-052-REASSESSMENT-20261116.md']:
+ if p.is_file():shutil.copyfile(p,prior/p.name)
+build=json.loads((f/'build-flags-debug-r6-project-debug/RESULTS.json').read_text());bh=json.loads((f/'build-flags-debug-r6-project-debug/HOST-RESULTS.json').read_text());assert bh['exit']==0 and bh['containerRemoved'] and bh['sourceBeforeAfterMatch']
+for k in ['debugControlPositive','debugControlNegative','installedDebugInfo','rustLinkFlagReachedInstalledBinary','requestedCCInvoked','requestedCFLAGSObserved']:assert build['checks'][k]
+measurements={}
+for label,base in [('default',f/'branch-coverage-r2'),('all-features',cov)]:
+ p=base/('branch-'+label)/'summary.json'
+ if p.exists():measurements[label]=json.loads(p.read_text())
+write(f/'MEASURED-RESULTS.json',{'build':{'run':'build-flags-debug-r6-project-debug/HOST-RESULTS.json','exit':bh['exit'],'installedBinarySha256':build['binarySha256'],'checks':build['checks'],'scope':build['scope'],'limitations':build['limitations']},'coverage':{'hostExit':host['exit'],'records':measurements,'scope':'Existing044LLVM branch instrumentation, default and all-features in separate finite offline environments. Mapped source counters and ambiguous/missing mappings remain separate. No statement metric or full product pass.'},'allFailuresPreserved':True})
+a=json.loads((e/'outputs/best-practices-assessment.json').read_text());refs=json.loads((e/'EVIDENCE-REFERENCES.json').read_text())
+refs['SECURITY']=[{'path':str(p.relative_to(r)),'exists':True,'sha256':H(p)} for p in [r/'SECURITY.md',r/'SECURITY.ja.md']]
+newfiles=[f/n for n in ['MAINTAINER-FACTS.json','GITHUB-HISTORY.json','GITHUB-ADVISORIES.json','NVD-QUERY.json','API-CURRENCY.json','SOURCE-REUSE.json','REGRESSION-COHORT-DISCOVERY.json','REGRESSION-LINK-CANDIDATES.json','MEASURED-RESULTS.json','MEASUREMENT-INTERPRETATION.md']]
+refs['VERIFY052']=[{'path':str(p.relative_to(r)),'exists':True,'sha256':H(p)} for p in newfiles]
+# Current source references bind current bytes; original references stay in prior snapshots.
+for rs in refs.values():
+ for ref in rs:
+  p=r/ref['path'];ref.update(exists=p.is_file(),sha256=H(p) if p.is_file() else None)
+write(e/'EVIDENCE-REFERENCES.json',refs)
+updates={
+ '1.documentation_achievements':('Met','Maintainer confirms no externally recognized achievement or badge has ever been attained. Thus no achievement-link deadline has been triggered as of this dated assessment. This conditional empty population is not a badge award, a percentage or an invented N/A exemption; no future compliance is claimed.'),
+ '2.two_person_review':('Unmet','Maintainer confirms no pre-publication/release review by any other human ever. All31public PRs and their review collections were read; six bot COMMENTED submissions and AI identities are not human review. A nonempty modification population exists and the human-reviewed numerator is zero, so the >=50%condition is not met without needing to equate PRs with every modification.'),
+ '1.interfaces_current':('Partial','Source review identifies the explicit pinned-rustls deprecated error-variant compatibility match alongside its Context replacement. Maintained YAML replacement is already bound by063. The exception and replacement are documented in API-CURRENCY.json; no vulnerability or exhaustive all-stack API currency is inferred.'),
+ '1.build_standard_variables':('Partial','A new offline static release source-install experiment observes requestedCC/CFLAGS and Rust flags/linker settings reaching compiler invocations and the installed ELF marker. CXX/CXXFLAGS are unexercised, genericLDFLAGS is not established, and optional-feature/macOS conformance remains unverified. Failed attempts and fixed limits are preserved; no full-matrix pass.'),
+ '1.build_preserve_debug':('Partial','New static release source installation retains.debug_info/.debug_line with project debug requested and third-party package debug explicitly disabled to fit4GiB scratch. Independent debug/no-debug controls pass. The installed40,862,248-byte binary is hash-bound. Full all-dependency/all-feature and macOS archive debug retention remain unverified; Linux does not substitute for macOS distribution assurance.')}
+branch='The current default measurement records4105/5454mapped LLVMbranches (75.26585991932527%), below80%. '
+if 'all-features' in measurements:
+ b=measurements['all-features']['totals']['branches'];branch+=f"The separate all-feature run records{b['covered']}/{b['count']}mapped branches ({b['percent']}%). "
+branch+='These are branch observations, not source statement coverage. Raw/mapped ambiguity and unobserved sources remain explicit; incomplete assessment validity is not cleared by a low score or an exit0. Earlier044measurements remain historical.'
+updates['2.test_branch_coverage80']=('Partial',branch)
+for row in a['criteria']:
+ if row['key'] in updates:
+  row['status'],row['assessment']=updates[row['key']];row['evidence']=list(dict.fromkeys(row['evidence']+['VERIFY052']))
+ if row['key'] in ['0.release_notes_vulns','0.vulnerabilities_fixed_60_days','0.vulnerabilities_critical_fixed','0.static_analysis_fixed','0.dynamic_analysis_fixed','1.vulnerability_report_credit']:
+  row['assessment']+=' Fresh repository advisories are empty and the exact-name NVD query returns HTTP200/zero results; neither identifies the complete internally confirmed vulnerability/severity/date/release population. These negative searches are not vulnerability-free evidence.'
+  row['evidence']=list(dict.fromkeys(row['evidence']+['VERIFY052']))
+ if row['key']=='1.regression_tests_added50':
+  row['assessment']+=' All129ancestry commits were discovery-classified (30merges,40prose-only,39product/test,20tool/workflow/test), and59change patches yielded function/test/record candidates. This does not supply a semantic individual-bug denominator; no>=50%claim.'
+  row['evidence']=list(dict.fromkeys(row['evidence']+['VERIFY052']))
+ row['evidenceApplicability']=[{'key':k,'references':refs[k]} for k in row['evidence']]
+a['countsByStatus']=dict(collections.Counter(x['status'] for x in a['criteria']));a['currentFollowup']='verification-followup/MEASURED-RESULTS.json';write(e/'outputs/best-practices-assessment.json',a)
+p=e/'outputs/best-practices.md';lines=p.read_text().splitlines()
+for i,line in enumerate(lines):
+ if line.startswith('Counts:'):lines[i]='Counts:'+json.dumps(a['countsByStatus'])+'. These are assessment labels, not a badge percentage.'
+ for row in a['criteria']:
+  if line.startswith('| ['+row['key']+']('):lines[i]='| ['+row['key']+']('+row['officialUrl']+') | '+row['status']+' | '+row['assessment'].replace('|','/')+' |';break
+p.write_text('\n'.join(lines)+'\n')
+controls=json.loads((e/'outputs/github-controls.json').read_text());controls['assessment']=[{'area':'Default-branch merge controls','observed':'Snapshot developprotected=false; rulesets and effective develop rules are empty.','recommendation':'Consider required checks and a deliberate merge policy for the sole-maintainer workflow; human-review requirements need an actual other human. No change is applied.','basis':['branches','rulesets','develop-rules']},{'area':'Workflow permissions','observed':'Default read permissions; Actions cannot approve PR reviews.','recommendation':'Preserve narrow default permissions and inspect job-specific write grants against their purpose.','basis':['workflow-permissions']},{'area':'Reporting and identity','observed':'Private reporting enabled; sole observed collaborator MFA confirmed; notification preference has a separate dated receipt, actual delivery untested.','recommendation':'Keep actual settings, local bilingual policy and the still-older public policy distinguished. Publication needs separate authorization.','basis':['private-reporting','user','collaborators']}];controls['currentLocalPolicies']=['SECURITY.md','SECURITY.ja.md'];write(e/'outputs/github-controls.json',controls)
+summary='''\n## Remaining verification follow-up —2026-11-16\n\nNo external achievement has been attained, per maintainer confirmation. No other\nhuman has reviewed changes before publication/release, per a separate explicit\nconfirmation. All31GitHub PRs and31review collections were read; observed review\nsubmissions are bots, not human reviewers. Human review is Unmet, not Unknown.\nThe conditional achievement-link obligation is Met for its empty trigger\npopulation, without an invented N/A or badge claim.\n\nA new strict offline static source-install experiment confirms requestedCC/CFLAGS,\nRust linker-flag propagation and retained project debug information. It does not\ncertify unexercisedCXX/LDFLAGS, macOS or all-feature debug behavior. Coverage and\nfailed attempts are in verification-followup/MEASURED-RESULTS.json. Default\nbranches measure4105/5454(75.27%); no statement rate is substituted.\n\nNVD exact-name query returns HTTP200/zero results and fresh GitHub advisory\ncollections are empty. Available internal fixes still need severity/date/release\nreconciliation; no zero-vulnerability claim follows.129commit discovery classes\nand59patch candidate maps do not establish the individual-bug regression ratio.\nThe policies are now EnglishSECURITY.md and JapaneseSECURITY.ja.md with reciprocal\nlinks and Japanese entry references updated. All199task060bindings still match.\nNo source-code, shared runner, dependency or workflow changes were made; no new\ntool installation/dependency download/settings change/publication/review identity was introduced. Measurement\ncontrollers are retained as evidence, not installed repository behavior.\n'''
+for p in [e/'outputs/security-process.md',e/'outputs/process-review.md',r/'tasks/052/TASK-052-REASSESSMENT-20261116.md']:p.write_text(p.read_text()+summary)
+remaining=json.loads((e/'REMAINING.json').read_text());remaining['unknownCriteria']=[{'key':x['key'],'reason':x['assessment']} for x in a['criteria'] if x['status']=='Unknown'];remaining['count']=len(remaining['unknownCriteria']);remaining['latestVerification']='verification-followup/MEASURED-RESULTS.json';remaining['assessmentValidity']='Still unfinished: individual vulnerability/fix populations, semantic regression cohort, valid source-statement measurement and outstanding Partial applicability/matrix gaps remain. Known unmet practices do not require automatic fixes or recruitment.';remaining['publication']='English/Japanese local SECURITY policies split and current references bound; public policy remains older and no publication is authorized.';remaining['measurementFeasibility']['buildFlagsDebug']='Static Linux release installation now measured with requested project debug; CXX/generic LDFLAGS, macOS and optional-feature debug scope remain unverified.';remaining['measurementFeasibility']['branchCoverage']='New default and separate all-feature results and raw mapping limitations are in verification-followup. No line/region substitute for statement coverage.';remaining['resolvedMaintainerFacts']=['No external achievement attained','No pre-publication/release review by another human ever'];write(e/'REMAINING.json',remaining)
+for name in ['best-practices.md','github-controls.json','process-review.md','scorecard.json','security-process.md']:shutil.copyfile(e/'outputs'/name,r/'target/quality-task-052'/name)
+current=json.loads((e/'SOURCE-FINAL.json').read_text());current['files'].update({p:H(r/p) for p in current['files'] if (r/p).is_file()});current['files']['SECURITY.ja.md']=H(r/'SECURITY.ja.md');current['note']='Current follow-up source binding; prior SOURCE-FINAL.json is preserved in verification-followup/before-integration/.';write(e/'SOURCE-FINAL.json',current)
+for p in [r/'tasks/054/TASK-054-RESULTS.md',r/'tasks/054/evidence/assessment-20261116/release-assessment.md']:
+ p.write_text(p.read_text()+summary+'\nCurrent052counts:'+json.dumps(a['countsByStatus'])+'.052/054andv0.3remain unfinished; original criteria,053andfrozen catalog are unchanged.\n')
+shutil.copyfile(r/'tasks/054/evidence/assessment-20261116/release-assessment.md',r/'target/quality-task-054/release-assessment.md')
+shutil.copyfile('/tmp/pqc052-integrate-followup.py',f/'integration-controller.py.txt')
+print(json.dumps({'counts':a['countsByStatus'],'unknown':remaining['count'],'coverageExit':host['exit']}))

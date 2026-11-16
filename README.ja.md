@@ -121,7 +121,7 @@ CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚�
 | [TLS・SSH接続先の明示的な診断](docs/user/PROBING.ja.md) | 任意の機能を有効にして、許可済みの接続先を1つ調べる |
 | [インストールとローカル配布物](docs/user/DISTRIBUTION.ja.md) | ルールの配置、配布物の検証、更新方法、サポート範囲 |
 
-脆弱性の報告方法は[SECURITY.md](SECURITY.md)を参照してください。
+脆弱性の報告方法は[SECURITY.md](SECURITY.ja.md)を参照してください。
 
 一部の組込ルールでは、import・別名・ファイル内の限定した参照関係を調べます。Nodeでは、固定配列の`for...of`や、局所的に生成したRSA鍵を使う署名・検証も追跡します。詳しくは[解析範囲と制約](docs/user/COVERAGE.ja.md#source-facts)を参照してください。参照の検出だけで、実行やPQC機能の有効化が確認できるわけではありません。
 
