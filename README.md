@@ -164,6 +164,18 @@ On `develop`, `baseline` and `scan` run independently of `quality`; PR validatio
 provides the pre-merge quality check. Manual execution remains available for
 running all three enabled jobs together.
 
+The CI self-scan reads a separate product input: `crates/*/src/**`, Cargo manifests
+and the root lockfile, build scripts when present, and `rules/default/*.yml`.
+Standalone tests, examples, task evidence, CI scripts and documentation are outside
+this scan. Source bytes and repository-relative locations are preserved; colocated
+Rust unit tests remain in their source files. This scope applies to repository CI.
+
+The summary separates results requiring review from exact reviewed references.
+The `pqc-self-scan-evidence` artifact contains the input inventory/hashes, scoped
+expectations, all results for that scope, upload results, diagnostics and summary.
+New or changed results still appear for review. These counts describe detected
+references, not confirmed vulnerabilities. See [the product scan scope](docs/quality/self-scan/CI-SELF-SCAN.md#product-scope-20261116).
+
 The existing `quality` and `baseline` jobs also aggregate all six quality axes
 offline from recorded evidence. Missing facts and stale measurements remain
 visible; aggregation does not run the high-cost studies or grant release acceptance.

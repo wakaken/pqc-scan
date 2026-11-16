@@ -1,0 +1,263 @@
+name: pqc-scan
+
+on:
+  # Keep this list limited to prose: docs/ also contains executable CI inputs.
+  # If these checks become required, use job-level gating instead of skipping
+  # the entire workflow, which would leave required checks pending.
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - 'README.md'
+      - 'README.ja.md'
+      - 'AGENTS.md'
+      - 'SECURITY.md'
+      - 'docs/**/*.md'
+      - 'prompts/**/*.md'
+      - 'tasks/README.md'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'README.ja.md'
+      - 'AGENTS.md'
+      - 'SECURITY.md'
+      - 'docs/**/*.md'
+      - 'prompts/**/*.md'
+      - 'tasks/README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable (explicit toolchain below)
+        with:
+          toolchain: 1.93.1
+          components: rustfmt, clippy
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+      - name: Run tests
+        run: cargo test --workspace --locked
+
+      - name: Run clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Test report navigation and self-scan preparation
+        run: node --test shell/*.test.cjs
+
+      - name: Test baseline evaluator
+        run: python3 -m unittest discover -s tests/quality -p 'test_*.py'
+
+      - name: Aggregate all-axis evidence offline
+        if: always()
+        timeout-minutes: 2
+        run: |
+          python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-integrated
+          cp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-integrated/ci-measurement-plan.md
+
+      - name: Preserve integrated evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pqc-quality-integrated-pr
+          if-no-files-found: error
+          retention-days: 30
+          path: target/quality-integrated/
+
+  protocols:
+    # Temporarily paused during development, including manual workflow runs.
+    # Remove this condition to restore the existing protocol checks.
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable (explicit toolchain below)
+        with:
+          toolchain: 1.93.1
+          components: rustfmt, clippy
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Prepare pinned protocol tools and dependency cache
+        run: python3 tests/protocol/prepare-image.py --out-dir target/protocol-image
+      - name: Verify kernel resource and filesystem boundaries
+        env:
+          PQC_RUN_CONTAINER_TESTS: '1'
+          PQC_PROTOCOL_IMAGE_FILE: target/protocol-image/IMAGE.json
+        run: python3 -m unittest discover -s tests/protocol -p 'test_*.py' -v
+      - name: Build and test all features, previews and OpenSSH under the same confinement
+        run: >-
+          python3 tests/protocol/run-isolated.py --out-dir target/protocol-ci
+          --image-file target/protocol-image/IMAGE.json --previews --ssh-kex
+      - name: Test packaging bounds and exact-version notices
+        run: python3 -m unittest discover -s tests/distribution -v
+      - name: Preserve protocol evidence and synthetic reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pqc-optional-protocol-evidence
+          if-no-files-found: error
+          path: |
+            target/protocol-ci/
+            target/protocol-image/IMAGE.json
+            target/protocol-image/prepare.log
+
+  baseline:
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable (explicit toolchain below)
+        with:
+          toolchain: 1.93.1
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Aggregate existing all-axis evidence offline
+        timeout-minutes: 2
+        run: |
+          python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-integrated
+          cp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-integrated/ci-measurement-plan.md
+      - name: Build baseline scanner
+        run: cargo build --workspace --release --locked
+      - name: Measure reviewed baseline without enforcing local signals
+        run: >-
+          python3 tests/quality/run.py
+          --binary target/release/pqc-scan --build-profile release
+          --out-dir target/quality-baseline --repeats 3 --warm-samples 3
+      - name: Summarize source-bound quality evidence
+        run: >-
+          python3 tests/quality/report.py --baseline target/quality-baseline
+          --reference tasks/023/evidence/task023/BASELINE.json
+          --out-dir target/quality-assessment
+      - name: Measure independently reviewed additional corpus
+        run: >-
+          python3 tests/quality/run.py --corpus-dir tests/quality/expanded
+          --binary target/release/pqc-scan --build-profile release
+          --out-dir target/quality-expanded --repeats 3 --skip-benchmarks
+      - name: Summarize additional nominal detection evidence
+        run: >-
+          python3 tests/quality/report.py --corpus-dir tests/quality/expanded
+          --baseline target/quality-expanded --out-dir target/quality-expanded-assessment
+      - name: Measure source-audited corrected corpus
+        run: >-
+          python3 tests/quality/run.py --corpus-dir tests/quality/expanded-v2
+          --binary target/release/pqc-scan --build-profile release
+          --out-dir target/quality-expanded-v2 --repeats 3 --skip-benchmarks
+      - name: Summarize corrected data separately from v1
+        run: >-
+          python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2
+          --baseline target/quality-expanded-v2
+          --applicability tests/quality/applicability-document-relocation-20261114/assessment.json
+          --out-dir target/quality-expanded-v2-assessment
+      - name: Measure missing lock-format controls
+        run: >-
+          python3 tests/quality/run.py --corpus-dir tests/quality/expanded-v2-lock-controls
+          --binary target/release/pqc-scan --build-profile release
+          --out-dir target/quality-lock-controls --repeats 3 --skip-benchmarks
+      - name: Summarize lock-format controls
+        run: >-
+          python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2-lock-controls
+          --baseline target/quality-lock-controls
+          --out-dir target/quality-lock-controls-assessment
+      - name: Measure TASK-043 fixes and fresh upstream controls
+        run: >-
+          python3 tests/quality/run.py --corpus-dir tests/quality/task043-corpus-v2
+          --binary target/release/pqc-scan --build-profile release
+          --out-dir target/quality-task043 --repeats 3 --skip-benchmarks
+      - name: Summarize TASK-043 without changing numeric gates
+        run: >-
+          python3 tests/quality/report.py --corpus-dir tests/quality/task043-corpus-v2
+          --baseline target/quality-task043 --out-dir target/quality-task043-assessment
+      - name: Preserve baseline reports and measurements
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pqc-quality-baseline
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            target/quality-integrated/
+            target/quality-baseline/
+            target/quality-assessment/
+            target/quality-expanded/
+            target/quality-expanded-assessment/
+            target/quality-expanded-v2/
+            target/quality-expanded-v2-assessment/
+            target/quality-lock-controls/
+            target/quality-lock-controls-assessment/
+            target/quality-task043/
+            target/quality-task043-assessment/
+
+  scan:
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable (explicit toolchain below)
+        with:
+          toolchain: 1.93.1
+
+      - name: Build
+        run: cargo build --workspace --release --locked
+
+      - name: Run pqc-scan
+        run: cargo run --locked --bin pqc-scan -- scan . --format sarif --out-dir ./pqc-report --rules-dir ./rules
+
+      - name: Prepare actionable Code Scanning results
+        run: >-
+          node shell/prepare-code-scanning.cjs
+          --input ./pqc-report/report.sarif
+          --expectations docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json
+          --root .
+          --output ./pqc-report/code-scanning.sarif
+          --audit ./pqc-report/code-scanning-audit.json
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@9418214df1f2c4b8128c770156c409013b07d6b9 # v3
+        with:
+          sarif_file: ./pqc-report/code-scanning.sarif
+
+      - name: Preserve full self-scan evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pqc-self-scan-evidence
+          if-no-files-found: error
+          path: |
+            ./pqc-report/report.sarif
+            ./pqc-report/code-scanning.sarif
+            ./pqc-report/code-scanning-audit.json
+            ./docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json
+
+      - name: Upload Dependency SBOM
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pqc-dependency-sbom
+          path: ./pqc-report/dependency-sbom.json

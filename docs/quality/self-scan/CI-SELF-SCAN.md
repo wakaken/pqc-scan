@@ -1,5 +1,8 @@
 # Repository self-scan expectations (task 040)
 
+Current CI uses the [product-only input scope](#product-scope-20261116). Earlier
+repository-wide measurements below retain their historical inputs and outcomes.
+
 ## Goal and authorized scope
 
 The repository intentionally contains positive detection fixtures, public certificate fixtures and inline unit-test strings. Uploading all of these as actionable production alerts caused the PR 11 Code Scanning results check to fail on a synthetic private-marker test. Keep scanner detection, native outputs, rule severity and GitHub failure thresholds unchanged. User authorized this CI correction, tests, documentation, independent review and a local commit; no push, PR or merge.
@@ -20,7 +23,7 @@ scope to rule definitions, OID labels, localization/guidance text, nonexecuted c
 examples and task prose. This is an exact-result exception, not a whole-file or
 production-code baseline. Unregistered product/rule implementation findings remain visible.
 
-The Node helper `shell/prepare-code-scanning.cjs` exports `prepareCodeScanning(sarif, policy, root)` and `resultDigest(result)`, and has a CLI accepting `--input`, `--expectations`, `--root`, `--output`, `--audit`. Use built-in Node modules only. Canonical JSON sorts object keys recursively, preserves arrays and includes every SARIF result field; the current writer has no volatile result ID/timestamp to discard.
+The Node helper `shell/prepare-code-scanning.cjs` exports `prepareCodeScanning(sarif, policy, root)`, `resultDigest(result)` and `renderSelfScanSummary(prepared)`. Its CLI accepts `--input`, `--expectations`, `--root`, `--output`, `--audit` and optional `--summary`. Use built-in Node modules only. Canonical JSON sorts object keys recursively, preserves arrays and includes every SARIF result field; the current writer has no volatile result ID/timestamp to discard.
 
 An expected result is omitted only if the tool is exactly `pqc-scan`, there is one physical primary location, no secondary/code-flow/related locations, the path is literal/normalized, source bytes and the full result digest match, and the observed count equals the registered count. Counts are checked across the whole SARIF before omission: an unexpected extra duplicate or copied run keeps the whole group. URI base/index references and run-level artifact/base/invocation indirection are ineligible. Different messages, levels, properties, rules or locations remain unchanged. A changed/missing/symlinked/outside-root source cannot be omitted. Unexpected/other-tool results and run metadata are preserved. Bad input/policy causes a safe nonzero exit, never an empty successful upload.
 
@@ -220,3 +223,100 @@ does not approve other source/fixture findings. Tests in
 `shell/relocated-evidence-self-scan.test.cjs` check these boundaries against the
 actual preserved files. The build-input snapshot filter is separate and does not
 exclude evidence from scanning.
+
+<a id="notification-review-20261116"></a>
+
+## Notification review — 2026-11-16
+
+This section records the earlier repository-wide notification checkpoint. The
+subsequent product-scope correction below is the current CI input selection.
+
+The maintainer requested resolving the mixed notification queue. The full scan
+still includes test inputs and historical evaluation evidence. The existing
+version1 exact-result policy now registers the current, individually bound
+reference contexts: test assertions/fixtures, examples, archived reports and
+documentation, rule/schema vocabularies, identifier/OID labels and rendered
+guidance strings. These are reviewed references, not a blanket false-positive
+or safety verdict. Actual workspace dependency observations and regionless
+results are not newly registered.
+
+The [finite review ledger](notification-review-20261116/REVIEWED-RESULTS.json)
+binds each source, reason and exact result/count. It replays the preserved
+same-tree hosted scan of5255results as5240reviewed references and15requiring
+review. The [previous policy](notification-review-20261116/EXPECTATIONS-BEFORE.json)
+is preserved byte for byte. Historical synthetic regression tests use that frozen
+policy to retain their original acceptance; the new current-source tests exercise
+the active policy against all recorded current results. Historical measurements
+are not rewritten to describe current source.
+
+With `--summary`, preparation also writes `self-scan-summary.md`. The existing
+scan job displays it in the GitHub Actions summary and archives it alongside
+the full SARIF, upload SARIF, audit and policy. The first table groups results
+requiring review by file, rule and level, retaining duplicate counts. The second
+table summarizes reviewed reference contexts. Changed/unavailable source bindings
+are reported separately. Detail tables show at most100groups and explicitly link
+the complete artifact when truncated. Scanned message/source payloads are not
+copied into the summary; unresolved identifiers/paths use safe placeholders.
+
+The count invariant remains `rawResults = expectedResults + retainedResults`.
+In user-facing explanations these mean all detected references, reviewed
+references and results requiring review. The internal audit fields and format
+remain compatible. The new summary output cannot alias input, policy, upload
+SARIF or audit, including through hard links or symlinks.
+
+No scanner exclusion, crypto rule, severity, GitHub failure threshold or automatic
+learning changes. A new/modified observation, excessive duplicate, changed source
+or ambiguous location remains visible. Root dependency inventory is not evidence
+of an exploitable vulnerability. This local implementation does not dismiss live
+alerts or establish a new hosted result; publication and hosted verification
+remain subject to the recorded task054 approval boundary.
+
+<a id="product-scope-20261116"></a>
+
+## Product scan scope — 2026-11-16
+
+The maintainer explicitly requested narrowing the scan itself. CI no longer runs
+`scan .` at repository root. `scripts/prepare-self-scan.py` copies only root
+`Cargo.toml`/`Cargo.lock`, optional root/crate `build.rs`, `crates/*/Cargo.toml`,
+all files under `crates/*/src/`, and shipped `rules/default/*.yml` into a fresh
+external input directory. Standalone tests/fixtures, examples, task records,
+historical reports, documentation, workflow definitions and CI scripts are not
+traversed as scan inputs. The normal quality tests still exercise test fixtures;
+that is separate from this notification-producing product self-scan.
+
+Files are copied without rewriting content, preserving repository-relative paths,
+line numbers and source hashes. Rust unit tests colocated under `src/` remain
+unchanged; this is a file-scope selection, not compiler-cfg extraction. Their
+previously reviewed literal references still use the existing exact-result guards.
+No general scanner default, crypto rule, severity or GitHub threshold changes.
+
+The prepared bundle contains `input/`, `manifest.json` and `expectations.json`.
+Only `input/` is scanned. The other two files are outside that directory, preventing
+the inventory and policy from becoming inputs themselves. The manifest lists
+every copied path, byte count and SHA-256. Existing version1 expectations are
+intersected with copied paths without learning new results or refreshing hashes.
+Changed source/result/duplicate guards still apply, and unknown results are sent
+to review. Policies for excluded test/evidence files are not sent to the uploader.
+
+Preparation rejects existing destinations, destinations inside the repository or
+under scanner-default excluded components, missing product inputs, linked source
+files/directories, special or oversized files and sources changing during copying.
+The existing no-follow source reader is reused. File-count/byte limits bound
+preparation; no source or fixture is executed. A completed manifest is written last.
+
+Before projection or upload, `--verify` checks the current product inventory,
+all original/copied bytes and the scanner's diagnostics. Selected, successfully
+read and analyzed counts must each equal the declared input count, with no
+failed, partial, unknown or excluded entries. An ignore file hiding an input
+therefore fails this gate even when the scanner itself exits successfully.
+`self-scan-verification.json` binds the inventory and diagnostics hashes. This
+checks the known prepared population; it does not claim successful per-file
+diagnostic records or completeness beyond that population.
+
+CI archives the selected-input inventory, scoped expectations, unfiltered results
+for this declared scope, upload results, diagnostics, verification, audit and summary. The summary
+states this scope explicitly. A successful product-scope scan does not validate
+excluded examples, tests, scripts or historical evidence and is not a full-repository
+security audit. Earlier 5255-result data and reviews remain historical, not rewritten
+as measurements of the smaller input. Publication and hosted verification retain
+the separate task054 approval boundary.

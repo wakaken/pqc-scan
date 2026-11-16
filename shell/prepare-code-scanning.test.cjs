@@ -300,3 +300,55 @@ test('a reviewed line-only result requires an explicit null column and exact ful
     assert.deepEqual(prepare(encoded, matching, root).sarif, encoded);
   }
 });
+
+test('human summary separates reviewed references from results requiring review and counts duplicates', t => {
+  const root = fixture(t), added = result();
+  added.locations[0].physicalLocation.region.startLine = 2;
+  const input = document([result(), added, added]), before = structuredClone(input);
+  const prepared = prepare(input, policy(), root);
+  const summary = require(script).renderSelfScanSummary(prepared);
+  assert.match(summary, /Review required: 2 results/);
+  assert.match(summary, /Reviewed references: 1 results/);
+  assert.match(summary, /\| tests\/fixture.txt \| TEST_ISSUE \| error \| 2 \|/);
+  assert.match(summary, /\| Tests and fixtures \| 1 \|/);
+  assert.deepEqual(input, before);
+});
+
+test('summary cannot turn changed source or unresolved locations into reviewed references', t => {
+  const root = fixture(t), unknown = result();
+  delete unknown.locations[0].physicalLocation.region;
+  fs.appendFileSync(path.join(root, 'tests/fixture.txt'), 'changed\n');
+  const summary = require(script).renderSelfScanSummary(prepare(document([result(), unknown]), policy(), root));
+  assert.match(summary, /Review required: 2 results/);
+  assert.match(summary, /Reviewed references: 0 results/);
+  assert.match(summary, /\| tests\/fixture.txt \| changed \|/);
+  assert.match(summary, /not a vulnerability count/);
+});
+
+test('summary does not copy payloads or interpret untrusted Markdown and HTML', t => {
+  const root = fixture(t), hostile = result();
+  hostile.ruleId = '<img src=x onerror=CANARY>';
+  hostile.message.text = 'SYNTHETIC_MESSAGE_CANARY';
+  hostile.locations[0].physicalLocation.artifactLocation.uri = '[click](https://example.invalid/)';
+  const summary = require(script).renderSelfScanSummary(prepare(document([hostile]), policy(), root));
+  assert(!summary.includes('CANARY'));
+  assert(!summary.includes('example.invalid'));
+  assert.match(summary, /unresolved location/);
+  assert.match(summary, /unresolved rule/);
+});
+
+test('CLI summary is optional, preserves raw bytes and cannot alias another input or output', t => {
+  const root = fixture(t); cliInputs(root);
+  const raw = fs.readFileSync(path.join(root, 'raw.sarif'));
+  const summaryPath = path.join(root, 'summary.md');
+  assert.equal(invoke(root, { '--summary': summaryPath }).status, 0);
+  assert.match(fs.readFileSync(summaryPath, 'utf8'), /Review required: 0 results/);
+  assert.deepEqual(fs.readFileSync(path.join(root, 'raw.sarif')), raw);
+  for (const name of ['raw.sarif', 'policy.json', 'upload.sarif', 'audit.json']) {
+    assert.notEqual(invoke(root, { '--summary': path.join(root, name) }).status, 0, name);
+  }
+  const alias = path.join(root, 'summary-alias');
+  fs.linkSync(path.join(root, 'raw.sarif'), alias);
+  assert.notEqual(invoke(root, { '--summary': alias }).status, 0);
+  assert.deepEqual(fs.readFileSync(path.join(root, 'raw.sarif')), raw);
+});

@@ -1,0 +1,166 @@
+{
+  "commands": [
+    {
+      "name": "node",
+      "argv": [
+        "/scratch/node",
+        "--test",
+        "shell/compact-report.test.cjs",
+        "shell/dependency-audit-notification.test.cjs",
+        "shell/final-gap-self-scan.test.cjs",
+        "shell/notification-self-scan.test.cjs",
+        "shell/prepare-code-scanning.test.cjs",
+        "shell/relocated-evidence-self-scan.test.cjs",
+        "shell/self-scan-backlog.test.cjs",
+        "shell/self-scan-policy.test.cjs",
+        "shell/v02-self-scan.test.cjs"
+      ],
+      "exitCode": 0,
+      "seconds": 8.31741695801611,
+      "deadlineSeconds": 300
+    },
+    {
+      "name": "scan",
+      "argv": [
+        "/scratch/target/debug/pqc-scan",
+        "scan",
+        ".",
+        "--format",
+        "sarif",
+        "--out-dir",
+        "/scratch/bounded-final-scan",
+        "--rules-dir",
+        "/source/rules"
+      ],
+      "exitCode": 0,
+      "seconds": 62.43892458299524,
+      "deadlineSeconds": 300
+    },
+    {
+      "name": "current projection",
+      "argv": [
+        "node",
+        "shell/prepare-code-scanning.cjs",
+        "--input",
+        "<preserved-full-scan.sarif>",
+        "--expectations",
+        "docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json",
+        "--root",
+        ".",
+        "--output",
+        "target/quality-task-054/notification-final/code-scanning.sarif",
+        "--audit",
+        "target/quality-task-054/notification-final/code-scanning-audit.json",
+        "--summary",
+        "target/quality-task-054/notification-final/self-scan-summary.md"
+      ],
+      "exitCode": 0,
+      "note": "Input placeholder denotes the hash-bound private raw artifact; no source bytes were changed."
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_ci053.py"
+      ],
+      "exitCode": 0,
+      "tests": 2
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_evidence.py"
+      ],
+      "exitCode": 0,
+      "tests": 29
+    },
+    {
+      "argv": [
+        "python3",
+        "tests/quality/report.py",
+        "--evidence-catalog",
+        "docs/quality/EVIDENCE-CATALOG.json",
+        "--out-dir",
+        "target/quality-task-054/notification-quality-final"
+      ],
+      "exitCode": 0,
+      "releaseDecision": "Unknown"
+    },
+    {
+      "argv": [
+        "node",
+        "--check",
+        "shell/prepare-code-scanning.cjs"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "ruby",
+        "-ryaml",
+        "-e",
+        "YAML.load_file(\".github/workflows/pqc-scan.yml\")"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "nodeTests": {
+    "passed": 50,
+    "failed": 0,
+    "skipped": 0,
+    "actualScannerCaseExecuted": true
+  },
+  "rawEvidenceHashes": {
+    "bounded-node.log": "27922b9f29fbc1b97f2740877b94b7fc81994e0ddf8e171d2d704c44d4f3f3c8",
+    "bounded-scan.log": "dc12987995c4527a13cc3ea978c5564f69576462eaf452614f4bfd8b6f9461ed",
+    "bounded-final.sarif": "960157fbcbd70e1b11a43d29bda528e33a7a5f9ef43b1e25d466507f75ec3bec",
+    "BOUNDED-FINAL-RUN.json": "d0833bf276432ab092eb6c9b6059f6d51637b35c89f8d96243d28565d0d0e6ce",
+    "final-container-inspect.json": "64302b1b3394408252f8b609ff1b5aa58c1c3f69f1e806a8faee9f48b9cd3700",
+    "ci-tests.log": "fe008aab760eb03ccac7578e2b84665b1b50b0d7f855b17a0c7a8d039435b658",
+    "evidence-tests-r2.log": "b4112909ff0e04238366168110969b76d255cafb9309ef2a17a0c3f6351c82e2",
+    "quality-final.log": "61046a7c20e2f0c9b75a4160d61fe70ffc705e3441fd412235b0f885896d614e",
+    "summary-red.log": "ef09f700c28355ee8bbed0a6b50e005928cdd5bf5325c99427929552ba822e3f"
+  },
+  "earlierAttempts": [
+    {
+      "stage": "offline build",
+      "result": "Missing yaml package in old cache; fixed through existing manifest-only tool preparation."
+    },
+    {
+      "stage": "offline build",
+      "result": "No-exec tmpfs rejected build-script execution; corrected with explicit exec on bounded scratch only."
+    },
+    {
+      "stage": "Node tool preparation",
+      "result": "Host Python lacked xz decoder; verified official gzip variant used."
+    },
+    {
+      "stage": "tmpfs artifact transfer",
+      "result": "Docker archive-copy did not access writable tmpfs under readonly root; bounded exec streaming used."
+    },
+    {
+      "stage": "catalog validation",
+      "result": "Two original mutable artifact hashes failed after authorized workflow/README edits; original exact Git blobs archived and references repaired. Final29tests include exact reverse reconstruction and tampered-snapshot rejection."
+    }
+  ],
+  "noRustWorkspaceSuiteRequired": "Only CI/Node policy/tests/prose changed; no Rust, Cargo, rules or dependencies changed. Default actual CLI build and scanner exercised in confinement. No new all-feature/protocol/platform claim."
+}

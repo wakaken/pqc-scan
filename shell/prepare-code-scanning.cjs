@@ -132,6 +132,63 @@ function prepareCodeScanning(sarif, policy, root) {
   return { sarif: output, audit };
 }
 
+// Summaries describe notification routing, not vulnerability or accuracy verdicts.
+function renderSelfScanSummary({ sarif, audit }) {
+  const groups = new Map();
+  let unknownPositions = 0;
+  for (const run of sarif.runs) {
+    for (const result of run.results) {
+      const locations = result.locations;
+      const uri = Array.isArray(locations) && locations.length === 1
+        ? locations[0]?.physicalLocation?.artifactLocation?.uri : null;
+      if (!Array.isArray(locations) || locations.length !== 1
+        || !positiveInteger(locations[0]?.physicalLocation?.region?.startLine)) unknownPositions++;
+      const filename = literalPath(uri) ? uri : '(unresolved location)';
+      const rule = typeof result.ruleId === 'string' && /^[A-Za-z0-9_.:-]{1,200}$/.test(result.ruleId)
+        ? result.ruleId : '(unresolved rule)';
+      const level = ['error', 'warning', 'note', 'none'].includes(result.level) ? result.level : '(unknown level)';
+      const key = JSON.stringify([filename, rule, level]);
+      if (!groups.has(key)) groups.set(key, { filename, rule, level, count: 0 });
+      groups.get(key).count++;
+    }
+  }
+  const categories = new Map();
+  for (const item of audit.omissions) {
+    const category = item.path.startsWith('tasks/') ? 'Evaluation records'
+      : item.path.startsWith('examples/') ? 'Examples'
+        : item.path.startsWith('tests/') || item.path.includes('/tests/') ? 'Tests and fixtures'
+          : 'Scanner reference data and test strings';
+    categories.set(category, (categories.get(category) || 0) + item.count);
+  }
+  const details = [...groups.values()].sort((a, b) => {
+    const left = JSON.stringify([a.filename, a.rule, a.level]), right = JSON.stringify([b.filename, b.rule, b.level]);
+    return left < right ? -1 : left > right ? 1 : 0;
+  });
+  if (details.reduce((n, g) => n + g.count, 0) !== audit.retainedResults
+    || [...categories.values()].reduce((n, count) => n + count, 0) !== audit.expectedResults
+    || audit.rawResults !== audit.expectedResults + audit.retainedResults) {
+    throw new Error('Inconsistent self-scan counts');
+  }
+  const lines = ['# Repository self-scan', '', `**Review required: ${audit.retainedResults} results**`, '',
+    'These results are sent to GitHub Code Scanning. This is not a vulnerability count.', '',
+    `No source position: ${unknownPositions} results. Results without a precise source position remain in the review queue.`, '',
+    '| File | Rule | Level | Count |', '| --- | --- | --- | ---: |',
+    ...details.slice(0, 100).map(g => `| ${g.filename} | ${g.rule} | ${g.level} | ${g.count} |`)];
+  if (!details.length) lines.push('| No unreviewed results | — | — | 0 |');
+  if (details.length > 100) lines.push('', `Showing 100 of ${details.length} groups; see code-scanning.sarif for all results.`);
+  lines.push('', `## Reviewed references: ${audit.expectedResults} results`, '',
+    'Exact, previously reviewed references are archived without creating Code Scanning alerts.', '',
+    '| Context | Count |', '| --- | ---: |',
+    ...[...categories].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([name, count]) => `| ${name} | ${count} |`), '',
+    `Total: ${audit.rawResults} = ${audit.retainedResults} requiring review + ${audit.expectedResults} reviewed references.`, '',
+    'Unfiltered results for the declared scan scope: report.sarif. Upload: code-scanning.sarif. Exact routing reasons and source hashes: code-scanning-audit.json.',
+    'New or changed results, extra duplicates and changed source files require review again.');
+  const changed = audit.sourceChecks.filter(item => item.status !== 'verified');
+  if (changed.length) lines.push('', '## Expected-source bindings needing review', '',
+    '| File | Status |', '| --- | --- |', ...changed.map(item => `| ${item.path} | ${item.status} |`));
+  return lines.join('\n') + '\n';
+}
+
 // Resolve missing destinations through existing ancestors, so path/symlink and
 // existing hard-link aliases cannot overwrite input, policy or another output.
 function destinationIdentity(filename) {
@@ -159,36 +216,40 @@ function assertDistinct(filenames) {
     }
   }
 }
-function writeJson(filename, value) {
+function writeText(filename, text) {
   fs.mkdirSync(path.dirname(path.resolve(filename)), { recursive: true });
   const temporary = `${filename}.tmp-${process.pid}-${randomUUID()}`;
   try {
-    fs.writeFileSync(temporary, `${JSON.stringify(value, null, 2)}\n`, { flag: 'wx' });
+    fs.writeFileSync(temporary, text, { flag: 'wx' });
     fs.renameSync(temporary, filename);
   } finally {
     fs.rmSync(temporary, { force: true });
   }
 }
+const writeJson = (filename, value) => writeText(filename, `${JSON.stringify(value, null, 2)}\n`);
 function main(args) {
-  const keys = ['--input', '--expectations', '--root', '--output', '--audit'];
+  const required = ['--input', '--expectations', '--root', '--output', '--audit'];
+  const keys = [...required, '--summary'];
   const options = new Map();
   for (let i = 0; i < args.length; i += 2) {
     if (!keys.includes(args[i]) || options.has(args[i]) || !args[i + 1]
       || args[i + 1].startsWith('--')) throw new Error('Invalid arguments');
     options.set(args[i], args[i + 1]);
   }
-  if (options.size !== keys.length) throw new Error('Invalid arguments');
-  assertDistinct(['--input', '--expectations', '--output', '--audit'].map(key => options.get(key)));
+  if (!required.every(key => options.has(key))) throw new Error('Invalid arguments');
+  assertDistinct(['--input', '--expectations', '--output', '--audit', '--summary']
+    .filter(key => options.has(key)).map(key => options.get(key)));
   const input = fs.readFileSync(options.get('--input'));
   const policy = JSON.parse(fs.readFileSync(options.get('--expectations'), 'utf8'));
   const { sarif, audit } = prepareCodeScanning(JSON.parse(input), policy, options.get('--root'));
   audit.rawSarifSha256 = sha256(input);
   writeJson(options.get('--output'), sarif);
   writeJson(options.get('--audit'), audit);
-  process.stdout.write(`Self-scan: ${audit.rawResults} raw, ${audit.expectedResults} reviewed expected results, ${audit.retainedResults} retained.\n`);
+  if (options.has('--summary')) writeText(options.get('--summary'), renderSelfScanSummary({ sarif, audit }));
+  process.stdout.write(`Self-scan: ${audit.rawResults} scanned, ${audit.expectedResults} reviewed references, ${audit.retainedResults} require review.\n`);
 }
 
-module.exports = { prepareCodeScanning, resultDigest };
+module.exports = { prepareCodeScanning, resultDigest, renderSelfScanSummary };
 if (require.main === module) {
   try { main(process.argv.slice(2)); }
   catch {

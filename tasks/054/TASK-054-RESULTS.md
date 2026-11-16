@@ -1,3 +1,27 @@
+## Authorized notification repair — 2026-11-16
+
+The [local notification repair](evidence/notification-20261116/RESULTS.md) has
+passed actual confined scan/build,50Node tests,31relatedPython tests and both
+required independent reviews. Raw5255results are unchanged; exact reviewed
+references are archived and15results remain in the upload. A human CI summary
+separates the two groups. Publication and real GitHub notification verification
+are pending separate approval. The original054assessment stays in-progress;
+this repair does not close the historical2135cohort or all73requirements.
+
+## Current resumption — 2026-11-16
+
+Task054 remains **in-progress and unfinished**. Task052/053 are done. The latest
+[resumed assessment](evidence/resume-20261116/release-assessment.md) supersedes
+current-state claims in older checkpoints below, while retaining their history.
+It binds latest origin/developaf472b23, all3763retained Code Scanning observations,
+19study populations and actual new29-test/aggregation checks. The2135check cohort
+has an unresolved6-error difference from the2129added-line reconstruction;
+individual verdicts and all73final-target conclusions remain unfinished. The
+same-tree hosted old023-v2 numeric comparison is still Failed. No acceptance,
+publication, remote mutation or new reviewer identity is claimed.
+
+---
+
 # Task054 partial results
 
 Status: unfinished / blocked. The original Q6-17 remains unmet; no done decision
@@ -456,3 +480,20 @@ criterion stays Partial and does not independently clear the evaluation gate.
 The earlier extra statement-tool/bug-ledger demands are superseded by the maintainer-approved scope correction. All five052assessment conditions now have complete evidence adjudications, pending the purpose-reset final validation. Unknown/Partial conformance is not promoted; the fixed measurement requirement remains actually executed. Earlier missing role/MFA/reporting statements are historical.054still has unfinished final-target applicability/self-scan work; no release acceptance, catalog rewrite or public action follows. See tasks/052/evidence/purpose-reset-20261116/ACCEPTANCE-MATRIX.json and VALIDATION.json.
 
 Task052final validation now passes and its task status isdone. The former upstream stop is resolved;054returns toin-progressfor its already authorized final-source evidence reconciliation. This does not accept the product or complete the roadmap.
+
+
+## Authorized product input narrowing — 2026-11-16
+
+Local implementation and both reused review stages are verified in
+[evidence/product-scope-20261116/RESULTS.md](evidence/product-scope-20261116/RESULTS.md).
+The maintainer explicitly requested narrowing actual scan inputs. Product-only
+input reduces3531selected files to105and5255raw results to486;475exact reviewed
+references remain separate from11review-required dependency observations
+(5warning,6note). All105files are selected/read/analyzed; inventory/byte/count
+verification is mandatory before projection/upload. All486results match the
+old wide scan restricted to the same paths. Node50and Python50tests pass with
+no skips; original053artifact bytes and previous wide-scan evidence are preserved.
+This supersedes only the earlier notification repair's future CI input scope.
+No hosted activation or historical2135cohort adjudication is claimed. Original054
+criteria/all73final-source applicability, roadmap closure, product acceptance
+and publication authorization remain separate and unfinished.
