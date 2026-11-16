@@ -347,6 +347,36 @@ class HostedReceiptTests(unittest.TestCase):
 
 
 class EnrolledEvidenceTests(unittest.TestCase):
+    def test_archival_reference_repair_preserves_exact_frozen_population_and_hashes(self):
+        root=pathlib.Path(__file__).resolve().parents[2]
+        current=evidence.parse_json((root/'docs/quality/EVIDENCE-CATALOG.json').read_bytes())
+        repair=current['archivalReferenceRepair']
+        frozen=evidence.parse_json(evidence.checked(root,repair['frozenCatalog']))
+        restored=evidence.parse_json(json.dumps(current).encode())
+        del restored['archivalReferenceRepair']
+        for replacement in repair['snapshots']:
+            record=next(r for r in restored['records'] if r['id']==replacement['record'])
+            artifact=next(a for a in record['artifacts'] if a['path']==replacement['path'])
+            self.assertEqual(artifact['sha256'],replacement['sha256'])
+            data=evidence.checked(root,replacement)
+            self.assertEqual(hashlib.sha256(data).hexdigest(),replacement['sha256'])
+            artifact['path']=replacement['originalPath']
+            # Snapshots are ordinary hash-bound evidence, not a bypass for drift.
+            with tempfile.TemporaryDirectory() as directory:
+                temp=pathlib.Path(directory);target=temp/replacement['path']
+                target.parent.mkdir(parents=True);target.write_bytes(data+b'changed')
+                with self.assertRaisesRegex(ValueError,'hash mismatch'):
+                    evidence.checked(temp,replacement)
+        self.assertEqual(restored,frozen)
+        own=next(r for r in frozen['records'] if r['task']=='053')
+        population=dict(frozen,records=[r for r in frozen['records'] if r['id']!=own['id']])
+        self.assertEqual(evidence.binding_digest(population),own['measurement']['populationDigest'])
+        observed=evidence.build_index(root/'docs/quality/EVIDENCE-CATALOG.json',root)
+        now=next(r for r in observed['records'] if r['task']=='053')
+        self.assertNotEqual(now['inputApplicability']['actual'],own['measurement']['populationDigest'])
+        self.assertEqual(now['inputApplicability']['status'],'Partial')
+        self.assertEqual(observed['releaseDecision'],'Unknown')
+
     def test_real_catalog_preserves_all_requirements_and_selected_actual_facts(self):
         root=pathlib.Path(__file__).resolve().parents[2]
         result=evidence.build_index(root/'docs/quality/EVIDENCE-CATALOG.json',root)
@@ -367,7 +397,9 @@ class EnrolledEvidenceTests(unittest.TestCase):
             self.assertTrue(rows[key]['records'], key)
             self.assertNotEqual(rows[key]['status'],'Not Tested', key)
         own=records['053']
-        self.assertEqual(own['inputApplicability']['status'],'Verified')
+        # The historical hosted run predates the explicitly repaired catalog inputs.
+        self.assertEqual(own['inputApplicability']['status'],'Partial')
+        self.assertEqual(own['sourceApplicability']['status'],'Partial')
         hosted=own['measurement'].get('hostedCI')
         if hosted and hosted['status']=='Verified':
             self.assertEqual(own['result']['criteria']['Q6-01'],'Passed')
