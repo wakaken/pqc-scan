@@ -1,0 +1,10 @@
+id: TLS_RSA_KEY_EXCHANGE
+kind: Regex
+category: TLS
+severity: high
+risk: quantum-vulnerable
+confidence: 0.70
+scope: code
+migration_hint: Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats.
+pattern: \bTLS_RSA_WITH_[A-Z0-9_]+\b
+description: TLS RSA key-exchange suite detected.

@@ -1,0 +1,1135 @@
+{
+  "generated_at": "2026-11-15T07:14:56.769014Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-f6e395e0856b506de1ec25309e27b9ff05a22fdf30c09381f3f49ea6967664e9",
+      "rule_id": "PRIVATE_KEY_RSA_HEADER",
+      "category": "KeyMaterial",
+      "risk": "non-quantum-risk",
+      "severity": "critical",
+      "confidence": 0.95,
+      "description": "RSA private key header detected.",
+      "migration_hint": "Confirm whether this is a header example, test key or complete live key. If a live key is exposed, revoke or rotate it and review key handling.",
+      "location": {
+        "file": "marker.txt",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "private_key",
+        "match": "[masked-private-key]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "key_detector",
+          "file": "marker.txt"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "incident.private-key-rotation",
+          "title": "Review private-key markers and rotate exposed live credentials",
+          "priority": "immediate",
+          "rationale": "A private-key marker was found. Confirm whether complete key material is present and whether it belongs to a live exposed credential; the marker alone does not establish an incident.",
+          "steps": [
+            "Check whether the signal is a header reference, a synthetic test key, or complete live key material.",
+            "If a live credential is exposed, revoke or replace it and invalidate affected sessions/tokens as appropriate.",
+            "Move keys to a secret manager or HSM and enforce commit scanning in CI."
+          ],
+          "references": [
+            "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-private-key-material]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-83a2afb1d046ff9c13d425258564c8eeedcfdcf0a5436521976e897d07318162",
+      "rule_id": "CERT_RSA_2048",
+      "category": "PKI",
+      "risk": "quantum-vulnerable",
+      "severity": "critical",
+      "confidence": 0.78,
+      "description": "Certificate subject public key is 2048-bit RSA.",
+      "migration_hint": "Plan supported PQC certificate signatures with issuer and peer compatibility checks; larger classical keys alone do not remove quantum exposure.",
+      "location": {
+        "file": "public.der",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "certificate",
+        "match": "RSA 2048-bit",
+        "snippet_preview": "sig=sha256WithRSAEncryption, key_bits=2048, expires=ASN1Time { time: 2036-11-06 7:55:51.0 +00:00:00, generalized: false }",
+        "metadata": {
+          "byte_offset": "0",
+          "certificate_der_bytes": "784",
+          "certificate_sha256": "ca58745a1bda90cc3368a37ae4a97d9022c57f8b82da22ca41b4416e08586772",
+          "detector": "certificate_detector",
+          "expires_at": "ASN1Time { time: 2036-11-06 7:55:51.0 +00:00:00, generalized: false }",
+          "key_bits": "2048",
+          "key_size_kind": "rsa_modulus",
+          "not_after_unix": "2109570951",
+          "not_before_unix": "1794210951",
+          "object_index": "1",
+          "parameters_content_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "parameters_kind": "null",
+          "parameters_oid": "",
+          "public_key_algorithm": "RSA",
+          "public_key_encoded_bytes": "270",
+          "public_key_oid": "1.2.840.113549.1.1.1",
+          "signature_algorithm": "sha256WithRSAEncryption",
+          "signature_oid": "1.2.840.113549.1.1.11",
+          "spki_der_bytes": "294",
+          "spki_sha256": "ab7b1c49ba16e2a4576844df0178691afd86d12d36c011e72371e5ac39608ff2"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "pki.hybrid-certificate-roadmap",
+          "title": "Plan certificate algorithm and trust-store migration",
+          "priority": "near-term",
+          "rationale": "PKI updates require coordinated CA, chain, and relying-party compatibility planning. FIPS 204/205 standardize signature primitives, not a universal hybrid certificate format.",
+          "steps": [
+            "Inventory certificate signature algorithms and key sizes from CBOM/report output.",
+            "Identify the exact certificate construction and encoding, then verify provider, CA, client and trust-store support before planning issuance.",
+            "Pilot only a supported construction in non-production trust stores; if format or ecosystem support is unavailable, keep issuance unverified and evaluate another supported migration path.",
+            "Define reissuance plan for quantum-vulnerable roots/intermediates/end-entity certs."
+          ],
+          "references": [
+            "https://csrc.nist.gov/pubs/fips/204/final",
+            "https://csrc.nist.gov/pubs/fips/205/final"
+          ]
+        }
+      ]
+    },
+    {
+      "finding_id": "finding-v1-d00f8c127db5cc1b2519b8de05d5e66b90db83d4cacdc5ebceefe57fd78e908d",
+      "rule_id": "CERT_RSA_SIGNATURE",
+      "category": "PKI",
+      "risk": "quantum-vulnerable",
+      "severity": "critical",
+      "confidence": 0.72,
+      "description": "Certificate signed with an RSA-based algorithm detected.",
+      "migration_hint": "Verify issuer, verifier and key-format support before evaluating standardized PQC certificate signatures.",
+      "location": {
+        "file": "public.der",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "certificate",
+        "match": "sha256WithRSAEncryption",
+        "snippet_preview": "sig=sha256WithRSAEncryption, key_bits=2048, expires=ASN1Time { time: 2036-11-06 7:55:51.0 +00:00:00, generalized: false }",
+        "metadata": {
+          "byte_offset": "0",
+          "certificate_der_bytes": "784",
+          "certificate_sha256": "ca58745a1bda90cc3368a37ae4a97d9022c57f8b82da22ca41b4416e08586772",
+          "detector": "certificate_detector",
+          "expires_at": "ASN1Time { time: 2036-11-06 7:55:51.0 +00:00:00, generalized: false }",
+          "key_bits": "2048",
+          "key_size_kind": "rsa_modulus",
+          "not_after_unix": "2109570951",
+          "not_before_unix": "1794210951",
+          "object_index": "1",
+          "parameters_content_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "parameters_kind": "null",
+          "parameters_oid": "",
+          "public_key_algorithm": "RSA",
+          "public_key_encoded_bytes": "270",
+          "public_key_oid": "1.2.840.113549.1.1.1",
+          "signature_algorithm": "sha256WithRSAEncryption",
+          "signature_oid": "1.2.840.113549.1.1.11",
+          "spki_der_bytes": "294",
+          "spki_sha256": "ab7b1c49ba16e2a4576844df0178691afd86d12d36c011e72371e5ac39608ff2"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "pki.hybrid-certificate-roadmap",
+          "title": "Plan certificate algorithm and trust-store migration",
+          "priority": "near-term",
+          "rationale": "PKI updates require coordinated CA, chain, and relying-party compatibility planning. FIPS 204/205 standardize signature primitives, not a universal hybrid certificate format.",
+          "steps": [
+            "Inventory certificate signature algorithms and key sizes from CBOM/report output.",
+            "Identify the exact certificate construction and encoding, then verify provider, CA, client and trust-store support before planning issuance.",
+            "Pilot only a supported construction in non-production trust stores; if format or ecosystem support is unavailable, keep issuance unverified and evaluate another supported migration path.",
+            "Define reissuance plan for quantum-vulnerable roots/intermediates/end-entity certs."
+          ],
+          "references": [
+            "https://csrc.nist.gov/pubs/fips/204/final",
+            "https://csrc.nist.gov/pubs/fips/205/final"
+          ]
+        }
+      ]
+    },
+    {
+      "finding_id": "finding-v1-f6668f126b8cd5130b2d3d68c55507aee7f5281920faedfc4dce901cfaf07e7e",
+      "rule_id": "TS_RSA_KEY_SIZE_LITERAL",
+      "category": "PKI",
+      "risk": "quantum-vulnerable",
+      "severity": "high",
+      "confidence": 0.57,
+      "description": "Classical public-key size literals detected in AST nodes.",
+      "migration_hint": "Shift from key-length based planning to PQC signatures/key exchange.",
+      "location": {
+        "file": "app.py",
+        "line": 3,
+        "column": 3
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "RSA.generate(2048",
+        "snippet_preview": "RSA.generate(2048)",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "python",
+          "node_kind": "call",
+          "scope": "java,javascript,typescript,python,go,rust,ruby"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "pki.hybrid-certificate-roadmap",
+          "title": "Plan certificate algorithm and trust-store migration",
+          "priority": "near-term",
+          "rationale": "PKI updates require coordinated CA, chain, and relying-party compatibility planning. FIPS 204/205 standardize signature primitives, not a universal hybrid certificate format.",
+          "steps": [
+            "Inventory certificate signature algorithms and key sizes from CBOM/report output.",
+            "Identify the exact certificate construction and encoding, then verify provider, CA, client and trust-store support before planning issuance.",
+            "Pilot only a supported construction in non-production trust stores; if format or ecosystem support is unavailable, keep issuance unverified and evaluate another supported migration path.",
+            "Define reissuance plan for quantum-vulnerable roots/intermediates/end-entity certs."
+          ],
+          "references": [
+            "https://csrc.nist.gov/pubs/fips/204/final",
+            "https://csrc.nist.gov/pubs/fips/205/final"
+          ]
+        },
+        {
+          "action_id": "runtime.verify-pqc-capabilities",
+          "title": "Verify deployed runtime and protocol PQC capabilities",
+          "priority": "planned",
+          "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+          "steps": [
+            "cryptography 48 adds OpenSSL 3.5+ support for ML-KEM/ML-DSA; 47 introduced APIs requiring AWS-LC/BoringSSL. Confirm resolved version and backend.",
+            "Check resolved versions, provider/features and interoperability before changing production policy."
+          ],
+          "references": [
+            "https://cryptography.io/en/50.0.2/changelog/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "from Crypto.PublicKey import RSA",
+            "highlighted": false
+          },
+          {
+            "line": 2,
+            "text": "a=RSA.generate(2048)",
+            "highlighted": false
+          },
+          {
+            "line": 3,
+            "text": "b=RSA.generate(2048)",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-d81f58afab6a98b4b5178f955aa54d7aedad80c745a2677d8c99a6ea671875c1",
+      "rule_id": "TS_RSA_KEY_SIZE_LITERAL",
+      "category": "PKI",
+      "risk": "quantum-vulnerable",
+      "severity": "high",
+      "confidence": 0.57,
+      "description": "Classical public-key size literals detected in AST nodes.",
+      "migration_hint": "Shift from key-length based planning to PQC signatures/key exchange.",
+      "location": {
+        "file": "app.py",
+        "line": 2,
+        "column": 3
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "RSA.generate(2048",
+        "snippet_preview": "RSA.generate(2048)",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "python",
+          "node_kind": "call",
+          "scope": "java,javascript,typescript,python,go,rust,ruby"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "pki.hybrid-certificate-roadmap",
+          "title": "Plan certificate algorithm and trust-store migration",
+          "priority": "near-term",
+          "rationale": "PKI updates require coordinated CA, chain, and relying-party compatibility planning. FIPS 204/205 standardize signature primitives, not a universal hybrid certificate format.",
+          "steps": [
+            "Inventory certificate signature algorithms and key sizes from CBOM/report output.",
+            "Identify the exact certificate construction and encoding, then verify provider, CA, client and trust-store support before planning issuance.",
+            "Pilot only a supported construction in non-production trust stores; if format or ecosystem support is unavailable, keep issuance unverified and evaluate another supported migration path.",
+            "Define reissuance plan for quantum-vulnerable roots/intermediates/end-entity certs."
+          ],
+          "references": [
+            "https://csrc.nist.gov/pubs/fips/204/final",
+            "https://csrc.nist.gov/pubs/fips/205/final"
+          ]
+        },
+        {
+          "action_id": "runtime.verify-pqc-capabilities",
+          "title": "Verify deployed runtime and protocol PQC capabilities",
+          "priority": "planned",
+          "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+          "steps": [
+            "cryptography 48 adds OpenSSL 3.5+ support for ML-KEM/ML-DSA; 47 introduced APIs requiring AWS-LC/BoringSSL. Confirm resolved version and backend.",
+            "Check resolved versions, provider/features and interoperability before changing production policy."
+          ],
+          "references": [
+            "https://cryptography.io/en/50.0.2/changelog/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "from Crypto.PublicKey import RSA",
+            "highlighted": false
+          },
+          {
+            "line": 2,
+            "text": "a=RSA.generate(2048)",
+            "highlighted": true
+          },
+          {
+            "line": 3,
+            "text": "b=RSA.generate(2048)",
+            "highlighted": false
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-6ef99f2b4c0c8cfae30ef652571012fe6ce867170a8f98326a5b0d3cd5200dfa",
+      "rule_id": "DEP_OPENSSL",
+      "category": "TLS",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.45,
+      "description": "OpenSSL dependency detected.",
+      "migration_hint": "Review the OpenSSL PQC roadmap.",
+      "location": {
+        "file": "Cargo.lock",
+        "line": 3,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "openssl@0.10.75",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "cargo",
+          "dep_name": "openssl",
+          "dep_purl": "pkg:cargo/openssl@0.10.75",
+          "dep_source_type": "manifest",
+          "dep_version": "0.10.75",
+          "detector": "dependency_detector",
+          "manifest": "Cargo.lock"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-93458a2f353e13540436687deffd4f5f9794560cae1a0218b70904f341399489",
+      "rule_id": "DEP_RUST_OPENSSL",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.46,
+      "description": "Rust TLS/crypto dependency detected.",
+      "migration_hint": "Track PQC migration options for Rust openssl/rustls crypto stacks.",
+      "location": {
+        "file": "Cargo.lock",
+        "line": 3,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "openssl@0.10.75",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "cargo",
+          "dep_name": "openssl",
+          "dep_purl": "pkg:cargo/openssl@0.10.75",
+          "dep_source_type": "manifest",
+          "dep_version": "0.10.75",
+          "detector": "dependency_detector",
+          "manifest": "Cargo.lock"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-c3e599808a5eac6391305fc6196ba34c003b82dd5ddb25bc2f9c2fb43bd9182a",
+      "rule_id": "DEP_OPENSSL",
+      "category": "TLS",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.45,
+      "description": "OpenSSL dependency detected.",
+      "migration_hint": "Review the OpenSSL PQC roadmap.",
+      "location": {
+        "file": "Cargo.toml",
+        "line": 2,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "openssl@0.10",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "cargo",
+          "dep_name": "openssl",
+          "dep_purl": "pkg:cargo/openssl",
+          "dep_source_type": "manifest",
+          "dep_version": "0.10",
+          "detector": "dependency_detector",
+          "manifest": "Cargo.toml"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 2,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-bf01bad52ddb0d0fa9fd4aca3b2c73550898c33312ebabd51a6db2b36231a5f8",
+      "rule_id": "DEP_RUST_OPENSSL",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.46,
+      "description": "Rust TLS/crypto dependency detected.",
+      "migration_hint": "Track PQC migration options for Rust openssl/rustls crypto stacks.",
+      "location": {
+        "file": "Cargo.toml",
+        "line": 2,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "openssl@0.10",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "cargo",
+          "dep_name": "openssl",
+          "dep_purl": "pkg:cargo/openssl",
+          "dep_source_type": "manifest",
+          "dep_version": "0.10",
+          "detector": "dependency_detector",
+          "manifest": "Cargo.toml"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 2,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-b9ac61e0e94241134df9e11b99c31e11aa7fa9eac9d49dd6946bd3526baa4fe0",
+      "rule_id": "TS_PY_RSA_USAGE",
+      "category": "CryptoAPI",
+      "risk": "quantum-vulnerable",
+      "severity": "medium",
+      "confidence": 0.58,
+      "description": "RSA-related usage detected from Python AST.",
+      "migration_hint": "Inventory Python RSA API usage as PQC migration targets.",
+      "location": {
+        "file": "app.py",
+        "line": 3,
+        "column": 3
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "RSA.generate",
+        "snippet_preview": "RSA.generate",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "python",
+          "node_kind": "resolved_call",
+          "resolution_method": "static_import_binding",
+          "scope": "python"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        },
+        {
+          "action_id": "runtime.verify-pqc-capabilities",
+          "title": "Verify deployed runtime and protocol PQC capabilities",
+          "priority": "planned",
+          "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+          "steps": [
+            "cryptography 48 adds OpenSSL 3.5+ support for ML-KEM/ML-DSA; 47 introduced APIs requiring AWS-LC/BoringSSL. Confirm resolved version and backend.",
+            "Check resolved versions, provider/features and interoperability before changing production policy."
+          ],
+          "references": [
+            "https://cryptography.io/en/50.0.2/changelog/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "from Crypto.PublicKey import RSA",
+            "highlighted": false
+          },
+          {
+            "line": 2,
+            "text": "a=RSA.generate(2048)",
+            "highlighted": false
+          },
+          {
+            "line": 3,
+            "text": "b=RSA.generate(2048)",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-ceb10b49ec3b2f027a0c9c70581b51daac8b55ac268455e62bbae66f6736168f",
+      "rule_id": "TS_PY_RSA_USAGE",
+      "category": "CryptoAPI",
+      "risk": "quantum-vulnerable",
+      "severity": "medium",
+      "confidence": 0.58,
+      "description": "RSA-related usage detected from Python AST.",
+      "migration_hint": "Inventory Python RSA API usage as PQC migration targets.",
+      "location": {
+        "file": "app.py",
+        "line": 2,
+        "column": 3
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "RSA.generate",
+        "snippet_preview": "RSA.generate",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "python",
+          "node_kind": "resolved_call",
+          "resolution_method": "static_import_binding",
+          "scope": "python"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        },
+        {
+          "action_id": "runtime.verify-pqc-capabilities",
+          "title": "Verify deployed runtime and protocol PQC capabilities",
+          "priority": "planned",
+          "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+          "steps": [
+            "cryptography 48 adds OpenSSL 3.5+ support for ML-KEM/ML-DSA; 47 introduced APIs requiring AWS-LC/BoringSSL. Confirm resolved version and backend.",
+            "Check resolved versions, provider/features and interoperability before changing production policy."
+          ],
+          "references": [
+            "https://cryptography.io/en/50.0.2/changelog/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "from Crypto.PublicKey import RSA",
+            "highlighted": false
+          },
+          {
+            "line": 2,
+            "text": "a=RSA.generate(2048)",
+            "highlighted": true
+          },
+          {
+            "line": 3,
+            "text": "b=RSA.generate(2048)",
+            "highlighted": false
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-b7f825983aa6e6c5019ecff21aa2116e7f0c4f8944e0dcdd286be96a46eb540a",
+      "rule_id": "API_PY_RSA_MODULE",
+      "category": "CryptoAPI",
+      "risk": "quantum-vulnerable",
+      "severity": "medium",
+      "confidence": 0.5,
+      "description": "Python RSA API usage detected.",
+      "migration_hint": "Evaluate PQC-capable libraries for Python crypto implementations.",
+      "location": {
+        "file": "app.py",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "from Cry***rt RSA",
+        "snippet_preview": "from Cry***(2048)",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        },
+        {
+          "action_id": "runtime.verify-pqc-capabilities",
+          "title": "Verify deployed runtime and protocol PQC capabilities",
+          "priority": "planned",
+          "rationale": "Source declarations and primitive availability do not establish deployment or peer support.",
+          "steps": [
+            "cryptography 48 adds OpenSSL 3.5+ support for ML-KEM/ML-DSA; 47 introduced APIs requiring AWS-LC/BoringSSL. Confirm resolved version and backend.",
+            "Check resolved versions, provider/features and interoperability before changing production policy."
+          ],
+          "references": [
+            "https://cryptography.io/en/50.0.2/changelog/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "from Crypto.PublicKey import RSA",
+            "highlighted": true
+          },
+          {
+            "line": 2,
+            "text": "a=RSA.generate(2048)",
+            "highlighted": false
+          },
+          {
+            "line": 3,
+            "text": "b=RSA.generate(2048)",
+            "highlighted": false
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-2e187e1baa4571bf8b6c9f0386f9ce3b9be0862ed0eb8c167cb4c1b7e1f99106",
+      "rule_id": "DEP_PQC_CAPABLE_LIBRARY",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "Library with version-dependent PQC capabilities inventoried; capability is not an enabled-state finding.",
+      "migration_hint": "Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection.",
+      "location": {
+        "file": "Cargo.lock",
+        "line": 3,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "openssl@0.10.75",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "cargo",
+          "dep_name": "openssl",
+          "dep_purl": "pkg:cargo/openssl@0.10.75",
+          "dep_source_type": "manifest",
+          "dep_version": "0.10.75",
+          "detector": "dependency_detector",
+          "manifest": "Cargo.lock"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-923699d20567a06c9de1432dda5fe19373fb152ffabe7405ca482b5755d1cf3f",
+      "rule_id": "DEP_PQC_CAPABLE_LIBRARY",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "Library with version-dependent PQC capabilities inventoried; capability is not an enabled-state finding.",
+      "migration_hint": "Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection.",
+      "location": {
+        "file": "Cargo.toml",
+        "line": 2,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "openssl@0.10",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "cargo",
+          "dep_name": "openssl",
+          "dep_purl": "pkg:cargo/openssl",
+          "dep_source_type": "manifest",
+          "dep_version": "0.10",
+          "detector": "dependency_detector",
+          "manifest": "Cargo.toml"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 2,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "marker.txt",
+      "algorithm": "[masked-private-key]",
+      "usage_type": "KeyMaterial",
+      "location": "marker.txt:1",
+      "quantum_risk": "non-quantum-risk",
+      "migration_hint": "Confirm whether this is a header example, test key or complete live key. If a live key is exposed, revoke or rotate it and review key handling."
+    },
+    {
+      "component": "public.der",
+      "algorithm": "RSA 2048-bit",
+      "usage_type": "PKI",
+      "location": "public.der:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Plan supported PQC certificate signatures with issuer and peer compatibility checks; larger classical keys alone do not remove quantum exposure."
+    },
+    {
+      "component": "public.der",
+      "algorithm": "sha256WithRSAEncryption",
+      "usage_type": "PKI",
+      "location": "public.der:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Verify issuer, verifier and key-format support before evaluating standardized PQC certificate signatures."
+    },
+    {
+      "component": "app.py",
+      "algorithm": "RSA.generate(2048",
+      "usage_type": "PKI",
+      "location": "app.py:3",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Shift from key-length based planning to PQC signatures/key exchange."
+    },
+    {
+      "component": "app.py",
+      "algorithm": "RSA.generate(2048",
+      "usage_type": "PKI",
+      "location": "app.py:2",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Shift from key-length based planning to PQC signatures/key exchange."
+    },
+    {
+      "component": "Cargo.lock",
+      "algorithm": "openssl@0.10.75",
+      "usage_type": "TLS",
+      "location": "Cargo.lock:3",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the OpenSSL PQC roadmap."
+    },
+    {
+      "component": "Cargo.lock",
+      "algorithm": "openssl@0.10.75",
+      "usage_type": "CryptoAPI",
+      "location": "Cargo.lock:3",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Track PQC migration options for Rust openssl/rustls crypto stacks."
+    },
+    {
+      "component": "Cargo.toml",
+      "algorithm": "openssl@0.10",
+      "usage_type": "TLS",
+      "location": "Cargo.toml:2",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the OpenSSL PQC roadmap."
+    },
+    {
+      "component": "Cargo.toml",
+      "algorithm": "openssl@0.10",
+      "usage_type": "CryptoAPI",
+      "location": "Cargo.toml:2",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Track PQC migration options for Rust openssl/rustls crypto stacks."
+    },
+    {
+      "component": "app.py",
+      "algorithm": "RSA.generate",
+      "usage_type": "CryptoAPI",
+      "location": "app.py:3",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Inventory Python RSA API usage as PQC migration targets."
+    },
+    {
+      "component": "app.py",
+      "algorithm": "RSA.generate",
+      "usage_type": "CryptoAPI",
+      "location": "app.py:2",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Inventory Python RSA API usage as PQC migration targets."
+    },
+    {
+      "component": "app.py",
+      "algorithm": "from Cry***rt RSA",
+      "usage_type": "CryptoAPI",
+      "location": "app.py:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Evaluate PQC-capable libraries for Python crypto implementations."
+    },
+    {
+      "component": "Cargo.lock",
+      "algorithm": "openssl@0.10.75",
+      "usage_type": "PQC",
+      "location": "Cargo.lock:3",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection."
+    },
+    {
+      "component": "Cargo.toml",
+      "algorithm": "openssl@0.10",
+      "usage_type": "PQC",
+      "location": "Cargo.toml:2",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection."
+    }
+  ],
+  "dependency_sbom": [
+    {
+      "name": "openssl",
+      "version": "0.10",
+      "ecosystem": "cargo",
+      "source_file": "Cargo.toml",
+      "source_type": "manifest",
+      "purl": "pkg:cargo/openssl"
+    },
+    {
+      "name": "openssl",
+      "version": "0.10.75",
+      "ecosystem": "cargo",
+      "source_file": "Cargo.lock",
+      "source_type": "manifest",
+      "purl": "pkg:cargo/openssl@0.10.75"
+    }
+  ],
+  "summary": {
+    "total_findings": 14,
+    "by_severity": {
+      "critical": 3,
+      "high": 2,
+      "info": 2,
+      "medium": 7
+    },
+    "by_risk": {
+      "non-quantum-risk": 1,
+      "quantum-uncertain": 6,
+      "quantum-vulnerable": 7
+    },
+    "scanned_files": 5,
+    "skipped_files": 0
+  }
+}

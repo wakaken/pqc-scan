@@ -1,0 +1,36 @@
+Usage: pqc-scan scan [OPTIONS] <PATH>
+
+Arguments:
+  <PATH>  
+
+Options:
+      --format <FORMAT>
+          [default: all] [possible values: json, html, md, sarif, all]
+      --lang <LANG>
+          Language of HTML and Markdown reports; machine outputs remain unchanged [default: en] [possible values: en, ja]
+      --cyclonedx-17
+          Add separate CycloneDX 1.7 CBOM and dependency SBOM files
+      --out-dir <OUT_DIR>
+          [default: ./pqc-report]
+      --rules-dir <RULES_DIR>
+          [default: ./rules]
+      --fail-on <FAIL_ON>
+          [possible values: high, critical]
+      --threads <THREADS>
+          [default: 0]
+      --include-non-scannable
+          Include known media, archives and binary data normally excluded before inspection
+      --diagnostics
+          Write inspection coverage and safe failure reasons to diagnostics.json
+      --inventory-json
+          Write the Cryptographic Inventory and Evidence Report to scan.inventory.v1.json
+      --policy-profile <POLICY_PROFILE>
+          Explicit offline advisory policy; writes scan.assessment.v1.json [possible values: migration-review-v1]
+      --assessment-context <ASSESSMENT_CONTEXT>
+          Bounded v1 enum/boolean context JSON; support is operator-declared, not verified
+      --repository-scope <REPOSITORY_SCOPE>
+          Non-secret project identifier for inventory correspondence keys; never a remote URL
+      --require-complete
+          Return exit code 3 unless every selected inspection is known to be complete
+  -h, --help
+          Print help

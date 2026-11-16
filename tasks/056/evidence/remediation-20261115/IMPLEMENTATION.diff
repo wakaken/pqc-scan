@@ -1,0 +1,168 @@
+diff --git a/crates/pqc_scan_core/src/recommendation.rs b/crates/pqc_scan_core/src/recommendation.rs
+index 95821b1..60c1930 100644
+--- a/crates/pqc_scan_core/src/recommendation.rs
++++ b/crates/pqc_scan_core/src/recommendation.rs
+@@ -392,7 +392,8 @@ fn add_middleware_pqc_signature_notes(actions: &mut Vec<RecommendedAction>, find
+                 priority: "advisory".to_string(),
+                 rationale: "Envoy TLS behavior depends on configured providers and peer capabilities; PQC signature readiness can vary between mesh edges, sidecars, and external clients.".to_string(),
+                 steps: vec![
+-                    "Harden min/max TLS versions and remove legacy RSA suites first.".to_string(),
++                    "Harden min/max TLS versions and retire static RSA key exchange where configured; ECDHE_RSA uses RSA authentication, not static RSA key exchange.".to_string(),
++                    "Review cipher_suites for TLS 1.0-1.2, not TLS 1.3; review certificate signatures and peer compatibility separately.".to_string(),
+                     "Verify PQC certificate-signature compatibility in both downstream and upstream clusters.".to_string(),
+                     "Gate production rollout with staged canary tests and explicit fallback paths.".to_string(),
+                 ],
+@@ -607,7 +608,8 @@ fn add_java_actions(
+                 priority: "near-term".to_string(),
+                 rationale: "Modern JDKs expose standardized PQC algorithm names through JCA, reducing vendor lock-in.".to_string(),
+                 steps: vec![
+-                    "Replace RSA-only `Signature.getInstance(...)` calls with `ML-DSA` where policy allows.".to_string(),
++                    "Select an explicit parameter set and generate a new ML-DSA key pair; never reuse RSA key material.".to_string(),
++                    "Provision matching public keys and required JOSE/PKI encodings to all verifiers before switching signers to ML-DSA where policy allows.".to_string(),
+                     "Adopt ML-KEM for key establishment in hybrid TLS/key exchange designs.".to_string(),
+                     "Keep dual verification during migration to preserve compatibility.".to_string(),
+                 ],
+@@ -618,7 +620,7 @@ fn add_java_actions(
+                 code_examples: vec![CodeExample {
+                     language: "java".to_string(),
+                     before: "Signature sig = Signature.getInstance(\"SHA256withRSA\");\nsig.initSign(privateKey);\nsig.update(payload);\nbyte[] signature = sig.sign();".to_string(),
+-                    after: "Signature sig = Signature.getInstance(\"ML-DSA\");\nsig.initSign(privateKey);\nsig.update(payload);\nbyte[] signature = sig.sign();\n// Keep legacy verification path during staged rollout.".to_string(),
++                    after: "// JDK 24+: provision a new ML-DSA key pair for the selected parameter set.\n// mlDsaPrivateKey is its private key, never the previous RSA key.\n// Provision the matching public key and encoding to verifiers before rollout.\nSignature sig = Signature.getInstance(\"ML-DSA\");\nsig.initSign(mlDsaPrivateKey);\nsig.update(payload);\nbyte[] signature = sig.sign();\n// Keep legacy verification only under the explicit migration policy.".to_string(),
+                 }],
+             },
+         );
+@@ -627,9 +629,17 @@ fn add_java_actions(
+             actions,
+             RecommendedAction {
+                 action_id: "java.runtime-upgrade-for-pqc".to_string(),
+-                title: "Upgrade Java runtime baseline for standard PQC APIs".to_string(),
++                title: if profile.java_version.as_deref().and_then(first_number).is_none() {
++                    "Check Java runtime baseline for standard PQC APIs"
++                } else {
++                    "Upgrade Java runtime baseline for standard PQC APIs"
++                }.to_string(),
+                 priority: "planned".to_string(),
+-                rationale: "Detected Java version appears older than JDK releases with standardized PQC APIs.".to_string(),
++                rationale: if profile.java_version.as_deref().and_then(first_number).is_none() {
++                    "The Java version is unknown; verify the deployed runtime before selecting a PQC API baseline."
++                } else {
++                    "Detected Java version appears older than JDK releases with standardized PQC APIs."
++                }.to_string(),
+                 steps: vec![
+                     "Target JDK 24+ for ML-KEM and ML-DSA support planning.".to_string(),
+                     "Pilot compatibility testing in CI before production migration.".to_string(),
+@@ -652,8 +662,8 @@ fn add_java_actions(
+                 priority: "near-term".to_string(),
+                 rationale: "BouncyCastle can be used as a pragmatic transition option when standard runtime support is unavailable or incomplete.".to_string(),
+                 steps: vec![
+-                    "Add BC provider initialization at bootstrap.".to_string(),
+-                    "Use BC ML-DSA / ML-KEM parameter specs for migration pilot implementations.".to_string(),
++                    "Verify the resolved BC release and deployed JDK support before provider initialization; the example uses BC Java 1.85 and the BC provider, not BCPQC.".to_string(),
++                    "Select explicit ML-DSA / ML-KEM parameter sets for the intended purpose. Generate new algorithm-compatible keys and provision matching public keys and encodings to verifiers; never reuse RSA key material.".to_string(),
+                     "Document provider ordering and FIPS/compliance impact.".to_string(),
+                 ],
+                 references: vec![
+@@ -663,7 +673,7 @@ fn add_java_actions(
+                 code_examples: vec![CodeExample {
+                     language: "java".to_string(),
+                     before: "Security.addProvider(new BouncyCastleProvider());\nSignature sig = Signature.getInstance(\"SHA256withRSA\", \"BC\");".to_string(),
+-                    after: "Security.addProvider(new BouncyCastlePQCProvider());\nSignature sig = Signature.getInstance(\"ML-DSA\", \"BCPQC\");\n// Configure parameter set (example): MLDSAParameterSpec.ml_dsa_65".to_string(),
++                    after: "// BC Java 1.85 example: verify the resolved release/provider supports this name.\nSecurity.addProvider(new BouncyCastleProvider());\n// Provision a new ML-DSA-65 key pair and its public key to verifiers.\n// mlDsaPrivateKey must not be the previous RSA key.\nSignature sig = Signature.getInstance(\"ML-DSA-65\", \"BC\");\nsig.initSign(mlDsaPrivateKey);".to_string(),
+                 }],
+             },
+         );
+@@ -776,7 +786,8 @@ fn add_tls_actions(
+                 rationale: "Envoy control-plane config supports strict min/max protocol and cipher suite policy.".to_string(),
+                 steps: vec![
+                     "Prefer `tls_minimum_protocol_version: TLSv1_3`; use TLSv1_2 only when interoperability requires it.".to_string(),
+-                    "Remove RSA-dependent suites from `cipher_suites`.".to_string(),
++                    "Review `cipher_suites` for TLS 1.0-1.2, not TLS 1.3. Retire static RSA key exchange where configured; ECDHE_RSA uses RSA authentication, not static RSA key exchange.".to_string(),
++                    "Review certificate-signature migration and peer compatibility separately before removing RSA authentication.".to_string(),
+                 ],
+                 references: vec!["https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto".to_string()],
+                 code_examples: Vec::new(),
+@@ -831,12 +842,13 @@ fn add_pki_actions(
+         actions,
+         RecommendedAction {
+             action_id: "pki.hybrid-certificate-roadmap".to_string(),
+-            title: "Prepare hybrid certificate issuance and trust-store rollout".to_string(),
++            title: "Plan certificate algorithm and trust-store migration".to_string(),
+             priority: "near-term".to_string(),
+-            rationale: "PKI updates require coordinated CA, chain, and relying-party compatibility planning.".to_string(),
++            rationale: "PKI updates require coordinated CA, chain, and relying-party compatibility planning. FIPS 204/205 standardize signature primitives, not a universal hybrid certificate format.".to_string(),
+             steps: vec![
+                 "Inventory certificate signature algorithms and key sizes from CBOM/report output.".to_string(),
+-                "Pilot hybrid chain issuance in non-production trust stores.".to_string(),
++                "Identify the exact certificate construction and encoding, then verify provider, CA, client and trust-store support before planning issuance.".to_string(),
++                "Pilot only a supported construction in non-production trust stores; if format or ecosystem support is unavailable, keep issuance unverified and evaluate another supported migration path.".to_string(),
+                 "Define reissuance plan for quantum-vulnerable roots/intermediates/end-entity certs.".to_string(),
+             ],
+             references: vec![
+diff --git a/crates/pqc_scan_report/src/japanese.rs b/crates/pqc_scan_report/src/japanese.rs
+index 9f6b875..32aede1 100644
+--- a/crates/pqc_scan_report/src/japanese.rs
++++ b/crates/pqc_scan_report/src/japanese.rs
+@@ -154,18 +154,19 @@ fn action_text(id: &str) -> Option<(&'static str, &'static str, &'static [&'stat
+         "python.signing-gateway" => ("Pythonの署名処理を切り替えられる構成にする", "署名処理をまとめると、ライブラリや方式を変更するときの影響を限定できます。", &["JWT署名の呼出しを共通の処理にまとめてください。", "cryptography 48以降とOpenSSL 3.5以降のML-KEM・ML-DSA対応を確認してください。47のAPIにはAWS-LC・BoringSSLの条件があります。非対応環境でのエラーも処理してください。"]),
+         "rust.oqs-integration" => ("Rustの暗号実装を切り替えられる構成にする", "署名・鍵共有の呼出しを共通の型で扱うと、方式を段階的に変更しやすくなります。", &["RSAを直接呼ぶ箇所を署名用のトレイトにまとめてください。", "Cargoのfeaturesと結合テストを使い、PQC実装を段階的に追加してください。", "TLSはrustlsの版とプロバイダーを確認してください。0.23.22でaws-lc-rsのX25519MLKEM768に対応し、0.23.27で優先設定が既定になりました。ringや独自のグループ設定は別に確認してください。"]),
+         "ruby.crypto-service-boundary" => ("Rubyの署名処理と暗号ライブラリの条件を整理する", "RubyのPQC機能は、OpenSSLのプロバイダーや外部の署名サービスにも依存します。", &["OpenSSL・JWTの呼出しを共通の処理にまとめてください。", "PQC対応の署名処理をプロバイダーや外部サービス経由で導入できるか確認してください。", "openssl gemとリンク先の版を確認してください。gem 4ではgroups=、sigalgs=、通信で選ばれた方式の確認APIが追加されています。"]),
+-        "java.jca-ml-dsa-ml-kem" => ("Java標準のPQC APIへの移行を検討する", "対応するJDKでは、JCAの標準方式名でML-DSA・ML-KEMを指定できます。", &["署名用途ではML-DSAへの切替を検討し、検証側の対応を確認してください。", "ML-KEMは鍵共有に使う方式です。TLSなどの対応は別に確認してください。", "移行中は旧方式の署名も検証できる期間を設けてください。"]),
+-        "java.runtime-upgrade-for-pqc" => ("Javaの実行環境をPQC APIに対応する版へ更新する", "現在のJavaの版では標準PQC APIを使えない可能性があります。版が不明な場合は実環境を確認してください。", &["ML-KEM・ML-DSAはJDK 24以降を更新候補にしてください。", "本番への適用前にCIで互換性を試してください。"]),
+-        "java.bouncycastle-pqc" => ("BouncyCastleによるPQC対応を検討する", "標準APIを使えない環境では、ライブラリによる対応が移行候補になります。", &["BouncyCastleの版とプロバイダーの登録方法を確認してください。", "ML-DSA・ML-KEMのパラメーターを選び、検証環境で試してください。", "プロバイダーの優先順位とFIPSなどの運用要件への影響を記録してください。"]),
++        "java.jca-ml-dsa-ml-kem" => ("Java標準のPQC APIへの移行を検討する", "対応するJDKでは、JCAの標準方式名でML-DSA・ML-KEMを指定できます。", &["パラメーターセットを選び、新しいML-DSA鍵ペアを生成してください。RSAの鍵を流用しないでください。", "署名側を切り替える前に、対応する公開鍵とJOSE・PKIの符号化形式をすべての検証側へ配備してください。", "ML-KEMは鍵共有に使う方式です。TLSなどの対応は別に確認してください。", "旧方式の検証を残す条件と廃止時期は、移行方針として明示してください。"]),
++        "java.runtime-upgrade-for-pqc" => ("Javaの版を確認し、必要ならPQC API対応版へ更新する", "版が不明な場合は、配備先のJavaを確認してください。宣言された版だけでは実環境のAPI対応は確定しません。", &["標準のML-KEM・ML-DSA APIが必要な場合は、JDK 24以降の対応を確認してください。", "本番への適用前にCIで互換性を試してください。"]),
++        "java.bouncycastle-pqc" => ("BouncyCastleによるPQC対応を検討する", "標準APIを使えない環境では、ライブラリによる対応が移行候補になります。", &["解決済みのBouncyCastleの版と配備先JDKの対応を確認してください。例はBC Java 1.85のBCプロバイダーを使います。BCPQCとは区別してください。", "用途に合うパラメーターセットを選び、新しいML-DSA鍵ペアなど、方式に対応した鍵を生成してください。RSA鍵を流用せず、公開鍵と符号化形式を検証側へ配備してください。", "プロバイダーの優先順位とFIPSなどの運用要件への影響を記録してください。"]),
+         "tls.remove-rsa-kex" => ("TLS 1.3を優先し、鍵共有方式を確認する", "RSA鍵交換や古いTLS設定は移行時の確認対象です。この一般的な確認項目だけで、RSAの利用が確定するわけではありません。", &["TLS 1.3を優先し、全接続先が対応していれば1.3だけを許可してください。TLS 1.0・1.1は無効にしてください。", "TLS 1.2は互換性が必要な場合に限り、安全な設定で残してください。理由を記録し、鍵共有方式のPQC対応も別に確認してください。", "クライアントと負荷分散装置を含め、互換性を継続して確認してください。"]),
+         "tls.nginx-hardening" => ("nginxのTLS設定を見直す", "プロトコルと暗号スイートを明示し、移行前後の動作を確認してください。", &["接続元がすべて対応していればssl_protocols TLSv1.3; を設定してください。TLSv1.2を残す場合は互換性の理由を確認してください。", "RSA鍵交換を使う暗号スイートを確認し、前方秘匿性を持つ方式へ見直してください。"]),
+         "tls.httpd-hardening" => ("Apache httpdのTLS設定を見直す", "プロトコルと暗号スイートの変更は、接続元との互換性を確認して進めてください。", &["接続元がすべて対応していればSSLProtocol -all +TLSv1.3を設定してください。TLSv1.2を残す場合は互換性の理由を確認してください。", "SSLCipherSuiteを見直し、RSA鍵交換を使う方式を確認してください。"]),
+-        "tls.envoy-hardening" => ("EnvoyのTLS設定を見直す", "最低・最高バージョンと暗号スイートを設定で管理できます。", &["tls_minimum_protocol_versionはTLSv1_3を優先し、TLSv1_2は互換性が必要な場合に限って検討してください。", "cipher_suitesのRSA依存の方式を確認して見直してください。"]),
++        "tls.envoy-hardening" => ("EnvoyのTLS設定を見直す", "最低・最高バージョンと暗号スイートを設定で管理できます。", &["tls_minimum_protocol_versionはTLSv1_3を優先し、TLSv1_2は互換性が必要な場合に限って検討してください。", "cipher_suitesはTLS 1.0〜1.2の設定で、TLS 1.3には適用されません。静的RSA鍵交換と、ECDHE_RSAのRSA認証を区別してください。", "RSA認証を外す前に、証明書の署名方式と通信相手の互換性を別に確認してください。"]),
+         "tls.istio-hardening" => ("IstioのTLS設定を移行計画に合わせる", "DestinationRuleとGatewayの設定を揃えて、接続への影響を確認してください。", &["サービス間通信とゲートウェイではTLS 1.3を優先し、TLS 1.2は互換性が必要な場合に限って残してください。", "設定されているRSA依存の暗号スイートを確認してください。"]),
+         "tls.k8s-ingress-hardening" => ("Kubernetesの入口のTLS設定を更新する", "Ingressなどの入口では、複数サービスに共通のTLS設定が使われます。", &["IngressコントローラーではTLS 1.3を優先し、TLS 1.2は互換性が必要な接続に限って残してください。", "古い方式の再混入を設定検査で防いでください。"]),
+-        "pki.hybrid-certificate-roadmap" => ("証明書の発行と信頼設定の更新を計画する", "証明書の方式変更には、認証局、証明書チェーン、検証側の対応が必要です。", &["CBOMで証明書の署名方式と鍵情報を確認してください。", "本番以外の信頼設定でハイブリッド証明書チェーンを試してください。", "ルート・中間・サーバー証明書の再発行手順を決めてください。"]),
++        "pki.hybrid-certificate-roadmap" => ("証明書の発行と信頼設定の更新を計画する", "FIPS 204/205は署名方式の規格であり、共通のハイブリッド証明書形式を定めていません。", &["CBOMで証明書の署名方式と鍵情報を確認してください。", "具体的な構成と符号化形式を選び、プロバイダー、認証局、クライアント、信頼ストアの対応を確認してから発行を計画してください。", "対応が確認できた構成だけを本番以外で試してください。形式や利用環境が非対応なら未検証のままとし、別の対応済みの移行方法を検討してください。", "ルート・中間・サーバー証明書の再発行手順を決めてください。"]),
+         "cryptoapi.abstraction-layer" => ("暗号方式を切り替えられる共通処理を設ける", "方式に依存する呼出しを分離すると、古典暗号からPQCへ段階的に移行しやすくなります。", &["署名・検証・鍵共有を共通の処理にまとめてください。", "設定で古典・ハイブリッド・PQCの各実装を選べる構成を検討してください。", "実装の変更を結合テストで確認してください。"]),
+-        "k8s.pqc-signature-readiness-note" | "nginx.pqc-signature-readiness-note" | "envoy.pqc-signature-readiness-note" | "istio.pqc-signature-readiness-note" | "haproxy.pqc-signature-readiness-note" | "traefik.pqc-signature-readiness-note" => ("接続経路全体でPQC証明書の署名を検証できるか確認する", "ハイブリッド鍵共有への対応と、PQC署名の証明書への対応は別です。TLSライブラリ、プロバイダー、各接続先の条件を確認してください。", &["元の参考資料と対象の製品・版を確認してください。", "入口、サービス間通信、認証局、クライアントを含めてML-DSA・SLH-DSA証明書の互換性を試してください。", "本番で必須にする前に、段階的な試験と切戻し手順を用意してください。"]),
++        "envoy.pqc-signature-readiness-note" => ("EnvoyのPQC証明書署名の互換性を確認する", "鍵共有と証明書の署名は別です。プロバイダーと通信相手の対応を確認してください。", &["TLSの最低・最高バージョンを見直し、設定に静的RSA鍵交換があれば移行を検討してください。ECDHE_RSAのRSA認証とは区別してください。", "cipher_suitesはTLS 1.0〜1.2の設定で、TLS 1.3には適用されません。", "下流・上流の両方でPQC証明書署名の互換性を試し、段階的な展開と切戻しを準備してください。"]),
++        "k8s.pqc-signature-readiness-note" | "nginx.pqc-signature-readiness-note" | "istio.pqc-signature-readiness-note" | "haproxy.pqc-signature-readiness-note" | "traefik.pqc-signature-readiness-note" => ("接続経路全体でPQC証明書の署名を検証できるか確認する", "ハイブリッド鍵共有への対応と、PQC署名の証明書への対応は別です。TLSライブラリ、プロバイダー、各接続先の条件を確認してください。", &["元の参考資料と対象の製品・版を確認してください。", "入口、サービス間通信、認証局、クライアントを含めてML-DSA・SLH-DSA証明書の互換性を試してください。", "本番で必須にする前に、段階的な試験と切戻し手順を用意してください。"]),
+         _ => return None,
+     })
+ }
+diff --git a/docs/user/REPORTS.ja.md b/docs/user/REPORTS.ja.md
+index b795ab7..4dbe84e 100644
+--- a/docs/user/REPORTS.ja.md
++++ b/docs/user/REPORTS.ja.md
+@@ -98,6 +98,14 @@ Node crypto・WebCrypto、ブラウザー、TypeScriptの実行環境では対
+ JWT署名を変更する際は、JOSE形式・ライブラリ・検証側の互換性も確認します。
+ 具体的な検出パターンは[静的な記述例と参考資料](../../examples/pqc-readiness/README.md)を参照してください。
+ 
++移行案を適用する前に、次を確認してください。
++
++- Javaの版が不明な場合は、配備先の実環境を調べてください。古い版とは断定しません。標準のML-KEM・ML-DSA APIはJDK 24以降が対象です。
++- 署名方式とパラメーターセットに合う新しい鍵ペアを生成し、公開鍵とJOSE・PKIの符号化形式を検証側へ配備してください。RSA鍵をML-DSAへ流用できません。
++- BCの例はBC Java 1.85の `BC` プロバイダーが対象です。`BCPQC` とは区別し、解決済みライブラリの版、配備先JDK、対応する方式を確認してください。
++- 証明書の移行では具体的な構成と符号化形式を選び、プロバイダー、認証局、クライアント、信頼ストアの対応を確認してから本番以外で試してください。FIPS 204/205は署名方式の規格であり、共通のハイブリッド証明書形式を定めていません。
++- Envoyの `cipher_suites` はTLS 1.0〜1.2に作用し、TLS 1.3には適用されません。静的RSA鍵交換の廃止とECDHE_RSAのRSA認証の廃止は別です。証明書と通信相手の互換性を別に確認してください。
++
+ <a id="choose-report"></a>
+ 
+ ## 用途に合うレポートを選ぶ
+diff --git a/docs/user/REPORTS.md b/docs/user/REPORTS.md
+index 9ec42ab..82433f6 100644
+--- a/docs/user/REPORTS.md
++++ b/docs/user/REPORTS.md
+@@ -95,6 +95,14 @@ These references can appear as informational findings in CBOM and SARIF too. Rea
+ Node crypto/WebCrypto, browser and TypeScript runtime support must be checked individually; their version requirements differ. JWT signature changes also need compatible JOSE formats, libraries and verifiers.
+ See [static examples and references](../../examples/pqc-readiness/README.md) for specific patterns.
+ 
++Before applying migration guidance:
++
++- If the Java version is unknown, check the deployed runtime; do not infer that it is old. Standard ML-KEM/ML-DSA APIs start at JDK 24.
++- Generate a new key pair for the selected signature algorithm and parameter set, then provision its public key and JOSE/PKI encoding to verifiers. An RSA key cannot be reused for ML-DSA.
++- The BC example is scoped to BC Java 1.85 and the `BC` provider, not `BCPQC`. Verify the resolved library release, deployed JDK and algorithm support before using it.
++- For certificate migration, choose the exact construction and encoding and confirm provider, CA, client and trust-store support before a nonproduction pilot. FIPS 204/205 specify signature primitives, not a universal hybrid certificate format.
++- Envoy `cipher_suites` applies to TLS 1.0–1.2, not TLS 1.3. Retiring static RSA key exchange differs from removing RSA authentication in ECDHE_RSA suites; check certificate and peer compatibility separately.
++
+ <a id="choose-report"></a>
+ 
+ ## Choose a report

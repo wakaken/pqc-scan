@@ -1,0 +1,2600 @@
+{
+  "targetHead": "f07d782cd68cfac95d93585d5ace049f590160d4",
+  "sourceBindings": "../native-r2/SOURCE.json",
+  "oracleSha256": "27fd6a55a411823279338ab760625ae2c8da4334f93b1f808bb242da91d28237",
+  "observationsSha256": "cf5a764efc6a64a2f246b23e38888c116cc43e2d62eb8df133cecd437f47d719",
+  "sourceDate": "2026-11-15 JST",
+  "evaluationScope": "Finite source-cited judgment table, independent of matcher labels; source-exposed main author, not a blind or independent-author population.",
+  "status": "Partial",
+  "unresolved": "Characterization and unselected combinations do not establish independent correctness or full branch coverage.",
+  "cases": [
+    {
+      "id": "certificate-valid",
+      "kind": "inventory",
+      "input": {
+        "assets": [
+          {
+            "tag": "sig",
+            "kind": "algorithm",
+            "attributes": {
+              "namespace": "named",
+              "identifier": "ML-DSA-65",
+              "parameters": {}
+            },
+            "relations": []
+          },
+          {
+            "tag": "subject-alg",
+            "kind": "algorithm",
+            "attributes": {
+              "namespace": "named",
+              "identifier": "ML-KEM-768",
+              "parameters": {}
+            },
+            "relations": []
+          },
+          {
+            "tag": "key",
+            "kind": "public_key",
+            "attributes": {},
+            "relations": [
+              {
+                "relationship": "algorithm",
+                "target": "subject-alg"
+              }
+            ]
+          },
+          {
+            "tag": "cert",
+            "kind": "certificate",
+            "attributes": {
+              "not_before_unix": 0,
+              "not_after_unix": 4102444800
+            },
+            "relations": [
+              {
+                "relationship": "signature_algorithm",
+                "target": "sig"
+              },
+              {
+                "relationship": "subject_key",
+                "target": "key"
+              }
+            ]
+          }
+        ]
+      },
+      "checks": [
+        {
+          "pointer": "/assessments/3/limitations",
+          "operation": "contains",
+          "expected": "trust_signatures_and_implementation_not_verified"
+        }
+      ],
+      "sources": [
+        "LOCAL026",
+        "R5280",
+        "S203",
+        "S204"
+      ],
+      "requirements": [
+        "Q3-02",
+        "Q3-07"
+      ],
+      "basis": "local_policy",
+      "actual": {
+        "assessments": [
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-DSA-65",
+              "parameters_known": true,
+              "purpose": "signature",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S204"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-14deae24c8ac99ec83c9913683bef8af9ea2b733d2f1d811afba135dd6f8a0d4",
+            "asset_kind": "algorithm",
+            "certainty": "unknown",
+            "id": "assessment-v1-5dced6bd245b872c35cb796420156b1c5a1b66dfee1f7912c0d63324bb0639c3",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-KEM-768",
+              "parameters_known": true,
+              "purpose": "key_establishment",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-e07a67c4fbab429945db2edc84c2194ee451b8267bd43e5d087e8f7144835ef6",
+            "asset_kind": "algorithm",
+            "certainty": "unknown",
+            "id": "assessment-v1-c9d77d60308d4fea75bd100b550c75e68c754dd3d0500b35991e15b8229cb753",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-KEM-768",
+              "parameters_known": true,
+              "purpose": "key_establishment",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-0042154615fc08faaf5a35e64ca53621e2348f1bb15b64c591bc058af0c64635",
+            "asset_kind": "public_key",
+            "certainty": "unknown",
+            "id": "assessment-v1-9b360683dea283600954b9ab186e81e18a44db3addbe9eb455bfb5202a1ff617",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [
+                {
+                  "assessment": {
+                    "attack_models": [],
+                    "classical_concerns": [],
+                    "combiner_assessment": null,
+                    "components": [],
+                    "construction": "post_quantum",
+                    "identifier": "ML-DSA-65",
+                    "parameters_known": true,
+                    "purpose": "signature",
+                    "quantum": "designed_resistant",
+                    "source_ids": [
+                      "LOCAL026",
+                      "S204"
+                    ],
+                    "standardization": "nist_final"
+                  },
+                  "role": "certificate_signature"
+                },
+                {
+                  "assessment": {
+                    "attack_models": [],
+                    "classical_concerns": [],
+                    "combiner_assessment": null,
+                    "components": [],
+                    "construction": "post_quantum",
+                    "identifier": "ML-KEM-768",
+                    "parameters_known": true,
+                    "purpose": "key_establishment",
+                    "quantum": "designed_resistant",
+                    "source_ids": [
+                      "LOCAL026",
+                      "S203"
+                    ],
+                    "standardization": "nist_final"
+                  },
+                  "role": "subject_public_key"
+                }
+              ],
+              "construction": "certificate",
+              "identifier": "certificate_roles",
+              "parameters_known": true,
+              "purpose": "signature",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203",
+                "S204"
+              ],
+              "standardization": "unknown"
+            },
+            "asset_id": "asset-v1-b2cf8d2ff9aa2b2a20295b40cdec76dad7d41dfc46da04011424876fab0deddb",
+            "asset_kind": "certificate",
+            "certainty": "unknown",
+            "id": "assessment-v1-775adfa1b631d6ac27d8b4a872a4d60e8b9554646e0cddda2084df0d5d4e365b",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          }
+        ],
+        "asset_policies": [
+          {
+            "asset_id": "asset-v1-14deae24c8ac99ec83c9913683bef8af9ea2b733d2f1d811afba135dd6f8a0d4",
+            "candidates": [
+              {
+                "identifier": "ML-DSA",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "signature",
+                "source_ids": [
+                  "S204",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-e07a67c4fbab429945db2edc84c2194ee451b8267bd43e5d087e8f7144835ef6",
+            "candidates": [
+              {
+                "identifier": "ML-KEM",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "key_establishment",
+                "source_ids": [
+                  "S203",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-0042154615fc08faaf5a35e64ca53621e2348f1bb15b64c591bc058af0c64635",
+            "candidates": [
+              {
+                "identifier": "ML-KEM",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "key_establishment",
+                "source_ids": [
+                  "S203",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-b2cf8d2ff9aa2b2a20295b40cdec76dad7d41dfc46da04011424876fab0deddb",
+            "candidates": [
+              {
+                "identifier": "ML-DSA",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "signature",
+                "source_ids": [
+                  "S204",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          }
+        ],
+        "catalog_version": "local-assessment-1",
+        "context": {
+          "input": {
+            "applicability": "applicable",
+            "hash_collision_required": null,
+            "long_lived_confidentiality": null,
+            "support": {
+              "jose": null,
+              "parameters": null,
+              "peer": null,
+              "pki": null,
+              "protocol": null,
+              "provider": null,
+              "runtime": null,
+              "verifiers": null
+            },
+            "use_case": "unknown",
+            "version": 1
+          },
+          "provenance": "local_profile_default_unknown_context"
+        },
+        "evaluation": {
+          "decision": "indeterminate",
+          "reasons": [
+            "inventory_not_exhaustive",
+            "no_complete_positive_policy_evidence"
+          ]
+        },
+        "inspection_status": "complete_within_scope",
+        "inventory": {
+          "file": "scan.inventory.v1.json",
+          "run_id": "scan-v1-2397c2fba32b6be5a429b879b3a789f9f5302094c39cc509d8aab94340f91972"
+        },
+        "inventory_completeness": "not_exhaustive",
+        "profile": {
+          "deadline_policy": "no_universal_deadlines",
+          "effective_dates": null,
+          "id": "migration-review-v1",
+          "scope": "local_advisory_candidate_review_not_compliance_or_deployment",
+          "source_editions": [
+            "LOCAL026:1.0.0",
+            "FIPS203:2024-08-13",
+            "FIPS204:2024-08-13",
+            "FIPS205:2024-08-13",
+            "SP800-131A:Rev2:2019",
+            "RFC8725:2020",
+            "RFC6151:2011",
+            "RFC4055:2005",
+            "NIST-PQ-FAQ:reviewed-2026-11-10",
+            "BHT1997:v1",
+            "CSOR:reviewed-2026-11-10"
+          ],
+          "version": "1.0.0"
+        },
+        "schema_version": 1
+      },
+      "comparison": {
+        "id": "certificate-valid",
+        "kind": "inventory",
+        "requirements": [
+          "Q3-02",
+          "Q3-07"
+        ],
+        "basis": "local_policy",
+        "status": "Verified",
+        "assertions": 1
+      }
+    },
+    {
+      "id": "certificate-expired",
+      "kind": "inventory",
+      "input": {
+        "assets": [
+          {
+            "tag": "sig",
+            "kind": "algorithm",
+            "attributes": {
+              "namespace": "named",
+              "identifier": "ML-DSA-65",
+              "parameters": {}
+            },
+            "relations": []
+          },
+          {
+            "tag": "subject-alg",
+            "kind": "algorithm",
+            "attributes": {
+              "namespace": "named",
+              "identifier": "ML-KEM-768",
+              "parameters": {}
+            },
+            "relations": []
+          },
+          {
+            "tag": "key",
+            "kind": "public_key",
+            "attributes": {},
+            "relations": [
+              {
+                "relationship": "algorithm",
+                "target": "subject-alg"
+              }
+            ]
+          },
+          {
+            "tag": "cert",
+            "kind": "certificate",
+            "attributes": {
+              "not_before_unix": 0,
+              "not_after_unix": 1
+            },
+            "relations": [
+              {
+                "relationship": "signature_algorithm",
+                "target": "sig"
+              },
+              {
+                "relationship": "subject_key",
+                "target": "key"
+              }
+            ]
+          }
+        ]
+      },
+      "checks": [
+        {
+          "pointer": "/assessments/3/limitations",
+          "operation": "contains",
+          "expected": "trust_signatures_and_implementation_not_verified"
+        },
+        {
+          "pointer": "/assessments/3/algorithm/classical_concerns",
+          "operation": "contains",
+          "expected": "certificate_expired"
+        }
+      ],
+      "sources": [
+        "LOCAL026",
+        "R5280",
+        "S203",
+        "S204"
+      ],
+      "requirements": [
+        "Q3-02",
+        "Q3-07"
+      ],
+      "basis": "local_policy",
+      "actual": {
+        "assessments": [
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-DSA-65",
+              "parameters_known": true,
+              "purpose": "signature",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S204"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-14deae24c8ac99ec83c9913683bef8af9ea2b733d2f1d811afba135dd6f8a0d4",
+            "asset_kind": "algorithm",
+            "certainty": "unknown",
+            "id": "assessment-v1-5dced6bd245b872c35cb796420156b1c5a1b66dfee1f7912c0d63324bb0639c3",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-KEM-768",
+              "parameters_known": true,
+              "purpose": "key_establishment",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-e07a67c4fbab429945db2edc84c2194ee451b8267bd43e5d087e8f7144835ef6",
+            "asset_kind": "algorithm",
+            "certainty": "unknown",
+            "id": "assessment-v1-c9d77d60308d4fea75bd100b550c75e68c754dd3d0500b35991e15b8229cb753",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-KEM-768",
+              "parameters_known": true,
+              "purpose": "key_establishment",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-0042154615fc08faaf5a35e64ca53621e2348f1bb15b64c591bc058af0c64635",
+            "asset_kind": "public_key",
+            "certainty": "unknown",
+            "id": "assessment-v1-9b360683dea283600954b9ab186e81e18a44db3addbe9eb455bfb5202a1ff617",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [
+                "certificate_expired"
+              ],
+              "combiner_assessment": null,
+              "components": [
+                {
+                  "assessment": {
+                    "attack_models": [],
+                    "classical_concerns": [],
+                    "combiner_assessment": null,
+                    "components": [],
+                    "construction": "post_quantum",
+                    "identifier": "ML-DSA-65",
+                    "parameters_known": true,
+                    "purpose": "signature",
+                    "quantum": "designed_resistant",
+                    "source_ids": [
+                      "LOCAL026",
+                      "S204"
+                    ],
+                    "standardization": "nist_final"
+                  },
+                  "role": "certificate_signature"
+                },
+                {
+                  "assessment": {
+                    "attack_models": [],
+                    "classical_concerns": [],
+                    "combiner_assessment": null,
+                    "components": [],
+                    "construction": "post_quantum",
+                    "identifier": "ML-KEM-768",
+                    "parameters_known": true,
+                    "purpose": "key_establishment",
+                    "quantum": "designed_resistant",
+                    "source_ids": [
+                      "LOCAL026",
+                      "S203"
+                    ],
+                    "standardization": "nist_final"
+                  },
+                  "role": "subject_public_key"
+                }
+              ],
+              "construction": "certificate",
+              "identifier": "certificate_roles",
+              "parameters_known": true,
+              "purpose": "signature",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203",
+                "S204"
+              ],
+              "standardization": "unknown"
+            },
+            "asset_id": "asset-v1-b2cf8d2ff9aa2b2a20295b40cdec76dad7d41dfc46da04011424876fab0deddb",
+            "asset_kind": "certificate",
+            "certainty": "unknown",
+            "id": "assessment-v1-775adfa1b631d6ac27d8b4a872a4d60e8b9554646e0cddda2084df0d5d4e365b",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          }
+        ],
+        "asset_policies": [
+          {
+            "asset_id": "asset-v1-14deae24c8ac99ec83c9913683bef8af9ea2b733d2f1d811afba135dd6f8a0d4",
+            "candidates": [
+              {
+                "identifier": "ML-DSA",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "signature",
+                "source_ids": [
+                  "S204",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-e07a67c4fbab429945db2edc84c2194ee451b8267bd43e5d087e8f7144835ef6",
+            "candidates": [
+              {
+                "identifier": "ML-KEM",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "key_establishment",
+                "source_ids": [
+                  "S203",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-0042154615fc08faaf5a35e64ca53621e2348f1bb15b64c591bc058af0c64635",
+            "candidates": [
+              {
+                "identifier": "ML-KEM",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "key_establishment",
+                "source_ids": [
+                  "S203",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-b2cf8d2ff9aa2b2a20295b40cdec76dad7d41dfc46da04011424876fab0deddb",
+            "candidates": [
+              {
+                "identifier": "ML-DSA",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "signature",
+                "source_ids": [
+                  "S204",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "fail",
+            "priority": "high",
+            "reasons": [
+              "known_classical_concern_in_profile_scope"
+            ]
+          }
+        ],
+        "catalog_version": "local-assessment-1",
+        "context": {
+          "input": {
+            "applicability": "applicable",
+            "hash_collision_required": null,
+            "long_lived_confidentiality": null,
+            "support": {
+              "jose": null,
+              "parameters": null,
+              "peer": null,
+              "pki": null,
+              "protocol": null,
+              "provider": null,
+              "runtime": null,
+              "verifiers": null
+            },
+            "use_case": "unknown",
+            "version": 1
+          },
+          "provenance": "local_profile_default_unknown_context"
+        },
+        "evaluation": {
+          "decision": "fail",
+          "reasons": [
+            "inventory_not_exhaustive",
+            "applicable_asset_violation"
+          ]
+        },
+        "inspection_status": "complete_within_scope",
+        "inventory": {
+          "file": "scan.inventory.v1.json",
+          "run_id": "scan-v1-2397c2fba32b6be5a429b879b3a789f9f5302094c39cc509d8aab94340f91972"
+        },
+        "inventory_completeness": "not_exhaustive",
+        "profile": {
+          "deadline_policy": "no_universal_deadlines",
+          "effective_dates": null,
+          "id": "migration-review-v1",
+          "scope": "local_advisory_candidate_review_not_compliance_or_deployment",
+          "source_editions": [
+            "LOCAL026:1.0.0",
+            "FIPS203:2024-08-13",
+            "FIPS204:2024-08-13",
+            "FIPS205:2024-08-13",
+            "SP800-131A:Rev2:2019",
+            "RFC8725:2020",
+            "RFC6151:2011",
+            "RFC4055:2005",
+            "NIST-PQ-FAQ:reviewed-2026-11-10",
+            "BHT1997:v1",
+            "CSOR:reviewed-2026-11-10"
+          ],
+          "version": "1.0.0"
+        },
+        "schema_version": 1
+      },
+      "comparison": {
+        "id": "certificate-expired",
+        "kind": "inventory",
+        "requirements": [
+          "Q3-02",
+          "Q3-07"
+        ],
+        "basis": "local_policy",
+        "status": "Verified",
+        "assertions": 2
+      }
+    },
+    {
+      "id": "certificate-future",
+      "kind": "inventory",
+      "input": {
+        "assets": [
+          {
+            "tag": "sig",
+            "kind": "algorithm",
+            "attributes": {
+              "namespace": "named",
+              "identifier": "ML-DSA-65",
+              "parameters": {}
+            },
+            "relations": []
+          },
+          {
+            "tag": "subject-alg",
+            "kind": "algorithm",
+            "attributes": {
+              "namespace": "named",
+              "identifier": "ML-KEM-768",
+              "parameters": {}
+            },
+            "relations": []
+          },
+          {
+            "tag": "key",
+            "kind": "public_key",
+            "attributes": {},
+            "relations": [
+              {
+                "relationship": "algorithm",
+                "target": "subject-alg"
+              }
+            ]
+          },
+          {
+            "tag": "cert",
+            "kind": "certificate",
+            "attributes": {
+              "not_before_unix": 4102444800,
+              "not_after_unix": 4102444900
+            },
+            "relations": [
+              {
+                "relationship": "signature_algorithm",
+                "target": "sig"
+              },
+              {
+                "relationship": "subject_key",
+                "target": "key"
+              }
+            ]
+          }
+        ]
+      },
+      "checks": [
+        {
+          "pointer": "/assessments/3/limitations",
+          "operation": "contains",
+          "expected": "trust_signatures_and_implementation_not_verified"
+        },
+        {
+          "pointer": "/assessments/3/algorithm/classical_concerns",
+          "operation": "contains",
+          "expected": "certificate_not_yet_valid"
+        }
+      ],
+      "sources": [
+        "LOCAL026",
+        "R5280",
+        "S203",
+        "S204"
+      ],
+      "requirements": [
+        "Q3-02",
+        "Q3-07"
+      ],
+      "basis": "local_policy",
+      "actual": {
+        "assessments": [
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-DSA-65",
+              "parameters_known": true,
+              "purpose": "signature",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S204"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-14deae24c8ac99ec83c9913683bef8af9ea2b733d2f1d811afba135dd6f8a0d4",
+            "asset_kind": "algorithm",
+            "certainty": "unknown",
+            "id": "assessment-v1-5dced6bd245b872c35cb796420156b1c5a1b66dfee1f7912c0d63324bb0639c3",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-KEM-768",
+              "parameters_known": true,
+              "purpose": "key_establishment",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-e07a67c4fbab429945db2edc84c2194ee451b8267bd43e5d087e8f7144835ef6",
+            "asset_kind": "algorithm",
+            "certainty": "unknown",
+            "id": "assessment-v1-c9d77d60308d4fea75bd100b550c75e68c754dd3d0500b35991e15b8229cb753",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-KEM-768",
+              "parameters_known": true,
+              "purpose": "key_establishment",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-0042154615fc08faaf5a35e64ca53621e2348f1bb15b64c591bc058af0c64635",
+            "asset_kind": "public_key",
+            "certainty": "unknown",
+            "id": "assessment-v1-9b360683dea283600954b9ab186e81e18a44db3addbe9eb455bfb5202a1ff617",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [
+                "certificate_not_yet_valid"
+              ],
+              "combiner_assessment": null,
+              "components": [
+                {
+                  "assessment": {
+                    "attack_models": [],
+                    "classical_concerns": [],
+                    "combiner_assessment": null,
+                    "components": [],
+                    "construction": "post_quantum",
+                    "identifier": "ML-DSA-65",
+                    "parameters_known": true,
+                    "purpose": "signature",
+                    "quantum": "designed_resistant",
+                    "source_ids": [
+                      "LOCAL026",
+                      "S204"
+                    ],
+                    "standardization": "nist_final"
+                  },
+                  "role": "certificate_signature"
+                },
+                {
+                  "assessment": {
+                    "attack_models": [],
+                    "classical_concerns": [],
+                    "combiner_assessment": null,
+                    "components": [],
+                    "construction": "post_quantum",
+                    "identifier": "ML-KEM-768",
+                    "parameters_known": true,
+                    "purpose": "key_establishment",
+                    "quantum": "designed_resistant",
+                    "source_ids": [
+                      "LOCAL026",
+                      "S203"
+                    ],
+                    "standardization": "nist_final"
+                  },
+                  "role": "subject_public_key"
+                }
+              ],
+              "construction": "certificate",
+              "identifier": "certificate_roles",
+              "parameters_known": true,
+              "purpose": "signature",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203",
+                "S204"
+              ],
+              "standardization": "unknown"
+            },
+            "asset_id": "asset-v1-b2cf8d2ff9aa2b2a20295b40cdec76dad7d41dfc46da04011424876fab0deddb",
+            "asset_kind": "certificate",
+            "certainty": "unknown",
+            "id": "assessment-v1-775adfa1b631d6ac27d8b4a872a4d60e8b9554646e0cddda2084df0d5d4e365b",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          }
+        ],
+        "asset_policies": [
+          {
+            "asset_id": "asset-v1-14deae24c8ac99ec83c9913683bef8af9ea2b733d2f1d811afba135dd6f8a0d4",
+            "candidates": [
+              {
+                "identifier": "ML-DSA",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "signature",
+                "source_ids": [
+                  "S204",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-e07a67c4fbab429945db2edc84c2194ee451b8267bd43e5d087e8f7144835ef6",
+            "candidates": [
+              {
+                "identifier": "ML-KEM",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "key_establishment",
+                "source_ids": [
+                  "S203",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-0042154615fc08faaf5a35e64ca53621e2348f1bb15b64c591bc058af0c64635",
+            "candidates": [
+              {
+                "identifier": "ML-KEM",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "key_establishment",
+                "source_ids": [
+                  "S203",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-b2cf8d2ff9aa2b2a20295b40cdec76dad7d41dfc46da04011424876fab0deddb",
+            "candidates": [
+              {
+                "identifier": "ML-DSA",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "signature",
+                "source_ids": [
+                  "S204",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "fail",
+            "priority": "high",
+            "reasons": [
+              "known_classical_concern_in_profile_scope"
+            ]
+          }
+        ],
+        "catalog_version": "local-assessment-1",
+        "context": {
+          "input": {
+            "applicability": "applicable",
+            "hash_collision_required": null,
+            "long_lived_confidentiality": null,
+            "support": {
+              "jose": null,
+              "parameters": null,
+              "peer": null,
+              "pki": null,
+              "protocol": null,
+              "provider": null,
+              "runtime": null,
+              "verifiers": null
+            },
+            "use_case": "unknown",
+            "version": 1
+          },
+          "provenance": "local_profile_default_unknown_context"
+        },
+        "evaluation": {
+          "decision": "fail",
+          "reasons": [
+            "inventory_not_exhaustive",
+            "applicable_asset_violation"
+          ]
+        },
+        "inspection_status": "complete_within_scope",
+        "inventory": {
+          "file": "scan.inventory.v1.json",
+          "run_id": "scan-v1-2397c2fba32b6be5a429b879b3a789f9f5302094c39cc509d8aab94340f91972"
+        },
+        "inventory_completeness": "not_exhaustive",
+        "profile": {
+          "deadline_policy": "no_universal_deadlines",
+          "effective_dates": null,
+          "id": "migration-review-v1",
+          "scope": "local_advisory_candidate_review_not_compliance_or_deployment",
+          "source_editions": [
+            "LOCAL026:1.0.0",
+            "FIPS203:2024-08-13",
+            "FIPS204:2024-08-13",
+            "FIPS205:2024-08-13",
+            "SP800-131A:Rev2:2019",
+            "RFC8725:2020",
+            "RFC6151:2011",
+            "RFC4055:2005",
+            "NIST-PQ-FAQ:reviewed-2026-11-10",
+            "BHT1997:v1",
+            "CSOR:reviewed-2026-11-10"
+          ],
+          "version": "1.0.0"
+        },
+        "schema_version": 1
+      },
+      "comparison": {
+        "id": "certificate-future",
+        "kind": "inventory",
+        "requirements": [
+          "Q3-02",
+          "Q3-07"
+        ],
+        "basis": "local_policy",
+        "status": "Verified",
+        "assertions": 2
+      }
+    },
+    {
+      "id": "certificate-inverted",
+      "kind": "inventory",
+      "input": {
+        "assets": [
+          {
+            "tag": "sig",
+            "kind": "algorithm",
+            "attributes": {
+              "namespace": "named",
+              "identifier": "ML-DSA-65",
+              "parameters": {}
+            },
+            "relations": []
+          },
+          {
+            "tag": "subject-alg",
+            "kind": "algorithm",
+            "attributes": {
+              "namespace": "named",
+              "identifier": "ML-KEM-768",
+              "parameters": {}
+            },
+            "relations": []
+          },
+          {
+            "tag": "key",
+            "kind": "public_key",
+            "attributes": {},
+            "relations": [
+              {
+                "relationship": "algorithm",
+                "target": "subject-alg"
+              }
+            ]
+          },
+          {
+            "tag": "cert",
+            "kind": "certificate",
+            "attributes": {
+              "not_before_unix": 10,
+              "not_after_unix": 1
+            },
+            "relations": [
+              {
+                "relationship": "signature_algorithm",
+                "target": "sig"
+              },
+              {
+                "relationship": "subject_key",
+                "target": "key"
+              }
+            ]
+          }
+        ]
+      },
+      "checks": [
+        {
+          "pointer": "/assessments/3/limitations",
+          "operation": "contains",
+          "expected": "trust_signatures_and_implementation_not_verified"
+        },
+        {
+          "pointer": "/assessments/3/algorithm/classical_concerns",
+          "operation": "contains",
+          "expected": "invalid_certificate_validity_interval"
+        }
+      ],
+      "sources": [
+        "LOCAL026",
+        "R5280",
+        "S203",
+        "S204"
+      ],
+      "requirements": [
+        "Q3-02",
+        "Q3-07"
+      ],
+      "basis": "local_policy",
+      "actual": {
+        "assessments": [
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-DSA-65",
+              "parameters_known": true,
+              "purpose": "signature",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S204"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-14deae24c8ac99ec83c9913683bef8af9ea2b733d2f1d811afba135dd6f8a0d4",
+            "asset_kind": "algorithm",
+            "certainty": "unknown",
+            "id": "assessment-v1-5dced6bd245b872c35cb796420156b1c5a1b66dfee1f7912c0d63324bb0639c3",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-KEM-768",
+              "parameters_known": true,
+              "purpose": "key_establishment",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-e07a67c4fbab429945db2edc84c2194ee451b8267bd43e5d087e8f7144835ef6",
+            "asset_kind": "algorithm",
+            "certainty": "unknown",
+            "id": "assessment-v1-c9d77d60308d4fea75bd100b550c75e68c754dd3d0500b35991e15b8229cb753",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-KEM-768",
+              "parameters_known": true,
+              "purpose": "key_establishment",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-0042154615fc08faaf5a35e64ca53621e2348f1bb15b64c591bc058af0c64635",
+            "asset_kind": "public_key",
+            "certainty": "unknown",
+            "id": "assessment-v1-9b360683dea283600954b9ab186e81e18a44db3addbe9eb455bfb5202a1ff617",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [
+                "invalid_certificate_validity_interval"
+              ],
+              "combiner_assessment": null,
+              "components": [
+                {
+                  "assessment": {
+                    "attack_models": [],
+                    "classical_concerns": [],
+                    "combiner_assessment": null,
+                    "components": [],
+                    "construction": "post_quantum",
+                    "identifier": "ML-DSA-65",
+                    "parameters_known": true,
+                    "purpose": "signature",
+                    "quantum": "designed_resistant",
+                    "source_ids": [
+                      "LOCAL026",
+                      "S204"
+                    ],
+                    "standardization": "nist_final"
+                  },
+                  "role": "certificate_signature"
+                },
+                {
+                  "assessment": {
+                    "attack_models": [],
+                    "classical_concerns": [],
+                    "combiner_assessment": null,
+                    "components": [],
+                    "construction": "post_quantum",
+                    "identifier": "ML-KEM-768",
+                    "parameters_known": true,
+                    "purpose": "key_establishment",
+                    "quantum": "designed_resistant",
+                    "source_ids": [
+                      "LOCAL026",
+                      "S203"
+                    ],
+                    "standardization": "nist_final"
+                  },
+                  "role": "subject_public_key"
+                }
+              ],
+              "construction": "certificate",
+              "identifier": "certificate_roles",
+              "parameters_known": true,
+              "purpose": "signature",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203",
+                "S204"
+              ],
+              "standardization": "unknown"
+            },
+            "asset_id": "asset-v1-b2cf8d2ff9aa2b2a20295b40cdec76dad7d41dfc46da04011424876fab0deddb",
+            "asset_kind": "certificate",
+            "certainty": "unknown",
+            "id": "assessment-v1-775adfa1b631d6ac27d8b4a872a4d60e8b9554646e0cddda2084df0d5d4e365b",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          }
+        ],
+        "asset_policies": [
+          {
+            "asset_id": "asset-v1-14deae24c8ac99ec83c9913683bef8af9ea2b733d2f1d811afba135dd6f8a0d4",
+            "candidates": [
+              {
+                "identifier": "ML-DSA",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "signature",
+                "source_ids": [
+                  "S204",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-e07a67c4fbab429945db2edc84c2194ee451b8267bd43e5d087e8f7144835ef6",
+            "candidates": [
+              {
+                "identifier": "ML-KEM",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "key_establishment",
+                "source_ids": [
+                  "S203",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-0042154615fc08faaf5a35e64ca53621e2348f1bb15b64c591bc058af0c64635",
+            "candidates": [
+              {
+                "identifier": "ML-KEM",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "key_establishment",
+                "source_ids": [
+                  "S203",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-b2cf8d2ff9aa2b2a20295b40cdec76dad7d41dfc46da04011424876fab0deddb",
+            "candidates": [
+              {
+                "identifier": "ML-DSA",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "signature",
+                "source_ids": [
+                  "S204",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "fail",
+            "priority": "high",
+            "reasons": [
+              "known_classical_concern_in_profile_scope"
+            ]
+          }
+        ],
+        "catalog_version": "local-assessment-1",
+        "context": {
+          "input": {
+            "applicability": "applicable",
+            "hash_collision_required": null,
+            "long_lived_confidentiality": null,
+            "support": {
+              "jose": null,
+              "parameters": null,
+              "peer": null,
+              "pki": null,
+              "protocol": null,
+              "provider": null,
+              "runtime": null,
+              "verifiers": null
+            },
+            "use_case": "unknown",
+            "version": 1
+          },
+          "provenance": "local_profile_default_unknown_context"
+        },
+        "evaluation": {
+          "decision": "fail",
+          "reasons": [
+            "inventory_not_exhaustive",
+            "applicable_asset_violation"
+          ]
+        },
+        "inspection_status": "complete_within_scope",
+        "inventory": {
+          "file": "scan.inventory.v1.json",
+          "run_id": "scan-v1-2397c2fba32b6be5a429b879b3a789f9f5302094c39cc509d8aab94340f91972"
+        },
+        "inventory_completeness": "not_exhaustive",
+        "profile": {
+          "deadline_policy": "no_universal_deadlines",
+          "effective_dates": null,
+          "id": "migration-review-v1",
+          "scope": "local_advisory_candidate_review_not_compliance_or_deployment",
+          "source_editions": [
+            "LOCAL026:1.0.0",
+            "FIPS203:2024-08-13",
+            "FIPS204:2024-08-13",
+            "FIPS205:2024-08-13",
+            "SP800-131A:Rev2:2019",
+            "RFC8725:2020",
+            "RFC6151:2011",
+            "RFC4055:2005",
+            "NIST-PQ-FAQ:reviewed-2026-11-10",
+            "BHT1997:v1",
+            "CSOR:reviewed-2026-11-10"
+          ],
+          "version": "1.0.0"
+        },
+        "schema_version": 1
+      },
+      "comparison": {
+        "id": "certificate-inverted",
+        "kind": "inventory",
+        "requirements": [
+          "Q3-02",
+          "Q3-07"
+        ],
+        "basis": "local_policy",
+        "status": "Verified",
+        "assertions": 2
+      }
+    },
+    {
+      "id": "certificate-unknown",
+      "kind": "inventory",
+      "input": {
+        "assets": [
+          {
+            "tag": "sig",
+            "kind": "algorithm",
+            "attributes": {
+              "namespace": "named",
+              "identifier": "ML-DSA-65",
+              "parameters": {}
+            },
+            "relations": []
+          },
+          {
+            "tag": "subject-alg",
+            "kind": "algorithm",
+            "attributes": {
+              "namespace": "named",
+              "identifier": "ML-KEM-768",
+              "parameters": {}
+            },
+            "relations": []
+          },
+          {
+            "tag": "key",
+            "kind": "public_key",
+            "attributes": {},
+            "relations": [
+              {
+                "relationship": "algorithm",
+                "target": "subject-alg"
+              }
+            ]
+          },
+          {
+            "tag": "cert",
+            "kind": "certificate",
+            "attributes": {
+              "not_before_unix": null,
+              "not_after_unix": null
+            },
+            "relations": [
+              {
+                "relationship": "signature_algorithm",
+                "target": "sig"
+              },
+              {
+                "relationship": "subject_key",
+                "target": "key"
+              }
+            ]
+          }
+        ]
+      },
+      "checks": [
+        {
+          "pointer": "/assessments/3/limitations",
+          "operation": "contains",
+          "expected": "trust_signatures_and_implementation_not_verified"
+        },
+        {
+          "pointer": "/assessments/3/algorithm/classical_concerns",
+          "operation": "contains",
+          "expected": "certificate_validity_unknown"
+        }
+      ],
+      "sources": [
+        "LOCAL026",
+        "R5280",
+        "S203",
+        "S204"
+      ],
+      "requirements": [
+        "Q3-02",
+        "Q3-07"
+      ],
+      "basis": "local_policy",
+      "actual": {
+        "assessments": [
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-DSA-65",
+              "parameters_known": true,
+              "purpose": "signature",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S204"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-14deae24c8ac99ec83c9913683bef8af9ea2b733d2f1d811afba135dd6f8a0d4",
+            "asset_kind": "algorithm",
+            "certainty": "unknown",
+            "id": "assessment-v1-5dced6bd245b872c35cb796420156b1c5a1b66dfee1f7912c0d63324bb0639c3",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-KEM-768",
+              "parameters_known": true,
+              "purpose": "key_establishment",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-e07a67c4fbab429945db2edc84c2194ee451b8267bd43e5d087e8f7144835ef6",
+            "asset_kind": "algorithm",
+            "certainty": "unknown",
+            "id": "assessment-v1-c9d77d60308d4fea75bd100b550c75e68c754dd3d0500b35991e15b8229cb753",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [],
+              "combiner_assessment": null,
+              "components": [],
+              "construction": "post_quantum",
+              "identifier": "ML-KEM-768",
+              "parameters_known": true,
+              "purpose": "key_establishment",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203"
+              ],
+              "standardization": "nist_final"
+            },
+            "asset_id": "asset-v1-0042154615fc08faaf5a35e64ca53621e2348f1bb15b64c591bc058af0c64635",
+            "asset_kind": "public_key",
+            "certainty": "unknown",
+            "id": "assessment-v1-9b360683dea283600954b9ab186e81e18a44db3addbe9eb455bfb5202a1ff617",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          },
+          {
+            "algorithm": {
+              "attack_models": [],
+              "classical_concerns": [
+                "certificate_validity_unknown"
+              ],
+              "combiner_assessment": null,
+              "components": [
+                {
+                  "assessment": {
+                    "attack_models": [],
+                    "classical_concerns": [],
+                    "combiner_assessment": null,
+                    "components": [],
+                    "construction": "post_quantum",
+                    "identifier": "ML-DSA-65",
+                    "parameters_known": true,
+                    "purpose": "signature",
+                    "quantum": "designed_resistant",
+                    "source_ids": [
+                      "LOCAL026",
+                      "S204"
+                    ],
+                    "standardization": "nist_final"
+                  },
+                  "role": "certificate_signature"
+                },
+                {
+                  "assessment": {
+                    "attack_models": [],
+                    "classical_concerns": [],
+                    "combiner_assessment": null,
+                    "components": [],
+                    "construction": "post_quantum",
+                    "identifier": "ML-KEM-768",
+                    "parameters_known": true,
+                    "purpose": "key_establishment",
+                    "quantum": "designed_resistant",
+                    "source_ids": [
+                      "LOCAL026",
+                      "S203"
+                    ],
+                    "standardization": "nist_final"
+                  },
+                  "role": "subject_public_key"
+                }
+              ],
+              "construction": "certificate",
+              "identifier": "certificate_roles",
+              "parameters_known": false,
+              "purpose": "signature",
+              "quantum": "designed_resistant",
+              "source_ids": [
+                "LOCAL026",
+                "S203",
+                "S204"
+              ],
+              "standardization": "unknown"
+            },
+            "asset_id": "asset-v1-b2cf8d2ff9aa2b2a20295b40cdec76dad7d41dfc46da04011424876fab0deddb",
+            "asset_kind": "certificate",
+            "certainty": "unknown",
+            "id": "assessment-v1-775adfa1b631d6ac27d8b4a872a4d60e8b9554646e0cddda2084df0d5d4e365b",
+            "limitations": [
+              "references_do_not_prove_active_use",
+              "not_a_full_classical_security_review",
+              "trust_signatures_and_implementation_not_verified"
+            ],
+            "observations": []
+          }
+        ],
+        "asset_policies": [
+          {
+            "asset_id": "asset-v1-14deae24c8ac99ec83c9913683bef8af9ea2b733d2f1d811afba135dd6f8a0d4",
+            "candidates": [
+              {
+                "identifier": "ML-DSA",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "signature",
+                "source_ids": [
+                  "S204",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-e07a67c4fbab429945db2edc84c2194ee451b8267bd43e5d087e8f7144835ef6",
+            "candidates": [
+              {
+                "identifier": "ML-KEM",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "key_establishment",
+                "source_ids": [
+                  "S203",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-0042154615fc08faaf5a35e64ca53621e2348f1bb15b64c591bc058af0c64635",
+            "candidates": [
+              {
+                "identifier": "ML-KEM",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "key_establishment",
+                "source_ids": [
+                  "S203",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "review",
+            "reasons": [
+              "use_case_unknown_or_purpose_mismatch"
+            ]
+          },
+          {
+            "asset_id": "asset-v1-b2cf8d2ff9aa2b2a20295b40cdec76dad7d41dfc46da04011424876fab0deddb",
+            "candidates": [
+              {
+                "identifier": "ML-DSA",
+                "parameter_selection": "explicit_parameter_selection_required",
+                "prerequisites": [
+                  {
+                    "claimed_support": null,
+                    "name": "runtime_api",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "provider_implementation",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "parameter_agreement",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "peer_capability",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  },
+                  {
+                    "claimed_support": null,
+                    "name": "protocol_binding",
+                    "provenance": "not_applicable_to_declared_use_case"
+                  }
+                ],
+                "purpose": "signature",
+                "source_ids": [
+                  "S204",
+                  "LOCAL026"
+                ],
+                "status": "candidate_primitive_integration_unverified",
+                "validation_steps": [
+                  "confirm_actual_use_and_required_purpose",
+                  "verify_exact_parameters_and_protocol_encoding",
+                  "test_runtime_provider_peer_and_rollout",
+                  "validate_implementation_and_interoperability_separately"
+                ]
+              }
+            ],
+            "decision": "indeterminate",
+            "priority": "high",
+            "reasons": [
+              "algorithm_or_parameters_unresolved"
+            ]
+          }
+        ],
+        "catalog_version": "local-assessment-1",
+        "context": {
+          "input": {
+            "applicability": "applicable",
+            "hash_collision_required": null,
+            "long_lived_confidentiality": null,
+            "support": {
+              "jose": null,
+              "parameters": null,
+              "peer": null,
+              "pki": null,
+              "protocol": null,
+              "provider": null,
+              "runtime": null,
+              "verifiers": null
+            },
+            "use_case": "unknown",
+            "version": 1
+          },
+          "provenance": "local_profile_default_unknown_context"
+        },
+        "evaluation": {
+          "decision": "indeterminate",
+          "reasons": [
+            "inventory_not_exhaustive",
+            "no_complete_positive_policy_evidence"
+          ]
+        },
+        "inspection_status": "complete_within_scope",
+        "inventory": {
+          "file": "scan.inventory.v1.json",
+          "run_id": "scan-v1-2397c2fba32b6be5a429b879b3a789f9f5302094c39cc509d8aab94340f91972"
+        },
+        "inventory_completeness": "not_exhaustive",
+        "profile": {
+          "deadline_policy": "no_universal_deadlines",
+          "effective_dates": null,
+          "id": "migration-review-v1",
+          "scope": "local_advisory_candidate_review_not_compliance_or_deployment",
+          "source_editions": [
+            "LOCAL026:1.0.0",
+            "FIPS203:2024-08-13",
+            "FIPS204:2024-08-13",
+            "FIPS205:2024-08-13",
+            "SP800-131A:Rev2:2019",
+            "RFC8725:2020",
+            "RFC6151:2011",
+            "RFC4055:2005",
+            "NIST-PQ-FAQ:reviewed-2026-11-10",
+            "BHT1997:v1",
+            "CSOR:reviewed-2026-11-10"
+          ],
+          "version": "1.0.0"
+        },
+        "schema_version": 1
+      },
+      "comparison": {
+        "id": "certificate-unknown",
+        "kind": "inventory",
+        "requirements": [
+          "Q3-02",
+          "Q3-07"
+        ],
+        "basis": "local_policy",
+        "status": "Verified",
+        "assertions": 2
+      }
+    }
+  ],
+  "coverage": {
+    "tested": "Captured-time validity states and explicit non-verification limitation, with signature/subject roles represented separately.",
+    "additionalExistingTests": "crates/pqc_scan_core/tests/assessment_policy.rs contains RSA1024/expired, namespace mismatch, KEM-in-signature and role/purpose controls; native-r2 workspace execution includes these.",
+    "unassessed": "Every OID/parameter/role/time combination and independent mathematical/chain/trust validation; those are not inferred from extracted attributes."
+  }
+}

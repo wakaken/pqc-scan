@@ -1,0 +1,31 @@
+{
+  "tool": {
+    "url": "https://github.com/rustsec/rustsec/releases/download/cargo-audit/v0.22.2/cargo-audit-aarch64-unknown-linux-gnu-v0.22.2.tgz",
+    "version": "0.22.2",
+    "retrieved_at": "2026-11-14T06:18:42.126415+00:00",
+    "archive_sha256": "c6603814ddaa45e51263dafd31c0ac98808f688d26f7395804f9670b0fd599dd",
+    "binary_sha256": "bc1528b7ba3b7dc0bb681eaa13237fb195142ef0ba037f0e73d28afc3ec22c4d"
+  },
+  "database_receipt_sha256": "8c97b467b00e28541334ef9e0f5488ba8bd1a0d712ff983d5edd0ad383b7db6b",
+  "cache_image": {
+    "image": "sha256:7fe1ac9c7a27d03c783c046a2446674883a45fad4593d71f7bfaff3c0728a252",
+    "preparation": "network-capable trusted tools and Cargo fetch only; no repository source execution",
+    "opensshSourceSha256": "ccc42c0419937959263fa1dbd16dafc18c56b984c03562d2937ce56a60f798b2",
+    "cargoLockSha256": "c2beb30a06d36911fb90d77ebb63a2430ca24ba6aaa2590fbf9f750d17ab3964"
+  },
+  "commands": [
+    {
+      "command": "Download official cargo-audit 0.22.2 Linux aarch64 release asset; compare SHA-256 to GitHub release asset digest; extract only regular cargo-audit member",
+      "exit": 0
+    },
+    {
+      "command": "git clone --depth 1 https://github.com/RustSec/advisory-db.git target/quality-task-051/preparation/advisory-db",
+      "exit": 0
+    },
+    {
+      "command": "python3 tests/protocol/prepare-image.py --out-dir target/quality-task-051/preparation/cache-image --tool-image sha256:d33e67aa572b1a3f4a6ab6f66bf5348334d3f589e3cbab4c0a75824a9206716b",
+      "exit": 0
+    }
+  ],
+  "policy": "Network-capable trusted preparation only. Manifests and empty stubs; cargo fetch --locked; no target build scripts/tests executed. No paid APIs or global installation."
+}

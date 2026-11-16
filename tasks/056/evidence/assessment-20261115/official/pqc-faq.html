@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="en-us" xml:lang="en-us">
+<head>
+    <meta charset="utf-8" />
+    <title>Post-Quantum Cryptography | CSRC</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="content-style-type" content="text/css" />
+    <meta http-equiv="content-script-type" content="text/javascript" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="msapplication-config" content="/CSRC/Media/images/favicons/browserconfig.xml" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="google-site-verification" content="xbrnrVYDgLD-Bd64xHLCt4XsPXzUhQ-4lGMj4TdUUTA" />
+    
+
+        <meta name="description" content="FAQs related to the project Post-Quantum Cryptography" />
+
+    <!-- dcterms meta information -->
+    <meta name="dcterms.title" content="Post-Quantum Cryptography | CSRC | CSRC" />
+    <meta name="dcterms.description" content="Short URL:&#160;&#160;https://www.nist.gov/pqcrypto  For a plain-language introduction to post-quantum cryptography, see&#160;What Is Post-Quantum Cryptography? &#160;  PQC Standards&#160; |&#160; Migration to PQC&#160; |&#160; Ongoing PQC Standardization Process  NIST’s Post-Quantum..." />
+    <meta name="dcterms.creator" content="Computer Security Division, Information Technology Laboratory, National Institute of Standards and Technology, U.S. Department of Commerce" />
+    <meta name="dcterms.date.created" scheme="ISO8601" content="2017-01-03" />
+    <meta name="dcterms.date.reviewed" scheme="ISO8601" content="2026-10-27" />
+    <meta name="dcterms.language" scheme="DCTERMS.RFC1766" content="EN-US" />
+
+    <!-- Facebook OpenGraph Tags -->
+    <meta name="og:site_name" content="CSRC | NIST" />
+    <meta name="og:type" content="article" />
+    <meta name="og:url" content="https://csrc.nist.gov/projects/post-quantum-cryptography/faqs" />
+    <meta name="og:title" content="Post-Quantum Cryptography | CSRC | CSRC" />
+    <meta name="og:description" content="Short URL:&#160;&#160;https://www.nist.gov/pqcrypto  For a plain-language introduction to post-quantum cryptography, see&#160;What Is Post-Quantum Cryptography? &#160;  PQC Standards&#160; |&#160; Migration to PQC&#160; |&#160; Ongoing PQC Standardization Process  NIST’s Post-Quantum Cryptography (PQC) project leads the national and global effort to secure electronic information against the future threat of quantum computers—machines that may be years or decades away but could eventually break many of today’s widely used cryptographic systems. Through a multi-year international competition involving industry, academia, and governments, NIST released the principal three PQC standards in 2024 and is developing additional standards to serve as backups or alternatives.&#160;Organizations should begin applying these standards now to migrate their systems to quantum-resistant cryptography.  Alongside these standards, NIST conducts foundational cryptographic research; collaborates with industry and federal partners to guide organizations preparing for PQC..." />
+
+    <meta name="article:tag" content="post-quantum cryptography" />
+    <meta name="article:published_time" content="2017-01-03" />
+        <meta name="article:modified_time" content="2026-10-27" />
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="/images/icons/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/images/icons/favicon-16x16.png" sizes="16x16" />
+    <link rel="manifest" href="/images/icons/manifest.json" />
+    <link rel="mask-icon" href="/images/icons/safari-pinned-tab.svg" color="#000000" />
+    <link href="/CSRC/Media/images/favicons/favicon.ico" type="image/x-icon" rel="shortcut icon" />
+    <link href="/CSRC/Media/images/favicons/favicon.ico" type="image/x-icon" rel="icon" />
+    <link href="/dist/app.css" rel="stylesheet" />
+    
+    <!-- Highlight.js -->
+    <link href="/dist/highlight-js/github.css" rel="stylesheet" />
+    
+    <!-- USWDS Top -->
+    <link href="/dist/uswds/css/uswds.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="/dist/uswds/js/uswds-init.min.js"></script>
+
+    <!-- reCAPTCHA v3 -->
+    <style>
+    .grecaptcha-badge {
+        visibility: hidden;
+    }
+    </style>
+
+    
+
+
+    <script async type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=nist&subagency=csrc&pua=UA-66610693-15&yt=true&exts=xsd,xml,wav,mpg,mpeg,avi,rtf,webm,ogg,ogv,oga,map,otf,eot,svg,ttf,woff"></script>
+    <style id="antiClickjackCss">
+        body > * {
+            display: none !important;
+        }
+        #antiClickjack {
+            display: block !important;
+        }
+    </style>
+    <noscript>
+        <style id="antiClickjackNoScript">
+            body > * { display: block !important; }
+            #antiClickjack {
+                display: none !important;
+            }
+        </style>
+    </noscript>
+    <script type="text/javascript" id="antiClickjackScript">
+        if (self === top) {
+            // no clickjacking
+            var antiClickjack = document.getElementById("antiClickjackCss"); antiClickjack.parentNode.removeChild(antiClickjack);
+        } else {
+            setTimeout(tryForward(), 5000);
+        }
+        function tryForward() {
+            top.location = self.location;
+        }
+    </script>
+    <!-- Google tag (gtag.js) --> 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TSQ0PLGJZP"></script> 
+    <script>   window.dataLayer = window.dataLayer || [];   function gtag(){dataLayer.push(arguments);}   gtag('js', new Date());   gtag('config', 'G-TSQ0PLGJZP'); </script>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-MZQC4NCJ');</script>
+    <!-- End Google Tag Manager -->
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MZQC4NCJ" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <div id="antiClickjack" style="display: none;">
+        <strong style="font-size: 1.6rem;">You are viewing this page in an unauthorized frame window.</strong>
+        <p>This is a potential security issue, you are being redirected to <a href="https://csrc.nist.gov">https://csrc.nist.gov</a>.</p>
+    </div>
+
+    <section
+    class="usa-banner"
+    aria-label="Official website of the United States government">
+    <div class="usa-accordion">
+        <header class="usa-banner__header">
+            <noscript>
+                <p style="font-size: 0.85rem; font-weight: bold;">You have JavaScript disabled. This site requires JavaScript to be enabled for complete site functionality.</p>
+            </noscript>
+            <div class="usa-banner__inner">
+                <div class="grid-col-auto">
+                    <img
+                        aria-hidden="true"
+                        class="usa-banner__header-flag"
+                        src="/dist/uswds/img/us_flag_small.png"
+                        alt=""/>
+                </div>
+                <div class="grid-col-fill tablet:grid-col-auto" aria-hidden="true">
+                    <p class="usa-banner__header-text">
+                        An official website of the United States government
+                    </p>
+                    <p class="usa-banner__header-action">Here’s how you know</p>
+                </div>
+                <button
+                    type="button"
+                    class="usa-accordion__button usa-banner__button"
+                    aria-expanded="false"
+                    aria-controls="gov-banner-default">
+                    <span class="usa-banner__button-text">Here’s how you know</span>
+                </button>
+            </div>
+        </header>
+        <div
+            class="usa-banner__content usa-accordion__content"
+            id="gov-banner-default">
+            <div class="grid-row grid-gap-lg">
+                <div class="usa-banner__guidance tablet:grid-col-6">
+                    <img
+                        class="usa-banner__icon usa-media-block__img"
+                        src="/dist/uswds/img/icon-dot-gov.svg"
+                        role="img"
+                        alt=""
+                        aria-hidden="true"/>
+                    <div class="usa-media-block__body">
+                        <p>
+                            <strong>Official websites use .gov</strong><br/>A
+                            <strong>.gov</strong> website belongs to an official government
+                            organization in the United States.
+                        </p>
+                    </div>
+                </div>
+                <div class="usa-banner__guidance tablet:grid-col-6">
+                    <img
+                        class="usa-banner__icon usa-media-block__img"
+                        src="/dist/uswds/img/icon-https.svg"
+                        role="img"
+                        alt=""
+                        aria-hidden="true"/>
+                    <div class="usa-media-block__body">
+                        <p>
+                            <strong>Secure .gov websites use HTTPS</strong><br/>A
+                            <strong>lock</strong> (
+                            <span class="icon-lock">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="52"
+                                    height="64"
+                                    viewBox="0 0 52 64"
+                                    class="usa-banner__lock-image"
+                                    role="img"
+                                    aria-labelledby="banner-lock-description-default"
+                                    focusable="false">
+                                    <title id="banner-lock-title-default">Lock</title>
+                                    <desc id="banner-lock-description-default">Locked padlock icon</desc>
+                                    <path
+                                        fill="#000000"
+                                        fill-rule="evenodd"
+                                        d="M26 0c10.493 0 19 8.507 19 19v9h3a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V32a4 4 0 0 1 4-4h3v-9C7 8.507 15.507 0 26 0zm0 8c-5.979 0-10.843 4.77-10.996 10.712L15 19v9h22v-9c0-6.075-4.925-11-11-11z"/>
+                                </svg>
+                            </span
+                            >) or <strong>https://</strong> means you’ve safely connected to
+                            the .gov website. Share sensitive information only on official,
+                            secure websites.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <nav id="navbar" class="navbar">
+    <div id="nist-menu-container" class="container">
+        <div class="row">
+            <!-- Brand -->
+            <div class="col-xs-6 col-md-4 navbar-header">
+                <a class="navbar-brand" href="https://www.nist.gov" target='_blank' rel="noopener noreferrer" id="navbar-brand-image">
+                    <img src="/CSRC/media/images/svg/nist-logo.svg" alt="National Institute of Standards and Technology" width="110" height="30">
+                </a>
+            </div>
+            <div class="col-xs-6 col-md-8 navbar-nist-logo">
+                <div class="form-inline hidden-sm hidden-xs">
+                    <form name="site-search" id="site-search-form" action="/search" method="GET">
+                        <label for="search-csrc-query" class="element-invisible">Search</label>
+                        <input autocomplete="off" class="form-control" id="search-csrc-query" name="keywords" type="text" size="15" maxlength="128" placeholder="Search CSRC" />
+                        <input type="hidden" name="ipp" value="25" />
+                        <input type="hidden" name="sortBy" value="relevance" />
+                        <input type="hidden" name="showOnly" value="publications,projects,news,events,presentations,glossary,topics" />
+                        <input type="hidden" name="topicsMatch" value="ANY" />
+                        <input type="hidden" name="status" value="Final,Draft" />
+                        <button type="submit" id="search-csrc-submit-btn" class="form-submit">
+                            <span class="element-invisible">Search</span>
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+                <span id="nvd-menu-button" class="pull-right">
+                    <a href="#" id="nvd-menu-button-link">
+                        <span class="fa fa-bars"></span>
+                        <span id="nvd-menu-full-text">CSRC MENU</span>
+                    </a>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-inline hidden-md hidden-lg">
+        <form name="site-search-mobile" id="site-search-form-mobile" action="/search" method="GET">
+            <label for="search-csrc-query-mobile" class="element-invisible">Search</label>
+            <input autocomplete="off" class="form-control" id="search-csrc-query-mobile" name="keywords" type="text" size="15" maxlength="128" placeholder="Search CSRC" />
+            <button type="submit" id="search-csrc-submit-btn-mobile" class="form-submit">
+                <span class="element-invisible">Search</span>
+                <i class="fa fa-search"></i>
+            </button>
+        </form>
+    </div>
+    <div class="main-menu-row container">
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="main-menu-drop" class="col-lg-12" style="display: none;">
+            <ul>
+                <li><a href="/projects">Projects</a></li>
+                <li>
+                    <a href="/publications">
+                        Publications
+                        <span class="expander fa fa-plus" id="main-menu-pubs-expander" data-expander-name="publications" data-expanded="false">
+                            <span class="element-invisible">Expand or Collapse</span>
+                        </span>
+                    </a>
+                    <div style="display: none;" class="sub-menu" data-expander-trigger="publications" id="main-menu-pubs-expanded">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <p><a href="/publications/drafts-open-for-comment">Drafts for Public Comment</a></p>
+                                <p><a href="/publications/draft-pubs">All Public Drafts</a></p>
+                                <p><a href="/publications/final-pubs">Final Pubs</a></p>
+                                <p><a href="/publications/fips">FIPS <small>(standards)</small></a></p>
+                            </div>
+                            <div class="col-lg-4">
+                                <p><a href="/publications/sp">Special Publications (SP<small>s</small>)</a></p>
+                                <p><a href="/publications/ir">IR <small>(interagency/internal reports)</small></a></p>
+                                <p><a href="/publications/cswp">CSWP <small>(cybersecurity white papers)</small></a></p>
+                                <p><a href="/publications/itl-bulletin">ITL Bulletins</a></p>
+                            </div>
+                            <div class="col-lg-4">
+                                <p><a href="/publications/project-description">Project Descriptions</a></p>
+                                <p><a href="/publications/journal-article">Journal Articles</a></p>
+                                <p><a href="/publications/conference-paper">Conference Papers</a></p>
+                                <p><a href="/publications/book">Books</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <a href="/topics">
+                        Topics
+                        <span class="expander fa fa-plus" id="main-menu-topics-expander" data-expander-name="topics" data-expanded="false">
+                            <span class="element-invisible">Expand or Collapse</span>
+                        </span>
+                    </a>
+                    <div style="display: none;" class="sub-menu" data-expander-trigger="topics" id="main-menu-topics-expanded">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <p><a href="/Topics/Security-and-Privacy">Security & Privacy</a></p>
+                                <p><a href="/Topics/Applications">Applications</a></p>
+                            </div>
+                            <div class="col-lg-4">
+                                <p><a href="/Topics/Technologies">Technologies</a></p>
+                                <p><a href="/Topics/Sectors">Sectors</a></p>
+                            </div>
+                            <div class="col-lg-4">
+                                <p><a href="/Topics/Laws-and-Regulations">Laws & Regulations</a></p>
+                                <p><a href="/Topics/Activities-and-Products">Activities & Products</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li><a href="/news">News & Updates</a></li>
+                <li><a href="/events">Events</a></li>
+                <li><a href="/glossary">Glossary</a></li>
+                <li><a href="/faq">FAQ</a></li>
+                <li>
+                    <a href="/about">
+                        About CSRC
+                        <span class="expander fa fa-plus" id="main-menu-about-expander" data-expander-name="about" data-expanded="false">
+                            <span class="element-invisible">Expand or Collapse</span>
+                        </span>
+                    </a>
+                    <div style="display: none;" class="sub-menu" data-expander-trigger="about" id="main-menu-about-expanded">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <p>
+                                    <strong><a href="/Groups/Computer-Security-Division">Computer Security Division</a></strong><br />
+                                    <ul>
+                                        <li><a href="/Groups/Computer-Security-Division/Cryptographic-Technology">Cryptographic Technology</a></li>
+                                        <li><a href="/Groups/Computer-Security-Division/software-security-group">Software Security Group</a></li>
+                                        <li><a href="/Groups/Computer-Security-Division/hardware-security-group">Hardware Security Group</a></li>
+                                        <li><a href="/Groups/Computer-Security-Division/Security-Engineering-and-Risk-Management">Security Engineering and Risk Management</a></li>
+                                    </ul>
+                                </p>
+                            </div>
+                            <div class="col-lg-6">
+                                <p>
+                                    <strong><a href="/Groups/Applied-Cybersecurity-Division">Applied Cybersecurity Division</a></strong><br />
+                                    <ul>
+                                        <li><a href="/Groups/Applied-Cybersecurity-Division/Cybersecurity-and-Privacy-Applications">Cybersecurity and Privacy Applications</a></li>
+                                        <li><a href="/Groups/Applied-Cybersecurity-Division/National-Cybersecurity-Center-of-Excellence">National Cybersecurity Center of Excellence (NCCoE)</a></li>
+                                        <li><a href="https://www.nist.gov/nice/">National Initiative for Cybersecurity Education (NICE)</a></li>
+                                    </ul>
+                                </p>
+                                <p>
+                                    <a href="/contact">
+                                        Contact Us
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div><!-- /#mobile-nav-container -->
+    </div>
+
+</nav>
+
+    <section id="itl-header" class="has-menu">
+        <div class="itl-background"></div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12 col-md-8">
+                        <div class="hidden-xs hidden-sm" id="itl-header-lg">
+                            <a href="https://www.nist.gov/itl" target='_blank' rel="noopener noreferrer" id="itl-header-link">Information Technology Laboratory</a>
+                        </div>
+                        <div class="hidden-xs hidden-sm" id="csrc-header-lg">
+                            <a href="/" id="csrc-header-link-lg">Computer Security Resource Center</a>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-4">
+                        <div class="hidden-xs hidden-sm hidden-md">
+                            <a id="logo-csrc-lg" href="/"><img id="img-logo-csrc-lg" src="/CSRC/Media/images/nist-logo-csrc-white.svg" alt="CSRC Logo" class="csrc-header-logo"></a>
+                        </div>
+                        <div class="hidden-lg">
+                            <a id="logo-csrc-sm" href="/"><img id="img-logo-csrc-sm" src="/CSRC/Media/images/nist-logo-csrc-white.svg" alt="CSRC Logo" class="csrc-header-logo"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+    <div id="body-section" class="container">
+        
+        
+
+
+
+
+<div class="breadcrumb">
+        <a href="/projects" class="breadcrumb-link">Projects</a>
+        <a href="/Projects/post-quantum-cryptography" class="breadcrumb-link">Post-Quantum Cryptography</a>
+</div>
+
+
+    <h1 id="projectName">Post-Quantum Cryptography <small id="project-acronym">PQC</small></h1>
+
+
+<div class="page-social-buttons" id=&quot;news-social-buttons&quot;>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fcsrc.nist.gov%2Fprojects%2Fpost-quantum-cryptography%2Ffaqs" class="social-facebook"><i class="fa fa-facebook fa-fw" aria-hidden="true"></i><span class="sr-only">Share to Facebook</span></a>
+    <a href="https://x.com/share?url=https%3A%2F%2Fcsrc.nist.gov%2Fprojects%2Fpost-quantum-cryptography%2Ffaqs" class="social-twitter"><i class="fa-brands fa-x-twitter"></i><span class="sr-only">Share to X</span></a>
+    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fcsrc.nist.gov%2Fprojects%2Fpost-quantum-cryptography%2Ffaqs&amp;source=csrc.nist.gov" class="social-linked-in"><i class="fa fa-linkedin fa-fw" aria-hidden="true"></i><span class="sr-only">Share to LinkedIn</span></a>
+    <a href="/cdn-cgi/l/email-protection#4e713d3b2c242b2d3a732d3d3c2d6020273d3a60292138682f233e752c212a37730d262b2d256e213b3a6e3a26273d6e3d273a2b6e263a3a3e3d7461612d3d3c2d6020273d3a60292138613e3c21242b2d3a3d613e213d3a633f3b2f203a3b23632d3c373e3a21293c2f3e263761282f3f3d" class="social-email"><i class="fa fa-envelope fa-fw" aria-hidden="true"></i><span class="sr-only">Share ia Email</span></a>
+</div>
+
+<div class="row visible-sm visible-xs visible-md">
+	<div class="col-sm-12">
+        <div class="bs-callout bs-callout-subnav" id="projectLinksContainer-sm">
+            <h4><i class="fa fa-link"></i> Project Links</h4>
+            <div class="project-icons-container">
+                <span>
+                    <a href="/projects/post-quantum-cryptography" id="NavOverviewLink-sm">
+                        <i class="fa fa-info-circle"></i> Overview
+                    </a>
+                </span>
+                <span>
+                    <a href="/Projects/post-quantum-cryptography/faqs" id="NavFaqsLink-sm">
+                        <i class="fa fa-question-circle"></i> FAQs
+                    </a>
+                </span>
+                                <span>
+                    <a href="/Projects/post-quantum-cryptography/news" id="NavNewsLink-sm" data-count="18">
+                        <i class="fa fa-newspaper-o"></i> News &amp; Updates
+                    </a>
+                </span>
+                                <span>
+                    <a href="/Projects/post-quantum-cryptography/events" id="NavEventsLink-sm" data-count="8">
+                        <i class="fa fa-calendar-o"></i> Events
+                    </a>
+                </span>
+                                <span>
+                    <a href="/Projects/post-quantum-cryptography/publications" id="NavPubsLink-sm" data-count="16">
+                        <i class="fa fa-file-text"></i> Publications
+                    </a>
+                </span>
+                                <span>
+                    <a href="/Projects/post-quantum-cryptography/presentations" id="NavPresLink-sm" data-count="12">
+                        <i class="fa fa-desktop"></i> Presentations
+                    </a>
+                </span>
+            </div>
+        </div>
+	</div>
+</div>
+<div class="row">
+
+
+        <div class="col-lg-8 col-sm-12">
+<h4>FAQs</h4>
+
+<div class="row">
+    <div class="col-md-6 col-sm-12">
+            Jump to:
+            <select id="catJumpTo" name="catJumpTo">
+                <option value="-1">Select a Category</option>
+                    <option value="Rdc7">PQC FIPS (General Questions)</option>
+                    <option value="6Xl3">Standardization Process</option>
+                    <option value="4FIK">CFP Requirements</option>
+                    <option value="IfPn">Evaluation Criteria</option>
+                    <option value="xisl">Transition and Migration</option>
+            </select>
+    </div>
+	<div class="col-md-6 col-sm-12">
+		<span class="pull-right">
+			<button type="button" id="faqExpand" class="btn btn-sm btn-success" style="display: none;">
+				<i class="fa fa-plus"></i> expand all
+			</button>
+			<button type="button" id="faqCollapse" class="btn btn-sm btn-info" style="display: none;">
+				<i class="fa fa-minus"></i> collapse all
+			</button>
+		</span>
+	</div>
+</div>
+<div id="accordion" data-total-categories="5">
+
+        <div data-cat-idx="0">
+            <h4 class="text-info" id="Rdc7" data-type="category" data-cat-idx="0">PQC FIPS (General Questions)</h4>
+            <div aria-multiselectable="true" class="panel-group project-faq-panel" id="category-faqs-Rdc7" role="tablist" data-total-faqs="2">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="wJGH" role="tab" data-faq-idx="0-0">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_wJGH" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_wJGH" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_wJGH">
+                                        <p>Are cryptographic modules implementing FIPS 203 or FIPS 204 allowed to use seeds as the default key format instead of expanded keys? For example, in FIPS 203, can a cryptographic module store a 64-byte seed (d, z) instead of the output (dk, ek) of Algorithm 19 (ML-KEM.KeyGen), and compute (dk, ek) as needed via (dk, ek) &lt;-- ML-KEM.KeyGen_internal(<em>d</em>, <em>z</em>)?<br />
+(Last revised: June 16, 2026)</p>
+
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="wJGH" 
+                             class="panel-collapse collapse" 
+                             id="collapse_wJGH" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_wJGH" >
+
+
+                                For both FIPS 203 and FIPS 204, a KeyGen seed is considered an acceptable alternative format for a key-pair, or for the private (i.e., decapsulation or signing) key. In particular, generating the seed in one cryptographic module and then importing or exporting it into another cryptographic module is allowed.&nbsp;The internal key generation functions ML-KEM.KeyGen_Internal(<em>d</em>, <em>z</em>) and ML-DSA.KeyGen_internal(ξ) can be accessed for this purpose.&nbsp;<br>
+<br>
+It is acceptable for the ML-KEM.Decaps algorithm (i.e., Algorithm 21 of FIPS 203) to receive, as input, the seeds $(d, z)$&nbsp;instead of the decapsulation key (dk). Similarly, it is also acceptable for the ML-DSA.Sign algorithm (i.e., Algorithm 2 of FIPS 204) to receive, as input, the seed $(\xi)$&nbsp;instead of the private key (sk). In these cases, the combined implementation must produce outputs identical to the original algorithms where&nbsp;the private keys are properly derived from the seeds.&nbsp;CAVP testing should be available for testing these algorithms using the seeds as input.&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="svAW" role="tab" data-faq-idx="0-1">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_svAW" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_svAW" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_svAW">
+                                        <p>FIPS 204 Section 6 states that the internal interfaces in this section <em>should not</em> be made available to applications, and that the interfaces in Section 5 <em>should</em> be used instead. The interfaces in Section 5 are not sufficient to allow an implementation to compute mu externally and provide it to the signing implementation. Will the Cryptographic Module Validation Program allow this in FIPS validated modules, and how? (Last Revised: March 19, 2025)</p>
+
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="svAW" 
+                             class="panel-collapse collapse" 
+                             id="collapse_svAW" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_svAW" >
+
+
+                                <p>Please see <a href="/csrc/media/Projects/post-quantum-cryptography/documents/faq/fips204-sec6-03192025.pdf">NIST's response</a> [PDF]</p>
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div data-cat-idx="1">
+            <h4 class="text-info" id="6Xl3" data-type="category" data-cat-idx="1">Standardization Process</h4>
+            <div aria-multiselectable="true" class="panel-group project-faq-panel" id="category-faqs-6Xl3" role="tablist" data-total-faqs="6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="C9gZ" role="tab" data-faq-idx="1-0">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_C9gZ" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_C9gZ" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_C9gZ">
+                                        What is the current understanding of the security of Kyber512 (i.e., ML-KEM-512)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="C9gZ" 
+                             class="panel-collapse collapse" 
+                             id="collapse_C9gZ" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_C9gZ" >
+
+
+                                Please see&nbsp;<a href="/csrc/media/Projects/post-quantum-cryptography/documents/faq/Kyber-512-FAQ.pdf">NIST's response.</a> [PDF]
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="ARbl" role="tab" data-faq-idx="1-1">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_ARbl" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_ARbl" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_ARbl">
+                                        What are NIST’s plans regarding stateful hash-based signatures? (old Q2)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="ARbl" 
+                             class="panel-collapse collapse" 
+                             id="collapse_ARbl" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_ARbl" >
+
+
+                                <p>NIST plans to coordinate with other standards organizations, such as the IETF, to develop standards for stateful hash-based signatures. As stateful hash-based signatures do not meet the API requested for signatures, this standardization effort will be a separate process from the one outlined in the call for proposals. It is expected that NIST will only approve a stateful hash-based signature standard for use in a limited range of signature applications, such as code signing, where most implementations will be able to securely deal with the requirement to keep state.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="RDuR" role="tab" data-faq-idx="1-2">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_RDuR" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_RDuR" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_RDuR">
+                                        Is the NIST PQC Standardization Process a competition? (old Q7)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="RDuR" 
+                             class="panel-collapse collapse" 
+                             id="collapse_RDuR" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_RDuR" >
+
+
+                                <p>This process shares many features with NIST competitions, and is modelled after the successes we have had with competitions in the past.&nbsp; There are, however, some important requirements that the current research climate demands we require for this process which constitute significant distinctions between this process and a competition.</p>
+
+<p>First, our handling of the applicants does not coincide with a competition as specified in NISTIR 7977, nor does this process correspond to multiple parallel competitions.&nbsp; There will not be an appropriate or directly analogous concept of “winners” and “losers.”&nbsp; Our intention is to select a couple of options for more immediate standardization, as well as to eliminate some submissions as unsuitable. There will likely be some submissions that we do not select for standardization, but that we also do not eliminate and which may be excellent options for a specific application that we're not ready or don't have the contemporaneous resources to standardize.&nbsp; In such a circumstance, we would communicate with the submitters to allow these to remain under a public license for study and practice and to remain under consideration for future standardization.&nbsp; There is no specification for the handling of such an applicant in a competition.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="fTXO" role="tab" data-faq-idx="1-3">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_fTXO" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_fTXO" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_fTXO">
+                                        What will happen to a submitted algorithm if some or all of the provided parameters fail to meet their claimed security strength categories? (old Q11)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="fTXO" 
+                             class="panel-collapse collapse" 
+                             id="collapse_fTXO" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_fTXO" >
+
+
+                                <p>NIST will not remove a scheme from consideration just because it was submitted with incorrectly analyzed parameters. Depending on how far off the estimate was, and how unanticipated the attack, NIST may take it as a sign the algorithm isn’t mature enough, which could lead NIST to remove the scheme from consideration. However, assessments of an algorithm’s maturity will not be primarily based on security strength categories. Rather, the point of the categories is to compare like with like when doing performance comparisons and to make it easier to plan crypto transitions in the future. NIST will respond to attacks that contradict the claimed security strength category, but do not bring the maturity of the scheme into question, by bumping the parameter set down to a lower category, and potentially encouraging the submitter to provide a higher security parameter set.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="GpRP" role="tab" data-faq-idx="1-4">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_GpRP" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_GpRP" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_GpRP">
+                                        Which security strength categories will NIST consider for standardization? (old Q12)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="GpRP" 
+                             class="panel-collapse collapse" 
+                             id="collapse_GpRP" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_GpRP" >
+
+
+                                <p>For any scheme selected for standardization, NIST hopes to select parameters sets from those offered by the submitter. If the submitted parameter sets fail to meet NIST’s needs, for whatever reason, NIST hopes to work with the submitter to provide parameter sets that do meet NIST’s needs. NIST may also choose not to standardize some of the submitted parameter sets. NIST’s reasons for doing this could include insufficient security, unacceptable performance, and too many parameter sets.</p>
+
+<p>NIST has numerous reasons for specifying a categorical post-quantum security hierarchy in the Call for Proposals for post-quantum standards.&nbsp; The primary purpose is to facilitate the comparison of submissions achieving specific benchmark security levels so that an honest assessment can be made.&nbsp; Due to the fact that the science is not yet fully developed in this area, it is possible and appropriate for these benchmarks to be refined in response to future advances in theory.&nbsp; It is not NIST’s intent to unfairly review submissions based on an analysis on parameter sets we learn to be un-impactful.</p>
+
+<p>It is, however, NIST’s present belief that all five of the security strength categories provide sufficient security to allow for standardization. More precisely, NIST would describe security strengths 4 and 5 as “likely excessive,” 2 and 3 as “probably secure for the foreseeable future,” and security strength 1 as “likely secure for the foreseeable future, unless quantum computers improve faster than is anticipated.” The only security considerations which are likely to lead NIST to decline to standardize a parameter set for a scheme NIST has selected are</p>
+
+<ol>
+	<li>NIST may assess the parameters as having insufficient security strength for any of the five categories</li>
+	<li>NIST may assess the parameters as having too little security margin to compensate for the expected uncertainty in attack complexity. And,</li>
+	<li>NIST may decide, based on technological developments during the evaluation process, that one or more of the security strength categories provides insufficient security. As each security category is defined to be at least as secure as an already-standardized, reference primitive, NIST would signal its uncertainty regarding the security of the category by announcing plans to deprecate or withdraw the reference primitive. For example, if NIST were to signal that parameters in category 1 may provide insufficient security, it would do so by announcing plans to deprecate or withdraw AES128. NIST has not done this, and does not expect to do so during the evaluation process.</li>
+</ol>
+
+<p>NIST may also decline to standardize parameters which have unacceptable performance. If NIST feels the higher security strength categories cannot be met with acceptable performance, NIST may encourage the submitter to provide parameters with intermediate security between security strengths 2 and 3, or between 3 and 4.</p>
+
+<p>Finally, NIST may pare down the range of options offered by the submitter, regarding how to select parameters. Flexibility is generally a good thing, but it may be weighed against the complexity of implementing and testing for all available options.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="Jl19" role="tab" data-faq-idx="1-5">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_Jl19" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_Jl19" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_Jl19">
+                                        What are the “standard conversion techniques” NIST will use to convert between public-key encryption schemes and KEMs? (old Q13)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="Jl19" 
+                             class="panel-collapse collapse" 
+                             id="collapse_Jl19" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_Jl19" >
+
+
+                                <p>To convert a public key encryption function to a KEM, NIST will construct the encapsulate function by generating a random key and encrypting it. The key generation and decapsulation functions of the KEM will be the same as the key generation and decryption functions of the original public key encryption scheme. To convert a KEM to a public key encryption scheme, NIST will construct the encryption function, by appending to the KEM ciphertext, an AES-GCM ciphertext of the plaintext message, with a randomly generated IV. The AES key will be the symmetric key output by the encapsulate function. (The key generation function will be identical to that for the original KEM, and the decryption function will be constructed by decapsulation followed by AES decryption.)</p>
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div data-cat-idx="2">
+            <h4 class="text-info" id="4FIK" data-type="category" data-cat-idx="2">CFP Requirements</h4>
+            <div aria-multiselectable="true" class="panel-group project-faq-panel" id="category-faqs-4FIK" role="tablist" data-total-faqs="6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="9hRO" role="tab" data-faq-idx="2-0">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_9hRO" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_9hRO" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_9hRO">
+                                        What is the rationale for the NIST decision to limit both the required reference implementation and the required optimized implementation to ANSI C source code? Are there any exceptions that allow for the use of other versions of C, C++, or assembly optimizations? (old Q3)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="9hRO" 
+                             class="panel-collapse collapse" 
+                             id="collapse_9hRO" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_9hRO" >
+
+
+                                <p>NIST understands that real-world cryptographic algorithm implementations will necessarily contain platform-specific optimizations. The two required implementations in the submission package are primarily intended to facilitate future analysis and development throughout the evaluation period, and as such, we require that both be written in a cross-platform manner. Additionally, the two required implementations need not be distinct.&nbsp; If a submitter does not see value in a separate cross-platform optimized implementation, they may simply note in their submission that the reference implementation is also the cross-platform optimized implementation.</p>
+
+<p>Regarding the ANSI C requirement, submitters should note that key requirements are that the submission code should be written in a cross-platform manner and that the submission must contain build scripts or instructions for version 6.4.0 of the GNU Compiler. In particular, mandatory implementations written in C99 and C11 are both perfectly fine, as long as any necessary compiler directives are included as part of the build script(s).</p>
+
+<p>Additionally, implementations that use NTL (see Question and Answer 16 for details on the use of third-party open source libraries) are necessarily allowed to be written in C++, although to ease portability to a pure C implementation via swapping NTL for C-based libraries, we ask that the original and new code in this submission be as ANSI C-like as possible, only using C++ functionality where absolutely required in order to interact with NTL.&nbsp;</p>
+
+<p>Submitters may not write their own new and original assembly (including inline assembly) code or compiler intrinsics for either the mandatory referenced implementation or the mandatory optimized implementation but may use third party open-source libraries that themselves rely on assembly optimizations, subject to the constraints described in Question and Answer 16.</p>
+
+<p>During the course of the evaluation process, NIST will be looking at performance data for the best-available implementations a variety of platforms. As such, we strongly encourage submitters to include optimized versions for major platforms- particularly x64, and 32-bit and 64-bit ARM architectures.&nbsp; However, we have made such submissions optional so as not to discourage submissions from teams that may have very strong algorithmic candidates, but have little experience in the area of platform optimization. For further questions on platform-specific optimizations and the role they will play in NIST’s evaluation process, see Question and Answer 4.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="DK5N" role="tab" data-faq-idx="2-1">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_DK5N" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_DK5N" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_DK5N">
+                                        Will NIST consider platforms other than the “NIST PQC Reference Platform” when evaluating submissions? (old Q4)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="DK5N" 
+                             class="panel-collapse collapse" 
+                             id="collapse_DK5N" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_DK5N" >
+
+
+                                <p>The reference platform was defined in order to provide a common and ubiquitous platform to verify the execution of the code provided in the submissions.&nbsp;&nbsp;</p>
+
+<p>The reference platform should be treated as a single core machine, but if an algorithm can make particular use of multiple cores or vector instructions, submitters are encouraged to provide additional implementations for these platforms.</p>
+
+<p>In our evaluation process, NIST plans to include performance metrics from a variety of platforms, including: 64-bit “desktop/server class,” 32-bit “mobile class,” microcontrollers (32-, 16-, and where possible, 8-bit), as well as hardware platforms (e.g., FPGA). Submitters are strongly encouraged to provide additional implementations for these platforms, but to avoid discouraging submissions from teams with strong candidate algorithms but little experience in the area of platform-specific optimizations, NIST is making them optional as part of the submission itself.&nbsp;</p>
+
+<p>NIST expects that as the evaluation process moves beyond the first round, we will see the wider cryptographic community (in particular, those skilled in platform-specific optimizations) provide optimized implementations for most submissions for a wide variety of platforms, as was the case in the SHA-3 competition. NIST plans to use such third-party optimized implementations and third-party benchmarking tools such as eBaCS/ SUPERCOP and Open Quantum Safe as part of its evaluation process.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="dIdI" role="tab" data-faq-idx="2-2">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_dIdI" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_dIdI" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_dIdI">
+                                        How does a submission obtain secure randomness? (old Q15)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="dIdI" 
+                             class="panel-collapse collapse" 
+                             id="collapse_dIdI" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_dIdI" >
+
+
+                                <p>The function randombytes() will be available to the submitters. This is a function from the SUPERCOP test environment and should be used to generate seed values for an algorithm.</p>
+
+<p>For functional and timing tests a deterministic generator is used inside randombytes() to produce the seed values. If security testing is being done simply substitute calls to a true hardware RBG inside randombytes().</p>
+
+<p>Function prototype for randombytes() is:</p>
+
+<p><tt>// The xlen parameter is in bytes<br>
+void randombytes(unsigned char *x,unsigned long long xlen)</tt></p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="2CD8" role="tab" data-faq-idx="2-3">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_2CD8" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_2CD8" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_2CD8">
+                                        Can third party open-source code be used in submissions? (old Q16)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="2CD8" 
+                             class="panel-collapse collapse" 
+                             id="collapse_2CD8" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_2CD8" >
+
+
+                                <p>In both the mandatory reference implementation and the mandatory optimized implementation, submissions may use NTL Version 10.5.0 (<a href="http://www.shoup.net/ntl/download.html">http://www.shoup.net/ntl/download.html</a>), GMP Version 6.1.2 (<a href="https://gmplib.org">https://gmplib.org</a>).&nbsp;<br>
+For the 2nd Round, submissions may use the newest version of OpenSSL 1.1.1 (available at <a href="https://www.openssl.org/source/">https://www.openssl.org/source/</a>) &nbsp;and<br>
+libkeccak from XKCP (the Keccak team’s updated library, available at <a href="https://github.com/XKCP/XKCP">https://github.com/XKCP/XKCP</a>). We strongly encourage submitters to make use of these newer versions when testing any tweaks to be made for the 2nd Round rather than the previously cited older versions of OpenSSL Version 1.10f (<a href="https://www.openssl.org/source">https://www.openssl.org/source</a>) and the Keccak code package (<a href="https://github.com/gvanas/KeccakCodePackage">https://github.com/gvanas/KeccakCodePackage</a>) .&nbsp;</p>
+
+<p>Submitters may assume that these libraries are installed on the reference platform and do not need to provide them along with their submissions.&nbsp;<br>
+<br>
+If a submitter wishes to use a third-party open source library other than the ones specified above, they must send a request to NIST at&nbsp;<a href="/cdn-cgi/l/email-protection#334342501e505c5e5e565d4740735d5a40471d545c45">pqc-</a><a href="/cdn-cgi/l/email-protection#8ae9e5e7e7efe4fef9cae4e3f9fea4ede5fc"><span class="__cf_email__" data-cfemail="5635393b3b3338222516383f252278313920">[email&#160;protected]</span></a>by September 1st, 2017, with the name of the library and a link to the primary website hosting it from which it may be downloaded. NIST will either approve or deny this request within 2 weeks of receiving it. Should a request be approved, it will be added to the above list of acceptable third-party open source libraries provided in this FAQ.</p>
+
+<p>All submission packages using third-party open source code should contain build scripts which will allow for seamless “one-stop” building of the submissions.</p>
+
+<p>For example, on a Linux platform, it should require no more work to build the than running the standard</p>
+
+<p><tt>&gt; ./configure [--options]<br>
+&gt; make<br>
+&gt; make install</tt></p>
+
+<p>succession of commands. In particular, the build process should be able to find the versions of these libraries specified above that will be pre-installed on the reference platform.</p>
+
+<p>Separate build scripts should be included for the reference Windows platform and reference Linux platform that work using the GNU Compiler Collection version 6.4.0 and related tools as well as any platform-specific commands required.&nbsp;</p>
+
+<p>In addition, as part of the written submission, the submitter shall describe in their own words the functionalities provided by any algorithms from third-party open-source libraries that are used in the implementations.&nbsp;</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="9vpn" role="tab" data-faq-idx="2-4">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_9vpn" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_9vpn" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_9vpn">
+                                        What are the definition of the terms inventor and owner as used in the CFP? (old Q18)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="9vpn" 
+                             class="panel-collapse collapse" 
+                             id="collapse_9vpn" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_9vpn" >
+
+
+                                <p>An inventor is whoever conceived of the algorithm described and implemented in the submission.&nbsp; If more than one person conceived of the algorithm, the algorithm will have been invented by co-inventors.&nbsp;</p>
+
+<p>An owner of the algorithm is the inventor unless and until the inventor assigns (i.e., transfers ownership) the algorithm to another.&nbsp; In the case of co-inventors, the co-inventors jointly own the algorithm, and each co-inventor may assign their individual ownership interest in the algorithm.&nbsp; The algorithm may be claimed in a patent or a patent application, and the patent or patent application can be assigned to transfer ownership of the patent or patent application to an assignee.</p>
+
+<p>The implementation of the algorithm may be subject to copyright, and the owner of the copyright in the implementation of the algorithm is initially the author or authors of the implementation.&nbsp; Authors of a joint work (i.e., an implementation made by more than one author) are co-owners of copyright in the implementation.&nbsp; The employer or other person for whom the implementation was prepared may own all rights comprised in the copyright of the implementation.</p>
+
+<p>Each submission must include signed statements by the submitter(s), patent (and patent application) owner(s), as well as the reference/optimized implementations’ owner(s).&nbsp; If an algorithm or implementation is put into the public domain, we still require the signed statements from the submitter(s) and owner(s) exactly as specified in Section 2.D of the Call for Proposals.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="KFWn" role="tab" data-faq-idx="2-5">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_KFWn" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_KFWn" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_KFWn">
+                                        What advice does NIST have for submitters to ensure their submissions will be complete and proper? (old Q19)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="KFWn" 
+                             class="panel-collapse collapse" 
+                             id="collapse_KFWn" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_KFWn" >
+
+
+                                <p><a id="Q19"></a>NIST has completed the reviews for all the submissions received by the preliminary deadline, and has sent back comments to each submission team.&nbsp; We note the reviews were to check if submissions were “complete and proper”, meeting both our submission requirements and minimal acceptance criteria.&nbsp; They were NOT a review on the technical merits.&nbsp; Submissions which had elements missing will need to revise their submissions, and re-submit by the final deadline of November 30, 2017.&nbsp;</p>
+
+<p>After going through this process, we have some suggestions we think will help submitters to make their submissions complete and proper, as well as help NIST with a more efficient review process following the final deadline.&nbsp;</p>
+
+<ul>
+	<li>Clearly provide ALL of the information on the cover sheet which is asked for in our Call for Proposals (CFP) section 2.A.&nbsp;</li>
+	<li>Please clearly and explicitly state which of our five security strength categories your proposed parameter sets meet.&nbsp; See CFP 2.B.4 and 4.A.5.</li>
+	<li>Some submissions can be submitted as either a KEM or a public-key encryption scheme, or both.&nbsp; Please clearly indicate which functionality (or functionalities) you want NIST to consider, and include the appropriate required algorithms.&nbsp; See CFP 2.B.1.</li>
+	<li>We are interested in qualitative statements about the possible tradeoffs between security and efficiency.&nbsp; That is, besides stating which of the five security strength categories are met, we would like submitters to describe what kind of flexibility there is when adjusting the parameters in their cryptosystem.&nbsp; See CFP 2.B.1.</li>
+</ul>
+
+<p>With regards to the implementations and KATs:</p>
+
+<ul>
+	<li>Please make sure your implementation is platform-independent.&nbsp;&nbsp; See NIST FAQ #3, at&nbsp;<a href="https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/faqs">https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/faqs</a></li>
+	<li>Please follow our guidance on following the NIST API and generating KATs as posted on our webpage:&nbsp;<a href="https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/Post-Quantum-Cryptography-Standardization/Example-Files">https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/Post-Quantum-Cryptography-Standardization/Example-Files</a></li>
+	<li>In&nbsp;addition to the requirement that the README file “shall be a plain text file and list all files that are included on the disc with a brief description of each”, it would be useful if the file also contains some basic information about what is being provided. This includes things like how to compile the code, what is produced by the Makefile, and any information necessary to run the files created by the Makefile. On the subject of Makefiles, it would be very useful to have the genKAT and rng files included in the submissions as a concrete example of how to compile the algorithm source code. This will also help facilitate checking of the packages for completeness.</li>
+</ul>
+
+<p>Thank you, and let us know if you have any questions.&nbsp; Specific questions on a submission should be sent to us at <a href="/cdn-cgi/l/email-protection#2b5b5a4806484446464e455f586b4542585f054c445d"><span class="__cf_email__" data-cfemail="c0b0b1a3eda3afadada5aeb4b380aea9b3b4eea7afb6">[email&#160;protected]</span></a>.&nbsp; General questions may be posted on the forum, or sent to us the email address just given.</p>
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div data-cat-idx="3">
+            <h4 class="text-info" id="IfPn" data-type="category" data-cat-idx="3">Evaluation Criteria</h4>
+            <div aria-multiselectable="true" class="panel-group project-faq-panel" id="category-faqs-IfPn" role="tablist" data-total-faqs="7">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="iHXg" role="tab" data-faq-idx="3-0">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_iHXg" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_iHXg" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_iHXg">
+                                        In Sections 4.A.2 and 4.A.4, NIST’s CFP sets the number of decryption (resp. signature) queries, that an attacker against a proposed encryption (resp. signature) scheme can make, to at most 2 to the 64. What is the rationale for not letting the adversary make essentially as many queries as the target security? (old Q5)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="iHXg" 
+                             class="panel-collapse collapse" 
+                             id="collapse_iHXg" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_iHXg" >
+
+
+                                <p>Our reason for primarily considering attacks involving fewer than 2 to the 64 decryption/signature queries is that the number of queries is controlled by the amount of work the honest party is willing to do, which one would expect to be significantly less than the amount of work an attacker is willing to do. Any attack involving more queries than this looks more like a denial of service attack than an impersonation or key recovery attack. Furthermore, effectively protecting against online attacks requiring more than 2 to the 64 queries using NIST standards would require additional protections which are outside the scope of the present post-quantum standardization effort, most notably the development of a block cipher with a block size larger than 128 bits. This may be something NIST pursues in the future, but we do not feel it is necessary for addressing the imminent threat of quantum computers. That said, as noted in the proposed call for algorithms, NIST is open to considering attacks involving more queries, and would certainly prefer algorithms that did not fail catastrophically if the attacker exceeds 2 to the 64 queries.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="TnET" role="tab" data-faq-idx="3-1">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_TnET" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_TnET" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_TnET">
+                                        What does NIST consider to be an acceptable rate of decryption/decapsulation failure? (old Q6)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="TnET" 
+                             class="panel-collapse collapse" 
+                             id="collapse_TnET" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_TnET" >
+
+
+                                <p>NIST did not provide an explicit limit on the rate of decryption/decapsulation failure. In cases where a scheme is targeting chosen ciphertext security, decryption/decapsulation failures may pose a security threat. A failure rate sufficiently high to violate the claimed security of a scheme is, of course, unacceptable. If, on the other hand, there is a strong argument that decryption/decapsulation failures do not pose a security threat, then the decryption/decapsulation failure rate becomes simply one among many performance considerations. NIST does not wish, at this time, to prejudge what performance considerations are important, and will therefore leave it up to submitters to provide performance characteristics that they feel will be most useful for the applications they think best fit their schemes.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="iVrU" role="tab" data-faq-idx="3-2">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_iVrU" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_iVrU" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_iVrU">
+                                        Why does NIST’s CFP ask submitters to provide a classical security analysis, when the intent is to plan for a world with quantum computers? (old Q8)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="iVrU" 
+                             class="panel-collapse collapse" 
+                             id="collapse_iVrU" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_iVrU" >
+
+
+                                <p>Classical cryptanalysis is still valuable for a number of reasons. First, classical computers are not going away. For algorithms not subject to dramatic quantum attacks, such as those involving Shor’s algorithm, NIST believes that classical measures of security will continue to be highly relevant. Currently envisioned quantum computing technologies would be orders of magnitude slower and more energy intensive than today’s classical computing technology, when performing the same sorts of operations. In addition, practical attacks typically must be run in parallel on large clusters of machines, which diminishes the speedup that can be achieved using Grover’s algorithm. When all of these considerations are taken into account, it becomes quite likely that variants of Grover’s algorithm will provide no advantage to an adversary wishing to perform a cryptanalytic attack that can be completed in a matter of years, or even decades. As most quantum attacks on proposed postquantum cryptosystems have involved some variant of Grover’s algorithm, it may be the case that the best attack in practice will simply be the classical attack.</p>
+
+<p>Also, the science involved in assessing classical security is better developed than that for assessing post-quantum security, and there is a larger community of researchers who can contribute to these investigations, increasing our confidence in the security of the proposed cryptosystems. Finally, classical cryptanalysis can improve our understanding of the mathematical structures underlying these cryptosystems, which is also the basis for quantum cryptanalysis.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="AuNr" role="tab" data-faq-idx="3-3">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_AuNr" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_AuNr" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_AuNr">
+                                        In section 4.A.5, it is stated that NIST will assume that its 5 security categories are correctly ordered (i.e. that a brute force collision attack on SHA256 (resp. SHA384) will be harder to perform than a brute force key search attack on AES192 (resp. AES 256.)) How realistic is this assumption? (old Q9)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="AuNr" 
+                             class="panel-collapse collapse" 
+                             id="collapse_AuNr" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_AuNr" >
+
+
+                                <p>Even assuming no disparity in the cost of quantum and classical gates, NIST estimates that the assumption holds as long as the adversary is depth limited to fewer than about 287 logical quantum gates. This is quite near the limit of what NIST considers to be a plausible technology for the foreseeable future.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="UuyA" role="tab" data-faq-idx="3-4">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_UuyA" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_UuyA" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_UuyA">
+                                        How can submitters who aren’t experts in quantum cryptanalysis set their parameters? (old Q10)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="UuyA" 
+                             class="panel-collapse collapse" 
+                             id="collapse_UuyA" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_UuyA" >
+
+
+                                <p>Security strengths 1, 3, and 5 are defined in such a way that they are likely to be met by any scheme that:</p>
+
+<ul>
+	<li>Provides classical security strength of 128, 192, and 256 bits, respectively, AND</li>
+	<li>Is not subject to quantum attacks, other than classical attacks sped up by generic techniques (Grover’s algorithm, quantum walks, amplitude amplification etc.)</li>
+</ul>
+
+<p>Security strengths 1,3, and 5 are unlikely to be met by any scheme with less than 128, 192 or 256 bits of classical security, respectively. This is not however an explicit requirement: At least for categories 3 and 5, NIST is open to classifying parameters with less classical security in these categories, given a sufficiently compelling argument demonstrating that:</p>
+
+<ul>
+	<li>With any plausible state of future technology where AES 192 (resp. AES 256) is near the limit of what can be broken by brute force, the most practical brute force attack against AES192 (AES 256 resp.) is not going to be the classical attack.</li>
+	<li>Given any such plausible state of future technology, the most practical attack against the parameters provided will be less practical than the most practical brute force attack against AES192 (resp. AES 256.)</li>
+</ul>
+
+<p>Security strengths 2 and 4 are defined in such a way that they offer the maximum possible quantum security strength that can be offered by a scheme that only has a classical security strength of 128 or 192 bits, respectively. They will generally be easier to meet with parameter sets offering more classical security. A detailed quantum security analysis will be required to determine whether a parameter set meets these security strengths (unless the parameter set also meets the criteria for the next higher security strength).&nbsp;</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="LLYy" role="tab" data-faq-idx="3-5">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_LLYy" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_LLYy" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_LLYy">
+                                        NIST provided APIs and security definitions for Public Key encryption, KEM, and digital signature. Why are other functionalities not included? (old Q14)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="LLYy" 
+                             class="panel-collapse collapse" 
+                             id="collapse_LLYy" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_LLYy" >
+
+
+                                <p>NIST is looking primarily to replace quantum-vulnerable schemes with functionalities that are widely used, have widely agreed upon security and correctness definitions in academic literature, and for which there appear to be a range of promising approaches for designing a postquantum replacement. NIST considered a number of other functionalities, but did not provide explicit support for them, since it did not feel they met the above criteria as well as encryption, KEM, and signature. In many cases, NIST expects that schemes providing some of these functionalities may be submitted as a special case or an extension of one of the functionalities we explicitly asked for. In such a case, any additional functionality would be considered an advantage as noted in section 4.C.1 of our Call for Proposals. Two particular functionalities NIST considered were authenticated key exchange (AKE), and a drop in replacement for Diffie-Hellman.</p>
+
+<p>Diffie-Hellman is an extremely widely used primitive, and has a number of potentially useful special features, such as asynchronous key exchange, and secure key use profiles ranging from static-static to ephemeral-ephemeral. However, NIST believes that in its most widely used applications, such as those requiring forward secrecy, Diffie-Hellman can be replaced by any secure KEM with an efficient key generation algorithm. The additional features of Diffie-Hellman may be useful in some applications, but there is no widely accepted security definition of which NIST is aware that captures everything one might want from a Diffie-Hellman replacement. Additionally, some plausibly important security properties of Diffie-Hellman, such as a secure, static-static key exchange, appear difficult to meet in the post-quantum setting. NIST therefore recommends that schemes sharing some or all of the desirable features of Diffie-Hellman be submitted as KEMs, while documenting any additional functionality.</p>
+
+<p>AKE is also a widely used functionality. However, NIST would consider it a protocol rather than a scheme. This is an important distinction, because most widely used AKE protocols are constructed by combining simpler primitives, like digital signature, public key encryption, and KEM schemes. NIST wants to leave open the possibility that standards for these schemes may come from different submitters. Additionally, the security definitions for AKE are significantly more complicated and contentious than those for the functionalities NIST is explicitly asking for in its call for proposals. NIST recognizes that there are some AKE functionalities, in particular implicitly authenticated key exchange (IAKE), that cannot easily be constructed from simpler components. While it is less natural to treat IAKE schemes as an extension of the KEM framework, than it is for Diffie-Hellman-like primitives, NIST does believe that it can be done in most cases. For example, a significant part of the functionality of a 2-message IAKE protocol could be demonstrated by treating the initiator’s public authentication key as part of a KEM public key, and the responder’s public authentication key as part of the KEM ciphertext.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="ideR" role="tab" data-faq-idx="3-6">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_ideR" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_ideR" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_ideR">
+                                        How should submitters choose symmetric algorithms for their submissions? (old Q17)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="ideR" 
+                             class="panel-collapse collapse" 
+                             id="collapse_ideR" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_ideR" >
+
+
+                                <p>While NIST will permit submitters to choose any NIST approved cryptographic algorithm for their submission if they feel it is necessary to achieve the desired security and performance, a number of potential submitters have asked us to offer default options for common symmetric cryptographic primitives. As such, here are our suggestions:</p>
+
+<ol>
+	<li>Hash functions: SHA512 is likely sufficient to meet the requirements of any of our five security strength categories and gives good performance in software, especially for 64 bit architectures. Submitters seeking a variable length output, good performance in hardware, or multiple input strings, may instead prefer to use TupleHash256 (specified in SP 800-185.)</li>
+	<li>XOFs: We would recommend SHAKE256</li>
+	<li>Authenticated encryption: We'd suggest AES256-GCM with a random IV.</li>
+	<li>PRFs: Where security proofs can accommodate something that is not indifferentiable from a random oracle, John's AES-based seed-expander will offer excellent performance. Otherwise, KMAC256 (specified in SP 800-185) will be a good choice.</li>
+</ol>
+
+<p>Also recall, from the CFP: "If the scheme uses a cryptographic primitive that has not been approved by NIST, the submitter shall provide an explanation for why a NIST-approved primitive would not be suitable."</p>
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div data-cat-idx="4">
+            <h4 class="text-info" id="xisl" data-type="category" data-cat-idx="4">Transition and Migration</h4>
+            <div aria-multiselectable="true" class="panel-group project-faq-panel" id="category-faqs-xisl" role="tablist" data-total-faqs="5">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="yp4Q" role="tab" data-faq-idx="4-0">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_yp4Q" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_yp4Q" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_yp4Q">
+                                        <p>Is it possible for a hybrid key-establishment mode to be performed in a FIPS 140 approved mode of operation? (updated 11/18/2024)</p>
+
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="yp4Q" 
+                             class="panel-collapse collapse" 
+                             id="collapse_yp4Q" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_yp4Q" >
+
+
+                                <p>A hybrid key-establishment mode is defined here to be a key establishment scheme that is a combination of two or more components that are themselves cryptographic key-establishment schemes. The hybrid key-establishment scheme becomes a composite of these component schemes.&nbsp;&nbsp;</p>
+
+<p>NIST currently allows a generic composite key-establishment technique described in SP 800-56C. Assume that the value <em>Z</em> is a shared secret that was generated as specified by SP 800-56A or 800-56B and that a shared secret <em>T</em><em> </em>is generated or distributed through other schemes. The value <em>Z</em>’=<em>Z</em>||<em>T</em> may then be treated as a shared secret and any of the key derivation methods given in SP 800-56C may be applied to <em>Z</em>’ to derive secret keying material.&nbsp;</p>
+
+<p>NIST intends to update SP 800-56C so that the value <em>Z</em> may be generated as specified by any current and future NIST key-establishment standards. This will include SP 800-56A, SP 800-56B, FIPS 203, and any additional post-quantum key-establishment standards. The desired property of hybrid techniques is that derived keys remain secure if at least one of the component schemes is secure. Security properties can be complex, and for composite key establishment schemes they will need to be analyzed on a case-by-case basis with the requirements of the application in mind. NIST intends to offer guidance on various key combiners in the forthcoming SP 800-227, <em>Recommendations for Key Encapsulation Mechanisms</em>. &nbsp;</p>
+
+<p>Additionally, the output of the key-establishment scheme specified in FIPS 203 is a shared secret key which is a shared secret that does not require further key derivation. NIST emphasizes that any shared secret key generated as specified in FIPS 203 may be used as the value Z in the generic composite mode described in SP 800-56C. These same properties will apply to any future FIPS which standardize KEMs.&nbsp;</p>
+
+<p>NIST leaves the decision to each specific application as to whether it can afford the implementation cost, performance reduction, and engineering complexity (including proper and independent security reviews) of a hybrid mode for key establishment. To assist external parties that desire such a mechanism, NIST will accommodate the use of a hybrid key-establishment mode in FIPS 140 validation when suitably combined with a NIST-approved scheme.&nbsp;</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="e5TH" role="tab" data-faq-idx="4-1">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_e5TH" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_e5TH" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_e5TH">
+                                        <p>Is it possible for dual signature generation or verification to be performed in a FIPS 140 approved mode of operation? (updated 11/18/24)</p>
+
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="e5TH" 
+                             class="panel-collapse collapse" 
+                             id="collapse_e5TH" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_e5TH" >
+
+
+                                <p>Common techniques for hybrid digital signatures involve the use of dual signatures, which consist of two or more signatures on a common message. It may also be known as a hybrid signature or composite signature. The verification of the dual signature requires all of the component signatures to be successfully verified, such as by creating a single logical composite signature from two or more component signature algorithms.&nbsp;</p>
+
+<p>Dual signatures could be used to sign user data (e.g., a document or e-mail) or digital certificates that contain references to user key pairs within a PKI. Existing NIST standards and guidelines accommodate their use provided that at least one component digital signature algorithm is NIST-approved.&nbsp;</p>
+
+<p>NIST leaves the decision to each specific application as to whether it can afford the implementation cost, performance reduction, and engineering complexity (including proper and independent security reviews) with the use of dual signatures. To assist external parties that desire such a mechanism, NIST will accommodate the use of dual signatures in FIPS 140 validation when suitably combined with a NIST-approved scheme.&nbsp;</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="OQxF" role="tab" data-faq-idx="4-2">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_OQxF" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_OQxF" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_OQxF">
+                                        <p>Does NIST consider the hybrid key establishment modes and dual signatures to be long-term solutions? (added 1/28/20)</p>
+
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="OQxF" 
+                             class="panel-collapse collapse" 
+                             id="collapse_OQxF" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_OQxF" >
+
+
+                                <p>NIST leaves the decision to each specific application as to whether it can afford the implementation cost, performance reduction, and engineering complexity (including proper and independent security review) of a hybrid mode for key establishment or the use of dual signatures. Future experience will help to decide on whether they can be a useful long-term solution. To assist external parties who desire such a mechanism, NIST will accommodate the use of a hybrid key-establishment mode and dual signatures in FIPS 140 validation when suitably combined with a NIST-approved scheme.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="LVQL" role="tab" data-faq-idx="4-3">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_LVQL" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_LVQL" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_LVQL">
+                                        To protect against the threat of quantum computers, should we double the key length for AES now? (added 11/18/18)
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="LVQL" 
+                             class="panel-collapse collapse" 
+                             id="collapse_LVQL" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_LVQL" >
+
+
+                                <p>Grover’s algorithm allows a quantum computer to perform a brute force key search using quadratically fewer steps than would be required classically. Taken at face value, this suggests that an attacker with access to a quantum computer might be able to attack a symmetric cipher with a key up to twice as long as could be attacked by an attacker with access only to classical computers. However there are a number of mitigating factors suggesting that Grover’s algorithm will not speed up brute force key search as dramatically as one might suspect from this result. First of all, quantum computing hardware will likely be more expensive to build and use than classical hardware. Additionally, it was proven by Zalka in 1997 that in order to obtain the full quadratic speedup, all the steps of Grover’s algorithm must be performed in series. In the real world, where attacks on cryptography use massively parallel processing, the advantage of Grover’s algorithm will be smaller.</p>
+
+<p>Taking these mitigating factors into account, it is quite likely that Grover’s algorithm will provide little or no advantage in attacking AES, and AES 128 will remain secure for decades to come. Furthermore, even if quantum computers turn out to be much less expensive than anticipated, the known difficulty of parallelizing Grover’s algorithm suggests that both AES 192 and AES 256 will still be safe for a very long time. This of course assumes that no new cryptographic weaknesses, either with respect to classical or quantum cryptanalysis, are found in AES.</p>
+
+<p>Based on such understanding, current applications can continue to use AES with key sizes 128, 192, or 256 bits. NIST will issue guidance regarding any transitions of symmetric key algorithms and hash functions to protect against threats from quantum computers when we can foresee a transition need. Until then, users should follow the recommendations and guidelines NIST has already issued. In particular, anything with less than 112 bits of classical security should not be used.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="fkwJ" role="tab" data-faq-idx="4-4">
+                            <div class="panel-title">
+                                <strong>
+                                    <a aria-controls="collapse_fkwJ" 
+                                       aria-expanded="false" 
+                                       class="" 
+                                       style="text-transform: none;"
+                                       data-parent="#collapse1489775128774" 
+                                       data-target="#collapse_fkwJ" 
+                                       data-toggle="collapse" 
+                                       href="javascript:void(0)"
+                                       id="question_fkwJ">
+                                        Does NIST have any additional information regarding Migration?
+                                    </a>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div aria-labelledby="fkwJ" 
+                             class="panel-collapse collapse" 
+                             id="collapse_fkwJ" 
+                             role="tabpanel" 
+                             aria-expanded="false">
+                            <div class="panel-body" id="answer_fkwJ" >
+
+
+                                The National Cybersecurity Center of Excellence (NCCoE) Migration to PQC project has additional Frequently Asked Questions (FAQs) at:&nbsp;
+<p><a href="https://pages.nist.gov/nccoe-migration-post-quantum-cryptography/FAQ/index.html" style="color:blue; text-decoration:underline">https://pages.nist.gov/nccoe-migration-post-quantum-cryptography/FAQ/index.html</a></p>
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+</div>
+        </div>
+
+
+        <div class="col-lg-4 hidden-xs hidden-sm hidden-md">
+
+            <div class="project-nav-container">
+                <div class="bs-callout bs-callout-subnav" id="projectLinksContainer-lg">
+<h4><i class="fa fa-link"></i> Project Links</h4>
+<div class="project-icons-container">
+    <span>
+        <a href="/projects/post-quantum-cryptography" id="SideNavOverviewLink">
+            <i class="fa fa-info-circle"></i> Overview
+        </a>
+    </span>
+    <span>
+        <a href="/Projects/post-quantum-cryptography/faqs" id="SideNavFaqsLink">
+            <i class="fa fa-question-circle"></i> FAQs
+        </a>
+    </span>
+        <span>
+        <a href="/Projects/post-quantum-cryptography/news" id="SideNavNewsLink" data-count="18">
+            <i class="fa fa-newspaper-o"></i> News &amp; Updates
+        </a>
+    </span>
+        <span>
+        <a href="/Projects/post-quantum-cryptography/events" id="SideNavEventsLink" data-count="8">
+            <i class="fa fa-calendar-o"></i> Events
+        </a>
+    </span>
+        <span>
+        <a href="/Projects/post-quantum-cryptography/publications" id="SideNavPubsLink" data-count="16">
+            <i class="fa fa-file-text"></i> Publications
+        </a>
+    </span>
+        <span>
+        <a href="/Projects/post-quantum-cryptography/presentations" id="SideNavPresLink" data-count="12">
+            <i class="fa fa-desktop"></i> Presentations
+        </a>
+    </span>
+</div>
+
+    <h4>Additional Pages</h4>
+    <div id="projectPagesCallout-lg">
+
+<a class="csrc-add-page" data-node-level="0" data-node-order="1" href="/Projects/post-quantum-cryptography/pqc-standards" id="projPage0" style="border-left: solid 0rem transparent;">PQC Standards</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="2" href="/Projects/post-quantum-cryptography/hash-based-signatures" id="projPage1" style="border-left: solid 0rem transparent;">Hash-Based Signatures</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="3" href="/Projects/post-quantum-cryptography/ipr-license-summary" id="projPage2" style="border-left: solid 0rem transparent;">IPR License Summary</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="4" href="/Projects/post-quantum-cryptography/post-quantum-cryptography-standardization" id="projPage3" style="border-left: solid 0rem transparent;">PQC Standardization Process</a>
+<a class="csrc-add-page" data-node-level="1" data-node-order="1" href="/Projects/post-quantum-cryptography/post-quantum-cryptography-standardization/selected-algorithms" id="projPage4" style="border-left: solid 1rem transparent;">Selected Algorithms</a>
+<a class="csrc-add-page" data-node-level="1" data-node-order="2" href="/Projects/post-quantum-cryptography/post-quantum-cryptography-standardization/additional-digital-signature-schemes" id="projPage5" style="border-left: solid 1rem transparent;">Additional Digital Signature Schemes</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="6" href="/Projects/post-quantum-cryptography/workshops-and-timeline" id="projPage6" style="border-left: solid 0rem transparent;">Workshops and Timeline</a>
+<a class="csrc-add-page" data-node-level="1" data-node-order="1" href="/Projects/post-quantum-cryptography/workshops-and-timeline/pqc-seminars" id="projPage7" style="border-left: solid 1rem transparent;">PQC Seminars</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="7" href="/Projects/post-quantum-cryptography/Contact-Info" id="projPage8" style="border-left: solid 0rem transparent;">Contact Info</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="8" href="/Projects/post-quantum-cryptography/email-list" id="projPage9" style="border-left: solid 0rem transparent;">Email List (PQC Forum)</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="9" href="/Projects/post-quantum-cryptography/pqc-archive" id="projPage10" style="border-left: solid 0rem transparent;">PQC Archive</a>
+
+
+    </div>
+
+                </div>
+            </div>
+
+    <div class="bs-callout bs-callout-success" id="contactsCallout-lg">
+        <h4><i class="fa fa-user"></i> Contacts</h4>
+            <p id="projContact0"><span class='contact-display'><strong data-field='full-name'> <span data-field='firstname'>PQC Crypto</span>   <span data-field='lastname'>Technical Inquiries</span> </strong><br/><a href="/cdn-cgi/l/email-protection#2b5b5a4806484446464e455f586b4542585f054c445d" data-field='email'><span class="__cf_email__" data-cfemail="93e3e2f0bef0fcfefef6fde7e0d3fdfae0e7bdf4fce5">[email&#160;protected]</span></a><br/></span></p>
+            <p id="projContact1"><span class='contact-display'><strong data-field='full-name'><span data-field='title'>Dr.</span> <span data-field='firstname'>Dustin</span>   <span data-field='lastname'>Moody</span> </strong><br/></span></p>
+    </div>
+
+
+    <div class="bs-callout bs-callout-danger" id="owningGroupCallout-lg">
+        <h4><i class="fa fa-sitemap"></i> Group</h4>
+        <a href="/Groups/Computer-Security-Division/Cryptographic-Technology">Cryptographic Technology</a>
+    </div>
+
+
+    <div class="bs-callout bs-callout-danger" id="topicsCallout-lg">
+        <h4><i class="fa fa-tag"></i> Topics</h4>
+
+            <p>
+                <strong id="catName0-lg">Security and Privacy:</strong>
+                    <a id="catTopLink0-0-lg" href="/Topics/Security-and-Privacy/cryptography/post-quantum-cryptography">post-quantum cryptography</a>            </p>
+    </div>
+
+
+    <div class="bs-callout bs-callout-warning" id="relatedProjectsCallout-lg">
+        <h4>Related Projects</h4>
+            <a href="/Projects/cryptographic-standards-and-guidelines" id="relProjLink0">Cryptographic Standards and Guidelines</a><br/>
+            <a href="/Projects/stateful-hash-based-signatures" id="relProjLink1">Hash-Based Signatures</a><br/>
+            <a href="/Projects/migration-to-post-quantum-cryptography-nccoe" id="relProjLink2">Migration to Post-Quantum Cryptography | NCCoE</a><br/>
+            <a href="/Projects/threshold-cryptography" id="relProjLink3">Multi-Party Threshold Cryptography</a><br/>
+            <a href="/Projects/pqc-dig-sig" id="relProjLink4">PQC Digital Signature Schemes</a><br/>
+    </div>
+
+
+        </div>
+
+</div>
+    <div class="row visible-sm visible-xs visible-md">
+
+        <div class="col-sm-12">
+
+<div class="bs-callout bs-callout-subnav" id="projectPagesCallout-sm">
+    <h4>Additional Pages</h4>
+    <p>
+
+<a class="csrc-add-page" data-node-level="0" data-node-order="1" href="/Projects/post-quantum-cryptography/pqc-standards" id="projPage0-sm" style="border-left: solid 0rem transparent;">PQC Standards</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="2" href="/Projects/post-quantum-cryptography/hash-based-signatures" id="projPage1-sm" style="border-left: solid 0rem transparent;">Hash-Based Signatures</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="3" href="/Projects/post-quantum-cryptography/ipr-license-summary" id="projPage2-sm" style="border-left: solid 0rem transparent;">IPR License Summary</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="4" href="/Projects/post-quantum-cryptography/post-quantum-cryptography-standardization" id="projPage3-sm" style="border-left: solid 0rem transparent;">PQC Standardization Process</a>
+<a class="csrc-add-page" data-node-level="1" data-node-order="1" href="/Projects/post-quantum-cryptography/post-quantum-cryptography-standardization/selected-algorithms" id="projPage4-sm" style="border-left: solid 1rem transparent;">Selected Algorithms</a>
+<a class="csrc-add-page" data-node-level="1" data-node-order="2" href="/Projects/post-quantum-cryptography/post-quantum-cryptography-standardization/additional-digital-signature-schemes" id="projPage5-sm" style="border-left: solid 1rem transparent;">Additional Digital Signature Schemes</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="6" href="/Projects/post-quantum-cryptography/workshops-and-timeline" id="projPage6-sm" style="border-left: solid 0rem transparent;">Workshops and Timeline</a>
+<a class="csrc-add-page" data-node-level="1" data-node-order="1" href="/Projects/post-quantum-cryptography/workshops-and-timeline/pqc-seminars" id="projPage7-sm" style="border-left: solid 1rem transparent;">PQC Seminars</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="7" href="/Projects/post-quantum-cryptography/Contact-Info" id="projPage8-sm" style="border-left: solid 0rem transparent;">Contact Info</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="8" href="/Projects/post-quantum-cryptography/email-list" id="projPage9-sm" style="border-left: solid 0rem transparent;">Email List (PQC Forum)</a>
+<a class="csrc-add-page" data-node-level="0" data-node-order="9" href="/Projects/post-quantum-cryptography/pqc-archive" id="projPage10-sm" style="border-left: solid 0rem transparent;">PQC Archive</a>
+
+
+    </p>
+</div>
+
+
+    <div class="bs-callout bs-callout-subnav" id="contactsCallout-sm">
+        <h4><i class="fa fa-user"></i> Contacts</h4>
+        <p style="padding-left: 15px;">
+            <span id="projContact0-sm"><span class='contact-display'><strong data-field='full-name'> <span data-field='firstname'>PQC Crypto</span>   <span data-field='lastname'>Technical Inquiries</span> </strong><br/><a href="/cdn-cgi/l/email-protection#1e6e6f7d337d7173737b706a6d5e70776d6a30797168" data-field='email'><span class="__cf_email__" data-cfemail="324243511f515d5f5f575c4641725c5b41461c555d44">[email&#160;protected]</span></a><br/></span></span><br/>
+            <span id="projContact1-sm"><span class='contact-display'><strong data-field='full-name'><span data-field='title'>Dr.</span> <span data-field='firstname'>Dustin</span>   <span data-field='lastname'>Moody</span> </strong><br/></span></span><br/>
+        </p>
+    </div>
+
+
+    <div class="bs-callout bs-callout-danger" id="owningGroupCallout-sm">
+        <h4><i class="fa fa-sitemap"></i> Group</h4>
+        <a href="/Groups/Computer-Security-Division/Cryptographic-Technology">Cryptographic Technology</a>
+    </div>
+
+
+    <div class="bs-callout bs-callout-danger" id="topicsCallout-sm">
+        <h4><i class="fa fa-tag"></i> Topics</h4>
+
+            <p>
+                <strong id="catName0-sm">Security and Privacy:</strong>
+                    <a id="catTopLink0-0-sm" href="/Topics/Security-and-Privacy/cryptography/post-quantum-cryptography">post-quantum cryptography</a>            </p>
+    </div>
+
+
+    <div class="bs-callout bs-callout-warning" id="relatedProjectsCallout-sm">
+        <h4>Related Projects</h4>
+        <p>
+            <a href="/Projects/cryptographic-standards-and-guidelines" id="relProjLink0-sm">Cryptographic Standards and Guidelines</a><br/>
+            <a href="/Projects/stateful-hash-based-signatures" id="relProjLink1-sm">Hash-Based Signatures</a><br/>
+            <a href="/Projects/migration-to-post-quantum-cryptography-nccoe" id="relProjLink2-sm">Migration to Post-Quantum Cryptography | NCCoE</a><br/>
+            <a href="/Projects/threshold-cryptography" id="relProjLink3-sm">Multi-Party Threshold Cryptography</a><br/>
+            <a href="/Projects/pqc-dig-sig" id="relProjLink4-sm">PQC Digital Signature Schemes</a><br/>
+        </p>
+    </div>
+
+
+        </div>
+
+    </div>
+
+<div class="row">
+    <div class="col-md-12 historical-data-area" id="historical-data-area">
+
+            <span>Created <span id="page-created-date">January 03, 2017</span>, Updated <span id="page-updated-date">October 27, 2026</span></span>
+    </div>
+</div>
+
+
+
+
+
+
+        <div id="footer-pusher"></div>
+
+    </div>
+
+    
+
+    <footer id="footer">
+    <div class="container">
+
+        <div class="row">
+            <div class="col-sm-6">
+                <span class="hidden-xs">
+                    <a href="https://www.nist.gov" title="National Institute of Standards and Technology" rel="home" target='_blank' rel="noopener noreferrer" class="footer-nist-logo" id="footer-nist-logo-link">
+                        <img src="/CSRC/Media/images/nist-logo-brand-white.svg" alt="National Institute of Standards and Technology logo" id="footer-nist-logo" />
+                    </a>
+                </span>
+
+                <div class="row footer-contact-container">
+                    <div class="col-sm-12" id="footer-address">
+                        <strong>HEADQUARTERS</strong><br>
+                        100 Bureau Drive<br>
+                        Gaithersburg, MD 20899
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <ul class="social-list text-right" style="display: block;">
+                    <li class="field-item service-twitter list-horiz">
+                        <a href="https://x.com/NISTCyber" class="social-btn social-btn--large extlink ext" id="footer-social-twitter-link">
+                            <i class="fa-brands fa-x-twitter fa-fw"><span class="element-invisible">X</span></i><span class="ext"><span class="element-invisible"> (link is external)</span></span>
+                        </a>
+                    </li>
+                    <li class="field-item service-facebook list-horiz">
+                        <a href="https://www.facebook.com/NIST" class="social-btn social-btn--large extlink ext" id="footer-social-facebook-link">
+                            <i class="fa fa-facebook fa-fw"><span class="element-invisible">facebook</span></i><span class="ext"><span class="element-invisible"> (link is external)</span></span>
+                        </a>
+
+                    </li>
+                    <li class="field-item service-linkedin list-horiz">
+                        <a href="https://www.linkedin.com/company/nist" class="social-btn social-btn--large extlink ext" id="footer-social-linkedin-link">
+                            <i class="fa fa-linkedin fa-fw"><span class="element-invisible">linkedin</span></i><span class="ext"><span class="element-invisible"> (link is external)</span></span>
+                        </a>
+
+                    </li>
+                    <li class="field-item service-instagram list-horiz">
+                        <a href="https://www.instagram.com/usnistgov/" class="social-btn social-btn--large extlink ext" id="footer-social-instagram-link">
+                            <i class="fa fa-instagram fa-fw"><span class="element-invisible">instagram</span></i>
+                            <span class="ext"><span class="element-invisible"> (link is external)</span></span>
+                        </a>
+
+                    </li>
+                    <li class="field-item service-youtube list-horiz">
+                        <a href="https://www.youtube.com/user/USNISTGOV" class="social-btn social-btn--large extlink ext" id="footer-social-youtube-link">
+                            <i class="fa fa-youtube fa-fw"><span class="element-invisible">youtube</span></i><span class="ext"><span class="element-invisible"> (link is external)</span></span>
+                        </a>
+
+                    </li>
+                    <li class="field-item service-rss list-horiz">
+                        <a href="https://www.nist.gov/news-events/nist-rss-feeds" class="social-btn social-btn--large extlink" id="footer-social-rss-link">
+                            <i class="fa fa-rss fa-fw"><span class="element-invisible">rss</span></i>
+                        </a>
+
+                    </li>
+                    <li class="field-item service-govdelivery list-horiz last">
+                        <a href="https://public.govdelivery.com/accounts/USNIST/subscriber/new?qsp=USNIST_3" class="social-btn social-btn--large extlink ext" title="Subscribe to CSRC and publication updates, and other NIST cybersecurity news" id="footer-social-govdelivery-link">
+                            <i class="fa fa-envelope fa-fw"><span class="element-invisible">govdelivery</span></i><span class="ext"><span class="element-invisible"> (link is external)</span></span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="text-right">
+                    Want updates about CSRC and our publications?
+                    <a href="https://public.govdelivery.com/accounts/USNIST/subscriber/new?qsp=USNIST_3" class="btn btn-lg btn-primary" style="background-color: #12659c!important; border-color: #12659c!important;" id="footer-subscribe-link">Subscribe</a>
+                </p>
+            </div>
+        </div>
+        <div class="row hidden-sm hidden-md hidden-lg">
+            <div class="col-sm-12">
+                <a href="https://www.nist.gov" title="National Institute of Standards and Technology" rel="home" target='_blank' rel="noopener noreferrer" class="footer-nist-logo" id="footer-bottom-nist-logo-link">
+                    <img src="/CSRC/Media/images/logo_rev.png" alt="National Institute of Standards and Technology logo" id="footer-bottom-nist-logo" />
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <p>
+                    <a href="/about/contact" id="footer-contact-us-link">Contact Us</a> |
+                    <a href="https://www.nist.gov/about-nist/visit" style="display: inline-block;" id="footer-org-link">Our Other Offices</a>
+                </p>
+            </div>
+            <div class="col-sm-6">
+                <span class="pull-right text-right">
+                    Send inquiries to <a href="/cdn-cgi/l/email-protection#e281919081cf8b8c93978b909ba28c8b9196cc858d94dd91978088878196dfa1b1b0a1c2ab8c93978b909b" style="display: inline-block;" id="footer-inquiries-link"><span class="__cf_email__" data-cfemail="bfdccccddc92d6d1cecad6cdc6ffd1d6cccb91d8d0c9">[email&#160;protected]</span></a>
+                </span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="footer-bottom-links-container" id="footer-bottom-links-container">
+                <ul>
+                  <li><a href="https://www.nist.gov/privacy-policy">Site Privacy</a></li>
+                  <li><a href="https://www.nist.gov/oism/accessibility">Accessibility</a></li>
+                  <li><a href="https://www.nist.gov/privacy">Privacy Program</a></li>
+                  <li><a href="https://www.nist.gov/oism/copyrights">Copyrights</a></li>
+                  <li><a href="https://www.commerce.gov/vulnerability-disclosure-policy">Vulnerability Disclosure</a></li>
+                  <li><a href="https://www.nist.gov/no-fear-act-policy">No Fear Act Policy</a></li>
+                  <li><a href="https://www.nist.gov/foia">FOIA</a></li>
+                  <li><a href="https://www.nist.gov/environmental-policy-statement">Environmental Policy</a></li>
+                  <li><a href="https://www.nist.gov/summary-report-scientific-integrity">Scientific Integrity</a></li>
+                  <li><a href="https://www.nist.gov/nist-information-quality-standards">Information Quality Standards</a></li>
+                  <li><a href="https://www.commerce.gov/">Commerce.gov</a></li>
+                  <li><a href="https://www.science.gov/">Science.gov</a></li>
+                  <li><a href="https://www.usa.gov/">USA.gov</a></li>
+                  <li><a href="https://vote.gov/">Vote.gov</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/javascript" src="/dist/js/quick-collapse.js"></script>
+<script type="text/javascript" src="/dist/app.bundle.js"></script>
+<!-- USWDS Bottom -->
+<script type="text/javascript" src="/dist/uswds/js/uswds.min.js"></script>
+
+    
+    <script type="text/javascript" src="/dist/projects.bundle.js"></script>
+
+    
+
+
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"9ef5b487afff42a68917b2d63593a474","spa":2}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5a9109e4cfe9989',t:'MTc5NDY5MTI3Ng=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5a9109e4cfe9989',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

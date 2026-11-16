@@ -1,0 +1,729 @@
+diff --git a/tasks/051/task.yaml b/tasks/051/task.yaml
+index be22213..a8a3975 100644
+--- a/tasks/051/task.yaml
++++ b/tasks/051/task.yaml
+@@ -2,8 +2,8 @@ id: '051'
+ title: 依存脆弱性・供給元・ライセンスを評価する
+ type: improvement
+ priority: high
+-status: pending
+-owner: Planner Agent
++status: in-progress
++owner: Main agent
+ phase: '5'
+ description: 工具とDBを固定し、配布variantごとの依存・notice・未解決事項を追跡する。
+ quality_alias: QAM-09の依存部分
+@@ -48,3 +48,8 @@ planning_record:
+   scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+   evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+   completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
++execution_record:
++  baseline: f07d782cd68cfac95d93585d5ace049f590160d4
++  branch: codex/task051-dependency-supply-chain-review
++  plan: tasks/051/TASK-051-PLAN.md
++  scope: Evaluate the three declared macOS arm64 distribution variants without changing dependencies, publication policy or scanner behavior.
+diff --git a/scripts/review-dependencies.py b/scripts/review-dependencies.py
+new file mode 100644
+index 0000000..f36c71f
+--- /dev/null
++++ b/scripts/review-dependencies.py
+@@ -0,0 +1,304 @@
++#!/usr/bin/env python3
++"""Offline task-051 dependency/notice assessment; never builds or updates crates."""
++import argparse
++from datetime import datetime, timezone
++from functools import lru_cache
++import gzip
++import hashlib
++import importlib.util
++import io
++import json
++from pathlib import Path
++import re
++import subprocess
++import tarfile
++import tomllib
++
++VARIANTS = {
++    'static': [],
++    'combined-probes': ['probe-tls', 'probe-ssh'],
++    'all-probes': ['probe-tls', 'probe-ssh', 'probe-ssh-kex'],
++}
++TARGET = 'aarch64-apple-darwin'
++REGISTRY = 'registry+https://github.com/rust-lang/crates.io-index'
++
++
++def sha(data):
++    return hashlib.sha256(data).hexdigest()
++
++
++def encoded(value):
++    return (json.dumps(value, sort_keys=True, indent=2)+'\n').encode()
++
++
++def identity(package):
++    return package['name'], package['version'], package.get('source')
++
++
++def closure(metadata):
++    """Match packaging's normal/build closure, retaining resolved feature facts."""
++    packages = {p['id']: p for p in metadata['packages']}
++    nodes = {n['id']: n for n in metadata['resolve']['nodes']}
++    roots = [p['id'] for p in packages.values() if p['name'] == 'pqc_scan_cli']
++    if len(roots) != 1:
++        raise ValueError('expected one CLI package')
++    selected, todo = set(), roots[:]
++    while todo:
++        ident = todo.pop()
++        if ident in selected:
++            continue
++        selected.add(ident)
++        todo.extend(d['pkg'] for d in nodes[ident]['deps']
++                    if any(k['kind'] in (None, 'build') for k in d['dep_kinds']))
++    return [(packages[i], nodes[i]) for i in sorted(selected)]
++
++
++def audit_findings(report, exit_code):
++    """Reject tool errors/partial JSON instead of interpreting them as no findings."""
++    vulnerabilities = report['vulnerabilities']
++    entries = vulnerabilities['list']
++    warnings = report['warnings']
++    if (type(entries) is not list or type(warnings) is not dict or
++            type(vulnerabilities['count']) is not int or
++            vulnerabilities['count'] != len(entries) or
++            type(vulnerabilities['found']) is not bool or
++            vulnerabilities['found'] != bool(entries) or
++            exit_code != (1 if entries else 0) or
++            report['settings']['ignore'] != []):
++        raise ValueError('failed, inconsistent or filtered audit')
++    result = []
++    for kind, items in [('vulnerability', entries), *sorted(warnings.items())]:
++        if type(items) is not list:
++            raise ValueError('invalid audit warnings')
++        for item in items:
++            advisory = item['advisory']
++            package = item['package']
++            if (not re.fullmatch(r'RUSTSEC-\d{4}-\d{4}', advisory['id']) or
++                    advisory['package'] != package['name'] or not package['version'] or
++                    package.get('source') != REGISTRY):
++                raise ValueError('invalid advisory identity/source')
++            result.append({'kind': kind, 'package': {k: package[k] for k in ('name', 'version', 'source')},
++                           'advisory': advisory, 'versions': item.get('versions'),
++                           'affected': item.get('affected'),
++                           'action': 'Review affected use and patched ranges; propose upgrade/replacement and rerun feature, detector and package checks before publication.',
++                           'exception': {'accepted': False, 'maintainer_decision': None,
++                                         'expires_at': None, 'reason': 'No exception requested or granted.'}})
++    return result
++
++
++@lru_cache(maxsize=512)
++def registry_files(directory, checksum):
++    """Bind collected registry files to the actual locked .crate archive."""
++    archive = directory.parents[2]/'cache'/directory.parent.name/(directory.name+'.crate')
++    if archive.is_symlink() or not archive.is_file() or archive.stat().st_size > 32*1024**2:
++        raise ValueError('missing or oversized registry archive')
++    data = archive.read_bytes()
++    if sha(data) != checksum:
++        raise ValueError('registry archive checksum mismatch')
++    with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream:
++        decoded = stream.read(128*1024**2+1)
++    if len(decoded) > 128*1024**2:
++        raise ValueError('registry archive decoded limit exceeded')
++    files = {}
++    with tarfile.open(fileobj=io.BytesIO(decoded), mode='r:') as stream:
++        for index, member in enumerate(stream):
++            if index >= 20000:
++                raise ValueError('registry archive member limit exceeded')
++            if not member.isfile():
++                continue
++            prefix = directory.name+'/'
++            if not member.name.startswith(prefix) or member.name in files or member.size > 32*1024**2:
++                raise ValueError('invalid registry archive member')
++            with stream.extractfile(member) as content:
++                files[member.name] = sha(content.read())
++    return {name.removeprefix(directory.name+'/'): digest for name, digest in files.items()}
++
++
++def package_record(root, package, node, lock, packaging, output):
++    key = identity(package)
++    locked = [p for p in lock['package'] if identity(p) == key]
++    if len(locked) != 1 or not package.get('license'):
++        raise ValueError('missing exact lock/license identity')
++    directory = Path(package['manifest_path']).parent.resolve()
++    checksum, vcs = None, None
++    if package['source'] is not None:
++        if package['source'] != REGISTRY:
++            raise ValueError('unreviewed dependency source')
++        checksum = locked[0]['checksum']
++        archive_files = registry_files(directory, checksum)
++        if archive_files.get('Cargo.toml') != sha(packaging.local_bytes(directory, 'Cargo.toml', 1024*1024)):
++            raise ValueError('registry manifest differs from archive')
++        vcs_path = directory/'.cargo_vcs_info.json'
++        if vcs_path.exists():
++            vcs_bytes = packaging.local_bytes(directory, '.cargo_vcs_info.json', 4096)
++            if archive_files.get('.cargo_vcs_info.json') != sha(vcs_bytes):
++                raise ValueError('registry VCS record differs from archive')
++            vcs = json.loads(vcs_bytes)
++    elif not directory.is_relative_to(root):
++        raise ValueError('local package outside source')
++    notices = []
++    paths = packaging.license_files(directory)
++    if package['source'] is None:
++        paths = sorted(set(paths + [root/'LICENSE']))
++    for path in paths:
++        base = directory if path.is_relative_to(directory) else root
++        name = path.relative_to(base).as_posix()
++        data = packaging.local_bytes(base, name, 1024*1024)
++        if package['source'] is not None and archive_files.get(name) != sha(data):
++            raise ValueError('registry notice file checksum mismatch')
++        notices.append({'data': data, 'source_relative_path': name,
++                        'kind': 'package_license_or_notice', 'review_required': False})
++    if not notices:
++        notices = packaging.reviewed_notice_files(root, package)
++    records = []
++    for item in notices:
++        data = item['data']; digest = sha(data)
++        name = 'notices/'+digest+'.txt'
++        (output/name).write_bytes(data)
++        records.append({k: v for k, v in item.items() if k != 'data'} |
++                       {'sha256': digest, 'path': name})
++    return {'name': key[0], 'version': key[1], 'source': key[2],
++            'registry_checksum': checksum, 'vcs': vcs, 'features': sorted(node['features']),
++            'license_expression': package['license'], 'notices': records,
++            'notice_review_required': any(n['review_required'] for n in records)}
++
++
++def database_binding(preparation):
++    record = json.loads((preparation/'database.json').read_text())
++    db = preparation/'advisory-db'
++    files = {p.relative_to(db).as_posix(): sha(p.read_bytes()) for p in sorted(db.rglob('*'))
++             if p.is_file() and '.git' not in p.relative_to(db).parts}
++    digest = sha(json.dumps(files, sort_keys=True, separators=(',', ':')).encode())
++    commit = subprocess.check_output(['git', '-c', 'safe.directory='+str(db), '-C', str(db),
++                                      'rev-parse', 'HEAD'], text=True).strip()
++    if (not files or files != record['files'] or digest != record['files_sha256'] or
++            commit != record['commit'] or not record['retrieved_at']):
++        raise ValueError('database snapshot binding mismatch')
++    return record
++
++
++def license_markdown(review):
++    lines = ['# Dependency license and notice review', '',
++             'Source: `'+review['source_head']+'`; target: `'+TARGET+'`.', '',
++             'Normal/build dependency closure and resolved features match the packaging metadata method. '
++             'This is not exact binary linkage, legal certification or publication clearance.', '',
++             'Each package below maps to declared license expressions and exact notice bytes in '
++             '`dependency-review.json`. Hash-named files under `notices/` retain those bytes. '
++             'Expressions are preserved, including legacy slash notation; no license choice is silently made.', '',
++             '## Variant inventory', '',
++             '| Variant | Packages | Notice reviews |', '|---|---:|---:|']
++    union = {}
++    for variant, info in review['variants'].items():
++        lines.append(f"| {variant} | {len(info['packages'])} | {sum(p['notice_review_required'] for p in info['packages'])} |")
++        for package in info['packages']:
++            key = identity(package)
++            union.setdefault(key, (package, []))[1].append(variant)
++    lines += ['', '## Exact package mapping', '', '| Package | Variants | Declared license | Notice bytes | Review |',
++              '|---|---|---|---|---|']
++    for key, (package, variants) in sorted(union.items(), key=lambda item: str(item[0])):
++        links = ', '.join(f"[{n['sha256'][:12]}]({n['path']})" for n in package['notices'])
++        lines.append(f"| {key[0]} {key[1]} | {', '.join(variants)} | {package['license_expression']} | {links} | {'OPEN' if package['notice_review_required'] else 'collected'} |")
++    lines += ['', '## Unresolved publication decisions', '',
++              'No unresolved issue is accepted by this assessment. No exception expiry is invented. '
++              'Any future acceptance must name the maintainer, rationale, scope and expiry/recheck date. '
++              'Dependency replacements/upgrades require fresh assessment and applicable tests.', '']
++    for key, (package, variants) in sorted(union.items(), key=lambda item: str(item[0])):
++        if package['notice_review_required']:
++            notes = sorted(set(n.get('review_note') or 'Review required' for n in package['notices'] if n['review_required']))
++            lines.append(f"- {key[0]} {key[1]} ({', '.join(variants)}): {' '.join(notes)}")
++    lines += ['', '## Recheck policy', '',
++              'Rerun before publication, after any lock/feature/target/notice change, and at least monthly '
++              'while preparing a release. Acquire a fresh RustSec snapshot explicitly, record its retrieval '
++              'date and content hash, then assess offline. No scheduler or CI gate is installed. '
++              'Yanked-package registry queries are disabled for offline operation; RustSec maintenance '
++              'advisories do not establish maintenance of every other package. Vulnerability results '
++              'and proposed actions are in dependency-review.json; no findings are ignored.', '']
++    return '\n'.join(lines)
++
++
++def assess(args):
++    root = args.source_root.resolve()
++    preparation = args.preparation.resolve()
++    output = args.out_dir.resolve(); output.mkdir(parents=True, exist_ok=False)
++    (output/'raw').mkdir(); (output/'notices').mkdir()
++    spec = importlib.util.spec_from_file_location('package_release', root/'scripts/package-release.py')
++    packaging = importlib.util.module_from_spec(spec); spec.loader.exec_module(packaging)
++    lock_bytes = (root/'Cargo.lock').read_bytes()
++    lock = tomllib.loads(lock_bytes.decode())
++    database = database_binding(preparation)
++    tool = json.loads((preparation/'tool.json').read_text())
++    binary = preparation/'cargo-audit'
++    if sha(binary.read_bytes()) != tool['binary_sha256']:
++        raise ValueError('audit binary hash mismatch')
++    commands = []
++
++    def run(command, name, cwd=root, accepted=(0,)):
++        completed = subprocess.run(command, cwd=cwd, capture_output=True, timeout=120)
++        (output/'raw'/f'{name}.stdout').write_bytes(completed.stdout)
++        (output/'raw'/f'{name}.stderr').write_bytes(completed.stderr)
++        commands.append({'command': list(map(str, command)), 'cwd': str(cwd), 'exit': completed.returncode,
++                         'stdout_sha256': sha(completed.stdout), 'stderr_sha256': sha(completed.stderr)})
++        (output/'commands.json').write_bytes(encoded(commands))
++        if completed.returncode not in accepted:
++            raise ValueError('tool execution failed: '+name)
++        return completed
++
++    version = run([str(binary), '--version'], 'audit-version', cwd=output).stdout.decode().strip()
++    if version != 'cargo-audit '+tool['version']:
++        raise ValueError('audit tool version mismatch')
++    raw = run([str(binary), 'audit', '--db', str(preparation/'advisory-db'), '--no-fetch',
++               '--no-yanked', '--stale', '--file', str(root/'Cargo.lock'), '--json'],
++              'audit', cwd=output, accepted=(0, 1))
++    audit = json.loads(raw.stdout)
++    findings = audit_findings(audit, raw.returncode)
++    if audit['lockfile']['dependency-count'] != len(lock['package']):
++        raise ValueError('audit lockfile population differs')
++    variants = {}
++    for variant, features in VARIANTS.items():
++        command = ['cargo', 'metadata', '--locked', '--offline', '--format-version', '1', '--filter-platform', TARGET]
++        if features:
++            command += ['--features', ','.join('pqc_scan_cli/'+f for f in features)]
++        metadata = json.loads(run(command, variant+'-metadata').stdout)
++        packages = [package_record(root, p, n, lock, packaging, output) for p, n in closure(metadata)]
++        keys = {identity(p) for p in packages}
++        variants[variant] = {'features': features, 'target': TARGET, 'packages': packages,
++                             'finding_ids': sorted({f['advisory']['id'] for f in findings if identity(f['package']) in keys})}
++    if (root/'Cargo.lock').read_bytes() != lock_bytes:
++        raise ValueError('lockfile changed during review')
++    for finding in findings:
++        finding['variants'] = [v for v, info in variants.items()
++                               if identity(finding['package']) in {identity(p) for p in info['packages']}]
++    source_files = ['Cargo.lock', 'Cargo.toml', 'rust-toolchain.toml', 'LICENSE',
++                    'scripts/package-release.py', 'scripts/review-dependencies.py',
++                    '.github/workflows/release.yml', 'third_party/notices/manifest.json']
++    source_files += [p.relative_to(root).as_posix() for p in sorted((root/'crates').glob('*/Cargo.toml'))]
++    review = {'source_head': args.source_head, 'source_inputs': {p: sha((root/p).read_bytes()) for p in source_files},
++              'evaluated_at': datetime.now(timezone.utc).isoformat(), 'tool': tool, 'database': database,
++              'lockfile_packages': len(lock['package']), 'variants': variants, 'findings': findings,
++              'assessment': 'findings-require-action' if findings else 'no-rustsec-findings',
++              'publication_approved': False,
++              'limitations': ['RustSec snapshot coverage only; no advisory is not proof of safety or maintenance.',
++                              'No registry yanked checks, binary linkage proof, cross-build or new platform certification.',
++                              'No target OS/architecture advisory filtering: retain conservative lockfile findings.',
++                              '--stale permits reproducible historical snapshots; acquisition and commit dates are explicit.'],
++              'recheck': 'Before publication, after dependency/feature/target/notice changes, and monthly during release preparation.'}
++    (output/'dependency-review.json').write_bytes(encoded(review))
++    (output/'license-review.md').write_text(license_markdown(review))
++    print(json.dumps({'assessment': review['assessment'], 'findings': len(findings),
++                      'packages': {v: len(i['packages']) for v, i in variants.items()}}))
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--source-root', type=Path, default=Path(__file__).resolve().parents[1])
++    parser.add_argument('--source-head', required=True)
++    parser.add_argument('--preparation', type=Path, required=True, help='Pinned cargo-audit binary, tool.json, advisory-db and database.json')
++    parser.add_argument('--out-dir', type=Path, required=True, help='New output directory; existing evidence is never overwritten')
++    args = parser.parse_args()
++    if not re.fullmatch('[0-9a-f]{40}', args.source_head):
++        parser.error('full source commit required')
++    assess(args)
++
++
++if __name__ == '__main__':
++    main()
+diff --git a/scripts/run-dependency-review.py b/scripts/run-dependency-review.py
+new file mode 100644
+index 0000000..4b9306e
+--- /dev/null
++++ b/scripts/run-dependency-review.py
+@@ -0,0 +1,145 @@
++#!/usr/bin/env python3
++"""Run task-051 checks in the existing immutable offline tool/cache image."""
++import argparse
++import hashlib
++import importlib.util
++import json
++from pathlib import Path
++import re
++import subprocess
++import tempfile
++import time
++import uuid
++
++ROOT = Path(__file__).resolve().parents[1]
++spec = importlib.util.spec_from_file_location('container_runner', ROOT/'tests/protocol/container_runner.py')
++confined = importlib.util.module_from_spec(spec); spec.loader.exec_module(confined)
++
++ENTRY = '''
++import json, os, pathlib, subprocess, sys, time, traceback
++scratch = pathlib.Path('/scratch')
++for name in ['home', 'tmp', 'cargo', 'evidence']:
++    (scratch/name).mkdir()
++for name in ['registry', 'git']:
++    cache = pathlib.Path('/usr/local/cargo')/name
++    if cache.exists(): (scratch/'cargo'/name).symlink_to(cache)
++sys.path.insert(0, '/source/tests/protocol')
++import container_entry
++boundary = container_entry.boundary()
++(scratch/'evidence'/'boundary.json').write_text(json.dumps(boundary, indent=2)+'\\n')
++commands = [
++    ['python3', '-m', 'unittest', 'discover', '-s', 'tests/distribution', '-v'],
++    ['python3', 'scripts/review-dependencies.py', '--source-root', '/source',
++     '--source-head', SOURCE_HEAD, '--preparation', '/preparation',
++     '--out-dir', '/scratch/evidence/review'],
++]
++results = []
++for index, command in enumerate(commands):
++    with (scratch/'evidence'/f'check-{index}.log').open('wb') as stream:
++        try:
++            result = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT, timeout=180)
++            code = result.returncode
++        except subprocess.TimeoutExpired:
++            code = 'timeout'
++    results.append({'command': command, 'exit': code})
++(scratch/'evidence'/'checks.json').write_text(json.dumps(results, indent=2)+'\\n')
++(scratch/'status.json').write_text(json.dumps({'exit': int(any(r['exit'] != 0 for r in results))}))
++while True: time.sleep(60)
++'''
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--image', required=True, help='Existing immutable Docker image SHA-256')
++    parser.add_argument('--preparation', type=Path, required=True)
++    parser.add_argument('--out-dir', type=Path, required=True)
++    args = parser.parse_args()
++    if not re.fullmatch(r'sha256:[0-9a-f]{64}', args.image):
++        parser.error('immutable image ID required')
++    output = args.out_dir.resolve(); output.mkdir(parents=True, exist_ok=False)
++    preparation = args.preparation.resolve()
++    source_head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
++    names = ['Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'LICENSE',
++             '.github/workflows/release.yml', 'scripts/package-release.py',
++             'scripts/review-dependencies.py', 'scripts/run-dependency-review.py',
++             'tests/protocol/container_runner.py', 'tests/protocol/container_entry.py']
++    for folder in ['crates', 'third_party/notices', 'tests/distribution']:
++        names += [p.relative_to(ROOT).as_posix() for p in sorted((ROOT/folder).rglob('*'))
++                  if p.is_file() and '__pycache__' not in p.parts]
++    bindings = {}
++    record = {'source_head': source_head, 'image': args.image, 'source_inputs': bindings,
++              'exit': None, 'container_removed': False,
++              'limits': {'network': 'none', 'source': 'readonly', 'root': 'readonly',
++                         'memory_bytes': 1024**3, 'swap_bytes': 0, 'scratch_bytes': 512*1024**2,
++                         'cpus': 1, 'pids': 64, 'wall_seconds': 420}}
++    container = 'pqc-dependency051-'+uuid.uuid4().hex
++    try:
++        with tempfile.TemporaryDirectory(prefix='pqc-dependency051-') as temp:
++            source = Path(temp)/'source'; source.mkdir()
++            for name in names:
++                data = confined.source_bytes(ROOT, name)
++                bindings[name] = hashlib.sha256(data).hexdigest()
++                destination = source/name; destination.parent.mkdir(parents=True, exist_ok=True)
++                destination.write_bytes(data); destination.chmod(0o444)
++            entry = ('SOURCE_HEAD = '+repr(source_head)+'\n'+ENTRY).encode()
++            (source/'entry.py').write_bytes(entry)
++            record['entry_sha256'] = hashlib.sha256(entry).hexdigest()
++            record['preparation_inputs'] = {n: confined.digest(preparation/n) for n in ['tool.json', 'database.json', 'cargo-audit']}
++            env = {'PATH': '/usr/local/cargo/bin:/usr/bin:/bin', 'HOME': '/scratch/home',
++                   'TMPDIR': '/scratch/tmp', 'CARGO_HOME': '/scratch/cargo',
++                   'RUSTUP_HOME': '/usr/local/rustup', 'CARGO_NET_OFFLINE': 'true',
++                   'PYTHONDONTWRITEBYTECODE': '1', 'LC_ALL': 'C'}
++            record['environment'] = env
++            command = ['docker', 'create', '--name', container, '--network', 'none', '--read-only',
++                       '--user', '65534:65534', '--log-driver', 'none', '--cap-drop', 'ALL',
++                       '--security-opt', 'no-new-privileges', '--memory', '1g', '--memory-swap', '1g',
++                       '--cpus', '1', '--pids-limit', '64', '--shm-size', '1m',
++                       '--ulimit', 'core=0:0', '--ulimit', 'fsize=16777216:16777216',
++                       '--ulimit', 'nofile=256:256', '--ulimit', 'cpu=180:180',
++                       '--tmpfs', '/scratch:rw,exec,nosuid,nodev,size=512m,mode=1777',
++                       '--mount', f'type=bind,src={source},dst=/source,readonly',
++                       '--mount', f'type=bind,src={preparation},dst=/preparation,readonly',
++                       '--workdir', '/source', '--entrypoint', '/usr/bin/env', args.image,
++                       '-i', *[f'{k}={v}' for k, v in env.items()], 'python3', '/source/entry.py']
++            record['command'] = command
++            subprocess.run(command, check=True, capture_output=True, timeout=30)
++            subprocess.run(['docker', 'start', container], check=True, capture_output=True, timeout=30)
++            deadline = time.monotonic()+420
++            while True:
++                if time.monotonic() >= deadline:
++                    raise subprocess.TimeoutExpired(['docker', 'exec', container], 420)
++                state = json.loads(subprocess.check_output(['docker', 'inspect', container], timeout=10))[0]['State']
++                if not state['Running']:
++                    raise RuntimeError('container exited before evidence collection')
++                try:
++                    status = json.loads(confined.bounded_output(['docker', 'exec', container, '/bin/cat', '/scratch/status.json'], limit=4096, timeout=3))
++                    break
++                except RuntimeError:
++                    time.sleep(.1)
++            record['exit'] = status['exit']
++            data = confined.bounded_output(['docker', 'exec', container, '/bin/tar', '-C', '/scratch/evidence', '-cf', '-', '.'],
++                                           limit=16*1024**2, timeout=30)
++            confined.extract_artifacts(data, output/'artifacts', max_bytes=16*1024**2)
++            boundary = json.loads((output/'artifacts/boundary.json').read_text())
++            if not (boundary['memoryMax'] <= 1024**3 and boundary['swapMax'] == 0 and
++                    boundary['pidsMax'] <= 64 and boundary['scratchCapacity'] <= 512*1024**2):
++                raise ValueError('container limits not enforced')
++            record['boundary'] = boundary
++            record['source_unchanged'] = all(confined.digest(ROOT/n) == h for n, h in bindings.items())
++            if not record['source_unchanged']:
++                raise ValueError('source changed during assessment')
++    except BaseException as error:
++        record['error'] = type(error).__name__
++        if record['exit'] in (None, 0):
++            record['exit'] = 'host_validation_failed'
++        raise
++    finally:
++        removed = subprocess.run(['docker', 'rm', '--force', container], capture_output=True, timeout=30)
++        record['container_removed'] = removed.returncode == 0
++        (output/'RUN.json').write_text(json.dumps(record, sort_keys=True, indent=2)+'\n')
++    print(json.dumps({'exit': record['exit'], 'container_removed': record['container_removed']}))
++    return record['exit'] if record['container_removed'] else 1
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tests/distribution/test_dependency_review.py b/tests/distribution/test_dependency_review.py
+new file mode 100644
+index 0000000..1978a40
+--- /dev/null
++++ b/tests/distribution/test_dependency_review.py
+@@ -0,0 +1,173 @@
++import copy
++import hashlib
++import importlib.util
++import io
++import json
++from pathlib import Path
++import tempfile
++import tarfile
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parents[2]
++
++
++def load(name, filename):
++    spec = importlib.util.spec_from_file_location(name, ROOT/'scripts'/filename)
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++
++
++review = load('dependency_review', 'review-dependencies.py')
++packaging = load('package_release', 'package-release.py')
++runner = load('dependency_runner', 'run-dependency-review.py')
++
++
++class DependencyReviewTests(unittest.TestCase):
++    def audit(self, vulnerabilities=(), warnings=None):
++        return {'settings': {'ignore': []},
++                'vulnerabilities': {'list': list(vulnerabilities), 'count': len(vulnerabilities),
++                                    'found': bool(vulnerabilities)}, 'warnings': warnings or {}}
++
++    def finding(self, version='1.2.3', source=review.REGISTRY):
++        return {'advisory': {'id': 'RUSTSEC-2026-0001', 'package': 'example', 'title': 'Synthetic advisory'},
++                'package': {'name': 'example', 'version': version, 'source': source},
++                'versions': {'patched': ['>=1.2.4'], 'unaffected': []}, 'affected': None}
++
++    def test_clean_and_vulnerable_audits_keep_actions_and_no_exception(self):
++        self.assertEqual(review.audit_findings(self.audit(), 0), [])
++        finding = review.audit_findings(self.audit([self.finding()]), 1)[0]
++        self.assertEqual(finding['versions']['patched'], ['>=1.2.4'])
++        self.assertFalse(finding['exception']['accepted'])
++        self.assertIsNone(finding['exception']['expires_at'])
++        self.assertIn('upgrade/replacement', finding['action'])
++
++    def test_maintenance_and_unsound_warnings_are_not_dropped(self):
++        result = review.audit_findings(self.audit(warnings={'unmaintained': [self.finding()],
++                                                           'unsound': [self.finding('2.0.0')]}), 0)
++        self.assertEqual([f['kind'] for f in result], ['unmaintained', 'unsound'])
++        self.assertEqual([f['package']['version'] for f in result], ['1.2.3', '2.0.0'])
++
++    def test_errors_filtered_and_inconsistent_audits_are_rejected(self):
++        for mutation in ['tool-error', 'false-clean', 'wrong-count', 'ignored', 'malformed', 'foreign-source']:
++            with self.subTest(mutation=mutation):
++                data = self.audit(); code = 0
++                if mutation == 'tool-error': code = 2
++                elif mutation == 'false-clean': code = 1
++                elif mutation == 'wrong-count': data['vulnerabilities']['count'] = 1
++                elif mutation == 'ignored': data['settings']['ignore'] = ['RUSTSEC-2026-0001']
++                elif mutation == 'malformed': del data['vulnerabilities']['list']
++                else: data = self.audit([self.finding(source='git+https://example.invalid')]); code = 1
++                with self.assertRaises((ValueError, KeyError)):
++                    review.audit_findings(data, code)
++        with self.assertRaises(ValueError):
++            review.audit_findings(self.audit([self.finding()]), 0)
++
++    def test_closure_includes_build_shared_cycles_and_excludes_dev_only(self):
++        names = ['pqc_scan_cli', 'normal', 'build', 'dev', 'shared']
++        packages = [{'id': name, 'name': name} for name in names]
++        def dep(name, *kinds):
++            return {'pkg': name, 'dep_kinds': [{'kind': k} for k in kinds]}
++        nodes = [{'id': names[0], 'deps': [dep('normal', None), dep('build', 'build'), dep('dev', 'dev')]},
++                 {'id': 'normal', 'deps': [dep('shared', 'dev', None)]},
++                 {'id': 'build', 'deps': [dep('shared', 'build')]},
++                 {'id': 'dev', 'deps': []},
++                 {'id': 'shared', 'deps': [dep('normal', None)]}]
++        result = review.closure({'packages': packages, 'resolve': {'nodes': nodes}})
++        self.assertEqual({p['id'] for p, _ in result}, {names[0], 'normal', 'build', 'shared'})
++        with self.assertRaises(ValueError):
++            review.closure({'packages': [], 'resolve': {'nodes': []}})
++
++    def test_identity_does_not_join_other_version_or_source(self):
++        original = self.finding()['package']
++        self.assertNotEqual(review.identity(original), review.identity(self.finding('1.2.4')['package']))
++        self.assertNotEqual(review.identity(original), review.identity(self.finding(source=None)['package']))
++
++    def fixture(self, root):
++        crate = root/'registry/src/index/example-1.2.3'; crate.mkdir(parents=True)
++        (root/'LICENSE').write_text('Synthetic workspace license')
++        data = b'Synthetic registry license\n'
++        (crate/'LICENSE').write_bytes(data)
++        (crate/'Cargo.toml').write_text('Synthetic registry manifest')
++        archive = root/'registry/cache/index/example-1.2.3.crate'
++        archive.parent.mkdir(parents=True)
++        with tarfile.open(archive, 'w:gz') as stream:
++            for name in ['LICENSE', 'Cargo.toml']:
++                content = (crate/name).read_bytes(); member = tarfile.TarInfo('example-1.2.3/'+name)
++                member.size = len(content); stream.addfile(member, io.BytesIO(content))
++        package = {'name': 'example', 'version': '1.2.3', 'source': review.REGISTRY,
++                   'license': 'MIT OR Apache-2.0', 'manifest_path': str(crate/'Cargo.toml')}
++        lock = {'package': [dict(package, checksum=hashlib.sha256(archive.read_bytes()).hexdigest())]}
++        output = root/'output'; (output/'notices').mkdir(parents=True)
++        return package, lock, output, crate
++
++    def test_exact_notice_bytes_features_and_registry_binding(self):
++        with tempfile.TemporaryDirectory() as temp:
++            root = Path(temp); package, lock, output, _ = self.fixture(root)
++            result = review.package_record(root, package, {'features': ['b', 'a']}, lock, packaging, output)
++            self.assertEqual(result['features'], ['a', 'b'])
++            self.assertEqual(result['registry_checksum'], lock['package'][0]['checksum'])
++            self.assertEqual(result['license_expression'], 'MIT OR Apache-2.0')
++            self.assertFalse(result['notice_review_required'])
++            self.assertEqual((output/result['notices'][0]['path']).read_bytes(), b'Synthetic registry license\n')
++
++    def test_tampered_missing_license_source_and_checksum_fail_closed(self):
++        for mutation in ['notice', 'checksum', 'license', 'lock', 'source', 'missing']:
++            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temp:
++                root = Path(temp); package, lock, output, crate = self.fixture(root)
++                if mutation == 'notice': (crate/'LICENSE').write_text('tampered')
++                elif mutation == 'checksum': lock['package'][0]['checksum'] = 'c'*64
++                elif mutation == 'license': package['license'] = None
++                elif mutation == 'lock': lock['package'] = []
++                elif mutation == 'source':
++                    package['source'] = 'git+https://example.invalid'; lock['package'][0]['source'] = package['source']
++                else: (crate/'LICENSE').unlink()
++                with self.assertRaises((ValueError, FileNotFoundError)):
++                    review.package_record(root, package, {'features': []}, lock, packaging, output)
++
++    def test_license_mapping_retains_open_decisions_and_per_variant_counts(self):
++        package = {'name': 'example', 'version': '1.2.3', 'source': review.REGISTRY,
++                   'license_expression': 'MIT', 'notice_review_required': True,
++                   'notices': [{'sha256': 'a'*64, 'path': 'notices/a.txt', 'review_required': True,
++                                'review_note': 'Synthetic unresolved publication condition.'}]}
++        variants = {name: {'packages': [] if name == 'static' else [copy.deepcopy(package)]}
++                    for name in review.VARIANTS}
++        text = review.license_markdown({'source_head': 'b'*40, 'variants': variants})
++        self.assertIn('| static | 0 | 0 |', text)
++        self.assertIn('| all-probes | 1 | 1 |', text)
++        self.assertIn('No unresolved issue is accepted', text)
++        self.assertIn('Synthetic unresolved publication condition.', text)
++        self.assertIn('(notices/a.txt)', text)
++
++    def test_database_binds_content_commit_and_retrieval_receipt(self):
++        for mutation in [None, 'bytes', 'commit', 'timestamp', 'manifest']:
++            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temp:
++                root = Path(temp); db = root/'advisory-db'; db.mkdir()
++                (db/'README.md').write_text('Synthetic database')
++                files = {'README.md': hashlib.sha256(b'Synthetic database').hexdigest()}
++                digest = hashlib.sha256(json.dumps(files, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
++                record = {'files': files, 'files_sha256': digest, 'commit': 'a'*40,
++                          'retrieved_at': '2026-11-14T00:00:00+00:00'}
++                if mutation == 'bytes': (db/'README.md').write_text('tampered')
++                elif mutation == 'commit': record['commit'] = 'b'*40
++                elif mutation == 'timestamp': record['retrieved_at'] = ''
++                elif mutation == 'manifest': record['files_sha256'] = 'c'*64
++                (root/'database.json').write_text(json.dumps(record))
++                with patch.object(review.subprocess, 'check_output', return_value='a'*40+'\n'):
++                    if mutation:
++                        with self.assertRaises(ValueError): review.database_binding(root)
++                    else:
++                        self.assertEqual(review.database_binding(root), record)
++
++    def test_runner_refuses_mutable_images_and_overwriting_evidence_before_docker(self):
++        with tempfile.TemporaryDirectory() as temp:
++            for image, expected in [('latest', SystemExit), ('sha256:'+'a'*64, FileExistsError)]:
++                argv = ['runner', '--image', image, '--preparation', temp, '--out-dir', temp]
++                with self.subTest(image=image), patch('sys.argv', argv), patch.object(runner.subprocess, 'run') as docker:
++                    with self.assertRaises(expected): runner.main()
++                    docker.assert_not_called()
++
++
++if __name__ == '__main__':
++    unittest.main()
+diff --git a/tasks/051/TASK-051-PLAN.md b/tasks/051/TASK-051-PLAN.md
+new file mode 100644
+index 0000000..f6083e3
+--- /dev/null
++++ b/tasks/051/TASK-051-PLAN.md
+@@ -0,0 +1,59 @@
++# Task 051 execution plan
++
++Baseline: `f07d782cd68cfac95d93585d5ace049f590160d4`, fetched from
++`origin/develop` on 2026-11-14. Clean worktree; new branch
++`codex/task051-dependency-supply-chain-review`.
++
++## Outcome and original criteria
++
++Q6-03 records exact dependency versions, resolved features, sources, RustSec
++database retrieval time/hash, vulnerabilities, maintenance advisories, exception
++expiry and actions. Q6-04 maps all distribution variants to licenses and notices;
++only the maintainer may accept unresolved publication issues. Required primary
++outputs remain `target/quality-task-051/dependency-review.json` and
++`target/quality-task-051/license-review.md`. Retain durable copies and raw evidence
++under `tasks/051/evidence/`.
++
++The current package script and release workflow declare `static`,
++`combined-probes` and `all-probes`, all targeting `aarch64-apple-darwin`.
++Other platforms/build reproducibility belong to 059/060. E41 did not execute a
++current RustSec audit. ED and ER provide reusable notice validators and historical
++five review flags, not a current dependency assessment.
++
++## Approach, compatibility and cost
++
++Reuse package-release.py's notice collection and exact-version fallback checks.
++Add an offline evaluation script, rather than altering scanner output, package
++schemas, dependencies or CI gates. Evaluate the complete lockfile with a pinned
++cargo-audit binary and an explicitly acquired RustSec Git snapshot; then map its
++findings to each variant's resolved normal/build dependency closure. Retain
++lockfile-only findings separately. A missing advisory is not proof of maintenance
++or safety; an unknown/malformed audit must never become a clean result.
++
++Use the existing immutable Linux tool/cache image for bounded, offline execution
++with read-only source, empty allowlisted environment and scratch-only writes.
++Cargo metadata filters the declared macOS target; no cross-platform binary build
++or protocol execution is claimed. Trusted preparation downloads only the official
++fixed audit binary and advisory DB, with hashes/timestamps. No paid service,
++publication, remote configuration, signing or system-wide installation is needed.
++Expected local cost: minutes to tens of minutes, bounded CPU/memory/disk/time.
++
++## Steps and checks
++
++1. Record source/tool/DB identity and acquisition evidence, including actual DB
++   commit time rather than assuming its freshness from the client date.
++2. Implement evaluation and synthetic tests: normal/build vs dev reachability,
++   cycles/shared nodes, source/version matching, clean/vulnerable/unmaintained
++   audit data, failed/malformed audit, missing/tampered notices and retained flags.
++3. Run initial Python checks and real offline evaluation; inspect combined diff.
++4. Obtain one isolated implementation review, address findings, then finish the
++   applicable distribution/script checks and obtain one isolated test review.
++   Record and reuse exactly those two reviewer identities for material fixes.
++5. Bind final source, inputs, commands, exits and artifacts by SHA-256. Apply the
++   original completion gates; keep unfinished any required maintainer decision
++   or missing validation. Preserve failures alongside successful reruns.
++
++No exception is pre-approved. Findings will carry proposed actions, an explicit
++unapproved decision and no invented expiry; a release-time acceptance requires a
++maintainer decision with a real expiry/recheck condition. The five existing notice
++flags must remain unless exact-version evidence resolves them.

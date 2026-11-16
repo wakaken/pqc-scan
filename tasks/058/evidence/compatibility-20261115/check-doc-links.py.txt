@@ -1,0 +1,14 @@
+from pathlib import Path
+import urllib.request,urllib.parse,concurrent.futures,json,datetime
+p=Path('tasks/058/evidence/compatibility-20261115');inputs=json.loads((p/'EXTERNAL-URL-INPUT.json').read_text());allowed={'github.com','maven.apache.org','docs.djangoproject.com'}
+def check(url):
+ assert urllib.parse.urlsplit(url).hostname in allowed
+ result={'url':url,'documents':inputs[url],'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat()}
+ try:
+  with urllib.request.urlopen(urllib.request.Request(url,method='HEAD',headers={'User-Agent':'Mozilla/5.0'}),timeout=15) as response:
+   result.update(status=response.status,finalUrl=response.url)
+ except Exception as e:result.update(status=getattr(e,'code',None),error=str(e))
+ return result
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:rows=list(pool.map(check,inputs))
+(p/'EXTERNAL-LINKS.json').write_text(json.dumps({'method':'Bounded HEAD metadata only, no archives/source execution or credentials; no remote writes. Redirect targets and HTTP failures preserved.','rows':rows},indent=2)+'\n')
+print([(r['url'],r['status']) for r in rows])

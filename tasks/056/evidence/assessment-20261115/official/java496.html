@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=us-ascii" /><meta http-equiv="Content-Type" content="text/html; charset=us-ascii" /><title>JEP 496: Quantum-Resistant Module-Lattice-Based Key Encapsulation Mechanism</title><link rel="shortcut icon" href="/images/nanoduke.ico" /><link rel="stylesheet" type="text/css" href="/page.css" /><script type="text/javascript" src="/page.js"><noscript></noscript></script><script src="https://cdn.usefathom.com/script.js" data-site="KCYJJPZX" defer="yes"></script><style type="text/css" xml:space="preserve">
+      TABLE { border-collapse: collapse; padding: 0px; margin: 1em 0 1em 2em; }
+      TR:first-child TH, TR:first-child TD { padding-top: 0; }
+      TH, TD { padding: 0px; padding-top: .5ex; vertical-align: baseline; text-align: left; }
+      TD + TD, TH + TH { padding-left: 1em; }
+      TD:first-child, TH:first-child, TD.jep { text-align: right; }
+      TABLE.head TD:first-child { font-style: italic; padding-left: 2em; white-space: nowrap; }
+      PRE { padding-left: 2em; margin: 1ex 0; font-size: inherit; }
+      TABLE PRE { padding-left: 0; margin: 0; }
+      TABLE.jeps TD:first-child + TD,
+      TABLE.jeps TD:first-child + TD + TD { padding-left: .5em; }
+      TABLE.jeps TD:first-child,
+      TABLE.jeps TD:first-child + TD,
+      TABLE.jeps TD:first-child + TD + TD { font-size: smaller; }
+      TABLE.jeps TD.cl { font-size: smaller; padding-right: 0; text-align: right; }
+      TABLE.jeps TD.cm { font-size: smaller; padding-left: .1em; padding-right: .1em; }
+      TABLE.jeps TD.cr { font-size: smaller; padding-left: 0; }
+      TABLE.jeps TD.z { padding-left: 0; padding-right: 0; }
+      TABLE.head TD { padding-top: 0; }
+    </style></head><body><div id="main"><h1>JEP 496: Quantum-Resistant Module-Lattice-Based Key Encapsulation Mechanism</h1><table class="head"><tr><td>Owner</td><td>Weijun Wang</td></tr><tr><td>Type</td><td>Feature</td></tr><tr><td>Scope</td><td>SE</td></tr><tr><td>Status</td><td>Closed&#8201;/&#8201;Delivered</td></tr><tr><td>Release</td><td>24</td></tr><tr><td>Component</td><td>security-libs&#8201;/&#8201;javax.crypto</td></tr><tr><td>Discussion</td><td>security dash dev at openjdk dot org</td></tr><tr><td>Effort</td><td>M</td></tr><tr><td>Duration</td><td>S</td></tr><tr><td>Reviewed by</td><td>Sean Mullan</td></tr><tr><td>Endorsed by</td><td>Alan Bateman, Sean Mullan</td></tr><tr><td>Created</td><td>2024/08/26 18:33</td></tr><tr><td>Updated</td><td>2025/03/13 14:49</td></tr><tr><td>Issue</td><td><a href="https://bugs.openjdk.org/browse/JDK-8339009">8339009</a></td></tr></table><div class="markdown"><h2 id="Summary">Summary</h2>
+<p>Enhance the security of Java applications by providing an implementation of the
+quantum-resistant Module-Lattice-Based Key-Encapsulation Mechanism (ML-KEM). Key
+encapsulation mechanisms (KEMs) are used to secure symmetric keys over insecure
+communication channels using public key cryptography. ML-KEM is designed to be
+secure against future quantum computing attacks. It has been standardized by the
+United States National Institute of Standards and Technology (NIST) in
+<a href="https://csrc.nist.gov/pubs/fips/203/final">FIPS&#160;203</a>.</p>
+<h2 id="Goals">Goals</h2>
+<ul>
+<li>Provide ML-KEM implementations of the <a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/security/KeyPairGenerator.html"><code>KeyPairGenerator</code></a>, <a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/javax/crypto/KEM.html"><code>KEM</code></a>, and
+<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/security/KeyFactory.html"><code>KeyFactory</code></a> APIs, with support for the parameter sets ML-KEM-512,
+ML-KEM-768, and ML-KEM-1024 standardized in FIPS&#160;203.</li>
+</ul>
+<h2 id="Non-Goals">Non Goals</h2>
+<ul>
+<li>
+<p>It is not a goal to implement the <a href="https://en.wikipedia.org/wiki/Kyber">Kyber
+algorithm</a>, from which ML-KEM was
+derived. The two algorithms are not interoperable.</p>
+</li>
+<li>
+<p>It is not a goal to add support for ML-KEM to components of the Java Platform
+for which the necessary standards do not yet exist. That is the case for, in
+particular, the implementation of Transport Layer Security (TLS) in the
+<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/javax/net/ssl/package-summary.html"><code>javax.net.ssl</code></a>
+package. We will add such support once the standards do exist.</p>
+</li>
+</ul>
+<h2 id="Motivation">Motivation</h2>
+<p>The field of <a href="https://en.wikipedia.org/wiki/Quantum_computing">quantum
+computing</a> has been advancing
+steadily for years. A future large-scale quantum computer could use <a href="https://en.wikipedia.org/wiki/Shor's_algorithm">Shor&#8217;s
+algorithm</a>, which is capable of
+factoring integers and solving the discrete logarithm problem, to compromise the
+security of widely-deployed public-key based algorithms including
+Rivest-Shamir-Adleman (RSA) and Diffie-Hellman. Such algorithms are used by the
+Java Platform to, among other things, digitally sign JAR files and establish
+secure network connections via the Transport Layer Security (TLS) protocol. An
+attack that a conventional supercomputer might need thousands to millions of
+years to complete could be accomplished by a quantum computer using Shor's
+algorithm in mere hours.</p>
+<p>Cryptographers have responded to this threat by inventing
+<a href="https://en.wikipedia.org/wiki/Post-quantum_cryptography">quantum-resistant</a>
+cryptographic algorithms, which cannot be defeated by Shor's algorithm.
+Switching to quantum-resistant algorithms is urgent even though large-scale
+quantum computers do not yet exist, since an adversary could harvest encrypted
+data today, store it, and decrypt it once such computers become available.</p>
+<p>For the purpose of exchanging keys in a quantum-resistant fashion, NIST
+standardized the Module-Lattice-Based Key-Encapsulation Mechanism (ML-KEM) in
+<a href="https://csrc.nist.gov/pubs/fips/203/final">FIPS&#160;203</a>. In the United
+States, <a href="https://media.defense.gov/2022/Sep/07/2003071836/-1/-1/0/CSI_CNSA_2.0_FAQ_.PDF">government computer systems that handle sensitive
+information</a>
+must be upgraded over the next decade to use ML-KEM. It is thus essential for
+the Java Platform to provide an implementation of this algorithm.</p>
+<h2 id="Description">Description</h2>
+<p>As described in <a href="https://openjdk.org/jeps/452">JEP 452</a>, a KEM consists of three
+functions:</p>
+<ul>
+<li>
+<p>A <em>key pair generation function</em> returns a key pair containing a public key
+and a private key.</p>
+</li>
+<li>
+<p>A <em>key encapsulation function</em>, called by the sender, takes the receiver's
+public key and an encryption option; it returns a secret key <em>K</em> and a <em>key
+encapsulation message</em>. The sender sends the key encapsulation message to the
+receiver.</p>
+</li>
+<li>
+<p>A <em>key decapsulation function</em>, called by the receiver, takes the receiver's
+private key and the received key encapsulation message; it returns the secret
+key <em>K</em>.</p>
+</li>
+</ul>
+<p>For the first function, we will provide an implementation of the
+<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/security/KeyPairGenerator.html"><code>KeyPairGenerator</code></a> API that generates ML-KEM key pairs. For the second and
+third functions, we will provide an implementation of the <a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/javax/crypto/KEM.html"><code>KEM</code></a> API that
+negotiates shared secret keys based on an ML-KEM key pair. We will also provide
+an implementation of the <a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/security/KeyFactory.html"><code>KeyFactory</code></a> API that converts ML-KEM keys to and
+from their encodings.</p>
+<p>In the <a href="https://docs.oracle.com/en/java/javase/23/docs/specs/security/standard-names.html">Java Security Standard Algorithm Names
+Specification</a>,
+we will define a new standard algorithm family name, <code>"ML-KEM"</code>, for the
+<code>KeyPairGenerator</code>, <code>KEM</code>, and <code>KeyFactory</code> APIs.</p>
+<p>FIPS 203 specifies three parameter sets for ML-KEM. In order of increasing
+security strength and decreasing performance, they are named <code>"ML-KEM-512"</code>,
+<code>"ML-KEM-768"</code>, and <code>"ML-KEM-1024"</code>. These parameter-set names will also be
+defined as standard algorithm names for the <code>KeyPairGenerator</code>, <code>KEM</code>, and
+<code>KeyFactory</code> APIs, and, further, will be represented by the new
+<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/security/spec/NamedParameterSpec.html"><code>NamedParameterSpec</code></a> constants <code>ML_KEM_512</code>, <code>ML_KEM_768</code>, and <code>ML_KEM_1024</code>.</p>
+<h3 id="Generating-ML-KEM-key-pairs">Generating ML-KEM key pairs</h3>
+<p>You can generate an ML-KEM key pair in one of three ways:</p>
+<ul>
+<li>
+<p>Instantiate a <code>KeyPairGenerator</code> with the family name and initialize it with a
+parameter-set name:</p>
+<pre><code>KeyPairGenerator g = KeyPairGenerator.getInstance("ML-KEM");
+g.initialize(NamedParameterSpec.ML_KEM_512);
+KeyPair kp = g.generateKeyPair(); // an ML-KEM-512 key pair</code></pre>
+</li>
+<li>
+<p>If you do not initialize the <code>KeyPairGenerator</code> with a parameter set, the
+implementation will use ML-KEM-768 as the default:</p>
+<pre><code>KeyPairGenerator g = KeyPairGenerator.getInstance("ML-KEM");
+KeyPair kp = g.generateKeyPair(); // an ML-KEM-768 key pair</code></pre>
+</li>
+<li>
+<p>Directly instantiate a <code>KeyPairGenerator</code> with a parameter-set name:</p>
+<pre><code>KeyPairGenerator g = KeyPairGenerator.getInstance("ML-KEM-1024");
+KeyPair kp = g.generateKeyPair(); // an ML-KEM-1024 key pair</code></pre>
+</li>
+</ul>
+<p>The <code>KeyPairGenerator</code> API allows an integer key size to be specified during
+initialization, but this is not supported for ML-KEM key pairs and will cause an
+<code>InvalidParameterException</code> to be thrown.</p>
+<p>The <code>keytool</code> command will support generating ML-KEM key pairs and certificates.
+For example, to generate an ML-KEM key pair and sign the certificate with an EC
+key:</p>
+<pre><code>$ keytool -keystore ks -storepass changeit -genkeypair -alias ec \
+          -keyalg ec -dname CN=ec -ext bc
+$ keytool -keystore ks -storepass changeit -genkeypair -alias mlkem \
+          -keyalg ML-KEM -groupname ML-KEM-768 -dname CN=ML-KEM -signer ec</code></pre>
+<p>The first command creates an EC key pair; the second command creates an ML-KEM
+key pair and a certificate signed by the EC key. We use an EC key to sign the
+certificate because ML-KEM itself is not a signature algorithm and thus cannot
+be used to sign the certificate containing the ML-KEM public key.</p>
+<p>The parameter-set name (ML-KEM-768) can also be provided directly with the
+<code>-keyalg</code> option:</p>
+<pre><code>$ keytool -keystore ks -storepass changeit -genkeypair -alias mlkem2 \
+          -keyalg ML-KEM-768 -dname CN=ML-KEM2 -signer ec</code></pre>
+<h3 id="Encapsulating-and-decapsulating-ML-KEM-keys">Encapsulating and decapsulating ML-KEM keys</h3>
+<p>You can use the ML-KEM <code>KEM</code> implementation to negotiate a shared secret key.</p>
+<p>For example, a sender can call the encapsulation function to get a secret key
+and a key encapsulation message:</p>
+<pre><code>KEM ks = KEM.getInstance("ML-KEM");
+KEM.Encapsulator enc = ks.newEncapsulator(publicKey);
+KEM.Encapsulated encap = enc.encapsulate();
+byte[] msg = encap.encapsulation();     // send this to receiver
+SecretKey sks = encap.key();</code></pre>
+<p>A receiver can then call the decapsulation function to recover the secret key
+from the key encapsulation message sent by the sender:</p>
+<pre><code>byte[] msg = ...;                       // received from sender
+KEM kr = KEM.getInstance("ML-KEM");
+KEM.Decapsulator dec = kr.newDecapsulator(privateKey);
+SecretKey skr = dec.decapsulate(msg);</code></pre>
+<p>Both <code>sks</code> and <code>skr</code> contain the same key material, which is known only to the
+sender and the receiver.</p>
+<p>If a <code>KEM</code> object is instantiated with a family name, it accepts ML-KEM keys in
+the family with any parameter set. If it is instantiated with a parameter-set
+name, it only accepts ML-KEM keys that use that parameter set; otherwise, the
+<code>newEncapsulator</code> and <code>newDecapsulator</code> methods throw an <code>InvalidKeyException</code>.</p>
+<h3 id="Encoding-and-decoding-ML-KEM-keys">Encoding and decoding ML-KEM keys</h3>
+<p>You can use the ML-KEM <code>KeyFactory</code> implementation to convert an ML-KEM private
+key to or from its PKCS #8 encoding, or an ML-KEM public key to or from its
+X.509 encoding.</p>
+<p>For example, to convert a ML-KEM private key to its PKCS #8 encoding, and
+vice-versa:</p>
+<pre><code>KeyFactory f = KeyFactory.getInstance("ML-KEM");
+PKCS8EncodedKeySpec p8spec = f.getKeySpec(kp.getPrivate(),
+                                          PKCS8EncodedKeySpec.class);
+PrivateKey sk2 = f.generatePrivate(p8spec);</code></pre>
+<p>Similarly, to convert a ML-KEM public key to its X.509 encoding, and vice-versa:</p>
+<pre><code>X509EncodedKeySpec x509spec = f.getKeySpec(kp.getPublic(),
+                                           X509EncodedKeySpec.class);
+PublicKey pk2 = f.generatePublic(x509spec);</code></pre>
+<p>The <code>KeyFactory</code> implementation can also translate a key from another security
+provider using the <code>translateKey</code> method, as long as its encoding format is
+supported.</p>
+<p>The <code>getAlgorithm</code> method of a <code>Key</code> object generated by an ML-KEM
+<code>KeyPairGenerator</code> or <code>KeyFactory</code> implementation always returns the family name
+<code>"ML-KEM"</code>, regardless of whether the <code>KeyPairGenerator</code> or <code>KeyFactory</code> was
+instantiated with the <code>"ML-KEM"</code> family name or one of the parameter-set names.
+The <code>getParams</code> method of an ML-KEM key returns a <code>NamedParameterSpec</code> object
+that matches the key's parameter-set name.</p>
+<p>If a <code>KeyFactory</code> object is instantiated with a family name, it encodes or
+decodes ML-KEM keys in the family with any parameter set. If it is instantiated
+with a parameter-set name, it only encodes or decodes ML-KEM keys that use that
+parameter set; otherwise, the <code>translateKey</code> method throws an
+<code>InvalidKeyException</code>, and the <code>generatePrivate</code>, <code>generatePublic</code>, and
+<code>getKeySpec</code> methods throw an <code>InvalidKeySpecException</code>.</p>
+<p>The encoding used by the ML-KEM <code>KeyFactory</code> is defined in a <a href="https://datatracker.ietf.org/doc/draft-ietf-lamps-kyber-certificates/">draft IETF
+RFC</a>. We
+will track changes in this draft until it is published.</p>
+<h2 id="Alternatives">Alternatives</h2>
+<ul>
+<li>
+<p>The <a href="https://openquantumsafe.org/">Open Quantum Safe project</a> provides a <a href="https://github.com/open-quantum-safe/liboqs-java">JNI
+wrapper</a> for their <a href="https://github.com/open-quantum-safe/liboqs/"><code>liboqs</code> C
+library</a>, which implements a
+collection of quantum-resistant algorithms including Kyber and ML-KEM. If Open
+Quantum Safe achieves its goal of becoming the primary quantum-resistant
+cryptography implementation for major projects such as OpenSSL, BoringSSL,
+OpenSSH, and Mozilla, then it will gain substantial performance and robustness
+through widespread testing and usage.</p>
+<p>Compared to a native implementation, a Java implementation of ML-KEM provides
+the key benefit of being integrated directly into the JDK. This makes it
+immediately available on all of the platforms to which the JDK is already
+ported.</p>
+</li>
+</ul>
+<h2 id="Testing">Testing</h2>
+<ul>
+<li>
+<p>Unit tests will confirm that the implementations comply with the
+specifications of the <code>KeyGenerator</code>, <code>KeyFactory</code>, and <code>KEM</code> APIs, including
+edge cases such as invalid input parameters, boundary values, and unsupported
+operations.</p>
+</li>
+<li>
+<p>Known Answer Tests (KATs) will cover both valid cryptographic operations
+(positive cases) and invalid operations or known vulnerabilities (negative
+cases), ensuring comprehensive validation. These will include but not be
+limited to:</p>
+<ul>
+<li>
+<p>KATs
+(<a href="https://github.com/usnistgov/ACVP-Server/tree/master/gen-val/json-files/ML-KEM-keyGen-FIPS203">here</a>
+and
+<a href="https://github.com/usnistgov/ACVP-Server/tree/master/gen-val/json-files/ML-KEM-encapDecap-FIPS203">here</a>)
+generated by NIST's <a href="https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program">Cryptographic Algorithm Validation Program
+service</a>,
+and</p>
+</li>
+<li>
+<p>The ML-KEM tests from <a href="https://github.com/C2SP/wycheproof">Project
+Wycheproof</a>, which are are <a href="https://github.com/C2SP/wycheproof/pull/110">in
+development</a>.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Interoperation tests with implementations from other vendors, including but
+not limited to <code>liboqs</code>, will confirm that our ML-KEM implementation works
+well with others.</p>
+</li>
+</ul>
+</div></div><div id="sidebar"><div id="openjdk-sidebar-logo"><a href="/"><img alt="OpenJDK logo" width="91" height="25" src="/images/openjdk2.svg" /></a></div><div class="links"><div class="link"><a href="/install/">Installing</a></div><div class="link"><a href="/guide/#contributing-to-an-openjdk-project">Contributing</a></div><div class="link"><a href="/guide/#reviewing-and-sponsoring-a-change">Sponsoring</a></div><div class="link"><a href="/guide/">Developers' Guide</a></div><div class="link"><a href="/groups/vulnerability/report">Vulnerabilities</a></div><div class="link"><a href="https://jdk.java.net">JDK GA/EA Builds</a></div></div><div class="links"><div class="links"><a href="https://mail.openjdk.org">Mailing lists</a></div><div class="link"><a href="https://wiki.openjdk.org">Wiki</a>
+                      &#183; <a href="/irc">IRC</a></div><div class="link"><a href="https://mastodon.social/@openjdk" rel="me">Mastodon</a></div><div class="link"><a href="https://bsky.app/profile/openjdk.org">Bluesky</a></div></div><div class="links"><div class="links"><a href="/bylaws">Bylaws</a> &#183; <a href="/census">Census</a></div><div class="link"><a href="/legal/">Legal</a> &#183; <a href="/legal/ai">AI</a></div></div><div class="links"><div class="links"><a href="/workshop"><b>Workshop</b></a></div></div><div class="links"><div class="links"><a href="/jeps/0"><b>JEP Process</b></a></div></div><div class="links"><div class="about">Source code</div><div class="link"><a href="https://github.com/openjdk/">GitHub</a></div><div class="link"><a href="https://hg.openjdk.org">Mercurial</a></div></div><div class="links"><div class="about">Tools</div><div class="link"><a href="http://git-scm.org/">Git</a></div><div class="link"><a href="/jtreg/">jtreg harness</a></div></div><div class="links"><div class="about">Groups</div><div class="link"><a href="/groups/">(overview</a>,
+      <a href="/groups/archive">archive</a>)</div><div class="link"><a href="/groups/adoption">Adoption</a></div><div class="link"><a href="/groups/build">Build</a></div><div class="link"><a href="/groups/client-libs">Client Libraries</a></div><div class="link"><a href="/groups/csr">Compatibility &amp; Specification Review</a></div><div class="link"><a href="/groups/compiler">Compiler</a></div><div class="link"><a href="/groups/conformance">Conformance</a></div><div class="link"><a href="/groups/core-libs">Core Libraries</a></div><div class="link"><a href="/groups/gb">Governing Board</a></div><div class="link"><a href="/groups/hotspot">HotSpot</a></div><div class="link"><a href="/groups/ide-support">IDE Tooling &amp; Support</a></div><div class="link"><a href="/groups/i18n">Internationalization</a></div><div class="link"><a href="/groups/members">Members</a></div><div class="link"><a href="/groups/net">Networking</a></div><div class="link"><a href="/groups/porters">Porters</a></div><div class="link"><a href="/groups/quality">Quality</a></div><div class="link"><a href="/groups/security">Security</a></div><div class="link"><a href="/groups/serviceability">Serviceability</a></div><div class="link"><a href="/groups/vulnerability">Vulnerability</a></div><div class="link"><a href="/groups/web">Web</a></div></div><div class="links"><div class="about">Projects</div><div class="link">(<a href="/projects/">overview</a>,
+      <a href="/projects/archive">archive</a>)</div><div class="link"><a href="/projects/amber">Amber</a></div><div class="link"><a href="/projects/babylon">Babylon</a></div><div class="link"><a href="/projects/brisbane">Brisbane</a></div><div class="link"><a href="/projects/crac">CRaC</a></div><div class="link"><a href="/projects/code-tools">Code Tools</a></div><div class="link"><a href="/projects/coin">Coin</a></div><div class="link"><a href="/projects/cvmi">Common VM Interface</a></div><div class="link"><a href="/projects/detroit">Detroit</a></div><div class="link"><a href="/projects/guide">Developers' Guide</a></div><div class="link"><a href="/projects/duke">Duke</a></div><div class="link"><a href="/projects/icedtea">IcedTea</a></div><div class="link"><a href="/projects/jdk8u">JDK 8 Updates</a></div><div class="link"><a href="/projects/jdk9">JDK 9</a></div><div class="link"><a href="/projects/jdk">JDK</a>
+      (&#8230;,
+       <a href="/projects/jdk/26">26</a>,
+       <a href="/projects/jdk/27">27</a>,
+       <a href="/projects/jdk/28">28</a>)</div><div class="link"><a href="/projects/jdk-updates">JDK Updates</a></div><div class="link"><a href="/projects/jmc">JMC</a></div><div class="link"><a href="/projects/jigsaw">Jigsaw</a></div><div class="link"><a href="/projects/lanai">Lanai</a></div><div class="link"><a href="/projects/leyden">Leyden</a></div><div class="link"><a href="/projects/lilliput">Lilliput</a></div><div class="link"><a href="/projects/loom">Loom</a></div><div class="link"><a href="/projects/jmm">Memory Model Update</a></div><div class="link"><a href="/projects/mlvm">Multi-Language VM</a></div><div class="link"><a href="/projects/nashorn">Nashorn</a></div><div class="link"><a href="/projects/nio">New I/O</a></div><div class="link"><a href="/projects/openjfx">OpenJFX</a></div><div class="link"><a href="/projects/panama">Panama</a></div><div class="link"><a href="/projects/aarch32-port">Port: AArch32</a></div><div class="link"><a href="/projects/aarch64-port">Port: AArch64</a></div><div class="link"><a href="/projects/bsd-port">Port: BSD</a></div><div class="link"><a href="/projects/haiku-port">Port: Haiku</a></div><div class="link"><a href="/projects/mips-port">Port: MIPS</a></div><div class="link"><a href="/projects/mobile">Port: Mobile</a></div><div class="link"><a href="/projects/ppc-aix-port">Port: PowerPC/AIX</a></div><div class="link"><a href="/projects/riscv-port">Port: RISC-V</a></div><div class="link"><a href="/projects/s390x-port">Port: s390x</a></div><div class="link"><a href="/projects/sctp">SCTP</a></div><div class="link"><a href="/projects/shenandoah">Shenandoah</a></div><div class="link"><a href="/projects/skara">Skara</a></div><div class="link"><a href="/projects/sumatra">Sumatra</a></div><div class="link"><a href="/projects/tsan">Tsan</a></div><div class="link"><a href="/projects/valhalla">Valhalla</a></div><div class="link"><a href="/projects/wakefield">Wakefield</a></div><div class="link"><a href="/projects/zero">Zero</a></div><div class="link"><a href="/projects/zgc">ZGC</a></div></div><div class="buttons"><a href="https://oracle.com"><img alt="Oracle logo" width="100" height="13" src="/images/oracle.svg" /></a></div></div><div id="footer">
+
+        &#169; 2026 Oracle Corporation and/or its affiliates
+        <br /><a href="/legal/tou/">Terms of Use</a>
+        &#183;
+        
+            License: <a href="/legal/gplv2+ce.html">GPLv2</a>
+        &#183; <a href="https://www.oracle.com/us/legal/privacy/">Privacy</a>
+        &#183; <a href="https://openjdk.org/legal/openjdk-trademark-notice.html">Trademarks</a></div><script type="text/javascript"  src="/rRs64_/TI/oS/VgxV/RKp2wQuCVp0KY/ma5JJ4tz1zGccL/EzQmBQE/Gz/IPdhZyPQg"></script></body></html>

@@ -1,0 +1,20 @@
+from pathlib import Path
+import urllib.request,json,hashlib,datetime
+out=Path('tasks/056/evidence/assessment-20261115/official');urls={
+'cargo-features.html':'https://doc.rust-lang.org/cargo/reference/features.html',
+'cargo-resolver.html':'https://doc.rust-lang.org/cargo/reference/resolver.html',
+'envoy-tls.html':'https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/common.proto',
+'rfc9325.txt':'https://www.rfc-editor.org/rfc/rfc9325.txt',
+'rfc-errata.json':'https://www.rfc-editor.org/errata.json',
+'bc-provider-1.85.java':'https://raw.githubusercontent.com/bcgit/bc-java/r1rv85/prov/src/main/java/org/bouncycastle/jce/provider/BouncyCastleProvider.java',
+'bc-pqc-provider-1.85.java':'https://raw.githubusercontent.com/bcgit/bc-java/r1rv85/prov/src/main/java/org/bouncycastle/pqc/jcajce/provider/BouncyCastlePQCProvider.java',
+'bc-mldsa-1.85.java':'https://raw.githubusercontent.com/bcgit/bc-java/r1rv85/prov/src/main/java/org/bouncycastle/jcajce/provider/asymmetric/MLDSA.java'}
+rows=[]
+for name,url in urls.items():
+ row={'url':url,'file':name,'retrievedAt':datetime.datetime.now(datetime.timezone.utc).isoformat()}
+ try:
+  with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'}),timeout=40) as r:data=r.read(16000000);row['httpStatus']=r.status
+  (out/name).write_bytes(data);row.update(sha256=hashlib.sha256(data).hexdigest(),bytes=len(data))
+ except Exception as e:row['error']=str(e)
+ rows.append(row);print(name,row.get('httpStatus',row.get('error')),flush=True)
+(out/'SUPPLEMENT-RECEIPTS.json').write_text(json.dumps(rows,indent=2)+'\n')

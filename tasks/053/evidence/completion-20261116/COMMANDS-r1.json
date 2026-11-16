@@ -1,0 +1,60 @@
+[
+  {
+    "label": "quality-r1",
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/quality",
+      "-p",
+      "test_*.py",
+      "-v"
+    ],
+    "exitCode": 0,
+    "seconds": 7.4265219579974655,
+    "log": "tasks/053/evidence/completion-20261116/quality-r1.log"
+  },
+  {
+    "label": "node-r1",
+    "argv": [
+      "node",
+      "--test",
+      "shell/compact-report.test.cjs",
+      "shell/final-gap-self-scan.test.cjs",
+      "shell/prepare-code-scanning.test.cjs",
+      "shell/relocated-evidence-self-scan.test.cjs",
+      "shell/self-scan-backlog.test.cjs",
+      "shell/self-scan-policy.test.cjs",
+      "shell/v02-self-scan.test.cjs"
+    ],
+    "exitCode": 0,
+    "seconds": 2.0790705420076847,
+    "log": "tasks/053/evidence/completion-20261116/node-r1.log"
+  },
+  {
+    "label": "ci-quality",
+    "argv": [
+      "bash",
+      "-e",
+      "-c",
+      "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-completion-quality-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-completion-quality-r1/ci-measurement-plan.md\n"
+    ],
+    "exitCode": 0,
+    "seconds": 0.844006541010458,
+    "log": "tasks/053/evidence/completion-20261116/ci-quality.log"
+  },
+  {
+    "label": "ci-baseline",
+    "argv": [
+      "bash",
+      "-e",
+      "-c",
+      "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-completion-baseline-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-completion-baseline-r1/ci-measurement-plan.md\n"
+    ],
+    "exitCode": 0,
+    "seconds": 0.7864347090071533,
+    "log": "tasks/053/evidence/completion-20261116/ci-baseline.log"
+  }
+]

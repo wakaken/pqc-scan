@@ -1,0 +1,3887 @@
+{
+  "model": "PQS-QAM-evidence/1",
+  "catalog": {
+    "path": "docs/quality/EVIDENCE-CATALOG.json",
+    "sha256": "6abf162f1abacf21e0d5918196a877c52d29cb29602be0786b8cd44d4aceca09"
+  },
+  "records": [
+    {
+      "record": "task042-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "target/release/pqc-scan",
+            "scan",
+            ".",
+            "--format",
+            "sarif",
+            "--rules-dir",
+            "./rules",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/self-scan-final"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "node",
+            "shell/prepare-code-scanning.cjs",
+            "--input",
+            "target/quality-task-042-reopen-20261112/self-scan-final/report.sarif",
+            "--expectations",
+            "docs/quality/SELF-SCAN-EXPECTATIONS.json",
+            "--root",
+            ".",
+            "--output",
+            "target/quality-task-042-reopen-20261112/self-scan-final/code-scanning.sarif",
+            "--audit",
+            "target/quality-task-042-reopen-20261112/self-scan-final/code-scanning-audit.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/quality",
+            "-p",
+            "test_*.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "node",
+            "--test",
+            "shell/compact-report.test.cjs",
+            "shell/final-gap-self-scan.test.cjs",
+            "shell/prepare-code-scanning.test.cjs",
+            "shell/self-scan-backlog.test.cjs",
+            "shell/self-scan-policy.test.cjs"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "ruby",
+            "-r",
+            "yaml",
+            "-e",
+            "YAML.load_file(ARGV.fetch(0)); puts \"Workflow YAML parsed\"",
+            ".github/workflows/pqc-scan.yml"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/legacy",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/legacy-report-complete",
+            "--reference",
+            "target/quality-task-042/legacy-regression-02/summary.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/v1",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/v1-report-complete",
+            "--reference",
+            "target/quality-task-042/expanded-accepted/summary.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded-v2",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/v2",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/v2-report-complete",
+            "--reference",
+            "target/quality-task-042/expanded-accepted/summary.json",
+            "--applicability",
+            "tests/quality/applicability-042-v2/assessment.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded-v2-lock-controls",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/lock-controls",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/lock-controls-report-complete"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--corpus-dir",
+            "tests/quality/expanded-v2-lock-controls",
+            "--binary",
+            "target/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/lock-controls",
+            "--repeats",
+            "3",
+            "--skip-benchmarks"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/legacy",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/legacy-report-final",
+            "--reference",
+            "target/quality-task-042/legacy-regression-02/summary.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/v1",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/v1-report-final",
+            "--reference",
+            "target/quality-task-042/expanded-accepted/summary.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded-v2",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/v2",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/v2-report-final",
+            "--reference",
+            "target/quality-task-042/expanded-accepted/summary.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded-v2-lock-controls",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/lock-controls",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/lock-controls-report-final"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "-p",
+            "pqc_scan_core",
+            "--test",
+            "task_ids",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "/Users/waka/development/pqc/pqc-scan/docs/quality/task042-reopen-20261112/validate-evidence.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--corpus-dir",
+            "tests/quality",
+            "--binary",
+            "target/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/legacy",
+            "--repeats",
+            "3",
+            "--skip-benchmarks"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/legacy",
+            "--reference",
+            "target/quality-task-042/legacy-regression-02/summary.json",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/legacy-report"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--corpus-dir",
+            "tests/quality/expanded",
+            "--binary",
+            "target/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/v1",
+            "--repeats",
+            "3",
+            "--skip-benchmarks"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/v1",
+            "--reference",
+            "target/quality-task-042/expanded-accepted/summary.json",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/v1-report"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--corpus-dir",
+            "tests/quality/expanded-v2",
+            "--binary",
+            "target/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/v2",
+            "--repeats",
+            "3",
+            "--skip-benchmarks"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded-v2",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/v2",
+            "--reference",
+            "target/quality-task-042/expanded-accepted/summary.json",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/v2-report"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "fmt",
+            "--all",
+            "--",
+            "--check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "run",
+            "--manifest-path",
+            "target/quality-task-042-reopen-20261112/parser-diagnostic/Cargo.toml",
+            "--locked",
+            "--offline",
+            "--",
+            "tests/quality/corpus/holdout/broken.py",
+            "tests/quality/expanded/inputs/tuning/java/Broken.java",
+            "tests/quality/expanded/inputs/tuning/python/broken.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "target/release/pqc-scan",
+            "scan",
+            ".",
+            "--format",
+            "sarif",
+            "--rules-dir",
+            "./rules",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/self-scan"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/legacy",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/legacy-report-verified",
+            "--reference",
+            "target/quality-task-042/legacy-regression-02/summary.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/v1",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/v1-report-verified",
+            "--reference",
+            "target/quality-task-042/expanded-accepted/summary.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded-v2",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/v2",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/v2-report-verified",
+            "--reference",
+            "target/quality-task-042/expanded-accepted/summary.json",
+            "--applicability",
+            "tests/quality/applicability-042-v2/assessment.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/expanded-v2-lock-controls",
+            "--baseline",
+            "target/quality-task-042-reopen-20261112/lock-controls",
+            "--out-dir",
+            "target/quality-task-042-reopen-20261112/lock-controls-report-verified"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "--version"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "git",
+            "rev-parse",
+            "HEAD"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "git",
+            "branch",
+            "--show-current"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "git",
+            "status",
+            "--short"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "rustc",
+            "-Vv"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "-V"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sysctl",
+            "-n",
+            "machdep.cpu.brand_string"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sysctl",
+            "-n",
+            "hw.memsize"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sysctl",
+            "-n",
+            "hw.ncpu"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task043-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--out-dir",
+            "target/quality-task-043-fixes-20261112/complete-after-v3",
+            "--build-profile",
+            "release",
+            "--repeats",
+            "3",
+            "--skip-benchmarks",
+            "--corpus-dir",
+            "tests/quality/task043-corpus-v2"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--baseline",
+            "target/quality-task-043-fixes-20261112/complete-after-v3",
+            "--out-dir",
+            "target/quality-task-043-fixes-20261112/complete-after-v3-report",
+            "--corpus-dir",
+            "tests/quality/task043-corpus-v2",
+            "--reference",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-043-fixes-20261112/before-checkout/target/before-complete/summary.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--out-dir",
+            "target/quality-task-043-fixes-20261112/complete-after-v2",
+            "--build-profile",
+            "release",
+            "--repeats",
+            "3",
+            "--skip-benchmarks",
+            "--corpus-dir",
+            "tests/quality/expanded-v2"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--baseline",
+            "target/quality-task-043-fixes-20261112/complete-after-v2",
+            "--out-dir",
+            "target/quality-task-043-fixes-20261112/complete-after-v2-report",
+            "--corpus-dir",
+            "tests/quality/expanded-v2",
+            "--applicability",
+            "tests/quality/applicability-042-v2/assessment.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--out-dir",
+            "target/quality-task-043-fixes-20261112/complete-after-v1",
+            "--build-profile",
+            "release",
+            "--repeats",
+            "3",
+            "--skip-benchmarks",
+            "--corpus-dir",
+            "tests/quality/expanded"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--baseline",
+            "target/quality-task-043-fixes-20261112/complete-after-v1",
+            "--out-dir",
+            "target/quality-task-043-fixes-20261112/complete-after-v1-report",
+            "--corpus-dir",
+            "tests/quality/expanded"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--out-dir",
+            "target/quality-task-043-fixes-20261112/complete-after-lock",
+            "--build-profile",
+            "release",
+            "--repeats",
+            "3",
+            "--skip-benchmarks",
+            "--corpus-dir",
+            "tests/quality/expanded-v2-lock-controls"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--baseline",
+            "target/quality-task-043-fixes-20261112/complete-after-lock",
+            "--out-dir",
+            "target/quality-task-043-fixes-20261112/complete-after-lock-report",
+            "--corpus-dir",
+            "tests/quality/expanded-v2-lock-controls"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--out-dir",
+            "target/quality-task-043-fixes-20261112/complete-after-original",
+            "--build-profile",
+            "release",
+            "--repeats",
+            "3",
+            "--skip-benchmarks"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--baseline",
+            "target/quality-task-043-fixes-20261112/complete-after-original",
+            "--out-dir",
+            "target/quality-task-043-fixes-20261112/complete-after-original-report",
+            "--reference",
+            "docs/quality/task023/BASELINE.json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--corpus-dir",
+            "tests/quality/task043-corpus-v2",
+            "--out-dir",
+            "target/before-complete",
+            "--build-profile",
+            "release",
+            "--repeats",
+            "3",
+            "--skip-benchmarks"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/report.py",
+            "--corpus-dir",
+            "tests/quality/task043-corpus-v2",
+            "--baseline",
+            "target/before-complete",
+            "--out-dir",
+            "target/before-complete-report"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--release",
+            "--offline",
+            "--locked"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "fmt",
+            "--all",
+            "--",
+            "--check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--offline",
+            "--locked"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--offline",
+            "--locked",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/quality",
+            "-p",
+            "test_*.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/protocol",
+            "-p",
+            "test_*.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/distribution"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "node",
+            "--test",
+            "shell/compact-report.test.cjs",
+            "shell/final-gap-self-scan.test.cjs",
+            "shell/prepare-code-scanning.test.cjs",
+            "shell/self-scan-backlog.test.cjs",
+            "shell/self-scan-policy.test.cjs"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "--version"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "git",
+            "rev-parse",
+            "HEAD"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "git",
+            "branch",
+            "--show-current"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "git",
+            "status",
+            "--short"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "rustc",
+            "-Vv"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "-V"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sysctl",
+            "-n",
+            "machdep.cpu.brand_string"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sysctl",
+            "-n",
+            "hw.memsize"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sysctl",
+            "-n",
+            "hw.ncpu"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "git diff --check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "cargo test -p pqc_scan_core --test task_ids --offline --locked"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "node",
+            "--test",
+            "shell/*.test.cjs"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task044-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "python3 -m unittest discover -s tests/quality -p 'test_*.py'"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "node --test shell/*.test.cjs"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "python3 -m unittest discover -s tests/distribution -v"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "python3 -m unittest discover -s tests/protocol -p 'test_*.py'"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "cargo fmt --all --check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "git diff --check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "Ruby YAML parse/original mapping; Python py_compile; local Markdown links; evidence SHA-256 audit"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task045-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/quality",
+            "-p",
+            "test_*.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "-m",
+            "py_compile",
+            "tests/quality/task045/entry.py",
+            "tests/quality/task045/study.py",
+            "tests/quality/test_mutation045.py",
+            "tests/protocol/container_entry.py",
+            "tests/protocol/container_runner.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "fmt",
+            "--all",
+            "--check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task046-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/quality",
+            "-p",
+            "test_*.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--all-features",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task047-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--all-features",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "-p",
+            "pqc_scan_detectors",
+            "-p",
+            "pqc_scan_report",
+            "-p",
+            "pqc_scan_probe_ssh",
+            "--test",
+            "quality047",
+            "--all-features",
+            "--no-run",
+            "--locked",
+            "--offline",
+            "--message-format=json"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "-p",
+            "pqc_scan_probe_tls",
+            "--lib",
+            "--all-features",
+            "--no-run",
+            "--locked",
+            "--offline",
+            "--message-format=json"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task048-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "openssl",
+            "x509",
+            "-inform",
+            "DER",
+            "-in",
+            "crates/pqc_scan_detectors/tests/fixtures/certificates/rsa2048.der",
+            "-noout",
+            "-text"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "fmt",
+            "--all",
+            "--check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--all-features",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/quality",
+            "-p",
+            "test_*.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "node",
+            "--test",
+            "shell/compact-report.test.cjs"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/.pyenv/versions/3.12.7/bin/python3",
+            "tests/quality/task048/contracts.py",
+            "--raw",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-048/raw",
+            "--out",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-048"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task049-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_probe_tls",
+            "-p",
+            "pqc_scan_probe_ssh",
+            "--all-features",
+            "049",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "fmt",
+            "--all",
+            "--check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--all-features",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_probe_ssh",
+            "--all-features",
+            "--test",
+            "openssh",
+            "--",
+            "--ignored",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/usr/bin/python3",
+            "/source/tests/protocol/ssh-kex-product.py",
+            "--inside",
+            "--binary",
+            "/scratch/target/debug/pqc-scan",
+            "--out-dir",
+            "/scratch/evidence/ssh-kex"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "rustc -Vv; cargo -V; /usr/sbin/sshd -V 2>&1; /opt/openssh/sbin/sshd -V 2>&1; python3 -V"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--all-features",
+            "--locked",
+            "--offline",
+            "--no-run",
+            "--message-format=json"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task050-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--release",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_cli"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/usr/bin/python3",
+            "/source/tests/quality/run.py",
+            "--performance-study",
+            "--binary",
+            "/scratch/build-default/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--features-label",
+            "default",
+            "--out-dir",
+            "/scratch/evidence/default-1"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/usr/bin/python3",
+            "/source/tests/quality/run.py",
+            "--performance-study",
+            "--binary",
+            "/scratch/build-default/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--features-label",
+            "default",
+            "--out-dir",
+            "/scratch/evidence/default-2"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--release",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_cli",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/usr/bin/python3",
+            "/source/tests/quality/run.py",
+            "--performance-study",
+            "--binary",
+            "/scratch/build-all-features/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--features-label",
+            "all-features",
+            "--out-dir",
+            "/scratch/evidence/all-features-1"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/usr/bin/python3",
+            "/source/tests/quality/run.py",
+            "--performance-study",
+            "--binary",
+            "/scratch/build-all-features/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--features-label",
+            "all-features",
+            "--out-dir",
+            "/scratch/evidence/all-features-2"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--release",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--release",
+            "--workspace",
+            "--all-features",
+            "--locked",
+            "--offline",
+            "--target-dir",
+            "target/quality-task-050/build-host-all"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "env",
+            "PQC050_BINARY=/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/quality",
+            "-p",
+            "test_*.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "fmt",
+            "--all",
+            "--check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests/protocol",
+            "-p",
+            "test_container_runner.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--performance-study",
+            "--binary",
+            "target/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--out-dir",
+            "target/quality-task-050/host-default-final-2"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--performance-study",
+            "--binary",
+            "target/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--out-dir",
+            "target/quality-task-050/host-default-final-3"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--skip-benchmarks",
+            "--binary",
+            "target/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--out-dir",
+            "target/quality-task-050/accuracy-default"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--skip-benchmarks",
+            "--binary",
+            "target/quality-task-050/build-host-all/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--features-label",
+            "all-features",
+            "--out-dir",
+            "target/quality-task-050/accuracy-all"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/run.py",
+            "--skip-benchmarks",
+            "--binary",
+            "target/release/pqc-scan",
+            "--build-profile",
+            "release",
+            "--out-dir",
+            "target/quality-task-050/accuracy-default-final"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tests/quality/task050/compare.py",
+            "--runs",
+            "target/quality-task-050/host-default-final-2",
+            "target/quality-task-050/host-default-final-3",
+            "target/quality-task-050/confined-final/default-1",
+            "target/quality-task-050/confined-final/default-2",
+            "target/quality-task-050/confined-final/all-features-1",
+            "target/quality-task-050/confined-final/all-features-2",
+            "--out",
+            "target/quality-task-050/aggregate-r4"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc050-8x1ndwb_/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-2/failure-threshold",
+            "--fail-on",
+            "high"
+          ],
+          "exitCode": 2
+        },
+        {
+          "argv": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc050-8x1ndwb_/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-2/failure-incomplete",
+            "--require-complete"
+          ],
+          "exitCode": 3
+        },
+        {
+          "argv": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc050-8x1ndwb_/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/tmp/pqc050-8x1ndwb_/absent-rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-2/failure-invalid-rules"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc050-8x1ndwb_/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-2/failure-deadline"
+          ],
+          "exitCode": -9
+        },
+        {
+          "argv": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc050-tdc5jlrs/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-3/failure-threshold",
+            "--fail-on",
+            "high"
+          ],
+          "exitCode": 2
+        },
+        {
+          "argv": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc050-tdc5jlrs/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-3/failure-incomplete",
+            "--require-complete"
+          ],
+          "exitCode": 3
+        },
+        {
+          "argv": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc050-tdc5jlrs/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/tmp/pqc050-tdc5jlrs/absent-rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-3/failure-invalid-rules"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "/Users/waka/development/pqc/pqc-scan/target/release/pqc-scan",
+            "scan",
+            "/tmp/pqc050-tdc5jlrs/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/Users/waka/development/pqc/pqc-scan/rules",
+            "--out-dir",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-050/host-default-final-3/failure-deadline"
+          ],
+          "exitCode": -9
+        },
+        {
+          "argv": [
+            "/scratch/build-default/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-aswaorcp/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/default-1/failure-threshold",
+            "--fail-on",
+            "high"
+          ],
+          "exitCode": 2
+        },
+        {
+          "argv": [
+            "/scratch/build-default/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-aswaorcp/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/default-1/failure-incomplete",
+            "--require-complete"
+          ],
+          "exitCode": 3
+        },
+        {
+          "argv": [
+            "/scratch/build-default/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-aswaorcp/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/scratch/tmp/pqc050-aswaorcp/absent-rules",
+            "--out-dir",
+            "/scratch/evidence/default-1/failure-invalid-rules"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "/scratch/build-default/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-aswaorcp/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/default-1/failure-deadline"
+          ],
+          "exitCode": -9
+        },
+        {
+          "argv": [
+            "/scratch/build-default/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-19eo7hl7/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/default-2/failure-threshold",
+            "--fail-on",
+            "high"
+          ],
+          "exitCode": 2
+        },
+        {
+          "argv": [
+            "/scratch/build-default/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-19eo7hl7/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/default-2/failure-incomplete",
+            "--require-complete"
+          ],
+          "exitCode": 3
+        },
+        {
+          "argv": [
+            "/scratch/build-default/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-19eo7hl7/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/scratch/tmp/pqc050-19eo7hl7/absent-rules",
+            "--out-dir",
+            "/scratch/evidence/default-2/failure-invalid-rules"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "/scratch/build-default/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-19eo7hl7/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/default-2/failure-deadline"
+          ],
+          "exitCode": -9
+        },
+        {
+          "argv": [
+            "/scratch/build-all-features/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-xpsyc7ho/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/all-features-1/failure-threshold",
+            "--fail-on",
+            "high"
+          ],
+          "exitCode": 2
+        },
+        {
+          "argv": [
+            "/scratch/build-all-features/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-xpsyc7ho/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/all-features-1/failure-incomplete",
+            "--require-complete"
+          ],
+          "exitCode": 3
+        },
+        {
+          "argv": [
+            "/scratch/build-all-features/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-xpsyc7ho/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/scratch/tmp/pqc050-xpsyc7ho/absent-rules",
+            "--out-dir",
+            "/scratch/evidence/all-features-1/failure-invalid-rules"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "/scratch/build-all-features/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-xpsyc7ho/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/all-features-1/failure-deadline"
+          ],
+          "exitCode": -9
+        },
+        {
+          "argv": [
+            "/scratch/build-all-features/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-upz_ab00/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/all-features-2/failure-threshold",
+            "--fail-on",
+            "high"
+          ],
+          "exitCode": 2
+        },
+        {
+          "argv": [
+            "/scratch/build-all-features/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-upz_ab00/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/all-features-2/failure-incomplete",
+            "--require-complete"
+          ],
+          "exitCode": 3
+        },
+        {
+          "argv": [
+            "/scratch/build-all-features/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-upz_ab00/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/scratch/tmp/pqc050-upz_ab00/absent-rules",
+            "--out-dir",
+            "/scratch/evidence/all-features-2/failure-invalid-rules"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "/scratch/build-all-features/release/pqc-scan",
+            "scan",
+            "/scratch/tmp/pqc050-upz_ab00/failures",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--threads",
+            "1",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/evidence/all-features-2/failure-deadline"
+          ],
+          "exitCode": -9
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task051-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "ruby",
+            "-r",
+            "yaml",
+            "-e",
+            "t=YAML.load_file(\"tasks/051/task.yaml\"); abort \"wrong status\" unless t[\"id\"] == \"051\" && t[\"status\"] == \"done\"; puts \"051 done\""
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "Python ast.parse on package-release.py, review-dependencies.py, run-dependency-review.py and test_dependency_review.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "sh",
+            "-c",
+            "git diff --check"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task052-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "target/quality-task-052/validate-assessment.py"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/usr/bin/sandbox-exec",
+            "-f",
+            "/Users/waka/development/pqc/pqc-scan/tasks/052/evidence/assessment-20261115/scorecard/final-sandbox.sb",
+            "/Users/waka/development/pqc/pqc-scan/target/quality-task-052/tools/scorecard",
+            "--repo=github.com/wakaken/pqc-scan",
+            "--format=json",
+            "--show-details"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Unknown",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task055-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--all-features",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task056-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "cargo",
+            "fmt",
+            "--all",
+            "--",
+            "--check"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "python3",
+            "tasks/056/evidence/remediation-20261115/compare.py.txt"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/rustc",
+            "-vV"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/cargo",
+            "--version"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/.rustup/toolchains/1.93.1-aarch64-apple-darwin/bin/clippy-driver",
+            "--version"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+            "--version"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_core",
+            "--test",
+            "recommendation056",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_report",
+            "--test",
+            "recommendation056",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_core",
+            "--test",
+            "quality056",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_cli",
+            "--test",
+            "quality056_pipeline",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_core",
+            "--all-features",
+            "--target-dir",
+            "/private/tmp/pqc056-native-7ezeuaru/work/build-all",
+            "--test",
+            "quality056",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_cli",
+            "--all-features",
+            "--target-dir",
+            "/private/tmp/pqc056-native-7ezeuaru/work/build-all",
+            "--test",
+            "quality056_pipeline",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--all-features",
+            "--locked",
+            "--offline",
+            "--target-dir",
+            "/private/tmp/pqc056-native-7ezeuaru/work/build-all",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task057-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--all-features",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline",
+            "--all-features"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/scratch/control057",
+            "success"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/scratch/control057",
+            "panic"
+          ],
+          "exitCode": 42
+        },
+        {
+          "argv": [
+            "/scratch/control057",
+            "error"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "/scratch/control057",
+            "signal"
+          ],
+          "exitCode": -6
+        },
+        {
+          "argv": [
+            "/scratch/control057",
+            "timeout"
+          ],
+          "exitCode": -9
+        },
+        {
+          "argv": [
+            "/scratch/control057",
+            "cpu"
+          ],
+          "exitCode": -24
+        },
+        {
+          "argv": [
+            "/scratch/target/debug/pqc-scan",
+            "scan",
+            "/scratch/static057",
+            "--rules-dir",
+            "/source/rules",
+            "--out-dir",
+            "/scratch/static057-output",
+            "--format",
+            "all",
+            "--diagnostics",
+            "--inventory-json",
+            "--cyclonedx-17"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [],
+      "sourceApplicability": "Partial",
+      "adequacyStatus": "Not Tested",
+      "reason": "Incomplete, stale or source-mismatched review evidence; command success alone is insufficient"
+    },
+    {
+      "record": "task058-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_report",
+            "--test",
+            "compatibility058",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_report",
+            "--test",
+            "recommendation056",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_cli",
+            "--test",
+            "output_contracts048",
+            "--",
+            "--nocapture"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 101
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--locked",
+            "--offline",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--workspace",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "install",
+            "--locked",
+            "--offline",
+            "--path",
+            "crates/pqc_scan_cli",
+            "--root",
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_cli",
+            "--all-features",
+            "--target-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/build-all",
+            "--test",
+            "cli_information"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "clippy",
+            "--workspace",
+            "--all-targets",
+            "--all-features",
+            "--locked",
+            "--offline",
+            "--target-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/build-all",
+            "--",
+            "-D",
+            "warnings"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--release",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_cli",
+            "--features",
+            "probe-tls,probe-ssh,probe-ssh-kex",
+            "--target-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/release-network"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "--version"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "scan",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "rules",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "diff",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan",
+            "--version"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan",
+            "scan",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan",
+            "rules",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan",
+            "diff",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan",
+            "probe",
+            "tls",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan",
+            "probe",
+            "ssh",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/release-network/release/pqc-scan",
+            "probe",
+            "ssh-kex",
+            "--help"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "--not-valid"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "scan",
+            "/private/tmp/pqc056-native-qfg2u55y/work/user-project",
+            "--native-json"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "rules",
+            "list",
+            "--rules-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "rules",
+            "show",
+            "TLS_RSA_KEY_EXCHANGE",
+            "--rules-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "scan",
+            "/private/tmp/pqc056-native-qfg2u55y/work/user-project",
+            "--rules-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules",
+            "--threads",
+            "2",
+            "--out-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/plain"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "scan",
+            "/private/tmp/pqc056-native-qfg2u55y/work/user-project",
+            "--rules-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules",
+            "--threads",
+            "2",
+            "--format",
+            "all",
+            "--lang",
+            "en",
+            "--diagnostics",
+            "--inventory-json",
+            "--cyclonedx-17",
+            "--policy-profile",
+            "migration-review-v1",
+            "--repository-scope",
+            "public058",
+            "--out-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/en"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "scan",
+            "/private/tmp/pqc056-native-qfg2u55y/work/user-project",
+            "--rules-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules",
+            "--threads",
+            "2",
+            "--format",
+            "all",
+            "--lang",
+            "ja",
+            "--diagnostics",
+            "--inventory-json",
+            "--cyclonedx-17",
+            "--policy-profile",
+            "migration-review-v1",
+            "--repository-scope",
+            "public058",
+            "--out-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/ja"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "scan",
+            "/private/tmp/pqc056-native-qfg2u55y/work/user-project",
+            "--rules-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules",
+            "--threads",
+            "2",
+            "--fail-on",
+            "high",
+            "--diagnostics",
+            "--out-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/threshold"
+          ],
+          "exitCode": 2
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "scan",
+            "/private/tmp/pqc056-native-qfg2u55y/work/user-project",
+            "--rules-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules",
+            "--threads",
+            "2",
+            "--require-complete",
+            "--diagnostics",
+            "--out-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/incomplete"
+          ],
+          "exitCode": 3
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "scan",
+            "/private/tmp/pqc056-native-qfg2u55y/work/user-project",
+            "--rules-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules",
+            "--threads",
+            "2",
+            "--require-complete",
+            "--fail-on",
+            "high",
+            "--diagnostics",
+            "--out-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/precedence"
+          ],
+          "exitCode": 3
+        },
+        {
+          "argv": [
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/bin/pqc-scan",
+            "scan",
+            "/private/tmp/pqc056-native-qfg2u55y/work/nonexistent",
+            "--rules-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/installed/rules",
+            "--out-dir",
+            "/private/tmp/pqc056-native-qfg2u55y/work/missing-out"
+          ],
+          "exitCode": 1
+        }
+      ],
+      "reviews": [
+        {
+          "stage": "implementation",
+          "reviewer": "/root/task056_implementation_review",
+          "status": "accepted",
+          "artifact": "tasks/058/TASK-058-REVIEWS.md",
+          "sourceDigest": "fce1598d84c90137323269b79dbaa30f96370ca5cbb69f477ebaa1a9e3ac0ada",
+          "scope": "Original accepted measurement and declared source population only; current applicability is checked separately"
+        },
+        {
+          "stage": "test",
+          "reviewer": "/root/task056_test_review",
+          "status": "accepted",
+          "artifact": "tasks/058/TASK-058-REVIEWS.md",
+          "sourceDigest": "fce1598d84c90137323269b79dbaa30f96370ca5cbb69f477ebaa1a9e3ac0ada",
+          "scope": "Original accepted measurement and declared source population only; current applicability is checked separately"
+        }
+      ],
+      "sourceApplicability": "Verified",
+      "adequacyStatus": "Verified",
+      "reason": "Two source-bound stages accepted for the declared matching source population"
+    },
+    {
+      "record": "task059-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "cargo",
+            "test",
+            "--workspace",
+            "--all-features",
+            "--locked",
+            "--offline"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+            "/Users/waka/development/pqc/pqc-scan/scripts/package-release.py",
+            "--source-root",
+            "/Users/waka/development/pqc/pqc-scan",
+            "--binary",
+            "/private/tmp/pqc056-native-yx8bv01m/work/static-pqc-scan",
+            "--variant",
+            "static",
+            "--out-dir",
+            "/private/tmp/pqc056-native-yx8bv01m/work/static-archive"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+            "/Users/waka/development/pqc/pqc-scan/scripts/package-release.py",
+            "--verify",
+            "/private/tmp/pqc056-native-yx8bv01m/work/static-archive/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "/Users/waka/.pyenv/versions/3.12.7/bin/python3.12",
+            "/Users/waka/development/pqc/pqc-scan/tests/distribution/check-install.py",
+            "/private/tmp/pqc056-native-yx8bv01m/work/static-archive/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz",
+            "--out-dir",
+            "/private/tmp/pqc056-native-yx8bv01m/work/static-install"
+          ],
+          "exitCode": 1
+        }
+      ],
+      "reviews": [
+        {
+          "stage": "implementation",
+          "reviewer": "/root/task056_implementation_review",
+          "status": "accepted",
+          "artifact": "tasks/059/TASK-059-REVIEWS.md",
+          "sourceDigest": "cd074d2bac397911b48be6be10edfb2122ba9efd7ca2275e04532a9a73c79384",
+          "scope": "Original accepted measurement and declared source population only; current applicability is checked separately"
+        },
+        {
+          "stage": "test",
+          "reviewer": "/root/task056_test_review",
+          "status": "accepted",
+          "artifact": "tasks/059/TASK-059-REVIEWS.md",
+          "sourceDigest": "cd074d2bac397911b48be6be10edfb2122ba9efd7ca2275e04532a9a73c79384",
+          "scope": "Original accepted measurement and declared source population only; current applicability is checked separately"
+        }
+      ],
+      "sourceApplicability": "Verified",
+      "adequacyStatus": "Verified",
+      "reason": "Two source-bound stages accepted for the declared matching source population"
+    },
+    {
+      "record": "task060-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--release",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_cli"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "cargo",
+            "build",
+            "--release",
+            "--locked",
+            "--offline",
+            "-p",
+            "pqc_scan_cli",
+            "--features",
+            "probe-tls,probe-ssh,probe-ssh-kex"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [
+        {
+          "stage": "implementation",
+          "reviewer": "/root/task056_implementation_review",
+          "status": "accepted",
+          "artifact": "tasks/060/TASK-060-REVIEWS.md",
+          "sourceDigest": "cd074d2bac397911b48be6be10edfb2122ba9efd7ca2275e04532a9a73c79384",
+          "scope": "Original accepted measurement and declared source population only; current applicability is checked separately"
+        },
+        {
+          "stage": "test",
+          "reviewer": "/root/task056_test_review",
+          "status": "accepted",
+          "artifact": "tasks/060/TASK-060-REVIEWS.md",
+          "sourceDigest": "cd074d2bac397911b48be6be10edfb2122ba9efd7ca2275e04532a9a73c79384",
+          "scope": "Original accepted measurement and declared source population only; current applicability is checked separately"
+        }
+      ],
+      "sourceApplicability": "Verified",
+      "adequacyStatus": "Verified",
+      "reason": "Two source-bound stages accepted for the declared matching source population"
+    },
+    {
+      "record": "task061-recorded-study",
+      "executionStatus": "Unknown",
+      "commands": [
+        {
+          "argv": [
+            "openssl",
+            "genpkey",
+            "-algorithm",
+            "ED25519",
+            "-out",
+            "/scratch/fixture-private.pem"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkey",
+            "-in",
+            "/scratch/fixture-private.pem",
+            "-pubout",
+            "-out",
+            "/scratch/fixture-public.pem"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/static-statement.json",
+            "-out",
+            "/scratch/static-statement.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/static-statement.json",
+            "-sigfile",
+            "/scratch/static-statement.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/static-sourceInputsSha256.json",
+            "-out",
+            "/scratch/static-sourceInputsSha256.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/static-sourceInputsSha256.json",
+            "-sigfile",
+            "/scratch/static-sourceInputsSha256.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/static-builderId.json",
+            "-out",
+            "/scratch/static-builderId.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/static-builderId.json",
+            "-sigfile",
+            "/scratch/static-builderId.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/static-target.json",
+            "-out",
+            "/scratch/static-target.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/static-target.json",
+            "-sigfile",
+            "/scratch/static-target.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/static-variant.json",
+            "-out",
+            "/scratch/static-variant.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/static-variant.json",
+            "-sigfile",
+            "/scratch/static-variant.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/static-preparationOnly.json",
+            "-out",
+            "/scratch/static-preparationOnly.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/static-preparationOnly.json",
+            "-sigfile",
+            "/scratch/static-preparationOnly.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/static-statement.json",
+            "-sigfile",
+            "/scratch/static-broken.sig"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "openssl",
+            "genpkey",
+            "-algorithm",
+            "ED25519",
+            "-out",
+            "/scratch/static-attacker-private.pem"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/static-attacker-private.pem",
+            "-in",
+            "/scratch/static-statement.json",
+            "-out",
+            "/scratch/static-statement.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/static-statement.json",
+            "-sigfile",
+            "/scratch/static-statement.json.sig"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/network-statement.json",
+            "-out",
+            "/scratch/network-statement.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/network-statement.json",
+            "-sigfile",
+            "/scratch/network-statement.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/network-sourceInputsSha256.json",
+            "-out",
+            "/scratch/network-sourceInputsSha256.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/network-sourceInputsSha256.json",
+            "-sigfile",
+            "/scratch/network-sourceInputsSha256.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/network-builderId.json",
+            "-out",
+            "/scratch/network-builderId.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/network-builderId.json",
+            "-sigfile",
+            "/scratch/network-builderId.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/network-target.json",
+            "-out",
+            "/scratch/network-target.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/network-target.json",
+            "-sigfile",
+            "/scratch/network-target.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/network-variant.json",
+            "-out",
+            "/scratch/network-variant.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/network-variant.json",
+            "-sigfile",
+            "/scratch/network-variant.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/fixture-private.pem",
+            "-in",
+            "/scratch/network-preparationOnly.json",
+            "-out",
+            "/scratch/network-preparationOnly.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/network-preparationOnly.json",
+            "-sigfile",
+            "/scratch/network-preparationOnly.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/network-statement.json",
+            "-sigfile",
+            "/scratch/network-broken.sig"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "openssl",
+            "genpkey",
+            "-algorithm",
+            "ED25519",
+            "-out",
+            "/scratch/network-attacker-private.pem"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-sign",
+            "-rawin",
+            "-inkey",
+            "/scratch/network-attacker-private.pem",
+            "-in",
+            "/scratch/network-statement.json",
+            "-out",
+            "/scratch/network-statement.json.sig"
+          ],
+          "exitCode": 0
+        },
+        {
+          "argv": [
+            "openssl",
+            "pkeyutl",
+            "-verify",
+            "-rawin",
+            "-pubin",
+            "-inkey",
+            "/scratch/fixture-public.pem",
+            "-in",
+            "/scratch/network-statement.json",
+            "-sigfile",
+            "/scratch/network-statement.json.sig"
+          ],
+          "exitCode": 1
+        },
+        {
+          "argv": [
+            "docker",
+            "create",
+            "--name",
+            "pqc061-fixture-f04037ca00e3438d93100a61f205c0ae",
+            "--network",
+            "none",
+            "--read-only",
+            "--user",
+            "65534:65534",
+            "--log-driver",
+            "none",
+            "--cap-drop",
+            "ALL",
+            "--security-opt",
+            "no-new-privileges",
+            "--memory",
+            "512m",
+            "--memory-swap",
+            "512m",
+            "--cpus",
+            "1",
+            "--pids-limit",
+            "32",
+            "--shm-size",
+            "1m",
+            "--ulimit",
+            "core=0:0",
+            "--ulimit",
+            "fsize=67108864:67108864",
+            "--ulimit",
+            "nofile=128:128",
+            "--ulimit",
+            "cpu=120:120",
+            "--tmpfs",
+            "/scratch:rw,exec,nosuid,nodev,size=256m,mode=1777",
+            "--mount",
+            "type=bind,src=/tmp/pqc061-source-jtgaj8lh/source,dst=/source,readonly",
+            "--workdir",
+            "/source",
+            "--entrypoint",
+            "/usr/bin/env",
+            "sha256:16a329d30bd8f2b8d12353b678777392203d3e3f567505709a8ca4a408f95bb1",
+            "-i",
+            "PATH=/usr/local/cargo/bin:/usr/bin:/bin",
+            "HOME=/scratch/home",
+            "TMPDIR=/scratch/tmp",
+            "PYTHONDONTWRITEBYTECODE=1",
+            "LC_ALL=C",
+            "python3",
+            "/source/worker.py"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "reviews": [
+        {
+          "stage": "implementation",
+          "reviewer": "/root/task056_implementation_review",
+          "status": "accepted",
+          "artifact": "tasks/061/TASK-061-REVIEWS.md",
+          "sourceDigest": "cd074d2bac397911b48be6be10edfb2122ba9efd7ca2275e04532a9a73c79384",
+          "scope": "Original accepted measurement and declared source population only; current applicability is checked separately"
+        },
+        {
+          "stage": "test",
+          "reviewer": "/root/task056_test_review",
+          "status": "accepted",
+          "artifact": "tasks/061/TASK-061-REVIEWS.md",
+          "sourceDigest": "cd074d2bac397911b48be6be10edfb2122ba9efd7ca2275e04532a9a73c79384",
+          "scope": "Original accepted measurement and declared source population only; current applicability is checked separately"
+        }
+      ],
+      "sourceApplicability": "Verified",
+      "adequacyStatus": "Verified",
+      "reason": "Two source-bound stages accepted for the declared matching source population"
+    }
+  ]
+}

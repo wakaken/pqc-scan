@@ -1,0 +1,80 @@
+// Actual Chrome/CDP acceptance using only a fresh profile and dedicated local reports.
+import {createServer} from 'node:http';
+import {readFile,writeFile,mkdir,mkdtemp,rm} from 'node:fs/promises';
+import {openSync,closeSync} from 'node:fs';
+import {spawn,execFileSync} from 'node:child_process';
+import {tmpdir} from 'node:os';
+import {resolve,join} from 'node:path';
+import assert from 'node:assert/strict';
+const evidence=resolve('tasks/058/evidence/compatibility-20261115');
+const root=resolve('tasks/058/evidence/compatibility-20261115/native-r2/user-reports');
+const out=join(evidence,'browser-user-flow-r2');await mkdir(out);
+const allowed=new Set(['en','ja'].flatMap(l=>['report.html','report.md','report.json','report.sarif'].map(f=>'/'+l+'/'+f)));
+const server=createServer(async(req,res)=>{
+ try {const path=new URL(req.url,'http://localhost').pathname;
+  if(!allowed.has(path)){res.writeHead(404).end();return;}
+  res.setHeader('Content-Type',path.endsWith('.html')?'text/html; charset=utf-8':'text/plain; charset=utf-8');
+  res.end(await readFile(join(root,path.slice(1))));
+ } catch {res.writeHead(500).end();}
+});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const origin=`http://127.0.0.1:${server.address().port}`;
+const profile=await mkdtemp(join(tmpdir(),'pqc056-chrome-'));
+const chrome='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const fd=openSync(join(out,'chrome.log'),'w');
+const args=['--headless=new','--no-first-run','--no-default-browser-check','--disable-sync','--disable-extensions','--disable-background-networking','--remote-debugging-address=127.0.0.1','--remote-debugging-port=0',`--user-data-dir=${profile}`,'about:blank'];
+const proc=spawn(chrome,args,{stdio:['ignore','ignore',fd]});
+let socket;const rows=[];const network=[];const exceptions=[];
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+try {
+ let port;
+ for(let i=0;i<100;i++){try{port=Number((await readFile(join(profile,'DevToolsActivePort'),'utf8')).split('\n')[0]);break;}catch{await delay(100);}}
+ assert(port,'Chrome debugger did not start');
+ const targets=await(await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+ socket=new WebSocket(targets.find(t=>t.type==='page').webSocketDebuggerUrl);
+ await new Promise((r,j)=>{socket.onopen=r;socket.onerror=j;});
+ let next=0;const pending=new Map();
+ const send=(method,params={})=>new Promise((r,j)=>{const id=++next;const timer=setTimeout(()=>{pending.delete(id);j(Error('CDP timeout '+method));},10000);pending.set(id,{r,j,timer});socket.send(JSON.stringify({id,method,params}));});
+ socket.onmessage=async e=>{const msg=JSON.parse(e.data);
+  if(msg.id){const p=pending.get(msg.id);if(p){clearTimeout(p.timer);pending.delete(msg.id);msg.error?p.j(Error(JSON.stringify(msg.error))):p.r(msg.result);}}
+  else if(msg.method==='Fetch.requestPaused'){
+   const {requestId,request}=msg.params;
+   network.push(request.url);
+   await send(request.url.startsWith(origin+'/')?'Fetch.continueRequest':'Fetch.failRequest',request.url.startsWith(origin+'/')?{requestId}:{requestId,errorReason:'BlockedByClient'});
+  }else if(msg.method==='Runtime.exceptionThrown')exceptions.push(msg.params.exceptionDetails);
+ };
+ const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;};
+ const screenshot=async name=>{const r=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});await writeFile(join(out,name),Buffer.from(r.data,'base64'));};
+ await send('Page.enable');await send('Page.bringToFront');await send('Emulation.setFocusEmulationEnabled',{enabled:true});await send('Runtime.enable');await send('Network.enable');await send('Fetch.enable',{patterns:[{urlPattern:'*'}]});
+ for(const language of ['en','ja']){
+  await send('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});
+  await send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
+  const url=`${origin}/${language}/report.html`;await send('Page.navigate',{url});
+  let loaded=false;for(let i=0;i<100;i++){loaded=await evaluate(`location.href===${JSON.stringify(url)} && document.readyState==='complete' && document.querySelectorAll('[data-rule]').length>=1`);if(loaded)break;await delay(50);}assert(loaded);
+  await screenshot(language+'-desktop.png');
+  const first=await evaluate(`({title:document.title,h1:document.querySelector('h1').innerText,width:innerWidth,scrollWidth:document.documentElement.scrollWidth,lang:document.documentElement.lang})`);
+  assert(first.scrollWidth<=1280);assert.equal(first.lang,language);
+  await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
+  const before=await evaluate(`(()=>{window.__keys=[];const d=document.querySelector('[data-rule]');const summary=d.querySelector('summary');summary.addEventListener('keydown',e=>window.__keys.push({key:e.key,code:e.code,trusted:e.isTrusted}));summary.focus();return d.open;})()`);
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',text:'\r',unmodifiedText:'\r',windowsVirtualKeyCode:13,nativeVirtualKeyCode:36});
+  await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+  await delay(120);const after=await evaluate(`document.querySelector('[data-rule]').open`);const keyboard=await evaluate(`({events:window.__keys,focused:document.hasFocus(),active:document.activeElement.tagName})`);await writeFile(join(out,language+'-keyboard.json'),JSON.stringify({before,after,keyboard},null,2));assert.notEqual(before,after);
+  await evaluate(`document.querySelector('[data-search]').focus()`);await send('Input.insertText',{text:'TLS_RSA_KEY_EXCHANGE'});await delay(120);
+  const filtered=await evaluate(`Array.from(document.querySelectorAll('[data-rule]')).filter(x=>!x.hidden&&getComputedStyle(x).display!=='none').length`);assert.equal(filtered,1);
+  await evaluate(`(()=>{const i=document.querySelector('[data-search]');i.value='';i.dispatchEvent(new Event('input',{bubbles:true}));document.querySelectorAll('details').forEach(d=>d.open=true);})()`);
+  const text=await evaluate('document.body.innerText');
+  const facts=language==='en'?['Gemfile','could not be checked fully','TLS_RSA_KEY_EXCHANGE']:['Gemfile','一部のファイル・検査を確認できていません','TLS_RSA_KEY_EXCHANGE'];
+  for(const fact of facts)assert(text.includes(fact),language+' missing '+fact);
+  await evaluate(`document.querySelector('.inspection-context').scrollIntoView({block:'start'})`);await screenshot(language+'-inspection.png');
+  await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+  await evaluate('scrollTo(0,0)');await delay(80);await screenshot(language+'-mobile.png');
+  const mobile=await evaluate(`({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,screenWidth:screen.width,wide:Array.from(document.querySelectorAll('*')).filter(e=>e.getBoundingClientRect().right>400).slice(0,25).map(e=>({tag:e.tagName,cls:e.className,right:e.getBoundingClientRect().right,text:e.textContent.slice(0,130),width:getComputedStyle(e).width,overflow:getComputedStyle(e).overflowX}))})`);await writeFile(join(out,language+'-viewport.json'),JSON.stringify(mobile,null,2));assert.equal(mobile.width,390,'Narrow report must keep390px layout viewport');assert(mobile.scrollWidth<=390);
+  rows.push({language,url,firstScreen:first,mobile,keyboardSummary:{before,after},offlineFilterVisibleRules:filtered,requiredFacts: facts,screenshots:[language+'-desktop.png',language+'-inspection.png',language+'-mobile.png']});
+ }
+ assert.equal(exceptions.length,0);
+ await writeFile(join(out,'RESULT.json'),JSON.stringify({browser:execFileSync(chrome,['--version'],{encoding:'utf8'}).trim(),args:args.map(a=>a.startsWith('--user-data-dir=')?'--user-data-dir=<fresh temporary profile>':a),rows,requests:network,exceptions,scope:'Actual headless Chrome. Only eight dedicated synthetic report files served on127.0.0.1. External page requests blocked; after load, offline mode exercised native keyboard details and search. No user browser profile or visible tab touched.'},null,2)+'\n');
+ console.log('Actual browser acceptance passed:',rows.length,'languages; desktop/mobile; keyboard; loaded-offline');
+} finally {
+ socket?.close();proc.kill('SIGTERM');await new Promise(r=>{if(proc.exitCode!==null)r();else{proc.once('exit',r);setTimeout(()=>{proc.kill('SIGKILL');r();},3000).unref();}});
+ await new Promise(r=>server.close(r));closeSync(fd);await rm(profile,{recursive:true,force:true,maxRetries:3});
+}

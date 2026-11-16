@@ -1,0 +1,94 @@
+[
+  {
+    "command": [
+      "/preparation/cargo-audit",
+      "--version"
+    ],
+    "cwd": "/scratch/evidence/review",
+    "exit": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "8748580845bee726903e69bc4543958fb01e2594317e6c68bf80114bff13d541"
+  },
+  {
+    "command": [
+      "cargo",
+      "--version"
+    ],
+    "cwd": "/scratch/evidence/review",
+    "exit": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "57d704d9ad73ec7cc1b1a79aed6703333615865be6e3dc1ce269ea4ca7068227"
+  },
+  {
+    "command": [
+      "rustc",
+      "--version"
+    ],
+    "cwd": "/scratch/evidence/review",
+    "exit": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "ab618f0332ef360846e240d76633d486a18701c2fb3cc3951334ce03a6ca5793"
+  },
+  {
+    "command": [
+      "python3",
+      "--version"
+    ],
+    "cwd": "/scratch/evidence/review",
+    "exit": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "cb64a3a0ddcaff0ce013ea3612beda0be4a4d3537087505bd8850d8f8476f4f8"
+  },
+  {
+    "command": [
+      "/preparation/cargo-audit",
+      "audit",
+      "--db",
+      "/preparation/advisory-db",
+      "--no-fetch",
+      "--no-yanked",
+      "--stale",
+      "--file",
+      "/source/Cargo.lock",
+      "--json"
+    ],
+    "cwd": "/scratch/evidence/review",
+    "exit": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "df2406bf82034b5776fe11e3acaf27580761286936ede6ca4ff0090e9a792e6f"
+  },
+  {
+    "command": [
+      "cargo",
+      "metadata",
+      "--locked",
+      "--offline",
+      "--format-version",
+      "1",
+      "--filter-platform",
+      "aarch64-apple-darwin"
+    ],
+    "cwd": "/source",
+    "exit": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "88394213457652dfe5d8244c2c20510441ca579123f5906b0d73efcab899edc0"
+  },
+  {
+    "command": [
+      "cargo",
+      "metadata",
+      "--locked",
+      "--offline",
+      "--format-version",
+      "1",
+      "--filter-platform",
+      "aarch64-apple-darwin",
+      "--features",
+      "pqc_scan_cli/probe-tls,pqc_scan_cli/probe-ssh,pqc_scan_cli/probe-ssh-kex"
+    ],
+    "cwd": "/source",
+    "exit": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "47018ac3943553540e423361af9b9740c59f5ee08f4504c5ccceb1bbfc6aa8f1"
+  }
+]

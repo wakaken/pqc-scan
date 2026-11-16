@@ -1,0 +1,648 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>耐量子暗号への移行調査レポート</title><style>
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #1a2233;
+  --muted: #5e6b85;
+  --border: #dfe5f2;
+  --hl: #fff2c7;
+  --line: #f8fafc;
+  --critical: #9d0208;
+  --high: #d00000;
+  --medium: #ef8a17;
+  --low: #1f7a8c;
+  --info: #3d5a80;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", "Noto Sans", sans-serif;
+  background: linear-gradient(180deg, #eef3fb 0%, var(--bg) 100%);
+  color: var(--text);
+}
+.container {
+  width: min(1200px, 96vw);
+  margin: 0 auto;
+  padding: 20px 12px 40px;
+}
+.top h1 { margin: 0; font-size: 28px; }
+.meta { color: var(--muted); margin-top: 8px; }
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 18px 0 22px;
+}
+.metric {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.metric-label { color: var(--muted); font-size: 13px; }
+.metric-value { font-size: 24px; font-weight: 700; }
+.finding {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.finding h3 {
+  margin: 0;
+  font-size: 18px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.desc {
+  margin: 10px 0 10px;
+  color: #26324a;
+}
+.kv {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+.kv li {
+  margin: 4px 0;
+}
+.sev {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 3px 9px;
+  border: 1px solid transparent;
+}
+.sev.critical { background: #ffe5e8; color: var(--critical); border-color: #f3b8bf; }
+.sev.high { background: #ffe9e9; color: var(--high); border-color: #f7c0c0; }
+.sev.medium { background: #fff4df; color: var(--medium); border-color: #f7d7a2; }
+.sev.low { background: #e5f5f8; color: var(--low); border-color: #b8dde4; }
+.sev.info { background: #e7eef7; color: var(--info); border-color: #c7d6ea; }
+.count {
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid #d6dfef;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #f7f9fe;
+}
+.snippet-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.evidence-list {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: #fbfcff;
+}
+.occurrence-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: #fbfcff;
+}
+.occurrence-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+.snippet-title {
+  background: #f3f6fc;
+  border-bottom: 1px solid var(--border);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.code-lines {
+  background: #fbfcff;
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.2;
+}
+pre {
+  margin: 0;
+  overflow-x: auto;
+  background: #fbfcff;
+}
+code {
+  display: inline;
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+pre code {
+  display: block;
+  font-size: 13px;
+  line-height: 1.28;
+}
+.occ-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.occ-table th, .occ-table td {
+  border-top: 1px solid #e4ebf7;
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+.occ-table th {
+  background: #f8faff;
+  color: #3b4964;
+  font-weight: 600;
+}
+.occ-table th:nth-child(1),
+.occ-table td:nth-child(1) {
+  width: 54%;
+}
+.occ-table td:nth-child(2) {
+  width: 72px;
+  text-align: right;
+}
+.occ-table th:nth-child(3),
+.occ-table td:nth-child(3) {
+  width: 20%;
+}
+.occ-table th:nth-child(4),
+.occ-table td:nth-child(4) {
+  width: 20%;
+}
+.file-toggle {
+  border: 0;
+  background: transparent;
+  color: #1b5fbf;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.file-toggle code {
+  color: inherit;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.occ-table td code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.line {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  column-gap: 8px;
+  background: var(--line);
+  min-height: 1.5em;
+}
+.line.hl {
+  background: var(--hl);
+}
+.ln {
+  user-select: none;
+  text-align: right;
+  color: #73819c;
+  border-right: 1px solid #dfe5f2;
+  padding: 0 8px 0 0;
+  line-height: 1.5;
+}
+.tx {
+  white-space: pre;
+  line-height: 1.5;
+}
+.occ-snippet-row.hidden {
+  display: none;
+}
+.occ-snippet-inline {
+  background: #f9fbff;
+  border: 1px solid #e2e9f7;
+  border-radius: 8px;
+  padding: 8px;
+}
+.occ-snippet-inline .snippet-wrap {
+  margin-top: 8px;
+}
+.actions {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.actions h4 { margin: 0 0 8px; }
+.action {
+  border: 1px dashed #d7deed;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: #fafcff;
+}
+.action-title {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  font-size: 11px;
+  border: 1px solid #bfcbe3;
+  background: #edf2fb;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.refs {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+.code-example {
+  margin-top: 6px;
+}
+.code-label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+@media (max-width: 640px) {
+  .line { grid-template-columns: 46px 1fr; }
+  code { font-size: 12px; }
+  .occ-table th:nth-child(1),
+  .occ-table td:nth-child(1) {
+    width: 48%;
+  }
+}
+
+[hidden] { display: none !important; }
+[data-report-controls] { display:flex; gap:12px; flex-wrap:wrap; padding:16px; border:1px solid var(--line, #ced8de); border-radius:12px; margin:18px 0; }
+[data-report-controls] label { display:flex; flex-direction:column; gap:5px; }
+input, select, button { font:inherit; padding:7px 10px; max-width:100%; }
+button { cursor:pointer; }
+button:disabled { cursor:default; opacity:.5; }
+nav { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin:14px 0; }
+summary { cursor:pointer; padding:14px; overflow-wrap:anywhere; }
+summary:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid #087f8c; outline-offset:3px; }
+.rule-card { border:1px solid #b9cbd2; border-radius:12px; margin:12px 0; background:#ffffffd9; }
+.rule-card > summary { display:list-item; }
+.rule-card > summary > span { margin-right:12px; }
+.rule-body { padding:0 18px 18px; }
+.occurrence { border-top:1px solid #dce4e8; padding-bottom:8px; }
+.occurrence > :not(summary) { margin-left:16px; margin-right:16px; }
+.occ-match { display:block; color:#576975; font-size:.9em; }
+.next-step { display:block; padding-top:5px; }
+.action { border-left:3px solid #087f8c; padding:4px 14px; margin:14px 0; }
+.shared { margin-top:16px; background:#f2f6f7; border-radius:8px; }
+pre { overflow:auto; padding:12px; background:#eef2f4; }
+code, .tx { overflow-wrap:anywhere; }
+@media (max-width:640px) { .rule-body { padding:0 8px 10px; } .rule-card > summary > span { display:block; margin:4px 0; } [data-report-controls] label { width:100%; } .occurrence > :not(summary) { margin-left:8px; margin-right:8px; } }
+/* Inventory identifiers must fit narrow screens without altering their values. */
+.inspection-context table { width: 100%; table-layout: fixed; }
+.inspection-context th, .inspection-context td { overflow-wrap: anywhere; word-break: break-word; text-align: left; vertical-align: top; }
+
+.inspection-overview { border:1px solid #b9cbd2; border-left:5px solid #087f8c; border-radius:12px; padding:18px; margin:20px 0; background:#f3f8f9; overflow-wrap:anywhere; }
+.inspection-status { font-size:1.15rem; font-weight:700; }
+.inspection-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.inspection-metrics > div { background:#fff; border:1px solid #dce4e8; border-radius:8px; padding:12px; }
+.inspection-metrics strong { display:block; font-size:1.7rem; }
+.inspection-scope { padding-left:22px; }
+.inspection-reasons { border-top:1px solid #ced8de; margin-top:14px; }
+.inspection-reason { border-top:1px solid #dce4e8; padding:4px 12px; }
+@media (max-width:640px) { .inspection-metrics { grid-template-columns:1fr; } .inspection-overview { padding:12px; } }
+</style></head><body><main class="container" data-compact-report>
+<header class="top"><h1>耐量子暗号への移行調査レポート</h1><p class="meta">作成日時: 2026-11-15 00:00:00 UTC</p><p>コードや設定の手掛かりをまとめた調査結果です。</p></header>
+<section class="summary">
+<div class="metric"><div class="metric-label">対応を確認する候補</div><div class="metric-value">4</div></div>
+<div class="metric"><div class="metric-label">参考情報</div><div class="metric-value">0</div></div>
+<div class="metric"><div class="metric-label">調査したファイル</div><div class="metric-value">4</div></div>
+<div class="metric"><div class="metric-label">対象外のファイル</div><div class="metric-value">0</div></div>
+<div class="metric"><div class="metric-label">該当ファイル</div><div class="metric-value">4</div></div>
+</section>
+<p>重大度の内訳（全検出）：</p><p>
+<span class="sev medium">中: 4</span> </p>
+<section data-report-controls hidden aria-label="表示の絞り込み"><label>表示対象<select data-mode><option value="candidate">対応候補</option><option value="inventory">参考情報</option><option value="all">すべて</option></select></label><label>検索<input data-search type="search" placeholder="ルール・説明・ファイル名"></label><label>重大度<select data-severity><option value="">すべて</option>
+<option value="critical">緊急</option>
+<option value="high">高</option>
+<option value="medium">中</option>
+<option value="low">低</option>
+<option value="info">参考情報</option>
+</select></label><label>リスク<select data-risk><option value="">すべて</option>
+<option value="quantum-vulnerable">量子計算によるリスクあり</option>
+<option value="quantum-uncertain">要確認（実装や設定の確認が必要）</option>
+<option value="quantum-safe">PQC方式の参照あり（対応完了の保証ではありません）</option>
+<option value="non-quantum-risk">量子計算とは別のセキュリティ上の注意点</option>
+</select></label><button type="button" data-reset>条件を解除</button></section><noscript><p>JavaScriptを使わない場合は、全件を表示します。折りたたみは開けますが、検索・絞り込み・ページ切替は使えません。</p></noscript><p data-report-status role="status" aria-live="polite"></p><p data-empty hidden>表示条件に一致する検出はありません。表示対象や絞り込み条件を変更してください。調査全体で検出がなかったという意味ではありません。</p><nav data-group-pager hidden aria-label="ルール一覧のページ"><button type="button" data-prev>前へ</button><span data-page></span><button type="button" data-next>次へ</button></nav>
+<details class="rule-card" id="rule-0" data-rule data-page-size="20"><summary><span><strong>日本語の説明が未登録のルールです。原文：Synthetic migration reference</strong> <code>ENVOY056</code></span><span class="sev medium">中</span><span class="count">1 件</span><span>ファイル 1 / 表示対象 <span data-match-count></span></span></summary><div class="rule-body"><p>ルール作成者の確認事項（原文）：Review actual use before migration</p>
+<h4>検出箇所と対応</h4><nav data-occ-pager hidden><button type="button" data-occ-prev>前の箇所</button><span data-occ-status aria-live="polite"></span><button type="button" data-occ-next>次の箇所</button></nav><div data-occurrence-list>
+<details class="occurrence" id="finding-0" data-finding-id="ENVOY056" data-inventory="false" data-severity="medium" data-risk="quantum-vulnerable" data-search="ENVOY056 日本語の説明が未登録のルールです。原文：Synthetic migration reference envoy.yaml"><summary><code>envoy.yaml:1:1</code><span class="occ-match">synthetic reference</span><span class="next-step">対応: TLS 1.3を優先し、鍵共有方式を確認する</span></summary><p>判断の目安: 量子計算によるリスクあり</p><p>確認すること: ルール作成者の確認事項（原文）：Review actual use before migration</p><p>検出した記述: <code>synthetic reference</code></p>
+<p>周辺のコードは取得できませんでした。元のファイルを確認してください。</p>
+<h4>この箇所の対応</h4>
+<section class="action"><h4>EnvoyのPQC証明書署名の互換性を確認する <span class="badge">advisory</span></h4><p>鍵共有と証明書の署名は別です。プロバイダーと通信相手の対応を確認してください。</p><ol>
+<li>TLSの最低・最高バージョンを見直し、設定に静的RSA鍵交換があれば移行を検討してください。ECDHE_RSAのRSA認証とは区別してください。</li>
+<li>cipher_suitesはTLS 1.0〜1.2の設定で、TLS 1.3には適用されません。</li>
+<li>下流・上流の両方でPQC証明書署名の互換性を試し、段階的な展開と切戻しを準備してください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/security/ssl.html" rel="noopener noreferrer">https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/security/ssl.html</a></p>
+<p><a href="https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto" rel="noopener noreferrer">https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto</a></p>
+</details>
+</section>
+<section class="action"><h4>TLS 1.3を優先し、鍵共有方式を確認する <span class="badge">早めに対応</span></h4><p>RSA鍵交換や古いTLS設定は移行時の確認対象です。この一般的な確認項目だけで、RSAの利用が確定するわけではありません。</p><ol>
+<li>TLS 1.3を優先し、全接続先が対応していれば1.3だけを許可してください。TLS 1.0・1.1は無効にしてください。</li>
+<li>TLS 1.2は互換性が必要な場合に限り、安全な設定で残してください。理由を記録し、鍵共有方式のPQC対応も別に確認してください。</li>
+<li>クライアントと負荷分散装置を含め、互換性を継続して確認してください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://www.rfc-editor.org/rfc/rfc8446" rel="noopener noreferrer">https://www.rfc-editor.org/rfc/rfc8446</a></p>
+</details>
+</section>
+<section class="action"><h4>EnvoyのTLS設定を見直す <span class="badge">早めに対応</span></h4><p>最低・最高バージョンと暗号スイートを設定で管理できます。</p><ol>
+<li>tls_minimum_protocol_versionはTLSv1_3を優先し、TLSv1_2は互換性が必要な場合に限って検討してください。</li>
+<li>cipher_suitesはTLS 1.0〜1.2の設定で、TLS 1.3には適用されません。静的RSA鍵交換と、ECDHE_RSAのRSA認証を区別してください。</li>
+<li>RSA認証を外す前に、証明書の署名方式と通信相手の互換性を別に確認してください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto" rel="noopener noreferrer">https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/tls.proto</a></p>
+</details>
+</section>
+<p>共通の確認・計画（この行で確認済みの事実ではありません）：</p><ul>
+<li><a href="#shared-0-0">既存方式とPQCを併用し、段階的に移行する</a></li>
+</ul>
+</details>
+</div>
+<details class="shared"><summary>共通の確認・計画 (1)</summary>
+<section id="shared-0-0" tabindex="-1">
+<section class="action"><h4>既存方式とPQCを併用し、段階的に移行する <span class="badge">早めに対応</span></h4><p>検出した方式には、量子計算による将来のリスクがあります。接続相手との互換性を確かめながら移行を進めてください。</p><ol>
+<li>利用箇所と担当チームを洗い出してください。</li>
+<li>既存のPQC・複合構成を確認し、移行が必要なら新旧方式の併用を試してください。</li>
+<li>旧方式を廃止する条件と時期を決めてください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://www.nist.gov/itl/post-quantum-cryptography" rel="noopener noreferrer">https://www.nist.gov/itl/post-quantum-cryptography</a></p>
+<p><a href="https://csrc.nist.gov/pubs/fips/203/final" rel="noopener noreferrer">https://csrc.nist.gov/pubs/fips/203/final</a></p>
+<p><a href="https://csrc.nist.gov/pubs/fips/204/final" rel="noopener noreferrer">https://csrc.nist.gov/pubs/fips/204/final</a></p>
+</details>
+</section>
+</section>
+</details>
+</div></details>
+<details class="rule-card" id="rule-1" data-rule data-page-size="20"><summary><span><strong>日本語の説明が未登録のルールです。原文：Synthetic migration reference</strong> <code>JAVA_CURRENT056</code></span><span class="sev medium">中</span><span class="count">1 件</span><span>ファイル 1 / 表示対象 <span data-match-count></span></span></summary><div class="rule-body"><p>ルール作成者の確認事項（原文）：Review actual use before migration</p>
+<h4>検出箇所と対応</h4><nav data-occ-pager hidden><button type="button" data-occ-prev>前の箇所</button><span data-occ-status aria-live="polite"></span><button type="button" data-occ-next>次の箇所</button></nav><div data-occurrence-list>
+<details class="occurrence" id="finding-1" data-finding-id="JAVA_CURRENT056" data-inventory="false" data-severity="medium" data-risk="quantum-vulnerable" data-search="JAVA_CURRENT056 日本語の説明が未登録のルールです。原文：Synthetic migration reference current/Example.java"><summary><code>current/Example.java:1:1</code><span class="occ-match">synthetic reference</span><span class="next-step">対応: Java標準のPQC APIへの移行を検討する</span></summary><p>判断の目安: 量子計算によるリスクあり</p><p>確認すること: ルール作成者の確認事項（原文）：Review actual use before migration</p><p>検出した記述: <code>synthetic reference</code></p>
+<p>周辺のコードは取得できませんでした。元のファイルを確認してください。</p>
+<h4>この箇所の対応</h4>
+<section class="action"><h4>Java標準のPQC APIへの移行を検討する <span class="badge">早めに対応</span></h4><p>対応するJDKでは、JCAの標準方式名でML-DSA・ML-KEMを指定できます。</p><ol>
+<li>パラメーターセットを選び、新しいML-DSA鍵ペアを生成してください。RSAの鍵を流用しないでください。</li>
+<li>署名側を切り替える前に、対応する公開鍵とJOSE・PKIの符号化形式をすべての検証側へ配備してください。</li>
+<li>ML-KEMは鍵共有に使う方式です。TLSなどの対応は別に確認してください。</li>
+<li>旧方式の検証を残す条件と廃止時期は、移行方針として明示してください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://openjdk.org/jeps/496" rel="noopener noreferrer">https://openjdk.org/jeps/496</a></p>
+<p><a href="https://openjdk.org/jeps/497" rel="noopener noreferrer">https://openjdk.org/jeps/497</a></p>
+<p>変更前 (java)</p><pre><code>Signature sig = Signature.getInstance(&quot;SHA256withRSA&quot;);
+sig.initSign(privateKey);
+sig.update(payload);
+byte[] signature = sig.sign();</code></pre><p>変更後</p><pre><code>// JDK 24+: provision a new ML-DSA key pair for the selected parameter set.
+// mlDsaPrivateKey is its private key, never the previous RSA key.
+// Provision the matching public key and encoding to verifiers before rollout.
+Signature sig = Signature.getInstance(&quot;ML-DSA&quot;);
+sig.initSign(mlDsaPrivateKey);
+sig.update(payload);
+byte[] signature = sig.sign();
+// Keep legacy verification only under the explicit migration policy.</code></pre>
+</details>
+</section>
+<p>共通の確認・計画（この行で確認済みの事実ではありません）：</p><ul>
+<li><a href="#shared-1-0">既存方式とPQCを併用し、段階的に移行する</a></li>
+<li><a href="#shared-1-1">実行環境と通信相手のPQC対応を確認する</a></li>
+</ul>
+</details>
+</div>
+<details class="shared"><summary>共通の確認・計画 (2)</summary>
+<section id="shared-1-0" tabindex="-1">
+<section class="action"><h4>既存方式とPQCを併用し、段階的に移行する <span class="badge">早めに対応</span></h4><p>検出した方式には、量子計算による将来のリスクがあります。接続相手との互換性を確かめながら移行を進めてください。</p><ol>
+<li>利用箇所と担当チームを洗い出してください。</li>
+<li>既存のPQC・複合構成を確認し、移行が必要なら新旧方式の併用を試してください。</li>
+<li>旧方式を廃止する条件と時期を決めてください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://www.nist.gov/itl/post-quantum-cryptography" rel="noopener noreferrer">https://www.nist.gov/itl/post-quantum-cryptography</a></p>
+<p><a href="https://csrc.nist.gov/pubs/fips/203/final" rel="noopener noreferrer">https://csrc.nist.gov/pubs/fips/203/final</a></p>
+<p><a href="https://csrc.nist.gov/pubs/fips/204/final" rel="noopener noreferrer">https://csrc.nist.gov/pubs/fips/204/final</a></p>
+</details>
+</section>
+</section>
+<section id="shared-1-1" tabindex="-1">
+<section class="action"><h4>実行環境と通信相手のPQC対応を確認する <span class="badge">計画して対応</span></h4><p>コードに方式名があるだけでは、その環境で動くか、接続相手が対応しているかは分かりません。</p><ol>
+<li>JDK 24以降のML-KEM・ML-DSA対応を確認してください。プロバイダーや通信規約の対応は別に確認が必要です。</li>
+<li>実際に配備している版、プロバイダー、機能設定を確認してください。</li>
+<li>本番設定を変える前に、接続相手との互換性を試してください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://docs.oracle.com/en/java/javase/27/security/java-secure-socket-extension-jsse-reference-guide.html" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/27/security/java-secure-socket-extension-jsse-reference-guide.html</a></p>
+</details>
+</section>
+</section>
+</details>
+</div></details>
+<details class="rule-card" id="rule-2" data-rule data-page-size="20"><summary><span><strong>日本語の説明が未登録のルールです。原文：Synthetic migration reference</strong> <code>JAVA_UNKNOWN056</code></span><span class="sev medium">中</span><span class="count">1 件</span><span>ファイル 1 / 表示対象 <span data-match-count></span></span></summary><div class="rule-body"><p>ルール作成者の確認事項（原文）：Review actual use before migration</p>
+<h4>検出箇所と対応</h4><nav data-occ-pager hidden><button type="button" data-occ-prev>前の箇所</button><span data-occ-status aria-live="polite"></span><button type="button" data-occ-next>次の箇所</button></nav><div data-occurrence-list>
+<details class="occurrence" id="finding-2" data-finding-id="JAVA_UNKNOWN056" data-inventory="false" data-severity="medium" data-risk="quantum-vulnerable" data-search="JAVA_UNKNOWN056 日本語の説明が未登録のルールです。原文：Synthetic migration reference unknown/Example.java"><summary><code>unknown/Example.java:1:1</code><span class="occ-match">synthetic reference</span><span class="next-step">対応: BouncyCastleによるPQC対応を検討する</span></summary><p>判断の目安: 量子計算によるリスクあり</p><p>確認すること: ルール作成者の確認事項（原文）：Review actual use before migration</p><p>検出した記述: <code>synthetic reference</code></p>
+<p>周辺のコードは取得できませんでした。元のファイルを確認してください。</p>
+<h4>この箇所の対応</h4>
+<section class="action"><h4>Javaの版を確認し、必要ならPQC API対応版へ更新する <span class="badge">計画して対応</span></h4><p>版が不明な場合は、配備先のJavaを確認してください。宣言された版だけでは実環境のAPI対応は確定しません。</p><ol>
+<li>標準のML-KEM・ML-DSA APIが必要な場合は、JDK 24以降の対応を確認してください。</li>
+<li>本番への適用前にCIで互換性を試してください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://openjdk.org/jeps/496" rel="noopener noreferrer">https://openjdk.org/jeps/496</a></p>
+<p><a href="https://openjdk.org/jeps/497" rel="noopener noreferrer">https://openjdk.org/jeps/497</a></p>
+</details>
+</section>
+<section class="action"><h4>BouncyCastleによるPQC対応を検討する <span class="badge">早めに対応</span></h4><p>標準APIを使えない環境では、ライブラリによる対応が移行候補になります。</p><ol>
+<li>解決済みのBouncyCastleの版と配備先JDKの対応を確認してください。例はBC Java 1.85のBCプロバイダーを使います。BCPQCとは区別してください。</li>
+<li>用途に合うパラメーターセットを選び、新しいML-DSA鍵ペアなど、方式に対応した鍵を生成してください。RSA鍵を流用せず、公開鍵と符号化形式を検証側へ配備してください。</li>
+<li>プロバイダーの優先順位とFIPSなどの運用要件への影響を記録してください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://www.bouncycastle.org/java.html" rel="noopener noreferrer">https://www.bouncycastle.org/java.html</a></p>
+<p><a href="https://downloads.bouncycastle.org/java/docs/bcprov-jdk18on-javadoc/" rel="noopener noreferrer">https://downloads.bouncycastle.org/java/docs/bcprov-jdk18on-javadoc/</a></p>
+<p>変更前 (java)</p><pre><code>Security.addProvider(new BouncyCastleProvider());
+Signature sig = Signature.getInstance(&quot;SHA256withRSA&quot;, &quot;BC&quot;);</code></pre><p>変更後</p><pre><code>// BC Java 1.85 example: verify the resolved release/provider supports this name.
+Security.addProvider(new BouncyCastleProvider());
+// Provision a new ML-DSA-65 key pair and its public key to verifiers.
+// mlDsaPrivateKey must not be the previous RSA key.
+Signature sig = Signature.getInstance(&quot;ML-DSA-65&quot;, &quot;BC&quot;);
+sig.initSign(mlDsaPrivateKey);</code></pre>
+</details>
+</section>
+<p>共通の確認・計画（この行で確認済みの事実ではありません）：</p><ul>
+<li><a href="#shared-2-0">既存方式とPQCを併用し、段階的に移行する</a></li>
+<li><a href="#shared-2-1">実行環境と通信相手のPQC対応を確認する</a></li>
+</ul>
+</details>
+</div>
+<details class="shared"><summary>共通の確認・計画 (2)</summary>
+<section id="shared-2-0" tabindex="-1">
+<section class="action"><h4>既存方式とPQCを併用し、段階的に移行する <span class="badge">早めに対応</span></h4><p>検出した方式には、量子計算による将来のリスクがあります。接続相手との互換性を確かめながら移行を進めてください。</p><ol>
+<li>利用箇所と担当チームを洗い出してください。</li>
+<li>既存のPQC・複合構成を確認し、移行が必要なら新旧方式の併用を試してください。</li>
+<li>旧方式を廃止する条件と時期を決めてください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://www.nist.gov/itl/post-quantum-cryptography" rel="noopener noreferrer">https://www.nist.gov/itl/post-quantum-cryptography</a></p>
+<p><a href="https://csrc.nist.gov/pubs/fips/203/final" rel="noopener noreferrer">https://csrc.nist.gov/pubs/fips/203/final</a></p>
+<p><a href="https://csrc.nist.gov/pubs/fips/204/final" rel="noopener noreferrer">https://csrc.nist.gov/pubs/fips/204/final</a></p>
+</details>
+</section>
+</section>
+<section id="shared-2-1" tabindex="-1">
+<section class="action"><h4>実行環境と通信相手のPQC対応を確認する <span class="badge">計画して対応</span></h4><p>コードに方式名があるだけでは、その環境で動くか、接続相手が対応しているかは分かりません。</p><ol>
+<li>JDK 24以降のML-KEM・ML-DSA対応を確認してください。プロバイダーや通信規約の対応は別に確認が必要です。</li>
+<li>実際に配備している版、プロバイダー、機能設定を確認してください。</li>
+<li>本番設定を変える前に、接続相手との互換性を試してください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://docs.oracle.com/en/java/javase/27/security/java-secure-socket-extension-jsse-reference-guide.html" rel="noopener noreferrer">https://docs.oracle.com/en/java/javase/27/security/java-secure-socket-extension-jsse-reference-guide.html</a></p>
+</details>
+</section>
+</section>
+</details>
+</div></details>
+<details class="rule-card" id="rule-3" data-rule data-page-size="20"><summary><span><strong>日本語の説明が未登録のルールです。原文：Synthetic migration reference</strong> <code>PKI056</code></span><span class="sev medium">中</span><span class="count">1 件</span><span>ファイル 1 / 表示対象 <span data-match-count></span></span></summary><div class="rule-body"><p>ルール作成者の確認事項（原文）：Review actual use before migration</p>
+<h4>検出箇所と対応</h4><nav data-occ-pager hidden><button type="button" data-occ-prev>前の箇所</button><span data-occ-status aria-live="polite"></span><button type="button" data-occ-next>次の箇所</button></nav><div data-occurrence-list>
+<details class="occurrence" id="finding-3" data-finding-id="PKI056" data-inventory="false" data-severity="medium" data-risk="quantum-vulnerable" data-search="PKI056 日本語の説明が未登録のルールです。原文：Synthetic migration reference certificate.pem"><summary><code>certificate.pem:1:1</code><span class="occ-match">synthetic reference</span><span class="next-step">対応: ルール作成者の確認事項（原文）：Review actual use before migration</span></summary><p>判断の目安: 量子計算によるリスクあり</p><p>確認すること: ルール作成者の確認事項（原文）：Review actual use before migration</p><p>検出した記述: <code>synthetic reference</code></p>
+<p>周辺のコードは取得できませんでした。元のファイルを確認してください。</p>
+<h4>この箇所の対応</h4>
+<p>共通の確認・計画（この行で確認済みの事実ではありません）：</p><ul>
+<li><a href="#shared-3-0">既存方式とPQCを併用し、段階的に移行する</a></li>
+<li><a href="#shared-3-1">証明書の発行と信頼設定の更新を計画する</a></li>
+</ul>
+</details>
+</div>
+<details class="shared"><summary>共通の確認・計画 (2)</summary>
+<section id="shared-3-0" tabindex="-1">
+<section class="action"><h4>既存方式とPQCを併用し、段階的に移行する <span class="badge">早めに対応</span></h4><p>検出した方式には、量子計算による将来のリスクがあります。接続相手との互換性を確かめながら移行を進めてください。</p><ol>
+<li>利用箇所と担当チームを洗い出してください。</li>
+<li>既存のPQC・複合構成を確認し、移行が必要なら新旧方式の併用を試してください。</li>
+<li>旧方式を廃止する条件と時期を決めてください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://www.nist.gov/itl/post-quantum-cryptography" rel="noopener noreferrer">https://www.nist.gov/itl/post-quantum-cryptography</a></p>
+<p><a href="https://csrc.nist.gov/pubs/fips/203/final" rel="noopener noreferrer">https://csrc.nist.gov/pubs/fips/203/final</a></p>
+<p><a href="https://csrc.nist.gov/pubs/fips/204/final" rel="noopener noreferrer">https://csrc.nist.gov/pubs/fips/204/final</a></p>
+</details>
+</section>
+</section>
+<section id="shared-3-1" tabindex="-1">
+<section class="action"><h4>証明書の発行と信頼設定の更新を計画する <span class="badge">早めに対応</span></h4><p>FIPS 204/205は署名方式の規格であり、共通のハイブリッド証明書形式を定めていません。</p><ol>
+<li>CBOMで証明書の署名方式と鍵情報を確認してください。</li>
+<li>具体的な構成と符号化形式を選び、プロバイダー、認証局、クライアント、信頼ストアの対応を確認してから発行を計画してください。</li>
+<li>対応が確認できた構成だけを本番以外で試してください。形式や利用環境が非対応なら未検証のままとし、別の対応済みの移行方法を検討してください。</li>
+<li>ルート・中間・サーバー証明書の再発行手順を決めてください。</li>
+</ol>
+<details><summary>参考資料・変更例</summary>
+<p><a href="https://csrc.nist.gov/pubs/fips/204/final" rel="noopener noreferrer">https://csrc.nist.gov/pubs/fips/204/final</a></p>
+<p><a href="https://csrc.nist.gov/pubs/fips/205/final" rel="noopener noreferrer">https://csrc.nist.gov/pubs/fips/205/final</a></p>
+</details>
+</section>
+</section>
+</details>
+</div></details>
+</main><script>(() => {
+  const root = document.querySelector('[data-compact-report]');
+  if (!root) return;
+  const ja = document.documentElement.lang === 'ja';
+  const choose = (en, jp) => ja ? jp : en;
+  const controls = root.querySelector('[data-report-controls]');
+  const mode = controls.querySelector('[data-mode]');
+  const search = controls.querySelector('[data-search]');
+  const severity = controls.querySelector('[data-severity]');
+  const risk = controls.querySelector('[data-risk]');
+  const rules = Array.from(root.querySelectorAll('[data-rule]'));
+  const rows = new Map(rules.map(rule => [rule, Array.from(rule.querySelectorAll('[data-finding-id]'))]));
+  const pages = new Map();
+  let page = 0;
+  let visibleRules = [];
+  const matches = row => {
+    const inventory = row.dataset.inventory === 'true';
+    return (mode.value === 'all' || (mode.value === 'inventory' ? inventory : !inventory))
+      && (!severity.value || row.dataset.severity === severity.value)
+      && (!risk.value || row.dataset.risk === risk.value)
+      && row.dataset.search.toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase());
+  };
+  function refresh() {
+    let count = 0;
+    visibleRules = [];
+    for (const rule of rules) {
+      const all = rows.get(rule);
+      const matched = all.filter(matches);
+      count += matched.length;
+      if (matched.length) visibleRules.push(rule);
+      const last = Math.max(0, Math.ceil(matched.length / 20) - 1);
+      const p = Math.min(pages.get(rule) || 0, last);
+      pages.set(rule, p);
+      all.forEach(row => { const i = matched.indexOf(row); row.hidden = i < p * 20 || i >= (p + 1) * 20; });
+      rule.querySelector('[data-match-count]').textContent = `${matched.length} / ${all.length}`;
+      rule.querySelector('[data-occ-pager]').hidden = matched.length <= 20;
+      rule.querySelector('[data-occ-prev]').disabled = p === 0;
+      rule.querySelector('[data-occ-next]').disabled = p === last;
+      rule.querySelector('[data-occ-status]').textContent = `${matched.length ? p * 20 + 1 : 0}-${Math.min((p + 1) * 20, matched.length)} / ${matched.length}`;
+    }
+    const last = Math.max(0, Math.ceil(visibleRules.length / 20) - 1);
+    page = Math.min(page, last);
+    rules.forEach(rule => { const i = visibleRules.indexOf(rule); rule.hidden = i < page * 20 || i >= (page + 1) * 20; });
+    root.querySelector('[data-report-status]').textContent = choose(
+      `${visibleRules.length} / ${rules.length} rule groups; ${count} / ${Array.from(rows.values()).reduce((n,r) => n+r.length,0)} findings match the current view.`,
+      `表示対象：${visibleRules.length} / ${rules.length}ルール、${count} / ${Array.from(rows.values()).reduce((n,r) => n+r.length,0)}箇所`);
+    root.querySelector('[data-empty]').hidden = count !== 0;
+    root.querySelector('[data-group-pager]').hidden = visibleRules.length <= 20;
+    root.querySelector('[data-prev]').disabled = page === 0;
+    root.querySelector('[data-next]').disabled = page === last;
+    root.querySelector('[data-page]').textContent = `${visibleRules.length ? page * 20 + 1 : 0}-${Math.min((page + 1) * 20, visibleRules.length)} / ${visibleRules.length}`;
+  }
+  function reset() { mode.value = 'all'; search.value = ''; severity.value = ''; risk.value = ''; page = 0; pages.clear(); }
+  controls.hidden = false;
+  controls.addEventListener('input', () => {
+    if (severity.value === 'info' || risk.value === 'quantum-safe') mode.value = 'all';
+    page = 0; pages.clear(); refresh();
+  });
+  root.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    if (!button || !root.contains(button)) return;
+    if (button.matches('[data-reset]')) reset();
+    else if (button.matches('[data-prev]')) page--;
+    else if (button.matches('[data-next]')) page++;
+    else if (button.matches('[data-occ-prev], [data-occ-next]')) {
+      const rule = button.closest('[data-rule]');
+      pages.set(rule, (pages.get(rule) || 0) + (button.matches('[data-occ-next]') ? 1 : -1));
+    } else return;
+    refresh();
+  });
+  function revealHash() {
+    let id;
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
+    const target = document.getElementById(id);
+    if (!target || !root.contains(target)) return;
+    const rule = target.closest('[data-rule]');
+    if (!rule) return;
+    reset();
+    page = Math.floor(rules.indexOf(rule) / 20);
+    const occurrence = target.closest('[data-finding-id]');
+    if (occurrence) pages.set(rule, Math.floor(rows.get(rule).indexOf(occurrence) / 20));
+    refresh();
+    for (let element = target; element && element !== root; element = element.parentElement) {
+      if (element.tagName === 'DETAILS') element.open = true;
+    }
+    (target.querySelector('summary') || target).focus();
+    target.scrollIntoView({block: 'nearest'});
+  }
+  window.addEventListener('hashchange', revealHash);
+  refresh();
+  if (location.hash) revealHash();
+})();
+</script></body></html>

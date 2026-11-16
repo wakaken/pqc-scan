@@ -1,0 +1,28 @@
+[
+  {
+    "command": [
+      "git",
+      "log",
+      "--oneline",
+      "--all",
+      "--",
+      "crates/pqc_scan_core/src/risk.rs"
+    ],
+    "exitCode": 0,
+    "stdout": "60ce6bb Add agent workflow improvements and report coverage\n0c948ad Initial public release of pqc-scan\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "blame",
+      "-L",
+      "1,36",
+      "--",
+      "crates/pqc_scan_core/src/risk.rs"
+    ],
+    "exitCode": 0,
+    "stdout": "^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900  1) use pqc_scan_rules::{Risk, Rule, Severity};\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900  2) \n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900  3) use crate::model::Detection;\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900  4) \n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900  5) pub fn adjusted_severity(rule: &Rule, detection: &Detection) -> Severity {\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900  6)     let sensitive_category = matches!(\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900  7)         rule.category.to_ascii_lowercase().as_str(),\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900  8)         \"tls\" | \"pki\" | \"jwt\" | \"auth\" | \"authentication\"\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900  9)     );\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 10) \n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 11)     if !sensitive_category {\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 12)         return rule.severity;\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 13)     }\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 14) \n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 15)     if rule.risk != Risk::QuantumVulnerable {\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 16)         return rule.severity;\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 17)     }\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 18) \n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 19)     // \u8aa4\u691c\u77e5\u306e\u7206\u767a\u3092\u9632\u3050\u305f\u3081\u3001\u9ad8\u4fe1\u983c\u306e\u307f\u6607\u683c\u3059\u308b\u3002\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 20)     if rule.confidence < 0.45 {\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 21)         return rule.severity;\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 22)     }\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 23) \n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 24)     if detection.evidence.r#type == \"private_key\" {\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 25)         return Severity::Critical;\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 26)     }\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 27) \n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 28)     bump_severity(rule.severity)\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 29) }\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 30) \n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 31) fn bump_severity(severity: Severity) -> Severity {\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 32)     match severity {\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 33)         Severity::Info => Severity::Low,\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 34)         Severity::Low => Severity::Medium,\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 35)         Severity::Medium => Severity::High,\n^0c948ad (Kenji Wakabayashi 2026-03-04 11:19:04 +0900 36)         Severity::High | Severity::Critical => Severity::Critical,\n",
+    "stderr": ""
+  }
+]

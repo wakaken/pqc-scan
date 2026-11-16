@@ -1,0 +1,68 @@
+diff --git a/crates/pqc_scan_report/src/compact.css b/crates/pqc_scan_report/src/compact.css
+index bdd18b5..491f15d 100644
+--- a/crates/pqc_scan_report/src/compact.css
++++ b/crates/pqc_scan_report/src/compact.css
+@@ -19,6 +19,7 @@ summary:focus-visible, button:focus-visible, a:focus-visible, input:focus-visibl
+ .shared { margin-top:16px; background:#f2f6f7; border-radius:8px; }
+ pre { overflow:auto; padding:12px; background:#eef2f4; }
+ code, .tx { overflow-wrap:anywhere; }
++a { overflow-wrap:anywhere; }
+ @media (max-width:640px) { .rule-body { padding:0 8px 10px; } .rule-card > summary > span { display:block; margin:4px 0; } [data-report-controls] label { width:100%; } .occurrence > :not(summary) { margin-left:8px; margin-right:8px; } }
+ /* Inventory identifiers must fit narrow screens without altering their values. */
+ .inspection-context table { width: 100%; table-layout: fixed; }
+diff --git a/docs/user/REPORTS.ja.md b/docs/user/REPORTS.ja.md
+index b795ab7..b46265c 100644
+--- a/docs/user/REPORTS.ja.md
++++ b/docs/user/REPORTS.ja.md
+@@ -37,7 +37,7 @@ HTMLでは、重大度順の短いルール一覧から確認を始めます。
+ ルール、検出箇所の順に開くと、その箇所のコードと対応を確認できます。
+ 同じ共通手順は繰り返さず参照リンクにまとめ、IDが同じでも内容の異なる対応案は残します。
+ JavaScriptが無効な場合は全件を表示し、標準の折りたたみで確認できます。
+-外部スクリプトや通信は不要です。Markdownにもルール・検出箇所への索引を設けています。
++外部スクリプトや通信は不要です。長い参考URLも、狭い画面内で折り返して表示します。Markdownにもルール・検出箇所への索引を設けています。
+ ソース断片とコード例はCRLF・CRの改行を正規化し、全行を字下げします。
+ Markdownとして表示したときも、含まれるHTML記法をコードの中に保ちます。
+ 
+@@ -98,6 +98,14 @@ Node crypto・WebCrypto、ブラウザー、TypeScriptの実行環境では対
+ JWT署名を変更する際は、JOSE形式・ライブラリ・検証側の互換性も確認します。
+ 具体的な検出パターンは[静的な記述例と参考資料](../../examples/pqc-readiness/README.md)を参照してください。
+ 
++移行案を適用する前に、次を確認してください。
++
++- Javaの版が不明な場合は、配備先の実環境を調べてください。古い版とは断定しません。標準のML-KEM・ML-DSA APIはJDK 24以降が対象です。
++- 署名方式とパラメーターセットに合う新しい鍵ペアを生成し、公開鍵とJOSE・PKIの符号化形式を検証側へ配備してください。RSA鍵をML-DSAへ流用できません。
++- BCの例はBC Java 1.85の `BC` プロバイダーが対象です。`BCPQC` とは区別し、解決済みライブラリの版、配備先JDK、対応する方式を確認してください。
++- 証明書の移行では具体的な構成と符号化形式を選び、プロバイダー、認証局、クライアント、信頼ストアの対応を確認してから本番以外で試してください。FIPS 204/205は署名方式の規格であり、共通のハイブリッド証明書形式を定めていません。
++- Envoyの `cipher_suites` はTLS 1.0〜1.2に作用し、TLS 1.3には適用されません。静的RSA鍵交換の廃止とECDHE_RSAのRSA認証の廃止は別です。証明書と通信相手の互換性を別に確認してください。
++
+ <a id="choose-report"></a>
+ 
+ ## 用途に合うレポートを選ぶ
+diff --git a/docs/user/REPORTS.md b/docs/user/REPORTS.md
+index 9ec42ab..0da2a4d 100644
+--- a/docs/user/REPORTS.md
++++ b/docs/user/REPORTS.md
+@@ -37,7 +37,7 @@ rule, then a location, to see its source context and applicable actions. Identic
+ shared guidance is linked instead of repeating it at every location. Different
+ recommendations sharing an action ID remain distinct. Without JavaScript, all
+ records remain available through native expandable details. No external scripts
+-or network connection are required. Markdown provides a linked rule/location index.
++or network connection are required. Long reference URLs wrap within the report, including on narrow screens. Markdown provides a linked rule/location index.
+ Source excerpts and code examples normalize CRLF and CR line endings and indent
+ every line so embedded markup remains code when rendered as Markdown.
+ 
+@@ -95,6 +95,14 @@ These references can appear as informational findings in CBOM and SARIF too. Rea
+ Node crypto/WebCrypto, browser and TypeScript runtime support must be checked individually; their version requirements differ. JWT signature changes also need compatible JOSE formats, libraries and verifiers.
+ See [static examples and references](../../examples/pqc-readiness/README.md) for specific patterns.
+ 
++Before applying migration guidance:
++
++- If the Java version is unknown, check the deployed runtime; do not infer that it is old. Standard ML-KEM/ML-DSA APIs start at JDK 24.
++- Generate a new key pair for the selected signature algorithm and parameter set, then provision its public key and JOSE/PKI encoding to verifiers. An RSA key cannot be reused for ML-DSA.
++- The BC example is scoped to BC Java 1.85 and the `BC` provider, not `BCPQC`. Verify the resolved library release, deployed JDK and algorithm support before using it.
++- For certificate migration, choose the exact construction and encoding and confirm provider, CA, client and trust-store support before a nonproduction pilot. FIPS 204/205 specify signature primitives, not a universal hybrid certificate format.
++- Envoy `cipher_suites` applies to TLS 1.0–1.2, not TLS 1.3. Retiring static RSA key exchange differs from removing RSA authentication in ECDHE_RSA suites; check certificate and peer compatibility separately.
++
+ <a id="choose-report"></a>
+ 
+ ## Choose a report

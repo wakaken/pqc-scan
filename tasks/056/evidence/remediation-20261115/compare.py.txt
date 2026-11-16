@@ -1,0 +1,22 @@
+from pathlib import Path
+import json,sys,hashlib,collections
+sys.path.insert(0,'tests/quality');import judgment
+p=Path('tasks/056/evidence/remediation-20261115');raw=p/'native-r1';cases=[]
+for name in ['oracle','supplement']:cases+=json.loads(Path('tests/quality/judgment/'+name+'.json').read_text())['cases']
+canonical=judgment.canonical_cases(cases);ids={c['id'] for c in canonical};summary={}
+for name in ['probe','optional-probe']:
+ obs=json.loads((raw/(name+'-OBSERVATIONS.json')).read_text());full=judgment.compare({'cases':cases},obs);assert full['incorrect']==0
+ r=judgment.compare({'cases':canonical},[o for o in obs if o['id'] in ids]);assert r['incorrect']==r['unassessed']==0
+ (p/(name+'-COMPARISON.json')).write_text(json.dumps(r,indent=2)+'\n');summary[name]={k:r[k] for k in ['correct','incorrect','unassessed']}
+for name in ['pipeline','optional-pipeline']:
+ r=judgment.compare(json.loads(Path('tests/quality/judgment/pipeline.json').read_text()),json.loads((raw/(name+'-OBSERVATIONS.json')).read_text()));assert r['incorrect']==r['unassessed']==0
+ (p/(name+'-COMPARISON.json')).write_text(json.dumps(r,indent=2)+'\n');summary[name]={k:r[k] for k in ['correct','incorrect','unassessed']}
+assert (raw/'probe-OBSERVATIONS.json').read_bytes()==(raw/'optional-probe-OBSERVATIONS.json').read_bytes()
+# Full action payloads, not only IDs, show the actual changed advice.
+actions={}
+for c in json.loads((raw/'probe-OBSERVATIONS.json').read_text()):
+ for a in c['actual'].get('recommended_actions',[]):
+  h=hashlib.sha256(json.dumps(a,sort_keys=True).encode()).hexdigest();actions.setdefault(h,{'action':a,'cases':[]})['cases'].append(c['id'])
+before=json.loads(Path('tasks/056/evidence/assessment-20261115/RECOMMENDATION-ACTIONS-r5.json').read_text());changed={h:v for h,v in actions.items() if h not in before};(p/'CHANGED-ACTION-PAYLOADS.json').write_text(json.dumps(changed,indent=2)+'\n')
+summary['recommendationPayloads']={'before':len(before),'after':len(actions),'changed':len(changed),'interpretation':'The additional distinct payload separates unknown Java from an observed older version. Original labels/measurements remain unchanged. Guidance content repairs are assessed separately from routing agreement.'}
+(p/'COMPARISON-SUMMARY.json').write_text(json.dumps(summary,indent=2)+'\n');print(json.dumps(summary))

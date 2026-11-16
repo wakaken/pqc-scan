@@ -1,0 +1,151 @@
+[
+  {
+    "name": "probe",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "pqc_scan_core",
+      "--test",
+      "quality056",
+      "--",
+      "--nocapture"
+    ],
+    "startedAt": "2026-11-14T22:06:49.946512+00:00",
+    "exitCode": 0,
+    "seconds": 15.02456879199599,
+    "log": "probe.log"
+  },
+  {
+    "name": "pipeline",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "pqc_scan_cli",
+      "--test",
+      "quality056_pipeline",
+      "--",
+      "--nocapture"
+    ],
+    "startedAt": "2026-11-14T22:07:05.012487+00:00",
+    "exitCode": 0,
+    "seconds": 26.918420166999567,
+    "log": "pipeline.log"
+  },
+  {
+    "name": "workspace",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--locked",
+      "--offline"
+    ],
+    "startedAt": "2026-11-14T22:07:31.961360+00:00",
+    "exitCode": 0,
+    "seconds": 89.47445029200026,
+    "log": "workspace.log"
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--locked",
+      "--offline",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "startedAt": "2026-11-14T22:09:01.457414+00:00",
+    "exitCode": 0,
+    "seconds": 13.888822791006532,
+    "log": "clippy.log"
+  },
+  {
+    "name": "build",
+    "command": [
+      "cargo",
+      "build",
+      "--workspace",
+      "--locked",
+      "--offline"
+    ],
+    "startedAt": "2026-11-14T22:09:15.366817+00:00",
+    "exitCode": 0,
+    "seconds": 3.5761578750025365,
+    "log": "build.log"
+  },
+  {
+    "name": "optional-probe",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "pqc_scan_core",
+      "--all-features",
+      "--target-dir",
+      "/private/tmp/pqc056-native-5l7j9lhc/work/build-all",
+      "--test",
+      "quality056",
+      "--",
+      "--nocapture"
+    ],
+    "startedAt": "2026-11-14T22:09:19.276427+00:00",
+    "exitCode": 0,
+    "seconds": 13.197690583001531,
+    "log": "optional-probe.log"
+  },
+  {
+    "name": "optional-pipeline",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "pqc_scan_cli",
+      "--all-features",
+      "--target-dir",
+      "/private/tmp/pqc056-native-5l7j9lhc/work/build-all",
+      "--test",
+      "quality056_pipeline",
+      "--",
+      "--nocapture"
+    ],
+    "startedAt": "2026-11-14T22:09:32.529957+00:00",
+    "exitCode": 0,
+    "seconds": 70.42933862499922,
+    "log": "optional-pipeline.log"
+  },
+  {
+    "name": "optional-clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--all-features",
+      "--locked",
+      "--offline",
+      "--target-dir",
+      "/private/tmp/pqc056-native-5l7j9lhc/work/build-all",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "startedAt": "2026-11-14T22:10:43.018798+00:00",
+    "exitCode": 0,
+    "seconds": 24.138944124999398,
+    "log": "optional-clippy.log"
+  }
+]

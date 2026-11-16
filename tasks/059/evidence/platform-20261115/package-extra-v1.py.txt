@@ -1,0 +1,28 @@
+import shutil
+built=root/'tasks/058/evidence/compatibility-20261115/native-r2';built_source=json.loads((built/'SOURCE.json').read_text())
+assert all(hashlib.sha256((root/f).read_bytes()).hexdigest()==h for f,h in built_source.items())
+(out/'BUILD-REUSE.json').write_text(json.dumps({'source':str(built/'SOURCE.json'),'equalFiles':len(built_source),'commands':str(built/'COMMANDS.json'),'defaultWorkspaceTests':{'passed':555,'failed':0,'ignored':3},'scope':'Productbuild inputs exactlyequal to058; reuse actualcleanstaticcargo install and release networkbuild, supplement with fullallfeature workspace tests here. Task metadata changes do not compile into releasedbinary.'},indent=2)+'\n')
+package_policy=isolation.profile(root,scratch,read_paths=[sysroot,python.parents[1],Path.home()/'.cargo/registry',Path.home()/'.cargo/git','/private/var/db/xcode_select_link'])
+(out/'PACKAGE-POLICY.sb').write_text(package_policy)
+rows=[];bound=json.loads((built/'BINARY-BINDINGS.json').read_text())
+def run_step(name,args,cwd=root):
+ log=out/(name+'.log');start=time.monotonic()
+ with log.open('w') as f:r=isolation.run(args,cwd=cwd,env=env,policy=package_policy,timeout=300,stdout=f,stderr=subprocess.STDOUT)
+ rows.append({'name':name,'command':args,'exitCode':r.returncode,'seconds':time.monotonic()-start});(out/'PACKAGE-COMMANDS.json').write_text(json.dumps(rows,indent=2)+'\n');assert r.returncode==0,(name,r.returncode)
+for variant in ['static','network']:
+ original=root/bound[variant]['path'];assert hashlib.sha256(original.read_bytes()).hexdigest()==bound[variant]['sha256'];binary=scratch/(variant+'-pqc-scan');shutil.copyfile(original,binary);binary.chmod(0o755)
+ destination=scratch/(variant+'-archive')
+ run_step(variant+'-package',[str(python),str(root/'scripts/package-release.py'),'--source-root',str(root),'--binary',str(binary),'--variant',variant,'--out-dir',str(destination)])
+ archive,=destination.glob('*.tar.gz');run_step(variant+'-verify',[str(python),str(root/'scripts/package-release.py'),'--verify',str(archive)])
+ run_step(variant+'-install',[str(python),str(root/'tests/distribution/check-install.py'),str(archive),'--out-dir',str(scratch/(variant+'-install'))])
+ target=out/'packages'/variant;target.mkdir(parents=True);shutil.copyfile(archive,target/archive.name)
+ shutil.copyfile(archive.with_suffix(archive.suffix+'.sha256'),target/(archive.name+'.sha256'))
+ shutil.copyfile(scratch/(variant+'-install/INSTALL-RESULTS.json'),target/'INSTALL-RESULTS.json')
+ # Existing internal dependency notices are inspected without exposing anykeymaterial.
+ import tarfile
+ with tarfile.open(archive,'r:gz') as tf:
+  inventory_name=next(m.name for m in tf.getmembers() if m.name.endswith('/DEPENDENCY-LICENSES.json'))
+  inventory=json.load(tf.extractfile(inventory_name));flags=[{'name':x['name'],'version':x['version']} for x in inventory['packages'] if x['notice_review_required']]
+ (target/'ARCHIVE.json').write_text(json.dumps({'archiveSha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'binarySha256':bound[variant]['sha256'],'noticeReviewRequired':flags,'publication':'Existinghold maintained' if variant=='network' else 'Localpreparation only; no publicationperformed'},indent=2)+'\n')
+assert all(hashlib.sha256((root/f).read_bytes()).hexdigest()==h for f,h in built_source.items())
+(out/'HOST.json').write_text(json.dumps({'uname':subprocess.check_output(['uname','-sm'],text=True).strip(),'sw_vers':subprocess.check_output(['sw_vers'],text=True),'rustc':subprocess.check_output([str(sysroot/'bin/rustc'),'-vV'],text=True),'target':'aarch64-apple-darwin','notEvaluated':['OtherOS','OtherCPU','OtherOSversions'],'formalSupport':'Existingpolicy unchanged; no new guarantee inferred'},indent=2)+'\n')

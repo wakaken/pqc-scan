@@ -1,0 +1,53 @@
+"""Replay only changed lightweight CI steps; never launch upstream experiments."""
+import ast
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import time
+import yaml
+
+root=Path.cwd();base=root/'tasks/053/evidence/resume-20261115'
+commands=[]
+def run(label,argv,timeout=120):
+    started=time.monotonic();log=base/(label+'.log')
+    with log.open('w') as out:
+        result=subprocess.run(argv,cwd=root,stdout=out,stderr=subprocess.STDOUT,timeout=timeout)
+    commands.append(dict(label=label,argv=argv,exitCode=result.returncode,seconds=time.monotonic()-started,log=str(log.relative_to(root))))
+    (base/'CHECKS-R1.json').write_text(json.dumps(commands,indent=2)+'\n')
+    assert result.returncode==0,(label,result.returncode)
+run('quality-final-r1',['python3','-m','unittest','discover','-s','tests/quality','-p','test_*.py','-v'])
+workflow=yaml.safe_load((root/'.github/workflows/pqc-scan.yml').read_text())
+events=workflow.get('on',workflow.get(True));assert set(events)=={'push','pull_request','workflow_dispatch'}
+assert events['push']['branches']==['develop']
+assert workflow['jobs']['protocols']['if']=='${{ false }}'
+for job in ['quality','baseline']:
+    steps=workflow['jobs'][job]['steps'];aggregate=[s for s in steps if '--evidence-catalog' in s.get('run','')]
+    assert len(aggregate)==1
+    script=aggregate[0]['run'].replace('target/quality-integrated',f'target/quality-ci053-{job}-r1')
+    run('ci-'+job+'-syntax',['bash','-n','-c',script])
+    run('ci-'+job+'-replay',['bash','-e','-c',script])
+    uploads=[s for s in steps if s.get('uses','').startswith('actions/upload-artifact@')]
+    assert len(uploads)==1 and uploads[0]['if']=='always()' and uploads[0]['with']['retention-days']==30
+    assert 'target/quality-integrated/' in uploads[0]['with']['path']
+for name in ['tests/quality/report.py','tests/quality/evidence.py','tests/quality/test_evidence.py','tests/quality/test_ci053.py',str(base.relative_to(root)/'enroll.py.txt'),str(Path(__file__).relative_to(root))]:
+    ast.parse((root/name).read_text(),filename=name)
+# Different job output directories must not change report facts.
+a=root/'target/quality-ci053-quality-r1';b=root/'target/quality-ci053-baseline-r1'
+for name in ['quality-evidence-index.json','test-evidence-index.json','quality-assessment.md','ci-measurement-plan.md']:
+    assert (a/name).read_bytes()==(b/name).read_bytes(),name
+q=json.loads((a/'quality-evidence-index.json').read_text());t=json.loads((a/'test-evidence-index.json').read_text())
+assert len(q['requirements'])==73 and len(q['records'])==18 and q['testEvidence']==t['records']
+text=(a/'quality-assessment.md').read_text()
+for row in q['requirements']:
+    assert f"| {row['id']} | {row['status']} | {row['ownerTask']} |" in text,row['id']
+assert q['releaseDecision']=='Unknown'
+assert all(r['status']=='Unknown' for r in q['requirements'] if r['ownerTask']=='052')
+assert any('Failed' in r['result']['summary'] for r in q['records'])
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+for record in q['records']:
+    for artifact in record['artifacts']:assert sha(root/artifact['path'])==artifact['sha256']
+for p,h in json.loads((base/'REVIEW-SOURCE-R2.json').read_text()).items():assert sha(root/p)==h,p
+run('diff-check',['git','diff','--check'])
+(base/'INTEGRATION-CHECKS.json').write_text(json.dumps(dict(status='Passed',requirements=73,records=18,artifactReferences=sum(len(r['artifacts']) for r in q['records']),jsonMarkdownRowParity=True,machineTestViewParity=True,ciJobOutputByteParity=True,hostedCIExecuted=False,workflowParser='PyYAML '+yaml.__version__,commandsExit0=len(commands)),indent=2)+'\n')
+print('All local integration checks passed; hosted CI not executed.')

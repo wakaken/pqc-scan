@@ -1,0 +1,43 @@
+test_real_catalog_preserves_all_requirements_and_selected_actual_facts (test_evidence.EnrolledEvidenceTests.test_real_catalog_preserves_all_requirements_and_selected_actual_facts) ... ok
+test_all_six_axes_and_missing_requirements_stay_visible (test_evidence.EvidenceIndexTests.test_all_six_axes_and_missing_requirements_stay_visible) ... ok
+test_bad_pointer_and_nonfinite_or_duplicate_json_are_rejected (test_evidence.EvidenceIndexTests.test_bad_pointer_and_nonfinite_or_duplicate_json_are_rejected) ... ok
+test_catalog_commands_are_data_never_executed (test_evidence.EvidenceIndexTests.test_catalog_commands_are_data_never_executed) ... ok
+test_catalog_integrity_failure_retains_only_infrastructure_receipt (test_evidence.EvidenceIndexTests.test_catalog_integrity_failure_retains_only_infrastructure_receipt) ... Quality evidence/report failed: ValueError; no quality pass asserted
+Quality evidence/report failed: ValueError; no quality pass asserted
+ok
+test_changed_measurement_source_is_historical_not_current_pass (test_evidence.EvidenceIndexTests.test_changed_measurement_source_is_historical_not_current_pass) ... ok
+test_fifo_and_oversize_files_fail_without_reading_or_blocking (test_evidence.EvidenceIndexTests.test_fifo_and_oversize_files_fail_without_reading_or_blocking) ... ok
+test_invalid_catalog_shapes_fail_closed_at_entrypoint (test_evidence.EvidenceIndexTests.test_invalid_catalog_shapes_fail_closed_at_entrypoint) ... Quality evidence/report failed: ValueError; no quality pass asserted
+Quality evidence/report failed: ValueError; no quality pass asserted
+Quality evidence/report failed: KeyError; no quality pass asserted
+ok
+test_log_success_never_manufactures_test_review (test_evidence.EvidenceIndexTests.test_log_success_never_manufactures_test_review) ... ok
+test_observation_values_and_record_count_are_bounded (test_evidence.EvidenceIndexTests.test_observation_values_and_record_count_are_bounded) ... ok
+test_product_failure_is_a_successful_report_with_raw_null_and_counts (test_evidence.EvidenceIndexTests.test_product_failure_is_a_successful_report_with_raw_null_and_counts) ... ok
+test_renderer_preserves_json_facts_and_refuses_overwrite (test_evidence.EvidenceIndexTests.test_renderer_preserves_json_facts_and_refuses_overwrite) ... FAIL
+test_report_entrypoint_catalog_mode_reuses_existing_dispatch (test_evidence.EvidenceIndexTests.test_report_entrypoint_catalog_mode_reuses_existing_dispatch) ... Quality evidence/report failed: ValueError; no quality pass asserted
+ok
+test_requirement_catalog_cannot_omit_or_reassign_authoritative_ids (test_evidence.EvidenceIndexTests.test_requirement_catalog_cannot_omit_or_reassign_authoritative_ids) ... ok
+test_review_bindings_must_cover_the_declared_product_population (test_evidence.EvidenceIndexTests.test_review_bindings_must_cover_the_declared_product_population) ... ok
+test_review_controller_drift_is_not_hidden_by_matching_product_source (test_evidence.EvidenceIndexTests.test_review_controller_drift_is_not_hidden_by_matching_product_source) ... ok
+test_reviews_need_two_stages_distinct_ids_and_exact_source (test_evidence.EvidenceIndexTests.test_reviews_need_two_stages_distinct_ids_and_exact_source) ... ok
+test_tampered_artifact_is_infrastructure_error (test_evidence.EvidenceIndexTests.test_tampered_artifact_is_infrastructure_error) ... ok
+test_task052_partial_cannot_disappear_behind_source_matching (test_evidence.EvidenceIndexTests.test_task052_partial_cannot_disappear_behind_source_matching) ... ok
+test_test_index_keeps_hash_bound_review_artifacts_without_inventing_acceptance (test_evidence.EvidenceIndexTests.test_test_index_keeps_hash_bound_review_artifacts_without_inventing_acceptance) ... ok
+test_tool_failure_has_its_own_state_separate_from_product_failure (test_evidence.EvidenceIndexTests.test_tool_failure_has_its_own_state_separate_from_product_failure) ... ok
+test_unknown_measurement_has_explicit_reason_and_no_invented_exit (test_evidence.EvidenceIndexTests.test_unknown_measurement_has_explicit_reason_and_no_invented_exit) ... ok
+test_unsafe_paths_and_symlinks_are_rejected (test_evidence.EvidenceIndexTests.test_unsafe_paths_and_symlinks_are_rejected) ... ok
+
+======================================================================
+FAIL: test_renderer_preserves_json_facts_and_refuses_overwrite (test_evidence.EvidenceIndexTests.test_renderer_preserves_json_facts_and_refuses_overwrite)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/waka/development/pqc/pqc-scan/tests/quality/test_evidence.py", line 184, in test_renderer_preserves_json_facts_and_refuses_overwrite
+    self.assertIn('Original recorded outcome',text)
+AssertionError: 'Original recorded outcome' not found in '# Integrated quality assessment\n\n6 requirements accounted for; 1 evidence records. Release decision: **Unknown**.\n\n| Requirement | Status | Owner task | Evidence records | Reason |\n|---|---|---|---|---|\n| Q1-01 | Failed | 001 | study-a | Source-scoped observations; command execution, result and review adequacy remain separate |\n| Q2-01 | Not Tested | 002 |  | No registered evidence for this requirement; upstream work remains unfinished/unavailable |\n| Q3-01 | Not Tested | 003 |  | No registered evidence for this requirement; upstream work remains unfinished/unavailable |\n| Q4-01 | Not Tested | 004 |  | No registered evidence for this requirement; upstream work remains unfinished/unavailable |\n| Q5-01 | Not Tested | 005 |  | No registered evidence for this requirement; upstream work remains unfinished/unavailable |\n| Q6-01 | Not Tested | 006 |  | No registered evidence for this requirement; upstream work remains unfinished/unavailable |\n\n## Measurement details and concerns\n\n### study-a\n\n**Failed**: One real product failure retained\nSource applicability: **Verified**; head `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`; version `0.2.0`; date 2026-11-15.\nFeatures: [\'default\']. Standards: [\'finite nominated truth\'].\nMethod: hand-labelled synthetic corpus. Environment: offline fixture.\nComparison: Same-data regression: Failed.\n\n- true positives: `2`\n- unknown rate: `null`\n- Concern (high): One known failure\n- Limitation: Only this fixed corpus\n- Artifact: `raw.json`; SHA-256 `0fb83a94a71de33ec8b9ff3be0fb4e3a82473654d8411a37ca33ee722e576613`; raw counts\n- Artifact: `review.md`; SHA-256 `a0720cfe8f6c4d6ddffdee2c5b21f3f2aa21a1f4f049e733cf16ae32a778da71`; review\n- Command: `["scanner", "scan", "fixture"]`; exit `0`\n- Execution: Passed; review adequacy: Not Tested; Incomplete, stale or source-mismatched review evidence; command success alone is insufficient\n\n## Scope and acceptance\n\nCheckout head: `Unknown`. Catalog SHA-256: `8b2201b091d9b7294926a76c874b8238d8bafe0b6a75e3474b6e32e97d6253b5`.\n\n- This integration does not complete pending upstream tasks or grant release acceptance.\n- Matching declared source bindings does not expand the original measured population.\n- Historical measurements, tool failures and product findings are distinct.\n'
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.884s
+
+FAILED (failures=1)
+Quality report saved: /private/tmp/tmp6uszd95q/target/report; release decision Unknown; numeric gates unchanged

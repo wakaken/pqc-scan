@@ -1,0 +1,78 @@
+[
+  {
+    "label": "quality-final-r1",
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/quality",
+      "-p",
+      "test_*.py",
+      "-v"
+    ],
+    "exitCode": 0,
+    "seconds": 5.2234273749927524,
+    "log": "tasks/053/evidence/resume-20261115/quality-final-r1.log"
+  },
+  {
+    "label": "ci-quality-syntax",
+    "argv": [
+      "bash",
+      "-n",
+      "-c",
+      "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-quality-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-quality-r1/ci-measurement-plan.md\n"
+    ],
+    "exitCode": 0,
+    "seconds": 0.0065666250011418015,
+    "log": "tasks/053/evidence/resume-20261115/ci-quality-syntax.log"
+  },
+  {
+    "label": "ci-quality-replay",
+    "argv": [
+      "bash",
+      "-e",
+      "-c",
+      "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-quality-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-quality-r1/ci-measurement-plan.md\n"
+    ],
+    "exitCode": 0,
+    "seconds": 0.7457683749962598,
+    "log": "tasks/053/evidence/resume-20261115/ci-quality-replay.log"
+  },
+  {
+    "label": "ci-baseline-syntax",
+    "argv": [
+      "bash",
+      "-n",
+      "-c",
+      "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-baseline-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-baseline-r1/ci-measurement-plan.md\n"
+    ],
+    "exitCode": 0,
+    "seconds": 0.006307874995400198,
+    "log": "tasks/053/evidence/resume-20261115/ci-baseline-syntax.log"
+  },
+  {
+    "label": "ci-baseline-replay",
+    "argv": [
+      "bash",
+      "-e",
+      "-c",
+      "python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-ci053-baseline-r1\ncp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-ci053-baseline-r1/ci-measurement-plan.md\n"
+    ],
+    "exitCode": 0,
+    "seconds": 0.7489437500044005,
+    "log": "tasks/053/evidence/resume-20261115/ci-baseline-replay.log"
+  },
+  {
+    "label": "diff-check",
+    "argv": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exitCode": 0,
+    "seconds": 0.0247267090016976,
+    "log": "tasks/053/evidence/resume-20261115/diff-check.log"
+  }
+]

@@ -1,0 +1,27 @@
+from pathlib import Path
+import json,collections,struct,hashlib,subprocess,datetime
+p=Path('tasks/056/evidence/assessment-20261115');data=json.loads((p/'THRESHOLD-INPUTS.json').read_text());rules=data['rules'];levels=['info','low','medium','high','critical']
+def f32(x):return struct.unpack('f',struct.pack('f',x))[0]
+def severity(rule,threshold,evidence='code'):
+ base=rule['severity'];eligible=rule['category'].lower() in {'tls','pki','jwt','auth','authentication'} and rule['risk']=='quantum-vulnerable'
+ if not eligible or f32(rule['confidence'])<f32(threshold):return base
+ return 'critical' if evidence=='private_key' else levels[min(levels.index(base)+1,4)]
+scenarios=[]
+for threshold in [0.0,0.45,0.5,0.6,0.7,0.8,0.9,1.0]:
+ current={r['id']:severity(r,.45) for r in rules};proposed={r['id']:severity(r,threshold) for r in rules};changed=[{'ruleId':r['id'],'confidence':r['confidence'],'base':r['severity'],'current':current[r['id']],'proposed':proposed[r['id']]} for r in rules if current[r['id']]!=proposed[r['id']]]
+ transitions={level:[r['id'] for r in rules if (levels.index(current[r['id']])>=levels.index(level))!=(levels.index(proposed[r['id']])>=levels.index(level))] for level in ['high','critical']}
+ scenarios.append({'threshold':threshold,'scenario':'one ordinary non-private-key evidence hit per builtin rule; not observed findings or accuracy','promotedRules':sum(proposed[r['id']]!=r['severity'] for r in rules),'changedFromCurrent':len(changed),'severityCounts':dict(collections.Counter(proposed.values())),'failOnThresholdChangedRuleHits':transitions,'changes':changed})
+# A source-characterization consistency check against all actual generic severity observations.
+obs=json.loads((p/'native-r2/OBSERVATIONS.json').read_text());indexed={o['id']:o['actual'] for o in obs};oracle=json.loads(Path('tests/quality/judgment/oracle.json').read_text());checked=0
+for c in oracle['cases']:
+ if c['kind']!='severity':continue
+ r=c['input'];assert severity(r,.45,r['evidence_type'])==indexed[c['id']]['severity'],c['id'];checked+=1
+commands=[['git','log','--oneline','--all','--','crates/pqc_scan_core/src/risk.rs'],['git','blame','-L','1,36','--','crates/pqc_scan_core/src/risk.rs']]
+history=[]
+for command in commands:
+ r=subprocess.run(command,capture_output=True,text=True);history.append({'command':command,'exitCode':r.returncode,'stdout':r.stdout,'stderr':r.stderr})
+(p/'THRESHOLD-HISTORY.json').write_text(json.dumps(history,indent=2)+'\n')
+result={'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'sourceHead':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'riskSourceSha256':hashlib.sha256(Path('crates/pqc_scan_core/src/risk.rs').read_bytes()).hexdigest(),'ruleSourceBindings':{str(f):hashlib.sha256(f.read_bytes()).hexdigest() for f in Path('rules/default').glob('*.yml')},'ruleCount':len(rules),'eligibleSensitiveVulnerableRules':len(data['sensitiveVulnerable']),'observedCurrentBranchChecks':checked,'currentBranchCheckInterpretation':'Matches implementation observations, not independent justification of intended threshold','scenarios':scenarios,'limits':['No score calibration, actual-hit weighting, false-positive adjudication, incident likelihood or population accuracy measured.','One-hit-per-rule scenario only; actual reports depend on which rules match and evidence kinds.','Changing confidence gate changes report severity and potentially --fail-on exit2, including compatible custom packs.','No threshold or product source changed.']}
+(p/'THRESHOLD-STUDY.json').write_text(json.dumps(result,indent=2)+'\n');print('Rule scenarios:')
+for r in scenarios:print(r['threshold'],'promoted',r['promotedRules'],'changed',r['changedFromCurrent'],'high-exit candidates',len(r['failOnThresholdChangedRuleHits']['high']),'critical-exit candidates',len(r['failOnThresholdChangedRuleHits']['critical']))
+print('Actual source-characterization checks',checked)
