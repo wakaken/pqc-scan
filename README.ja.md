@@ -88,6 +88,7 @@ pqc-scan scan /path/to/your-product --format all --out-dir /path/to/reports/prod
 
 実行結果を比較するときは、検査対象のリポジトリの外に新しい出力先を用意します。
 過去のレポートを入力として読み込んだり、今回の出力と取り違えたりするのを避けるためです。
+出力先の経路やファイル位置にあるシンボリックリンクは拒否します。通常の既存レポートは上書きできます。詳しくは[出力先の安全性](docs/user/SCANNING.ja.md#出力先の安全性)を参照してください。
 HTML・Markdownを日本語にするには `--lang ja` を加えます。[インストールせずにソースから実行する方法](docs/user/SCANNING.ja.md#from-source)もあります。
 
 <a id="results"></a>

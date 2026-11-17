@@ -85,6 +85,7 @@ pqc-scan scan /path/to/your-product --format all --out-dir /path/to/reports/prod
 ```
 
 Use a new output directory outside the scanned repository when comparing scans, so old/generated reports do not become part of the input or get confused with current output.
+Output paths containing symbolic links are rejected; existing regular reports remain replaceable. See [output destination safety](docs/user/SCANNING.md#output-destination-safety).
 To produce Japanese HTML/Markdown, add `--lang ja`. [Running from source](docs/user/SCANNING.md#from-source) is also supported.
 
 <a id="results"></a>

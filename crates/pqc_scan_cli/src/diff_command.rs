@@ -1,6 +1,6 @@
 use pqc_scan_core::diff::{compare, parse_inventory, MAX_INPUT_BYTES};
 use std::{
-    fs::{self, File},
+    fs::File,
     io::{Read, Write},
     path::Path,
 };
@@ -26,11 +26,11 @@ pub(crate) fn run(
     let report = compare(&before, &after, scope)?;
     let json = serde_json::to_vec_pretty(&report)?;
     let summary = report.summary_markdown();
-    fs::create_dir_all(out_dir)?;
+    pqc_scan_core::safe_output::create_dir_all(out_dir)?;
     let json_path = out_dir.join("scan.diff.v1.json");
     let summary_path = out_dir.join("scan.diff.v1.md");
-    fs::write(&json_path, json)?;
-    fs::write(&summary_path, summary)?;
+    pqc_scan_core::safe_output::write(&json_path, json)?;
+    pqc_scan_core::safe_output::write(&summary_path, summary)?;
     writeln!(stdout, "written {}", json_path.display())?;
     writeln!(stdout, "written {}", summary_path.display())?;
     Ok(())

@@ -18,6 +18,7 @@ pub mod privacy;
 pub mod probe;
 pub mod recommendation;
 pub mod risk;
+pub mod safe_output;
 mod safe_read;
 pub mod target_policy;
 mod text_encoding;

@@ -382,7 +382,7 @@ pub(crate) fn html_report_with_context(
         "</main><script>{}</script></body></html>",
         include_str!("compact.js")
     )?;
-    std::fs::write(path, out)?;
+    pqc_scan_core::safe_output::write(path, out)?;
     Ok(())
 }
 
@@ -670,7 +670,7 @@ pub(crate) fn markdown_report_with_context(
     if let Some(context) = context {
         out.push_str(&crate::inspection::markdown(context, lang)?);
     }
-    std::fs::write(path, out)?;
+    pqc_scan_core::safe_output::write(path, out)?;
     Ok(())
 }
 

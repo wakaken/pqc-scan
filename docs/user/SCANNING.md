@@ -31,6 +31,27 @@ Defaults are `--format all`, `--lang en`, `--out-dir ./pqc-report`, `--rules-dir
 Add `--cyclonedx-17` to write separate CycloneDX 1.7 inventories. The [report guide](REPORTS.md#cyclonedx)
 explains these documents and the completeness limits of [inventory comparison](REPORTS.md#diff).
 
+
+### Output destination safety
+
+On Unix (including macOS and Linux), report writers reject symbolic links in the
+output directory path and existing symbolic-link or non-regular-file destinations.
+The root-controlled macOS aliases `/tmp`, `/var` and `/etc` remain usable; links
+inside them receive the same checks. Use the physical path for other directory
+aliases. This applies to scan, inventory, assessment, diagnostics, CycloneDX, diff
+and probe reports.
+
+Missing directories are created. Existing regular report files can be overwritten,
+including on repeated runs. Each file is replaced atomically rather than truncated;
+an external file sharing a hard link is not modified. Published files have private
+permissions (0600, subject to umask); replacing a file does not preserve its inode,
+old permissions, ACLs or extended attributes. Directory write permission is needed.
+A failed report set may leave earlier files from that run; the set is not one
+transaction. Concurrent modifications by someone who can write the destination
+can still remove or alter reports; this protection prevents redirected writes,
+not tamper-proof storage. Unsupported non-Unix platforms fail explicitly instead
+of falling back to unsafe output.
+
 ### Recommended usage from your product repository
 
 When running `pqc-scan` inside your own product repository (not inside the `pqc-scan` repo), use an **absolute path** for `--rules-dir`.

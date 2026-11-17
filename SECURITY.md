@@ -201,12 +201,15 @@ usage recommendation or proposed fix is not acceptance or remediation.
 Detection coverage, secret masking and optional probes have documented limits.
 Zero findings do not prove safety or exhaustive inspection. Preserve partial
 coverage, missing measurements and unexecuted platform/runtime checks as such.
-The linked models retain historical partial coverage and an unresolved
-output-destination finding. Later scan reports must state their own source
+The linked models retain historical partial coverage and the output-destination
+finding observed in their original snapshot. Later scan reports must state their own source
 revision, reviewed surfaces and verification limits. A policy or threat-model
 update does not close a finding or establish that unreviewed code is safe.
 
-A fresh, trusted output directory outside an untrusted checkout reduces the
-known output-link placement risk. It is an operational precaution, not enforced
-writer containment or evidence of remediation. Input-read controls do not
-compensate for unsafe output writes.
+Current Unix report writers use held directory handles, no-follow traversal and
+exclusive staging followed by atomic replacement. They do not truncate existing
+linked inodes. See [output destination safety](docs/user/SCANNING.md#output-destination-safety)
+for link rejection, private file modes, supported platforms and concurrency limits.
+A fresh, trusted output directory remains recommended; this does not make an
+attacker-writable destination tamper-proof. Historical models/findings remain
+unchanged, and a later security assessment must verify its own exact source.
