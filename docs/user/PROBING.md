@@ -1,9 +1,8 @@
 # Explicit TLS and SSH diagnostics
 
-[日本語](PROBING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
+[日本語](PROBING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.md)
 
-All three probe modes remain experimental in the v0.3 development checkout, as in v0.2.0. The published v0.2.0 binary is
-the static variant, which has no `probe` command. Probe bundles have completed
+All three probe modes remain experimental alongside the unpublished v0.3.0 static candidate. Both the candidate static binary and the published v0.2.0 static binary have no `probe` command. Probe bundles have completed
 technical preparation but retain publication checks; see [distribution status](DISTRIBUTION.md#release-status).
 
 Use probes only for a host/port you are authorized to inspect. A probe exchanges
@@ -19,7 +18,7 @@ commands at build time using the pinned Rust toolchain:
 cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh
 ```
 
-The published binary targets macOS on Apple Silicon. An isolated Linux protocol/OpenSSH test harness is available, but the repository's `protocols` CI job is currently paused, including manual workflow runs. Do not infer a fresh protocol pass from a successful `quality`, `baseline` or `scan` job. The harness does not qualify a Linux binary distribution or other OS/architecture combinations. TLS adds a native cryptographic provider
+The published binary targets macOS on Apple Silicon. An isolated Linux protocol/OpenSSH test harness is available, but the repository's `protocols` CI job is currently paused, including manual workflow runs. Do not infer a fresh protocol pass from a successful `quality`, `baseline` or `scan` job. The generic suite's read-only-target write failure was corrected and the [candidate validation](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md) completed the original suite, separately from protocol049. That evidence does not resume hosted CI; resumption needs a maintainer decision and verification of current inputs/environment/limits. The harness does not qualify a Linux binary distribution or other OS/architecture combinations. TLS adds a native cryptographic provider
 build; static builds/tests do not require that provider. No AI service is used.
 
 ## TLS

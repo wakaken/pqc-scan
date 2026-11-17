@@ -1,8 +1,6 @@
 # pqc-scan
 
-This branch develops **v0.3**, with a focus on measuring scanner accuracy, inspection coverage and verification limits. See the [quality roadmap](docs/roadmap/v0.3/ROADMAP.md) for completed and planned work.
-
-The unpublished static release candidate is **0.3.0** for macOS arm64; candidate preparation is separate from release acceptance and publication.
+This checkout prepares **v0.3.0**, an unpublished static candidate for macOS Apple Silicon (`aarch64-apple-darwin`). See the [candidate notes](docs/releases/v0.3.0.md) for changes and compatibility. Technical preparation and completion of the [quality roadmap](docs/roadmap/v0.3/ROADMAP.md) are separate from product acceptance and publication.
 
 The published release is **v0.2.0**; its [release notes](docs/releases/v0.2.0.md) describe the released scope. Static scanning is the formal scope; TLS and SSH probes remain experimental.
 
@@ -108,7 +106,7 @@ Additional inventory, assessment and diagnostic files require explicit options.
 Use `--cyclonedx-17` for separate CycloneDX 1.7 exports, or `diff` to compare
 inventories with the same explicit repository scope. See the [report guide](docs/user/REPORTS.md).
 
-Finding IDs use `finding-v1-<SHA-256>` with length-prefixed fields and repository-relative paths. Identical findings keep the same ID across checkout locations.
+Finding IDs use `finding-v1-<SHA-256>` with length-prefixed fields and repository-relative paths. With the same binary, rules, selected input and scan settings, identical findings keep their IDs across checkout locations. Position/evidence corrections between versions can change affected IDs and counts; see [versions and identity](docs/user/REPORTS.md#versions-and-identity).
 
 <a id="guides"></a>
 
@@ -126,7 +124,7 @@ For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
 
 Selected built-in source rules follow imports, aliases and bounded local bindings. Node checks also follow literal `for...of` algorithm lists and locally generated RSA keys into signing/verification. See [source analysis and its limits](docs/user/COVERAGE.md#source-facts); these observations do not prove execution or enabled PQC support.
 
-For the scanner's own measured capabilities and limitations, see the [PQS-QAM quality assessment](tasks/041/QUALITY-ASSESSMENT.md). Measurements identify their inputs and source versions; they do not certify overall security. The existing offline benchmark produces separate [JSON/Markdown quality reports](tests/quality/README.md).
+For the current candidate's source versions, measurements and remaining limits, start with the [static candidate evaluation](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md) and [individual rule/branch assessments](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/QUALITY-COMPLETION.md). These are bounded evaluations, not a guarantee of accuracy for every rule or product. The [2026-11-11 PQS-QAM assessment](tasks/041/QUALITY-ASSESSMENT.md) is historical; it is not the current candidate's quality verdict. The offline benchmark produces separate [JSON/Markdown quality reports](tests/quality/README.md).
 
 Each guide has a Japanese version linked at the top.
 
@@ -195,10 +193,10 @@ rules, workflow files and JSON data under `docs/`, still run CI. The exact list 
 [the workflow](.github/workflows/pqc-scan.yml). Run it manually from GitHub Actions
 when validation is needed for an otherwise skipped change.
 
-During development, the `protocols` job is temporarily disabled for all triggers,
-including manual runs. Its protocol, isolation and packaging checks do not run;
-the jobs in the event table remain enabled. Remove the job's `if: ${{ false }}`
-condition in the workflow to restore those checks.
+The `protocols` job is disabled for every trigger, including manual runs. Its
+`if: ${{ false }}` condition remains in place. The generic isolated suite's
+read-only-target write failure has been corrected and its tests, Clippy, previews
+and SSH KEX completed in the [candidate validation](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md). This is separate evidence from the dedicated protocol049 path and does not resume the hosted job. Re-enabling it requires a maintainer decision and validation of its current inputs, environment and resource limits; the three enabled jobs do not establish a protocol pass.
 
 GitHub limits the number of changed files considered
 by path filtering; for large changes, manually run CI if it was omitted.

@@ -2,7 +2,7 @@
 
 [日本語](SCANNING.ja.md) · [README](../../README.md)
 
-This guide describes the v0.3 development checkout. Detected references and findings can differ from the published v0.2.0 release.
+This guide describes the unpublished v0.3.0 static candidate. The published release is v0.2.0; detected references, evidence and IDs can differ between versions. See the [candidate notes](../releases/v0.3.0.md) for compatibility and release status.
 
 Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
 
@@ -186,37 +186,30 @@ See [dependency declarations and resolution evidence](../architecture/DEPENDENCY
 ### Reference positions
 
 Explicit Python PQC imports are located at the module reference after `from `;
-the evidence range still includes the imported symbols and continuation lines.
-Configuration regex evidence starts after leading layout whitespace, including
-blank lines; intentionally whitespace-only custom matches keep their full range.
-Locations use original source bytes and character columns. This correction can
-change finding and observation IDs for affected ranges; rule matching, risk,
-severity and confidence are unchanged. Schemas and the identity algorithm are unchanged.
+the evidence range includes imported symbols and continuation lines. Only regex
+rules whose `scope` is exactly `config` omit leading whitespace from a nonempty
+reference range. This is not a rule for every configuration file or every regex.
+Whitespace-only custom matches retain their full range.
 
-### Java RSA parameter references and Maven declarations
+The exact built-in `TLS_VERSION_1_0` pattern/scope selects the protocol token and
+reuses its trailing delimiter for an adjacent reference. Modified patterns/scopes
+and unrelated custom IDs retain generic matching ranges and non-overlapping
+iteration. A name reference does not establish effective configuration or a
+negotiated protocol. Locations use original decoded text and character columns;
+see [version-to-version identity changes](REPORTS.md#versions-and-identity).
 
-The 0.3.0 candidate also inspects Java `RSAKeyGenParameterSpec` constructors
-for the existing 1024/2048/3072-bit reference rule. A newly detected constructor
-can add a finding and its IDs; it does not establish an effective key size or
+### Java RSA, Maven and certificate facts
+
+Java `RSAKeyGenParameterSpec` constructors are inspected for explicit
+1024/2048/3072-bit RSA references. They do not prove an effective key size or
 runtime use. Existing candidates are inspected before additional constructors
-consume remaining inspection budgets. Incomplete inspection stays explicit.
-Rejected Maven dependency coordinates do not change the context annotations of
-earlier valid declarations. The output schema and valid declaration meaning
-remain unchanged.
+consume the remaining budgets; incomplete inspection stays explicit.
+Rejected Maven dependency coordinates cannot change the context annotations of
+earlier valid declarations.
 
 Certificate parameter OIDs and named curves require the corresponding universal
-ASN.1 type and encoding shape. Non-OID content or context-specific/constructed
-lookalikes no longer become OID, curve or key-size facts. Invalid shapes retain
-Partial/Unsupported status; this corrects attribute values and may change their
-observation/asset IDs without adding a signature/trust-validation claim.
-
-A NULL parameter has no parameter OID: the legacy metadata no longer emits an
-empty `parameters_oid` entry for it. Consumers must continue treating this
-metadata entry as optional. The enclosing schema and finding IDs in the measured
-canonical corpora remain unchanged; full field differences are recorded.
-
-The built-in TLS 1.0 name rule reports the protocol token itself and preserves
-adjacent references separated by one delimiter. Corrected positions and evidence
-change affected IDs; previously missed adjacent names can increase the count.
-Custom patterns/scopes retain their matching ranges. A name reference does not
-establish effective configuration or a negotiated protocol.
+ASN.1 type and encoding shape. Content bytes alone do not establish an OID, curve
+or key-size fact. Uninterpreted or malformed attributes retain inspection limits;
+no signature/trust validation follows. A NULL parameter has no parameter OID, so
+the optional `parameters_oid` metadata entry is absent, rather than an empty
+string. See the [candidate compatibility notes](../releases/v0.3.0.md).

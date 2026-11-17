@@ -1,36 +1,33 @@
 # Installation and distribution
 
-[日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
+[日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.md)
 
-This guide covers source installation from the **v0.3 development checkout** and the published **v0.2.0** archives. Build this checkout with its matching rules to use the development changes; downloading the v0.2.0 archive does not include them. The public
-distribution channel is GitHub Releases with a static macOS Apple Silicon archive
-(`aarch64-apple-darwin`), its matching rules/notices, SHA-256 checksums and a GitHub
-build-provenance attestation. A merged candidate or Actions artifact is not yet a
-published Release. See the [v0.2 release notes](../releases/v0.2.0.md).
+This guide covers the unpublished **v0.3.0 static candidate** and the published
+**v0.2.0** archives. Build a source checkout with its matching rules to use candidate
+changes; the v0.2.0 download does not include them. The published channel is the
+[v0.2.0 GitHub Release](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0),
+with a static macOS Apple Silicon archive (`aarch64-apple-darwin`), matching
+rules/notices, SHA-256 checksums and hosted build provenance. A local candidate or
+Actions artifact is not a published Release. See the [v0.3.0 candidate notes](../releases/v0.3.0.md) and the historical [v0.2.0 notes](../releases/v0.2.0.md).
 
 Maintenance is best-effort for the latest verified 0.2.x snapshot. No SLA or
-older-version backport guarantee is declared. Probes remain experimental;
+older-version backport guarantee is declared. The 0.3.0 candidate does not establish
+a 0.3.x maintenance/backport policy; that decision remains open. Probes remain experimental;
 the `network` package is technical preparation and retains its notice
 review flags. Other binary platforms and crates.io publication are outside this
 release scope. See [security reporting](../../SECURITY.md).
 
 ## Static 0.3.0 candidate (unpublished)
 
-The next candidate is `0.3.0` for macOS Apple Silicon static scanning. It is under
-verification and is not a published Release. The v0.2.0 notes below remain the
-historical published-release record. Keep each candidate binary, rules, archive
-manifest and source commit together; the version string alone is insufficient.
+The candidate is `0.3.0` for macOS Apple Silicon static scanning. Its
+[technical evaluation](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md) records completed checks and bounded remaining limits; formal product acceptance, release provenance/signing and publication remain separate gates. No v0.3.0 Release is published. Keep the candidate binary, rules, archive manifest and source commit together; the version string alone is insufficient.
 
-This candidate prevents report-output redirection through symbolic links and
-preserves ordinary file replacement through private staged writes. New Unix output
-files use mode 0600; replacing a file does not preserve its old inode permissions
-or ACLs. Arbitrary output symlinks are rejected; non-Unix output is unsupported.
-Python explicit-import and configuration-reference positions/evidence are corrected;
-affected finding and observation IDs can change. Detection counts, confidence and
-risk interpretation are preserved. Reports remain bounded investigation evidence,
-not proof that a repository is safe or fully PQC-ready. Network publication holds
-remain separate. Product acceptance, provenance/signing and publication require
-the final release decision; local archives and CI artifacts do not grant it.
+Unix writers reject output symlinks and use private staged files for ordinary
+replacement. New files use mode 0600; old inode permissions and ACLs are not
+preserved. Non-Unix output is unsupported. Version-to-version position/evidence
+corrections, additional Java RSA references and corrected certificate attributes
+can change counts, values and affected IDs. Risk/confidence policy and format
+versions remain separate from these changes; see [compatibility](../releases/v0.3.0.md#compatibility). Reports remain bounded investigation evidence, not proof of repository safety or completed PQC migration. Network publication holds remain in place.
 
 <a id="release-status"></a>
 
@@ -43,7 +40,7 @@ for published assets. The probe bundles below are not part of that release.
 
 | Variant | Optional commands | Public distribution status |
 |---|---|---|
-| `static` | None | v0.2 distribution target; verify hosted build provenance |
+| `static` | None | v0.2.0 published; v0.3.0 candidate unpublished. Verify the selected release's provenance |
 | `network` (network diagnostics included) | `probe tls`, `probe ssh`, `probe ssh-kex`, plus static scanning | Unpublished; four dependency notice reviews remain |
 
 The unresolved dependency checks are recorded in the
@@ -57,8 +54,8 @@ The `russh-util 0.52.0` source comparison found that all three Rust files match
 the recorded revision and the original manifest differs only in the package
 version. Its `dirty=true` archive record is preserved, and the Apache-2.0 text
 remains bound to that revision. This resolves that technical review flag; it does
-not approve publication. The network variant remain on hold for the four notice
-reviews above. See the [follow-up evidence](../../tasks/063/TASK-063-RESULTS.md).
+not approve publication. The network variant remains on hold for the four notice
+reviews above. See the [follow-up evidence](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/tasks/063/TASK-063-RESULTS.md).
 
 These are open notice/source-origin reviews, not evidence that a probe is broken
 or that a dependency is unlawful. Preserve the flags until the checks are
@@ -74,12 +71,12 @@ commit recorded in the Release.
 Publishing a probe bundle is additional scope: resolve its reviews above,
 provide and verify hosted provenance for that variant (the current workflow
 attests only `static`), then validate the final release inputs before upload.
-See the [candidate validation record](../records/v0.2-release/V02-RELEASE-VALIDATION.md) for the
+See the [candidate validation record](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/records/v0.2-release/V02-RELEASE-VALIDATION.md) for the
 completed technical checks. `review_required` is not an end-user setting to disable.
 
 ## Source installation
 
-The workspace now declares package version `0.3.0` for the unpublished static candidate. Record the source commit and keep its binary/rules together; `--version` alone does not identify the development snapshot. Local package filenames below follow the Cargo version and do not establish a new official release.
+This checkout declares product version `0.3.0` for the unpublished static candidate. Record the source commit and keep its binary/rules together; `--version` alone does not identify the candidate snapshot. Local package filenames below follow the Cargo version and do not establish a new official release.
 
 Use the toolchain pinned in `rust-toolchain.toml`, retain this checkout's reviewed
 rules, and run from its root:
@@ -181,7 +178,9 @@ unsigned, unpublished technical preparation.
 
 ## Verify hosted build identity
 
-For an archive generated by the hosted preparation workflow, verify provenance
+The following example is for the published v0.2.0 archive. A locally prepared
+0.3.0 candidate has no hosted attestation by default. For an archive generated
+by the hosted preparation workflow, verify provenance
 against the repository, workflow and the exact source commit intended for release:
 
 ```sh

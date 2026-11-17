@@ -2,7 +2,7 @@
 
 [日本語](REPORTS.ja.md) · [README](../../README.md)
 
-This guide describes the v0.3 development checkout. Detected references and findings can differ from the published v0.2.0 release.
+This guide describes the unpublished v0.3.0 static candidate. The published release is v0.2.0; detected references, evidence and IDs can differ between versions. See the [candidate notes](../releases/v0.3.0.md) for compatibility and release status.
 
 After a scan, use the human report to investigate findings, then choose machine-readable files for tracking or automation. A finding records evidence and suggested checks; it is not an instruction to replace an algorithm without investigating its use.
 
@@ -130,7 +130,7 @@ exports (ten files in total):
 pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang en --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
-A policy assessment is an additional, separate opt-in. The v0.3 development work retains inventory v1, SARIF 2.1.0 and CycloneDX 1.7; the product roadmap version does not rename these formats. Separate
+A policy assessment is an additional, separate opt-in. Product version 0.3.0 is separate from Inventory v1, SARIF 2.1.0 and CycloneDX 1.7; it does not rename these formats. Separate
 probe reports are described in the [probe guide](PROBING.md).
 
 ### What CBOM and SBOM mean here
@@ -147,7 +147,7 @@ Use `scan.inventory.v1.json` when you need richer observations and provenance al
 `--inventory-json` adds `scan.inventory.v1.json` with method-specific observations,
 normalized algorithm/public-key/certificate/dependency assets, and links to legacy
 findings. This is pqc-scan's own JSON format. It is opt-in even with `--format all`;
-existing reports and IDs remain unchanged. Use `--repository-scope team/project`
+selecting it does not change the legacy report schemas or finding identity algorithm. Use `--repository-scope team/project`
 with inventory capture to enable weak cross-scan source correlation. Omit secret
 or absolute identifiers. The report does not assert active use, trust or a PQC
 assessment. See the [contract and limitations](../architecture/INVENTORY-REPORT-V1.md).
@@ -160,8 +160,8 @@ Dependency assets preserve declared constraints (for example `^1.2.3`), optional
 lock-record resolved versions and source provenance separately. A declaration or
 SBOM claim alone never creates a versioned purl. Path/git/workspace locators stay
 unresolved; no dependency graph or package download is inferred. The legacy
-`dependency-sbom.json` remains a flat array with the same fields; corrected purls
-and inspection diagnostics are intentional semantic changes. Source origins remain
+`dependency-sbom.json` is a flat array; its purls and inspection diagnostics reflect
+the supported declaration/resolution evidence. Source origins remain
 separate in inventory even when the legacy projection collapses them.
 
 <a id="cyclonedx"></a>
@@ -247,6 +247,23 @@ including one column per emoji, combining code point or tab, rather than visual
 width or UTF-16 units. Legacy AST columns mix byte and character offsets: SARIF
 keeps a column only when the existing unmasked snippet proves an ASCII prefix;
 otherwise it retains the line only. Missing, masked or clipped prefixes cannot
-prove a column. `report.json` locations/IDs, other reports, CLI flags and filenames
-are unchanged. These corrections intentionally replace invalid/misleading SARIF
-positions and unescaped paths. See the [contract and validation record](../../tasks/022/SARIF-LOCATION-CONTRACT-022.md).
+prove a column. Selecting SARIF does not rewrite `report.json` locations or finding IDs.
+Version-to-version changes to the underlying source evidence are a separate
+compatibility matter; the output format alone does not guarantee stable IDs. See the [contract and validation record](../../tasks/022/SARIF-LOCATION-CONTRACT-022.md).
+
+<a id="versions-and-identity"></a>
+
+## Product versions and record identity
+
+Finding identity is stable for identical findings with the same binary, rules,
+selected input and settings at the same repository-relative paths. Enabling an
+additional output or changing the human report language is not a version upgrade.
+Native assets/occurrences have separate identity and repository-scope contracts;
+duplicate weak anchors can remain ambiguous. Run/observation records can also
+contain execution-specific identifiers. Do not expect every exported byte or ID
+to be identical across runs.
+
+Across product or rule versions, corrected positions, evidence, attributes or
+newly detected references can change IDs and counts without changing the identity
+algorithm or schema. Compare the binary/source and rule versions alongside your
+scan settings. See the [v0.3.0 compatibility notes](../releases/v0.3.0.md).

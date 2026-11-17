@@ -1,8 +1,6 @@
 # pqc-scan
 
-このブランチでは、検出精度・検査範囲・検証の限界を測定する基盤を中心に、**v0.3**を開発しています。実施済みの内容と今後の作業は[品質評価ロードマップ](docs/roadmap/v0.3/ROADMAP.md)を参照してください。
-
-未公開の静的版リリース候補は、macOS arm64向けの**0.3.0**です。候補の準備と、製品受入・公開の判断は分けています。
+このチェックアウトは、macOS Apple Silicon（`aarch64-apple-darwin`）向けの未公開の静的版候補**v0.3.0**です。変更点と互換性は[候補のリリースノート](docs/releases/v0.3.0.ja.md)を参照してください。技術的な準備や[品質評価ロードマップ](docs/roadmap/v0.3/ROADMAP.md)の完了は、製品受入・公開の承認とは別です。
 
 公開済みのリリースは**v0.2.0**です。公開版の対象範囲は[リリース内容](docs/releases/v0.2.0.ja.md)に記載しています。静的スキャンを正式対象とし、TLS・SSH診断は引き続き実験的機能として扱います。
 
@@ -112,7 +110,7 @@ Markdownでは、CR・LFを含む複数行のソース断片やコード例も�
 CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚卸し比較には `diff` を使います。
 指定方法と制約は[結果の読み方](docs/user/REPORTS.ja.md)を参照してください。
 
-所見IDは、長さで区切った各フィールドとリポジトリ相対パスから生成する `finding-v1-<SHA-256>` です。同じ所見なら、チェックアウト先が変わっても同じIDになります。
+所見IDは、長さ付きの各項目とリポジトリ相対パスから作る`finding-v1-<SHA-256>`です。同じバイナリ・ルール・選択入力・設定で同じ所見を得た場合は、チェックアウト先によらず同じIDになります。版をまたぐ位置・根拠の補正では、該当IDや件数が変わる場合があります。[版とIDの扱い](docs/user/REPORTS.ja.md#versions-and-identity)も参照してください。
 
 <a id="guides"></a>
 
@@ -130,7 +128,7 @@ CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚�
 
 一部の組込ルールでは、import・別名・ファイル内の限定した参照関係を調べます。Nodeでは、固定配列の`for...of`や、局所的に生成したRSA鍵を使う署名・検証も追跡します。詳しくは[解析範囲と制約](docs/user/COVERAGE.ja.md#source-facts)を参照してください。参照の検出だけで、実行やPQC機能の有効化が確認できるわけではありません。
 
-スキャナー自身の測定結果と限界は[PQS-QAM品質評価](tasks/041/QUALITY-ASSESSMENT.md)に記載しています。各測定は入力とソースの版を明示したもので、製品全体の安全性を認定するものではありません。既存のオフラインベンチマークから、別途[JSON・Markdownの品質報告](tests/quality/README.md)を生成できます。
+候補の対象ソース・測定結果・残る制約は、[静的版候補の評価記録](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md)と[ルール・分岐の個別評価](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/QUALITY-COMPLETION.md)で確認できます。有限の入力と条件による評価であり、全ルール・全製品の精度を保証するものではありません。[2026年11月11日のPQS-QAM評価](tasks/041/QUALITY-ASSESSMENT.md)は過去の記録で、現在の候補への品質判定とは区別します。オフライン評価では、別途[JSON・Markdownの品質レポート](tests/quality/README.md)を出力します。
 
 各ガイドの冒頭から英語版へ移れます。
 
@@ -188,9 +186,7 @@ PRとdevelopへのpushでは、変更パスがすべて文書用の一覧に一�
 正確な一覧は[ワークフロー](.github/workflows/pqc-scan.yml)で管理します。
 スキップ対象の変更でも検証が必要な場合は、GitHub Actionsから手動実行できます。
 
-開発中は`protocols`ジョブを一時停止し、手動実行を含むすべての起動方法でスキップします。
-このジョブのプロトコル・隔離・パッケージ検証は実行しません。上の表に示すジョブは引き続き有効です。
-再開する際は、ワークフローの該当ジョブから`if: ${{ false }}`を削除してください。
+`protocols`ジョブは、手動実行を含む全トリガーで停止しています。workflowの`if: ${{ false }}`も残っています。汎用隔離suiteが読取り専用の出力先への書込みで停止する問題は修正済みで、[候補の検証](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md)ではテスト・Clippy・プレビュー・SSH KEXまで成功しています。専用のprotocol049経路とは別の証拠であり、ホスト型ジョブの再開を意味しません。再開には維持者の判断と、現在の入力・環境・資源制限での確認が必要です。稼働中の3ジョブの成功だけでは、プロトコル検証の成功とは扱いません。
 
 GitHubのパス判定には変更ファイル数の上限があるため、
 大量のファイルを変更してCIが起動しなかった場合は手動実行してください。
