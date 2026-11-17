@@ -12,7 +12,7 @@
     },
     {
       "path": "rules/default/crypto_api.yml",
-      "sha256": "84f672787e883cbd2c2dd790ada8076c8a4c3f0628f3bc26aeb2b5bf4f7ea10a"
+      "sha256": "a6c60fbde7e835d463f855167d67f893c2ed9c61645713c219305c8506aa8ec2"
     },
     {
       "path": "rules/default/jwt.yml",
@@ -2062,7 +2062,7 @@
         "risk": "quantum-vulnerable",
         "confidence": 0.5,
         "migration_hint": "Plan migration away from classical RSA crates in Rust workloads.",
-        "pattern": "(?i)pkg:cargo/[^\\s]*(rsa|jsonwebtoken)",
+        "pattern": "(?i)(?:^|\\s)pkg:cargo/(?:rsa|jsonwebtoken)(?:@[^\\s/?#]+)?\\z",
         "scope": "dependency",
         "description": "Rust RSA/JWT dependency detected."
       },
@@ -2080,7 +2080,8 @@
       "method_limits": [
         "Pattern runs on safe projected name/version/ecosystem/purl text.",
         "Presence or a lock record does not prove deployment, selected algorithm or enabled PQC features.",
-        "No network resolution, cross-file graph or provider/peer capability inference."
+        "No network resolution, cross-file graph or provider/peer capability inference.",
+        "Cargo package component is exactly rsa or jsonwebtoken (case-insensitive); canonical purl must terminate the projected target. Query/subpath inputs remain unsupported by the existing parser."
       ],
       "known_gaps": [
         "Legacy risk tags cannot establish the selected algorithm from package presence."
@@ -2096,6 +2097,21 @@
           "target": "serde 1.0 cargo pkg:cargo/serde",
           "desired_positive": false,
           "expected_pattern_match": false
+        },
+        {
+          "target": "universal-hash 0.6.1 cargo pkg:cargo/universal-hash@0.6.1",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "rsa-helper 1.0 cargo pkg:cargo/rsa-helper@1.0.0",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "jsonwebtoken 9.3.1 cargo pkg:cargo/jsonwebtoken@9.3.1",
+          "desired_positive": true,
+          "expected_pattern_match": true
         }
       ]
     },

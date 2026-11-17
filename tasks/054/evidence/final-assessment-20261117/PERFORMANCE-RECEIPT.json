@@ -1,0 +1,200 @@
+{
+  "head": "3d5bd27fe5ab4c0b5b6b916f06d8001772884ad6",
+  "hostExit": 0,
+  "containerRemoved": true,
+  "image": "sha256:f7c0365571a37fbbd5469e25b563a6069bda7395155f46d2fa2e3cf17271c82f",
+  "limits": {
+    "memoryBytes": 6442450944,
+    "swapBytes": 0,
+    "scratchBytes": 4294967296,
+    "sharedMemoryBytes": 1048576,
+    "pids": 128,
+    "cpus": 2,
+    "wallSeconds": 1200,
+    "memoryEnforced": true,
+    "aggregateDiskEnforced": true
+  },
+  "commands": [
+    {
+      "name": "default-build",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "-p",
+        "pqc_scan_cli"
+      ],
+      "exit": 0,
+      "seconds": 53.44867539899997
+    },
+    {
+      "name": "default-study-1",
+      "command": [
+        "/usr/bin/python3",
+        "/source/tests/quality/run.py",
+        "--performance-study",
+        "--binary",
+        "/scratch/build-default/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--features-label",
+        "default",
+        "--out-dir",
+        "/scratch/evidence/default-1"
+      ],
+      "exit": 0,
+      "seconds": 72.84189415800006
+    },
+    {
+      "name": "default-study-2",
+      "command": [
+        "/usr/bin/python3",
+        "/source/tests/quality/run.py",
+        "--performance-study",
+        "--binary",
+        "/scratch/build-default/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--features-label",
+        "default",
+        "--out-dir",
+        "/scratch/evidence/default-2"
+      ],
+      "exit": 0,
+      "seconds": 72.96293469900002
+    },
+    {
+      "name": "all-features-build",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "-p",
+        "pqc_scan_cli",
+        "--all-features"
+      ],
+      "exit": 0,
+      "seconds": 110.50164567599995
+    },
+    {
+      "name": "all-features-study-1",
+      "command": [
+        "/usr/bin/python3",
+        "/source/tests/quality/run.py",
+        "--performance-study",
+        "--binary",
+        "/scratch/build-all-features/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--features-label",
+        "all-features",
+        "--out-dir",
+        "/scratch/evidence/all-features-1"
+      ],
+      "exit": 0,
+      "seconds": 74.14572899199993
+    },
+    {
+      "name": "all-features-study-2",
+      "command": [
+        "/usr/bin/python3",
+        "/source/tests/quality/run.py",
+        "--performance-study",
+        "--binary",
+        "/scratch/build-all-features/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--features-label",
+        "all-features",
+        "--out-dir",
+        "/scratch/evidence/all-features-2"
+      ],
+      "exit": 0,
+      "seconds": 74.42837145099998
+    }
+  ],
+  "runs": 4,
+  "successfulSamples": 96,
+  "expectedFailures": 16,
+  "failureThroughputExcluded": true,
+  "failureExitClasses": {
+    "2": 4,
+    "3": 4,
+    "1": 4,
+    "-9": 4
+  },
+  "sameConditionComparisons": 12,
+  "differentConditionComparisons": 24,
+  "above2xInvestigations": 0,
+  "formats": "All11raw/semantic/order hashes retained; native run/observation IDs intentionally remain in reported equality checks.",
+  "reproducibility": "Finding/asset/occurrence facts remain stable in declared comparisons; native run/observation ID drift and Markdown/native/CBOM differences are recorded as measured, not passed semantic equality.",
+  "secondaryMdAttribution": {
+    "scope": "First small-t1sample default-repeat1versus2only;diagnostic explanation, not a new approved comparison normalizer.",
+    "timestampAndObservationIdMaskMakesStringsEqual": true,
+    "reportedOriginalEqualityRemainsFalse": true
+  },
+  "uncertainty": "Initial versus warm is distinguished. True cold cache, controlled multi-day variance and Windows remain unmeasured; no threshold or support scope changed.",
+  "original023v2FailedPreserved": true,
+  "performanceIsNotAccuracy": "MIT product-source workload has no independent precision truth; current hosted accuracy is separate.",
+  "rawHostReceiptSha256": "d4f57f69487fa01ba5aa5a884a052f7d1231cf7a3a41c5cdc4782163aef3c2d8",
+  "outputProjection": [
+    {
+      "file": "performance/environment-comparison.json",
+      "rawSha256": "254359dcb39dc0133b6e92a730e8a3babb5d195cf6de283098b40730dda26235",
+      "projectedSha256": "660c84a9474551b3380980cf7c7c4af188851cff4c53736b6b8cabc12f756ed6",
+      "projection": "Remove only private host run-directory prefix from provenance labels; keep all measured values, status, IDs/digests, configurations, commands and limitations."
+    },
+    {
+      "file": "performance/failure-resources.json",
+      "rawSha256": "b951a2eabfb513163641242c2b1991aeebb7e164ea5b6a3ebb7ec89589c4a3bf",
+      "projectedSha256": "2607c829f7f1d41118a6365dae878533347f1ac9e7b6f58546f48bba704a136d",
+      "projection": "Remove only private host run-directory prefix from provenance labels; keep all measured values, status, IDs/digests, configurations, commands and limitations."
+    },
+    {
+      "file": "performance/noise-study.md",
+      "rawSha256": "efb6ac3a011912f68bdb1dbac623a8e99a23a49a5d270df4d87562b802a84b90",
+      "projectedSha256": "efb6ac3a011912f68bdb1dbac623a8e99a23a49a5d270df4d87562b802a84b90",
+      "projection": "Remove only private host run-directory prefix from provenance labels; keep all measured values, status, IDs/digests, configurations, commands and limitations."
+    },
+    {
+      "file": "performance/ordering.json",
+      "rawSha256": "0e5702d3703383a8dff892fbe09e1da6322eab5f5bf0e9834c59c4f717a62b12",
+      "projectedSha256": "df158398eeec43d7e97eb93d0b25db81502c9687254133a96b0eecbdd14780cd",
+      "projection": "Remove only private host run-directory prefix from provenance labels; keep all measured values, status, IDs/digests, configurations, commands and limitations."
+    },
+    {
+      "file": "performance/regression-review.md",
+      "rawSha256": "32435348cf049072f949c27bd2bd0753ac20d5f18d316e5e6032fd2d5a4385c0",
+      "projectedSha256": "32435348cf049072f949c27bd2bd0753ac20d5f18d316e5e6032fd2d5a4385c0",
+      "projection": "Remove only private host run-directory prefix from provenance labels; keep all measured values, status, IDs/digests, configurations, commands and limitations."
+    },
+    {
+      "file": "performance/resources.json",
+      "rawSha256": "5beea84d356a45a7d7cf3a44ec53bdc1792b1edd1a1843471d21140a094bfac2",
+      "projectedSha256": "0e14d1fe11886ea5872fc489e70512e163edc6b5cf4d1c30813711df21d8f109",
+      "projection": "Remove only private host run-directory prefix from provenance labels; keep all measured values, status, IDs/digests, configurations, commands and limitations."
+    },
+    {
+      "file": "performance/scaling.json",
+      "rawSha256": "0c018448518f06da30093140e8a18f2855dce0b83c0e23c6fb4a13ff513e07a8",
+      "projectedSha256": "a400b8c3f0f169487dc289cc9428dc49686a2cc286f3dd0eb24a393e5078d59e",
+      "projection": "Remove only private host run-directory prefix from provenance labels; keep all measured values, status, IDs/digests, configurations, commands and limitations."
+    },
+    {
+      "file": "performance/semantic-reproducibility.json",
+      "rawSha256": "0c64a6a9c20126ec81c0d195741049b84640a7554866907e63963f4b155c4185",
+      "projectedSha256": "3eecea2d6dc82891c937adc1ef6784cea1081308864760e6744fd668178e7b55",
+      "projection": "Remove only private host run-directory prefix from provenance labels; keep all measured values, status, IDs/digests, configurations, commands and limitations."
+    },
+    {
+      "file": "performance/throughput.json",
+      "rawSha256": "55133532d64799a8c76f0153195289098d4fe8751038712824f990203e5ef4e0",
+      "projectedSha256": "369091d12fb667d5890b2506e0ce87e1aa730de783b6244ea4ba9f5027c79b2b",
+      "projection": "Remove only private host run-directory prefix from provenance labels; keep all measured values, status, IDs/digests, configurations, commands and limitations."
+    }
+  ]
+}

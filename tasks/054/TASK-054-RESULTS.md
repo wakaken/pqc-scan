@@ -509,3 +509,147 @@ instances match local/upload evidence. All4artifact archive digests verify.
 See[evidence/hosted-product-scope-20261117/RESULTS.md](evidence/hosted-product-scope-20261117/RESULTS.md).
 No develop merge or retrospective2135cohort verdict follows. Original054all73
 assessment and completion gates remain open; status staysin-progress.
+
+
+## Final original-purpose assessment closure — 2026-11-17
+
+Task054is done as an assessment of the original73requirements. The latest
+[table and report](evidence/final-assessment-20261117/release-assessment.md)
+connect each unchanged original quote/owner/prior result to final-source evidence,
+applicability and bounded conclusions. Both existing reviewer identities accepted
+implementation/evaluation content and test adequacy; final consistency, negative
+controls and required target mirrors pass. Old64Partial/9Passed labels remain;
+73verified evaluations are not73product passes.
+
+The same-head/tool entire3763historical upload is byte-exact and fully
+risk-adjudicated as the accepted authoritative alternative. Exact2135newness and
+six residual identities remainUnknown;the oldcheck remainsfailure. Current11
+review-required observations are10inventory observations plus confirmed
+F054-01universal-hash/RSA substring overmatch. No rule change or suppression.
+
+New bounded final-source measurements include fixed20mutations(16caught/4missed),
+12kernel tests,4performance studies(96success/16expected failures),currentTLS/SSH
+matrix and18fuzz recipe slots(12227executions,not independent inputs). Source,
+worker,seed,tool/environment,commands,exits,hashes and cleanup are preserved.
+Fuzz's first parent had an incorrectly short budget;14completed slots were
+checkpointed and only4continued within original2700seconds. The interrupted
+whole attempt is not relabeled Passed. Existing source-matching studies and
+resolved052/053/056/063work are reused rather than repeated.
+
+[Completion and roadmap reconciliation](evidence/final-assessment-20261117/COMPLETION-DECISION.json)
+separates054done,the originalv0.3quality implementation/required-verification
+closure,product acceptance and publication authority. Product acceptance is
+withheld:current classification defect,old023-v2Failed,three meaningful mutation
+misses and probe-notice holds remain. No product fix,new task,other-task reopening,
+criterion waiver,merge,tag,release,real signing or new publication occurred.
+This update is local;the previous specific push/CI authorization is not expanded.
+
+
+## Completion decision reconsideration — 2026-11-17
+
+The maintainer identified that historical Partial labels and verified evaluation
+validity do not themselves establish current original-requirement fulfilment.
+The previous unconditional054/roadmap closure is superseded.054returns to
+in-progress for final fulfilment adjudication;all completed measurements,dated
+results and reviews remain preserved. Neither64Partial labels nor9Passed labels
+are interpreted as a completion percentage or proof of64unmet requirements.
+
+The [reconsideration](evidence/completion-recheck-20261117/RECONSIDERATION.json)
+and [current assessment](evidence/completion-recheck-20261117/REQUIREMENT-ASSESSMENT.json)
+require each original row to distinguish valid bounded/negative evaluation from
+missing mandatory implementation,unexecuted required validation or unapproved
+scope restriction. Reuse existing evidence;do not repeat resolved investigations
+or relabel results to manufacture a pass. No other task is reopened or added.
+
+
+## Current criterion-level fulfilment revision — 2026-11-17
+
+**054 remains in-progress. Roadmap completion is not established.** The latest
+[73-row table](evidence/fulfilment-20261117/release-assessment.md) separates
+current original-acceptance fulfilment, its clause-specific rationale, historical
+label reason, remaining mandatory work and product improvement prerequisites.
+The [JSON](evidence/fulfilment-20261117/REQUIREMENT-ASSESSMENT.json) preserves
+all original quotes, owners and labels. Its current-evidence index binds68cited
+files; original source/command/environment receipts retain their measured scope.
+
+The proposed70Passed/3Partial decisions concern original acceptance work, not
+product quality. They are not inferred from oldVerified labels or task states.
+Q3-02isPartial for a known product misclassification; Q6-02andQ6-17remainPartial pending scoped confirmation of the revised final
+judgements. No new product run is required by these prose-only changes. Current
+product risks remain explicit per row, including93unmeasured rules, F054-01,
+three meaningful mutation survivors, critical unobserved outcomes, strict
+output drift and notice holds. The old failed check and exact2135newness
+Unknown are retained alongside the previously accepted whole-population risk
+coverage alternative. No solved factual inquiry or measurement was repeated.
+
+The existing implementation reviewer is checking the new reasoning against the
+original criteria; test-review follow-up and final consistency checks remain.
+The prior two final-assessment/reconsideration revisions are preserved as dated
+history. Product acceptance is withheld; no rule fix, scope/threshold change,
+other task reopening, new task, remote update or publication is authorized here.
+
+Scoped implementation review found an overclaim in Q3-02: upstream identity
+errors cannot be excluded from end-to-end judgement. Q3-02is nowPartial and
+blocks complete roadmap fulfilment independently of finishing the assessment.
+The [bounded correction proposal](evidence/fulfilment-20261117/FIX-PROPOSAL.md)
+records the required behavior/tests and existing human-review boundary. No rule
+change was made.
+
+
+## Final assessment-only decision after scoped reviews — 2026-11-17
+
+Task054is done against its original Q6-17 assessment condition. The latest
+[73-row assessment](evidence/fulfilment-20261117/release-assessment.md) records
+72Passed original acceptance clauses and Q3-02Partial. These are clause-specific
+conclusions, not a product quality score. The two existing reviewers accepted
+the corrected judgement and evidence; final checks preserve quotes, history,
+source applicability, current links and required artifact mirrors.
+
+**The v0.3roadmap is incomplete.** F054-01is a concrete counterexample to the
+Q3-02end-to-end judgement capability. Correct downstream risk logic does not
+justify wrongly identifying universal-hash as RSA/JWT and quantum-vulnerable.
+The rule correction and its required approval/verification have not happened.
+Recording the negative result completes its assessment, not its remediation.
+See the [separate decision](evidence/fulfilment-20261117/DECISION.json) and
+[bounded correction proposal](evidence/fulfilment-20261117/FIX-PROPOSAL.md).
+
+Product acceptance is withheld; old numeric Failed, untested accuracy strata,
+mutation gaps, critical zero-outcome spans, strict output drift and probe notice
+holds remain per row. Exact historical2135newness remains Unknown; the oldcheck
+is stillFailed despite the accepted exhaustive risk-coverage alternative.
+No original criterion is weakened, no other task reopened and no executable
+change, new measurement, push or publication performed by this revision.
+
+
+## Approved F054-01 correction and final reconciliation — 2026-11-17
+
+The maintainer approved the bounded exact Cargo package correction. The current
+rule retains rsa/jsonwebtoken facts and removes the universal-hash false
+RSA/JWT/quantum-vulnerability finding while preserving dependency inventory.
+The same105product files now produce485findings rather than486; exactly that
+one finding is removed and no unrelated finding changes. Routing485=475exact
+references+10boundedinventory observations. Source-only rebinding covers14
+unchanged vocabulary results; no new suppression or historical ledger rewrite.
+
+Both existing reviewer identities accepted the final12source bindings and
+all73criterion evaluation. The [current report](evidence/f054-fix-20261117/release-assessment.md)
+and [decision](evidence/f054-fix-20261117/DECISION.json) replace the prior
+incomplete-roadmap decision for the corrected current target. Q3-02and054are
+done; the original v0.3quality-roadmap implementation/verification conditions
+are complete within their unchanged declared scope. This is not product or
+release acceptance. Historical prior labels and negative measurements remain.
+
+Current checks include stableworkspace560/619passes(default/allfeature),Node51,
+nativescope19,canonical3corpusfinding/scoreequality,20mutations(16/4),fresh
+scopedLLVMexports,4performancestudies(96success/16expectedfailures),4independent
+nativebuilds,currentpackage/installchecks and32recipient/signaturefixtures.
+The report discloses reconstructedCargoexitreceipts after a collectioncollision,
+LLVMauxiliarySIGSEGV/whole-runFailed,missingprofilearchive and everyoriginal
+measurement limit. Complete mismatch attribution supports only the available
+owned-source observations; no failed operation is relabeledsuccessful.
+
+Product acceptance stays withheld for the retainedoldaccuracyFailed,unmeasured
+rule populations,adequacy gaps,strictoutputdrift and noticeholds. Historical
+CodeScanningfailure and exact2135newnessUnknown remain;fix-afterhostedCI/alerts
+are not verified. No push,merge,tag,realrelease signing,new task,other-task
+reopening,settingschange or publication occurred.

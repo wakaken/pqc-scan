@@ -1,0 +1,30 @@
+{
+  "missed": {
+    "source": "#[test] fn control() { assert_eq!(2 + 2, 4); }",
+    "sourceSha256": "13efb513e2ac4a44d507faa48dcbb7a6f6592099a1faa617aff5360e266c5339",
+    "buildExit": 0,
+    "testExit": 0,
+    "actual": "missed"
+  },
+  "caught": {
+    "source": "#[test] fn control() { assert_eq!(2 + 2, 5); }",
+    "sourceSha256": "e1c3e291783c46612a2a1b7a9b8def33e7c53e1b68972324fefd96801f73daf0",
+    "buildExit": 0,
+    "testExit": 101,
+    "actual": "caught"
+  },
+  "unviable": {
+    "source": "#[test] fn control() { DOES_NOT_EXIST; }",
+    "sourceSha256": "79f045a96e0190d265f29c8633457c8aacc9b6396e24f55a55f382c5fd47d9eb",
+    "buildExit": 1,
+    "testExit": null,
+    "actual": "unviable"
+  },
+  "timeout": {
+    "source": "#[test] fn control() { loop { std::thread::sleep(std::time::Duration::from_secs(1)); } }",
+    "sourceSha256": "2482895f91f9379d681c04885dca9a8adc35eabf7da721b988225686597f53b2",
+    "buildExit": 0,
+    "testExit": "timeout",
+    "actual": "timeout"
+  }
+}

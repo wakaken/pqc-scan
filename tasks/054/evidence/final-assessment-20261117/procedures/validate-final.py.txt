@@ -1,0 +1,48 @@
+from pathlib import Path
+import json,hashlib,copy,subprocess,collections,re
+root=Path.cwd();out=root/'tasks/054/evidence/final-assessment-20261117';load=lambda f:json.loads(Path(f).read_text());sha=lambda f:hashlib.sha256(Path(f).read_bytes()).hexdigest()
+prior=load('tasks/054/evidence/resume-20261116/REQUIREMENT-ASSESSMENT.json');old={r['id']:r for r in prior['requirements']};source=load(out/'SOURCE.json')
+def validate(v,md):
+ rows=v['requirements'];assert len(rows)==73 and len({r['id'] for r in rows})==73
+ assert {r['id'] for r in rows}==set(old)
+ for r in rows:
+  assert all(r[k]==old[r['id']][k] for k in ['id','ownerTask','acceptanceQuote','result'])
+  assert r['currentAssessment'] and r['currentEvidence']
+  assert all((root/f).is_file() for f in r['currentEvidence']),r['id']
+  assert all((root/f).is_file() for f in r['newEvidence']),r['id']
+  assert '| '+r['id']+' | '+r['result']+' | ' in md,r['id']
+ assert dict(collections.Counter(r['evaluationStatus'] for r in rows))==v['evaluationCounts']
+ assert v['acceptanceDecision']['accepted'] is False
+ assert len(re.findall(r'^\| Q[1-6]-\d{2} \|',md,re.M))==73
+ assert 'Product/release acceptance is withheld.' in md
+ return True
+v=load(out/'REQUIREMENT-ASSESSMENT.json');md=(out/'release-assessment.md').read_text();validate(v,md)
+checks=[{'name':'all73originalQuotesOwnersResultsIdsAndRefs','passed':True}]
+for name,mutate,text in [
+ ('missingRow',lambda x:x['requirements'].pop(),md),
+ ('duplicateId',lambda x:x['requirements'][0].update(id=x['requirements'][1]['id']),md),
+ ('weakenedAcceptance',lambda x:x['requirements'][0].update(acceptanceQuote='weakened'),md),
+ ('missingEvidence',lambda x:x['requirements'][0].update(currentEvidence=['not-a-real-artifact']),md),
+ ('reportRowMissing',lambda x:None,md.replace('| Q1-01 |','| removed |',1)),
+ ('falseProductAcceptance',lambda x:x['acceptanceDecision'].update(accepted=True),md)]:
+ bad=copy.deepcopy(v);mutate(bad)
+ try:validate(bad,text)
+ except AssertionError:checks.append({'negativeControl':name,'rejected':True})
+ else:raise AssertionError('invalid assessment accepted:'+name)
+for name in ['release-assessment.md','REQUIREMENT-ASSESSMENT.json']:
+ assert (out/name).read_bytes()==(root/'target/quality-task-054'/name).read_bytes();checks.append({'name':'requiredMirror:'+name,'passed':True})
+assert sha('docs/quality/EVIDENCE-CATALOG.json')==source['frozenCatalogSha256'];checks.append({'name':'frozenCatalogUnchanged','passed':True})
+reviewed=load('tasks/054/evidence/product-scope-20261116/SOURCE.json')['sourceBindings'];assert all(sha(n)==h for n,h in reviewed.items());checks.append({'name':'all20ReviewedImplementationBindingsUnchanged','passed':True})
+changed=subprocess.check_output(['git','diff',source['head'],'--','crates','Cargo.toml','Cargo.lock','rules','rust-toolchain.toml','scripts','shell','tests','.github'],text=True);assert not changed;checks.append({'name':'productRulesCryptoThresholdExecutableScriptsUnchanged','passed':True})
+for t in ['041',*[f'{n:03}' for n in range(42,65) if n!=54]]:
+ name='tasks/'+t+'/task.yaml';assert Path(name).read_bytes()==subprocess.check_output(['git','show',source['head']+':'+name])
+checks.append({'name':'all23OtherTaskDefinitionsUnchanged','passed':True})
+# Historical measurements are immutable. Only new dated records are authored.
+for folder in ['tasks/054/evidence/resume-20261116','tasks/054/evidence/notification-20261116','tasks/054/evidence/product-scope-20261116','tasks/054/evidence/hosted-product-scope-20261117']:
+ assert not subprocess.check_output(['git','diff',source['head'],'--',folder],text=True)
+checks.append({'name':'allPrior054EvidenceUnchanged','passed':True})
+for f in out.rglob('*'):
+ if f.is_file():assert all(s not in f.read_bytes() for s in [b'/'+b'Users/',b'/'+b'private/tmp/',b'/'+b'tmp/pqc-task054-final-']),str(f)
+checks.append({'name':'noPrivateHostPathsInNewEvidence','passed':True})
+checks.append({'name':'diffCheck','exitCode':subprocess.run(['git','diff','--check']).returncode});assert checks[-1]['exitCode']==0
+(out/'VALIDATION.json').write_text(json.dumps({'head':source['head'],'exitCode':0,'checks':checks,'evaluations':v['evaluationCounts'],'assessmentComplete':v['assessmentComplete'],'scope':'Content,source,reference,mirror and preservation gates. Review/completion transitions are separate;no product acceptance.'},indent=2)+'\n');print('Validation passed:',len(checks),'checks including6negative controls')

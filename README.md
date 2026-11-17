@@ -61,6 +61,8 @@ A reference to a PQC algorithm is useful evidence, but it does not establish tha
 
 <a id="quick-start"></a>
 
+The Rust RSA/JWT dependency rule matches the exact Cargo package names `rsa` and `jsonwebtoken`; names such as `universal-hash` are excluded. Package presence does not prove use of RSA.
+
 ## Run your first scan
 
 Use the Rust toolchain pinned in [`rust-toolchain.toml`](rust-toolchain.toml) (currently Rust 1.93.1) and install from this checkout:

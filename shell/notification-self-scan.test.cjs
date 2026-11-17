@@ -15,8 +15,11 @@ const filename = result => result.locations[0].physicalLocation.artifactLocation
 
 test('current finite review binds every actual source and preserves dependency and unresolved observations', () => {
   assert.deepEqual(ledger.counts, { raw: 5255, reviewed: 5240, requireReview: 15 });
+  const current = policy();
   for (const file of ledger.files) {
-    assert.equal(createHash('sha256').update(fs.readFileSync(path.join(root, file.path))).digest('hex'), file.sha256, file.path);
+    const binding = current.files.find(item => item.path === file.path);
+    assert(binding, file.path);
+    assert.equal(createHash('sha256').update(fs.readFileSync(path.join(root, file.path))).digest('hex'), binding.sha256, file.path);
     assert(file.reason.length > 20);
     assert(file.results.every(result => filename(result) === file.path));
   }
@@ -62,4 +65,18 @@ test('source drift fails closed for every reviewed context, without a directory-
     assert.deepEqual(prepared.sarif.runs[0].results.filter(result => filename(result) === file.path), file.results);
     assert.equal(prepared.audit.sourceChecks.find(item => item.path === file.path).status, 'changed');
   }
+});
+
+test('approved rule correction preserves historical hashes and old bindings still fail closed', () => {
+  const current = policy();
+  const changed = ledger.files.filter(file => current.files.find(item => item.path === file.path).sha256 !== file.sha256);
+  assert.deepEqual(changed.map(file => file.path), ['rules/default/crypto_api.yml']);
+  const historical = changed[0];
+  assert.equal(historical.sha256, '84f672787e883cbd2c2dd790ada8076c8a4c3f0628f3bc26aeb2b5bf4f7ea10a');
+  const stale = structuredClone(current);
+  stale.files.find(file => file.path === historical.path).sha256 = historical.sha256;
+  const prepared = prepareCodeScanning(input(), stale, root);
+  assert.deepEqual(prepared.sarif.runs[0].results.filter(result => filename(result) === historical.path), historical.results);
+  assert.equal(prepared.audit.retainedResults, ledger.counts.requireReview + historical.results.length);
+  assert.equal(prepared.audit.sourceChecks.find(file => file.path === historical.path).status, 'changed');
 });

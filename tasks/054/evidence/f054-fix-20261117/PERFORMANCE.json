@@ -1,0 +1,193 @@
+{
+  "image": "sha256:f7c0365571a37fbbd5469e25b563a6069bda7395155f46d2fa2e3cf17271c82f",
+  "limits": {
+    "memoryBytes": 6442450944,
+    "swapBytes": 0,
+    "scratchBytes": 4294967296,
+    "sharedMemoryBytes": 1048576,
+    "pids": 128,
+    "cpus": 2,
+    "wallSeconds": 1200,
+    "memoryEnforced": true,
+    "aggregateDiskEnforced": true
+  },
+  "wholeRunExit": 0,
+  "containerRemoved": true,
+  "sourceBeforeAfterMatch": true,
+  "commands": [
+    {
+      "name": "default-build",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "-p",
+        "pqc_scan_cli"
+      ],
+      "exit": 0,
+      "seconds": 52.80370185800007
+    },
+    {
+      "name": "default-study-1",
+      "command": [
+        "/usr/bin/python3",
+        "/source/tests/quality/run.py",
+        "--performance-study",
+        "--binary",
+        "/scratch/build-default/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--features-label",
+        "default",
+        "--out-dir",
+        "/scratch/evidence/default-1"
+      ],
+      "exit": 0,
+      "seconds": 72.35769170000003
+    },
+    {
+      "name": "default-study-2",
+      "command": [
+        "/usr/bin/python3",
+        "/source/tests/quality/run.py",
+        "--performance-study",
+        "--binary",
+        "/scratch/build-default/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--features-label",
+        "default",
+        "--out-dir",
+        "/scratch/evidence/default-2"
+      ],
+      "exit": 0,
+      "seconds": 71.87238919900005
+    },
+    {
+      "name": "all-features-build",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "-p",
+        "pqc_scan_cli",
+        "--all-features"
+      ],
+      "exit": 0,
+      "seconds": 115.70020084499993
+    },
+    {
+      "name": "all-features-study-1",
+      "command": [
+        "/usr/bin/python3",
+        "/source/tests/quality/run.py",
+        "--performance-study",
+        "--binary",
+        "/scratch/build-all-features/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--features-label",
+        "all-features",
+        "--out-dir",
+        "/scratch/evidence/all-features-1"
+      ],
+      "exit": 0,
+      "seconds": 73.48736895000002
+    },
+    {
+      "name": "all-features-study-2",
+      "command": [
+        "/usr/bin/python3",
+        "/source/tests/quality/run.py",
+        "--performance-study",
+        "--binary",
+        "/scratch/build-all-features/release/pqc-scan",
+        "--build-profile",
+        "release",
+        "--features-label",
+        "all-features",
+        "--out-dir",
+        "/scratch/evidence/all-features-2"
+      ],
+      "exit": 0,
+      "seconds": 73.44678145000012
+    }
+  ],
+  "runs": 4,
+  "successfulSamples": 96,
+  "expectedFailures": 16,
+  "failureThroughputExcluded": true,
+  "failureExitClasses": {
+    "2": 4,
+    "3": 4,
+    "1": 4,
+    "-9": 4
+  },
+  "sameConditionComparisons": 12,
+  "differentConditionComparisons": 24,
+  "above2xInvestigationSignals": 0,
+  "conditions": "Same original050procedure; sequential samples, no other heavy measurement/build ran during this performance campaign. First versus warm distinguished; true cold/controlled multi-day/Windows not measured.",
+  "strictComparison": "All11formats raw/semantic/order and facts/IDs/duplicates retained. Actual equality values are in performance/semantic-reproducibility.json and ordering.json; no new normalizer or universal deterministic-ID claim.",
+  "old023v2Gate": "Failed preserved separately from performance",
+  "rawHostReceiptSha256": "af50d9f1ebc49d809d4beca527a8e9d211f985cfc938bbbc7acfea29f1212a20",
+  "outputProjection": [
+    {
+      "file": "performance/environment-comparison.json",
+      "rawSha256": "d698023e1282daf64b2d1c1150f56e89211b010abd307f7db7cd16d5786a834d",
+      "projectedSha256": "1a7b2db71a8c80c4b50a8507a2f57c70948ed340f6726bdd3eab47b922ef71ac",
+      "projection": "Only remove private host run-prefix from provenance labels; measured values/statuses/digests retained."
+    },
+    {
+      "file": "performance/failure-resources.json",
+      "rawSha256": "54cbc1baab8c63148c33e7600f4d1c2b9b7698162264ed8cb68aa734ebfa75fe",
+      "projectedSha256": "8cac85800c15588fef4e5f8de1f81ae7a4e6a9b1864a3fc0dcae49f7d891d005",
+      "projection": "Only remove private host run-prefix from provenance labels; measured values/statuses/digests retained."
+    },
+    {
+      "file": "performance/noise-study.md",
+      "rawSha256": "efb6ac3a011912f68bdb1dbac623a8e99a23a49a5d270df4d87562b802a84b90",
+      "projectedSha256": "efb6ac3a011912f68bdb1dbac623a8e99a23a49a5d270df4d87562b802a84b90",
+      "projection": "Only remove private host run-prefix from provenance labels; measured values/statuses/digests retained."
+    },
+    {
+      "file": "performance/ordering.json",
+      "rawSha256": "c5021f42a105c4dbbbc9ae3ed8b488db1ea6eea6ec3000218547b27e0fe9099c",
+      "projectedSha256": "13ef6c8672650390ce8e23788aefc307e58a91c781e5e21a5b5a0f268465d56b",
+      "projection": "Only remove private host run-prefix from provenance labels; measured values/statuses/digests retained."
+    },
+    {
+      "file": "performance/regression-review.md",
+      "rawSha256": "32435348cf049072f949c27bd2bd0753ac20d5f18d316e5e6032fd2d5a4385c0",
+      "projectedSha256": "32435348cf049072f949c27bd2bd0753ac20d5f18d316e5e6032fd2d5a4385c0",
+      "projection": "Only remove private host run-prefix from provenance labels; measured values/statuses/digests retained."
+    },
+    {
+      "file": "performance/resources.json",
+      "rawSha256": "1d52ed06c1be3ca3c34dc697f4cbd8c2e86d25c565e02d145999f917c858d10e",
+      "projectedSha256": "bf41c0bd0376a9b71e4bc82adedac60b713d40c26b26fdbeb220a98074d5833a",
+      "projection": "Only remove private host run-prefix from provenance labels; measured values/statuses/digests retained."
+    },
+    {
+      "file": "performance/scaling.json",
+      "rawSha256": "20d3a431b5dc8313ee3203e086776f7a4cab0da9d9482c4994fcd47a31c5e8e3",
+      "projectedSha256": "0a1ac27109a0d584a050c4059eb41e188f47f09d2da1b27d8c757e5e2a836576",
+      "projection": "Only remove private host run-prefix from provenance labels; measured values/statuses/digests retained."
+    },
+    {
+      "file": "performance/semantic-reproducibility.json",
+      "rawSha256": "5aecdb57ce53699206a1d29eef720321298171a1089891d8534a85d137556dd0",
+      "projectedSha256": "8c965e5413296ca06cb04d0d81b4c775f21bab77f418ae7a4ffa4236cd25b91d",
+      "projection": "Only remove private host run-prefix from provenance labels; measured values/statuses/digests retained."
+    },
+    {
+      "file": "performance/throughput.json",
+      "rawSha256": "0d25e29140e848fd75a70e8fface4c2b523eef884e738491deff53be692383f7",
+      "projectedSha256": "63879dfd366e46dfc8c75be1b7e1c4554a7fc7a226db9f062bcaf07a315e64dc",
+      "projection": "Only remove private host run-prefix from provenance labels; measured values/statuses/digests retained."
+    }
+  ]
+}

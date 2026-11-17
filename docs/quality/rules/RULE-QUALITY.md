@@ -85,3 +85,15 @@ are classification context, not a current-law compliance engine. Local task021
 cutoff and task028 method policy are explicitly marked repository references.
 
 The 2026-11-12 source repair refresh includes three additional classical API/EdDSA rules, narrowed Ruby/Go/TLS predicates and source-bound controls. Pattern fixtures remain distinct from language-aware detector tests (`semantic_repairs.rs`); current changes do not retroactively alter historical task028 evidence.
+
+## Maintainer-approved F054-01 correction — 2026-11-17
+
+The current DEP_RUST_RSA_CRATE predicate now matches exactly the Cargo package
+components rsa and jsonwebtoken, with the existing case-insensitive policy.
+Its other fields and the dependency parser are unchanged. Three additional
+compiled-target controls cover universal-hash, rsa-helper and a versioned
+jsonwebtoken purl; the current metadata has123rules and268controls. These are
+synthetic controls, not independent accuracy units. Historical task062 metadata
+and the earlier measurements remain unchanged; the maintained metadata source
+hash/snapshot update records this explicitly approved correction. Detector and
+CLI regressions additionally test real manifests,locks,SBOMs and provenance.

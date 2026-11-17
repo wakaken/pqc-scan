@@ -1,0 +1,335 @@
+{
+  "head": "3d5bd27fe5ab4c0b5b6b916f06d8001772884ad6",
+  "image": "sha256:f7c0365571a37fbbd5469e25b563a6069bda7395155f46d2fa2e3cf17271c82f",
+  "hostExit": 0,
+  "containerRemoved": true,
+  "limits": {
+    "memoryBytes": 6442450944,
+    "swapBytes": 0,
+    "scratchBytes": 4294967296,
+    "sharedMemoryBytes": 1048576,
+    "pids": 128,
+    "cpus": 2,
+    "wallSeconds": 1200,
+    "memoryEnforced": true,
+    "aggregateDiskEnforced": true
+  },
+  "commands": [
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.568854126000133,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "fmt.log"
+    },
+    {
+      "name": "default-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--offline"
+      ],
+      "exit": 0,
+      "seconds": 109.57046796600002,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "default-tests.log"
+    },
+    {
+      "name": "default-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "seconds": 11.269466713999918,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "default-clippy.log"
+    },
+    {
+      "name": "default-build",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--locked",
+        "--offline"
+      ],
+      "exit": 0,
+      "seconds": 4.594672085000184,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "default-build.log"
+    },
+    {
+      "name": "all-features-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--offline",
+        "--all-features"
+      ],
+      "exit": 0,
+      "seconds": 139.35048143899985,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "all-features-tests.log"
+    },
+    {
+      "name": "all-features-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "seconds": 13.994805422999889,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "all-features-clippy.log"
+    },
+    {
+      "name": "all-features-build",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--locked",
+        "--offline",
+        "--all-features"
+      ],
+      "exit": 0,
+      "seconds": 5.179609502000176,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "all-features-build.log"
+    },
+    {
+      "name": "openssh-offers",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "pqc_scan_probe_ssh",
+        "--all-features",
+        "--test",
+        "openssh",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "exit": 0,
+      "seconds": 10.66061437999997,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "openssh-offers.log"
+    },
+    {
+      "name": "openssh-kex",
+      "command": [
+        "/usr/bin/python3",
+        "/source/tests/protocol/ssh-kex-product.py",
+        "--inside",
+        "--binary",
+        "/scratch/target/debug/pqc-scan",
+        "--out-dir",
+        "/scratch/evidence/ssh-kex"
+      ],
+      "exit": 0,
+      "seconds": 0.4697967500001141,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "openssh-kex.log"
+    },
+    {
+      "name": "tools",
+      "command": [
+        "sh",
+        "-c",
+        "rustc -Vv; cargo -V; /usr/sbin/sshd -V 2>&1; /opt/openssh/sbin/sshd -V 2>&1; python3 -V"
+      ],
+      "exit": 0,
+      "seconds": 0.06402841699991768,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "tools.log"
+    },
+    {
+      "name": "test-binaries",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features",
+        "--locked",
+        "--offline",
+        "--no-run",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "seconds": 0.16492037500006518,
+      "evidenceEnvironment": {
+        "PQC049_EVIDENCE": "/scratch/evidence/raw"
+      },
+      "log": "test-binaries.log"
+    }
+  ],
+  "reports": [
+    {
+      "name": "protocol-assurance.json",
+      "sha256": "9fdc304ef88ed75808f48ed3d45af83cac7b567924752ddacd73f409bfa9e221",
+      "bytes": 6223,
+      "requirement": "Q3-06",
+      "status": "Passed",
+      "listPopulations": {}
+    },
+    {
+      "name": "tls-matrix.json",
+      "sha256": "f1b5fd74fc82955babc782c2c89dc6f4b79a6d0d2dc74bda18ee94d9b33ecfeb",
+      "bytes": 97799,
+      "requirement": "Q4-08",
+      "status": "Passed",
+      "listPopulations": {
+        "cases": 21
+      }
+    },
+    {
+      "name": "tls-failures.json",
+      "sha256": "52d93ade0c184e7626831a78e28e33440185a83b258904d7ef901c880608caa7",
+      "bytes": 62277,
+      "requirement": "Q4-09",
+      "status": "Passed",
+      "listPopulations": {
+        "cases": 13
+      }
+    },
+    {
+      "name": "ssh-matrix.json",
+      "sha256": "ac9aa1cfa2ce32163a6d7fdd2c85b9e3092e20a2ccdeb721db9d538229ddfb87",
+      "bytes": 49497,
+      "requirement": "Q4-10",
+      "status": "Passed",
+      "listPopulations": {
+        "offers": 10
+      }
+    },
+    {
+      "name": "ssh-failures.json",
+      "sha256": "05b363f689c2ae2a97f3531ef61ed51ed396737ffa8ce6c448ccb95bc3dcb809",
+      "bytes": 55240,
+      "requirement": "Q4-12",
+      "status": "Passed",
+      "listPopulations": {
+        "cases": 22,
+        "boundaryTests": 4
+      }
+    },
+    {
+      "name": "ssh-no-auth.json",
+      "sha256": "859781965aec8eb9e383006459969b44e7568c63786dcb46e1ff8e1328308371",
+      "bytes": 96725,
+      "requirement": "Q4-11",
+      "status": "Passed",
+      "listPopulations": {
+        "rawPeerCases": 26,
+        "opensshOffers": 2
+      }
+    }
+  ],
+  "tlsControlledRecords": 21,
+  "sshRawPeerNoAuthCases": 26,
+  "caseIds": {
+    "tls": [
+      "tls12-x25519",
+      "tls13-x25519",
+      "tls13-p256",
+      "tls13-p384",
+      "tls13-hybrid-hrr",
+      "untrusted",
+      "wrong-name",
+      "expired",
+      "not-yet-valid",
+      "chain-limit",
+      "message-limit",
+      "mtls",
+      "refused",
+      "timeout",
+      "cancelled",
+      "oversized-record",
+      "truncated-record",
+      "profile-no-overlap",
+      "absent-group",
+      "unknown-group",
+      "freshness"
+    ],
+    "sshOffers": [
+      "classical",
+      "hybrid",
+      "classical",
+      "hybrid",
+      "unknown",
+      "fragmented",
+      "classical",
+      "hybrid",
+      "unknown",
+      "fragmented"
+    ]
+  },
+  "assuranceConclusions": {
+    "sshOffers": "unauthenticated_advertisement, no negotiated or verified fields",
+    "sshKex": "only trusted pin + signature + completed initial KEX yields verified MLKEM+X25519; Ed25519 host authentication remains classical",
+    "tls": "verified version/suite/group distinct from incomplete collection; failed certificate verification never yields verified negotiation"
+  },
+  "scope": {
+    "classicalVsHybrid": "TLS1.2 X25519; TLS1.3 X25519/P256/MLKEM; SSH unauthenticated classical/hybrid/unknown and pinned MLKEM KEX",
+    "profile": "existing fixed provider aws_lc_rs 1.18.0 / rustls 0.23.46; no provider swap",
+    "unknownGroup": "unit-controlled post-verification accessor, not an unsupported real network handshake",
+    "bounds": "parser exact/over-limit and malformed lists, real IO truncation/budgets/deadline/cancellation, single target/attempt; existing core transport tests bind DNS/pinning",
+    "limits": [
+      "finite controlled local peers",
+      "no whole-protocol conformance or formal support expansion",
+      "Windows not executed",
+      "CI protocols remains paused"
+    ]
+  },
+  "retention": "Current raw per-case reports/transcripts/test logs retained privately with hashes; existing049source-bound fixture expectations and public matrices are preserved. No private ephemeral key exported or specimen executed.",
+  "historical": "Old049and063receipts are not rewritten. Current run confirms existing fixed provider/current dependency behavior under the same strict local-peer model; no protocol certification or support expansion."
+}

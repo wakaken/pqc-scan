@@ -1,0 +1,71 @@
+import os,sys,json,time,hashlib,subprocess,traceback,shutil
+from pathlib import Path
+sys.path.insert(0,'/source/tests/protocol');import container_entry as e
+R=Path('/source');S=Path('/scratch');E=S/'evidence';E.mkdir();(S/'home').mkdir();(S/'tmp').mkdir();(S/'test-target').mkdir()
+e.write('checks.json',e.boundary()); c=S/'cargo';c.mkdir()
+for n in ['registry','git']:
+ if (Path('/usr/local/cargo')/n).exists():(c/n).symlink_to(Path('/usr/local/cargo')/n,target_is_directory=True)
+records=[]
+def save(): (E/'COMMANDS.json').write_text(json.dumps(records,indent=2)+'\n')
+def cmd(name,args,*,env=None,expected=0,seconds=600):
+ started=time.monotonic(); log=E/(name+'.log')
+ with log.open('w') as f:r=subprocess.run(args,cwd=R,env=env,stdout=f,stderr=subprocess.STDOUT,timeout=seconds)
+ records.append({'name':name,'argv':args,'exit':r.returncode,'expectedExit':expected,'wallSeconds':time.monotonic()-started,'log':log.name});save()
+ if r.returncode != expected: raise RuntimeError(name+' exit '+str(r.returncode))
+def target(config):
+ env=dict(os.environ);env['CARGO_TARGET_DIR']=str(S/config);return env
+status={'exit':0}
+try:
+ env=target('default')
+ cmd('fmt',['cargo','fmt','--all','--','--check'],env=env)
+ cmd('targeted-detector',['cargo','test','-p','pqc_scan_detectors','--test','f054_dependency_identity','--locked','--offline'],env=env)
+ cmd('targeted-cli',['cargo','test','-p','pqc_scan_cli','--test','f054_dependency_identity','--locked','--offline'],env=env)
+ cmd('rule-validation',['cargo','test','-p','pqc_scan_rules','--locked','--offline'],env=env)
+ (E/'PHASE.json').write_text(json.dumps({'phase':'implementation-review-ready','commands':len(records)}))
+ while not (S/'continue-full').exists():time.sleep(.2)
+ for config,features in [('default',[]),('all-features',['--all-features'])]:
+  env=target(config)
+  cmd(config+'-build',['cargo','build','--workspace','--offline','--locked']+features,env=env)
+  cmd(config+'-workspace',['cargo','test','--workspace','--offline','--locked']+features,env=env)
+  cmd(config+'-clippy',['cargo','clippy','--workspace','--all-targets','--offline','--locked']+features+['--','-D','warnings'],env=env)
+ (E/'PHASE.json').write_text(json.dumps({'phase':'required-tests-complete','commands':len(records)}))
+ # Preserve exact old predicate as a separate rule pack; never alter source/current truth.
+ old=S/'old-rules';shutil.copytree(R/'rules',old)
+ f=old/'default/crypto_api.yml';text=f.read_text();lines=text.splitlines();i=next(i for i,l in enumerate(lines) if l=='- id: DEP_RUST_RSA_CRATE');j=next(j for j in range(i+1,len(lines)) if lines[j].startswith('  pattern:'));lines[j]='  pattern: '+json.dumps(r'(?i)pkg:cargo/[^\s]*(rsa|jsonwebtoken)');f.write_text('\n'.join(lines)+'\n')
+ binary=S/'default/debug/pqc-scan';results=[]
+ # Same executable/input/path/config; old versus corrected rules only.
+ populations=[('product',None),('023',R/'tests/quality/corpus'),('042v2',R/'tests/quality/expanded-v2/inputs'),('043v2',R/'tests/quality/task043-corpus-v2/inputs')]
+ for label,root in populations:
+  if root is None:
+   cmd('prepare-product',[sys.executable,'scripts/prepare-self-scan.py','--root','/source','--out-dir',str(S/'product')])
+   root=S/'product/input'
+  assert root.is_dir(),root
+  pair={}
+  for version,rules in [('old',old),('new',R/'rules')]:
+   out=E/(label+'-'+version)
+   cmd(label+'-'+version,[str(binary),'scan',str(root),'--format','all','--inventory-json','--diagnostics','--threads','1','--rules-dir',str(rules),'--out-dir',str(out)])
+   report=json.loads((out/'report.json').read_text());pair[version]=report['findings']
+  def canon(rows):return {json.dumps(x,sort_keys=True,separators=(',',':')) for x in rows}
+  a,b=canon(pair['old']),canon(pair['new']);removed=[json.loads(x) for x in sorted(a-b)];added=[json.loads(x) for x in sorted(b-a)]
+  assert not added,(label,'unexpected added findings')
+  assert all(x['rule_id']=='DEP_RUST_RSA_CRATE' and 'universal-hash' in x['evidence']['metadata'].get('dep_purl','') for x in removed),(label,removed)
+  if label=='product':assert len(removed)==1
+  else:assert not removed,(label,'frozen corpus regression')
+  results.append({'population':label,'input':str(root),'oldFindings':len(pair['old']),'newFindings':len(pair['new']),'removed':removed,'added':added,'allUnchangedFindingsByteEquivalent':True})
+  if label=='product':
+   cmd('verify-product',[sys.executable,'scripts/prepare-self-scan.py','--root','/source','--out-dir',str(S/'product'),'--verify','--diagnostics',str(E/'product-new/scan.diagnostics.v1.json')])
+ # Export compact finding deltas rather than redundant HTML copies.
+ (E/'COMPATIBILITY.json').write_text(json.dumps({'binarySha256':e.sha(binary),'oldRuleSourceSha256':e.sha(old/'default/crypto_api.yml'),'newRuleSourceSha256':e.sha(R/'rules/default/crypto_api.yml'),'pairs':results,'scope':'Same source executable and input, only exact predicate differs. Old corpus/truth not changed. Run/observation IDs and rule-set hashes are not asserted byte-identical.'},indent=2)+'\n')
+ for label,_ in populations:
+  for version in ['old','new']:
+   folder=E/(label+'-'+version)
+   # Retain core native/report/diagnostic facts; avoid full redundant HTML report archives.
+   for f in folder.iterdir():
+    if f.name not in ['report.json','scan.inventory.v1.json','scan.assessment.v1.json','scan.diagnostics.v1.json','dependency-sbom.json']:f.unlink()
+ (E/'PHASE.json').write_text(json.dumps({'phase':'complete','commands':len(records)}))
+except BaseException as error:
+ status={'exit':1,'errorType':type(error).__name__,'message':str(error)}
+ (E/'ERROR.log').write_text(traceback.format_exc())
+finally:
+ save();(S/'status.json').write_text(json.dumps(status))
+while True:time.sleep(30)

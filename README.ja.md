@@ -62,6 +62,8 @@ PQC方式の名前が見つかっても、アプリケーションで正しく�
 
 <a id="quick-start"></a>
 
+RustのRSA/JWT依存規則は、Cargoのパッケージ名が`rsa`または`jsonwebtoken`の場合に一致します。`universal-hash`などの名前は対象外です。依存が存在するだけではRSAの実利用は確認できません。
+
 ## 使い始める
 
 [`rust-toolchain.toml`](rust-toolchain.toml)で指定したRust（現在は1.93.1）を使い、このリポジトリのソースからインストールします。

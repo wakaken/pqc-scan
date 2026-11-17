@@ -110,3 +110,37 @@ post-scan upload count. Reuse the two existing notification reviewers for scoped
 implementation and test confirmation; no new identity or budget reset. Preserve
 the earlier repository-wide measurements and original054 criteria. No public
 activation, other task reopening, scanner-default or crypto-rule change is implied.
+
+## Authorized F054-01 rule correction — 2026-11-17
+
+The maintainer explicitly approved the existing bounded correction proposal.
+Correct only DEP_RUST_RSA_CRATE's predicate: exact case-insensitive Cargo package
+components rsa/jsonwebtoken and a whole terminal canonical purl. Preserve its
+ID, kind, scope, severity, risk, confidence, text, parser, custom-rule semantics
+and all output schemas. The current parser rejects query/subpath purls; no new
+format support is introduced. Preserve dependency inventory/provenance even
+when the inappropriate crypto finding disappears.
+
+Acceptance: exact package/alias/optional declarations and resolved versions still
+match; universal-hash and misleading prefixes/suffixes do not. Real manifests,
+locks, supported CycloneDX/SPDX, malformed/unsupported purls, end-to-end risk
+classification and declaration/resolution/unknown states need meaningful tests.
+Only the approved overmatch may disappear from identical product inputs; frozen
+corpus truth/results and unrelated findings must remain. Changes in ruleset/run
+identities are disclosed instead of normalized away.
+
+Maintain the rule companion's current snapshot/controls and paired user guidance,
+without overwriting historical metadata or measurement records. Run initial
+checks, inspect the combined delta and obtain the existing implementation
+reviewer's scoped follow-up. Complete required workspace build/test/fmt/clippy
+and optional configurations, affected compatibility/evidence checks and the
+existing test-reviewer's follow-up. Reassess later source reuse rather than
+assuming old compiled-input hashes still match. Reconcile all73rows and roadmap
+gates only after final-source checks. A corrected Q3-02does not clear old numeric
+Failed, notice/publication holds, or authorize remote changes/release actions.
+
+The first confined targeted attempt caught an incorrect test assumption: a
+Cargo.lock entry without registry source is a local path record and intentionally
+has no Cargo purl. Preserve that failed run; correct the fixture to a registry
+record and add local/git negative controls. Do not change production provenance
+logic to make that fixture pass.

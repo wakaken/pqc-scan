@@ -39,6 +39,8 @@ Gradle's lexical single-line subset accepts the existing six dependency configur
 
 These are bounded component/package subsets: CycloneDX 1.4 to 1.7 and SPDX 2.2 to 2.3. They are input formats, not full-schema validation, installed-state proof or standards export. Structured dependency parsing, lexical fallbacks, supported versions and limits are listed in the [dependency provenance contract](../architecture/DEPENDENCY-PROVENANCE.md).
 
+The Rust RSA/JWT dependency rule matches exact Cargo package names `rsa` and `jsonwebtoken` (case-insensitive), including supported manifest, lock and SBOM records. Names containing those strings, such as `universal-hash` or `rsa-helper`, are excluded. An inventory entry is preserved even without this crypto finding; presence does not prove RSA use or enabled features.
+
 <a id="certificates"></a>
 
 ## Certificates and key markers

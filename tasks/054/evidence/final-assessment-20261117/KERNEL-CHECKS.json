@@ -1,0 +1,193 @@
+{
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/protocol",
+    "-p",
+    "test_container_runner.py",
+    "-v"
+  ],
+  "environment": {
+    "PQC_RUN_CONTAINER_TESTS": "1",
+    "image": "sha256:f7c0365571a37fbbd5469e25b563a6069bda7395155f46d2fa2e3cf17271c82f",
+    "evidence": "Private bounded run directory;host paths omitted"
+  },
+  "exitCode": 0,
+  "tests": 12,
+  "skipped": 0,
+  "cases": [
+    {
+      "case": "boundary",
+      "actualExit": 0,
+      "containerRemoved": true,
+      "limits": {
+        "memoryBytes": 6442450944,
+        "swapBytes": 0,
+        "scratchBytes": 4294967296,
+        "sharedMemoryBytes": 1048576,
+        "pids": 128,
+        "cpus": 2,
+        "wallSeconds": 1200,
+        "memoryEnforced": true,
+        "aggregateDiskEnforced": true
+      },
+      "checks": {
+        "memoryMax": 6442450944,
+        "swapMax": 0,
+        "pidsMax": 128,
+        "cpuMax": [
+          "200000",
+          "100000"
+        ],
+        "scratchCapacity": 4294967296,
+        "sourceReadonly": true,
+        "rootReadonly": true,
+        "emptyEnvironment": true,
+        "loopbackWorks": true,
+        "externalNetworkDenied": true
+      },
+      "hostReceiptSha256": "3f5d6910dfd5079239688f845cd25ffef8d1cf1ab97fde8c018fdfe7744bd6d3"
+    },
+    {
+      "case": "create-response",
+      "actualExit": "deadline_exceeded",
+      "containerRemoved": true,
+      "limits": {
+        "memoryBytes": 6442450944,
+        "swapBytes": 0,
+        "scratchBytes": 4294967296,
+        "sharedMemoryBytes": 1048576,
+        "pids": 128,
+        "cpus": 2,
+        "wallSeconds": 1200,
+        "memoryEnforced": false,
+        "aggregateDiskEnforced": false
+      },
+      "checks": null,
+      "hostReceiptSha256": "469802bbe5946db9bc8aabf52fc4e79df764e4c20b8b1a150cce3a1c063ab388"
+    },
+    {
+      "case": "disk",
+      "actualExit": 0,
+      "containerRemoved": true,
+      "limits": {
+        "memoryBytes": 134217728,
+        "swapBytes": 0,
+        "scratchBytes": 16777216,
+        "sharedMemoryBytes": 1048576,
+        "pids": 128,
+        "cpus": 2,
+        "wallSeconds": 1200,
+        "memoryEnforced": true,
+        "aggregateDiskEnforced": true
+      },
+      "checks": {
+        "memoryMax": 134217728,
+        "swapMax": 0,
+        "pidsMax": 128,
+        "cpuMax": [
+          "200000",
+          "100000"
+        ],
+        "scratchCapacity": 16777216,
+        "sourceReadonly": true,
+        "rootReadonly": true,
+        "emptyEnvironment": true,
+        "loopbackWorks": true,
+        "externalNetworkDenied": true,
+        "aggregateDiskDenied": true,
+        "filesWritten": 4
+      },
+      "hostReceiptSha256": "5b35bee923e69e27dde48054f47d709301c3a651f6438240a89c0c6e0618ecf5"
+    },
+    {
+      "case": "memory",
+      "actualExit": 0,
+      "containerRemoved": true,
+      "limits": {
+        "memoryBytes": 67108864,
+        "swapBytes": 0,
+        "scratchBytes": 16777216,
+        "sharedMemoryBytes": 1048576,
+        "pids": 128,
+        "cpus": 2,
+        "wallSeconds": 1200,
+        "memoryEnforced": true,
+        "aggregateDiskEnforced": true
+      },
+      "checks": {
+        "memoryMax": 67108864,
+        "swapMax": 0,
+        "pidsMax": 128,
+        "cpuMax": [
+          "200000",
+          "100000"
+        ],
+        "scratchCapacity": 16777216,
+        "sourceReadonly": true,
+        "rootReadonly": true,
+        "emptyEnvironment": true,
+        "loopbackWorks": true,
+        "externalNetworkDenied": true,
+        "oomKills": 2
+      },
+      "hostReceiptSha256": "94f6baa7babcede338652899ab77026d5fdce7c0ee9e9115905cf8ef02dbb97e"
+    },
+    {
+      "case": "pids",
+      "actualExit": 0,
+      "containerRemoved": true,
+      "limits": {
+        "memoryBytes": 134217728,
+        "swapBytes": 0,
+        "scratchBytes": 16777216,
+        "sharedMemoryBytes": 1048576,
+        "pids": 16,
+        "cpus": 2,
+        "wallSeconds": 1200,
+        "memoryEnforced": true,
+        "aggregateDiskEnforced": true
+      },
+      "checks": {
+        "memoryMax": 134217728,
+        "swapMax": 0,
+        "pidsMax": 16,
+        "cpuMax": [
+          "200000",
+          "100000"
+        ],
+        "scratchCapacity": 16777216,
+        "sourceReadonly": true,
+        "rootReadonly": true,
+        "emptyEnvironment": true,
+        "loopbackWorks": true,
+        "externalNetworkDenied": true,
+        "forkDenied": true,
+        "children": 15
+      },
+      "hostReceiptSha256": "8fb3a6d05d33f0ab88b4deeebf87521973582cbae2b54ef890fbd51415874037"
+    },
+    {
+      "case": "timeout",
+      "actualExit": "deadline_exceeded",
+      "containerRemoved": true,
+      "limits": {
+        "memoryBytes": 6442450944,
+        "swapBytes": 0,
+        "scratchBytes": 4294967296,
+        "sharedMemoryBytes": 1048576,
+        "pids": 128,
+        "cpus": 2,
+        "wallSeconds": 1,
+        "memoryEnforced": false,
+        "aggregateDiskEnforced": false
+      },
+      "checks": null,
+      "hostReceiptSha256": "0ee8fd17fa437f2108223d4a3b9860fc199e30b3a7e284b8078544f97d52b3ed"
+    }
+  ],
+  "scope": "Current host source/root/environment/network boundary, actual child-memory pressure/OOM, aggregate scratch, fork/PID limits, lost create-response cleanup and whole-container timeout cleanup. Expected negative raw exits are successful refusal controls, not product failures."
+}

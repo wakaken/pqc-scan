@@ -1,0 +1,20 @@
+import pathlib,subprocess,json,hashlib,importlib.util,time
+p=pathlib.Path(__file__).parent;root=pathlib.Path.cwd();spec=importlib.util.spec_from_file_location('r',root/'tests/protocol/container_runner.py');r=importlib.util.module_from_spec(spec);spec.loader.exec_module(r)
+old=json.loads((p/'fuzz-current/HOST-RESULTS.json').read_text());assert old['containerRemoved'];bindings=r.snapshot(root,p/'fuzz-resume-source');assert bindings==old['sourceBindings']
+name='pqc054-fuzz-continuation-20261117-rln6xo7y';image='sha256:f7c0365571a37fbbd5469e25b563a6069bda7395155f46d2fa2e3cf17271c82f';record={'image':image,'wallSeconds':1500,'firstAttemptWallBudget':1200,'original047WallBudget':2700,'sourceBindings':bindings,'sourceEqualsFirstAttempt':True,'removed':False,'phases':[]};checkpoint=json.loads((p/'fuzz-checkpoint/CHECKPOINT.json').read_text())
+command=['docker','run','--detach','--name',name,'--network','none','--read-only','--user','65534:65534','--cap-drop','ALL','--security-opt','no-new-privileges','--memory','6g','--memory-swap','6g','--cpus','2','--pids-limit','128','--shm-size','1m','--ulimit','core=0:0','--ulimit','fsize=1073741824:1073741824','--ulimit','nofile=1024:1024','--ulimit','cpu=900:900','--tmpfs','/scratch:rw,exec,nosuid,nodev,size=4g,mode=1777','--mount',f'type=bind,src={p/"fuzz-resume-source"},dst=/source,readonly','--mount',f'type=bind,src={p/"fuzz-checkpoint"},dst=/checkpoint,readonly','--mount',f'type=bind,src={p/"fuzz-continue.py"},dst=/driver.py,readonly','--entrypoint','/usr/bin/env',image,'-i',*[f'{k}={v}' for k,v in r.ENV.items()],'sleep','infinity']
+try:
+ subprocess.run(command,check=True,stdout=subprocess.DEVNULL,timeout=30)
+ subprocess.run(['docker','exec',name,'mkdir','-p','/scratch/workers','/scratch/home','/scratch/tmp'],check=True,timeout=30)
+ for key,info in checkpoint['binaries'].items():
+  assert key in ['pqc_scan_detectors','pqc_scan_report','pqc_scan_probe_tls','pqc_scan_probe_ssh']
+  subprocess.run(['docker','exec',name,'sh','-c','gzip -dc /checkpoint/'+key+'.gz > /scratch/workers/'+key+' && chmod 755 /scratch/workers/'+key],check=True,timeout=30)
+ start=time.monotonic()
+ # docker exec inherits the image environment, so enforce the same allowlist again.
+ with (p/'fuzz-continuation.log').open('w') as log:run=subprocess.run(['docker','exec','--workdir','/source',name,'/usr/bin/env','-i',*[f'{k}={v}' for k,v in r.ENV.items()],'/usr/bin/python3','/driver.py'],stdout=log,stderr=subprocess.STDOUT,timeout=1500)
+ record.update(exitCode=run.returncode,seconds=time.monotonic()-start);assert run.returncode==0,(p/'fuzz-continuation.log').read_text()[-2000:]
+ data=r.bounded_output(['docker','exec',name,'tar','-C','/scratch/evidence','-cf','-','.'],limit=64*1024**2-32768,timeout=30);r.extract_artifacts(data,p/'fuzz-complete')
+ record['sourceBeforeAfterMatch']=all(hashlib.sha256(r.source_bytes(root,n)).hexdigest()==h for n,h in bindings.items());assert record['sourceBeforeAfterMatch']
+finally:
+ subprocess.run(['docker','rm','-f',name],check=True,stdout=subprocess.DEVNULL,timeout=30);record['removed']=True;(p/'FUZZ-CONTINUATION-HOST.json').write_text(json.dumps(record,indent=2)+'\n')
+print('All18same-recipe fuzz slots completed;14reused;source/worker hashes and control verified;container removed')

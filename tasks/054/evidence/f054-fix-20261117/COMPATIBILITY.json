@@ -1,0 +1,103 @@
+{
+  "pairs": [
+    {
+      "population": "product",
+      "oldFindings": 486,
+      "newFindings": 485,
+      "removed": [
+        {
+          "category": "CryptoAPI",
+          "confidence": 0.5,
+          "description": "Rust RSA/JWT dependency detected.",
+          "evidence": {
+            "match": "universal-hash@0.6.1",
+            "metadata": {
+              "dep_ecosystem": "cargo",
+              "dep_name": "universal-hash",
+              "dep_purl": "pkg:cargo/universal-hash@0.6.1",
+              "dep_source_type": "manifest",
+              "dep_version": "0.6.1",
+              "detector": "dependency_detector",
+              "manifest": "Cargo.lock"
+            },
+            "snippet_preview": "[masked-sensitive-file-content]",
+            "type": "dependency"
+          },
+          "finding_id": "finding-v1-a0df18f44c77ad97fa63c78af9c9c3745d17eaf472c4b9b324a682d3cecdf245",
+          "location": {
+            "column": 1,
+            "file": "Cargo.lock",
+            "line": 2963
+          },
+          "migration_hint": "Plan migration away from classical RSA crates in Rust workloads.",
+          "recommended_actions": [
+            {
+              "action_id": "dependency.track-pqc-readiness",
+              "priority": "planned",
+              "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+              "references": [
+                "https://cyclonedx.org/",
+                "https://spdx.dev/"
+              ],
+              "steps": [
+                "Record current versions in dependency-sbom.json and define upgrade targets.",
+                "Subscribe to release notes for PQC feature availability and API changes.",
+                "Run integration tests for PQC or hybrid modes before promoting to production."
+              ],
+              "title": "Track PQC readiness of dependent libraries"
+            }
+          ],
+          "risk": "quantum-vulnerable",
+          "rule_id": "DEP_RUST_RSA_CRATE",
+          "severity": "medium",
+          "source_snippet": {
+            "lines": [
+              {
+                "highlighted": true,
+                "line": 2963,
+                "text": "[masked-sensitive-file-content]"
+              }
+            ]
+          }
+        }
+      ],
+      "added": [],
+      "unchangedFindingsMultisetEqual": true,
+      "oldReportSha256": "932106346f5b5914918c768f68f6afcaf34edb121549ff524fbcf667be9d81b8",
+      "newReportSha256": "8b175bc9cae363d69b7dd36ec391205ff5c5ac22478adf623a9a2c4b72598305"
+    },
+    {
+      "population": "023",
+      "oldFindings": 52,
+      "newFindings": 52,
+      "removed": [],
+      "added": [],
+      "unchangedFindingsMultisetEqual": true,
+      "oldReportSha256": "bc693d1bf887637fcc4858a5d0bba35795d59c8f91962a1bd9dac6aa289870bd",
+      "newReportSha256": "6badc62dc2cc14dadb4d472571f0ac5aa785b20f96fc69ab5e8ad778bbac79ee"
+    },
+    {
+      "population": "042v2",
+      "oldFindings": 205,
+      "newFindings": 205,
+      "removed": [],
+      "added": [],
+      "unchangedFindingsMultisetEqual": true,
+      "oldReportSha256": "5191e01cf20fc577991f217401f828c617a92931bfde3a729e747da9a4f68ead",
+      "newReportSha256": "22f4fae2a9f7710d801cec4d3c4b54c8ca65a251de95bd0971bd81ac48e0ba11"
+    },
+    {
+      "population": "043v2",
+      "oldFindings": 216,
+      "newFindings": 216,
+      "removed": [],
+      "added": [],
+      "unchangedFindingsMultisetEqual": true,
+      "oldReportSha256": "28ed971635b10c4cf5d0a46194cf2cb06c8c71146c7db1e674a1e484ada82734",
+      "newReportSha256": "90bf248f68704ea798b61fc137e22383e05c10e1e37d323c2ee0b28da4eaeef0"
+    }
+  ],
+  "corpusMethod": "023/042v2/043v2 use existing load_truth and materialize with every original per-file digest. Original data and labels unchanged; no new independent holdout claim.",
+  "corpusSource": "CANONICAL-CORPUS-RECEIPT.json",
+  "identityLimit": "Only finding objects/multiplicity are compared as unchanged. Ruleset/run/observation hashes and packaged binary bytes may change; no broad native-ID byte equality claim."
+}

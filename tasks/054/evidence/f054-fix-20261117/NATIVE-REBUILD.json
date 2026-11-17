@@ -1,0 +1,141 @@
+{
+  "sourceHead": "3d5bd27fe5ab4c0b5b6b916f06d8001772884ad6",
+  "independence": {
+    "samePhysicalHost": true,
+    "independentOSConfinedSourceHomeTmpCargoTargetRoots": true,
+    "noSharedBuildArtifacts": true,
+    "sharedReadonlyDependencyInputs": true,
+    "sourceSnapshotsByteEqual": true,
+    "scope": "Two clean local buildenvironments, not two hosts or every environment"
+  },
+  "conditions": {
+    "target": "aarch64-apple-darwin",
+    "sourceDateEpoch": "1794861186",
+    "logicalRoot": "/pqc-build",
+    "compilerHashes": {
+      "rustc": "34a8f7034eeb844189a3c36ebb3fe36c2193fdb47b60028eb7f9392cb1f62484",
+      "cargo": "2be8a4e73901a99470d15b793e5ee814005c3b9ebbd3815ccbf9cf0f292238e7",
+      "python3.12": "81f3e43043ccf6feab8d50bf6b3b6181f265295bffd46cf5092077f938c4fc52"
+    },
+    "sdk": "MacOSX26.2.sdk",
+    "pathRemapping": "Both independent build roots are mapped to the same /pqc-build logical root; original060procedure unchanged except output directory."
+  },
+  "rows": [
+    {
+      "variant": "static",
+      "A": {
+        "sha256": "1bbec6be8a8d7d3550f803fdefb23b11c67f83e02d456dee9b60cfde24733ae3",
+        "size": 16119024,
+        "version": "pqc-scan 0.2.0"
+      },
+      "B": {
+        "sha256": "1bbec6be8a8d7d3550f803fdefb23b11c67f83e02d456dee9b60cfde24733ae3",
+        "size": 16119024,
+        "version": "pqc-scan 0.2.0"
+      },
+      "rawBytesEqual": true,
+      "firstDifferenceOffsets": [],
+      "lengthDifference": 0
+    },
+    {
+      "variant": "network",
+      "A": {
+        "sha256": "97e154394f6737dd5a020a28ceb96261a4222d7c1dd8405ce515e15bc4aca194",
+        "size": 22196960,
+        "version": "pqc-scan 0.2.0"
+      },
+      "B": {
+        "sha256": "97e154394f6737dd5a020a28ceb96261a4222d7c1dd8405ce515e15bc4aca194",
+        "size": 22196960,
+        "version": "pqc-scan 0.2.0"
+      },
+      "rawBytesEqual": true,
+      "firstDifferenceOffsets": [],
+      "lengthDifference": 0
+    }
+  ],
+  "rawComparisonSha256": "8339df77ef467afdb08bf58f45ef9371b94e98117ef711bc4529c4585268ac72",
+  "commands": [
+    {
+      "environment": "A",
+      "variant": "static",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "-p",
+        "pqc_scan_cli"
+      ],
+      "startedAt": "2026-11-17T00:26:19.860131+00:00",
+      "seconds": 92.9906162089901,
+      "exitCode": 0,
+      "targetInitiallyAbsent": true,
+      "target": "Independent initially absent A/static target directory"
+    },
+    {
+      "environment": "A",
+      "variant": "network",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "-p",
+        "pqc_scan_cli",
+        "--features",
+        "probe-tls,probe-ssh,probe-ssh-kex"
+      ],
+      "startedAt": "2026-11-17T00:27:53.584692+00:00",
+      "seconds": 140.59011062499485,
+      "exitCode": 0,
+      "targetInitiallyAbsent": true,
+      "target": "Independent initially absent A/network target directory"
+    },
+    {
+      "environment": "B",
+      "variant": "static",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "-p",
+        "pqc_scan_cli"
+      ],
+      "startedAt": "2026-11-17T00:30:15.499363+00:00",
+      "seconds": 67.40977004199522,
+      "exitCode": 0,
+      "targetInitiallyAbsent": true,
+      "target": "Independent initially absent B/static target directory"
+    },
+    {
+      "environment": "B",
+      "variant": "network",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "-p",
+        "pqc_scan_cli",
+        "--features",
+        "probe-tls,probe-ssh,probe-ssh-kex"
+      ],
+      "startedAt": "2026-11-17T00:31:23.203405+00:00",
+      "seconds": 138.41483991700807,
+      "exitCode": 0,
+      "targetInitiallyAbsent": true,
+      "target": "Independent initially absent B/network target directory"
+    }
+  ],
+  "scratch": {
+    "exitCode": 0,
+    "allScratchContextsRemoved": true,
+    "scope": "Native readonlysource/cache,scratchonlywrites,noexternalnetwork,finiteperprocess/percommand limits; noaggregateLinuxcgroup guarantee."
+  }
+}
