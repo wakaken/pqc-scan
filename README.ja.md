@@ -1,8 +1,8 @@
 # pqc-scan
 
-このチェックアウトは、macOS Apple Silicon（`aarch64-apple-darwin`）向けの未公開の静的版候補**v0.3.0**です。変更点と互換性は[候補のリリースノート](docs/releases/v0.3.0.ja.md)を参照してください。技術的な準備や[品質評価ロードマップ](docs/roadmap/v0.3/ROADMAP.md)の完了は、製品受入・公開の承認とは別です。
+このチェックアウトの製品バージョンは、macOS Apple Silicon（`aarch64-apple-darwin`）向け静的版の**v0.3.0**です。変更点と互換性は[リリースノート](docs/releases/v0.3.0.ja.md)を参照してください。維持者は評価範囲と制約を踏まえて製品を受け入れ、最終ビルドの来歴検証後の公開を承認しています。
 
-公開済みのリリースは**v0.2.0**です。公開版の対象範囲は[リリース内容](docs/releases/v0.2.0.ja.md)に記載しています。静的スキャンを正式対象とし、TLS・SSH診断は引き続き実験的機能として扱います。
+公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。ローカルの準備物やActions成果物は、公開済みReleaseとは別です。過去の[v0.2.0のノート](docs/releases/v0.2.0.ja.md)も保持しています。正式対象は静的スキャンです。TLS・SSH診断は実験的機能とし、ネットワーク診断のバイナリ公開は引き続き保留します。
 
 [English](README.md)
 
@@ -75,7 +75,7 @@ cargo install --locked --path crates/pqc_scan_cli
 
 この開発版で準備する配布物は、`static`（ローカルの静的スキャン）と`network`（静的スキャン＋TLS・SSHの接続先診断）の2構成です。`network`は実験的機能を含む未公開の構成です。内部の機能スイッチは、個別ビルド用に残しています。
 
-アーカイブの検証と導入方法は[インストールガイド](docs/user/DISTRIBUTION.ja.md)を参照してください。v0.2の配布バイナリはmacOS Apple Silicon向けの静的版です。[GitHub Releases](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0)から取得できます。probe同梱版は公開前の確認が残っています。
+アーカイブの検証と導入方法は[インストールガイド](docs/user/DISTRIBUTION.ja.md)を参照してください。macOS Apple Silicon向け静的版の公開物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。probe同梱版は公開前の確認が残っています。
 
 インストール後も、このリポジトリの `rules` ディレクトリを参照できる場所に残してください。
 バイナリにルールディレクトリは含まれないため、別のプロジェクトを調べるときは `--rules-dir` を絶対パスで指定します。

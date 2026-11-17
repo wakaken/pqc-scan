@@ -1,8 +1,8 @@
 # pqc-scan
 
-This checkout prepares **v0.3.0**, an unpublished static candidate for macOS Apple Silicon (`aarch64-apple-darwin`). See the [candidate notes](docs/releases/v0.3.0.md) for changes and compatibility. Technical preparation and completion of the [quality roadmap](docs/roadmap/v0.3/ROADMAP.md) are separate from product acceptance and publication.
+This checkout contains **v0.3.0** for static scanning on macOS Apple Silicon (`aarch64-apple-darwin`). See the [release notes](docs/releases/v0.3.0.md) for changes and compatibility. The maintainer has accepted its bounded scope and authorized publication after final build-provenance verification.
 
-The published release is **v0.2.0**; its [release notes](docs/releases/v0.2.0.md) describe the released scope. Static scanning is the formal scope; TLS and SSH probes remain experimental.
+Check [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets; local preparation and Actions artifacts are not published Releases. Historical [v0.2.0 notes](docs/releases/v0.2.0.md) remain available. Static scanning is the formal scope; TLS/SSH probes remain experimental and network binary publication remains on hold.
 
 [日本語](README.ja.md)
 
@@ -74,7 +74,7 @@ cargo install --locked --path crates/pqc_scan_cli
 
 This development checkout prepares two archive configurations: `static` (local scanning) and `network` (static scanning plus TLS/SSH diagnostics). `network` remains experimental and unpublished. Internal feature switches remain available for custom source builds.
 
-For archive verification and installation, see the [installation guide](docs/user/DISTRIBUTION.md). The v0.2 binary is the static macOS Apple Silicon variant, available from [GitHub Releases](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0); probe bundles are not yet cleared for public distribution.
+For archive verification and installation, see the [installation guide](docs/user/DISTRIBUTION.md). Static macOS Apple Silicon binaries are distributed through [GitHub Releases](https://github.com/wakaken/pqc-scan/releases); probe bundles are not cleared for public distribution.
 
 Keep the checkout's `rules` directory available after installation. The binary does not bundle that directory; use an absolute `--rules-dir` path when scanning another project.
 If the command is not found, check that `~/.cargo/bin` is in `PATH`.

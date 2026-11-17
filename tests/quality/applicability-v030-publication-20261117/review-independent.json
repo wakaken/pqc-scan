@@ -1,0 +1,51 @@
+{
+  "reviewer": "/root/output_implementation_review",
+  "timestampUtc": "2026-11-17T09:34:49Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "b373d4fbb118f66f962242e4ae589e6132621c6eb711847ddb20d4f2bb2534b8",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "236f52f39d64a82b41cad2e2a1d606482b4edde40c3942972162834d81eaeaee",
+    "docs/user/COVERAGE.ja.md": "2f4d082ca929981f3cd6c37e0517516e2982ed7bcb028ed2a8859a348703d0ad",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "remainingScopeReason": "Current independent source-scope revalidation covers all 246 nominated units and the remaining 240 units. Verified all 203 input hashes against both frozen corpus and provenance, and verified unchanged corpus/truth and the complete parser hash against the previous independently authored record. Both current COVERAGE guides differ from the preceding bound version only in their opening release-status paragraph; every support/limit paragraph is unchanged. Rechecked the six encrypted-container attribute questions against the unchanged non-decrypting content branches and original certificate-only conversion provenance: encryptedData remains opaque, while outer filename/container signals remain in scope. The unencrypted Data/certificate-bag controls retain their documented subset. Source/API/configuration/dependency/SBOM/marker properties and existing malformed, unsupported and ambiguous scopes are unchanged for every remaining unit. Maintenance/release acceptance language changes neither input support nor nominal object facts. This is post-observation source applicability, not new blind labels or accuracy and not scope derived from predictions. Previous measurements and applicability records were exposed; the current main record and proposed aggregate were not read.",
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The SHA-bound public-only.p12 has encryptedData content, OID 1.2.840.113549.1.7.6, inside its Data AuthenticatedSafe. The conversion provenance binds the known public RSA3072 certificate and preserves its nominal non-ECDSA signature truth. Both current guides exclude decryption, and the complete parser returns no certificate attributes from non-Data content. Only the inner signature question is unsupported; the container signal remains in scope."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The original public-only.pfx is byte-identical to public-only.p12, including its encryptedData certificate-bearing content. Certificate-only conversion and an empty password do not establish unencrypted content. The known negative ECDSA signature truth remains unchanged, while extraction of that inner attribute is outside the current non-decrypting public subset."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "Provenance binds public-only.p12 to the public RSA3072 certificate, preserving the positive modulus-size object fact. Its encryptedData content remains opaque under the unchanged parser and current paired support contract. The inner RSA modulus question is unsupported without changing nominal truth or excluding the outer container signal."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The original public-only.p12 conversion establishes the known certificate's sha256WithRSAEncryption signature fact. Reading that signature attribute requires access to encryptedData, which both guides and the unchanged parser exclude. Preserve the positive nominal truth separately from unsupported extraction applicability."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The SHA-bound public-only.pfx shares the original encrypted P12 bytes and RSA3072 certificate provenance. The documented parser does not enter its encryptedData content to recover the modulus. Retain the positive object-property truth and exclude only this inner key-size question from the supported-input view."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The original public-only.pfx contains encryptedData rather than the Data content supported for certificate extraction. Provenance preserves the positive RSA signature fact, but does not establish parser access to it. The current documentation changes concern candidate status, source-reference conditions and identity explanations; they do not change this extraction boundary or the remaining units' scope."
+    }
+  ]
+}

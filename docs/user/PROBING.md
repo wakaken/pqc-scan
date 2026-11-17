@@ -2,7 +2,7 @@
 
 [日本語](PROBING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.md)
 
-All three probe modes remain experimental alongside the unpublished v0.3.0 static candidate. Both the candidate static binary and the published v0.2.0 static binary have no `probe` command. Probe bundles have completed
+All three probe modes remain experimental alongside static v0.3.0. The v0.3.0 and v0.2.0 static binaries have no `probe` command. Probe bundles have completed
 technical preparation but retain publication checks; see [distribution status](DISTRIBUTION.md#release-status).
 
 Use probes only for a host/port you are authorized to inspect. A probe exchanges

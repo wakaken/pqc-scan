@@ -1,22 +1,26 @@
 # インストールと配布
 
-[English](DISTRIBUTION.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.ja.md)
+[English](DISTRIBUTION.md) · [README](https://github.com/wakaken/pqc-scan/blob/7bcbca20bc61380873005be71440bd53889ff5dd/README.ja.md)
 
-このガイドは、未公開の**v0.3.0静的版候補**と公開済みの**v0.2.0**を扱います。
-候補の機能を使う場合は、ソースのチェックアウトと対応するルールを一緒にビルドしてください。
-v0.2.0の配布物に候補の変更は含まれません。
+このガイドは、macOS Apple Silicon（`aarch64-apple-darwin`）向けの**v0.3.0静的版**を扱います。
+公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認し、
+バイナリ・対応するルールとライセンス文書・SHA-256・ホスト型のビルド来歴証明を一組で管理してください。
+ローカルの準備物やActions成果物は、公開済みReleaseとは別です。
+[v0.3.0のノート](../releases/v0.3.0.ja.md)と、過去の[v0.2.0のノート](../releases/v0.2.0.ja.md)も参照してください。
+v0.2.0の配布物にv0.3.0の変更は含まれません。
 
-公開物は[v0.2.0のGitHub Release](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0)にある
-macOS Apple Silicon（`aarch64-apple-darwin`）向け静的版です。アーカイブには対応する
-ルール・ライセンス文書があり、SHA-256とホスト型のビルド来歴証明も公開しています。
-ローカルの候補やActions成果物の保存は、Release公開とは別です。
-[v0.3.0候補のノート](../releases/v0.3.0.ja.md)と、過去の[v0.2.0のノート](../releases/v0.2.0.ja.md)を参照してください。
+0.2.x・0.3.xの各系列で最新の検証済み版を可能な範囲で保守し、SLAや旧版への修正提供は保証しません。
+TLS／SSHは実験的機能です。probe同梱アーカイブのライセンス確認フラグと公開保留は維持します。
+他のバイナリ環境やcrates.io公開は今回の範囲に含めません。
+[脆弱性の連絡方法](https://github.com/wakaken/pqc-scan/blob/7bcbca20bc61380873005be71440bd53889ff5dd/SECURITY.ja.md)も確認してください。
 
-保守は最新の検証済み0.2.xに対するベストエフォートとし、SLAや旧版への修正提供は保証しません。0.3.xの保守・旧版への修正適用方針は未確定で、候補の準備だけでは変更しません。TLS／SSHは実験的機能です。probe同梱アーカイブは技術的な配布準備として維持し、既存のライセンス確認フラグも残します。他のバイナリ環境やcrates.io公開は今回の範囲に含めません。[脆弱性の連絡方法](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/SECURITY.ja.md)も確認してください。
+## 静的版0.3.0
 
-## 静的版0.3.0の候補（未公開）
-
-候補はmacOS Apple Silicon向けの静的版`0.3.0`です。[技術評価](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md)には完了した確認と残る制約を記録しています。正式な製品受入、リリースの来歴・署名、公開の判断は別に必要で、v0.3.0のReleaseは未公開です。バイナリ・ルール・アーカイブのマニフェスト・ソースコミットを一組で管理してください。版番号だけでは対象を特定できません。
+維持者はmacOS Apple Silicon向け静的版を評価範囲と制約を踏まえて受け入れ、
+最終ホスト型ビルドの来歴検証後の公開を承認しています。
+[技術評価](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md)には、
+完了した確認と残る制約を記録しています。製品受入、ビルドの出所、Release公開は別の事実です。
+バイナリ・ルール・アーカイブのマニフェスト・ソースコミットを一組で管理してください。版番号だけでは対象を特定できません。
 
 Unixでは出力先のシンボリックリンクを拒否し、通常ファイルの置き換えには非公開の一時ファイルを使います。新しい出力はモード0600となり、以前のinodeの権限やACLは引き継ぎません。Unix以外への出力は未対応です。版をまたぐ位置・根拠の補正、JavaのRSA参照の追加、証明書属性の訂正では、件数・値・該当IDが変わる場合があります。リスク・信頼度の方針や形式の版は別に扱います。[互換性情報](../releases/v0.3.0.ja.md#compatibility)を参照してください。レポートは対応範囲内の調査材料であり、リポジトリの安全性やPQC移行完了を証明するものではありません。network版の公開保留も維持します。
 
@@ -24,11 +28,11 @@ Unixでは出力先のシンボリックリンクを拒否し、通常ファイ�
 
 ## 配布構成とprobe同梱版の確認事項
 
-v0.2候補では、macOS arm64向けの3構成すべてでホスト型CI、同一アーカイブの再作成、クリーンな環境への導入を確認しています。配布バイナリは `static` です。この構成には通知文の不足や `notice_review_required` はありません。公開物は[v0.2.0のGitHub Release](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0)で確認してください。以下のprobe同梱版は公開対象に含みません。
+v0.2候補では、macOS arm64向けの3構成すべてでホスト型CI、同一アーカイブの再作成、クリーンな環境への導入を確認しています。配布バイナリは `static` です。この構成には通知文の不足や `notice_review_required` はありません。過去の公開物は[v0.2.0のGitHub Release](https://github.com/wakaken/pqc-scan/releases/tag/v0.2.0)、現在の静的版の公開物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。probe同梱版は公開対象に含みません。
 
 | 構成 | 追加コマンド | 公開までの状況 |
 |---|---|---|
-| `static` | なし | v0.2.0は公開済み、v0.3.0候補は未公開。選んだ公開版のビルド来歴を検証する |
+| `static` | なし | v0.3.0は受入済み。GitHub Releasesで公開物を確認し、選んだ公開版のビルド来歴を検証する |
 | `network`（接続先診断付き） | 静的スキャンに加え、`probe tls`、`probe ssh`、`probe ssh-kex` | 未公開。依存パッケージ4件の通知文・再配布条件の確認が残る |
 
 確認対象は、[版を固定した通知文の記録](../../third_party/notices/manifest.json)に残しています。
@@ -47,7 +51,7 @@ probe同梱版も公開する場合は、上の確認に加え、その構成の
 
 ## ソースから導入する
 
-このチェックアウトの製品バージョンは、未公開の静的版候補`0.3.0`です。ソースのコミットを記録し、対応するバイナリとルールを一緒に管理してください。`--version`だけでは候補のどのスナップショットかを区別できません。以下のローカル配布物の名前もCargoの版に従い、新しい正式リリースを示すものではありません。
+このチェックアウトの製品バージョンは、静的版`0.3.0`です。ソースのコミットを記録し、対応するバイナリとルールを一緒に管理してください。`--version`だけでは候補のどのスナップショットかを区別できません。以下のローカル配布物の名前もCargoの版に従い、新しい正式リリースを示すものではありません。
 
 `rust-toolchain.toml`で指定したツールチェーンを使い、チェックアウト直下で実行します。
 ルールはこのチェックアウトとともに保管してください。
