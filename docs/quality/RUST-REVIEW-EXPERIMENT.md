@@ -28,8 +28,11 @@ input bytes, uncommitted changes and tool/configuration bindings before executio
 | A: existing review | Existing project policy, template, scoped source/diff and evidence only. |
 | B: supplemented review | Byte-identical common package, plus the frozen supplement explicitly named as an optional reference. |
 
-Use [prompts/REVIEWER.md](../../prompts/REVIEWER.md) as the only review prompt in
-both arms, with stage set to implementation review. Both receive
+The prepared packets embed the historical `prompts/REVIEWER.md` as their only
+review prompt, with stage set to implementation review. The live checkout now
+uses [docs/agent/REVIEWER.md](../agent/REVIEWER.md). Do not silently regenerate
+packets or claim that frozen results evaluate the newer guidance. Both arms
+receive baseline copies of
 [AGENTS.md](../../AGENTS.md), [review policy](../agent/REVIEWS.md),
 [verification rules](../agent/VERIFICATION.md), [best practices](../BEST-PRACTICES.md),
 and the same scoped architecture/pattern/contract excerpts where relevant.
@@ -173,3 +176,21 @@ migration, parser budgets, unsafe, concurrency, cryptographic judgment and produ
 performance remain Not Tested by
 this pilot. A separate fresh-case study is needed before broad claims of review
 accuracy, and a later implementation study before claims of improved Rust code.
+
+## Branch relocation (2026-11-17)
+
+The user requested a separate branch from `origin/develop`. The prepared 54 files
+were preserved byte-for-byte in commit `8ab51a8` on
+`codex/beautifulrust-review-pilot`, based on develop commit
+`af472b23c03d096ae6709edd94096fe4a3af813c`. The dataset, truth, packets and original
+preparation/review receipts remain unchanged; their historical source baseline
+is still `f07d782cd68cfac95d93585d5ace049f590160d4` plus the recorded worktree.
+Only these live documentation references were subsequently aligned with the
+relocated review template. Current guidance differs from the frozen baseline;
+a comparison against updated guidance would require separately prepared inputs.
+
+Source excerpts retain original trailing blank lines, including the two SARIF
+type excerpts. They are immutable source data, not whitespace cleanup targets.
+The transfer check ignores only Git's blank-at-EOF warning for those bytes;
+ordinary authored-document whitespace checks still apply. No experiment,
+installation, Clippy/CI/product change or additional review identity was added.

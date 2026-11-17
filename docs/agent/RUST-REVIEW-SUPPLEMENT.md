@@ -3,10 +3,14 @@
 Optional reference for the treatment arm of the
 [review experiment](../quality/RUST-REVIEW-EXPERIMENT.md). This is not a skill,
 a second review prompt, or a new acceptance gate. It is not automatically required
-for normal reviews. Use [the existing template](../../prompts/REVIEWER.md),
+for normal reviews. Use [the existing template](REVIEWER.md),
 [review policy](REVIEWS.md), and [verification rules](VERIFICATION.md).
 [AGENTS.md](../../AGENTS.md) and explicit project safety and compatibility
 constraints take precedence over external guidance.
+
+The prepared pilot packets retain their original frozen copy of this supplement
+and the historical review template. Updating this live document does not update
+those packets or their source-bound evidence.
 
 ## Review the change and its consequences
 
