@@ -9,7 +9,7 @@ const repositoryRoot=path.resolve(__dirname,'..');
 const read=p=>JSON.parse(fs.readFileSync(path.join(repositoryRoot,p)));
 const ledger=read('docs/records/v0.2-release/V02-SELF-SCAN-REVIEW.json');
 const {reviewedResultTestSource}=require('./reviewed-result-test-source.cjs');
-const fixture=reviewedResultTestSource(read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json'));
+const fixture=reviewedResultTestSource(read('docs/quality/self-scan/notification-review-20261116/EXPECTATIONS-BEFORE.json'));
 const root=fixture.root;
 const policy=()=>structuredClone(fixture.policy);
 test.after(fixture.cleanup);

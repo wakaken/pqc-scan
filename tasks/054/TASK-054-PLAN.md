@@ -79,3 +79,68 @@ Read-only source/history/evidence review is the first step; time-consuming new
 measurements are selected only after establishing an actual original-criterion gap.
 No review agent is preassigned; any later executable changes require the current
 review policy and docs/agent/REVIEWER.md, not new scope by implication.
+
+## Authorized notification repair — 2026-11-16
+
+The maintainer explicitly requested resolving the mixed Code Scanning queue after
+reviewing its current counts. This authorizes a bounded CI notification repair:
+register exact reviewed reference contexts using the existing policy format,
+preserve full results and historical policies, and expose a human summary separating
+review-required results from reviewed reference material. It does not change the
+original73requirements, product rules, source scan scope, severity or thresholds.
+
+Reuse the existing projection rather than introduce directory exclusions. Verify
+changed/new/duplicate/unlocated observations remain visible, actual source hashes,
+full-result count partitions, optional CLI compatibility, alias/markup safety and
+real scanner output. Obtain both implementation and test review under
+docs/agent/REVIEWER.md, one identity per stage. Record earlier unfinished054work
+separately. Publication/push/hosted workflow execution remain a final separate
+approval step after local changes and reviews are concrete and verified.
+
+## Authorized product-scope correction — 2026-11-16
+
+The maintainer subsequently requested narrowing the scan itself. Prepare a
+byte-preserving product-only input with Cargo manifests/lock, optional build
+scripts, crate source files and shipped rules. Preserve relative paths and exact
+hash guards, and exclude standalone tests/examples/task evidence from the actual
+scan input. Source-colocated unit tests are retained without source rewriting.
+
+Verify the actual selected input inventory and scanner diagnostics, not just the
+post-scan upload count. Reuse the two existing notification reviewers for scoped
+implementation and test confirmation; no new identity or budget reset. Preserve
+the earlier repository-wide measurements and original054 criteria. No public
+activation, other task reopening, scanner-default or crypto-rule change is implied.
+
+## Authorized F054-01 rule correction — 2026-11-17
+
+The maintainer explicitly approved the existing bounded correction proposal.
+Correct only DEP_RUST_RSA_CRATE's predicate: exact case-insensitive Cargo package
+components rsa/jsonwebtoken and a whole terminal canonical purl. Preserve its
+ID, kind, scope, severity, risk, confidence, text, parser, custom-rule semantics
+and all output schemas. The current parser rejects query/subpath purls; no new
+format support is introduced. Preserve dependency inventory/provenance even
+when the inappropriate crypto finding disappears.
+
+Acceptance: exact package/alias/optional declarations and resolved versions still
+match; universal-hash and misleading prefixes/suffixes do not. Real manifests,
+locks, supported CycloneDX/SPDX, malformed/unsupported purls, end-to-end risk
+classification and declaration/resolution/unknown states need meaningful tests.
+Only the approved overmatch may disappear from identical product inputs; frozen
+corpus truth/results and unrelated findings must remain. Changes in ruleset/run
+identities are disclosed instead of normalized away.
+
+Maintain the rule companion's current snapshot/controls and paired user guidance,
+without overwriting historical metadata or measurement records. Run initial
+checks, inspect the combined delta and obtain the existing implementation
+reviewer's scoped follow-up. Complete required workspace build/test/fmt/clippy
+and optional configurations, affected compatibility/evidence checks and the
+existing test-reviewer's follow-up. Reassess later source reuse rather than
+assuming old compiled-input hashes still match. Reconcile all73rows and roadmap
+gates only after final-source checks. A corrected Q3-02does not clear old numeric
+Failed, notice/publication holds, or authorize remote changes/release actions.
+
+The first confined targeted attempt caught an incorrect test assumption: a
+Cargo.lock entry without registry source is a local path record and intentionally
+has no Cargo purl. Preserve that failed run; correct the fixture to a registry
+record and add local/git negative controls. Do not change production provenance
+logic to make that fixture pass.

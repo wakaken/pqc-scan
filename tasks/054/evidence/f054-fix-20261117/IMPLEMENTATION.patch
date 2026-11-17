@@ -1,0 +1,461 @@
+diff --git a/README.ja.md b/README.ja.md
+index eb78642..5752f96 100644
+--- a/README.ja.md
++++ b/README.ja.md
+@@ -62,6 +62,8 @@ PQC方式の名前が見つかっても、アプリケーションで正しく
+ 
+ <a id="quick-start"></a>
+ 
++RustのRSA/JWT依存規則は、Cargoのパッケージ名が`rsa`または`jsonwebtoken`の場合に一致します。`universal-hash`などの名前は対象外です。依存が存在するだけではRSAの実利用は確認できません。
++
+ ## 使い始める
+ 
+ [`rust-toolchain.toml`](rust-toolchain.toml)で指定したRust（現在は1.93.1）を使い、このリポジトリのソースからインストールします。
+diff --git a/README.md b/README.md
+index ce08581..4db2d1a 100644
+--- a/README.md
++++ b/README.md
+@@ -61,6 +61,8 @@ A reference to a PQC algorithm is useful evidence, but it does not establish tha
+ 
+ <a id="quick-start"></a>
+ 
++The Rust RSA/JWT dependency rule matches the exact Cargo package names `rsa` and `jsonwebtoken`; names such as `universal-hash` are excluded. Package presence does not prove use of RSA.
++
+ ## Run your first scan
+ 
+ Use the Rust toolchain pinned in [`rust-toolchain.toml`](rust-toolchain.toml) (currently Rust 1.93.1) and install from this checkout:
+diff --git a/docs/quality/rules/RULE-QUALITY-METADATA.json b/docs/quality/rules/RULE-QUALITY-METADATA.json
+index 4ff80d5..13c1ff0 100644
+--- a/docs/quality/rules/RULE-QUALITY-METADATA.json
++++ b/docs/quality/rules/RULE-QUALITY-METADATA.json
+@@ -12,7 +12,7 @@
+     },
+     {
+       "path": "rules/default/crypto_api.yml",
+-      "sha256": "84f672787e883cbd2c2dd790ada8076c8a4c3f0628f3bc26aeb2b5bf4f7ea10a"
++      "sha256": "a6c60fbde7e835d463f855167d67f893c2ed9c61645713c219305c8506aa8ec2"
+     },
+     {
+       "path": "rules/default/jwt.yml",
+@@ -2062,7 +2062,7 @@
+         "risk": "quantum-vulnerable",
+         "confidence": 0.5,
+         "migration_hint": "Plan migration away from classical RSA crates in Rust workloads.",
+-        "pattern": "(?i)pkg:cargo/[^\\s]*(rsa|jsonwebtoken)",
++        "pattern": "(?i)(?:^|\\s)pkg:cargo/(?:rsa|jsonwebtoken)(?:@[^\\s/?#]+)?\\z",
+         "scope": "dependency",
+         "description": "Rust RSA/JWT dependency detected."
+       },
+@@ -2080,7 +2080,8 @@
+       "method_limits": [
+         "Pattern runs on safe projected name/version/ecosystem/purl text.",
+         "Presence or a lock record does not prove deployment, selected algorithm or enabled PQC features.",
+-        "No network resolution, cross-file graph or provider/peer capability inference."
++        "No network resolution, cross-file graph or provider/peer capability inference.",
++        "Cargo package component is exactly rsa or jsonwebtoken (case-insensitive); canonical purl must terminate the projected target. Query/subpath inputs remain unsupported by the existing parser."
+       ],
+       "known_gaps": [
+         "Legacy risk tags cannot establish the selected algorithm from package presence."
+@@ -2096,6 +2097,21 @@
+           "target": "serde 1.0 cargo pkg:cargo/serde",
+           "desired_positive": false,
+           "expected_pattern_match": false
++        },
++        {
++          "target": "universal-hash 0.6.1 cargo pkg:cargo/universal-hash@0.6.1",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        },
++        {
++          "target": "rsa-helper 1.0 cargo pkg:cargo/rsa-helper@1.0.0",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        },
++        {
++          "target": "jsonwebtoken 9.3.1 cargo pkg:cargo/jsonwebtoken@9.3.1",
++          "desired_positive": true,
++          "expected_pattern_match": true
+         }
+       ]
+     },
+diff --git a/docs/quality/rules/RULE-QUALITY.md b/docs/quality/rules/RULE-QUALITY.md
+index 551b0d6..4f512ef 100644
+--- a/docs/quality/rules/RULE-QUALITY.md
++++ b/docs/quality/rules/RULE-QUALITY.md
+@@ -85,3 +85,15 @@ are classification context, not a current-law compliance engine. Local task021
+ cutoff and task028 method policy are explicitly marked repository references.
+ 
+ The 2026-11-12 source repair refresh includes three additional classical API/EdDSA rules, narrowed Ruby/Go/TLS predicates and source-bound controls. Pattern fixtures remain distinct from language-aware detector tests (`semantic_repairs.rs`); current changes do not retroactively alter historical task028 evidence.
++
++## Maintainer-approved F054-01 correction — 2026-11-17
++
++The current DEP_RUST_RSA_CRATE predicate now matches exactly the Cargo package
++components rsa and jsonwebtoken, with the existing case-insensitive policy.
++Its other fields and the dependency parser are unchanged. Three additional
++compiled-target controls cover universal-hash, rsa-helper and a versioned
++jsonwebtoken purl; the current metadata has123rules and268controls. These are
++synthetic controls, not independent accuracy units. Historical task062 metadata
++and the earlier measurements remain unchanged; the maintained metadata source
++hash/snapshot update records this explicitly approved correction. Detector and
++CLI regressions additionally test real manifests,locks,SBOMs and provenance.
+diff --git a/docs/rules-reference.md b/docs/rules-reference.md
+index 882b251..38f4da0 100644
+--- a/docs/rules-reference.md
++++ b/docs/rules-reference.md
+@@ -129,7 +129,7 @@ identifiers are not exhaustively assessed. See the
+ | `DEP_RUBY_JWT` | `dependency` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.48 | `dependency` | `crypto_api.yml` | Ruby JWT dependency detected. | Replace RSA-based JWT signing in Ruby with PQC-ready options. | `(?i)pkg:gem/[^\s]*jwt` |
+ | `DEP_RUBY_OPENSSL` | `dependency` | CryptoAPI | `medium` | `quantum-uncertain` | 0.44 | `dependency` | `crypto_api.yml` | Ruby OpenSSL dependency detected. | Review OpenSSL usage in Ruby and prepare PQC migration path. | `(?i)pkg:gem/[^\s]*openssl` |
+ | `DEP_RUST_OPENSSL` | `dependency` | CryptoAPI | `medium` | `quantum-uncertain` | 0.46 | `dependency` | `crypto_api.yml` | Rust TLS/crypto dependency detected. | Track PQC migration options for Rust openssl/rustls crypto stacks. | `(?i)pkg:cargo/[^\s]*(openssl(-sys)?\|rustls)` |
+-| `DEP_RUST_RSA_CRATE` | `dependency` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.50 | `dependency` | `crypto_api.yml` | Rust RSA/JWT dependency detected. | Plan migration away from classical RSA crates in Rust workloads. | `(?i)pkg:cargo/[^\s]*(rsa\|jsonwebtoken)` |
++| `DEP_RUST_RSA_CRATE` | `dependency` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.50 | `dependency` | `crypto_api.yml` | Rust RSA/JWT dependency detected. | Plan migration away from classical RSA crates in Rust workloads. | `(?i)(?:^\|\\s)pkg:cargo/(?:rsa\|jsonwebtoken)(?:@[^\\s/?#]+)?\\z` |
+ | `ENVOY_CIPHER_SUITES_RSA` | `regex` | Middleware | `high` | `quantum-vulnerable` | 0.68 | `config` | `middleware.yml` | Envoy TLS cipher suites include RSA or weak ciphers. | Remove RSA-dependent suites from Envoy cipher_suites. | `cipher_suites\s*:\s*\[[^\]]*(RSA\|3DES\|RC4)` |
+ | `ENVOY_SIGNATURE_ALGORITHMS_RSA` | `regex` | Middleware | `medium` | `quantum-vulnerable` | 0.62 | `config` | `middleware.yml` | RSA signature algorithms are explicitly configured in Envoy. | Reflect PQC migration plans in Envoy signature algorithm settings. | `signature_algorithms\s*:\s*\[[^\]]*rsa` |
+ | `ENVOY_TLS_MAX_VERSION_LEGACY` | `regex` | Middleware | `medium` | `non-quantum-risk` | 0.55 | `config` | `middleware.yml` | Envoy maximum TLS version is pinned too low. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `tls_maximum_protocol_version\s*:\s*TLSv1_[01]` |
+@@ -247,3 +247,14 @@ The user-approved audit remediation retains IDs, schemas and the severity engine
+ `PQC_STANDARD_REFERENCE` (tree_sitter, info, quantum-safe, seven language scopes) inventories recognized standard parameter names and X25519MLKEM768. It is nominal source inventory, not execution, enabled state, implementation conformance or certification. Specific API rules remain separate findings.
+ 
+ The current source-bound companion is [AUDIT-RULE-QUALITY-METADATA.json](../tasks/062/evidence/AUDIT-RULE-QUALITY-METADATA.json); the original metadata and past measurements remain unchanged. These are hand-authored pattern controls, not a calibrated accuracy claim. Actual detector/CLI regression controls are in `crates/pqc_scan_cli/tests/audit_remediation.rs`.
++
++## Exact Cargo RSA/JWT package identity (F054-01)
++
++The maintainer-approved correction limits DEP_RUST_RSA_CRATE to exact rsa and
++jsonwebtoken Cargo package components, preserving case-insensitive matching and
++all other rule fields. Names such as universal-hash and rsa-helper no longer
++produce this finding. Manifest aliases use the actual package name; lock and
++supported SBOM records retain their existing version/provenance handling.
++Query/subpath or malformed SBOM purls retain the parser's existing partial state.
++Package presence still does not prove an enabled algorithm or runtime use.
++See the task054 correction evidence; no custom predicate or output schema changes.
+diff --git a/docs/user/COVERAGE.ja.md b/docs/user/COVERAGE.ja.md
+index 4e46f57..92367ec 100644
+--- a/docs/user/COVERAGE.ja.md
++++ b/docs/user/COVERAGE.ja.md
+@@ -42,6 +42,8 @@ Gradleは、既存の6種類の依存設定について、1行の座標文字列
+ 入力の全項目の規格検証や、インストール済みであることの確認は行いません。規格に沿った出力とは別の機能です。
+ 構造化データの解析、簡易解析、対応する版と上限は[依存関係の確認根拠](../architecture/DEPENDENCY-PROVENANCE.md)に記載しています。
+ 
++RustのRSA/JWT依存規則は、対応する定義・ロック・SBOM情報のCargoパッケージ名が`rsa`または`jsonwebtoken`の場合に、大文字・小文字を区別せず一致します。`universal-hash`や`rsa-helper`など、文字列を一部に含むだけの名前は対象外です。この暗号所見がなくても依存一覧には残ります。依存の存在だけでは、RSAの実利用や機能の有効化は確認できません。
++
+ <a id="certificates"></a>
+ 
+ ## 証明書と秘密鍵マーカー
+diff --git a/docs/user/COVERAGE.md b/docs/user/COVERAGE.md
+index 66abe4a..9137893 100644
+--- a/docs/user/COVERAGE.md
++++ b/docs/user/COVERAGE.md
+@@ -39,6 +39,8 @@ Gradle's lexical single-line subset accepts the existing six dependency configur
+ 
+ These are bounded component/package subsets: CycloneDX 1.4 to 1.7 and SPDX 2.2 to 2.3. They are input formats, not full-schema validation, installed-state proof or standards export. Structured dependency parsing, lexical fallbacks, supported versions and limits are listed in the [dependency provenance contract](../architecture/DEPENDENCY-PROVENANCE.md).
+ 
++The Rust RSA/JWT dependency rule matches exact Cargo package names `rsa` and `jsonwebtoken` (case-insensitive), including supported manifest, lock and SBOM records. Names containing those strings, such as `universal-hash` or `rsa-helper`, are excluded. An inventory entry is preserved even without this crypto finding; presence does not prove RSA use or enabled features.
++
+ <a id="certificates"></a>
+ 
+ ## Certificates and key markers
+diff --git a/rules/default/crypto_api.yml b/rules/default/crypto_api.yml
+index ca56556..6d7c25b 100644
+--- a/rules/default/crypto_api.yml
++++ b/rules/default/crypto_api.yml
+@@ -170,7 +170,7 @@
+   risk: quantum-vulnerable
+   confidence: 0.50
+   migration_hint: Plan migration away from classical RSA crates in Rust workloads.
+-  pattern: "(?i)pkg:cargo/[^\\s]*(rsa|jsonwebtoken)"
++  pattern: "(?i)(?:^|\\s)pkg:cargo/(?:rsa|jsonwebtoken)(?:@[^\\s/?#]+)?\\z"
+   scope: dependency
+   description: Rust RSA/JWT dependency detected.
+ 
+diff --git a/crates/pqc_scan_detectors/tests/f054_dependency_identity.rs b/crates/pqc_scan_detectors/tests/f054_dependency_identity.rs
+new file mode 100644
+index 0000000..e5184b2
+--- /dev/null
++++ b/crates/pqc_scan_detectors/tests/f054_dependency_identity.rs
+@@ -0,0 +1,165 @@
++//! Exact package identity controls for the approved F054-01 correction.
++use pqc_scan_core::{Detector, DetectorStatus, ScannableFile};
++use pqc_scan_detectors::dependency_detector::DependencyDetector;
++use pqc_scan_rules::RuleSet;
++use serde_json::json;
++use std::path::{Path, PathBuf};
++
++const RULE: &str = "DEP_RUST_RSA_CRATE";
++fn rules() -> RuleSet {
++    RuleSet::load_from_dir(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules/default"))
++        .unwrap()
++}
++fn check(name: &str, text: &str, expected: usize) {
++    let outcome = DependencyDetector
++        .detect_detailed(
++            &ScannableFile::from_bytes(PathBuf::from(name), text.as_bytes().to_vec()),
++            &rules(),
++        )
++        .unwrap();
++    assert_eq!(outcome.status(), DetectorStatus::Complete, "{name}: {text}");
++    assert_eq!(
++        outcome
++            .detections()
++            .iter()
++            .filter(|d| d.rule_id == RULE)
++            .count(),
++        expected,
++        "{name}: {text}"
++    );
++    // Rejecting a crypto classification must not discard the dependency inventory.
++    assert!(outcome
++        .detections()
++        .iter()
++        .any(|d| d.rule_id == "__DEPENDENCY_INVENTORY__"));
++}
++
++#[test]
++fn exact_names_keep_manifest_aliases_optional_declarations_and_lock_versions() {
++    for name in ["rsa", "jsonwebtoken", "RSA", "JsonWebToken"] {
++        check(
++            "Cargo.toml",
++            &format!("[dependencies]\n{name} = '^0.9'\n"),
++            1,
++        );
++        check("Cargo.toml", &format!("[dependencies]\nalias = {{ package = '{name}', version = '^0.9', optional = true }}\n"), 1);
++        for version in ["0.9.8", "1.0.0-rc.1", "1.0.0+build.3"] {
++            check(
++                "Cargo.lock",
++                &format!("version = 4\n[[package]]\nname = '{name}'\nversion = '{version}'\nsource = 'registry+https://github.com/rust-lang/crates.io-index'\n"),
++                1,
++            );
++        }
++    }
++    // Local/git lock records retain inventory but do not assert registry identity.
++    for source in ["", "source = 'git+https://example.invalid/rsa#deadbeef'\n"] {
++        check(
++            "Cargo.lock",
++            &format!("version = 4\n[[package]]\nname = 'rsa'\nversion = '0.9.8'\n{source}"),
++            0,
++        );
++    }
++    for name in [
++        "universal-hash",
++        "rsa-helper",
++        "my-rsa",
++        "librsa",
++        "jsonwebtoken-extra",
++        "myjsonwebtoken",
++        "rsa_jsonwebtoken",
++    ] {
++        check(
++            "Cargo.toml",
++            &format!("[dependencies]\n'{name}' = '0.6.1'\n"),
++            0,
++        );
++        check(
++            "Cargo.lock",
++            &format!("version = 4\n[[package]]\nname = '{name}'\nversion = '0.6.1'\nsource = 'registry+https://github.com/rust-lang/crates.io-index'\n"),
++            0,
++        );
++    }
++}
++
++#[test]
++fn supported_sbom_formats_classify_exact_cargo_packages_only() {
++    for (name, expected) in [
++        ("rsa", 1),
++        ("jsonwebtoken", 1),
++        ("universal-hash", 0),
++        ("rsa-helper", 0),
++        ("myjsonwebtoken", 0),
++    ] {
++        for ecosystem in ["cargo", "npm"] {
++            let count = if ecosystem == "cargo" { expected } else { 0 };
++            let purl = format!("pkg:{ecosystem}/{name}@0.6.1");
++            check("bom.cdx.json", &json!({"bomFormat":"CycloneDX","specVersion":"1.7","components":[{"type":"library","name":name,"version":"0.6.1","purl":purl}]}).to_string(), count);
++            check("sbom.spdx.json", &json!({"spdxVersion":"SPDX-2.3","packages":[{"name":name,"versionInfo":"0.6.1","externalRefs":[{"referenceType":"purl","referenceLocator":purl}]}]}).to_string(), count);
++        }
++    }
++}
++
++#[test]
++fn malformed_or_unsupported_purls_never_become_rsa_facts() {
++    // Query/subpath parsing was already unsupported: the fix must not add it.
++    for purl in [
++        "pkg:cargo/rsa@",
++        "pkg:cargo/rsa?arch=x",
++        "pkg:cargo/rsa#src",
++        "pkg:cargo/rsa@0.9.8?arch=x",
++        "pkg:cargo/rsa@0.9.8#src",
++        "pkg:cargo/namespace/rsa@0.9.8",
++        "pkg:cargo/rsa/@0.9.8",
++        "https://example.invalid/pkg:cargo/rsa@0.9.8",
++        "pkg:cargo/rsa@0.9.8 trailing",
++        "pkg:cargo/rsa%2Fextra@0.9.8",
++    ] {
++        let source = json!({"bomFormat":"CycloneDX","specVersion":"1.7","components":[{"type":"library","name":"rsa","version":"0.9.8","purl":purl}]}).to_string();
++        let outcome = DependencyDetector
++            .detect_detailed(
++                &ScannableFile::from_bytes(PathBuf::from("bom.cdx.json"), source.into_bytes()),
++                &rules(),
++            )
++            .unwrap();
++        assert_eq!(outcome.status(), DetectorStatus::Partial, "{purl}");
++        assert!(
++            !outcome.detections().iter().any(|d| d.rule_id == RULE),
++            "{purl}"
++        );
++    }
++}
++
++#[test]
++fn compiled_predicate_respects_whole_purl_boundaries_and_keeps_public_rule_fields() {
++    let set = rules();
++    let rule = set.get(RULE).unwrap();
++    let regex = rule.compiled_pattern().unwrap();
++    for target in [
++        "rsa  cargo pkg:cargo/rsa",
++        "jsonwebtoken 0.9.8 cargo pkg:cargo/jsonwebtoken@0.9.8",
++        "RSA 1.0.0 cargo pkg:cargo/RSA@1.0.0",
++        "rsa 1.0.0+build cargo pkg:cargo/rsa@1.0.0%2Bbuild",
++    ] {
++        assert!(regex.is_match(target), "{target}");
++    }
++    for target in [
++        "universal-hash 0.6.1 cargo pkg:cargo/universal-hash@0.6.1",
++        "rsa-helper 1 cargo pkg:cargo/rsa-helper@1.0.0",
++        "rsa 1 cargo pkg:cargo/rsa/extra",
++        "rsa 1 cargo pkg:cargo/rsa@",
++        "rsa 1 cargo pkg:cargo/rsa@1.0.0?x=y",
++        "rsa 1 cargo pkg:cargo/rsa#src",
++        "rsa 1 cargo xpkg:cargo/rsa@1.0.0",
++        "rsa 1 cargo pkg:cargo/rsa@1.0.0 trailing",
++        "rsa 1 cargo pkg:npm/rsa@1.0.0",
++    ] {
++        assert!(!regex.is_match(target), "{target}");
++    }
++    let value = serde_json::to_value(rule).unwrap();
++    assert_eq!(value["id"], RULE);
++    assert_eq!(value["kind"], "dependency");
++    assert_eq!(value["scope"], "dependency");
++    assert_eq!(value["risk"], "quantum-vulnerable");
++    assert_eq!(value["severity"], "medium");
++    assert_eq!(value["confidence"], 0.5);
++}
+diff --git a/crates/pqc_scan_cli/tests/f054_dependency_identity.rs b/crates/pqc_scan_cli/tests/f054_dependency_identity.rs
+new file mode 100644
+index 0000000..aec03c8
+--- /dev/null
++++ b/crates/pqc_scan_cli/tests/f054_dependency_identity.rs
+@@ -0,0 +1,117 @@
++//! Real CLI classification and native provenance for the F054-01 regression.
++use serde_json::{json, Value};
++use std::{
++    path::{Path, PathBuf},
++    process::Command,
++};
++struct Scratch(PathBuf);
++impl Drop for Scratch {
++    fn drop(&mut self) {
++        let _ = std::fs::remove_dir_all(&self.0);
++    }
++}
++#[test]
++fn non_rsa_inventory_is_retained_without_a_false_quantum_classification() {
++    let temp = Scratch(std::env::temp_dir().join(format!("pqc-f054-cli-{}", std::process::id())));
++    let input = temp.0.join("input");
++    let output = temp.0.join("output");
++    std::fs::create_dir_all(&input).unwrap();
++    std::fs::write(input.join("Cargo.toml"), "[dependencies]\nrsa = '^0.9'\njsonwebtoken = '9'\nuniversal-hash = '^0.6'\nrsa-helper = '1'\n").unwrap();
++    std::fs::write(input.join("Cargo.lock"), "version = 4\n[[package]]\nname = 'rsa'\nversion = '0.9.8'\nsource = 'registry+https://github.com/rust-lang/crates.io-index'\n[[package]]\nname = 'jsonwebtoken'\nversion = '9.3.1'\nsource = 'registry+https://github.com/rust-lang/crates.io-index'\n[[package]]\nname = 'universal-hash'\nversion = '0.6.1'\nsource = 'registry+https://github.com/rust-lang/crates.io-index'\n[[package]]\nname = 'rsa-helper'\nversion = '1.0.0'\nsource = 'registry+https://github.com/rust-lang/crates.io-index'\n").unwrap();
++    let components: Vec<Value> = ["rsa", "jsonwebtoken", "universal-hash", "rsa-helper"].iter().map(|name|json!({"type":"library","name":name,"version":"0.6.1","purl":format!("pkg:cargo/{name}@0.6.1")})).collect();
++    std::fs::write(
++        input.join("bom.cdx.json"),
++        json!({"bomFormat":"CycloneDX","specVersion":"1.7","components":components}).to_string(),
++    )
++    .unwrap();
++    let packages: Vec<Value> = ["rsa", "jsonwebtoken", "universal-hash", "rsa-helper"].iter().map(|name|json!({"name":name,"versionInfo":"0.6.1","externalRefs":[{"referenceType":"purl","referenceLocator":format!("pkg:cargo/{name}@0.6.1")}]})).collect();
++    std::fs::write(
++        input.join("sbom.spdx.json"),
++        json!({"spdxVersion":"SPDX-2.3","packages":packages}).to_string(),
++    )
++    .unwrap();
++    let result = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++        .arg("scan")
++        .arg(&input)
++        .args([
++            "--format",
++            "all",
++            "--inventory-json",
++            "--policy-profile",
++            "migration-review-v1",
++            "--threads",
++            "1",
++            "--rules-dir",
++        ])
++        .arg(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules"))
++        .arg("--out-dir")
++        .arg(&output)
++        .output()
++        .unwrap();
++    assert!(
++        result.status.success(),
++        "{}",
++        String::from_utf8_lossy(&result.stderr)
++    );
++    let read = |file: &str| -> Value {
++        serde_json::from_slice(&std::fs::read(output.join(file)).unwrap()).unwrap()
++    };
++    let report = read("report.json");
++    let hits: Vec<_> = report["findings"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .filter(|f| f["rule_id"] == "DEP_RUST_RSA_CRATE")
++        .collect();
++    assert_eq!(hits.len(), 8);
++    for hit in hits {
++        assert_eq!(hit["risk"], "quantum-vulnerable");
++        assert_eq!(hit["severity"], "medium");
++        let purl = hit["evidence"]["metadata"]["dep_purl"].as_str().unwrap();
++        assert!(
++            purl == "pkg:cargo/rsa"
++                || purl.starts_with("pkg:cargo/rsa@")
++                || purl == "pkg:cargo/jsonwebtoken"
++                || purl.starts_with("pkg:cargo/jsonwebtoken@"),
++            "{purl}"
++        );
++    }
++    let native = read("scan.inventory.v1.json");
++    let assets: Vec<_> = native["assets"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .filter(|a| a["kind"] == "dependency" && a["attributes"]["name"] == "universal-hash")
++        .collect();
++    assert!(!assets.is_empty(), "dependency inventory was lost");
++    assert!(assets
++        .iter()
++        .any(|a| a["attributes"]["declared_constraint"] == "^0.6"));
++    assert!(assets
++        .iter()
++        .any(|a| a["attributes"]["resolved_version"] == "0.6.1"));
++    assert!(assets
++        .iter()
++        .any(|a| a["attributes"]["reported_version"] == "0.6.1"));
++    for observation in native["observations"].as_array().unwrap() {
++        assert_ne!(observation["usage"], "executed");
++        assert_ne!(observation["usage"], "active");
++        assert_ne!(observation["assurance"], "cryptographically_verified");
++    }
++    let assessment = read("scan.assessment.v1.json");
++    let ids: Vec<_> = assets.iter().filter_map(|a| a["id"].as_str()).collect();
++    assert!(!assessment["assessments"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .any(|a| ids.contains(&a["asset_id"].as_str().unwrap_or("")) && a["decision"] == "pass"));
++    for file in [
++        "report.html",
++        "report.md",
++        "report.sarif",
++        "cbom.json",
++        "dependency-sbom.json",
++    ] {
++        assert!(output.join(file).is_file());
++    }
++}

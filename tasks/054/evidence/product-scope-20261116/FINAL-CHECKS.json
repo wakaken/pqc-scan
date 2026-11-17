@@ -1,0 +1,145 @@
+{
+  "wallLimitPerPhaseSeconds": 300,
+  "phases": [
+    {
+      "name": "node",
+      "command": [
+        "/scratch/node",
+        "--test",
+        "shell/compact-report.test.cjs",
+        "shell/dependency-audit-notification.test.cjs",
+        "shell/final-gap-self-scan.test.cjs",
+        "shell/notification-self-scan.test.cjs",
+        "shell/prepare-code-scanning.test.cjs",
+        "shell/relocated-evidence-self-scan.test.cjs",
+        "shell/self-scan-backlog.test.cjs",
+        "shell/self-scan-policy.test.cjs",
+        "shell/v02-self-scan.test.cjs"
+      ],
+      "exitCode": 0,
+      "seconds": 7.0708610829897225
+    },
+    {
+      "name": "test_self_scan_scope.py",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_self_scan_scope.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "seconds": 0.2995765420200769
+    },
+    {
+      "name": "test_ci053.py",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_ci053.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "seconds": 0.09381049999501556
+    },
+    {
+      "name": "test_evidence.py",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_evidence.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "seconds": 3.3665185830031987
+    },
+    {
+      "name": "prepare",
+      "command": [
+        "python3",
+        "scripts/prepare-self-scan.py",
+        "--root",
+        ".",
+        "--out-dir",
+        "/scratch/final-bundle"
+      ],
+      "exitCode": 0,
+      "seconds": 0.19502337501035072
+    },
+    {
+      "name": "scan",
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "scan",
+        "/scratch/final-bundle/input",
+        "--format",
+        "sarif",
+        "--diagnostics",
+        "--out-dir",
+        "/scratch/final-report",
+        "--rules-dir",
+        "/source/rules"
+      ],
+      "exitCode": 0,
+      "seconds": 1.5178054589778185
+    },
+    {
+      "name": "verify",
+      "command": [
+        "python3",
+        "scripts/prepare-self-scan.py",
+        "--verify",
+        "--root",
+        ".",
+        "--out-dir",
+        "/scratch/final-bundle",
+        "--diagnostics",
+        "/scratch/final-report/diagnostics.json"
+      ],
+      "exitCode": 0,
+      "seconds": 0.18824570800643414
+    },
+    {
+      "name": "project",
+      "command": [
+        "/scratch/node",
+        "shell/prepare-code-scanning.cjs",
+        "--input",
+        "/scratch/final-report/report.sarif",
+        "--expectations",
+        "/scratch/final-bundle/expectations.json",
+        "--root",
+        "/scratch/final-bundle/input",
+        "--output",
+        "/scratch/final-report/code-scanning.sarif",
+        "--audit",
+        "/scratch/final-report/code-scanning-audit.json",
+        "--summary",
+        "/scratch/final-report/self-scan-summary.md"
+      ],
+      "exitCode": 0,
+      "seconds": 0.08178933398448862
+    }
+  ],
+  "removed": true,
+  "observedCgroupValues": [
+    "6442450944",
+    "0",
+    "200000 100000",
+    "128"
+  ]
+}

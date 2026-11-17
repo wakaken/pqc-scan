@@ -1,0 +1,50 @@
+{
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "reviewer": "/root",
+  "timestampUtc": "2026-11-17T01:51:05.587438+00:00",
+  "protocolSha256": "3c6a9e8c2fac107d708491bdad88e555ded0d87c438c36ade6e135a5deb1dd3b",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "6c3541cd8d43560f8db5c730b1f6a5e4cca1a8a2a562fd41ab2a4b64c027f912",
+    "docs/user/COVERAGE.ja.md": "9360188b2bc938b31024f3f0ed6abfea113de4eeea8fcd74e9e42d58f704003b",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The original public-only.p12 wraps the certificate in encryptedData. The current contract and parser do not decrypt it; an inner certificate signature-property negative is outside the readable public subset. Revalidated against the unchanged parser and PKCS#12 contract after the unrelated Cargo paragraph update; original input/provenance and nominal labels are retained."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The PFX bytes equal the encrypted P12. Certificate-only conversion provenance identifies the original public certificate but does not make encrypted contents inspectable. Revalidated against the unchanged parser and PKCS#12 contract after the unrelated Cargo paragraph update; original input/provenance and nominal labels are retained."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "The original P12 contains encryptedData. The known source certificate key width does not establish that its key attributes can be extracted without decryption. Revalidated against the unchanged parser and PKCS#12 contract after the unrelated Cargo paragraph update; original input/provenance and nominal labels are retained."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The source certificate signature family remains nominal truth; the encrypted P12 does not expose that attribute to the bounded non-decrypting parser. Revalidated against the unchanged parser and PKCS#12 contract after the unrelated Cargo paragraph update; original input/provenance and nominal labels are retained."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The PFX is byte-identical to the encrypted P12. Its known source key width remains truth, while extraction from opaque encrypted content is outside the supported subset. Revalidated against the unchanged parser and PKCS#12 contract after the unrelated Cargo paragraph update; original input/provenance and nominal labels are retained."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "Certificate-only provenance excludes private-key bags, not encryption. The PFX inner signature property requires decryption and remains outside the current public contract. Revalidated against the unchanged parser and PKCS#12 contract after the unrelated Cargo paragraph update; original input/provenance and nominal labels are retained."
+    }
+  ]
+}

@@ -8,7 +8,7 @@ const repositoryRoot = path.resolve(__dirname, '..');
 const read = name => JSON.parse(fs.readFileSync(path.join(repositoryRoot, name)));
 const ledger = read('docs/records/final-gaps/FINAL-GAPS-SELF-SCAN-REVIEW.json');
 const { reviewedResultTestSource } = require('./reviewed-result-test-source.cjs');
-const fixture = reviewedResultTestSource(read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json'));
+const fixture = reviewedResultTestSource(read('docs/quality/self-scan/notification-review-20261116/EXPECTATIONS-BEFORE.json'));
 const { root, policy } = fixture;
 test.after(fixture.cleanup);
 const input = () => ({version:'2.1.0', runs:[{tool:{driver:{name:'pqc-scan'}},

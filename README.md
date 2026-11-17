@@ -61,6 +61,8 @@ A reference to a PQC algorithm is useful evidence, but it does not establish tha
 
 <a id="quick-start"></a>
 
+The Rust RSA/JWT dependency rule matches the exact Cargo package names `rsa` and `jsonwebtoken`; names such as `universal-hash` are excluded. Package presence does not prove use of RSA.
+
 ## Run your first scan
 
 Use the Rust toolchain pinned in [`rust-toolchain.toml`](rust-toolchain.toml) (currently Rust 1.93.1) and install from this checkout:
@@ -163,6 +165,18 @@ still triggers PR validation.
 On `develop`, `baseline` and `scan` run independently of `quality`; PR validation
 provides the pre-merge quality check. Manual execution remains available for
 running all three enabled jobs together.
+
+The CI self-scan reads a separate product input: `crates/*/src/**`, Cargo manifests
+and the root lockfile, build scripts when present, and `rules/default/*.yml`.
+Standalone tests, examples, task evidence, CI scripts and documentation are outside
+this scan. Source bytes and repository-relative locations are preserved; colocated
+Rust unit tests remain in their source files. This scope applies to repository CI.
+
+The summary separates results requiring review from exact reviewed references.
+The `pqc-self-scan-evidence` artifact contains the input inventory/hashes, scoped
+expectations, all results for that scope, upload results, diagnostics and summary.
+New or changed results still appear for review. These counts describe detected
+references, not confirmed vulnerabilities. See [the product scan scope](docs/quality/self-scan/CI-SELF-SCAN.md#product-scope-20261116).
 
 The existing `quality` and `baseline` jobs also aggregate all six quality axes
 offline from recorded evidence. Missing facts and stale measurements remain

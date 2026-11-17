@@ -1,0 +1,48 @@
+{
+  "target": "synthetic-panic-control",
+  "command": [
+    "/usr/bin/python3",
+    "-c",
+    "import os;from pathlib import Path;d=Path(os.environ['PQC_FUZZ_INPUT']).read_bytes();print('PQC047:{}');raise SystemExit(42 if b'CRASH' in d else 0)"
+  ],
+  "seed": 47,
+  "seedCount": 1,
+  "seedHashes": [
+    "b2162607b7be4bd6c05992a1918960281d605c8a038e92f071e5b9685bd189bb"
+  ],
+  "configuredSeconds": 5,
+  "wallSeconds": 0.38699887499979013,
+  "inputLimitBytes": 1048576,
+  "perInputWallSeconds": 2,
+  "perInputCpuSeconds": 2,
+  "maxCases": 1,
+  "executed": 1,
+  "statuses": {
+    "panic": 1
+  },
+  "reachedStates": {},
+  "failures": [
+    {
+      "recipe": {
+        "index": 0,
+        "seed": 47,
+        "selectedSeed": 0,
+        "name": "control",
+        "sha256": "b2162607b7be4bd6c05992a1918960281d605c8a038e92f071e5b9685bd189bb",
+        "bytes": 16
+      },
+      "signature": [
+        "panic",
+        "42"
+      ],
+      "originalBytes": 16,
+      "minimalBytes": 5,
+      "minimalSha256": "6f93481fe2c111b1c44176bfa27e6461bf26668e0c6c31fab4a32fa8a4f663e5",
+      "reductionCalls": 18,
+      "minimality": "single-byte deletion minimal; not globally smallest"
+    }
+  ],
+  "stopReason": "failure",
+  "engine": "deterministic byte mutation, not coverage-guided",
+  "reachability": "observed entrypoint outcome counts; no line/branch percentage claimed"
+}

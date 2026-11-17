@@ -1,0 +1,161 @@
+id: '054'
+title: 次の対象版の1.0品質受入と残存リスクを判定する
+type: improvement
+priority: high
+status: in-progress
+owner: Planner Agent
+phase: '6'
+description: 要求対応表の全行を照合し、範囲・必須条件・承認を伴う判定と次の改善作業を残す。
+quality_alias: QAM-11
+plan_reference: docs/roadmap/v0.3/ROADMAP.md
+requirements_reference: docs/roadmap/v0.3/REQUIREMENTS.md
+quality_requirements:
+- Q6-17
+depends_on:
+- '043'
+- '053'
+target_components:
+- docs/quality/QUALITY-GATES.md
+existing_assets:
+- EG
+- ER
+problem:
+- 次の対象版の全要求別判定
+acceptance:
+- 'Q6-17: 全要求に結果/証拠/範囲を付け、必須検証未実行・未解決欠陥は自動合格にせず、除外/条件変更は維持者承認に結ぶ'
+deliverables:
+- target/quality-task-054/release-assessment.md
+implementation_steps:
+- 着手前に対象HEAD・既存証拠・対応範囲・費用を再確認する。
+- 対応する要求の不足だけを既存の仕組みに追加する。計測結果・失敗・未実行理由を保存する。
+- 実装変更にはAGENTS.mdの実装レビューと試験妥当性レビューを適用し、必要な検証後にEvaluatorが判定する。
+testing_requirements:
+- 受入条件ごとの正例・負例・境界例を既存試験に結び付け、手計算または独立した事実を正解とする。
+- ソース・入力・工具・規則・コマンドと終了状態をhash付きで保存し、過去の記録を上書きしない。
+risks:
+- タスクのdone件数だけで受入を決め、必須検証の未実行や残存欠陥を見逃すおそれがある。
+- 既存証拠の再利用だけで新しい対象範囲を検証済みと誤認するおそれがある。
+- 未実施や環境差を合格・製品退行と取り違えない。必要な追加工具は費用・版・権限・隔離を評価してから選ぶ。
+approval_boundary:
+- 検出規則・暗号判断・公開Schema・数値ハードゲート・正式サポートの意味変更は影響分析と承認後に行う。
+- リモート設定変更・公開・merge・tag・実release署名は別の明示許可を要する。
+planning_record:
+  date: '2026-11-11'
+  scope: 今回の依頼は計画とタスク整理のみ。実装・工具導入・製品測定は未着手。
+  evidence_scope: 参照先は既存実装と過去の限定された証拠。新タスクの実行成功を意味しない。
+  completion_evidence: 全quality_requirementsの成果物・コマンド/状態・レビュー・対象版の証拠が必要。Unknown/Not Testedを残しただけでは実装完了にしない。
+
+execution_record:
+  date: '2026-11-16'
+  plan: tasks/054/TASK-054-PLAN.md
+  baseline: tasks/054/evidence/assessment-20261116/BASELINE.json
+  transitions:
+  - from: pending
+    to: planned
+    reason: Restored original Q6-17 scope and all 73 requirements from the handoff and current rules.
+  - from: planned
+    to: in-progress
+    reason: Started source-bound evidence reconciliation and release assessment without changing acceptance.
+  scope: Assessment and evidence only; no product changes, task052 resumption or publication authorization.
+  results: tasks/054/TASK-054-RESULTS.md
+  assessment: tasks/054/evidence/assessment-20261116/REQUIREMENT-ASSESSMENT.json
+  transitions_followup:
+  - from: in-progress
+    to: blocked
+    reason: Required upstream ownership and operational truth remains unavailable; all-row inventory is provisional and does not satisfy complete final-target assessment validity.
+  blocker:
+    dependency: Task052 required factual ownership, backup, operational populations and authentication evidence remain unverified.
+    attempts: Reconciled all73 original rows with existing source-bound catalog, read052 original assessment, requested factual dated records, recovered063 primary evidence and checked later056/063 source bindings.
+    unmet_criteria:
+    - Q6-17
+    upstream_unverified:
+    - Q6-05
+    - Q6-06
+    - Q6-07
+    - Q6-09
+    next_action: Obtain existing factual records without reopening052 or changing settings; finish current-target applicability and affected self-scan validation. Keep original acceptance and release hold.
+  review: Prose and assessment evidence only; no executable behavior changed and no review identity started. Future required reviews use docs/agent/REVIEWER.md.
+  maintainer_clarification:
+    date: '2026-11-16'
+    evidence: tasks/054/evidence/assessment-20261116/MAINTAINER-CLARIFICATION-20261116.json
+    fact: The maintainer states the requested matters are not yet decided; no ownership, operational or MFA confirmation is inferred.
+    impact: Keep052 and054 unfinished; no repeated factual request, scope waiver,052 resumption or settings change is authorized.
+  policy_sync_followup:
+    date: '2026-11-16'
+    authorization: Maintainer requested continuing approved local policy synchronization and remaining criterion reconciliation; no052 reopening or publication.
+    policy: SECURITY.md
+    criterion_followup: tasks/054/evidence/assessment-20261116/TASK052-CRITERION-FOLLOWUP-20261116.json
+    remaining: tasks/054/evidence/assessment-20261116/TASK052-REMAINING-20261116.md
+    current_blocker: Required developer knowledge and technical/final-source assessment remain unverified; new approved facts supersede earlier unknown role/channel/MFA assertions only in their stated scope.
+  task052_authorized_resumption:
+    date: '2026-11-16'
+    authorization: Explicit maintainer approval of proposed bounded052resumption.
+    result: tasks/052/TASK-052-REASSESSMENT-20261116.md
+    current_status: Original052criteria preserved; reassessment in progress and unfinished,15Unknowns remain.
+    impact: Prior no-resumption statements are historical;054/v0.3andproduct/publication acceptance remain unfinished.
+
+  task052_purpose_correction_20261116:
+    evidence: tasks/052/evidence/purpose-reset-20261116/ACCEPTANCE-MATRIX.json
+    current_upstream: Original052assessment conditions reconciled; final closure receipt records validation. Earlier role/MFA/reporting blockers are historical.
+    remaining_054: Complete current-target evidence applicability and affected repository self-scan validation for Q6-17; no automatic product pass or roadmap closure.
+
+    transition:
+      from: blocked
+      to: in-progress
+      reason: Original052assessment completed; resume already authorized054final-source requirement reconciliation. Old upstream ownership/MFA uncertainty is resolved.
+    upstream_status: Task052done as an assessment only; product and roadmap acceptance remain unestablished.
+
+resume_20261116:
+  source_commit: af472b23c03d096ae6709edd94096fe4a3af813c
+  source_tree: 2463fe44100906e68a559ced4e857cf1536db7a6
+  branch: codex/task054-assessment-20261116
+  evidence: tasks/054/evidence/resume-20261116/release-assessment.md
+  authorization: Continue original054 assessment from freshly fetched origin/develop in a new dedicated branch; preserve existing work and review continuity.
+  status: in-progress
+  verification: Offline aggregation exit0;29existing evidence tests passed; current source/artifact and3763observation multiset reconciliation recorded.
+  remaining: Exact2135check cohort and individual dispositions; complete73-row final-source applicability and original acceptance validation.
+  boundaries: No scope or threshold changes;052/053done preserved; no product changes, remote mutation, publication or new reviewer identities.
+
+notification_repair_20261116:
+  authorization: Maintainer explicitly requested solving the mixed Code Scanning notification list; original054acceptance and publication boundaries remain unchanged.
+  scope: Renew exact reviewed reference routing and add a safe review-queue summary; no scan exclusions, rule, severity, threshold or public schema change.
+  result: tasks/054/evidence/notification-20261116/RESULTS.md
+  source: tasks/054/evidence/notification-20261116/SOURCE.json
+  local_validation: Verified;5255raw byte-identical to hosted baseline,5240reviewed references,15review-required;50Node and31relatedPython tests passed.
+  implementation_reviewer: /root/notification_implementation_review
+  implementation_decision: accepted;18final source bindings including scoped follow-up
+  test_reviewer: /root/notification_test_review
+  test_decision: accepted;local scope only
+  remaining: Separate publication authorization and actual hosted summary/upload/notification verification; original054all73requirement assessment remains unfinished.
+  state: local repair verified; no remote mutation or054done decision
+
+product_scope_followup_20261116:
+  authorization: Maintainer explicitly requested narrowing actual scan inputs; prior no-exclusion scope is superseded only for this CI input selection.
+  evidence: tasks/054/evidence/product-scope-20261116/RESULTS.md
+  source: tasks/054/evidence/product-scope-20261116/SOURCE.json
+  inputs: Root Cargo manifests/lock, optional root/crate build scripts, crate manifests and src trees, shipped default rules; colocated unit tests remain byte-identical.
+  measurement: 105selected/read/analyzed files;486raw equals475exact reviewed references plus11review-required dependency observations;5warning6note0error.
+  verification: Required inventory/source/copy hash and diagnostic count gate before projection/upload;Node50andPython50tests passed without skips, actual ignore-omission regression included.
+  implementation_reviewer: /root/notification_implementation_review
+  implementation_decision: accepted; final combined20source bindings
+  test_reviewer: /root/notification_test_review
+  test_decision: accepted; local scope only
+  historical_evidence: Earlier3531file5255result scan and all prior reviews preserved; no retrospective2135cohort verdict or original acceptance change.
+  remaining: No hosted activation; original054all73final-source assessment and completion gates remain open; publication, roadmap and product acceptance remain separate.
+  state: Local narrowing verified;054in-progress; no remote mutation
+
+hosted_verification_authorization_20261117:
+  authorization: Maintainer explicitly approved pushing the verified branch and checking CI reflection.
+  allowed: Commit and push the task054 branch; dispatch its existing workflow and inspect job results, artifacts, summary and branch-specific Code Scanning processing.
+  boundaries: No merge, tag, release, threshold/settings change, historical alert dismissal or task054done decision is authorized by this approval.
+
+hosted_product_scope_verification_20261117:
+  measured_commit: c1a6170c196a46358b046d1a8c800eec2e837c03
+  run: https://github.com/wakaken/pqc-scan/actions/runs/43949808144
+  result: tasks/054/evidence/hosted-product-scope-20261117/RESULTS.md
+  jobs: Quality,baseline,scan succeeded;protocols remained disabled/skipped.
+  verified: 105files1253880bytes;486raw equals475reviewed references plus11review-required results; all11GitHub alert instances match source/upload and current commit.
+  artifacts: All4ZIPdigests match GitHub metadata; source inventory, diagnostics, verification, scoped policy and archived summary reconcile with local evidence.
+  boundary: Task054branch only; no develop merge, PR creation, release, settings change or historical alert dismissal.
+  remaining: Original054all73final-source assessment and completion gates remain open; authenticated rendered summary body not independently observed; no roadmap or product acceptance.
+  state: Hosted branch reflection verified;054in-progress.

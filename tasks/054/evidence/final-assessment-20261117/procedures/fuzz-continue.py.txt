@@ -1,0 +1,38 @@
+"""Continue unchanged047recipes using verified compiled workers and finished slots."""
+import sys,json,hashlib
+from pathlib import Path
+sys.path[:0]=['/source/tests/protocol','/source/tests/quality']
+from container_entry import EVIDENCE,SCRATCH,write,boundary
+from container_runner import extract_artifacts
+from task047.study import run_target,digest
+from task047.entry import seed
+checkpoint=Path('/checkpoint');meta=json.loads((checkpoint/'CHECKPOINT.json').read_text());rows=json.loads((checkpoint/'fuzz-results.json').read_text())['results'];groups=json.loads((checkpoint/'groups.json').read_text())
+assert len(rows)==meta['completedSlots'] and len({(r['mode'],r['target']) for r in rows})==len(rows)
+for r in rows:
+ assert not r['failures'] and r['statuses']=={'completed':r['executed']}
+ assert r['configuredSeconds']==(30 if r['mode']=='short' else 120)
+ assert r['maxCases']==(256 if r['mode']=='short' else 2048)
+ assert r['seedHashes']==[digest(bytes.fromhex(s['hex'])) for s in groups[r['target']]]
+EVIDENCE.mkdir();extract_artifacts((checkpoint/'completed-evidence.tar').read_bytes(),EVIDENCE)
+# Only the explicit frozen14slot checkpoint is reused; a concurrently advanced
+# aggregate file in the captured tar is not a completed-slot authority.
+write('checks.json',boundary());write('fuzz-results.json',{'results':rows,'productFailures':0})
+workers={}
+for key,info in meta['binaries'].items():
+ file=SCRATCH/'workers'/key;assert file.stat().st_size<=256*1024**2
+ assert digest(file.read_bytes())==info['sha256'];workers[key]=str(file)
+write('WORKER-REUSE.json',{'mode':'Exact SHA-bound previously compiled workers, no new build claimed','binaries':meta['binaries'],'completedRecipeSlots':len(rows),'originalParentBudget':1200,'continuationBudget':1500,'combinedBudget':2700})
+recipes=EVIDENCE/'fuzz';completed={(r['mode'],r['target']) for r in rows}
+for mode,seconds,cap in [('short',30,256),('long',120,2048)]:
+ for i,category in enumerate(['DER','PEM','PKCS12','SBOM','settings','source','output','SSH','TLS']):
+  if (mode,category) in completed:continue
+  crate='pqc_scan_report' if category=='output' else 'pqc_scan_probe_ssh' if category=='SSH' else 'pqc_scan_probe_tls' if category=='TLS' else 'pqc_scan_detectors'
+  exact='runtime::quality047::quality047_worker' if category=='TLS' else 'quality047_worker'
+  observed=run_target(category,[workers[crate],'--ignored','--exact',exact,'--nocapture'],groups[category],recipes/(mode+'-'+category),SCRATCH/'fuzz-work',seconds=seconds,seed=470000+(1000 if mode=='long' else 0)+i,max_cases=cap)
+  rows.append(dict(observed,mode=mode));write('fuzz-results.json',{'results':rows,'scope':'Same frozen source/seed/recipe/limits;first14slots reused, remaining slots continued;not independent repeated trials','productFailures':sum(len(r['failures']) for r in rows)})
+  if observed['failures']:raise RuntimeError('reproducible fuzz failure retained')
+control="import os;from pathlib import Path;d=Path(os.environ['PQC_FUZZ_INPUT']).read_bytes();print('PQC047:{}');raise SystemExit(42 if b'CRASH' in d else 0)"
+result=run_target('synthetic-panic-control',[sys.executable,'-c',control],[seed('control',b'paddingCRASHtail','deliberate harness fault, not product bug')],EVIDENCE/'reducer-control',SCRATCH/'fuzz-work',seconds=5,seed=47,max_cases=1)
+assert (EVIDENCE/'reducer-control/failure/minimal.bin').read_bytes()==b'CRASH';write('reducer-control.json',result)
+assert len(rows)==18 and len({(r['mode'],r['target']) for r in rows})==18
+write('CONTINUATION-COMPLETE.json',{'completeSlots':18,'reusedSlots':meta['completedSlots'],'newSlots':18-meta['completedSlots'],'productFailures':0,'reducerControl':'CRASH reproduced and deletion-minimized with original assertions'})

@@ -1,0 +1,74 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "outcome": "Failed targeted test",
+      "cause": "Synthetic Cargo.lock positive omitted registry source; existing parser correctly treats it as path-origin and supplies no Cargo purl.",
+      "correction": "Use registry source for resolved positives; add explicit path/git negative controls. Production provenance logic unchanged.",
+      "hostReceiptSha256": "b9517544a36c76a5fcf2a9f43fe33691316ca9767b5fe2b11ba6be5fc7899cb2",
+      "wholeRunExit": 1,
+      "containerRemoved": true
+    },
+    {
+      "attempt": 2,
+      "outcome": "Required stable Cargo commands passed; whole attempt Failed",
+      "cause": "Comparison-only old-rule scratch copy retained read-only mode. Diagnostic export then collided with previously staged files because extractor correctly uses exclusive creation.",
+      "correction": "Make only the disposable old-rule scratch copy writable; use fresh final extraction and retain raw export before extraction. Full command exits are explicitly reconstructed from exact guarded driver flow and success logs; raw final command receipt not invented.",
+      "hostReceiptSha256": "3bf3a318d05a9f68094a51671a927db7d86b3acc1244742d68d379c1503ab28c",
+      "wholeRunExit": 1,
+      "containerRemoved": true
+    },
+    {
+      "attempt": 3,
+      "outcome": "Product before/after scans succeeded; verification attempt Failed",
+      "cause": "Comparison driver named scan.diagnostics.v1.json instead of the CLI diagnostics.json.",
+      "correction": "Use actual emitted diagnostics.json. Missing diagnostic remains a failed verification, not a complete scan.",
+      "hostReceiptSha256": "466eef157695fa4980e00b7568625132845b61fb8dc47636e6d9bf7c7a291736",
+      "wholeRunExit": 1,
+      "containerRemoved": true
+    },
+    {
+      "attempt": 4,
+      "outcome": "Product before/after scans and verification succeeded; corpus preparation Failed",
+      "cause": "Comparison procedure guessed an inputs subdirectory for043-v2, whose corpus instead records individual source paths.",
+      "correction": "Use existing load_truth and materialize over canonical manifest data for all three corpora; no data/labels changed. Direct directory trials are not counted as canonical corpus evaluation.",
+      "hostReceiptSha256": "a2f57a655fb26ed39bb83ffe95b1e30720e8c0f112229ff84b00b4e957f48723",
+      "wholeRunExit": 1,
+      "containerRemoved": true
+    },
+    {
+      "attempt": 5,
+      "outcome": "Successful canonical compatibility run,source before/after matched,container removed",
+      "cause": null,
+      "correction": null,
+      "hostReceiptSha256": "d9e8531a4d5721270a6ce51f23c00a0e316ae6db902d496ead6b1de986cdc39c",
+      "wholeRunExit": 0,
+      "containerRemoved": true
+    },
+    {
+      "attempt": "native-package-1",
+      "outcome": "Failed preparation; scratch removed",
+      "cause": "Read-only native policy did not include Git common/worktree metadata directories; the packager could not read current worktree provenance.",
+      "correction": "Add only the exact resolved git-dir/common-dir as readonly inputs; deny network and scratch-only writes unchanged."
+    },
+    {
+      "attempt": "Node-1",
+      "outcome": "49passed/1failed",
+      "cause": "One test compared current rule bytes directly with a frozen historical ledger hash.",
+      "correction": "Verify current bytes against current policy, retain the historical hash unchanged, and add a real old-binding fail-closed negative control. Final51tests passed."
+    },
+    {
+      "attempt": "coverage-1",
+      "outcome": "Failed tool smoke;container removed",
+      "cause": "General Rust test image lacks llvm-profdata. No coverage success is claimed.",
+      "correction": "Reuse the already prepared task052immutable coverage image and exact cache-bound controller,with fresh independent default/all-feature contexts; no tool installation or repeated investigation."
+    },
+    {
+      "attempt": "score-relative-path",
+      "outcome": "Existing label symlink guard rejected a relative host corpus path",
+      "cause": "Caller bypassed normal canonical corpus-path selection.",
+      "correction": "Pass resolve()canonical corpus paths,as the original runner does; no guard or frozen label change."
+    }
+  ],
+  "policy": "No unchanged failed attempt repeated. Corrections affect fixture/procedure/output collection only, not acceptance limits,truth,production provenance or unsafe-input isolation. Historical runs retained privately with hashes; successful partial steps are not whole-run success."
+}

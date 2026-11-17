@@ -1,0 +1,99 @@
+{
+  "measuredCommit": "c1a6170c196a46358b046d1a8c800eec2e837c03",
+  "event": "workflow_dispatch",
+  "sourceBindings": "tasks/054/evidence/product-scope-20261116/SOURCE.json",
+  "all20ReviewedSourceBindingsStillMatch": true,
+  "jobs": {
+    "scan": {
+      "id": 133588979997,
+      "conclusion": "success"
+    },
+    "quality": {
+      "id": 133588980277,
+      "conclusion": "success"
+    },
+    "baseline": {
+      "id": 133588980326,
+      "conclusion": "success"
+    },
+    "protocols": {
+      "id": 133591192193,
+      "conclusion": "skipped"
+    }
+  },
+  "quality": {
+    "rustWorkspaceTests": {
+      "passed": 555,
+      "failed": 0,
+      "ignored": 3
+    },
+    "node": {
+      "tests": 50,
+      "passed": 50,
+      "failed": 0
+    },
+    "python": {
+      "tests": 159,
+      "skipped": 2,
+      "conclusion": "OK",
+      "scope": "The optional actual-scanner scope regression ran locally without skipping; hosted suite conditional skips are not counted as passes."
+    },
+    "format": "success",
+    "clippy": "success",
+    "aggregation": "success;release decision Unknown"
+  },
+  "scan": {
+    "prepare": "success",
+    "scan": "success",
+    "inventoryByteAndDiagnosticGate": "success",
+    "projection": "success",
+    "summaryStep": "success",
+    "sarifUpload": "success",
+    "artifactPreservation": "success"
+  },
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "push",
+        "-u",
+        "origin",
+        "codex/task054-assessment-20261116"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "gh",
+        "workflow",
+        "run",
+        "pqc-scan.yml",
+        "--repo",
+        "wakaken/pqc-scan",
+        "--ref",
+        "codex/task054-assessment-20261116"
+      ],
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "gh",
+        "run",
+        "view",
+        "43949808144",
+        "--repo",
+        "wakaken/pqc-scan",
+        "--json",
+        "headSha,event,status,conclusion,url,jobs"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "archiveVerification": "All4GitHubZIPdigests match. The600211657byte baseline archive was not extracted; full baseline benchmark reports were outside this self-scan verification.",
+  "uiObservation": {
+    "runPage": "Public browser page visibly shows Success;quality/baseline/scan successful,protocols skipped.",
+    "summary": "Summary generation step passed and archived summary byte-matches local. Authenticated rendered job summary was not independently observed; logged-out job page displays steps/log sign-in, not the summary body."
+  },
+  "warnings": "Existing action/runtime deprecation and runner-migration annotations do not change successful job conclusions; no version or threshold change performed.",
+  "original054": "in-progress;no acceptance or roadmap closure inferred"
+}

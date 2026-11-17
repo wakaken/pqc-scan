@@ -168,7 +168,7 @@ jobs:
         run: >-
           python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2
           --baseline target/quality-expanded-v2
-          --applicability tests/quality/applicability-document-relocation-20261114/assessment.json
+          --applicability tests/quality/applicability-054-f054-20261117/assessment.json
           --out-dir target/quality-expanded-v2-assessment
       - name: Measure missing lock-format controls
         run: >-
@@ -227,17 +227,43 @@ jobs:
       - name: Build
         run: cargo build --workspace --release --locked
 
-      - name: Run pqc-scan
-        run: cargo run --locked --bin pqc-scan -- scan . --format sarif --out-dir ./pqc-report --rules-dir ./rules
+      - name: Prepare product self-scan input
+        run: |
+          python3 scripts/prepare-self-scan.py --root . --out-dir "$RUNNER_TEMP/pqc-self-scan"
+          mkdir -p ./pqc-report
+          cp "$RUNNER_TEMP/pqc-self-scan/manifest.json" ./pqc-report/self-scan-inputs.json
+          cp "$RUNNER_TEMP/pqc-self-scan/expectations.json" ./pqc-report/self-scan-expectations.json
+
+      - name: Run pqc-scan on product input
+        run: >-
+          cargo run --locked --bin pqc-scan --
+          scan "$RUNNER_TEMP/pqc-self-scan/input" --format sarif --diagnostics
+          --out-dir ./pqc-report --rules-dir ./rules
+
+      - name: Verify every declared product input was scanned
+        run: |
+          python3 scripts/prepare-self-scan.py --verify --root . --out-dir "$RUNNER_TEMP/pqc-self-scan" --diagnostics ./pqc-report/diagnostics.json
+          cp "$RUNNER_TEMP/pqc-self-scan/verification.json" ./pqc-report/self-scan-verification.json
 
       - name: Prepare actionable Code Scanning results
         run: >-
           node shell/prepare-code-scanning.cjs
           --input ./pqc-report/report.sarif
-          --expectations docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json
-          --root .
+          --expectations ./pqc-report/self-scan-expectations.json
+          --root "$RUNNER_TEMP/pqc-self-scan/input"
           --output ./pqc-report/code-scanning.sarif
           --audit ./pqc-report/code-scanning-audit.json
+          --summary ./pqc-report/self-scan-summary.md
+
+      - name: Summarize self-scan review queue
+        if: always()
+        run: |
+          if [ -f ./pqc-report/self-scan-summary.md ]; then
+            echo 'Scan scope: product sources, Cargo manifests/lock and shipped rules. Test corpora, examples and task evidence are outside this CI scan. See self-scan-inputs.json for exact input hashes.' >> "$GITHUB_STEP_SUMMARY"
+            cat ./pqc-report/self-scan-summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Self-scan summary unavailable. Check the scan/preparation failure; no complete result is asserted.' >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@9418214df1f2c4b8128c770156c409013b07d6b9 # v3
@@ -254,7 +280,11 @@ jobs:
             ./pqc-report/report.sarif
             ./pqc-report/code-scanning.sarif
             ./pqc-report/code-scanning-audit.json
-            ./docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json
+            ./pqc-report/self-scan-summary.md
+            ./pqc-report/self-scan-inputs.json
+            ./pqc-report/self-scan-verification.json
+            ./pqc-report/self-scan-expectations.json
+            ./pqc-report/diagnostics.json
 
       - name: Upload Dependency SBOM
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

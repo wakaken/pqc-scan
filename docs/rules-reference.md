@@ -129,7 +129,7 @@ identifiers are not exhaustively assessed. See the
 | `DEP_RUBY_JWT` | `dependency` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.48 | `dependency` | `crypto_api.yml` | Ruby JWT dependency detected. | Replace RSA-based JWT signing in Ruby with PQC-ready options. | `(?i)pkg:gem/[^\s]*jwt` |
 | `DEP_RUBY_OPENSSL` | `dependency` | CryptoAPI | `medium` | `quantum-uncertain` | 0.44 | `dependency` | `crypto_api.yml` | Ruby OpenSSL dependency detected. | Review OpenSSL usage in Ruby and prepare PQC migration path. | `(?i)pkg:gem/[^\s]*openssl` |
 | `DEP_RUST_OPENSSL` | `dependency` | CryptoAPI | `medium` | `quantum-uncertain` | 0.46 | `dependency` | `crypto_api.yml` | Rust TLS/crypto dependency detected. | Track PQC migration options for Rust openssl/rustls crypto stacks. | `(?i)pkg:cargo/[^\s]*(openssl(-sys)?\|rustls)` |
-| `DEP_RUST_RSA_CRATE` | `dependency` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.50 | `dependency` | `crypto_api.yml` | Rust RSA/JWT dependency detected. | Plan migration away from classical RSA crates in Rust workloads. | `(?i)pkg:cargo/[^\s]*(rsa\|jsonwebtoken)` |
+| `DEP_RUST_RSA_CRATE` | `dependency` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.50 | `dependency` | `crypto_api.yml` | Rust RSA/JWT dependency detected. | Plan migration away from classical RSA crates in Rust workloads. | `(?i)(?:^\|\\s)pkg:cargo/(?:rsa\|jsonwebtoken)(?:@[^\\s/?#]+)?\\z` |
 | `ENVOY_CIPHER_SUITES_RSA` | `regex` | Middleware | `high` | `quantum-vulnerable` | 0.68 | `config` | `middleware.yml` | Envoy TLS cipher suites include RSA or weak ciphers. | Remove RSA-dependent suites from Envoy cipher_suites. | `cipher_suites\s*:\s*\[[^\]]*(RSA\|3DES\|RC4)` |
 | `ENVOY_SIGNATURE_ALGORITHMS_RSA` | `regex` | Middleware | `medium` | `quantum-vulnerable` | 0.62 | `config` | `middleware.yml` | RSA signature algorithms are explicitly configured in Envoy. | Reflect PQC migration plans in Envoy signature algorithm settings. | `signature_algorithms\s*:\s*\[[^\]]*rsa` |
 | `ENVOY_TLS_MAX_VERSION_LEGACY` | `regex` | Middleware | `medium` | `non-quantum-risk` | 0.55 | `config` | `middleware.yml` | Envoy maximum TLS version is pinned too low. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `tls_maximum_protocol_version\s*:\s*TLSv1_[01]` |
@@ -246,4 +246,15 @@ The user-approved audit remediation retains IDs, schemas and the severity engine
 
 `PQC_STANDARD_REFERENCE` (tree_sitter, info, quantum-safe, seven language scopes) inventories recognized standard parameter names and X25519MLKEM768. It is nominal source inventory, not execution, enabled state, implementation conformance or certification. Specific API rules remain separate findings.
 
-The current source-bound companion is [AUDIT-RULE-QUALITY-METADATA.json](../tasks/062/evidence/AUDIT-RULE-QUALITY-METADATA.json); the original metadata and past measurements remain unchanged. These are hand-authored pattern controls, not a calibrated accuracy claim. Actual detector/CLI regression controls are in `crates/pqc_scan_cli/tests/audit_remediation.rs`.
+The task062 source-bound companion is preserved as [historical audit metadata](../tasks/062/evidence/AUDIT-RULE-QUALITY-METADATA.json). The maintained [rule companion](quality/rules/RULE-QUALITY-METADATA.json) now also records the approved F054-01 correction; historical snapshots and past measurements remain unchanged. These are hand-authored pattern controls, not a calibrated accuracy claim. Actual detector/CLI regression controls are in `crates/pqc_scan_cli/tests/audit_remediation.rs`.
+
+## Exact Cargo RSA/JWT package identity (F054-01)
+
+The maintainer-approved correction limits DEP_RUST_RSA_CRATE to exact rsa and
+jsonwebtoken Cargo package components, preserving case-insensitive matching and
+all other rule fields. Names such as universal-hash and rsa-helper no longer
+produce this finding. Manifest aliases use the actual package name; lock and
+supported SBOM records retain their existing version/provenance handling.
+Query/subpath or malformed SBOM purls retain the parser's existing partial state.
+Package presence still does not prove an enabled algorithm or runtime use.
+See the [task054 correction evidence](../tasks/054/evidence/f054-fix-20261117/RULE-COMPATIBILITY.json); no custom predicate or output schema changes.

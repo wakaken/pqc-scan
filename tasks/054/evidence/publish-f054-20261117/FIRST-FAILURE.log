@@ -1,0 +1,67 @@
+baseline	Summarize corrected data separately from v1	﻿2026-11-17T01:44:06.3942002Z ##[group]Run python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2 --baseline target/quality-expanded-v2 --applicability tests/quality/applicability-document-relocation-20261114/assessment.json --out-dir target/quality-expanded-v2-assessment
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3944065Z ^[[36;1mpython3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2 --baseline target/quality-expanded-v2 --applicability tests/quality/applicability-document-relocation-20261114/assessment.json --out-dir target/quality-expanded-v2-assessment^[[0m
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3970901Z shell: /usr/bin/bash -e {0}
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3971191Z env:
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3971421Z   CARGO_HOME: /home/runner/.cargo
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3971701Z   CARGO_INCREMENTAL: 0
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3971938Z   CARGO_TERM_COLOR: always
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3972219Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.16/x64
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3972632Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib/pkgconfig
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3972987Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3973262Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3973536Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.16/x64
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3973817Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.16/x64/lib
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.3974051Z ##[endgroup]
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.6243964Z Quality evidence/report failed: ValueError; no quality pass asserted
+baseline	Summarize corrected data separately from v1	2026-11-17T01:44:06.6331180Z ##[error]Process completed with exit code 1.
+quality	Test baseline evaluator	﻿2026-11-17T01:45:39.8396086Z ##[group]Run python3 -m unittest discover -s tests/quality -p 'test_*.py'
+quality	Test baseline evaluator	2026-11-17T01:45:39.8397078Z ^[[36;1mpython3 -m unittest discover -s tests/quality -p 'test_*.py'^[[0m
+quality	Test baseline evaluator	2026-11-17T01:45:39.8415682Z shell: /usr/bin/bash -e {0}
+quality	Test baseline evaluator	2026-11-17T01:45:39.8415897Z env:
+quality	Test baseline evaluator	2026-11-17T01:45:39.8416102Z   CARGO_HOME: /home/runner/.cargo
+quality	Test baseline evaluator	2026-11-17T01:45:39.8416300Z   CARGO_INCREMENTAL: 0
+quality	Test baseline evaluator	2026-11-17T01:45:39.8416475Z   CARGO_TERM_COLOR: always
+quality	Test baseline evaluator	2026-11-17T01:45:39.8417659Z ##[endgroup]
+quality	Test baseline evaluator	2026-11-17T01:45:41.6052938Z .......E..................................Quality evidence/report failed: ValueError; no quality pass asserted
+quality	Test baseline evaluator	2026-11-17T01:45:41.6057479Z Quality evidence/report failed: ValueError; no quality pass asserted
+quality	Test baseline evaluator	2026-11-17T01:45:41.6190919Z .....Quality evidence/report failed: ValueError; no quality pass asserted
+quality	Test baseline evaluator	2026-11-17T01:45:41.6195956Z Quality evidence/report failed: ValueError; no quality pass asserted
+quality	Test baseline evaluator	2026-11-17T01:45:41.6201836Z Quality evidence/report failed: KeyError; no quality pass asserted
+quality	Test baseline evaluator	2026-11-17T01:45:41.6319469Z ......Quality evidence/report failed: ValueError; no quality pass asserted
+quality	Test baseline evaluator	2026-11-17T01:45:43.9300482Z ..........................................s.....................................s.........................
+quality	Test baseline evaluator	2026-11-17T01:45:43.9301064Z ======================================================================
+quality	Test baseline evaluator	2026-11-17T01:45:43.9301684Z ERROR: test_workflow_uses_current_complete_review_without_changing_scope (test_ci_applicability.CIApplicabilityTests.test_workflow_uses_current_complete_review_without_changing_scope)
+quality	Test baseline evaluator	2026-11-17T01:45:43.9302278Z ----------------------------------------------------------------------
+quality	Test baseline evaluator	2026-11-17T01:45:43.9302551Z Traceback (most recent call last):
+quality	Test baseline evaluator	2026-11-17T01:45:43.9303028Z   File "/home/runner/work/pqc-scan/pqc-scan/tests/quality/test_ci_applicability.py", line 38, in test_workflow_uses_current_complete_review_without_changing_scope
+quality	Test baseline evaluator	2026-11-17T01:45:43.9303508Z     result = scoped(ROOT, selected)
+quality	Test baseline evaluator	2026-11-17T01:45:43.9303874Z   File "/home/runner/work/pqc-scan/pqc-scan/tests/quality/test_ci_applicability.py", line 29, in scoped
+quality	Test baseline evaluator	2026-11-17T01:45:43.9304328Z     return report.supported_scope(repo/selected, repo, directory, data, truth, [],
+quality	Test baseline evaluator	2026-11-17T01:45:43.9304754Z            ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quality	Test baseline evaluator	2026-11-17T01:45:43.9305081Z                                   {f['path']: f['inputFormat'] for f in data['files']},
+quality	Test baseline evaluator	2026-11-17T01:45:43.9305352Z                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quality	Test baseline evaluator	2026-11-17T01:45:43.9305677Z                                   {rule: 'reviewed' for rules in data['families'].values() for rule in rules})
+quality	Test baseline evaluator	2026-11-17T01:45:43.9306010Z                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quality	Test baseline evaluator	2026-11-17T01:45:43.9306379Z   File "/home/runner/work/pqc-scan/pqc-scan/tests/quality/report.py", line 135, in supported_scope
+quality	Test baseline evaluator	2026-11-17T01:45:43.9306946Z     bound(repo, name, expected)
+quality	Test baseline evaluator	2026-11-17T01:45:43.9307157Z     ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+quality	Test baseline evaluator	2026-11-17T01:45:43.9307435Z   File "/home/runner/work/pqc-scan/pqc-scan/tests/quality/report.py", line 124, in bound
+quality	Test baseline evaluator	2026-11-17T01:45:43.9307794Z     raise ValueError('Applicability source/review binding changed')
+quality	Test baseline evaluator	2026-11-17T01:45:43.9308097Z ValueError: Applicability source/review binding changed
+quality	Test baseline evaluator	2026-11-17T01:45:43.9308271Z 
+quality	Test baseline evaluator	2026-11-17T01:45:43.9308382Z ----------------------------------------------------------------------
+quality	Test baseline evaluator	2026-11-17T01:45:43.9308617Z Ran 159 tests in 3.832s
+quality	Test baseline evaluator	2026-11-17T01:45:43.9308723Z 
+quality	Test baseline evaluator	2026-11-17T01:45:43.9308800Z FAILED (errors=1, skipped=2)
+quality	Test baseline evaluator	2026-11-17T01:45:43.9309048Z Dependency audit: vulnerabilities; exit 1; see retained evidence.
+quality	Test baseline evaluator	2026-11-17T01:45:43.9309354Z Dependency audit: warnings; exit 0; see retained evidence.
+quality	Test baseline evaluator	2026-11-17T01:45:43.9309628Z Dependency audit: error; exit 2; see retained evidence.
+quality	Test baseline evaluator	2026-11-17T01:45:43.9309889Z Dependency audit: error; exit 2; see retained evidence.
+quality	Test baseline evaluator	2026-11-17T01:45:43.9310433Z Dependency audit: error; exit 2; see retained evidence.
+quality	Test baseline evaluator	2026-11-17T01:45:43.9310816Z Dependency audit: error; exit 2; see retained evidence.
+quality	Test baseline evaluator	2026-11-17T01:45:43.9311066Z Dependency audit: error; exit 2; see retained evidence.
+quality	Test baseline evaluator	2026-11-17T01:45:43.9311312Z Dependency audit: clean; exit 0; see retained evidence.
+quality	Test baseline evaluator	2026-11-17T01:45:43.9311694Z Quality report saved: /tmp/tmprqufowu8/target/baseline-only; release decision Unknown; numeric gates unchanged
+quality	Test baseline evaluator	2026-11-17T01:45:43.9312192Z Quality report saved: /tmp/tmprqufowu8/target/combined; release decision Unknown; numeric gates unchanged
+quality	Test baseline evaluator	2026-11-17T01:45:43.9312672Z Quality report saved: /tmp/tmpiqlc8djt/target/report; release decision Unknown; numeric gates unchanged
+quality	Test baseline evaluator	2026-11-17T01:45:43.9547856Z ##[error]Process completed with exit code 1.

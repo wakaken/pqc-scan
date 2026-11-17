@@ -134,3 +134,133 @@ configurations and native macOS package/install checks passed, with both review
 stages accepted. Four objc2 notice questions remain: the user selected continued
 probe-publication hold and an unsent upstream clarification draft. Task 051's
 original measurements are preserved; no release or publication was performed.
+
+
+## Final original-requirement reconciliation — 2026-11-17
+
+The original v0.3 quality roadmap's implementation and required-verification
+work is complete within its declared finite scope. Task054has individually
+adjudicated all73original requirements against current source,actual checks or
+valid source-bound reuse,evidence,scope and residual risks;completion is not
+inferred from task counts. The direct042–061definitions are all done;041and
+062–064remain done. No task was reopened or added to obtain this result.
+
+The [final assessment](../../../tasks/054/evidence/final-assessment-20261117/release-assessment.md)
+and [completion decision](../../../tasks/054/evidence/final-assessment-20261117/COMPLETION-DECISION.json)
+retain untested rule strata,finite platform/protocol/measurement scope,old
+numeric Failed and all measured quality limits. These are not upgraded to
+universal support,complete precision,formal safety or product acceptance.
+
+Product/release acceptance is withheld. F054-01is an open RSA-name overmatch,
+M03/M04/M09remain meaningful mutation misses,and network notice flags0/4/4
+and the selected probe-publication hold remain. Exact historical2135newness
+identity remainsUnknown while same-head/tool whole3763risk coverage is complete;
+the oldcheck failure is not retroactively passed. Paused CIprotocols remain
+paused;manual confined current-source protocol validation is recorded separately.
+No scope/criterion waiver,new threshold,rule/crypto/schema change,merge,tag,
+release,real signing or new publication follows from roadmap closure.
+
+
+## Completion decision correction — 2026-11-17
+
+The unconditional completion assertion in the preceding final-reconciliation
+section is superseded. Roadmap completion is not yet established. Historical
+quality labels and verified assessment evidence are distinct from fulfilment of
+the original mandatory implementation/verification/scope conditions.054has
+returned to in-progress to record that distinction explicitly for each row.
+
+All executed measurements and review evidence remain preserved. Partial alone
+does not prove an unmet original criterion;equally,completed evaluation does not
+automatically prove the criterion fulfilled. Do not promote old labels toPassed
+or waive required work. See[the current decision](../../../tasks/054/evidence/completion-recheck-20261117/RECONSIDERATION.json).
+Product acceptance/publication boundaries remain unchanged;052/053andother
+completed tasks are not reopened.
+
+
+## Current 73-row fulfilment reconciliation — 2026-11-17
+
+The [current table](../../../tasks/054/evidence/fulfilment-20261117/release-assessment.md)
+now records each original acceptance clause, current fulfilment, evidence,
+remaining mandatory work and separate product limitations/improvement needs.
+Proposed counts describe acceptance work only, not product quality. Revised
+final-judgement review remains unfinished;054stays in-progress and roadmap
+completion remains unestablished. No original criterion or declared scope was
+changed, and052/053andother completed tasks remain unchanged. All previous
+measurements and superseded completion assertions are preserved. Product
+acceptance, notice/publication holds and separate release authority are retained.
+
+
+## Current outcome: assessment complete, roadmap incomplete — 2026-11-17
+
+Task054has completed its original Q6-17assessment condition with both existing
+scoped review stages and final consistency checks. This does **not** restore the
+earlier superseded roadmap-complete assertion. The final
+[73-row fulfilment table](../../../tasks/054/evidence/fulfilment-20261117/release-assessment.md)
+records a concrete unmet requirement: **Q3-02isPartial**. F054-01incorrectly
+identifies universal-hash as RSA/JWT and quantum-vulnerable. The original
+all-requirements gate is therefore unsatisfied; complete v0.3roadmap fulfilment
+remains incomplete even though its acceptance assessment is now complete.
+
+The [bounded correction proposal](../../../tasks/054/evidence/fulfilment-20261117/FIX-PROPOSAL.md)
+records necessary behavior, compatibility tests and the existing human-review
+boundary before an affected rule change. No rule fix or criterion waiver is
+claimed. Other measured limitations and product/release holds remain in the
+per-row table.052/053andother completed task states remain unchanged; no task
+is automatically created or reopened. Product acceptance, publication, signing,
+tagging, merging and remote settings retain their separate approval boundaries.
+
+
+## Current final decision after approved F054-01 correction — 2026-11-17
+
+The original v0.3quality-evaluation and verification-infrastructure roadmap is
+complete within its unchanged declared scope. The maintainer-approved exact
+Cargo package correction removes F054-01,soQ3-02's concrete outstanding
+capability defect is corrected and verified. Both existing independent review
+stages accept the current source and evidence.054has reconciled everyoriginal
+clause's implementation,executedverification,scope,evidence and residualrisk;
+completion is not inferred from task counts or historical quality labels.
+
+See the [current73rowreport](../../../tasks/054/evidence/f054-fix-20261117/release-assessment.md)
+and [roadmap reconciliation](../../../tasks/054/evidence/f054-fix-20261117/ROADMAP-RECONCILIATION.json).
+The prior incomplete-roadmap decision remains historical evidence of the
+pre-fix target; the earlier superseded unconditional completion decision is not
+restored. The current decision rests on the actual approved correction and
+applicable source-bound checks,with no criterion waiver or deferred mandatory
+work.052/053andother task states remain unchanged.
+
+Product/release acceptance is withheld. Old numericalaccuracyFailed,unmeasured
+rule populations,meaningfulmutationmisses,criticalzero-outcome spans,strict
+outputdrift and noticeholds remain. AuxiliaryLLVMfailures are stillfailures.
+HistoricalCodeScanningfailure and exact2135newnessUnknown remain distinct from
+the accepted whole-population risk assessment;newhostedCI/alerts are not
+verified after this localfix. Publication,realrelease signing,tagging,merge,
+push,remote settings and badge application keep their separate boundaries.
+
+
+## Hosted integration follow-up in progress — 2026-11-17
+
+The authorized post-fix manualCIrun43997580523exposed a current-guide hash
+binding gap in the CI applicability record. Scanpassed;quality/baselinefailed
+closed.054is in-progress to correct and verify that integration. The preceding
+local completion judgement is preserved as dated evidence; current final
+roadmap/CIreflection is not asserted until the affected integration and review
+gates pass. The F054-01rule correction and nominal data remain unchanged.
+
+
+## Hosted integration closure — 2026-11-17
+
+The current CI applicability correction at `0ce610b548fb76916cc46a5cf78ba6c4dbe8682c`
+passed manual run44000511276: quality, baseline and scan succeeded; protocols
+remained intentionally skipped. Both existing reviewers accepted the correction.
+CodeScanninganalysis2182510272 and all10actual branch alert instances match the
+commit and uploadedSARIF. F054-01is absent before projection;105productinputs
+produce485rawfindings,475reviewedreferences and10bounded inventory observations.
+No manual dismissal occurred. See the [hosted results](../../../tasks/054/evidence/publish-f054-20261117/HOSTED-RESULTS.md).
+
+054returns through review to done. Q3-02and the original finite v0.3quality
+roadmap remain complete within their unchanged declared scope. The first failed
+hosted run stays Failed; historical2135newnessUnknown, numericalFailed and all
+product limitations remain. Product acceptance and publication remain withheld.
+No merge, publication, settings change or other-task reopening was performed.
+Final recording-commit CI/CodeScanningconfirmation is required before handoff;
+that commit changes evidence/prose only, not the18bound product/CIinput files.

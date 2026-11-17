@@ -1,0 +1,29 @@
+{
+  "source": "Exact original057controller bytes extracted without execution from hash-bound VERIFICATION.tar.gz;sha matches prior SOURCE-APPLICABILITY expected hashes.",
+  "controllers": [
+    {
+      "path": "tests/protocol/container_runner.py",
+      "original057Sha256": "489e5dded4f017ef1c334b2a9afea004fa7e0f93ad27d6af955a0bde881cab6c",
+      "currentSha256": "fa2736586931139510d0550814ebf0b9cbf99ad966bc8a4fa02a06005be8a008",
+      "safetyFunctionsAstUnchanged": {
+        "source_bytes": true,
+        "extract_artifacts": true,
+        "bounded_output": true,
+        "image_id": true
+      }
+    },
+    {
+      "path": "tests/protocol/container_entry.py",
+      "original057Sha256": "259c5397ea33d3193e48e82cd05b4d1f776fbbadf5c8175b3e8236a60e37373d",
+      "currentSha256": "8639f2a77ade3bcd3962d2ad9210e6a6b5ac58ea42b47df7ca79348bb85c659c",
+      "safetyFunctionsAstUnchanged": {
+        "facts": true,
+        "boundary": true,
+        "exercise": true,
+        "oom_kills": true
+      }
+    }
+  ],
+  "manualDiffAdjudication": "Entry adds unrelated study branches. Host adds case selectors, metadata-path relocation and snapshot policy for moved/deleted task records. Fault program, process supervisor, source reader, resource enforcement, network/root boundary and artifact extraction semantics remain unchanged. Product/Rust tests/Cargo/rules reuse separately matches final204compiled inputs.",
+  "currentKernelEvidence": "KERNEL-CHECKS.json;12tests passed,0skips,all6containers removed"
+}
