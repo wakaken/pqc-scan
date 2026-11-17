@@ -458,3 +458,7 @@ mod tests {
         assert!(!p.sensitive(3, 1, false));
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/support/privacy_quality.rs"]
+mod individual_quality;

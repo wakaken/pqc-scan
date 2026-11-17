@@ -2,11 +2,11 @@
 
 [日本語](COVERAGE.ja.md) · [README](../../README.md)
 
-This guide describes the v0.3 development checkout. Detected references and findings can differ from the published v0.2.0 release.
+This guide describes the unpublished v0.3.0 static candidate. The published release is v0.2.0; detected references, evidence and IDs can differ between versions. See the [candidate notes](../releases/v0.3.0.md) for compatibility and release status.
 
 Start with the [input overview](../../README.md#targets). This guide gives the supported formats and boundaries behind that table. Support for a file type means the documented subset can be inspected; it does not mean every cryptographic operation or runtime path can be found.
 
-Audit rule coverage: the RSA-size rule requires an explicit RSA token or recognized RSA-size identifier, not any `Key` substring. It remains nominal matching, not binding or measured key-size proof. `PQC_STANDARD_REFERENCE` recognizes ML-KEM/ML-DSA/SLH-DSA parameter names and X25519MLKEM768, including compact MLKEM/MLDSA symbols. Evidence metadata records `reference_kind` as `name_literal`, `call_reference` or `symbol_reference` based on the eligible AST candidate; none establishes execution. Hash-commented `.conf`/`.cfg` lines are excluded by the lexical comment filter. Generic C/text protocol references remain references, not effective settings.
+Rule coverage: the RSA-size rule requires an explicit RSA token or recognized RSA-size identifier, not any `Key` substring. It remains nominal matching, not binding or measured key-size proof. `PQC_STANDARD_REFERENCE` recognizes ML-KEM/ML-DSA/SLH-DSA parameter names and X25519MLKEM768, including compact MLKEM/MLDSA symbols. Evidence metadata records `reference_kind` as `name_literal`, `call_reference` or `symbol_reference` based on the eligible AST candidate; none establishes execution. Hash-commented `.conf`/`.cfg` lines are excluded by the lexical comment filter. Generic C/text protocol references remain references, not effective settings.
 
 Gradle's lexical single-line subset accepts the existing six dependency configurations with quoted coordinates or literal `group`/`name` map fields and optional `version`. Variables/interpolation are unresolved, declarations never supply a resolved version, and lexical inspection remains NotReported rather than full Gradle analysis. Dynamic expressions, multiline declarations and script evaluation remain outside this subset.
 
@@ -59,7 +59,7 @@ lengths are recorded separately, without inventing RSA key size or security stre
 Unknown/PQC subject-key encodings retain their OID and public fingerprints with
 unknown semantic size; a PQC OID is not proof of a valid PQC key.
 
-Existing certificate evidence metadata now includes public certificate/SPKI SHA-256
+Certificate evidence metadata includes public certificate/SPKI SHA-256
 fingerprints, explicitly named encoded byte lengths, key type/parameters, known
 semantic size/curve, validity timestamps and object positions. PEM bundles preserve
 each certificate's real line/column and block index, including distinct certificates
@@ -90,9 +90,9 @@ The CLI uses a fresh certificate assessment clock for each scan.
 scopes `rsa_modulus_bits`, `certificate_validity` and `legacy_not_after_2026` use
 typed modulus, current-validity and fixed-cutoff inputs respectively.
 Existing `signature_oid`/`public_key_oid` scopes remain exact identifier inputs.
-Corrected facts, typed evidence and risk tags intentionally change affected
-certificate findings, IDs and legacy CBOM algorithm strings; CLI options, report
-structures/enums and core ID/scoring algorithms remain unchanged. No signature,
+Certificate facts, typed evidence and risk tags determine the findings and
+legacy CBOM algorithm strings. Version changes can affect their values and IDs;
+see [versions and identity](REPORTS.md#versions-and-identity). No signature,
 chain or runtime-use guarantee follows. PSS digest parameters and unlisted
 signature OIDs are not fully assessed; absence of a hash finding does not prove a
 safe digest. See [classification specification](../../tasks/021/TASK-021-IMPLEMENTATION.md)
@@ -121,6 +121,12 @@ Limits are 2 MiB, 256 bags, 256 content entries, nesting depth 8 and 4096 attrib
 - Traefik
 
 Settings remain static references, not effective runtime configuration. Supported Java/Ruby rules include selected SLH-DSA variants and classical-only TLS group settings; pre-standard algorithm names are checked case-insensitively. Hash-commented SSH settings in `.conf`/`.cfg` files are excluded by the applicable comment filter. See the rule reference for exact patterns; these checks do not negotiate a connection.
+
+Configuration-reference whitespace handling applies only to regex rules with
+`scope: config` and a non-whitespace remainder, not every configuration file.
+The exact built-in TLS 1.0 rule instead uses a token capture and reuses delimiters
+for adjacent references. Custom patterns/scopes keep their generic ranges. See
+[reference positions](SCANNING.md#reference-positions) for the applicable conditions.
 
 ### Built-in Rule Set
 
@@ -163,7 +169,7 @@ This analysis applies when the loaded rule ID, kind, pattern and scope match the
 
 ## Repository inspection budgets and encoded text
 
-AST candidates borrow full source slices: the former 2,000-character matching cutoff is removed; only displayed previews are clipped. Defaults allow 262,144 semantic candidates, 2,000,000 scheduled nodes, 4,096 accepted hits per rule/file, 65,536 examined matches per rule/file, and 256 MiB of cumulative candidate text examined across AST rules per file. Exactly reaching a hit cap is distinguished from observing another eligible hit. Real exhaustion remains `detector_truncated`; these are finite resource controls, not proof that a specific number of findings was lost. Library callers can use `DetectorBudget` with `TreeSitterDetector::with_budget` / `RegexDetector::with_budget` to set explicit budgets.
+AST candidates borrow full source slices; only displayed previews are clipped. Defaults allow 262,144 semantic candidates, 2,000,000 scheduled nodes, 4,096 accepted hits per rule/file, 65,536 examined matches per rule/file, and 256 MiB of cumulative candidate text examined across AST rules per file. Exactly reaching a hit cap is distinguished from observing another eligible hit. Real exhaustion remains `detector_truncated`; these are finite resource controls, not proof that a specific number of findings was lost. Library callers can use `DetectorBudget` with `TreeSitterDetector::with_budget` / `RegexDetector::with_budget` to set explicit budgets.
 
 The pinned module grammars are supplemented by a parse-only compatibility view for TypeScript `export type *` (including namespace re-exports) and JavaScript/TypeScript `import defer * as ...`. ASCII modifier bytes are replaced with spaces only in actual top-level module statements; evidence and matching use the original decoded text with unchanged offsets. Other syntax errors retain partial status. This does not evaluate modules or validate runtime behavior.
 

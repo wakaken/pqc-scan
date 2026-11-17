@@ -1,12 +1,13 @@
 # Security policy
 
-[English](SECURITY.md) | [日本語](SECURITY.ja.md)
+[English](SECURITY.md) | [日本語](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/SECURITY.ja.md)
 
 The v0.2 release targets static scanning with optional explicitly invoked network
 probes. The latest verified 0.2.x snapshot receives best-effort maintenance. No
 response SLA or old-version backport guarantee is declared. Optional TLS/SSH
 probes remain experimental. Unsupported inputs and incomplete observations must
-not be interpreted as a clean security assessment.
+not be interpreted as a clean security assessment. The unpublished 0.3.0 candidate
+does not establish a 0.3.x maintenance or backport policy; that decision remains open.
 
 ## Reporting a vulnerability
 
@@ -84,7 +85,7 @@ authorize execution, network access, disclosure or remediation.
 
 ### System and Scope
 
-The development checkout targets v0.3; the maintenance statement above concerns
+This checkout prepares the unpublished 0.3.0 static candidate; maintenance above concerns
 the verified 0.2.x release line. Assess the selected source revision and enabled
 features rather than assuming that a published release represents this checkout.
 
@@ -100,8 +101,8 @@ CI authority boundary; their directory names alone do not exclude them.
 
 The repository threat-model references are:
 
-- [Repository threat model (English)](docs/security/threat-model.md)
-- [脅威モデル（日本語訳）](docs/security/threat-model.ja.md)
+- [Repository threat model (English)](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/security/threat-model.md)
+- [脅威モデル（日本語訳）](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/security/threat-model.ja.md)
 
 These are dated reference snapshots with their original source revision,
 worktree digest, findings and verification limits preserved. Recheck changed
@@ -138,7 +139,7 @@ job submission from this local CLI; state any additional deployment prerequisite
   file/parent links and races. Reader hardening does not establish writer safety.
 - Preserve the documented masking of recognized private-key and credential
   syntax across applicable evidence and export fields. Keep diagnostics safe.
-  The [privacy contract](docs/user/COVERAGE.md#privacy) is bounded; do not infer
+  The [privacy contract](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/user/COVERAGE.md#privacy) is bounded; do not infer
   universal secret detection or that redacted reports are safe for all recipients.
 - Render source-derived and peer-derived text as data in HTML, Markdown and
   machine reports, with encoding appropriate to each context.
@@ -201,12 +202,15 @@ usage recommendation or proposed fix is not acceptance or remediation.
 Detection coverage, secret masking and optional probes have documented limits.
 Zero findings do not prove safety or exhaustive inspection. Preserve partial
 coverage, missing measurements and unexecuted platform/runtime checks as such.
-The linked models retain historical partial coverage and an unresolved
-output-destination finding. Later scan reports must state their own source
+The linked models retain historical partial coverage and the output-destination
+finding observed in their original snapshot. Later scan reports must state their own source
 revision, reviewed surfaces and verification limits. A policy or threat-model
 update does not close a finding or establish that unreviewed code is safe.
 
-A fresh, trusted output directory outside an untrusted checkout reduces the
-known output-link placement risk. It is an operational precaution, not enforced
-writer containment or evidence of remediation. Input-read controls do not
-compensate for unsafe output writes.
+Current Unix report writers use held directory handles, no-follow traversal and
+exclusive staging followed by atomic replacement. They do not truncate existing
+linked inodes. See [output destination safety](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/user/SCANNING.md#output-destination-safety)
+for link rejection, private file modes, supported platforms and concurrency limits.
+A fresh, trusted output directory remains recommended; this does not make an
+attacker-writable destination tamper-proof. Historical models/findings remain
+unchanged, and a later security assessment must verify its own exact source.

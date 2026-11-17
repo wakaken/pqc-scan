@@ -32,7 +32,7 @@
     },
     {
       "path": "rules/default/tls.yml",
-      "sha256": "87d9e3940b476b79612d4c864541867336d1afff985ad5c938d28980d39ed511"
+      "sha256": "bab99ff127a7cc147f83bdae3a4246d8e629389c9de0a6d280f3a3ec25e7af43"
     },
     {
       "path": "rules/default/tree_sitter.yml",
@@ -5029,7 +5029,7 @@
         "risk": "non-quantum-risk",
         "confidence": 0.75,
         "migration_hint": "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.",
-        "pattern": "(?:^|[^A-Za-z0-9_])TLSv1(?:[._]0)?(?:$|[^A-Za-z0-9_.])",
+        "pattern": "(?:^|[^A-Za-z0-9_])(?P<reference>TLSv1(?:[._]0)?)(?:$|[^A-Za-z0-9_.])",
         "scope": "code",
         "description": "TLS 1.0 name referenced; effective configuration and runtime use are not established."
       },
@@ -5049,7 +5049,8 @@
         "Comment filtering is heuristic; strings/data/generated text can match.",
         "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
         "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
-        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
+        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs.",
+        "2026-11-17 authorized audit correction: exact built-in token capture reuses delimiters and reports token-only positions; independent source tests in tls_reference_boundaries.rs. Pattern-only controls remain limited."
       ],
       "known_gaps": [
         "Version strings do not establish a live listener or negotiated security."

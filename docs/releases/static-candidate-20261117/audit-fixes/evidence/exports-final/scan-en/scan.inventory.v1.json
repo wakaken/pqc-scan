@@ -1,0 +1,1055 @@
+{
+  "schema_version": 1,
+  "identity_scheme": "pqc-scan-length-prefixed-sha256-v1",
+  "scanner_version": "0.3.0",
+  "catalog_version": "native-exact-identifiers-1",
+  "profile": "static-native-v1",
+  "rules_digest": "rules-v1-e98053c82c06c37f2477b74078b80d96c2e0e630a5c08e1f1a386d18910db81b",
+  "run": {
+    "id": "scan-v1-a5bb6654d35dcf891376f5aa176c2e176b40d4fd2ae34e14fc14a2698233f985",
+    "attempt_id": "static-1",
+    "generated_at": "2026-11-17T06:26:07.725799+00:00"
+  },
+  "repository_scope": "quality/048",
+  "scope": {
+    "default_excludes": [
+      ".git",
+      "node_modules",
+      "target",
+      "dist",
+      "docs",
+      "known non-scannable media, archives and binary data"
+    ],
+    "git_exclude": true,
+    "git_global": true,
+    "git_ignore": true,
+    "markdown_excluded": true,
+    "max_file_size_bytes": 2097152
+  },
+  "coverage": {
+    "analysis_failed_files": 0,
+    "analyzed_files": 5,
+    "enumeration_failed_entries": 0,
+    "excluded_enumerated_files": 0,
+    "not_applicable_files": 0,
+    "not_enumerated_population": true,
+    "partial_files": 0,
+    "read_failed_files": 0,
+    "read_ok_files": 5,
+    "selected_files": 5,
+    "status": "complete_within_scope",
+    "unknown_files": 0,
+    "unsupported_files": 0
+  },
+  "diagnostics": [],
+  "native_completeness": "not_exhaustive",
+  "assets": [
+    {
+      "id": "asset-v1-dae48197d26ca7335bd9cfb1cb9f7777aaeedd585645f6cf68af6b5450eff8d8",
+      "kind": "algorithm",
+      "identity_basis": "normalized_identifier_and_reported_parameters",
+      "attributes": {
+        "identifier": "1.2.840.113549.1.1.1",
+        "namespace": "oid",
+        "parameters": {
+          "parameters_kind": "null"
+        },
+        "purpose": "public_key"
+      },
+      "relations": [],
+      "uncertainty": []
+    },
+    {
+      "id": "asset-v1-21bb03bffb268e7b5726fdb5ff7bfc95036a64a99256d51d55fc7af879da6cb5",
+      "kind": "algorithm",
+      "identity_basis": "identifier_only_parameters_not_fully_interpreted",
+      "attributes": {
+        "identifier": "1.2.840.113549.1.1.11",
+        "namespace": "oid",
+        "parameters": {
+          "parameter_interpretation": "not_available"
+        },
+        "purpose": "certificate_signature"
+      },
+      "relations": [],
+      "uncertainty": [
+        "algorithm_parameters_not_fully_interpreted"
+      ]
+    },
+    {
+      "id": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+      "kind": "algorithm",
+      "identity_basis": "identifier_only_parameters_not_fully_interpreted",
+      "attributes": {
+        "identifier": "RSA",
+        "namespace": "named",
+        "parameters": {},
+        "purpose": "reference"
+      },
+      "relations": [],
+      "uncertainty": [
+        "algorithm_parameters_not_fully_interpreted"
+      ]
+    },
+    {
+      "id": "asset-v1-8f840a694ce3a2aabc09a6c926ba150227da1967ad9ea770b8d1da6e8d9e7fa1",
+      "kind": "certificate",
+      "identity_basis": "public_certificate_der_sha256",
+      "attributes": {
+        "certificate_sha256": "ca58745a1bda90cc3368a37ae4a97d9022c57f8b82da22ca41b4416e08586772",
+        "not_after_unix": 2109570951,
+        "not_before_unix": 1794210951
+      },
+      "relations": [
+        {
+          "relationship": "subject_key",
+          "target": "asset-v1-70040dd83548ebe9db3bc9797c050f9e331241f6289c246b0d2a0e3c0c3e80a0"
+        },
+        {
+          "relationship": "signature_algorithm",
+          "target": "asset-v1-21bb03bffb268e7b5726fdb5ff7bfc95036a64a99256d51d55fc7af879da6cb5"
+        }
+      ],
+      "uncertainty": [
+        "trust_and_signature_not_verified"
+      ]
+    },
+    {
+      "id": "asset-v1-c107b6bb88260f51b5fec82879d5da9be71caec5d9d2e9a68cd7519c6566478b",
+      "kind": "dependency",
+      "identity_basis": "scoped_source_assertion_not_installed_package",
+      "attributes": {
+        "declared_constraint": "^0.10",
+        "ecosystem": "cargo",
+        "name": "openssl",
+        "reported_version": "^0.10",
+        "resolved_version": null,
+        "version_provenance": "manifest_declared"
+      },
+      "relations": [],
+      "uncertainty": [
+        "source_ordinal_can_shift_no_inferred_dependency_graph"
+      ]
+    },
+    {
+      "id": "asset-v1-dc3ec79c66d3d45929703676e81e944c1bcd6c569260c6d1c2a285c4fccb670e",
+      "kind": "dependency",
+      "identity_basis": "scoped_source_assertion_not_installed_package",
+      "attributes": {
+        "declared_constraint": null,
+        "ecosystem": "cargo",
+        "name": "openssl",
+        "reported_version": "0.10.75",
+        "resolved_version": "0.10.75",
+        "version_provenance": "lock_resolved"
+      },
+      "relations": [],
+      "uncertainty": [
+        "source_ordinal_can_shift_no_inferred_dependency_graph"
+      ]
+    },
+    {
+      "id": "asset-v1-70040dd83548ebe9db3bc9797c050f9e331241f6289c246b0d2a0e3c0c3e80a0",
+      "kind": "public_key",
+      "identity_basis": "public_spki_sha256",
+      "attributes": {
+        "key_bits": 2048,
+        "named_curve_oid": null,
+        "spki_sha256": "ab7b1c49ba16e2a4576844df0178691afd86d12d36c011e72371e5ac39608ff2"
+      },
+      "relations": [
+        {
+          "relationship": "algorithm",
+          "target": "asset-v1-dae48197d26ca7335bd9cfb1cb9f7777aaeedd585645f6cf68af6b5450eff8d8"
+        }
+      ],
+      "uncertainty": [
+        "public_key_not_cryptographically_validated"
+      ]
+    },
+    {
+      "id": "asset-v1-222f95df2eda5cd7e961041e14962a3da065aec445e5c7fa345f1414cb5cf991",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-0a1f98dc6e8c9cb881686ddd758c3cd48a45b78e01c45db818d85fc04a960efe",
+        "local_ordinal": 0,
+        "method": "dependency_report",
+        "path": "Cargo.lock"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-dc3ec79c66d3d45929703676e81e944c1bcd6c569260c6d1c2a285c4fccb670e"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-2fa9b19ac26dbbe2be3d9f32a3b565671c0b3e76e36915e243de7e353aeb9139",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-2db5e6b56030f10ce70e77c22b99f83e3c86027317573b8f33f869589299f7b4",
+        "local_ordinal": 0,
+        "method": "lexical_match",
+        "path": "app.py"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-36078846a597a7122ccc96c1a60441ae58d885416447099aa6b764f5a5e5a57e",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-522e0b7877a691570efe177b4298229072992aca8da7604cad037f3079e552ce",
+        "local_ordinal": 0,
+        "method": "dependency_report",
+        "path": "Cargo.lock"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-dc3ec79c66d3d45929703676e81e944c1bcd6c569260c6d1c2a285c4fccb670e"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-1c535d35d99a0dece1474f4262ecc5db18f3a107995760b4d1af82b496807333",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-5b2213a77c70f519d36d483b5d261311849f2f7fbf73a1652a8d0f3a2dc9c148",
+        "local_ordinal": 0,
+        "method": "certificate_parse",
+        "path": "public.der"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-21bb03bffb268e7b5726fdb5ff7bfc95036a64a99256d51d55fc7af879da6cb5"
+        },
+        {
+          "relationship": "references",
+          "target": "asset-v1-dae48197d26ca7335bd9cfb1cb9f7777aaeedd585645f6cf68af6b5450eff8d8"
+        },
+        {
+          "relationship": "references",
+          "target": "asset-v1-70040dd83548ebe9db3bc9797c050f9e331241f6289c246b0d2a0e3c0c3e80a0"
+        },
+        {
+          "relationship": "references",
+          "target": "asset-v1-8f840a694ce3a2aabc09a6c926ba150227da1967ad9ea770b8d1da6e8d9e7fa1"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-b7724157d8d35b191705db319379e7cd94448f242341541771013fe1dcf1f8e5",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-5c5deea8dbca8f7a0d5fe11ce34e8198bdcddd1a726c9e0b84109d888f7c3562",
+        "local_ordinal": 0,
+        "method": "dependency_report",
+        "path": "Cargo.lock"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-dc3ec79c66d3d45929703676e81e944c1bcd6c569260c6d1c2a285c4fccb670e"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-c7b120b4e0196a11bc5211143dc260b587d39d0efc02a86d1f1588ea4e05b0fd",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-5e097a4fd64bb3bf596cf0ab1aa77e713a1754da4189dcd52e78f2ce9246a441",
+        "local_ordinal": 0,
+        "method": "dependency_report",
+        "path": "Cargo.toml"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-c107b6bb88260f51b5fec82879d5da9be71caec5d9d2e9a68cd7519c6566478b"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-3aec3730c162169b5c20bb6abf01abc7b1cee005f4580e7671cdd9612aa492e8",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-6518af793b52ec0b2afad2dc02c2a67f34a8363825e12f1f9f243bfa9c6da800",
+        "local_ordinal": 0,
+        "method": "private_key_marker",
+        "path": "marker.txt"
+      },
+      "relations": [],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-516b4df7ddf7bfccaf2493f00e08f9761e141a44c51ad6a72062f10344ad0ee1",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-687d6884a16b9c5e6cb89f3f1c3b6a262e4afc2a5778a9ab55cd1ff462c85e7c",
+        "local_ordinal": 0,
+        "method": "dependency_report",
+        "path": "Cargo.toml"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-c107b6bb88260f51b5fec82879d5da9be71caec5d9d2e9a68cd7519c6566478b"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-3cebd944749f559480f6688ffc1e60e0c4019c1eaf04cf5bfc2ec58adfe16c17",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-68cc0a6a3ef0da6563b27f98b3ef17f21c9aa06833676e3a25451b5d8a90365c",
+        "local_ordinal": 0,
+        "method": "dependency_report",
+        "path": "Cargo.lock"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-dc3ec79c66d3d45929703676e81e944c1bcd6c569260c6d1c2a285c4fccb670e"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-29bef60a61c288d6a4944ec341d20a20f50ed1781926d91f8d05a238695872fc",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-a0e9948e0b4c2899859a385324ee9bf2c1f10f516e216d1b1a7049c98df798f8",
+        "local_ordinal": 0,
+        "method": "dependency_report",
+        "path": "Cargo.toml"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-c107b6bb88260f51b5fec82879d5da9be71caec5d9d2e9a68cd7519c6566478b"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-d3eb48213bf72af36df0d89ddcf3cf5d243d8ed2c1e9bfec830a3c87a7754c05",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-b023747bc7568ff6cad1d55bc1dc52d9bf490440d0c417ed94541662be4c9bca",
+        "local_ordinal": 0,
+        "method": "dependency_report",
+        "path": "Cargo.toml"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-c107b6bb88260f51b5fec82879d5da9be71caec5d9d2e9a68cd7519c6566478b"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-07ae183c86ce79c0ef179c061d46c42ecc624806d8efbea7463e194a191b68dd",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-7c7b22fe767bb1dac8e528203c527c9867ebed77803c26504d733965f34c336a",
+        "local_ordinal": 0,
+        "method": "ast_pattern",
+        "path": "app.py"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-64bdb0f44a5ff674fb62b3aea9372ae7451a93ba6b3c1a167900db31b85bf6b5",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-7c7b22fe767bb1dac8e528203c527c9867ebed77803c26504d733965f34c336a",
+        "local_ordinal": 1,
+        "method": "ast_pattern",
+        "path": "app.py"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-f2152403a630c9234c9261e4e962e51d73195d02807cd4e58c725c8699952147",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-f1461f767c5df981b9d5c61bc07d994f439552258f5f392ec9bfd74f188f627d",
+        "local_ordinal": 0,
+        "method": "ast_pattern",
+        "path": "app.py"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-3cd221be6cf0a113cc951ff750b100ec7c3ad83d153e0e3c253b14ae033de438",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-f1461f767c5df981b9d5c61bc07d994f439552258f5f392ec9bfd74f188f627d",
+        "local_ordinal": 1,
+        "method": "ast_pattern",
+        "path": "app.py"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-v1-4b8867a0c4a549cc70903ab05276e42df5395154c50ecc6a300db34ad8cc0c44",
+      "occurrence_key": "occurrence-v1-3b66c2400b9b8eccd6ee57d8e42151e22caad89c35638997d323014bff3ed82d",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-dc3ec79c66d3d45929703676e81e944c1bcd6c569260c6d1c2a285c4fccb670e",
+        "asset-v1-222f95df2eda5cd7e961041e14962a3da065aec445e5c7fa345f1414cb5cf991"
+      ],
+      "target": {
+        "path": "Cargo.lock",
+        "line": 3,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": null,
+        "byte_end": null,
+        "object_index": 1
+      },
+      "method": "dependency_report",
+      "producer": "dependency_detector",
+      "assurance": "parsed",
+      "usage": "referenced",
+      "rule_id": "DEP_OPENSSL",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "dependency_provenance_recorded"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-429df60f1db5a228893e41f5f465a27a5f889bdb699c421e8860ade9a66b2026",
+      "occurrence_key": "occurrence-v1-8cf30bd9eee92f1327235a491a9dfee27e91d414ab944b3dcd924f38493b0b94",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-dc3ec79c66d3d45929703676e81e944c1bcd6c569260c6d1c2a285c4fccb670e",
+        "asset-v1-b7724157d8d35b191705db319379e7cd94448f242341541771013fe1dcf1f8e5"
+      ],
+      "target": {
+        "path": "Cargo.lock",
+        "line": 3,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": null,
+        "byte_end": null,
+        "object_index": 1
+      },
+      "method": "dependency_report",
+      "producer": "dependency_detector",
+      "assurance": "parsed",
+      "usage": "referenced",
+      "rule_id": "DEP_PQC_CAPABLE_LIBRARY",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "dependency_provenance_recorded"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-53acfbcd181b57ff430e87ff10fc21921b9cc641fc2ae4684dea59f8355d6124",
+      "occurrence_key": "occurrence-v1-477b4fdeb5e7e5445be86af00629e9a65ba3edd25fa95f957055b2525a73e67a",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-dc3ec79c66d3d45929703676e81e944c1bcd6c569260c6d1c2a285c4fccb670e",
+        "asset-v1-36078846a597a7122ccc96c1a60441ae58d885416447099aa6b764f5a5e5a57e"
+      ],
+      "target": {
+        "path": "Cargo.lock",
+        "line": 3,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": null,
+        "byte_end": null,
+        "object_index": 1
+      },
+      "method": "dependency_report",
+      "producer": "dependency_detector",
+      "assurance": "parsed",
+      "usage": "referenced",
+      "rule_id": "DEP_RUST_OPENSSL",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "dependency_provenance_recorded"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-fa2247b2cd600595e34976255b7f0bf9bb8db0a34444116de889e2b53cab3898",
+      "occurrence_key": "occurrence-v1-ccefe104037986ba2a17e0722af13a0169f3901cf034b0a35b520b0429dc23d4",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-dc3ec79c66d3d45929703676e81e944c1bcd6c569260c6d1c2a285c4fccb670e",
+        "asset-v1-3cebd944749f559480f6688ffc1e60e0c4019c1eaf04cf5bfc2ec58adfe16c17"
+      ],
+      "target": {
+        "path": "Cargo.lock",
+        "line": 3,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": null,
+        "byte_end": null,
+        "object_index": 1
+      },
+      "method": "dependency_report",
+      "producer": "dependency_detector",
+      "assurance": "parsed",
+      "usage": "referenced",
+      "rule_id": "__DEPENDENCY_INVENTORY__",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "dependency_provenance_recorded"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-c8011a0ee5cfb3faad5dcd9365add8f950fa16ef92f558d111ad75da8feb8aa9",
+      "occurrence_key": "occurrence-v1-d4ccd20cd2ffc3429c261c1c9ddc3d5d982e61686a10515224dd80eaf48d711e",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-c107b6bb88260f51b5fec82879d5da9be71caec5d9d2e9a68cd7519c6566478b",
+        "asset-v1-29bef60a61c288d6a4944ec341d20a20f50ed1781926d91f8d05a238695872fc"
+      ],
+      "target": {
+        "path": "Cargo.toml",
+        "line": 2,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": null,
+        "byte_end": null,
+        "object_index": 1
+      },
+      "method": "dependency_report",
+      "producer": "dependency_detector",
+      "assurance": "parsed",
+      "usage": "referenced",
+      "rule_id": "DEP_OPENSSL",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "dependency_provenance_recorded"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-845dc6df8e67a56f9a2585c3269f7b0cc8f6572d93f7d37cb6e8aeb31ea6dee1",
+      "occurrence_key": "occurrence-v1-e8d7d7d682a95c2b41ae739581eee1e1d26238b7810d2068b20f503709771aa6",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-c107b6bb88260f51b5fec82879d5da9be71caec5d9d2e9a68cd7519c6566478b",
+        "asset-v1-d3eb48213bf72af36df0d89ddcf3cf5d243d8ed2c1e9bfec830a3c87a7754c05"
+      ],
+      "target": {
+        "path": "Cargo.toml",
+        "line": 2,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": null,
+        "byte_end": null,
+        "object_index": 1
+      },
+      "method": "dependency_report",
+      "producer": "dependency_detector",
+      "assurance": "parsed",
+      "usage": "referenced",
+      "rule_id": "DEP_PQC_CAPABLE_LIBRARY",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "dependency_provenance_recorded"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-67a247b178fba5ec0f87959cf93f56f6d124d65caf0e0a1fc2cd984947e649fd",
+      "occurrence_key": "occurrence-v1-fea713d751d13288ed5e5cfb5daf8080e0c0a425df1d82a406d142390f85936b",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-c107b6bb88260f51b5fec82879d5da9be71caec5d9d2e9a68cd7519c6566478b",
+        "asset-v1-516b4df7ddf7bfccaf2493f00e08f9761e141a44c51ad6a72062f10344ad0ee1"
+      ],
+      "target": {
+        "path": "Cargo.toml",
+        "line": 2,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": null,
+        "byte_end": null,
+        "object_index": 1
+      },
+      "method": "dependency_report",
+      "producer": "dependency_detector",
+      "assurance": "parsed",
+      "usage": "referenced",
+      "rule_id": "DEP_RUST_OPENSSL",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "dependency_provenance_recorded"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-9e6f634be2c49fece530000265f09edc842e4ab164f9f492abe37654914b14ff",
+      "occurrence_key": "occurrence-v1-1cd9a120d52be0448f0b9cb2725444308b474f77986a2e0542c076fa71969f02",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-c107b6bb88260f51b5fec82879d5da9be71caec5d9d2e9a68cd7519c6566478b",
+        "asset-v1-c7b120b4e0196a11bc5211143dc260b587d39d0efc02a86d1f1588ea4e05b0fd"
+      ],
+      "target": {
+        "path": "Cargo.toml",
+        "line": 2,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": null,
+        "byte_end": null,
+        "object_index": 1
+      },
+      "method": "dependency_report",
+      "producer": "dependency_detector",
+      "assurance": "parsed",
+      "usage": "referenced",
+      "rule_id": "__DEPENDENCY_INVENTORY__",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "dependency_provenance_recorded"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-da7c8c6ffbbe03ff6f86cf830c50f6b6bd33e5bc0a883dd029f98211352771d3",
+      "occurrence_key": "occurrence-v1-784383bb5de344f33668cab58da0fde2d286acc106b82848656dd80c2710b6a7",
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+        "asset-v1-f2152403a630c9234c9261e4e962e51d73195d02807cd4e58c725c8699952147"
+      ],
+      "target": {
+        "path": "app.py",
+        "line": 2,
+        "column": 3,
+        "column_kind": "legacy_mixed",
+        "byte_start": 35,
+        "byte_end": 47,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "TS_PY_RSA_USAGE",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-fe210ed74530178e446782f469950fd573c040105bc87a9c39b0bfa9a78d9e3f",
+      "occurrence_key": "occurrence-v1-db18e092b59a0ef83154d939b43a716b31889463e30a61e2c1360ab31ea03abf",
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+        "asset-v1-3cd221be6cf0a113cc951ff750b100ec7c3ad83d153e0e3c253b14ae033de438"
+      ],
+      "target": {
+        "path": "app.py",
+        "line": 3,
+        "column": 3,
+        "column_kind": "legacy_mixed",
+        "byte_start": 56,
+        "byte_end": 68,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "TS_PY_RSA_USAGE",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-4bc526f2bb60e6d8b7404e5e7ba4d6240c98497661e0a640644c885a2ab766df",
+      "occurrence_key": "occurrence-v1-9838c181019280e723d5387e8d6578900817d72aa7e12d0c988f56970d0b0e0c",
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+        "asset-v1-07ae183c86ce79c0ef179c061d46c42ecc624806d8efbea7463e194a191b68dd"
+      ],
+      "target": {
+        "path": "app.py",
+        "line": 2,
+        "column": 3,
+        "column_kind": "legacy_mixed",
+        "byte_start": 35,
+        "byte_end": 52,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "TS_RSA_KEY_SIZE_LITERAL",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-2739d30a642c9b53ef9f6d75df86eae282fe55ad73431df95dec4476f502625c",
+      "occurrence_key": "occurrence-v1-2a8ca73b776ce2d8685d1a8f536c998559ca89654d2bac9f9ff6838feaac2ffc",
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+        "asset-v1-64bdb0f44a5ff674fb62b3aea9372ae7451a93ba6b3c1a167900db31b85bf6b5"
+      ],
+      "target": {
+        "path": "app.py",
+        "line": 3,
+        "column": 3,
+        "column_kind": "legacy_mixed",
+        "byte_start": 56,
+        "byte_end": 73,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "TS_RSA_KEY_SIZE_LITERAL",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-3cd9336d4955aca315eb421b13258192009afe499167f3e7a16f8301d0108d45",
+      "occurrence_key": "occurrence-v1-670d57ecf2931b69e134a167886d7afb1dddfd0d65d24d40dfada3653005c000",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+        "asset-v1-2fa9b19ac26dbbe2be3d9f32a3b565671c0b3e76e36915e243de7e353aeb9139"
+      ],
+      "target": {
+        "path": "app.py",
+        "line": 1,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": 0,
+        "byte_end": 32,
+        "object_index": null
+      },
+      "method": "lexical_match",
+      "producer": "regex_detector",
+      "assurance": "lexical",
+      "usage": "referenced",
+      "rule_id": "API_PY_RSA_MODULE",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-c72ad020ad6accdc6a3048a4f018a0b677b5b296f90d9f92c2a7956824389b72",
+      "occurrence_key": "occurrence-v1-3f74c273368189f564329651b03c7bd42ad3b4f6eaf2a8e6a35ba79aac1be401",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-3aec3730c162169b5c20bb6abf01abc7b1cee005f4580e7671cdd9612aa492e8"
+      ],
+      "target": {
+        "path": "marker.txt",
+        "line": 1,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": null,
+        "byte_end": null,
+        "object_index": null
+      },
+      "method": "private_key_marker",
+      "producer": "key_detector",
+      "assurance": "lexical",
+      "usage": "unknown",
+      "rule_id": "PRIVATE_KEY_RSA_HEADER",
+      "evidence": {
+        "marker_kind": "private_marker",
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-caccabb262b3fcb6aa846dee2773e9d8797a66bafb488c528d82f00da0becad3",
+      "occurrence_key": "occurrence-v1-76fc6a57ece330acfea1303dc118c0f2aa0652b31b63fcb3f942fc8b90de7b6f",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-21bb03bffb268e7b5726fdb5ff7bfc95036a64a99256d51d55fc7af879da6cb5",
+        "asset-v1-dae48197d26ca7335bd9cfb1cb9f7777aaeedd585645f6cf68af6b5450eff8d8",
+        "asset-v1-70040dd83548ebe9db3bc9797c050f9e331241f6289c246b0d2a0e3c0c3e80a0",
+        "asset-v1-8f840a694ce3a2aabc09a6c926ba150227da1967ad9ea770b8d1da6e8d9e7fa1",
+        "asset-v1-1c535d35d99a0dece1474f4262ecc5db18f3a107995760b4d1af82b496807333"
+      ],
+      "target": {
+        "path": "public.der",
+        "line": 1,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "byte_start": null,
+        "byte_end": null,
+        "object_index": 1
+      },
+      "method": "certificate_parse",
+      "producer": "certificate_detector",
+      "assurance": "parsed",
+      "usage": "unknown",
+      "rule_id": null,
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "complete"
+      },
+      "uncertainty": []
+    }
+  ],
+  "legacy_associations": [
+    {
+      "legacy_index": 0,
+      "legacy_id": "finding-v1-f6e395e0856b506de1ec25309e27b9ff05a22fdf30c09381f3f49ea6967664e9",
+      "observation_ids": [
+        "observation-v1-c72ad020ad6accdc6a3048a4f018a0b677b5b296f90d9f92c2a7956824389b72"
+      ]
+    },
+    {
+      "legacy_index": 1,
+      "legacy_id": "finding-v1-83a2afb1d046ff9c13d425258564c8eeedcfdcf0a5436521976e897d07318162",
+      "observation_ids": [
+        "observation-v1-caccabb262b3fcb6aa846dee2773e9d8797a66bafb488c528d82f00da0becad3"
+      ]
+    },
+    {
+      "legacy_index": 2,
+      "legacy_id": "finding-v1-d00f8c127db5cc1b2519b8de05d5e66b90db83d4cacdc5ebceefe57fd78e908d",
+      "observation_ids": [
+        "observation-v1-caccabb262b3fcb6aa846dee2773e9d8797a66bafb488c528d82f00da0becad3"
+      ]
+    },
+    {
+      "legacy_index": 3,
+      "legacy_id": "finding-v1-f6668f126b8cd5130b2d3d68c55507aee7f5281920faedfc4dce901cfaf07e7e",
+      "observation_ids": [
+        "observation-v1-2739d30a642c9b53ef9f6d75df86eae282fe55ad73431df95dec4476f502625c"
+      ]
+    },
+    {
+      "legacy_index": 4,
+      "legacy_id": "finding-v1-d81f58afab6a98b4b5178f955aa54d7aedad80c745a2677d8c99a6ea671875c1",
+      "observation_ids": [
+        "observation-v1-4bc526f2bb60e6d8b7404e5e7ba4d6240c98497661e0a640644c885a2ab766df"
+      ]
+    },
+    {
+      "legacy_index": 5,
+      "legacy_id": "finding-v1-6ef99f2b4c0c8cfae30ef652571012fe6ce867170a8f98326a5b0d3cd5200dfa",
+      "observation_ids": [
+        "observation-v1-4b8867a0c4a549cc70903ab05276e42df5395154c50ecc6a300db34ad8cc0c44"
+      ]
+    },
+    {
+      "legacy_index": 6,
+      "legacy_id": "finding-v1-93458a2f353e13540436687deffd4f5f9794560cae1a0218b70904f341399489",
+      "observation_ids": [
+        "observation-v1-53acfbcd181b57ff430e87ff10fc21921b9cc641fc2ae4684dea59f8355d6124"
+      ]
+    },
+    {
+      "legacy_index": 7,
+      "legacy_id": "finding-v1-c3e599808a5eac6391305fc6196ba34c003b82dd5ddb25bc2f9c2fb43bd9182a",
+      "observation_ids": [
+        "observation-v1-c8011a0ee5cfb3faad5dcd9365add8f950fa16ef92f558d111ad75da8feb8aa9"
+      ]
+    },
+    {
+      "legacy_index": 8,
+      "legacy_id": "finding-v1-bf01bad52ddb0d0fa9fd4aca3b2c73550898c33312ebabd51a6db2b36231a5f8",
+      "observation_ids": [
+        "observation-v1-67a247b178fba5ec0f87959cf93f56f6d124d65caf0e0a1fc2cd984947e649fd"
+      ]
+    },
+    {
+      "legacy_index": 9,
+      "legacy_id": "finding-v1-b9ac61e0e94241134df9e11b99c31e11aa7fa9eac9d49dd6946bd3526baa4fe0",
+      "observation_ids": [
+        "observation-v1-fe210ed74530178e446782f469950fd573c040105bc87a9c39b0bfa9a78d9e3f"
+      ]
+    },
+    {
+      "legacy_index": 10,
+      "legacy_id": "finding-v1-ceb10b49ec3b2f027a0c9c70581b51daac8b55ac268455e62bbae66f6736168f",
+      "observation_ids": [
+        "observation-v1-da7c8c6ffbbe03ff6f86cf830c50f6b6bd33e5bc0a883dd029f98211352771d3"
+      ]
+    },
+    {
+      "legacy_index": 11,
+      "legacy_id": "finding-v1-b7f825983aa6e6c5019ecff21aa2116e7f0c4f8944e0dcdd286be96a46eb540a",
+      "observation_ids": [
+        "observation-v1-3cd9336d4955aca315eb421b13258192009afe499167f3e7a16f8301d0108d45"
+      ]
+    },
+    {
+      "legacy_index": 12,
+      "legacy_id": "finding-v1-2e187e1baa4571bf8b6c9f0386f9ce3b9be0862ed0eb8c167cb4c1b7e1f99106",
+      "observation_ids": [
+        "observation-v1-429df60f1db5a228893e41f5f465a27a5f889bdb699c421e8860ade9a66b2026"
+      ]
+    },
+    {
+      "legacy_index": 13,
+      "legacy_id": "finding-v1-923699d20567a06c9de1432dda5fe19373fb152ffabe7405ca482b5755d1cf3f",
+      "observation_ids": [
+        "observation-v1-845dc6df8e67a56f9a2585c3269f7b0cc8f6572d93f7d37cb6e8aeb31ea6dee1"
+      ]
+    }
+  ],
+  "unassociated_observation_ids": [
+    "observation-v1-fa2247b2cd600595e34976255b7f0bf9bb8db0a34444116de889e2b53cab3898",
+    "observation-v1-9e6f634be2c49fece530000265f09edc842e4ab164f9f492abe37654914b14ff"
+  ],
+  "legacy_loss_records": [
+    {
+      "observation_id": "observation-v1-fa2247b2cd600595e34976255b7f0bf9bb8db0a34444116de889e2b53cab3898",
+      "reason": "dependency_inventory_not_a_legacy_finding",
+      "count": 1,
+      "unit": "legacy_binding"
+    },
+    {
+      "observation_id": "observation-v1-9e6f634be2c49fece530000265f09edc842e4ab164f9f492abe37654914b14ff",
+      "reason": "dependency_inventory_not_a_legacy_finding",
+      "count": 1,
+      "unit": "legacy_binding"
+    }
+  ],
+  "assessment_status": "not_evaluated",
+  "assessments": [],
+  "export_loss_notes": [
+    "raw_matches_snippets_and_arbitrary_metadata_omitted",
+    "unknown_raw_identifiers_not_guessed",
+    "legacy_snapshot_not_derived_from_inventory",
+    "legacy_ids_are_not_native_identity",
+    "legacy_dependency_version_provenance_unavailable",
+    "legacy_applicability_coverage_is_not_native_inventory_completeness",
+    "weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity",
+    "cryptographic_trust_and_policy_not_evaluated"
+  ]
+}

@@ -353,14 +353,14 @@ pub fn write_cyclonedx_17(document: &ScanDocument, out_dir: &Path) -> Result<Vec
         .native()
         .context("CycloneDX export requires inventory capture")?;
     let (crypto, software) = documents(native)?;
-    std::fs::create_dir_all(out_dir)?;
+    pqc_scan_core::safe_output::create_dir_all(out_dir)?;
     let mut paths = Vec::new();
     for (name, value) in [
         ("cbom.cdx-1.7.json", crypto),
         ("dependency-sbom.cdx-1.7.json", software),
     ] {
         let path = out_dir.join(name);
-        std::fs::write(&path, serde_json::to_string_pretty(&value)?)
+        pqc_scan_core::safe_output::write(&path, serde_json::to_string_pretty(&value)?)
             .with_context(|| format!("failed to write {}", path.display()))?;
         paths.push(path);
     }

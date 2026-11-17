@@ -45,7 +45,7 @@ pub fn write_probe_reports<T: Serialize>(
         ProbeProtocol::SshOffers => "probe.ssh-offers.v1.json",
         ProbeProtocol::SshKex => "probe.ssh-kex.v1.json",
     };
-    std::fs::create_dir_all(out_dir)?;
+    pqc_scan_core::safe_output::create_dir_all(out_dir)?;
     let mut outputs = Vec::new();
     for (filename, content) in [
         (filename, json),
@@ -53,7 +53,7 @@ pub fn write_probe_reports<T: Serialize>(
         ("report.md", markdown),
     ] {
         let path = out_dir.join(filename);
-        std::fs::write(&path, content)?;
+        pqc_scan_core::safe_output::write(&path, content)?;
         outputs.push(path);
     }
     Ok(outputs)

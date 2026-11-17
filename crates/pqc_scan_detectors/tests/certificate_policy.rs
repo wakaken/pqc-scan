@@ -433,3 +433,76 @@ fn custom_legacy_cutoff_scope_evidence_describes_both_possible_predicate_results
         assert_eq!(outcome.detections()[0].evidence.r#match, expected);
     }
 }
+
+#[test]
+fn previously_empty_certificate_rule_strata_have_positive_and_negative_fact_controls() {
+    let rules = rules();
+    let mut data = corpus();
+    // Explicitly synthetic OID-bearing containers; signatures/key shapes are not
+    // validated and Partial is retained. These assert parsed OID observations only.
+    for (name, property, oid, expected) in [
+        (
+            "slh-signature-reference",
+            "signature_oid_hex",
+            "608648016503040314",
+            vec!["CERT_RSA_2048", "CERT_SLH_DSA_SIGNATURE"],
+        ),
+        (
+            "slh-subject-reference",
+            "public_key_oid_hex",
+            "608648016503040314",
+            vec!["CERT_RSA_SIGNATURE", "CERT_SLH_DSA_PUBLIC_KEY"],
+        ),
+    ] {
+        let mut case = named("rsa-2048");
+        case["name"] = name.into();
+        case[property] = oid.into();
+        case["expected_rules"] = serde_json::json!(expected);
+        case["expected_status"] = "partial".into();
+        data["cases"].as_array_mut().unwrap().push(case);
+    }
+    let ids = [
+        "CERT_DSA_SIGNATURE",
+        "CERT_EXPIRED",
+        "CERT_EXPIRY_2026_OR_BEFORE",
+        "CERT_MD5_SIGNATURE",
+        "CERT_ML_DSA_PUBLIC_KEY",
+        "CERT_ML_DSA_SIGNATURE",
+        "CERT_NOT_YET_VALID",
+        "CERT_OID_RSA_PSS",
+        "CERT_P12_CONTAINER",
+        "CERT_PEM_CONTAINER",
+        "CERT_RSA_1024",
+        "CERT_RSA_2048",
+        "CERT_SHA1_SIGNATURE",
+        "CERT_SLH_DSA_PUBLIC_KEY",
+        "CERT_SLH_DSA_SIGNATURE",
+    ];
+    let clock = CertificateDetector::at(data["assessment_time_unix"].as_i64().unwrap());
+    for id in ids {
+        let mut polarities = [0, 0];
+        for case in data["cases"].as_array().unwrap() {
+            let expected = case["expected_rules"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|v| v.as_str() == Some(id));
+            let result = clock.detect_detailed(&input(case), &rules).unwrap();
+            let observed = result
+                .detections()
+                .iter()
+                .filter(|d| d.rule_id == id)
+                .count();
+            assert_eq!(observed, usize::from(expected), "{id}/{}", case["name"]);
+            if case["expected_status"] == "partial" {
+                assert_eq!(result.status(), DetectorStatus::Partial);
+            }
+            polarities[usize::from(expected)] += 1;
+        }
+        assert!(polarities.iter().all(|n| *n > 0), "{id}");
+        println!(
+            "CERT_RULE_CASE {}",
+            serde_json::json!({"id":id,"negative":polarities[0],"positive":polarities[1],"correct":true,"scope":"Parsed facts/container markers only; existing fixed clock and exact reviewed cases reused. Synthetic PQC shape remains Partial."})
+        );
+    }
+}

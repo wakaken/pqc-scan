@@ -1,0 +1,315 @@
+diff --git a/crates/pqc_scan_cli/tests/output_contracts048.rs b/crates/pqc_scan_cli/tests/output_contracts048.rs
+index 697f740..b903a42 100644
+--- a/crates/pqc_scan_cli/tests/output_contracts048.rs
++++ b/crates/pqc_scan_cli/tests/output_contracts048.rs
+@@ -415,3 +415,97 @@ fn all_probe_cli_exports_reject_schema_corruption_without_connecting() {
+         .unwrap();
+     }
+ }
++
++#[test]
++fn tls_adjacent_references_keep_exact_positions_and_distinct_ids_in_exports() {
++    let w = Workspace::new();
++    fs::write(w.0.join("input/tls.conf"), "\nTLSv1.0 TLSv1.0\nTLSv1.0\n").unwrap();
++    let mut previous = None;
++    for lang in ["en", "ja"] {
++        let out = w.0.join(lang);
++        let run = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++            .arg("scan")
++            .arg(w.0.join("input"))
++            .args([
++                "--format",
++                "all",
++                "--inventory-json",
++                "--cyclonedx-17",
++                "--repository-scope",
++                "quality/tls-audit",
++                "--lang",
++                lang,
++                "--rules-dir",
++            ])
++            .arg(root().join("rules"))
++            .arg("--out-dir")
++            .arg(&out)
++            .output()
++            .unwrap();
++        assert!(
++            run.status.success(),
++            "{}",
++            String::from_utf8_lossy(&run.stderr)
++        );
++        let report = read(&out.join("report.json"));
++        let hits: Vec<_> = rows(&report["findings"])
++            .iter()
++            .filter(|h| h["rule_id"] == "TLS_VERSION_1_0")
++            .collect();
++        assert_eq!(hits.len(), 3);
++        let mut ids = BTreeSet::new();
++        let sarif = read(&out.join("report.sarif"));
++        let html = fs::read_to_string(out.join("report.html")).unwrap();
++        let md = fs::read_to_string(out.join("report.md")).unwrap();
++        for (h, (line, col)) in hits.iter().zip([(2, 1), (2, 9), (3, 1)]) {
++            assert_eq!(h["location"]["line"], line);
++            assert_eq!(h["location"]["column"], col);
++            assert_eq!(h["evidence"]["match"], "TLSv1.0");
++            let id = h["finding_id"].as_str().unwrap();
++            assert!(ids.insert(id.to_string()));
++            assert!(html.contains(id));
++            assert!(md.contains(&format!("tls.conf:{line}:{col}")));
++            assert!(rows(&sarif["runs"][0]["results"])
++                .iter()
++                .any(|r| r["ruleId"] == "TLS_VERSION_1_0"
++                    && r["locations"][0]["physicalLocation"]["region"]["startLine"] == line
++                    && r["locations"][0]["physicalLocation"]["region"]["startColumn"] == col));
++        }
++        let native = read(&out.join("scan.inventory.v1.json"));
++        assert_eq!(rows(&native["legacy_associations"]).len(), 3);
++        let mut targets: Vec<_> = rows(&native["observations"])
++            .iter()
++            .map(|o| {
++                assert_eq!(o["rule_id"], "TLS_VERSION_1_0");
++                assert_eq!(o["usage"], "referenced");
++                (
++                    o["target"]["byte_start"].as_u64().unwrap(),
++                    o["target"]["byte_end"].as_u64().unwrap(),
++                )
++            })
++            .collect();
++        targets.sort();
++        assert_eq!(targets, vec![(1, 8), (9, 16), (17, 24)]);
++        assert_eq!(html.matches("data-finding-id=").count(), 3);
++        assert_eq!(md.matches("<a id=\"finding-").count(), 3);
++        // Legacy CBOM intentionally collapses same-line references and has no
++        // column/occurrence ID contract; native/SARIF retain all three.
++        let cbom = read(&out.join("cbom.json"));
++        assert_eq!(
++            rows(&cbom)
++                .iter()
++                .map(|e| e["location"].as_str().unwrap())
++                .collect::<BTreeSet<_>>(),
++            BTreeSet::from(["tls.conf:2", "tls.conf:3"])
++        );
++        for a in rows(&native["legacy_associations"]) {
++            assert!(ids.contains(a["legacy_id"].as_str().unwrap()));
++            assert_eq!(rows(&a["observation_ids"]).len(), 1);
++        }
++        if let Some(old) = &previous {
++            assert_eq!(&ids, old);
++        }
++        previous = Some(ids);
++        retain(&format!("tls-boundaries-{lang}"), &out);
++    }
++}
+diff --git a/crates/pqc_scan_detectors/src/regex_detector.rs b/crates/pqc_scan_detectors/src/regex_detector.rs
+index cb9ee34..0f87865 100644
+--- a/crates/pqc_scan_detectors/src/regex_detector.rs
++++ b/crates/pqc_scan_detectors/src/regex_detector.rs
+@@ -147,7 +147,7 @@ impl RegexDetector {
+             let mut accepted = 0;
+             let mut examined = 0;
+             'targets: for (base, target) in targets {
+-                for found in regex.find_iter(target) {
++                for found in reference_matches(regex, target, rule) {
+                     if examined >= budget.max_match_candidates {
+                         status = DetectorStatus::Truncated;
+                         break 'targets;
+@@ -363,3 +363,27 @@ mod tests {
+         assert_eq!(detections.last().map(|d| d.location.line), Some(32));
+     }
+ }
++
++// Only this exact shipped rule uses non-consuming boundary reuse. Custom rules
++// (including copied IDs with another pattern/scope) keep regex::find_iter.
++fn reference_matches<'a>(
++    regex: &'a regex::Regex,
++    text: &'a str,
++    rule: &pqc_scan_rules::Rule,
++) -> impl Iterator<Item = regex::Match<'a>> {
++    let builtin = rule.id == "TLS_VERSION_1_0"
++        && rule.scope == "code"
++        && rule.pattern == r"(?:^|[^A-Za-z0-9_])(?P<reference>TLSv1(?:[._]0)?)(?:$|[^A-Za-z0-9_.])";
++    let mut generic = regex.find_iter(text);
++    let mut cursor = 0;
++    std::iter::from_fn(move || {
++        if !builtin {
++            return generic.next();
++        }
++        let reference = regex.captures_at(text, cursor)?.name("reference")?;
++        // This fixed capture is nonempty; advance past it, leaving its trailing
++        // delimiter available as the next reference's leading boundary.
++        cursor = reference.end();
++        Some(reference)
++    })
++}
+diff --git a/docs/quality/EVIDENCE-CATALOG.json b/docs/quality/EVIDENCE-CATALOG.json
+index ebc16bd..49f5a11 100644
+--- a/docs/quality/EVIDENCE-CATALOG.json
++++ b/docs/quality/EVIDENCE-CATALOG.json
+@@ -10080,7 +10080,7 @@
+           "purpose": "Frozen original measurement, source/command/review context or result; see scope and limitations"
+         },
+         {
+-          "path": "tests/protocol/container_entry.py",
++          "path": "docs/releases/static-candidate-20261117/audit-fixes/ARCHIVED-container_entry.py.txt",
+           "sha256": "8639f2a77ade3bcd3962d2ad9210e6a6b5ac58ea42b47df7ca79348bb85c659c",
+           "purpose": "Frozen original measurement, source/command/review context or result; see scope and limitations"
+         }
+@@ -11024,12 +11024,23 @@
+         "path": "docs/quality/self-scan/notification-review-20261116/ARCHIVED-README.md",
+         "sha256": "53507368ee8b2da6b08514fce29a61a6c5788bc29514001d948430a611f4548f",
+         "sourceBlob": "d52b7db21d0c7843e9f7fecd0b7b7e8f4fd35c4e"
++      },
++      {
++        "record": "task061-recorded-study",
++        "originalPath": "tests/protocol/container_entry.py",
++        "path": "docs/releases/static-candidate-20261117/audit-fixes/ARCHIVED-container_entry.py.txt",
++        "sha256": "8639f2a77ade3bcd3962d2ad9210e6a6b5ac58ea42b47df7ca79348bb85c659c",
++        "sourceBlob": "1360545b3ba835e70eb6dc24f28546ec02db78a8"
+       }
+     ],
+     "scope": "Two original mutable document artifact paths and the newly revised regression-test artifact path relocate to exact old snapshots. All measured hashes, sourceBindings, populationDigest, result labels, commands and reviews remain unchanged.",
+     "notificationFollowup": {
+       "date": "2026-11-16",
+       "reason": "The authorized notification repair changes two previously mutable053artifact paths. Exact HEAD blobs preserve their original hash and source scope; no original measurement, source binding, population or result is changed."
++    },
++    "auditFixFollowup": {
++      "date": "2026-11-17",
++      "reason": "Preserve exact historical task061 execution artifact as generic suite output routing changes. Source bindings, measured facts, population and labels remain historical."
+     }
+   }
+ }
+diff --git a/docs/quality/rules/RULE-QUALITY-METADATA.json b/docs/quality/rules/RULE-QUALITY-METADATA.json
+index 13c1ff0..4400e54 100644
+--- a/docs/quality/rules/RULE-QUALITY-METADATA.json
++++ b/docs/quality/rules/RULE-QUALITY-METADATA.json
+@@ -32,7 +32,7 @@
+     },
+     {
+       "path": "rules/default/tls.yml",
+-      "sha256": "87d9e3940b476b79612d4c864541867336d1afff985ad5c938d28980d39ed511"
++      "sha256": "bab99ff127a7cc147f83bdae3a4246d8e629389c9de0a6d280f3a3ec25e7af43"
+     },
+     {
+       "path": "rules/default/tree_sitter.yml",
+@@ -5029,7 +5029,7 @@
+         "risk": "non-quantum-risk",
+         "confidence": 0.75,
+         "migration_hint": "Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.",
+-        "pattern": "(?:^|[^A-Za-z0-9_])TLSv1(?:[._]0)?(?:$|[^A-Za-z0-9_.])",
++        "pattern": "(?:^|[^A-Za-z0-9_])(?P<reference>TLSv1(?:[._]0)?)(?:$|[^A-Za-z0-9_.])",
+         "scope": "code",
+         "description": "TLS 1.0 name referenced; effective configuration and runtime use are not established."
+       },
+@@ -5049,7 +5049,8 @@
+         "Comment filtering is heuristic; strings/data/generated text can match.",
+         "Per-rule output/candidate budgets and unsupported syntax can limit capture.",
+         "2026-11-12: default-rule integration is tested in semantic_repairs.rs; pattern-only fixtures do not bypass detector language/applicability checks.",
+-        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs."
++        "2026-11-13 audit remediation: reference-oriented guidance; final CLI controls in audit_remediation.rs.",
++        "2026-11-17 authorized audit correction: exact built-in token capture reuses delimiters and reports token-only positions; independent source tests in tls_reference_boundaries.rs. Pattern-only controls remain limited."
+       ],
+       "known_gaps": [
+         "Version strings do not establish a live listener or negotiated security."
+diff --git a/docs/rules-reference.md b/docs/rules-reference.md
+index 368ae20..aaa923a 100644
+--- a/docs/rules-reference.md
++++ b/docs/rules-reference.md
+@@ -179,7 +179,7 @@ identifiers are not exhaustively assessed. See the
+ | `TLS_ECDHE_RSA` | `regex` | TLS | `medium` | `quantum-uncertain` | 0.50 | `code` | `tls.yml` | TLS_ECDHE_RSA usage detected. | Plan hybrid PQC key agreement adoption. | `TLS_ECDHE_RSA` |
+ | `TLS_RSA_CIPHER_SUITE` | `regex` | TLS | `high` | `quantum-vulnerable` | 0.68 | `code` | `tls.yml` | RSA-based TLS cipher suite detected. | Migrate to PQC-ready or hybrid cipher suites. | `\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\b` |
+ | `TLS_RSA_KEY_EXCHANGE` | `regex` | TLS | `high` | `quantum-vulnerable` | 0.70 | `code` | `tls.yml` | TLS RSA key-exchange suite detected. | Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats. | `\bTLS_RSA_WITH_[A-Z0-9_]+\b` |
+-| `TLS_VERSION_1_0` | `regex` | TLS | `high` | `non-quantum-risk` | 0.75 | `code` | `tls.yml` | Legacy TLS 1.0 configuration detected. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `(?:^\|[^A-Za-z0-9_])TLSv1(?:[._]0)?(?:$\|[^A-Za-z0-9_.])` |
++| `TLS_VERSION_1_0` | `regex` | TLS | `high` | `non-quantum-risk` | 0.75 | `code` | `tls.yml` | Legacy TLS 1.0 configuration detected. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `(?:^\|[^A-Za-z0-9_])(?P<reference>TLSv1(?:[._]0)?)(?:$\|[^A-Za-z0-9_.])` |
+ | `TLS_VERSION_1_1` | `regex` | TLS | `high` | `non-quantum-risk` | 0.75 | `code` | `tls.yml` | Legacy TLS 1.1 configuration detected. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `\bTLSv1[._]1\b` |
+ | `TRAEFIK_TLS_OPTIONS_LEGACY` | `regex` | Middleware | `medium` | `non-quantum-risk` | 0.58 | `config` | `middleware.yml` | Traefik configuration contains a low minimum TLS version. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `(?i)minversion\s*:\s*versiontls1(0\|1)` |
+ | `TS_CERT_SIGALG_LITERAL` | `tree_sitter` | PKI | `medium` | `quantum-vulnerable` | 0.55 | `java,javascript,typescript,python,go,rust,ruby` | `tree_sitter.yml` | Certificate signature algorithm literals detected in AST nodes. | Update certificate signature algorithms to PQC or hybrid schemes. | `(?i)(sha256WithRSAEncryption\|sha384WithRSAEncryption\|sha512WithRSAEncryption\|ecdsa-with-SHA(256\|384\|512))` |
+@@ -258,3 +258,13 @@ supported SBOM records retain their existing version/provenance handling.
+ Query/subpath or malformed SBOM purls retain the parser's existing partial state.
+ Package presence still does not prove an enabled algorithm or runtime use.
+ See the [task054 correction evidence](../tasks/054/evidence/f054-fix-20261117/RULE-COMPATIBILITY.json); no custom predicate or output schema changes.
++
++### TLS 1.0 token boundaries (2026-11-17 audit correction)
++
++The exact shipped `TLS_VERSION_1_0` regex/scope identifies the named `reference`
++capture and reuses its trailing delimiter for the next candidate. Reported spans
++contain only the protocol name. Adjacent references can increase counts and their
++corrected locations/evidence change affected IDs. Severity/risk/confidence remain
++unchanged. Modified patterns/scopes and unrelated/custom IDs retain generic regex
++ranges and non-overlapping iteration, including empty-match behavior. References
++do not establish effective configuration or runtime negotiation.
+diff --git a/docs/user/SCANNING.ja.md b/docs/user/SCANNING.ja.md
+index 51116ff..0798cea 100644
+--- a/docs/user/SCANNING.ja.md
++++ b/docs/user/SCANNING.ja.md
+@@ -195,3 +195,8 @@ Pythonの明示的なPQC importは、`from `の後にあるモジュール参照
+ 証明書パラメータのOIDや名前付き曲線は、対応するASN.1の汎用型と符号化の形を確認してから記録します。OID以外の内容や、文脈依存型・構築型の見かけが似た値から、OID・曲線・鍵長を推定しません。不正な形はPartial／Unsupportedを維持します。属性値の訂正により観測や資産のIDが変わる場合がありますが、署名や信頼の検証を追加したものではありません。
+ 
+ NULLパラメータにはパラメータOIDがないため、従来のメタデータに空文字列の`parameters_oid`を出力しなくなります。この項目は引き続き任意項目として扱ってください。出力形式と、測定した既存コーパスの検出結果IDは維持され、項目ごとの差分は評価記録に残しています。
++
++既定のTLS 1.0参照ルールは、方式名そのものの位置を示し、区切り文字を共有する
++隣接した参照も検出します。位置と根拠の補正により該当IDが変わり、従来取りこぼして
++いた参照が件数に加わる場合があります。独自パターン・スコープの一致範囲は維持
++します。名前の参照だけでは、有効な設定や実際に交渉したプロトコルは確定しません。
+diff --git a/docs/user/SCANNING.md b/docs/user/SCANNING.md
+index 4472800..e44d744 100644
+--- a/docs/user/SCANNING.md
++++ b/docs/user/SCANNING.md
+@@ -214,3 +214,9 @@ A NULL parameter has no parameter OID: the legacy metadata no longer emits an
+ empty `parameters_oid` entry for it. Consumers must continue treating this
+ metadata entry as optional. The enclosing schema and finding IDs in the measured
+ canonical corpora remain unchanged; full field differences are recorded.
++
++The built-in TLS 1.0 name rule reports the protocol token itself and preserves
++adjacent references separated by one delimiter. Corrected positions and evidence
++change affected IDs; previously missed adjacent names can increase the count.
++Custom patterns/scopes retain their matching ranges. A name reference does not
++establish effective configuration or a negotiated protocol.
+diff --git a/rules/default/tls.yml b/rules/default/tls.yml
+index 096469c..59543a7 100644
+--- a/rules/default/tls.yml
++++ b/rules/default/tls.yml
+@@ -27,7 +27,7 @@
+   risk: non-quantum-risk
+   confidence: 0.75
+   migration_hint: Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1.
+-  pattern: "(?:^|[^A-Za-z0-9_])TLSv1(?:[._]0)?(?:$|[^A-Za-z0-9_.])"
++  pattern: "(?:^|[^A-Za-z0-9_])(?P<reference>TLSv1(?:[._]0)?)(?:$|[^A-Za-z0-9_.])"
+   scope: code
+   description: TLS 1.0 name referenced; effective configuration and runtime use are not established.
+ 
+diff --git a/tests/protocol/container_entry.py b/tests/protocol/container_entry.py
+index 1360545..5678f78 100644
+--- a/tests/protocol/container_entry.py
++++ b/tests/protocol/container_entry.py
+@@ -140,7 +140,17 @@ def exercise(case):
+ 
+ 
+ def suite(previews, ssh_kex):
+-    write('checks.json',boundary())
++    # Only legacy untracked test output is writable; source/root stay readonly.
++    output = SCRATCH/'test-target'
++    output.mkdir()
++    assert (ROOT/'target').is_symlink() and (ROOT/'target').resolve() == output
++    probe = ROOT/'target/suite-output-probe'
++    probe.write_text('scratch only')
++    assert (output/probe.name).read_text() == 'scratch only'
++    probe.unlink()
++    checks = boundary()
++    checks['legacyTestOutputScratch'] = str(output)
++    write('checks.json',checks)
+     cargo = SCRATCH/'cargo'; cargo.mkdir()
+     for name in ['registry', 'git']:
+         cache = Path('/usr/local/cargo')/name
+diff --git a/tests/protocol/container_runner.py b/tests/protocol/container_runner.py
+index 135ed4c..c970721 100644
+--- a/tests/protocol/container_runner.py
++++ b/tests/protocol/container_runner.py
+@@ -177,7 +177,7 @@ def execute(image, output, *, case='suite', previews=False, ssh_kex=False,
+         subprocess.run(['docker', 'image', 'inspect', image], check=True, stdout=subprocess.DEVNULL, timeout=30)
+         with tempfile.TemporaryDirectory(prefix='pqc-confined-source-') as temporary:
+             source = Path(temporary)/'source'; bindings = snapshot(ROOT, source)
+-            if case in {'coverage044', 'coverage044-branch', 'mutation045', 'quality055', 'security057', 'fuzz047', 'fuzz047-profile', 'protocol049', 'performance050'}:
++            if case in {'suite', 'coverage044', 'coverage044-branch', 'mutation045', 'quality055', 'security057', 'fuzz047', 'fuzz047-profile', 'protocol049', 'performance050'}:
+                 # Legacy tests write beneath the repository target/ instead of
+                 # CARGO_TARGET_DIR. Route only that untracked output to tmpfs.
+                 (source/'target').symlink_to('/scratch/test-target', target_is_directory=True)

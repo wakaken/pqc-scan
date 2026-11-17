@@ -1,0 +1,752 @@
+{
+  "scope": "Explicit synthetic reference/declaration controls, fixed before detector execution. Exposed implementation-informed validation; not independent holdout or universal accuracy. Historical 042 truth is unchanged.",
+  "cases": [
+    {
+      "id": "API_BC_RSA_ENGINE",
+      "path": "Use.java",
+      "positive": "class Use { Object engine = new RSAEngine(); }",
+      "negative": "class Use { Object engine = new AESEngine(); }",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "API_EVP_PKEY_RSA",
+      "path": "use.c",
+      "positive": "int type = EVP_PKEY_RSA;",
+      "negative": "int type = EVP_PKEY_EC;",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "API_GO_CRYPTO_RSA",
+      "path": "use.go",
+      "positive": "package main\nimport \"crypto/rsa\"\n",
+      "negative": "package main\nimport \"crypto/ecdsa\"\n",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "API_JOSE_RSA_ALG",
+      "path": "use.js",
+      "positive": "const options = {alg: \"PS384\"};",
+      "negative": "const options = {alg: \"EdDSA\"};",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "API_NODE_CRYPTO_SIGN_RSA",
+      "path": "use.js",
+      "positive": "import * as crypto from \"node:crypto\";\nconst signer = crypto.createSign(\"RSA-SHA256\");",
+      "negative": "import * as crypto from \"node:crypto\";\nconst signer = crypto.createSign(\"SHA256\");",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only. Imported Node/Python API bindings are explicit. RSA key-size uses the named Java RSA parameter constructor; a bare assignment is outside candidate selection.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "API_OPENSSL_RSA_NEW",
+      "path": "use.c",
+      "positive": "RSA *key = RSA_new();",
+      "negative": "EVP_PKEY *key = EVP_PKEY_new();",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "API_PY_RSA_MODULE",
+      "path": "use.py",
+      "positive": "from Crypto.PublicKey import RSA\n",
+      "negative": "from Crypto.PublicKey import ECC\n",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "API_RSA_KEYPAIR_GENERATOR",
+      "path": "Use.java",
+      "positive": "class Use { Object key = KeyPairGenerator.getInstance(\"RSA\"); }",
+      "negative": "class Use { Object key = KeyPairGenerator.getInstance(\"EC\"); }",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "API_SIGNATURE_RSA",
+      "path": "Use.java",
+      "positive": "class Use { Object s = Signature.getInstance(\"SHA384withRSA\"); }",
+      "negative": "class Use { Object s = Signature.getInstance(\"SHA384withECDSA\"); }",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JAVA_KEYFACTORY_RSA",
+      "path": "Use.java",
+      "positive": "class Use { Object key = KeyFactory.getInstance(\"RSA\"); }",
+      "negative": "class Use { Object key = KeyFactory.getInstance(\"EC\"); }",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWK_RSA_KEY",
+      "path": "use.json",
+      "positive": "{\"kty\":\"RSA\",\"use\":\"sig\"}",
+      "negative": "{\"kty\":\"EC\",\"use\":\"sig\"}",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWT_KID_HEADER",
+      "path": "use.json",
+      "positive": "{\"kid\":\"synthetic-key-label\",\"alg\":\"ES256\"}",
+      "negative": "{\"alg\":\"ES256\"}",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWT_SIGNING_METHOD_RS",
+      "path": "use.go",
+      "positive": "package main\nvar method = jwt.SigningMethodRS384\n",
+      "negative": "package main\nvar method = jwt.SigningMethodES384\n",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "NODE_TLS_MIN_VERSION",
+      "path": "use.js",
+      "positive": "const config = {minVersion: \"TLSv1.1\"};",
+      "negative": "const config = {minVersion: \"TLSv1.3\"};",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "OIDC_ID_TOKEN_SIGALG",
+      "path": "use.json",
+      "positive": "{\"id_token_signed_response_alg\":\"RS256\"}",
+      "negative": "{\"userinfo_signed_response_alg\":\"RS256\"}",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "OPENSSL_RSA_API",
+      "path": "use.c",
+      "positive": "int result = RSA_public_encrypt(0, input, output, key, 0);",
+      "negative": "int result = EVP_PKEY_encrypt(ctx, output, &size, input, 0);",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "SSH_AUTHORIZED_KEYS_RSA",
+      "path": "authorized_keys",
+      "positive": "ssh-rsa QUJD synthetic-public-marker\n",
+      "negative": "ssh-ed25519 QUJD synthetic-public-marker\n",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "SSH_CONFIG_HOSTKEY_RSA",
+      "path": "sshd_config",
+      "positive": "HostKey /etc/ssh/ssh_host_rsa_key\n",
+      "negative": "HostKey /etc/ssh/ssh_host_ed25519_key\n",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "SSH_DH_GROUP1",
+      "path": "use.txt",
+      "positive": "diffie-hellman-group1-sha1",
+      "negative": "diffie-hellman-group14-sha256",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "SSH_RSA_ALGO",
+      "path": "use.txt",
+      "positive": "ssh-rsa",
+      "negative": "ssh-ed25519",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "SSH_RSA_SHA2_SIGALG",
+      "path": "use.txt",
+      "positive": "rsa-sha2-512",
+      "negative": "ssh-ed25519",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TLS_CERT_PIN_RSA",
+      "path": "use.txt",
+      "positive": "rsa-pin: synthetic-public-pin",
+      "negative": "sha256-pin: synthetic-public-pin",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TLS_ECDHE_RSA",
+      "path": "use.txt",
+      "positive": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+      "negative": "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TLS_RSA_CIPHER_SUITE",
+      "path": "use.txt",
+      "positive": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+      "negative": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TLS_RSA_KEY_EXCHANGE",
+      "path": "use.txt",
+      "positive": "TLS_RSA_WITH_AES_128_GCM_SHA256",
+      "negative": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TLS_VERSION_1_0",
+      "path": "use.txt",
+      "positive": "TLSv1.0",
+      "negative": "TLSv1.2",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TLS_VERSION_1_1",
+      "path": "use.txt",
+      "positive": "TLSv1.1",
+      "negative": "TLSv1.3",
+      "fact": "Explicit named API, property, protocol or public marker contrasted with the named alternative; reference presence only.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWT_ES256",
+      "path": "use.js",
+      "positive": "const algorithm = \"ES256\";",
+      "negative": "const algorithm = \"HS256\";",
+      "fact": "Explicit JOSE algorithm identifier versus HMAC identifier; no signing/execution assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWT_PS256",
+      "path": "use.js",
+      "positive": "const algorithm = \"PS256\";",
+      "negative": "const algorithm = \"HS256\";",
+      "fact": "Explicit JOSE algorithm identifier versus HMAC identifier; no signing/execution assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWT_PS384",
+      "path": "use.js",
+      "positive": "const algorithm = \"PS384\";",
+      "negative": "const algorithm = \"HS256\";",
+      "fact": "Explicit JOSE algorithm identifier versus HMAC identifier; no signing/execution assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWT_PS512",
+      "path": "use.js",
+      "positive": "const algorithm = \"PS512\";",
+      "negative": "const algorithm = \"HS256\";",
+      "fact": "Explicit JOSE algorithm identifier versus HMAC identifier; no signing/execution assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWT_RS384",
+      "path": "use.js",
+      "positive": "const algorithm = \"RS384\";",
+      "negative": "const algorithm = \"HS256\";",
+      "fact": "Explicit JOSE algorithm identifier versus HMAC identifier; no signing/execution assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWT_RS512",
+      "path": "use.js",
+      "positive": "const algorithm = \"RS512\";",
+      "negative": "const algorithm = \"HS256\";",
+      "fact": "Explicit JOSE algorithm identifier versus HMAC identifier; no signing/execution assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "ENVOY_CIPHER_SUITES_RSA",
+      "path": "envoy.yaml",
+      "positive": "cipher_suites: [ECDHE-RSA-AES128-GCM-SHA256]\n",
+      "negative": "cipher_suites: [ECDHE-ECDSA-AES128-GCM-SHA256]\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "ENVOY_SIGNATURE_ALGORITHMS_RSA",
+      "path": "envoy.yaml",
+      "positive": "signature_algorithms: [rsa_pss_rsae_sha256]\n",
+      "negative": "signature_algorithms: [ecdsa_secp256r1_sha256]\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "ENVOY_TLS_MAX_VERSION_LEGACY",
+      "path": "envoy.yaml",
+      "positive": "tls_maximum_protocol_version: TLSv1_1\n",
+      "negative": "tls_maximum_protocol_version: TLSv1_3\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "HTTPD_SSLCIPHERSUITE_RSA",
+      "path": "httpd.conf",
+      "positive": "SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384\n",
+      "negative": "SSLCipherSuite ECDHE-ECDSA-AES256-GCM-SHA384\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "HTTPD_SSLHONORCIPHERORDER_OFF",
+      "path": "httpd.conf",
+      "positive": "SSLHonorCipherOrder off\n",
+      "negative": "SSLHonorCipherOrder on\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "ISTIO_DESTINATIONRULE_RSA_CIPHERS",
+      "path": "istio.yaml",
+      "positive": "ciphers: [ECDHE-RSA-AES128-GCM-SHA256]\n",
+      "negative": "ciphers: [ECDHE-ECDSA-AES128-GCM-SHA256]\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "ISTIO_DESTINATIONRULE_TLSV1",
+      "path": "istio.yaml",
+      "positive": "minProtocolVersion: TLSV1_1\n",
+      "negative": "minProtocolVersion: TLSV1_3\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "K8S_GATEWAYAPI_TLSV1",
+      "path": "gateway.yaml",
+      "positive": "minVersion: TLSv1.1\n",
+      "negative": "minVersion: TLSv1.3\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "K8S_INGRESS_SSL_PROTOCOLS_LEGACY",
+      "path": "ingress.yaml",
+      "positive": "nginx.ingress.kubernetes.io/ssl-protocols: \"TLSv1.1\"\n",
+      "negative": "nginx.ingress.kubernetes.io/ssl-protocols: \"TLSv1.3\"\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "NGINX_PROXY_SSL_PROTOCOLS_LEGACY",
+      "path": "nginx.conf",
+      "positive": "proxy_ssl_protocols TLSv1.1;\n",
+      "negative": "proxy_ssl_protocols TLSv1.3;\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "NGINX_SSL_PREFER_SERVER_CIPHERS_OFF",
+      "path": "nginx.conf",
+      "positive": "ssl_prefer_server_ciphers off;\n",
+      "negative": "ssl_prefer_server_ciphers on;\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "NGINX_SSL_PROTOCOLS_LEGACY",
+      "path": "nginx.conf",
+      "positive": "ssl_protocols TLSv1.0;\n",
+      "negative": "ssl_protocols TLSv1.3;\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "PQC_GO_TLS_DISABLED",
+      "path": "env.conf",
+      "positive": "GODEBUG=tlsmlkem=0\n",
+      "negative": "GODEBUG=tlsmlkem=1\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "PQC_RUBY_CLASSICAL_GROUPS",
+      "path": "ruby.conf",
+      "positive": "ctx.groups = \"X25519:P-256\"\n",
+      "negative": "ctx.groups = \"X25519MLKEM768\"\n",
+      "fact": "Explicit setting value contrasts, not proof of effective deployment configuration.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "GO_TLS_RSA_IMPORT",
+      "path": "use.go",
+      "positive": "package main\nimport \"crypto/rsa\"\n",
+      "negative": "package main\nimport \"crypto/ecdsa\"\n",
+      "fact": "Go import path identifies the RSA package versus ECDSA.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_BORINGSSL",
+      "path": "package.json",
+      "positive": "{\"dependencies\": {\"boringssl\": \"1.2.3\"}}",
+      "negative": "{\"dependencies\": {\"unrelated-package\": \"1.2.3\"}}",
+      "fact": "Literal declared npm package identity versus unrelated package; no installation/usage assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_BOUNCYCASTLE",
+      "path": "package.json",
+      "positive": "{\"dependencies\": {\"bouncycastle\": \"1.2.3\"}}",
+      "negative": "{\"dependencies\": {\"unrelated-package\": \"1.2.3\"}}",
+      "fact": "Literal declared npm package identity versus unrelated package; no installation/usage assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_LIBSSH",
+      "path": "package.json",
+      "positive": "{\"dependencies\": {\"libssh\": \"1.2.3\"}}",
+      "negative": "{\"dependencies\": {\"unrelated-package\": \"1.2.3\"}}",
+      "fact": "Literal declared npm package identity versus unrelated package; no installation/usage assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_OPENSSL",
+      "path": "package.json",
+      "positive": "{\"dependencies\": {\"openssl\": \"1.2.3\"}}",
+      "negative": "{\"dependencies\": {\"unrelated-package\": \"1.2.3\"}}",
+      "fact": "Literal declared npm package identity versus unrelated package; no installation/usage assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWT_LIB_JOSE",
+      "path": "package.json",
+      "positive": "{\"dependencies\": {\"jose\": \"1.2.3\"}}",
+      "negative": "{\"dependencies\": {\"unrelated-package\": \"1.2.3\"}}",
+      "fact": "Literal declared npm package identity versus unrelated package; no installation/usage assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "JWT_LIB_JSONWEBTOKEN",
+      "path": "package.json",
+      "positive": "{\"dependencies\": {\"jsonwebtoken\": \"1.2.3\"}}",
+      "negative": "{\"dependencies\": {\"unrelated-package\": \"1.2.3\"}}",
+      "fact": "Literal declared npm package identity versus unrelated package; no installation/usage assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_PARAMIKO",
+      "path": "requirements.txt",
+      "positive": "paramiko==1.2.3\n",
+      "negative": "unrelated-package==1.2.3\n",
+      "fact": "Literal Python declaration versus unrelated package; version is synthetic and not a readiness assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_PYCA_CRYPTOGRAPHY",
+      "path": "requirements.txt",
+      "positive": "cryptography==1.2.3\n",
+      "negative": "unrelated-package==1.2.3\n",
+      "fact": "Literal Python declaration versus unrelated package; version is synthetic and not a readiness assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_PYCRYPTODOME",
+      "path": "requirements.txt",
+      "positive": "pycryptodome==1.2.3\n",
+      "negative": "unrelated-package==1.2.3\n",
+      "fact": "Literal Python declaration versus unrelated package; version is synthetic and not a readiness assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_RUBY_JWT",
+      "path": "Gemfile",
+      "positive": "gem \"jwt\", \"1.2.3\"\n",
+      "negative": "gem \"unrelated-package\", \"1.2.3\"\n",
+      "fact": "Ruby gem identity projected to its gem PURL; no runtime use assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_RUBY_OPENSSL",
+      "path": "Gemfile",
+      "positive": "gem \"openssl\", \"1.2.3\"\n",
+      "negative": "gem \"unrelated-package\", \"1.2.3\"\n",
+      "fact": "Ruby gem identity projected to its gem PURL; no runtime use assertion.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_RUST_OPENSSL",
+      "path": "Cargo.toml",
+      "positive": "[dependencies]\nopenssl = \"1.2.3\"\n",
+      "negative": "[dependencies]\nuniversal-hash = \"0.5\"\n",
+      "fact": "Exact Cargo package identity versus unrelated name; preserves approved F054-01 boundary.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_RUST_RSA_CRATE",
+      "path": "Cargo.toml",
+      "positive": "[dependencies]\nrsa = \"1.2.3\"\n",
+      "negative": "[dependencies]\nuniversal-hash = \"0.5\"\n",
+      "fact": "Exact Cargo package identity versus unrelated name; preserves approved F054-01 boundary.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_GO_JOSE",
+      "path": "go.mod",
+      "positive": "module example.org/app\nrequire github.com/go-jose/go-jose/v4 v4.0.5\n",
+      "negative": "module example.org/app\nrequire example.org/unrelated v1.2.3\n",
+      "fact": "Declared Go module path, not an installed binary.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "DEP_JAVA_BOUNCYCASTLE",
+      "path": "pom.xml",
+      "positive": "<project><dependencies><dependency><groupId>org.bouncycastle</groupId><artifactId>bcprov-jdk18on</artifactId><version>1.80</version></dependency></dependencies></project>",
+      "negative": "<project><dependencies><dependency><groupId>org.example</groupId><artifactId>unrelated</artifactId><version>1.80</version></dependency></dependencies></project>",
+      "fact": "Literal Maven group/artifact declaration versus unrelated coordinate.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "PQC_DRAFT_ALGORITHM",
+      "path": "use.js",
+      "positive": "const group = \"Kyber768\";",
+      "negative": "const group = \"ML-KEM-768\";",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "PQC_RUBY_API",
+      "path": "use.rb",
+      "positive": "key = OpenSSL::PKey.generate_key(\"ML-DSA-65\")",
+      "negative": "key = OpenSSL::PKey.generate_key(\"ED25519\")",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "PQC_STANDARD_REFERENCE",
+      "path": "use.js",
+      "positive": "const group = \"X25519MLKEM768\";",
+      "negative": "const group = \"X25519\";",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_CLASSICAL_EC_API",
+      "path": "use.py",
+      "positive": "from cryptography.hazmat.primitives.asymmetric import ec\nkey = ec.generate_private_key(ec.SECP256R1())\n",
+      "negative": "from cryptography.hazmat.primitives.asymmetric import ec\nkey = bytes(32)\n",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim. Imported Node/Python API bindings are explicit. RSA key-size uses the named Java RSA parameter constructor; a bare assignment is outside candidate selection.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_CLASSICAL_EDDSA_API",
+      "path": "use.py",
+      "positive": "from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey\nkey = Ed25519PrivateKey.generate()\n",
+      "negative": "from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey\nkey = bytes(32)\n",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim. Imported Node/Python API bindings are explicit. RSA key-size uses the named Java RSA parameter constructor; a bare assignment is outside candidate selection.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_JWT_EDDSA_ALG",
+      "path": "use.js",
+      "positive": "const algorithm = \"EdDSA\";",
+      "negative": "const algorithm = \"HS256\";",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_CERT_SIGALG_LITERAL",
+      "path": "use.py",
+      "positive": "algorithm = \"sha256WithRSAEncryption\"\n",
+      "negative": "algorithm = \"Ed25519\"\n",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_GO_RSA_USAGE",
+      "path": "use.go",
+      "positive": "package main\nimport \"crypto/rsa\"\n",
+      "negative": "package main\nimport \"crypto/ecdsa\"\n",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_JAVA_RSA_API",
+      "path": "Use.java",
+      "positive": "class Use { Object key = KeyFactory.getInstance(\"RSA\"); }",
+      "negative": "class Use { Object key = KeyFactory.getInstance(\"EC\"); }",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_JWT_ES_ALG",
+      "path": "use.js",
+      "positive": "const algorithm = \"ES384\";",
+      "negative": "const algorithm = \"HS384\";",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_JWT_RSA_ALGS",
+      "path": "use.js",
+      "positive": "const algorithm = \"PS512\";",
+      "negative": "const algorithm = \"HS512\";",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_NODE_JOSE_USAGE",
+      "path": "use.js",
+      "positive": "const token = jwt.sign(payload, key);",
+      "negative": "const token = encode(payload);",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_NODE_RSA_USAGE",
+      "path": "use.js",
+      "positive": "const key = generateKeyPairSync(\"rsa\");",
+      "negative": "const key = generateKeyPairSync(\"ed25519\");",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_PY_RSA_USAGE",
+      "path": "use.py",
+      "positive": "from cryptography.hazmat.primitives.asymmetric import rsa\nkey = rsa.generate_private_key(public_exponent=65537, key_size=2048)\n",
+      "negative": "from cryptography.hazmat.primitives.asymmetric import rsa\nkey = bytes(32)\n",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim. Imported Node/Python API bindings are explicit. RSA key-size uses the named Java RSA parameter constructor; a bare assignment is outside candidate selection.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_RSA_KEY_SIZE_LITERAL",
+      "path": "Use.java",
+      "positive": "class Use { Object spec = new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4); }",
+      "negative": "class Use { Object spec = new ECGenParameterSpec(\"secp256r1\"); }",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim. Imported Node/Python API bindings are explicit. RSA key-size uses the named Java RSA parameter constructor; a bare assignment is outside candidate selection.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_RUBY_RSA_USAGE",
+      "path": "use.rb",
+      "positive": "key = OpenSSL::PKey::RSA.new(2048)",
+      "negative": "key = OpenSSL::PKey::EC.new(\"prime256v1\")",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_RUST_RSA_USAGE",
+      "path": "use.rs",
+      "positive": "fn main() { let key = rsa::RsaPrivateKey::new(); }",
+      "negative": "fn main() { let key = ed25519::SigningKey::new(); }",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_SSH_RSA_STRING",
+      "path": "use.py",
+      "positive": "algorithm = \"rsa-sha2-256\"\n",
+      "negative": "algorithm = \"ssh-ed25519\"\n",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_TLS_LEGACY_VERSION_LITERAL",
+      "path": "use.py",
+      "positive": "protocol = \"TLSv1.1\"\n",
+      "negative": "protocol = \"TLSv1.3\"\n",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    },
+    {
+      "id": "TS_TLS_RSA_CIPHER_LITERAL",
+      "path": "use.py",
+      "positive": "cipher = \"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256\"\n",
+      "negative": "cipher = \"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256\"\n",
+      "fact": "Syntactic API/name reference versus distinct primitive/API; no execution, effective state, key validity or migration-completion claim.",
+      "positive_expected": 1,
+      "negative_expected": 0
+    }
+  ]
+}

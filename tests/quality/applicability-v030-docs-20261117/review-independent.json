@@ -1,0 +1,51 @@
+{
+  "reviewer": "/root/output_implementation_review",
+  "timestampUtc": "2026-11-17T08:02:02Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "1c49f2d7677767f4c174723b5c149646da1628206a376f096f3917d7e5beae70",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "e8bebf32bfad90ccbd84a8521e01fc9d2602471c991bd55f9a433f066bfe7874",
+    "docs/user/COVERAGE.ja.md": "302dc1228fbdddc84ade293b0af692b9a65eb07cff8979d8b3f22a45b3bd01de",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "remainingScopeReason": "Reviewed all 246 nominated units and the remaining 240 units' source-scope applicability against the current paired guides, complete unchanged PKCS#12 parser, frozen protocol and existing provenance. Independently verified every one of the 203 input byte hashes against corpus and provenance. The complete paired PKCS#12 support paragraphs are byte-identical to the preceding bound version. Source/API/configuration/dependency/SBOM/marker properties retain their bounded nominal scope, including malformed, unsupported and ambiguous cases. Outer filename/container signals remain distinct from inner certificate attributes. The unencrypted width controls retain Data content and certificate-only -certpbe NONE/-nomac provenance and remain within the documented extraction subset. No additional applicability conflict was identified. This carries forward source scope only; it does not re-label truth, establish new blind accuracy or infer scope from scanner predictions.",
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The SHA-bound public-only.p12 has encryptedData content, OID 1.2.840.113549.1.7.6, inside its Data AuthenticatedSafe. The conversion provenance binds the known public RSA3072 certificate and preserves its nominal non-ECDSA signature truth. Both current guides exclude decryption, and the complete parser returns no certificate attributes from non-Data content. Only the inner signature question is unsupported; the container signal remains in scope."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The original public-only.pfx is byte-identical to public-only.p12, including its encryptedData certificate-bearing content. Certificate-only conversion and an empty password do not establish unencrypted content. The known negative ECDSA signature truth remains unchanged, while extraction of that inner attribute is outside the current non-decrypting public subset."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "Provenance binds public-only.p12 to the public RSA3072 certificate, preserving the positive modulus-size object fact. Its encryptedData content remains opaque under the unchanged parser and current paired support contract. The inner RSA modulus question is unsupported without changing nominal truth or excluding the outer container signal."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The original public-only.p12 conversion establishes the known certificate's sha256WithRSAEncryption signature fact. Reading that signature attribute requires access to encryptedData, which both guides and the unchanged parser exclude. Preserve the positive nominal truth separately from unsupported extraction applicability."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The SHA-bound public-only.pfx shares the original encrypted P12 bytes and RSA3072 certificate provenance. The documented parser does not enter its encryptedData content to recover the modulus. Retain the positive object-property truth and exclude only this inner key-size question from the supported-input view."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The original public-only.pfx contains encryptedData rather than the Data content supported for certificate extraction. Provenance preserves the positive RSA signature fact, but does not establish parser access to it. The current documentation changes concern candidate status, source-reference conditions and identity explanations; they do not change this extraction boundary or the remaining units' scope."
+    }
+  ]
+}

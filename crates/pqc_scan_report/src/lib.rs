@@ -19,7 +19,7 @@ use pqc_scan_core::{ScanDocument, ScanResult};
 
 /// Write only the explicitly requested, versioned inspection diagnostics artifact.
 pub fn write_diagnostics(document: &ScanDocument, out_dir: &Path) -> Result<PathBuf> {
-    std::fs::create_dir_all(out_dir)?;
+    pqc_scan_core::safe_output::create_dir_all(out_dir)?;
     let path = out_dir.join("diagnostics.json");
     json_report::write_diagnostics(document, &path)?;
     Ok(path)
@@ -31,9 +31,9 @@ pub fn write_assessment_json(
     out_dir: &Path,
 ) -> Result<PathBuf> {
     report.validate()?;
-    std::fs::create_dir_all(out_dir)?;
+    pqc_scan_core::safe_output::create_dir_all(out_dir)?;
     let path = out_dir.join("scan.assessment.v1.json");
-    std::fs::write(&path, serde_json::to_string_pretty(report)?)?;
+    pqc_scan_core::safe_output::write(&path, serde_json::to_string_pretty(report)?)?;
     Ok(path)
 }
 
@@ -53,7 +53,7 @@ fn write_observation_json(
     out_dir: &Path,
     filename: &str,
 ) -> Result<PathBuf> {
-    std::fs::create_dir_all(out_dir)?;
+    pqc_scan_core::safe_output::create_dir_all(out_dir)?;
     let native = document.native().ok_or_else(|| {
         anyhow::anyhow!("native observations were not captured; use scan_repository_native")
     })?;
@@ -136,7 +136,7 @@ fn write_reports_context(
     language: ReportLanguage,
     context: Option<&inspection::HumanContext<'_>>,
 ) -> Result<Vec<PathBuf>> {
-    std::fs::create_dir_all(out_dir)?;
+    pqc_scan_core::safe_output::create_dir_all(out_dir)?;
     let mut sanitized = result.clone();
     sanitize_scan_result(&mut sanitized);
 

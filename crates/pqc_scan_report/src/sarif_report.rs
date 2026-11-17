@@ -118,7 +118,8 @@ pub fn write_sarif_report(result: &ScanResult, path: &Path) -> Result<()> {
     };
 
     let json = serde_json::to_string_pretty(&sarif)?;
-    std::fs::write(path, json).with_context(|| format!("failed to write {}", path.display()))?;
+    pqc_scan_core::safe_output::write(path, json)
+        .with_context(|| format!("failed to write {}", path.display()))?;
     Ok(())
 }
 

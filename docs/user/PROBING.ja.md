@@ -1,8 +1,8 @@
 # TLS・SSH接続先の明示的な診断
 
-[English](PROBING.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.ja.md)
+[English](PROBING.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.ja.md)
 
-v0.3開発ブランチでも、TLS・SSH提示方式・SSH KEXはv0.2.0と同じく実験的機能です。公開済みv0.2.0の静的版には `probe` コマンドを含みません。probe同梱版は配布・導入の技術検証を終えていますが、公開前の確認が残っています。[配布状況](DISTRIBUTION.ja.md#release-status)を参照してください。
+未公開のv0.3.0静的版候補でも、TLS・SSH提示方式・SSH KEXは実験的機能です。候補の静的版と公開済みv0.2.0のバイナリには、`probe`コマンドを含みません。probe同梱版は配布・導入の技術検証を終えていますが、公開前の確認が残っています。[配布状況](DISTRIBUTION.ja.md#release-status)を参照してください。
 
 管理者から検査の許可を得たホスト・ポートだけを指定してください。
 `probe` は指定先と通信します。リポジトリの `scan` とレポート生成はローカルで完結し、ソース内のURL、証明書のSAN、所見を根拠に自動接続することはありません。
@@ -15,7 +15,7 @@ v0.3開発ブランチでも、TLS・SSH提示方式・SSH KEXはv0.2.0と同じ
 cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh
 ```
 
-公開バイナリの対象環境はApple SiliconのmacOSです。Linuxの隔離環境でプロトコルとOpenSSHを検証する仕組みはありますが、現在は`protocols` CIジョブを手動実行も含めて停止しています。`quality`・`baseline`・`scan`の成功を、新たなプロトコル検証の成功と解釈しないでください。この検証環境があることと、Linuxや他のOS・アーキテクチャーの配布対応は別です。
+公開バイナリの対象環境はApple SiliconのmacOSです。Linuxの隔離環境でプロトコルとOpenSSHを検証する仕組みはありますが、現在は`protocols` CIジョブを手動実行も含めて停止しています。`quality`・`baseline`・`scan`の成功を、新たなプロトコル検証の成功と解釈しないでください。汎用suiteの読取り専用の出力先への書込み問題は修正済みで、[候補の検証](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md)では元のsuite全体を完了しています。protocol049とは別の証拠で、ホスト型CIの再開を意味しません。再開には維持者の判断と現在の入力・環境・上限での確認が必要です。この検証環境があることと、Linuxや他のOS・アーキテクチャーの配布対応は別です。
 TLS機能では暗号プロバイダーのネイティブビルドが加わります。静的スキャンだけのビルド・テストには不要で、AIサービスも使いません。
 
 ## TLS

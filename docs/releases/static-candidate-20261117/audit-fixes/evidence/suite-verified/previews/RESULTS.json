@@ -1,0 +1,198 @@
+{
+  "scope": "Synthetic local protocol observations for browser acceptance, not public endpoints",
+  "isolation": "Use the accompanying HOST-RESULTS.json for enforced container limits; this fixture does not establish its own sandbox",
+  "binary_sha256": "0378516f26fe4fc22486610a69d107a6e58331e6ceb8533762a217d86ba71287",
+  "openssl": "OpenSSL 3.0.22 25 Aug 2026 (Library: OpenSSL 3.0.22 25 Aug 2026)",
+  "runs": [
+    {
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "probe",
+        "tls",
+        "127.0.0.1",
+        "--port",
+        "49029",
+        "--allow-cidr",
+        "127.0.0.1/32",
+        "--server-name",
+        "localhost",
+        "--ca-file",
+        "<ephemeral-public-ca-dir>/ca.pem",
+        "--lang",
+        "ja",
+        "--out-dir",
+        "/scratch/evidence/previews/tls-ja"
+      ],
+      "exit": 0,
+      "files": {
+        "report.md": "09fa16d44590dcc743438f5689c402780953656fc6f705767335e82a1b78e3ac",
+        "report.html": "c83b145b0c5065b495fb8250d27093f6b036a841454e9a34afaab84ac16e1c66",
+        "probe.tls.v1.json": "9192b5193861d985fb00039d06f0a41541cd3ce0c8a3ee30480553ad1e21c907"
+      }
+    },
+    {
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "probe",
+        "ssh",
+        "127.0.0.1",
+        "--port",
+        "54053",
+        "--allow-cidr",
+        "127.0.0.1/32",
+        "--lang",
+        "ja",
+        "--out-dir",
+        "/scratch/evidence/previews/ssh-ja"
+      ],
+      "exit": 0,
+      "files": {
+        "report.md": "d34b43d2b22e1d3ff06fc5703a5f2c66f4cfe0297c9329c6bbbeda81378b3aff",
+        "report.html": "42a5e2c108f9c89db59a3f50fc302310aa2261e0964430b53a40af002cec16c6",
+        "probe.ssh-offers.v1.json": "4e41b0d8be22086c2f7f130d3e2037fa18942fc513e89b4756fc95c86647444e"
+      },
+      "peer_record": {
+        "client_packet_types": [
+          20
+        ],
+        "no_post_kexinit_bytes": true
+      }
+    },
+    {
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "probe",
+        "tls",
+        "127.0.0.1",
+        "--port",
+        "443",
+        "--lang",
+        "ja",
+        "--out-dir",
+        "/scratch/evidence/previews/tls-denied-ja"
+      ],
+      "exit": 3,
+      "files": {
+        "report.md": "93425c909832bc39ecd765dc1351d0836f81c07f54135bf783117cbbdb7acc86",
+        "report.html": "179f65801ac926dac65a79d6ba9e8fda3880825fe8812c67830d31de5c9ea10a",
+        "probe.tls.v1.json": "316135ad60759ae39101378cfb9f78f7bc4040fd8fa044ce834b9cc724041cba"
+      }
+    },
+    {
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "probe",
+        "ssh",
+        "127.0.0.1",
+        "--port",
+        "443",
+        "--lang",
+        "ja",
+        "--out-dir",
+        "/scratch/evidence/previews/ssh-denied-ja"
+      ],
+      "exit": 3,
+      "files": {
+        "report.md": "46971e6f4c8d14fc3f7cf1565999eefc25a82f2b17f41a1ab508bc55ebb65211",
+        "report.html": "aafc436211e2dc58ae2312716998b2492ecc03c9f9eba368b38e18f84327c923",
+        "probe.ssh-offers.v1.json": "b01fa179891eeb031c4950cb6ffd2f5e5f9071bb20e8873926708c6534bba791"
+      }
+    },
+    {
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "probe",
+        "tls",
+        "127.0.0.1",
+        "--port",
+        "53829",
+        "--allow-cidr",
+        "127.0.0.1/32",
+        "--server-name",
+        "localhost",
+        "--ca-file",
+        "<ephemeral-public-ca-dir>/ca.pem",
+        "--lang",
+        "en",
+        "--out-dir",
+        "/scratch/evidence/previews/tls-en"
+      ],
+      "exit": 0,
+      "files": {
+        "report.md": "b2d4d4f182a5cbfb41fba85d7cd6628ecda127123e2a47e9cba98fd69bb60f0c",
+        "report.html": "8e2113594b751d83a8ece8b4e16fd277e0402bd0677c00f8222249dd03b69a0b",
+        "probe.tls.v1.json": "a6c94b268a43781ebf69f575fff5db7d8d9f84851545962b011a4bb88e5dd700"
+      }
+    },
+    {
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "probe",
+        "ssh",
+        "127.0.0.1",
+        "--port",
+        "56929",
+        "--allow-cidr",
+        "127.0.0.1/32",
+        "--lang",
+        "en",
+        "--out-dir",
+        "/scratch/evidence/previews/ssh-en"
+      ],
+      "exit": 0,
+      "files": {
+        "report.md": "a388b43562a491eb2c198f8a2225a94255266b35fa1efcd47e378607bec9b49e",
+        "report.html": "d51d1f60e5662c1d703c87be9e8cddbe1deb447a67a4c2ad1b447ab1522be17f",
+        "probe.ssh-offers.v1.json": "e86b602c10f005e5f2aba53dda88f4bf153b5346ec4934fcc0e46994c58cef3b"
+      },
+      "peer_record": {
+        "client_packet_types": [
+          20
+        ],
+        "no_post_kexinit_bytes": true
+      }
+    },
+    {
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "probe",
+        "tls",
+        "127.0.0.1",
+        "--port",
+        "443",
+        "--lang",
+        "en",
+        "--out-dir",
+        "/scratch/evidence/previews/tls-denied-en"
+      ],
+      "exit": 3,
+      "files": {
+        "report.md": "15280be9b585627a79af12c081e4a46d1eac02713ce1d421bcd8e63a0ba4e3c3",
+        "report.html": "cf0c332b401999308402966be22f00224c155030ffaabc0ba1744f3003568ece",
+        "probe.tls.v1.json": "3751159a4ee30289a522f7c1b0a55f06747bcbeb004b04c27845fe1bdedf4421"
+      }
+    },
+    {
+      "command": [
+        "/scratch/target/debug/pqc-scan",
+        "probe",
+        "ssh",
+        "127.0.0.1",
+        "--port",
+        "443",
+        "--lang",
+        "en",
+        "--out-dir",
+        "/scratch/evidence/previews/ssh-denied-en"
+      ],
+      "exit": 3,
+      "files": {
+        "report.md": "39983f0584c33681b685cea7c3470dfa3419fd57097bb021aa1836ff2189e376",
+        "report.html": "f437342f3af18a53e5fdeb113c35dfe22ab479596a2a2e4b00fc361e33b586f7",
+        "probe.ssh-offers.v1.json": "0a785fd1722ef75cee24e99126f75fefbefe2f984b9975faf6d9282c792df7bc"
+      }
+    }
+  ],
+  "public_ca_sha256": "fe5fea6da34d52fab59d542dacfe96c5cb9aa32449611344da04967623dd5ef3",
+  "fixture_keys_removed": true
+}

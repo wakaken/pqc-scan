@@ -179,7 +179,7 @@ identifiers are not exhaustively assessed. See the
 | `TLS_ECDHE_RSA` | `regex` | TLS | `medium` | `quantum-uncertain` | 0.50 | `code` | `tls.yml` | TLS_ECDHE_RSA usage detected. | Plan hybrid PQC key agreement adoption. | `TLS_ECDHE_RSA` |
 | `TLS_RSA_CIPHER_SUITE` | `regex` | TLS | `high` | `quantum-vulnerable` | 0.68 | `code` | `tls.yml` | RSA-based TLS cipher suite detected. | Migrate to PQC-ready or hybrid cipher suites. | `\bTLS_(?:[A-Z0-9]+_)*RSA_WITH_[A-Z0-9_]+\b` |
 | `TLS_RSA_KEY_EXCHANGE` | `regex` | TLS | `high` | `quantum-vulnerable` | 0.70 | `code` | `tls.yml` | TLS RSA key-exchange suite detected. | Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats. | `\bTLS_RSA_WITH_[A-Z0-9_]+\b` |
-| `TLS_VERSION_1_0` | `regex` | TLS | `high` | `non-quantum-risk` | 0.75 | `code` | `tls.yml` | Legacy TLS 1.0 configuration detected. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `(?:^\|[^A-Za-z0-9_])TLSv1(?:[._]0)?(?:$\|[^A-Za-z0-9_.])` |
+| `TLS_VERSION_1_0` | `regex` | TLS | `high` | `non-quantum-risk` | 0.75 | `code` | `tls.yml` | Legacy TLS 1.0 configuration detected. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `(?:^\|[^A-Za-z0-9_])(?P<reference>TLSv1(?:[._]0)?)(?:$\|[^A-Za-z0-9_.])` |
 | `TLS_VERSION_1_1` | `regex` | TLS | `high` | `non-quantum-risk` | 0.75 | `code` | `tls.yml` | Legacy TLS 1.1 configuration detected. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `\bTLSv1[._]1\b` |
 | `TRAEFIK_TLS_OPTIONS_LEGACY` | `regex` | Middleware | `medium` | `non-quantum-risk` | 0.58 | `config` | `middleware.yml` | Traefik configuration contains a low minimum TLS version. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `(?i)minversion\s*:\s*versiontls1(0\|1)` |
 | `TS_CERT_SIGALG_LITERAL` | `tree_sitter` | PKI | `medium` | `quantum-vulnerable` | 0.55 | `java,javascript,typescript,python,go,rust,ruby` | `tree_sitter.yml` | Certificate signature algorithm literals detected in AST nodes. | Update certificate signature algorithms to PQC or hybrid schemes. | `(?i)(sha256WithRSAEncryption\|sha384WithRSAEncryption\|sha512WithRSAEncryption\|ecdsa-with-SHA(256\|384\|512))` |
@@ -258,3 +258,13 @@ supported SBOM records retain their existing version/provenance handling.
 Query/subpath or malformed SBOM purls retain the parser's existing partial state.
 Package presence still does not prove an enabled algorithm or runtime use.
 See the [task054 correction evidence](../tasks/054/evidence/f054-fix-20261117/RULE-COMPATIBILITY.json); no custom predicate or output schema changes.
+
+### TLS 1.0 token boundaries (2026-11-17 audit correction)
+
+The exact shipped `TLS_VERSION_1_0` regex/scope identifies the named `reference`
+capture and reuses its trailing delimiter for the next candidate. Reported spans
+contain only the protocol name. Adjacent references can increase counts and their
+corrected locations/evidence change affected IDs. Severity/risk/confidence remain
+unchanged. Modified patterns/scopes and unrelated/custom IDs retain generic regex
+ranges and non-overlapping iteration, including empty-match behavior. References
+do not establish effective configuration or runtime negotiation.

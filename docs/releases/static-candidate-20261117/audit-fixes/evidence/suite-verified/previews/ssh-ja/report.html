@@ -1,0 +1,127 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SSH提示アルゴリズムの観測結果</title><style>body{font:16px/1.6 system-ui,sans-serif;color:#15243b;background:#f5f7fb;margin:0}main{max-width:1100px;margin:auto;padding:24px}dt,dd,p{overflow-wrap:anywhere}section{background:white;padding:16px 20px;margin:16px 0;border-radius:8px}dt{font-weight:600}dd{margin:0 0 12px}table{width:100%;table-layout:fixed;border-collapse:collapse;background:white}th,td{text-align:left;vertical-align:top;padding:12px;border:1px solid #c9d2df;overflow-wrap:anywhere;word-break:break-word}th{width:48%}code{display:block;font-size:.8em;overflow-wrap:anywhere}summary{cursor:pointer;padding:12px;font-weight:600}summary:focus-visible{outline:3px solid #1c60b9;outline-offset:2px}.loss{border-left:4px solid #a63d00;padding:12px;background:#fff4e8}@media(max-width:600px){main{padding:12px}th,td{padding:8px}}</style></head><body><main><h1>SSH提示アルゴリズムの観測結果</h1><p>接続先に対する、上限を設けた1回の観測です。全記録は技術情報で確認できます。</p>
+<section><h2>観測の概要</h2><dl>
+<dt>観測の完了状況</dt><dd>要求した観測を収集しました (completed)</dd>
+<dt>実際の接続相手</dt><dd>127.0.0.1:54053</dd>
+<dt>要求したホスト</dt><dd>127.0.0.1</dd>
+<dt>要求したポート</dt><dd>54053</dd>
+</dl></section>
+<section><h2>今回わかったこと</h2>
+<p>サーバーの一覧は認証前の申告です。鍵交換・ホスト認証は実施していません。</p>
+<p>未検証のサーバー申告: SSH-2.0-pqc_preview synthetic fixture only</p>
+<dl>
+<dt>提示された鍵交換一覧</dt><dd>5件の記録: sntrup761x25519-sha512@openssh.com, curve25519-sha256, kex-strict-s-v00@openssh.com, mlkem768x25519-sha256, unknown-preview-kex</dd>
+<dt>提示されたホスト鍵一覧</dt><dd>2件の記録: ssh-ed25519, rsa-sha2-512</dd>
+</dl>
+</section><section><h2>確認範囲と未完了の理由</h2>
+<p>1つのクライアント設定による1接続先の観測です。サーバーの全対応方式やPQC移行完了を確認するものではありません。</p>
+</section><section><h2>次に確認すること</h2>
+<p>許可されたSSHクライアントで実際に選ばれる方式とホストの本人性を確認してください。対応方式の全体はサーバー設定と照合してください。</p>
+</section>
+<details id="technical-details"><summary>技術情報 — 記録した全項目</summary><table><caption>元の機械項目パスと対応する事実</caption><thead><tr><th scope="col">項目</th><th scope="col">内容</th></tr></thead><tbody>
+<tr data-field="/attempt_id"><th scope="row">今回の実行内の試行番号<code>/attempt_id</code></th><td>1</td></tr>
+<tr data-field="/details/assurance"><th scope="row">確認根拠<code>/details/assurance</code></th><td>unauthenticated_advertisement</td></tr>
+<tr data-field="/details/client_profile/first_kex_packet_follows"><th scope="row">後続の推測KEXパケットの申告<code>/details/client_profile/first_kex_packet_follows</code></th><td>false</td></tr>
+<tr data-field="/details/client_profile/identification"><th scope="row">診断クライアントの識別情報<code>/details/client_profile/identification</code></th><td>SSH-2.0-pqc_scan_0.3.0</td></tr>
+<tr data-field="/details/client_profile/offers/compression_algorithms_client_to_server/0"><th scope="row">圧縮候補：クライアントからサーバー<code>/details/client_profile/offers/compression_algorithms_client_to_server/0</code></th><td>none</td></tr>
+<tr data-field="/details/client_profile/offers/compression_algorithms_server_to_client/0"><th scope="row">圧縮候補：サーバーからクライアント<code>/details/client_profile/offers/compression_algorithms_server_to_client/0</code></th><td>none</td></tr>
+<tr data-field="/details/client_profile/offers/encryption_algorithms_client_to_server/0"><th scope="row">暗号化候補：クライアントからサーバー<code>/details/client_profile/offers/encryption_algorithms_client_to_server/0</code></th><td>chacha20-poly1305@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/encryption_algorithms_client_to_server/1"><th scope="row">暗号化候補：クライアントからサーバー<code>/details/client_profile/offers/encryption_algorithms_client_to_server/1</code></th><td>aes256-gcm@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/encryption_algorithms_client_to_server/2"><th scope="row">暗号化候補：クライアントからサーバー<code>/details/client_profile/offers/encryption_algorithms_client_to_server/2</code></th><td>aes128-gcm@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/encryption_algorithms_client_to_server/3"><th scope="row">暗号化候補：クライアントからサーバー<code>/details/client_profile/offers/encryption_algorithms_client_to_server/3</code></th><td>aes256-ctr</td></tr>
+<tr data-field="/details/client_profile/offers/encryption_algorithms_client_to_server/4"><th scope="row">暗号化候補：クライアントからサーバー<code>/details/client_profile/offers/encryption_algorithms_client_to_server/4</code></th><td>aes128-ctr</td></tr>
+<tr data-field="/details/client_profile/offers/encryption_algorithms_server_to_client/0"><th scope="row">暗号化候補：サーバーからクライアント<code>/details/client_profile/offers/encryption_algorithms_server_to_client/0</code></th><td>chacha20-poly1305@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/encryption_algorithms_server_to_client/1"><th scope="row">暗号化候補：サーバーからクライアント<code>/details/client_profile/offers/encryption_algorithms_server_to_client/1</code></th><td>aes256-gcm@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/encryption_algorithms_server_to_client/2"><th scope="row">暗号化候補：サーバーからクライアント<code>/details/client_profile/offers/encryption_algorithms_server_to_client/2</code></th><td>aes128-gcm@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/encryption_algorithms_server_to_client/3"><th scope="row">暗号化候補：サーバーからクライアント<code>/details/client_profile/offers/encryption_algorithms_server_to_client/3</code></th><td>aes256-ctr</td></tr>
+<tr data-field="/details/client_profile/offers/encryption_algorithms_server_to_client/4"><th scope="row">暗号化候補：サーバーからクライアント<code>/details/client_profile/offers/encryption_algorithms_server_to_client/4</code></th><td>aes128-ctr</td></tr>
+<tr data-field="/details/client_profile/offers/kex_algorithms/0"><th scope="row">鍵交換方式の候補<code>/details/client_profile/offers/kex_algorithms/0</code></th><td>mlkem768x25519-sha256</td></tr>
+<tr data-field="/details/client_profile/offers/kex_algorithms/1"><th scope="row">鍵交換方式の候補<code>/details/client_profile/offers/kex_algorithms/1</code></th><td>sntrup761x25519-sha512</td></tr>
+<tr data-field="/details/client_profile/offers/kex_algorithms/2"><th scope="row">鍵交換方式の候補<code>/details/client_profile/offers/kex_algorithms/2</code></th><td>sntrup761x25519-sha512@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/kex_algorithms/3"><th scope="row">鍵交換方式の候補<code>/details/client_profile/offers/kex_algorithms/3</code></th><td>curve25519-sha256</td></tr>
+<tr data-field="/details/client_profile/offers/kex_algorithms/4"><th scope="row">鍵交換方式の候補<code>/details/client_profile/offers/kex_algorithms/4</code></th><td>curve25519-sha256@libssh.org</td></tr>
+<tr data-field="/details/client_profile/offers/languages_client_to_server"><th scope="row">言語候補：クライアントからサーバー<code>/details/client_profile/offers/languages_client_to_server</code></th><td>[]</td></tr>
+<tr data-field="/details/client_profile/offers/languages_server_to_client"><th scope="row">言語候補：サーバーからクライアント<code>/details/client_profile/offers/languages_server_to_client</code></th><td>[]</td></tr>
+<tr data-field="/details/client_profile/offers/mac_algorithms_client_to_server/0"><th scope="row">MAC候補：クライアントからサーバー<code>/details/client_profile/offers/mac_algorithms_client_to_server/0</code></th><td>hmac-sha2-256-etm@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/mac_algorithms_client_to_server/1"><th scope="row">MAC候補：クライアントからサーバー<code>/details/client_profile/offers/mac_algorithms_client_to_server/1</code></th><td>hmac-sha2-512-etm@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/mac_algorithms_client_to_server/2"><th scope="row">MAC候補：クライアントからサーバー<code>/details/client_profile/offers/mac_algorithms_client_to_server/2</code></th><td>hmac-sha2-256</td></tr>
+<tr data-field="/details/client_profile/offers/mac_algorithms_server_to_client/0"><th scope="row">MAC候補：サーバーからクライアント<code>/details/client_profile/offers/mac_algorithms_server_to_client/0</code></th><td>hmac-sha2-256-etm@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/mac_algorithms_server_to_client/1"><th scope="row">MAC候補：サーバーからクライアント<code>/details/client_profile/offers/mac_algorithms_server_to_client/1</code></th><td>hmac-sha2-512-etm@openssh.com</td></tr>
+<tr data-field="/details/client_profile/offers/mac_algorithms_server_to_client/2"><th scope="row">MAC候補：サーバーからクライアント<code>/details/client_profile/offers/mac_algorithms_server_to_client/2</code></th><td>hmac-sha2-256</td></tr>
+<tr data-field="/details/client_profile/offers/server_host_key_algorithms/0"><th scope="row">ホスト鍵方式の候補<code>/details/client_profile/offers/server_host_key_algorithms/0</code></th><td>ssh-ed25519</td></tr>
+<tr data-field="/details/client_profile/offers/server_host_key_algorithms/1"><th scope="row">ホスト鍵方式の候補<code>/details/client_profile/offers/server_host_key_algorithms/1</code></th><td>ecdsa-sha2-nistp256</td></tr>
+<tr data-field="/details/client_profile/offers/server_host_key_algorithms/2"><th scope="row">ホスト鍵方式の候補<code>/details/client_profile/offers/server_host_key_algorithms/2</code></th><td>rsa-sha2-512</td></tr>
+<tr data-field="/details/client_profile/offers/server_host_key_algorithms/3"><th scope="row">ホスト鍵方式の候補<code>/details/client_profile/offers/server_host_key_algorithms/3</code></th><td>rsa-sha2-256</td></tr>
+<tr data-field="/details/client_profile/purpose"><th scope="row">用途<code>/details/client_profile/purpose</code></th><td>diagnostic_proposal_only</td></tr>
+<tr data-field="/details/client_profile/reserved"><th scope="row">予約フィールド<code>/details/client_profile/reserved</code></th><td>0</td></tr>
+<tr data-field="/details/early_messages"><th scope="row">初期メッセージ数<code>/details/early_messages</code></th><td>0</td></tr>
+<tr data-field="/details/extension_markers/0"><th scope="row">拡張マーカー<code>/details/extension_markers/0</code></th><td>kex-strict-s-v00@openssh.com</td></tr>
+<tr data-field="/details/first_kex_packet_follows"><th scope="row">後続の推測KEXパケットの申告<code>/details/first_kex_packet_follows</code></th><td>false</td></tr>
+<tr data-field="/details/host_key_candidates/0/construction"><th scope="row">構成の分類<code>/details/host_key_candidates/0/construction</code></th><td>classical</td></tr>
+<tr data-field="/details/host_key_candidates/0/name"><th scope="row">名前<code>/details/host_key_candidates/0/name</code></th><td>ssh-ed25519</td></tr>
+<tr data-field="/details/host_key_candidates/0/namespace"><th scope="row">識別子の名前空間<code>/details/host_key_candidates/0/namespace</code></th><td>unqualified</td></tr>
+<tr data-field="/details/host_key_candidates/0/provenance"><th scope="row">情報の出所<code>/details/host_key_candidates/0/provenance</code></th><td>rfc_defined</td></tr>
+<tr data-field="/details/host_key_candidates/0/reference"><th scope="row">参考資料<code>/details/host_key_candidates/0/reference</code></th><td>https://www.rfc-editor.org/rfc/rfc8709.html</td></tr>
+<tr data-field="/details/host_key_candidates/1/construction"><th scope="row">構成の分類<code>/details/host_key_candidates/1/construction</code></th><td>classical</td></tr>
+<tr data-field="/details/host_key_candidates/1/name"><th scope="row">名前<code>/details/host_key_candidates/1/name</code></th><td>rsa-sha2-512</td></tr>
+<tr data-field="/details/host_key_candidates/1/namespace"><th scope="row">識別子の名前空間<code>/details/host_key_candidates/1/namespace</code></th><td>unqualified</td></tr>
+<tr data-field="/details/host_key_candidates/1/provenance"><th scope="row">情報の出所<code>/details/host_key_candidates/1/provenance</code></th><td>rfc_defined</td></tr>
+<tr data-field="/details/host_key_candidates/1/reference"><th scope="row">参考資料<code>/details/host_key_candidates/1/reference</code></th><td>https://www.rfc-editor.org/rfc/rfc8332.html</td></tr>
+<tr data-field="/details/kex_candidates/0/construction"><th scope="row">構成の分類<code>/details/kex_candidates/0/construction</code></th><td>hybrid</td></tr>
+<tr data-field="/details/kex_candidates/0/name"><th scope="row">名前<code>/details/kex_candidates/0/name</code></th><td>sntrup761x25519-sha512@openssh.com</td></tr>
+<tr data-field="/details/kex_candidates/0/namespace"><th scope="row">識別子の名前空間<code>/details/kex_candidates/0/namespace</code></th><td>vendor_namespaced</td></tr>
+<tr data-field="/details/kex_candidates/0/provenance"><th scope="row">情報の出所<code>/details/kex_candidates/0/provenance</code></th><td>openssh_defined</td></tr>
+<tr data-field="/details/kex_candidates/0/reference"><th scope="row">参考資料<code>/details/kex_candidates/0/reference</code></th><td>https://www.openssh.org/releasenotes.html</td></tr>
+<tr data-field="/details/kex_candidates/1/construction"><th scope="row">構成の分類<code>/details/kex_candidates/1/construction</code></th><td>classical</td></tr>
+<tr data-field="/details/kex_candidates/1/name"><th scope="row">名前<code>/details/kex_candidates/1/name</code></th><td>curve25519-sha256</td></tr>
+<tr data-field="/details/kex_candidates/1/namespace"><th scope="row">識別子の名前空間<code>/details/kex_candidates/1/namespace</code></th><td>unqualified</td></tr>
+<tr data-field="/details/kex_candidates/1/provenance"><th scope="row">情報の出所<code>/details/kex_candidates/1/provenance</code></th><td>rfc_defined</td></tr>
+<tr data-field="/details/kex_candidates/1/reference"><th scope="row">参考資料<code>/details/kex_candidates/1/reference</code></th><td>https://www.rfc-editor.org/rfc/rfc8731.html</td></tr>
+<tr data-field="/details/kex_candidates/2/construction"><th scope="row">構成の分類<code>/details/kex_candidates/2/construction</code></th><td>hybrid</td></tr>
+<tr data-field="/details/kex_candidates/2/name"><th scope="row">名前<code>/details/kex_candidates/2/name</code></th><td>mlkem768x25519-sha256</td></tr>
+<tr data-field="/details/kex_candidates/2/namespace"><th scope="row">識別子の名前空間<code>/details/kex_candidates/2/namespace</code></th><td>unqualified</td></tr>
+<tr data-field="/details/kex_candidates/2/provenance"><th scope="row">情報の出所<code>/details/kex_candidates/2/provenance</code></th><td>rfc_informational</td></tr>
+<tr data-field="/details/kex_candidates/2/reference"><th scope="row">参考資料<code>/details/kex_candidates/2/reference</code></th><td>https://www.rfc-editor.org/rfc/rfc10042.html</td></tr>
+<tr data-field="/details/kex_candidates/3/construction"><th scope="row">構成の分類<code>/details/kex_candidates/3/construction</code></th><td>unknown</td></tr>
+<tr data-field="/details/kex_candidates/3/name"><th scope="row">名前<code>/details/kex_candidates/3/name</code></th><td>unknown-preview-kex</td></tr>
+<tr data-field="/details/kex_candidates/3/namespace"><th scope="row">識別子の名前空間<code>/details/kex_candidates/3/namespace</code></th><td>unqualified</td></tr>
+<tr data-field="/details/kex_candidates/3/provenance"><th scope="row">情報の出所<code>/details/kex_candidates/3/provenance</code></th><td>unknown</td></tr>
+<tr data-field="/details/kex_candidates/3/reference"><th scope="row">参考資料<code>/details/kex_candidates/3/reference</code></th><td>null</td></tr>
+<tr data-field="/details/offers/compression_algorithms_client_to_server/0"><th scope="row">圧縮候補：クライアントからサーバー<code>/details/offers/compression_algorithms_client_to_server/0</code></th><td>none</td></tr>
+<tr data-field="/details/offers/compression_algorithms_server_to_client/0"><th scope="row">圧縮候補：サーバーからクライアント<code>/details/offers/compression_algorithms_server_to_client/0</code></th><td>none</td></tr>
+<tr data-field="/details/offers/encryption_algorithms_client_to_server/0"><th scope="row">暗号化候補：クライアントからサーバー<code>/details/offers/encryption_algorithms_client_to_server/0</code></th><td>aes128-ctr</td></tr>
+<tr data-field="/details/offers/encryption_algorithms_server_to_client/0"><th scope="row">暗号化候補：サーバーからクライアント<code>/details/offers/encryption_algorithms_server_to_client/0</code></th><td>aes128-ctr</td></tr>
+<tr data-field="/details/offers/kex_algorithms/0"><th scope="row">鍵交換方式の候補<code>/details/offers/kex_algorithms/0</code></th><td>sntrup761x25519-sha512@openssh.com</td></tr>
+<tr data-field="/details/offers/kex_algorithms/1"><th scope="row">鍵交換方式の候補<code>/details/offers/kex_algorithms/1</code></th><td>curve25519-sha256</td></tr>
+<tr data-field="/details/offers/kex_algorithms/2"><th scope="row">鍵交換方式の候補<code>/details/offers/kex_algorithms/2</code></th><td>kex-strict-s-v00@openssh.com</td></tr>
+<tr data-field="/details/offers/kex_algorithms/3"><th scope="row">鍵交換方式の候補<code>/details/offers/kex_algorithms/3</code></th><td>mlkem768x25519-sha256</td></tr>
+<tr data-field="/details/offers/kex_algorithms/4"><th scope="row">鍵交換方式の候補<code>/details/offers/kex_algorithms/4</code></th><td>unknown-preview-kex</td></tr>
+<tr data-field="/details/offers/languages_client_to_server"><th scope="row">言語候補：クライアントからサーバー<code>/details/offers/languages_client_to_server</code></th><td>[]</td></tr>
+<tr data-field="/details/offers/languages_server_to_client"><th scope="row">言語候補：サーバーからクライアント<code>/details/offers/languages_server_to_client</code></th><td>[]</td></tr>
+<tr data-field="/details/offers/mac_algorithms_client_to_server/0"><th scope="row">MAC候補：クライアントからサーバー<code>/details/offers/mac_algorithms_client_to_server/0</code></th><td>hmac-sha2-256</td></tr>
+<tr data-field="/details/offers/mac_algorithms_server_to_client/0"><th scope="row">MAC候補：サーバーからクライアント<code>/details/offers/mac_algorithms_server_to_client/0</code></th><td>hmac-sha2-256</td></tr>
+<tr data-field="/details/offers/server_host_key_algorithms/0"><th scope="row">ホスト鍵方式の候補<code>/details/offers/server_host_key_algorithms/0</code></th><td>ssh-ed25519</td></tr>
+<tr data-field="/details/offers/server_host_key_algorithms/1"><th scope="row">ホスト鍵方式の候補<code>/details/offers/server_host_key_algorithms/1</code></th><td>rsa-sha2-512</td></tr>
+<tr data-field="/details/pre_identification_lines"><th scope="row">識別前の行数<code>/details/pre_identification_lines</code></th><td>0</td></tr>
+<tr data-field="/details/server_identification"><th scope="row">未検証のサーバー申告<code>/details/server_identification</code></th><td>SSH-2.0-pqc_preview synthetic fixture only</td></tr>
+<tr data-field="/diagnostics"><th scope="row">診断コード<code>/diagnostics</code></th><td>[]</td></tr>
+<tr data-field="/generated_at"><th scope="row">作成日時<code>/generated_at</code></th><td>2026-11-17T06:30:53.375516298+00:00</td></tr>
+<tr data-field="/limits/dns_timeout_ns"><th scope="row">名前解決の制限時間（ナノ秒）<code>/limits/dns_timeout_ns</code></th><td>5000000000</td></tr>
+<tr data-field="/limits/max_dns_answers"><th scope="row">名前解決結果の上限<code>/limits/max_dns_answers</code></th><td>8</td></tr>
+<tr data-field="/limits/max_received_bytes"><th scope="row">受信上限（バイト）<code>/limits/max_received_bytes</code></th><td>524288</td></tr>
+<tr data-field="/limits/max_sent_bytes"><th scope="row">送信上限（バイト）<code>/limits/max_sent_bytes</code></th><td>65536</td></tr>
+<tr data-field="/limits/overall_timeout_ns"><th scope="row">全体の制限時間（ナノ秒）<code>/limits/overall_timeout_ns</code></th><td>15000000000</td></tr>
+<tr data-field="/limits/protocol_timeout_ns"><th scope="row">プロトコル処理の制限時間（ナノ秒）<code>/limits/protocol_timeout_ns</code></th><td>5000000000</td></tr>
+<tr data-field="/limits/tcp_timeout_ns"><th scope="row">TCP接続の制限時間（ナノ秒）<code>/limits/tcp_timeout_ns</code></th><td>3000000000</td></tr>
+<tr data-field="/outcome"><th scope="row">観測の完了状況<code>/outcome</code></th><td>要求した観測を収集しました (completed)</td></tr>
+<tr data-field="/protocol"><th scope="row">観測方法<code>/protocol</code></th><td>ssh_offers</td></tr>
+<tr data-field="/redaction_applied"><th scope="row">秘密情報に見える文字列の省略<code>/redaction_applied</code></th><td>false</td></tr>
+<tr data-field="/scanner_version"><th scope="row">スキャナーの版<code>/scanner_version</code></th><td>0.3.0</td></tr>
+<tr data-field="/schema_version"><th scope="row">スキーマの版<code>/schema_version</code></th><td>1</td></tr>
+<tr data-field="/target/connected_peer"><th scope="row">実際の接続相手<code>/target/connected_peer</code></th><td>127.0.0.1:54053</td></tr>
+<tr data-field="/target/host"><th scope="row">要求したホスト<code>/target/host</code></th><td>127.0.0.1</td></tr>
+<tr data-field="/target/pinned_address"><th scope="row">固定した接続先<code>/target/pinned_address</code></th><td>127.0.0.1:54053</td></tr>
+<tr data-field="/target/port"><th scope="row">要求したポート<code>/target/port</code></th><td>54053</td></tr>
+<tr data-field="/target/resolved_addresses/0"><th scope="row">確認した名前解決結果<code>/target/resolved_addresses/0</code></th><td>127.0.0.1</td></tr>
+<tr data-field="/traffic/received_bytes"><th scope="row">ソケットで受信したバイト数<code>/traffic/received_bytes</code></th><td>316</td></tr>
+<tr data-field="/traffic/sent_bytes"><th scope="row">ソケットで送信したバイト数<code>/traffic/sent_bytes</code></th><td>632</td></tr>
+</tbody></table><p>収集できた提示一覧は、サーバーによる認証前の申告として元の順に記録します。クライアント側の一覧は診断用の提案で、暗号方式の実装対応を示すものではありません。鍵交換・ホストの検証・認証は実施していません。</p></details></main></body></html>

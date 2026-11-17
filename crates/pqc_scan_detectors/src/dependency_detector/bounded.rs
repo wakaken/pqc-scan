@@ -730,6 +730,7 @@ pub(super) fn pom_with_context(
         let any = !emitted.is_empty();
         let conditional = own_profile.is_some() || baseline_unresolved || emitted.len() > 1;
         for (name, declared) in emitted {
+            let inserted = b.items.len();
             b.add(
                 "maven",
                 &name,
@@ -745,7 +746,7 @@ pub(super) fn pom_with_context(
                 false,
             );
             if conditional {
-                if let Some(item) = b.items.last_mut() {
+                if let Some(item) = b.items.get_mut(inserted) {
                     item.context = Some("conditional_profile_declaration_not_effective");
                 }
             }
@@ -754,6 +755,7 @@ pub(super) fn pom_with_context(
             let group = expand_maven(group, &base);
             let artifact = expand_maven(artifact, &base);
             if !group.contains('$') && !artifact.contains('$') {
+                let inserted = b.items.len();
                 b.add(
                     "maven",
                     &format!("{group}:{artifact}"),
@@ -764,7 +766,7 @@ pub(super) fn pom_with_context(
                     line_col_for_offset(text, n.range().start).0,
                     false,
                 );
-                if let Some(item) = b.items.last_mut() {
+                if let Some(item) = b.items.get_mut(inserted) {
                     item.context = Some("unresolved_property_not_effective");
                 }
             }
@@ -811,3 +813,7 @@ fn expand_maven(value: &str, properties: &std::collections::BTreeMap<String, Str
     }
     value
 }
+
+#[cfg(test)]
+#[path = "../../tests/support/bounded_quality.rs"]
+mod individual_quality;

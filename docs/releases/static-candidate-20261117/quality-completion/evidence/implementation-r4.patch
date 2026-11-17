@@ -1,0 +1,824 @@
+diff --git a/crates/pqc_scan_core/src/pipeline.rs b/crates/pqc_scan_core/src/pipeline.rs
+index 1ea104f..ec14b02 100644
+--- a/crates/pqc_scan_core/src/pipeline.rs
++++ b/crates/pqc_scan_core/src/pipeline.rs
+@@ -1331,3 +1331,7 @@ pub fn scan_repository_with_selection(
+ #[cfg(test)]
+ #[path = "quality055.rs"]
+ mod quality055;
++
++#[cfg(test)]
++#[path = "../tests/support/pipeline_quality.rs"]
++mod individual_quality;
+diff --git a/crates/pqc_scan_core/src/privacy.rs b/crates/pqc_scan_core/src/privacy.rs
+index 4baca80..30e972f 100644
+--- a/crates/pqc_scan_core/src/privacy.rs
++++ b/crates/pqc_scan_core/src/privacy.rs
+@@ -458,3 +458,7 @@ mod tests {
+         assert!(!p.sensitive(3, 1, false));
+     }
+ }
++
++#[cfg(test)]
++#[path = "../tests/support/privacy_quality.rs"]
++mod individual_quality;
+diff --git a/crates/pqc_scan_detectors/src/certificate_detector/attributes.rs b/crates/pqc_scan_detectors/src/certificate_detector/attributes.rs
+index 9600702..f37bc77 100644
+--- a/crates/pqc_scan_detectors/src/certificate_detector/attributes.rs
++++ b/crates/pqc_scan_detectors/src/certificate_detector/attributes.rs
+@@ -188,10 +188,19 @@ fn validate_certificate_layout(der: &[u8]) -> Result<&[u8], PublicDerParseError>
+     Ok(spki)
+ }
+ 
++fn universal_shape(value: &Any<'_>, tag: Tag, constructed: bool) -> bool {
++    value.class() == Class::Universal
++        && value.tag() == tag
++        && value.header.is_constructed() == constructed
++}
++
+ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes {
+     let oid = spki.algorithm.algorithm.to_id_string();
+     let parameters = spki.algorithm.parameters.as_ref();
++    // Any::as_oid casts content without checking the ASN.1 tag in the
++    // pinned library. Only an actual universal primitive OID is an OID fact.
+     let parameters_oid = parameters
++        .filter(|p| universal_shape(p, Tag::Oid, false))
+         .and_then(|p| p.as_oid().ok())
+         .map(|o| o.to_id_string());
+     let mut out = PublicKeyAttributes {
+@@ -213,7 +222,7 @@ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes
+         named_curve: None,
+         parameters_kind: match parameters {
+             None => "absent",
+-            Some(p) if p.as_null().is_ok() => "null",
++            Some(p) if universal_shape(p, Tag::Null, false) && p.as_null().is_ok() => "null",
+             Some(_) if parameters_oid.is_some() => "oid",
+             Some(_) => "other",
+         },
+@@ -234,7 +243,10 @@ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes
+             let parameters_ok = if oid == "1.2.840.113549.1.1.1" {
+                 parameters.is_none() || out.parameters_kind == "null"
+             } else {
+-                parameters.is_none() || parameters.is_some_and(|p| p.as_sequence().is_ok())
++                parameters.is_none()
++                    || parameters.is_some_and(|p| {
++                        universal_shape(p, Tag::Sequence, true) && p.as_sequence().is_ok()
++                    })
+             };
+             out.status = DetectorStatus::Partial;
+             if parameters_ok {
+@@ -323,7 +335,7 @@ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes
+                         && fields.iter().all(|f| {
+                             Any::from_der(f).ok().is_some_and(|(rest, v)| {
+                                 rest.is_empty()
+-                                    && v.tag() == Tag::Integer
++                                    && universal_shape(&v, Tag::Integer, false)
+                                     && positive_integer_bits(v.as_bytes()).is_some()
+                             })
+                         });
+@@ -331,7 +343,7 @@ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes
+                     if valid
+                         && y.is_some_and(|(rest, y)| {
+                             rest.is_empty()
+-                                && y.tag() == Tag::Integer
++                                && universal_shape(&y, Tag::Integer, false)
+                                 && positive_integer_bits(y.as_bytes()).is_some()
+                         })
+                     {
+@@ -383,7 +395,7 @@ fn fingerprint(bytes: &[u8]) -> String {
+ }
+ 
+ fn integer_parameter_fields<'a>(p: &Any<'a>) -> Result<Vec<&'a [u8]>, PublicDerParseError> {
+-    if p.tag() != Tag::Sequence {
++    if !universal_shape(p, Tag::Sequence, true) {
+         return Err(PublicDerParseError);
+     }
+     let mut input = p.as_bytes();
+@@ -420,3 +432,7 @@ fn pqc_signature_size(oid: &str) -> Option<usize> {
+         _ => None,
+     }
+ }
++
++#[cfg(test)]
++#[path = "../../tests/support/certificate_quality.rs"]
++mod individual_quality;
+diff --git a/crates/pqc_scan_detectors/src/dependency_detector/bounded.rs b/crates/pqc_scan_detectors/src/dependency_detector/bounded.rs
+index 32cb8b7..5011e76 100644
+--- a/crates/pqc_scan_detectors/src/dependency_detector/bounded.rs
++++ b/crates/pqc_scan_detectors/src/dependency_detector/bounded.rs
+@@ -730,6 +730,7 @@ pub(super) fn pom_with_context(
+         let any = !emitted.is_empty();
+         let conditional = own_profile.is_some() || baseline_unresolved || emitted.len() > 1;
+         for (name, declared) in emitted {
++            let inserted = b.items.len();
+             b.add(
+                 "maven",
+                 &name,
+@@ -745,7 +746,7 @@ pub(super) fn pom_with_context(
+                 false,
+             );
+             if conditional {
+-                if let Some(item) = b.items.last_mut() {
++                if let Some(item) = b.items.get_mut(inserted) {
+                     item.context = Some("conditional_profile_declaration_not_effective");
+                 }
+             }
+@@ -754,6 +755,7 @@ pub(super) fn pom_with_context(
+             let group = expand_maven(group, &base);
+             let artifact = expand_maven(artifact, &base);
+             if !group.contains('$') && !artifact.contains('$') {
++                let inserted = b.items.len();
+                 b.add(
+                     "maven",
+                     &format!("{group}:{artifact}"),
+@@ -764,7 +766,7 @@ pub(super) fn pom_with_context(
+                     line_col_for_offset(text, n.range().start).0,
+                     false,
+                 );
+-                if let Some(item) = b.items.last_mut() {
++                if let Some(item) = b.items.get_mut(inserted) {
+                     item.context = Some("unresolved_property_not_effective");
+                 }
+             }
+@@ -811,3 +813,7 @@ fn expand_maven(value: &str, properties: &std::collections::BTreeMap<String, Str
+     }
+     value
+ }
++
++#[cfg(test)]
++#[path = "../../tests/support/bounded_quality.rs"]
++mod individual_quality;
+diff --git a/crates/pqc_scan_detectors/src/tree_sitter_detector.rs b/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+index aed3fb8..39c5618 100644
+--- a/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
++++ b/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+@@ -89,12 +89,29 @@ impl TreeSitterDetector {
+             template_pending,
+             template_limited,
+         } = source_tree(text, &file.path, language, language_name, budget)?;
+-        let (mut candidates, mut status) = collect_candidate_nodes(text, &tree, budget);
++        let rsa_constructors = language_name == "java"
++            && rules
++                .get("TS_RSA_KEY_SIZE_LITERAL")
++                .is_some_and(|r| r.kind == RuleKind::TreeSitter && scope_matches(&r.scope, "java"));
++        let (mut candidates, mut status, mut constructors) =
++            collect_candidate_nodes(text, &tree, budget, rsa_constructors);
+         if compatibility_limited {
+             status = DetectorStatus::Truncated;
+         }
+         if tree.root_node().id() != original_tree.root_node().id() {
+-            let (original, original_status) = collect_candidate_nodes(text, &original_tree, budget);
++            let (original, original_status, extra_constructors) =
++                collect_candidate_nodes(text, &original_tree, budget, rsa_constructors);
++            for candidate in extra_constructors {
++                if !constructors.iter().any(|old| {
++                    old.byte_start == candidate.byte_start && old.text.len() == candidate.text.len()
++                }) {
++                    if constructors.len() == budget.max_ast_candidates {
++                        status = DetectorStatus::Truncated;
++                        break;
++                    }
++                    constructors.push(candidate);
++                }
++            }
+             if original_status == DetectorStatus::Truncated {
+                 status = DetectorStatus::Truncated;
+             }
+@@ -164,122 +181,216 @@ impl TreeSitterDetector {
+         let file_path = file.path.to_string_lossy().into_owned();
+ 
+         let mut remaining_match_bytes = budget.max_ast_match_bytes;
+-        for rule in rules.by_kind(RuleKind::TreeSitter) {
+-            if !scope_matches(&rule.scope, language_name) {
+-                continue;
+-            }
+-
+-            let regex = match rule.compiled_pattern() {
+-                Some(v) => v,
+-                None => {
+-                    if status != DetectorStatus::Truncated {
+-                        status = DetectorStatus::Partial;
+-                    }
+-                    continue;
+-                }
++        // Preserve the complete legacy candidate/alias/rule pass before spending
++        // residual budgets on the previously omitted Java RSA constructor arm.
++        let remaining_candidates = budget.max_ast_candidates.saturating_sub(candidates.len());
++        if constructors.len() > remaining_candidates {
++            status = DetectorStatus::Truncated;
++        }
++        constructors.truncate(remaining_candidates);
++        let mut rsa_dedup = HashSet::new();
++        let mut rsa_examined = 0;
++        for constructor_pass in [false, true] {
++            let pass_candidates = if constructor_pass {
++                &constructors
++            } else {
++                &candidates
+             };
+-
+-            let mut dedup = HashSet::new();
+-            let mut rule_hits = 0usize;
+-            let mut examined = 0usize;
+-            'candidates: for candidate in &candidates {
+-                if facts.replaces(rule) {
+-                    break;
+-                }
+-                if language_name == "python"
+-                    && matches!(
+-                        rule.id.as_str(),
+-                        "TS_PY_RSA_USAGE" | "TS_CLASSICAL_EC_API" | "TS_CLASSICAL_EDDSA_API"
+-                    )
+-                    && candidate.kind != "resolved_call"
+-                {
++            for rule in rules
++                .by_kind(RuleKind::TreeSitter)
++                .filter(|r| !constructor_pass || r.id == "TS_RSA_KEY_SIZE_LITERAL")
++            {
++                if !scope_matches(&rule.scope, language_name) {
+                     continue;
+                 }
+-                let match_text = candidate.canonical.as_deref().unwrap_or(candidate.text);
+-                if match_text.len() > remaining_match_bytes {
+-                    status = DetectorStatus::Truncated;
+-                    break;
+-                }
+-                remaining_match_bytes -= match_text.len();
+-                for hit in regex.find_iter(match_text) {
+-                    if examined >= budget.max_match_candidates {
+-                        status = DetectorStatus::Truncated;
+-                        break 'candidates;
++
++                let regex = match rule.compiled_pattern() {
++                    Some(v) => v,
++                    None => {
++                        if status != DetectorStatus::Truncated {
++                            status = DetectorStatus::Partial;
++                        }
++                        continue;
+                     }
+-                    examined += 1;
+-                    if should_skip_comment_only_match_for_language(
+-                        language_name,
+-                        match_text,
+-                        hit.start(),
+-                    ) {
++                };
++
++                let mut dedup = if constructor_pass {
++                    rsa_dedup.clone()
++                } else {
++                    HashSet::new()
++                };
++                let mut rule_hits = if constructor_pass {
++                    out.iter()
++                        .filter(|d: &&Detection| d.rule_id == rule.id)
++                        .count()
++                } else {
++                    0
++                };
++                let mut examined = if constructor_pass { rsa_examined } else { 0 };
++                'candidates: for candidate in pass_candidates {
++                    // Java constructors are included for the existing RSA parameter
++                    // rule only; other rules retain their original candidate scope.
++                    if candidate.kind == "object_creation_expression"
++                        && rule.id != "TS_RSA_KEY_SIZE_LITERAL"
++                    {
+                         continue;
+                     }
+-                    if is_embedded_identifier_submatch(match_text, hit.start(), hit.end()) {
++                    if facts.replaces(rule) {
++                        break;
++                    }
++                    if language_name == "python"
++                        && matches!(
++                            rule.id.as_str(),
++                            "TS_PY_RSA_USAGE" | "TS_CLASSICAL_EC_API" | "TS_CLASSICAL_EDDSA_API"
++                        )
++                        && candidate.kind != "resolved_call"
++                    {
+                         continue;
+                     }
++                    let match_text = candidate.canonical.as_deref().unwrap_or(candidate.text);
++                    if match_text.len() > remaining_match_bytes {
++                        status = DetectorStatus::Truncated;
++                        break;
++                    }
++                    remaining_match_bytes -= match_text.len();
++                    for hit in regex.find_iter(match_text) {
++                        if examined >= budget.max_match_candidates {
++                            status = DetectorStatus::Truncated;
++                            break 'candidates;
++                        }
++                        examined += 1;
++                        if should_skip_comment_only_match_for_language(
++                            language_name,
++                            match_text,
++                            hit.start(),
++                        ) {
++                            continue;
++                        }
++                        if is_embedded_identifier_submatch(match_text, hit.start(), hit.end()) {
++                            continue;
++                        }
+ 
+-                    let (relative_line, relative_col) = pqc_scan_core::model::line_col_for_offset(
+-                        candidate.text,
+-                        if candidate.canonical.is_some() {
+-                            0
++                        let (relative_line, relative_col) =
++                            pqc_scan_core::model::line_col_for_offset(
++                                candidate.text,
++                                if candidate.canonical.is_some() {
++                                    0
++                                } else {
++                                    hit.start()
++                                },
++                            );
++                        let line = candidate.line + relative_line.saturating_sub(1);
++                        let column = if relative_line == 1 {
++                            candidate.column + relative_col.saturating_sub(1)
+                         } else {
+-                            hit.start()
+-                        },
+-                    );
+-                    let line = candidate.line + relative_line.saturating_sub(1);
+-                    let column = if relative_line == 1 {
+-                        candidate.column + relative_col.saturating_sub(1)
+-                    } else {
+-                        relative_col
+-                    };
++                            relative_col
++                        };
+ 
+-                    // Parent/child candidates can expose the same token with
+-                    // different quote wrappers. Normalize only its boundaries;
+-                    // distinct occurrences must never share a line/text key.
+-                    let raw = hit.as_str();
+-                    let leading = raw.len() - raw.trim_start_matches(is_match_boundary).len();
+-                    let token = raw.trim_matches(is_match_boundary);
+-                    let source_start = candidate.byte_start
+-                        + if candidate.canonical.is_some() {
+-                            0
++                        // Parent/child candidates can expose the same token with
++                        // different quote wrappers. Normalize only its boundaries;
++                        // distinct occurrences must never share a line/text key.
++                        let raw = hit.as_str();
++                        let leading = raw.len() - raw.trim_start_matches(is_match_boundary).len();
++                        let token = raw.trim_matches(is_match_boundary);
++                        let source_start = candidate.byte_start
++                            + if candidate.canonical.is_some() {
++                                0
++                            } else {
++                                hit.start() + leading
++                            };
++                        let source_end = if candidate.canonical.is_some() {
++                            candidate.byte_start + candidate.text.len()
+                         } else {
+-                            hit.start() + leading
++                            source_start + token.len()
+                         };
+-                    let source_end = if candidate.canonical.is_some() {
+-                        candidate.byte_start + candidate.text.len()
+-                    } else {
+-                        source_start + token.len()
+-                    };
+-                    let dedup_key = (source_start, source_end);
+-                    if dedup.contains(&dedup_key) {
++                        let dedup_key = (source_start, source_end);
++                        if dedup.contains(&dedup_key) {
++                            continue;
++                        }
++                        if rule_hits == budget.max_hits_per_rule {
++                            status = DetectorStatus::Truncated;
++                            break 'candidates;
++                        }
++                        dedup.insert(dedup_key);
++
++                        let mut metadata = BTreeMap::new();
++                        metadata.insert("detector".to_string(), self.name().to_string());
++                        metadata.insert("language".to_string(), language_name.to_string());
++                        metadata.insert("node_kind".to_string(), candidate.kind.to_string());
++                        if rule.id == "PQC_STANDARD_REFERENCE" {
++                            let kind = if candidate.kind.contains("string") {
++                                "name_literal"
++                            } else if candidate.kind.contains("call") {
++                                "call_reference"
++                            } else {
++                                "symbol_reference"
++                            };
++                            metadata.insert("reference_kind".into(), kind.into());
++                        }
++                        metadata.insert("scope".to_string(), rule.scope.clone());
++                        if candidate.canonical.is_some() {
++                            metadata
++                                .insert("resolution_method".into(), "static_import_binding".into());
++                        }
++
++                        out.push(Detection {
++                            rule_id: rule.id.clone(),
++                            location: Location {
++                                file: file_path.clone(),
++                                line,
++                                column,
++                            },
++                            evidence: Evidence {
++                                r#type: "tree_sitter_match".to_string(),
++                                r#match: mask_preview(if candidate.canonical.is_some() {
++                                    candidate.text
++                                } else {
++                                    hit.as_str()
++                                }),
++                                snippet_preview: mask_preview(
++                                    &clip_text(candidate.text.trim(), 240).0,
++                                ),
++                                metadata,
++                            },
++                        });
++                        if observe {
++                            observations.push(pqc_scan_core::ObservationDraft::source(
++                                out.last().expect("accepted detection"),
++                                pqc_scan_core::ObservationMethod::AstPattern,
++                                hit.as_str(),
++                                Some((source_start, source_end)),
++                            ));
++                        }
++                        rule_hits += 1;
++                    }
++                }
++                for found in facts
++                    .rule_matches(rule)
++                    .iter()
++                    .filter(|_| !constructor_pass)
++                {
++                    if dedup
++                        .iter()
++                        .any(|&(start, end)| found.start <= start && end <= found.end)
++                    {
+                         continue;
+                     }
+-                    if rule_hits == budget.max_hits_per_rule {
++                    if rule_hits >= budget.max_hits_per_rule
++                        || examined >= budget.max_match_candidates
++                    {
+                         status = DetectorStatus::Truncated;
+-                        break 'candidates;
+-                    }
+-                    dedup.insert(dedup_key);
+-
+-                    let mut metadata = BTreeMap::new();
+-                    metadata.insert("detector".to_string(), self.name().to_string());
+-                    metadata.insert("language".to_string(), language_name.to_string());
+-                    metadata.insert("node_kind".to_string(), candidate.kind.to_string());
+-                    if rule.id == "PQC_STANDARD_REFERENCE" {
+-                        let kind = if candidate.kind.contains("string") {
+-                            "name_literal"
+-                        } else if candidate.kind.contains("call") {
+-                            "call_reference"
+-                        } else {
+-                            "symbol_reference"
+-                        };
+-                        metadata.insert("reference_kind".into(), kind.into());
++                        break;
+                     }
+-                    metadata.insert("scope".to_string(), rule.scope.clone());
+-                    if candidate.canonical.is_some() {
+-                        metadata.insert("resolution_method".into(), "static_import_binding".into());
++                    let (line, column) =
++                        pqc_scan_core::model::line_col_for_offset(text, found.start);
++                    let raw = &text[found.start..found.end];
++                    if found.budget_bytes() > remaining_match_bytes {
++                        status = DetectorStatus::Truncated;
++                        break;
+                     }
+-
+-                    out.push(Detection {
++                    remaining_match_bytes -= found.budget_bytes();
++                    examined += 1;
++                    let detection = Detection {
+                         rule_id: rule.id.clone(),
+                         location: Location {
+                             file: file_path.clone(),
+@@ -287,83 +398,39 @@ impl TreeSitterDetector {
+                             column,
+                         },
+                         evidence: Evidence {
+-                            r#type: "tree_sitter_match".to_string(),
+-                            r#match: mask_preview(if candidate.canonical.is_some() {
+-                                candidate.text
+-                            } else {
+-                                hit.as_str()
+-                            }),
+-                            snippet_preview: mask_preview(&clip_text(candidate.text.trim(), 240).0),
+-                            metadata,
++                            r#type: "tree_sitter_match".into(),
++                            r#match: mask_preview(raw),
++                            snippet_preview: pqc_scan_core::model::snippet_around(
++                                text,
++                                found.start,
++                                found.end,
++                                64,
++                            ),
++                            metadata: BTreeMap::from([
++                                ("detector".into(), self.name().into()),
++                                ("language".into(), language_name.into()),
++                                ("node_kind".into(), "bounded_source_fact".into()),
++                                ("scope".into(), rule.scope.clone()),
++                                ("source_resolution".into(), found.reason.into()),
++                            ]),
+                         },
+-                    });
++                    };
+                     if observe {
+                         observations.push(pqc_scan_core::ObservationDraft::source(
+-                            out.last().expect("accepted detection"),
++                            &detection,
+                             pqc_scan_core::ObservationMethod::AstPattern,
+-                            hit.as_str(),
+-                            Some((source_start, source_end)),
++                            raw,
++                            Some((found.start, found.end)),
+                         ));
+                     }
++                    dedup.insert((found.start, found.end));
++                    out.push(detection);
+                     rule_hits += 1;
+                 }
+-            }
+-            for found in facts.rule_matches(rule) {
+-                if dedup
+-                    .iter()
+-                    .any(|&(start, end)| found.start <= start && end <= found.end)
+-                {
+-                    continue;
+-                }
+-                if rule_hits >= budget.max_hits_per_rule || examined >= budget.max_match_candidates
+-                {
+-                    status = DetectorStatus::Truncated;
+-                    break;
+-                }
+-                let (line, column) = pqc_scan_core::model::line_col_for_offset(text, found.start);
+-                let raw = &text[found.start..found.end];
+-                if found.budget_bytes() > remaining_match_bytes {
+-                    status = DetectorStatus::Truncated;
+-                    break;
+-                }
+-                remaining_match_bytes -= found.budget_bytes();
+-                examined += 1;
+-                let detection = Detection {
+-                    rule_id: rule.id.clone(),
+-                    location: Location {
+-                        file: file_path.clone(),
+-                        line,
+-                        column,
+-                    },
+-                    evidence: Evidence {
+-                        r#type: "tree_sitter_match".into(),
+-                        r#match: mask_preview(raw),
+-                        snippet_preview: pqc_scan_core::model::snippet_around(
+-                            text,
+-                            found.start,
+-                            found.end,
+-                            64,
+-                        ),
+-                        metadata: BTreeMap::from([
+-                            ("detector".into(), self.name().into()),
+-                            ("language".into(), language_name.into()),
+-                            ("node_kind".into(), "bounded_source_fact".into()),
+-                            ("scope".into(), rule.scope.clone()),
+-                            ("source_resolution".into(), found.reason.into()),
+-                        ]),
+-                    },
+-                };
+-                if observe {
+-                    observations.push(pqc_scan_core::ObservationDraft::source(
+-                        &detection,
+-                        pqc_scan_core::ObservationMethod::AstPattern,
+-                        raw,
+-                        Some((found.start, found.end)),
+-                    ));
++                if !constructor_pass && rule.id == "TS_RSA_KEY_SIZE_LITERAL" {
++                    rsa_dedup = dedup;
++                    rsa_examined = examined;
+                 }
+-                dedup.insert((found.start, found.end));
+-                out.push(detection);
+-                rule_hits += 1;
+             }
+         }
+ 
+@@ -385,8 +452,14 @@ fn collect_candidate_nodes<'a>(
+     text: &'a str,
+     tree: &tree_sitter::Tree,
+     budget: crate::DetectorBudget,
+-) -> (Vec<CandidateNode<'a>>, DetectorStatus) {
++    rsa_constructors: bool,
++) -> (
++    Vec<CandidateNode<'a>>,
++    DetectorStatus,
++    Vec<CandidateNode<'a>>,
++) {
+     let mut out = Vec::new();
++    let mut constructors = Vec::new();
+     let mut stack = vec![tree.root_node()];
+     let mut scheduled = 1;
+     let mut status = DetectorStatus::Complete;
+@@ -444,7 +517,13 @@ fn collect_candidate_nodes<'a>(
+         }
+ 
+         let kind = node.kind();
+-        if !is_semantic_node_kind(kind) {
++        let constructor = rsa_constructors
++            && kind == "object_creation_expression"
++            && node
++                .child_by_field_name("type")
++                .and_then(|n| n.utf8_text(text.as_bytes()).ok())
++                .is_some_and(|name| name.rsplit('.').next() == Some("RSAKeyGenParameterSpec"));
++        if !is_semantic_node_kind(kind) && !constructor {
+             continue;
+         }
+ 
+@@ -461,12 +540,20 @@ fn collect_candidate_nodes<'a>(
+             continue;
+         }
+ 
+-        if out.len() >= budget.max_ast_candidates {
++        let target = if constructor {
++            &mut constructors
++        } else {
++            &mut out
++        };
++        if target.len() >= budget.max_ast_candidates {
+             status = DetectorStatus::Truncated;
++            if constructor {
++                continue;
++            }
+             break;
+         }
+         let point = node.start_position();
+-        out.push(CandidateNode {
++        target.push(CandidateNode {
+             kind,
+             text: raw_text,
+             line: point.row + 1,
+@@ -476,7 +563,7 @@ fn collect_candidate_nodes<'a>(
+         });
+     }
+ 
+-    (out, status)
++    (out, status, constructors)
+ }
+ 
+ fn clip_text(input: &str, max_chars: usize) -> (String, bool) {
+diff --git a/crates/pqc_scan_detectors/tests/certificate_policy.rs b/crates/pqc_scan_detectors/tests/certificate_policy.rs
+index 487a45d..e96556d 100644
+--- a/crates/pqc_scan_detectors/tests/certificate_policy.rs
++++ b/crates/pqc_scan_detectors/tests/certificate_policy.rs
+@@ -433,3 +433,76 @@ fn custom_legacy_cutoff_scope_evidence_describes_both_possible_predicate_results
+         assert_eq!(outcome.detections()[0].evidence.r#match, expected);
+     }
+ }
++
++#[test]
++fn previously_empty_certificate_rule_strata_have_positive_and_negative_fact_controls() {
++    let rules = rules();
++    let mut data = corpus();
++    // Explicitly synthetic OID-bearing containers; signatures/key shapes are not
++    // validated and Partial is retained. These assert parsed OID observations only.
++    for (name, property, oid, expected) in [
++        (
++            "slh-signature-reference",
++            "signature_oid_hex",
++            "608648016503040314",
++            vec!["CERT_RSA_2048", "CERT_SLH_DSA_SIGNATURE"],
++        ),
++        (
++            "slh-subject-reference",
++            "public_key_oid_hex",
++            "608648016503040314",
++            vec!["CERT_RSA_SIGNATURE", "CERT_SLH_DSA_PUBLIC_KEY"],
++        ),
++    ] {
++        let mut case = named("rsa-2048");
++        case["name"] = name.into();
++        case[property] = oid.into();
++        case["expected_rules"] = serde_json::json!(expected);
++        case["expected_status"] = "partial".into();
++        data["cases"].as_array_mut().unwrap().push(case);
++    }
++    let ids = [
++        "CERT_DSA_SIGNATURE",
++        "CERT_EXPIRED",
++        "CERT_EXPIRY_2026_OR_BEFORE",
++        "CERT_MD5_SIGNATURE",
++        "CERT_ML_DSA_PUBLIC_KEY",
++        "CERT_ML_DSA_SIGNATURE",
++        "CERT_NOT_YET_VALID",
++        "CERT_OID_RSA_PSS",
++        "CERT_P12_CONTAINER",
++        "CERT_PEM_CONTAINER",
++        "CERT_RSA_1024",
++        "CERT_RSA_2048",
++        "CERT_SHA1_SIGNATURE",
++        "CERT_SLH_DSA_PUBLIC_KEY",
++        "CERT_SLH_DSA_SIGNATURE",
++    ];
++    let clock = CertificateDetector::at(data["assessment_time_unix"].as_i64().unwrap());
++    for id in ids {
++        let mut polarities = [0, 0];
++        for case in data["cases"].as_array().unwrap() {
++            let expected = case["expected_rules"]
++                .as_array()
++                .unwrap()
++                .iter()
++                .any(|v| v.as_str() == Some(id));
++            let result = clock.detect_detailed(&input(case), &rules).unwrap();
++            let observed = result
++                .detections()
++                .iter()
++                .filter(|d| d.rule_id == id)
++                .count();
++            assert_eq!(observed, usize::from(expected), "{id}/{}", case["name"]);
++            if case["expected_status"] == "partial" {
++                assert_eq!(result.status(), DetectorStatus::Partial);
++            }
++            polarities[usize::from(expected)] += 1;
++        }
++        assert!(polarities.iter().all(|n| *n > 0), "{id}");
++        println!(
++            "CERT_RULE_CASE {}",
++            serde_json::json!({"id":id,"negative":polarities[0],"positive":polarities[1],"correct":true,"scope":"Parsed facts/container markers only; existing fixed clock and exact reviewed cases reused. Synthetic PQC shape remains Partial."})
++        );
++    }
++}
+diff --git a/docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json b/docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json
+index fded6a8..6a94c73 100644
+--- a/docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json
++++ b/docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json
+@@ -2180,7 +2180,7 @@
+     },
+     {
+       "path": "crates/pqc_scan_core/src/pipeline.rs",
+-      "sha256": "67059e6f6dc7accd6a5ff2fb818b13d3955c56d4e176dbebabadf5173a49fa6f",
++      "sha256": "cb441756e7550daf39b58247a7973cfbe797bd38d8d7ba0bf5b48400595fe374",
+       "reason": "Inline cfg(test) synthetic file/finding and privacy controls.",
+       "results": [
+         {
+@@ -2495,7 +2495,7 @@
+     },
+     {
+       "path": "crates/pqc_scan_core/src/privacy.rs",
+-      "sha256": "5505c9ab854b1038d13d4c492f32b2234efa1edde07cfcf179af1348d27a49e8",
++      "sha256": "c4bfc85feeadd81e24e3b010c8c9d722ccd458404b151dbce2d80eaf66582863",
+       "reason": "Inline cfg(test) redaction canaries and token spans.",
+       "results": [
+         {
+@@ -4931,7 +4931,7 @@
+     },
+     {
+       "path": "crates/pqc_scan_detectors/tests/certificate_policy.rs",
+-      "sha256": "a1394888c8f45b7b615b3a7d731342d411bb9564b3bb22e5c0b917e3d3dfdd30",
++      "sha256": "f89d6092905f4dc74a7ee643453541a4e121ee874130b7d88ae92f59e938d9ae",
+       "reason": "Reviewed synthetic regression/acceptance input or test source; expected references remain in the full scan.",
+       "results": [
+         {
+diff --git a/docs/user/SCANNING.ja.md b/docs/user/SCANNING.ja.md
+index 54bf0e2..9865fce 100644
+--- a/docs/user/SCANNING.ja.md
++++ b/docs/user/SCANNING.ja.md
+@@ -186,3 +186,10 @@ Pythonの明示的なPQC importは、`from `の後にあるモジュール参照
+ 位置は元ソースのバイト範囲と文字単位の列に対応します。この修正により、対象範囲の
+ 所見ID・観測IDが変わる場合があります。規則の一致条件・リスク・重大度・信頼度、
+ スキーマとIDの計算方式は変更していません。
++
++### JavaのRSAパラメータ参照とMaven依存宣言
++
++0.3.0候補では、Javaの`RSAKeyGenParameterSpec`コンストラクタも、既存の1024／2048／3072ビット参照ルールで検査します。新たに検出されるコンストラクタには検出結果とIDが追加されますが、実際に使われる鍵長や実行を確認したという意味ではありません。既存の候補を先に検査し、追加のコンストラクタには残った処理量の予算を使います。検査が終わらない場合は未完了として示します。
++不正なMaven依存座標が拒否されても、それより前の正常な依存宣言の注記は変更しません。出力形式と正常な宣言の意味は維持します。
++
++証明書パラメータのOIDや名前付き曲線は、対応するASN.1の汎用型と符号化の形を確認してから記録します。OID以外の内容や、文脈依存型・構築型の見かけが似た値から、OID・曲線・鍵長を推定しません。不正な形はPartial／Unsupportedを維持します。属性値の訂正により観測や資産のIDが変わる場合がありますが、署名や信頼の検証を追加したものではありません。
+diff --git a/docs/user/SCANNING.md b/docs/user/SCANNING.md
+index dbc31b0..6546460 100644
+--- a/docs/user/SCANNING.md
++++ b/docs/user/SCANNING.md
+@@ -192,3 +192,20 @@ blank lines; intentionally whitespace-only custom matches keep their full range.
+ Locations use original source bytes and character columns. This correction can
+ change finding and observation IDs for affected ranges; rule matching, risk,
+ severity and confidence are unchanged. Schemas and the identity algorithm are unchanged.
++
++### Java RSA parameter references and Maven declarations
++
++The 0.3.0 candidate also inspects Java `RSAKeyGenParameterSpec` constructors
++for the existing 1024/2048/3072-bit reference rule. A newly detected constructor
++can add a finding and its IDs; it does not establish an effective key size or
++runtime use. Existing candidates are inspected before additional constructors
++consume remaining inspection budgets. Incomplete inspection stays explicit.
++Rejected Maven dependency coordinates do not change the context annotations of
++earlier valid declarations. The output schema and valid declaration meaning
++remain unchanged.
++
++Certificate parameter OIDs and named curves require the corresponding universal
++ASN.1 type and encoding shape. Non-OID content or context-specific/constructed
++lookalikes no longer become OID, curve or key-size facts. Invalid shapes retain
++Partial/Unsupported status; this corrects attribute values and may change their
++observation/asset IDs without adding a signature/trust-validation claim.

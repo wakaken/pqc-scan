@@ -19,6 +19,12 @@ pub(crate) struct SourceMatch {
     pub start: usize,
     pub end: usize,
     pub reason: &'static str,
+    retained_prefix_bytes: usize,
+}
+impl SourceMatch {
+    pub fn budget_bytes(&self) -> usize {
+        self.end - self.start + self.retained_prefix_bytes
+    }
 }
 #[derive(Default)]
 pub(crate) struct Facts {
@@ -47,11 +53,26 @@ impl Facts {
         }
         let hits = self.hits.entry(id).or_default();
         if start < end {
-            hits.push(SourceMatch { start, end, reason });
+            hits.push(SourceMatch {
+                start,
+                end,
+                reason,
+                retained_prefix_bytes: 0,
+            });
         }
     }
     fn node(&mut self, id: &'static str, node: Node<'_>, reason: &'static str) {
         self.push(id, node.start_byte(), node.end_byte(), reason);
+    }
+    fn reference(&mut self, id: &'static str, node: Node<'_>, start: usize, reason: &'static str) {
+        let next = self.hits.get(id).map_or(0, Vec::len);
+        self.node(id, node, reason);
+        if let Some(hit) = self.hits.get_mut(id).and_then(|hits| hits.get_mut(next)) {
+            // Preserve the original statement's budget cost. A location repair
+            // must not let more candidates through a caller's existing cap.
+            hit.retained_prefix_bytes = start - hit.start;
+            hit.start = start;
+        }
     }
     fn callee(&mut self, id: &'static str, node: Node<'_>, reason: &'static str) {
         if let Some(function) = node.child_by_field_name("function") {

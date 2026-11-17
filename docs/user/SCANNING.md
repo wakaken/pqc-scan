@@ -2,7 +2,7 @@
 
 [日本語](SCANNING.ja.md) · [README](../../README.md)
 
-This guide describes the v0.3 development checkout. Detected references and findings can differ from the published v0.2.0 release.
+This guide describes the unpublished v0.3.0 static candidate. The published release is v0.2.0; detected references, evidence and IDs can differ between versions. See the [candidate notes](../releases/v0.3.0.md) for compatibility and release status.
 
 Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
 
@@ -30,6 +30,27 @@ Defaults are `--format all`, `--lang en`, `--out-dir ./pqc-report`, `--rules-dir
 
 Add `--cyclonedx-17` to write separate CycloneDX 1.7 inventories. The [report guide](REPORTS.md#cyclonedx)
 explains these documents and the completeness limits of [inventory comparison](REPORTS.md#diff).
+
+
+### Output destination safety
+
+On Unix (including macOS and Linux), report writers reject symbolic links in the
+output directory path and existing symbolic-link or non-regular-file destinations.
+The root-controlled macOS aliases `/tmp`, `/var` and `/etc` remain usable; links
+inside them receive the same checks. Use the physical path for other directory
+aliases. This applies to scan, inventory, assessment, diagnostics, CycloneDX, diff
+and probe reports.
+
+Missing directories are created. Existing regular report files can be overwritten,
+including on repeated runs. Each file is replaced atomically rather than truncated;
+an external file sharing a hard link is not modified. Published files have private
+permissions (0600, subject to umask); replacing a file does not preserve its inode,
+old permissions, ACLs or extended attributes. Directory write permission is needed.
+A failed report set may leave earlier files from that run; the set is not one
+transaction. Concurrent modifications by someone who can write the destination
+can still remove or alter reports; this protection prevents redirected writes,
+not tamper-proof storage. Unsupported non-Unix platforms fail explicitly instead
+of falling back to unsafe output.
 
 ### Recommended usage from your product repository
 
@@ -160,3 +181,35 @@ See [dependency declarations and resolution evidence](../architecture/DEPENDENCY
 ## Including normally excluded binary formats
 
 `scan` excludes known media/archive/compiled-data extensions and otherwise non-text binary inputs before selecting files. These exclusions are counted separately from unfinished checks. `--include-non-scannable` restores their inclusion for forensic/custom-detector runs; it does not add parsers for those formats and can increase “not applicable” counts. Existing directory, Markdown, Git-ignore and size policies still apply. Cryptographic container extensions are retained by default even when unsupported, so their inspection gaps remain visible. Full exclusion paths remain in diagnostic JSON, while human diagnostics show counts and at most three examples per reason.
+
+
+### Reference positions
+
+Explicit Python PQC imports are located at the module reference after `from `;
+the evidence range includes imported symbols and continuation lines. Only regex
+rules whose `scope` is exactly `config` omit leading whitespace from a nonempty
+reference range. This is not a rule for every configuration file or every regex.
+Whitespace-only custom matches retain their full range.
+
+The exact built-in `TLS_VERSION_1_0` pattern/scope selects the protocol token and
+reuses its trailing delimiter for an adjacent reference. Modified patterns/scopes
+and unrelated custom IDs retain generic matching ranges and non-overlapping
+iteration. A name reference does not establish effective configuration or a
+negotiated protocol. Locations use original decoded text and character columns;
+see [version-to-version identity changes](REPORTS.md#versions-and-identity).
+
+### Java RSA, Maven and certificate facts
+
+Java `RSAKeyGenParameterSpec` constructors are inspected for explicit
+1024/2048/3072-bit RSA references. They do not prove an effective key size or
+runtime use. Existing candidates are inspected before additional constructors
+consume the remaining budgets; incomplete inspection stays explicit.
+Rejected Maven dependency coordinates cannot change the context annotations of
+earlier valid declarations.
+
+Certificate parameter OIDs and named curves require the corresponding universal
+ASN.1 type and encoding shape. Content bytes alone do not establish an OID, curve
+or key-size fact. Uninterpreted or malformed attributes retain inspection limits;
+no signature/trust validation follows. A NULL parameter has no parameter OID, so
+the optional `parameters_oid` metadata entry is absent, rather than an empty
+string. See the [candidate compatibility notes](../releases/v0.3.0.md).

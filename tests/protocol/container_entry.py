@@ -140,7 +140,17 @@ def exercise(case):
 
 
 def suite(previews, ssh_kex):
-    write('checks.json',boundary())
+    # Only legacy untracked test output is writable; source/root stay readonly.
+    output = SCRATCH/'test-target'
+    output.mkdir()
+    assert (ROOT/'target').is_symlink() and (ROOT/'target').resolve() == output
+    probe = ROOT/'target/suite-output-probe'
+    probe.write_text('scratch only')
+    assert (output/probe.name).read_text() == 'scratch only'
+    probe.unlink()
+    checks = boundary()
+    checks['legacyTestOutputScratch'] = str(output)
+    write('checks.json',checks)
     cargo = SCRATCH/'cargo'; cargo.mkdir()
     for name in ['registry', 'git']:
         cache = Path('/usr/local/cargo')/name

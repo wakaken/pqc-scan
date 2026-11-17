@@ -1,0 +1,130 @@
+{
+  "binary_sha256": "0378516f26fe4fc22486610a69d107a6e58331e6ceb8533762a217d86ba71287",
+  "cases": [
+    {
+      "case": "success-ja",
+      "exit": 0,
+      "server_received_types": [
+        20,
+        30,
+        21,
+        1
+      ],
+      "server_sent_types": [
+        20,
+        31,
+        21
+      ],
+      "proxy": {
+        "server_plaintext_types": [],
+        "signature_bytes_flipped": 0
+      },
+      "files": {
+        "report.md": "593e3f799f07373e7cd0774779ca426f9fa47f9c82787855fd12655478cdc6e9",
+        "report.html": "b02b580170102376a4e9728fd94f0b56698ef1d09eb90e5c01174e19b4d1b389",
+        "probe.ssh-kex.v1.json": "aed58ec7bf02ee98f34bf80d90fd03f79e72cf0277d5099e6d9bee6e69e168fb"
+      },
+      "cleanup": true
+    },
+    {
+      "case": "success-en",
+      "exit": 0,
+      "server_received_types": [
+        20,
+        30,
+        21,
+        1
+      ],
+      "server_sent_types": [
+        20,
+        31,
+        21
+      ],
+      "proxy": {
+        "server_plaintext_types": [],
+        "signature_bytes_flipped": 0
+      },
+      "files": {
+        "report.md": "e352b12de2a9578043f368322b8f32c6539cdbd6b21b419e47a4440bb382a921",
+        "report.html": "00425512e150993b71909c346a697920c3863541b474f9c37c88ca8d8fc1c9c1",
+        "probe.ssh-kex.v1.json": "7e8c28a4b334de7daff0176027b08c58418232308a91567458322dbbf720ea04"
+      },
+      "cleanup": true
+    },
+    {
+      "case": "wrong-pin",
+      "exit": 3,
+      "server_received_types": [
+        20,
+        30,
+        21
+      ],
+      "server_sent_types": [
+        20,
+        31,
+        21
+      ],
+      "proxy": {
+        "server_plaintext_types": [],
+        "signature_bytes_flipped": 0
+      },
+      "files": {
+        "report.md": "2bb7c07fcb7440142fd26032c27d701a9c6a3a716c86b75f7eb62daaf1cd0b33",
+        "report.html": "51d0151c174b57b734124b2f76b78a6aa53e932080a2a38c7b021ca7b55f94a1",
+        "probe.ssh-kex.v1.json": "e1158fb83b3bb6116b4073e2cfd030aa4111c81047ba148731aeba8b115bbec3"
+      },
+      "cleanup": true
+    },
+    {
+      "case": "tampered-signature",
+      "exit": 3,
+      "server_received_types": [
+        20,
+        30
+      ],
+      "server_sent_types": [
+        20,
+        31,
+        21
+      ],
+      "proxy": {
+        "server_plaintext_types": [
+          20,
+          31,
+          21
+        ],
+        "signature_bytes_flipped": 1,
+        "upload_thread_stopped": true
+      },
+      "files": {
+        "report.md": "898eed1a81b6bca10a346c8a8969f9b564adac46476f438e3a7c4c81698fab5d",
+        "report.html": "3216dbd6379add7ae18bbc2dda324e52bca243f7ceb6da2105cf4965cc393654",
+        "probe.ssh-kex.v1.json": "52069749e16b8930b304471c49c70ec1dafdc82c8cb15cc52b82c9582b55bd41"
+      },
+      "cleanup": true
+    },
+    {
+      "case": "no-overlap",
+      "exit": 3,
+      "server_received_types": [
+        20
+      ],
+      "server_sent_types": [
+        20
+      ],
+      "proxy": {
+        "server_plaintext_types": [],
+        "signature_bytes_flipped": 0
+      },
+      "files": {
+        "report.md": "86bd47c1e2fc9095defa9ba71a04679674a71972b8d7b6f36da96895062c0d25",
+        "report.html": "c8d35ec41bfa928a03cc400da8328d057d377fd3ebaa62862a3fa7142759a1c1",
+        "probe.ssh-kex.v1.json": "09508e41375a246fbac78be50f688e23b730e1f7cb56287bc5eb023c44a0bdfa"
+      },
+      "cleanup": true
+    }
+  ],
+  "fixture_keys_removed": true,
+  "binary_before_after_match": true,
+  "sshd_version": "OpenSSH_10.2p1, OpenSSL 3.0.22 25 Aug 2026"
+}

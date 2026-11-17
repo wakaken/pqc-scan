@@ -452,3 +452,24 @@ The current AST adapter borrows full source slices rather than clipping matching
 ## Selected-file repository context
 
 The pipeline supplies an optional `RepositoryContext` to detectors through a backwards-compatible default trait adapter. References are restricted to the walker-selected file set, normalized inside the root and read via `safe_read`, retaining size and no-link protections. Context does not widen the scan scope. Maven uses validated local parents for properties only; gemspec delegation retains observations at their actual source files. Conditional assertions use existing metadata/capture-status/uncertainty fields, without changing inventory schemas or claiming effective dependency resolution. Detector explanations are fixed strings in the existing diagnostic message field, never arbitrary parser or I/O error text.
+
+
+## Report destination boundary
+
+All static, inventory, assessment, diagnostics, CycloneDX, probe and diff writers
+use `pqc_scan_core::safe_output`. On Unix it walks/creates output directories with
+`openat`/`mkdirat` and `O_NOFOLLOW`, then writes an exclusively created private
+staging file and publishes it with descriptor-relative `renameat`. A pre-existing
+non-regular destination is rejected; a final symlink inserted after validation is
+replaced as a directory entry without writing its target. A renamed parent remains
+the held directory object, not the symlink substituted at its former pathname.
+Replacing a hard link does not modify the other inode reference.
+
+Rendering, schemas, file names and callable writer signatures are unchanged. Files
+are individually atomic replacements, not a report-set transaction, and have mode
+0600 subject to umask. Other inode metadata is not retained. The only directory
+link aliases resolved are the fixed root-controlled macOS `/tmp`, `/var`, `/etc`
+aliases when their targets match the expected physical system locations. Other
+links are rejected. Non-Unix output fails Unsupported rather than using an unsafe
+fallback; this does not add a new official platform. See the paired user guide
+for operational compatibility and destination-tampering limits.
