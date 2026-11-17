@@ -177,7 +177,7 @@ def execute(image, output, *, case='suite', previews=False, ssh_kex=False,
         subprocess.run(['docker', 'image', 'inspect', image], check=True, stdout=subprocess.DEVNULL, timeout=30)
         with tempfile.TemporaryDirectory(prefix='pqc-confined-source-') as temporary:
             source = Path(temporary)/'source'; bindings = snapshot(ROOT, source)
-            if case in {'coverage044', 'coverage044-branch', 'mutation045', 'quality055', 'security057', 'fuzz047', 'fuzz047-profile', 'protocol049', 'performance050'}:
+            if case in {'suite', 'coverage044', 'coverage044-branch', 'mutation045', 'quality055', 'security057', 'fuzz047', 'fuzz047-profile', 'protocol049', 'performance050'}:
                 # Legacy tests write beneath the repository target/ instead of
                 # CARGO_TARGET_DIR. Route only that untracked output to tmpfs.
                 (source/'target').symlink_to('/scratch/test-target', target_is_directory=True)

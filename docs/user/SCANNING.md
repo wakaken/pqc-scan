@@ -214,3 +214,9 @@ A NULL parameter has no parameter OID: the legacy metadata no longer emits an
 empty `parameters_oid` entry for it. Consumers must continue treating this
 metadata entry as optional. The enclosing schema and finding IDs in the measured
 canonical corpora remain unchanged; full field differences are recorded.
+
+The built-in TLS 1.0 name rule reports the protocol token itself and preserves
+adjacent references separated by one delimiter. Corrected positions and evidence
+change affected IDs; previously missed adjacent names can increase the count.
+Custom patterns/scopes retain their matching ranges. A name reference does not
+establish effective configuration or a negotiated protocol.

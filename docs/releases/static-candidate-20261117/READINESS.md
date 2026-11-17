@@ -137,3 +137,11 @@ one-sided rule strata and 136 static missing-outcome spans. Current work and
 source-specific measurements are in [QUALITY-COMPLETION.md](QUALITY-COMPLETION.md).
 Earlier candidate binaries, hosted receipts, labels and limitations above remain
 historical and are not relabelled as executions of the new product fixes.
+
+## Independent audit fix follow-up
+
+The current candidate follow-up is [AUDIT-FIXES.md](AUDIT-FIXES.md), with all73
+original clauses preserved in [the candidate matrix](audit-fixes/REQUIREMENTS.md).
+Its local checks and both reviews are accepted; exact hosted and clean-source
+package gates are recorded there separately. This preserves the older candidate
+measurements above rather than applying them to changed product bytes.

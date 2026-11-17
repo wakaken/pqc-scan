@@ -147,7 +147,7 @@ impl RegexDetector {
             let mut accepted = 0;
             let mut examined = 0;
             'targets: for (base, target) in targets {
-                for found in regex.find_iter(target) {
+                for found in reference_matches(regex, target, rule) {
                     if examined >= budget.max_match_candidates {
                         status = DetectorStatus::Truncated;
                         break 'targets;
@@ -234,6 +234,30 @@ impl Detector for BoundedRegexDetector {
     fn detect_observed(&self, f: &ScannableFile, r: &RuleSet) -> Result<DetectorOutcome> {
         RegexDetector.detect_internal(f, r, true, self.0)
     }
+}
+
+// Only this exact shipped rule uses non-consuming boundary reuse. Custom rules
+// (including copied IDs with another pattern/scope) keep regex::find_iter.
+fn reference_matches<'a>(
+    regex: &'a regex::Regex,
+    text: &'a str,
+    rule: &pqc_scan_rules::Rule,
+) -> impl Iterator<Item = regex::Match<'a>> {
+    let builtin = rule.id == "TLS_VERSION_1_0"
+        && rule.scope == "code"
+        && rule.pattern == r"(?:^|[^A-Za-z0-9_])(?P<reference>TLSv1(?:[._]0)?)(?:$|[^A-Za-z0-9_.])";
+    let mut generic = regex.find_iter(text);
+    let mut cursor = 0;
+    std::iter::from_fn(move || {
+        if !builtin {
+            return generic.next();
+        }
+        let reference = regex.captures_at(text, cursor)?.name("reference")?;
+        // This fixed capture is nonempty; advance past it, leaving its trailing
+        // delimiter available as the next reference's leading boundary.
+        cursor = reference.end();
+        Some(reference)
+    })
 }
 
 #[cfg(test)]

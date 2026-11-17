@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/probe.py", line 18, in <module>
+    c.write('checks.json',c.boundary());e.smoke();e.measure('static-branches',nightly=True)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/source/tests/quality/task044/entry.py", line 126, in measure
+    run(base + ['-summary-only', '-dump'], label+'/diagnostic.txt', timeout=120, separate_stderr=True)
+  File "/probe.py", line 14, in run
+    return original(args,name,**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/source/tests/quality/task044/entry.py", line 38, in run
+    raise RuntimeError(f'{name}: {status}')
+RuntimeError: static-branches/diagnostic.txt: -6

@@ -1,0 +1,502 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "columnKind": "unicodeCodePoints",
+      "tool": {
+        "driver": {
+          "name": "pqc-scan",
+          "rules": [
+            {
+              "id": "API_PY_RSA_MODULE",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "Python RSA API usage detected."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "CERT_RSA_2048",
+              "shortDescription": {
+                "text": "PKI"
+              },
+              "fullDescription": {
+                "text": "Certificate subject public key is 2048-bit RSA."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "CERT_RSA_SIGNATURE",
+              "shortDescription": {
+                "text": "PKI"
+              },
+              "fullDescription": {
+                "text": "Certificate signed with an RSA-based algorithm detected."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "DEP_OPENSSL",
+              "shortDescription": {
+                "text": "TLS"
+              },
+              "fullDescription": {
+                "text": "OpenSSL dependency detected."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "DEP_PQC_CAPABLE_LIBRARY",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "Library with version-dependent PQC capabilities inventoried; capability is not an enabled-state finding."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "DEP_RUST_OPENSSL",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "Rust TLS/crypto dependency detected."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "PRIVATE_KEY_RSA_HEADER",
+              "shortDescription": {
+                "text": "KeyMaterial"
+              },
+              "fullDescription": {
+                "text": "RSA private key header detected."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "TS_PY_RSA_USAGE",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "RSA-related usage detected from Python AST."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "TS_RSA_KEY_SIZE_LITERAL",
+              "shortDescription": {
+                "text": "PKI"
+              },
+              "fullDescription": {
+                "text": "Classical public-key size literals detected in AST nodes."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "PRIVATE_KEY_RSA_HEADER",
+          "level": "error",
+          "message": {
+            "text": "RSA private key header detected. | migration_hint=Confirm whether this is a header example, test key or complete live key. If a live key is exposed, revoke or rotate it and review key handling. | next_actions=Review private-key markers and rotate exposed live credentials (immediate)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "marker.txt"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Confirm whether this is a header example, test key or complete live key. If a live key is exposed, revoke or rotate it and review key handling.",
+            "recommended_actions": [
+              "Review private-key markers and rotate exposed live credentials (immediate)"
+            ]
+          }
+        },
+        {
+          "ruleId": "CERT_RSA_2048",
+          "level": "error",
+          "message": {
+            "text": "Certificate subject public key is 2048-bit RSA. | migration_hint=Plan supported PQC certificate signatures with issuer and peer compatibility checks; larger classical keys alone do not remove quantum exposure. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Plan certificate algorithm and trust-store migration (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "public.der"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Plan supported PQC certificate signatures with issuer and peer compatibility checks; larger classical keys alone do not remove quantum exposure.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Plan certificate algorithm and trust-store migration (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "CERT_RSA_SIGNATURE",
+          "level": "error",
+          "message": {
+            "text": "Certificate signed with an RSA-based algorithm detected. | migration_hint=Verify issuer, verifier and key-format support before evaluating standardized PQC certificate signatures. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Plan certificate algorithm and trust-store migration (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "public.der"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify issuer, verifier and key-format support before evaluating standardized PQC certificate signatures.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Plan certificate algorithm and trust-store migration (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "TS_RSA_KEY_SIZE_LITERAL",
+          "level": "error",
+          "message": {
+            "text": "Classical public-key size literals detected in AST nodes. | migration_hint=Shift from key-length based planning to PQC signatures/key exchange. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Plan certificate algorithm and trust-store migration (near-term); Verify deployed runtime and protocol PQC capabilities (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Shift from key-length based planning to PQC signatures/key exchange.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Plan certificate algorithm and trust-store migration (near-term)",
+              "Verify deployed runtime and protocol PQC capabilities (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "TS_RSA_KEY_SIZE_LITERAL",
+          "level": "error",
+          "message": {
+            "text": "Classical public-key size literals detected in AST nodes. | migration_hint=Shift from key-length based planning to PQC signatures/key exchange. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Plan certificate algorithm and trust-store migration (near-term); Verify deployed runtime and protocol PQC capabilities (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Shift from key-length based planning to PQC signatures/key exchange.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Plan certificate algorithm and trust-store migration (near-term)",
+              "Verify deployed runtime and protocol PQC capabilities (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_OPENSSL",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL dependency detected. | migration_hint=Review the OpenSSL PQC roadmap. | next_actions=Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Cargo.lock"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Review the OpenSSL PQC roadmap.",
+            "recommended_actions": [
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_RUST_OPENSSL",
+          "level": "warning",
+          "message": {
+            "text": "Rust TLS/crypto dependency detected. | migration_hint=Track PQC migration options for Rust openssl/rustls crypto stacks. | next_actions=Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Cargo.lock"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Track PQC migration options for Rust openssl/rustls crypto stacks.",
+            "recommended_actions": [
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_OPENSSL",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL dependency detected. | migration_hint=Review the OpenSSL PQC roadmap. | next_actions=Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Cargo.toml"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Review the OpenSSL PQC roadmap.",
+            "recommended_actions": [
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_RUST_OPENSSL",
+          "level": "warning",
+          "message": {
+            "text": "Rust TLS/crypto dependency detected. | migration_hint=Track PQC migration options for Rust openssl/rustls crypto stacks. | next_actions=Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Cargo.toml"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Track PQC migration options for Rust openssl/rustls crypto stacks.",
+            "recommended_actions": [
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "TS_PY_RSA_USAGE",
+          "level": "warning",
+          "message": {
+            "text": "RSA-related usage detected from Python AST. | migration_hint=Inventory Python RSA API usage as PQC migration targets. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term); Verify deployed runtime and protocol PQC capabilities (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Inventory Python RSA API usage as PQC migration targets.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)",
+              "Verify deployed runtime and protocol PQC capabilities (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "TS_PY_RSA_USAGE",
+          "level": "warning",
+          "message": {
+            "text": "RSA-related usage detected from Python AST. | migration_hint=Inventory Python RSA API usage as PQC migration targets. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term); Verify deployed runtime and protocol PQC capabilities (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Inventory Python RSA API usage as PQC migration targets.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)",
+              "Verify deployed runtime and protocol PQC capabilities (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_PY_RSA_MODULE",
+          "level": "warning",
+          "message": {
+            "text": "Python RSA API usage detected. | migration_hint=Evaluate PQC-capable libraries for Python crypto implementations. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term); Verify deployed runtime and protocol PQC capabilities (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Evaluate PQC-capable libraries for Python crypto implementations.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)",
+              "Verify deployed runtime and protocol PQC capabilities (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+          "level": "note",
+          "message": {
+            "text": "Library with version-dependent PQC capabilities inventoried; capability is not an enabled-state finding. | migration_hint=Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection. | next_actions=Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Cargo.lock"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection.",
+            "recommended_actions": [
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_PQC_CAPABLE_LIBRARY",
+          "level": "note",
+          "message": {
+            "text": "Library with version-dependent PQC capabilities inventoried; capability is not an enabled-state finding. | migration_hint=Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection. | next_actions=Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Cargo.toml"
+                },
+                "region": {
+                  "startLine": 2,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Inspect resolved version, features and backend. rustls 0.23.27 prefers hybrid TLS with aws-lc-rs; cryptography 48+ supports OpenSSL 3.5+ PQC. Presence alone proves no protection.",
+            "recommended_actions": [
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

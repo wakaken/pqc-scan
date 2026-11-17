@@ -415,3 +415,97 @@ fn all_probe_cli_exports_reject_schema_corruption_without_connecting() {
         .unwrap();
     }
 }
+
+#[test]
+fn tls_adjacent_references_keep_exact_positions_and_distinct_ids_in_exports() {
+    let w = Workspace::new();
+    fs::write(w.0.join("input/tls.conf"), "\nTLSv1.0 TLSv1.0\nTLSv1.0\n").unwrap();
+    let mut previous = None;
+    for lang in ["en", "ja"] {
+        let out = w.0.join(lang);
+        let run = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
+            .arg("scan")
+            .arg(w.0.join("input"))
+            .args([
+                "--format",
+                "all",
+                "--inventory-json",
+                "--cyclonedx-17",
+                "--repository-scope",
+                "quality/tls-audit",
+                "--lang",
+                lang,
+                "--rules-dir",
+            ])
+            .arg(root().join("rules"))
+            .arg("--out-dir")
+            .arg(&out)
+            .output()
+            .unwrap();
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        let report = read(&out.join("report.json"));
+        let hits: Vec<_> = rows(&report["findings"])
+            .iter()
+            .filter(|h| h["rule_id"] == "TLS_VERSION_1_0")
+            .collect();
+        assert_eq!(hits.len(), 3);
+        let mut ids = BTreeSet::new();
+        let sarif = read(&out.join("report.sarif"));
+        let html = fs::read_to_string(out.join("report.html")).unwrap();
+        let md = fs::read_to_string(out.join("report.md")).unwrap();
+        for (h, (line, col)) in hits.iter().zip([(2, 1), (2, 9), (3, 1)]) {
+            assert_eq!(h["location"]["line"], line);
+            assert_eq!(h["location"]["column"], col);
+            assert_eq!(h["evidence"]["match"], "TLSv1.0");
+            let id = h["finding_id"].as_str().unwrap();
+            assert!(ids.insert(id.to_string()));
+            assert!(html.contains(id));
+            assert!(md.contains(&format!("tls.conf:{line}:{col}")));
+            assert!(rows(&sarif["runs"][0]["results"])
+                .iter()
+                .any(|r| r["ruleId"] == "TLS_VERSION_1_0"
+                    && r["locations"][0]["physicalLocation"]["region"]["startLine"] == line
+                    && r["locations"][0]["physicalLocation"]["region"]["startColumn"] == col));
+        }
+        let native = read(&out.join("scan.inventory.v1.json"));
+        assert_eq!(rows(&native["legacy_associations"]).len(), 3);
+        let mut targets: Vec<_> = rows(&native["observations"])
+            .iter()
+            .map(|o| {
+                assert_eq!(o["rule_id"], "TLS_VERSION_1_0");
+                assert_eq!(o["usage"], "referenced");
+                (
+                    o["target"]["byte_start"].as_u64().unwrap(),
+                    o["target"]["byte_end"].as_u64().unwrap(),
+                )
+            })
+            .collect();
+        targets.sort();
+        assert_eq!(targets, vec![(1, 8), (9, 16), (17, 24)]);
+        assert_eq!(html.matches("data-finding-id=").count(), 3);
+        assert_eq!(md.matches("<a id=\"finding-").count(), 3);
+        // Legacy CBOM intentionally collapses same-line references and has no
+        // column/occurrence ID contract; native/SARIF retain all three.
+        let cbom = read(&out.join("cbom.json"));
+        assert_eq!(
+            rows(&cbom)
+                .iter()
+                .map(|e| e["location"].as_str().unwrap())
+                .collect::<BTreeSet<_>>(),
+            BTreeSet::from(["tls.conf:2", "tls.conf:3"])
+        );
+        for a in rows(&native["legacy_associations"]) {
+            assert!(ids.contains(a["legacy_id"].as_str().unwrap()));
+            assert_eq!(rows(&a["observation_ids"]).len(), 1);
+        }
+        if let Some(old) = &previous {
+            assert_eq!(&ids, old);
+        }
+        previous = Some(ids);
+        retain(&format!("tls-boundaries-{lang}"), &out);
+    }
+}

@@ -102,24 +102,59 @@ test('historical rule hashes remain recorded and changed source bindings fail cl
   assert.equal(prepared.audit.sourceChecks.find(file => file.path === historical.path).status, 'changed');
 });
 
-test('static candidate references map unchanged test lines and retain every unreviewed payload', () => {
+test('historical static candidate references retain frozen source lines and payloads', () => {
   const review = read('docs/releases/static-candidate-20261117/evidence/POLICY-REBIND.json');
   const results = read('docs/releases/static-candidate-20261117/evidence/REVIEWED-RESULTS.json');
   assert.equal(results.length, 98);
   assert.equal(new Set(review.rows.map(row => row.path)).size, 4);
+  const frozen = JSON.parse(require('node:zlib').gunzipSync(fs.readFileSync(path.join(repositoryRoot,
+    'docs/releases/static-candidate-20261117/audit-fixes/STATIC-REFERENCE-SOURCES.json.gz'))));
+  for (const source of Object.values(frozen.files)) assert.equal(createHash('sha256').update(source.text).digest('hex'), source.sha256);
   for (const row of review.rows) {
-    const lines = fs.readFileSync(path.join(repositoryRoot, row.path), 'utf8').split('\n');
+    const lines = frozen.files[row.path].text.split('\n');
     assert.equal(createHash('sha256').update(lines[row.newLine - 1]).digest('hex'), row.sourceLineSha256);
     assert(row.newLine > lines.findIndex(line => line.trim() === '#[cfg(test)]') + 1);
     assert.equal(results.filter(result => resultDigest(result) === row.newResultSha256).length, row.count);
   }
   const raw = { version: '2.1.0', runs: [{ tool: { driver: { name: 'pqc-scan' } }, results }] };
-  const live = read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json');
-  const prepared = prepareCodeScanning(raw, live, repositoryRoot);
+  const groups = [...new Set(review.rows.map(row => row.path))].map(name => ({
+    path: name, sha256: frozen.files[name].sha256, reason: 'Historical reviewed inline test source references.',
+    results: [...new Map(review.rows.filter(row => row.path === name).map(row => {
+      const result = results.find(result => resultDigest(result) === row.newResultSha256);
+      const region = result.locations[0].physicalLocation.region;
+      return [row.newResultSha256, {ruleId:result.ruleId, line:region.startLine,
+        column:region.startColumn ?? null, sha256:row.newResultSha256, count:row.count}];
+    })).values()],
+  }));
+  const historical = reviewedResultTestSource({version:1, files:groups});
+  try {
+  for (const binding of historical.policy.files) {
+    fs.writeFileSync(path.join(historical.root,binding.path), frozen.files[binding.path].text);
+    binding.sha256=frozen.files[binding.path].sha256;
+  }
+  const prepared = prepareCodeScanning(raw, historical.policy, historical.root);
   assert.equal(prepared.audit.expectedResults, 98);
   assert.equal(prepared.audit.retainedResults, 0);
   const added = structuredClone(results[0]);
   added.message.text = 'New observation on an already reviewed test line';
   raw.runs[0].results.push(added);
-  assert.deepEqual(prepareCodeScanning(raw, live, repositoryRoot).sarif.runs[0].results, [added]);
+  assert.deepEqual(prepareCodeScanning(raw, historical.policy, historical.root).sarif.runs[0].results, [added]);
+  } finally { historical.cleanup(); }
+});
+
+test('current audit repair binds actual product results and preserves the complete review queue', () => {
+  const bytes=fs.readFileSync(path.join(repositoryRoot,
+    'docs/releases/static-candidate-20261117/audit-fixes/evidence/self-scan/report.sarif.gz'));
+  const raw=JSON.parse(require('node:zlib').gunzipSync(bytes));
+  const live=read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json');
+  const prepared=prepareCodeScanning(raw,live,repositoryRoot);
+  assert.deepEqual([prepared.audit.rawResults,prepared.audit.expectedResults,prepared.audit.retainedResults],[487,477,10]);
+  assert(prepared.audit.sourceChecks.every(row=>row.status==='verified'));
+  const queue=prepared.sarif.runs.flatMap(run=>run.results);
+  assert(queue.every(row=>['DEP_RUST_OPENSSL','DEP_PQC_CAPABLE_LIBRARY'].includes(row.ruleId)));
+  const changed=structuredClone(raw), reference=changed.runs[0].results.find(row=>row.ruleId==='TLS_VERSION_1_0');
+  reference.message.text='New unreviewed TLS report on an existing reference line';
+  const checked=prepareCodeScanning(changed,live,repositoryRoot);
+  assert.equal(checked.audit.retainedResults,11);
+  assert(checked.sarif.runs.flatMap(run=>run.results).some(row=>row.message.text===reference.message.text));
 });
