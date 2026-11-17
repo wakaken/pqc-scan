@@ -75,3 +75,138 @@ SHA-256 manifests detect changes relative to supplied hashes; they do not prove
 authenticity. Follow the [installation and update guide](docs/user/DISTRIBUTION.md)
 or [日本語の導入・更新手順](docs/user/DISTRIBUTION.ja.md). Keep binary and rule
 versions together and retain the previous verified bundle for rollback.
+
+## Codex Security assessment context
+
+This section defines repository-wide assessment context for Codex Security.
+It supplements the reporting and distribution guidance above; it does not
+authorize execution, network access, disclosure or remediation.
+
+### System and Scope
+
+The development checkout targets v0.3; the maintenance statement above concerns
+the verified 0.2.x release line. Assess the selected source revision and enabled
+features rather than assuming that a published release represents this checkout.
+
+pqc-scan is a local Rust CLI and library for advisory inspection of cryptographic
+usage and PQC migration risks. Static scanning is the primary product surface.
+Explicit, feature-enabled TLS, SSH-offer and SSH hybrid-KEX probes are separate,
+experimental network operations.
+
+Assess relevant boundaries across `crates/`, `rules/`, report generation,
+`scripts/`, packaging and `.github/workflows/`. Include developer tools, tests
+and fixtures when they can expose product behavior or cross a host, artifact or
+CI authority boundary; their directory names alone do not exclude them.
+
+The repository threat-model references are:
+
+- [Repository threat model (English)](docs/security/threat-model.md)
+- [脅威モデル（日本語訳）](docs/security/threat-model.ja.md)
+
+These are dated reference snapshots with their original source revision,
+worktree digest, findings and verification limits preserved. Recheck changed
+boundaries against current source. A historical observation, proposed mitigation
+or documented control is not proof of current behavior, a completed test or an
+accepted risk. This root policy defines assessment expectations; the model
+supplies architecture and threat context. Identify material disagreements rather
+than using them to silently suppress findings.
+
+### Threat Model and Trust Boundaries
+
+Protect host files outside the intended input/output authority, private source
+and credentials, report and assessment integrity, scanner/CI availability, probe
+peer identity and build/distribution provenance.
+
+Treat scanned checkouts, paths, manifests, public containers, imported inventory
+and explicitly contacted peers as potentially attacker-controlled. Do not assume
+that an attacker already controls the operator account, trusted executable,
+external rule pack, public CA/host-key trust inputs or release authority.
+Operator-selected roots, rules, output paths, CIDRs and trust inputs define the
+authorized operation; they do not grant checkout content additional host rights.
+
+The ordinary CLI runs with its invoking account's authority. Rust crate
+boundaries are not sandboxes. Do not infer a public service, tenants or remote
+job submission from this local CLI; state any additional deployment prerequisites.
+
+### Security Invariants
+
+- Static inspection must not execute scanned source, evaluate templates, resolve
+  dependencies over the network or automatically contact discovered endpoints.
+- Repository and local-parent reads must stay within selected, bounded regular
+  files and the intended root, including link replacement and file-growth paths.
+  Output writes must likewise preserve the intended destination authority across
+  file/parent links and races. Reader hardening does not establish writer safety.
+- Preserve the documented masking of recognized private-key and credential
+  syntax across applicable evidence and export fields. Keep diagnostics safe.
+  The [privacy contract](docs/user/COVERAGE.md#privacy) is bounded; do not infer
+  universal secret detection or that redacted reports are safe for all recipients.
+- Render source-derived and peer-derived text as data in HTML, Markdown and
+  machine reports, with encoding appropriate to each context.
+- Apply finite applicable parsing, traversal, collection, traffic and deadline
+  budgets. Keep malformed, unsupported, truncated, failed and unknown inspection
+  distinct from complete inspection. Per-file caps are not whole-run guarantees.
+- Explicit probes must authorize the numeric destination actually connected,
+  preserve peer/budget binding and respect cancellation. TLS verification must
+  retain the selected chain/name checks. SSH offers remain unauthenticated claims;
+  verified SSH KEX requires the separately trusted host pin and signature path.
+  Do not imply login, exhaustive server support or completed PQC migration.
+- Preserve observation identity, scope and provenance across inventories, diffs
+  and advisory policy. Missing detections or records and operator-declared support
+  are not proof of remediation, runtime use or deployment safety.
+- Bound archive/import handling and reject unsafe destinations and member types.
+  Distinguish checksums from authenticity, supplied binaries from independent
+  rebuilds, and preparation/provenance authority from release publication.
+- Treat report upload and sharing as separate disclosure boundaries. Account for
+  actual contents, recipients and effective CI permissions before claiming impact.
+
+### Reportable Findings and Severity Context
+
+Report source-backed violations that give a realistic attacker a meaningful
+capability beyond their initial authority: unintended host reads/writes, protected
+secret exposure, active-content injection, exploitable parser/resource failures,
+probe destination or authentication bypass, assessment-integrity failures or
+misuse of build/artifact authority.
+
+For each finding, establish attacker control, entry point, dataflow, broken
+control, sensitive operation, prerequisites, effective mitigations and concrete
+impact. Retain the strongest counterevidence and material uncertainty. Static
+evidence can establish a finding without a deployed instance or runtime PoC;
+do not claim that an unexecuted test or hypothetical deployment was verified.
+
+Calibrate severity using demonstrated impact and likelihood, not the cryptographic
+algorithm name or a fixed mapping from a directory or CWE. Reserve Critical for
+clear, immediately actionable severe compromise. High impact with high likelihood
+can warrant High; with medium/unknown likelihood it generally warrants Medium,
+and with low likelihood Low. Medium/unknown impact generally warrants Medium
+only with high likelihood, otherwise Low. Low impact remains Low. Explain how
+local-only exposure, required operator actions and actual containment affect the
+rating; keep confidence separate from severity.
+
+A weak-algorithm or private-key-marker fixture is not by itself a vulnerability
+in pqc-scan. Ordinary authorized behavior and same-authority, self-only effects
+without meaningful gain are not findings. Conversely, a test/example filename,
+an experimental feature or absence of runtime reproduction does not invalidate
+a supported boundary violation. Triage suspected embedded credentials from their
+format, context and useful access beyond source reading; never use them to check
+validity and never reproduce secret material in a report.
+
+### Out of Scope, Exclusions, and Accepted Risk
+
+No new blanket component exclusion or accepted-risk exception is established by
+this policy. A known finding remains eligible for reporting; an unresolved issue,
+usage recommendation or proposed fix is not acceptance or remediation.
+
+### Known Limitations and Compensating Controls
+
+Detection coverage, secret masking and optional probes have documented limits.
+Zero findings do not prove safety or exhaustive inspection. Preserve partial
+coverage, missing measurements and unexecuted platform/runtime checks as such.
+The linked models retain historical partial coverage and an unresolved
+output-destination finding. Later scan reports must state their own source
+revision, reviewed surfaces and verification limits. A policy or threat-model
+update does not close a finding or establish that unreviewed code is safe.
+
+A fresh, trusted output directory outside an untrusted checkout reduces the
+known output-link placement risk. It is an operational precaution, not enforced
+writer containment or evidence of remediation. Input-read controls do not
+compensate for unsafe output writes.
