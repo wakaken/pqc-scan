@@ -8,6 +8,14 @@ GitHub Releasesで静的スキャン版のmacOS Apple Silicon（`aarch64-apple-d
 
 保守は最新の検証済み0.2.xに対するベストエフォートとし、SLAや旧版への修正提供は保証しません。TLS／SSHは実験的機能です。probe同梱アーカイブは技術的な配布準備として維持し、既存のライセンス確認フラグも残します。他のバイナリ環境やcrates.io公開は今回の範囲に含めません。[脆弱性の連絡方法](../../SECURITY.ja.md)も確認してください。
 
+## 静的版0.3.0の候補（未公開）
+
+次の候補はmacOS Apple Silicon向けの静的版`0.3.0`です。現在は検証中で、正式なReleaseとしては公開していません。以下のv0.2.0のリリースノートは、公開済み版の記録です。候補のバイナリ、ルール、アーカイブのマニフェスト、ソースコミットを一緒に管理してください。版番号だけでは対象を特定できません。
+
+この候補では、シンボリックリンクを通じてレポートが意図しない場所へ書き込まれることを防ぎ、通常ファイルの置き換えには非公開の一時ファイルを使います。Unixで作成する出力はモード0600になり、置き換え前のinodeの権限やACLは引き継ぎません。任意の出力先シンボリックリンクは拒否し、Unix以外への出力は未対応です。Pythonの明示importと設定記述の位置・根拠も修正し、影響する検出結果や観測のIDは変わります。検出件数、信頼度、リスクの意味は維持します。
+
+レポートは対応範囲内の調査材料であり、リポジトリの安全性やPQC移行完了を証明するものではありません。network版の公開保留は別に維持します。製品受入、来歴・署名、公開は最終的なリリース判断が必要です。ローカルアーカイブやCI成果物の作成は、その許可を意味しません。
+
 <a id="release-status"></a>
 
 ## 配布構成とprobe同梱版の確認事項
@@ -35,7 +43,7 @@ probe同梱版も公開する場合は、上の確認に加え、その構成の
 
 ## ソースから導入する
 
-v0.3開発中の現在も、Cargoのパッケージ版は`0.2.0`です。ソースのコミットを記録し、対応するバイナリとルールを一緒に管理してください。`--version`だけでは開発中のどの版かを区別できません。以下のローカル配布物の名前もCargoの版に従い、新しい正式リリースを示すものではありません。
+未公開の静的版候補として、Cargoのパッケージ版を`0.3.0`に更新しました。ソースのコミットを記録し、対応するバイナリとルールを一緒に管理してください。`--version`だけでは開発中のどの版かを区別できません。以下のローカル配布物の名前もCargoの版に従い、新しい正式リリースを示すものではありません。
 
 `rust-toolchain.toml`で指定したツールチェーンを使い、チェックアウト直下で実行します。
 ルールはこのチェックアウトとともに保管してください。
@@ -64,7 +72,7 @@ cargo build --locked --release --package pqc_scan_cli
 python3 scripts/package-release.py --binary target/release/pqc-scan --variant static --out-dir target/task-038/static
 cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/network-release-build
 python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network
-python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz
+python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.3.0-aarch64-apple-darwin-static.tar.gz
 ```
 
 準備処理はオフラインのCargoメタデータを使うため、依存物は先にビルドで取得します。

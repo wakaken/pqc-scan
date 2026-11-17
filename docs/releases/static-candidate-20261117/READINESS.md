@@ -1,7 +1,8 @@
 # Static 0.3.0 candidate readiness — 2026-11-17
 
 Status: local verification and both independent reviews passed within the scope below;
-exact-commit hosted CI, maintainer product acceptance and publication remain pending.
+hosted receipts must be matched to the candidate commit. Maintainer product acceptance
+and publication are not granted by this record.
 The maintainer selected static macOS arm64 and version **0.3.0**. Published 0.2.0
 is not overwritten. Network release holds, real signing and publication are separate.
 No original criterion, frozen truth, rule, numerical budget or task state was changed.
@@ -51,7 +52,7 @@ original byte-cap boundary. Scanner version and its golden expectation are 0.3.0
 | Independent native rebuild | Two clean local environments, no shared compiled artifacts: identical raw binaries SHA-256 `04caf19bffd2839e9dc5ea9b959362f21fb67810fac88ca16748c3c483193b4a` | Same physical host, recorded path normalization/toolchain/SDK; no all-host reproducibility claim |
 | Required checks | Rust 1.93.1: fmt/build/default tests 580 passed, 3 ignored; all-feature tests 639 passed, 5 ignored; both Clippy configurations pass. Python quality 160 (3 skipped), distribution 25; Node 53 pass | Skipped checks are not passes. Existing environment-dependent quality hooks remain explicitly skipped; actual candidate runs are separately recorded |
 | Current self-scan | All 106 product inputs read/analyzed; 485 raw, 475 reviewed references, 10 requiring review | Four existing source bindings and 94 distinct/98 occurrence positions mapped to unchanged test lines; no new allowance, payload/count/rule/reason unchanged. Raw results remain intact |
-| Hosted CI / Code Scanning | Pending exact-commit run | Prior merged CI is not evidence for this candidate. Historical failure and 2,135-newness uncertainty are not erased |
+| Hosted CI / Code Scanning | Candidate source `d194787`: quality/baseline/scan succeeded; protocols skipped. Server analysis 2183141978 has 10 results, no error/warning; all ten branch alerts match uploaded rule/path/line/full message | `evidence/ci-44017642002/RESULT.json`. Subsequent guide-only changes are outside that run; final-commit verification is recorded in the current handoff. Historical failure and 2,135-newness uncertainty are not erased |
 
 ## Residual product-quality disposition
 
@@ -110,3 +111,21 @@ maintainer product acceptance/publication and pending exact-commit hosted CI fro
 their approval. No new reviewer identity is introduced. Reviews follow
 `docs/agent/REVIEWER.md`. Later edits to this status record are prose-only and do not
 change the reviewed product/test inputs or measured outcomes.
+
+## Distribution-guide follow-up
+
+The actual archive revealed a stale workspace-version statement and local archive
+verification filename in the paired installation guides. Both now describe the
+unpublished 0.3.0 candidate and its output/position compatibility effects; published
+0.2.0 history and maintenance policy remain unchanged. Both existing reviewers
+accepted this limited follow-up. Actual revised archive preparation and offline
+installation pass; the dirty-source receipt is kept separately from clean-commit
+preparation. Product/test bytes remain unchanged. Final package/source and hosted
+receipts must identify the final commit, rather than relabelling the d194787 run.
+
+A same-host, interleaved actual-binary performance check uses the same small corpus,
+rules, one thread and all reports/native/assessment/CDX outputs: one warm-up and
+five measured samples per binary. Candidate/old maximum wall-time ratio is 1.096,
+below the original greater-than-2x investigation signal. Output time is included;
+this is a small-input signal, not a new scaling/resource study or numeric CI gate.
+See `evidence/PERFORMANCE-SIGNAL.json`; test review accepted this measurement scope.

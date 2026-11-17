@@ -14,6 +14,24 @@ the `network` package is technical preparation and retains its notice
 review flags. Other binary platforms and crates.io publication are outside this
 release scope. See [security reporting](../../SECURITY.md).
 
+## Static 0.3.0 candidate (unpublished)
+
+The next candidate is `0.3.0` for macOS Apple Silicon static scanning. It is under
+verification and is not a published Release. The v0.2.0 notes below remain the
+historical published-release record. Keep each candidate binary, rules, archive
+manifest and source commit together; the version string alone is insufficient.
+
+This candidate prevents report-output redirection through symbolic links and
+preserves ordinary file replacement through private staged writes. New Unix output
+files use mode 0600; replacing a file does not preserve its old inode permissions
+or ACLs. Arbitrary output symlinks are rejected; non-Unix output is unsupported.
+Python explicit-import and configuration-reference positions/evidence are corrected;
+affected finding and observation IDs can change. Detection counts, confidence and
+risk interpretation are preserved. Reports remain bounded investigation evidence,
+not proof that a repository is safe or fully PQC-ready. Network publication holds
+remain separate. Product acceptance, provenance/signing and publication require
+the final release decision; local archives and CI artifacts do not grant it.
+
 <a id="release-status"></a>
 
 ## Distribution variants and probe publication checks
@@ -61,7 +79,7 @@ completed technical checks. `review_required` is not an end-user setting to disa
 
 ## Source installation
 
-The workspace currently declares package version `0.2.0` during v0.3 development. Record the source commit and keep its binary/rules together; `--version` alone does not identify the development snapshot. Local package filenames below follow the Cargo version and do not establish a new official release.
+The workspace now declares package version `0.3.0` for the unpublished static candidate. Record the source commit and keep its binary/rules together; `--version` alone does not identify the development snapshot. Local package filenames below follow the Cargo version and do not establish a new official release.
 
 Use the toolchain pinned in `rust-toolchain.toml`, retain this checkout's reviewed
 rules, and run from its root:
@@ -91,7 +109,7 @@ cargo build --locked --release --package pqc_scan_cli
 python3 scripts/package-release.py --binary target/release/pqc-scan --variant static --out-dir target/task-038/static
 cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/network-release-build
 python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network
-python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz
+python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.3.0-aarch64-apple-darwin-static.tar.gz
 ```
 
 Preparation uses offline Cargo metadata: fetch dependencies during an authorized
