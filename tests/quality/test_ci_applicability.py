@@ -10,7 +10,8 @@ import unittest
 import report
 
 ROOT = Path(__file__).resolve().parents[2]
-CURRENT = 'tests/quality/applicability-document-relocation-20261114/assessment.json'
+CURRENT = 'tests/quality/applicability-054-f054-20261117/assessment.json'
+PREVIOUS = 'tests/quality/applicability-document-relocation-20261114/assessment.json'
 HISTORICAL = 'tests/quality/applicability-044-develop-integration/assessment.json'
 CANDIDATES = {'x154', 'x156', 'v2-audit4', 'v2-audit5', 'v2-audit6', 'v2-audit7'}
 
@@ -50,10 +51,15 @@ class CIApplicabilityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'binding changed'):
             scoped(ROOT, HISTORICAL)
 
+    def test_previous_ci_binding_remains_rejected_after_guide_correction(self):
+        # Keep dated source guards strict; never rewrite the old reviewed hash.
+        with self.assertRaisesRegex(ValueError, 'binding changed'):
+            scoped(ROOT, PREVIOUS)
+
     def test_actual_ci_input_rejects_source_and_review_corruption(self):
         selected = ci_assessment()
         original = json.loads((ROOT/selected).read_text())
-        mutations = ['contract', 'parser', 'protocol', 'corpus', 'truth', 'review_bytes',
+        mutations = ['contract', 'paired_contract', 'parser', 'protocol', 'corpus', 'truth', 'review_bytes',
                      'missing_review', 'same_identity', 'unresolved', 'decision', 'review_binding']
         for mutation in mutations:
             with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temp:
@@ -70,8 +76,10 @@ class CIApplicabilityTests(unittest.TestCase):
                 review_name = list(manifest['reviewSources'])[1]
                 review_path = folder/review_name
                 review = json.loads(review_path.read_text())
-                if mutation in ['contract', 'parser']:
-                    name = 'docs/user/COVERAGE.md' if mutation == 'contract' else 'crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs'
+                if mutation in ['contract', 'paired_contract', 'parser']:
+                    name = {'contract': 'docs/user/COVERAGE.md',
+                            'paired_contract': 'docs/user/COVERAGE.ja.md',
+                            'parser': 'crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs'}[mutation]
                     with (repo/name).open('a') as stream: stream.write('\nchanged\n')
                 if mutation == 'protocol': (folder/'PROTOCOL.md').write_text('changed')
                 if mutation in ['corpus', 'truth']:

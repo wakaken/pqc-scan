@@ -653,3 +653,22 @@ rule populations,adequacy gaps,strictoutputdrift and noticeholds. Historical
 CodeScanningfailure and exact2135newnessUnknown remain;fix-afterhostedCI/alerts
 are not verified. No push,merge,tag,realrelease signing,new task,other-task
 reopening,settingschange or publication occurred.
+
+
+## Authorized push and hosted CI follow-up — 2026-11-17
+
+Commitb7e2e3f619eda665989f25eead793c61a48ceb48contains the reviewed correction
+and preserved assessment history and was pushed to the dedicated task054branch.
+Manualrun43997580523passedscan but failedquality/baseline at the same strict
+applicability contract guard. The approved Cargo guide paragraph invalidated
+the previous current-document hash. The loader correctly rejected stale data;
+no unsupported unit or numerical failure is promoted to pass.
+
+054returns to in-progress for this integration gap. A fresh source-based
+applicability revision retains the same six attribute dispositions and240other
+unit scope;203input hashes and246nominal labels are unchanged. Main and the
+existing implementation reviewer authored separate current records under the
+new protocol,truthfully disclosing prior exposure. CI/testselection will use
+that revision. Historicalrecords,hashguards,nominaltruth and release boundaries
+remain unchanged. Required review,full evaluator tests and a corrected hosted
+run remain unfinished. No merge or publication is authorized.

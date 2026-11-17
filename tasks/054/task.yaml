@@ -2,7 +2,7 @@ id: '054'
 title: 次の対象版の1.0品質受入と残存リスクを判定する
 type: improvement
 priority: high
-status: done
+status: in-progress
 owner: Planner Agent
 phase: '6'
 description: 要求対応表の全行を照合し、範囲・必須条件・承認を伴う判定と次の改善作業を残す。
@@ -289,3 +289,18 @@ f054_correction_completion_20261117:
   remote_state: Not pushed or dispatched after this fix; current hostedCI/alert update unverified
   remaining_product_risks: Old023-v2Failed;93nominatedrulesNotTested;M03/M04/M09meaningfulmutationmisses;154criticalzerooutcomes;strictID/outputdrift;noticehold;historical2135newnessUnknown/oldcheckFailed
   preserved: Prior negativeassessment,incomplete-roadmap decisions,all failed attempts,originalcriteria and other task states
+
+f054_publish_ci_followup_20261117:
+  authorization: Maintainer requests committing/pushing current fix and assessment and verifying CI/CodeScanning; no merge/publication.
+  code_commit: b7e2e3f619eda665989f25eead793c61a48ceb48
+  initial_run: https://github.com/wakaken/pqc-scan/actions/runs/43997580523
+  result: scanpassed;quality/baselinefailed on stale applicability contract binding after the approved guide correction
+  transition:
+    from: done
+    to: in-progress
+    reason: Hosted integration verification exposed a current-document/CI-applicability binding gap; fix within054without changing originalcriteria or truth.
+  affected_requirements: Q6-01,Q6-02,Q6-16,Q6-17,Q6-18;Q3-02fix remains implemented and scan succeeds
+  correction: Preserve originalassessments/labels; create a current-source revalidation with the same dispositions and independent records; select it explicitly inCI; retain all corruption rejection tests
+  remaining: Existing implementation and testreviewfollowups,localfull evaluator checks,freshCIandCodeScanningconfirmation
+  product_accepted: false
+  publication_authorized: false

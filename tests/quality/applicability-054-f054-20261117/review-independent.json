@@ -1,0 +1,50 @@
+{
+  "reviewer": "/root/notification_implementation_review",
+  "timestampUtc": "2026-11-17T01:52:43Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "3c6a9e8c2fac107d708491bdad88e555ded0d87c438c36ade6e135a5deb1dd3b",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "6c3541cd8d43560f8db5c730b1f6a5e4cca1a8a2a562fd41ab2a4b64c027f912",
+    "docs/user/COVERAGE.ja.md": "9360188b2bc938b31024f3f0ed6abfea113de4eeea8fcd74e9e42d58f704003b",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The original SHA-bound public-only.p12 contains encryptedData. Its certificate-only conversion provenance establishes the nominal RSA, non-ECDSA certificate signature fact, but does not make encrypted contents readable. Both current coverage guides exclude decryption, and the complete unchanged parser leaves non-Data content opaque. Retain the original negative truth separately from this unsupported inner-attribute question."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The original public-only.pfx is byte-identical to the encrypted public-only.p12. The bound conversion provenance establishes the nominal non-ECDSA signature fact, not extraction by the non-decrypting parser. The filename/container signal remains in scope; the inner certificate signature question remains unsupported without changing its negative truth."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "The original P12 conversion is bound to the public RSA3072 certificate, preserving the positive modulus-size truth. Its encryptedData content is not entered by the unchanged parser, so extracting the inner RSA modulus is outside the current paired public-support contract. The F054 Cargo paragraph does not change that boundary."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "Conversion provenance binds the original P12 to the known sha256WithRSAEncryption certificate. That positive object-property truth is preserved, while extracting its signature OID from encryptedData remains outside the documented non-decrypting subset. No scanner prediction was used to determine applicability."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The original PFX has the same SHA-bound encrypted bytes as the P12 and the same public RSA3072 conversion provenance. Its nominal positive key-width truth remains unchanged, but the parser cannot extract the inner modulus from opaque encrypted content. Exclude only this attribute question from the supported-input view."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The original PFX's encryptedData content remains opaque under both current guides and the unchanged parser. Provenance establishes the nominal positive RSA signature fact without establishing parser access to it. All 203 original input bindings match; the other 240 units retain their previous scope, including the outer container signals. The guide delta only documents exact Cargo package matching, and no remaining unit nominates DEP_RUST_RSA_CRATE. Preserve nominal truth and supported-input results as separate views."
+    }
+  ]
+}

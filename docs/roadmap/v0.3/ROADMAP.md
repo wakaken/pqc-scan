@@ -235,3 +235,13 @@ HistoricalCodeScanningfailure and exact2135newnessUnknown remain distinct from
 the accepted whole-population risk assessment;newhostedCI/alerts are not
 verified after this localfix. Publication,realrelease signing,tagging,merge,
 push,remote settings and badge application keep their separate boundaries.
+
+
+## Hosted integration follow-up in progress — 2026-11-17
+
+The authorized post-fix manualCIrun43997580523exposed a current-guide hash
+binding gap in the CI applicability record. Scanpassed;quality/baselinefailed
+closed.054is in-progress to correct and verify that integration. The preceding
+local completion judgement is preserved as dated evidence; current final
+roadmap/CIreflection is not asserted until the affected integration and review
+gates pass. The F054-01rule correction and nominal data remain unchanged.
