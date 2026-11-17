@@ -1,12 +1,14 @@
 # Rust review supplement comparison proposal
 
-Status: fixtures and source-based labels prepared; no experiment trials run.
+Status: 24 app trial reports collected; independent human evaluation is pending.
+No CLI or direct API experiment is authorized.
 Date: 2026-11-17. Following the user's selection of existing historical source,
 the [six-case dataset](../../tests/quality/rust-review-pilot-v1/README.md) now
 provides frozen request packets, provenance, draft truth, schedule, execution
 procedure and cost estimate. The [short supplement](../agent/RUST-REVIEW-SUPPLEMENT.md)
-remains unchanged. Preparation is authorized; experiment execution, installation,
-Clippy/CI/product changes and additional experiment agents are not.
+remains unchanged. The user selected this app and authorized the explained
+24-chat comparison on 2026-11-17 after the method update. Installation and
+Clippy/CI/product changes remain excluded.
 
 ## Question and scope
 
@@ -40,21 +42,15 @@ Both receive the same original requirements, baseline/current source, diff,
 pre-existing-change exclusions, supplied command/exit/feature evidence and gaps.
 No arm receives another arm's report, truth labels, grading rubric or this design.
 
-Stage the common package in disposable isolated copies outside the live checkout.
-Arm A must not be able to discover the supplement through repository search,
-history, a shared folder, or a prompt link; remove pilot-only material and its
-discovery links from the common experimental snapshot, identically in both arms.
-Record this transformation and the package hashes. B receives only the additional
-supplement. Do not change production guidance to construct the control.
-
-Disable BeautifulRust installations, external MCP, superpowers and unrelated
-automatic skills in both conditions; record the actually loaded instructions.
-If those cannot be controlled, label the comparison confounded and do not attribute
-the result to the supplement. Use an identical read-only tool allowlist, evidence
-access and offline dependencies; no automatic Cargo runs or external lookups.
-If a case requires reproduction, the main agent prepares equal evidence for both
-arms before freezing it. The pilot measures evidence-assisted review, not autonomous
-test execution. Give both arms the same output limit and existing response format.
+The active method is the [Codex app runbook](../../tests/quality/rust-review-pilot-v1/RUNBOOK.md).
+Send one unchanged packet per fresh projectless app chat, without this parent
+conversation, repository, labels or another arm. No direct API or CLI execution,
+API-key setup, skill installation or trial subagent is part of the app run.
+Inspect visible tool/turn histories for compliance with the packet's prohibition
+on tools, lookup, delegation and superpowers. This is context separation, not
+verified OS isolation. Hidden app configuration and unavailable model/settings
+remain Unknown and qualify causal conclusions. Do not claim the earlier CLI
+isolation conditions were met. Preserve all original A/B packet bytes.
 
 ## Six-case pilot
 
@@ -75,9 +71,11 @@ The complete [truth and provenance](../../tests/quality/rust-review-pilot-v1/REA
 are operator-only. Each control asserts only absence of the nominated defect,
 not that the historical file is generally clean. No current product defect or
 browser exploit is inferred from old source. The main agent has prepared the
-labels from source and historical repair evidence; human truth approval/freeze
-is still required before any model trial. Preserve the authored labels and
-record a separately approved digest. Reject ambiguous cases before execution.
+labels from source and historical repair evidence. The user's start instruction
+authorizes using this fixed reference for the app run; record the digest and
+authorization separately from historical label metadata. This does not establish
+independent human relabeling. Human outcome adjudication remains required before
+a definitive quality evaluation decision.
 These public, targeted, correlated examples are not representative or independent
 holdout, and may already be known to the tested model.
 
@@ -91,24 +89,18 @@ Randomize case order with a frozen seed (proposed: 20261117). For each case,
 counterbalance A/B order between the two repeats. Retain the generated schedule.
 Two repeats are descriptive stability checks, not six independent populations.
 
-Proposed per-trial limits: 5 minutes wall time, 4,000 output tokens, 20 tool calls;
-total 24 attempted trials and 120 minutes of model wall time. Freeze the actual
-limits before execution. The [cost estimate](../../tests/quality/rust-review-pilot-v1/COST.md) proposes
-USD 8 as an API experiment reserve, with expected scenarios of USD 2.16-5.28.
-It is not a verified hard cap; freeze enforceable spending/token bounds and
-available usage telemetry before execution. Record input,
-cached-input and output rates separately; an unavailable cost remains Unknown.
-Do not start paid trials until the maximum spend and execution scope are agreed.
-No automatic retries or extra runs. Preserve timeouts/tool failures as outcomes;
-never convert them to a clean review or silently substitute a rerun.
+Use the configured app default model/settings without an unrequested override;
+record exposed metadata and retain unavailable fields as Unknown. The user
+approved the explained 24 new trial chats. They do not reset the ordinary
+[reviewer budget](../agent/REVIEWS.md) or authorize trial subagents.
 
-The 24 independent trial contexts are proposed benchmark runs, not authority to
-launch 24 subagents. Execution must first reconcile the chosen harness with the
-[reviewer budget](../agent/REVIEWS.md): any additional agents require explicit
-authorization stating their purpose and maximum count. Do not reset the budget
-by splitting cases or reuse contaminated contexts and call them independent.
-Normal product changes still require the existing two review stages and their
-original reviewer identities. No agents are requested by this document.
+Five minutes and 4,000 visible output tokens are observation budgets, not hard
+app limits. Use existing account allowance with no purchases or resets. Read
+usage before launch and after each six completions. Stop further launches when
+ordinary usage is unavailable, payment/reset is required, or reported remaining
+allowance reaches 10 percent. Preserve errors, unfinished/overrun reports and
+tool violations. No retries or extra attempts. See the
+[app usage budget](../../tests/quality/rust-review-pilot-v1/COST.md).
 
 ## Blind scoring
 
@@ -155,18 +147,16 @@ demonstrated benefit, a regression, or an inconclusive result; do not install a
 skill or add lints just because the pilot ran. A tie supports keeping the current
 workflow. Do not tune the supplement and retest on the same six cases as holdout.
 
-The [operator runbook](../../tests/quality/rust-review-pilot-v1/RUNBOOK.md) gives
-the staged single-packet method and a CLI command template verified against local
-help only. No CLI model request or isolation capability test was executed.
-Before an authorized run, agree a task/evidence destination under the existing
-[task lifecycle](../TASK-LIFECYCLE.md); this proposal creates no task. Keep durable
-records in that task's evidence directory and disposable copies in fresh scratch
-directories. Preserve source/status bindings, loaded instructions, input/diff/
-policy/supplement/truth hashes, model/client/settings, schedule, timestamps,
-limits, commands/exits, raw reports, usage receipts, blind mapping, adjudication,
-per-case scores and the final decision. Freeze truth before reports and reveal
-the arm mapping only after scores are fixed. An unavailable required record makes
-the comparison Partial or Unknown; it is not a successful zero-cost trial.
+The [operator runbook](../../tests/quality/rust-review-pilot-v1/RUNBOOK.md) now
+uses native app thread creation/status tools. Preserve the former CLI proposal
+and original manifest in the
+[historical preparation](../records/rust-review-app-20261117/historical-preparation/).
+Store current receipts and actual outcomes under
+`docs/records/rust-review-app-20261117/`, since no task record exists. No new task
+is created. Bind packet/truth hashes, thread/host IDs, raw creation/status/final
+receipts, visible tool history, usage snapshots, unknowns and later blind scoring.
+Missing telemetry is not zero cost. Model reports do not establish human
+adjudication or eliminate hidden-instruction uncertainty.
 
 Do not modify the current evidence catalog, historical results or quality gates.
 Later catalog enrollment would be a separate authorized change with source-bound
@@ -194,3 +184,16 @@ type excerpts. They are immutable source data, not whitespace cleanup targets.
 The transfer check ignores only Git's blank-at-EOF warning for those bytes;
 ordinary authored-document whitespace checks still apply. No experiment,
 installation, Clippy/CI/product change or additional review identity was added.
+
+## App execution authorization (2026-11-17)
+
+The user selected this app and permitted experiment start after the method
+update. This supersedes the preparation-only hold and CLI/API budget proposal.
+The six cases, unchanged A/B packets, 24-attempt maximum, no-install/no-Clippy/
+no-CI restrictions, historical evidence and human outcome-adjudication condition
+remain. This is an app pilot with explicit control limitations, not a claim of
+verified hard spending limits or OS isolation.
+
+The [app collection results](../records/rust-review-app-20261117/RESULTS.md) retain
+all 24 reports and observed limitations. Collection completion is not final
+quality acceptance, and no supplement adoption decision has been made.

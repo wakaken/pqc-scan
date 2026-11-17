@@ -1,13 +1,13 @@
 # Historical Rust review pilot: prepared inputs
 
-Status: prepared for inspection, not executed. This is a six-case, text-only
+Status: prepared inputs; app execution is now authorized separately. This is a six-case, text-only
 review dataset. No new product feature, synthetic Rust implementation, runnable
 test, skill, dependency, Clippy configuration or CI job is added. Historical Rust
 is stored as `.rs.txt`; never compile or execute these excerpts. The repository
 [MIT license](../../../LICENSE) applies to the copied project source.
 
 The current request authorizes fixture/label preparation and a concrete method
-and estimate. It does not authorize the 24 model trials. See the
+and estimate. The later user instruction authorizes the app comparison; see the active runbook. See the
 [experiment design](../../../docs/quality/RUST-REVIEW-EXPERIMENT.md),
 [operator procedure](RUNBOOK.md), [cost estimate](COST.md) and
 [preparation handoff](PREPARATION.md).
@@ -63,3 +63,7 @@ schedule item against the packet hash. Verify exactly three positive labels,
 three scoped negative labels and balanced arm/repeat coverage. Keep validation
 results in `private/validation.json`. These are preparation integrity checks,
 not model trials, Rust test runs or evidence that review quality improved.
+
+Original preparation receipts remain historical. The active runbook and cost
+note now describe the authorized app method. Source, labels, packets and planned
+schedule remain unchanged; actual run outcomes are stored separately.
