@@ -1,6 +1,6 @@
 # Installation and distribution
 
-[日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.md)
+[日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/7bcbca20bc61380873005be71440bd53889ff5dd/README.md)
 
 This guide covers **v0.3.0 static** distribution on macOS Apple Silicon
 (`aarch64-apple-darwin`). Download published assets from

@@ -1,6 +1,6 @@
 # Security policy
 
-[English](SECURITY.md) | [日本語](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/SECURITY.ja.md)
+[English](SECURITY.md) | [日本語](https://github.com/wakaken/pqc-scan/blob/7bcbca20bc61380873005be71440bd53889ff5dd/SECURITY.ja.md)
 
 Static scanning on macOS Apple Silicon is the formal binary release scope.
 The latest verified snapshots in 0.2.x and 0.3.x receive best-effort maintenance.

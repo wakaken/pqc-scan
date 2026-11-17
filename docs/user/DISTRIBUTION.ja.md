@@ -1,6 +1,6 @@
 # インストールと配布
 
-[English](DISTRIBUTION.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.ja.md)
+[English](DISTRIBUTION.md) · [README](https://github.com/wakaken/pqc-scan/blob/7bcbca20bc61380873005be71440bd53889ff5dd/README.ja.md)
 
 このガイドは、macOS Apple Silicon（`aarch64-apple-darwin`）向けの**v0.3.0静的版**を扱います。
 公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認し、
@@ -12,7 +12,7 @@ v0.2.0の配布物にv0.3.0の変更は含まれません。
 0.2.x・0.3.xの各系列で最新の検証済み版を可能な範囲で保守し、SLAや旧版への修正提供は保証しません。
 TLS／SSHは実験的機能です。probe同梱アーカイブのライセンス確認フラグと公開保留は維持します。
 他のバイナリ環境やcrates.io公開は今回の範囲に含めません。
-[脆弱性の連絡方法](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/SECURITY.ja.md)も確認してください。
+[脆弱性の連絡方法](https://github.com/wakaken/pqc-scan/blob/7bcbca20bc61380873005be71440bd53889ff5dd/SECURITY.ja.md)も確認してください。
 
 ## 静的版0.3.0
 
