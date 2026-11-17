@@ -1,5 +1,9 @@
 # Rust review supplement (pilot)
 
+Disposition: retained as unactivated study material. The maintainer selected
+condition A and [deferred BeautifulRust adoption](../quality/BEAUTIFULRUST-ASSESSMENT.md).
+This document adds no normal-review reading requirement.
+
 Optional reference for the treatment arm of the
 [review experiment](../quality/RUST-REVIEW-EXPERIMENT.md). This is not a skill,
 a second review prompt, or a new acceptance gate. It is not automatically required

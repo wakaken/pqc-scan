@@ -1,5 +1,10 @@
 # Historical Rust review pilot: prepared inputs
 
+Disposition: the maintainer accepted condition A and deferred BeautifulRust.
+See the [summary and limitations](../../../docs/quality/BEAUTIFULRUST-ASSESSMENT.md).
+The inputs and results remain evidence; no further trial or automatic activation
+is planned. Original unfilled human scorecards are preserved, not marked passed.
+
 Status: prepared inputs; app execution is now authorized separately. This is a six-case, text-only
 review dataset. No new product feature, synthetic Rust implementation, runnable
 test, skill, dependency, Clippy configuration or CI job is added. Historical Rust

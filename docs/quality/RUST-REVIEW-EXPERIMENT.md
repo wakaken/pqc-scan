@@ -1,5 +1,11 @@
 # Rust review supplement comparison proposal
 
+Disposition: the maintainer accepted keeping A and deferring BeautifulRust for
+this iteration. See the [investigation summary and limits](BEAUTIFULRUST-ASSESSMENT.md).
+No further trial or activation is planned. The formal human-blind evaluation
+below is retained as unfinished history; it is not a prerequisite for the accepted
+operational decision and is not being declared complete.
+
 Status: 24 app trial reports collected; independent human evaluation is pending.
 No CLI or direct API experiment is authorized.
 Date: 2026-11-17. Following the user's selection of existing historical source,
