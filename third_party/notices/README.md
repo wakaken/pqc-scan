@@ -33,4 +33,4 @@ three Rust files match its recorded upstream revision, and Cargo.toml.orig diffe
 only by the package version (0.51.0 to 0.52.0). Its normalized dependency declarations
 match the upstream workspace. The archived dirty=true record is retained; source
 comparison does not imply publication approval. The four objc-family review flags
-remain unresolved. See [the follow-up record](../../tasks/063/TASK-063-RESULTS.md).
+remain unresolved. See [the follow-up record](https://github.com/wakaken/pqc-scan/blob/27b14f9d8ecaae34b7aae837999438512a55472f/tasks/063/TASK-063-RESULTS.md).
