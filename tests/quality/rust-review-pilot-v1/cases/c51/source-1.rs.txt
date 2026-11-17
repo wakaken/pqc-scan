@@ -1,0 +1,45 @@
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SarifResult {
+    rule_id: String,
+    level: String,
+    message: SarifMessage,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    locations: Vec<SarifLocation>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    properties: Option<SarifResultProperties>,
+}
+
+#[derive(Debug, Serialize)]
+struct SarifMessage {
+    text: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SarifLocation {
+    physical_location: SarifPhysicalLocation,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SarifPhysicalLocation {
+    artifact_location: SarifArtifactLocation,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    region: Option<SarifRegion>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SarifArtifactLocation {
+    uri: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SarifRegion {
+    start_line: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    start_column: Option<usize>,
+}
+

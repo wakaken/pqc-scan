@@ -1,0 +1,39 @@
+fn to_result(finding: &Finding) -> SarifResult {
+    let action_titles: Vec<String> = finding
+        .recommended_actions
+        .iter()
+        .take(4)
+        .map(|action| format!("{} ({})", action.title, action.priority))
+        .collect();
+    let next_actions = if action_titles.is_empty() {
+        String::new()
+    } else {
+        format!(" | next_actions={}", action_titles.join("; "))
+    };
+
+    SarifResult {
+        rule_id: finding.rule_id.clone(),
+        level: severity_to_level(&finding.severity.to_string()).to_string(),
+        message: SarifMessage {
+            text: format!(
+                "{} | migration_hint={}{}",
+                finding.description, finding.migration_hint, next_actions
+            ),
+        },
+        locations: vec![SarifLocation {
+            physical_location: SarifPhysicalLocation {
+                artifact_location: SarifArtifactLocation {
+                    uri: finding.location.file.clone(),
+                },
+                region: SarifRegion {
+                    start_line: finding.location.line,
+                    start_column: finding.location.column,
+                },
+            },
+        }],
+        properties: Some(SarifResultProperties {
+            migration_hint: finding.migration_hint.clone(),
+            recommended_actions: action_titles,
+        }),
+    }
+}

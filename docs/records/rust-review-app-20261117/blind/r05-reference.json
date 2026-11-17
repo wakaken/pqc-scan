@@ -1,0 +1,34 @@
+{
+  "family": "markdown",
+  "target_defect_present": true,
+  "scope": "Only the nominated contract; not a claim that the source is generally defect-free.",
+  "expected_root_cause": "markdown-01",
+  "location": {
+    "file": "crates/pqc_scan_report/src/compact.rs",
+    "symbol": "markdown_report_with_context snippet loop"
+  },
+  "severity": "P1",
+  "evidence_method": "static source analysis and historical repair; no Rust/browser/model execution",
+  "trigger": {
+    "text": "safe\n\n<img src=x onerror=alert(1)>",
+    "highlighted": false,
+    "line": 7
+  },
+  "cause": "Only the first physical line gets the four-space code indentation; embedded continuation lines can become Markdown/HTML structure.",
+  "consequence": "Attacker-controlled source text can escape code presentation. Active HTML depends on the consuming renderer; this preparation does not demonstrate script execution.",
+  "fixed_reason": "md_code normalizes CRLF and CR to LF and indents every continuation before interpolation.",
+  "acceptable_finding": "Identify unindented embedded newlines at the source snippet formatting call, with a concrete rendering integrity consequence.",
+  "reject_as_target": "Claiming HTML escaping is always required inside an indented block, or asserting browser XSS execution without renderer evidence.",
+  "expected_response": "One actionable finding identifying the nominated historical root cause; duplicates count separately as overhead.",
+  "context": "# Scoped source review\n\nAssess only whether untrusted source_snippet.lines[*].text remains an indented Markdown code block across LF, CRLF and CR. Input text may contain line separators; surrounding sanitization does not remove arbitrary markup. No browser execution claim is required. Other report fields, code examples and HTML writer behavior are outside this case.\n\nThe files are verbatim historical excerpts supplied as inert text, not a complete\ncrate or an executable example. Missing surrounding imports/types and the absence\nof a buildable manifest are intentional. No patch is proposed against production.\nReview the supplied snapshot within the stated contract and report no actionable\nfindings if none are demonstrated. No build or test result is supplied or claimed.\nUse static reasoning and distinguish an unverified hypothesis from a defect.\n\nSource location map (1-based original lines):\n\n- source-1.rs.txt: crates/pqc_scan_report/src/compact.rs:622-639.\n",
+  "source": [
+    {
+      "original_path": "crates/pqc_scan_report/src/compact.rs",
+      "original_lines": [
+        622,
+        639
+      ],
+      "text": "        for (offset, f) in group.occurrences.iter().enumerate() {\n            if let Some(snippet) = &f.source_snippet {\n                writeln!(\n                    out,\n                    \"\\n<a id=\\\"source-{}\\\"></a>\\n\\n### {}\\n\",\n                    start + offset,\n                    m(&location(f, lang))\n                )?;\n                for line in &snippet.lines {\n                    writeln!(\n                        out,\n                        \"    {} {} {}\",\n                        if line.highlighted { \">\" } else { \" \" },\n                        line.line,\n                        line.text\n                    )?;\n                }\n            }\n"
+    }
+  ]
+}

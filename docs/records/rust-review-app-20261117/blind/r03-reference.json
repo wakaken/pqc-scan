@@ -1,0 +1,53 @@
+{
+  "family": "identity",
+  "target_defect_present": false,
+  "scope": "Only the nominated contract; not a claim that the source is generally defect-free.",
+  "expected_root_cause": null,
+  "location": {
+    "file": "crates/pqc_scan_core/src/pipeline.rs",
+    "symbol": "make_finding_id"
+  },
+  "severity": "P2",
+  "evidence_method": "static source analysis and historical repair; no Rust/browser/model execution",
+  "trigger": [
+    [
+      "R",
+      "p",
+      1,
+      23,
+      "x"
+    ],
+    [
+      "R",
+      "p",
+      12,
+      3,
+      "x"
+    ]
+  ],
+  "cause": "Unframed concatenation feeds identical bytes Rp123x to SHA-256 for distinct field tuples. This is encoding ambiguity, not a cryptographic SHA collision.",
+  "consequence": "Distinct occurrences can share a finding ID and downstream associations; do not attribute the separate colon-based dedup defect to this excerpt.",
+  "fixed_reason": "native_id frames domain/version, part count and every UTF-8 part length before hashing.",
+  "acceptable_finding": "Explain at least one concrete distinct-tuple encoding collision; delimiter-free hashing ambiguity is sufficient.",
+  "reject_as_target": "Speculation that truncated SHA alone proves an actual collision, general hasher replacement, absolute-root behavior not supplied here.",
+  "expected_response": "No actionable finding for the nominated historical root cause; other claims require blind adjudication.",
+  "context": "# Scoped source review\n\nAssess whether distinct tuples of rule ID, path, line, column and evidence are encoded without ambiguous field boundaries. Treat the supplied path as already repository-relative. Do not grade ID prefix/length changes or normalize_findings outside these excerpts. Compatibility changes require a separate explicit decision; these are historical snapshots, not a request to change current IDs.\n\nThe files are verbatim historical excerpts supplied as inert text, not a complete\ncrate or an executable example. Missing surrounding imports/types and the absence\nof a buildable manifest are intentional. No patch is proposed against production.\nReview the supplied snapshot within the stated contract and report no actionable\nfindings if none are demonstrated. No build or test result is supplied or claimed.\nUse static reasoning and distinguish an unverified hypothesis from a defect.\n\nSource location map (1-based original lines):\n\n- source-1.rs.txt: crates/pqc_scan_core/src/pipeline.rs:417-434.\n- source-2.rs.txt: crates/pqc_scan_core/src/identity.rs:4-18.\n",
+  "source": [
+    {
+      "original_path": "crates/pqc_scan_core/src/pipeline.rs",
+      "original_lines": [
+        417,
+        434
+      ],
+      "text": "fn make_finding_id(\n    rule_id: &str,\n    file: &str,\n    line: usize,\n    column: usize,\n    evidence: &str,\n) -> String {\n    crate::identity::native_id(\n        \"finding\",\n        &[\n            rule_id,\n            file,\n            &line.to_string(),\n            &column.to_string(),\n            evidence,\n        ],\n    )\n}\n"
+    },
+    {
+      "original_path": "crates/pqc_scan_core/src/identity.rs",
+      "original_lines": [
+        4,
+        18
+      ],
+      "text": "/// Domain/version and component count are framed along with every tuple member.\npub fn native_id(domain: &str, parts: &[&str]) -> String {\n    let mut hash = Sha256::new();\n    let values = [\"pqc-scan-native\", \"1\", domain];\n    for value in values {\n        hash.update((value.len() as u64).to_be_bytes());\n        hash.update(value.as_bytes());\n    }\n    hash.update((parts.len() as u64).to_be_bytes());\n    for part in parts {\n        hash.update((part.len() as u64).to_be_bytes());\n        hash.update(part.as_bytes());\n    }\n    format!(\"{domain}-v1-{}\", hex::encode(hash.finalize()))\n}\n"
+    }
+  ]
+}

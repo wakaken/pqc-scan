@@ -1,0 +1,45 @@
+{
+  "family": "identity",
+  "target_defect_present": true,
+  "scope": "Only the nominated contract; not a claim that the source is generally defect-free.",
+  "expected_root_cause": "identity-01",
+  "location": {
+    "file": "crates/pqc_scan_core/src/pipeline.rs",
+    "symbol": "make_finding_id"
+  },
+  "severity": "P2",
+  "evidence_method": "static source analysis and historical repair; no Rust/browser/model execution",
+  "trigger": [
+    [
+      "R",
+      "p",
+      1,
+      23,
+      "x"
+    ],
+    [
+      "R",
+      "p",
+      12,
+      3,
+      "x"
+    ]
+  ],
+  "cause": "Unframed concatenation feeds identical bytes Rp123x to SHA-256 for distinct field tuples. This is encoding ambiguity, not a cryptographic SHA collision.",
+  "consequence": "Distinct occurrences can share a finding ID and downstream associations; do not attribute the separate colon-based dedup defect to this excerpt.",
+  "fixed_reason": "native_id frames domain/version, part count and every UTF-8 part length before hashing.",
+  "acceptable_finding": "Explain at least one concrete distinct-tuple encoding collision; delimiter-free hashing ambiguity is sufficient.",
+  "reject_as_target": "Speculation that truncated SHA alone proves an actual collision, general hasher replacement, absolute-root behavior not supplied here.",
+  "expected_response": "One actionable finding identifying the nominated historical root cause; duplicates count separately as overhead.",
+  "context": "# Scoped source review\n\nAssess whether distinct tuples of rule ID, path, line, column and evidence are encoded without ambiguous field boundaries. Treat the supplied path as already repository-relative. Do not grade ID prefix/length changes or normalize_findings outside these excerpts. Compatibility changes require a separate explicit decision; these are historical snapshots, not a request to change current IDs.\n\nThe files are verbatim historical excerpts supplied as inert text, not a complete\ncrate or an executable example. Missing surrounding imports/types and the absence\nof a buildable manifest are intentional. No patch is proposed against production.\nReview the supplied snapshot within the stated contract and report no actionable\nfindings if none are demonstrated. No build or test result is supplied or claimed.\nUse static reasoning and distinguish an unverified hypothesis from a defect.\n\nSource location map (1-based original lines):\n\n- source-1.rs.txt: crates/pqc_scan_core/src/pipeline.rs:425-442.\n",
+  "source": [
+    {
+      "original_path": "crates/pqc_scan_core/src/pipeline.rs",
+      "original_lines": [
+        425,
+        442
+      ],
+      "text": "fn make_finding_id(\n    rule_id: &str,\n    file: &str,\n    line: usize,\n    column: usize,\n    evidence: &str,\n) -> String {\n    use sha2::{Digest, Sha256};\n\n    let mut hasher = Sha256::new();\n    hasher.update(rule_id.as_bytes());\n    hasher.update(file.as_bytes());\n    hasher.update(line.to_string().as_bytes());\n    hasher.update(column.to_string().as_bytes());\n    hasher.update(evidence.as_bytes());\n    let digest = hasher.finalize();\n    hex::encode(&digest[..12])\n}\n"
+    }
+  ]
+}

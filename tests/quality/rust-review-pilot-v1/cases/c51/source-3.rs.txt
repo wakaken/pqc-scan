@@ -1,0 +1,22 @@
+fn sarif_column(finding: &Finding) -> Option<usize> {
+    let column = finding.location.column;
+    if column == 0 {
+        return None;
+    }
+    if finding.evidence.r#type == "tree_sitter_match" {
+        let line = finding
+            .source_snippet
+            .as_ref()?
+            .lines
+            .iter()
+            .find(|line| line.line == finding.location.line)?;
+        if line.text.contains("[masked-") {
+            return None;
+        }
+        let text = line.text.strip_suffix("...").unwrap_or(&line.text);
+        if !text.get(..column - 1).is_some_and(str::is_ascii) {
+            return None;
+        }
+    }
+    Some(column)
+}

@@ -1,0 +1,70 @@
+{
+  "family": "sarif",
+  "target_defect_present": false,
+  "scope": "Only the nominated contract; not a claim that the source is generally defect-free.",
+  "expected_root_cause": null,
+  "location": {
+    "file": "crates/pqc_scan_report/src/sarif_report.rs",
+    "symbol": "to_result / SarifPhysicalLocation / SarifRegion"
+  },
+  "severity": "P2",
+  "evidence_method": "static source analysis and historical repair; no Rust/browser/model execution",
+  "trigger": [
+    {
+      "file": "Cargo.lock",
+      "line": 0,
+      "column": 0
+    },
+    {
+      "file": "Cargo.lock",
+      "line": 4,
+      "column": 0
+    },
+    {
+      "file": "Cargo.lock",
+      "line": 4,
+      "column": 9
+    }
+  ],
+  "cause": "Always serializing native coordinate zero as SARIF startLine/startColumn invents an invalid position instead of representing unknown.",
+  "consequence": "SARIF consumers can reject the result or receive misleading source locations.",
+  "fixed_reason": "An unknown line omits region; sarif_column returns None for column zero and serde skips it, preserving a known line.",
+  "acceptable_finding": "Explain unknown-zero serialization for either line or column; combine both as one coordinate-projection root cause.",
+  "reject_as_target": "URI escaping, columnKind, unrelated schema properties or unsupported AST policy outside the nominated scope.",
+  "expected_response": "No actionable finding for the nominated historical root cause; other claims require blind adjudication.",
+  "context": "# Scoped source review\n\nAssess only native unknown coordinates projected to SARIF: line 0 means unknown and must omit region; known line with column 0 must omit startColumn, retaining startLine. Known positive regex coordinates remain unchanged. Source snippets may be absent. Do not assess URI encoding, AST Unicode column policy, unrelated properties or schema retrieval.\n\nThe files are verbatim historical excerpts supplied as inert text, not a complete\ncrate or an executable example. Missing surrounding imports/types and the absence\nof a buildable manifest are intentional. No patch is proposed against production.\nReview the supplied snapshot within the stated contract and report no actionable\nfindings if none are demonstrated. No build or test result is supplied or claimed.\nUse static reasoning and distinguish an unverified hypothesis from a defect.\n\nSource location map (1-based original lines):\n\n- source-1.rs.txt: crates/pqc_scan_report/src/sarif_report.rs:51-95.\n- source-2.rs.txt: crates/pqc_scan_report/src/sarif_report.rs:145-187.\n- source-3.rs.txt: crates/pqc_scan_report/src/sarif_report.rs:200-221.\n- source-4.rs.txt: crates/pqc_scan_report/src/sarif_report.rs:225-256.\n",
+  "source": [
+    {
+      "original_path": "crates/pqc_scan_report/src/sarif_report.rs",
+      "original_lines": [
+        51,
+        95
+      ],
+      "text": "#[derive(Debug, Serialize)]\n#[serde(rename_all = \"camelCase\")]\nstruct SarifResult {\n    rule_id: String,\n    level: String,\n    message: SarifMessage,\n    #[serde(skip_serializing_if = \"Vec::is_empty\")]\n    locations: Vec<SarifLocation>,\n    #[serde(skip_serializing_if = \"Option::is_none\")]\n    properties: Option<SarifResultProperties>,\n}\n\n#[derive(Debug, Serialize)]\nstruct SarifMessage {\n    text: String,\n}\n\n#[derive(Debug, Serialize)]\n#[serde(rename_all = \"camelCase\")]\nstruct SarifLocation {\n    physical_location: SarifPhysicalLocation,\n}\n\n#[derive(Debug, Serialize)]\n#[serde(rename_all = \"camelCase\")]\nstruct SarifPhysicalLocation {\n    artifact_location: SarifArtifactLocation,\n    #[serde(skip_serializing_if = \"Option::is_none\")]\n    region: Option<SarifRegion>,\n}\n\n#[derive(Debug, Serialize)]\n#[serde(rename_all = \"camelCase\")]\nstruct SarifArtifactLocation {\n    uri: String,\n}\n\n#[derive(Debug, Serialize)]\n#[serde(rename_all = \"camelCase\")]\nstruct SarifRegion {\n    start_line: usize,\n    #[serde(skip_serializing_if = \"Option::is_none\")]\n    start_column: Option<usize>,\n}\n\n"
+    },
+    {
+      "original_path": "crates/pqc_scan_report/src/sarif_report.rs",
+      "original_lines": [
+        145,
+        187
+      ],
+      "text": "fn to_result(finding: &Finding) -> SarifResult {\n    let action_titles: Vec<String> = finding\n        .recommended_actions\n        .iter()\n        .take(4)\n        .map(|action| format!(\"{} ({})\", action.title, action.priority))\n        .collect();\n    let next_actions = if action_titles.is_empty() {\n        String::new()\n    } else {\n        format!(\" | next_actions={}\", action_titles.join(\"; \"))\n    };\n\n    SarifResult {\n        rule_id: finding.rule_id.clone(),\n        level: severity_to_level(&finding.severity.to_string()).to_string(),\n        message: SarifMessage {\n            text: format!(\n                \"{} | migration_hint={}{}\",\n                finding.description, finding.migration_hint, next_actions\n            ),\n        },\n        locations: if finding.location.file.is_empty() {\n            Vec::new()\n        } else {\n            vec![SarifLocation {\n                physical_location: SarifPhysicalLocation {\n                    artifact_location: SarifArtifactLocation {\n                        uri: path_to_uri(&finding.location.file),\n                    },\n                    region: (finding.location.line > 0).then(|| SarifRegion {\n                        start_line: finding.location.line,\n                        start_column: sarif_column(finding),\n                    }),\n                },\n            }]\n        },\n        properties: Some(SarifResultProperties {\n            migration_hint: finding.migration_hint.clone(),\n            recommended_actions: action_titles,\n        }),\n    }\n}\n"
+    },
+    {
+      "original_path": "crates/pqc_scan_report/src/sarif_report.rs",
+      "original_lines": [
+        200,
+        221
+      ],
+      "text": "fn sarif_column(finding: &Finding) -> Option<usize> {\n    let column = finding.location.column;\n    if column == 0 {\n        return None;\n    }\n    if finding.evidence.r#type == \"tree_sitter_match\" {\n        let line = finding\n            .source_snippet\n            .as_ref()?\n            .lines\n            .iter()\n            .find(|line| line.line == finding.location.line)?;\n        if line.text.contains(\"[masked-\") {\n            return None;\n        }\n        let text = line.text.strip_suffix(\"...\").unwrap_or(&line.text);\n        if !text.get(..column - 1).is_some_and(str::is_ascii) {\n            return None;\n        }\n    }\n    Some(column)\n}\n"
+    },
+    {
+      "original_path": "crates/pqc_scan_report/src/sarif_report.rs",
+      "original_lines": [
+        225,
+        256
+      ],
+      "text": "fn path_to_uri(path: &str) -> String {\n    #[cfg(windows)]\n    let normalized = path.replace('\\\\', \"/\");\n    #[cfg(windows)]\n    let path = normalized.as_str();\n\n    let mut encoded = String::new();\n    for byte in path.bytes() {\n        if byte.is_ascii_alphanumeric() || b\"-._~/\".contains(&byte) {\n            encoded.push(char::from(byte));\n        } else {\n            use std::fmt::Write;\n            write!(encoded, \"%{byte:02X}\").expect(\"writing to String cannot fail\");\n        }\n    }\n    #[cfg(windows)]\n    {\n        if path.starts_with(\"//\") {\n            return format!(\"file:{encoded}\");\n        }\n        if path.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)\n            && path.as_bytes().get(1..3) == Some(b\":/\")\n        {\n            return format!(\"file:///{}:{}\", &encoded[..1], &encoded[4..]);\n        }\n    }\n    if path.starts_with('/') {\n        format!(\"file://{encoded}\")\n    } else {\n        encoded\n    }\n}\n"
+    }
+  ]
+}
