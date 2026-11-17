@@ -2,7 +2,7 @@
 
 [English](PROBING.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.ja.md)
 
-未公開のv0.3.0静的版候補でも、TLS・SSH提示方式・SSH KEXは実験的機能です。候補の静的版と公開済みv0.2.0のバイナリには、`probe`コマンドを含みません。probe同梱版は配布・導入の技術検証を終えていますが、公開前の確認が残っています。[配布状況](DISTRIBUTION.ja.md#release-status)を参照してください。
+TLS・SSH提示方式・SSH KEXは、静的版v0.3.0と併せても実験的機能です。v0.3.0とv0.2.0の静的版バイナリに、`probe`コマンドは含みません。probe同梱版は配布・導入の技術検証を終えていますが、公開前の確認が残っています。[配布状況](DISTRIBUTION.ja.md#release-status)を参照してください。
 
 管理者から検査の許可を得たホスト・ポートだけを指定してください。
 `probe` は指定先と通信します。リポジトリの `scan` とレポート生成はローカルで完結し、ソース内のURL、証明書のSAN、所見を根拠に自動接続することはありません。

@@ -2,7 +2,7 @@
 
 [日本語](SCANNING.ja.md) · [README](../../README.md)
 
-This guide describes the unpublished v0.3.0 static candidate. The published release is v0.2.0; detected references, evidence and IDs can differ between versions. See the [candidate notes](../releases/v0.3.0.md) for compatibility and release status.
+This guide describes static v0.3.0. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.3.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
 
 Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
 

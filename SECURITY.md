@@ -2,12 +2,12 @@
 
 [English](SECURITY.md) | [日本語](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/SECURITY.ja.md)
 
-The v0.2 release targets static scanning with optional explicitly invoked network
-probes. The latest verified 0.2.x snapshot receives best-effort maintenance. No
-response SLA or old-version backport guarantee is declared. Optional TLS/SSH
-probes remain experimental. Unsupported inputs and incomplete observations must
-not be interpreted as a clean security assessment. The unpublished 0.3.0 candidate
-does not establish a 0.3.x maintenance or backport policy; that decision remains open.
+Static scanning on macOS Apple Silicon is the formal binary release scope.
+The latest verified snapshots in 0.2.x and 0.3.x receive best-effort maintenance.
+No response SLA or old-version backport guarantee is declared. Optional explicitly
+invoked TLS/SSH probes remain experimental; network binary publication remains
+on hold. Unsupported inputs and incomplete observations must not be interpreted
+as a clean security assessment.
 
 ## Reporting a vulnerability
 
@@ -85,8 +85,7 @@ authorize execution, network access, disclosure or remediation.
 
 ### System and Scope
 
-This checkout prepares the unpublished 0.3.0 static candidate; maintenance above concerns
-the verified 0.2.x release line. Assess the selected source revision and enabled
+This checkout contains product version 0.3.0. Assess the selected source revision and enabled
 features rather than assuming that a published release represents this checkout.
 
 pqc-scan is a local Rust CLI and library for advisory inspection of cryptographic
