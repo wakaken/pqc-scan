@@ -4,16 +4,38 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
-const { prepareCodeScanning, renderSelfScanSummary } = require('./prepare-code-scanning.cjs');
-const root = path.resolve(__dirname, '..');
-const read = name => JSON.parse(fs.readFileSync(path.join(root, name), 'utf8'));
+const { prepareCodeScanning, renderSelfScanSummary, resultDigest } = require('./prepare-code-scanning.cjs');
+const repositoryRoot = path.resolve(__dirname, '..');
+const read = name => JSON.parse(fs.readFileSync(path.join(repositoryRoot, name), 'utf8'));
 const ledger = read('docs/quality/self-scan/notification-review-20261116/REVIEWED-RESULTS.json');
-const policy = () => read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json');
+// Historical full-repository results are tested on explicit synthetic sources.
+// Current product bindings are verified separately; old line numbers cannot
+// authorize omissions from the changed current source.
+const { reviewedResultTestSource } = require('./reviewed-result-test-source.cjs');
+const fixture = reviewedResultTestSource({ version: 1, files: ledger.files.map(file => ({
+  path: file.path, sha256: file.sha256, reason: file.reason,
+  results: [...new Map(file.results.map(result => {
+    const region = result.locations[0].physicalLocation.region;
+    const hash = resultDigest(result);
+    return [hash, { ruleId: result.ruleId, line: region.startLine,
+      column: region.startColumn ?? null, sha256: hash,
+      count: file.results.filter(item => resultDigest(item) === hash).length }];
+  })).values()],
+})) });
+const root = fixture.root;
+const policy = () => structuredClone(fixture.policy);
+test.after(fixture.cleanup);
+
+test('current finite policy binds every actual source after reviewed source changes', () => {
+  for (const file of read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json').files) {
+    assert.equal(createHash('sha256').update(fs.readFileSync(path.join(repositoryRoot, file.path))).digest('hex'), file.sha256, file.path);
+  }
+});
 const input = () => ({ version: '2.1.0', runs: [{ tool: { driver: { name: 'pqc-scan' } },
   results: structuredClone([...ledger.files.flatMap(file => file.results), ...ledger.remaining]) }] });
 const filename = result => result.locations[0].physicalLocation.artifactLocation.uri;
 
-test('current finite review binds every actual source and preserves dependency and unresolved observations', () => {
+test('historical finite review preserves dependency and unresolved observations on bound synthetic sources', () => {
   assert.deepEqual(ledger.counts, { raw: 5255, reviewed: 5240, requireReview: 15 });
   const current = policy();
   for (const file of ledger.files) {
@@ -67,16 +89,37 @@ test('source drift fails closed for every reviewed context, without a directory-
   }
 });
 
-test('approved rule correction preserves historical hashes and old bindings still fail closed', () => {
-  const current = policy();
-  const changed = ledger.files.filter(file => current.files.find(item => item.path === file.path).sha256 !== file.sha256);
-  assert.deepEqual(changed.map(file => file.path), ['rules/default/crypto_api.yml']);
-  const historical = changed[0];
+test('historical rule hashes remain recorded and changed source bindings fail closed', () => {
+  const current = read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json');
+  const historical = ledger.files.find(file => file.path === 'rules/default/crypto_api.yml');
   assert.equal(historical.sha256, '84f672787e883cbd2c2dd790ada8076c8a4c3f0628f3bc26aeb2b5bf4f7ea10a');
-  const stale = structuredClone(current);
+  assert.notEqual(current.files.find(file => file.path === historical.path).sha256, historical.sha256);
+  const stale = policy();
   stale.files.find(file => file.path === historical.path).sha256 = historical.sha256;
   const prepared = prepareCodeScanning(input(), stale, root);
   assert.deepEqual(prepared.sarif.runs[0].results.filter(result => filename(result) === historical.path), historical.results);
   assert.equal(prepared.audit.retainedResults, ledger.counts.requireReview + historical.results.length);
   assert.equal(prepared.audit.sourceChecks.find(file => file.path === historical.path).status, 'changed');
+});
+
+test('static candidate references map unchanged test lines and retain every unreviewed payload', () => {
+  const review = read('docs/releases/static-candidate-20261117/evidence/POLICY-REBIND.json');
+  const results = read('docs/releases/static-candidate-20261117/evidence/REVIEWED-RESULTS.json');
+  assert.equal(results.length, 98);
+  assert.equal(new Set(review.rows.map(row => row.path)).size, 4);
+  for (const row of review.rows) {
+    const lines = fs.readFileSync(path.join(repositoryRoot, row.path), 'utf8').split('\n');
+    assert.equal(createHash('sha256').update(lines[row.newLine - 1]).digest('hex'), row.sourceLineSha256);
+    assert(row.newLine > lines.findIndex(line => line.trim() === '#[cfg(test)]') + 1);
+    assert.equal(results.filter(result => resultDigest(result) === row.newResultSha256).length, row.count);
+  }
+  const raw = { version: '2.1.0', runs: [{ tool: { driver: { name: 'pqc-scan' } }, results }] };
+  const live = read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json');
+  const prepared = prepareCodeScanning(raw, live, repositoryRoot);
+  assert.equal(prepared.audit.expectedResults, 98);
+  assert.equal(prepared.audit.retainedResults, 0);
+  const added = structuredClone(results[0]);
+  added.message.text = 'New observation on an already reviewed test line';
+  raw.runs[0].results.push(added);
+  assert.deepEqual(prepareCodeScanning(raw, live, repositoryRoot).sarif.runs[0].results, [added]);
 });

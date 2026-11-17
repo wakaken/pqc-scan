@@ -89,11 +89,11 @@ impl RegexDetector {
                         }
                         let (line, column) = line_col_for_offset(text, found.start);
                         let raw = &text[found.start..found.end];
-                        if raw.len() > remaining_bytes {
+                        if found.budget_bytes() > remaining_bytes {
                             status = DetectorStatus::Truncated;
                             break;
                         }
-                        remaining_bytes -= raw.len();
+                        remaining_bytes -= found.budget_bytes();
                         let detection = Detection {
                             rule_id: rule.id.clone(),
                             location: Location {
@@ -156,15 +156,26 @@ impl RegexDetector {
                     if go_rule && (found.start() != 0 || found.end() != target.len()) {
                         continue;
                     }
-                    let start = base + found.start();
+                    let original_start = base + found.start();
                     let end = base + found.end();
-                    if should_skip_comment_only_match(&file.path, text, start) {
+                    if should_skip_comment_only_match(&file.path, text, original_start) {
                         continue;
                     }
                     if accepted == budget.max_hits_per_rule {
                         status = DetectorStatus::Truncated;
                         break 'targets;
                     }
+                    // Layout is not the configuration reference. Keep the
+                    // selected original-source range and evidence consistent.
+                    // Deliberately whitespace-only custom matches stay intact.
+                    let raw = found.as_str();
+                    let trimmed = raw.trim_start();
+                    let raw = if rule.scope == "config" && !trimmed.is_empty() {
+                        trimmed
+                    } else {
+                        raw
+                    };
+                    let start = end - raw.len();
                     let (line, column) = line_col_for_offset(text, start);
                     out.push(Detection {
                         rule_id: rule.id.clone(),
@@ -175,7 +186,7 @@ impl RegexDetector {
                         },
                         evidence: Evidence {
                             r#type: "regex_match".into(),
-                            r#match: mask_preview(found.as_str()),
+                            r#match: mask_preview(raw),
                             snippet_preview: snippet_around(text, start, end, 64),
                             metadata: std::collections::BTreeMap::from([
                                 ("detector".into(), self.name().into()),
@@ -191,7 +202,7 @@ impl RegexDetector {
                             } else {
                                 pqc_scan_core::ObservationMethod::LexicalMatch
                             },
-                            found.as_str(),
+                            raw,
                             Some((start, end)),
                         ));
                     }

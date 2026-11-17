@@ -322,11 +322,11 @@ impl TreeSitterDetector {
                 }
                 let (line, column) = pqc_scan_core::model::line_col_for_offset(text, found.start);
                 let raw = &text[found.start..found.end];
-                if raw.len() > remaining_match_bytes {
+                if found.budget_bytes() > remaining_match_bytes {
                     status = DetectorStatus::Truncated;
                     break;
                 }
-                remaining_match_bytes -= raw.len();
+                remaining_match_bytes -= found.budget_bytes();
                 examined += 1;
                 let detection = Detection {
                     rule_id: rule.id.clone(),

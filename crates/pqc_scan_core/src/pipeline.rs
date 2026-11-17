@@ -945,6 +945,46 @@ mod tests {
         }
     }
 
+    #[test]
+    fn normalization_preserves_declared_confidence_and_metadata_exactly() {
+        let root = temp_dir("normalization-confidence");
+        let rule_dir = root.join("rules");
+        fs::create_dir(&rule_dir).unwrap();
+        for confidence in [0.0_f32, 0.17, 0.449, 0.45, 0.83, 1.0] {
+            fs::write(rule_dir.join("confidence.yml"), format!(
+                "id: CONFIDENCE_ORACLE\nkind: regex\ncategory: custom\nseverity: info\nrisk: quantum-uncertain\nconfidence: {confidence}\nmigration_hint: Retain the source heuristic.\npattern: TOKEN\nscope: code\n"
+            )).unwrap();
+            let rules = RuleSet::load_from_dir(&rule_dir).unwrap();
+            let detection = Detection {
+                rule_id: "CONFIDENCE_ORACLE".into(),
+                location: crate::Location {
+                    file: root.join("input.rs").to_string_lossy().into_owned(),
+                    line: 3,
+                    column: 7,
+                },
+                evidence: crate::Evidence {
+                    r#type: "test".into(),
+                    r#match: "TOKEN".into(),
+                    snippet_preview: "TOKEN".into(),
+                    metadata: BTreeMap::from([("source".into(), "explicit-test-oracle".into())]),
+                },
+            };
+            let expected_evidence = detection.evidence.clone();
+            let normalized = normalize_findings(&root, vec![detection], &rules);
+            assert_eq!(normalized.len(), 1);
+            let finding = &normalized[0];
+            assert_eq!(finding.confidence.to_bits(), confidence.to_bits());
+            assert_eq!(finding.location.file, "input.rs");
+            assert_eq!((finding.location.line, finding.location.column), (3, 7));
+            assert_eq!(finding.severity, Severity::Info);
+            assert_eq!(
+                serde_json::to_value(&finding.evidence).unwrap(),
+                serde_json::to_value(&expected_evidence).unwrap()
+            );
+        }
+        fs::remove_dir_all(root).unwrap();
+    }
+
     fn assert_coverage_partitions(c: &crate::CoverageSummary) {
         assert_eq!(
             c.selected_files(),

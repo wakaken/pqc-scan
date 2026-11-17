@@ -181,3 +181,14 @@ See [dependency declarations and resolution evidence](../architecture/DEPENDENCY
 ## Including normally excluded binary formats
 
 `scan` excludes known media/archive/compiled-data extensions and otherwise non-text binary inputs before selecting files. These exclusions are counted separately from unfinished checks. `--include-non-scannable` restores their inclusion for forensic/custom-detector runs; it does not add parsers for those formats and can increase “not applicable” counts. Existing directory, Markdown, Git-ignore and size policies still apply. Cryptographic container extensions are retained by default even when unsupported, so their inspection gaps remain visible. Full exclusion paths remain in diagnostic JSON, while human diagnostics show counts and at most three examples per reason.
+
+
+### Reference positions
+
+Explicit Python PQC imports are located at the module reference after `from `;
+the evidence range still includes the imported symbols and continuation lines.
+Configuration regex evidence starts after leading layout whitespace, including
+blank lines; intentionally whitespace-only custom matches keep their full range.
+Locations use original source bytes and character columns. This correction can
+change finding and observation IDs for affected ranges; rule matching, risk,
+severity and confidence are unchanged. Schemas and the identity algorithm are unchanged.

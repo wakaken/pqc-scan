@@ -2,6 +2,8 @@
 
 This branch develops **v0.3**, with a focus on measuring scanner accuracy, inspection coverage and verification limits. See the [quality roadmap](docs/roadmap/v0.3/ROADMAP.md) for completed and planned work.
 
+The unpublished static release candidate is **0.3.0** for macOS arm64; candidate preparation is separate from release acceptance and publication.
+
 The published release is **v0.2.0**; its [release notes](docs/releases/v0.2.0.md) describe the released scope. Static scanning is the formal scope; TLS and SSH probes remain experimental.
 
 [日本語](README.ja.md)

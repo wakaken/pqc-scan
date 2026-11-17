@@ -95,4 +95,36 @@ mod tests {
         let detection = sample_detection("private_key");
         assert_eq!(adjusted_severity(&rule, &detection), Severity::Critical);
     }
+
+    #[test]
+    fn approved_severity_table_covers_every_level_and_confidence_boundary() {
+        // Explicit policy oracle, including the two previously surviving mutants.
+        let cases = [
+            (Severity::Info, Severity::Low),
+            (Severity::Low, Severity::Medium),
+            (Severity::Medium, Severity::High),
+            (Severity::High, Severity::Critical),
+            (Severity::Critical, Severity::Critical),
+        ];
+        for (original, promoted) in cases {
+            for category in ["TLS", "pki", "jwt", "auth", "authentication"] {
+                let detection = sample_detection("code");
+                let below = sample_rule(category, Risk::QuantumVulnerable, original, 0.449);
+                let at = sample_rule(category, Risk::QuantumVulnerable, original, 0.45);
+                assert_eq!(adjusted_severity(&below, &detection), original);
+                assert_eq!(adjusted_severity(&at, &detection), promoted);
+                for risk in [
+                    Risk::QuantumSafe,
+                    Risk::QuantumUncertain,
+                    Risk::NonQuantumRisk,
+                ] {
+                    let rule = sample_rule(category, risk, original, 1.0);
+                    assert_eq!(
+                        adjusted_severity(&rule, &sample_detection("private_key")),
+                        original
+                    );
+                }
+            }
+        }
+    }
 }

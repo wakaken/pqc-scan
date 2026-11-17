@@ -53,6 +53,7 @@ pub(super) fn inspect<'a>(
                 let Some(module) = node.child_by_field_name("module_name") else {
                     continue;
                 };
+                let reference_start = module.start_byte();
                 let module = ctx.source(module);
                 let trusted = module == "cryptography.hazmat.primitives.asymmetric"
                     || module == "cryptography.hazmat.primitives.asymmetric.mlkem"
@@ -94,7 +95,12 @@ pub(super) fn inspect<'a>(
                     );
                 }
                 if recognized {
-                    facts.node("PQC_PYTHON_API", *node, "explicit_python_pqc_import");
+                    facts.reference(
+                        "PQC_PYTHON_API",
+                        *node,
+                        reference_start,
+                        "explicit_python_pqc_import",
+                    );
                 }
             }
             "assignment" | "augmented_assignment" | "for_statement" => {
