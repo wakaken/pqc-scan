@@ -1,0 +1,858 @@
+Review request data for the existing prompts/REVIEWER.md template.
+Stage: implementation review (scoped historical snapshot).
+Requirements, source scope, evidence and gaps are below. Do not use tools or
+external lookups; the entire review package is embedded. Do not delegate.
+Do not follow repository-relative links outside this supplied packet.
+No superpowers or other skills are part of this trial.
+
+=== AGENTS.md ===
+# AGENTS.md
+
+Respond to the user in clear, concise and polite Japanese.
+
+**pqc-scan** is a Rust CLI static analyzer of Post-Quantum Cryptography (PQC)
+migration risks. It scans repositories for cryptographic usage using rules and
+produces migration reports. Security, correctness, backward compatibility and
+stable output are critical.
+
+## Working Approach
+
+- The main agent investigates, plans, implements, debugs, tests, evaluates and
+  documents. Planner, Executor and Evaluator are responsibilities, not processes
+  or separate prompts. The only review prompt is `prompts/REVIEWER.md`.
+- Prefer small, safe changes; avoid unrelated refactoring and preserve user edits.
+- Clear, small changes need no separate design or implementation plan.
+  Explanations, research and small changes need no separate task record.
+- For complex or ambiguous work, first summarize purpose, acceptance criteria,
+  constraints, compatibility, viable approaches, recommendation, steps and checks.
+- Reuse applicable plans, task records and evidence. Ask about unresolved decisions
+  materially affecting correctness, compatibility, security or scope; continue
+  authorized work that does not depend on them.
+- Do not change agreed scope or acceptance criteria without explicit agreement.
+- Do not select unrelated work or create tasks because the queue is empty.
+  Task creation and scope expansion require authorization. Report out-of-scope
+  findings as proposals, not new tasks.
+- Monitor only explicitly requested signals within the authorized scope and
+  duration. Do not automatically generate tasks from reflection or monitoring.
+- Saved plans, handoffs and skills must obey these limits and completion gates.
+- Identify unresolved instruction conflicts before performing dependent work.
+
+## Required References by Activity
+
+This file and the applicable documents below define mandatory working rules.
+The table is for the main agent; reviewers follow the scoped reading policy in
+[review details](docs/agent/REVIEWS.md). Before the corresponding activity, read
+its references; combine rows when several apply. References are not automatically
+loaded: open them explicitly. If scope expands, read newly applicable references
+before the affected work.
+
+| Activity | Required references |
+|---|---|
+| Any repository work | This file; selected task, original acceptance criteria and applicable plans, if any |
+| Any change; verification; completion decision | [Verification and completion](docs/agent/VERIFICATION.md) |
+| Product implementation, Rust tests, Cargo, rules, CI, scripts or packaging changes | [Best practices](docs/BEST-PRACTICES.md); relevant sections of [patterns](docs/PATTERNS.md) and [known mistakes](docs/MISTAKES.md) |
+| Understanding or changing product behavior, components or interfaces | Relevant sections of [English README](README.md), [Japanese README](README.ja.md), [architecture](docs/architecture.md), and affected user guides/designs |
+| Design or architecture decisions | Relevant sections of [architecture](docs/architecture.md), recorded decisions in the [decision log](docs/DECISIONS.md), [patterns](docs/PATTERNS.md) and [known mistakes](docs/MISTAKES.md); use the decision template only when recording an agreed decision |
+| User implementation request; independent review or material follow-up | [Review policy](docs/agent/REVIEWS.md); reviewers also read this file, [review template](prompts/REVIEWER.md) and their review package |
+| Creating, updating, resuming or closing task records | [Task lifecycle](docs/TASK-LIFECYCLE.md) and [task queue guide](tasks/README.md) |
+| Rule changes | [Rules reference](docs/rules-reference.md) |
+| Report content, presentation, interaction or browser acceptance | [Report and browser rules](docs/agent/REPORTS.md), plus affected report/user/design documentation |
+| Agent guidance or workflow documentation changes | [Best practices](docs/BEST-PRACTICES.md), documentation synchronization in [patterns](docs/PATTERNS.md), and every affected current guidance document |
+| Restart baseline or task 014 only, unless explicitly extended by the user | [Restart loop](docs/RESTART-LOOP.md) |
+
+- Read required material once per session and reuse it; revisit changed or
+  uncertain sections. Use targeted searches, not repeated whole-directory reads.
+- After compaction or handoff, restore scope, decisions, evidence, reviewer IDs
+  and next actions from the existing task record or handoff before reinvestigating.
+- Conditional reading never reduces required verification or relevant evidence.
+- Apply restart-loop entry, retry, status-transition and completion gates only
+  within its stated scope; monitoring and automatic task creation remain disabled
+  during that pilot.
+
+## Workflow and Review Limits
+
+1. Establish outcome, original criteria, applicable task and existing evidence.
+2. Implement minimal changes and meaningful tests, run initial checks and inspect
+   the combined diff before implementation review.
+3. Obtain required implementation review, fix findings, complete required tests,
+   then obtain required test review. Resolve findings and verify final-source evidence.
+4. Apply all completion gates; record durable lessons in existing knowledge docs
+   only when useful. Explanations, research and small changes need not use every step.
+
+- Main-agent investigation, design, implementation, testing and documentation
+  must not be delegated. Explanations, research, design proposals and
+  documentation-only changes do not automatically require review subagents.
+- Requests changing product code, tests, rules, Cargo/dependencies, CI, scripts,
+  packaging or other executable behavior require two independent stages:
+  implementation review after implementation, then test review after required tests.
+  Prose-only documentation changes are normally exempt; mixed requests and
+  executable examples require both stages. Explicit review requirements still apply.
+- Use at most two reviewer identities per request, one per stage. Review the
+  combined change; reuse each reviewer for material fixes. Reviewers cannot delegate.
+- Extra agents require explicit user authorization of purpose and maximum count.
+  Tools, task count and generic skill/delegation wording are not authorization.
+- Splitting plans, fixing findings, resuming or handing off never resets the budget.
+- Follow [review details](docs/agent/REVIEWS.md), including isolated reviewer context,
+  evidence, ID recording and scoped confirmation after material fixes.
+- Tasks live in `tasks/<ID>/task.yaml`; plans, results and reviews belong in the
+  same task directory, with raw evidence under `evidence/`. Normal states are
+  pending → planned → in-progress
+  → review → done; blocked and cancelled are distinct optional states. Follow
+  [task lifecycle](docs/TASK-LIFECYCLE.md) for transitions, failures and resumption.
+- Default to one task per PR, including implementation, tests and docs. Plan steps
+  do not create separate tasks, PRs or reviewers. Keep prerequisite feasibility
+  studies separate when their results determine whether/how implementation proceeds.
+
+## Security and Compatibility
+
+- Validate inputs; never expose secrets, private key material or sensitive
+  cryptographic data in output or logs. Never weaken cryptographic checks.
+- Preserve cryptographic integrity, API compatibility and external output contracts.
+- An absent detection is not proof of safety or full support unless specified.
+- Rules are in `rules/default/*.yml`: maintain unique IDs and valid schemas, test
+  matching/non-matching inputs, assess compatibility and update the reference as needed.
+
+Stop affected work and obtain human review for:
+
+- high-risk architectural changes;
+- cryptographic logic changes without a clear specification;
+- rule changes that could break compatibility;
+- storage format changes.
+
+Preserve work and evidence; explain the required decision before proceeding.
+Human review is separate from independent reviews and grants no extra agent slots.
+
+## Documentation
+
+- Maintain English and Japanese versions of end-user documentation: the root
+  `README.md` (English), root `README.ja.md` (Japanese), and documents under
+  `docs/user/`. Keep paired versions factually consistent and update both for
+  user-facing behavior changes. Report format changes also require applicable
+  report docs, subject to the human review conditions above.
+- Write developer-only documentation in English: `tasks/`, `docs/agent/`,
+  `docs/quality/`, `docs/records/`, `docs/roadmap/`, `docs/architecture/`,
+  `docs/product/`, `docs/releases/`, and all other files under `docs/` outside
+  `docs/user/`. This includes explanatory prose in task definitions and results.
+- Apply these language rules to newly authored or revised explanatory prose.
+  Do not translate code, commands, identifiers, paths, structured data or quoted
+  material to satisfy this policy. These rules do not change the requirement to
+  communicate with the user in Japanese.
+- Update affected agent references together when terms or paths change.
+- This file owns core constraints and summarizes detailed rules. Linked guides
+  own verification/completion (`docs/agent/VERIFICATION.md`), reviews
+  (`docs/agent/REVIEWS.md`), reports (`docs/agent/REPORTS.md`) and task lifecycle
+  (`docs/TASK-LIFECYCLE.md`) details. Core constraints always apply; update affected
+  summaries, details and references together in the same change. Resolve conflicts
+  before dependent work; neither location permits weakening the other's constraints.
+- Preserve past reviews, completed tasks and measurements, including their
+  original languages and wording; the language policy does not authorize
+  translating or rewriting historical records or evidence. Historical role names
+  and paths describe their time, not instructions to restore removed prompts.
+- Use existing knowledge documents for durable lessons; avoid duplicate knowledge
+  and unnecessary design/reflection docs. Documentation never replaces validation.
+
+## Completion and Communication
+
+- Use `rust-toolchain.toml` and the applicable checks in
+  [verification rules](docs/agent/VERIFICATION.md); optional features need their
+  own applicable checks. Documentation-only work normally needs no Rust checks.
+- Mark done only when every original criterion/deliverable is implemented and
+  verified against final source, including required reviews. Partial, Unknown,
+  Not Tested, failed or deferred required work prevents completion.
+- Artifact lists, passing logs or limited reviews do not cover requirements
+  outside their scope. Never narrow criteria or move work elsewhere to claim done.
+- Evaluation completion and measured product quality are different; incomplete
+  truth, missing measurements and unverified assessment validity stay unfinished.
+- Continue resolvable work. For blockers, keep work unfinished and record the
+  dependency, attempts, unmet criteria and concrete action/decision needed.
+- Reopening incorrectly closed work preserves history and reconciles queue/roadmap;
+  cancellation requires a maintainer decision and reopening an explicit new request.
+- Report in concise, polite Japanese: resulting behavior, why it changed, actual
+  verification and remaining work. Distinguish implementation, measurements,
+  proposals and unexecuted checks. Provide source version, commands, exit results
+  and artifact links for changes/measurements; summarize routine successful checks.
+- Claim completion only against original criteria. Lead partial results with the
+  unfinished status and reason; never describe unfinished work as complete.
+
+
+=== docs/agent/REVIEWS.md ===
+# Independent Reviews
+
+These are mandatory details of [AGENTS.md](../../AGENTS.md). The main agent reads
+this file before starting a user implementation request and before each review
+stage or material follow-up. Reviewers read it with AGENTS.md,
+[prompts/REVIEWER.md](../../prompts/REVIEWER.md) and the supplied review package.
+The main agent's full reading list is not a reviewer checklist; reviewers consult
+additional source and documents only as needed for their assigned scope.
+
+# Subagent and Token Policy
+
+## Main-Agent Responsibilities
+
+The main agent performs investigation, design, planning, implementation,
+debugging, testing and documentation without delegating them to subagents.
+
+Explanations, research, design proposals and documentation-only changes
+do not automatically require independent review subagents.
+
+## Required Review Stages
+
+For this policy, a user implementation request includes changes to product code,
+tests, detection rules, Cargo configuration or dependencies, CI, scripts,
+packaging, executable examples or other executable behavior, regardless of file
+extension. A request mixing these with documentation follows both stages for the
+combined change. Small implementation changes are not exempt.
+
+Explanations, research, design proposals and prose-only documentation changes
+normally require neither stage unless the original acceptance criteria or an
+explicit user instruction require review. This exception does not waive applicable
+verification, safety, compatibility or human-review gates.
+
+Use two review stages for each user implementation request in this scope:
+
+1. Implementation review:
+   - After implementation, start one implementation-review subagent.
+   - Review the combined change for correctness, requirements, security,
+     architecture consistency and compatibility.
+   - Supply available test results and identify checks that remain unexecuted.
+
+2. Test review:
+   - After the main agent completes required tests, start one test-review
+     subagent.
+   - Check whether the tests actually verify the final change.
+   - Inspect coverage, relevant positive and negative cases, meaningful
+     assertions, commands, features and evidence matching the final source.
+   - Passing logs alone do not establish adequate testing.
+
+The main agent fixes findings and runs necessary verification.
+
+## Review Budget and Context
+
+- Use at most two reviewer identities per user implementation request:
+  one for each stage.
+- Review the combined change rather than starting reviewers for individual
+  plan steps, files, edits, test commands or log files.
+- Design, task, branch, final and pre-merge reviews do not create additional
+  review slots.
+- Reuse each stage's reviewer for scoped verification of material fixes.
+- Batch related findings and follow-up requests.
+- Reviewers must not delegate further.
+- Any additional subagent requires explicit user authorization covering
+  its purpose and maximum agent count.
+- Tool availability, task count and generic skill wording are not authorization.
+
+When starting a reviewer:
+
+- Use `fork_turns: "none"`.
+- Provide concise requirements, the relevant diff or diff artifact,
+  source version and test evidence.
+- Identify relevant pre-existing changes and exclude unrelated work.
+- Do not copy the whole conversation.
+- Request actionable findings with file references and requirement impact.
+
+Reviewers rely on the main agent's test evidence unless a specific concern
+requires independent reproduction. Do not automatically repeat the full suite.
+
+## Revisions and Resumption
+
+- Record reviewer IDs, review scope and reviewed source versions in the
+  existing task record or handoff.
+- Splitting a plan, fixing findings, resuming a chat or handing off work
+  does not reset the review budget.
+- After review-driven changes, rerun affected checks and determine whether
+  prior review evidence still applies.
+- Obtain scoped confirmation from the existing reviewer when changes
+  materially affect the reviewed conclusions.
+- A test-review-driven product change must also receive scoped
+  implementation review when it affects correctness or compatibility.
+- Do not claim an earlier review covers later changes without checking them.
+
+
+=== docs/agent/VERIFICATION.md ===
+# Verification and Completion
+
+These are mandatory details of [AGENTS.md](../../AGENTS.md). Read this file
+before any change and before claiming completion, including documentation-only
+work. Apply every relevant change category; overlapping categories accumulate.
+
+# Development and Verification
+
+Use the Rust toolchain specified in `rust-toolchain.toml`.
+
+Typical commands:
+
+```bash
+cargo build --workspace
+cargo test --workspace
+cargo fmt --all
+cargo clippy --workspace --all-targets -- -D warnings
+```
+
+Example CLI run:
+
+```bash
+cargo run --bin pqc-scan -- scan ./examples \
+  --format all \
+  --out-dir ./target/pqc-report \
+  --rules-dir ./rules
+```
+
+## Verification by Change Type
+
+For Rust implementation, Rust tests, Cargo configuration or dependency changes:
+
+- Run relevant targeted tests during development.
+- Run `cargo fmt --all` and inspect resulting changes.
+- Run `cargo test --workspace`.
+- Run `cargo clippy --workspace --all-targets -- -D warnings`.
+- Run `cargo build --workspace` when validating executable behavior,
+  packaging or a required build deliverable.
+- Exercise affected optional features and supported configurations.
+  Default workspace tests do not establish coverage of disabled features.
+
+For rule changes:
+
+- Validate rule schema and unique IDs.
+- Run relevant positive and negative detection tests.
+- Run workspace tests and required task-specific acceptance checks.
+- Run Rust checks above when Rust source or test code also changes.
+
+For documentation-only changes:
+
+- Check references, links, commands and consistency with actual behavior.
+- Check agreement between English and Japanese documentation where applicable.
+- Rust builds and tests are not required unless the documentation change
+  affects executable examples or its acceptance criteria require them.
+
+For CI, scripts or packaging changes:
+
+- Run the relevant syntax checks, script tests and packaging checks.
+- Validate affected workflows or produced artifacts as required.
+- Local checks do not substitute for required CI execution.
+
+For user-facing behavior:
+
+- Exercise the affected CLI or report workflow.
+- Verify compatibility and relevant error paths.
+- Follow the browser verification requirements for report presentation
+  or interaction changes.
+
+## Verification Evidence
+
+- Record the source revision, relevant uncommitted changes, command,
+  feature configuration and exit result.
+- Preserve logs or artifacts needed to assess required acceptance criteria.
+- A HEAD SHA alone is insufficient when the worktree contains tested changes.
+- Reuse passing results while their source, inputs and environment remain
+  applicable. Repeat checks when changes or unresolved concerns invalidate them.
+- Do not write tests that merely mirror implementation details.
+- Use assertions that establish observable requirements and relevant failures.
+- Do not claim an unexecuted, unavailable or failed check passed.
+
+# Completion and Partial Results
+
+Mark a task `done` only when every original acceptance criterion and required
+deliverable has been implemented and verified with evidence matching the
+final source, including the required review stages.
+
+- An artifact list, passing tests or a limited review does not establish
+  completion of requirements outside its scope.
+- Do not mark a task done while required work is Partial, Unknown, Not Tested,
+  failed or deferred.
+- Recording a limitation or transferring work to another task does not satisfy
+  the original criterion.
+- Do not narrow acceptance criteria or reinterpret scope without explicit
+  user agreement.
+- Distinguish completion of an evaluation from measured product quality.
+  Finding a product failure can be a valid completed evaluation only when
+  the evaluation itself is complete and valid for every required criterion.
+- Incomplete truth, missing measurements, unresolved required reviews and
+  unverified assessment validity remain unfinished work.
+- Continue work on resolvable issues.
+- If a blocker prevents completion, keep the task unfinished and explain:
+  - what is blocked and why
+  - what was attempted
+  - which acceptance criteria remain unmet
+  - the concrete action or decision needed to proceed
+- When reopening an incorrectly closed task, preserve historical evidence,
+  record why the previous completion decision is superseded, and reconcile
+  the task queue and roadmap without rewriting old measurements.
+- Cancellation is an explicit maintainer decision, not implementation completion.
+  Preserve its reason and history. Reopening requires an explicit new request.
+
+
+=== docs/BEST-PRACTICES.md ===
+# Best Practices
+
+This document contains normative development guidance for this repository.
+Use it for rules contributors should normally follow.
+For recurring repository structures and extension styles, see `docs/PATTERNS.md`.
+
+---
+
+## Code Quality
+
+- prefer small, readable functions with minimal nesting
+- keep public entrypoints thin and delegate real work to testable helpers
+- preserve CLI behavior, output stability, and backward compatibility
+- prefer explicit return values for control flow over deep process termination
+
+---
+
+## Testing
+
+- add unit tests for new logic
+- add integration tests where behavior crosses module boundaries
+- keep tests deterministic
+- for CLI code, separate argument parsing, command execution, and process exit so exit codes and output can be tested without spawning a subprocess
+- prefer repository-local temporary fixtures and checked-in rule sets so scanner tests remain stable
+- for security-sensitive detector paths, use synthetic fixtures and assert both positive detection and masking behavior
+
+---
+
+## Security And Compatibility
+
+- validate inputs and avoid exposing secrets
+- do not weaken cryptographic checks or compatibility guarantees
+- never emit raw private key material or sensitive cryptographic data
+- keep report and CLI contracts stable unless the change is explicitly planned and documented
+
+---
+
+## Documentation
+
+- keep agent-facing document references aligned with the actual repository layout
+- when renaming or relocating docs, update `AGENTS.md` and related knowledge docs in the same change
+- keep this document focused on prescriptive guidance; move reusable repository structures to `docs/PATTERNS.md`
+
+## User-Facing Reports
+
+Follow the [report content and browser rules](agent/REPORTS.md), as required by
+[AGENTS.md](../AGENTS.md). Review the rendered first screen for useful findings,
+locations and next checks; keep
+technical accounting and repeated disclaimers out of the opening.
+
+
+=== docs/PATTERNS.md ===
+# Patterns
+
+This document captures recurring repository-specific design and implementation patterns.
+Use it to understand how this codebase is typically extended.
+For normative rules and contributor expectations, see `docs/BEST-PRACTICES.md`.
+
+---
+
+## Thin CLI Entrypoints
+
+Pattern:
+- keep `main` focused on argument parsing, top-level error reporting, and process exit
+- move command behavior into helpers that return explicit results or exit status values
+
+Why it works here:
+- CLI behavior stays compatible while remaining easy to test
+- stdout and stderr can be asserted without spawning a subprocess
+
+Current example:
+- `crates/pqc_scan_cli/src/main.rs`
+
+---
+
+## Pipeline-Centered Scanning
+
+Pattern:
+- keep orchestration in the core pipeline
+- let repository walking, detection, normalization, recommendation enrichment, and reporting remain distinct stages
+
+Why it works here:
+- security-sensitive logic stays inspectable
+- new detection capabilities can be added without rewriting the whole scan flow
+
+Current example:
+- `crates/pqc_scan_core/src/pipeline.rs`
+- `crates/pqc_scan_core/src/walker.rs`
+
+---
+
+## Detector Extension Pattern
+
+Pattern:
+- implement the shared detector trait
+- keep detector-specific parsing and matching local to the detector crate
+- register new detectors through the default detector list rather than wiring them ad hoc
+- add targeted tests for both detection hits and sensitive-output handling when a detector touches key or certificate material
+- when a detector parses multiple manifest families, keep representative tests for manifest, lockfile, and SBOM inputs so inventory metadata stays stable
+
+Why it works here:
+- new detector kinds remain isolated
+- the scan pipeline can treat detectors uniformly
+- regressions in masking or fallback behavior are caught close to the detector implementation
+
+Current example:
+- `crates/pqc_scan_detectors/src/lib.rs`
+- `crates/pqc_scan_detectors/src/regex_detector.rs`
+- `crates/pqc_scan_detectors/src/tree_sitter_detector.rs`
+
+---
+
+## Rule-Driven Matching
+
+Pattern:
+- encode detection logic in YAML rules where possible
+- compile and validate rule data at load time
+- keep rule IDs unique and update rule reference docs with rule changes
+
+Why it works here:
+- detection coverage can evolve without invasive code changes
+- invalid rules fail early instead of producing silent scan drift
+
+Current example:
+- `crates/pqc_scan_rules/src/lib.rs`
+- `rules/default/*.yml`
+- `docs/rules-reference.md`
+
+---
+
+## Report Writer Extension Pattern
+
+Pattern:
+- add new output formats in the reporting crate
+- keep sanitization centralized before format-specific rendering
+- preserve existing output paths and field stability unless a planned compatibility change is approved
+
+Why it works here:
+- sensitive data handling remains consistent across formats
+- downstream tooling can rely on stable report contracts
+
+Current example:
+- `crates/pqc_scan_report/src/lib.rs`
+- `crates/pqc_scan_report/src/json_report.rs`
+- `crates/pqc_scan_report/src/sarif_report.rs`
+
+---
+
+## Report Contract Test Pattern
+
+Pattern:
+- keep deterministic writer-level tests next to JSON, HTML, and Markdown report generators
+- assert grouped finding rendering, format-specific escaping, stable serialized field names, recommended-action sections, and masked evidence output
+- cover inventory-oriented outputs such as `cbom.json` and `dependency-sbom.json` when report contracts are extended
+- use synthetic findings with masked placeholders instead of raw sensitive fixtures
+
+Why it works here:
+- report outputs are compatibility surfaces and can regress during refactors even when core finding data stays correct
+- escaping and masking behavior are security-sensitive and should be checked in the final rendered format, not only in lower-level helpers
+
+Current example:
+- `crates/pqc_scan_report/src/json_report.rs`
+- `crates/pqc_scan_report/src/html_report.rs`
+- `crates/pqc_scan_report/src/markdown_report.rs`
+
+---
+
+## Documentation Synchronization Pattern
+
+Pattern:
+- when renaming docs or changing workflow terms, update all agent-facing references in the same patch
+- keep core working rules and activity-based reading triggers in `AGENTS.md`, detailed verification/review/report rules in `docs/agent/`, and the shared review request template in `prompts/REVIEWER.md`
+- treat `AGENTS.md` as the owner of core constraints and the linked guides as owners of detailed procedures; update affected summaries, details and references in the same change, preserving constraints in both
+- keep current lifecycle definitions aligned across `AGENTS.md`, `docs/TASK-LIFECYCLE.md` and `tasks/README.md`
+- preserve completed task records and past review evidence, including historical prompt paths
+
+Why it works here:
+- agents depend on these files as operational inputs
+- inconsistent wording causes workflow mistakes and duplicate repair work
+
+Current example:
+- `AGENTS.md`
+- `docs/TASK-LIFECYCLE.md`
+- `prompts/REVIEWER.md`
+
+---
+
+## Task Queue Pattern
+
+Pattern:
+- keep each task definition in `tasks/<ID>/task.yaml`, with plans, results and reviews beside it and raw evidence under `tasks/<ID>/evidence/`
+- discover only the numbered task directories and their direct `task.yaml`; do not treat YAML inside evidence as task definitions
+- keep tasks small; responsibility labels describe work performed by the main agent
+- let Planner move tasks to `planned`, Executor to `in-progress`, Reviewer review the implementation, and Evaluator close the loop with `done`
+- use `blocked` when progress depends on unavailable validation or human decisions
+
+Why it works here:
+- responsibilities stay auditable
+- unfinished work remains visible without overloading normal completion states
+
+## Export redaction after stable identity (task 029)
+
+Use source positions collected before detector callbacks to protect recognized
+private/credential context, then sanitize after legacy IDs and native associations
+are built. A truncated preview can lose the syntax needed for later redaction;
+mask its context conservatively and test middle fragments as well as whole canaries.
+Keep legacy CBOM rows and resolve column-less collisions in favor of masking.
+See [the bounded privacy contract](architecture/EVIDENCE-PRIVACY.md).
+
+## Bind comparisons and human assessments to actual facts
+
+A run ID alone does not bind a policy report to immutable inventory content.
+Validate the assessment against the actual inventory and selected local context
+before rendering it. For heuristic moves, count ambiguous observations before
+filtering eligible candidates, and compare referenced asset facts as well as IDs.
+An ambiguous or incomplete observation set must preserve uncertainty.
+
+## Preserve standards semantics through explicit export loss
+
+Schema validation verifies shape, not the meaning of a digest, version or
+assurance claim. Keep a full-certificate DER hash in a named provenance property
+when a standard field requires a different digest input. Omit unsupported standard
+fields and record the loss. Preserve source-column units with their values.
+
+
+=== docs/MISTAKES.md ===
+# Known Mistakes
+
+Recurring issues discovered during development.
+
+---
+
+## Example
+
+Mistake:
+Breaking API compatibility.
+
+Cause:
+Response format changed.
+
+Lesson:
+Maintain backward compatibility.
+
+---
+
+## Example
+
+Mistake:
+Migration failure.
+
+Cause:
+Missing schema constraints.
+
+Lesson:
+Test migrations locally.
+
+---
+
+## CLI Testability
+
+Mistake:
+CLI command logic was coupled directly to `std::process::exit`, which made exit-code behavior hard to test.
+
+Cause:
+Argument parsing, command execution, and process termination were handled in the same path.
+
+Lesson:
+Return an explicit exit status from command logic and keep `main` as a thin wrapper.
+
+---
+
+## Documentation Drift
+
+Mistake:
+Agent-facing docs referenced files that no longer existed or had different names.
+
+Cause:
+Documentation paths changed without updating all workflow and knowledge documents together.
+
+Lesson:
+When doc locations change, verify every referenced path and update all agent guidance in the same patch.
+
+## Shared target directories can invalidate feature-specific protocol evidence
+
+Cause:
+An isolated optional-feature resolver test failed while default builds shared its
+CLI executable path. Concurrent replacement was suspected, but the failed CLI's
+hash was not captured, so its cause remains unconfirmed. A dedicated target-dir
+rerun succeeded.
+
+Lesson:
+Use a separate Cargo target directory for each protocol feature matrix. Bind both
+the test executable and the launched CLI binary to hashes before execution, and
+read completed logs before reporting success. Preserve failed attempts separately
+from successful reruns.
+
+
+## LLVM coverage counters need a bounded and attributable collection path
+
+Cause:
+LLVM diagnostics (including debug dumps on stdout) contaminated machine JSON.
+Accumulating per-process raw profiles exceeded the study's artifact budget.
+A source module compiled through both the CLI and a path-included test also
+showed ambiguous file aggregation; env-cleared children did not inherit the
+profile destination.
+
+Lesson:
+Verify a small compile/run/merge/export round trip before a workspace run.
+Separate machine output from diagnostics, merge profiles incrementally and bind
+executables/source hashes before retiring scratch caches. Preserve ambiguous or
+missing counters separately from proven execution gaps; never weaken a product's
+child environment boundary merely to collect coverage.
+
+### Miriのbuild script失敗を依存crateの非対応と早合点しない
+
+固定版Cargo/Miriでは汎用target runnerがhostのbuild scriptにも適用され、native ELFをMiri用JSONとして誤読する場合がありました。依存なしのbuild.rs有無で再現を比較し、生成物の形式と同版工具のhost/target処理を照合します。今回の固定版ではhost runnerの明示で解消しました。対処後も、元crateでの試験、工具の正負対照、OS/FFIの制約と時間上限は別に確認します。[044の追加調査](../tasks/044/TASK-044-MIRI-FOLLOWUP.md)を参照してください。
+
+
+=== prompts/REVIEWER.md ===
+# Independent Review Request Template
+
+The main agent fills the request below for each required review stage and sends
+it to that stage's reviewer. Use the same template for both stages; do not combine
+reviewer identities. Read [AGENTS.md](../AGENTS.md) and the
+[review policy](../docs/agent/REVIEWS.md) for criteria, budget and revision handling.
+
+## Request
+
+- Stage: implementation review or test review
+- Requirements: original acceptance criteria, scope and compatibility constraints
+- Source: baseline/current revision and relevant uncommitted changes
+- Change: relevant diff or diff artifact, affected files and pre-existing changes
+- Evidence: commands, features/configurations, results and artifact paths
+- Gaps: failed, unavailable or unexecuted required checks
+- Follow-up, if applicable: prior findings, material fixes and affected conclusions
+
+## Reviewer Instructions
+
+- Apply the assigned stage's criteria in `docs/agent/REVIEWS.md` and the applicable
+  completion/verification gates in `docs/agent/VERIFICATION.md`. Read additional
+  source or documentation only as needed to evaluate the supplied scope.
+- Do not modify files or delegate. Rely on supplied test results unless a
+  specific concern requires independent reproduction; do not automatically
+  repeat the full suite.
+- For follow-up, check material fixes and whether evidence covers the final
+  source. Do not assume an earlier review covers later changes.
+
+## Response
+
+- Reviewed stage, source version and scope
+- Actionable findings: severity, file/line, requirement impact and reasoning
+- Material coverage gaps or unknowns, including missing required evidence
+- Acceptance decision for the assigned scope, with reasons
+
+Explicitly state when no actionable findings were identified. Review acceptance
+is not task completion; the main agent applies all completion gates in AGENTS.md.
+
+
+=== Case scope and source map ===
+# Scoped source review
+
+Assess whether distinct tuples of rule ID, path, line, column and evidence are encoded without ambiguous field boundaries. Treat the supplied path as already repository-relative. Do not grade ID prefix/length changes or normalize_findings outside these excerpts. Compatibility changes require a separate explicit decision; these are historical snapshots, not a request to change current IDs.
+
+The files are verbatim historical excerpts supplied as inert text, not a complete
+crate or an executable example. Missing surrounding imports/types and the absence
+of a buildable manifest are intentional. No patch is proposed against production.
+Review the supplied snapshot within the stated contract and report no actionable
+findings if none are demonstrated. No build or test result is supplied or claimed.
+Use static reasoning and distinguish an unverified hypothesis from a defect.
+
+Source location map (1-based original lines):
+
+- source-1.rs.txt: crates/pqc_scan_core/src/pipeline.rs:417-434.
+- source-2.rs.txt: crates/pqc_scan_core/src/identity.rs:4-18.
+
+=== source-1.rs.txt ===
+fn make_finding_id(
+    rule_id: &str,
+    file: &str,
+    line: usize,
+    column: usize,
+    evidence: &str,
+) -> String {
+    crate::identity::native_id(
+        "finding",
+        &[
+            rule_id,
+            file,
+            &line.to_string(),
+            &column.to_string(),
+            evidence,
+        ],
+    )
+}
+
+=== source-2.rs.txt ===
+/// Domain/version and component count are framed along with every tuple member.
+pub fn native_id(domain: &str, parts: &[&str]) -> String {
+    let mut hash = Sha256::new();
+    let values = ["pqc-scan-native", "1", domain];
+    for value in values {
+        hash.update((value.len() as u64).to_be_bytes());
+        hash.update(value.as_bytes());
+    }
+    hash.update((parts.len() as u64).to_be_bytes());
+    for part in parts {
+        hash.update((part.len() as u64).to_be_bytes());
+        hash.update(part.as_bytes());
+    }
+    format!("{domain}-v1-{}", hex::encode(hash.finalize()))
+}
+
+=== Additional optional review reference ===
+# Rust review supplement (pilot)
+
+Optional reference for the treatment arm of the
+[review experiment](../quality/RUST-REVIEW-EXPERIMENT.md). This is not a skill,
+a second review prompt, or a new acceptance gate. It is not automatically required
+for normal reviews. Use [the existing template](../../prompts/REVIEWER.md),
+[review policy](REVIEWS.md), and [verification rules](VERIFICATION.md).
+[AGENTS.md](../../AGENTS.md) and explicit project safety and compatibility
+constraints take precedence over external guidance.
+
+## Review the change and its consequences
+
+- Trace external input to panic, indexing, arithmetic overflow, narrowing/sign
+  conversion, allocation and resource limits. An `expect` message does not make
+  an input-dependent panic safe; an `unwrap` in a test is not automatically a bug.
+- Check that custom `Eq`, `Ord`, `PartialOrd` and `Hash` agree on identity. Look for
+  lost or duplicated findings and unstable ordering, rather than trait presence alone.
+- Check ownership and borrowing for unintended copies, stale cloned state and
+  unnecessary shared mutation. Prefer a small local correction; do not replace
+  deliberate ownership, `Arc`, trait objects or parallelism just to match an idiom.
+- Preserve actionable errors and partial results. Follow failure paths and cleanup;
+  do not replace a documented recovery policy with a blanket panic rule. Error,
+  `Debug`, assertion and logging output must not expose sensitive input.
+- For changed unsafe/FFI code, check the actual lifetime, aliasing, bounds and
+  resource invariants. A `SAFETY` comment describes the argument; it is not proof.
+  Check lock scope, callbacks and cancellation where the change involves concurrency.
+- Check affected public failure/precondition documentation and tests against the
+  behavior. Prefer observable assertions, boundary cases and negative controls;
+  passing logs do not establish that the relevant requirement is tested.
+
+## Keep scanner requirements separate from Rust idioms
+
+- Preserve CLI defaults/exit behavior, public signatures, existing detector
+  adapters, report fields, finding identity, ordering and reference integrity.
+  Do not privatize fields, replace bool parameters, seal traits, change error types
+  or add `non_exhaustive` to existing APIs merely to satisfy a general guideline.
+- Keep unknown, unsupported, failed, partial and complete inspection distinct.
+  No findings is not proof of safety; a legacy adapter is not proof of completeness.
+- Follow sensitive data through collection, snippets, diagnostics and final
+  exports. Keep read boundaries, finite budgets and non-execution of scanned input.
+- Do not infer PQC protection from a name or static reference. Keep declaration
+  versus use, offered versus negotiated, and KEM versus signature facts distinct.
+  Rust idioms do not replace the [PQS-QAM evidence](../quality/QUALITY-MODEL.md).
+
+## Report only justified findings
+
+Use the existing response format. Give the file/line, reachable cause, observable
+impact and relevant requirement or Rust contract. Suggest the smallest compatible
+fix when useful. Separate a demonstrated defect from a question or optional style
+preference; do not invent a finding to fill a checklist. Reuse supplied test evidence
+unless a specific concern needs reproduction. Do not edit files, rerun the full suite
+automatically, add dependencies/lints, or expand review scope.
+
+## Source
+
+Project-specific synthesis informed by BeautifulRust's
+[rust-review](https://github.com/morganlinton/BeautifulRust/blob/b9718436d77ee7bcf17cdcb6aa27628feb95d97a/skills/rust-review/SKILL.md)
+and [rust-best-practices](https://github.com/morganlinton/BeautifulRust/blob/b9718436d77ee7bcf17cdcb6aa27628feb95d97a/skills/rust-best-practices/SKILL.md)
+at commit `b9718436d77ee7bcf17cdcb6aa27628feb95d97a` (MIT).
+This pilot deliberately omits their automatic tool runs, broad skill triggers,
+standalone report format and blanket API/style prescriptions.

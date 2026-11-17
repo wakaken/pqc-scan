@@ -1,0 +1,15 @@
+/// Domain/version and component count are framed along with every tuple member.
+pub fn native_id(domain: &str, parts: &[&str]) -> String {
+    let mut hash = Sha256::new();
+    let values = ["pqc-scan-native", "1", domain];
+    for value in values {
+        hash.update((value.len() as u64).to_be_bytes());
+        hash.update(value.as_bytes());
+    }
+    hash.update((parts.len() as u64).to_be_bytes());
+    for part in parts {
+        hash.update((part.len() as u64).to_be_bytes());
+        hash.update(part.as_bytes());
+    }
+    format!("{domain}-v1-{}", hex::encode(hash.finalize()))
+}

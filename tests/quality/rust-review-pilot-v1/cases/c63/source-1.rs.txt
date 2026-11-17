@@ -1,0 +1,18 @@
+        for (offset, f) in group.occurrences.iter().enumerate() {
+            if let Some(snippet) = &f.source_snippet {
+                writeln!(
+                    out,
+                    "\n<a id=\"source-{}\"></a>\n\n### {}\n",
+                    start + offset,
+                    m(&location(f, lang))
+                )?;
+                for line in &snippet.lines {
+                    writeln!(
+                        out,
+                        "    {} {} {}",
+                        if line.highlighted { ">" } else { " " },
+                        line.line,
+                        line.text
+                    )?;
+                }
+            }
