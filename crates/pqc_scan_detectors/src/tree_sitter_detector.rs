@@ -89,12 +89,29 @@ impl TreeSitterDetector {
             template_pending,
             template_limited,
         } = source_tree(text, &file.path, language, language_name, budget)?;
-        let (mut candidates, mut status) = collect_candidate_nodes(text, &tree, budget);
+        let rsa_constructors = language_name == "java"
+            && rules
+                .get("TS_RSA_KEY_SIZE_LITERAL")
+                .is_some_and(|r| r.kind == RuleKind::TreeSitter && scope_matches(&r.scope, "java"));
+        let (mut candidates, mut status, mut constructors) =
+            collect_candidate_nodes(text, &tree, budget, rsa_constructors);
         if compatibility_limited {
             status = DetectorStatus::Truncated;
         }
         if tree.root_node().id() != original_tree.root_node().id() {
-            let (original, original_status) = collect_candidate_nodes(text, &original_tree, budget);
+            let (original, original_status, extra_constructors) =
+                collect_candidate_nodes(text, &original_tree, budget, rsa_constructors);
+            for candidate in extra_constructors {
+                if !constructors.iter().any(|old| {
+                    old.byte_start == candidate.byte_start && old.text.len() == candidate.text.len()
+                }) {
+                    if constructors.len() == budget.max_ast_candidates {
+                        status = DetectorStatus::Truncated;
+                        break;
+                    }
+                    constructors.push(candidate);
+                }
+            }
             if original_status == DetectorStatus::Truncated {
                 status = DetectorStatus::Truncated;
             }
@@ -164,122 +181,216 @@ impl TreeSitterDetector {
         let file_path = file.path.to_string_lossy().into_owned();
 
         let mut remaining_match_bytes = budget.max_ast_match_bytes;
-        for rule in rules.by_kind(RuleKind::TreeSitter) {
-            if !scope_matches(&rule.scope, language_name) {
-                continue;
-            }
-
-            let regex = match rule.compiled_pattern() {
-                Some(v) => v,
-                None => {
-                    if status != DetectorStatus::Truncated {
-                        status = DetectorStatus::Partial;
-                    }
-                    continue;
-                }
+        // Preserve the complete legacy candidate/alias/rule pass before spending
+        // residual budgets on the previously omitted Java RSA constructor arm.
+        let remaining_candidates = budget.max_ast_candidates.saturating_sub(candidates.len());
+        if constructors.len() > remaining_candidates {
+            status = DetectorStatus::Truncated;
+        }
+        constructors.truncate(remaining_candidates);
+        let mut rsa_dedup = HashSet::new();
+        let mut rsa_examined = 0;
+        for constructor_pass in [false, true] {
+            let pass_candidates = if constructor_pass {
+                &constructors
+            } else {
+                &candidates
             };
-
-            let mut dedup = HashSet::new();
-            let mut rule_hits = 0usize;
-            let mut examined = 0usize;
-            'candidates: for candidate in &candidates {
-                if facts.replaces(rule) {
-                    break;
-                }
-                if language_name == "python"
-                    && matches!(
-                        rule.id.as_str(),
-                        "TS_PY_RSA_USAGE" | "TS_CLASSICAL_EC_API" | "TS_CLASSICAL_EDDSA_API"
-                    )
-                    && candidate.kind != "resolved_call"
-                {
+            for rule in rules
+                .by_kind(RuleKind::TreeSitter)
+                .filter(|r| !constructor_pass || r.id == "TS_RSA_KEY_SIZE_LITERAL")
+            {
+                if !scope_matches(&rule.scope, language_name) {
                     continue;
                 }
-                let match_text = candidate.canonical.as_deref().unwrap_or(candidate.text);
-                if match_text.len() > remaining_match_bytes {
-                    status = DetectorStatus::Truncated;
-                    break;
-                }
-                remaining_match_bytes -= match_text.len();
-                for hit in regex.find_iter(match_text) {
-                    if examined >= budget.max_match_candidates {
-                        status = DetectorStatus::Truncated;
-                        break 'candidates;
-                    }
-                    examined += 1;
-                    if should_skip_comment_only_match_for_language(
-                        language_name,
-                        match_text,
-                        hit.start(),
-                    ) {
-                        continue;
-                    }
-                    if is_embedded_identifier_submatch(match_text, hit.start(), hit.end()) {
-                        continue;
-                    }
 
-                    let (relative_line, relative_col) = pqc_scan_core::model::line_col_for_offset(
-                        candidate.text,
+                let regex = match rule.compiled_pattern() {
+                    Some(v) => v,
+                    None => {
+                        if status != DetectorStatus::Truncated {
+                            status = DetectorStatus::Partial;
+                        }
+                        continue;
+                    }
+                };
+
+                let mut dedup = if constructor_pass {
+                    rsa_dedup.clone()
+                } else {
+                    HashSet::new()
+                };
+                let mut rule_hits = if constructor_pass {
+                    out.iter()
+                        .filter(|d: &&Detection| d.rule_id == rule.id)
+                        .count()
+                } else {
+                    0
+                };
+                let mut examined = if constructor_pass { rsa_examined } else { 0 };
+                'candidates: for candidate in pass_candidates {
+                    // Java constructors are included for the existing RSA parameter
+                    // rule only; other rules retain their original candidate scope.
+                    if candidate.kind == "object_creation_expression"
+                        && rule.id != "TS_RSA_KEY_SIZE_LITERAL"
+                    {
+                        continue;
+                    }
+                    if facts.replaces(rule) {
+                        break;
+                    }
+                    if language_name == "python"
+                        && matches!(
+                            rule.id.as_str(),
+                            "TS_PY_RSA_USAGE" | "TS_CLASSICAL_EC_API" | "TS_CLASSICAL_EDDSA_API"
+                        )
+                        && candidate.kind != "resolved_call"
+                    {
+                        continue;
+                    }
+                    let match_text = candidate.canonical.as_deref().unwrap_or(candidate.text);
+                    if match_text.len() > remaining_match_bytes {
+                        status = DetectorStatus::Truncated;
+                        break;
+                    }
+                    remaining_match_bytes -= match_text.len();
+                    for hit in regex.find_iter(match_text) {
+                        if examined >= budget.max_match_candidates {
+                            status = DetectorStatus::Truncated;
+                            break 'candidates;
+                        }
+                        examined += 1;
+                        if should_skip_comment_only_match_for_language(
+                            language_name,
+                            match_text,
+                            hit.start(),
+                        ) {
+                            continue;
+                        }
+                        if is_embedded_identifier_submatch(match_text, hit.start(), hit.end()) {
+                            continue;
+                        }
+
+                        let (relative_line, relative_col) =
+                            pqc_scan_core::model::line_col_for_offset(
+                                candidate.text,
+                                if candidate.canonical.is_some() {
+                                    0
+                                } else {
+                                    hit.start()
+                                },
+                            );
+                        let line = candidate.line + relative_line.saturating_sub(1);
+                        let column = if relative_line == 1 {
+                            candidate.column + relative_col.saturating_sub(1)
+                        } else {
+                            relative_col
+                        };
+
+                        // Parent/child candidates can expose the same token with
+                        // different quote wrappers. Normalize only its boundaries;
+                        // distinct occurrences must never share a line/text key.
+                        let raw = hit.as_str();
+                        let leading = raw.len() - raw.trim_start_matches(is_match_boundary).len();
+                        let token = raw.trim_matches(is_match_boundary);
+                        let source_start = candidate.byte_start
+                            + if candidate.canonical.is_some() {
+                                0
+                            } else {
+                                hit.start() + leading
+                            };
+                        let source_end = if candidate.canonical.is_some() {
+                            candidate.byte_start + candidate.text.len()
+                        } else {
+                            source_start + token.len()
+                        };
+                        let dedup_key = (source_start, source_end);
+                        if dedup.contains(&dedup_key) {
+                            continue;
+                        }
+                        if rule_hits == budget.max_hits_per_rule {
+                            status = DetectorStatus::Truncated;
+                            break 'candidates;
+                        }
+                        dedup.insert(dedup_key);
+
+                        let mut metadata = BTreeMap::new();
+                        metadata.insert("detector".to_string(), self.name().to_string());
+                        metadata.insert("language".to_string(), language_name.to_string());
+                        metadata.insert("node_kind".to_string(), candidate.kind.to_string());
+                        if rule.id == "PQC_STANDARD_REFERENCE" {
+                            let kind = if candidate.kind.contains("string") {
+                                "name_literal"
+                            } else if candidate.kind.contains("call") {
+                                "call_reference"
+                            } else {
+                                "symbol_reference"
+                            };
+                            metadata.insert("reference_kind".into(), kind.into());
+                        }
+                        metadata.insert("scope".to_string(), rule.scope.clone());
                         if candidate.canonical.is_some() {
-                            0
-                        } else {
-                            hit.start()
-                        },
-                    );
-                    let line = candidate.line + relative_line.saturating_sub(1);
-                    let column = if relative_line == 1 {
-                        candidate.column + relative_col.saturating_sub(1)
-                    } else {
-                        relative_col
-                    };
+                            metadata
+                                .insert("resolution_method".into(), "static_import_binding".into());
+                        }
 
-                    // Parent/child candidates can expose the same token with
-                    // different quote wrappers. Normalize only its boundaries;
-                    // distinct occurrences must never share a line/text key.
-                    let raw = hit.as_str();
-                    let leading = raw.len() - raw.trim_start_matches(is_match_boundary).len();
-                    let token = raw.trim_matches(is_match_boundary);
-                    let source_start = candidate.byte_start
-                        + if candidate.canonical.is_some() {
-                            0
-                        } else {
-                            hit.start() + leading
-                        };
-                    let source_end = if candidate.canonical.is_some() {
-                        candidate.byte_start + candidate.text.len()
-                    } else {
-                        source_start + token.len()
-                    };
-                    let dedup_key = (source_start, source_end);
-                    if dedup.contains(&dedup_key) {
+                        out.push(Detection {
+                            rule_id: rule.id.clone(),
+                            location: Location {
+                                file: file_path.clone(),
+                                line,
+                                column,
+                            },
+                            evidence: Evidence {
+                                r#type: "tree_sitter_match".to_string(),
+                                r#match: mask_preview(if candidate.canonical.is_some() {
+                                    candidate.text
+                                } else {
+                                    hit.as_str()
+                                }),
+                                snippet_preview: mask_preview(
+                                    &clip_text(candidate.text.trim(), 240).0,
+                                ),
+                                metadata,
+                            },
+                        });
+                        if observe {
+                            observations.push(pqc_scan_core::ObservationDraft::source(
+                                out.last().expect("accepted detection"),
+                                pqc_scan_core::ObservationMethod::AstPattern,
+                                hit.as_str(),
+                                Some((source_start, source_end)),
+                            ));
+                        }
+                        rule_hits += 1;
+                    }
+                }
+                for found in facts
+                    .rule_matches(rule)
+                    .iter()
+                    .filter(|_| !constructor_pass)
+                {
+                    if dedup
+                        .iter()
+                        .any(|&(start, end)| found.start <= start && end <= found.end)
+                    {
                         continue;
                     }
-                    if rule_hits == budget.max_hits_per_rule {
+                    if rule_hits >= budget.max_hits_per_rule
+                        || examined >= budget.max_match_candidates
+                    {
                         status = DetectorStatus::Truncated;
-                        break 'candidates;
+                        break;
                     }
-                    dedup.insert(dedup_key);
-
-                    let mut metadata = BTreeMap::new();
-                    metadata.insert("detector".to_string(), self.name().to_string());
-                    metadata.insert("language".to_string(), language_name.to_string());
-                    metadata.insert("node_kind".to_string(), candidate.kind.to_string());
-                    if rule.id == "PQC_STANDARD_REFERENCE" {
-                        let kind = if candidate.kind.contains("string") {
-                            "name_literal"
-                        } else if candidate.kind.contains("call") {
-                            "call_reference"
-                        } else {
-                            "symbol_reference"
-                        };
-                        metadata.insert("reference_kind".into(), kind.into());
+                    let (line, column) =
+                        pqc_scan_core::model::line_col_for_offset(text, found.start);
+                    let raw = &text[found.start..found.end];
+                    if found.budget_bytes() > remaining_match_bytes {
+                        status = DetectorStatus::Truncated;
+                        break;
                     }
-                    metadata.insert("scope".to_string(), rule.scope.clone());
-                    if candidate.canonical.is_some() {
-                        metadata.insert("resolution_method".into(), "static_import_binding".into());
-                    }
-
-                    out.push(Detection {
+                    remaining_match_bytes -= found.budget_bytes();
+                    examined += 1;
+                    let detection = Detection {
                         rule_id: rule.id.clone(),
                         location: Location {
                             file: file_path.clone(),
@@ -287,83 +398,39 @@ impl TreeSitterDetector {
                             column,
                         },
                         evidence: Evidence {
-                            r#type: "tree_sitter_match".to_string(),
-                            r#match: mask_preview(if candidate.canonical.is_some() {
-                                candidate.text
-                            } else {
-                                hit.as_str()
-                            }),
-                            snippet_preview: mask_preview(&clip_text(candidate.text.trim(), 240).0),
-                            metadata,
+                            r#type: "tree_sitter_match".into(),
+                            r#match: mask_preview(raw),
+                            snippet_preview: pqc_scan_core::model::snippet_around(
+                                text,
+                                found.start,
+                                found.end,
+                                64,
+                            ),
+                            metadata: BTreeMap::from([
+                                ("detector".into(), self.name().into()),
+                                ("language".into(), language_name.into()),
+                                ("node_kind".into(), "bounded_source_fact".into()),
+                                ("scope".into(), rule.scope.clone()),
+                                ("source_resolution".into(), found.reason.into()),
+                            ]),
                         },
-                    });
+                    };
                     if observe {
                         observations.push(pqc_scan_core::ObservationDraft::source(
-                            out.last().expect("accepted detection"),
+                            &detection,
                             pqc_scan_core::ObservationMethod::AstPattern,
-                            hit.as_str(),
-                            Some((source_start, source_end)),
+                            raw,
+                            Some((found.start, found.end)),
                         ));
                     }
+                    dedup.insert((found.start, found.end));
+                    out.push(detection);
                     rule_hits += 1;
                 }
-            }
-            for found in facts.rule_matches(rule) {
-                if dedup
-                    .iter()
-                    .any(|&(start, end)| found.start <= start && end <= found.end)
-                {
-                    continue;
+                if !constructor_pass && rule.id == "TS_RSA_KEY_SIZE_LITERAL" {
+                    rsa_dedup = dedup;
+                    rsa_examined = examined;
                 }
-                if rule_hits >= budget.max_hits_per_rule || examined >= budget.max_match_candidates
-                {
-                    status = DetectorStatus::Truncated;
-                    break;
-                }
-                let (line, column) = pqc_scan_core::model::line_col_for_offset(text, found.start);
-                let raw = &text[found.start..found.end];
-                if found.budget_bytes() > remaining_match_bytes {
-                    status = DetectorStatus::Truncated;
-                    break;
-                }
-                remaining_match_bytes -= found.budget_bytes();
-                examined += 1;
-                let detection = Detection {
-                    rule_id: rule.id.clone(),
-                    location: Location {
-                        file: file_path.clone(),
-                        line,
-                        column,
-                    },
-                    evidence: Evidence {
-                        r#type: "tree_sitter_match".into(),
-                        r#match: mask_preview(raw),
-                        snippet_preview: pqc_scan_core::model::snippet_around(
-                            text,
-                            found.start,
-                            found.end,
-                            64,
-                        ),
-                        metadata: BTreeMap::from([
-                            ("detector".into(), self.name().into()),
-                            ("language".into(), language_name.into()),
-                            ("node_kind".into(), "bounded_source_fact".into()),
-                            ("scope".into(), rule.scope.clone()),
-                            ("source_resolution".into(), found.reason.into()),
-                        ]),
-                    },
-                };
-                if observe {
-                    observations.push(pqc_scan_core::ObservationDraft::source(
-                        &detection,
-                        pqc_scan_core::ObservationMethod::AstPattern,
-                        raw,
-                        Some((found.start, found.end)),
-                    ));
-                }
-                dedup.insert((found.start, found.end));
-                out.push(detection);
-                rule_hits += 1;
             }
         }
 
@@ -385,8 +452,14 @@ fn collect_candidate_nodes<'a>(
     text: &'a str,
     tree: &tree_sitter::Tree,
     budget: crate::DetectorBudget,
-) -> (Vec<CandidateNode<'a>>, DetectorStatus) {
+    rsa_constructors: bool,
+) -> (
+    Vec<CandidateNode<'a>>,
+    DetectorStatus,
+    Vec<CandidateNode<'a>>,
+) {
     let mut out = Vec::new();
+    let mut constructors = Vec::new();
     let mut stack = vec![tree.root_node()];
     let mut scheduled = 1;
     let mut status = DetectorStatus::Complete;
@@ -444,7 +517,13 @@ fn collect_candidate_nodes<'a>(
         }
 
         let kind = node.kind();
-        if !is_semantic_node_kind(kind) {
+        let constructor = rsa_constructors
+            && kind == "object_creation_expression"
+            && node
+                .child_by_field_name("type")
+                .and_then(|n| n.utf8_text(text.as_bytes()).ok())
+                .is_some_and(|name| name.rsplit('.').next() == Some("RSAKeyGenParameterSpec"));
+        if !is_semantic_node_kind(kind) && !constructor {
             continue;
         }
 
@@ -461,12 +540,20 @@ fn collect_candidate_nodes<'a>(
             continue;
         }
 
-        if out.len() >= budget.max_ast_candidates {
+        let target = if constructor {
+            &mut constructors
+        } else {
+            &mut out
+        };
+        if target.len() >= budget.max_ast_candidates {
             status = DetectorStatus::Truncated;
+            if constructor {
+                continue;
+            }
             break;
         }
         let point = node.start_position();
-        out.push(CandidateNode {
+        target.push(CandidateNode {
             kind,
             text: raw_text,
             line: point.row + 1,
@@ -476,7 +563,7 @@ fn collect_candidate_nodes<'a>(
         });
     }
 
-    (out, status)
+    (out, status, constructors)
 }
 
 fn clip_text(input: &str, max_chars: usize) -> (String, bool) {

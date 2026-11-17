@@ -1331,3 +1331,7 @@ pub fn scan_repository_with_selection(
 #[cfg(test)]
 #[path = "quality055.rs"]
 mod quality055;
+
+#[cfg(test)]
+#[path = "../tests/support/pipeline_quality.rs"]
+mod individual_quality;

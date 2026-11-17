@@ -188,10 +188,19 @@ fn validate_certificate_layout(der: &[u8]) -> Result<&[u8], PublicDerParseError>
     Ok(spki)
 }
 
+fn universal_shape(value: &Any<'_>, tag: Tag, constructed: bool) -> bool {
+    value.class() == Class::Universal
+        && value.tag() == tag
+        && value.header.is_constructed() == constructed
+}
+
 fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes {
     let oid = spki.algorithm.algorithm.to_id_string();
     let parameters = spki.algorithm.parameters.as_ref();
+    // Any::as_oid casts content without checking the ASN.1 tag in the
+    // pinned library. Only an actual universal primitive OID is an OID fact.
     let parameters_oid = parameters
+        .filter(|p| universal_shape(p, Tag::Oid, false))
         .and_then(|p| p.as_oid().ok())
         .map(|o| o.to_id_string());
     let mut out = PublicKeyAttributes {
@@ -213,7 +222,7 @@ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes
         named_curve: None,
         parameters_kind: match parameters {
             None => "absent",
-            Some(p) if p.as_null().is_ok() => "null",
+            Some(p) if universal_shape(p, Tag::Null, false) && p.as_null().is_ok() => "null",
             Some(_) if parameters_oid.is_some() => "oid",
             Some(_) => "other",
         },
@@ -234,7 +243,10 @@ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes
             let parameters_ok = if oid == "1.2.840.113549.1.1.1" {
                 parameters.is_none() || out.parameters_kind == "null"
             } else {
-                parameters.is_none() || parameters.is_some_and(|p| p.as_sequence().is_ok())
+                parameters.is_none()
+                    || parameters.is_some_and(|p| {
+                        universal_shape(p, Tag::Sequence, true) && p.as_sequence().is_ok()
+                    })
             };
             out.status = DetectorStatus::Partial;
             if parameters_ok {
@@ -323,7 +335,7 @@ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes
                         && fields.iter().all(|f| {
                             Any::from_der(f).ok().is_some_and(|(rest, v)| {
                                 rest.is_empty()
-                                    && v.tag() == Tag::Integer
+                                    && universal_shape(&v, Tag::Integer, false)
                                     && positive_integer_bits(v.as_bytes()).is_some()
                             })
                         });
@@ -331,7 +343,7 @@ fn public_key_attributes(spki: &SubjectPublicKeyInfo<'_>) -> PublicKeyAttributes
                     if valid
                         && y.is_some_and(|(rest, y)| {
                             rest.is_empty()
-                                && y.tag() == Tag::Integer
+                                && universal_shape(&y, Tag::Integer, false)
                                 && positive_integer_bits(y.as_bytes()).is_some()
                         })
                     {
@@ -383,7 +395,7 @@ fn fingerprint(bytes: &[u8]) -> String {
 }
 
 fn integer_parameter_fields<'a>(p: &Any<'a>) -> Result<Vec<&'a [u8]>, PublicDerParseError> {
-    if p.tag() != Tag::Sequence {
+    if !universal_shape(p, Tag::Sequence, true) {
         return Err(PublicDerParseError);
     }
     let mut input = p.as_bytes();
@@ -420,3 +432,7 @@ fn pqc_signature_size(oid: &str) -> Option<usize> {
         _ => None,
     }
 }
+
+#[cfg(test)]
+#[path = "../../tests/support/certificate_quality.rs"]
+mod individual_quality;

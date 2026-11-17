@@ -129,3 +129,11 @@ five measured samples per binary. Candidate/old maximum wall-time ratio is 1.096
 below the original greater-than-2x investigation signal. Output time is included;
 this is a small-input signal, not a new scaling/resource study or numeric CI gate.
 See `evidence/PERFORMANCE-SIGNAL.json`; test review accepted this measurement scope.
+
+## Individual quality follow-up
+
+The maintainer subsequently authorized individual assessment of the 98 empty/
+one-sided rule strata and 136 static missing-outcome spans. Current work and
+source-specific measurements are in [QUALITY-COMPLETION.md](QUALITY-COMPLETION.md).
+Earlier candidate binaries, hosted receipts, labels and limitations above remain
+historical and are not relabelled as executions of the new product fixes.

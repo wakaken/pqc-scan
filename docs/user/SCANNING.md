@@ -192,3 +192,25 @@ blank lines; intentionally whitespace-only custom matches keep their full range.
 Locations use original source bytes and character columns. This correction can
 change finding and observation IDs for affected ranges; rule matching, risk,
 severity and confidence are unchanged. Schemas and the identity algorithm are unchanged.
+
+### Java RSA parameter references and Maven declarations
+
+The 0.3.0 candidate also inspects Java `RSAKeyGenParameterSpec` constructors
+for the existing 1024/2048/3072-bit reference rule. A newly detected constructor
+can add a finding and its IDs; it does not establish an effective key size or
+runtime use. Existing candidates are inspected before additional constructors
+consume remaining inspection budgets. Incomplete inspection stays explicit.
+Rejected Maven dependency coordinates do not change the context annotations of
+earlier valid declarations. The output schema and valid declaration meaning
+remain unchanged.
+
+Certificate parameter OIDs and named curves require the corresponding universal
+ASN.1 type and encoding shape. Non-OID content or context-specific/constructed
+lookalikes no longer become OID, curve or key-size facts. Invalid shapes retain
+Partial/Unsupported status; this corrects attribute values and may change their
+observation/asset IDs without adding a signature/trust-validation claim.
+
+A NULL parameter has no parameter OID: the legacy metadata no longer emits an
+empty `parameters_oid` entry for it. Consumers must continue treating this
+metadata entry as optional. The enclosing schema and finding IDs in the measured
+canonical corpora remain unchanged; full field differences are recorded.
