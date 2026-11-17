@@ -124,3 +124,39 @@ or publication rights. Next: commit/push these verified inputs, verify hosted
 CI and exact Code Scanning payloads, bind a clean-commit static package to the
 verified independent build, then reconcile final acceptance without weakening
 original criteria.
+
+## Final criterion and technical release decision
+
+Evaluated code d6afccbc98242d760e9d01687f4c031fecbdddb1 has hosted run
+44034239763 quality/baseline/scan success; protocols explicitly skipped. Current
+Code Scanning analysis2183827533 has no error/warning, 10 results, and its full
+rule/path/line/message multiset equals the uploaded SARIF. Hosted input hashes
+match all106 committed files. Original023 nonregression is Passed; the broad
+corpus evaluator remains Unknown. Those are distinct conclusions.
+
+The clean evaluated-commit static archive/install is bound in
+evidence/PACKAGE-D6AFCCB.json and evidence/install-d6afccb/. It uses the verified
+independent A/B binary, 139 dependency notices with no missing/review flags,
+and offline installed-rule scanning. All73 original rows are now fulfilled
+within their unchanged finite evaluation criteria; see audit-fixes/REQUIREMENTS.
+The independent old audit's72/1 counts remain historical. This follow-up resolves
+the two findings and supplies the previously missing current-candidate closeout,
+rather than rewriting the audit. No old Partial/Failed/Unknown product measurement
+is relabelled as universal success.
+
+**Technical recommendation: the static0.3.0/macOSarm64 candidate is ready for
+maintainer acceptance and subsequent authorized publication.** Formal product
+acceptance is pending the maintainer's explicit disposition of the bounded
+limits in audit-fixes/RELEASE-DECISION.json. No authority for actual signing,
+tagging, merging or publication is inferred. Network notice/publication holds
+remain. These findings do not require a redesign or an invented100%quality gate.
+
+A subsequent recording commit changes only prose/assessment/receipt artifacts.
+Every executable/test input must still match evidence/FINAL-SOURCE.json. Its
+exact hosted head and final clean-source archive/installation will be verified
+separately before the final response; those future results are not claimed here.
+
+The same test reviewer accepted the exact hosted/clean-package receipts and all73
+criterion closeout, including source204/independent-build212/final-input243
+bindings. No unresolved review finding remains. The recording-head confirmation
+and maintainer/publication boundaries above are preserved.
