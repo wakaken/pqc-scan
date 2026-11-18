@@ -1,3 +1,31 @@
+<!-- README hero -->
+<p align="center">
+  <img src="docs/images/pqc-scan-banner.webp" alt="pqc-scan — Post-Quantum Cryptography Migration Scanner" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/wakaken/pqc-scan/actions/workflows/pqc-scan.yml"><img alt="CI" src="https://github.com/wakaken/pqc-scan/actions/workflows/pqc-scan.yml/badge.svg?branch=develop"></a>
+  <a href="https://github.com/wakaken/pqc-scan/releases"><img alt="Release" src="https://img.shields.io/github/v/release/wakaken/pqc-scan?display_name=tag"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <img alt="Rust" src="https://img.shields.io/badge/built%20with-Rust-CE422B?logo=rust&logoColor=white">
+</p>
+
+<p align="center"><strong>Discover cryptographic references. Investigate migration risks. Prepare for the post-quantum era.</strong></p>
+
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#report-preview">Report preview</a> ·
+  <a href="docs/user/COVERAGE.md">Coverage & limits</a> ·
+  <a href="README.ja.md">日本語</a>
+</p>
+
+| Discover | Investigate | Report |
+| :--- | :--- | :--- |
+| Identify supported cryptographic references in local source, config, certificates, and manifests. | Review locations, migration guidance, and inspection completeness. | Explore offline HTML/Markdown or export JSON/SARIF for automation. |
+
+> **Scope:** Static, advisory analysis. Findings are not confirmed vulnerabilities; zero findings do not guarantee safety or complete coverage. TLS/SSH probes are experimental and separately invoked.
+<!-- /README hero -->
+
 # pqc-scan
 
 This checkout contains **v0.3.0** for static scanning on macOS Apple Silicon (`aarch64-apple-darwin`). See the [release notes](docs/releases/v0.3.0.md) for changes and compatibility. The maintainer has accepted its bounded scope and authorized publication after final build-provenance verification.

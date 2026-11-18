@@ -1,3 +1,31 @@
+<!-- README hero -->
+<p align="center">
+  <img src="docs/images/pqc-scan-banner.webp" alt="pqc-scan — 耐量子暗号移行スキャナー" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/wakaken/pqc-scan/actions/workflows/pqc-scan.yml"><img alt="CI" src="https://github.com/wakaken/pqc-scan/actions/workflows/pqc-scan.yml/badge.svg?branch=develop"></a>
+  <a href="https://github.com/wakaken/pqc-scan/releases"><img alt="Release" src="https://img.shields.io/github/v/release/wakaken/pqc-scan?display_name=tag"></a>
+  <a href="LICENSE"><img alt="MITライセンス" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <img alt="Rust" src="https://img.shields.io/badge/built%20with-Rust-CE422B?logo=rust&logoColor=white">
+</p>
+
+<p align="center"><strong>暗号利用の手掛かりを発見し、移行リスクを調査し、耐量子暗号時代に備える。</strong></p>
+
+<p align="center">
+  <a href="#quick-start">クイックスタート</a> ·
+  <a href="#report-preview">レポート画面</a> ·
+  <a href="docs/user/COVERAGE.ja.md">対応範囲と制約</a> ·
+  <a href="README.md">English</a>
+</p>
+
+| 発見 | 調査 | レポート |
+| :--- | :--- | :--- |
+| 対応するソースコード・設定・証明書・依存ファイル内の暗号利用を調査。 | 検出場所・移行時の確認事項・検査の完了状況を確認。 | オフラインHTML・Markdown、または自動処理向けJSON・SARIFを出力。 |
+
+> **対象範囲：** 静的解析に基づく調査支援ツールです。検出結果は脆弱性の確定を意味せず、検出ゼロも安全性や検査の完全性を保証しません。TLS・SSH診断は別途実行する実験的機能です。
+<!-- /README hero -->
+
 # pqc-scan
 
 このチェックアウトの製品バージョンは、macOS Apple Silicon（`aarch64-apple-darwin`）向け静的版の**v0.3.0**です。変更点と互換性は[リリースノート](docs/releases/v0.3.0.ja.md)を参照してください。維持者は評価範囲と制約を踏まえて製品を受け入れ、最終ビルドの来歴検証後の公開を承認しています。
