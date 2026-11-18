@@ -1,0 +1,177 @@
+{
+  "record_date": "2026-11-19",
+  "evaluated_code_commit": "ad548d2c81702576475d86c9cf6557fbae1e7759",
+  "branch": "codex/v04-roadmap-20261118",
+  "requested_release": "v0.4",
+  "declared_product_version": "0.3.0",
+  "decision": "HOLD_NOT_READY",
+  "scope": "Static/default aarch64-apple-darwin only; no support expansion",
+  "tasks": [
+    {
+      "id": "065",
+      "status": "done"
+    },
+    {
+      "id": "066",
+      "status": "done"
+    },
+    {
+      "id": "067",
+      "status": "done"
+    },
+    {
+      "id": "068",
+      "status": "done"
+    },
+    {
+      "id": "069",
+      "status": "done"
+    },
+    {
+      "id": "070",
+      "status": "done"
+    },
+    {
+      "id": "071",
+      "status": "done"
+    },
+    {
+      "id": "072",
+      "status": "done"
+    },
+    {
+      "id": "073",
+      "status": "done"
+    },
+    {
+      "id": "074",
+      "status": "done"
+    },
+    {
+      "id": "075",
+      "status": "done"
+    }
+  ],
+  "all_v04_tasks_done_under_current_acceptance": true,
+  "task_acceptance_basis": "Explicit 2026-11-19 maintainer amendment for071 and dependent072/075. Original human/M2/numerical study is not complete.",
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Current amended feature acceptance and independent reviews",
+      "status": "Passed",
+      "evidence": [
+        "../../../tasks/071/TASK-071-RESULTS.md",
+        "../../../tasks/072/TASK-072-RECONCILIATION.md",
+        "../../../tasks/075/TASK-075-RECONCILIATION-v2.md",
+        "../../../tasks/071/TASK-071-REVIEWS.md",
+        "../../../tasks/072/TASK-072-REVIEWS.md",
+        "../../../tasks/075/TASK-075-REVIEWS.md",
+        "evidence/SOURCE-REUSE.json"
+      ]
+    },
+    {
+      "id": "G2",
+      "name": "Applicable local regression evidence",
+      "status": "Passed_bounded",
+      "details": "Unchanged reviewed source:719 workspace passes/3 existing ignored supervisor entries;226 isolated all-feature core;69 Python quality;23 featured CLI; build/fmt/strict clippy and actual browser evidence retained. New release build and25 distribution tests exit0. No global score inferred.",
+      "evidence": [
+        "../../../tasks/071/evidence/DEFAULT-COMMANDS-v2.json",
+        "../../../tasks/071/evidence/FEATURE-COMMANDS-v2.json",
+        "../../../tasks/071/evidence/QUALITY-COMMAND-v2.json",
+        "evidence/COMMANDS.json"
+      ]
+    },
+    {
+      "id": "G3",
+      "name": "Current static distribution package",
+      "status": "Failed",
+      "details": "First archive preparation exits1 before writing archive: exact-version notice registration is missing for uuid-simd0.8.0 and vsimd0.8.0 when their cached crates provide no collected license file. This is a collection/registration failure, not a legal conclusion. No bypass or unrelated source edit.",
+      "evidence": [
+        "evidence/package-first.log",
+        "evidence/NOTICE-DIAGNOSTIC.json"
+      ]
+    },
+    {
+      "id": "G4",
+      "name": "Repeated archive and clean offline installation",
+      "status": "Not_Tested",
+      "details": "Blocked by G3. Second preparation and clean-install commands were not reached. No current final archive digest, verified package or installation is claimed."
+    },
+    {
+      "id": "G5",
+      "name": "Hosted checks and final-source build provenance",
+      "status": "Not_Tested",
+      "details": "Exact evaluated commit has0 workflow runs and0 returned commit statuses at observation. Feature-branch push does not trigger configured develop/PR/manual checks. No hosted workflow was dispatched; no final-source archive attestation/verification exists in this assessment. Local checks do not substitute.",
+      "evidence": [
+        "evidence/HOSTED-RUNS.json",
+        "evidence/HOSTED-STATUSES.json"
+      ]
+    },
+    {
+      "id": "G6",
+      "name": "v0.4 version, release documentation and final package binding",
+      "status": "Not_Ready",
+      "details": "Workspace and optimized binary still identify0.3.0; no v0.4 release notes/support-maintenance disposition or final v0.4 package is prepared. This assessment does not change versions or act as release notes."
+    },
+    {
+      "id": "G7",
+      "name": "Maintainer product acceptance and actual publication authority",
+      "status": "Separate_Decision",
+      "details": "Request authorizes assessment and git commit/push. Historical approval is static macOS arm64 v0.3.0 only and does not authorize v0.4 signing/tag/publication. No actual release action performed."
+    }
+  ],
+  "excluded_not_failed_dimensions": [
+    "Human practical usefulness",
+    "Actual human workload",
+    "Human inter-rater agreement",
+    "Independent human expert validation",
+    "Numerical-score validity/superiority/adoption or non-adoption"
+  ],
+  "exclusion_rule": "Excluded dimensions are not newly restored as mandatory limited071 acceptance gates; no positive claim is made. Original96 planned human judgments remain0 observed.",
+  "study_results": {
+    "synthetic_cases": 24,
+    "pairs": 12,
+    "tuning_cases": 8,
+    "final_cases": 16,
+    "technical_properties_agree": 222,
+    "technical_properties_eligible": 222,
+    "spec_properties_agree": 507,
+    "spec_properties_eligible": 507,
+    "complete_report_repeat_pairs_agree": 24,
+    "cli_runs": 48,
+    "unconfirmed_statements_excluded": 56,
+    "population_accuracy_claim": false
+  },
+  "network_distribution": "Outside selected release scope; existing four exact-version notice holds and publication restrictions remain.",
+  "actions_not_performed": [
+    "Version bump",
+    "Notice collection or manifest modification",
+    "Hosted workflow dispatch",
+    "Signing",
+    "Tagging",
+    "GitHub Release creation",
+    "Artifact publication",
+    "Outreach/recruitment/fees",
+    "Numerical product-score adoption"
+  ],
+  "next_actions_in_dependency_order": [
+    "Collect and verify applicable complete notices for exact uuid-simd0.8.0 and vsimd0.8.0; record bindings using existing notice policy without weakening guards; review and test any executable changes.",
+    "Prepare v0.4 product version and paired release/support documentation within approved static support scope.",
+    "On final agreed source, repeat static package preparation, byte comparison and clean offline installation; verify bundled docs/rules and new migration entrypoints.",
+    "Obtain actual final-source hosted CI and release-preparation/attestation receipts using existing workflows; reassess any changed inputs.",
+    "Reassess technical readiness, then obtain explicit bounded v0.4 product/publication authorization before actual signing/tag/publication."
+  ],
+  "new_task_created": false,
+  "evidence_sha256": {
+    "BUILD-IDENTITY.json": "6c44b1440151a9c3cc7b4d6424662aa84e7cc1abb9df9104c8f6884501101091",
+    "COMMANDS.json": "fe83ca84bbe61e96111ebba5db6b1e5716cf6cd3dd3224cb430f696d170ab7a5",
+    "HOSTED-RUNS.json": "6264d6ab566a54d30f122c020ba1fc6ce7dc549447b4df28fa18c333a3f4f54c",
+    "HOSTED-STATUSES.json": "a53d9213ab0d85e3d6ccd010ecca601b0973a069edd36a29d4f56d2266962a1d",
+    "NOTICE-DIAGNOSTIC.json": "f847dd8a39db6a483da0b0a245c6f200179d30f72d88d5a17bbe817aaf049d55",
+    "SOURCE-REUSE.json": "bffb4d76c715c68069a929ac72d48e9e76ebfa912d6c770b6b0fd2bb1499c6ae",
+    "distribution-tests.log": "3e29fe603ec854df8b247e66d66817236fdf42162ce43a4d0c3694c34ebc544d",
+    "package-first.log": "452b77635872b418f062efbd29712da97400df7881e73c559902e29e08f0b808",
+    "release-build.log": "cc0ca35c65fe00502edffa8f7e8c09e234281dd3e708a8a614b88dffee2e7ffb",
+    "release-version.log": "2e7d8870dadde7ccd7fd4c051b08563cac76680bb29473ef8def4f816f1819d7"
+  }
+}
