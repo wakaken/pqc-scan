@@ -10,6 +10,7 @@ pub mod diff;
 pub mod error;
 pub mod identity;
 pub mod inventory;
+pub mod migration;
 pub mod model;
 pub mod observation;
 pub mod pipeline;

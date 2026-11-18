@@ -11,6 +11,16 @@ pub use probe_report::write_probe_reports;
 mod japanese;
 mod json_report;
 mod markdown_report;
+mod migration_copy;
+mod migration_html;
+pub use migration_html::{migration_html_bytes, MIGRATION_HTML};
+mod migration_markdown;
+mod migration_report;
+pub use migration_markdown::{migration_markdown_bytes, MIGRATION_MARKDOWN};
+pub use migration_report::{
+    migration_json_bytes, write_migration_assessment_json, write_migration_assessment_reports,
+    MAX_MIGRATION_REPORT_BYTES, MIGRATION_JSON,
+};
 mod sarif_report;
 
 use std::path::{Path, PathBuf};

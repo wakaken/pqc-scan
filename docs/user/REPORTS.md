@@ -17,6 +17,7 @@ Reports show findings, locations and suggested next steps. The inspection overvi
 - [Export CycloneDX 1.7](#cyclonedx)
 - [Compare inventories](#diff)
 - [Use local policy assessment](#assessment)
+- [Reassess saved evidence](#saved-assessment)
 - [Read SARIF locations](#sarif-locations)
 
 <a id="review"></a>
@@ -242,6 +243,52 @@ Optional `--assessment-context ./context.json` supplies typed local context, e.g
 `{"version":1,"use_case":"jwt"}`. Missing support stays unknown; provided values are
 unverified operator claims. Dependency presence does not prove PQC readiness.
 See [scope, prerequisites and context fields](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/architecture/LOCAL-ASSESSMENT-V1.md).
+
+<a id="saved-assessment"></a>
+
+## Review an organization's migration response from saved evidence
+
+`assess` combines detected cryptographic references with declared organization and
+system context to explain where attention is needed, what blocks migration and
+what to check next. The scan HTML investigates source findings; the assess HTML
+supports migration decisions using saved evidence and business assumptions.
+
+```console
+pqc-scan assess saved.inventory.v1.json --input-format inventory-v1 \
+  --as-of 2026-11-18T00:00:00Z --context migration-context.json \
+  --out-dir ./migration-report --lang ja
+```
+
+Open `migration.assessment.html` in the output directory using a browser. This
+is generated directly by assess; no Markdown conversion, QA server or `serve`
+command is required. The browser does not open automatically. The command also
+writes `migration.assessment.md` and `migration.assessment.v1.json`. See the
+[saved-input guide](SAVED-EVIDENCE.md) for formats and context preparation.
+
+HTML provides response counts, a target index and cards by system/location.
+Urgency and readiness stay separate, distinguishing urgent-but-unsupported peers
+from cases needing investigation. Expand a candidate to see its primitive,
+prerequisites, declared support and required checks. Raw JSON is kept in the
+linked machine-readable file; human evidence, claims and source details remain
+available when needed.
+
+The page reuses the scan HTML's styles and local language/theme controls.
+`--lang ja` selects the HTML initial language and Markdown language; English is
+the default. Without JavaScript, the initial language and native disclosures
+remain available. No external translation, scripts or fonts are fetched. JSON,
+IDs, facts and decisions are language-independent. Assessment uses saved inputs
+without rescanning or connecting to endpoints.
+
+Operator/external-review claims remain unverified. Ready means active declared
+support, not verified deployment. Candidates need exact parameter and compatibility
+validation before adoption. Outside scope is a scoped declaration; monitor applies
+to the recorded technical role. Unknown is not low priority; no aggregate safety
+or independently measured practitioner-usefulness verdict is presented.
+
+All three files render within64MiB/file and validate output aliases against input
+and context before any write. Replacement is atomic per file. JSON-only library
+output remains available. Existing scan HTML, rule guide, serve, migration-review-v1
+and publication status retain their behavior.
 
 <a id="sarif-locations"></a>
 

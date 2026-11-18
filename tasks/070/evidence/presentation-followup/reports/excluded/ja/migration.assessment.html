@@ -1,0 +1,637 @@
+<!doctype html><html lang="ja" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>組織の暗号移行レポート | pqc-scan</title><style>
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #1a2233;
+  --muted: #5e6b85;
+  --border: #dfe5f2;
+  --hl: #fff2c7;
+  --line: #f8fafc;
+  --critical: #9d0208;
+  --high: #d00000;
+  --medium: #ef8a17;
+  --low: #1f7a8c;
+  --info: #3d5a80;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", "Noto Sans", sans-serif;
+  background: linear-gradient(180deg, #eef3fb 0%, var(--bg) 100%);
+  color: var(--text);
+}
+.container {
+  width: min(1200px, 96vw);
+  margin: 0 auto;
+  padding: 20px 12px 40px;
+}
+.top h1 { margin: 0; font-size: 28px; }
+.meta { color: var(--muted); margin-top: 8px; }
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 18px 0 22px;
+}
+.metric {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.metric-label { color: var(--muted); font-size: 13px; }
+.metric-value { font-size: 24px; font-weight: 700; }
+.finding {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.finding h3 {
+  margin: 0;
+  font-size: 18px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.desc {
+  margin: 10px 0 10px;
+  color: #26324a;
+}
+.kv {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+.kv li {
+  margin: 4px 0;
+}
+.sev {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 3px 9px;
+  border: 1px solid transparent;
+}
+.sev.critical { background: #ffe5e8; color: var(--critical); border-color: #f3b8bf; }
+.sev.high { background: #ffe9e9; color: var(--high); border-color: #f7c0c0; }
+.sev.medium { background: #fff4df; color: var(--medium); border-color: #f7d7a2; }
+.sev.low { background: #e5f5f8; color: var(--low); border-color: #b8dde4; }
+.sev.info { background: #e7eef7; color: var(--info); border-color: #c7d6ea; }
+.count {
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid #d6dfef;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #f7f9fe;
+}
+.snippet-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.evidence-list {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: #fbfcff;
+}
+.occurrence-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: #fbfcff;
+}
+.occurrence-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+.snippet-title {
+  background: #f3f6fc;
+  border-bottom: 1px solid var(--border);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.code-lines {
+  background: #fbfcff;
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.2;
+}
+pre {
+  margin: 0;
+  overflow-x: auto;
+  background: #fbfcff;
+}
+code {
+  display: inline;
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+pre code {
+  display: block;
+  font-size: 13px;
+  line-height: 1.28;
+}
+.occ-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.occ-table th, .occ-table td {
+  border-top: 1px solid #e4ebf7;
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+.occ-table th {
+  background: #f8faff;
+  color: #3b4964;
+  font-weight: 600;
+}
+.occ-table th:nth-child(1),
+.occ-table td:nth-child(1) {
+  width: 54%;
+}
+.occ-table td:nth-child(2) {
+  width: 72px;
+  text-align: right;
+}
+.occ-table th:nth-child(3),
+.occ-table td:nth-child(3) {
+  width: 20%;
+}
+.occ-table th:nth-child(4),
+.occ-table td:nth-child(4) {
+  width: 20%;
+}
+.file-toggle {
+  border: 0;
+  background: transparent;
+  color: #1b5fbf;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.file-toggle code {
+  color: inherit;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.occ-table td code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.line {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  column-gap: 8px;
+  background: var(--line);
+  min-height: 1.5em;
+}
+.line.hl {
+  background: var(--hl);
+}
+.ln {
+  user-select: none;
+  text-align: right;
+  color: #73819c;
+  border-right: 1px solid #dfe5f2;
+  padding: 0 8px 0 0;
+  line-height: 1.5;
+}
+.tx {
+  white-space: pre;
+  line-height: 1.5;
+}
+.occ-snippet-row.hidden {
+  display: none;
+}
+.occ-snippet-inline {
+  background: #f9fbff;
+  border: 1px solid #e2e9f7;
+  border-radius: 8px;
+  padding: 8px;
+}
+.occ-snippet-inline .snippet-wrap {
+  margin-top: 8px;
+}
+.actions {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.actions h4 { margin: 0 0 8px; }
+.action {
+  border: 1px dashed #d7deed;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: #fafcff;
+}
+.action-title {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  font-size: 11px;
+  border: 1px solid #bfcbe3;
+  background: #edf2fb;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.refs {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+.code-example {
+  margin-top: 6px;
+}
+.code-label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+@media (max-width: 640px) {
+  .line { grid-template-columns: 46px 1fr; }
+  code { font-size: 12px; }
+  .occ-table th:nth-child(1),
+  .occ-table td:nth-child(1) {
+    width: 48%;
+  }
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f6f8fa;
+  --card: #fff;
+  --text: #1f2328;
+  --muted: #59636e;
+  --border: #d1d9e0;
+  --line: #d1d9e0;
+  --critical: #b42318;
+  --high: #9a3412;
+  --medium: #7a5500;
+  --low: #175cd3;
+  --info: #59636e;
+}
+[hidden] { display: none !important; }
+body { background: var(--bg); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif; }
+.container { width: min(1440px, 100%); padding: 28px 32px 56px; }
+a { color: #0969da; overflow-wrap: anywhere; }
+a:hover { text-decoration: underline; }
+.skip-link { position: absolute; top: 8px; left: 8px; transform: translateY(-180%); background: #fff; padding: 10px 16px; z-index: 10; }
+.skip-link:focus { transform: none; }
+.top { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+.eyebrow { color: var(--muted); font-size: 12px; font-weight: 600; margin: 0 0 7px; letter-spacing: .02em; }
+.eyebrow span { color: #8c959f; margin: 0 6px; }
+.top h1 { font-size: 25px; font-weight: 650; line-height: 1.3; letter-spacing: -.025em; }
+.report-description { margin: 8px 0 0; color: var(--muted); }
+.meta { margin: 0; font-size: 12px; text-align: right; flex-shrink: 0; }
+.summary { display: flex; margin: 0; gap: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; }
+.metric { flex: 1; min-width: 0; border: 0; border-right: 1px solid #e5e9ed; border-radius: 0; padding: 14px 20px; background: none; }
+.metric:last-child { border-right: 0; }
+.metric-label { color: var(--muted); font-size: 12px; }
+.metric-value { font-size: 26px; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.severity-distribution { display: grid; grid-template-columns: auto minmax(90px, 1fr) auto; align-items: center; gap: 16px; margin: 15px 0 20px; }
+.severity-distribution figcaption { color: var(--muted); font-size: 12px; }
+.severity-bar { display: flex; height: 8px; background: #d8dee4; border-radius: 4px; overflow: hidden; }
+.severity-segment { height: 100%; }
+.severity-segment.critical, .severity-dot.critical { background: #cf222e; }
+.severity-segment.high, .severity-dot.high { background: #bc4c00; }
+.severity-segment.medium, .severity-dot.medium { background: #bf8700; }
+.severity-segment.low, .severity-dot.low { background: #218bff; }
+.severity-segment.info, .severity-dot.info { background: #8c959f; }
+.severity-legend { display: flex; flex-wrap: wrap; gap: 14px; list-style: none; margin: 0; padding: 0; font-size: 12px; }
+.severity-legend li { display: inline-flex; align-items: center; gap: 5px; }
+.severity-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+.severity-legend strong { font-variant-numeric: tabular-nums; }
+.inspection-overview { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 24px; margin: 0 0 24px; padding: 14px 18px; border: 1px solid var(--border); border-left: 3px solid #218bff; border-radius: 8px; background: #fff; overflow-wrap: anywhere; }
+.inspection-overview h2 { margin: 0; font-size: 12px; color: var(--muted); font-weight: 500; }
+.inspection-status { grid-column: 1; margin: 2px 0; font-size: 14px; font-weight: 650; }
+.inspection-overview > p:not(.inspection-status) { grid-column: 1; margin: 0; color: var(--muted); font-size: 12px; }
+.inspection-overview[data-inspection-status="partial"], .inspection-overview[data-inspection-status="unknown"] { border-left-color: #bf8700; }
+.inspection-overview[data-inspection-status="failed"] { border-left-color: #cf222e; }
+.inspection-metrics { grid-column: 2; grid-row: 1 / 4; display: flex; align-items: center; gap: 22px; }
+.inspection-metrics > div { min-width: 65px; padding: 0; background: none; border: 0; text-align: right; color: var(--muted); font-size: 12px; }
+.inspection-metrics strong { display: block; font-size: 21px; color: var(--text); font-variant-numeric: tabular-nums; }
+.inspection-scope-details, .inspection-reasons { grid-column: 1 / -1; min-width: 0; font-size: 12px; }
+.inspection-scope-details { margin-top: 6px; }
+.inspection-scope-details > summary { padding: 3px 0; color: #0969da; }
+.inspection-scope { padding-left: 20px; }
+.inspection-reasons { margin-top: 3px; border: 0; }
+.inspection-reasons h3 { display: none; }
+.inspection-reasons > p { display: inline; margin: 0 12px 0 0; }
+.inspection-overview[data-inspection-status="complete_within_scope"] .inspection-reasons > p { display: none; }
+.inspection-diagnostics { margin-top: 4px; }
+.inspection-diagnostics > summary { padding: 3px 0; }
+.inspection-reason { border-top: 1px solid #e5e9ed; padding: 2px 8px; }
+.report-workspace { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 24px; align-items: start; }
+.report-workspace:has([data-report-controls][hidden]) { grid-template-columns: minmax(0, 1fr); }
+[data-report-controls] { display: flex; flex-direction: column; gap: 16px; padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: #fff; position: sticky; top: 16px; }
+[data-report-controls] h2 { font-size: 14px; margin: 0; }
+[data-report-controls] label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 600; min-width: 0; }
+input, select, button { font: inherit; color: var(--text); min-height: 34px; padding: 6px 9px; max-width: 100%; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+input, select { width: 100%; min-width: 0; }
+input[type="search"] { background: #f6f8fa; }
+button { cursor: pointer; font-size: 12px; font-weight: 600; background: #f6f8fa; }
+button:hover { background: #eef1f4; border-color: #8c959f; }
+button:disabled { cursor: default; opacity: .55; }
+summary { cursor: pointer; overflow-wrap: anywhere; }
+summary:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0969da; outline-offset: 3px; }
+.results { min-width: 0; }
+.results-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 32px; margin-bottom: 10px; }
+.results-heading h2 { font-size: 16px; margin: 0; }
+[data-report-status] { color: var(--muted); font-size: 12px; margin: 0; }
+.rule-card { border: 1px solid var(--border); border-radius: 6px; margin: 0 0 8px; background: #fff; }
+.rule-card > summary { display: flex; align-items: center; gap: 10px; padding: 12px 14px; list-style: none; }
+.rule-card > summary::-webkit-details-marker { display: none; }
+.rule-card > summary::before { content: "›"; color: var(--muted); font-size: 20px; line-height: 1; width: 10px; flex-shrink: 0; }
+.rule-card[open] > summary::before { transform: rotate(90deg); }
+.rule-card > summary:hover { background: #f6f8fa; }
+.rule-title { min-width: 0; flex: 1; }
+.rule-title strong { display: block; font-size: 14px; font-weight: 600; }
+.rule-title code { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+.rule-meta { display: block; color: var(--muted); font-size: 11px; max-width: 180px; text-align: right; }
+.sev { display: inline-block; flex-shrink: 0; white-space: nowrap; font-size: 11px; padding: 1px 7px; font-weight: 600; }
+.sev.critical { color: #b42318; background: #fff0ee; border-color: #f5b5ac; }
+.sev.high { color: #9a3412; background: #fff4ed; border-color: #f5c4a5; }
+.sev.medium { color: #7a5500; background: #fff8c5; border-color: #eac54f; }
+.sev.low { color: #175cd3; background: #eff8ff; border-color: #b2ddff; }
+.sev.info { color: #59636e; background: #f6f8fa; border-color: #d1d9e0; }
+.count { white-space: nowrap; font-size: 11px; }
+.rule-body { padding: 0 16px 14px 34px; }
+.rule-body > p { color: var(--muted); margin: 0 0 12px; }
+.rule-body h4 { font-size: 12px; margin: 12px 0 6px; }
+nav { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0; font-size: 12px; }
+.occurrence { border-top: 1px solid #e5e9ed; padding-bottom: 4px; }
+.occurrence > summary { padding: 10px 0; }
+.occurrence > summary code { font-weight: 600; color: #0969da; }
+.occurrence > :not(summary) { margin-left: 15px; margin-right: 0; }
+.occurrence p { font-size: 13px; }
+.occ-match { display: block; color: var(--muted); font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; margin: 3px 0 0 15px; }
+.next-step { display: none; }
+.action { border-left: 2px solid var(--border); padding: 2px 12px; margin: 14px 0; }
+.shared { margin-top: 14px; background: #f6f8fa; border-radius: 6px; padding: 8px 12px; }
+.shared > summary { padding: 2px 0; font-size: 12px; font-weight: 600; }
+.snippet-wrap { margin-top: 12px; min-width: 0; }
+.code-lines { line-height: 1.6; background: #f6f8fa; }
+.line { min-width: 0; }
+.tx { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+pre { overflow: auto; padding: 12px; background: #f6f8fa; }
+code { overflow-wrap: anywhere; }
+.empty-state { border: 1px dashed var(--border); border-radius: 6px; padding: 40px 20px; text-align: center; color: var(--muted); background: #fff; }
+.print-note { display: none; }
+.inspection-context table { width: 100%; table-layout: fixed; }
+.inspection-context th, .inspection-context td { overflow-wrap: anywhere; text-align: left; vertical-align: top; }
+@media (max-width: 1000px) {
+  .severity-distribution { grid-template-columns: auto 1fr; }
+  .severity-legend { grid-column: 1 / -1; }
+  .inspection-overview { grid-template-columns: 1fr; }
+  .inspection-metrics { grid-column: 1; grid-row: auto; margin: 6px 0; justify-content: flex-start; }
+  .inspection-metrics > div { text-align: left; }
+  .rule-meta { display: none; }
+}
+@media (max-width: 760px) {
+  .container { padding: 18px 16px 36px; }
+  .top { flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .top h1 { font-size: 21px; }
+  .meta { text-align: left; }
+  .meta br { display: none; }
+  .meta time { margin-left: 8px; }
+  .summary { flex-wrap: wrap; }
+  .metric { flex-basis: 33%; padding: 12px; }
+  .metric-value { font-size: 23px; }
+  .report-workspace { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  [data-report-controls] { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  [data-report-controls] h2 { grid-column: 1 / -1; }
+  .rule-card > summary { flex-wrap: wrap; gap: 8px; padding: 11px 12px; }
+  .rule-title { flex-basis: calc(100% - 28px); }
+  .rule-card > summary > .sev { margin-left: 20px; }
+  .rule-body { padding: 0 12px 12px; }
+  .inspection-overview { padding: 12px 14px; }
+  .severity-distribution { gap: 8px 12px; }
+  .severity-legend { gap: 12px; }
+}
+@media print {
+  @page { margin: 14mm; }
+  body { background: #fff; color: #000; font-size: 10pt; }
+  .container { width: 100%; padding: 0; }
+  .top { margin-bottom: 12px; }
+  .skip-link, [data-report-controls], [data-group-pager], [data-occ-pager], [data-report-status], [data-empty], noscript { display: none !important; }
+  .report-workspace { display: block; }
+  .rule-card[hidden], .occurrence[hidden] { display: block !important; }
+  .print-note { display: block; font-size: 9pt; }
+  details::details-content { content-visibility: visible; display: block; }
+  details > :not(summary) { display: block !important; }
+  .rule-card { break-inside: auto; margin-bottom: 12px; }
+  summary, h4 { break-after: avoid; }
+  .occurrence, .action, .snippet-wrap { break-inside: avoid; }
+  .rule-meta { display: none !important; }
+  .next-step { display: block; }
+  pre, .snippet-wrap { overflow: visible; }
+  pre code, .tx { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .inspection-metrics { display: flex; }
+  a { color: #000; }
+}
+.report-settings { width: min(1440px, 100%); margin: 0 auto; padding: 14px 32px 0; display: flex; justify-content: flex-end; gap: 16px; }
+.report-settings label { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.report-settings select { width: auto; }
+.rule-guide-link { font-size: 12px; }
+[data-report-controls] > .rule-guide-link { margin-top: -10px; }
+.rule-guide-intro, .rule-explanation { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+.rule-explanation h2 { font-size: 17px; margin: 0 0 6px; }
+.rule-explanation h3 { font-size: 14px; }
+.rule-explanation dl { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 8px 16px; }
+.rule-explanation dt { color: var(--muted); }
+.rule-explanation dd { margin: 0; overflow-wrap: anywhere; }
+@media screen {
+  html[data-theme="dark"] { color-scheme: dark; --bg: #0d1117; --card: #161b22; --text: #e6edf3; --muted: #a3aeba; --border: #3d444d; --line: #30363d; --hl: #493b12; }
+  [data-theme="dark"] .summary, [data-theme="dark"] .inspection-overview, [data-theme="dark"] [data-report-controls], [data-theme="dark"] .rule-card, [data-theme="dark"] .empty-state { background: var(--card); border-color: var(--border); }
+  [data-theme="dark"] .metric { border-color: var(--border); }
+  [data-theme="dark"] a, [data-theme="dark"] .occurrence > summary code, [data-theme="dark"] .inspection-scope-details > summary { color: #79c0ff; }
+  [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] button { background: #21262d; border-color: var(--border); color: var(--text); }
+  [data-theme="dark"] button:hover, [data-theme="dark"] .rule-card > summary:hover, [data-theme="dark"] .shared { background: #262e38; }
+  [data-theme="dark"] .count, [data-theme="dark"] .sev.info { color: #c9d1d9; background: #21262d; border-color: #484f58; }
+  [data-theme="dark"] .sev.critical { color: #ffb4ae; background: #45201f; border-color: #a74540; }
+  [data-theme="dark"] .sev.high { color: #ffc49c; background: #432917; border-color: #975a16; }
+  [data-theme="dark"] .sev.medium { color: #f8de79; background: #3d3213; border-color: #8b741f; }
+  [data-theme="dark"] .sev.low { color: #a5d6ff; background: #142e49; border-color: #326fa4; }
+  [data-theme="dark"] .snippet-wrap, [data-theme="dark"] .occurrence, [data-theme="dark"] .inspection-reason { border-color: #3d444d; }
+  [data-theme="dark"] .code-lines, [data-theme="dark"] pre, [data-theme="dark"] .line { background: #0d1117; color: #e6edf3; }
+  [data-theme="dark"] .line.hl { background: #443819; }
+  [data-theme="dark"] .ln { color: #a3aeba; background: #161b22; border-color: #3d444d; }
+  [data-theme="dark"] .skip-link { background: var(--card); }
+  [data-theme="dark"] .severity-bar { background: #3d444d; }
+  [data-theme="dark"] :focus-visible { outline-color: #79c0ff; }
+}
+@media (max-width: 760px) {
+  .report-settings { padding: 12px 16px 0; gap: 12px; flex-wrap: wrap; }
+  .report-settings label { flex-wrap: wrap; gap: 3px; }
+  .rule-explanation dl { grid-template-columns: 1fr; gap: 4px; }
+  .rule-explanation dd { margin-bottom: 8px; }
+}
+@media print { .report-settings { display: none !important; } }
+
+/* Independently visible filters and finding-bearing paths. */
+.panel-toggles { display:flex; justify-content:flex-end; gap:8px; margin:0 0 12px; }
+.panel-toggles button[aria-pressed="true"] { color:#0969da; border-color:#0969da; }
+[data-report-sidebar] { display:grid; gap:16px; min-width:0; }
+.report-workspace:has([data-report-sidebar][hidden]) { grid-template-columns:minmax(0,1fr); }
+.report-workspace:has([data-report-sidebar]:not([hidden])) { grid-template-columns:260px minmax(0,1fr); }
+[data-report-controls] { position:static; }
+.file-tree { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; min-width:0; max-height:65vh; overflow:auto; }
+.file-tree h2 { font-size:14px; margin:0 0 4px; }
+.file-tree > p { color:var(--muted); font-size:12px; margin:4px 0 10px; }
+.file-tree ul { list-style:none; margin:2px 0; padding-left:16px; }
+.file-tree > ul { padding-left:0; margin-top:10px; }
+.file-tree li { margin:0; }
+.file-tree summary, .file-tree button[data-tree-file] { display:flex; align-items:center; gap:7px; width:100%; min-width:0; min-height:32px; padding:5px 6px; border:0; border-radius:6px; background:transparent; text-align:left; font-size:13px; font-weight:400; line-height:20px; }
+.file-tree summary { list-style:none; }
+.file-tree summary::-webkit-details-marker { display:none; }
+.file-tree summary:hover, .file-tree button[data-tree-file]:hover { background:#f0f2f5; }
+.tree-chevron, .tree-chevron-space { width:12px; height:16px; flex:0 0 12px; }
+.tree-chevron { fill:none; stroke:var(--muted); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.file-tree details[open] > summary > .tree-chevron { transform:rotate(90deg); }
+.tree-icon { flex:0 0 16px; }
+.tree-folder { fill:#54aeff; }
+.tree-file { fill:none; stroke:var(--muted); stroke-width:1.25; stroke-linecap:round; stroke-linejoin:round; }
+.tree-name { min-width:0; overflow-wrap:anywhere; }
+.tree-count { margin-left:auto; padding:0 5px; border-radius:10px; background:#eaeef2; color:var(--muted); font-size:11px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.file-tree button[aria-pressed="true"] { position:relative; background:#eaeef2; color:var(--text); }
+.file-tree button[aria-pressed="true"]::before { content:""; position:absolute; top:5px; bottom:5px; left:-7px; width:3px; border-radius:2px; background:#0969da; }
+@media screen {
+  [data-theme="dark"] .panel-toggles button[aria-pressed="true"] { color:#79c0ff; border-color:#79c0ff; }
+  [data-theme="dark"] .file-tree summary:hover, [data-theme="dark"] .file-tree button[data-tree-file]:hover { background:#21262d; }
+  [data-theme="dark"] .tree-folder { fill:#79c0ff; }
+  [data-theme="dark"] .tree-count { background:#30363d; }
+  [data-theme="dark"] .file-tree button[aria-pressed="true"] { background:#30363d; color:var(--text); }
+  [data-theme="dark"] .file-tree button[aria-pressed="true"]::before { background:#58a6ff; }
+}
+@media (max-width:800px) { .report-workspace:has([data-report-sidebar]:not([hidden])) { grid-template-columns:minmax(0,1fr); } .file-tree { max-height:360px; } }
+@media print { .panel-toggles, [data-report-sidebar] { display:none !important; } .report-workspace:has([data-report-sidebar]:not([hidden])) { display:block; } }
+
+/* Migration presentation extends the existing scan report design tokens. */
+.migration { max-width:1440px; }
+.migration .top h1 { font-size:28px; }
+.migration .summary { margin:24px 0; background:var(--card); }
+.migration-layout { display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;align-items:start; }
+.migration-index { display:block;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;position:sticky;top:20px; }
+.migration-index h2 { font-size:14px;margin:0 0 14px; }
+.migration-index a { display:block;padding:11px 0;border-top:1px solid var(--border);text-decoration:none; }
+.migration-index strong,.migration-index span { display:block;overflow-wrap:anywhere; }
+.migration-index span { color:var(--muted);font-size:12px;margin-top:5px; }
+.migration-results { min-width:0; }
+.decision-card { background:var(--card);border:1px solid var(--border);border-top:3px solid var(--info);border-radius:8px;padding:22px;margin-bottom:20px;scroll-margin-top:20px; }
+.decision-card.urgent { border-top-color:var(--critical); }
+.decision-card.plan { border-top-color:var(--medium); }
+.decision-card header { display:flex;justify-content:space-between;gap:16px;align-items:start; }
+.decision-card h3 { font-size:22px;margin:0;overflow-wrap:anywhere; }
+.role { font-weight:400;color:var(--muted);font-size:13px;margin-left:6px; }
+.migration-badge { flex-shrink:0;display:inline-block;font-size:12px;font-weight:650;padding:5px 10px;border:1px solid var(--border);border-radius:20px;color:var(--text); }
+.migration-badge.urgent { background:#fff1f0;color:#b42318;border-color:#f5b4ae; }
+.migration-badge.plan { background:#fff6e4;color:#7a5500;border-color:#e7cb8a; }
+.migration-location { color:var(--muted);font:12px/1.6 ui-monospace,monospace;overflow-wrap:anywhere;margin:10px 0; }
+.decision-status { display:flex;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:12px;margin:14px 0 18px; }
+.decision-status span { border:1px solid var(--border);padding:4px 8px;border-radius:4px; }
+.response-box { padding:16px 18px;border-radius:6px;background:var(--bg);border-left:3px solid #0969da; }
+.response-box > p:first-child { color:var(--muted);font-size:12px;margin:0 0 6px; }
+.response-box h4 { font-size:20px;margin:0 0 8px; }
+.decision-reason { margin:0;line-height:1.8; }
+.decision-card h4 { margin-top:18px;margin-bottom:8px; }
+.response-box h4 { margin-top:0; }
+.decision-note { border-left:3px solid var(--border);padding:2px 14px;margin:18px 0; }
+.decision-note.blockers { border-left-color:var(--medium); }
+.decision-note ul { margin:8px 0; }
+.migration li { margin:6px 0; }
+.next-checks ol { padding-left:22px; }
+.candidate-section { padding-top:4px; }
+.muted { color:var(--muted); }
+.migration details { border-top:1px solid var(--border);margin-top:14px; }
+.migration summary { padding:14px 0;font-weight:600; }
+.migration summary span { color:var(--muted);font-size:12px;font-weight:400; }
+.detail-body { padding:0 0 12px; }
+.table-scroll { overflow-x:auto;max-width:100%; }
+.migration table { width:100%;border-collapse:collapse;font-size:13px; }
+.migration caption { text-align:left;color:var(--muted);padding:8px 0; }
+.migration th,.migration td { text-align:left;padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:top;overflow-wrap:anywhere; }
+.migration th { color:var(--muted);font-weight:600; }
+.reference-section { margin-top:28px;background:var(--card);padding:20px;border:1px solid var(--border);border-radius:8px;min-width:0; }
+.reference-section h2 { font-size:18px;margin:0 0 12px; }
+.reference-section h3 { font-size:15px; }
+.reference-id { font:11px/1.7 ui-monospace,monospace;color:var(--muted);overflow-wrap:anywhere; }
+.migration footer { padding-top:24px;display:flex;gap:20px;flex-wrap:wrap;font-size:12px; }
+[data-theme="dark"] .migration-badge.urgent { background:#432326;color:#ffa198;border-color:#74363c; }
+[data-theme="dark"] .migration-badge.plan { background:#3d311a;color:#eac178;border-color:#6b542a; }
+@media(max-width:850px) { .migration-layout { grid-template-columns:minmax(0,1fr); }.migration-index { position:static; }.migration-index a { display:inline-block;margin-right:16px; }.decision-card { padding:16px; }.decision-card header { flex-wrap:wrap; }.migration .top h1 { font-size:24px; }.migration .summary { display:grid;grid-template-columns:1fr 1fr; }.migration .metric { border-bottom:1px solid var(--border); }.reference-section { padding:14px; }.migration th,.migration td { padding:8px; } }
+@media print { .migration-index,.report-settings,.skip-link { display:none; }.migration-layout { display:block; }.migration details > * { display:block; }.decision-card { break-inside:avoid; }.migration footer { display:none; } }
+</style></head><body><div class="report-settings" data-settings hidden><label>Language / 言語<select data-language aria-label="Language / 言語"><option value="en">English</option><option value="ja">日本語</option></select></label><label>Theme / 表示<select data-theme-select aria-label="Theme / 表示"><option value="light">Light / ライト</option><option value="dark">Dark / ダーク</option></select></label></div><main class="container migration" data-report-view lang="ja"><a class="skip-link" href="#decisions">判断結果へ移動</a><header class="top"><div><p class="eyebrow">pqc-scan <span>/</span> 移行判断</p><h1>組織の暗号移行レポート</h1><p class="report-description">検出結果と業務上の申告から、対応が必要な対象と次の確認事項を整理します。</p></div><p class="meta">評価時刻<br><time>2026-11-18T00:00:00Z</time></p></header><section class="summary" aria-label="対応の見通し"><div class="metric"><div class="metric-label">評価対象</div><div class="metric-value">1</div></div><div class="metric"><div class="metric-label">早急な対応</div><div class="metric-value">0</div></div><div class="metric"><div class="metric-label">阻害条件あり</div><div class="metric-value">0</div></div><div class="metric"><div class="metric-label">情報不足・矛盾</div><div class="metric-value">0</div></div></section><div class="migration-layout"><nav class="migration-index" aria-label="評価対象"><h2>対象を選ぶ</h2><a href="#target-1"><strong>system-a</strong><span>RSA · 申告された範囲では対象外</span></a></nav><section id="decisions" class="migration-results"><div class="results-heading"><h2>対象ごとの対応</h2><span>1 件</span></div><article class="decision-card outside" id="target-1"><header><div><p class="eyebrow">system-a</p><h3>RSA <span class="role">暗号方式への参照</span></h3></div><span class="migration-badge outside">申告された範囲では対象外</span></header><p class="migration-location">app.txt:1</p><div class="decision-status"><span>必要情報あり</span><span>移行準備の判断対象外</span></div><section class="response-box"><p>次に取る対応</p><h4>申告された範囲では対応なし</h4><p class="decision-reason">有効な申告では対象外です。既知の技術上の懸念は残ります。</p></section><section class="next-checks"><h4>次の確認</h4><ol><li>事実・対象範囲・申告が変わった際に再評価してください。</li></ol></section><details class="evidence-details" id="evidence-1"><summary>この対応とした根拠・前提情報</summary><div class="detail-body"><div class="table-scroll"><table><caption>記録された技術上の事実</caption><tbody><tr><th scope="row">暗号の役割</th><td>暗号方式への参照</td></tr><tr><th scope="row">量子計算に対する評価</th><td>量子計算に対する懸念あり</td></tr><tr><th scope="row">確認できている範囲</th><td>構文上の参照</td></tr><tr><th scope="row">収集状況</th><td>記録された範囲で収集完了</td></tr><tr><th scope="row">パラメーターの符号化</th><td>不明</td></tr></tbody></table></div><ul><li>正確なパラメーターの符号化は不明です。</li></ul><h5>判断に使った申告</h5><ul><li><a href="#claim-1">適用範囲</a> · 申告範囲では対象外 · 申告期間内</li></ul><p>出典: <a href="#source-1">F12</a> <a href="#source-2">F14</a> <a href="#source-3">LOCAL026</a> <a href="#source-4">NIST-PQ-FAQ</a> </p><p class="reference-id">対象ID: migration_target-v1-114701d84e5655c8e85a185e3d38612b5764dbe9a416e76facefd000102676ad<br>判断ID: migration_decision-v1-067843b7b1e9bd1356eecac18b465326fba784da7ef23f871694b10f16ca62f8</p></div></details></article></section></div><section class="reference-section"><h2>判断に使った申告と由来</h2><p class="muted">外部レビュー由来のものも含め、申告は未検証です。移行準備は申告上の対応状況であり、配備の検証結果ではありません。</p><div class="table-scroll"><table><caption>使用した申告</caption><thead><tr><th>項目</th><th>申告された内容</th><th>有効性</th><th>由来・時刻</th></tr></thead><tbody><tr id="claim-1"><th scope="row">適用範囲</th><td>申告範囲では対象外</td><td>申告期間内</td><td>利用者の申告（未検証） · owner<br>2026-11-17T00:00:00Z<br>有効期限: 2027-11-17T00:00:00Z</td></tr></tbody></table></div></section><details class="reference-section" id="assessment-sources"><summary>出典の版・評価の範囲</summary><div class="detail-body"><section id="source-1"><h3>F12 <span class="role">task066 adopted contract 2026-11-18</span></h3><p>technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12</p><p class="reference-id">docs/architecture/MIGRATION-ASSESSMENT-V1.md</p></section><section id="source-2"><h3>F14 <span class="role">migration-decision-v1 1.0.0; adopted 2026-11-18</span></h3><p>P1-P8; readiness and action precedence</p><p class="reference-id">docs/architecture/MIGRATION-ASSESSMENT-V1.md</p></section><section id="source-3"><h3>LOCAL026 <span class="role">local-assessment-1</span></h3><p>finite vocabulary and evidence limits</p><p class="reference-id">docs/architecture/LOCAL-ASSESSMENT-V1.md</p></section><section id="source-4"><h3>NIST-PQ-FAQ <span class="role">task056 pinned FAQ snapshot</span></h3><p>quantum public-key and generic-search models</p><p class="reference-id">https://csrc.nist.gov/projects/post-quantum-cryptography/faqs</p></section><ul><li>棚卸しの結果だけでは、網羅的に確認したとは判断できません。</li><li>ダイジェストは保存内容の同一性を示し、収集者の真正性を証明しません。</li><li>オフライン評価では暗号学的な再検証を行いません。</li><li>このローカルな助言方針が実務に役立つかどうかは、まだ評価していません。</li></ul><p>収集時刻: 2026-11-17T00:00:00Z</p><p class="reference-id">SHA-256: ea072032ff581bb287e010de83d5c9be0f72debdce0962925dfa3c5dbf29f81f</p><p>migration-facts-v1 1.0.0 / migration-decision-v1 1.0.0 / decision_table 1.0.0</p></div></details><footer><a href="migration.assessment.md">Markdown</a><a href="migration.assessment.v1.json" download>機械処理用の根拠データ（JSON）</a></footer></main><template data-report-translation lang="en"><main class="container migration" data-report-view lang="en"><a class="skip-link" href="#decisions">Skip to decisions</a><header class="top"><div><p class="eyebrow">pqc-scan <span>/</span> Migration assessment</p><h1>Organization migration review</h1><p class="report-description">Saved findings and declared context show what needs attention and what to check next.</p></div><p class="meta">Evaluated at<br><time>2026-11-18T00:00:00Z</time></p></header><section class="summary" aria-label="Response overview"><div class="metric"><div class="metric-label">Targets</div><div class="metric-value">1</div></div><div class="metric"><div class="metric-label">Urgent</div><div class="metric-value">0</div></div><div class="metric"><div class="metric-label">Blocked prerequisites</div><div class="metric-value">0</div></div><div class="metric"><div class="metric-label">Incomplete / conflicting information</div><div class="metric-value">0</div></div></section><div class="migration-layout"><nav class="migration-index" aria-label="Assessment targets"><h2>Targets</h2><a href="#target-1"><strong>system-a</strong><span>RSA · Outside declared scope</span></a></nav><section id="decisions" class="migration-results"><div class="results-heading"><h2>Response by target</h2><span>1 targets</span></div><article class="decision-card outside" id="target-1"><header><div><p class="eyebrow">system-a</p><h3>RSA <span class="role">Algorithm reference</span></h3></div><span class="migration-badge outside">Outside declared scope</span></header><p class="migration-location">app.txt:1</p><div class="decision-status"><span>Required information available</span><span>Migration readiness not applicable</span></div><section class="response-box"><p>Next response</p><h4>No action within the declared scope</h4><p class="decision-reason">The active declaration excludes this target; known technical concerns remain.</p></section><section class="next-checks"><h4>Next checks</h4><ol><li>Reassess when facts, scope or declarations change.</li></ol></section><details class="evidence-details" id="evidence-1"><summary>Evidence and assumptions for this response</summary><div class="detail-body"><div class="table-scroll"><table><caption>Recorded technical facts</caption><tbody><tr><th scope="row">Role</th><td>Algorithm reference</td></tr><tr><th scope="row">Quantum exposure</th><td>Quantum exposure identified</td></tr><tr><th scope="row">Evidence assurance</th><td>Syntactic reference</td></tr><tr><th scope="row">Collection</th><td>Completed within recorded scope</td></tr><tr><th scope="row">Parameter encoding</th><td>Unknown</td></tr></tbody></table></div><ul><li>The exact parameter encoding is unknown.</li></ul><h5>Claims used</h5><ul><li><a href="#claim-1">Applicability</a> · Outside declared scope · Active declared interval</li></ul><p>Sources: <a href="#source-1">F12</a> <a href="#source-2">F14</a> <a href="#source-3">LOCAL026</a> <a href="#source-4">NIST-PQ-FAQ</a> </p><p class="reference-id">Target ID: migration_target-v1-114701d84e5655c8e85a185e3d38612b5764dbe9a416e76facefd000102676ad<br>Decision ID: migration_decision-v1-067843b7b1e9bd1356eecac18b465326fba784da7ef23f871694b10f16ca62f8</p></div></details></article></section></div><section class="reference-section"><h2>Declared context and provenance</h2><p class="muted">All claims are unverified, including external-review claims. Readiness is declared support, not verified deployment.</p><div class="table-scroll"><table><caption>Applied declarations</caption><thead><tr><th>Item</th><th>Declared value</th><th>Validity</th><th>Origin / time</th></tr></thead><tbody><tr id="claim-1"><th scope="row">Applicability</th><td>Outside declared scope</td><td>Active declared interval</td><td>Operator claim (unverified) · owner<br>2026-11-17T00:00:00Z<br>Expires: 2027-11-17T00:00:00Z</td></tr></tbody></table></div></section><details class="reference-section" id="assessment-sources"><summary>Source editions and assessment scope</summary><div class="detail-body"><section id="source-1"><h3>F12 <span class="role">task066 adopted contract 2026-11-18</span></h3><p>technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12</p><p class="reference-id">docs/architecture/MIGRATION-ASSESSMENT-V1.md</p></section><section id="source-2"><h3>F14 <span class="role">migration-decision-v1 1.0.0; adopted 2026-11-18</span></h3><p>P1-P8; readiness and action precedence</p><p class="reference-id">docs/architecture/MIGRATION-ASSESSMENT-V1.md</p></section><section id="source-3"><h3>LOCAL026 <span class="role">local-assessment-1</span></h3><p>finite vocabulary and evidence limits</p><p class="reference-id">docs/architecture/LOCAL-ASSESSMENT-V1.md</p></section><section id="source-4"><h3>NIST-PQ-FAQ <span class="role">task056 pinned FAQ snapshot</span></h3><p>quantum public-key and generic-search models</p><p class="reference-id">https://csrc.nist.gov/projects/post-quantum-cryptography/faqs</p></section><ul><li>Inventory does not establish exhaustive coverage.</li><li>The digest binds saved content, not collector authenticity.</li><li>Offline assessment does not repeat cryptographic verification.</li><li>This local advisory policy has not established practitioner usefulness.</li></ul><p>Collected at: 2026-11-17T00:00:00Z</p><p class="reference-id">SHA-256: ea072032ff581bb287e010de83d5c9be0f72debdce0962925dfa3c5dbf29f81f</p><p>migration-facts-v1 1.0.0 / migration-decision-v1 1.0.0 / decision_table 1.0.0</p></div></details><footer><a href="migration.assessment.md">Markdown</a><a href="migration.assessment.v1.json" download>Machine-readable evidence (JSON)</a></footer></main></template><script>(() => {
+  const settings = document.querySelector('[data-settings]');
+  const alternate = document.querySelector('[data-report-translation]');
+  let active = document.querySelector('[data-report-view]');
+  if (!settings || !alternate || !active) return;
+  const language = settings.querySelector('[data-language]');
+  const theme = settings.querySelector('[data-theme-select]');
+  function localTime() {
+    const locale = active.lang === 'ja' ? 'ja-JP' : 'en-US';
+    for (const time of active.querySelectorAll('[data-local-time]')) {
+      try {
+        const formatter = new Intl.DateTimeFormat(locale, {dateStyle: 'medium', timeStyle: 'long'});
+        time.textContent = `${formatter.format(new Date(time.dateTime))} (${formatter.resolvedOptions().timeZone})`;
+      } catch { /* Keep the generation host's explicit offset if Intl is unavailable. */ }
+    }
+  }
+  function switchLanguage(value) {
+    if (!['en', 'ja'].includes(value)) return;
+    if (active.lang !== value && alternate.lang === value) {
+      const state = {};
+      active.dispatchEvent(new CustomEvent('pqc-report-capture', {detail: state}));
+      const opened = new Set(Array.from(active.querySelectorAll('details[id]')).filter(d => d.open).map(d => d.id));
+      const incoming = alternate.content.firstElementChild;
+      const outgoing = active;
+      active.replaceWith(incoming);
+      alternate.content.append(outgoing);
+      alternate.lang = outgoing.lang;
+      active = incoming;
+      document.dispatchEvent(new CustomEvent('pqc-report-view', {detail: active}));
+      active.dispatchEvent(new CustomEvent('pqc-report-restore', {detail: state}));
+      active.querySelectorAll('details[id]').forEach(d => { d.open = opened.has(d.id); });
+    }
+    language.value = active.lang;
+    document.documentElement.lang = active.lang;
+    document.title = active.querySelector('h1').textContent;
+    localTime();
+  }
+  function applyTheme(value) {
+    if (!['light', 'dark'].includes(value)) value = 'light';
+    theme.value = value;
+    document.documentElement.dataset.theme = value;
+  }
+  language.addEventListener('change', () => switchLanguage(language.value));
+  theme.addEventListener('change', () => {
+    applyTheme(theme.value);
+    try { localStorage.setItem('pqc-scan-theme', theme.value); } catch { /* Optional preference. */ }
+  });
+  try { applyTheme(localStorage.getItem('pqc-scan-theme')); } catch { applyTheme('light'); }
+  let requested;
+  try { requested = new URLSearchParams(location.search).get('lang'); } catch { /* CLI default. */ }
+  switchLanguage(requested || active.lang);
+  settings.hidden = false;
+})();
+</script></body></html>

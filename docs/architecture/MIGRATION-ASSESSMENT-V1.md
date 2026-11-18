@@ -12,6 +12,18 @@ See [feasibility](../../tasks/066/FEASIBILITY.md),
 The actual approval and scope exclusions are recorded in the decision package.
 Implementation and independent verification remain downstream obligations.
 
+## Maintainer presentation amendment (2026-11-18)
+
+The maintainer subsequently requested a comprehensible human report with the
+existing scan HTML styling and an assess-generated HTML file. This explicitly
+selects additive `migration.assessment.html` alongside JSON and Markdown in the
+opt-in assess workflow. Human views summarize typed facts and claims without raw
+JSON dumps; exact machine data stays in the unchanged JSON contract. Reuse the
+existing report styles and local language/theme controls. No scan/serve default,
+policy, source schema, numeric score or publication change is authorized. See
+[tasks/070 presentation follow-up](../../tasks/070/TASK-070-PRESENTATION-FOLLOWUP.md).
+The original066 selection below remains historical where it excludes HTML.
+
 ## Dispatch and workflow
 
 Proposed new CLI entry `assess` accepts one local saved input, explicit

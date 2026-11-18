@@ -14,6 +14,7 @@ use pqc_scan_report::{
     write_inventory_json, ReportFormat, ReportLanguage,
 };
 use pqc_scan_rules::{RuleSet, Severity};
+mod assess_command;
 mod diff_command;
 #[cfg(any(
     feature = "probe-tls",
@@ -39,6 +40,8 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    /// Reassess explicitly selected saved evidence offline, with scoped claims.
+    Assess(assess_command::AssessArgs),
     #[cfg(any(
         feature = "probe-tls",
         feature = "probe-ssh",
@@ -271,6 +274,10 @@ fn run_cli<WOut: Write, WErr: Write>(
     stderr: &mut WErr,
 ) -> Result<ExitStatus> {
     match cli.command {
+        Commands::Assess(args) => {
+            assess_command::run(args, stdout)?;
+            Ok(ExitStatus::Success)
+        }
         #[cfg(any(
             feature = "probe-tls",
             feature = "probe-ssh",

@@ -1,0 +1,54 @@
+/* Migration presentation extends the existing scan report design tokens. */
+.migration { max-width:1440px; }
+.migration .top h1 { font-size:28px; }
+.migration .summary { margin:24px 0; background:var(--card); }
+.migration-layout { display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;align-items:start; }
+.migration-index { display:block;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;position:sticky;top:20px; }
+.migration-index h2 { font-size:14px;margin:0 0 14px; }
+.migration-index a { display:block;padding:11px 0;border-top:1px solid var(--border);text-decoration:none; }
+.migration-index strong,.migration-index span { display:block;overflow-wrap:anywhere; }
+.migration-index span { color:var(--muted);font-size:12px;margin-top:5px; }
+.migration-results { min-width:0; }
+.decision-card { background:var(--card);border:1px solid var(--border);border-top:3px solid var(--info);border-radius:8px;padding:22px;margin-bottom:20px;scroll-margin-top:20px; }
+.decision-card.urgent { border-top-color:var(--critical); }
+.decision-card.plan { border-top-color:var(--medium); }
+.decision-card header { display:flex;justify-content:space-between;gap:16px;align-items:start; }
+.decision-card h3 { font-size:22px;margin:0;overflow-wrap:anywhere; }
+.role { font-weight:400;color:var(--muted);font-size:13px;margin-left:6px; }
+.migration-badge { flex-shrink:0;display:inline-block;font-size:12px;font-weight:650;padding:5px 10px;border:1px solid var(--border);border-radius:20px;color:var(--text); }
+.migration-badge.urgent { background:#fff1f0;color:#b42318;border-color:#f5b4ae; }
+.migration-badge.plan { background:#fff6e4;color:#7a5500;border-color:#e7cb8a; }
+.migration-location { color:var(--muted);font:12px/1.6 ui-monospace,monospace;overflow-wrap:anywhere;margin:10px 0; }
+.decision-status { display:flex;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:12px;margin:14px 0 18px; }
+.decision-status span { border:1px solid var(--border);padding:4px 8px;border-radius:4px; }
+.response-box { padding:16px 18px;border-radius:6px;background:var(--bg);border-left:3px solid #0969da; }
+.response-box > p:first-child { color:var(--muted);font-size:12px;margin:0 0 6px; }
+.response-box h4 { font-size:20px;margin:0 0 8px; }
+.decision-reason { margin:0;line-height:1.8; }
+.decision-card h4 { margin-top:18px;margin-bottom:8px; }
+.response-box h4 { margin-top:0; }
+.decision-note { border-left:3px solid var(--border);padding:2px 14px;margin:18px 0; }
+.decision-note.blockers { border-left-color:var(--medium); }
+.decision-note ul { margin:8px 0; }
+.migration li { margin:6px 0; }
+.next-checks ol { padding-left:22px; }
+.candidate-section { padding-top:4px; }
+.muted { color:var(--muted); }
+.migration details { border-top:1px solid var(--border);margin-top:14px; }
+.migration summary { padding:14px 0;font-weight:600; }
+.migration summary span { color:var(--muted);font-size:12px;font-weight:400; }
+.detail-body { padding:0 0 12px; }
+.table-scroll { overflow-x:auto;max-width:100%; }
+.migration table { width:100%;border-collapse:collapse;font-size:13px; }
+.migration caption { text-align:left;color:var(--muted);padding:8px 0; }
+.migration th,.migration td { text-align:left;padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:top;overflow-wrap:anywhere; }
+.migration th { color:var(--muted);font-weight:600; }
+.reference-section { margin-top:28px;background:var(--card);padding:20px;border:1px solid var(--border);border-radius:8px;min-width:0; }
+.reference-section h2 { font-size:18px;margin:0 0 12px; }
+.reference-section h3 { font-size:15px; }
+.reference-id { font:11px/1.7 ui-monospace,monospace;color:var(--muted);overflow-wrap:anywhere; }
+.migration footer { padding-top:24px;display:flex;gap:20px;flex-wrap:wrap;font-size:12px; }
+[data-theme="dark"] .migration-badge.urgent { background:#432326;color:#ffa198;border-color:#74363c; }
+[data-theme="dark"] .migration-badge.plan { background:#3d311a;color:#eac178;border-color:#6b542a; }
+@media(max-width:850px) { .migration-layout { grid-template-columns:minmax(0,1fr); }.migration-index { position:static; }.migration-index a { display:inline-block;margin-right:16px; }.decision-card { padding:16px; }.decision-card header { flex-wrap:wrap; }.migration .top h1 { font-size:24px; }.migration .summary { display:grid;grid-template-columns:1fr 1fr; }.migration .metric { border-bottom:1px solid var(--border); }.reference-section { padding:14px; }.migration th,.migration td { padding:8px; } }
+@media print { .migration-index,.report-settings,.skip-link { display:none; }.migration-layout { display:block; }.migration details > * { display:block; }.decision-card { break-inside:avoid; }.migration footer { display:none; } }

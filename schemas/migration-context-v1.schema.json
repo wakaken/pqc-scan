@@ -1,0 +1,976 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pqc-scan.local/schemas/migration-context-v1.schema.json",
+  "title": "Scoped operator migration claims v1",
+  "description": "Adopted task066 D1/D2 contract. Structural schema only; bounded bytes, duplicate keys, whole-second time, reference/content/binding and semantic checks are enforced by the reader. No scanner verification or legal-compliance claim.",
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_kind": {
+          "enum": [
+            "operator_claim",
+            "external_review_claim"
+          ]
+        },
+        "actor_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]{0,63}$"
+        },
+        "asserted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reference_id": {
+          "type": "string",
+          "pattern": "^[!-~]{1,128}$"
+        }
+      },
+      "required": [
+        "source_kind",
+        "actor_id",
+        "asserted_at"
+      ]
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "enum": [
+                    "applicable",
+                    "not_applicable"
+                  ]
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "use_case": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "enum": [
+                    "key_establishment",
+                    "signature",
+                    "jwt",
+                    "pki",
+                    "encryption",
+                    "hashing"
+                  ]
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "usage_state": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "enum": [
+                    "active",
+                    "planned",
+                    "test_only",
+                    "unused"
+                  ]
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "business_critical": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "type": "boolean"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "confidential": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "type": "boolean"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "historical_ciphertext": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "type": "boolean"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "confidentiality_until": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "signature_verification_until": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "migration_lead_seconds": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 315576000
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "deadline": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "kind": {
+                          "const": "none"
+                        }
+                      },
+                      "required": [
+                        "kind"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "kind": {
+                          "const": "at"
+                        },
+                        "at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "reference_id": {
+                          "type": "string",
+                          "pattern": "^[!-~]{1,128}$"
+                        },
+                        "scope_reason": {
+                          "enum": [
+                            "organization_policy",
+                            "contractual_requirement"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "at",
+                        "reference_id",
+                        "scope_reason"
+                      ]
+                    }
+                  ]
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "support": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "runtime": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "value",
+                    "provenance"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "unknown"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "provenance"
+                  ]
+                }
+              ]
+            },
+            "provider": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "value",
+                    "provenance"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "unknown"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "provenance"
+                  ]
+                }
+              ]
+            },
+            "peer": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "value",
+                    "provenance"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "unknown"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "provenance"
+                  ]
+                }
+              ]
+            },
+            "protocol": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "value",
+                    "provenance"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "unknown"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "provenance"
+                  ]
+                }
+              ]
+            },
+            "parameters": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "value",
+                    "provenance"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "unknown"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "provenance"
+                  ]
+                }
+              ]
+            },
+            "jose": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "value",
+                    "provenance"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "unknown"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "provenance"
+                  ]
+                }
+              ]
+            },
+            "verifiers": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "value",
+                    "provenance"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "unknown"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "provenance"
+                  ]
+                }
+              ]
+            },
+            "pki": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "value",
+                    "provenance"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "state": {
+                      "const": "unknown"
+                    },
+                    "provenance": {
+                      "$ref": "#/$defs/provenance"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "provenance"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": []
+        }
+      },
+      "required": []
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "pqc-scan.migration-context"
+    },
+    "version": {
+      "const": 1
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "enum": [
+            "inventory-v1",
+            "tls-v1",
+            "ssh-offers-v1",
+            "ssh-kex-v1"
+          ]
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "format",
+        "sha256"
+      ]
+    },
+    "organization_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]{0,63}$"
+    },
+    "systems": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]{0,63}$"
+          },
+          "defaults": {
+            "$ref": "#/$defs/claims"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    },
+    "bindings": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "target_id": {
+            "type": "string",
+            "pattern": "^migration_target-v1-[0-9a-f]{64}$"
+          },
+          "system_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]{0,63}$"
+          },
+          "claims": {
+            "$ref": "#/$defs/claims"
+          }
+        },
+        "required": [
+          "target_id",
+          "system_id"
+        ]
+      }
+    },
+    "organization_defaults": {
+      "$ref": "#/$defs/claims"
+    },
+    "references": {
+      "type": "array",
+      "maxItems": 65536,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[!-~]{1,128}$"
+          },
+          "issuer_id": {
+            "type": "string",
+            "pattern": "^[!-~]{1,128}$"
+          },
+          "document_id": {
+            "type": "string",
+            "pattern": "^[!-~]{1,128}$"
+          },
+          "edition": {
+            "type": "string",
+            "pattern": "^[!-~]{1,128}$"
+          },
+          "clause": {
+            "type": "string",
+            "pattern": "^[!-~]{1,128}$"
+          },
+          "scope_id": {
+            "type": "string",
+            "pattern": "^[!-~]{1,128}$"
+          },
+          "https_uri": {
+            "type": "string",
+            "maxLength": 1024,
+            "pattern": "^https://",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "id",
+          "issuer_id",
+          "document_id",
+          "edition",
+          "clause",
+          "scope_id"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "version",
+    "input",
+    "organization_id",
+    "systems",
+    "bindings"
+  ]
+}

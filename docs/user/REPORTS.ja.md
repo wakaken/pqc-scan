@@ -18,6 +18,7 @@
 - [CycloneDX 1.7形式で出力する](#cyclonedx)
 - [棚卸しを比較する](#diff)
 - [ローカル方針で評価する](#assessment)
+- [保存済み入力を再評価する](#saved-assessment)
 - [SARIFの位置情報を読む](#sarif-locations)
 
 <a id="review"></a>
@@ -227,6 +228,48 @@ pqc-scan scan . --inventory-json --policy-profile migration-review-v1 --rules-di
 例は `{"version":1,"use_case":"jwt"}` です。省略値は不明のままとし、指定値も利用者の申告として記録します。
 依存ライブラリの存在だけで、PQCを利用できるとは判定しません。
 用途・前提条件・入力項目・制約は[評価仕様](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/architecture/LOCAL-ASSESSMENT-V1.md)を参照してください。
+
+<a id="saved-assessment"></a>
+
+## 保存済み入力から組織の移行判断を確認する
+
+`assess`は、検出された暗号の利用箇所と組織・システムの申告を組み合わせ、
+「どこで対応が必要か」「何が移行を妨げているか」「次に何を確認するか」を示します。
+`scan`のHTMLはソース上の所見を調べるためのレポートです。`assess`のHTMLは、
+その保存済み情報に業務上の前提を加え、組織の移行判断を支援するためのレポートです。
+
+```console
+pqc-scan assess saved.inventory.v1.json --input-format inventory-v1 \
+  --as-of 2026-11-18T00:00:00Z --context migration-context.json \
+  --out-dir ./migration-report --lang ja
+```
+
+出力先の`migration.assessment.html`をブラウザーで開いてください。
+これは`assess`が直接生成するHTMLです。Markdownの変換、確認用サーバー、
+`serve`の起動は不要です。自動ではブラウザーを開きません。
+`migration.assessment.md`と`migration.assessment.v1.json`も同時に出力します。
+入力形式と前提情報の作成方法は[保存済み入力のガイド](SAVED-EVIDENCE.ja.md)を参照してください。
+
+HTMLには、対応の件数、対象の索引、システム・場所ごとの判断カードを表示します。
+緊急度と移行準備を分け、「緊急だが接続相手は未対応」「情報が足りず判断を保留」などを
+読み分けられます。候補を開くと、方式、必要な条件、申告上の対応状況、検証事項を
+確認できます。生のJSONは本文に並べず、機械処理用ファイルへのリンクにまとめています。
+根拠・申告・出典の詳細は、必要なときに確認できます。
+
+スキャンHTMLと共通のスタイルを使い、言語とライト／ダーク表示を画面上で選べます。
+`--lang ja`はHTMLの初期言語とMarkdownの言語を日本語にします。既定は英語です。
+JavaScriptなしでも初期言語の本文と標準の折りたたみを使えます。
+外部の翻訳サービス、スクリプト、フォントの取得は不要です。JSONや各種ID、事実、判断は
+言語により変わりません。保存済み入力だけで評価し、再スキャンや再接続は行いません。
+
+利用者や外部レビュー由来の申告は未検証です。準備が整ったという表示は、有効な対応状況の
+申告に基づき、配備の検証結果ではありません。候補は採用前に正確なパラメーターと互換性の
+検証が必要です。対象外は申告範囲の判断、継続確認は記録された技術的役割の範囲に限ります。
+不明を低優先度とせず、全体の安全性や独立した実務評価の結果は示しません。
+
+3ファイルすべてを上限64 MiB以内で描画し、入力・前提情報との出力先の重複を確認してから
+書き込みます。置き換えはファイル単位です。JSONのみのライブラリ出力も利用できます。
+既存のスキャンHTML、ルール解説、`serve`、`migration-review-v1`の動作と公開状態は変えません。
 
 <a id="sarif-locations"></a>
 

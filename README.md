@@ -58,6 +58,7 @@ They are not repository scan targets. Arbitrary programming languages are not su
 - Writes HTML/Markdown for investigation and JSON/SARIF for automation.
 - Lists cryptographic findings and software dependencies in separate inventory files.
 - Optionally records richer observations, local advisory assessments and inspection diagnostics.
+- The explicit `assess` command can [reassess saved evidence offline](docs/user/SAVED-EVIDENCE.md), keeping technical roles, scoped claims and migration decisions separate.
 
 A reference to a PQC algorithm is useful evidence, but it does not establish that the application uses it successfully. The [report guide](docs/user/REPORTS.md#pqc-findings) explains these findings with examples.
 

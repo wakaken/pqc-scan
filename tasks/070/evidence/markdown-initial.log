@@ -1,0 +1,31 @@
+   Compiling pqc_scan_core v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_core)
+   Compiling pqc_scan_report v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_report)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.68s
+     Running tests/migration_markdown.rs (target/debug/deps/migration_markdown-4061eb434cf24d20)
+
+running 3 tests
+test markdown_locations_neutralize_html_links_images_controls_and_raw_metadata ... FAILED
+test paired_reports_retain_each_decision_axis_next_action_and_exact_machine_records ... FAILED
+test internal_links_are_complete_identical_across_languages_and_unknown_is_not_low ... ok
+
+failures:
+
+---- markdown_locations_neutralize_html_links_images_controls_and_raw_metadata stdout ----
+
+thread 'markdown_locations_neutralize_html_links_images_controls_and_raw_metadata' (10869060) panicked at crates/pqc_scan_report/tests/migration_markdown.rs:166:9:
+assertion failed: first.contains("&lt;script&gt;")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- paired_reports_retain_each_decision_axis_next_action_and_exact_machine_records stdout ----
+
+thread 'paired_reports_retain_each_decision_axis_next_action_and_exact_machine_records' (10869061) panicked at crates/pqc_scan_report/tests/migration_markdown.rs:112:21:
+missing record {"id":"migration_target-v1-114701d84e5655c8e85a185e3d38612b5764dbe9a416e76facefd000102676ad","limitations":["unknown_parameter_encoding"],"observation":{"assurance":"syntactic","collection_outcome":"complete","method":"ast_pattern","usage":"referenced"},"source_ref":{"line":1,"observation_id":"observation-v1-b75202b15a37ec57748d93b99e1538e2c70f9b0a81bb14f7b908c113e0bae108","path":"app.txt","role":"algorithm","root_asset_id":"asset-v1-e30d0455518fa3502bcd153e2d7d70096c2ac56e9d275847e8c1488261964b33","run_id":"scan-v1-a9ff06a933b8f9ebe359562fad7005b81895235c5435bb91a62562566eb479b7"},"technical":{"attack_models":[],"classical_concerns":[],"combiner_assessment":null,"components":[],"construction":"classical_public_key","encoding_assurance":"unknown","identifier":"RSA","parameters_known":true,"protocol_ref":null,"purpose":"unknown","quantum":"vulnerable","role":"algorithm","source_ids":["F12","LOCAL026","NIST-PQ-FAQ"],"standardization":"classical_standard"}}
+
+
+failures:
+    markdown_locations_neutralize_html_links_images_controls_and_raw_metadata
+    paired_reports_retain_each_decision_axis_next_action_and_exact_machine_records
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+error: test failed, to rerun pass `-p pqc_scan_report --test migration_markdown`

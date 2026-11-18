@@ -14,6 +14,29 @@ subsequently authorized [tasks and requirement map](TASKS.md) registers 065-072 
 `pending`. Registration does not select or execute them. Evidence names below
 describe required content, not existing artifacts or approved new public filenames.
 
+<a id="input-assistance-extension"></a>
+## Input-assistance extension (2026-11-18)
+
+The maintainer authorized the following nine additional acceptance clauses and
+registration only. They supplement R4/X03 and preserve all five mandatory outcomes
+and original 30 clauses below. No feature availability or execution is claimed.
+CLI conversational input is deferred; a noninteractive template entrypoint and
+existing local-web input/reassessment are in scope. Task 075 owns expanded final
+acceptance after original 072; see [the roadmap](ROADMAP.md) and [map](TASKS.md).
+
+| ID | Primary task | Required behavior | Acceptance and required future evidence |
+|---|---|---|---|
+| U01 | 073 | Common typed configuration generation | Use existing saved-evidence targets and context validation/binding; produce adopted v1 JSON with exact input digest/IDs; valid partial or empty claims are allowed. No second evaluator/schema or invented claims. |
+| U02 | 073 | Explicit template generation without manual IDs | A separately selected noninteractive CLI entrypoint writes a validated template through safe output, with readable target selection, configurable known claims and generated aliases. No manual digest/ID transcription, default binding of all targets, or CLI conversation. Unknown/sparse inputs remain valid; invalid/stale bindings fail safely. |
+| U03 | 074 | Personal and purpose-dependent optional forms | Users may skip context or answer only known relevant questions. Company/department/business deadlines are not required. Distinguish omission/unknown/false/N/A and preserve existing criticality semantics; no personal-mode low-priority shortcut. |
+| U04 | 074 | End-to-end existing local web workflow | Opt-in serve workflow captures Inventory v1, selects job-bound targets, previews/saves context and reassesses the same immutable input without rescanning. Only valid completed session jobs or explicitly selected bounded inputs are eligible; input replacement invalidates bindings and requires explicit reselection. |
+| U05 | 074 | Review, provenance and context round trip | Import/export adopted context using the shared layer; review influential claims, actors, dates and exact target scope before applying. No invented expiry/verification or silent scope widening; stale/conflicting/ambiguous input is surfaced or rejected according to existing semantics. Unsupported fields are not silently discarded during edit/export. |
+| U06 | 074 | Bilingual accessible result view | Render structured evaluator results in the local UI with urgency/information/readiness/actions, evidence and influential/missing claims; preserve JSON/Markdown semantics and uncertainty. Paired EN/JA labels, keyboard access, focus/error/status handling and real-browser offline interaction evidence are required. |
+| U07 | 074 | Bounded local integration and compatibility | Retain loopback/session-token/Host/origin protections; define bounded bodies/jobs/imports, allowed paths/artifacts, cancellation/failure and safe saves before adding APIs. No arbitrary file access, external upload, injected script, project execution or outbound reassessment. Old CLI/report/serve defaults stay compatible; UI and CLI evaluation agree for identical inputs/context/versions/time. |
+| U08 | 075 | Measure assisted workflow operation | Freeze a bounded workflow-comparison protocol before observations; compare manual-JSON and assisted personal/organization scenarios using actual CLI/browser operations. Record completion, time, errors, skipped/unknown answers and next-action checks with denominators, operator authorship/exposure, failures and limitations. These controlled observations do not establish independent human usefulness. Reuse task071 practitioner evidence only when applicable; no additional recruitment is required or authorized. Original task 071 study remains mandatory. |
+| U09 | 075 | Expanded final-source reconciliation | After tasks 071/072/074, reconcile all original 30 and added 9 clauses against final-source implementation, applicable tests/browser/study evidence and reviews. Original task 072 completion covers its original scope only; preserve historical records and separately bind new evidence. Release/support and numerical adoption remain separate. |
+
+
 ## Mandatory outcomes
 
 | Requirement group | Outcome | Delivery obligation |

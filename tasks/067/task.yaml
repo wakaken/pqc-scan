@@ -2,7 +2,7 @@ id: '067'
 title: Extend technical assessment and ingest approved saved evidence formats
 type: improvement
 priority: high
-status: pending
+status: done
 owner: Main agent
 phase: '3'
 description: >
@@ -69,3 +69,24 @@ planning_record:
   primary_requirements: [R2-01, R2-02, R2-03, R2-04, R2-05]
   supporting_requirements: []
   completion_evidence: Each R2 clause needs implemented behavior, independent expected cases, applicable final-source checks and both review stages.
+execution_record:
+  selected_on: '2026-11-18'
+  source_head: c7e76b59da44ffdc8a60da86efd5393e70a039e3
+  plan: tasks/067/TASK-067-PLAN.md
+  lifecycle:
+    - '2026-11-18: pending -> planned; selected task067 onward in dependency order; adopted task066 contract retained.'
+    - '2026-11-18: planned -> in-progress; implementing bounded adapters and new-only technical dispatch.'
+    - '2026-11-18: in-progress -> review; initial implementation and targeted tests ready for /root/v04_implementation_review.'
+    - '2026-11-18: review -> in-progress; correcting I067-01 parameter uncertainty and I067-02 TLS identity/SNI consistency.'
+    - '2026-11-18: in-progress -> review; implementation fixes accepted by the same reviewer; required final checks passed; test review remains.'
+    - '2026-11-18: review -> done; both independent stages accepted; all R2-01..05 clauses and required final-source checks verified.'
+  reviews: tasks/067/TASK-067-REVIEWS.md
+  results: tasks/067/TASK-067-RESULTS.md
+  reopened_on: '2026-11-18'
+  reopening_reason: Task069 integration exposed accepted contradictory AES size and known EC curve/size facts; R2-01/R2-04 require correction before renewed completion. Original results and review evidence remain historical and unchanged.
+  correction_scope: New-dispatch parameter consistency only; legacy catalog/rules/outputs remain unchanged. Reuse the same two reviewers with the combined067-correction/069 package.
+
+  renewed_review: Combined067 correction/069 implementation and test review accepted by the original identities; final checks passed.
+
+  final_completion: All original criteria verified against final source; same implementation and test reviewer identities accepted, with final required checks recorded in tasks/069/evidence/COMMANDS.json.
+  completion_transition: "2026-11-18: review -> done; renewed067 and069 accepted after both stages and final-source checks; original067 history retained."

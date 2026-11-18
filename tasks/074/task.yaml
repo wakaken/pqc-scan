@@ -1,0 +1,95 @@
+id: '074'
+title: Add optional context forms and reassessment to the existing local web interface
+type: improvement
+priority: high
+status: pending
+owner: Main agent
+plan_reference: docs/roadmap/v0.4/ROADMAP.md
+requirements_reference: docs/roadmap/v0.4/REQUIREMENTS.md
+description: Implement the authorized input-assistance increment only after later task selection; reuse
+  existing contracts and components and preserve completed history.
+quality_requirements:
+- U03
+- U04
+- U05
+- U06
+- U07
+depends_on:
+- '070'
+- '073'
+target_components:
+- crates/pqc_scan_cli/src/serve.rs
+- crates/pqc_scan_cli/src/serve.html
+- crates/pqc_scan_cli/src/serve.js
+- crates/pqc_scan_report/
+- docs/user/
+problem:
+- Manual JSON editing and hash/target transcription burden personal users; adding UI must retain exact
+  scope, uncertainty and existing behavior.
+acceptance:
+- 'U03: Users may skip context or answer only known relevant questions. Company/department/business deadlines
+  are not required. Distinguish omission/unknown/false/N/A and preserve existing criticality semantics;
+  no personal-mode low-priority shortcut.'
+- 'U04: Opt-in serve workflow captures Inventory v1, selects job-bound targets, previews/saves context
+  and reassesses the same immutable input without rescanning. Only valid completed session jobs or explicitly
+  selected bounded inputs are eligible; input replacement invalidates bindings and requires explicit reselection.'
+- 'U05: Import/export adopted context using the shared layer; review influential claims, actors, dates
+  and exact target scope before applying. No invented expiry/verification or silent scope widening; stale/conflicting/ambiguous
+  input is surfaced or rejected according to existing semantics. Unsupported fields are not silently discarded
+  during edit/export.'
+- 'U06: Render structured evaluator results in the local UI with urgency/information/readiness/actions,
+  evidence and influential/missing claims; preserve JSON/Markdown semantics and uncertainty. Paired EN/JA
+  labels, keyboard access, focus/error/status handling and real-browser offline interaction evidence are
+  required.'
+- 'U07: Retain loopback/session-token/Host/origin protections; define bounded bodies/jobs/imports, allowed
+  paths/artifacts, cancellation/failure and safe saves before adding APIs. No arbitrary file access, external
+  upload, injected script, project execution or outbound reassessment. Old CLI/report/serve defaults stay
+  compatible; UI and CLI evaluation agree for identical inputs/context/versions/time.'
+deliverables:
+- tasks/074/TASK-074-RESULTS.md
+- tasks/074/evidence/
+- Implemented behavior, meaningful tests, paired user documentation and applicable final-source implementation/test
+  reviews.
+implementation_steps:
+- Record concrete D4 API/UI contracts, bounds, allowed session artifacts and failure/cancellation behavior
+  before implementing the opt-in extension; preserve existing defaults.
+- Obtain Inventory v1 for the selected web scan path and reuse073 generation/validation plus069 evaluation;
+  do not shell out with user-controlled text or replicate policy in JavaScript.
+- Deliver target selection, purpose-dependent optional personal/organization forms, preview, provenance
+  and lossless supported context import/export; unsupported edit fields must be surfaced rather than dropped.
+- Integrate offline reassessment and bilingual structured-result presentation with safe save/download
+  paths; bundle relevant tests, paired guides and actual browser evidence.
+testing_requirements:
+- Apply docs/agent/VERIFICATION.md and both independent review stages for executable changes; reuse reviewer
+  identities within the authorized request and retain source/input/context/version/time bindings.
+- Check actual generated/imported configurations, exact target scope, missing/unknown/false/N/A, stale
+  claims, substitution and invalid input; do not silently create positive claims.
+- Verify CLI/template/web agreement for identical inputs where applicable; preserve v1, 0.45, scan/report
+  defaults and no-outbound reassessment.
+- 'Follow docs/agent/REPORTS.md: real-browser EN/JA first-screen, keyboard/focus/error/round-trip/reassessment
+  checks; verify loopback/session/Host/origin, bounded requests, path/output protections and synthetic
+  secret/script canaries.'
+out_of_scope:
+- No SaaS, separate web app, database, CLI conversation, arbitrary filesystem browsing, public server,
+  automatic cross-scan binding or invented criticality/expiry.
+risks:
+- UI convenience can invent facts, widen target scope, erase unknowns or falsely imply verified readiness;
+  prior accepted evidence may be inapplicable after integration.
+approval_boundary:
+- Registration only; execution requires later selection and completed dependencies. Record D4 details
+  before affected implementation; any storage-contract or high-risk architectural change requires the
+  applicable human decision.
+- No external contact, fees, release or publication is authorized. Missing required evaluation resources
+  keep affected work unfinished.
+planning_record:
+  date: '2026-11-18'
+  scope: Definition only; no implementation, product execution or measurement selected.
+  primary_requirements:
+  - U03
+  - U04
+  - U05
+  - U06
+  - U07
+  supporting_requirements: []
+  completion_evidence: Original criteria, applicable tests, final-source evidence and required reviews
+    must all be complete; completed historical tasks remain unchanged.

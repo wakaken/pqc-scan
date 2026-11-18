@@ -9,12 +9,72 @@ cryptographic evidence and assessment pipeline. It does not replace the scanner,
 the inventory, or `migration-review-v1`. The five required outcomes and their
 acceptance evidence are defined in [REQUIREMENTS.md](REQUIREMENTS.md).
 
-This roadmap and its [task map](TASKS.md) define planning and task registration
-only. The maintainer subsequently authorized definitions for tasks 065-072; all
-are registered as `pending`, not selected for execution. No implementation,
-schema/policy change or release is started or approved by registration. Work
-packages below remain logical planning units; their outputs and checks are future
-deliverables unless explicitly identified as existing evidence.
+At initial registration, this roadmap and its [task map](TASKS.md) authorized
+planning and definitions for tasks 065-072 only. Later execution and completion
+are recorded in the task definitions and the map's execution update; the initial
+pending states are historical. The present extension authorizes definitions for
+073-075 only, not their implementation. Registration does not approve a release
+or an unspecified schema/policy change.
+
+## Authorized input-assistance extension (2026-11-18)
+
+The maintainer authorized planning and registration of tasks 073-075 on
+`codex/v04-roadmap-20261118`, not implementation. This dated extension takes
+precedence over the original exclusion of new UI work only for an opt-in
+extension of the existing local `serve` interface. SaaS, a separate web
+application, a database and CLI conversational input remain outside this scope.
+The five mandatory outcomes and all original acceptance clauses remain intact.
+
+Reuse SavedEvidence, MigrationContext validation/binding, the pure migration
+evaluator, safe report writers, the final task-070 human presentation and the existing loopback server. Add a common
+configuration-generation layer and an explicit template-generation entrypoint;
+then use that same layer from the existing local web interface. No second
+scanner, decision table, browser-side evaluator or alternate context schema is
+planned. The generated configuration uses the adopted migration-context v1
+contract. Public entrypoint names and bounded local HTTP request/response details
+must be specified before implementation; this roadmap does not declare new
+commands available. Record a concrete D4 supplement before affected UI/API work;
+any necessary stored-contract change still requires the separate D1 decision.
+
+The proposed flow is scan (or select an existing session result), inspect targets,
+answer only known relevant questions, review and save the generated context,
+reassess the same saved bytes, and inspect decisions/reasons/missing information
+and next actions. Web scanning must explicitly obtain Inventory v1 for this
+selected workflow; the existing serve path must not be assumed to produce it.
+The UI uses job-scoped targets and content bindings rather than asking users to
+copy hashes/IDs. Reassessment and context import/export never rescan, execute
+project code or initiate outbound connections. Existing scan/report defaults stay
+compatible when the new workflow is not selected.
+
+Individual users can skip context entirely or provide only known purpose/use
+claims. Organization/system aliases can be generated without asking for a company
+or department. Personal/organization presentation does not select a different
+risk model. Unknown, omitted, false and not-applicable remain distinct. Questions
+are purpose-dependent; no business deadline, criticality, protection lifetime,
+support status, expiry or factual verification is invented. Existing
+business_critical semantics must not be relabelled into a different claim.
+Provide a readable source/target selector; ambiguous targets cannot acquire a
+binding. Grouped application requires explicit review of the exact target set.
+
+Tasks 065-070 and their completion/review records are preserved. Task 071 remains
+responsible for the original mandatory study and its unresolved D6 resources;
+new input assistance cannot substitute for it. Task 072 retains its original
+30-row reconciliation scope. Task 075, depending on071/072/074, supplies the
+additional workflow observations and final reconciliation of all 39 rows (30
+original plus U01-U09). Completion of072 alone cannot close the expanded v0.4.
+No existing protocol or historical result is silently amended: freeze the added
+workflow-comparison protocol before its observations and retain separate versions/evidence.
+
+Acceptance requires common-helper/CLI/web configuration equivalence, headless
+operation, bounded session-local inputs, explicit ownership and freshness,
+existing security and output protections, bilingual accessible forms/results,
+real-browser interaction evidence, and measured personal/organization scenarios.
+Controlled operator observations are not independent practitioner validation; no
+additional recruitment is a new prerequisite. Task071 remains mandatory.
+An unavailable required observation keeps the extension unfinished. See the
+[additional requirements](REQUIREMENTS.md#input-assistance-extension) and
+[task map](TASKS.md#input-assistance-extension).
+
 
 ## Baseline and relationship to v0.3
 

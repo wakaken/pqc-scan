@@ -420,6 +420,10 @@ output and inventory-v1 semantics remain unchanged. See
 
 Evidence export boundaries and bounded redaction are documented in [EVIDENCE-PRIVACY.md](architecture/EVIDENCE-PRIVACY.md).
 
+Task067 adds provider-independent saved-evidence technical readers under the
+separate `migration-facts-v1` dispatch. See
+[reader boundaries](architecture/SAVED-EVIDENCE-READERS.md).
+
 ### Repository read boundary (Cursor audit follow-up)
 
 Only regular files are selected. In-tree symlinks and special files are skipped
@@ -477,3 +481,6 @@ for operational compatibility and destination-tampering limits.
 ### Local scan web UI
 
 `pqc_scan_cli::serve` adds a loopback-only folder picker and job coordinator around the existing `scan_cmd` entrypoint. It does not implement a second detector pipeline. A per-session random path, exact Host and same-origin POST checks protect the local interface. Folder traversal is constrained to an explicit canonical root; linked folders are excluded. Only allowlisted artifacts from completed jobs can be served, never source files. One background scan runs at a time; session jobs and folder lists are bounded. HTML and machine report schemas remain owned by the existing reporting crate. HTTP parsing uses tiny_http rather than a custom protocol parser.
+
+The explicit saved-evidence decision path is described in
+[offline migration decisions](architecture/OFFLINE-MIGRATION-DECISIONS.md).

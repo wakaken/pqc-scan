@@ -1,0 +1,27 @@
+    Checking pqc_scan_core v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_core)
+    Checking pqc_scan_detectors v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_detectors)
+    Checking pqc_scan_report v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_report)
+    Checking pqc_scan_probe_ssh v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_probe_ssh)
+    Checking pqc_scan_probe_tls v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_probe_tls)
+    Checking pqc_scan_cli v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_cli)
+error: items after a test module
+  --> crates/pqc_scan_report/src/migration_report.rs:56:1
+   |
+56 |   mod tests {
+   |   ^^^^^^^^^
+...
+81 | / pub fn write_migration_assessment_reports(
+82 | |     report: &MigrationAssessment,
+83 | |     evidence: &SavedEvidence,
+84 | |     context: Option<&MigrationContext>,
+85 | |     out_dir: &Path,
+86 | |     language: crate::ReportLanguage,
+87 | | ) -> anyhow::Result<Vec<PathBuf>> {
+   | |_________________________________^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#items_after_test_module
+   = note: `-D clippy::items-after-test-module` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::items_after_test_module)]`
+   = help: move the items to before the test module was defined
+
+error: could not compile `pqc_scan_report` (lib test) due to 1 previous error
