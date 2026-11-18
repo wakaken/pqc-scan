@@ -276,7 +276,7 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
             "<div><span>{label}</span><strong>{count}</strong></div>"
         )?;
     }
-    writeln!(out, "</div><p>{}</p><ul class=\"inspection-scope\">", text(lang, "This is a local inspection of supported files, not a live connection test. File counts are not a cryptographic coverage percentage.", "対応する形式のローカルファイルを調べた結果です。実通信や実際の利用は確認していません。ファイル件数は、暗号利用の網羅率ではありません。"))?;
+    writeln!(out, "</div><details class=\"inspection-scope-details\" id=\"inspection-scope\"><summary>{}</summary><p>{}</p><ul class=\"inspection-scope\">", text(lang,"Scope and exclusions","検査範囲と除外条件"), text(lang, "This is a local inspection of supported files, not a live connection test. File counts are not a cryptographic coverage percentage.", "対応する形式のローカルファイルを調べた結果です。実通信や実際の利用は確認していません。ファイル件数は、暗号利用の網羅率ではありません。"))?;
     writeln!(
         out,
         "<li>{}: <code>{}</code></li>",
@@ -361,7 +361,7 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
     )?;
     writeln!(
         out,
-        "</ul><div class=\"inspection-reasons\"><h3>{}</h3>",
+        "</ul></details><div class=\"inspection-reasons\"><h3>{}</h3>",
         text(
             lang,
             "Unfinished checks and reasons",
@@ -443,7 +443,7 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
         if !grouped.is_empty() {
             writeln!(
                 out,
-                "<details class=\"inspection-diagnostics\"><summary>{}</summary>",
+                "<details class=\"inspection-diagnostics\" id=\"inspection-diagnostics\"><summary>{}</summary>",
                 text(lang, "Reasons and example files", "理由とファイルの例")
             )?;
             for (code, records) in grouped {

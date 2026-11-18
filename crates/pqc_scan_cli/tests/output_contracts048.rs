@@ -205,7 +205,11 @@ fn real_exports_preserve_facts_and_validate_offline_with_negative_controls() {
         for f in findings {
             let id = f["finding_id"].as_str().unwrap();
             assert_eq!(
-                html.matches(&format!("data-finding-id=\"{id}\"")).count(),
+                html.split("<template")
+                    .next()
+                    .unwrap()
+                    .matches(&format!("data-finding-id=\"{id}\""))
+                    .count(),
                 1,
                 "HTML omission/duplication {id}"
             );
@@ -486,7 +490,14 @@ fn tls_adjacent_references_keep_exact_positions_and_distinct_ids_in_exports() {
             .collect();
         targets.sort();
         assert_eq!(targets, vec![(1, 8), (9, 16), (17, 24)]);
-        assert_eq!(html.matches("data-finding-id=").count(), 3);
+        assert_eq!(
+            html.split("<template")
+                .next()
+                .unwrap()
+                .matches("data-finding-id=")
+                .count(),
+            3
+        );
         assert_eq!(md.matches("<a id=\"finding-").count(), 3);
         // Legacy CBOM intentionally collapses same-line references and has no
         // column/occurrence ID contract; native/SARIF retain all three.

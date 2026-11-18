@@ -66,7 +66,7 @@ fn documented_examples_complete_supported_inspection_and_keep_all_requested_repo
         "incomplete supported example inspection: {}",
         diagnostics["coverage"]
     );
-    assert_eq!(files, 9);
+    assert_eq!(files, 10);
     let c = &diagnostics["coverage"];
     assert_eq!(c["status"], "complete_within_scope");
     assert_eq!(c["selected_files"], 55);

@@ -32,6 +32,7 @@ fn local_rsa_source_positions_spans_and_secret_masking_survive_exports() {
     names.sort();
     let mut expected = vec![
         "report.html",
+        "report.rules.html",
         "report.md",
         "report.json",
         "report.sarif",

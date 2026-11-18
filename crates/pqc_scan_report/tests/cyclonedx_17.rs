@@ -275,7 +275,7 @@ fn selected_writer_adds_exactly_two_files_and_preserves_legacy_bytes() {
             .collect::<Vec<_>>(),
         ["cbom.cdx-1.7.json", "dependency-sbom.cdx-1.7.json"]
     );
-    assert_eq!(std::fs::read_dir(&out).unwrap().count(), 8);
+    assert_eq!(std::fs::read_dir(&out).unwrap().count(), 9);
     assert_eq!(
         before,
         paths

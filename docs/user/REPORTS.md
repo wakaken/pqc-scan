@@ -30,9 +30,14 @@ Start with `report.html`:
 3. Check whether the reference belongs to active application code, a setting, a dependency, an example or a test. Static matching cannot settle runtime use.
 4. Review the proposed action against the actual runtime, library, protocol and peers before making a change.
 
-HTML reports start with a compact, severity-sorted rule list. Search by rule or
-file, filter severity/risk, and switch between risk candidates and informational
-inventory. Rules and their occurrences are paginated in groups of 20. Expand a
+HTML reports start with compact result and inspection summaries and a severity
+distribution of all findings. The chart and summary totals stay fixed while you
+filter the results. Scope and exclusions are expandable; incomplete inspection
+remains visible. A side panel combines search with severity, risk, rule and exact
+file filters, and switches between risk candidates and informational inventory.
+On narrow screens, the filters move above the severity-sorted rule list. Clearing
+all filters shows every finding, including informational inventory. Printing
+includes all findings and expanded evidence, regardless of screen filters or pages. Rules and their occurrences are paginated in groups of 20. Expand a
 rule, then a location, to see its source context and applicable actions. Identical
 shared guidance is linked instead of repeating it at every location. Different
 recommendations sharing an action ID remain distinct. Without JavaScript, all
@@ -45,7 +50,11 @@ TLS guidance prefers TLS 1.3, retaining securely configured TLS 1.2 only for an
 identified interoperability need. PQC override settings receive setting-specific
 checks rather than an assertion of RSA usage.
 
-Use `--lang ja` for Japanese HTML and Markdown reports. English remains the default
+HTML includes Japanese and English views in one self-contained file. Use the language selector to switch descriptions, recommendations and labels while retaining filters, pagination and opened occurrences. `--lang` selects the initial HTML view and the Markdown language. JavaScript-free viewing retains that initial language. The rule selector includes short explanations; its help link and each expanded rule link to the companion `report.rules.html`, which explains the rules found in this scan. Keep both HTML files together for those local links. No remote translation service is used.
+
+The theme selector offers Light and Dark, defaulting to Light; an explicitly selected theme is saved locally when browser storage is available. Printing uses the light palette. HTML creation times use the viewer’s timezone (for example Asia/Tokyo/JST), while preserving the original instant in the time element. With JavaScript unavailable, the generation host’s local time and explicit offset remain visible. Markdown uses the generation host’s local time; machine timestamps remain unchanged. There is no IP or geolocation lookup.
+
+Use `--lang ja` for an initially Japanese HTML view and Japanese Markdown. English remains the default
 (`--lang en`). JSON, SARIF, CBOM and dependency SBOM retain their existing content
 regardless of this option. Finding IDs, paths, evidence, code and reference URLs
 are never translated. Japanese reports explain the findings and next steps using
@@ -110,6 +119,7 @@ Before applying migration guidance:
 | File | Selection | Use |
 |---|---|---|
 | `report.html` | `--format html` or `all` | Investigate findings interactively |
+| `report.rules.html` | With HTML | Explain the rules found in this report and link back to their evidence |
 | `report.md` | `--format md` or `all` | Share text findings and source/action links |
 | `report.json` | `--format json` or `all` | Process findings, evidence, recommendations and summary |
 | `report.sarif` | `--format sarif` or `all` | Send findings to Code Scanning tools |
@@ -120,11 +130,11 @@ Before applying migration guidance:
 | `diagnostics.json` | `--diagnostics` | Check inspection scope, coverage and safe failure reasons |
 | `cbom.cdx-1.7.json`, `dependency-sbom.cdx-1.7.json` | `--cyclonedx-17` | Exchange separate CycloneDX 1.7 cryptographic and software inventories |
 
-`--format all` selects the six legacy files; additional artifacts require their own options. A single selected report format still writes both flat inventory files. `--lang en|ja` changes HTML/Markdown only.
+`--format all` selects the six original files plus the companion `report.rules.html` (seven files). Inventory, diagnostics and CycloneDX still require their own options. A single selected report format still writes both flat inventory files. `--lang en|ja` changes HTML/Markdown only.
 Use a fresh output directory for comparisons; files from previous runs are not automatically removed.
 
 To request the six default files plus inventory, diagnostics and both CycloneDX
-exports (ten files in total):
+exports and the HTML rule guide (eleven files in total):
 
 ```bash
 pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang en --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
@@ -267,3 +277,11 @@ Across product or rule versions, corrected positions, evidence, attributes or
 newly detected references can change IDs and counts without changing the identity
 algorithm or schema. Compare the binary/source and rule versions alongside your
 scan settings. See the [v0.3.0 compatibility notes](../releases/v0.3.0.md).
+
+### File tree and panel visibility
+
+The **Filters** and **File tree** buttons independently show or hide each panel without clearing conditions. The tree lists only files with findings, grouped by directory. The badge counts all finding occurrences (including informational ones), regardless of active filters; it is not a vulnerability count. Select a file to apply the exact file filter, combined with other conditions. **All files** clears only that file condition. Folder expansion, selected file, panel visibility and pagination carry across language changes. These navigation panels are hidden in print and when JavaScript is unavailable.
+
+For `CERT_EXPIRY_2026_OR_BEFORE`, the human report identifies expiry before January 1, 2027 UTC and explains that the cutoff alone does not establish expiry at scan time. Check the parsed expiry and `CERT_EXPIRED` findings. The rule ID, detector predicate and machine descriptions are unchanged.
+
+Folder rows use blue folder icons, file rows use outlined document icons, and the selected file has a leading blue marker. Icons are inline SVG and decorative; file names and counts remain accessible without them.

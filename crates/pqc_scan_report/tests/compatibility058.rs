@@ -100,6 +100,7 @@ fn old_detector_and_scan_writer_calls_keep_results_and_unknown_assurance() {
         BTreeSet::from([
             "report.json",
             "report.html",
+            "report.rules.html",
             "report.md",
             "report.sarif",
             "cbom.json",

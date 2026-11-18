@@ -473,3 +473,7 @@ aliases when their targets match the expected physical system locations. Other
 links are rejected. Non-Unix output fails Unsupported rather than using an unsafe
 fallback; this does not add a new official platform. See the paired user guide
 for operational compatibility and destination-tampering limits.
+
+### Local scan web UI
+
+`pqc_scan_cli::serve` adds a loopback-only folder picker and job coordinator around the existing `scan_cmd` entrypoint. It does not implement a second detector pipeline. A per-session random path, exact Host and same-origin POST checks protect the local interface. Folder traversal is constrained to an explicit canonical root; linked folders are excluded. Only allowlisted artifacts from completed jobs can be served, never source files. One background scan runs at a time; session jobs and folder lists are bounded. HTML and machine report schemas remain owned by the existing reporting crate. HTTP parsing uses tiny_http rather than a custom protocol parser.

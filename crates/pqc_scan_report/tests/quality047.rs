@@ -61,7 +61,7 @@ fn inspect(bytes: &[u8], out: &Path) -> Value {
         let paths =
             write_reports_with_language(&result, &out.join(tag), ReportFormat::All, language)
                 .unwrap();
-        assert_eq!(paths.len(), 6);
+        assert_eq!(paths.len(), 7);
         for path in paths {
             let text = fs::read_to_string(&path).unwrap();
             assert!(!text.contains("CANARY047_EXPORT"));

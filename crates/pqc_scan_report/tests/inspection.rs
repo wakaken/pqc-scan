@@ -599,7 +599,7 @@ fn html_prioritizes_coverage_and_omits_internal_observation_and_asset_tables() {
         let md = fs::read_to_string(out.join("report.md")).unwrap();
         assert!(
             html.find("<section class=\"inspection-overview").unwrap()
-                < html.find("<section data-report-controls").unwrap()
+                < html.find("data-report-controls hidden").unwrap()
         );
         assert!(html.contains("37 bytes"));
         assert!(html.contains("node_modules"));
@@ -643,7 +643,14 @@ fn human_reports_group_diagnostics_and_preserve_full_machine_records() {
     .unwrap();
     let html = fs::read_to_string(out.join("report.html")).unwrap();
     let md = fs::read_to_string(out.join("report.md")).unwrap();
-    assert_eq!(html.matches("class=\"inspection-reason\"").count(), 1);
+    assert_eq!(
+        html.split("<template")
+            .next()
+            .unwrap()
+            .matches("class=\"inspection-reason\"")
+            .count(),
+        1
+    );
     assert!(html.contains("12件"));
     assert!(html.contains("ほか9件"));
     assert!(!html.contains("file-11.txt"));
