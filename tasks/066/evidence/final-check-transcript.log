@@ -1,0 +1,88 @@
+Raw final verification transcript; not a maintained executable product/test script.
+Command: python3 /tmp/pqc066-final-check.py
+Source:
+from pathlib import Path
+import json,hashlib,subprocess,re
+from datetime import datetime
+root=Path.cwd();out=Path('tasks/066/evidence');h=lambda b:hashlib.sha256(b).hexdigest();sha=lambda p:h(Path(p).read_bytes())
+def git(*args):return subprocess.check_output(['git',*args],text=True).strip()
+merge=json.load(open(out/'DEVELOP-INTEGRATION.json'));source=json.load(open(out/'SOURCE.json'));freeze=json.load(open(out/'FREEZE.json'))
+assert git('branch','--show-current')=='codex/v04-roadmap-20261118'
+assert git('rev-parse','HEAD')==git('rev-parse','origin/develop')==merge['selected_head']
+subprocess.run(['git','merge-base','--is-ancestor',merge['old_head'],'HEAD'],check=True)
+assert set(git('diff','--cached','--name-only').splitlines())==set(merge['index'])
+for p,d in merge['index'].items():assert h(subprocess.check_output(['git','show',':'+p]))==d,('index',p)
+for p,d in merge['files'].items():
+ if p!='tasks/066/task.yaml':assert sha(p)==d,('preserved preexisting bytes',p)
+for p,d in source['task065_sha256'].items():assert sha(p)==d,('task065 history',p)
+applicability=json.load(open(out/'SOURCE-APPLICABILITY.json'))
+app_rows={r['path']:r for r in applicability['entries']}
+assert set(app_rows)==set(source['sha256'])
+for p,d in source['sha256'].items():
+ assert app_rows[p]['initial_sha256']==d and app_rows[p]['current_sha256']==sha(p),('source applicability',p)
+ if sha(p)!=d:
+  assert p=='docs/product/STANDARDS-REGISTER.md' and sha(p)==freeze['sha256'][p],('authorized documentation delta',p)
+ else:assert app_rows[p]['unchanged']
+assert len(applicability['current_deltas'])==1
+for p,d in freeze['sha256'].items():assert sha(p)==d,('frozen artifact',p)
+# Confirm no authored executable changes beyond the fetched upstream source.
+assert not git('diff','HEAD','--name-only','--','crates','rules','schemas','Cargo.toml','Cargo.lock','rust-toolchain.toml','.github','scripts','shell','tests')
+changed=git('diff','--name-only').splitlines()+git('ls-files','--others','--exclude-standard').splitlines()
+assert all(p.startswith(('tasks/065/','tasks/066/')) or p in ['docs/quality/rules/RULE-QUALITY.md','docs/architecture/MIGRATION-ASSESSMENT-V1.md','docs/product/STANDARDS-REGISTER.md'] for p in changed),changed
+ruby="require 'yaml'; require 'json'; puts Dir['tasks/[0-9][0-9][0-9]/task.yaml'].sort.map { |p| [p,YAML.load_file(p)] }.to_h.to_json"
+tasks=json.loads(subprocess.check_output(['ruby','-e',ruby],text=True));assert len(tasks)==72
+for p,t in tasks.items():assert isinstance(t['id'],str) and t['id']==Path(p).parent.name
+assert tasks['tasks/065/task.yaml']['status']=='done'
+assert tasks['tasks/066/task.yaml']['status'] in ['review','done']
+for i in range(67,73):assert tasks[f'tasks/{i:03}/task.yaml']['status']=='pending'
+raw=subprocess.check_output(['git','show',':tasks/066/task.yaml']);original=json.loads(subprocess.check_output(['ruby','-rjson','-ryaml','-e','puts YAML.load(STDIN.read).to_json'],input=raw))
+current=tasks['tasks/066/task.yaml'];assert {k:v for k,v in current.items() if k not in ['status','execution_record']}=={k:v for k,v in original.items() if k!='status'}
+case=json.load(open('tasks/066/ACCEPTANCE-CASES.json'));rows=case['cases'];ids={r['id'] for r in rows};assert len(ids)==len(rows)==65
+assert {r['example'] for r in rows}=={f'A{i:02}' for i in range(1,19)}
+for r in rows:
+ if 'base' in r['given']:assert r['given']['base'] in ids
+ assert all(re.fullmatch('F(?:0[1-9]|1[0-4])',x) for x in r['source_ids'])
+by={r['id']:r for r in rows};v=by['A15']['given']['provenance'];assert datetime.fromisoformat(v['asserted_at'])<datetime.fromisoformat(v['valid_until'])<datetime.fromisoformat(case['common_clock']['as_of'])
+assert by['A09-known-false-plus-missing']['expected']['readiness']=='blocked'
+assert by['A08-plan-unknown-readiness']['expected']['next_action']=='investigate'
+assert by['A05-partial-certificate-collection']['expected']['reported_verified_negotiation']
+assert h(json.dumps(rows,sort_keys=True,separators=(',',':')).encode())==freeze['case_semantic_sha256']
+assert case['status']=='frozen_specification_expectations' and freeze['new_v04_implementation_observations']==0
+assert len(json.load(open(out/'MAINTAINER-DECISIONS.json'))['responses'])==3
+review=json.load(open(out/'IMPLEMENTATION-REVIEW-FINAL.json'))
+test_review=json.load(open(out/'TEST-REVIEW-FINAL.json'))
+assert review['decision'].startswith('Accepted') and test_review['decision']=='accepted'
+assert review['reviewer']!=test_review['reviewer']
+if current['status']=='done':
+ assert current['execution_record']['completion_record']['test_reviewer']==test_review['reviewer']
+assert sha('docs/architecture/MIGRATION-ASSESSMENT-V1.md')==review['sha256']['docs/architecture/MIGRATION-ASSESSMENT-V1.md']
+metadata=json.load(open(out/'POST-REVIEW-METADATA.json'));assert metadata['expectations_changed'] is False and metadata['final_case_sha256']==sha('tasks/066/ACCEPTANCE-CASES.json')
+for receipt in ['RECEIPTS.json','ERRATA-RECEIPTS.json']:
+ for r in json.load(open(out/'official'/receipt))['rows']:assert r['http_status']==200 and sha(r['file'])==r['sha256']
+commands=json.load(open(out/'COMMANDS.json'))
+for r in commands['runs']:assert r['exit_code']==0 and sha(r['log'])==r['sha256']
+for p,d in commands['post_run_binary_sha256'].items():assert sha(p)==d
+for p in Path('tasks/066').rglob('*.json'):
+ if p.name!='FINAL-SOURCE.json':json.loads(p.read_text())
+for cmd in [['git','diff','--check'],['git','diff','--cached','--check']]:subprocess.run(cmd,check=True)
+# FINAL-SOURCE and open log are excluded from recursive hashes.
+artifacts=[p for p in Path('tasks/066').rglob('*') if p.is_file() and p.name not in ['FINAL-SOURCE.json','final-validation.log','final-check-transcript.log']]
+manifest={'head':merge['selected_head'],'branch':merge['branch'],'task_status':current['status'],'source_and_original_index_preserved':True,'original_criteria_preserved':True,'task065_history_preserved':True,'tasks067_072_untouched':True,'new_executable_changes_after_upstream_import':False,'D1_D5_actual_approvals':True,'frozen_cases':65,'case_groups':18,'implementation_review':review['reviewer'],'test_review':{'reviewer':test_review['reviewer'],'decision':'accepted','finding':'T066-01 resolved; final artifact bookkeeping reconciled'},'implementation_review_decision':'accepted','freeze_receipt':'tasks/066/evidence/FREEZE.json','artifact_sha256':{str(p):sha(p) for p in sorted(artifacts)},'contract_sha256':sha('docs/architecture/MIGRATION-ASSESSMENT-V1.md'),'standards_register_sha256':sha('docs/product/STANDARDS-REGISTER.md'),'limits':'No future implementation, practitioner, numerical-score, protocol-interoperability or publication success claimed. This manifest/open log/transcript excluded to avoid recursive hashes.'}
+(out/'FINAL-SOURCE.json').write_text(json.dumps(manifest,indent=2)+'\n')
+links=[]
+for p in [*Path('tasks/066').glob('*.md'),Path('docs/architecture/MIGRATION-ASSESSMENT-V1.md'),Path('docs/product/STANDARDS-REGISTER.md')]:
+ for target in re.findall(r'\[[^\]]*\]\(([^)]+)\)',p.read_text()):
+  if re.match(r'[a-z]+://',target):continue
+  path=target.split('#',1)[0]
+  if not path:continue
+  assert (p.parent/path).exists(),(str(p),target);links.append((str(p),target))
+print('PASS: fetched HEAD/branch/ancestry;13 original staged blobs;47 pre-existing files (task066 authorized changes excepted); task065 history and original task066 criteria; tasks067-072 pending.')
+print('PASS: no authored executable change; current source bindings; adopted freeze;65 unique cases/all18 A-groups; base/source refs, valid stale interval, readiness/action/partial counterexamples and unchanged post-review expectations.')
+print('PASS: actual D1-D5/protocol decisions; official source/errata hashes; seven passing command log/binary bindings; task JSON/YAML; both Git whitespace checks;',len(links),'local Markdown links.')
+print('Final lifecycle state:',current['status'])
+
+Exit:0
+PASS: fetched HEAD/branch/ancestry;13 original staged blobs;47 pre-existing files (task066 authorized changes excepted); task065 history and original task066 criteria; tasks067-072 pending.
+PASS: no authored executable change; current source bindings; adopted freeze;65 unique cases/all18 A-groups; base/source refs, valid stale interval, readiness/action/partial counterexamples and unchanged post-review expectations.
+PASS: actual D1-D5/protocol decisions; official source/errata hashes; seven passing command log/binary bindings; task JSON/YAML; both Git whitespace checks; 48 local Markdown links.
+Final lifecycle state: done

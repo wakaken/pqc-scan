@@ -1,0 +1,37 @@
+Raw local verification transcript; not a maintained executable test or product script.
+Command: python3 /tmp/pqc065-negative.py
+Source used:
+from pathlib import Path
+import json,re,subprocess,hashlib
+p=Path('docs/quality/rules/RULE-QUALITY-METADATA.json')
+raw=p.read_bytes();base=json.loads(raw)
+log=Path('tasks/065/evidence/rules-tests.log').read_text()
+binary=re.search(r'Running tests/quality_metadata.rs \(([^)]+)\)',log).group(1)
+assert Path(binary).is_file()
+mutations={
+ 'missing_row':lambda m:m['rules'].pop(),
+ 'duplicate_row':lambda m:m['rules'].__setitem__(-1,m['rules'][0]),
+ 'extra_row':lambda m:m['rules'].append(dict(m['rules'][0],id='EXTRA_065')),
+ 'unknown_id_same_count':lambda m:m['rules'][0].__setitem__('id','EXTRA_065'),
+ 'stale_snapshot':lambda m:m['rules'][0]['rule_snapshot'].__setitem__('severity','critical'),
+ 'stale_source_hash':lambda m:m['source_files'][0].__setitem__('sha256','0'*64),
+ 'unresolved_reference':lambda m:m['rules'][0]['reference_ids'].append('MISSING_065'),
+}
+rows=[]
+try:
+ for name,mutate in mutations.items():
+  m=json.loads(raw);mutate(m);p.write_text(json.dumps(m))
+  r=subprocess.run([binary,'--exact','every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls'],text=True,capture_output=True)
+  Path('tasks/065/evidence/negative-'+name+'.log').write_text(r.stdout+r.stderr)
+  rows.append({'control':name,'exit_code':r.returncode,'expected':'nonzero rejection','passed':r.returncode!=0})
+  assert r.returncode!=0,name
+finally:
+ p.write_bytes(raw)
+r=subprocess.run([binary],text=True,capture_output=True)
+Path('tasks/065/evidence/metadata-restored.log').write_text(r.stdout+r.stderr)
+assert r.returncode==0
+assert p.read_bytes()==raw
+Path('tasks/065/evidence/NEGATIVE-CONTROLS.json').write_text(json.dumps({'binary':binary,'binary_sha256':hashlib.sha256(Path(binary).read_bytes()).hexdigest(),'command':[binary,'--exact','every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls'],'method':'Mutate only the maintained companion during sequential test invocations; finally restore original bytes, then rerun the real validator. Product rules untouched.','rows':rows,'restored_exit_code':r.returncode,'original_and_restored_sha256':hashlib.sha256(raw).hexdigest()},indent=2)+'\n')
+print('Real Rust companion validator: seven deliberate negatives rejected; original restored and passing.')
+
+Process exit: 0

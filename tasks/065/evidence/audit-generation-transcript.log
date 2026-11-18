@@ -1,0 +1,91 @@
+Raw local verification transcript; not a maintained executable test or product script.
+Command: python3 /tmp/pqc065-audit.py
+Source used:
+import json,hashlib,re,struct,collections
+from pathlib import Path
+root=Path.cwd(); out=Path('tasks/065/evidence'); companion='docs/quality/rules/RULE-QUALITY-METADATA.json'
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def f32(x):return struct.unpack('f',struct.pack('f',x))[0]
+def write(p,v):Path(p).write_text(json.dumps(v,indent=2,ensure_ascii=False)+'\n')
+m=json.load(open(companion)); loaded=json.load(open('/tmp/pqc065-rules.json'))
+assert len(loaded)==len({v['rule']['id'] for v in loaded})
+byid={v['rule']['id']:v for v in loaded}; assert set(byid)=={r['id'] for r in m['rules']}
+for f in m['source_files']:assert sha(f['path'])==f['sha256']
+methods={
+ 'regex':'Lexical reference/configuration candidate with heuristic comment filtering; scope is not a file/language filter. Exact shipped TLS_VERSION_1_0 uses the bounded reference-capture path; a changed selector retains generic matching.',
+ 'tree_sitter':'Eligible syntax-node reference with language scopes and bounded parsing. Canonical selected API rules can use local binding/import/key facts; see inherited method_limits. Neither reachability nor runtime success is proved.',
+ 'dependency':'Normalized recognized manifest/lock/SBOM item reference; declared/resolved provenance remains separate. Package/version presence does not establish provider, enabled features or deployed cryptography.',
+ 'certificate':'Typed parsed attributes only for exact typed scopes; otherwise legacy composite/path matching. No signature, chain, trust, hostname or revocation verification.',
+ 'key':'Recognized private-key header plus compiled rule predicate; no decryption, validation, ownership or deployment/exposure proof.'}
+params={
+ 'CERT_RSA_1024':'Exactly 1024 parsed RSA modulus bits; other sizes do not satisfy this predicate.',
+ 'CERT_RSA_2048':'Exactly 2048 parsed RSA modulus bits; this is not a parameter-policy pass.',
+ 'CERT_RSA_3072':'Exactly 3072 parsed RSA modulus bits; this is not a parameter-policy pass.',
+ 'CERT_EXPIRED':'Parsed notAfter before the captured evaluation time; equality is not expired; unknown clock does not prove validity.',
+ 'CERT_NOT_YET_VALID':'Parsed notBefore after the captured evaluation time; equality is not future; unknown clock does not prove validity.',
+ 'CERT_EXPIRY_2026_OR_BEFORE':'Parsed notAfter before 2027-01-01 UTC, local historical cutoff, distinct from current expiry and external migration deadlines.',
+ 'TS_RSA_KEY_SIZE_LITERAL':'Nominal 1024/2048/3072 text within the bounded explicit RSA context in the snapshot; not a measured or bound key size.',
+ 'JWT_ES256':'The ES256 name denotes ECDSA/P-256/SHA-256 under RFC7518 section 3.4; actual key and use are unverified.',
+ 'TS_JWT_ES_ALG':'ES256/ES384/ES512 names denote ECDSA curve/hash pairs under RFC7518 section 3.4; actual keys and use are unverified.',
+ 'SSH_DH_GROUP1':'Named group1/SHA1 KEX reference, distinct from observed selected group/parameters.',
+ 'SSH_DH_GROUP14_SHA1':'Named group14/SHA1 KEX reference, distinct from observed selected group/parameters.',
+ 'PQC_GO_API':'ML-KEM or ML-DSA module spelling only; no parameter-set selection established.',
+ 'PQC_RUST_API':'ML-KEM/ML-DSA/SLH-DSA namespace and item spelling only; selected parameter set remains unknown.',
+ 'PQC_PYTHON_API':'MLKEM768/1024 or MLDSA44/65/87 static generation spelling in the predicate; no runtime result or provider proof.',
+ 'PQC_DRAFT_ALGORITHM':'Kyber512/768/1024, Dilithium2/3/5 or X25519Kyber768Draft00 references; no equivalence with final FIPS encodings or verified hybrid combiner.',
+ 'PQC_STANDARD_REFERENCE':'Explicit ML-KEM512/768/1024, ML-DSA44/65/87 and SLH-DSA SHA2/SHAKE128/192/256 s/f name variants, or X25519MLKEM768 spelling. Group composition/negotiation/combiner assurance is not established.',
+ 'PQC_JAVA_API':'ML-KEM (optional 512/768/1024), ML-DSA (optional 44/65/87) or SLH-DSA SHA2/SHAKE128/192/256 s/f names; a bare family name leaves its parameter set unknown.',
+ 'PQC_NODE_API':'ML-KEM512/768/1024, ML-DSA44/65/87, SLH-DSA SHA2/SHAKE128/192/256 s/f names in selected calls; provider/use unverified.',
+ 'PQC_RUBY_API':'ML-KEM512/768/1024, ML-DSA44/65/87, SLH-DSA SHA2/SHAKE128/192/256 s/f literals; no call success proved.',
+ 'PQC_WEBCRYPTO_API':'ML-KEM512/768/1024 or ML-DSA44/65/87 literal request spelling; actual API availability and use unverified.',
+ 'PQC_GO_TLS_DISABLED':'Literal tlsmlkem=0 in supported GODEBUG setting; effective process environment and negotiation unknown.',
+ 'PQC_JAVA_CLASSICAL_GROUPS':'Explicit recognized x25519/x448/secp256r1/secp384r1/secp521r1 list; effective configuration unknown.',
+ 'PQC_RUBY_CLASSICAL_GROUPS':'Explicit recognized X25519/X448/P-256/P-384/P-521 list; effective configuration unknown.',
+ 'TS_CLASSICAL_EDDSA_API':'Named Ed25519/Ed448 signing or X25519/X448 ECDH key-generation spelling; selected purpose depends on the branch; these are not interchangeable.',
+ 'CERT_ML_DSA_PUBLIC_KEY':'Exact selected public-key OIDs ending 17/18/19; names identify ML-DSA44/65/87; supported DER shape is not signature/trust validation.',
+ 'CERT_ML_DSA_SIGNATURE':'Exact selected signature OIDs ending 17/18/19; names identify ML-DSA44/65/87; supported DER shape is not signature/trust validation.',
+ 'CERT_SLH_DSA_PUBLIC_KEY':'Exact selected SLH-DSA public-key OIDs ending 20..31; individual parameters depend on the matched OID, not this family-wide row.',
+ 'CERT_SLH_DSA_SIGNATURE':'Exact selected SLH-DSA signature OIDs ending 20..31; individual parameters depend on the matched OID, not this family-wide row.'}
+oldfixed={'TLS_VERSION_1_0':'Legacy underscore/prefix negative fixed; later d6afccb additionally fixes captured spans/adjacency.', 'NODE_TLS_MIN_VERSION':'Modern TLSv1.3 negative fixed in the maintained predicate.', 'TS_TLS_LEGACY_VERSION_LITERAL':'Modern underscore TLSv1_3 negative fixed.', 'TS_RUBY_RSA_USAGE':'Generic HMAC JWT negative fixed by excluding generic encode/decode from RSA rule.'}
+rows=[]
+for i,r in enumerate(m['rules']):
+ id=r['id']; src=byid[id];s=src['rule'];snapshot=r['rule_snapshot']
+ for k,v in snapshot.items():
+  assert (f32(v)==f32(s[k]) if k=='confidence' else v==s.get(k)),(id,k)
+ refs=[dict(id=k,**m['references'][k]) for k in r['reference_ids']]
+ families=r['algorithm_families'][:]
+ if id in ['PQC_JAVA_API','PQC_RUBY_API']:
+  families.append('SLH-DSA');refs.append(dict(id='FIPS205',**m['references']['FIPS205']))
+ note=params.get(id)
+ if note is None:
+  if s['kind']=='dependency':note='Algorithm, key length, mode and enabled parameters are unknown from a dependency item. The exact package predicate is in the bound snapshot.'
+  elif s['scope'] in ['signature_oid','public_key_oid']:note='Exact OID alternatives in the bound predicate identify only their selected role/family/digest where encoded; other parameters remain unknown (including RSA-PSS details absent separate parsing).'
+  elif s['kind']=='key':note='Container/header spelling only; key algorithm (except an RSA hint in the RSA header), size, validity and protection are unknown.'
+  elif r['purpose']=='container_inventory':note='Filename/container extension only; algorithm, purpose and parameters unknown.'
+  elif id.startswith(('JWT_RS','JWT_PS')):note='Exact '+id[4:]+' signature-name reference; RSA modulus unknown. Digest follows the identifier in RFC7518 sections 3.3/3.5; no signing or verification proved.'
+  elif r['purpose']=='signature_reference':note='Only explicit algorithm/digest spellings in the bound pattern are known; actual key sizes, padding parameters and use remain unknown.'
+  elif r['purpose']=='transport_configuration_reference':note='Only supported protocol-version spellings in the bound pattern are known; enabled/effective versions, algorithms and key sizes remain unknown.'
+  else:note='Only the exact names/alternatives and scope in the bound snapshot are observed. Actual key length, curve, padding/mode, digest and active parameters remain unknown unless separately captured; do not infer them from this family-wide rule.'
+ gaps=[dict(fixture_index=j,**v) for j,v in enumerate(r['fixtures']) if v['desired_positive']!=v['expected_pattern_match']]
+ gates=[]
+ if s['category'].lower() not in ['tls','pki','jwt','auth','authentication']:gates.append('category_not_sensitive')
+ if s['risk']!='quantum-vulnerable':gates.append('risk_not_quantum_vulnerable')
+ if f32(s['confidence'])<f32(.45):gates.append('confidence_below_legacy_boundary')
+ base=s['severity'];order=['info','low','medium','high','critical'];promoted=order[min(order.index(base)+1,4)] if not gates else base
+ line=next(n for n,l in enumerate(Path(src['file']).read_text().splitlines(),1) if re.search(r'\bid:\s*[\'\"]?'+re.escape(id)+r'[\'\"]?\s*$',l))
+ rows.append(dict(id=id,source=dict(path=src['file'],line=line,sha256=sha(src['file'])),companion_pointer=f'{companion}#/rules/{i}',inherited_fields=['rule_snapshot','purpose','quantum','classical','method_limits','known_gaps','fixtures','reference_application'],purpose=r['purpose'],algorithm_families=families,parameters=note,quantum=r['quantum'],classical=r['classical'],method=methods[s['kind']],reference_ids=[v['id'] for v in refs],base_severity=base,severity_rationale_id='S-UNKNOWN',base_confidence=s['confidence'],confidence_rationale_id='C-UNKNOWN',promotion=dict(blocking_gates=gates,ordinary_evidence_severity=promoted,private_key_evidence_severity='critical' if not gates else base,rationale_ids=['P-CATEGORY','P-RISK','P-CONFIDENCE','P-PRIVATE','P-BUMP']),fp_fn=dict(retained_pattern_disagreements=gaps,pattern_controls=len(r['fixtures']),historical_disposition=oldfixed.get(id,'Retained pattern false-positive control; repair not authorized.' if gaps else 'No historical correction asserted by this supplement.'),unmeasured='End-to-end FP/FN rates and unenumerated misses unknown; inherited known_gaps and method_limits remain in force. A passing pattern target is not a complete detector test.'),audit_augmentation='SLH-DSA family and FIPS205 omitted in inherited row; completed here without changing the companion or executable predicate.' if id in ['PQC_JAVA_API','PQC_RUBY_API'] else None))
+reasons={
+ 'S-UNKNOWN':'Unknown independent justification for selecting this exact base Severity level. The bound source description/purpose and quantum/classical axes explain the signal, but do not establish production impact or empirically justify the priority magnitude. Values preserved, not re-adjudicated as optimal.',
+ 'C-UNKNOWN':'Unknown empirical derivation/calibration of this exact numeric confidence. A preserved rule-level f32 match heuristic; neither correctness probability nor vulnerability probability, impact, deployment assurance or organization urgency.',
+ 'P-CATEGORY':'Case-insensitive exact TLS/PKI/JWT/auth/authentication gate represents legacy sensitive-category policy. Its chosen membership and exclusion of Middleware/SSH/CryptoAPI lack an independent empirical optimality rationale in the reviewed records. Whitespace is not trimmed.',
+ 'P-RISK':'Only the legacy quantum-vulnerable enum enters promotion. Other Risk tags are not promoted, even if separate family facts identify quantum exposure; this preserves enum behavior and is not proof of safety.',
+ 'P-CONFIDENCE':'Source comment intends to limit false-positive escalation; exact 0.45 selection has unknown empirical justification. Maintainer selected preservation on 2026-11-15, not calibration. Loader validates source finite f64 in [0,1] before f32 narrowing; risk compares the public f32 at 0.45f32.',
+ 'P-PRIVATE':'After all three gates, exact case-sensitive private_key evidence returns Critical. Marker presence does not prove a live exposed secret. Other evidence strings take the ordinary bump; all earlier gates still apply to custom private_key rules.',
+ 'P-BUMP':'Ordinary eligible evidence bumps Info to Low, Low to Medium, Medium to High, High/Critical to Critical. Saturation and one-step choice are legacy compatibility policy, not measured business urgency or probability.'}
+write('tasks/065/RULE-AUDIT.json',dict(task='065',selected_head='3f2bc6e6209e1f2813caac8077c8d7a7198832cc',date='2026-11-18',scope='Development-only source-bound audit supplement, not a product input or new public storage contract. Compose each row with its inherited companion row; explicit SLH-DSA augmentations take precedence only in this audit.',companion=dict(path=companion,sha256=sha(companion)),inherited_field_resolution='Each companion_pointer is exact and its inherited_fields and reference_ids resolve in the companion. Pattern/scope/snapshot are predicates, not claims of effective runtime parameters.',references={**m['references'],'LOCAL021':dict(m['references']['LOCAL021'],url='tasks/021/CERTIFICATE-BASELINE-021.md'),'LOCAL028':dict(m['references']['LOCAL028'],url='docs/quality/rules/RULE-QUALITY.md')},reference_path_augmentations={'LOCAL021':{'inherited_url':m['references']['LOCAL021']['url'],'effective_url':'tasks/021/CERTIFICATE-BASELINE-021.md'},'LOCAL028':{'inherited_url':m['references']['LOCAL028']['url'],'effective_url':'docs/quality/rules/RULE-QUALITY.md'}},rationale_definitions=reasons,method_definitions=methods,rules=rows))
+write(out/'POPULATION.json',dict(direct_files=m['source_files'],rules=loaded,rule_count=len(loaded),audit_count=len(rows),pattern_controls=sum(len(r['fixtures']) for r in m['rules']),retained_pattern_false_positives=[r['id'] for r in rows if r['fp_fn']['retained_pattern_disagreements']],historically_fixed_controls=oldfixed,eligible_category_risk=sum(r['rule']['category'].lower() in ['tls','pki','jwt','auth','authentication'] and r['rule']['risk']=='quantum-vulnerable' for r in loaded),promoted_ordinary=[r['id'] for r in rows if not r['promotion']['blocking_gates']],base_severity_counts=dict(collections.Counter(r['base_severity'] for r in rows)),empirical_rationale_unknown=dict(severity=len(rows),confidence=len(rows))))
+print('Audited',len(rows),'rules; positive/negative pattern controls:',sum(len(r['fixtures']) for r in m['rules']))
+print('Retained FP',[r['id'] for r in rows if r['fp_fn']['retained_pattern_disagreements']])
+print('Promoted',sum(not r['promotion']['blocking_gates'] for r in rows))
+
+Process exit: 0

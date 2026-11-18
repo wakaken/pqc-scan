@@ -1,0 +1,79 @@
+id: '069'
+title: Add explainable migration decisions and offline reassessment
+type: improvement
+priority: high
+status: pending
+owner: Main agent
+phase: '5'
+description: >
+  Implement the approved migration decision table using shared technical facts
+  and scoped context. Deliver the explicit saved-evidence CLI/library workflow
+  and separately selected machine-readable report without rescanning or probing.
+plan_reference: docs/roadmap/v0.4/ROADMAP.md
+requirements_reference: docs/roadmap/v0.4/REQUIREMENTS.md
+quality_requirements:
+  - R3-01
+  - R3-02
+  - R3-03
+  - R3-04
+  - R3-05
+  - R4-05
+  - X02
+  - X04
+depends_on:
+  - '067'
+  - '068'
+target_components:
+  - crates/pqc_scan_core/src/policy.rs
+  - crates/pqc_scan_cli/src/
+  - crates/pqc_scan_report/src/
+  - schemas/
+existing_assets:
+  - E-TECH
+  - E-POLICY
+  - E-JUDGMENT
+  - E-ID
+  - E-COMPAT
+  - E-OUTPUT
+problem:
+  - Existing priority does not implement the approved organization-specific decision model.
+  - Users need reproducible reassessment of one saved input under different contexts with a traceable output.
+acceptance:
+  - 'R3-01: The approved versioned decision table uses branch-minimum inputs, precedence and reasons to produce justified responses for different system contexts.'
+  - 'R3-02: Urgency, sufficiency and readiness remain separate; known concerns survive unknown context, urgent-but-unready retains urgency, investigation can be urgent, and N/A is not a safety verdict.'
+  - 'R3-03: Explicit observation/context/evaluation times, scoped deadlines, confidentiality/signature lifetimes, historical ciphertext and lead time follow the approved model; no invented Z or universal deadline is introduced.'
+  - 'R3-04: Decisions include evidence, applied claims, missing inputs, constraints and useful investigation/planning/dependency/migration actions without guessing replacements.'
+  - 'R3-05: Identical content/context/model/catalog/policy/time gives semantically equal results; influential input and version changes explain differences without altering legacy v1.'
+  - 'R4-05: The approved CLI/library entry evaluates saved evidence with contexts A/B without rescanning, executing input programs or opening a connection; results bind exact inputs and context.'
+  - 'X02: The separately selected approved report validates source/target references, content, versions, context provenance, time, assessment, reasons, missing information, readiness, actions and limits; it makes no false aggregate safety claim.'
+  - 'X04: Reassessment is bounded and offline, uses the existing safe output boundary, safely rejects invalid input, and does not change probe support or publication status.'
+deliverables:
+  - tasks/069/TASK-069-RESULTS.md
+  - tasks/069/evidence/
+  - Approved decision policy, explicit reassessment entry point and structured report with their integrated tests and affected paired user guides.
+implementation_steps:
+  - Verify task-066 D1/D2/D4 decisions and task-067/task-068 interfaces before selecting public names or output contracts.
+  - Implement the pure decision table and reason/action handling without replacing existing primitive assessment or migration-review-v1.
+  - Integrate saved-input/context dispatch, explicit evaluation time and content/reference validation in the approved CLI/library path.
+  - Serialize through report writers and existing safe output handling; keep policy evaluation out of rendering.
+  - Exercise paired contexts, invalid/failure boundaries, deterministic results and the legacy workflow; finish both review stages and applicable checks.
+testing_requirements:
+  - Check all applicable A01-A18 decision branches using the expectations frozen before implementation observations.
+  - Cover minimum required versus irrelevant missing inputs, urgent-but-blocked cases, confidentiality/signing/expiry boundaries and conflicting claims.
+  - Reject input-content substitution and invalid schema/references; verify actual offline behavior, safe output and no secret disclosure.
+  - Check old CLI/exit behavior, 0.45, v1 goldens, semantic determinism and affected feature configurations under docs/agent/VERIFICATION.md.
+out_of_scope:
+  - A numerical product score, a new scanner/inventory framework, unapproved policy dates, live probing and expert-usefulness claims based only on table agreement.
+risks:
+  - A correct table implementation may be mistaken for independent evidence that the table is useful.
+  - New CLI/report paths may bypass legacy compatibility, no-network or safe-output boundaries.
+approval_boundary:
+  - Execution requires later selection and completed prerequisites; D1/D2/D4 contracts must be recorded before affected changes.
+  - Numerical adoption, storage changes outside the approved contract, remote settings and release/publication require separate decisions.
+planning_record:
+  date: '2026-11-18'
+  scope: Definition only; no decision code, CLI option, report or product test has been implemented or executed.
+  work_packages: [W4, W5]
+  primary_requirements: [R3-01, R3-02, R3-03, R3-04, R3-05, R4-05, X02, X04]
+  supporting_requirements: []
+  completion_evidence: All eight assigned clauses need executed end-to-end and boundary evidence for final source plus both independent review stages; usefulness is assessed separately by task 071.

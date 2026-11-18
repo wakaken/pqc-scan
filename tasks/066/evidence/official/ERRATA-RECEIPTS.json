@@ -1,0 +1,108 @@
+{
+  "date": "2026-11-18",
+  "prior_web_attempts": {
+    "10024": "429 at old redirecting endpoint",
+    "10042": "redirect target inaccessible to web tool",
+    "9954": "web retrieval succeeded; verified editorial erratum9136 changes reference to RFC9846 section4.3.8",
+    "9846": "redirect target inaccessible to web tool"
+  },
+  "changed_approach": "Use official new errata host directly, bounded parallel reads; not repeated unchanged requests.",
+  "rows": [
+    {
+      "rfc": 10024,
+      "url": "https://errata.rfc-editor.org/search/?rfc_number=10024",
+      "http_status": 200,
+      "sha256": "0d65bf22cc20d1a22e9cc71da79b86141fbf030999455bef8ee83e9569fdc705",
+      "file": "tasks/066/evidence/official/errata-10024.html",
+      "summary_text": "RFC Errata RFC Errata About Login Errata RFC Number Errata ID Status All/Any Verified+Reported Verified Reported Held for Document Update Rejected Area Acronym All/Any app art gen int ops rai rtg sec tsv wit Type All/Any Editorial Technical WG Acronym Submitter Name Stream All/Any IAB INDEPENDENT IRTF Legacy Editorial Date Submitted Presentation Table Full Records Submit No matching errata found. Report New Erratum rfc-editor.org is maintained by the Internet Engineering Task Force Useful links IETF.org IRTF.org IAB.org Datatracker Author Resources Contact Us RFC Editor rfc-dist Info Page rfc-interest Info Page"
+    },
+    {
+      "rfc": 10042,
+      "url": "https://errata.rfc-editor.org/search/?rfc_number=10042",
+      "http_status": 200,
+      "sha256": "0bc88b9f659bc4793ca6edb115589225a160bb110b5eebd8fb28aea16ec01a75",
+      "file": "tasks/066/evidence/official/errata-10042.html",
+      "summary_text": "RFC Errata RFC Errata About Login Errata RFC Number Errata ID Status All/Any Verified+Reported Verified Reported Held for Document Update Rejected Area Acronym All/Any app art gen int ops rai rtg sec tsv wit Type All/Any Editorial Technical WG Acronym Submitter Name Stream All/Any IAB INDEPENDENT IRTF Legacy Editorial Date Submitted Presentation Table Full Records Submit Verified (2) RFC 10042 inline-errata Source of RFC: sshm (sec) Errata-ID: 9159 Status: Verified Type: Technical Publication Format: TXT Reported By: Nikolai Malykh Date Reported: 2026-09-01 Verified by: Deb Cooley Date Verified: 2026-10-12 Section 2.1 says: If any of these checks fail, the client MUST abort using a disconnect message (SSH_MSG_DISCONNECT) with a SSH_DISCONNECT_KEY_EXCHANGE_FAILED as the reason. It should say: If any of these checks fail, the server MUST abort using a disconnect message (SSH_MSG_DISCONNECT) with a SSH_DISCONNECT_KEY_EXCHANGE_FAILED as the reason. Notes: The client has no information about the results of the server-side check. RFC EDITOR: Edited Original/Corrected text to only include sentence that is affected. Errata-ID: 9160 Status: Verified Type: Editorial Publication Format: TXT Reported By: Nikolai Malykh Date Reported: 2026-09-01 Verified by: Madison Church Date Verified: 2026-09-02 Section 5 says: The security considerations given in [RFC5656] and [RFC8731] also apply to the ECDH part of the P/T Hybrid key exchange schemes defined in this document. It should say: The security considerations given in [RFC5656] and [RFC8731] also apply to the ECDH part of the PQ/T Hybrid key exchange schemes defined in this document. Notes: Typo Report New Erratum rfc-editor.org is maintained by the Internet Engineering Task Force Useful links IETF.org IRTF.org IAB.org Datatracker Author Resources Contact Us RFC Editor rfc-dist Info Page rfc-interest Info Page"
+    },
+    {
+      "rfc": 9954,
+      "url": "https://errata.rfc-editor.org/search/?rfc_number=9954",
+      "http_status": 200,
+      "sha256": "996e3bf9b6c8a8764232f3c6f11208a5616a6cfb6c708fda3d593aa8c23d6feb",
+      "file": "tasks/066/evidence/official/errata-9954.html",
+      "summary_text": "RFC Errata RFC Errata About Login Errata RFC Number Errata ID Status All/Any Verified+Reported Verified Reported Held for Document Update Rejected Area Acronym All/Any app art gen int ops rai rtg sec tsv wit Type All/Any Editorial Technical WG Acronym Submitter Name Stream All/Any IAB INDEPENDENT IRTF Legacy Editorial Date Submitted Presentation Table Full Records Submit Verified (1) RFC 9954 inline-errata Source of RFC: tls (sec) Errata-ID: 9136 Status: Verified Type: Editorial Publication Format: TXT Reported By: Nikolai Malykh Date Reported: 2026-08-17 Verified by: Madison Church Date Verified: 2026-08-17 Section 3.2 says: Recall that, in TLS 1.3 ([TLS13], Section 4.2.8), a KEM public key or KEM ciphertext is represented as a KeyShareEntry: struct { NamedGroup group; opaque key_exchange&lt;1..2^16-1&gt;; } KeyShareEntry; These are transmitted in the extension_data fields of KeyShareClientHello and KeyShareServerHello extensions: struct { KeyShareEntry client_shares&lt;0..2^16-1&gt;; } KeyShareClientHello; struct { KeyShareEntry server_share; } KeyShareServerHello; The client&#x27;s shares are listed in descending order of client preference; the server selects one algorithm and sends its corresponding share. For a hybrid key exchange, the key_exchange field of a KeyShareEntry is the concatenation of the key_exchange field for each of the constituent algorithms. The order of shares in the concatenation MUST be the same as the order of algorithms indicated in the definition of the NamedGroup. For the client&#x27;s share, the key_exchange value contains the concatenation of the pk outputs of the corresponding KEMs&#x27; KeyGen algorithms if that algorithm corresponds to a KEM or the (EC)DH ephemeral key share if that algorithm corresponds to an (EC)DH group. For the server&#x27;s share, the key_exchange value contains the concatenation of the ct outputs of the corresponding KEMs&#x27; Encaps algorithms if that algorithm corresponds to a KEM or the (EC)DH ephemeral key share if that algorithm corresponds to an (EC)DH group. Section 4.2.8 of [TLS13] requires that &quot;The key_exchange values for each KeyShareEntry MUST be generated independently.&quot; In the context of this document, the same algorithm may appear in multiple named groups; thus, this document relaxes the above requirement to allow the same key_exchange value for the same algorithm to be reused in multiple KeyShareEntry records sent within the same ClientHello. However, key_exchange values for different algorithms MUST be generated independently. Explicitly, if the NamedGroup is the hybrid key exchange MyECDHMyPQKEM, the KeyShareEntry.key_exchange values MUST be generated in one of the following two ways: It should say: Recall that, in TLS 1.3 ([TLS13], Section 4.3.8), a KEM public key or KEM ciphertext is represented as a KeyShareEntry: struct { NamedGroup group; opaque key_exchange&lt;1..2^16-1&gt;; } KeyShareEntry; These are transmitted in the extension_data fields of KeyShareClientHello and KeyShareServerHello extensions: struct { KeyShareEntry client_shares&lt;0..2^16-1&gt;; } KeyShareClientHello; struct { KeyShareEntry server_share; } KeyShareServerHello; The client&#x27;s shares are listed in descending order of client preference; the server selects one algorithm and sends its corresponding share. For a hybrid key exchange, the key_exchange field of a KeyShareEntry is the concatenation of the key_exchange field for each of the constituent algorithms. The order of shares in the concatenation MUST be the same as the order of algorithms indicated in the definition of the NamedGroup. For the client&#x27;s share, the key_exchange value contains the concatenation of the pk outputs of the corresponding KEMs&#x27; KeyGen algorithms if that algorithm corresponds to a KEM or the (EC)DH ephemeral key share if that algorithm corresponds to an (EC)DH group. For the server&#x27;s share, the key_exchange value contains the concatenation of the ct outputs of the corresponding KEMs&#x27; Encaps algorithms if that algorithm corresponds to a KEM or the (EC)DH ephemeral key share if that algorithm corresponds to an (EC)DH group. Section 4.3.8 of [TLS13] requires that &quot;The key_exchange values for each KeyShareEntry MUST be generated independently.&quot; In the context of this document, the same algorithm may appear in multiple named groups; thus, this document relaxes the above requirement to allow the same key_exchange value for the same algorithm to be reused in multiple KeyShareEntry records sent within the same ClientHello. However, key_exchange values for different algorithms MUST be generated independently. Explicitly, if the NamedGroup is the hybrid key exchange MyECDHMyPQKEM, the KeyShareEntry.key_exchange values MUST be generated in one of the following two ways: Notes: There is a typo in the section number - 4.2.8 instead of 4.3.8 Report New Erratum rfc-editor.org is maintained by the Internet Engineering Task Force Useful links IETF.org IRTF.org IAB.org Datatracker Author Resources Contact Us RFC Editor rfc-dist Info Page rfc-interest Info Page"
+    },
+    {
+      "rfc": 9846,
+      "url": "https://errata.rfc-editor.org/search/?rfc_number=9846",
+      "http_status": 200,
+      "sha256": "68c880a7fe14fcaa69f2419036b642bbad6255216af84a994ed4effa48a816b6",
+      "file": "tasks/066/evidence/official/errata-9846.html",
+      "summary_text": "RFC Errata RFC Errata About Login Errata RFC Number Errata ID Status All/Any Verified+Reported Verified Reported Held for Document Update Rejected Area Acronym All/Any app art gen int ops rai rtg sec tsv wit Type All/Any Editorial Technical WG Acronym Submitter Name Stream All/Any IAB INDEPENDENT IRTF Legacy Editorial Date Submitted Presentation Table Full Records Submit Verified (1) RFC 9846 inline-errata Source of RFC: tls (sec) Errata-ID: 9040 Status: Verified Type: Technical Publication Format: TXT Reported By: Eric Rescorla Date Reported: 2026-07-24 Verified by: Deb Cooley Date Verified: 2026-10-12 Section E.2 says: A TLS server can also receive a ClientHello indicating a version number smaller than its highest supported version. If the &quot;supported_versions&quot; extension is present, the server MUST negotiate using that extension as described in Section 4.3.1. If the &quot;supported_versions&quot; extension is not present, the server MUST negotiate the minimum of ClientHello.legacy_version and TLS 1.2. For example, if the server supports TLS 1.0, 1.1, and 1.2, and legacy_version is TLS 1.0, the server will proceed with a TLS 1.0 ServerHello. If the &quot;supported_versions&quot; extension is absent and the server only supports versions greater than ClientHello.legacy_version, the server MUST abort the handshake with a &quot;protocol_version&quot; alert. It should say: TLS server can also receive a ClientHello indicating a version number smaller than its highest supported version. If the &quot;supported_versions&quot; extension is present, the server MUST negotiate using that extension as described in Section 4.3.1. If the &quot;supported_versions&quot; extension is absent and the ClientHello.legacy_version is TLS 1.2, then the server MUST proceed with TLS 1.2. Otherwise, the server MUST abort the handshake with a &quot;protocol_version&quot; alert. Notes: We no longer support &lt; TLS 1.2. Issue originally reported by Jaime Gomez Garcia Reported (4) RFC 9846 inline-errata Source of RFC: tls (sec) Errata-ID: 9042 Status: Reported Type: Technical Publication Format: TXT Reported By: Nikolai Malykh Date Reported: 2026-07-29 Section 4.2.3 says: random: 32 bytes generated by a secure random number generator. See Appendix C for additional information. The last 8 bytes MUST be overwritten as described below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random. This structure is generated by the server and MUST be generated independently of the ClientHello.random. It should say: random: 32 bytes generated by a secure random number generator. See Appendix C for additional information. The last 8 bytes MUST be overwritten as described below if negotiating TLS 1.2, but the remaining bytes MUST be random. This structure is generated by the server and MUST be generated independently of the ClientHello.random. Notes: TLS 1.1 is deprecated by RFC 8996. Errata-ID: 9043 Status: Reported Type: Technical Publication Format: TXT Reported By: Nikolai Malykh Date Reported: 2026-07-29 Section 4.2.3 says: random: 32 bytes generated by a secure random number generator. See Appendix C for additional information. The last 8 bytes MUST be overwritten as described below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random. This structure is generated by the server and MUST be generated independently of the ClientHello.random. It should say: random: 32 bytes generated by a secure random number generator. See Appendix C for additional information. The last 8 bytes MUST be overwritten as described below if negotiating TLS 1.2, but the remaining bytes MUST be random. This structure is generated by the server and MUST be generated independently of the ClientHello.random. Notes: TLS 1.1 is deprecated by RFC 8996. Errata-ID: 9161 Status: Reported Type: Technical Publication Formats: HTML PDF TXT Reported By: Antun Jurkovikj Date Reported: 2026-09-01 Section 1.2 says: Correct the lower bound on CertificateRequest.extensions to be 0 bytes. This was an error in the syntax as it is possible to send no extensions, which results in length 0. It should say: Correct the lower bound on CertificateRequest.extensions to be 0 bytes. This corrects the presentation syntax to represent an empty vector; Section 4.4.2 nevertheless requires the &quot;signature_algorithms&quot; extension in a conforming CertificateRequest. Notes: The presentation-language bound and the message-specific sender requirement address different layers. Extension extensions&lt;0..2^16-1&gt; makes a zero-length vector syntactically representable. However, Section 4.4.2 requires the &quot;signature_algorithms&quot; extension in every conforming CertificateRequest under the base specification. The existing Section 1.2 sentence conflates syntactic representability with permitted sender behavior. The corrected text changes no wire rule or sender requirement. Errata-ID: 9157 Status: Reported Type: Editorial Publication Formats: HTML PDF TXT Reported By: Muhammad Usama Sardar Date Reported: 2026-08-30 Section Appendix F.1 says: derived from the main secret It should say: derived from the Main Secret Notes: &quot;the main secret&quot; is undefined in RFC9846. Figure 5 (https://www.rfc-editor.org/rfc/rfc9846.html#figure-5) defines Main Secret. Please note that the original text appears twice within Appendix F.1. Report New Erratum rfc-editor.org is maintained by the Internet Engineering Task Force Useful links IETF.org IRTF.org IAB.org Datatracker Author Resources Contact Us RFC Editor rfc-dist Info Page rfc-interest Info Page"
+    }
+  ],
+  "dispositions": [
+    {
+      "rfc": 10024,
+      "ids": [],
+      "status": "No matching errata in acquired 2026-11-18 official search",
+      "scope": "Snapshot only; numeric groups and component mappings use acquired publication sections4/7."
+    },
+    {
+      "rfc": 10042,
+      "id": 9159,
+      "status": "Verified Technical",
+      "section": "2.1",
+      "disposition": "Correct client-to-server abort responsibility after server-side check. Offline reader performs no KEX or disconnect; do not claim it validates cryptographic checks. Method names/components unchanged."
+    },
+    {
+      "rfc": 10042,
+      "id": 9160,
+      "status": "Verified Editorial",
+      "section": "5",
+      "disposition": "P/T to PQ/T terminology typo; preserve combined component/security scope, no change to names or saved facts."
+    },
+    {
+      "rfc": 9954,
+      "id": 9136,
+      "status": "Verified Editorial",
+      "section": "3.2",
+      "disposition": "Use RFC9846 KeyShare section4.3.8 rather than old4.2.8 cross-reference. No changed numeric group identities or implemented crypto."
+    },
+    {
+      "rfc": 9846,
+      "id": 9040,
+      "status": "Verified Technical",
+      "section": "E.2",
+      "disposition": "Correct absent-supported_versions negotiation to TLS1.2-only or abort. Offline importer does not negotiate; current collector TLS1.2/1.3 profile remains unchanged; no lower-version support inferred."
+    },
+    {
+      "rfc": 9846,
+      "id": 9042,
+      "status": "Reported Technical",
+      "section": "4.2.3",
+      "disposition": "Reported removal of TLS1.1 downgrade wording. Not an enacted amendment; importer does not validate ServerHello.random and does not enable TLS1.1."
+    },
+    {
+      "rfc": 9846,
+      "id": 9043,
+      "status": "Reported Technical",
+      "section": "4.2.3",
+      "disposition": "Separate reported duplicate-topic record retained, not silently merged into Verified. Same offline/source scope as9042."
+    },
+    {
+      "rfc": 9846,
+      "id": 9161,
+      "status": "Reported Technical",
+      "section": "1.2",
+      "disposition": "Syntax vector bound versus CertificateRequest signature_algorithms sender requirements. Importer handles no wire CertificateRequest and collector uses no client auth; no validation/support inferred."
+    },
+    {
+      "rfc": 9846,
+      "id": 9157,
+      "status": "Reported Editorial",
+      "section": "F.1",
+      "disposition": "Main Secret capitalization terminology. No effect on saved-role/group mapping; reported status retained."
+    }
+  ]
+}

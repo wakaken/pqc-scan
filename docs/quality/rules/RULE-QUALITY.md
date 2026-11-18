@@ -1,7 +1,7 @@
 # Built-in rule quality companion (task028)
 
-[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **122 current
-built-in rules**, not the historical117 in the task description. Existing YAML is
+[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **123 current
+built-in rules**, not the historical counts in task descriptions. Existing YAML is
 the executable source of truth. This original MIT development-only companion is
 not loaded by the CLI, does not add report fields, and does not certify accuracy.
 
@@ -37,21 +37,23 @@ configuration grammar. No standard text or real private keys are copied.
 
 ## Fixtures and known gaps
 
-The 244 examples exercise **compiled regex targets only**, with desired labels
+The 268 current examples exercise **compiled regex targets only**, with desired labels
 separate from expected current matches. They are not end-to-end source truth,
 symbol resolution, a key parser test, provider validation or performance evidence.
 The existing detector/CLI/certificate/schema suites and frozen task023 corpus still
-provide their own bounded integration evidence. Do not count these controls as122
+provide their own bounded integration evidence. Do not count these controls as123
 new independently labeled accuracy units or as approved quality budgets.
 
-Eight negative controls intentionally retain known false positives:
+The original task028 recorded eight negative controls with false positives. Four
+remain in the current companion; the others have passing negative expectations
+after later repairs. The historical targets and their current dispositions are:
 
-| Rule | Negative intent | Current match / unresolved issue |
+| Rule | Negative intent | Historical issue and current disposition |
 |---|---|---|
-| TLS_VERSION_1_0 | `TLSv1_3` | Underscore is accepted by the old boundary |
-| NODE_TLS_MIN_VERSION | `minVersion: "TLSv1.3"` | Prefix pattern also accepts modern versions |
-| TS_TLS_LEGACY_VERSION_LITERAL | `TLSv1_3` | Legacy boundary accepts the underscore form |
-| TS_RUBY_RSA_USAGE | JWT HMAC example | Generic encode/decode branch does not identify RSA |
+| TLS_VERSION_1_0 | `TLSv1_3` | Fixed: current predicate rejects this modern version; later span/adjacency repair is also retained |
+| NODE_TLS_MIN_VERSION | `minVersion: "TLSv1.3"` | Fixed: current predicate rejects this modern version |
+| TS_TLS_LEGACY_VERSION_LITERAL | `TLSv1_3` | Fixed: current predicate rejects this modern version |
+| TS_RUBY_RSA_USAGE | JWT HMAC example | Fixed: generic encode/decode branch removed; computed/aliased references remain bounded |
 | HTTPD_SSLPROTOCOL_LEGACY | Explicitly disabled TLS1.0/1.1 | Does not parse enable/disable modifiers |
 | HTTPD_SSLCIPHERSUITE_RSA | ECDSA cipher plus excluded RSA/weak operands | Does not interpret cipher exclusions |
 | NGINX_SSL_CIPHERS_RSA | ECDSA cipher plus excluded RSA/weak operands | Does not interpret cipher exclusions |
@@ -97,3 +99,24 @@ synthetic controls, not independent accuracy units. Historical task062 metadata
 and the earlier measurements remain unchanged; the maintained metadata source
 hash/snapshot update records this explicitly approved correction. Detector and
 CLI regressions additionally test real manifests,locks,SBOMs and provenance.
+
+## Current-source audit supplement (task 065)
+
+The [task 065 audit](../../../tasks/065/RULE-AUDIT.json) composes exactly one
+supplemental row per maintained companion row, bound to the selected source.
+See [results and correction impacts](../../../tasks/065/TASK-065-RESULTS.md) and
+[population evidence](../../../tasks/065/evidence/POPULATION.json). The supplement
+adds explicit parameter limits, per-rule base Severity/Confidence rationale gaps,
+promotion gates and current FP/FN dispositions without changing executable rules.
+It also supplies the SLH-DSA family and existing FIPS205 reference missing from
+the Java/Ruby companion annotations. The maintained companion's snapshots and
+historical evidence remain unchanged. The supplement also resolves the two local
+reference paths left behind by documentation relocation, preserving their original
+values as audit findings.
+
+All 123 exact numeric confidence choices and independent justifications for exact
+base Severity levels remain explicitly unknown in the bounded reviewed evidence;
+source descriptions and cryptographic-family facts do not calibrate those values.
+The existing 0.45 promotion policy remains compatibility behavior. Current
+268 compiled-target controls include four retained false-positive controls,
+not an estimate of end-to-end false-positive/false-negative rates.
