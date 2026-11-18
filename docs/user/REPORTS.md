@@ -1,6 +1,6 @@
 # Understanding reports
 
-[日本語](REPORTS.ja.md) · [README](../../README.md)
+[日本語](REPORTS.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.md)
 
 This guide describes static v0.3.0. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.3.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
 
@@ -98,11 +98,11 @@ For example:
 The rule set includes ML-KEM/ML-DSA references across the seven listed languages, selected Java, Node and Ruby SLH-DSA API references, selected libraries, Java/Ruby classical-only TLS group settings and Go `GODEBUG=tlsmlkem=0`.
 Certificate signature OIDs and subject-public-key OIDs for ML-DSA/SLH-DSA are checked separately; a filename does not establish the certificate's algorithm. Parsed OIDs do not verify a signature, trust chain or valid PQC key.
 
-Selected built-in rules use [bounded local source analysis](COVERAGE.md#source-facts) to distinguish supported API calls from shadowed names or display strings. Other rules remain nominal pattern checks. In either case, review the evidence and inspection status; local reference tracing does not establish execution.
+Selected built-in rules use [bounded local source analysis](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.md#source-facts) to distinguish supported API calls from shadowed names or display strings. Other rules remain nominal pattern checks. In either case, review the evidence and inspection status; local reference tracing does not establish execution.
 
 These references can appear as informational findings in CBOM and SARIF too. Read `quantum-safe` as a classification of the primitive, not “migration complete.” Dependency findings remain `quantum-uncertain`.
 Node crypto/WebCrypto, browser and TypeScript runtime support must be checked individually; their version requirements differ. JWT signature changes also need compatible JOSE formats, libraries and verifiers.
-See [static examples and references](../../examples/pqc-readiness/README.md) for specific patterns.
+See [static examples and references](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/examples/pqc-readiness/README.md) for specific patterns.
 
 Before applying migration guidance:
 
@@ -160,7 +160,7 @@ findings. This is pqc-scan's own JSON format. It is opt-in even with `--format a
 selecting it does not change the legacy report schemas or finding identity algorithm. Use `--repository-scope team/project`
 with inventory capture to enable weak cross-scan source correlation. Omit secret
 or absolute identifiers. The report does not assert active use, trust or a PQC
-assessment. See the [contract and limitations](../architecture/INVENTORY-REPORT-V1.md).
+assessment. See the [contract and limitations](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/architecture/INVENTORY-REPORT-V1.md).
 
 ```bash
 pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
@@ -241,7 +241,7 @@ pqc-scan scan . --inventory-json --policy-profile migration-review-v1 --rules-di
 Optional `--assessment-context ./context.json` supplies typed local context, e.g.
 `{"version":1,"use_case":"jwt"}`. Missing support stays unknown; provided values are
 unverified operator claims. Dependency presence does not prove PQC readiness.
-See [scope, prerequisites and context fields](../architecture/LOCAL-ASSESSMENT-V1.md).
+See [scope, prerequisites and context fields](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/architecture/LOCAL-ASSESSMENT-V1.md).
 
 <a id="sarif-locations"></a>
 
@@ -259,7 +259,7 @@ keeps a column only when the existing unmasked snippet proves an ASCII prefix;
 otherwise it retains the line only. Missing, masked or clipped prefixes cannot
 prove a column. Selecting SARIF does not rewrite `report.json` locations or finding IDs.
 Version-to-version changes to the underlying source evidence are a separate
-compatibility matter; the output format alone does not guarantee stable IDs. See the [contract and validation record](../../tasks/022/SARIF-LOCATION-CONTRACT-022.md).
+compatibility matter; the output format alone does not guarantee stable IDs. See the [contract and validation record](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/tasks/022/SARIF-LOCATION-CONTRACT-022.md).
 
 <a id="versions-and-identity"></a>
 

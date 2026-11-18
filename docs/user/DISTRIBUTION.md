@@ -141,6 +141,17 @@ contains `bin/pqc-scan`, `rules/default`, license notices, release notes, and th
 /absolute/path/to/bundle/bin/pqc-scan scan /absolute/path/to/authorized/repository --rules-dir /absolute/path/to/bundle/rules/default --format json --out-dir /absolute/path/outside/repository/reports
 ```
 
+The default static bundle also includes `serve`. To choose a project in the browser:
+
+```sh
+/absolute/path/to/bundle/bin/pqc-scan serve --root /absolute/path/to/projects --rules-dir /absolute/path/to/bundle/rules/default
+```
+
+Choose **Scan this folder**; the report opens after generation. Stop with Ctrl+C.
+The server binds only to `127.0.0.1`. Open the complete session URL printed in the
+terminal. The archive includes the [scanning guide](SCANNING.md#local-web-scanning)
+and [report guide](REPORTS.md) in English and Japanese.
+
 The archive normalizes paths, permissions, owners and times. Repackaging the same
 binary and unchanged source/tool inputs must yield identical bytes. This does not
 claim independently reproducible Rust binaries or cross-host reproducibility.

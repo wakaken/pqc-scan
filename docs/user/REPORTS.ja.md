@@ -1,6 +1,6 @@
 # 結果の読み方
 
-[English](REPORTS.md) · [README](../../README.ja.md)
+[English](REPORTS.md) · [README](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.ja.md)
 
 このガイドは静的版v0.3.0を対象とします。版によって検出内容・根拠・IDが異なる場合があります。互換性は[リリースノート](../releases/v0.3.0.ja.md)、公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。ローカルの準備物やActions成果物は、公開済みReleaseとは別です。
 
@@ -94,16 +94,16 @@ ML-KEM（鍵共有）、ML-DSA・SLH-DSA（署名）の名前や、Kyber・Dilit
 | Kyber・Dilithiumなどの旧名称 | どの実装・仕様の版を指すか。旧草案と最終仕様を同じものとして扱わない |
 | PQC・ハイブリッド方式を無効にするTLS設定 | 実際に有効な設定と接続相手の対応。通信して決まった方式を観測した結果ではない |
 
-対象には、[対象一覧](../../README.ja.md#targets)の7言語のML-KEM・ML-DSA参照、Java・Node・Rubyの一部のSLH-DSA API参照、対応候補のライブラリ、Java・Rubyの古典方式限定TLS設定、Goの `GODEBUG=tlsmlkem=0` があります。
+対象には、[対象一覧](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.ja.md#targets)の7言語のML-KEM・ML-DSA参照、Java・Node・Rubyの一部のSLH-DSA API参照、対応候補のライブラリ、Java・Rubyの古典方式限定TLS設定、Goの `GODEBUG=tlsmlkem=0` があります。
 証明書ではML-DSA・SLH-DSAの署名OIDと公開鍵OIDを別々に照合し、ファイル名では方式を判定しません。
 OIDの解析だけで、署名・信頼チェーンやPQC鍵の妥当性を検証したことにはなりません。
 
-一部の組込ルールでは、[限定した局所解析](COVERAGE.ja.md#source-facts)で参照先を確認し、対応する範囲で同名の別関数や表示文字列を除外します。他のルールはパターンによる名目的な参照検出です。どちらも証拠と検査状態を確認してください。参照を追跡できても、実行したことの証明にはなりません。
+一部の組込ルールでは、[限定した局所解析](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.ja.md#source-facts)で参照先を確認し、対応する範囲で同名の別関数や表示文字列を除外します。他のルールはパターンによる名目的な参照検出です。どちらも証拠と検査状態を確認してください。参照を追跡できても、実行したことの証明にはなりません。
 
 参考情報の所見もCBOMやSARIFに含まれます。`quantum-safe` は方式の分類として読み、「移行完了」と解釈しないでください。依存関係の所見は `quantum-uncertain` のままです。
 Node crypto・WebCrypto、ブラウザー、TypeScriptの実行環境では対応条件や必要な版が異なります。
 JWT署名を変更する際は、JOSE形式・ライブラリ・検証側の互換性も確認します。
-具体的な検出パターンは[静的な記述例と参考資料](../../examples/pqc-readiness/README.md)を参照してください。
+具体的な検出パターンは[静的な記述例と参考資料](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/examples/pqc-readiness/README.md)を参照してください。
 
 移行案を適用する前に、次を確認してください。
 
@@ -162,7 +162,7 @@ CBOM（Cryptographic Bill of Materials）は、暗号方式やその利用箇所
 `--repository-scope team/project` はこのオプションと併用し、スキャン間でソース位置を
 対応付ける弱い手掛かりを付与します。秘密情報や絶対パスは指定しないでください。
 実際の稼働、証明書の信頼性、PQC対応判定を保証するものではありません。
-詳細は[形式・識別方法・制約](../architecture/INVENTORY-REPORT-V1.md)を参照してください。
+詳細は[形式・識別方法・制約](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/architecture/INVENTORY-REPORT-V1.md)を参照してください。
 
 ```bash
 pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
@@ -226,7 +226,7 @@ pqc-scan scan . --inventory-json --policy-profile migration-review-v1 --rules-di
 任意の `--assessment-context ./context.json` で、用途や実行環境の対応状況を指定できます。
 例は `{"version":1,"use_case":"jwt"}` です。省略値は不明のままとし、指定値も利用者の申告として記録します。
 依存ライブラリの存在だけで、PQCを利用できるとは判定しません。
-用途・前提条件・入力項目・制約は[評価仕様](../architecture/LOCAL-ASSESSMENT-V1.md)を参照してください。
+用途・前提条件・入力項目・制約は[評価仕様](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/architecture/LOCAL-ASSESSMENT-V1.md)を参照してください。
 
 <a id="sarif-locations"></a>
 
@@ -245,7 +245,7 @@ Windowsではネイティブの区切り文字を正規化し、Unixのバック
 SARIFを選んでも、`report.json`の位置や所見IDを書き換えることはありません。
 版をまたぐ元の根拠範囲の変更は別の互換性の問題です。出力形式が同じでも、IDが
 常に同じになるとは限りません。
-詳細は[契約と検証記録](../../tasks/022/SARIF-LOCATION-CONTRACT-022.md)を参照してください。
+詳細は[契約と検証記録](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/tasks/022/SARIF-LOCATION-CONTRACT-022.md)を参照してください。
 
 <a id="versions-and-identity"></a>
 

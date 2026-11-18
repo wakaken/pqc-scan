@@ -1,11 +1,11 @@
 # リポジトリのスキャン方法
 
-[English](SCANNING.md) · [README](../../README.ja.md)
+[English](SCANNING.md) · [README](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.ja.md)
 
 このガイドは静的版v0.3.0を対象とします。版によって検出内容・根拠・IDが異なる場合があります。互換性は[リリースノート](../releases/v0.3.0.ja.md)、公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。ローカルの準備物やActions成果物は、公開済みReleaseとは別です。
 
 静的スキャンの出力オプション、CIの終了判定、検査できなかった箇所の確認方法を説明します。
-棚卸しや評価の見方は[結果の読み方](REPORTS.ja.md)、形式ごとの制約は[対応する入力と検査範囲](COVERAGE.ja.md)を参照してください。
+棚卸しや評価の見方は[結果の読み方](REPORTS.ja.md)、形式ごとの制約は[対応する入力と検査範囲](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.ja.md)を参照してください。
 
 ## 目次
 
@@ -87,10 +87,10 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 プロダクトのCIでは `--format sarif` で出力し、所見でジョブを失敗させる場合は `--fail-on high|critical` を指定します。
 検査の不完全さも失敗とする場合に限り、`--require-complete` を加えます。終了コード3は所見のしきい値より優先されるため、対象範囲や未対応形式も確認してください。
 
-このリポジトリの[ワークフロー](../../.github/workflows/pqc-scan.yml)には、GitHub Code Scanningへの送信と成果物保存の例があります。PRでは`quality`、developへのpushでは`baseline`・`scan`を実行し、手動実行では3ジョブを有効にします。文書だけの変更では自動実行を省略し、`protocols`は手動実行を含めて一時停止しています。[CIの実行条件](../../README.ja.md#repository-ci)を確認してください。自分のプロダクトで使う終了条件は、用途に合わせて明示します。
+このリポジトリの[ワークフロー](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/.github/workflows/pqc-scan.yml)には、GitHub Code Scanningへの送信と成果物保存の例があります。PRでは`quality`、developへのpushでは`baseline`・`scan`を実行し、手動実行では3ジョブを有効にします。文書だけの変更では自動実行を省略し、`protocols`は手動実行を含めて一時停止しています。[CIの実行条件](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.ja.md#repository-ci)を確認してください。自分のプロダクトで使う終了条件は、用途に合わせて明示します。
 元のレポートも保存し、所見を確認できるようにします。
 本リポジトリの自己スキャンでは、確認済みのテスト・分類データをソースと結果の一致に基づいて扱います。テストディレクトリ全体の除外ではありません。
-その送信準備を別のプロジェクトへ転用する前に、[自己スキャンの方針](../quality/self-scan/CI-SELF-SCAN.md)を確認してください。
+その送信準備を別のプロジェクトへ転用する前に、[自己スキャンの方針](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/quality/self-scan/CI-SELF-SCAN.md)を確認してください。
 
 <a id="from-source"></a>
 
@@ -155,7 +155,7 @@ pqc-scan scan . --diagnostics --require-complete --out-dir /path/to/reports/prod
 
 1ルール・1ファイル当たりの採用上限は、正規表現とASTが4,096件、秘密鍵マーカーが8件です。正規表現は言語ごとのコメント除外後に数えます。上限ちょうどでは打ち切りとせず、追加の有効な一致があるか、探索を終えられなかった場合に `detector_truncated` を記録します。それまでの所見は残し、省略件数は推測しません。
 
-正規表現とASTの一致候補は、1ルール・1ファイル当たり65,536件までです。ASTには、構文候補262,144件、処理予定ノード2,000,000件、全ルールで調べる候補テキストの累計256 MiBというファイル単位の上限もあります。候補テキスト全体を検査し、表示用プレビューの短縮は検査範囲に影響しません。上限内でも、採用する所見が多いとレポート容量・メモリ使用量・出力時間は増えます。性能の保証値ではなく、処理量を抑えるための制限です。[対応範囲](COVERAGE.ja.md#source-limits)も参照してください。
+正規表現とASTの一致候補は、1ルール・1ファイル当たり65,536件までです。ASTには、構文候補262,144件、処理予定ノード2,000,000件、全ルールで調べる候補テキストの累計256 MiBというファイル単位の上限もあります。候補テキスト全体を検査し、表示用プレビューの短縮は検査範囲に影響しません。上限内でも、採用する所見が多いとレポート容量・メモリ使用量・出力時間は増えます。性能の保証値ではなく、処理量を抑えるための制限です。[対応範囲](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.ja.md#source-limits)も参照してください。
 
 ### 解析エラー・未対応形式の扱い
 
@@ -170,7 +170,7 @@ ASTに構文エラーがあれば、取得できた検出を残して `detector_
 完了はパッケージ管理ツールと同じ検証やインストール状態の保証ではありません。
 
 `--require-complete` の終了コードの規約は変わりませんが、解析結果や対応範囲によって、実際に返るコードは変わり得ます。
-依存関係ごとの詳細は[指定と確認根拠](../architecture/DEPENDENCY-PROVENANCE.md)を参照してください。
+依存関係ごとの詳細は[指定と確認根拠](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/architecture/DEPENDENCY-PROVENANCE.md)を参照してください。
 
 ## 通常は除外するバイナリ形式を含める
 

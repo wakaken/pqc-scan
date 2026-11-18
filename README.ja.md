@@ -21,6 +21,8 @@ JWT、TLS、PKI、SSHなどの暗号処理を変更する前に、調査する�
 - [スキャンできる成果物](#targets)
 - [ツールの主な機能](#features)
 - [使い始める](#quick-start)
+- [ブラウザでスキャンする](#web-scan)
+- [レポートの画面](#report-preview)
 - [結果を確認する](#results)
 - [利用ガイド](#guides)
 - [制約と秘密情報の扱い](#limits)
@@ -91,11 +93,45 @@ pqc-scan scan /path/to/your-product --format all --out-dir /path/to/reports/prod
 出力先の経路やファイル位置にあるシンボリックリンクは拒否します。通常の既存レポートは上書きできます。詳しくは[出力先の安全性](docs/user/SCANNING.ja.md#出力先の安全性)を参照してください。
 HTML・Markdownを日本語にするには `--lang ja` を加えます。[インストールせずにソースから実行する方法](docs/user/SCANNING.ja.md#from-source)もあります。
 
+<a id="web-scan"></a>
+
+## ブラウザでスキャンする
+
+上の手順でCLIをインストールしたら、簡易Webサーバーを起動します。
+
+```bash
+pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
+```
+
+1. 既定のブラウザでトップ画面が開きます。開かない場合は、ターミナルに表示された `http://127.0.0.1:8787/<session>/` の完全なURLを開きます。
+2. `--root` 内で対象プロジェクトのフォルダへ移動し、**このフォルダをスキャン**を選びます。指定したルートの外へは移動できず、シンボリックリンクも表示しません。
+3. スキャンが終わるとHTMLレポートが自動で開きます。検出結果とともに、検査が完了した範囲を確認してください。ブラウザで戻ると、別のフォルダもスキャンできます。
+4. 終了時は **Ctrl+C** でサーバーを停止します。レポートはターミナルに表示された非公開の `pqc-scan-web-*` ディレクトリに残ります。オフラインで読む場合は `report.html` と `report.rules.html` を一緒に保管してください。
+
+サーバーは `127.0.0.1` だけで待ち受け、CLIと同じ静的スキャンを実行します。ソースやレポートの外部送信は行いません。ポートが使用中なら `--port 0`、ブラウザを自動で開かない場合は `--no-open` を指定します。配布物を展開して使う場合は、コマンドを `/path/to/bundle/bin/pqc-scan`、ルールを `/path/to/bundle/rules/default` に置き換えます。詳しい制約とオプションは[ローカルWebスキャン](docs/user/SCANNING.ja.md#ローカルwebスキャン)を参照してください。
+
+<a id="report-preview"></a>
+
+## レポートの画面
+
+v0.3.0のHTMLレポートでは、重大度の分布、ルールごとの一覧、検索・絞り込み、検出件数付きのファイルツリーを表示します。所見を展開すると場所・コードの根拠・推奨する確認事項を読め、ルールの意味は解説ページで確認できます。絞り込みとツリーは個別に表示・非表示を切り替えられます。日本語・Englishの選択、ライト・ダーク表示、閲覧環境のタイムゾーンでの時刻表示もオフラインで利用できます。
+
+![検査状況、ファイルツリー、ルールごとの検出一覧を表示したライトモード](docs/images/report-light-ja.jpg)
+
+<details>
+<summary>ダークモード</summary>
+
+![HTMLレポートのダークモード](docs/images/report-dark-ja.jpg)
+
+</details>
+
+2026年11月18日に実際のKeycloakをスキャンした画面です。既定の対応候補を表示し、絞り込みパネルを非表示にしています。件数はテスト用のデータを含むこの時点の参照の検出数で、確定した脆弱性の数ではありません。検査が未完了の範囲も画面に示しています。[撮影元と設定](docs/images/README.md)。
+
 <a id="results"></a>
 
 ## 結果を確認する
 
-HTMLは検査範囲と未完了の確認から読み始められます。観測・資産ごとの詳しい記録はJSON・Markdownに残します。
+HTMLでは検出件数、検査範囲、未完了の確認をまとめて表示します。観測・資産ごとの詳しい記録はJSON・Markdownに残します。
 評価方針による参考判定はHTMLに表示せず、明示的に求めたJSON・Markdownに残します。
 
 まず `report.html` を開きます。所見ごとのファイル位置、周辺のコード、確認事項を読み、実際に修正が必要か判断してください。
@@ -103,10 +139,10 @@ HTMLは検査範囲と未完了の確認から読み始められます。観測�
 Markdownでは、CR・LFを含む複数行のソース断片やコード例もコード表示の中に収めます。
 どちらにも検査状態を表示します。ローカル評価の参考判定はMarkdownと明示的に指定したJSONに出力し、HTMLには表示しません。
 
-ブラウザから操作する場合は `pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules` を実行します。ローカルのフォルダ選択画面が開き、選んだ対象のスキャンからレポート表示まで実行します。[Web版の使い方](docs/user/SCANNING.ja.md#ローカルwebスキャン)も参照してください。
+フォルダ選択からレポート生成まで画面上で操作するには、[ブラウザでスキャンする](#web-scan)を参照してください。
 
 `--format all` では、`report.html`、`report.md`、`report.json`、`report.sarif`、`cbom.json`、`dependency-sbom.json` の従来の6ファイルに、ルール解説の `report.rules.html` を加えて出力します。
-最後の2つは、それぞれ暗号利用の所見とソフトウェアの依存関係の一覧です。
+`cbom.json` と `dependency-sbom.json` は、それぞれ暗号利用の所見とソフトウェアの依存関係の一覧です。
 用途や関係は[用途に合うレポートを選ぶ](docs/user/REPORTS.ja.md#choose-report)で説明しています。
 詳しい棚卸し、評価、診断情報を加えるには、それぞれのオプションが必要です。
 CycloneDX 1.7形式には `--cyclonedx-17`、同じリポジトリ範囲の棚卸し比較には `diff` を使います。

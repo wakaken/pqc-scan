@@ -104,6 +104,16 @@ featureとツールの版を記録します。記録したソースからその�
 /absolute/path/to/bundle/bin/pqc-scan scan /absolute/path/to/authorized/repository --rules-dir /absolute/path/to/bundle/rules/default --format json --out-dir /absolute/path/outside/repository/reports
 ```
 
+既定の静的版にも `serve` が含まれます。ブラウザで対象を選ぶには、次を実行します。
+
+```sh
+/absolute/path/to/bundle/bin/pqc-scan serve --root /absolute/path/to/projects --rules-dir /absolute/path/to/bundle/rules/default
+```
+
+**このフォルダをスキャン**を選ぶと、生成後にレポートが開きます。終了はCtrl+Cです。
+サーバーは `127.0.0.1` だけで待ち受けます。ターミナルに表示された完全なセッションURLを開いてください。
+配布物には日英の[スキャン手順](SCANNING.ja.md#ローカルwebスキャン)と[レポートの読み方](REPORTS.ja.md)も含みます。
+
 アーカイブはパス、権限、所有者、時刻を正規化します。同じバイナリ、変更のないソースと
 ツール入力なら再生成したバイト列も一致します。Rustバイナリそのものの独立した再現ビルドや、
 異なるホスト間の再現性は保証していません。
