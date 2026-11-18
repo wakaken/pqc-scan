@@ -53,7 +53,7 @@ jobs:
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
       - name: Test report navigation and self-scan preparation
-        run: node --test shell/*.test.cjs
+        run: node --test shell/*.test.cjs tests/report-ui/*.test.cjs
 
       - name: Test baseline evaluator
         run: python3 -m unittest discover -s tests/quality -p 'test_*.py'

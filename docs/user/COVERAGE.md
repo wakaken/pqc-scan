@@ -78,8 +78,8 @@ separates replacement of signing from legacy signature verification.
 
 `CERT_EXPIRED` and `CERT_NOT_YET_VALID` use parsed UTC timestamps and an explicit
 Unix-second assessment clock; both validity endpoints are inclusive. The old
-`CERT_EXPIRY_2026_OR_BEFORE` ID uses its parsed cutoff before 2027-01-01
-UTC. This condition alone does not establish expiry at scan time. Reversed ranges
+`CERT_EXPIRY_2026_OR_BEFORE` ID retains its fixed parsed cutoff before 2027-01-01
+UTC and is labeled legacy; it is not an alias for current expiry. Reversed ranges
 or unavailable assessment clocks prevent a complete validity verdict while
 retaining static facts. Time findings record `assessment_time_unix` and
 `validity_status` in the existing evidence metadata map.

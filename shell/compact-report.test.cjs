@@ -8,6 +8,8 @@ const vm = require('node:vm');
 class Element {
   constructor(tag='div', attrs={}) { this.tagName=tag.toUpperCase(); this.attrs=attrs; this.children=[]; this.parentElement=null; this.hidden=false; this.disabled=false; this.value=''; this.open=false; this.textContent=''; this.listeners={}; this.dataset={}; for(const [key,value]of Object.entries(attrs)) if(key.startsWith('data-')) this.dataset[key.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=value; }
   append(...children) { for(const child of children){child.parentElement=this;this.children.push(child);}return this; }
+  hasAttribute(name) { return Object.hasOwn(this.attrs,name); }
+  setAttribute(name,value) { this.attrs[name]=value; }
   matches(selector) { return selector.split(',').some(s=>{s=s.trim();return s.startsWith('[')?Object.hasOwn(this.attrs,s.slice(1,-1)):this.tagName.toLowerCase()===s;}); }
   querySelectorAll(selector) { return this.children.flatMap(c=>[...(c.matches(selector)?[c]:[]),...c.querySelectorAll(selector)]); }
   querySelector(selector) { return this.querySelectorAll(selector)[0]||null; }
@@ -19,9 +21,9 @@ class Element {
 }
 const el=(tag,key,value='')=>new Element(tag,{[key]:value});
 function harness() {
-  const root=el('main','data-compact-report');
+  const root=el('main','data-compact-report');root.lang='en';
   const controls=el('section','data-report-controls');
-  for(const key of ['mode','search','severity','risk']) controls.append(el(key==='search'?'input':'select',`data-${key}`));
+  for(const key of ['mode','search','severity','risk','rule-filter','file-filter']) controls.append(el(key==='search'?'input':'select',`data-${key}`));
   controls.querySelector('[data-mode]').value='candidate';
   controls.append(el('button','data-reset'));
   root.append(controls,el('p','data-report-status'),el('p','data-empty'),new Element('nav').append(el('button','data-prev'),el('span','data-page'),el('button','data-next')));
@@ -35,7 +37,7 @@ function harness() {
     rule.append(list);root.append(rule);rules.push(rule);
   }
   const location={hash:''},window={listeners:{},addEventListener(k,f){this.listeners[k]=f;}};
-  const document={documentElement:{lang:'en'},querySelector:s=>root.matches(s)?root:root.querySelector(s),getElementById:id=>[root,...root.querySelectorAll('details')].find(e=>e.attrs.id===id)};
+  const document={addEventListener(){},documentElement:{lang:'en'},querySelector:s=>root.matches(s)?root:root.querySelector(s),getElementById:id=>[root,...root.querySelectorAll('details')].find(e=>e.attrs.id===id)};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../crates/pqc_scan_report/src/compact.js'),'utf8'),{document,window,location});
   const click=key=>root.listeners.click({target:root.querySelector(`[data-${key}]`)});
   const input=()=>controls.listeners.input();

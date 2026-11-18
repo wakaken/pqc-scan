@@ -142,19 +142,58 @@ test('historical static candidate references retain frozen source lines and payl
   } finally { historical.cleanup(); }
 });
 
-test('current audit repair binds actual product results and preserves the complete review queue', () => {
+test('historical product audit preserves its original source-bound review queue', () => {
   const bytes=fs.readFileSync(path.join(repositoryRoot,
     'docs/releases/static-candidate-20261117/audit-fixes/evidence/self-scan/report.sarif.gz'));
   const raw=JSON.parse(require('node:zlib').gunzipSync(bytes));
-  const live=read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json');
-  const prepared=prepareCodeScanning(raw,live,repositoryRoot);
+  const original=read('docs/quality/self-scan/html-report-20261118/HISTORICAL-PRODUCT-EXPECTATIONS.json');
+  const sources=JSON.parse(require('node:zlib').gunzipSync(fs.readFileSync(path.join(repositoryRoot,
+    'docs/quality/self-scan/html-report-20261118/HISTORICAL-PRODUCT-SOURCES.json.gz'))));
+  const historical=reviewedResultTestSource(original);
+  try {
+  for(const file of historical.policy.files) {
+    const source=sources.files[file.path];assert(source);
+    assert.equal(createHash('sha256').update(source.text).digest('hex'),source.sha256);
+    assert.equal(source.sha256,original.files.find(f=>f.path===file.path).sha256);
+    fs.writeFileSync(path.join(historical.root,file.path),source.text);file.sha256=source.sha256;
+  }
+  const live=historical.policy;
+  const prepared=prepareCodeScanning(raw,live,historical.root);
   assert.deepEqual([prepared.audit.rawResults,prepared.audit.expectedResults,prepared.audit.retainedResults],[487,477,10]);
   assert(prepared.audit.sourceChecks.every(row=>row.status==='verified'));
   const queue=prepared.sarif.runs.flatMap(run=>run.results);
   assert(queue.every(row=>['DEP_RUST_OPENSSL','DEP_PQC_CAPABLE_LIBRARY'].includes(row.ruleId)));
   const changed=structuredClone(raw), reference=changed.runs[0].results.find(row=>row.ruleId==='TLS_VERSION_1_0');
   reference.message.text='New unreviewed TLS report on an existing reference line';
-  const checked=prepareCodeScanning(changed,live,repositoryRoot);
+  const checked=prepareCodeScanning(changed,live,historical.root);
   assert.equal(checked.audit.retainedResults,11);
   assert(checked.sarif.runs.flatMap(run=>run.results).some(row=>row.message.text===reference.message.text));
+  } finally {historical.cleanup();}
+});
+
+test('current rebound references retain unchanged source lines and actual before/after result digests', () => {
+  const directory='docs/quality/self-scan/html-report-20261118/';
+  const review=read(directory+'POLICY-REBIND.json');
+  const zipped=name=>JSON.parse(require('node:zlib').gunzipSync(fs.readFileSync(path.join(repositoryRoot,directory+name))));
+  const sources=zipped('REBIND-SOURCES.json.gz');
+  const before=zipped('BEFORE-CHANGED-FILES.sarif.gz').runs.flatMap(run=>run.results);
+  const after=zipped('AFTER-CHANGED-FILES.sarif.gz').runs.flatMap(run=>run.results);
+  const current=read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json');
+  assert.equal(before.length,243);assert.equal(after.length,243);assert.equal(review.rows.length,203);
+  for(const [name,source] of Object.entries(sources)) {
+    assert.equal(createHash('sha256').update(source.beforeText).digest('hex'),source.beforeSha256);
+    assert.equal(createHash('sha256').update(fs.readFileSync(path.join(repositoryRoot,name))).digest('hex'),source.afterSha256);
+  }
+  for(const row of review.rows) {
+    const original=sources[row.path].beforeText.split('\n')[row.oldLine-1];
+    const line=fs.readFileSync(path.join(repositoryRoot,row.path),'utf8').split('\n')[row.newLine-1];
+    assert.equal(original,line);assert.equal(createHash('sha256').update(line).digest('hex'),row.sourceLineSha256);
+    assert.equal(before.filter(result=>resultDigest(result)===row.oldResultSha256).length,row.count);
+    assert.equal(after.filter(result=>resultDigest(result)===row.newResultSha256).length,row.count);
+    const binding=current.files.find(file=>file.path===row.path).results.find(result=>result.sha256===row.newResultSha256);
+    assert(binding);assert.equal(binding.ruleId,row.ruleId);assert.equal(binding.line,row.newLine);assert.equal(binding.count,row.count);
+  }
+  for(const removed of review.removedUnmatchedAllowances) {
+    assert(!current.files.find(file=>file.path===removed.path).results.some(result=>result.sha256===removed.sha256));
+  }
 });
