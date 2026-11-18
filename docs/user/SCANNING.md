@@ -1,10 +1,10 @@
 # Scanning repositories
 
-[日本語](SCANNING.ja.md) · [README](../../README.md)
+[日本語](SCANNING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.md)
 
 This guide describes static v0.3.0. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.3.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
 
-Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
+Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.md) for format-specific limits.
 
 ## Contents
 
@@ -86,8 +86,8 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 
 For a CI scan of your product, generate SARIF with `--format sarif` and choose `--fail-on high|critical` if findings should fail the job. Add `--require-complete` only if incomplete inspection must also fail; its exit 3 takes precedence over the finding threshold. The selected scope and unsupported formats still matter.
 
-The checked-in [workflow](../../.github/workflows/pqc-scan.yml) shows GitHub Code Scanning upload and artifact storage. Its `quality` job runs on PRs, while `baseline` and `scan` run on develop pushes; manual runs enable all three. Documentation-only automatic runs are skipped, and `protocols` is temporarily disabled even for manual runs. See [repository CI](../../README.md#repository-ci) for the event conditions. These are this repository's CI choices; select exit gates explicitly for your own product. Retain the raw report so findings remain available for review.
-This repository applies an additional source/result-bound policy to its own reviewed test/catalog references; it is not a general exclusion of test directories. See [self-scan policy](../quality/self-scan/CI-SELF-SCAN.md) before reusing that preparation step in another project.
+The checked-in [workflow](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/.github/workflows/pqc-scan.yml) shows GitHub Code Scanning upload and artifact storage. Its `quality` job runs on PRs, while `baseline` and `scan` run on develop pushes; manual runs enable all three. Documentation-only automatic runs are skipped, and `protocols` is temporarily disabled even for manual runs. See [repository CI](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.md#repository-ci) for the event conditions. These are this repository's CI choices; select exit gates explicitly for your own product. Retain the raw report so findings remain available for review.
+This repository applies an additional source/result-bound policy to its own reviewed test/catalog references; it is not a general exclusion of test directories. See [self-scan policy](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/quality/self-scan/CI-SELF-SCAN.md) before reusing that preparation step in another project.
 
 <a id="from-source"></a>
 
@@ -161,7 +161,7 @@ limits semantic candidates to 262,144, scheduled tree nodes to 2,000,000 and
 cumulative candidate text examined across rules to 256 MiB per file. Matching uses
 full candidate text; clipping a displayed preview does not limit inspection.
 Large numbers of accepted findings can increase report size, memory use and output time even within these limits. These are finite resource bounds, not performance guarantees. See the
-[coverage guide](COVERAGE.md#source-limits) for syntax and encoding limits.
+[coverage guide](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.md#source-limits) for syntax and encoding limits.
 
 ### Parsing errors and unsupported formats
 
@@ -176,7 +176,7 @@ Supported structured subsets can report completion; unrelated files are not appl
 Completion is not full package-manager validation or proof of installation.
 
 The `--require-complete` exit-code contract is unchanged, but actual returned codes depend on parser outcomes and supported scope.
-See [dependency declarations and resolution evidence](../architecture/DEPENDENCY-PROVENANCE.md) for format-specific details.
+See [dependency declarations and resolution evidence](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/architecture/DEPENDENCY-PROVENANCE.md) for format-specific details.
 
 ## Including normally excluded binary formats
 

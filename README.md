@@ -21,6 +21,8 @@ Reports show findings, locations and suggested next steps. The inspection overvi
 - [What can I scan?](#targets)
 - [What does it do?](#features)
 - [Run your first scan](#quick-start)
+- [Scan in your browser](#web-scan)
+- [Report preview](#report-preview)
 - [Read the results](#results)
 - [User guides](#guides)
 - [Limits and privacy](#limits)
@@ -88,11 +90,45 @@ Use a new output directory outside the scanned repository when comparing scans, 
 Output paths containing symbolic links are rejected; existing regular reports remain replaceable. See [output destination safety](docs/user/SCANNING.md#output-destination-safety).
 To produce Japanese HTML/Markdown, add `--lang ja`. [Running from source](docs/user/SCANNING.md#from-source) is also supported.
 
+<a id="web-scan"></a>
+
+## Scan in your browser
+
+After installing the CLI above, start the local server:
+
+```bash
+pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
+```
+
+1. The default browser opens the local start page. If it does not, open the complete `http://127.0.0.1:8787/<session>/` URL printed in the terminal.
+2. Browse to a project within `--root` and choose **Scan this folder**. The picker stays within this root and skips symbolic links.
+3. Wait for the scan to finish; the HTML report opens automatically. Review inspection completion as well as findings. Browser Back returns to the start page for another scan.
+4. Stop the server with **Ctrl+C**. Reports remain in the private `pqc-scan-web-*` directory printed in the terminal. Keep `report.html` and `report.rules.html` together for offline reading.
+
+The server listens only on `127.0.0.1` and runs the same static scanner as the CLI, without uploading source or reports. Use `--port 0` if the default port is occupied, or `--no-open` to open the printed URL yourself. With an extracted distribution, replace the command and rules paths with `/path/to/bundle/bin/pqc-scan` and `/path/to/bundle/rules/default`. See [local web scanning](docs/user/SCANNING.md#local-web-scanning) for limits and options.
+
+<a id="report-preview"></a>
+
+## Report preview
+
+The v0.3.0 HTML report includes a severity summary, rule groups, search/filters, and a file tree with finding counts. Expand findings for locations, source evidence and recommended checks; follow the rule guide for explanations. Filters and the tree can be hidden independently. Language (English/Japanese), light/dark theme and browser-local time display work offline.
+
+![Light HTML report with inspection status, file tree and grouped findings](docs/images/report-light-en.jpg)
+
+<details>
+<summary>Dark theme</summary>
+
+![Dark HTML report](docs/images/report-dark-en.jpg)
+
+</details>
+
+Actual Keycloak scan, captured on 2026-11-18 with the default risk-candidate view and filters hidden. Counts describe that scan snapshot, including test fixtures; they are references requiring investigation, not confirmed vulnerability counts. The incomplete-inspection notice remains visible. [Capture source and settings](docs/images/README.md).
+
 <a id="results"></a>
 
 ## Read the results
 
-HTML starts with inspection scope and unfinished checks; detailed observation and asset ledgers remain in JSON/Markdown.
+HTML summarizes findings, inspection scope and unfinished checks; detailed observation and asset ledgers remain in JSON/Markdown.
 Advisory policy decisions are kept in explicitly requested JSON/Markdown exports.
 
 Open `report.html` first. Review a finding's file location, source context and suggested checks before deciding on a change.
@@ -100,10 +136,10 @@ Search and filters help you work through repeated findings; `report.md` provides
 Markdown keeps multiline source excerpts and code examples inside code blocks, including CR/LF input.
 Both show inspection status. Local assessment decisions appear only in Markdown and explicitly requested JSON; HTML does not display them.
 
-For a browser workflow, run `pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules`. It opens a local folder picker, runs the existing scanner and opens the generated report. See [local web scanning](docs/user/SCANNING.md#local-web-scanning).
+See [browser scanning](#web-scan) to select a folder and generate reports from the local web interface.
 
 `--format all` writes six original files: `report.html`, `report.md`, `report.json`, `report.sarif`, `cbom.json` and `dependency-sbom.json`, plus the local rule guide `report.rules.html`.
-The last two list cryptographic findings and software dependencies respectively. Their purpose and relationship are explained in [choosing a report](docs/user/REPORTS.md#choose-report).
+`cbom.json` and `dependency-sbom.json` list cryptographic findings and software dependencies respectively. Their purpose and relationship are explained in [choosing a report](docs/user/REPORTS.md#choose-report).
 Additional inventory, assessment and diagnostic files require explicit options.
 Use `--cyclonedx-17` for separate CycloneDX 1.7 exports, or `diff` to compare
 inventories with the same explicit repository scope. See the [report guide](docs/user/REPORTS.md).

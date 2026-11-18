@@ -279,7 +279,7 @@ def prepare(args):
     if binary_data[:8] != bytes.fromhex('cffaedfe0c000001'):
         raise ValueError('expected thin Mach-O aarch64 binary for declared target')
     entries = {'bin/pqc-scan': (binary_data, 0o755)}
-    explicit = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md', 'docs/user/PROBING.ja.md', 'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json', 'third_party/notices/README.md']
+    explicit = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md', 'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json', 'third_party/notices/README.md']
     paths = ([root/p for p in explicit] + sorted((root/'rules/default').glob('*.yml'))
              + sorted((root/'docs/releases').glob('*.md')))
     source_hashes = {}
