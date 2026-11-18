@@ -453,7 +453,14 @@ mod tests {
         let html = fs::read_to_string(&path).unwrap();
         assert!(!html.contains("data-candidate-locations="));
         assert!(!html.contains("Candidate findings with unknown positions"));
-        assert_eq!(html.matches("data-finding-id=").count(), 6);
+        assert_eq!(
+            html.split("<template")
+                .next()
+                .unwrap()
+                .matches("data-finding-id=")
+                .count(),
+            6
+        );
         assert!(html.contains("CERT_SHA1_SIGNATURE"));
         fs::remove_file(path).unwrap();
     }

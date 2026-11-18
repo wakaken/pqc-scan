@@ -231,7 +231,11 @@ fn human_headers_omit_internal_explanations_but_keep_findings_and_inspection_sta
             assert!(!md.contains(unwanted), "Markdown: {lang}: {unwanted}");
         }
         assert_eq!(
-            html.matches("data-finding-id=").count(),
+            html.split("<template")
+                .next()
+                .unwrap()
+                .matches("data-finding-id=")
+                .count(),
             scan.findings().len()
         );
         assert!(html.contains("data-inspection-status=\"partial\""));

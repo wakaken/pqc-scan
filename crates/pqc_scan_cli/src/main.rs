@@ -21,6 +21,7 @@ mod diff_command;
     feature = "probe-ssh-kex"
 ))]
 mod probe_command;
+mod serve;
 
 #[cfg(feature = "probe-transport")]
 mod probe_resolver;
@@ -53,6 +54,8 @@ enum Commands {
         host: String,
     },
     Scan(ScanArgs),
+    /// Start a loopback-only folder picker, scanner and report viewer.
+    Serve(serve::ServeArgs),
     /// Compare compatible inventories within one explicit repository scope.
     Diff(DiffArgs),
     Rules {
@@ -287,6 +290,10 @@ fn run_cli<WOut: Write, WErr: Write>(
             Ok(ExitStatus::Success)
         }
         Commands::Scan(args) => scan_cmd(args, stdout, stderr),
+        Commands::Serve(args) => {
+            serve::run(args, stdout)?;
+            Ok(ExitStatus::Success)
+        }
         Commands::Diff(args) => {
             diff_command::run(
                 &args.before,
@@ -604,14 +611,14 @@ mod tests {
         };
         let (result, stdout, stderr) = run_cli_test(arguments(&plain));
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert_eq!(stdout.matches("written ").count(), 6);
+        assert_eq!(stdout.matches("written ").count(), 7);
         assert!(!plain.join("diagnostics.json").exists());
         assert!(stderr.contains("unenumerated"), "{stderr}");
         let mut args = arguments(&detailed);
         args.push("--diagnostics".into());
         let (result, stdout, _) = run_cli_test(args);
         assert_eq!(result.unwrap(), ExitStatus::Success);
-        assert_eq!(stdout.matches("written ").count(), 7);
+        assert_eq!(stdout.matches("written ").count(), 8);
         let diagnostics: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(detailed.join("diagnostics.json")).unwrap())
                 .unwrap();
@@ -808,7 +815,7 @@ mod tests {
         ]);
         assert_eq!(result.unwrap(), ExitStatus::Success);
         assert!(stderr.contains("unenumerated"), "{stderr}");
-        assert_eq!(stdout.matches("written ").count(), 6);
+        assert_eq!(stdout.matches("written ").count(), 7);
         let report: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
         let hits = report["findings"].as_array().unwrap();
@@ -872,7 +879,7 @@ mod tests {
         ]);
         assert_eq!(result.expect("acceptance scan"), ExitStatus::Success);
         assert!(stderr.contains("unenumerated"), "{stderr}");
-        assert_eq!(stdout.matches("written ").count(), 6);
+        assert_eq!(stdout.matches("written ").count(), 7);
         let json: serde_json::Value =
             serde_json::from_str(&fs::read_to_string(out.join("report.json")).unwrap()).unwrap();
         let findings = json["findings"].as_array().unwrap();

@@ -100,7 +100,9 @@ Search and filters help you work through repeated findings; `report.md` provides
 Markdown keeps multiline source excerpts and code examples inside code blocks, including CR/LF input.
 Both show inspection status. Local assessment decisions appear only in Markdown and explicitly requested JSON; HTML does not display them.
 
-`--format all` writes six files: `report.html`, `report.md`, `report.json`, `report.sarif`, `cbom.json` and `dependency-sbom.json`.
+For a browser workflow, run `pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules`. It opens a local folder picker, runs the existing scanner and opens the generated report. See [local web scanning](docs/user/SCANNING.md#local-web-scanning).
+
+`--format all` writes six original files: `report.html`, `report.md`, `report.json`, `report.sarif`, `cbom.json` and `dependency-sbom.json`, plus the local rule guide `report.rules.html`.
 The last two list cryptographic findings and software dependencies respectively. Their purpose and relationship are explained in [choosing a report](docs/user/REPORTS.md#choose-report).
 Additional inventory, assessment and diagnostic files require explicit options.
 Use `--cyclonedx-17` for separate CycloneDX 1.7 exports, or `diff` to compare

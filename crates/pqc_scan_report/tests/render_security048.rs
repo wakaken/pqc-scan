@@ -59,7 +59,14 @@ fn check(dir: &Path, machine: &str, count: usize) {
     );
     if count > 0 {
         assert_eq!(value["findings"].as_array().unwrap().len(), count);
-        assert_eq!(html.matches("class=\"occurrence\"").count(), count);
+        assert_eq!(
+            html.split("<template")
+                .next()
+                .unwrap()
+                .matches("class=\"occurrence\"")
+                .count(),
+            count
+        );
         assert_eq!(md.matches("<a id=\"finding-").count(), count);
     }
     for e in fs::read_dir(dir).unwrap() {

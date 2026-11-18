@@ -105,7 +105,7 @@ fn real_scan_default_and_explicit_outputs_cannot_redirect_writes() {
         fs::read(outside.join("report.json")).unwrap(),
         b"EXTERNAL_CANARY"
     );
-    assert_eq!(fs::read_dir(&output).unwrap().count(), 11);
+    assert_eq!(fs::read_dir(&output).unwrap().count(), 12);
     let report: serde_json::Value =
         serde_json::from_slice(&fs::read(output.join("report.json")).unwrap()).unwrap();
     assert!(report["findings"].as_array().unwrap().is_empty());

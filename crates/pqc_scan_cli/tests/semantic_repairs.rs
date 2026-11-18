@@ -108,7 +108,7 @@ fn a123_repairs_reach_all_reports_and_keep_stable_findings_and_invalid_controls(
             .output()
             .unwrap();
         assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
-        assert_eq!(std::fs::read_dir(&output).unwrap().count(), 10);
+        assert_eq!(std::fs::read_dir(&output).unwrap().count(), 11);
         let read = |name| {
             serde_json::from_slice::<Value>(&std::fs::read(output.join(name)).unwrap()).unwrap()
         };
@@ -194,7 +194,7 @@ fn malformed_source_retains_findings_without_claiming_completed_analysis() {
             .output()
             .unwrap();
         assert!(r.status.success());
-        assert_eq!(std::fs::read_dir(&output).unwrap().count(), 10);
+        assert_eq!(std::fs::read_dir(&output).unwrap().count(), 11);
         let d: Value =
             serde_json::from_slice(&std::fs::read(output.join("diagnostics.json")).unwrap())
                 .unwrap();

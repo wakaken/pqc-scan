@@ -59,6 +59,7 @@ fn every_static_export_rejects_a_final_link_and_preserves_the_external_file() {
         for filename in [
             "report.json",
             "report.html",
+            "report.rules.html",
             "report.md",
             "report.sarif",
             "cbom.json",

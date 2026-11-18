@@ -26,7 +26,7 @@ fn known_secret_syntax_is_omitted_in_all_legacy_formats_and_both_languages() {
         let input = result();
         let before = serde_json::to_value(&input).unwrap();
         let paths = write_reports_with_language(&input, &root, ReportFormat::All, lang).unwrap();
-        assert_eq!(paths.len(), 6);
+        assert_eq!(paths.len(), 7);
         for path in paths {
             let text = fs::read_to_string(&path).unwrap();
             assert!(

@@ -71,7 +71,7 @@ fn private_bodies_and_inline_credentials_never_survive_cli_report_paths() {
             assert!(!text.contains("MID029"), "middle canary fragment survived");
             count += 1;
         }
-        assert_eq!(count, 9);
+        assert_eq!(count, 10);
         let mut native: Value =
             serde_json::from_slice(&fs::read(out.join("scan.inventory.v1.json")).unwrap()).unwrap();
         let mut map: BTreeMap<String, String> = std::iter::once((

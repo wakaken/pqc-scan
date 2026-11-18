@@ -49,7 +49,7 @@ fn cyclonedx_flag_only_adds_two_documents_and_keeps_legacy_machine_content() {
         );
         assert_eq!(
             fs::read_dir(&output).unwrap().count(),
-            if extra { 8 } else { 6 }
+            if extra { 9 } else { 7 }
         );
         assert!(!output.join("scan.inventory.v1.json").exists());
         for name in ["cbom.cdx-1.7.json", "dependency-sbom.cdx-1.7.json"] {

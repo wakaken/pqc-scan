@@ -213,3 +213,17 @@ or key-size fact. Uninterpreted or malformed attributes retain inspection limits
 no signature/trust validation follows. A NULL parameter has no parameter OID, so
 the optional `parameters_oid` metadata entry is absent, rather than an empty
 string. See the [candidate compatibility notes](../releases/v0.3.0.md).
+
+## Local web scanning
+
+```bash
+pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
+```
+
+The default browser opens the session's local page. Browse subfolders of `--root`, then choose **Scan this folder**. The UI shows scan progress and opens the HTML report automatically when generation succeeds. Completed scans remain listed on the start page; use browser Back to return. The report shows incomplete inspection separately from successful report generation. Scanner errors leave a failed entry and allow retry; they are not presented as zero findings.
+
+`--root` defaults to the current directory; the picker cannot leave that boundary and omits symbolic links. `--port` defaults to 8787; use `--port 0` for an available port. `--threads` defaults to 4. `--no-open` prints the URL without opening a browser. The picker UI offers Japanese and English; reports retain their own language and theme selectors.
+
+The server binds only to `127.0.0.1`. Open the full random session URL printed in the terminal; `localhost` aliases or a bare `/` URL are not accepted. Keep that URL private. No source file contents are served. Each scan uses the CLI's default rules/selection behavior and writes the seven `--format all` outputs plus `diagnostics.json`; filters, thresholds and network probing cannot be configured from this UI. One scan runs at a time, with at most 20 scans per server session. Folder listings show up to 1,000 subfolders and state when entries were omitted.
+
+Reports are retained in the private `pqc-scan-web-*` session directory printed in the terminal. Stop with Ctrl+C. To keep an offline report, retain both `report.html` and `report.rules.html`; exports are also available at the corresponding filenames under the report URL. This mode does not upload source or reports. It does not run project build scripts or package commands. A folder containing the session output directory cannot be selected for scanning.

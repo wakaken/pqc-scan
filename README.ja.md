@@ -103,7 +103,9 @@ HTMLは検査範囲と未完了の確認から読み始められます。観測�
 Markdownでは、CR・LFを含む複数行のソース断片やコード例もコード表示の中に収めます。
 どちらにも検査状態を表示します。ローカル評価の参考判定はMarkdownと明示的に指定したJSONに出力し、HTMLには表示しません。
 
-`--format all` では、`report.html`、`report.md`、`report.json`、`report.sarif`、`cbom.json`、`dependency-sbom.json` の6ファイルを出力します。
+ブラウザから操作する場合は `pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules` を実行します。ローカルのフォルダ選択画面が開き、選んだ対象のスキャンからレポート表示まで実行します。[Web版の使い方](docs/user/SCANNING.ja.md#ローカルwebスキャン)も参照してください。
+
+`--format all` では、`report.html`、`report.md`、`report.json`、`report.sarif`、`cbom.json`、`dependency-sbom.json` の従来の6ファイルに、ルール解説の `report.rules.html` を加えて出力します。
 最後の2つは、それぞれ暗号利用の所見とソフトウェアの依存関係の一覧です。
 用途や関係は[用途に合うレポートを選ぶ](docs/user/REPORTS.ja.md#choose-report)で説明しています。
 詳しい棚卸し、評価、診断情報を加えるには、それぞれのオプションが必要です。

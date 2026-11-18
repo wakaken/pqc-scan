@@ -1,9 +1,11 @@
 mod compact;
 pub mod cyclonedx;
 pub use cyclonedx::write_cyclonedx_17;
+mod file_tree;
 mod grouping;
 mod html_report;
 mod inspection;
+mod presentation;
 mod probe_report;
 pub use probe_report::write_probe_reports;
 mod japanese;
@@ -157,6 +159,7 @@ fn write_reports_context(
                 } else {
                     html_report::write_html_report(&sanitized, &path)?;
                 }
+                outputs.push(out_dir.join("report.rules.html"));
                 path
             }
             ReportFormat::Markdown => {
