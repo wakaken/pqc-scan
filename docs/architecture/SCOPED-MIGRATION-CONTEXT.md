@@ -43,3 +43,21 @@ ownership and conflicts. This is not a business-priority evaluator or proof that
 an operator mapped the real system correctly. Task069 consumes it for pure policy
 and saved-evidence reassessment; task070 renders those results. Existing policy,
 rules, native IDs/schemas and scan-wide context semantics are untouched.
+
+
+Task073 adds a shared typed generator and canonical complete export, using the same
+ClaimSet/Provenance validator and final context parser/bind. Explicit target indices
+resolve only within the held SavedEvidence; duplicate/ambiguous/unselected targets
+never receive implicit claims. Aggregate cloning is bounded before serialization;
+canonical output omits absent Option fields rather than emitting forbidden null.
+No storage schema, inheritance/evaluator, existing reader or default scan behavior
+changes. The concrete opt-in CLI D4 supplement is in task073's plan.
+
+
+The074 integration follow-up adds ClaimValue at raw CLI/HTTP answer boundaries,
+reusing the original duplicate-aware bounded serde seed before Value conversion.
+Complete export uses pretty serialization when it fits, otherwise bounded compact
+serialization; absent optional empty references need not be added. Supported data is
+not dropped to fit. Readiness question hints reuse the evaluator's existing support
+requirements; they do not create claims, freshness or decisions. Core semantics and
+stored schemas remain unchanged; original conformance cases remain required.

@@ -1,3 +1,11 @@
+> Current amendment2026-11-19: R5-01..05 now require only synthetic technical
+> correctness, adopted-specification conformance and fixed-condition reproducibility.
+> Human usefulness/workload/rater agreement and numeric-score validity/adoption are
+> explicitly unmeasured and are not completion gates for this limited scope. Original
+> text/approvals/unexecuted96 human judgments are preserved in task071's archive.
+> The v2 protocol is authoritative for current R5; conflicting narrative below is
+> historical. X05/072 and U08/U09/075 must disclose this amended scope and exclusions.
+
 # v0.4の要求と証拠の対応表
 
 [English](REQUIREMENTS.md)
@@ -36,7 +44,7 @@ v0.3と同じく、要求と証拠を対応付ける構成とする。今後提�
 | V04-R2 | 標準に基づくPQCの技術評価を高度化する | 必要な箇所だけ既存の技術評価を拡張し、v1の意味を維持する |
 | V04-R3 | 組織ごとのPQC移行優先度を説明する | 技術的事実と適用範囲を定めた申告情報を使う判断方針を追加し、緊急度、不明情報、準備状況を分ける |
 | V04-R4 | 組織・システム・資産ごとの情報を入力する | ローカルの申告を、変更しない証拠と正しい利用箇所へ対応付け、再スキャンせずに再評価する |
-| V04-R5 | 数値スコアリングの妥当性を評価する | 既存の品質基盤で根拠のある比較を実施する。製品の数値スコア提供は任意とする |
+| V04-R5 | Evaluate synthetic technical correctness, specification conformance and reproducibility | Reuse existing source-bound PQS-QAM comparison; human/scoring dimensions remain unmeasured under explicit2026-11-19 amendment |
 
 選択したv0.4の範囲では、以下のR群の詳細要求と、横断要件Xの全行を必須とする。最小構成を超えて扱う入力形式は、明示的に範囲を決める。その判断を使って、5つの必須要求を無断で削除してはならない。
 
@@ -108,17 +116,21 @@ v0.3と同じく、要求と証拠を対応付ける構成とする。今後提�
 | R4-05 | 同じ保存済み証拠を別の情報で再評価する | 現在はスキャン処理内で評価する。保存結果を使うオフライン手順は新規となる | 固定した収集内容に情報A・Bを適用できる。再スキャン、検査対象コードの実行、接続先への通信を行わない。結果を入力と選択した情報の両方へ対応付ける | CLI・ライブラリの入口の契約、情報を変えた評価結果、通信しないことと入力を変更しないことの確認 |
 | R4-06 | 危険な入力を拒否し、利用者の情報を保護する | E-POLICY・E-OUTPUT。新しい項目によって入力境界が広がる | サイズ、深さ、件数、文字列、参照に有限の上限を承認する。不正形式、不明・重複フィールド、不正参照に安全なエラーを返す。鍵・パスワード・トークンの入力を要求しない。試験用の秘密情報をログやレポートへ出さない | 上限と脅威の例、解析・パス・参照の負例試験、試験用秘密情報の漏洩確認 |
 
-## V04-R5：スコアリングの評価
+## V04-R5: limited synthetic technical evaluation
 
-主担当とする作業単位の案は、評価計画を固定するW3、実施するW6、証拠を照合するW7。製品で数値スコアを提供しない場合も、この調査は必須である。TASK-056の既存データは、作成者と実装を見た範囲の制約を明示した回帰確認用データとして扱う。
+Current scope is the explicit2026-11-19 amendment: technical correctness against
+saved evidence/primary sources, adopted-specification conformance and fixed-condition
+semantic reproducibility only. The original practitioner/M2/numerical study remains
+archived and unexecuted; usefulness, actual human workload, rater agreement and
+numeric-score validity/adoption remain Not Tested. Completion applies to revised scope.
 
 | ID | 必要な振る舞い | 既存証拠と不足 | 受入条件と検証 | 今後必要な証拠 |
 |---|---|---|---|---|
-| R5-01 | 同じ案件、事実、評価方針で方式を比較する | E-QAM・E-JUDGMENT。組織の移行優先度を比較する評価はまだない | 明示的な決定表・決定木を基準とし、比較できる代替方式を1つ以上評価する。順序尺度、数値、多基準意思決定分析（MCDA）の候補を調べる。出力カテゴリと判断手法を混同せず、根拠のない重みを作らない | 事前に固定した候補選定・比較計画、各方式の採否と理由 |
-| R5-02 | 技術的正解、実装の仕様適合、有用性を分ける | E-JUDGMENT。実務担当者と新しい独立データは未確保 | 技術的な期待結果は事実を参照し、決定表との一致でコードを検証する。実務担当者の判断は方針と役割を明示し、不一致を残す。作成者、実装を見た範囲、調整用と独立評価用のデータの分離を開示する。AIレビューを人間の専門家の検証と呼ばない | 固定した試験例、方針の決定権者、参加者とその確保の証拠、裁定、データの由来 |
-| R5-03 | 判断の品質、頑健性、作業負担を測る | E-QAMの集約を再利用し、新しい指標を追加する | 説明可能性・行動との一致、有害な過小評価、欠損値への頑健性、感度、根拠のある順位、作業量、判断者間の不一致について、分母と測定方法を定義する。同じ版での再現性と方針変更の影響を分ける | 条件を変えた対照例の測定原本、軸ごとの指標、費用、失敗、限られた標本による制約 |
-| R5-04 | 数値スコアの扱いを根拠付きで判断する | 検証済みの移行用数値スコアはない | 採用、不採用、証拠不足を区別する。尺度、正規化、重み、相関、欠損、不確実性、利点を評価する。必要な評価が欠けていれば未完了とし、裏付けのない優劣を主張しない | 比較評価書、除外候補の理由を含む根拠付きの結論 |
-| R5-05 | 品質基盤を再利用し、採用を管理する | E-QAM・E-COMPAT。新しい評価記録だけを追加する | 既存のソースと対応する比較・集約処理で新しい評価軸を報告し、過去の正解、閾値、測定を上書きしない。任意のスコアを採用する場合は、計算式、モデル、版、互換性証拠を別途用意する | 既存処理の拡張結果、過去の記録の保持確認、採用する場合の別途承認 |
+| R5-01 | Limited technical evaluation (maintainer amendment2026-11-19) | Existing PQS-QAM and archived original study | Freeze a24-case/12-pair source-separated AI-authored synthetic protocol, family-grouped8/16 tuning/final allocation, exact inputs/expectations/conditions before subject outputs; preserve old method/practitioner plan unexecuted. | Task071 v2 protocol, frozen cases, source checks, raw results and review records |
+| R5-02 | Limited technical evaluation (maintainer amendment2026-11-19) | Existing PQS-QAM and archived original study | Main checks proposed technical facts against saved evidence and public primary clauses, and policy expectations against adopted P1-P8; record AI prompt/model visibility/sources/results/corrections/exposure. Unconfirmed facts are not successes; no human independent-verification claim. | Task071 v2 protocol, frozen cases, source checks, raw results and review records |
+| R5-03 | Limited technical evaluation (maintainer amendment2026-11-19) | Existing PQS-QAM and archived original study | Measure technical property/case agreement, exact policy tuple/reasons/actions and semantic fixed-input reproducibility with explicit denominators, splits, failures and limits. Human practical usefulness, actual workload and inter-rater agreement remain Not Tested, observed0 and rates null. | Task071 v2 protocol, frozen cases, source checks, raw results and review records |
+| R5-04 | Limited technical evaluation (maintainer amendment2026-11-19) | Existing PQS-QAM and archived original study | Draw no conclusion on numeric scoring validity, superiority/inferiority or adoption/non-adoption from this limited study; label that dimension unassessed. Preserve original planned comparison and no unapproved formula/model/threshold/adoption. | Task071 v2 protocol, frozen cases, source checks, raw results and review records |
+| R5-05 | Limited technical evaluation (maintainer amendment2026-11-19) | Existing PQS-QAM and archived original study | Reuse existing PQS-QAM judgment comparison and evidence/report aggregation with source/input/context/model/catalog/policy/time binding, negative consistency controls and existing independent reviewers; preserve historical truth/failures and separate amended task completion from product quality/release. | Task071 v2 protocol, frozen cases, source checks, raw results and review records |
 
 ## 横断する契約と受入条件
 

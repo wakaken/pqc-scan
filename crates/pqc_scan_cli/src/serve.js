@@ -1,6 +1,8 @@
 (() => {
   const $ = id => document.getElementById(id);
   let language = 'ja', folder = '', busy = false, starting = false, folderLoading = false, folderRequest = 0, selectedJob = null, currentJobs = [], listing = null;
+  let migrationReady=false,migrationPending=null,migrationEnabled=false;
+  function openMigration(job) {if(migrationReady)window.dispatchEvent(new CustomEvent('pqc-migration-job',{detail:job}));else migrationPending=job;}
   const t = (ja,en) => language === 'ja' ? ja : en;
   async function api(route, options) {
     const response = await fetch(route, options);
@@ -31,10 +33,11 @@
     if (!currentJobs.length) {$('jobs').textContent=t('まだスキャンしていません。','No scans yet.');return;}
     for(const job of currentJobs.slice().reverse()) {
       const row=document.createElement('div');row.className='job';
-      const path=document.createElement('strong');path.className='path';path.textContent=job.path||'/';row.append(path);
+      const path=document.createElement('strong');path.className='path';path.textContent=(job.migration_input?`#${job.id} · `:'')+(job.kind==='saved'?t('保存済みの棚卸し','Saved inventory'):job.path||'/');row.append(path);
       const status=document.createElement('p');
-      status.textContent=job.status==='running'?t('スキャン中…','Scanning…'):job.status==='failed'?t('スキャンに失敗しました。フォルダとルールの読み取り可否を確認し、再実行してください。','Scan failed. Check folder and rule access, then retry.'):job.coverage==='complete_within_scope'?t('対象範囲の解析が完了しました。','Inspection completed within the selected scope.'):t('レポートを生成しました。一部の解析が未完了です。理由はレポートで確認してください。','Report ready. Some inspection is unfinished; review the reasons in the report.');row.append(status);
-      if (job.status==='ready') {const a=document.createElement('a');a.href=job.report;a.textContent=t('レポートを開く','Open report');row.append(a);}
+      status.textContent=job.kind==='saved'?t('保存済みの棚卸しを選択しました。移行の確認に進めます。','Saved inventory selected. You can review migration context.'):job.status==='running'?t('スキャン中…','Scanning…'):job.status==='failed'?t('スキャンに失敗しました。フォルダとルールの読み取り可否を確認し、再実行してください。','Scan failed. Check folder and rule access, then retry.'):job.coverage==='complete_within_scope'?t('対象範囲の解析が完了しました。','Inspection completed within the selected scope.'):t('レポートを生成しました。一部の解析が未完了です。理由はレポートで確認してください。','Report ready. Some inspection is unfinished; review the reasons in the report.');row.append(status);
+      if (job.status==='ready' && job.report) {const a=document.createElement('a');a.href=job.report;a.textContent=t('レポートを開く','Open report');row.append(a);}
+      if(job.status==='ready'&&job.migration_input){const b=document.createElement('button');b.type='button';b.textContent=t('移行の確認へ進む','Review migration');b.addEventListener('click',()=>openMigration(job));row.append(b);}
       $('jobs').append(row);
     }
   }
@@ -42,22 +45,23 @@
     try {
       currentJobs=(await api('api/jobs')).jobs;busy=currentJobs.some(j=>j.status==='running');$('scan').disabled=folderLoading||starting||busy||!listing;renderJobs();
       const finished=currentJobs.find(j=>j.id===selectedJob&&j.status!=='running');
-      if(finished) {selectedJob=null;if(finished.status==='ready'){setTimeout(poll,1000);location.href=finished.report;return;}feedback(t('スキャンに失敗しました。対象フォルダを確認して再実行してください。','Scan failed. Check the selected folder and try again.'),true);}
+      if(finished) {selectedJob=null;if(finished.status==='ready'){if(finished.migration_input){openMigration(finished);feedback(t('スキャン完了。任意の移行情報を確認できます。','Scan complete. You can review optional migration context.'));setTimeout(poll,1000);return;}else{setTimeout(poll,1000);location.href=finished.report;return;}}feedback(t('スキャンに失敗しました。対象フォルダを確認して再実行してください。','Scan failed. Check the selected folder and try again.'),true);}
     } catch {feedback(t('サーバーに接続できません。ターミナルで起動状態を確認してください。','Cannot reach the server. Check the terminal.'),true);}
     setTimeout(poll,1000);
   }
   $('scan').addEventListener('click',async()=>{
     if(folderLoading||starting||busy||!listing)return;starting=true;busy=true;$('scan').disabled=true;feedback(t('スキャンを開始しています…','Starting scan…'));
-    try {const job=await api(`api/scan?path=${encodeURIComponent(folder)}`,{method:'POST'});selectedJob=job.id;starting=false;feedback(t('スキャン中です。完了するとレポートを開きます。','Scanning. The report opens when ready.'));}
+    try {const job=await api(`api/scan?path=${encodeURIComponent(folder)}`,{method:'POST'});selectedJob=job.id;starting=false;feedback(migrationEnabled?t('スキャン中です。完了すると任意の移行情報を入力できます。','Scanning. Optional migration context is available when ready.'):t('スキャン中です。完了するとレポートを開きます。','Scanning. The report opens when ready.'));}
     catch {starting=false;busy=false;$('scan').disabled=!listing;feedback(t('開始できませんでした。他のスキャンの完了を待つか、対象フォルダを確認してください。','Could not start. Wait for the active scan or check the folder.'),true);}
   });
   $('up').addEventListener('click',()=>loadFolder(folder.split('/').slice(0,-1).join('/')));
   function applyLanguage() {
     language=$('language').value==='en'?'en':'ja';document.documentElement.lang=language;
     for(const node of document.querySelectorAll('[data-en]'))node.textContent=node.dataset[language];
-    renderFolders();renderJobs();
+    renderFolders();renderJobs();window.dispatchEvent(new CustomEvent('pqc-language',{detail:language}));
   }
   $('language').addEventListener('change',()=>{applyLanguage();feedback('');});
   window.addEventListener('pageshow',applyLanguage);
+  api('api/config').then(config=>{if(!config.migration)return;migrationEnabled=true;const script=document.createElement('script');script.src='migration.js';script.onload=()=>{migrationReady=true;window.dispatchEvent(new CustomEvent('pqc-language',{detail:language}));if(migrationPending){openMigration(migrationPending);migrationPending=null;}};document.body.append(script);}).catch(()=>{});
   loadFolder('');poll();
 })();

@@ -110,6 +110,8 @@ The server listens only on `127.0.0.1` and runs the same static scanner as the C
 
 <a id="report-preview"></a>
 
+Optional migration input is available with `serve --migration`: select exact targets, answer only known questions, review/save context and reassess the same saved inventory. See [the local workflow](docs/user/SCANNING.md#optional-migration-context-and-reassessment).
+
 ## Report preview
 
 The v0.3.0 HTML report includes a severity summary, rule groups, search/filters, and a file tree with finding counts. Expand findings for locations, source evidence and recommended checks; follow the rule guide for explanations. Filters and the tree can be hidden independently. Language (English/Japanese), light/dark theme and browser-local time display work offline.

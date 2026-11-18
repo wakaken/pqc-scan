@@ -1,0 +1,75 @@
+{
+  "commands": [
+    {
+      "command": [
+        "/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/target/debug/pqc-scan",
+        "context-template",
+        "tasks/073/evidence/example/input.json",
+        "--input-format",
+        "inventory-v1",
+        "--list-targets"
+      ],
+      "exit": 0,
+      "log": "tasks/073/evidence/example/targets.log"
+    },
+    {
+      "command": [
+        "/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/target/debug/pqc-scan",
+        "context-template",
+        "tasks/073/evidence/example/input.json",
+        "--input-format",
+        "inventory-v1",
+        "--out",
+        "tasks/073/evidence/example/migration-context.json",
+        "--as-of",
+        "2026-11-18T00:00:00Z",
+        "--target",
+        "1",
+        "--set",
+        "use_case=\"signature\"",
+        "--set",
+        "usage_state=\"active\"",
+        "--set",
+        "business_critical=false",
+        "--unknown",
+        "confidential",
+        "--actor",
+        "owner",
+        "--asserted-at",
+        "2026-11-17T00:00:00Z"
+      ],
+      "exit": 0,
+      "log": "tasks/073/evidence/example/generate.log"
+    },
+    {
+      "command": [
+        "/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/target/debug/pqc-scan",
+        "assess",
+        "tasks/073/evidence/example/input.json",
+        "--input-format",
+        "inventory-v1",
+        "--context",
+        "tasks/073/evidence/example/migration-context.json",
+        "--as-of",
+        "2026-11-18T00:00:00Z",
+        "--lang",
+        "ja",
+        "--out-dir",
+        "tasks/073/evidence/example/reports"
+      ],
+      "exit": 0,
+      "log": "tasks/073/evidence/example/assess.log"
+    }
+  ],
+  "binary_sha256": "743bed0adc9090806f30bc4720148fd6c98188a25173c10ac3a14cd6bfe2cb4f",
+  "sha256": {
+    "tasks/073/evidence/example/input.json": "ea072032ff581bb287e010de83d5c9be0f72debdce0962925dfa3c5dbf29f81f",
+    "tasks/073/evidence/example/assess.log": "d6b132d73480247b51dd26f9444715044b044ae2edceb7b00450178a70c68d3f",
+    "tasks/073/evidence/example/migration-context.json": "b24ef50cbbe5e9b1d45db16df9d0c6830b60021fc30b224de831d8120fbbe38c",
+    "tasks/073/evidence/example/generate.log": "75893c68d00a168d0924d0a5c1453e80317f254090a3cfb42227c5d83642280a",
+    "tasks/073/evidence/example/targets.log": "7e7b133a13a2c39444e54506824c2ce22a5f19468e6e14dd59319ee3b8d33b85",
+    "tasks/073/evidence/example/reports/migration.assessment.v1.json": "80d37384d16c4eca51d61a8490f7ede0abe3545dd07710ae48d3f07cbd430617",
+    "tasks/073/evidence/example/reports/migration.assessment.md": "3bcd7080e76f2c340e0ac75690ee158a5a255873188f727ed9b5200c926e1425",
+    "tasks/073/evidence/example/reports/migration.assessment.html": "4b2c90d527a9b9bfcca03315f877517806c9869a19e10b7e75bf9fcbd7644001"
+  }
+}

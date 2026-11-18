@@ -1,3 +1,13 @@
+> Current maintainer amendment2026-11-19: task071 uses a fresh-context AI-authored
+>24-case/12-pair limited technical correctness/conformance/reproducibility study.
+> The original human/M2/numeric evaluation is preserved and unexecuted; human utility,
+> workload, rater agreement and score validity/adoption remain unmeasured. Revised R5
+> requirements and task071/EVALUATION-PROTOCOL-v2.md govern current071/072/075 acceptance.
+> Two practitioners/human technical adjudicator are not gates for this limited scope.
+> One extra case-author AI only (no redelegation) is authorized; existing2 reviewers
+> are reused. No score adoption, release/publication, outreach or fees are authorized.
+> Earlier resource-block/completion narrative below remains historical, not current scope.
+
 # v0.4 roadmap: Risk & Migration Intelligence
 
 [日本語](ROADMAP.ja.md)
@@ -117,7 +127,7 @@ issues nor relabels old measurements. Fresh v0.4 behavior needs its own evidence
 | V04-R2: technical classification | Pure `assessment` functions and a finite, versioned catalog | Close explicit classification and evidence-ingestion gaps; retain old behavior | Extend shared assessment logic; keep legacy contracts |
 | V04-R3: migration decisions | Versioned primitive-suitability policy, reasons, candidates and simple priority | Explain organization-specific urgency, missing information, readiness and actions | Add a distinct decision policy using shared technical facts |
 | V04-R4: organization and asset context | Strict, bounded, scan-wide operator context v1 | Bind scoped claims to systems and usage occurrences; reassess saved evidence | Extend input handling through a separately selected contract |
-| V04-R5: scoring evaluation | PQS-QAM, judgment comparison, evidence aggregation and frozen cases | Evaluate decision usefulness and whether numerical scoring adds value | Extend the existing evaluation pipeline; no parallel quality platform |
+| V04-R5: limited technical evaluation | PQS-QAM, existing judgment comparison and source-bound evidence |24 AI-authored synthetic cases/12 pairs: technical correctness, adopted specification and reproducibility | Human utility/workload/rater agreement/numeric validity remain unmeasured; no parallel quality platform |
 
 Read-only enumeration found 123 unique rule IDs and 123 matching metadata rows.
 All eight rule-file SHA-256 bindings in the companion matched this baseline.
@@ -258,7 +268,7 @@ priority does not waive an outcome.
 | W3: joint decision/context specification | R3, R4, R5-01/02 | Decision table, minimal fields, binding/precedence/clock contract, evaluator study protocol and frozen expectations; D1-D6 resolved where blocking | W1; W2 fact contract | Medium to high: business-to-usage mapping is the main new design |
 | W4: context and decision implementation | R3, R4, R2-04 | Explicit offline reassessment and selected-input adapters implement W3; targeted negative/boundary checks and implementation review | W2, W3; applicable human decisions | Medium to high: new policy and bounded inputs, not scanner replacement |
 | W5: decision reporting | R3-04, R4-05, X01-X03 | Selected machine-readable and bilingual human views; exact reference/meaning/privacy validation and applicable browser checks | W3 output contract, W4 | Medium: reuse writers and safe output, no new UI |
-| W6: model/scoring evaluation | R5; validity of R3 | Execute the frozen multi-method comparison and practitioner study; retain disagreement, failures and limits; provide scoring disposition | W3 protocol, W4/W5 outputs, D6 resources | Medium to high: valid independent data is a dependency, not an invented count |
+| W6: amended technical evaluation | R5; bounded R3 conformance | Execute frozen24/12 source-separated AI synthetic cases; main confirms facts/expectations before outputs, retains failures/unknowns and repeats | W3 adopted policy; W4/W5; explicit2026-11-19 authority | No human expert/practitioner or score-validity conclusion |
 | W7: integrated acceptance | All rows | Final-source requirement/evidence reconciliation, applicable checks and independent review stages; separate product/release disposition | W1-W6 | Medium: extend QAM aggregation and existing compatibility suite |
 
 Prepare the evaluation protocol and expected cases in W3 before observing W4/W6
@@ -351,8 +361,8 @@ needs them; this roadmap does not initiate a general compliance or GRC program.
 | D3: runtime input scope | Saved TLS v1 required in the proposed minimum; compare SSH offers/KEX adapters without changing probe support | Select the exact runtime formats and fixture obligations before W2/W3 contract closure; no implicit SSH support |
 | D4: human output and CLI entry | Explicit saved-evidence reassessment, structured report and bilingual Markdown; assess opt-in HTML cost | Approve command/schema names and presentation scope; defaults unchanged |
 | D5: audit/classification repairs | Reuse correct current judgments; propose only evidence-backed gaps | Rule meaning, confidence/severity, high-risk architecture and unspecified crypto logic retain AGENTS human-review gates |
-| D6: evaluation authority and resources | Frozen protocol, suitable practitioner/expert participants, paired cases, explicit time/sample bounds | Secure resources and approve assessment criteria before observing study results; unavailable truth stays a dependency |
-| D7: numerical product score | Withhold by default pending demonstrated benefit | Separate formula/model approval after W6; evaluation remains mandatory |
+| D6: limited evaluation authority/resources | Explicit2026-11-19 amendment; maximum1 fresh-context nondelegating case-author AI, main source/specification verification,24/12 family-grouped freeze | Original two practitioners/human adjudicator removed only as limited-scope gates; original96 human judgments remain unexecuted |
+| D7: numerical product score | Validity/superiority/adoption not evaluated by limited071 | No adoption/non-adoption conclusion; future formula/model/support/publication needs separate authority |
 
 These are open product/design decisions, not requests for permission to perform
 the already authorized documentation work. Recommendations are not adopted public

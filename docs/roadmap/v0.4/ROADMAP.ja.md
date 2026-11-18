@@ -1,3 +1,13 @@
+> Current maintainer amendment2026-11-19: task071 uses a fresh-context AI-authored
+>24-case/12-pair limited technical correctness/conformance/reproducibility study.
+> The original human/M2/numeric evaluation is preserved and unexecuted; human utility,
+> workload, rater agreement and score validity/adoption remain unmeasured. Revised R5
+> requirements and task071/EVALUATION-PROTOCOL-v2.md govern current071/072/075 acceptance.
+> Two practitioners/human technical adjudicator are not gates for this limited scope.
+> One extra case-author AI only (no redelegation) is authorized; existing2 reviewers
+> are reused. No score adoption, release/publication, outreach or fees are authorized.
+> Earlier resource-block/completion narrative below remains historical, not current scope.
+
 # v0.4ロードマップ：リスク評価と移行判断
 
 [English](ROADMAP.md)
@@ -72,7 +82,7 @@ SaaS、DB、CLIの対話入力は対象外とする。5つの必須要求と当�
 | V04-R2：技術分類 | 副作用のない`assessment`関数と、対応範囲・版を定めた分類カタログ | 分類と証拠の取り込みに関する具体的な不足を補う | 共通の技術評価を拡張し、既存の契約を維持する |
 | V04-R3：移行判断 | 版を持つ暗号方式単体の適合性評価、理由、移行候補、簡易な優先度 | 組織ごとの緊急度、不足情報、準備状況、行動を説明する | 共通の技術的事実を使う別の判断方針を追加する |
 | V04-R4：組織・資産情報 | 厳格な形式と上限を持ち、スキャン全体に適用する申告情報v1 | 適用範囲を定めた申告をシステムや利用箇所へ対応付け、保存結果を再評価する | 明示選択する別の契約を通じて入力処理を拡張する |
-| V04-R5：スコアリング評価 | PQS-QAM、判断比較、証拠集約、固定した試験例 | 判断の実用性と、数値化による付加価値を評価する | 既存の評価処理を拡張し、別の品質基盤を作らない |
+| V04-R5: limited technical evaluation | PQS-QAM, existing judgment comparison and source-bound evidence |24 AI-authored synthetic cases/12 pairs: technical correctness, adopted specification and reproducibility | Human utility/workload/rater agreement/numeric validity remain unmeasured; no parallel quality platform |
 
 読み取り確認では、重複のない123件のルールIDと、それに一致する123行の評価メタデータを確認した。評価台帳が参照する8つのルールファイルのSHA-256も、基準ソースとすべて一致した。これは対象集合とソースの対応確認であり、新しい意味の監査や検出試験ではない。台帳の説明文に残る古い件数より、実際のルール集合を優先する。各資産のソースと限界は、[要求定義の既存証拠一覧](REQUIREMENTS.ja.md#existing-evidence)に示す。
 
@@ -136,7 +146,7 @@ W1〜W7は計画上の論理的な識別子である。登録したTask IDと要
 | W3：判断と申告情報の仕様 | R3、R4、R5-01/02 | 決定表、最小入力、対応付け・優先関係・時刻の契約、評価調査の計画、固定した期待結果。作業を妨げるD1〜D6を解決する | W1、W2で定める技術的事実の契約 | 中〜大。業務システムと利用箇所の対応付けが、主な新規設計になる |
 | W4：申告情報と判断の実装 | R3、R4、R2-04 | W3に従う明示的なオフライン再評価と、選択した入力の取り込み処理。対象を絞った負例・境界確認と実装レビューを行う | W2、W3、該当する人の判断 | 中〜大。新しい評価方針と上限を定めた入力を追加し、スキャナーは置き換えない |
 | W5：判断レポート | R3-04、R4-05、X01-X03 | 選択した機械可読形式と日英の人向け表示。参照・意味・秘匿を照合し、必要なブラウザー確認を行う | W3の出力契約、W4 | 中。既存のレポート出力と安全な書き込みを再利用し、新しいUIを作らない |
-| W6：判断モデルと数値化の評価 | R5、R3の妥当性 | 固定した計画に従う複数方式の比較と実務担当者の評価。不一致、失敗、限界を残し、数値化の扱いを結論付ける | W3の評価計画、W4・W5の出力、D6の人員・資源 | 中〜大。有効な独立データの確保が前提であり、件数を作って埋めない |
+| W6: amended technical evaluation | R5; bounded R3 conformance | Execute frozen24/12 source-separated AI synthetic cases; main confirms facts/expectations before outputs, retains failures/unknowns and repeats | W3 adopted policy; W4/W5; explicit2026-11-19 authority | No human expert/practitioner or score-validity conclusion |
 | W7：総合受入 | 全行 | 最終ソースに対する要求と証拠の照合、該当する検証、独立したレビュー段階。製品・リリースの判断を分ける | W1〜W6 | 中。QAMの集約と既存互換性試験を拡張する |
 
 W4・W6の結果を見る前に、W3で評価計画と期待結果を用意する。技術的事実はW2で整理を進められるが、判断と申告情報の仕様を固める前に実装を先行させない。W4の実装中に、W5がW3の契約に沿って表示を検討してもよい。複数の作業が同じ要求を使う場合も、実装を重複させない。タスク・PRの区切りは対応表に示す。追加の登録や実行は、リポジトリのライフサイクル規則に従い、別途指示を受けて行う。
@@ -186,8 +196,8 @@ W4・W6の結果を見る前に、W3で評価計画と期待結果を用意す�
 | D3：接続先観測結果の入力範囲 | 最小案に保存済みTLS v1を含める。接続先診断の対応範囲を変えずに、SSHの提示結果・鍵交換結果を取り込む費用を比較する | W2・W3の契約を確定する前に、正確な形式と必要な試験入力を選ぶ。SSHを暗黙に対応扱いにしない |
 | D4：人向け出力とCLIの入口 | 保存済み証拠の明示的な再評価、構造化したレポート、日英のMarkdownを用意し、任意のHTML表示の費用を比較する | コマンド・スキーマの名前と表示範囲を承認し、既定動作は維持する |
 | D5：監査・分類の修正 | 現在の正しい判断を再利用し、根拠のある不足だけを修正候補にする | ルールの意味、信頼度・重大度、高リスクな構成変更、仕様が不明確な暗号ロジックには、AGENTS.mdで定める人のレビューを適用する |
-| D6：評価の決定権者と人員・資源 | 評価計画を固定し、適切な実務担当者・専門家、条件を変えた対照例、時間・標本数の上限を確保する | 調査結果を見る前に、人員・資源を確保し、評価基準を承認する。必要な事実が得られない場合は依存事項として残す |
-| D7：製品の数値スコア | 利点を確認するまで、提供を見送る | W6後に計算式・モデルを別途承認する。数値化の評価は引き続き必須 |
+| D6: limited evaluation authority/resources | Explicit2026-11-19 amendment; maximum1 fresh-context nondelegating case-author AI, main source/specification verification,24/12 family-grouped freeze | Original two practitioners/human adjudicator removed only as limited-scope gates; original96 human judgments remain unexecuted |
+| D7: numerical product score | Validity/superiority/adoption not evaluated by limited071 | No adoption/non-adoption conclusion; future formula/model/support/publication needs separate authority |
 
 これらは未決の製品・設計判断であり、許可済みの文書作成を進めるための承認要求ではない。推奨案は、採用済みの公開契約ではない。この文書への記載によって、任意の上限、方針の期日、点数の重み、対応範囲の拡大を承認したことにはならない。判断により設計を具体化してよいが、明示的な範囲合意なしに必須要求を削除しない。
 

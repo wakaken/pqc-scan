@@ -11,14 +11,17 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{fs::File, path::Path, str::FromStr};
 
+pub use context::generation::{
+    generate_context, ClaimAnswer, ClaimValue, ContextClaims, ContextSelection,
+};
 pub use context::{
-    parse_as_of, BoundContext, ClaimFreshness, ContextReference, MigrationContext, ResolvedClaim,
-    TargetContext,
+    parse_as_of, BoundContext, ClaimFreshness, ContextReference, MigrationContext, Provenance,
+    ResolvedClaim, TargetContext,
 };
 pub use decision::{
-    evaluate, evaluate_with_versions, Action, ActionKind, Candidate, ContextDescriptor, Coverage,
-    Decision, Information, MigrationAssessment, Prerequisite, Readiness, SourceRecord, Urgency,
-    Version, VersionSelection, POLICY_ID, POLICY_VERSION,
+    evaluate, evaluate_with_versions, input_support_fields, Action, ActionKind, Candidate,
+    ContextDescriptor, Coverage, Decision, Information, MigrationAssessment, Prerequisite,
+    Readiness, SourceRecord, Urgency, Version, VersionSelection, POLICY_ID, POLICY_VERSION,
 };
 pub use technical::{assess_primitive, source, TechnicalSource, CATALOG_ID, CATALOG_VERSION};
 
@@ -172,6 +175,11 @@ pub struct Target {
     /// False for ambiguous native anchors; never inferred from array position.
     #[serde(skip)]
     pub(crate) bindable: bool,
+}
+impl Target {
+    pub fn is_bindable(&self) -> bool {
+        self.bindable
+    }
 }
 
 /// Validated projection; callers cannot substitute input identity or targets.

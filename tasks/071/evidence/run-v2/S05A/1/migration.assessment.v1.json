@@ -1,0 +1,204 @@
+{
+  "format": "pqc-scan.migration-assessment",
+  "version": 1,
+  "input": {
+    "format": "inventory-v1",
+    "sha256": "affbde4ab23593cd929cf0d9becc5f14472122652112af27a2be792e8004c0f6",
+    "schema_version": 1,
+    "collection_time": "2026-11-01T00:00:00Z",
+    "run_id": "scan-v1-4a1e2bd944917ebf2ce1e57dbe5e63a3a260fe0262c711e9d77ba361e5e89010"
+  },
+  "context": {
+    "format": "pqc-scan.migration-context",
+    "version": 1,
+    "sha256": "3f4c4d777952cdd149ffdafcae8fe3ea97de0ddcc4c07dea6aedb26e50bcc2ac"
+  },
+  "catalog": {
+    "id": "migration-facts-v1",
+    "version": "1.0.0"
+  },
+  "policy": {
+    "id": "migration-decision-v1",
+    "version": "1.0.0"
+  },
+  "model": {
+    "id": "decision_table",
+    "version": "1.0.0"
+  },
+  "as_of": "2026-11-19T00:00:00Z",
+  "targets": [
+    {
+      "id": "migration_target-v1-fa82b47bf482ba1ea5ec9859882d0c5d2247ac20df96919df716e9bafdc95093",
+      "source_ref": {
+        "run_id": "scan-v1-4a1e2bd944917ebf2ce1e57dbe5e63a3a260fe0262c711e9d77ba361e5e89010",
+        "observation_id": "observation-v1-fe84a5a63f39721df03c44b415dc50d8e9c710b47752036e2f1fc73349ced07a",
+        "root_asset_id": "asset-v1-50c109524b3acc5c399f3f87885e0aed0ed6aec433a3e12aa3c3bc51978bd6ac",
+        "role": "algorithm",
+        "path": "S05A/captured-record.txt",
+        "line": 1
+      },
+      "technical": {
+        "identifier": "AES-128",
+        "construction": "symmetric",
+        "standardization": "classical_standard",
+        "quantum": "generic_search",
+        "purpose": "encryption",
+        "parameters_known": true,
+        "classical_concerns": [],
+        "attack_models": [
+          {
+            "attack": "generic_key_search",
+            "exponent_numerator": 128,
+            "exponent_denominator": 2,
+            "assumption": "ideal_oracle_queries_not_operational_security_bits; memory_parallelism_and_circuit_cost_not_estimated"
+          }
+        ],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "F12",
+          "LOCAL026",
+          "NIST-PQ-FAQ"
+        ],
+        "encoding_assurance": "unknown",
+        "protocol_ref": null,
+        "role": "algorithm"
+      },
+      "observation": {
+        "method": "ast_pattern",
+        "assurance": "syntactic",
+        "usage": "referenced",
+        "collection_outcome": "complete"
+      },
+      "limitations": [
+        "unknown_parameter_encoding"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "migration_claim-v1-84fbe87a6fc10e5e6919bf90fe60ffec4b15187dc737af61cacc4863ac083f26",
+      "context_pointer": "/bindings/0/claims/usage_state",
+      "field": "usage_state",
+      "state": "known",
+      "value": "active",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-b1ff6f0a74013b725b9a2591f55fe402196f1e2928a685e68069ebf5c99df734",
+      "context_pointer": "/bindings/0/claims/applicability",
+      "field": "applicability",
+      "state": "known",
+      "value": "applicable",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-bde2c68a168759e94adb006cdd6e6179e91140ddd0cb6d6583ccd5b73b5ded75",
+      "context_pointer": "/bindings/0/claims/use_case",
+      "field": "use_case",
+      "state": "known",
+      "value": "encryption",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    }
+  ],
+  "candidates": [],
+  "decisions": [
+    {
+      "id": "migration_decision-v1-a2ec0eaa768c73db98d69e43e55188ef3922a7037c98b572b3fa901ac8473c7f",
+      "target_id": "migration_target-v1-fa82b47bf482ba1ea5ec9859882d0c5d2247ac20df96919df716e9bafdc95093",
+      "system_id": "f05",
+      "urgency": "monitor",
+      "information": "sufficient",
+      "readiness": "not_applicable",
+      "reason_codes": [
+        "bounded_role_no_known_concern",
+        "unknown_parameter_encoding"
+      ],
+      "missing_inputs": [],
+      "applied_claim_ids": [
+        "migration_claim-v1-84fbe87a6fc10e5e6919bf90fe60ffec4b15187dc737af61cacc4863ac083f26",
+        "migration_claim-v1-b1ff6f0a74013b725b9a2591f55fe402196f1e2928a685e68069ebf5c99df734",
+        "migration_claim-v1-bde2c68a168759e94adb006cdd6e6179e91140ddd0cb6d6583ccd5b73b5ded75"
+      ],
+      "action": {
+        "kind": "monitor",
+        "candidate_ids": [],
+        "blocking_prerequisites": [],
+        "validation_steps": []
+      },
+      "source_ids": [
+        "F12",
+        "F14",
+        "LOCAL026",
+        "NIST-PQ-FAQ"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "F12",
+      "edition": "task066 adopted contract 2026-11-18",
+      "clause": "technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "saved claims preserve assurance; digest does not attest collector truth"
+    },
+    {
+      "id": "F14",
+      "edition": "migration-decision-v1 1.0.0; adopted 2026-11-18",
+      "clause": "P1-P8; readiness and action precedence",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "local advisory policy; conformance is not practitioner usefulness"
+    },
+    {
+      "id": "LOCAL026",
+      "edition": "local-assessment-1",
+      "clause": "finite vocabulary and evidence limits",
+      "uri": null,
+      "local_source_id": "docs/architecture/LOCAL-ASSESSMENT-V1.md",
+      "scope_limit": "advisory facts; no deployment or cryptographic verification"
+    },
+    {
+      "id": "NIST-PQ-FAQ",
+      "edition": "task056 pinned FAQ snapshot",
+      "clause": "quantum public-key and generic-search models",
+      "uri": "https://csrc.nist.gov/projects/post-quantum-cryptography/faqs",
+      "local_source_id": null,
+      "scope_limit": "not quantum arrival, probability or operational security bits"
+    }
+  ],
+  "coverage": {
+    "collection_outcome": "complete",
+    "input_count": 1,
+    "target_count": 1,
+    "unknown_identity_or_parameters_targets": 0,
+    "unresolved_target_count": 0,
+    "limits": [
+      "inventory_not_exhaustive"
+    ]
+  },
+  "limitations": [
+    "saved_content_not_collector_attestation",
+    "no_offline_cryptographic_reverification",
+    "local_advisory_policy_not_practitioner_validation"
+  ]
+}

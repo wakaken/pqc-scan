@@ -81,3 +81,39 @@ HTMLの初期言語とMarkdownの言語を指定します。JSON、ID、事実�
 拒否します。既存の安全な出力処理を使い、ファイル単位で置き換えます。
 入力の実行、参照先の取得、ソースの再スキャン、接続先への通信は行いません。
 実験的なプローブ機能を有効にしたビルドでも同じです。
+
+## 対象IDを転記せずに設定を作る
+
+非対話の`context-template`コマンドで、対象の番号・方式・役割・位置を確認します。
+
+```console
+pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 --list-targets
+pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 \
+  --target 1 --out migration-context.json --as-of 2026-11-18T00:00:00Z \
+  --set 'use_case="signature"' --set 'usage_state="active"' \
+  --set 'business_critical=false' --unknown confidential \
+  --actor owner --asserted-at 2026-11-17T00:00:00Z
+```
+
+対応付ける番号だけを選びます。複数をまとめて扱う場合は`--target`を繰り返します。
+ハッシュと対象IDはコマンドが設定します。対象を選ばなければ、対応付けのない有効な
+ひな形を作り、申告の指定は拒否します。全対象への自動適用は行いません。
+曖昧な対象、重複、不正な番号は拒否します。別名は既定の`organization`と`system-1`を
+使えるので、会社や部署の入力は不要です。変更には`--organization`と`--system`を使います。
+番号はその保存済みファイルに対する指定です。入力を変えたら一覧を確認し直してください。
+別の内容に結び付いた既存の設定は拒否します。
+
+`--set 項目=JSON値`には既存の項目名を指定します。対応状況は`support.peer`などです。
+文字列はJSONの引用符で囲み、真偽値や秒数にはJSONの型を使います。
+`--unknown 項目`は不明という回答、省略は未回答として扱います。
+回答には申告者と申告日時が必要です。`--valid-until`は任意で、自動では補いません。
+期限がなければ、既存の規則に従って有効性は不明になります。資料を根拠とする期限や
+継承を使う詳細な設定は、既存形式の文書で指定してください。簡易入力から資料の参照を
+捏造しません。個人利用でも重要度の意味は変わりません。生成した設定は`assess`で使います。
+
+既存の安全な出力処理と1MiBの上限を適用します。入力と同じ名前・ハードリンク、
+リンク先への出力、不正な値・由来、上限超過は置換前に拒否します。
+ライブラリの`generate_context`、`ContextSelection`、`ContextClaims`、`ClaimAnswer`も
+同じ読み込み・対応付け規則を使います。`MigrationContext::to_bytes`は、日時を正規化し、
+対応する全項目・申告・資料参照を保持して出力します。従来のContext v1とは別で、
+既定のスキャン動作は変わりません。

@@ -1,0 +1,197 @@
+{
+  "format": "pqc-scan.migration-assessment",
+  "version": 1,
+  "input": {
+    "format": "inventory-v1",
+    "sha256": "55eea00e849f7aaf43dfb8e4a02c7f8e2cfc86b30d18ce1c84c8d1572c89d29a",
+    "schema_version": 1,
+    "collection_time": "2026-11-01T00:00:00Z",
+    "run_id": "scan-v1-c429b17ee56e360eef17c828e57f45a799febf7e6bc6f65ff71abda823e0d08b"
+  },
+  "context": {
+    "format": "pqc-scan.migration-context",
+    "version": 1,
+    "sha256": "c09450b95c321e87095e90edad3ef3f1e94b06d1a760c12bc47ad4fc864806c2"
+  },
+  "catalog": {
+    "id": "migration-facts-v1",
+    "version": "1.0.0"
+  },
+  "policy": {
+    "id": "migration-decision-v1",
+    "version": "1.0.0"
+  },
+  "model": {
+    "id": "decision_table",
+    "version": "1.0.0"
+  },
+  "as_of": "2026-11-19T00:00:00Z",
+  "targets": [
+    {
+      "id": "migration_target-v1-1e4687898484ee86923243cadb2511d7fdf5db9076cec803cfdce875b68643c4",
+      "source_ref": {
+        "run_id": "scan-v1-c429b17ee56e360eef17c828e57f45a799febf7e6bc6f65ff71abda823e0d08b",
+        "observation_id": "observation-v1-3869f84b09246ba20f9d683fe3ad521f9ecc8d949cadbd26f44f52288a0d0d86",
+        "root_asset_id": "asset-v1-8db72a130fc3e96e05d600fc26fcf58acc836ac06cb8c1a1630ec9167f5c0cb2",
+        "role": "algorithm",
+        "path": "S08B/captured-record.txt",
+        "line": 1
+      },
+      "technical": {
+        "identifier": "ML-KEM-768",
+        "construction": "post_quantum",
+        "standardization": "nist_final",
+        "quantum": "designed_resistant",
+        "purpose": "key_establishment",
+        "parameters_known": true,
+        "classical_concerns": [],
+        "attack_models": [],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "F12",
+          "LOCAL026",
+          "S203"
+        ],
+        "encoding_assurance": "unknown",
+        "protocol_ref": null,
+        "role": "algorithm"
+      },
+      "observation": {
+        "method": "ast_pattern",
+        "assurance": "syntactic",
+        "usage": "referenced",
+        "collection_outcome": "complete"
+      },
+      "limitations": [
+        "unknown_parameter_encoding"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "migration_claim-v1-91e47151c4e97546f6aa88c45b5877cbaece251e56d80b9e30f5ce719de0183c",
+      "context_pointer": "/bindings/0/claims/usage_state",
+      "field": "usage_state",
+      "state": "known",
+      "value": "planned",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-9aca8d3973c5fbb68a3637ebfc8dad8e4c6a7331f528ad7cceb71df8f1f5afec",
+      "context_pointer": "/bindings/0/claims/applicability",
+      "field": "applicability",
+      "state": "known",
+      "value": "applicable",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-b0ad6319313dd64ed3d0af47bf5966bf8cc9ddca30b62e77283e537a15423000",
+      "context_pointer": "/bindings/0/claims/use_case",
+      "field": "use_case",
+      "state": "known",
+      "value": "key_establishment",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    }
+  ],
+  "candidates": [],
+  "decisions": [
+    {
+      "id": "migration_decision-v1-cdd76a6c5cd41fd224f78bd50cadade8cf855feed638b8d88d36ad8409ce19b9",
+      "target_id": "migration_target-v1-1e4687898484ee86923243cadb2511d7fdf5db9076cec803cfdce875b68643c4",
+      "system_id": "f08",
+      "urgency": "monitor",
+      "information": "sufficient",
+      "readiness": "not_applicable",
+      "reason_codes": [
+        "bounded_role_no_known_concern",
+        "unknown_parameter_encoding"
+      ],
+      "missing_inputs": [],
+      "applied_claim_ids": [
+        "migration_claim-v1-91e47151c4e97546f6aa88c45b5877cbaece251e56d80b9e30f5ce719de0183c",
+        "migration_claim-v1-9aca8d3973c5fbb68a3637ebfc8dad8e4c6a7331f528ad7cceb71df8f1f5afec",
+        "migration_claim-v1-b0ad6319313dd64ed3d0af47bf5966bf8cc9ddca30b62e77283e537a15423000"
+      ],
+      "action": {
+        "kind": "monitor",
+        "candidate_ids": [],
+        "blocking_prerequisites": [],
+        "validation_steps": []
+      },
+      "source_ids": [
+        "F12",
+        "F14",
+        "LOCAL026",
+        "S203"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "F12",
+      "edition": "task066 adopted contract 2026-11-18",
+      "clause": "technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "saved claims preserve assurance; digest does not attest collector truth"
+    },
+    {
+      "id": "F14",
+      "edition": "migration-decision-v1 1.0.0; adopted 2026-11-18",
+      "clause": "P1-P8; readiness and action precedence",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "local advisory policy; conformance is not practitioner usefulness"
+    },
+    {
+      "id": "LOCAL026",
+      "edition": "local-assessment-1",
+      "clause": "finite vocabulary and evidence limits",
+      "uri": null,
+      "local_source_id": "docs/architecture/LOCAL-ASSESSMENT-V1.md",
+      "scope_limit": "advisory facts; no deployment or cryptographic verification"
+    },
+    {
+      "id": "S203",
+      "edition": "FIPS203 Final 2024-08-13",
+      "clause": "1.1; 3.1; 7; 8 Table2",
+      "uri": "https://csrc.nist.gov/pubs/fips/203/final",
+      "local_source_id": null,
+      "scope_limit": "KEM parameter names/purpose only"
+    }
+  ],
+  "coverage": {
+    "collection_outcome": "complete",
+    "input_count": 1,
+    "target_count": 1,
+    "unknown_identity_or_parameters_targets": 0,
+    "unresolved_target_count": 0,
+    "limits": [
+      "inventory_not_exhaustive"
+    ]
+  },
+  "limitations": [
+    "saved_content_not_collector_attestation",
+    "no_offline_cryptographic_reverification",
+    "local_advisory_policy_not_practitioner_validation"
+  ]
+}

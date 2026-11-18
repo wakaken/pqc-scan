@@ -1,0 +1,166 @@
+{
+  "assessment_status": "not_evaluated",
+  "assessments": [],
+  "assets": [
+    {
+      "attributes": {
+        "identifier": "RSA",
+        "namespace": "named",
+        "parameters": {},
+        "purpose": "reference"
+      },
+      "id": "asset-v1-67e04dc776183967dab79adddf671ab8a792ef9eaeb17ee908c2fa3556e19eb9",
+      "identity_basis": "synthetic-declared-facts",
+      "kind": "algorithm",
+      "relations": [],
+      "uncertainty": [
+        "synthetic_capture_not_real_deployment"
+      ]
+    },
+    {
+      "attributes": {
+        "identifier": "unknown",
+        "namespace": "named",
+        "parameters": {},
+        "purpose": "reference"
+      },
+      "id": "asset-v1-cb9bb5cdfb9759d03c63b004f1d8cf6ba75267dfaa225befa19aa87ebd2a48bf",
+      "identity_basis": "synthetic-declared-facts",
+      "kind": "algorithm",
+      "relations": [],
+      "uncertainty": [
+        "synthetic_capture_not_real_deployment"
+      ]
+    },
+    {
+      "attributes": {
+        "key_bits": null,
+        "named_curve_oid": null,
+        "spki_sha256": "46775cf0c9974c6a6d9eaa7016a0373c6615406b9ac138a64969b0766239489f"
+      },
+      "id": "asset-v1-979c14514ec33ba538a3f62a3194fc055a84c45948c5b4d3b1d9cd49df22913b",
+      "identity_basis": "synthetic-declared-facts",
+      "kind": "public_key",
+      "relations": [
+        {
+          "relationship": "algorithm",
+          "target": "asset-v1-67e04dc776183967dab79adddf671ab8a792ef9eaeb17ee908c2fa3556e19eb9"
+        }
+      ],
+      "uncertainty": [
+        "synthetic_capture_not_real_deployment"
+      ]
+    },
+    {
+      "attributes": {
+        "certificate_sha256": "71c4c6585ed5782f727f2ccb8a98d7071bb7458d9632cc599ffca17d05fd9bb0",
+        "not_after_unix": 1924992000,
+        "not_before_unix": 1767225600
+      },
+      "id": "asset-v1-d9b2a0762039c1693b4f21dc76d27fbc6ce29570b7a9694785df2eef969b94c0",
+      "identity_basis": "synthetic-declared-facts",
+      "kind": "certificate",
+      "relations": [
+        {
+          "relationship": "subject_key",
+          "target": "asset-v1-979c14514ec33ba538a3f62a3194fc055a84c45948c5b4d3b1d9cd49df22913b"
+        },
+        {
+          "relationship": "signature_algorithm",
+          "target": "asset-v1-cb9bb5cdfb9759d03c63b004f1d8cf6ba75267dfaa225befa19aa87ebd2a48bf"
+        }
+      ],
+      "uncertainty": [
+        "synthetic_capture_not_real_deployment"
+      ]
+    }
+  ],
+  "catalog_version": "native-exact-identifiers-1",
+  "coverage": {
+    "analysis_failed_files": 0,
+    "analyzed_files": 1,
+    "enumeration_failed_entries": 0,
+    "excluded_enumerated_files": 0,
+    "not_applicable_files": 0,
+    "not_enumerated_population": true,
+    "partial_files": 0,
+    "read_failed_files": 0,
+    "read_ok_files": 1,
+    "selected_files": 1,
+    "status": "partial",
+    "unknown_files": 0,
+    "unsupported_files": 0
+  },
+  "diagnostics": [],
+  "export_loss_notes": [
+    "raw_matches_snippets_and_arbitrary_metadata_omitted",
+    "unknown_raw_identifiers_not_guessed",
+    "legacy_snapshot_not_derived_from_inventory",
+    "legacy_ids_are_not_native_identity",
+    "legacy_dependency_version_provenance_unavailable",
+    "legacy_applicability_coverage_is_not_native_inventory_completeness",
+    "weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity",
+    "cryptographic_trust_and_policy_not_evaluated"
+  ],
+  "identity_scheme": "pqc-scan-length-prefixed-sha256-v1",
+  "legacy_associations": [],
+  "legacy_loss_records": [],
+  "native_completeness": "not_exhaustive",
+  "observations": [
+    {
+      "asset_ids": [
+        "asset-v1-d9b2a0762039c1693b4f21dc76d27fbc6ce29570b7a9694785df2eef969b94c0"
+      ],
+      "assurance": "parsed",
+      "evidence": {
+        "capture_status": "legacy_reported",
+        "marker_kind": null
+      },
+      "id": "observation-v1-ff45812bae72680af333823033833f426e28624067eefe79fb56a73ad59b0456",
+      "identity_confidence": "weak_structural_anchor",
+      "method": "certificate_parse",
+      "occurrence_key": "occurrence-v1-090681faaa35fafb835672c2d8a1ebe429a9f8ad634c93f4d63cf12daab42e89",
+      "producer": "regex_detector",
+      "rule_id": "TEST_NATIVE",
+      "target": {
+        "byte_end": 10,
+        "byte_start": 0,
+        "column": 1,
+        "column_kind": "unicode_code_points",
+        "line": 1,
+        "object_index": null,
+        "path": "S03A/captured-record.txt"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ],
+      "usage": "referenced"
+    }
+  ],
+  "profile": "static-native-v1",
+  "repository_scope": "test/project",
+  "rules_digest": "rules-v1-bd3e2080a4ee8734b100c5839b8018d06a083cda5b8cb170d39dbd527c9a9f0b",
+  "run": {
+    "attempt_id": "static-1",
+    "generated_at": "2026-11-01T00:00:00Z",
+    "id": "scan-v1-6e170b35745ffebd4b386186b2d090ebaa777a8ef87f27400b260be5fba31690"
+  },
+  "scanner_version": "0.3.0",
+  "schema_version": 1,
+  "scope": {
+    "default_excludes": [
+      ".git",
+      "node_modules",
+      "target",
+      "dist",
+      "docs",
+      "known non-scannable media, archives and binary data"
+    ],
+    "git_exclude": true,
+    "git_global": true,
+    "git_ignore": true,
+    "markdown_excluded": true,
+    "max_file_size_bytes": 2097152
+  },
+  "unassociated_observation_ids": []
+}

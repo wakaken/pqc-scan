@@ -54,6 +54,11 @@ pub(crate) fn parse(bytes: &[u8], limit: usize) -> Result<Value> {
 }
 
 struct Seed(usize);
+pub(crate) fn deserialize_value<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> std::result::Result<Value, D::Error> {
+    Seed(0).deserialize(deserializer)
+}
 impl<'de> DeserializeSeed<'de> for Seed {
     type Value = Value;
     fn deserialize<D: serde::Deserializer<'de>>(

@@ -1,0 +1,241 @@
+{
+  "format": "pqc-scan.migration-assessment",
+  "version": 1,
+  "input": {
+    "format": "inventory-v1",
+    "sha256": "786b3825271035373d8e4185695bd8f1dbc2a6d8cca0f2d8a46a7da0478a5580",
+    "schema_version": 1,
+    "collection_time": "2026-11-01T00:00:00Z",
+    "run_id": "scan-v1-c82b5d2f3bcfa49be8f357506e59e587ec917ebc58531cb5acf70c571636038f"
+  },
+  "context": {
+    "format": "pqc-scan.migration-context",
+    "version": 1,
+    "sha256": "78b721ec5661eef5a207b513797bea09c1a3495bf6d44e51ccdbfb1ba35d74b8"
+  },
+  "catalog": {
+    "id": "migration-facts-v1",
+    "version": "1.0.0"
+  },
+  "policy": {
+    "id": "migration-decision-v1",
+    "version": "1.0.0"
+  },
+  "model": {
+    "id": "decision_table",
+    "version": "1.0.0"
+  },
+  "as_of": "2026-11-19T00:00:00Z",
+  "targets": [
+    {
+      "id": "migration_target-v1-f4aa2047d14c3c2724d5ecfa4a75052b130f870e2621bf8ed674dafac2913a7f",
+      "source_ref": {
+        "run_id": "scan-v1-c82b5d2f3bcfa49be8f357506e59e587ec917ebc58531cb5acf70c571636038f",
+        "observation_id": "observation-v1-b023fa70c574949d7f1bb658866ed0ba95ec5e774f1839af9e209e71f400d5f4",
+        "root_asset_id": "asset-v1-7a28efd620af91244d37e7b7455d3fd8b04e1f32ef5295b5e1016b5fc9676a98",
+        "role": "algorithm",
+        "path": "S06B/captured-record.txt",
+        "line": 1
+      },
+      "technical": {
+        "identifier": "MD5",
+        "construction": "hash",
+        "standardization": "classical_standard",
+        "quantum": "generic_search",
+        "purpose": "hash",
+        "parameters_known": true,
+        "classical_concerns": [
+          "weak_collision_resistance"
+        ],
+        "attack_models": [
+          {
+            "attack": "generic_preimage",
+            "exponent_numerator": 128,
+            "exponent_denominator": 2,
+            "assumption": "ideal_oracle_queries_not_operational_security_bits; memory_parallelism_and_circuit_cost_not_estimated"
+          },
+          {
+            "attack": "generic_collision",
+            "exponent_numerator": 128,
+            "exponent_denominator": 3,
+            "assumption": "ideal_oracle_queries_not_operational_security_bits; memory_parallelism_and_circuit_cost_not_estimated"
+          }
+        ],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "BHT1997",
+          "F12",
+          "LOCAL026",
+          "NIST-PQ-FAQ",
+          "R6151"
+        ],
+        "encoding_assurance": "unknown",
+        "protocol_ref": null,
+        "role": "algorithm"
+      },
+      "observation": {
+        "method": "ast_pattern",
+        "assurance": "syntactic",
+        "usage": "referenced",
+        "collection_outcome": "complete"
+      },
+      "limitations": [
+        "unknown_parameter_encoding"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "migration_claim-v1-3cd697d24a9ca13214220c841e51ff3e4c0e13b4ea6d99162dc4a81a6a980f2d",
+      "context_pointer": "/bindings/0/claims/usage_state",
+      "field": "usage_state",
+      "state": "known",
+      "value": "active",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-854e84c5c8239467bf897f88be3155e373c023bab91e5894f16ab7b2b8bdf6a7",
+      "context_pointer": "/bindings/0/claims/applicability",
+      "field": "applicability",
+      "state": "known",
+      "value": "applicable",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-b81c87ac09d84f0ddb6665274559617fb7fb4fe9f06b8baa4a18534da04b33de",
+      "context_pointer": "/bindings/0/claims/use_case",
+      "field": "use_case",
+      "state": "known",
+      "value": "signature",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    }
+  ],
+  "candidates": [],
+  "decisions": [
+    {
+      "id": "migration_decision-v1-529e954ae1d315e3ba9a5f89d2f3603582d689de2685afa14203666d94f98ae6",
+      "target_id": "migration_target-v1-f4aa2047d14c3c2724d5ecfa4a75052b130f870e2621bf8ed674dafac2913a7f",
+      "system_id": "f06",
+      "urgency": "undetermined",
+      "information": "conflicting",
+      "readiness": "unknown",
+      "reason_codes": [
+        "insufficient_information",
+        "unknown_parameter_encoding",
+        "purpose_mismatch"
+      ],
+      "missing_inputs": [
+        "support.parameters",
+        "support.provider",
+        "support.runtime",
+        "technical.collision_sensitive_use"
+      ],
+      "applied_claim_ids": [
+        "migration_claim-v1-3cd697d24a9ca13214220c841e51ff3e4c0e13b4ea6d99162dc4a81a6a980f2d",
+        "migration_claim-v1-854e84c5c8239467bf897f88be3155e373c023bab91e5894f16ab7b2b8bdf6a7",
+        "migration_claim-v1-b81c87ac09d84f0ddb6665274559617fb7fb4fe9f06b8baa4a18534da04b33de"
+      ],
+      "action": {
+        "kind": "investigate",
+        "candidate_ids": [],
+        "blocking_prerequisites": [],
+        "validation_steps": [
+          "confirm_actual_use_and_required_purpose",
+          "refresh_missing_or_stale_scoped_claims"
+        ]
+      },
+      "source_ids": [
+        "BHT1997",
+        "F12",
+        "F14",
+        "LOCAL026",
+        "NIST-PQ-FAQ",
+        "R6151"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "BHT1997",
+      "edition": "1997",
+      "clause": "ideal quantum collision-query model",
+      "uri": "https://arxiv.org/abs/quant-ph/9705002",
+      "local_source_id": null,
+      "scope_limit": "oracle queries only; circuit and memory cost excluded"
+    },
+    {
+      "id": "F12",
+      "edition": "task066 adopted contract 2026-11-18",
+      "clause": "technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "saved claims preserve assurance; digest does not attest collector truth"
+    },
+    {
+      "id": "F14",
+      "edition": "migration-decision-v1 1.0.0; adopted 2026-11-18",
+      "clause": "P1-P8; readiness and action precedence",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "local advisory policy; conformance is not practitioner usefulness"
+    },
+    {
+      "id": "LOCAL026",
+      "edition": "local-assessment-1",
+      "clause": "finite vocabulary and evidence limits",
+      "uri": null,
+      "local_source_id": "docs/architecture/LOCAL-ASSESSMENT-V1.md",
+      "scope_limit": "advisory facts; no deployment or cryptographic verification"
+    },
+    {
+      "id": "NIST-PQ-FAQ",
+      "edition": "task056 pinned FAQ snapshot",
+      "clause": "quantum public-key and generic-search models",
+      "uri": "https://csrc.nist.gov/projects/post-quantum-cryptography/faqs",
+      "local_source_id": null,
+      "scope_limit": "not quantum arrival, probability or operational security bits"
+    },
+    {
+      "id": "R6151",
+      "edition": "RFC6151 2011",
+      "clause": "2",
+      "uri": "https://www.rfc-editor.org/rfc/rfc6151.html",
+      "local_source_id": null,
+      "scope_limit": "MD5 collision-sensitive use; not every hash use"
+    }
+  ],
+  "coverage": {
+    "collection_outcome": "complete",
+    "input_count": 1,
+    "target_count": 1,
+    "unknown_identity_or_parameters_targets": 0,
+    "unresolved_target_count": 0,
+    "limits": [
+      "inventory_not_exhaustive"
+    ]
+  },
+  "limitations": [
+    "saved_content_not_collector_attestation",
+    "no_offline_cryptographic_reverification",
+    "local_advisory_policy_not_practitioner_validation"
+  ]
+}

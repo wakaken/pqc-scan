@@ -143,3 +143,40 @@ using the existing safe output boundary; oversized reports reject without
 truncation. Existing files are atomically replaced individually. The command
 never executes input, fetches references, rescans source or contacts endpoints,
 including builds with experimental probe features enabled.
+
+## Generate context without copying target IDs
+
+The explicit noninteractive `context-template` command lists readable target numbers:
+
+```console
+pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 --list-targets
+pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 \
+  --target 1 --out migration-context.json --as-of 2026-11-18T00:00:00Z \
+  --set 'use_case="signature"' --set 'usage_state="active"' \
+  --set 'business_critical=false' --unknown confidential \
+  --actor owner --asserted-at 2026-11-17T00:00:00Z
+```
+
+Select only the displayed numbers you intend to bind; repeat `--target` for an
+explicit group. The command calculates the exact input hash/IDs. Without selected
+targets it writes a valid unbound template and refuses claims. It never selects all
+targets implicitly. Ambiguous targets, duplicates and invalid numbers reject.
+Default aliases `organization` and `system-1` need no company or department;
+`--organization`/`--system` customize them. Numbers apply to this exact saved file;
+review the list again if it changes. Existing context bound to other bytes rejects.
+
+`--set FIELD=JSON_VALUE` uses adopted field names, with `support.peer` and other
+support names for prerequisites. String values require JSON quotes; booleans and
+seconds use JSON types. `--unknown FIELD` explicitly records uncertainty; omission
+leaves no answer. Answers require an actor and assertion instant; optional
+`--valid-until` is never generated. Without expiry the existing freshness rules
+remain unknown. Reference-backed deadlines and advanced inheritance can be authored
+in the adopted context document; the simple answer builder does not invent references.
+No personal-use shortcut changes criticality. Use the generated file with `assess`.
+
+Output uses the existing safe writer and1MiB context limit. Input aliases, hardlinks,
+linked destinations, bad values/provenance and oversized output reject before
+replacement. The shared library `generate_context`, `ContextSelection`, `ContextClaims`
+and `ClaimAnswer` use the same reader/binding rules; `MigrationContext::to_bytes`
+exports all supported fields with normalized times, preserving claims and references.
+This is separate from legacy Context v1 and does not change existing scan defaults.

@@ -1,3 +1,13 @@
+> Current maintainer amendment2026-11-19: task071 uses a fresh-context AI-authored
+>24-case/12-pair limited technical correctness/conformance/reproducibility study.
+> The original human/M2/numeric evaluation is preserved and unexecuted; human utility,
+> workload, rater agreement and score validity/adoption remain unmeasured. Revised R5
+> requirements and task071/EVALUATION-PROTOCOL-v2.md govern current071/072/075 acceptance.
+> Two practitioners/human technical adjudicator are not gates for this limited scope.
+> One extra case-author AI only (no redelegation) is authorized; existing2 reviewers
+> are reused. No score adoption, release/publication, outreach or fees are authorized.
+> Earlier resource-block/completion narrative below remains historical, not current scope.
+
 # v0.4 task and requirement map
 
 Registered on 2026-11-18 against baseline
@@ -193,3 +203,55 @@ Do not mark tasks done from artifact lists, source inspection, Unknown displays 
 task counts alone. No automatic scope reduction, task creation or unrelated
 remediation is authorized. Product acceptance, support, score adoption and
 release/publication remain separate from task completion.
+
+
+## Input-assistance execution update (2026-11-18)
+
+The maintainer selected073-075 while retaining071/072 unchanged.073 is done with
+shared typed generation, explicit headless context-template, safe output and complete
+context export; both original reviewer identities accepted705 workspace/222 featured
+core/12 featured CLI results and final source.074 proceeds under its concrete D4 API/UI
+plan.075's supplemental protocol is frozen before observations; original071/072
+prerequisites keep U09/final completion unfinished. No original criteria or historical
+study records are rewritten and no release, contact or scoring adoption is authorized.
+
+
+### Assisted-input completion update
+
+073 and074 are now done after combined final-source implementation and test reviews
+by the same two original identities.073 was reopened during074 for compact full-context
+export/raw duplicate input and then reverified. Final source6459a573... retains718
+workspace/225 featured core/23 featured CLI passes, applicable scoped frontend checks
+and actual bilingual/offline browser evidence with five exact CLI comparisons.
+075 may execute its independent pre-frozen U08 supplement after074; this does not
+bypass071/072 for U09.071 remains blocked and072 pending, byte-for-byte unchanged.
+
+
+### Supplemental comparison disposition
+
+075 is blocked after completing/reviewing its independent controlled supplement:
+6/6 actual CLI/browser routes preserve declared scope/unknowns and match complete
+canonical evaluation outputs; one operator-tool recovery is retained. This is one
+source-exposed implementation-author AI, not practitioner truth or a human speed
+comparison. All39 rows are mapped,30 scoped component passes and9 partial/blocked;
+full acceptance remains false. Original071 study and072 reconciliation remain
+mandatory and byte-for-byte unchanged. Resume071, then072 and final075/U09 once actual
+resources are resolved; no further task, outreach, score or release is selected.
+
+
+## Current amended-scope completion (2026-11-19)
+
+The explicit maintainer amendment changed only R5 study/completion authority and its
+072/075 dependencies.071 is done for24 AI-authored/source-confirmed technical cases,
+adopted specification and reproducibility:222/222 technical properties,507/507
+conformance,24/24 full semantic repetitions (48runs),56 unconfirmed statements excluded.
+Both original reviewers accepted.072 then closed current30-row/65-original-example/
+compatibility reconciliation;075 resumed after072 and closed all39 current rows using
+its preserved6-route operator comparison.073/074 and065-070 remain done.
+
+This is acceptance in the amended limited scope. Original96 human judgments and the
+M2/numerical comparison remain unexecuted; human usefulness, actual workload, rater
+agreement and numeric-score validity/superiority/adoption remain Not Tested/no conclusion.
+No full original study, unrestricted product quality, new support, publication/release,
+outreach, fees or numerical product adoption is asserted. Historical blocked results,
+old approvals/protocols and raw observations remain preserved and separately bound.

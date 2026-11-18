@@ -14,6 +14,10 @@ mod markdown_report;
 mod migration_copy;
 mod migration_html;
 pub use migration_html::{migration_html_bytes, MIGRATION_HTML};
+/// Share saved-role terminology with optional local workflow selectors.
+pub fn migration_role_label(role: &str, language: ReportLanguage) -> &str {
+    migration_copy::Labels(language).token(role)
+}
 mod migration_markdown;
 mod migration_report;
 pub use migration_markdown::{migration_markdown_bytes, MIGRATION_MARKDOWN};

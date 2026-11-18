@@ -564,8 +564,11 @@ fn effective_purpose(t: &Target, c: Option<&TargetContext>) -> Purpose {
     if c.is_some_and(|c| c.purpose_conflicting) || t.technical.algorithm.identifier == "unknown" {
         return Purpose::Unknown;
     }
-    let claimed = purpose(text(c, "use_case"));
+    effective_from_usage(t, text(c, "use_case"))
+}
+fn effective_from_usage(t: &Target, usage: Option<&str>) -> Purpose {
     let actual = t.technical.algorithm.purpose;
+    let claimed = purpose(usage);
     if actual != Purpose::Unknown {
         actual
     } else if matches!(t.technical.algorithm.identifier.as_str(), "RSA" | "EC")
@@ -576,23 +579,44 @@ fn effective_purpose(t: &Target, c: Option<&TargetContext>) -> Purpose {
         Purpose::Unknown
     }
 }
+/// Input-question hints only. Reuse the evaluator's prerequisite vocabulary;
+/// these do not establish active claims, readiness or an assessment decision.
+pub fn input_support_fields(t: &Target, usage: Option<&str>) -> Result<Vec<&'static str>> {
+    if usage.is_some_and(|s| {
+        !matches!(
+            s,
+            "signature" | "jwt" | "pki" | "key_establishment" | "encryption" | "hashing"
+        )
+    }) {
+        return Err(Error::InvalidInput);
+    }
+    Ok(support_requirements(
+        t,
+        usage,
+        effective_from_usage(t, usage),
+    ))
+}
 fn requirements(t: &Target, c: Option<&TargetContext>, p: Purpose) -> Vec<&'static str> {
+    support_requirements(t, text(c, "use_case"), p)
+}
+fn support_requirements(t: &Target, usage: Option<&str>, p: Purpose) -> Vec<&'static str> {
     let mut fields = vec!["runtime", "provider", "parameters"];
     if matches!(p, Purpose::KeyEstablishment | Purpose::Signature) {
         fields.extend(["peer", "protocol"]);
     } else if p == Purpose::Encryption {
         fields.push("protocol");
     }
-    if p == Purpose::Signature && text(c, "use_case") == Some("jwt") {
+    if p == Purpose::Signature && usage == Some("jwt") {
         fields.extend(["jose", "verifiers"]);
     }
     if p == Purpose::Signature
-        && (text(c, "use_case") == Some("pki") || t.source_ref.role.starts_with("certificate"))
+        && (usage == Some("pki") || t.source_ref.role.starts_with("certificate"))
     {
         fields.push("pki");
     }
     fields
 }
+
 fn classical_concern(t: &Target, p: Purpose) -> bool {
     t.technical
         .algorithm

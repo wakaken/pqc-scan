@@ -227,3 +227,56 @@ The default browser opens the session's local page. Browse subfolders of `--root
 The server binds only to `127.0.0.1`. Open the full random session URL printed in the terminal; `localhost` aliases or a bare `/` URL are not accepted. Keep that URL private. No source file contents are served. Each scan uses the CLI's default rules/selection behavior and writes the seven `--format all` outputs plus `diagnostics.json`; filters, thresholds and network probing cannot be configured from this UI. One scan runs at a time, with at most 20 scans per server session. Folder listings show up to 1,000 subfolders and state when entries were omitted.
 
 Reports are retained in the private `pqc-scan-web-*` session directory printed in the terminal. Stop with Ctrl+C. To keep an offline report, retain both `report.html` and `report.rules.html`; exports are also available at the corresponding filenames under the report URL. This mode does not upload source or reports. It does not run project build scripts or package commands. A folder containing the session output directory cannot be selected for scanning.
+
+### Optional migration context and reassessment
+
+```console
+pqc-scan serve --migration --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
+```
+
+This opt-in mode additionally records Inventory v1 for new web scans. On completion,
+it opens optional migration input instead of navigating directly to the scan report;
+the ordinary scan-report link remains available. Select **Review migration** on a
+completed session job, or explicitly choose a saved Inventory v1 file (32MiB maximum).
+No file is uploaded outside this local session and no project code is executed.
+
+Select only the targets to which your declarations apply. Lists are paged100 at a
+time, with at most4096 selected targets; ambiguous targets cannot acquire bindings.
+Personal/organization guidance does not change policy or criticality. Company and
+department names are not required; generated organization/system aliases can be kept.
+Answer only known relevant questions, explicitly choose Unknown, or leave them
+unanswered. False and Not applicable are separate choices. Show all optional
+questions to review other fields. An already supplied answer stays visible when
+purpose changes; it is never silently removed.
+
+Answers require an actor alias and assertion instant. The current-time button is an
+explicit way to supply that instant; expiry is optional and never generated. Without
+expiry, existing freshness remains unknown. Review the evaluation instant separately.
+You may instead continue without context. Known technical concerns and missing
+information remain visible in the resulting report.
+
+**Import existing context** accepts the adopted migration-context v1 (1MiB maximum),
+validates its exact saved-input binding and preserves every supported field, default,
+reference and provenance. Advanced fields remain read-only rather than disappearing
+into the simple form. To change those fields, edit and import the original context
+again. Selecting another input resets declarations/selections and requires new review.
+
+Choose **Review declarations and scope** to see the exact targets, supplied claims,
+actor/dates, applicable freshness and purpose conflicts. **Save context** downloads the
+validated canonical document; use it unchanged with CLI assess for the same result.
+After confirming that review, **Reassess** opens the real bilingual migration HTML,
+with urgency/information/readiness, reasons, evidence, missing information and next
+checks. It evaluates the same saved bytes without rescanning or outbound connections.
+The existing language/theme report controls work independently of the input page.
+
+You can cancel a pending review before confirmation. Confirmed synchronous evaluation
+runs to completion; cancellation during writes is not promised. Errors are shown and
+invalid settings are not applied. Each output replacement is atomic individually,
+not a transaction across files. A changed input rejects a stale review token.
+
+The private job subdirectory migration/ retains the3 migration report files and,
+when supplied, migration-context.json. Only completed allowlisted reports/context
+are served. Imports count toward the existing20-job session limit; one context draft
+per job is bounded, with a3MiB request and16MiB response limit. The ordinary serve
+mode, scan/report defaults, legacy contexts and schemas remain unchanged. Original
+practitioner evaluation and release approval are separate from this workflow.

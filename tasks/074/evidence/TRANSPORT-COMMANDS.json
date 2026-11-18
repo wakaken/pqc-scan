@@ -1,0 +1,87 @@
+{
+  "source": "TRANSPORT-SOURCE.json",
+  "commands": [
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--offline",
+        "--locked",
+        "-p",
+        "pqc_scan_cli"
+      ],
+      "exit": 0,
+      "source": "TRANSPORT-SOURCE.json",
+      "log": "tasks/074/evidence/transport-build.log",
+      "sha256": "e097f2ba6f079852704aefb74e1a2e22dbed1ad684edd7b0e743a97b0afa3865"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "pqc_scan_cli",
+        "--test",
+        "serve"
+      ],
+      "exit": 0,
+      "source": "TRANSPORT-SOURCE.json",
+      "log": "tasks/074/evidence/transport-http.log",
+      "sha256": "93bc7822cb1369f61a67e20e0eeff834c7599799404bbbd722dead3614ce898c"
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--offline",
+        "--locked",
+        "-p",
+        "pqc_scan_cli",
+        "--all-features",
+        "--target-dir",
+        "target/task066-all-features"
+      ],
+      "exit": 0,
+      "source": "TRANSPORT-SOURCE.json",
+      "log": "tasks/074/evidence/transport-build-features.log",
+      "sha256": "71a4552857880dee5159ccfc5da9c33d1d9c4e50b1b4c3816910e55b7dc6c668"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "pqc_scan_cli",
+        "--all-features",
+        "--test",
+        "serve",
+        "--target-dir",
+        "target/task066-all-features"
+      ],
+      "exit": 0,
+      "source": "TRANSPORT-SOURCE.json",
+      "log": "tasks/074/evidence/transport-http-features.log",
+      "sha256": "73f4b7bbe9f2805390e76ed0ca572c28e5b70cc88e070c5274bd4136232d8d91"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "crates/pqc_scan_cli/src/serve-migration.js"
+      ],
+      "exit": 0,
+      "source": "TRANSPORT-SOURCE.json",
+      "log": "tasks/074/evidence/transport-js.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "binary_sha256": {
+    "target/debug/pqc-scan": "55e25b1fb65a14a17bd0941b861da4fbdc262846da608b3b3407e2cb700994c9",
+    "target/task066-all-features/debug/pqc-scan": "d855c9907e1ce75876b81f946947f4e686c5a421768a93d06f4ec9d0b6f85066"
+  },
+  "reuse": "Only one frontend transport helper/caller and cancellation cleanup changed. Prior Rust/full/feature/clippy/fmt/report-controller and browser data equality remains applicable; focused actual offline upload regression required separately."
+}

@@ -1,3 +1,26 @@
+# Current task071 plan: limited synthetic evaluation
+
+Selected and explicitly amended by the maintainer on2026-11-19. Status: planned;
+previous blocked resource plan is preserved verbatim below and archived. Follow
+[EVALUATION-PROTOCOL-v2.md](EVALUATION-PROTOCOL-v2.md), superseding only its stated
+original-study completion conditions. No product/schema/crypto/score change selected.
+
+1. Archive original071/072/075 definitions, requirements and protocol; record exact
+   authority, excluded unmeasured dimensions and current acceptance mapping.
+2. One authorized fresh AI authors24 cases/12 pairs in isolated minimal-source package;
+   main validates novelty/family allocation and every fact/expected judgment before
+   freezing. No product output informs expected truth.
+3. Materialize adopted saved inputs/context with existing v0.3 models/contracts; freeze
+   source/binary/harness/data/time/expected checks. Reuse canonical comparison and QAM.
+4. Run fixed CLI twice/case, retain all raw results, compare separately and test data/
+   source/observation guards. Report technical/conformance/reproducibility separately.
+5. Same original implementation/test reviewers assess changes. Run applicable Python/
+   QAM checks, reuse source-matched Rust/feature/browser evidence when valid. Preserve
+   original human96 unexecuted and no score-validity conclusion. Reconcile072 then075
+   under the amended criteria, with no publication/release or score adoption.
+
+## Historical plan (unchanged content)
+
 # Task071 plan and resource gate
 
 Selected for prerequisite/resource planning after066/069/070 completed under the

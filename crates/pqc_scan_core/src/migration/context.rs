@@ -11,6 +11,8 @@ use std::{
 
 const LIMIT: usize = 1024 * 1024;
 const FORMAT: &str = "pqc-scan.migration-context";
+#[path = "generation.rs"]
+pub mod generation;
 pub(crate) const SUPPORT_NAMES: [&str; 8] = [
     "runtime",
     "provider",
@@ -170,7 +172,7 @@ pub struct ContextReference {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub https_uri: Option<String>,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Input {
     format: String,
@@ -180,7 +182,7 @@ struct Input {
     systems: Vec<System>,
     bindings: Vec<Binding>,
     organization_defaults: Option<ClaimSet>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     references: Vec<ContextReference>,
 }
 

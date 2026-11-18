@@ -1,0 +1,2763 @@
+diff --git a/README.ja.md b/README.ja.md
+index dee265c..38916f3 100644
+--- a/README.ja.md
++++ b/README.ja.md
+@@ -113,6 +113,8 @@ pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
+ 
+ <a id="report-preview"></a>
+ 
++`serve --migration`では、対象を選び、分かる項目だけを入力して、申告の確認・保存と同じ棚卸しの再評価に進めます。詳しくは[任意入力の手順](docs/user/SCANNING.ja.md#移行情報の任意入力と再評価)を参照してください。
++
+ ## レポートの画面
+ 
+ v0.3.0のHTMLレポートでは、重大度の分布、ルールごとの一覧、検索・絞り込み、検出件数付きのファイルツリーを表示します。所見を展開すると場所・コードの根拠・推奨する確認事項を読め、ルールの意味は解説ページで確認できます。絞り込みとツリーは個別に表示・非表示を切り替えられます。日本語・Englishの選択、ライト・ダーク表示、閲覧環境のタイムゾーンでの時刻表示もオフラインで利用できます。
+diff --git a/README.md b/README.md
+index 935e4de..84c913b 100644
+--- a/README.md
++++ b/README.md
+@@ -110,6 +110,8 @@ The server listens only on `127.0.0.1` and runs the same static scanner as the C
+ 
+ <a id="report-preview"></a>
+ 
++Optional migration input is available with `serve --migration`: select exact targets, answer only known questions, review/save context and reassess the same saved inventory. See [the local workflow](docs/user/SCANNING.md#optional-migration-context-and-reassessment).
++
+ ## Report preview
+ 
+ The v0.3.0 HTML report includes a severity summary, rule groups, search/filters, and a file tree with finding counts. Expand findings for locations, source evidence and recommended checks; follow the rule guide for explanations. Filters and the tree can be hidden independently. Language (English/Japanese), light/dark theme and browser-local time display work offline.
+diff --git a/crates/pqc_scan_cli/src/main.rs b/crates/pqc_scan_cli/src/main.rs
+index 07b0b55..156fa70 100644
+--- a/crates/pqc_scan_cli/src/main.rs
++++ b/crates/pqc_scan_cli/src/main.rs
+@@ -15,6 +15,7 @@ use pqc_scan_report::{
+ };
+ use pqc_scan_rules::{RuleSet, Severity};
+ mod assess_command;
++mod context_command;
+ mod diff_command;
+ #[cfg(any(
+     feature = "probe-tls",
+@@ -42,6 +43,8 @@ struct Cli {
+ enum Commands {
+     /// Reassess explicitly selected saved evidence offline, with scoped claims.
+     Assess(assess_command::AssessArgs),
++    /// List saved-evidence targets or generate explicitly scoped migration context.
++    ContextTemplate(context_command::ContextArgs),
+     #[cfg(any(
+         feature = "probe-tls",
+         feature = "probe-ssh",
+@@ -278,6 +281,10 @@ fn run_cli<WOut: Write, WErr: Write>(
+             assess_command::run(args, stdout)?;
+             Ok(ExitStatus::Success)
+         }
++        Commands::ContextTemplate(args) => {
++            context_command::run(args, stdout)?;
++            Ok(ExitStatus::Success)
++        }
+         #[cfg(any(
+             feature = "probe-tls",
+             feature = "probe-ssh",
+diff --git a/crates/pqc_scan_cli/src/serve.js b/crates/pqc_scan_cli/src/serve.js
+index 487a826..1b8accc 100644
+--- a/crates/pqc_scan_cli/src/serve.js
++++ b/crates/pqc_scan_cli/src/serve.js
+@@ -1,6 +1,8 @@
+ (() => {
+   const $ = id => document.getElementById(id);
+   let language = 'ja', folder = '', busy = false, starting = false, folderLoading = false, folderRequest = 0, selectedJob = null, currentJobs = [], listing = null;
++  let migrationReady=false,migrationPending=null,migrationEnabled=false;
++  function openMigration(job) {if(migrationReady)window.dispatchEvent(new CustomEvent('pqc-migration-job',{detail:job}));else migrationPending=job;}
+   const t = (ja,en) => language === 'ja' ? ja : en;
+   async function api(route, options) {
+     const response = await fetch(route, options);
+@@ -33,8 +35,9 @@
+       const row=document.createElement('div');row.className='job';
+       const path=document.createElement('strong');path.className='path';path.textContent=job.path||'/';row.append(path);
+       const status=document.createElement('p');
+-      status.textContent=job.status==='running'?t('スキャン中…','Scanning…'):job.status==='failed'?t('スキャンに失敗しました。フォルダとルールの読み取り可否を確認し、再実行してください。','Scan failed. Check folder and rule access, then retry.'):job.coverage==='complete_within_scope'?t('対象範囲の解析が完了しました。','Inspection completed within the selected scope.'):t('レポートを生成しました。一部の解析が未完了です。理由はレポートで確認してください。','Report ready. Some inspection is unfinished; review the reasons in the report.');row.append(status);
+-      if (job.status==='ready') {const a=document.createElement('a');a.href=job.report;a.textContent=t('レポートを開く','Open report');row.append(a);}
++      status.textContent=job.kind==='saved'?t('保存済みの棚卸しを選択しました。移行の確認に進めます。','Saved inventory selected. You can review migration context.'):job.status==='running'?t('スキャン中…','Scanning…'):job.status==='failed'?t('スキャンに失敗しました。フォルダとルールの読み取り可否を確認し、再実行してください。','Scan failed. Check folder and rule access, then retry.'):job.coverage==='complete_within_scope'?t('対象範囲の解析が完了しました。','Inspection completed within the selected scope.'):t('レポートを生成しました。一部の解析が未完了です。理由はレポートで確認してください。','Report ready. Some inspection is unfinished; review the reasons in the report.');row.append(status);
++      if (job.status==='ready' && job.report) {const a=document.createElement('a');a.href=job.report;a.textContent=t('レポートを開く','Open report');row.append(a);}
++      if(job.status==='ready'&&job.migration_input){const b=document.createElement('button');b.type='button';b.textContent=t('移行の確認へ進む','Review migration');b.addEventListener('click',()=>openMigration(job));row.append(b);}
+       $('jobs').append(row);
+     }
+   }
+@@ -42,22 +45,23 @@
+     try {
+       currentJobs=(await api('api/jobs')).jobs;busy=currentJobs.some(j=>j.status==='running');$('scan').disabled=folderLoading||starting||busy||!listing;renderJobs();
+       const finished=currentJobs.find(j=>j.id===selectedJob&&j.status!=='running');
+-      if(finished) {selectedJob=null;if(finished.status==='ready'){setTimeout(poll,1000);location.href=finished.report;return;}feedback(t('スキャンに失敗しました。対象フォルダを確認して再実行してください。','Scan failed. Check the selected folder and try again.'),true);}
++      if(finished) {selectedJob=null;if(finished.status==='ready'){if(finished.migration_input){openMigration(finished);feedback(t('スキャン完了。任意の移行情報を確認できます。','Scan complete. You can review optional migration context.'));setTimeout(poll,1000);return;}else{setTimeout(poll,1000);location.href=finished.report;return;}}feedback(t('スキャンに失敗しました。対象フォルダを確認して再実行してください。','Scan failed. Check the selected folder and try again.'),true);}
+     } catch {feedback(t('サーバーに接続できません。ターミナルで起動状態を確認してください。','Cannot reach the server. Check the terminal.'),true);}
+     setTimeout(poll,1000);
+   }
+   $('scan').addEventListener('click',async()=>{
+     if(folderLoading||starting||busy||!listing)return;starting=true;busy=true;$('scan').disabled=true;feedback(t('スキャンを開始しています…','Starting scan…'));
+-    try {const job=await api(`api/scan?path=${encodeURIComponent(folder)}`,{method:'POST'});selectedJob=job.id;starting=false;feedback(t('スキャン中です。完了するとレポートを開きます。','Scanning. The report opens when ready.'));}
++    try {const job=await api(`api/scan?path=${encodeURIComponent(folder)}`,{method:'POST'});selectedJob=job.id;starting=false;feedback(migrationEnabled?t('スキャン中です。完了すると任意の移行情報を入力できます。','Scanning. Optional migration context is available when ready.'):t('スキャン中です。完了するとレポートを開きます。','Scanning. The report opens when ready.'));}
+     catch {starting=false;busy=false;$('scan').disabled=!listing;feedback(t('開始できませんでした。他のスキャンの完了を待つか、対象フォルダを確認してください。','Could not start. Wait for the active scan or check the folder.'),true);}
+   });
+   $('up').addEventListener('click',()=>loadFolder(folder.split('/').slice(0,-1).join('/')));
+   function applyLanguage() {
+     language=$('language').value==='en'?'en':'ja';document.documentElement.lang=language;
+     for(const node of document.querySelectorAll('[data-en]'))node.textContent=node.dataset[language];
+-    renderFolders();renderJobs();
++    renderFolders();renderJobs();window.dispatchEvent(new CustomEvent('pqc-language',{detail:language}));
+   }
+   $('language').addEventListener('change',()=>{applyLanguage();feedback('');});
+   window.addEventListener('pageshow',applyLanguage);
++  api('api/config').then(config=>{if(!config.migration)return;migrationEnabled=true;const script=document.createElement('script');script.src='migration.js';script.onload=()=>{migrationReady=true;window.dispatchEvent(new CustomEvent('pqc-language',{detail:language}));if(migrationPending){openMigration(migrationPending);migrationPending=null;}};document.body.append(script);}).catch(()=>{});
+   loadFolder('');poll();
+ })();
+diff --git a/crates/pqc_scan_cli/src/serve.rs b/crates/pqc_scan_cli/src/serve.rs
+index 9eb9b16..0e3cff1 100644
+--- a/crates/pqc_scan_cli/src/serve.rs
++++ b/crates/pqc_scan_cli/src/serve.rs
+@@ -10,6 +10,8 @@ use std::{
+     sync::{Arc, Mutex},
+ };
+ use tiny_http::{Header, Method, Request, Response, Server, StatusCode};
++#[path = "serve_migration.rs"]
++mod migration_ui;
+ 
+ #[derive(Debug, Parser)]
+ pub(super) struct ServeArgs {
+@@ -26,6 +28,9 @@ pub(super) struct ServeArgs {
+     /// Do not open the default browser automatically.
+     #[arg(long)]
+     no_open: bool,
++    /// Enable optional migration context forms and saved-evidence reassessment.
++    #[arg(long)]
++    migration: bool,
+ }
+ #[derive(Default)]
+ struct Jobs {
+@@ -41,6 +46,8 @@ struct State {
+     prefix: String,
+     threads: usize,
+     jobs: Mutex<Jobs>,
++    migration: bool,
++    drafts: Mutex<BTreeMap<u64, migration_ui::Draft>>,
+ }
+ fn random_token() -> Result<String> {
+     let mut bytes = [0u8; 32];
+@@ -86,6 +93,8 @@ pub(super) fn run(args: ServeArgs, stdout: &mut impl Write) -> Result<()> {
+         prefix: format!("/{}/", random_token()?),
+         threads: args.threads,
+         jobs: Mutex::new(Jobs::default()),
++        migration: args.migration,
++        drafts: Mutex::new(BTreeMap::new()),
+     });
+     let url = format!("{}{}", state.origin, state.prefix);
+     writeln!(stdout, "pqc-scan local web UI: {url}")?;
+@@ -174,8 +183,23 @@ fn handle(request: Request, state: &Arc<State>) {
+         return;
+     }
+     let (route, query) = url.split_once('?').unwrap_or((&url, ""));
++    if route.starts_with("api/migration/") {
++        if state.migration {
++            migration_ui::handle(request, state, route, query);
++        } else {
++            json_reply(request, 404, json!({"error":"Not found"}));
++        }
++        return;
++    }
+     if request.method() == &Method::Get {
+         match route {
++            "api/config" => json_reply(request, 200, json!({"migration":state.migration})),
++            "migration.js" if state.migration => reply(
++                request,
++                200,
++                "text/javascript; charset=utf-8",
++                include_bytes!("serve-migration.js").to_vec(),
++            ),
+             "" => reply(
+                 request,
+                 200,
+@@ -336,7 +360,7 @@ fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
+             threads: owner.threads,
+             include_non_scannable: false,
+             diagnostics: true,
+-            inventory_json: false,
++            inventory_json: owner.migration,
+             policy_profile: None,
+             assessment_context: None,
+             repository_scope: None,
+@@ -345,7 +369,7 @@ fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
+         let result = std::panic::catch_unwind(|| {
+             super::scan_cmd(args, &mut std::io::sink(), &mut std::io::sink())
+         });
+-        let value = match result {
++        let mut value = match result {
+             Ok(Ok(_)) => match fs::read(output.join("diagnostics.json"))
+                 .ok()
+                 .and_then(|v| serde_json::from_slice::<Value>(&v).ok())
+@@ -357,6 +381,9 @@ fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
+             },
+             _ => json!({"id":id,"path":relative,"status":"failed"}),
+         };
++        if owner.migration && value["status"] == "ready" {
++            value["migration_input"] = true.into();
++        }
+         let mut jobs = owner.jobs.lock().unwrap();
+         jobs.active = false;
+         jobs.entries.insert(id, value);
+@@ -384,7 +411,32 @@ fn report_file(request: Request, state: &State, route: &str) {
+         json_reply(request, 404, json!({"error":"Report is not ready"}));
+         return;
+     }
++    let migration_artifact = matches!(
++        parts[2],
++        "migration.assessment.html"
++            | "migration.assessment.md"
++            | "migration.assessment.v1.json"
++            | "migration-context.json"
++    );
++    if migration_artifact
++        && (!state.migration
++            || !state
++                .jobs
++                .lock()
++                .unwrap()
++                .entries
++                .get(&id)
++                .is_some_and(|j| j["migration_ready"] == true))
++    {
++        json_reply(request, 404, json!({"error":"Report is not ready"}));
++        return;
++    }
+     let mime = match parts[2] {
++        "migration.assessment.html" if migration_artifact => "text/html; charset=utf-8",
++        "migration.assessment.md" if migration_artifact => "text/markdown; charset=utf-8",
++        "migration.assessment.v1.json" | "migration-context.json" if migration_artifact => {
++            "application/json; charset=utf-8"
++        }
+         "report.html" | "report.rules.html" => "text/html; charset=utf-8",
+         "report.json"
+         | "report.sarif"
+@@ -397,7 +449,12 @@ fn report_file(request: Request, state: &State, route: &str) {
+             return;
+         }
+     };
+-    let file = state.output.join(id.to_string()).join(parts[2]);
++    let directory = state.output.join(id.to_string());
++    let file = if migration_artifact {
++        directory.join("migration").join(parts[2])
++    } else {
++        directory.join(parts[2])
++    };
+     match fs::read(file) {
+         Ok(bytes) => reply(request, 200, mime, bytes),
+         Err(_) => json_reply(request, 404, json!({"error":"Report is unavailable"})),
+@@ -439,6 +496,8 @@ mod tests {
+             prefix: "/token/".into(),
+             threads: 1,
+             jobs: Mutex::new(Jobs::default()),
++            migration: false,
++            drafts: Mutex::new(BTreeMap::new()),
+         });
+         let listing = directories(&state, "").unwrap();
+         assert_eq!(listing["directories"].as_array().unwrap().len(), 1);
+@@ -473,6 +532,8 @@ mod tests {
+             prefix: "/token/".into(),
+             threads: 1,
+             jobs: Mutex::new(Jobs::default()),
++            migration: false,
++            drafts: Mutex::new(BTreeMap::new()),
+         };
+         let exact = directories(&state, "").unwrap();
+         assert_eq!(exact["directories"].as_array().unwrap().len(), 1000);
+@@ -507,6 +568,8 @@ mod failure_test {
+             prefix: "/token/".into(),
+             threads: 1,
+             jobs: Mutex::new(Jobs::default()),
++            migration: false,
++            drafts: Mutex::new(BTreeMap::new()),
+         });
+         let id = start_scan(&state, "project").unwrap();
+         let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+diff --git a/crates/pqc_scan_cli/tests/serve.rs b/crates/pqc_scan_cli/tests/serve.rs
+index a44b182..6987063 100644
+--- a/crates/pqc_scan_cli/tests/serve.rs
++++ b/crates/pqc_scan_cli/tests/serve.rs
+@@ -1,4 +1,9 @@
+-use serde_json::Value;
++use serde_json::{json, Value};
++#[path = "../../pqc_scan_core/tests/support/migration/context.rs"]
++mod ctx;
++#[path = "../../pqc_scan_core/tests/support/migration/mod.rs"]
++#[allow(dead_code)]
++mod fixture;
+ use std::{
+     fs,
+     io::{BufRead, BufReader, Read, Write},
+@@ -24,7 +29,15 @@ impl Drop for Session {
+ }
+ impl Session {
+     fn start() -> Self {
+-        let root = std::env::temp_dir().join(format!("pqc-web-integration-{}", std::process::id()));
++        Self::start_with(false)
++    }
++    fn start_with(migration: bool) -> Self {
++        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
++        let root = std::env::temp_dir().join(format!(
++            "pqc-web-integration-{}-{}",
++            std::process::id(),
++            NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
++        ));
+         fs::create_dir_all(root.join("project & 日")).unwrap();
+         fs::write(
+             root.join("project & 日/main.py"),
+@@ -32,16 +45,14 @@ impl Session {
+         )
+         .unwrap();
+         fs::write(root.join("private-canary.txt"), "DO_NOT_SERVE_CANARY").unwrap();
+-        let mut child = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
+-            .args([
+-                "serve",
+-                "--port",
+-                "0",
+-                "--no-open",
+-                "--threads",
+-                "1",
+-                "--root",
+-            ])
++        let mut command = Command::new(env!("CARGO_BIN_EXE_pqc-scan"));
++        if migration {
++            command.arg("serve").arg("--migration");
++        } else {
++            command.arg("serve");
++        }
++        let mut child = command
++            .args(["--port", "0", "--no-open", "--threads", "1", "--root"])
+             .arg(&root)
+             .arg("--rules-dir")
+             .arg(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../rules"))
+@@ -81,14 +92,21 @@ impl Session {
+         origin: Option<&str>,
+         extra: &str,
+     ) -> (u16, String) {
++        let origin = origin
++            .map(|o| format!("Origin: {o}\r\n"))
++            .unwrap_or_default();
++        self.exchange(format!("{method} {path} HTTP/1.1\r\nHost: {host}\r\n{origin}{extra}Content-Length: 0\r\nConnection: close\r\n\r\n").as_bytes())
++    }
++    fn post(&self, route: &str, body: &str) -> (u16, String) {
++        self.exchange(format!("POST {}{route} HTTP/1.1\r\nHost: {}\r\nOrigin: http://{}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",self.prefix,self.host,self.host,body.len()).as_bytes())
++    }
++    fn exchange(&self, request: &[u8]) -> (u16, String) {
+         let mut stream = TcpStream::connect(&self.host).unwrap();
+         stream
+             .set_read_timeout(Some(Duration::from_secs(20)))
+             .unwrap();
+-        let origin = origin
+-            .map(|o| format!("Origin: {o}\r\n"))
+-            .unwrap_or_default();
+-        write!(stream,"{method} {path} HTTP/1.1\r\nHost: {host}\r\n{origin}{extra}Content-Length: 0\r\nConnection: close\r\n\r\n").unwrap();
++        stream.write_all(request).unwrap();
++        stream.shutdown(std::net::Shutdown::Write).unwrap();
+         let mut bytes = Vec::new();
+         stream.read_to_end(&mut bytes).unwrap();
+         let split = bytes.windows(4).position(|w| w == b"\r\n\r\n").unwrap();
+@@ -218,3 +236,362 @@ fn local_ui_selects_folder_scans_and_serves_only_completed_report_artifacts() {
+         "server remains available after scan"
+     );
+ }
++fn import(s: &Session, v: &Value) -> u64 {
++    let (code, body) = s.post("api/migration/import", &serde_json::to_string(v).unwrap());
++    assert_eq!(code, 200, "{body}");
++    serde_json::from_str::<Value>(&body).unwrap()["id"]
++        .as_u64()
++        .unwrap()
++}
++fn targets(s: &Session, id: u64) -> Value {
++    let (code, body) = s.get(&format!("api/migration/targets?job={id}&page=0"));
++    assert_eq!(code, 200, "{body}");
++    serde_json::from_str(&body).unwrap()
++}
++fn generated_request(sha: &str) -> Value {
++    json!({"mode":"generate","input_sha256":sha,"as_of":ctx::AS_OF,"organization_id":"organization","system_id":"system-1","selected":[1],"answers":[{"field":"use_case","state":"known","value":"signature"},{"field":"usage_state","state":"known","value":"active"},{"field":"business_critical","state":"known","value":false},{"field":"confidential","state":"unknown"}],"actor":"owner","asserted_at":"2026-11-17T00:00:00Z"})
++}
++fn preview(s: &Session, id: u64, request: &Value) -> Value {
++    let (code, body) = s.post(
++        &format!("api/migration/preview?job={id}"),
++        &serde_json::to_string(request).unwrap(),
++    );
++    assert_eq!(code, 200, "{body}");
++    serde_json::from_str(&body).unwrap()
++}
++fn confirm(s: &Session, id: u64, token: &str) -> Value {
++    let (code, body) = s.post(
++        &format!("api/migration/assess?job={id}"),
++        &json!({"token":token,"language":"ja"}).to_string(),
++    );
++    assert_eq!(code, 200, "{body}");
++    serde_json::from_str(&body).unwrap()
++}
++#[test]
++fn migration_is_opt_in_and_retains_host_origin_session_and_request_bounds() {
++    let ordinary = Session::start();
++    assert_eq!(ordinary.get("api/config").1, "{\"migration\":false}");
++    assert_eq!(ordinary.get("migration.js").0, 404);
++    assert_eq!(ordinary.post("api/migration/import", "{}").0, 404);
++    let s = Session::start_with(true);
++    assert_eq!(s.get("api/config").1, "{\"migration\":true}");
++    assert_eq!(s.get("migration.js").0, 200);
++    let route = format!("{}api/migration/import", s.prefix);
++    for origin in [None, Some("https://attacker.invalid")] {
++        assert_eq!(s.request("POST", &route, &s.host, origin).0, 403);
++    }
++    assert_eq!(
++        s.request(
++            "GET",
++            &format!("{}api/migration/targets?job=1", s.prefix),
++            "attacker.invalid",
++            None
++        )
++        .0,
++        403
++    );
++    assert_eq!(s.post("../api/migration/import", "{}").0, 405);
++    assert_eq!(
++        s.post("api/migration/import", "{\"SECRET_CANARY_074\":true}")
++            .0,
++        400
++    );
++    let response=s.exchange(format!("POST {route} HTTP/1.1\r\nHost: {}\r\nOrigin: http://{}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",s.host,s.host,32*1024*1024+1).as_bytes());
++    assert_eq!(response.0, 413);
++    assert!(!response.1.contains("CANARY"));
++    assert_eq!(s.get("api/migration/targets?job=999").0, 400);
++    assert_eq!(s.get("api/migration/targets?job=1&job=1").0, 400);
++}
++#[test]
++fn actual_web_generation_preview_confirm_and_cli_share_exact_output_without_rescan() {
++    let s = Session::start_with(true);
++    let id = import(&s, &fixture::inventory("RSA"));
++    let list = targets(&s, id);
++    let request = generated_request(list["input"]["sha256"].as_str().unwrap());
++    let p = preview(&s, id, &request);
++    assert_eq!(p["scope"][0]["number"], 1);
++    assert!(p["resolved"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .any(|c| c["field"] == "usage_state" && c["freshness"] == "unknown"));
++    let native = s.reports.join(format!("{id}/scan.inventory.v1.json"));
++    let before = fs::metadata(&native).unwrap().modified().unwrap();
++    let original = fs::read(&native).unwrap();
++    let ctx_path = s.root.join("downloaded-context.json");
++    fs::write(&ctx_path, p["context"].as_str().unwrap()).unwrap();
++    let result = confirm(&s, id, p["token"].as_str().unwrap());
++    let (code, actual) = s.get(result["json"].as_str().unwrap());
++    assert_eq!(code, 200);
++    let cli = s.root.join("cli-assess");
++    let output = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++        .arg("assess")
++        .arg(&native)
++        .args(["--input-format", "inventory-v1", "--context"])
++        .arg(&ctx_path)
++        .args(["--as-of", ctx::AS_OF, "--out-dir"])
++        .arg(&cli)
++        .output()
++        .unwrap();
++    assert!(
++        output.status.success(),
++        "{}",
++        String::from_utf8_lossy(&output.stderr)
++    );
++    assert_eq!(
++        serde_json::from_str::<Value>(&actual).unwrap(),
++        serde_json::from_slice::<Value>(
++            &fs::read(cli.join("migration.assessment.v1.json")).unwrap()
++        )
++        .unwrap()
++    );
++    assert_eq!(
++        s.get(&format!("reports/{id}/migration-context.json")).1,
++        p["context"].as_str().unwrap()
++    );
++    assert!(s
++        .get(result["report"].as_str().unwrap())
++        .1
++        .contains("組織の暗号移行レポート"));
++    assert_eq!(fs::read(native.clone()).unwrap(), original);
++    assert_eq!(fs::metadata(native).unwrap().modified().unwrap(), before);
++    assert_eq!(
++        s.get(&format!("reports/{id}/scan.inventory.v1.json")).0,
++        404
++    );
++    assert_eq!(s.get(&format!("reports/{id}/../private-canary.txt")).0, 404);
++    let e = pqc_scan_core::migration::SavedEvidence::from_bytes(
++        &original,
++        pqc_scan_core::migration::InputFormat::InventoryV1,
++    )
++    .unwrap();
++    let provenance =
++        pqc_scan_core::migration::Provenance::operator("owner", "2026-11-17T00:00:00Z", None)
++            .unwrap();
++    let answers = vec![
++        pqc_scan_core::migration::ClaimAnswer {
++            field: "use_case".into(),
++            value: Some(json!("signature")),
++        },
++        pqc_scan_core::migration::ClaimAnswer {
++            field: "usage_state".into(),
++            value: Some(json!("active")),
++        },
++        pqc_scan_core::migration::ClaimAnswer {
++            field: "business_critical".into(),
++            value: Some(json!(false)),
++        },
++        pqc_scan_core::migration::ClaimAnswer {
++            field: "confidential".into(),
++            value: None,
++        },
++    ];
++    let shared = pqc_scan_core::migration::generate_context(
++        &e,
++        "organization",
++        &[pqc_scan_core::migration::ContextSelection {
++            target_index: 0,
++            system_id: "system-1".into(),
++            claims: pqc_scan_core::migration::ContextClaims::from_answers(&answers, provenance)
++                .unwrap(),
++        }],
++        ctx::AS_OF,
++    )
++    .unwrap();
++    assert_eq!(shared, p["context"].as_str().unwrap().as_bytes());
++}
++#[test]
++fn full_import_stale_conflict_no_context_and_cancelled_tokens_preserve_semantics() {
++    let s = Session::start_with(true);
++    let v = fixture::inventory("ML-KEM-768");
++    let id = import(&s, &v);
++    let e = fixture::ingest(&v, pqc_scan_core::migration::InputFormat::InventoryV1).unwrap();
++    let mut context = ctx::context(&e, ctx::critical_signing());
++    context["organization_defaults"] = json!({"historical_ciphertext":ctx::unknown()});
++    context["bindings"][0]["claims"]["business_critical"]["provenance"]["valid_until"] =
++        "2026-11-17T12:00:00Z".into();
++    let p = preview(
++        &s,
++        id,
++        &json!({"mode":"import_context","input_sha256":e.input().sha256,"as_of":ctx::AS_OF,"context":context.to_string()}),
++    );
++    assert_eq!(
++        serde_json::from_str::<Value>(p["context"].as_str().unwrap()).unwrap(),
++        context
++    );
++    assert_eq!(p["purpose_conflicting"], true);
++    assert!(p["resolved"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .any(|r| r["freshness"] == "stale"));
++    let token = p["token"].as_str().unwrap();
++    assert_eq!(
++        s.post(
++            &format!("api/migration/cancel?job={id}"),
++            &json!({"token":token}).to_string()
++        )
++        .0,
++        200
++    );
++    assert_eq!(
++        s.post(
++            &format!("api/migration/assess?job={id}"),
++            &json!({"token":token}).to_string()
++        )
++        .0,
++        400
++    );
++    assert_eq!(
++        s.get(&format!("reports/{id}/migration.assessment.html")).0,
++        404
++    );
++    let p = preview(
++        &s,
++        id,
++        &json!({"mode":"without_context","input_sha256":e.input().sha256,"as_of":ctx::AS_OF}),
++    );
++    assert!(p["context"].is_null());
++    let r = confirm(&s, id, p["token"].as_str().unwrap());
++    let actual: Value = serde_json::from_str(&s.get(r["json"].as_str().unwrap()).1).unwrap();
++    assert!(actual["context"].is_null());
++    assert_eq!(actual["decisions"][0]["urgency"], "undetermined");
++}
++#[test]
++fn changed_inputs_invalid_scope_duplicate_fields_and_output_links_fail_safely() {
++    let s = Session::start_with(true);
++    let id = import(&s, &fixture::inventory("RSA"));
++    let list = targets(&s, id);
++    let request = generated_request(list["input"]["sha256"].as_str().unwrap());
++    for selected in [json!([0]), json!([999]), json!([1, 1]), json!([])] {
++        let mut bad = request.clone();
++        bad["selected"] = selected;
++        assert_eq!(
++            s.post(&format!("api/migration/preview?job={id}"), &bad.to_string())
++                .0,
++            400
++        );
++    }
++    assert_eq!(
++        s.post(
++            &format!("api/migration/preview?job={id}"),
++            "{\"mode\":\"without_context\",\"mode\":\"generate\"}"
++        )
++        .0,
++        400
++    );
++    let p = preview(&s, id, &request);
++    let native = s.reports.join(format!("{id}/scan.inventory.v1.json"));
++    let original = fs::read(&native).unwrap();
++    let mut changed = original.clone();
++    changed.push(b' ');
++    fs::write(&native, changed).unwrap();
++    assert_eq!(
++        s.post(
++            &format!("api/migration/assess?job={id}"),
++            &json!({"token":p["token"]}).to_string()
++        )
++        .0,
++        400
++    );
++    assert_eq!(
++        s.get(&format!("reports/{id}/migration.assessment.html")).0,
++        404
++    );
++    fs::write(&native, &original).unwrap();
++    let p = preview(&s, id, &request);
++    let dir = s.reports.join(format!("{id}/migration"));
++    fs::create_dir(&dir).unwrap();
++    fs::hard_link(&native, dir.join("migration-context.json")).unwrap();
++    assert_eq!(
++        s.post(
++            &format!("api/migration/assess?job={id}"),
++            &json!({"token":p["token"]}).to_string()
++        )
++        .0,
++        400
++    );
++    assert_eq!(fs::read(native).unwrap(), original);
++    assert!(!dir.join("migration.assessment.html").exists());
++}
++#[test]
++fn selected_web_scan_captures_inventory_while_default_contract_is_retained() {
++    let s = Session::start_with(true);
++    let origin = format!("http://{}", s.host);
++    let route = format!("{}api/scan?path=project%20%26%20%E6%97%A5", s.prefix);
++    assert_eq!(s.request("POST", &route, &s.host, Some(&origin)).0, 202);
++    let deadline = Instant::now() + Duration::from_secs(20);
++    loop {
++        let jobs: Value = serde_json::from_str(&s.get("api/jobs").1).unwrap();
++        let j = &jobs["jobs"][0];
++        if j["status"] != "running" {
++            assert_eq!(j["status"], "ready");
++            assert_eq!(j["migration_input"], true);
++            break;
++        }
++        assert!(Instant::now() < deadline);
++        std::thread::sleep(Duration::from_millis(20));
++    }
++    assert!(s.reports.join("1/scan.inventory.v1.json").is_file());
++    let t = targets(&s, 1);
++    let scan: pqc_scan_core::model::ScanResult =
++        serde_json::from_slice(&fs::read(s.reports.join("1/report.json")).unwrap()).unwrap();
++    let as_of = (scan.generated_at + Duration::from_secs(1))
++        .format("%Y-%m-%dT%H:%M:%SZ")
++        .to_string();
++    let p = preview(
++        &s,
++        1,
++        &json!({"mode":"without_context","input_sha256":t["input"]["sha256"],"as_of":as_of}),
++    );
++    confirm(&s, 1, p["token"].as_str().unwrap());
++    assert_eq!(s.get("reports/1/report.html").0, 200);
++    assert_eq!(s.get("reports/1/migration.assessment.html").0, 200);
++}
++#[test]
++fn ambiguous_targets_canaries_and_twenty_job_import_limit_are_enforced() {
++    let s = Session::start_with(true);
++    let mut value = fixture::inventory("RSA");
++    value["observations"][0]["target"]["path"] = "<script>alert(1)</script>![x](evil.png)".into();
++    value["arbitrary_metadata"] = json!({"secret":"SECRET_CANARY_074"});
++    let id = import(&s, &value);
++    let list = targets(&s, id);
++    assert!(list["targets"][0]["path"]
++        .as_str()
++        .unwrap()
++        .contains("<script"));
++    let p = preview(
++        &s,
++        id,
++        &json!({"mode":"without_context","input_sha256":list["input"]["sha256"],"as_of":ctx::AS_OF}),
++    );
++    let r = confirm(&s, id, p["token"].as_str().unwrap());
++    let html = s.get(r["report"].as_str().unwrap()).1;
++    assert!(!html.contains("<script>alert(1)"));
++    assert!(!html.contains("SECRET_CANARY_074"));
++    assert!(html.contains("&lt;script"));
++    value["observations"][0]["identity_confidence"] = "ambiguous_duplicate_anchor".into();
++    let id = import(&s, &value);
++    let list = targets(&s, id);
++    assert_eq!(list["targets"][0]["selectable"], false);
++    assert_eq!(
++        s.post(
++            &format!("api/migration/preview?job={id}"),
++            &generated_request(list["input"]["sha256"].as_str().unwrap()).to_string()
++        )
++        .0,
++        400
++    );
++    for _ in 2..20 {
++        import(&s, &fixture::inventory("RSA"));
++    }
++    assert_eq!(
++        s.post(
++            "api/migration/import",
++            &fixture::inventory("RSA").to_string()
++        )
++        .0,
++        400
++    );
++    assert!(!s.reports.join("21").exists());
++}
+diff --git a/crates/pqc_scan_core/src/migration/context.rs b/crates/pqc_scan_core/src/migration/context.rs
+index b26737f..5746d0f 100644
+--- a/crates/pqc_scan_core/src/migration/context.rs
++++ b/crates/pqc_scan_core/src/migration/context.rs
+@@ -11,6 +11,8 @@ use std::{
+ 
+ const LIMIT: usize = 1024 * 1024;
+ const FORMAT: &str = "pqc-scan.migration-context";
++#[path = "generation.rs"]
++pub mod generation;
+ pub(crate) const SUPPORT_NAMES: [&str; 8] = [
+     "runtime",
+     "provider",
+@@ -170,7 +172,7 @@ pub struct ContextReference {
+     #[serde(skip_serializing_if = "Option::is_none")]
+     pub https_uri: Option<String>,
+ }
+-#[derive(Debug, Deserialize)]
++#[derive(Debug, Serialize, Deserialize)]
+ #[serde(deny_unknown_fields)]
+ struct Input {
+     format: String,
+diff --git a/crates/pqc_scan_core/src/migration/mod.rs b/crates/pqc_scan_core/src/migration/mod.rs
+index bc583df..7ac1b38 100644
+--- a/crates/pqc_scan_core/src/migration/mod.rs
++++ b/crates/pqc_scan_core/src/migration/mod.rs
+@@ -11,9 +11,10 @@ use serde::{Deserialize, Serialize};
+ use serde_json::Value;
+ use std::{fs::File, path::Path, str::FromStr};
+ 
++pub use context::generation::{generate_context, ClaimAnswer, ContextClaims, ContextSelection};
+ pub use context::{
+-    parse_as_of, BoundContext, ClaimFreshness, ContextReference, MigrationContext, ResolvedClaim,
+-    TargetContext,
++    parse_as_of, BoundContext, ClaimFreshness, ContextReference, MigrationContext, Provenance,
++    ResolvedClaim, TargetContext,
+ };
+ pub use decision::{
+     evaluate, evaluate_with_versions, Action, ActionKind, Candidate, ContextDescriptor, Coverage,
+@@ -173,6 +174,11 @@ pub struct Target {
+     #[serde(skip)]
+     pub(crate) bindable: bool,
+ }
++impl Target {
++    pub fn is_bindable(&self) -> bool {
++        self.bindable
++    }
++}
+ 
+ /// Validated projection; callers cannot substitute input identity or targets.
+ /// Hashes bind saved bytes, not collector authenticity or business identity.
+diff --git a/crates/pqc_scan_report/src/lib.rs b/crates/pqc_scan_report/src/lib.rs
+index f96ffae..4e306d8 100644
+--- a/crates/pqc_scan_report/src/lib.rs
++++ b/crates/pqc_scan_report/src/lib.rs
+@@ -14,6 +14,10 @@ mod markdown_report;
+ mod migration_copy;
+ mod migration_html;
+ pub use migration_html::{migration_html_bytes, MIGRATION_HTML};
++/// Share saved-role terminology with optional local workflow selectors.
++pub fn migration_role_label(role: &str, language: ReportLanguage) -> &str {
++    migration_copy::Labels(language).token(role)
++}
+ mod migration_markdown;
+ mod migration_report;
+ pub use migration_markdown::{migration_markdown_bytes, MIGRATION_MARKDOWN};
+diff --git a/docs/architecture.md b/docs/architecture.md
+index 2293658..6ef49e8 100644
+--- a/docs/architecture.md
++++ b/docs/architecture.md
+@@ -484,3 +484,13 @@ for operational compatibility and destination-tampering limits.
+ 
+ The explicit saved-evidence decision path is described in
+ [offline migration decisions](architecture/OFFLINE-MIGRATION-DECISIONS.md).
++
++
++Task074 adds opt-in serve --migration using the existing session coordinator, exact
++Host/origin guards and ready-job artifact allowlist. Selected scans request Inventory
++v1; explicit bounded imports retain exact bytes. Job/digest-bound previews use073's
++shared generator/full canonical import and typed bind. Confirmation calls069's pure
++evaluator and070's real report writers; no JS policy or rescan. Context/selection/time
++changes require a new token. Concrete routes, bounds and cancellation/output behavior
++are recorded in tasks/074/TASK-074-PLAN.md and paired user scanning guides. Default
++serve options and output behavior are retained when the extension is not selected.
+diff --git a/docs/architecture/SCOPED-MIGRATION-CONTEXT.md b/docs/architecture/SCOPED-MIGRATION-CONTEXT.md
+index 84f08b0..419a82f 100644
+--- a/docs/architecture/SCOPED-MIGRATION-CONTEXT.md
++++ b/docs/architecture/SCOPED-MIGRATION-CONTEXT.md
+@@ -43,3 +43,12 @@ ownership and conflicts. This is not a business-priority evaluator or proof that
+ an operator mapped the real system correctly. Task069 consumes it for pure policy
+ and saved-evidence reassessment; task070 renders those results. Existing policy,
+ rules, native IDs/schemas and scan-wide context semantics are untouched.
++
++
++Task073 adds a shared typed generator and canonical complete export, using the same
++ClaimSet/Provenance validator and final context parser/bind. Explicit target indices
++resolve only within the held SavedEvidence; duplicate/ambiguous/unselected targets
++never receive implicit claims. Aggregate cloning is bounded before serialization;
++canonical output omits absent Option fields rather than emitting forbidden null.
++No storage schema, inheritance/evaluator, existing reader or default scan behavior
++changes. The concrete opt-in CLI D4 supplement is in task073's plan.
+diff --git a/docs/roadmap/v0.4/TASKS.md b/docs/roadmap/v0.4/TASKS.md
+index e6aacaf..bc266df 100644
+--- a/docs/roadmap/v0.4/TASKS.md
++++ b/docs/roadmap/v0.4/TASKS.md
+@@ -193,3 +193,14 @@ Do not mark tasks done from artifact lists, source inspection, Unknown displays
+ task counts alone. No automatic scope reduction, task creation or unrelated
+ remediation is authorized. Product acceptance, support, score adoption and
+ release/publication remain separate from task completion.
++
++
++## Input-assistance execution update (2026-11-18)
++
++The maintainer selected073-075 while retaining071/072 unchanged.073 is done with
++shared typed generation, explicit headless context-template, safe output and complete
++context export; both original reviewer identities accepted705 workspace/222 featured
++core/12 featured CLI results and final source.074 proceeds under its concrete D4 API/UI
++plan.075's supplemental protocol is frozen before observations; original071/072
++prerequisites keep U09/final completion unfinished. No original criteria or historical
++study records are rewritten and no release, contact or scoring adoption is authorized.
+diff --git a/docs/user/SAVED-EVIDENCE.ja.md b/docs/user/SAVED-EVIDENCE.ja.md
+index 0c8610a..48c3a72 100644
+--- a/docs/user/SAVED-EVIDENCE.ja.md
++++ b/docs/user/SAVED-EVIDENCE.ja.md
+@@ -81,3 +81,39 @@ HTMLの初期言語とMarkdownの言語を指定します。JSON、ID、事実
+ 拒否します。既存の安全な出力処理を使い、ファイル単位で置き換えます。
+ 入力の実行、参照先の取得、ソースの再スキャン、接続先への通信は行いません。
+ 実験的なプローブ機能を有効にしたビルドでも同じです。
++
++## 対象IDを転記せずに設定を作る
++
++非対話の`context-template`コマンドで、対象の番号・方式・役割・位置を確認します。
++
++```console
++pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 --list-targets
++pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 \
++  --target 1 --out migration-context.json --as-of 2026-11-18T00:00:00Z \
++  --set 'use_case="signature"' --set 'usage_state="active"' \
++  --set 'business_critical=false' --unknown confidential \
++  --actor owner --asserted-at 2026-11-17T00:00:00Z
++```
++
++対応付ける番号だけを選びます。複数をまとめて扱う場合は`--target`を繰り返します。
++ハッシュと対象IDはコマンドが設定します。対象を選ばなければ、対応付けのない有効な
++ひな形を作り、申告の指定は拒否します。全対象への自動適用は行いません。
++曖昧な対象、重複、不正な番号は拒否します。別名は既定の`organization`と`system-1`を
++使えるので、会社や部署の入力は不要です。変更には`--organization`と`--system`を使います。
++番号はその保存済みファイルに対する指定です。入力を変えたら一覧を確認し直してください。
++別の内容に結び付いた既存の設定は拒否します。
++
++`--set 項目=JSON値`には既存の項目名を指定します。対応状況は`support.peer`などです。
++文字列はJSONの引用符で囲み、真偽値や秒数にはJSONの型を使います。
++`--unknown 項目`は不明という回答、省略は未回答として扱います。
++回答には申告者と申告日時が必要です。`--valid-until`は任意で、自動では補いません。
++期限がなければ、既存の規則に従って有効性は不明になります。資料を根拠とする期限や
++継承を使う詳細な設定は、既存形式の文書で指定してください。簡易入力から資料の参照を
++捏造しません。個人利用でも重要度の意味は変わりません。生成した設定は`assess`で使います。
++
++既存の安全な出力処理と1MiBの上限を適用します。入力と同じ名前・ハードリンク、
++リンク先への出力、不正な値・由来、上限超過は置換前に拒否します。
++ライブラリの`generate_context`、`ContextSelection`、`ContextClaims`、`ClaimAnswer`も
++同じ読み込み・対応付け規則を使います。`MigrationContext::to_bytes`は、日時を正規化し、
++対応する全項目・申告・資料参照を保持して出力します。従来のContext v1とは別で、
++既定のスキャン動作は変わりません。
+diff --git a/docs/user/SAVED-EVIDENCE.md b/docs/user/SAVED-EVIDENCE.md
+index 35a2404..0b05607 100644
+--- a/docs/user/SAVED-EVIDENCE.md
++++ b/docs/user/SAVED-EVIDENCE.md
+@@ -143,3 +143,40 @@ using the existing safe output boundary; oversized reports reject without
+ truncation. Existing files are atomically replaced individually. The command
+ never executes input, fetches references, rescans source or contacts endpoints,
+ including builds with experimental probe features enabled.
++
++## Generate context without copying target IDs
++
++The explicit noninteractive `context-template` command lists readable target numbers:
++
++```console
++pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 --list-targets
++pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 \
++  --target 1 --out migration-context.json --as-of 2026-11-18T00:00:00Z \
++  --set 'use_case="signature"' --set 'usage_state="active"' \
++  --set 'business_critical=false' --unknown confidential \
++  --actor owner --asserted-at 2026-11-17T00:00:00Z
++```
++
++Select only the displayed numbers you intend to bind; repeat `--target` for an
++explicit group. The command calculates the exact input hash/IDs. Without selected
++targets it writes a valid unbound template and refuses claims. It never selects all
++targets implicitly. Ambiguous targets, duplicates and invalid numbers reject.
++Default aliases `organization` and `system-1` need no company or department;
++`--organization`/`--system` customize them. Numbers apply to this exact saved file;
++review the list again if it changes. Existing context bound to other bytes rejects.
++
++`--set FIELD=JSON_VALUE` uses adopted field names, with `support.peer` and other
++support names for prerequisites. String values require JSON quotes; booleans and
++seconds use JSON types. `--unknown FIELD` explicitly records uncertainty; omission
++leaves no answer. Answers require an actor and assertion instant; optional
++`--valid-until` is never generated. Without expiry the existing freshness rules
++remain unknown. Reference-backed deadlines and advanced inheritance can be authored
++in the adopted context document; the simple answer builder does not invent references.
++No personal-use shortcut changes criticality. Use the generated file with `assess`.
++
++Output uses the existing safe writer and1MiB context limit. Input aliases, hardlinks,
++linked destinations, bad values/provenance and oversized output reject before
++replacement. The shared library `generate_context`, `ContextSelection`, `ContextClaims`
++and `ClaimAnswer` use the same reader/binding rules; `MigrationContext::to_bytes`
++exports all supported fields with normalized times, preserving claims and references.
++This is separate from legacy Context v1 and does not change existing scan defaults.
+diff --git a/docs/user/SCANNING.ja.md b/docs/user/SCANNING.ja.md
+index 0a4d192..bab144e 100644
+--- a/docs/user/SCANNING.ja.md
++++ b/docs/user/SCANNING.ja.md
+@@ -218,3 +218,52 @@ pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
+ サーバーは `127.0.0.1` だけで待ち受けます。ターミナルに表示したランダムなセッションURL全体を開いてください。`localhost` などの別名や、パスが `/` だけのURLは受け付けません。URLは他者に共有しないでください。ソースファイルの内容は配信しません。各スキャンはCLIと同じ既定のルール・対象選択で実行し、`--format all` の7ファイルと `diagnostics.json` を出力します。この画面から判定閾値・スキャンオプションの変更やネットワーク検査はできません。同時実行は1件、1セッションは最大20件です。フォルダ一覧は最大1,000サブフォルダを表示し、省略があれば件数を示します。
+ 
+ レポートはターミナルに表示した専用の `pqc-scan-web-*` ディレクトリに保存します。終了はCtrl+Cです。オフラインで残す場合は `report.html` と `report.rules.html` を一緒に保存してください。各出力はレポートURL配下の対応するファイル名からも取得できます。ソースやレポートのアップロード、プロジェクトのビルドスクリプト・パッケージコマンドの実行は行いません。セッションの出力先を含むフォルダは、スキャン対象に選べません。
++
++### 移行情報の任意入力と再評価
++
++```console
++pqc-scan serve --migration --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
++```
++
++このモードを選ぶと、新しいWebスキャンでInventory v1も保存します。完了後は
++移行情報の任意入力へ進みます。通常のスキャンレポートもリンクから開けます。
++完了したセッションの「移行の確認へ進む」を選ぶか、保存済みのInventory v1を
++明示的に選んでください。取込上限は32MiBです。ファイルはこのローカルセッション内で
++処理し、外部へ送信したりプロジェクトのコードを実行したりしません。
++
++申告を適用する対象だけを選びます。100件ずつ表示し、最大4096件を選べます。
++曖昧な対象には対応付けできません。個人・組織の選択は入力の案内にだけ使い、
++評価方針や重要度は変えません。会社や部署の入力は不要で、組織・システムの別名は
++生成されたものを使えます。用途に関係する分かる項目だけを回答し、不明なら「不明」、
++未回答なら「回答しない」を選びます。「いいえ」と「対象外」も区別します。
++他の項目は「すべての任意項目を表示する」で確認できます。用途を変えても、
++入力済みの回答は表示したまま保持し、無断で消しません。
++
++回答には申告者の別名と申告日時が必要です。現在の時刻を使う場合も、ボタンを押して
++明示的に指定します。有効期限は任意で、自動では補いません。期限がなければ有効性は
++不明として扱います。評価時刻は別に確認してください。追加情報なしで進むこともでき、
++その場合も技術上の懸念と情報不足をレポートに示します。
++
++「既存の設定を読み込む」では、既存形式のmigration-context v1を最大1MiBまで
++読み込みます。保存済み入力との一致を検証し、対応する全項目・既定値・資料参照・由来を
++保持します。簡易フォームで編集できない項目は読み取り専用とし、無断で削除しません。
++修正する場合は元の設定を編集し、読み込み直してください。別の入力を選ぶと回答と
++対象選択を消去し、改めて確認する必要があります。
++
++「内容と適用先を確認」で対象・申告・申告者・日時・有効性・用途の矛盾を確認します。
++「設定を保存」から、検証済みの文書を保存できます。そのままCLIのassessに渡せば
++同じ結果になります。確認済みのチェックを付けて再評価すると、実際の移行HTMLが開き、
++緊急度・情報の状態・準備状況、理由、証拠、不足情報、次の確認を読めます。
++同じ保存済み入力を使うため、再スキャンや外部接続は行いません。
++レポートの言語・配色は、入力画面とは別に切り替えられます。
++
++確定前の確認は取り消せます。確定後の評価は同期処理で完了まで進み、書き込み途中の
++取消しは保証しません。エラーは画面に示し、不正な設定は適用しません。各ファイルは
++個別に安全に置換しますが、全ファイルを一括で置換する仕組みではありません。
++入力が変わっていれば、古い確認内容では評価できません。
++
++専用のジョブディレクトリ内のmigration/に3種類の移行レポートと、申告があれば
++migration-context.jsonを保存します。配信するのは完了した許可済みのレポート・設定だけです。
++取込も1セッション20件の上限に含みます。ジョブごとの確認内容を制限し、確認リクエストは
++3MiB、応答は16MiBまでです。通常のserve・スキャン・レポートの既定動作、従来のContext、
++スキーマは変わりません。実務者による評価や公開承認は、この操作確認とは別に扱います。
+diff --git a/docs/user/SCANNING.md b/docs/user/SCANNING.md
+index 8f0a033..7bff15c 100644
+--- a/docs/user/SCANNING.md
++++ b/docs/user/SCANNING.md
+@@ -227,3 +227,56 @@ The default browser opens the session's local page. Browse subfolders of `--root
+ The server binds only to `127.0.0.1`. Open the full random session URL printed in the terminal; `localhost` aliases or a bare `/` URL are not accepted. Keep that URL private. No source file contents are served. Each scan uses the CLI's default rules/selection behavior and writes the seven `--format all` outputs plus `diagnostics.json`; filters, thresholds and network probing cannot be configured from this UI. One scan runs at a time, with at most 20 scans per server session. Folder listings show up to 1,000 subfolders and state when entries were omitted.
+ 
+ Reports are retained in the private `pqc-scan-web-*` session directory printed in the terminal. Stop with Ctrl+C. To keep an offline report, retain both `report.html` and `report.rules.html`; exports are also available at the corresponding filenames under the report URL. This mode does not upload source or reports. It does not run project build scripts or package commands. A folder containing the session output directory cannot be selected for scanning.
++
++### Optional migration context and reassessment
++
++```console
++pqc-scan serve --migration --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
++```
++
++This opt-in mode additionally records Inventory v1 for new web scans. On completion,
++it opens optional migration input instead of navigating directly to the scan report;
++the ordinary scan-report link remains available. Select **Review migration** on a
++completed session job, or explicitly choose a saved Inventory v1 file (32MiB maximum).
++No file is uploaded outside this local session and no project code is executed.
++
++Select only the targets to which your declarations apply. Lists are paged100 at a
++time, with at most4096 selected targets; ambiguous targets cannot acquire bindings.
++Personal/organization guidance does not change policy or criticality. Company and
++department names are not required; generated organization/system aliases can be kept.
++Answer only known relevant questions, explicitly choose Unknown, or leave them
++unanswered. False and Not applicable are separate choices. Show all optional
++questions to review other fields. An already supplied answer stays visible when
++purpose changes; it is never silently removed.
++
++Answers require an actor alias and assertion instant. The current-time button is an
++explicit way to supply that instant; expiry is optional and never generated. Without
++expiry, existing freshness remains unknown. Review the evaluation instant separately.
++You may instead continue without context. Known technical concerns and missing
++information remain visible in the resulting report.
++
++**Import existing context** accepts the adopted migration-context v1 (1MiB maximum),
++validates its exact saved-input binding and preserves every supported field, default,
++reference and provenance. Advanced fields remain read-only rather than disappearing
++into the simple form. To change those fields, edit and import the original context
++again. Selecting another input resets declarations/selections and requires new review.
++
++Choose **Review declarations and scope** to see the exact targets, supplied claims,
++actor/dates, applicable freshness and purpose conflicts. **Save context** downloads the
++validated canonical document; use it unchanged with CLI assess for the same result.
++After confirming that review, **Reassess** opens the real bilingual migration HTML,
++with urgency/information/readiness, reasons, evidence, missing information and next
++checks. It evaluates the same saved bytes without rescanning or outbound connections.
++The existing language/theme report controls work independently of the input page.
++
++You can cancel a pending review before confirmation. Confirmed synchronous evaluation
++runs to completion; cancellation during writes is not promised. Errors are shown and
++invalid settings are not applied. Each output replacement is atomic individually,
++not a transaction across files. A changed input rejects a stale review token.
++
++The private job subdirectory migration/ retains the3 migration report files and,
++when supplied, migration-context.json. Only completed allowlisted reports/context
++are served. Imports count toward the existing20-job session limit; one context draft
++per job is bounded, with a3MiB request and16MiB response limit. The ordinary serve
++mode, scan/report defaults, legacy contexts and schemas remain unchanged. Original
++practitioner evaluation and release approval are separate from this workflow.
+diff --git a/tasks/074/task.yaml b/tasks/074/task.yaml
+index 5835244..06db028 100644
+--- a/tasks/074/task.yaml
++++ b/tasks/074/task.yaml
+@@ -2,7 +2,7 @@ id: '074'
+ title: Add optional context forms and reassessment to the existing local web interface
+ type: improvement
+ priority: high
+-status: pending
++status: in-progress
+ owner: Main agent
+ plan_reference: docs/roadmap/v0.4/ROADMAP.md
+ requirements_reference: docs/roadmap/v0.4/REQUIREMENTS.md
+@@ -93,3 +93,11 @@ planning_record:
+   supporting_requirements: []
+   completion_evidence: Original criteria, applicable tests, final-source evidence and required reviews
+     must all be complete; completed historical tasks remain unchanged.
++
++execution_record:
++  selected_on: '2026-11-18'
++  plan: tasks/074/TASK-074-PLAN.md
++  lifecycle:
++  - 'pending -> planned: concrete D4 API/UI/bounds recorded; await073 completion before executable changes.'
++  reviewer_continuity: Reuse /root/v04_implementation_review and /root/v04_test_review.
++  implementation_transition: "planned -> in-progress:073 completed with both stages and final required checks; concrete D4 plan retained."
+diff --git a/crates/pqc_scan_cli/src/context_command.rs b/crates/pqc_scan_cli/src/context_command.rs
+new file mode 100644
+index 0000000..10b97bf
+--- /dev/null
++++ b/crates/pqc_scan_cli/src/context_command.rs
+@@ -0,0 +1,141 @@
++use clap::Args;
++use pqc_scan_core::migration::{
++    generate_context, ClaimAnswer, ContextClaims, ContextSelection, Error, InputFormat, Provenance,
++    SavedEvidence,
++};
++use std::{io::Write, path::PathBuf};
++
++#[derive(Debug, Args)]
++pub(crate) struct ContextArgs {
++    input: PathBuf,
++    #[arg(long)]
++    input_format: String,
++    /// Show one-based target numbers, roles and locations without writing context.
++    #[arg(long)]
++    list_targets: bool,
++    /// Select a displayed target number. Repeat for an explicitly reviewed group.
++    #[arg(long)]
++    target: Vec<usize>,
++    #[arg(long)]
++    out: Option<PathBuf>,
++    #[arg(long)]
++    as_of: Option<String>,
++    #[arg(long, default_value = "organization")]
++    organization: String,
++    #[arg(long, default_value = "system-1")]
++    system: String,
++    /// Known claim as FIELD=JSON_VALUE; strings require JSON quotes.
++    #[arg(long = "set")]
++    values: Vec<String>,
++    /// Explicit unknown claim field; omitted fields are not answered.
++    #[arg(long)]
++    unknown: Vec<String>,
++    #[arg(long)]
++    actor: Option<String>,
++    #[arg(long)]
++    asserted_at: Option<String>,
++    #[arg(long)]
++    valid_until: Option<String>,
++}
++
++pub(crate) fn run(args: ContextArgs, stdout: &mut impl Write) -> anyhow::Result<()> {
++    let evidence = SavedEvidence::read(&args.input, args.input_format.parse::<InputFormat>()?)?;
++    if args.list_targets {
++        if args.out.is_some()
++            || !args.target.is_empty()
++            || !args.values.is_empty()
++            || !args.unknown.is_empty()
++        {
++            return Err(Error::InvalidInput.into());
++        }
++        for (i, target) in evidence.targets().iter().enumerate() {
++            let location = target
++                .source_ref
++                .path
++                .as_deref()
++                .or(target.source_ref.detail_path.as_deref())
++                .unwrap_or("(saved record)");
++            writeln!(
++                stdout,
++                "{}\t{}\t{}\t{}{}\t{}",
++                i + 1,
++                target.technical.algorithm.identifier,
++                target.source_ref.role,
++                serde_json::to_string(location)?,
++                target
++                    .source_ref
++                    .line
++                    .map(|n| format!(":{n}"))
++                    .unwrap_or_default(),
++                if target.is_bindable() {
++                    "selectable"
++                } else {
++                    "ambiguous; cannot bind"
++                }
++            )?;
++        }
++        return Ok(());
++    }
++    let out = args.out.ok_or(Error::InvalidInput)?;
++    let as_of = args.as_of.ok_or(Error::InvalidTime)?;
++    let mut answers = Vec::new();
++    for value in &args.values {
++        if value.len() > 1024 * 1024 {
++            return Err(Error::ResourceLimit.into());
++        }
++        let (field, value) = value.split_once('=').ok_or(Error::InvalidInput)?;
++        answers.push(ClaimAnswer {
++            field: field.to_owned(),
++            value: Some(serde_json::from_str(value).map_err(|_| Error::InvalidInput)?),
++        });
++    }
++    answers.extend(
++        args.unknown
++            .into_iter()
++            .map(|field| ClaimAnswer { field, value: None }),
++    );
++    let claims = if answers.is_empty() {
++        if args.actor.is_some() || args.asserted_at.is_some() || args.valid_until.is_some() {
++            return Err(Error::InvalidInput.into());
++        }
++        ContextClaims::default()
++    } else {
++        if args.target.is_empty() {
++            return Err(Error::InvalidContextBinding.into());
++        }
++        ContextClaims::from_answers(
++            &answers,
++            Provenance::operator(
++                args.actor.as_deref().ok_or(Error::InvalidInput)?,
++                args.asserted_at.as_deref().ok_or(Error::InvalidTime)?,
++                args.valid_until.as_deref(),
++            )?,
++        )?
++    };
++    let selections = args
++        .target
++        .into_iter()
++        .map(|n| {
++            Ok(ContextSelection {
++                target_index: n.checked_sub(1).ok_or(Error::InvalidReference)?,
++                system_id: args.system.clone(),
++                claims: claims.clone(),
++            })
++        })
++        .collect::<pqc_scan_core::migration::Result<Vec<_>>>()?;
++    let bytes = generate_context(&evidence, &args.organization, &selections, &as_of)?;
++    evidence.validate_output_paths(None, std::slice::from_ref(&out))?;
++    pqc_scan_core::safe_output::create_dir_all(
++        out.parent()
++            .filter(|p| !p.as_os_str().is_empty())
++            .unwrap_or(std::path::Path::new(".")),
++    )
++    .map_err(|_| Error::UnsafeOutput)?;
++    pqc_scan_core::safe_output::write(&out, bytes).map_err(|_| Error::UnsafeOutput)?;
++    writeln!(
++        stdout,
++        "written migration-context v1; {} explicitly selected targets",
++        selections.len()
++    )?;
++    Ok(())
++}
+diff --git a/crates/pqc_scan_cli/src/serve-migration.js b/crates/pqc_scan_cli/src/serve-migration.js
+new file mode 100644
+index 0000000..246ece1
+--- /dev/null
++++ b/crates/pqc_scan_cli/src/serve-migration.js
+@@ -0,0 +1,91 @@
++/* Optional local forms. Validation and decisions are performed by shared Rust code. */
++(() => {
++  const root=document.createElement('section');root.id='migration';root.tabIndex=-1;
++  document.querySelector('main').append(root);
++  const style=document.createElement('style');style.textContent=`#migration[aria-busy=true]{opacity:.8}#migration label{display:block;margin:12px 0}#migration input:not([type=checkbox]),#migration select{font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;max-width:100%;min-height:40px;background:var(--card);color:var(--text)}#migration .check-label{display:flex;align-items:start;gap:8px}#migration .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px}#migration fieldset{border:1px solid var(--line);border-radius:6px;margin:16px 0;min-width:0}#migration legend{font-weight:600}#migration table{border-collapse:collapse;width:100%;font-size:14px}#migration th,#migration td{border-bottom:1px solid var(--line);padding:10px 6px;vertical-align:top;text-align:left;overflow-wrap:anywhere}#migration .scope{max-height:330px;overflow:auto}#migration .scope label{margin:0;overflow-wrap:anywhere}#migration .preview{background:var(--bg);padding:16px;margin:20px 0;border-radius:6px}#migration .answer-label{display:block;margin-bottom:4px}#migration small{display:block}#migration [hidden]{display:none!important}@media(max-width:600px){#migration .fields{grid-template-columns:1fr}#migration table{font-size:13px}}`;document.head.append(style);
++  let lang=document.documentElement.lang==='en'?'en':'ja',job=null,input=null,page=0,total=0,rows=[],selected=new Set(),answers=new Map(),imported=null,preview=null,downloadUrl=null,version=0,busy=false,controller=null;
++  const t=(ja,en)=>lang==='ja'?ja:en;
++  const $=id=>root.querySelector(`#m-${id}`);
++  function node(tag,text,attrs={}) {const n=document.createElement(tag);if(text!==null)n.textContent=text;for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;}
++  function words(tag,ja,en,attrs={}) {const n=node(tag,t(ja,en),attrs);n.dataset.ja=ja;n.dataset.en=en;return n;}
++  function label(control,ja,en) {const l=node('label',null);if(control.type==='checkbox'){l.className='check-label';l.append(control,words('span',ja,en));}else l.append(words('span',ja,en,{'class':'answer-label'}),control);return l;}
++  function select(id,items) {const s=node('select',null,{id:`m-${id}`});for(const [value,ja,en] of items)s.append(words('option',ja,en,{value}));return s;}
++  function text(id,value='') {const e=node('input',null,{id:`m-${id}`,type:'text'});e.value=value;return e;}
++  function button(id,ja,en) {return words('button',ja,en,{id:`m-${id}`,type:'button'});}
++  root.append(words('h2','暗号移行の確認（任意）','Review cryptographic migration (optional)'),words('p','分かる項目だけを申告し、対応方針と次の確認を調べます。入力を省略して進めることもできます。','Provide only what you know, then review the response and next checks. You can continue without context.'));
++  const file=node('input',null,{id:'m-input-file',type:'file',accept:'.json,application/json'});root.append(label(file,'保存済みの棚卸しを選ぶ（Inventory v1）','Select saved inventory (Inventory v1)'));
++  const status=node('p','',{id:'m-status',role:'status','aria-live':'polite',tabindex:'-1'});root.append(status);
++  const workspace=node('div',null,{id:'m-workspace',hidden:''});root.append(workspace);
++  workspace.append(node('p','',{id:'m-job-label','class':'path'}));
++  const mode=select('mode',[['generate','分かる項目を入力する','Enter known information'],['without_context','追加情報なしで進める','Continue without context'],['import_context','既存の設定を読み込む','Import existing context']]);workspace.append(label(mode,'入力方法','Context input'));
++  const asOf=text('as-of');workspace.append(label(asOf,'評価時刻（UTCオフセット付き、秒単位）','Evaluation instant (UTC offset, whole seconds)'));
++  const form=node('div',null,{id:'m-form'});workspace.append(form);
++  const audience=select('audience',[['personal','個人のプロジェクト','Personal project'],['organization','組織のプロジェクト','Organization project']]);form.append(label(audience,'利用場面（入力の案内のみ）','Project setting (guidance only)'));
++  form.append(words('p','申告を適用する対象だけを選びます。選ばない対象には申告を適用しません。','Select only the targets to which your declarations apply. Unselected targets receive no context.'));
++  const targetBox=node('div',null,{id:'m-targets','class':'scope'});form.append(targetBox);
++  const paging=node('div',null,{'class':'toolbar'});paging.append(button('previous','前の100件','Previous 100'),node('span','',{id:'m-page'}),button('next','次の100件','Next 100'));form.append(paging,node('p','',{id:'m-selection-count'}));
++  const aliases=node('details',null);aliases.append(words('summary','別名を変更する（会社・部署名は不要）','Customize aliases (no company or department required)'));const org=text('organization','organization'),system=text('system','system-1');aliases.append(label(org,'組織の別名','Organization alias'),label(system,'システムの別名','System alias'));form.append(aliases);
++  const extra=node('input',null,{id:'m-all-fields',type:'checkbox'});form.append(label(extra,'すべての任意項目を表示する','Show all optional questions'));
++  const questions=node('div',null,{id:'m-questions','class':'fields'});form.append(questions);
++  const provenance=node('fieldset',null);provenance.append(words('legend','申告の由来（回答を入力した場合）','Declaration provenance (when answering)'));
++  const actor=text('actor'),asserted=text('asserted-at'),until=text('valid-until');provenance.append(label(actor,'申告者の別名','Actor alias'),label(asserted,'申告日時（UTCオフセット付き、秒単位）','Assertion instant (UTC offset, whole seconds)'),label(until,'有効期限（任意。未指定なら有効性は不明）','Expiry (optional; omitted expiry means unknown freshness)'));const assertionNow=button('assertion-now','現在の時刻を申告日時にする','Use current time for assertion');provenance.append(assertionNow);form.append(provenance);
++  const importBox=node('div',null,{id:'m-import',hidden:''}),contextFile=node('input',null,{id:'m-context-file',type:'file',accept:'.json,application/json'});importBox.append(label(contextFile,'既存の移行設定（migration-context v1）','Existing migration context v1'),words('p','読み込んだ全項目を保持します。簡易フォームで扱えない項目は読み取り専用です。変更する場合は元の設定を編集し、読み込み直してください。','All imported fields are preserved. Fields outside the simple form remain read-only. To change them, edit and import the original context again.'),node('p','',{id:'m-import-note'}));workspace.append(importBox);
++  const toolbar=node('div',null,{'class':'toolbar'});toolbar.append(button('preview','内容と適用先を確認','Review declarations and scope'),button('cancel','入力の確認を取り消す','Cancel pending review'));workspace.append(toolbar);
++  const previewBox=node('div',null,{id:'m-preview',hidden:'','class':'preview',tabindex:'-1'});workspace.append(previewBox);
++  const actions=node('div',null,{id:'m-actions',hidden:''}),download=words('a','設定を保存','Save context',{id:'m-download',download:'migration-context.json'}),reviewed=node('input',null,{id:'m-reviewed',type:'checkbox'}),confirm=button('confirm','この内容で再評価する','Reassess with these declarations');confirm.className='primary';actions.append(download,label(reviewed,'適用先・申告・日時を確認しました','I reviewed the scope, declarations and dates'),confirm);workspace.append(actions);
++  const descriptors=[
++    ['applicability','適用範囲','Applicability',[['applicable','対象として扱う','Applicable'],['not_applicable','この範囲では対象外','Not applicable within this scope']]],
++    ['use_case','用途','Purpose',[['signature','署名','Signature'],['jwt','JWT','JWT'],['pki','PKI','PKI'],['key_establishment','鍵確立','Key establishment'],['encryption','暗号化','Encryption'],['hashing','ハッシュ','Hashing']]],
++    ['usage_state','利用状況','Usage',[['active','利用中','Active'],['planned','利用予定','Planned'],['test_only','試験のみ','Test only'],['unused','未使用','Unused']]],
++    ['business_critical','業務上の重要性（該当する場合）','Business-critical use (when applicable)','bool'],
++    ['confidential','機密情報を扱う','Handles confidential information','bool','encryption,key_establishment'],
++    ['confidentiality_until','機密性を保つ期限','Confidentiality protection until','date','encryption,key_establishment'],
++    ['historical_ciphertext','過去の暗号文を考慮する','Historical ciphertext applies','bool','encryption,key_establishment'],
++    ['signature_verification_until','署名の検証が必要な期限','Signature verification until','date','signature,jwt,pki'],
++    ['migration_lead_seconds','移行に必要な期間（秒）','Migration lead time (seconds)','number'],
++    ['support.runtime','実行環境の対応','Runtime support','bool','all'],['support.provider','暗号プロバイダーの対応','Provider support','bool','all'],['support.parameters','正確なパラメーターへの対応','Exact parameter support','bool','all'],
++    ['support.peer','接続相手の対応','Peer support','bool','key_establishment,encryption'],['support.protocol','通信方式の対応','Protocol support','bool','key_establishment,encryption'],['support.verifiers','検証側の対応','Verifier support','bool','signature,jwt,pki'],['support.jose','JOSEの対応','JOSE support','bool','jwt'],['support.pki','PKIの対応','PKI support','bool','pki']
++  ];
++  function message(ja,en,error=false) {status.textContent=t(ja,en);status.classList.toggle('error',error);status.setAttribute('role',error?'alert':'status');if(error)status.focus();}
++  function invalidate() {preview=null;previewBox.hidden=true;actions.hidden=true;reviewed.checked=false;confirm.disabled=true;if(downloadUrl){URL.revokeObjectURL(downloadUrl);downloadUrl=null;}}
++  function setBusy(value,kind='') {busy=value;root.setAttribute('aria-busy',String(value));for(const c of root.querySelectorAll('button,input,select'))c.disabled=value;$('cancel').disabled=value&&kind!=='preview';if(!value){$('previous').disabled=page===0;$('next').disabled=(page+1)*100>=total;confirm.disabled=!preview||!reviewed.checked;for(const c of root.querySelectorAll('[data-target-number]'))c.disabled=!rows.find(r=>r.number===Number(c.dataset.targetNumber))?.selectable;}}
++  function failure(error) {const code=error.message;if(code==='input_binding_mismatch'){selected.clear();invalidate();message('入力の内容が変わりました。対象を開き直して選び直してください。','The saved input changed. Open the targets again and reselect them.',true);}else if(code==='resource_limit'){message('入力または出力が上限を超えました。対象や設定のサイズを確認してください。','The input or output exceeds its limit. Check the target count or context size.',true);}else{message('入力内容を確認してください。対象、日時、申告の値や設定形式が不正な場合は適用しません。','Check the targets, dates, declaration values and context format. Invalid settings are not applied.',true);}}
++  async function api(route,body) {const response=await fetch(route,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:controller?.signal});const data=await response.json();if(!response.ok)throw new Error(data.error||'invalid_request');return data;}
++  function renderQuestions() {
++    const focused=document.activeElement?.id;questions.replaceChildren();const purpose=answers.get('use_case')?.value;
++    for(const [field,ja,en,kind,relevance] of descriptors) {
++      if(!extra.checked&&!answers.has(field)&&relevance&&!(relevance==='all'?Boolean(purpose):relevance.split(',').includes(purpose)))continue;
++      const current=answers.get(field), id=`answer-${field.replaceAll('.','-')}`;
++      const choices=[['','回答しない','No answer'],['?','不明','Unknown'],...(Array.isArray(kind)?kind:kind==='bool'?[['true','はい','Yes'],['false','いいえ','No']]:[['known','値を指定する','Provide a value']])];
++      const control=select(id,choices);control.value=current?.state==='unknown'?'?':current?Array.isArray(kind)?current.value:kind==='bool'?String(current.value):'known':'';
++      const wrapper=label(control,ja,en);questions.append(wrapper);
++      let detail=null;if(kind==='date'||kind==='number'){detail=text(`${id}-value`,current?.state==='known'?String(current.value):'');detail.type=kind==='number'?'number':'text';if(kind==='number'){detail.min='0';detail.max='315576000';detail.step='1';}else detail.placeholder='2030-01-01T00:00:00Z';detail.hidden=control.value!=='known';detail.setAttribute('aria-label',t(ja,en));wrapper.append(detail);detail.addEventListener('input',()=>{answers.set(field,{state:'known',value:detail.value});invalidate();});}
++      control.addEventListener('change',()=>{if(control.value==='')answers.delete(field);else if(control.value==='?')answers.set(field,{state:'unknown'});else answers.set(field,{state:'known',value:Array.isArray(kind)?control.value:kind==='bool'?control.value==='true':detail.value});if(detail)detail.hidden=control.value!=='known';invalidate();if(field==='use_case')renderQuestions();});
++    }
++    if(focused)root.querySelector(`#${focused}`)?.focus({preventScroll:true});
++  }
++  function renderTargets() {targetBox.replaceChildren();for(const row of rows){const c=node('input',null,{type:'checkbox','data-target-number':row.number});c.checked=selected.has(row.number);c.disabled=!row.selectable||busy;const l=node('label',null);l.append(c,node('span',` ${row.number}. ${row.algorithm} · ${row.path||t('保存済みの記録','Saved record')}${row.line?':'+row.line:''} · ${row['role_'+lang]||row.role}${row.selectable?'':t('（対応付けできない曖昧な対象）',' (ambiguous; cannot bind)')}`));targetBox.append(l);c.addEventListener('change',()=>{if(c.checked){if(selected.size>=4096){c.checked=false;failure(new Error('resource_limit'));return;}selected.add(row.number);}else selected.delete(row.number);invalidate();renderCount();});}$('page').textContent=total?`${page*100+1}–${Math.min((page+1)*100,total)} / ${total}`:'0';$('previous').disabled=busy||page===0;$('next').disabled=busy||(page+1)*100>=total;renderCount();}
++  function renderCount() {$('selection-count').textContent=t(`申告を適用する対象：${selected.size}件`,`Declarations apply to ${selected.size} selected targets`);}
++  async function loadPage(next) {const v=version;const data=await api(`api/migration/targets?job=${job}&page=${next}`);if(v!==version)return;if(input&&input.sha256!==data.input.sha256){selected.clear();answers.clear();imported=null;invalidate();message('入力が更新されたため、選択と申告を消去しました。対象を確認し直してください。','Input changed; selections and declarations were cleared. Review targets again.',true);}input=data.input;page=data.page;total=data.total;rows=data.targets;renderTargets();}
++  async function loadJob(id,internal=false) {if(busy&&!internal){message('処理が終わるか、確認を取り消してから対象を選んでください。','Wait for processing or cancel the pending review before changing targets.');return;}version++;job=id;input=null;page=0;selected.clear();answers.clear();imported=null;invalidate();mode.value='generate';form.hidden=false;importBox.hidden=true;actor.value='';asserted.value='';until.value='';org.value='organization';system.value='system-1';contextFile.value='';asOf.value=new Date(Math.ceil(Date.now()/1000)*1000).toISOString().replace('.000Z','Z');workspace.hidden=false;$('job-label').textContent=t(`選択した結果：${id}`,`Selected session result: ${id}`);setBusy(true);try{await loadPage(0);renderQuestions();root.focus();message('対象を選び、分かる項目だけ入力してください。追加情報なしでも進められます。','Select targets and enter only what you know, or continue without context.');}catch(e){failure(e);}finally{setBusy(false);}}
++  const enums={applicable:['対象として扱う','Applicable'],not_applicable:['この範囲では対象外','Not applicable within scope'],signature:['署名','Signature'],key_establishment:['鍵確立','Key establishment'],encryption:['暗号化','Encryption'],hashing:['ハッシュ','Hashing'],active:['利用中','Active'],planned:['利用予定','Planned'],test_only:['試験のみ','Test only'],unused:['未使用','Unused']};
++  function human(value) {if(value===true)return t('はい','Yes');if(value===false)return t('いいえ','No');if(typeof value==='string')return enums[value]?t(...enums[value]):value;if(value&&value.kind==='none')return t('期限の指定なし','No deadline');if(value&&value.kind==='at')return `${value.at} · ${value.reference_id} · ${value.scope_reason}`;return String(value);}
++  function claimRows(table,set,scope) {for(const [name,claim] of Object.entries(set||{})){if(name==='support'){claimRows(table,claim,`${scope} / support`);continue;}const key=scope.endsWith('support')?'support.'+name:name;const descriptor=descriptors.find(d=>d[0]===key);const p=claim.provenance;const tr=node('tr',null);tr.append(node('td',`${scope} / ${descriptor?t(descriptor[1],descriptor[2]):name}`),node('td',claim.state==='unknown'?t('不明','Unknown'):human(claim.value)),node('td',`${p.source_kind==='external_review_claim'?t('外部レビューの申告（未検証）','External review claim (unverified)'):t('利用者の申告（未検証）','Operator claim (unverified)')} · ${p.actor_id}\n${p.asserted_at}\n${p.valid_until||t('有効期限の指定なし','Expiry not supplied')}${p.reference_id?' · '+p.reference_id:''}`));table.append(tr);}}
++  function renderPreview() {if(!preview)return;previewBox.replaceChildren(words('h3','適用前の確認','Review before applying'),node('p',`${t('評価時刻','Evaluation instant')}: ${preview.as_of}`));const scope=node('ul',null);for(const row of preview.scope)scope.append(node('li',`${row.number}. ${row.algorithm} · ${row.path||row.role}${row.line?':'+row.line:''}`));previewBox.append(words('p',`申告を適用する対象：${preview.scope.length}件`,`Declared scope: ${preview.scope.length} targets`),scope);
++    if(preview.context===null){previewBox.append(words('p','追加申告なしで、保存済みの技術情報を評価します。','Reassess saved technical information without additional declarations.'));download.hidden=true;return;}
++    download.hidden=false;const c=JSON.parse(preview.context);previewBox.append(node('p',`${t('組織の別名','Organization alias')}: ${c.organization_id}`));const table=node('table',null);const header=node('tr',null);for(const pair of [['項目・範囲','Field and scope'],['申告内容','Declaration'],['申告者・日時・期限','Provenance and dates']])header.append(words('th',...pair));table.append(header);claimRows(table,c.organization_defaults,t('組織の既定値','Organization defaults'));for(const s of c.systems)claimRows(table,s.defaults,s.id);for(const b of c.bindings)claimRows(table,b.claims,b.system_id+' / '+(preview.scope.find(r=>r.id===b.target_id)?.number||b.target_id));previewBox.append(table);if(preview.resolved?.length){const list=node('ul',null);for(const r of preview.resolved){const d=descriptors.find(d=>d[0]===r.field);const names={active:['申告期間内','Within declaration interval'],stale:['有効期限切れ','Expired'],not_yet_effective:['申告日時より前','Before assertion instant'],unknown:['有効性が不明','Freshness unknown']};list.append(node('li',`${r.target_number}. ${d?t(d[1],d[2]):r.field} · ${names[r.freshness]?t(...names[r.freshness]):r.freshness}`));}previewBox.append(words('h4','適用する申告の有効性','Freshness of applied declarations'),list);}if(preview.purpose_conflicting)previewBox.append(words('p','用途の申告と技術情報が一致しない対象があります。元の事実と申告を確認してください。','Some declared purposes conflict with technical facts. Review the original observations and declarations.',{'class':'error'}));if(table.rows.length===1)previewBox.append(words('p','申告はありません。未回答の項目は補いません。','No declarations. Unanswered fields are not filled in.'));if(c.references?.length){previewBox.append(words('h4','申告に付随する資料参照（未検証）','Declared references (unverified)'));for(const r of c.references)previewBox.append(node('p',[r.id,r.issuer_id,r.document_id,r.edition,r.clause,r.scope_id,r.https_uri].filter(Boolean).join(' · ')));}}
++  function requestBody() {const common={input_sha256:input.sha256,as_of:asOf.value};if(mode.value==='without_context')return {mode:'without_context',...common};if(mode.value==='import_context'){if(imported===null)throw new Error('invalid_request');return {mode:'import_context',...common,context:imported};}const values=[...answers].map(([field,a])=>{if(a.state==='unknown')return {field,state:'unknown'};const d=descriptors.find(x=>x[0]===field);let value=a.value;if(d[3]==='number'){if(String(value).trim()===''||!Number.isSafeInteger(Number(value)))throw new Error('invalid_request');value=Number(value);}if(d[3]==='date'&&!value)throw new Error('invalid_request');return {field,state:'known',value};});return {mode:'generate',...common,organization_id:org.value,system_id:system.value,selected:[...selected].sort((a,b)=>a-b),answers:values,...(values.length?{actor:actor.value,asserted_at:asserted.value,...(until.value?{valid_until:until.value}:{})}:{})};}
++  $('preview').addEventListener('click',async()=>{if(busy||!input)return;invalidate();controller=new AbortController();const v=version;setBusy(true,'preview');message('入力と適用範囲を確認しています…','Validating declarations and scope…');try{const data=await api(`api/migration/preview?job=${job}`,requestBody());if(v!==version)return;preview=data;renderPreview();previewBox.hidden=false;actions.hidden=false;reviewed.checked=false;if(data.context!==null){downloadUrl=URL.createObjectURL(new Blob([data.context],{type:'application/json'}));download.href=downloadUrl;}previewBox.focus();message('適用先・申告・日時を確認してから再評価してください。','Review the scope, declarations and dates before reassessing.');}catch(e){if(e.name!=='AbortError')failure(e);}finally{if(v===version){controller=null;setBusy(false);}}});
++  reviewed.addEventListener('change',()=>confirm.disabled=!preview||!reviewed.checked||busy);
++  confirm.addEventListener('click',async()=>{if(busy||!preview||!reviewed.checked)return;setBusy(true,'confirm');message('保存済み入力を再評価しています。再スキャンは行いません…','Reassessing the saved input without rescanning…');try{const result=await api(`api/migration/assess?job=${job}`,{token:preview.token,language:lang});const destination=result.report;invalidate();location.href=destination;}catch(e){invalidate();failure(e);}finally{setBusy(false);}});
++  $('cancel').addEventListener('click',async()=>{if(busy&&controller){version++;controller.abort();invalidate();setBusy(false);message('入力の確認を取り消しました。','Pending review cancelled.');return;}const token=preview?.token;invalidate();if(token){try{await api(`api/migration/cancel?job=${job}`,{token});}catch(e){failure(e);return;}}message('入力の確認を取り消しました。','Pending review cancelled.');});
++  file.addEventListener('change',async()=>{const f=file.files[0];if(!f)return;if(f.size>32*1024*1024){failure(new Error('resource_limit'));return;}setBusy(true);message('選択した棚卸しを検証しています…','Validating selected inventory…');try{const response=await fetch('api/migration/import',{method:'POST',headers:{'Content-Type':'application/json'},body:await f.text()});const data=await response.json();if(!response.ok)throw new Error(data.error);await loadJob(data.id,true);}catch(e){failure(e);}finally{setBusy(false);file.value='';}});
++  contextFile.addEventListener('change',async()=>{invalidate();imported=null;const v=version,f=contextFile.files[0];if(!f)return;if(f.size>1024*1024){imported=null;failure(new Error('resource_limit'));return;}try{const contents=await f.text();if(v!==version||f!==contextFile.files[0])return;imported=contents;}catch(e){imported=null;failure(e);return;}$('import-note').textContent=t('設定を選択しました。「内容と適用先を確認」で検証します。','Context selected. Review declarations and scope to validate it.');});
++  mode.addEventListener('change',()=>{invalidate();form.hidden=mode.value!=='generate';importBox.hidden=mode.value!=='import_context';});
++  extra.addEventListener('change',renderQuestions);$('previous').addEventListener('click',()=>loadPage(page-1).catch(failure));$('next').addEventListener('click',()=>loadPage(page+1).catch(failure));
++  assertionNow.addEventListener('click',()=>{asserted.value=new Date().toISOString().replace(/\.\d{3}Z$/,'Z');invalidate();});
++  for(const c of [asOf,org,system,actor,asserted,until])c.addEventListener('input',invalidate);
++  window.addEventListener('pqc-migration-job',e=>loadJob(e.detail.id));
++  window.addEventListener('pqc-language',e=>{lang=e.detail;for(const n of root.querySelectorAll('[data-ja]'))n.textContent=n.dataset[lang];for(const n of root.querySelectorAll('[aria-label]')){const d=descriptors.find(d=>n.id===`m-answer-${d[0].replaceAll('.','-')}-value`);if(d)n.setAttribute('aria-label',t(d[1],d[2]));}renderTargets();renderPreview();});
++  setBusy(false);
++})();
+diff --git a/crates/pqc_scan_cli/src/serve_migration.rs b/crates/pqc_scan_cli/src/serve_migration.rs
+new file mode 100644
+index 0000000..f12128f
+--- /dev/null
++++ b/crates/pqc_scan_cli/src/serve_migration.rs
+@@ -0,0 +1,385 @@
++//! Opt-in, session-bound adapters. All decisions remain in the core evaluator.
++use super::*;
++use pqc_scan_core::migration::{
++    self, ClaimAnswer, ContextClaims, ContextSelection, InputFormat, MigrationContext, Provenance,
++    SavedEvidence,
++};
++use serde::Deserialize;
++use std::io::Read;
++const INPUT_LIMIT: usize = 32 * 1024 * 1024;
++const PREVIEW_LIMIT: usize = 3 * 1024 * 1024;
++const RESPONSE_LIMIT: usize = 16 * 1024 * 1024;
++#[derive(Clone)]
++pub(super) struct Draft {
++    token: String,
++    input_sha256: String,
++    as_of: String,
++    context: Option<Vec<u8>>,
++}
++#[derive(Deserialize)]
++#[serde(tag = "state", rename_all = "snake_case", deny_unknown_fields)]
++enum Answer {
++    Known { field: String, value: Value },
++    Unknown { field: String },
++}
++#[derive(Deserialize)]
++#[serde(tag = "mode", rename_all = "snake_case", deny_unknown_fields)]
++enum Preview {
++    WithoutContext {
++        input_sha256: String,
++        as_of: String,
++    },
++    Generate {
++        input_sha256: String,
++        as_of: String,
++        organization_id: String,
++        system_id: String,
++        selected: Vec<usize>,
++        answers: Vec<Answer>,
++        actor: Option<String>,
++        asserted_at: Option<String>,
++        valid_until: Option<String>,
++    },
++    ImportContext {
++        input_sha256: String,
++        as_of: String,
++        context: String,
++    },
++}
++#[derive(Deserialize)]
++#[serde(deny_unknown_fields)]
++struct Confirmation {
++    token: String,
++    language: Option<String>,
++}
++fn query(query: &str) -> Result<(u64, usize)> {
++    let mut job = None;
++    let mut page = None;
++    for pair in query.split('&') {
++        let (k, v) = pair.split_once('=').context("invalid query")?;
++        match k {
++            "job" if job.is_none() => job = Some(v.parse::<u64>()?),
++            "page" if page.is_none() => page = Some(v.parse::<usize>()?),
++            _ => bail!("invalid query"),
++        }
++    }
++    Ok((job.context("missing job")?, page.unwrap_or(0)))
++}
++fn body(request: &mut Request, limit: usize) -> Result<Vec<u8>> {
++    if header(request, "Content-Type").and_then(|v| v.split(';').next()) != Some("application/json")
++    {
++        bail!("invalid content type");
++    }
++    let length = header(request, "Content-Length")
++        .context("length required")?
++        .parse::<usize>()?;
++    if request.body_length() != Some(length) {
++        bail!("invalid length");
++    }
++    if length > limit {
++        return Err(migration::Error::ResourceLimit.into());
++    }
++    let mut bytes = Vec::with_capacity(length);
++    request
++        .as_reader()
++        .take((limit + 1) as u64)
++        .read_to_end(&mut bytes)?;
++    if bytes.len() > limit {
++        return Err(migration::Error::ResourceLimit.into());
++    }
++    if bytes.len() != length {
++        bail!("invalid body length");
++    }
++    Ok(bytes)
++}
++fn evidence(state: &State, id: u64) -> Result<SavedEvidence> {
++    if !state
++        .jobs
++        .lock()
++        .unwrap()
++        .entries
++        .get(&id)
++        .is_some_and(|j| j["status"] == "ready" && j["migration_input"] == true)
++    {
++        bail!("unavailable job");
++    }
++    Ok(SavedEvidence::read(
++        &state
++            .output
++            .join(id.to_string())
++            .join("scan.inventory.v1.json"),
++        InputFormat::InventoryV1,
++    )?)
++}
++fn display(index: usize, target: &migration::Target) -> Value {
++    json!({"number":index+1,"id":target.id,"algorithm":target.technical.algorithm.identifier,"role":target.source_ref.role,"role_ja":pqc_scan_report::migration_role_label(&target.source_ref.role,pqc_scan_report::ReportLanguage::Ja),"role_en":pqc_scan_report::migration_role_label(&target.source_ref.role,pqc_scan_report::ReportLanguage::En),"path":target.source_ref.path,"line":target.source_ref.line,"selectable":target.is_bindable()})
++}
++fn targets(state: &State, id: u64, page: usize) -> Result<Value> {
++    let e = evidence(state, id)?;
++    let start = page.checked_mul(100).context("invalid page")?;
++    if start > e.targets().len() {
++        bail!("invalid page");
++    }
++    let rows = e
++        .targets()
++        .iter()
++        .enumerate()
++        .skip(start)
++        .take(100)
++        .map(|(i, t)| display(i, t))
++        .collect::<Vec<_>>();
++    Ok(json!({"input":e.input(),"total":e.targets().len(),"page":page,"targets":rows}))
++}
++fn import(state: &State, bytes: Vec<u8>) -> Result<Value> {
++    SavedEvidence::from_bytes(&bytes, InputFormat::InventoryV1)?;
++    let mut jobs = state.jobs.lock().unwrap();
++    if jobs.active || jobs.next >= 20 {
++        bail!("session busy or full");
++    }
++    jobs.next += 1;
++    let id = jobs.next;
++    let dir = state.output.join(id.to_string());
++    pqc_scan_core::safe_output::create_dir_all(&dir)?;
++    pqc_scan_core::safe_output::write(&dir.join("scan.inventory.v1.json"), bytes)?;
++    let job = json!({"id":id,"path":"Saved inventory","kind":"saved","status":"ready","migration_input":true});
++    jobs.entries.insert(id, job);
++    Ok(json!({"id":id}))
++}
++fn preview(state: &State, id: u64, request: Preview) -> Result<Value> {
++    let e = evidence(state, id)?;
++    let (sha, as_of, bytes) = match request {
++        Preview::WithoutContext {
++            input_sha256,
++            as_of,
++        } => {
++            migration::generate_context(&e, "organization", &[], &as_of)?;
++            (input_sha256, as_of, None)
++        }
++        Preview::Generate {
++            input_sha256,
++            as_of,
++            organization_id,
++            system_id,
++            selected,
++            answers,
++            actor,
++            asserted_at,
++            valid_until,
++        } => {
++            if selected.len() > 4096 || answers.len() > 18 {
++                return Err(migration::Error::ResourceLimit.into());
++            }
++            let claims = if answers.is_empty() {
++                if actor.is_some() || asserted_at.is_some() || valid_until.is_some() {
++                    bail!("provenance without answers");
++                }
++                ContextClaims::default()
++            } else {
++                if selected.is_empty() {
++                    bail!("unbound answers");
++                }
++                let answers = answers
++                    .into_iter()
++                    .map(|a| match a {
++                        Answer::Known { field, value } => ClaimAnswer {
++                            field,
++                            value: Some(value),
++                        },
++                        Answer::Unknown { field } => ClaimAnswer { field, value: None },
++                    })
++                    .collect::<Vec<_>>();
++                ContextClaims::from_answers(
++                    &answers,
++                    Provenance::operator(
++                        actor.as_deref().context("actor required")?,
++                        asserted_at.as_deref().context("assertion required")?,
++                        valid_until.as_deref(),
++                    )?,
++                )?
++            };
++            let selections = selected
++                .into_iter()
++                .map(|n| {
++                    Ok(ContextSelection {
++                        target_index: n.checked_sub(1).context("invalid index")?,
++                        system_id: system_id.clone(),
++                        claims: claims.clone(),
++                    })
++                })
++                .collect::<Result<Vec<_>>>()?;
++            let bytes = migration::generate_context(&e, &organization_id, &selections, &as_of)?;
++            (input_sha256, as_of, Some(bytes))
++        }
++        Preview::ImportContext {
++            input_sha256,
++            as_of,
++            context,
++        } => {
++            let c = MigrationContext::from_bytes(context.as_bytes())?;
++            c.bind(&e, &as_of)?;
++            (input_sha256, as_of, Some(c.to_bytes()?))
++        }
++    };
++    if sha != e.input().sha256 {
++        return Err(migration::Error::InputBindingMismatch.into());
++    }
++    let mut scope = Vec::new();
++    let mut resolved = Vec::new();
++    let mut purpose_conflicting = false;
++    if let Some(bytes) = &bytes {
++        let v: Value = serde_json::from_slice(bytes)?;
++        let context = MigrationContext::from_bytes(bytes)?;
++        let bound = context.bind(&e, &as_of)?;
++        let lookup = e
++            .targets()
++            .iter()
++            .enumerate()
++            .map(|(i, t)| (t.id.as_str(), (i, t)))
++            .collect::<BTreeMap<_, _>>();
++        for binding in v["bindings"].as_array().context("invalid context")? {
++            let (i, t) = lookup
++                .get(binding["target_id"].as_str().context("invalid target")?)
++                .context("invalid target")?;
++            scope.push(display(*i, t));
++            if let Some(target) = bound.target(&t.id) {
++                purpose_conflicting |= target.purpose_conflicting;
++                for claim in target.claims() {
++                    resolved.push(json!({"target_number":i+1,"field":claim.field,"freshness":claim.freshness}));
++                }
++            }
++        }
++    }
++    let token = random_token()?;
++    let as_of = migration::parse_as_of(&as_of)?;
++    let context = bytes
++        .as_ref()
++        .map(|b| String::from_utf8(b.clone()))
++        .transpose()?;
++    state.drafts.lock().unwrap().insert(
++        id,
++        Draft {
++            token: token.clone(),
++            input_sha256: sha.clone(),
++            as_of: as_of.clone(),
++            context: bytes,
++        },
++    );
++    Ok(
++        json!({"token":token,"input_sha256":sha,"as_of":as_of,"scope":scope,"context":context,"resolved":resolved,"purpose_conflicting":purpose_conflicting}),
++    )
++}
++fn confirm(state: &State, id: u64, confirmation: Confirmation) -> Result<Value> {
++    let draft = state
++        .drafts
++        .lock()
++        .unwrap()
++        .get(&id)
++        .filter(|d| d.token == confirmation.token)
++        .cloned()
++        .context("draft expired")?;
++    let e = evidence(state, id)?;
++    if e.input().sha256 != draft.input_sha256 {
++        state.drafts.lock().unwrap().remove(&id);
++        return Err(migration::Error::InputBindingMismatch.into());
++    }
++    let context = draft
++        .context
++        .as_deref()
++        .map(MigrationContext::from_bytes)
++        .transpose()?;
++    let report = migration::evaluate(&e, context.as_ref(), &draft.as_of)?;
++    let language = match confirmation.language.as_deref().unwrap_or("ja") {
++        "en" => pqc_scan_report::ReportLanguage::En,
++        "ja" => pqc_scan_report::ReportLanguage::Ja,
++        _ => bail!("invalid language"),
++    };
++    let dir = state.output.join(id.to_string()).join("migration");
++    let context_path = dir.join("migration-context.json");
++    e.validate_output_paths(
++        context.as_ref(),
++        &[
++            context_path.clone(),
++            dir.join(pqc_scan_report::MIGRATION_JSON),
++            dir.join(pqc_scan_report::MIGRATION_HTML),
++            dir.join(pqc_scan_report::MIGRATION_MARKDOWN),
++        ],
++    )?;
++    state
++        .jobs
++        .lock()
++        .unwrap()
++        .entries
++        .get_mut(&id)
++        .context("unavailable job")?["migration_ready"] = false.into();
++    pqc_scan_report::write_migration_assessment_reports(
++        &report,
++        &e,
++        context.as_ref(),
++        &dir,
++        language,
++    )?;
++    if let Some(bytes) = draft.context {
++        pqc_scan_core::safe_output::write(&context_path, bytes)?;
++    } else if context_path.exists() {
++        std::fs::remove_file(&context_path)?;
++    }
++    state
++        .jobs
++        .lock()
++        .unwrap()
++        .entries
++        .get_mut(&id)
++        .context("unavailable job")?["migration_ready"] = true.into();
++    state.drafts.lock().unwrap().remove(&id);
++    Ok(
++        json!({"report":format!("reports/{id}/migration.assessment.html"),"json":format!("reports/{id}/migration.assessment.v1.json"),"context":context.is_some()}),
++    )
++}
++fn dispatch(request: &mut Request, state: &State, route: &str, query_text: &str) -> Result<Value> {
++    if route == "api/migration/import" && request.method() == &Method::Post {
++        if !query_text.is_empty() {
++            bail!("invalid query");
++        }
++        return import(state, body(request, INPUT_LIMIT)?);
++    }
++    let (id, page) = query(query_text)?;
++    match (request.method(), route) {
++        (&Method::Get, "api/migration/targets") => targets(state, id, page),
++        (&Method::Post, "api/migration/preview") => preview(
++            state,
++            id,
++            serde_json::from_slice(&body(request, PREVIEW_LIMIT)?)?,
++        ),
++        (&Method::Post, "api/migration/assess") => {
++            confirm(state, id, serde_json::from_slice(&body(request, 1024)?)?)
++        }
++        (&Method::Post, "api/migration/cancel") => {
++            let c: Confirmation = serde_json::from_slice(&body(request, 1024)?)?;
++            let mut drafts = state.drafts.lock().unwrap();
++            if drafts.get(&id).is_none_or(|d| d.token != c.token) {
++                bail!("draft expired");
++            }
++            drafts.remove(&id);
++            Ok(json!({"cancelled":true}))
++        }
++        _ => bail!("invalid route"),
++    }
++}
++pub(super) fn handle(mut request: Request, state: &State, route: &str, query: &str) {
++    let result = dispatch(&mut request, state, route, query)
++        .and_then(|value| Ok(serde_json::to_vec(&value)?));
++    match result {
++        Ok(bytes) if bytes.len() <= RESPONSE_LIMIT => {
++            reply(request, 200, "application/json; charset=utf-8", bytes)
++        }
++        Ok(_) => json_reply(request, 413, json!({"error":"resource_limit"})),
++        Err(error) => {
++            let code = error
++                .downcast_ref::<migration::Error>()
++                .map(ToString::to_string)
++                .unwrap_or_else(|| "invalid_request".to_owned());
++            let status = if code == "resource_limit" { 413 } else { 400 };
++            json_reply(request, status, json!({"error":code}));
++        }
++    }
++}
+diff --git a/crates/pqc_scan_cli/tests/context_template.rs b/crates/pqc_scan_cli/tests/context_template.rs
+new file mode 100644
+index 0000000..ecccfe0
+--- /dev/null
++++ b/crates/pqc_scan_cli/tests/context_template.rs
+@@ -0,0 +1,232 @@
++#[path = "../../pqc_scan_core/tests/support/migration/mod.rs"]
++#[allow(dead_code)]
++mod fixture;
++use pqc_scan_core::migration::*;
++use serde_json::{json, Value};
++use std::{
++    path::PathBuf,
++    process::{Command, Output},
++    sync::atomic::{AtomicU64, Ordering},
++};
++const NOW: &str = "2026-11-18T00:00:00Z";
++struct Files(PathBuf);
++impl Files {
++    fn new() -> Self {
++        static NEXT: AtomicU64 = AtomicU64::new(0);
++        let p = std::env::temp_dir().join(format!(
++            "pqc-template073-{}-{}",
++            std::process::id(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        std::fs::create_dir_all(&p).unwrap();
++        Self(p)
++    }
++    fn input(&self, value: &Value) -> PathBuf {
++        let p = self.0.join("input.json");
++        std::fs::write(&p, serde_json::to_vec(value).unwrap()).unwrap();
++        p
++    }
++    fn run(&self, input: &std::path::Path, format: &str, extra: &[&str]) -> Output {
++        Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++            .arg("context-template")
++            .arg(input)
++            .args(["--input-format", format])
++            .args(extra)
++            .output()
++            .unwrap()
++    }
++}
++impl Drop for Files {
++    fn drop(&mut self) {
++        let _ = std::fs::remove_dir_all(&self.0);
++    }
++}
++fn ok(o: &Output) {
++    assert!(o.status.success(), "{}", String::from_utf8_lossy(&o.stderr));
++    assert!(o.stderr.is_empty());
++}
++#[test]
++fn actual_headless_cli_list_sparse_template_and_assess_roundtrip() {
++    let f = Files::new();
++    let input = f.input(&fixture::inventory("RSA"));
++    let original = std::fs::read(&input).unwrap();
++    let list = f.run(&input, "inventory-v1", &["--list-targets"]);
++    ok(&list);
++    let text = String::from_utf8(list.stdout).unwrap();
++    assert!(text.starts_with("1\tRSA\t"));
++    assert!(text.contains("app.txt"));
++    assert!(text.contains("selectable"));
++    let out = f.0.join("context.json");
++    ok(&f.run(
++        &input,
++        "inventory-v1",
++        &[
++            "--out",
++            out.to_str().unwrap(),
++            "--as-of",
++            NOW,
++            "--target",
++            "1",
++            "--set",
++            "usage_state=\"active\"",
++            "--set",
++            "business_critical=false",
++            "--unknown",
++            "confidential",
++            "--actor",
++            "owner",
++            "--asserted-at",
++            "2026-11-17T00:00:00Z",
++        ],
++    ));
++    let bytes = std::fs::read(&out).unwrap();
++    let v: Value = serde_json::from_slice(&bytes).unwrap();
++    assert_eq!(v["bindings"].as_array().unwrap().len(), 1);
++    assert_eq!(
++        v["bindings"][0]["claims"]["business_critical"]["value"],
++        false
++    );
++    assert_eq!(
++        v["bindings"][0]["claims"]["confidential"]["state"],
++        "unknown"
++    );
++    assert!(v["bindings"][0]["claims"].get("use_case").is_none());
++    let e = SavedEvidence::read(&input, InputFormat::InventoryV1).unwrap();
++    let c = MigrationContext::read(&out).unwrap();
++    let expected = evaluate(&e, Some(&c), NOW).unwrap();
++    let report = f.0.join("report");
++    let run = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++        .arg("assess")
++        .arg(&input)
++        .args(["--input-format", "inventory-v1", "--context"])
++        .arg(&out)
++        .args(["--as-of", NOW, "--out-dir"])
++        .arg(&report)
++        .output()
++        .unwrap();
++    ok(&run);
++    let actual: Value = serde_json::from_slice(
++        &std::fs::read(report.join("migration.assessment.v1.json")).unwrap(),
++    )
++    .unwrap();
++    assert_eq!(actual, serde_json::to_value(expected).unwrap());
++    assert_eq!(std::fs::read(input).unwrap(), original);
++}
++#[test]
++fn no_selection_is_unbound_and_each_adopted_format_works() {
++    let f = Files::new();
++    for (i, (v, format)) in [
++        (fixture::inventory("RSA"), "inventory-v1"),
++        (fixture::tls(), "tls-v1"),
++        (fixture::offers(), "ssh-offers-v1"),
++        (fixture::kex(), "ssh-kex-v1"),
++    ]
++    .into_iter()
++    .enumerate()
++    {
++        let input = f.input(&v);
++        let out = f.0.join(format!("{i}.json"));
++        ok(&f.run(
++            &input,
++            format,
++            &["--out", out.to_str().unwrap(), "--as-of", NOW],
++        ));
++        let c: Value = serde_json::from_slice(&std::fs::read(&out).unwrap()).unwrap();
++        assert_eq!(c["bindings"], json!([]));
++        assert_eq!(c["systems"], json!([]));
++        ok(&f.run(
++            &input,
++            format,
++            &[
++                "--out",
++                out.to_str().unwrap(),
++                "--as-of",
++                NOW,
++                "--target",
++                "1",
++            ],
++        ));
++        let e = SavedEvidence::read(&input, format.parse().unwrap()).unwrap();
++        MigrationContext::read(&out).unwrap().bind(&e, NOW).unwrap();
++    }
++}
++#[test]
++fn invalid_answers_targets_and_times_leave_existing_output_untouched() {
++    let f = Files::new();
++    let input = f.input(&fixture::inventory("RSA"));
++    let out = f.0.join("keep.json");
++    std::fs::write(&out, b"KEEP").unwrap();
++    for args in [
++        vec!["--target", "0"],
++        vec!["--target", "999"],
++        vec!["--target", "1", "--target", "1"],
++        vec![
++            "--target",
++            "1",
++            "--set",
++            "business_critical=\"SECRET_CANARY_073\"",
++            "--actor",
++            "owner",
++            "--asserted-at",
++            NOW,
++        ],
++        vec!["--target", "1", "--unknown", "usage_state"],
++        vec!["--set", "usage_state=\"active\""],
++        vec![
++            "--target",
++            "1",
++            "--set",
++            "confidential=null",
++            "--actor",
++            "owner",
++            "--asserted-at",
++            NOW,
++        ],
++    ] {
++        let mut extra = vec!["--out", out.to_str().unwrap(), "--as-of", NOW];
++        extra.extend(args);
++        let o = f.run(&input, "inventory-v1", &extra);
++        assert_eq!(o.status.code(), Some(1));
++        assert!(!String::from_utf8_lossy(&o.stderr).contains("SECRET_CANARY_073"));
++        assert_eq!(std::fs::read(&out).unwrap(), b"KEEP");
++    }
++}
++#[test]
++fn output_name_inode_and_link_boundaries_preserve_input() {
++    let f = Files::new();
++    let input = f.input(&fixture::inventory("RSA"));
++    let original = std::fs::read(&input).unwrap();
++    let hard = f.0.join("hard.json");
++    std::fs::hard_link(&input, &hard).unwrap();
++    for out in [&input, &hard] {
++        let o = f.run(
++            &input,
++            "inventory-v1",
++            &[
++                "--out",
++                out.to_str().unwrap(),
++                "--as-of",
++                NOW,
++                "--target",
++                "1",
++            ],
++        );
++        assert_eq!(o.status.code(), Some(1));
++        assert!(String::from_utf8_lossy(&o.stderr).contains("unsafe_output"));
++    }
++    #[cfg(unix)]
++    {
++        let linked = f.0.join("link.json");
++        std::os::unix::fs::symlink(&input, &linked).unwrap();
++        assert!(!f
++            .run(
++                &input,
++                "inventory-v1",
++                &["--out", linked.to_str().unwrap(), "--as-of", NOW]
++            )
++            .status
++            .success());
++    }
++    assert_eq!(std::fs::read(&input).unwrap(), original);
++    assert_eq!(std::fs::read(hard).unwrap(), original);
++}
+diff --git a/crates/pqc_scan_core/src/migration/generation.rs b/crates/pqc_scan_core/src/migration/generation.rs
+new file mode 100644
+index 0000000..d7d315f
+--- /dev/null
++++ b/crates/pqc_scan_core/src/migration/generation.rs
+@@ -0,0 +1,207 @@
++//! Generate the adopted context from explicit selections; never infer claims.
++use super::*;
++
++/// One explicitly supplied answer. `None` means explicit unknown, not omission.
++#[derive(Debug, Clone)]
++pub struct ClaimAnswer {
++    pub field: String,
++    pub value: Option<Value>,
++}
++
++/// Validated existing claim set, shared by headless and local UI callers.
++#[derive(Debug, Clone, Default)]
++pub struct ContextClaims(std::sync::Arc<ClaimSet>);
++impl ContextClaims {
++    pub fn from_answers(answers: &[ClaimAnswer], provenance: Provenance) -> Result<Self> {
++        if answers.len() > 18 {
++            return Err(Error::ResourceLimit);
++        }
++        let mut set = serde_json::Map::new();
++        let mut seen = BTreeSet::new();
++        for answer in answers {
++            if !seen.insert(&answer.field) {
++                return Err(Error::InvalidInput);
++            }
++            let claim = match &answer.value {
++                Some(value) => {
++                    serde_json::json!({"state":"known","value":value,"provenance":provenance})
++                }
++                None => serde_json::json!({"state":"unknown","provenance":provenance}),
++            };
++            if let Some(name) = answer.field.strip_prefix("support.") {
++                if !SUPPORT_NAMES.contains(&name) {
++                    return Err(Error::InvalidInput);
++                }
++                set.entry("support")
++                    .or_insert_with(|| serde_json::json!({}))
++                    .as_object_mut()
++                    .ok_or(Error::InvalidInput)?
++                    .insert(name.to_owned(), claim);
++            } else {
++                if answer.field == "support" {
++                    return Err(Error::InvalidInput);
++                }
++                set.insert(answer.field.clone(), claim);
++            }
++        }
++        Self::from_bytes(&serde_json::to_vec(&set).map_err(|_| Error::InvalidInput)?)
++    }
++
++    pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
++        let value = bounded::parse(bytes, LIMIT)?;
++        reject_null(&value)?;
++        let mut claims: ClaimSet =
++            serde_json::from_value(value).map_err(|_| Error::InvalidInput)?;
++        validate_set(&mut claims, &BTreeSet::new())?;
++        Ok(Self(std::sync::Arc::new(claims)))
++    }
++}
++
++impl Provenance {
++    /// The caller supplies the assertion instant; absence of expiry stays unknown.
++    pub fn operator(actor: &str, asserted_at: &str, valid_until: Option<&str>) -> Result<Self> {
++        let mut result = Self {
++            source_kind: SourceKind::OperatorClaim,
++            actor_id: actor.to_owned(),
++            asserted_at: asserted_at.to_owned(),
++            valid_until: valid_until.map(str::to_owned),
++            reference_id: None,
++        };
++        provenance(&mut result, &BTreeSet::new())?;
++        Ok(result)
++    }
++}
++
++/// Zero-based index into the exact SavedEvidence target list, never an asset-wide match.
++#[derive(Debug, Clone)]
++pub struct ContextSelection {
++    pub target_index: usize,
++    pub system_id: String,
++    pub claims: ContextClaims,
++}
++
++pub fn generate_context(
++    evidence: &SavedEvidence,
++    organization_id: &str,
++    selections: &[ContextSelection],
++    as_of: &str,
++) -> Result<Vec<u8>> {
++    if selections.len() > 4096 {
++        return Err(Error::ResourceLimit);
++    }
++    let mut systems = BTreeSet::new();
++    let mut seen = BTreeSet::new();
++    let mut bindings = Vec::new();
++    let mut minimum_size = 0usize;
++    for selection in selections {
++        let target = evidence
++            .targets()
++            .get(selection.target_index)
++            .ok_or(Error::InvalidReference)?;
++        if !seen.insert(&target.id) {
++            return Err(Error::AmbiguousContextBinding);
++        }
++        if !target.bindable {
++            return Err(Error::AmbiguousContextBinding);
++        }
++        if selection.system_id.len() > 64 {
++            return Err(Error::ResourceLimit);
++        }
++        if !alias(&selection.system_id) {
++            return Err(Error::InvalidInput);
++        }
++        systems.insert(selection.system_id.clone());
++        if systems.len() > 256 {
++            return Err(Error::ResourceLimit);
++        }
++        let mut row = serde_json::to_value(Binding {
++            target_id: target.id.clone(),
++            system_id: selection.system_id.clone(),
++            claims: None,
++        })
++        .map_err(|_| Error::InvalidInput)?;
++        row["claims"] =
++            serde_json::to_value(selection.claims.0.as_ref()).map_err(|_| Error::InvalidInput)?;
++        omit_absent(&mut row);
++        // A lower bound cannot reject any valid final pretty representation.
++        // Check before retaining another row; shared claims never multiply upfront.
++        minimum_size = minimum_size
++            .checked_add(
++                serde_json::to_vec(&row)
++                    .map_err(|_| Error::InvalidInput)?
++                    .len(),
++            )
++            .filter(|n| *n <= LIMIT)
++            .ok_or(Error::ResourceLimit)?;
++        bindings.push(row);
++    }
++
++    let input = Input {
++        format: FORMAT.to_owned(),
++        version: 1,
++        input: InputBinding {
++            format: evidence.input().format,
++            sha256: evidence.input().sha256.clone(),
++        },
++        organization_id: organization_id.to_owned(),
++        systems: systems
++            .into_iter()
++            .map(|id| System { id, defaults: None })
++            .collect(),
++        bindings: Vec::new(),
++        organization_defaults: None,
++        references: Vec::new(),
++    };
++    let mut value = serde_json::to_value(&input).map_err(|_| Error::InvalidInput)?;
++    value["bindings"] = Value::Array(bindings);
++    let bytes = encode_value(value)?;
++    let context = MigrationContext::from_bytes(&bytes)?;
++    context.bind(evidence, as_of)?;
++    Ok(bytes)
++}
++
++fn omit_absent(value: &mut Value) {
++    match value {
++        Value::Object(map) => {
++            map.retain(|_, v| !v.is_null());
++            map.values_mut().for_each(omit_absent);
++        }
++        Value::Array(values) => values.iter_mut().for_each(omit_absent),
++        _ => {}
++    }
++}
++fn encode_value(mut value: Value) -> Result<Vec<u8>> {
++    struct Limited(Vec<u8>);
++    impl std::io::Write for Limited {
++        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
++            if self
++                .0
++                .len()
++                .checked_add(bytes.len())
++                .is_none_or(|n| n > LIMIT)
++            {
++                return Err(std::io::Error::other("resource_limit"));
++            }
++            self.0.extend_from_slice(bytes);
++            Ok(bytes.len())
++        }
++        fn flush(&mut self) -> std::io::Result<()> {
++            Ok(())
++        }
++    }
++    omit_absent(&mut value);
++    let mut output = Limited(Vec::new());
++    serde_json::to_writer_pretty(&mut output, &value).map_err(|_| Error::ResourceLimit)?;
++    Ok(output.0)
++}
++fn encode(input: &Input) -> Result<Vec<u8>> {
++    encode_value(serde_json::to_value(input).map_err(|_| Error::InvalidInput)?)
++}
++
++impl MigrationContext {
++    /// Export every supported field; typed validation has normalized timestamps.
++    /// Call bind against the selected evidence before applying imported context.
++    pub fn to_bytes(&self) -> Result<Vec<u8>> {
++        encode(&self.input)
++    }
++}
+diff --git a/crates/pqc_scan_core/tests/migration073.rs b/crates/pqc_scan_core/tests/migration073.rs
+new file mode 100644
+index 0000000..0b5b22d
+--- /dev/null
++++ b/crates/pqc_scan_core/tests/migration073.rs
+@@ -0,0 +1,268 @@
++#[path = "support/migration/context.rs"]
++mod ctx;
++#[path = "support/migration/mod.rs"]
++#[allow(dead_code)]
++mod fixture;
++use pqc_scan_core::migration::*;
++use serde_json::{json, Value};
++fn evidence() -> SavedEvidence {
++    fixture::ingest(&fixture::inventory("RSA"), InputFormat::InventoryV1).unwrap()
++}
++fn selection(claims: ContextClaims) -> ContextSelection {
++    ContextSelection {
++        target_index: 0,
++        system_id: "system-1".into(),
++        claims,
++    }
++}
++fn answer(field: &str, value: Option<Value>) -> ClaimAnswer {
++    ClaimAnswer {
++        field: field.into(),
++        value,
++    }
++}
++#[test]
++fn empty_sparse_false_unknown_and_na_preserve_meaning_and_schema() {
++    let e = evidence();
++    let empty = generate_context(&e, "organization", &[], ctx::AS_OF).unwrap();
++    let c = MigrationContext::from_bytes(&empty).unwrap();
++    assert!(c
++        .bind(&e, ctx::AS_OF)
++        .unwrap()
++        .target(&e.targets()[0].id)
++        .is_none());
++    for value in [
++        json!({}),
++        json!({"usage_state":ctx::unknown(),"confidential":ctx::claim(json!(false)),"applicability":ctx::claim(json!("not_applicable"))}),
++    ] {
++        let claims = ContextClaims::from_bytes(&serde_json::to_vec(&value).unwrap()).unwrap();
++        let bytes = generate_context(&e, "organization", &[selection(claims)], ctx::AS_OF).unwrap();
++        let v: Value = serde_json::from_slice(&bytes).unwrap();
++        let schema: Value = serde_json::from_str(include_str!(
++            "../../../schemas/migration-context-v1.schema.json"
++        ))
++        .unwrap();
++        assert!(jsonschema::validator_for(&schema).unwrap().is_valid(&v));
++        assert_eq!(v["bindings"][0]["claims"], value);
++        assert_eq!(v["input"]["sha256"], e.input().sha256);
++        assert!(!String::from_utf8(bytes.clone()).unwrap().contains("null"));
++        let imported = MigrationContext::from_bytes(&bytes).unwrap();
++        assert_eq!(imported.to_bytes().unwrap(), bytes);
++        if value != json!({}) {
++            let bound = imported.bind(&e, ctx::AS_OF).unwrap();
++            let claims = bound.target(&e.targets()[0].id).unwrap();
++            assert_eq!(
++                claims.claim("confidential").unwrap().active_value(),
++                Some(&json!(false))
++            );
++            assert!(claims.claim("usage_state").unwrap().state == "unknown");
++            assert!(claims.claim("business_critical").is_none());
++            assert_eq!(
++                evaluate(&e, Some(&imported), ctx::AS_OF)
++                    .unwrap()
++                    .decisions()[0]
++                    .urgency,
++                Urgency::NotApplicable
++            );
++        }
++    }
++}
++#[test]
++fn explicit_scope_duplicates_ambiguity_substitution_and_time_are_checked() {
++    let e = evidence();
++    let s = selection(ContextClaims::default());
++    assert_eq!(
++        generate_context(&e, "organization", &[s.clone(), s.clone()], ctx::AS_OF).unwrap_err(),
++        Error::AmbiguousContextBinding
++    );
++    let mut invalid = s.clone();
++    invalid.target_index = 1;
++    assert_eq!(
++        generate_context(&e, "organization", &[invalid], ctx::AS_OF).unwrap_err(),
++        Error::InvalidReference
++    );
++    assert_eq!(
++        generate_context(&e, "INVALID alias", std::slice::from_ref(&s), ctx::AS_OF).unwrap_err(),
++        Error::InvalidInput
++    );
++    assert_eq!(
++        generate_context(
++            &e,
++            "organization",
++            std::slice::from_ref(&s),
++            "2000-01-01T00:00:00Z"
++        )
++        .unwrap_err(),
++        Error::InvalidTime
++    );
++    let bytes = generate_context(&e, "organization", std::slice::from_ref(&s), ctx::AS_OF).unwrap();
++    let mut other = fixture::inventory("RSA");
++    other["producer"]["version"] = "changed".into();
++    let other = fixture::ingest(&other, InputFormat::InventoryV1).unwrap();
++    assert_eq!(
++        MigrationContext::from_bytes(&bytes)
++            .unwrap()
++            .bind(&other, ctx::AS_OF)
++            .unwrap_err(),
++        Error::InputBindingMismatch
++    );
++    let mut ambiguous = fixture::inventory("RSA");
++    ambiguous["observations"][0]["identity_confidence"] = "ambiguous_duplicate_anchor".into();
++    let ambiguous = fixture::ingest(&ambiguous, InputFormat::InventoryV1).unwrap();
++    assert!(!ambiguous.targets()[0].is_bindable());
++    assert_eq!(
++        generate_context(
++            &ambiguous,
++            "organization",
++            std::slice::from_ref(&s),
++            ctx::AS_OF
++        )
++        .unwrap_err(),
++        Error::AmbiguousContextBinding
++    );
++    assert_eq!(
++        generate_context(&e, "organization", &vec![s; 4097], ctx::AS_OF).unwrap_err(),
++        Error::ResourceLimit
++    );
++}
++#[test]
++fn selected_target_does_not_apply_to_other_occurrences() {
++    let mut input = fixture::inventory("RSA");
++    let mut second = input["observations"][0].clone();
++    second["id"] = pqc_scan_core::identity::native_id("observation", &["second"]).into();
++    second["occurrence_key"] = pqc_scan_core::identity::native_id("occurrence", &["second"]).into();
++    second["target"]["path"] = "other.rs".into();
++    input["observations"].as_array_mut().unwrap().push(second);
++    let e = fixture::ingest(&input, InputFormat::InventoryV1).unwrap();
++    assert_eq!(e.targets().len(), 2);
++    let c = MigrationContext::from_bytes(
++        &generate_context(
++            &e,
++            "organization",
++            &[selection(ContextClaims::default())],
++            ctx::AS_OF,
++        )
++        .unwrap(),
++    )
++    .unwrap();
++    let b = c.bind(&e, ctx::AS_OF).unwrap();
++    assert!(b.target(&e.targets()[0].id).is_some());
++    assert!(b.target(&e.targets()[1].id).is_none());
++}
++#[test]
++fn answers_use_existing_types_and_never_invent_expiry() {
++    let p = Provenance::operator("owner", "2026-11-17T09:00:00+09:00", None).unwrap();
++    let claims = ContextClaims::from_answers(
++        &[
++            answer("usage_state", Some(json!("active"))),
++            answer("support.peer", Some(json!(false))),
++            answer("confidential", None),
++        ],
++        p.clone(),
++    )
++    .unwrap();
++    let e = evidence();
++    let bytes = generate_context(&e, "organization", &[selection(claims)], ctx::AS_OF).unwrap();
++    let v: Value = serde_json::from_slice(&bytes).unwrap();
++    assert_eq!(
++        v["bindings"][0]["claims"]["support"]["peer"]["value"],
++        false
++    );
++    assert_eq!(
++        v["bindings"][0]["claims"]["usage_state"]["provenance"]["asserted_at"],
++        "2026-11-17T00:00:00Z"
++    );
++    assert!(v["bindings"][0]["claims"]["usage_state"]["provenance"]
++        .get("valid_until")
++        .is_none());
++    for a in [
++        vec![answer("business_critical", Some(json!("false")))],
++        vec![answer("usage_state", Some(json!("guessed")))],
++        vec![answer("support.missing", Some(json!(true)))],
++        vec![answer("confidential", Some(Value::Null))],
++        vec![
++            answer("usage_state", None),
++            answer("usage_state", Some(json!("active"))),
++        ],
++    ] {
++        assert!(ContextClaims::from_answers(&a, p.clone()).is_err());
++    }
++    assert!(Provenance::operator("owner", ctx::AS_OF, Some("2026-01-01T00:00:00Z")).is_err());
++}
++#[test]
++fn imported_all_supported_fields_references_and_stale_provenance_roundtrip() {
++    let e = evidence();
++    let mut v = ctx::context(&e, ctx::ordinary_signing());
++    v["organization_defaults"] = json!({"historical_ciphertext":ctx::unknown(),"confidentiality_until":ctx::claim(json!("2030-01-01T00:00:00Z")),"migration_lead_seconds":ctx::claim(json!(123))});
++    v["bindings"][0]["claims"]["deadline"] = ctx::claim(
++        json!({"kind":"at","at":"2030-01-01T00:00:00Z","reference_id":"org-deadline","scope_reason":"contractual_requirement"}),
++    );
++    v["bindings"][0]["claims"]["business_critical"]["provenance"]["valid_until"] =
++        "2026-11-17T12:00:00Z".into();
++    let c = ctx::parse(&v);
++    let exported = c.to_bytes().unwrap();
++    assert_eq!(serde_json::from_slice::<Value>(&exported).unwrap(), v);
++    let restored = MigrationContext::from_bytes(&exported).unwrap();
++    let bound = restored.bind(&e, ctx::AS_OF).unwrap();
++    assert_eq!(
++        bound
++            .target(&e.targets()[0].id)
++            .unwrap()
++            .claim("business_critical")
++            .unwrap()
++            .freshness,
++        ClaimFreshness::Stale
++    );
++    assert_eq!(
++        bound.references()[0].https_uri.as_deref(),
++        Some("https://synthetic.invalid/never-fetch")
++    );
++}
++#[test]
++fn full_4096_sparse_bindings_fit_the_actual_context_limit() {
++    let mut input = fixture::inventory("RSA");
++    let original = input["observations"][0].clone();
++    let observations = input["observations"].as_array_mut().unwrap();
++    observations.clear();
++    for n in 0..4096 {
++        let mut row = original.clone();
++        let name = n.to_string();
++        row["id"] = pqc_scan_core::identity::native_id("observation", &[&name]).into();
++        row["occurrence_key"] = pqc_scan_core::identity::native_id("occurrence", &[&name]).into();
++        observations.push(row);
++    }
++    let e = fixture::ingest(&input, InputFormat::InventoryV1).unwrap();
++    assert_eq!(e.targets().len(), 4096);
++    let claims = ContextClaims::default();
++    let selections = (0..4096)
++        .map(|target_index| ContextSelection {
++            target_index,
++            system_id: "system-1".into(),
++            claims: claims.clone(),
++        })
++        .collect::<Vec<_>>();
++    let bytes = generate_context(&e, "organization", &selections, ctx::AS_OF).unwrap();
++    assert!(bytes.len() < 1024 * 1024);
++    let context = MigrationContext::from_bytes(&bytes).unwrap();
++    let bound = context.bind(&e, ctx::AS_OF).unwrap();
++    assert!(e.targets().iter().all(|t| bound.target(&t.id).is_some()));
++    let large = ContextClaims::from_bytes(&serde_json::to_vec(&ctx::support()).unwrap()).err();
++    assert!(
++        large.is_some(),
++        "support is nested, never accepted as untyped root claims"
++    );
++    let claims =
++        ContextClaims::from_bytes(&serde_json::to_vec(&json!({"support":ctx::support()})).unwrap())
++            .unwrap();
++    let selections = (0..4096)
++        .map(|target_index| ContextSelection {
++            target_index,
++            system_id: "system-1".into(),
++            claims: claims.clone(),
++        })
++        .collect::<Vec<_>>();
++    assert_eq!(
++        generate_context(&e, "organization", &selections, ctx::AS_OF).unwrap_err(),
++        Error::ResourceLimit
++    );
++}
+diff --git a/tasks/073/TASK-073-PLAN.md b/tasks/073/TASK-073-PLAN.md
+new file mode 100644
+index 0000000..ffafb55
+--- /dev/null
++++ b/tasks/073/TASK-073-PLAN.md
+@@ -0,0 +1,49 @@
++# Task073 plan and D4 supplement
++
++Selected by maintainer on2026-11-18 after commit c1f8a4bc5478eefb2b1babb6b2aa86295f9c8d34,
++in the existing worktree and branch. U01/U02 and original criteria remain unchanged.
++071/072 remain untouched;075 final reconciliation remains dependent on them.
++
++## Outcome, compatibility and choices
++
++Generate the adopted migration-context v1 without hash/ID transcription or invented
++claims. Reuse SavedEvidence, typed ClaimSet/Provenance validation, bind, and safe_output.
++A shared typed generation API accepts explicit target selections and optional typed
++claims, generates default aliases and validates final bytes against the same reader
++and evaluator binding. No new stored schema, policy, rule or cryptographic behavior.
++Import/export uses the adopted closed context and preserves all supported information;
++no lossy form projection. No CLI conversation, web implementation or default scan change.
++
++D4 supplement: add explicit context-template INPUT --input-format FORMAT. --list-targets
++prints a one-based readable list (algorithm, role, source/location and bindability).
++Generation requires --out FILE and --as-of TIME; repeat --target N to select only those
++rows from this exact input. No selections produce a valid unbound empty template;
++claims without selected targets reject. Default aliases are organization/system-1,
++customizable via --organization and --system. Optional repeated --set FIELD=JSON_VALUE
++and --unknown FIELD provide known/explicit-unknown claims; omitted fields stay omitted.
++Known strings use JSON quoting. Support fields use support.peer, etc. Any answers
++require --actor and --asserted-at; --valid-until is optional and never invented.
++No guessed positive values or all-target selection. Invalid/duplicate/ambiguous indices,
++fields, provenance and stale imported input bindings fail using existing fixed errors.
++
++Use existing1MiB context and256-system/4096-binding ceilings. Bound parsing applies
++before generation/import. Complete rendering and input/context alias checks precede
++safe atomic file replacement. No new dependency, output bypass or outbound operation.
++A cosmetic JSON example would leave ID transcription unresolved; generating defaults
++for every target would silently widen scope. Explicit selections and shared validation
++meet both usability and ownership requirements.
++
++## Steps and acceptance evidence
++
++1. Add shared claims/selection generation and complete context export over existing
++   typed records. Keep normalized semantic values and all provenance/references.
++2. Add thin headless CLI, readable list and safe write; document EN/JA examples.
++3. Test sparse/empty, unknown/false/N/A, exact grouped scope, malformed answers,
++   duplicate/ambiguous targets, stale/substituted inputs, roundtrip and output aliases.
++   Run actual generation followed by assess, retained legacy contracts and features.
++4. Inspect combined diff, reuse original implementation/test reviewers, run required
++   fmt/workspace/build/strict clippy and affected optional-feature checks, bind final
++   source/logs/binaries and record results. Main agent closes only all criteria passed.
++
++Main agent owns all development/testing/docs. Same reviewer identities are
++/root/v04_implementation_review and /root/v04_test_review; no extra delegation.
+diff --git a/tasks/073/TASK-073-RESULTS.md b/tasks/073/TASK-073-RESULTS.md
+new file mode 100644
+index 0000000..f64997d
+--- /dev/null
++++ b/tasks/073/TASK-073-RESULTS.md
+@@ -0,0 +1,49 @@
++# Task073 results
++
++Status: done; both original reviewer identities accepted final source and required checks passed.
++Baseline c1f8a4bc5478eefb2b1babb6b2aa86295f9c8d34 plus uncommitted task073 source.
++Same requested worktree/branch; existing work preserved.071/072 unchanged.
++
++## Outcome against U01/U02
++
++context-template lists readable one-based algorithm/role/location targets and generates
++adopted v1 from explicit selections without digest/ID copying. No selections produce
++an unbound empty template; answers without selections reject. --set FIELD=JSON_VALUE
++and --unknown FIELD retain absent/unknown/false/N/A distinctions. Actor/assertion are
++explicit and expiry is optional, never invented; missing expiry remains unknown.
++Organization/system aliases default without company input. Safe output rejects input
++names/inodes/links before replacement. This command is noninteractive and offline.
++
++Shared ContextClaims/ClaimAnswer/ContextSelection/generate_context reuse existing
++typed validation and binding. Immutable shared claims avoid multiplied upfront memory;
++actual bounded serialization allows all4096 sparse bindings under1MiB and rejects
++oversized output. MigrationContext::to_bytes preserves all supported inherited claims,
++references and provenance with normalized times; no schema, evaluator, old context,
++crypto/rule/default scan change. Paired user guides and architecture explain the entry.
++
++## Verification and source
++
++COMMANDS.json binds7 final commands to REVIEW-FIX-SOURCE: fmt, workspace tests705 passed
++and3 pre-existing ignored supervisor entries, build, strict default clippy; isolated
++core allfeatures222 passed, featured CLI context_template4+migration_assess8 passed,
++strict allfeature workspace clippy. All exit0. Separate target directories retained.
++Six new core tests include4096-target boundary/overflow, explicit single-target scope,
++stale/substituted/ambiguous/duplicate binding, invalid answers, sparse/false/unknown/N/A
++and lossless complete context/reference roundtrip. Four actual headless CLI tests cover
++all4 adopted saved formats, list/generate/assess semantic equality, failures leaving
++existing outputs unchanged and name/hardlink/symlink safety. The persisted example/
++contains actual saved input, list, context, paired machine/human assessment and commands.
++
++Development test API mismatch and clippy slice-reference fixes remain in initial logs.
++Earlier successful broad checks are preserved as before-review-fix-* and superseded
++by current705/222/12 results after substantive memory/bound fixes. Final source hashes
++match accepted code; subsequent074/075 plans/definitions and073 evidence/status prose
++are outside build inputs. No browser test is required for this headless CLI increment;
++074 will exercise the same layer in a real browser. No independent usefulness claim.
++
++## Remaining work
++
++The main agent closed073 after both stages and original U01/U02 gates passed.074 begins
++after this closure.075 supplemental protocol is frozen before observations and cannot close its
++U09 final reconciliation without071/072. No external contact, costs, scoring adoption,
++release, commit or push was performed for this increment.
+diff --git a/tasks/073/TASK-073-REVIEWS.md b/tasks/073/TASK-073-REVIEWS.md
+new file mode 100644
+index 0000000..1f73b38
+--- /dev/null
++++ b/tasks/073/TASK-073-REVIEWS.md
+@@ -0,0 +1,27 @@
++# Task073 independent reviews
++
++Original identities reused; no delegated development or extra reviewers.
++
++## Implementation
++
++/root/v04_implementation_review accepted final REVIEW-FIX-SOURCE.json, SHA-256
++59c78c66ea42cc939e861c620a54d09d816450be1f7245abc17c7c204d929f0b.
++All hashes matched. Initial IMPLEMENTATION-SOURCE629a431f... had I073-01 medium
++(valid4096 sparse targets rejected by null/overhead estimate) and I073-02 medium
++(CLI cloned claims before aggregate guard). Both resolved: immutable Arc claims,
++actual omitted-null row lower bound and bounded final serialization. A real4096-target
++sparse context succeeds and binds; oversized full-support output rejects. Reviewer
++inspected6 core/4 actual CLI tests and strict clippy, no actionable findings remain.
++Final broader checks and independent test review are separate gates.
++
++## Test
++
++/root/v04_test_review accepted U01/U02 with no actionable findings/material missing
++verification. Reviewed59c78c66... source and b061a6feb43b59220208256f9d03944d8ead481159495c2171ecf25213a3f2b6
++final snapshot; all1468 artifacts,7 command logs,214 binary hashes and persisted
++example input/context/report digests matched. Six core/four CLI assertions cover
++scope/unknowns/immutable bindings/schema/provenance/roundtrip/4096 limit and safe
++outputs. Workspace705/3 existing ignored, corefeatures222, featuredCLI12 and build/
++fmt/strict clippy passed. No suite/browser repeated; headless acceptance does not
++establish071 usefulness. Main agent applied final gates and closed073; subsequent
++closure prose is separate from reviewed executable source.
+diff --git a/tasks/074/TASK-074-PLAN.md b/tasks/074/TASK-074-PLAN.md
+new file mode 100644
+index 0000000..7b4b7e5
+--- /dev/null
++++ b/tasks/074/TASK-074-PLAN.md
+@@ -0,0 +1,89 @@
++# Task074 plan and concrete D4 supplement
++
++Selected by the maintainer2026-11-18, dependent on completed070/073. Planning may
++precede073 closure; executable changes start after073 completion. Original U03-U07
++remain intact.071/072 stay byte-for-byte unchanged;075 final acceptance depends on them.
++Main agent owns design/code/tests/docs; reuse the same two reviewer identities.
++
++## Purpose and choice
++
++Extend the existing local serve page, rather than creating an application or
++browser evaluator. Use073 generation/complete import-export,069 pure evaluation,
++070 styled bilingual report writers and existing safe_output. Optional personal/
++organization presentation changes hints only, never criticality/policy. Unknown,
++omitted, false and scoped N/A remain distinct. No company, department, deadline,
++expiry, known criticality, deployment support or verification is invented.
++
++D4 entry: serve --migration explicitly enables the optional workflow; default false
++retains normal scan options/output and automatic scan-report navigation. Selected
++migration scans additionally request scan.inventory.v1.json. Ready jobs provide
++readable target selection and optional forms. Context-free evaluation is selectable.
++The final result opens the existing real bilingual product HTML, with all structured
++axes, evidence, influential/missing claims, blockers, reasons and next checks; no
++JavaScript decision logic or duplicate report engine. Ordinary report links remain.
++
++The form exposes purpose/use/applicability, optional business_critical with its actual
++business semantics, relevant confidentiality/signature lifetimes and integration
++support; no personal-mode low-priority preset. Actor/assertion are required for
++answers, optional expiry is never inferred. More complex inherited/reference-backed
++context is imported and previewed losslessly, with unsupported form-edit fields
++explicitly read-only. Imported context cannot silently project into simpler fields;
++starting a new form explicitly discards that draft and requires new scope review.
++
++## Local API, bounds and safety
++
++All routes retain exact Host, random session prefix, same-origin POST and existing
++cross-site/navigation checks. Migration routes are unavailable without --migration.
++No user-controlled path or command, outbound operation, project execution, alternate
++schema or storage model. One synchronous bounded preview/assessment at a time follows
++the existing HTTP coordinator; no extra worker or background evaluator.
++
++- GET api/config exposes enabled flag; migration.js is loaded only when selected.
++- GET api/migration/targets?job=ID&page=N lists100 rows per page from a ready session
++  job's fixed scan.inventory.v1.json, returning exact digest and one-based indices.
++  At most65536 technical targets; selection cap4096, ambiguous rows disabled.
++- POST api/migration/import accepts explicitly selected raw Inventory v1 JSON, at most
++  32MiB, stores exact validated bytes in a new private session job (same20-job limit).
++  Files are selected in-browser; no arbitrary filesystem path/read API is added.
++- POST api/migration/preview?job=ID accepts a closed JSON envelope (at most3MiB) with
++  input_sha256, whole-second as_of, explicit selected indices/aliases and known or
++  unknown answers/provenance, or an imported context string, or explicit no-context.
++  Imported context is limited to1MiB, fully validated/bound and canonically exported
++  with all supported fields. Mixed form/import/no-context modes reject.
++- A successful preview retains only one bounded draft per job and returns a fresh
++  opaque token, exact scope and downloadable context. An altered input, job, answer,
++  scope or time requires another preview. Confirm never silently accepts stale IDs.
++- POST api/migration/assess?job=ID confirms the current token, rereads and checks exact
++  input digest, evaluates without rescanning, and writes the existing3 bounded reports
++  plus optional migration-context.json in that job's migration subdirectory. No new
++  public report schema or policy. GET allowlist serves only those completed artifacts.
++- POST api/migration/cancel?job=ID revokes the matching draft token before confirmation.
++  Confirmed synchronous evaluation is not cancellable mid-write; UI disables cancel
++  and reports progress. Failures are explicit, each file replacement remains atomic,
++  and no multi-file transaction or cancellation guarantee is invented.
++
++Session limit20 jobs includes imports; at most20 drafts of1MiB each. Generation uses
++existing256-system/4096-binding limits. Migration JSON responses are capped16MiB;
++reports remain64MiB per file. No external assets. Reject wrong content type, missing
++or oversized declared bodies and malformed/duplicate/unknown envelope fields before
++use; bounded readers enforce actual lengths. Static source/input files are never
++served outside the fixed ready-job artifact allowlist. A replaced input invalidates
++preview and selection. No ambient job/target binding is allowed.
++
++## Steps, verification and completion
++
++Implement the opt-in controller, shared helper calls and fixed artifact routing;
++add bilingual accessible selector/forms/provenance preview, safe downloads/import,
++reset/error/progress/cancel states and final report navigation. Meaningful actual
++HTTP/CLI tests cover guards, bounds, ready/failed/jobs, no-rescan equality, defaults,
++imports/lossless roundtrip, stale/wrong input/target, false/unknown/omitted, aliases
++and injection/canaries. Preserve and extend existing serve integration controls.
++Run required Rust/full/feature checks and both reviewer stages. Real loopback browser
++observations cover EN/JA desktop/narrow, focus/errors, optional personal and grouped
++organization paths, context import/export, immutable substitution, report next checks,
++language and loaded-offline native report operations. Preserve visible final report.
++Source inspection alone cannot close U06. Main agent records final-source evidence.
++
++No high-risk architecture or stored-contract change is selected: this is an opt-in
++bounded adapter around existing session/validation/assessment/writer components.
++If implementation requires either, stop affected work with a concrete proposal.
+diff --git a/tasks/075/TASK-075-PROTOCOL.md b/tasks/075/TASK-075-PROTOCOL.md
+new file mode 100644
+index 0000000..2388ad3
+--- /dev/null
++++ b/tasks/075/TASK-075-PROTOCOL.md
+@@ -0,0 +1,84 @@
++# Assisted-input workflow comparison supplement v1
++
++Frozen before supplemental observations on2026-11-18. This is task075 U08 preparation,
++not execution/completion of071 or072 and not the U09 final reconciliation. The maintainer
++selected073-075 while explicitly retaining071/072 unchanged. Independent final U09
++acceptance remains blocked on071/072; the original mandatory study is not replaced.
++No protocol or historical results from071 are altered.
++
++## Operator, scope and limitations
++
++One operator: the implementation-author AI agent, using real CLI and browser tools.
++The operator has already seen the implementation, fixture helper, expected original
++policy and QA results. Cases are synthetic author-derived controls, not independent
++truth, holdout data, participants or evidence of practitioner usefulness. No external
++recruitment, contact, cost, scoring adoption or publication is needed/authorized.
++Predeclare these exposures, fixed route order and tooling differences in every result.
++
++Measure operational conformance and actual execution/interaction time, not human
++completion speed. CLI timings use monotonic wall time spanning the specified command
++sequence; browser timings span recorded initial action through observed final result,
++including tool/orchestration latency. They are reported separately and cannot establish
++a usability speedup. Record actual failures/retries without excluding them. Do not
++invent missing times or successful next-action checks. No aggregate usefulness score.
++
++## Cases and fixed route order
++
++Reuse one immutable, source-bound synthetic Inventory v1 RSA2048 reference with one
++selectable target; freeze its exact bytes/digest before first observation. Evaluation
++instant2026-11-18T00:00:00Z. Actor owner; assertion2026-11-17T00:00:00Z.
++Default generated aliases organization/system-1; exact target selected, no all-target
++shortcut. All generated/imported contexts retain adopted v1 and are revalidated.
++
++- P1 personal sparse: applicability applicable, use_case signature, usage_state active,
++  business_critical explicitly unknown, signature_verification_until explicitly unknown.
++  Other fields unanswered, expiry absent. No company/department/positive criticality
++  invented. Missing expiry remains unknown freshness under existing semantics.
++- O1 organization urgent blocked: applicability applicable, use_case signature,
++  usage_state active, business_critical true; runtime/provider/protocol/parameters/jose/
++  verifiers/pki support true, peer support false. Explicit given expiry
++  2027-11-17T00:00:00Z. Other fields unanswered. Expected urgent response retains
++  blocking peer support; the original approved070 fixture supplies this case basis.
++
++For each case, in order: M manual JSON + CLI assess; C context-template + CLI assess;
++W existing local web form + preview/download + confirm/reassessment. Six planned
++observations, two case triples. M manually transcribes the shown digest/target ID into
++the adopted JSON; no generation helper writes M. C uses the implemented explicit
++number selection/answers; W uses actual browser controls and the same declarations.
++Manual/assisted CLI use source-built final binaries; W uses serve --migration with
++that same binary and an explicit import of the identical saved input.
++
++Two additional controls: a personal no-context web route must reach a truthful unknown
++result; an imported full context with references/inheritance must preserve unsupported
++form fields through preview/export/reassessment. These are conformance controls and
++excluded from the six-run comparative denominator. If blocked, record unexecuted rather
++than substitute DOM/source inspection or synthetic timing.
++
++## Measurements and checks
++
++Record source/CLI hash, toolchain/configuration, input/context/report digests, policy/
++catalog/model versions, time and language. For each observed route record attempted/
++completed status, commands or actual browser action trace, wall-time definition/value,
++errors/retries, omitted and unknown answers, fields entered and provenance/scope review,
++export validity and observed next-action text. Count success/error denominators6 and
++actual attempted runs explicitly. Compare normalized context JSON and complete
++structured decisions for identical saved bytes/canonical context/versions/time; use
++canonical context exported by the shared helper when property order differs. Preserve
++raw contexts/outputs so equality and skipped answers can be independently checked.
++
++For W, verify the exported context using actual CLI assess and compare it to the web
++output. Locate the actual human next action/blocked or missing-information explanation
++in the final product report; screenshot/AX alone cannot establish semantic equality.
++Do not evaluate a human participant's understanding from the author AI's action trace.
++Read-only report language/disclosure operations remain covered by task074 browser QA.
++
++## Final reconciliation boundary
++
++After074, record supplemental U08 results only when observed. Prepare all39 original/
++added rows with final-source evidence applicability, fulfilled/unmet/blocked status,
++limitations and the two existing reviewers. R5-01..R5-05 and original072 reconciliation
++cannot be marked fulfilled while071/072 remain unfinished. U09 and task075 remain
++unfinished; a future maintainer decision and actual original-study evidence are needed.
++No new quality aggregation program is justified solely to turn missing observations
++into numbers. Existing evidence catalog/QAM records remain historical unless a valid
++source-bound update is actually performed.

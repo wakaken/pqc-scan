@@ -15,6 +15,7 @@ use pqc_scan_report::{
 };
 use pqc_scan_rules::{RuleSet, Severity};
 mod assess_command;
+mod context_command;
 mod diff_command;
 #[cfg(any(
     feature = "probe-tls",
@@ -42,6 +43,8 @@ struct Cli {
 enum Commands {
     /// Reassess explicitly selected saved evidence offline, with scoped claims.
     Assess(assess_command::AssessArgs),
+    /// List saved-evidence targets or generate explicitly scoped migration context.
+    ContextTemplate(context_command::ContextArgs),
     #[cfg(any(
         feature = "probe-tls",
         feature = "probe-ssh",
@@ -276,6 +279,10 @@ fn run_cli<WOut: Write, WErr: Write>(
     match cli.command {
         Commands::Assess(args) => {
             assess_command::run(args, stdout)?;
+            Ok(ExitStatus::Success)
+        }
+        Commands::ContextTemplate(args) => {
+            context_command::run(args, stdout)?;
             Ok(ExitStatus::Success)
         }
         #[cfg(any(

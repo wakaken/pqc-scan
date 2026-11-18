@@ -1,3 +1,11 @@
+> Current amendment2026-11-19: R5-01..05 now require only synthetic technical
+> correctness, adopted-specification conformance and fixed-condition reproducibility.
+> Human usefulness/workload/rater agreement and numeric-score validity/adoption are
+> explicitly unmeasured and are not completion gates for this limited scope. Original
+> text/approvals/unexecuted96 human judgments are preserved in task071's archive.
+> The v2 protocol is authoritative for current R5; conflicting narrative below is
+> historical. X05/072 and U08/U09/075 must disclose this amended scope and exclusions.
+
 # v0.4 requirements and evidence map
 
 [日本語](REQUIREMENTS.ja.md)
@@ -33,7 +41,7 @@ acceptance after original 072; see [the roadmap](ROADMAP.md) and [map](TASKS.md)
 | U05 | 074 | Review, provenance and context round trip | Import/export adopted context using the shared layer; review influential claims, actors, dates and exact target scope before applying. No invented expiry/verification or silent scope widening; stale/conflicting/ambiguous input is surfaced or rejected according to existing semantics. Unsupported fields are not silently discarded during edit/export. |
 | U06 | 074 | Bilingual accessible result view | Render structured evaluator results in the local UI with urgency/information/readiness/actions, evidence and influential/missing claims; preserve JSON/Markdown semantics and uncertainty. Paired EN/JA labels, keyboard access, focus/error/status handling and real-browser offline interaction evidence are required. |
 | U07 | 074 | Bounded local integration and compatibility | Retain loopback/session-token/Host/origin protections; define bounded bodies/jobs/imports, allowed paths/artifacts, cancellation/failure and safe saves before adding APIs. No arbitrary file access, external upload, injected script, project execution or outbound reassessment. Old CLI/report/serve defaults stay compatible; UI and CLI evaluation agree for identical inputs/context/versions/time. |
-| U08 | 075 | Measure assisted workflow operation | Freeze a bounded workflow-comparison protocol before observations; compare manual-JSON and assisted personal/organization scenarios using actual CLI/browser operations. Record completion, time, errors, skipped/unknown answers and next-action checks with denominators, operator authorship/exposure, failures and limitations. These controlled observations do not establish independent human usefulness. Reuse task071 practitioner evidence only when applicable; no additional recruitment is required or authorized. Original task 071 study remains mandatory. |
+| U08 | 075 | Measure assisted workflow operation | Freeze a bounded workflow-comparison protocol before observations; compare manual-JSON and assisted personal/organization scenarios using actual CLI/browser operations. Record completion, time, errors, skipped/unknown answers and next-action checks with denominators, operator authorship/exposure, failures and limitations. These controlled observations do not establish independent human usefulness. Reuse task071 practitioner evidence only when applicable; no additional recruitment is required or authorized. The amended task071 limited technical evaluation remains mandatory; human/scoring dimensions remain unmeasured. |
 | U09 | 075 | Expanded final-source reconciliation | After tasks 071/072/074, reconcile all original 30 and added 9 clauses against final-source implementation, applicable tests/browser/study evidence and reviews. Original task 072 completion covers its original scope only; preserve historical records and separately bind new evidence. Release/support and numerical adoption remain separate. |
 
 
@@ -45,7 +53,7 @@ acceptance after original 072; see [the roadmap](ROADMAP.md) and [map](TASKS.md)
 | V04-R2 | Improve standards-grounded PQC cryptographic assessment | Extend existing technical assessment only where necessary; preserve v1 semantics |
 | V04-R3 | Explain organization-specific PQC migration priorities | Add a decision policy using technical facts and scoped context; distinguish urgency, unknowns and readiness |
 | V04-R4 | Accept organization/system/asset-specific context | Bind local claims to the correct immutable evidence and usage targets; reassess without rescanning |
-| V04-R5 | Evaluate numerical scoring validity | Execute a justified comparison using the existing quality infrastructure; a numerical product score is optional |
+| V04-R5 | Evaluate synthetic technical correctness, specification conformance and reproducibility | Reuse existing source-bound PQS-QAM comparison; human/scoring dimensions remain unmeasured under explicit2026-11-19 amendment |
 
 All detailed R-group rows and cross-cutting X rows below are mandatory within the
 selected v0.4 scope. Every input format beyond the minimum requires an explicit
@@ -127,19 +135,21 @@ version, dispatch or file format is a proposed contract requiring D1 review.
 | R4-05 | Reassess the same saved evidence with different context | Current scan path evaluates in-process; saved offline workflow is new | Users can evaluate fixed captured content with contexts A/B without rescanning, executing scanned code or contacting an endpoint; results bind both input and selected context | CLI/library entry contract, paired-context results, no-network and immutable-input checks |
 | R4-06 | Reject unsafe inputs and protect operator information | E-POLICY/E-OUTPUT; new fields broaden the input boundary | Finite size/depth/count/string/reference limits are approved; malformed/unknown/duplicate fields and invalid references have safe errors; no key/password/token input is required; synthetic secrets do not reach logs/reports | Limits and threat cases, negative parser/path/reference tests and secret-canary results |
 
-## V04-R5: scoring evaluation
+## V04-R5: limited synthetic technical evaluation
 
-Owner proposals: W3 frozen protocol, W6 execution, W7 evidence reconciliation.
-The study is mandatory even if the product ships no numerical score. Existing
-task 056 data is regression evidence with disclosed authorship/exposure limits.
+Current scope is the explicit2026-11-19 amendment: technical correctness against
+saved evidence/primary sources, adopted-specification conformance and fixed-condition
+semantic reproducibility only. The original practitioner/M2/numerical study remains
+archived and unexecuted; usefulness, actual human workload, rater agreement and
+numeric-score validity/adoption remain Not Tested. Completion applies to revised scope.
 
 | ID | Required behavior | Existing evidence and gap | Acceptance and verification | Required future evidence |
 |---|---|---|---|---|
-| R5-01 | Compare methods on common cases, facts and policy | E-QAM/E-JUDGMENT; no organization-priority comparison yet | Explicit table/tree baseline and at least one comparable alternative are evaluated; ordinal/numerical/MCDA candidates are screened; output categories are not confused with the algorithm; unsupported weights are not fabricated | Preregistered candidate-screening/comparison protocol and method dispositions |
-| R5-02 | Separate technical truth, implementation conformance and usefulness | E-JUDGMENT; practitioners/independent new data are not secured | Technical expectations cite facts; table agreement checks code; practitioner decisions use declared policy/roles and retain disagreement; authorship, exposure and tuning/holdout separation are disclosed; AI review is not claimed as human expert validation | Frozen cases, policy authority, participant/recruitment evidence, adjudication and data provenance |
-| R5-03 | Measure decision quality, robustness and effort | E-QAM aggregation reused; new measures needed | Explainability/action consistency, harmful under-prioritization, missing-data robustness, sensitivity, defensible ordering, effort and rater disagreement have defined denominators/methods; same-version reproducibility is separate from policy-change effects | Raw paired outcomes, per-dimension measures, costs, failures and finite-sample limitations |
-| R5-04 | Reach a supported numerical-scoring disposition | No validated numerical migration score exists | Adoption/non-adoption/insufficient evidence are distinct; scale/normalization/weights/correlation/missingness/uncertainty and advantage are assessed; missing required evaluation stays unfinished; no unsupported superiority or inferiority claim | Comparative assessment and justified disposition, including rejected-candidate reasons |
-| R5-05 | Reuse quality infrastructure and control adoption | E-QAM/E-COMPAT; add only new assessment records | Existing source-bound comparison/aggregation reports the new dimensions without rewriting historical truth, thresholds or measurements; an approved optional score needs separate formula/model/version and compatibility evidence | Existing-pipeline extension results, historical preservation checks and any separate adoption approval |
+| R5-01 | Limited technical evaluation (maintainer amendment2026-11-19) | Existing PQS-QAM and archived original study | Freeze a24-case/12-pair source-separated AI-authored synthetic protocol, family-grouped8/16 tuning/final allocation, exact inputs/expectations/conditions before subject outputs; preserve old method/practitioner plan unexecuted. | Task071 v2 protocol, frozen cases, source checks, raw results and review records |
+| R5-02 | Limited technical evaluation (maintainer amendment2026-11-19) | Existing PQS-QAM and archived original study | Main checks proposed technical facts against saved evidence and public primary clauses, and policy expectations against adopted P1-P8; record AI prompt/model visibility/sources/results/corrections/exposure. Unconfirmed facts are not successes; no human independent-verification claim. | Task071 v2 protocol, frozen cases, source checks, raw results and review records |
+| R5-03 | Limited technical evaluation (maintainer amendment2026-11-19) | Existing PQS-QAM and archived original study | Measure technical property/case agreement, exact policy tuple/reasons/actions and semantic fixed-input reproducibility with explicit denominators, splits, failures and limits. Human practical usefulness, actual workload and inter-rater agreement remain Not Tested, observed0 and rates null. | Task071 v2 protocol, frozen cases, source checks, raw results and review records |
+| R5-04 | Limited technical evaluation (maintainer amendment2026-11-19) | Existing PQS-QAM and archived original study | Draw no conclusion on numeric scoring validity, superiority/inferiority or adoption/non-adoption from this limited study; label that dimension unassessed. Preserve original planned comparison and no unapproved formula/model/threshold/adoption. | Task071 v2 protocol, frozen cases, source checks, raw results and review records |
+| R5-05 | Limited technical evaluation (maintainer amendment2026-11-19) | Existing PQS-QAM and archived original study | Reuse existing PQS-QAM judgment comparison and evidence/report aggregation with source/input/context/model/catalog/policy/time binding, negative consistency controls and existing independent reviewers; preserve historical truth/failures and separate amended task completion from product quality/release. | Task071 v2 protocol, frozen cases, source checks, raw results and review records |
 
 ## Cross-cutting contracts and acceptance
 

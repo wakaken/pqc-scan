@@ -10,6 +10,8 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tiny_http::{Header, Method, Request, Response, Server, StatusCode};
+#[path = "serve_migration.rs"]
+mod migration_ui;
 
 #[derive(Debug, Parser)]
 pub(super) struct ServeArgs {
@@ -26,6 +28,9 @@ pub(super) struct ServeArgs {
     /// Do not open the default browser automatically.
     #[arg(long)]
     no_open: bool,
+    /// Enable optional migration context forms and saved-evidence reassessment.
+    #[arg(long)]
+    migration: bool,
 }
 #[derive(Default)]
 struct Jobs {
@@ -41,6 +46,8 @@ struct State {
     prefix: String,
     threads: usize,
     jobs: Mutex<Jobs>,
+    migration: bool,
+    drafts: Mutex<BTreeMap<u64, migration_ui::Draft>>,
 }
 fn random_token() -> Result<String> {
     let mut bytes = [0u8; 32];
@@ -86,6 +93,8 @@ pub(super) fn run(args: ServeArgs, stdout: &mut impl Write) -> Result<()> {
         prefix: format!("/{}/", random_token()?),
         threads: args.threads,
         jobs: Mutex::new(Jobs::default()),
+        migration: args.migration,
+        drafts: Mutex::new(BTreeMap::new()),
     });
     let url = format!("{}{}", state.origin, state.prefix);
     writeln!(stdout, "pqc-scan local web UI: {url}")?;
@@ -174,8 +183,23 @@ fn handle(request: Request, state: &Arc<State>) {
         return;
     }
     let (route, query) = url.split_once('?').unwrap_or((&url, ""));
+    if route.starts_with("api/migration/") {
+        if state.migration {
+            migration_ui::handle(request, state, route, query);
+        } else {
+            json_reply(request, 404, json!({"error":"Not found"}));
+        }
+        return;
+    }
     if request.method() == &Method::Get {
         match route {
+            "api/config" => json_reply(request, 200, json!({"migration":state.migration})),
+            "migration.js" if state.migration => reply(
+                request,
+                200,
+                "text/javascript; charset=utf-8",
+                include_bytes!("serve-migration.js").to_vec(),
+            ),
             "" => reply(
                 request,
                 200,
@@ -336,7 +360,7 @@ fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
             threads: owner.threads,
             include_non_scannable: false,
             diagnostics: true,
-            inventory_json: false,
+            inventory_json: owner.migration,
             policy_profile: None,
             assessment_context: None,
             repository_scope: None,
@@ -345,7 +369,7 @@ fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
         let result = std::panic::catch_unwind(|| {
             super::scan_cmd(args, &mut std::io::sink(), &mut std::io::sink())
         });
-        let value = match result {
+        let mut value = match result {
             Ok(Ok(_)) => match fs::read(output.join("diagnostics.json"))
                 .ok()
                 .and_then(|v| serde_json::from_slice::<Value>(&v).ok())
@@ -357,6 +381,9 @@ fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
             },
             _ => json!({"id":id,"path":relative,"status":"failed"}),
         };
+        if owner.migration && value["status"] == "ready" {
+            value["migration_input"] = true.into();
+        }
         let mut jobs = owner.jobs.lock().unwrap();
         jobs.active = false;
         jobs.entries.insert(id, value);
@@ -384,7 +411,32 @@ fn report_file(request: Request, state: &State, route: &str) {
         json_reply(request, 404, json!({"error":"Report is not ready"}));
         return;
     }
+    let migration_artifact = matches!(
+        parts[2],
+        "migration.assessment.html"
+            | "migration.assessment.md"
+            | "migration.assessment.v1.json"
+            | "migration-context.json"
+    );
+    if migration_artifact
+        && (!state.migration
+            || !state
+                .jobs
+                .lock()
+                .unwrap()
+                .entries
+                .get(&id)
+                .is_some_and(|j| j["migration_ready"] == true))
+    {
+        json_reply(request, 404, json!({"error":"Report is not ready"}));
+        return;
+    }
     let mime = match parts[2] {
+        "migration.assessment.html" if migration_artifact => "text/html; charset=utf-8",
+        "migration.assessment.md" if migration_artifact => "text/markdown; charset=utf-8",
+        "migration.assessment.v1.json" | "migration-context.json" if migration_artifact => {
+            "application/json; charset=utf-8"
+        }
         "report.html" | "report.rules.html" => "text/html; charset=utf-8",
         "report.json"
         | "report.sarif"
@@ -397,7 +449,12 @@ fn report_file(request: Request, state: &State, route: &str) {
             return;
         }
     };
-    let file = state.output.join(id.to_string()).join(parts[2]);
+    let directory = state.output.join(id.to_string());
+    let file = if migration_artifact {
+        directory.join("migration").join(parts[2])
+    } else {
+        directory.join(parts[2])
+    };
     match fs::read(file) {
         Ok(bytes) => reply(request, 200, mime, bytes),
         Err(_) => json_reply(request, 404, json!({"error":"Report is unavailable"})),
@@ -439,6 +496,8 @@ mod tests {
             prefix: "/token/".into(),
             threads: 1,
             jobs: Mutex::new(Jobs::default()),
+            migration: false,
+            drafts: Mutex::new(BTreeMap::new()),
         });
         let listing = directories(&state, "").unwrap();
         assert_eq!(listing["directories"].as_array().unwrap().len(), 1);
@@ -473,6 +532,8 @@ mod tests {
             prefix: "/token/".into(),
             threads: 1,
             jobs: Mutex::new(Jobs::default()),
+            migration: false,
+            drafts: Mutex::new(BTreeMap::new()),
         };
         let exact = directories(&state, "").unwrap();
         assert_eq!(exact["directories"].as_array().unwrap().len(), 1000);
@@ -507,6 +568,8 @@ mod failure_test {
             prefix: "/token/".into(),
             threads: 1,
             jobs: Mutex::new(Jobs::default()),
+            migration: false,
+            drafts: Mutex::new(BTreeMap::new()),
         });
         let id = start_scan(&state, "project").unwrap();
         let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);

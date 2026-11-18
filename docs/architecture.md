@@ -484,3 +484,13 @@ for operational compatibility and destination-tampering limits.
 
 The explicit saved-evidence decision path is described in
 [offline migration decisions](architecture/OFFLINE-MIGRATION-DECISIONS.md).
+
+
+Task074 adds opt-in serve --migration using the existing session coordinator, exact
+Host/origin guards and ready-job artifact allowlist. Selected scans request Inventory
+v1; explicit bounded imports retain exact bytes. Job/digest-bound previews use073's
+shared generator/full canonical import and typed bind. Confirmation calls069's pure
+evaluator and070's real report writers; no JS policy or rescan. Context/selection/time
+changes require a new token. Concrete routes, bounds and cancellation/output behavior
+are recorded in tasks/074/TASK-074-PLAN.md and paired user scanning guides. Default
+serve options and output behavior are retained when the extension is not selected.
