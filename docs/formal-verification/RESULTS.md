@@ -1,6 +1,7 @@
 # PoC results
 
-Status: the selected local PoC proofs pass; hosted CI and final review are pending.
+Status: the selected PoC is implemented and verified locally and in hosted CI;
+both independent review stages are accepted. Unproved scope is retained below.
 No project-wide security or completeness claim.
 
 ## Source and environment
@@ -126,5 +127,37 @@ version-selection dependency on the user's default, and a contradictory
 `--mode lean --assessment` combination. The installer now uses a fixed official
 release and verified digest, version selection runs beside `lean-toolchain`, and
 the contradictory combination is rejected. Both runner defects have observed
-red/green regression tests. Hosted CI and final two-stage review confirmation are
-still pending; the request is not yet declared complete.
+red/green regression tests. The final implementation review and subsequent
+independent test review accepted `22aa9f9..5e0c8c7`, with no unresolved required
+findings. Reviewers inspected evidence instead of repeating the full suites.
+
+## Hosted CI
+
+[Formal verification run 44491155629](https://github.com/wakaken/pqc-scan/actions/runs/44491155629)
+passed on **2026-11-19** for source commit
+`5e0c8c72f69e85f49b98ba5423d0c18ae688f588`. Both jobs ran on Ubuntu 24.04 x86_64
+with fresh installation of the pinned verifiers:
+
+| Job | Result | Total job time | Downloaded results.json SHA-256 |
+|---|---|---|---|
+| formal-kani (135446804179) | All 13 selected harnesses passed | 4m 06s | `56b4b01280805f763e6b267ac50b00c34333c143ffc30eb72fc4466e32ec3d61` |
+| formal-lean (135446804586) | Seven theorems/audit and 10,662-row comparison passed | 48s | `c9d02ee5d334615f9cbdace3ca7726441fa9a786b007eec0fee54157f190c5d5` |
+
+Each lane reports source unchanged, and both source-file manifests exactly match
+the local final manifest above. The experimental unknown-name harness remains
+`not_run` in both default CI reports; it is not a successfully proved property.
+
+Artifacts: `formal-kani-5e0c8c72f69e85f49b98ba5423d0c18ae688f588`
+(ID 14512224642, ZIP SHA-256
+`89675ff8b75073804c94011ea0c3bd4edb2df7d7fce16069ca348011d66229e1`)
+and `formal-lean-5e0c8c72f69e85f49b98ba5423d0c18ae688f588`
+(ID 14513340970, ZIP SHA-256
+`9b6c9a945eb9391f60814e40a902a04cd7a709ab814d694b930fc17c6495fd4b`).
+Actions artifacts have 14-day retention; rerun the documented commands or workflow
+when a fresh measurement is needed. Local downloaded evidence is under
+`target/formal-tools/ci-{kani,lean}/` and workflow metadata is in
+`target/formal-tools/ci-run.json`.
+
+Only this results prose changed after those reviewed/executed source bytes.
+The report update does not alter proof/build/test inputs, so the checks and review
+conclusions remain applicable. No PR merge or develop update is part of this PoC.
