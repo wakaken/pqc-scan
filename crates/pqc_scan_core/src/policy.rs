@@ -2,6 +2,10 @@
 use crate::assessment::{AlgorithmAssessment, Purpose, QuantumExposure};
 use serde::{Deserialize, Serialize};
 
+#[cfg(kani)]
+#[path = "formal/policy.rs"]
+mod proofs;
+
 pub const PROFILE_ID: &str = "migration-review-v1";
 pub const PROFILE_VERSION: &str = "1.0.0";
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -290,6 +294,25 @@ pub fn assess_primitive_policy(a: &AlgorithmAssessment, c: &AssessmentContext) -
 }
 /// Aggregate Pass requires positive relevant results and both completeness conditions.
 /// Current inventory v1 is never exhaustive; its report evaluator always passes false.
+fn aggregate_decision(
+    decisions: &[Decision],
+    inspection_complete: bool,
+    inventory_exhaustive: bool,
+) -> Decision {
+    if decisions.contains(&Decision::Fail) {
+        Decision::Fail
+    } else if !decisions.contains(&Decision::Pass)
+        || decisions.contains(&Decision::Indeterminate)
+        || !inspection_complete
+        || !inventory_exhaustive
+    {
+        Decision::Indeterminate
+    } else {
+        Decision::Pass
+    }
+}
+
+/// Aggregate advisory decisions, retaining applicability and uncertainty reasons.
 pub fn summarize(
     decisions: &[Decision],
     inspection_complete: bool,
@@ -315,19 +338,13 @@ pub fn summarize(
     if !inventory_exhaustive {
         reasons.push("inventory_not_exhaustive");
     }
-    let decision = if decisions.contains(&Decision::Fail) {
-        reasons.push("applicable_asset_violation");
-        Decision::Fail
-    } else if !decisions.contains(&Decision::Pass)
-        || decisions.contains(&Decision::Indeterminate)
-        || !reasons.is_empty()
-    {
-        reasons.push("no_complete_positive_policy_evidence");
-        Decision::Indeterminate
-    } else {
-        reasons.push("bounded_scope_checks_passed_not_deployment_assurance");
-        Decision::Pass
-    };
+    let decision = aggregate_decision(decisions, inspection_complete, inventory_exhaustive);
+    reasons.push(match decision {
+        Decision::Fail => "applicable_asset_violation",
+        Decision::Indeterminate => "no_complete_positive_policy_evidence",
+        Decision::Pass => "bounded_scope_checks_passed_not_deployment_assurance",
+        Decision::NotApplicable => unreachable!("aggregation cannot exclude an applicable profile"),
+    });
     record(decision, &reasons)
 }
 

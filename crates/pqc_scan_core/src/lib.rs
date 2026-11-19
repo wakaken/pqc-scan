@@ -1,4 +1,7 @@
 mod repository_context;
+
+#[cfg(test)]
+mod formal;
 pub use repository_context::RepositoryContext;
 pub mod file_selection;
 pub use file_selection::FileSelection;

@@ -1,0 +1,77 @@
+name: Formal verification
+
+on:
+  push:
+    paths:
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'docs/formal-verification/**/*.lean'
+      - 'docs/formal-verification/lean-toolchain'
+      - 'scripts/formal-verification.py'
+      - 'tests/formal-verification/**'
+      - '.github/workflows/formal-verification.yml'
+  pull_request:
+    paths:
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'docs/formal-verification/**/*.lean'
+      - 'docs/formal-verification/lean-toolchain'
+      - 'scripts/formal-verification.py'
+      - 'tests/formal-verification/**'
+      - '.github/workflows/formal-verification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: formal-${{ matrix.verifier }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        verifier: [kani, lean]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.93.1
+      - name: Check runner failure handling
+        run: python3 -m unittest discover -s tests/formal-verification -v
+      - name: Install pinned Kani
+        if: matrix.verifier == 'kani'
+        run: |
+          cargo install --locked kani-verifier --version 0.68.0
+          cargo kani setup
+      - name: Install pinned Lean
+        if: matrix.verifier == 'lean'
+        run: |
+          curl --fail --location --silent --show-error https://github.com/leanprover/elan/releases/download/v4.4.0/elan-x86_64-unknown-linux-gnu.tar.gz -o "$RUNNER_TEMP/elan.tar.gz"
+          echo "0e8250aa2be86c7af929ade68db617af9edc8b9ccf6eaf5ece228250d0d032e2  $RUNNER_TEMP/elan.tar.gz" | sha256sum --check
+          mkdir "$RUNNER_TEMP/elan-installer"
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP/elan-installer"
+          "$RUNNER_TEMP/elan-installer/elan-init" -y --no-modify-path --default-toolchain none
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.36.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify
+        run: python3 scripts/formal-verification.py --mode ${{ matrix.verifier }} --timeout 300 --out-dir target/formal-verification/ci
+      - name: Preserve proof results and source bindings
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: formal-${{ matrix.verifier }}-${{ github.sha }}
+          path: target/formal-verification/ci/
+          if-no-files-found: warn
+          retention-days: 14

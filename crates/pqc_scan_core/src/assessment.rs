@@ -2,6 +2,10 @@
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
 
+#[cfg(kani)]
+#[path = "formal/assessment.rs"]
+mod proofs;
+
 pub const CATALOG_VERSION: &str = "local-assessment-1";
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]

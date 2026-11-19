@@ -4,6 +4,10 @@ use serde::Serialize;
 
 use crate::{Detection, ScanConfig, ScanResult};
 
+#[cfg(kani)]
+#[path = "formal/diagnostic.rs"]
+mod proofs;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DetectorStatus {
     Complete,
