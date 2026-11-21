@@ -12,7 +12,8 @@ use serde_json::Value;
 use std::{fs::File, path::Path, str::FromStr};
 
 pub use context::generation::{
-    generate_context, ClaimAnswer, ClaimValue, ContextClaims, ContextSelection,
+    generate_context, generate_context_with_references, ClaimAnswer, ClaimValue, ContextClaims,
+    ContextSelection,
 };
 pub use context::{
     parse_as_of, BoundContext, ClaimFreshness, ContextReference, MigrationContext, Provenance,
@@ -172,7 +173,7 @@ pub struct Target {
     pub technical: TechnicalFacts,
     pub observation: ObservationFacts,
     pub limitations: Vec<String>,
-    /// False for ambiguous native anchors; never inferred from array position.
+    /// True only for explicit within-input selection; never cross-input identity.
     #[serde(skip)]
     pub(crate) bindable: bool,
 }

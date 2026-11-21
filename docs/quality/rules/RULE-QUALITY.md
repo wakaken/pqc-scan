@@ -1,6 +1,6 @@
 # Built-in rule quality companion (task028)
 
-[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **123 current
+[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **125 current
 built-in rules**, not the historical counts in task descriptions. Existing YAML is
 the executable source of truth. This original MIT development-only companion is
 not loaded by the CLI, does not add report fields, and does not certify accuracy.
@@ -37,11 +37,11 @@ configuration grammar. No standard text or real private keys are copied.
 
 ## Fixtures and known gaps
 
-The 268 current examples exercise **compiled regex targets only**, with desired labels
+The 272 current examples exercise **compiled regex targets only**, with desired labels
 separate from expected current matches. They are not end-to-end source truth,
 symbol resolution, a key parser test, provider validation or performance evidence.
 The existing detector/CLI/certificate/schema suites and frozen task023 corpus still
-provide their own bounded integration evidence. Do not count these controls as123
+provide their own bounded integration evidence. Do not count these controls as125
 new independently labeled accuracy units or as approved quality budgets.
 
 The original task028 recorded eight negative controls with false positives. Four

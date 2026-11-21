@@ -31,6 +31,8 @@ Reports show findings, locations and suggested next steps. The inspection overvi
 
 <a id="targets"></a>
 
+Selected source rules now follow bounded relative JS/TS constant imports and simple JWT forwarding functions. Error-message algorithm references remain visible as informational entries; inspection diagnostics show known causes and next checks. See [coverage](docs/user/COVERAGE.md#source-facts).
+
 ## What can I scan?
 
 Point the scanner at a local repository. It inspects the following artifacts within its supported patterns and formats:
@@ -44,10 +46,14 @@ Point the scanner at a local repository. It inspects the following artifacts wit
 | Dependency manifests and locks | `Cargo.toml`, `Cargo.lock`, `package.json`, npm/pnpm locks, Python/Ruby/Java/Go dependency files | Relevant libraries, declared version constraints and supported resolution records |
 | Existing SBOM files | CycloneDX JSON and SPDX JSON | Reported dependency components/packages; not proof of installation |
 
+Selected source rules follow bounded local bindings. Explicit JOSE ES384/ES512/EdDSA references and RSA/Ed25519 module/type names retain algorithm facts; jsonwebtoken signing options and Ruby optional defaults are followed within the documented bounds. Ruby OpenSSL cipher calls can retain same-class AES-GCM/CBC candidates; Rust OpenSSL TLS construction is recognized through explicit imports and aliases. These are source references, not deployed configuration or negotiated algorithms. See [source analysis limits](docs/user/COVERAGE.md#source-facts).
+
 PKCS#12 (`.p12`/`.pfx`) supports unencrypted public-certificate extraction. Encrypted contents and private-key bags remain unsupported; no password, decryption or integrity/trust verification is performed.
 See [supported inputs and inspection limits](docs/user/COVERAGE.md) for the full file list, supported versions and parser boundaries.
 Live endpoints are inspected only through separately enabled, explicit [TLS/SSH probes](docs/user/PROBING.md).
 They are not repository scan targets. Arbitrary programming languages are not supported.
+
+File selection defaults to 2 MiB per file. Use `scan --max-file-size-mib 16` or the folder picker’s size field to change it (1–64 MiB); [other inspection budgets remain](docs/user/SCANNING.md#file-size-limit).
 
 <a id="features"></a>
 
@@ -59,6 +65,7 @@ They are not repository scan targets. Arbitrary programming languages are not su
 - Lists cryptographic findings and software dependencies in separate inventory files.
 - Optionally records richer observations, local advisory assessments and inspection diagnostics.
 - The explicit `assess` command can [reassess saved evidence offline](docs/user/SAVED-EVIDENCE.md), keeping technical roles, scoped claims and migration decisions separate.
+- Repeated source references can receive explicit use declarations when records and saved locations are unique within the same input. Collisions and missing positions remain excluded; cross-scan ambiguity and exact-input binding are preserved.
 
 A reference to a PQC algorithm is useful evidence, but it does not establish that the application uses it successfully. The [report guide](docs/user/REPORTS.md#pqc-findings) explains these findings with examples.
 
@@ -102,15 +109,15 @@ pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
 ```
 
 1. The default browser opens the local start page. If it does not, open the complete `http://127.0.0.1:8787/<session>/` URL printed in the terminal.
-2. Browse to a project within `--root` and choose **Scan this folder**. The picker stays within this root and skips symbolic links.
-3. Wait for the scan to finish; the HTML report opens automatically. Review inspection completion as well as findings. Browser Back returns to the start page for another scan.
+2. Select one or more project folders within `--root` using the rows or checkboxes, then **Scan selected folders**. Double-click to open a folder; use Back/Forward or the path above the list to navigate. The picker stays within this root and skips symbolic links.
+3. The progress dialog blocks other page actions while folders scan in selection order. Each folder keeps its own result. For multiple folders, review the results list after completion; a single default-mode scan opens its HTML report automatically. Review inspection completion as well as findings. Browser Back returns to the start page for another scan.
 4. Stop the server with **Ctrl+C**. Reports remain in the private `pqc-scan-web-*` directory printed in the terminal. Keep `report.html` and `report.rules.html` together for offline reading.
 
 The server listens only on `127.0.0.1` and runs the same static scanner as the CLI, without uploading source or reports. Use `--port 0` if the default port is occupied, or `--no-open` to open the printed URL yourself. With an extracted distribution, replace the command and rules paths with `/path/to/bundle/bin/pqc-scan` and `/path/to/bundle/rules/default`. See [local web scanning](docs/user/SCANNING.md#local-web-scanning) for limits and options.
 
 <a id="report-preview"></a>
 
-Optional migration input is available with `serve --migration`: select exact targets, answer only known questions, review/save context and reassess the same saved inventory. See [the local workflow](docs/user/SCANNING.md#optional-migration-context-and-reassessment).
+Optional migration input is available with `serve --migration`: the results screen links to the scan report and migration input. Review the scan overview, enter shared context for a chosen use and open grouped response work items. Exact evidence and individual exceptions remain available; generation shows its current stage. See [the local workflow](docs/user/SCANNING.md#optional-migration-context-and-reassessment).
 
 ## Report preview
 
@@ -252,3 +259,17 @@ required checks pending.
 
 [MIT](LICENSE). Bundled dependencies have their own licenses; see the archive’s
 `DEPENDENCY-LICENSES.json` and `licenses/` directory.
+
+
+Use Cancel remaining scans in the progress dialog to stop all unsubmitted folders. The active folder finishes and its result remains in Scan history. Migration loading and preparation also show a blocking dialog. Opening Response work items does not generate anything; use Prepare review items explicitly. Evaluation time appears beside the input method; optional declaration expiry is folded into details. Explicitly choosing a duration or goal month clears the other field. Existing imported formats and meanings are preserved.
+
+Omitting declaration expiry leaves purpose/support claims with unknown validity. Entered declarations and currently usable assessment claims are distinct; supply the intended expiry explicitly.
+
+
+Migration HTML separates observed purpose/algorithm from current declarations of purpose, usage and proposed configuration; declarations alone do not verify deployed cryptography. Concrete missing facts, locations and next checks precede the full original assessment reasoning/evidence. Evaluation time uses Japan time. Search appears for multiple work items and matches algorithms, purposes, filenames and related text (e.g. RSA, encryption, package.json). A single urgency category has no dropdown. Undetermined urgency does not mean low risk. JSON decisions, declarations and UTC timestamps remain unchanged.
+
+The optional migration form also accepts sourced organization/contract deadlines. HTML work items distinguish records from recorded locations, explain binding limitations and show applied deadlines/lead times; `assess --report-label` identifies a saved HTML report. See the local workflow for details.
+
+HTML and Markdown merge equivalent findings at the same position and algorithm, retaining matched rules in details. Inspection totals count files; finding totals count merged items. Machine exports such as JSON retain original rule-level records.
+
+Tests remain included by default. Use `--exclude-tests` or the browser’s “Exclude test code” option below “Clear selection” to omit conventional test paths and filenames. See [scanning](docs/user/SCANNING.md) for matching conventions and limits. Custom exclusions can be configured with `.pqcignore`; syntax-proven Rust test-only findings can also be omitted.

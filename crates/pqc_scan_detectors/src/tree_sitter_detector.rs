@@ -1,7 +1,9 @@
+mod display_references;
 mod javascript_validation;
 mod module_syntax;
 mod source_api;
 mod syntax_compat;
+mod test_scope;
 use std::collections::{BTreeMap, HashSet};
 use std::path::Path;
 
@@ -40,6 +42,19 @@ impl Detector for TreeSitterDetector {
     fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
         self.detect_internal(file, rules, false, crate::DetectorBudget::default())
     }
+    fn detect_in_repository(
+        &self,
+        file: &ScannableFile,
+        rules: &RuleSet,
+        repository: Option<&pqc_scan_core::RepositoryContext>,
+        observe: bool,
+    ) -> Result<DetectorOutcome> {
+        let budget = crate::DetectorBudget::default();
+        self.detect_source(file, rules, observe, budget, repository)
+            .map(|outcome| {
+                outcome.with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
+            })
+    }
     fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
         self.detect_internal(file, rules, true, crate::DetectorBudget::default())
     }
@@ -51,6 +66,19 @@ impl TreeSitterDetector {
         rules: &RuleSet,
         observe: bool,
         budget: crate::DetectorBudget,
+    ) -> Result<DetectorOutcome> {
+        self.detect_source(file, rules, observe, budget, None)
+            .map(|outcome| {
+                outcome.with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
+            })
+    }
+    fn detect_source(
+        &self,
+        file: &ScannableFile,
+        rules: &RuleSet,
+        observe: bool,
+        budget: crate::DetectorBudget,
+        repository: Option<&pqc_scan_core::RepositoryContext>,
     ) -> Result<DetectorOutcome> {
         let text = match file.text.as_ref() {
             Some(v) => v,
@@ -170,8 +198,15 @@ impl TreeSitterDetector {
         if tree.root_node().has_error() && status != DetectorStatus::Truncated {
             status = DetectorStatus::Partial;
         }
-        let facts =
-            crate::source_facts::inspect(tree.root_node(), text, language_name, rules, budget);
+        let facts = crate::source_facts::inspect_in_repository(
+            tree.root_node(),
+            text,
+            language_name,
+            rules,
+            budget,
+            Some(&file.path),
+            repository,
+        );
         if facts.truncated {
             status = DetectorStatus::Truncated;
         }
@@ -327,6 +362,13 @@ impl TreeSitterDetector {
                             };
                             metadata.insert("reference_kind".into(), kind.into());
                         }
+                        if let Some(fact) = facts
+                            .rule_matches(rule)
+                            .iter()
+                            .find(|f| f.start == source_start && f.end == source_end)
+                        {
+                            metadata.insert("source_resolution".into(), fact.reason.into());
+                        }
                         metadata.insert("scope".to_string(), rule.scope.clone());
                         if candidate.canonical.is_some() {
                             metadata
@@ -354,12 +396,17 @@ impl TreeSitterDetector {
                             },
                         });
                         if observe {
-                            observations.push(pqc_scan_core::ObservationDraft::source(
-                                out.last().expect("accepted detection"),
-                                pqc_scan_core::ObservationMethod::AstPattern,
-                                hit.as_str(),
-                                Some((source_start, source_end)),
-                            ));
+                            observations.push(
+                                pqc_scan_core::ObservationDraft::source(
+                                    out.last().expect("accepted detection"),
+                                    pqc_scan_core::ObservationMethod::AstPattern,
+                                    hit.as_str(),
+                                    Some((source_start, source_end)),
+                                )
+                                .with_algorithm_references(
+                                    facts.references_at(rule, source_start, source_end),
+                                ),
+                            );
                         }
                         rule_hits += 1;
                     }
@@ -416,12 +463,15 @@ impl TreeSitterDetector {
                         },
                     };
                     if observe {
-                        observations.push(pqc_scan_core::ObservationDraft::source(
-                            &detection,
-                            pqc_scan_core::ObservationMethod::AstPattern,
-                            raw,
-                            Some((found.start, found.end)),
-                        ));
+                        observations.push(
+                            pqc_scan_core::ObservationDraft::source(
+                                &detection,
+                                pqc_scan_core::ObservationMethod::AstPattern,
+                                raw,
+                                Some((found.start, found.end)),
+                            )
+                            .with_algorithm_references(&found.algorithm_references),
+                        );
                     }
                     dedup.insert((found.start, found.end));
                     out.push(detection);
@@ -439,9 +489,22 @@ impl TreeSitterDetector {
         } else if template_pending && status != DetectorStatus::Truncated {
             status = DetectorStatus::Partial;
         }
-        let outcome = DetectorOutcome::new(out, status).with_observations(observations);
+        let test_ranges = if language_name == "rust" {
+            test_scope::rust_test_ranges(original_tree.root_node(), text, budget.max_ast_nodes)
+        } else {
+            Vec::new()
+        };
+        let outcome = DetectorOutcome::new(out, status)
+            .with_observations(observations)
+            .with_test_ranges(test_ranges);
         Ok(if template_pending {
             outcome.with_explanation("Unrendered template: static source inspected; generated values and branches remain unknown.")
+        } else if let Some((reason, limit, processed)) = facts.limit_reason {
+            outcome.with_limit(reason, limit, processed)
+        } else if status == DetectorStatus::Truncated {
+            outcome.with_explanation("AST inspection limit: node, candidate, alias or retained-match work was bounded. Retained findings remain available; omitted findings are unknown. Inspect the remaining source separately.")
+        } else if status == DetectorStatus::Partial {
+            outcome.with_explanation("Source syntax could not be fully interpreted. Parsed regions were inspected; unresolved syntax remains unknown. Check generated syntax, language version and the source file separately.")
         } else {
             outcome
         })

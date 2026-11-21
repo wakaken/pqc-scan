@@ -228,7 +228,9 @@
             "support.protocol",
             "support.jose",
             "support.verifiers",
-            "support.pki"
+            "support.pki",
+            "migration_target",
+            "migration_goal_month"
           ]
         },
         "state": {
@@ -685,7 +687,83 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "migration_target"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "$ref": "#/$defs/configuration"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "migration_goal_month"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+                "not": {
+                  "pattern": "^0000-"
+                }
+              }
+            }
+          }
         }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "use_case": {
+          "enum": [
+            "signature",
+            "jwt",
+            "pki",
+            "key_establishment",
+            "encryption",
+            "hashing"
+          ]
+        },
+        "algorithm": {
+          "enum": [
+            "ML-DSA",
+            "ML-KEM",
+            "AES",
+            "SHA-256"
+          ]
+        },
+        "parameters": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "use_case",
+        "algorithm",
+        "parameters"
       ]
     }
   },

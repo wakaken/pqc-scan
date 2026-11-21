@@ -52,6 +52,16 @@ impl Write for LimitedBuffer {
     }
 }
 
+/// Actual serialization/write phases, not an estimate of total elapsed time.
+#[derive(Clone, Copy, Debug)]
+pub enum MigrationReportProgress {
+    Validating,
+    Json,
+    Markdown,
+    Html,
+    Writing { completed: usize, total: usize },
+}
+
 /// Render and validate the complete selected set before creating any output.
 pub fn write_migration_assessment_reports(
     report: &MigrationAssessment,
@@ -60,10 +70,60 @@ pub fn write_migration_assessment_reports(
     out_dir: &Path,
     language: crate::ReportLanguage,
 ) -> anyhow::Result<Vec<PathBuf>> {
+    write_migration_assessment_reports_with_progress(
+        report,
+        evidence,
+        context,
+        out_dir,
+        language,
+        |_| {},
+    )
+}
+
+/// Compatible writer with observable real phases; limits and replacement gates are unchanged.
+pub fn write_migration_assessment_reports_with_progress(
+    report: &MigrationAssessment,
+    evidence: &SavedEvidence,
+    context: Option<&MigrationContext>,
+    out_dir: &Path,
+    language: crate::ReportLanguage,
+    progress: impl FnMut(MigrationReportProgress),
+) -> anyhow::Result<Vec<PathBuf>> {
+    write_migration_assessment_reports_with_label_and_progress(
+        report, evidence, context, out_dir, language, None, progress,
+    )
+}
+
+/// Optional display label does not change canonical assessment or context data.
+pub fn write_migration_assessment_reports_with_label_and_progress(
+    report: &MigrationAssessment,
+    evidence: &SavedEvidence,
+    context: Option<&MigrationContext>,
+    out_dir: &Path,
+    language: crate::ReportLanguage,
+    label: Option<&str>,
+    mut progress: impl FnMut(MigrationReportProgress),
+) -> anyhow::Result<Vec<PathBuf>> {
+    crate::migration_html::validate_label(label)?;
+    progress(MigrationReportProgress::Validating);
     report.validate_for(evidence, context)?;
+    progress(MigrationReportProgress::Json);
     let json = migration_json_bytes(report)?;
+    progress(MigrationReportProgress::Markdown);
     let markdown = crate::migration_markdown::migration_markdown_bytes(report, language)?;
-    let html = crate::migration_html::migration_html_bytes(report, language)?;
+    progress(MigrationReportProgress::Html);
+    let unbindable = evidence
+        .targets()
+        .iter()
+        .filter(|t| !t.is_bindable())
+        .map(|t| t.id.as_str())
+        .collect::<Vec<_>>();
+    let html = crate::migration_html::migration_html_bytes_with_presentation(
+        report,
+        language,
+        label,
+        &unbindable,
+    )?;
     let paths = vec![
         out_dir.join(MIGRATION_JSON),
         out_dir.join(crate::migration_markdown::MIGRATION_MARKDOWN),
@@ -72,10 +132,18 @@ pub fn write_migration_assessment_reports(
     evidence.validate_output_paths(context, &paths)?;
     pqc_scan_core::safe_output::create_dir_all(out_dir)
         .map_err(|_| anyhow::anyhow!("output_unavailable"))?;
-    for (path, bytes) in paths.iter().zip([json, markdown, html]) {
+    for (completed, (path, bytes)) in paths.iter().zip([json, markdown, html]).enumerate() {
+        progress(MigrationReportProgress::Writing {
+            completed,
+            total: 3,
+        });
         pqc_scan_core::safe_output::write(path, bytes)
             .map_err(|_| anyhow::anyhow!("output_unavailable"))?;
     }
+    progress(MigrationReportProgress::Writing {
+        completed: 3,
+        total: 3,
+    });
     Ok(paths)
 }
 

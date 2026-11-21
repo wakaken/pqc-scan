@@ -88,6 +88,31 @@ fn compact_reports_keep_all_locations_and_only_share_identical_actions() {
         let html = fs::read_to_string(root.join(name).join("report.html")).unwrap();
         assert!(html.contains("data-report-controls"));
         assert!(html.contains("data-occurrence-list"));
+        let heading = html
+            .split("class=\"rule-title\"")
+            .nth(1)
+            .unwrap()
+            .split("</summary>")
+            .next()
+            .unwrap();
+        assert!(
+            !heading.contains("JWT_RS256"),
+            "rule IDs must not appear in result headings"
+        );
+        let matched = html.split("class=\"matched-rules\"").nth(1).unwrap();
+        let section = matched
+            .split("<section>")
+            .nth(1)
+            .unwrap()
+            .split("</section>")
+            .next()
+            .unwrap();
+        assert!(section.starts_with("<h4>"));
+        assert!(!section.split("</h4>").next().unwrap().contains("JWT_RS256"));
+        assert!(
+            section.contains("<p><code>JWT_RS256</code>"),
+            "matched rule detail retains its ID"
+        );
         assert!(html.contains("data-page-size=\"20\""));
         assert_eq!(
             html.split("<template")
@@ -314,8 +339,10 @@ fn tree_uses_all_occurrences_escapes_paths_and_clarifies_certificate_cutoff_only
     let active = html.split("<template").next().unwrap();
     assert!(active.contains("src/a.py、全検出2件"));
     assert!(active.contains("data-tree-file=\"tests/&lt;example&gt;&amp;.pem\""));
-    assert!(active.contains("data-toggle-filters"));
-    assert!(active.contains("data-toggle-tree"));
+    assert!(!active.contains("data-toggle-filters"));
+    assert!(active.contains("<details id=\"report-filters\""));
+    assert!(!active.contains("data-toggle-tree"));
+    assert!(active.contains("<details id=\"report-file-tree\""));
     assert!(!html.contains("従来の固定基準"));
     assert!(html.contains("解析した証明書の有効期限が2026年以前です。"));
     assert!(html.contains("2027年1月1日UTCより前"));
@@ -330,5 +357,25 @@ fn tree_uses_all_occurrences_escapes_paths_and_clarifies_certificate_cutoff_only
         machine["findings"][2]["migration_hint"],
         "Original machine hint"
     );
+    fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn deep_tree_hover_paths_are_complete_and_escape_attribute_text() {
+    let root = std::env::temp_dir().join(format!(
+        "pqc-deep-hover-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    let mut scan = result(1);
+    scan.findings[0].location.file="test-framework/oauth/src/main/java/org/keycloak/testframework/oauth/<unsafe>\"&/OAuthIdentityProvider.java".into();
+    write_reports_with_language(&scan, &root, ReportFormat::All, ReportLanguage::Ja).unwrap();
+    let html = fs::read_to_string(root.join("report.html")).unwrap();
+    assert!(html.contains("<summary title=\"test-framework/oauth/src/main/java/org/keycloak/testframework/oauth/&lt;unsafe&gt;&quot;&amp;\">"));
+    assert!(html.contains("title=\"test-framework/oauth/src/main/java/org/keycloak/testframework/oauth/&lt;unsafe&gt;&quot;&amp;/OAuthIdentityProvider.java\""));
+    assert!(html.contains("data-tree-file=\"test-framework/oauth/src/main/java/org/keycloak/testframework/oauth/&lt;unsafe&gt;&quot;&amp;/OAuthIdentityProvider.java\""));
     fs::remove_dir_all(root).unwrap();
 }

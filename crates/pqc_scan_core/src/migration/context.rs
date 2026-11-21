@@ -132,9 +132,39 @@ struct Support {
     verifiers: Option<Claim<bool>>,
     pki: Option<Claim<bool>>,
 }
+/// Explicit operator-selected integration configuration, not verified compatibility.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct MigrationConfiguration {
+    use_case: String,
+    algorithm: String,
+    parameters: String,
+}
+impl MigrationConfiguration {
+    fn validate(&self) -> Result<()> {
+        let expected = match self.use_case.as_str() {
+            "signature" | "jwt" | "pki" => "ML-DSA",
+            "key_establishment" => "ML-KEM",
+            "encryption" => "AES",
+            "hashing" => "SHA-256",
+            _ => return Err(Error::InvalidInput),
+        };
+        if self.algorithm != expected
+            || self.parameters.trim().is_empty()
+            || self.parameters.len() > 320
+            || self.parameters.chars().count() > 80
+            || self.parameters.chars().any(char::is_control)
+        {
+            return Err(Error::InvalidInput);
+        }
+        Ok(())
+    }
+}
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ClaimSet {
+    migration_target: Option<Claim<MigrationConfiguration>>,
+    migration_goal_month: Option<Claim<String>>,
     applicability: Option<Claim<Applicability>>,
     use_case: Option<Claim<UseCase>>,
     usage_state: Option<Claim<Usage>>,
@@ -229,7 +259,22 @@ pub struct TargetContext {
 }
 impl TargetContext {
     pub fn claim(&self, field: &str) -> Option<&ResolvedClaim> {
-        self.claims.get(field)
+        let claim = self.claims.get(field)?;
+        if field.starts_with("support.") {
+            if let Some(configuration) = self.claims.get("migration_target") {
+                let value = configuration.active_value()?;
+                if self
+                    .claims
+                    .get("use_case")
+                    .and_then(ResolvedClaim::active_value)
+                    .and_then(Value::as_str)
+                    != value["use_case"].as_str()
+                {
+                    return None;
+                }
+            }
+        }
+        Some(claim)
     }
     pub fn claims(&self) -> impl Iterator<Item = &ResolvedClaim> {
         self.claims.values()
@@ -335,6 +380,34 @@ impl MigrationContext {
                     merge_claims(&mut claims, set, &pointer, &self.sha256, now)?;
                 }
             }
+            if let Some(configuration) = claims.get("migration_target") {
+                if let Some(value) = &configuration.value {
+                    let declared = claims
+                        .get("use_case")
+                        .and_then(|c| c.value.as_ref())
+                        .and_then(Value::as_str);
+                    if declared != value["use_case"].as_str() {
+                        return Err(Error::InvalidInput);
+                    }
+                }
+                if configuration.state == "known" {
+                    let scope = configuration
+                        .context_pointer
+                        .strip_suffix("/migration_target")
+                        .ok_or(Error::InvalidInput)?;
+                    for claim in claims
+                        .values()
+                        .filter(|c| c.field.starts_with("support.") && c.state == "known")
+                    {
+                        if !claim
+                            .context_pointer
+                            .starts_with(&format!("{scope}/support/"))
+                        {
+                            return Err(Error::InvalidContextBinding);
+                        }
+                    }
+                }
+            }
             let purpose_conflicting = claims
                 .get("use_case")
                 .and_then(ResolvedClaim::active_value)
@@ -430,39 +503,7 @@ fn validate(input: &mut Input) -> Result<()> {
     if input.systems.len() > 256 || input.bindings.len() > 4096 {
         return Err(Error::ResourceLimit);
     }
-    let mut refs = BTreeSet::new();
-    for r in &input.references {
-        if [
-            &r.id,
-            &r.issuer_id,
-            &r.document_id,
-            &r.edition,
-            &r.clause,
-            &r.scope_id,
-        ]
-        .iter()
-        .any(|s| s.len() > 128)
-        {
-            return Err(Error::ResourceLimit);
-        }
-        if ![
-            &r.id,
-            &r.issuer_id,
-            &r.document_id,
-            &r.edition,
-            &r.clause,
-            &r.scope_id,
-        ]
-        .iter()
-        .all(|s| identifier(s))
-            || !refs.insert(r.id.as_str())
-        {
-            return Err(Error::InvalidReference);
-        }
-        if let Some(uri) = &r.https_uri {
-            validate_uri(uri)?;
-        }
-    }
+    let refs = reference_ids(&input.references)?;
     let mut systems = BTreeSet::new();
     for s in &input.systems {
         if s.id.len() > 64 {
@@ -568,6 +609,23 @@ fn validate_claim<T>(claim: &mut Option<Claim<T>>, refs: &BTreeSet<&str>) -> Res
     Ok(())
 }
 fn validate_set(s: &mut ClaimSet, refs: &BTreeSet<&str>) -> Result<()> {
+    validate_claim(&mut s.migration_target, refs)?;
+    if let Some(Claim::Known { value, .. }) = &s.migration_target {
+        value.validate()?;
+    }
+    validate_claim(&mut s.migration_goal_month, refs)?;
+    if let Some(Claim::Known { value, .. }) = &s.migration_goal_month {
+        let bytes = value.as_bytes();
+        if bytes.len() != 7
+            || bytes[4] != b'-'
+            || !bytes[..4].iter().all(u8::is_ascii_digit)
+            || !bytes[5..].iter().all(u8::is_ascii_digit)
+            || &value[..4] == "0000"
+            || !("01"..="12").contains(&&value[5..])
+        {
+            return Err(Error::InvalidInput);
+        }
+    }
     validate_claim(&mut s.applicability, refs)?;
     validate_claim(&mut s.use_case, refs)?;
     validate_claim(&mut s.usage_state, refs)?;
@@ -678,6 +736,8 @@ fn merge_claims(
             add(c, &s.$name, stringify!($name), pointer, digest, now)?;
         };
     }
+    field!(migration_target);
+    field!(migration_goal_month);
     field!(applicability);
     field!(use_case);
     field!(usage_state);
@@ -725,4 +785,44 @@ fn purpose_conflict(target: &Target, usage: &str) -> bool {
     }
     matches!(a.identifier.as_str(), "RSA" | "EC")
         && !matches!(selected, Purpose::Signature | Purpose::KeyEstablishment)
+}
+
+fn reference_ids(references: &[ContextReference]) -> Result<BTreeSet<&str>> {
+    if references.len() > 65536 {
+        return Err(Error::ResourceLimit);
+    }
+    let mut refs = BTreeSet::new();
+    for r in references {
+        if [
+            &r.id,
+            &r.issuer_id,
+            &r.document_id,
+            &r.edition,
+            &r.clause,
+            &r.scope_id,
+        ]
+        .iter()
+        .any(|s| s.len() > 128)
+        {
+            return Err(Error::ResourceLimit);
+        }
+        if ![
+            &r.id,
+            &r.issuer_id,
+            &r.document_id,
+            &r.edition,
+            &r.clause,
+            &r.scope_id,
+        ]
+        .iter()
+        .all(|s| identifier(s))
+            || !refs.insert(r.id.as_str())
+        {
+            return Err(Error::InvalidReference);
+        }
+        if let Some(uri) = &r.https_uri {
+            validate_uri(uri)?;
+        }
+    }
+    Ok(refs)
 }

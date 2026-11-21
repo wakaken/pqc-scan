@@ -12,6 +12,24 @@ See [feasibility](../../tasks/066/FEASIBILITY.md),
 The actual approval and scope exclusions are recorded in the decision package.
 Implementation and independent verification remain downstream obligations.
 
+## Unpublished configuration amendment (2026-11-19)
+
+The maintainer explicitly approved extending the current unpublished format, without
+introducing v2, for the approved local UI. Optional `migration_target` is a normal
+known/unknown provenanced claim. Its known value is the closed object
+`{use_case, algorithm, parameters}`; the family must match the declared purpose and
+parameters contain1–80 non-control characters with a nonblank value. Custom strings
+are unverified operator declarations. The effective declared use must match its
+use_case. Support claims under that configuration must come from the same scoped
+claim set; a known inherited answer from another scope is rejected rather than
+rebound. Unknown/stale configuration or inactive use cannot establish specific
+known support. Contexts without the claim retain their former generic meaning.
+The claim is retained in assessment evidence for applicable decision branches;
+parameter selection/compatibility still needs separate validation. No new P1–P8
+branch or numeric model is introduced. The closed context/assessment schemas include
+this field. The complete approved UI semantics and checks are in
+[local scan workflow](../product/LOCAL-SCAN-UI.md).
+
 ## Maintainer presentation amendment (2026-11-18)
 
 The maintainer subsequently requested a comprehensible human report with the
@@ -69,9 +87,22 @@ certificate.signature_algorithm, certificate.subject_key.algorithm, or
 reference-only. Validate the actual relationship names against the input; each
 role path has one unambiguous target or remains unresolved. Never search arbitrary
 graph paths or transfer a business binding through a shared algorithm asset.
-Ambiguous duplicate anchors cannot receive a business-system binding: reject the
-binding with a fixed ambiguity error and retain the technical target in a
-context-free assessment. No position/name/glob/algorithm-based guesswork.
+Repeated weak anchors retain their native cross-scan ambiguity. As approved on
+2026-11-21, a limited within-input exception permits explicit target-ID binding
+when every saved source member of the anchor group has a distinct nonempty byte
+span and line/column location, a uniquely owned consistent usage asset, and a
+supported source method/assurance. Count all members before eligibility filtering;
+missing positions, overlapping spans, duplicate locations, reused/inconsistent
+usage assets and nonunique occurrence keys reject the exception. Unresolved
+component roles and unsupported algorithm components stay unbindable. The fixed
+reference-only role may receive a declared business use while its algorithm stays
+unknown. This never infers a primitive, runtime use or negotiated TLS facts.
+
+Outside this exception, ambiguous records retain the fixed binding error and
+context-free technical facts. Positions only check distinguishability inside the
+exact saved input; they never select another target, create cross-scan identity or
+transfer claims. Native IDs, ambiguity flags and stored schemas are unchanged.
+No position/name/glob/algorithm-based automatic business mapping is introduced.
 
 For TLS, target references use attempt1 and fixed JSON detail paths: negotiated
 key establishment and certificate-index signature/subject-key components. Preserve
@@ -247,6 +278,28 @@ Next actions reuse existing candidate-purpose/prerequisite concepts; no KEM for
 signatures, guessed replacement, unverified hybrid PKI deployment or automatic
 code edit. Generic RSA intended purpose cannot be resolved by a hashing claim.
 
+## Explicit source-reference correction (2026-11-21)
+
+The source-fact correction normalizes RSA/Ed25519 module/type vocabulary and
+JOSE names already recognized by default detection rules. ES384/ES512 map to the
+existing ECDSA catalog with key_bits384/P-384 and key_bits521/P-521, respectively
+(RFC7518 section3.4); original JOSE spelling remains at the saved source location.
+EdDSA maps only to generic EC public-key family (RFC8037 section3.1), never to
+ECDSA or Ed25519. Its curve, key bits, parameters and primitive purpose remain
+unknown; intended business purpose is a separate explicit declaration.
+
+Both primitive dispatches, catalog/policy identifiers and versions, schemas and
+native ID encoding remain unchanged. Held inventory/context/as-of evaluation must
+remain byte-identical to the prior binary; new facts require a rescan and fresh
+exact-input declarations. Typed facts can change affected observation/asset IDs.
+
+Provenance-backed jsonwebtoken signing can retain the literal algorithm option
+from that same call when its header agrees. Unresolved/overridden objects, namespace alias writes and namespace escapes
+into containers/calls/returns remain unknown. Ruby optional defaults are candidate references, including a cipher
+constructor used for a key-length query; they do not establish supplied arguments,
+active encryption or effective mode. TLS construction/profiles do not identify
+negotiated algorithms. Import references likewise do not establish active use.
+
 ## Technical dispatch and ingestion invariants
 
 Keep `local-assessment-1` and `migration-review-v1`/1.0.0 unchanged. The new path
@@ -419,3 +472,51 @@ malformed/oversize/duplicate/unknown/false/stale/conflict cases and paired rende
 Markdown checks. Adopted HTML would additionally require a new D4 decision and
 browser verification. A passing future parser or table agreement is not an
 independent assessment of practitioner usefulness; task071 executes the protocol.
+
+
+## Approved grouped human HTML (2026-11-19)
+
+The maintainer approved replacing the per-target human HTML workflow with the
+three-screen production mock: overview, shared use context, response work items.
+This supersedes earlier human HTML layout descriptions, not JSON record contracts
+or evaluator semantics. No cryptographic policy or storage schema is changed.
+
+Work groups require equality of system, observed purpose/role, urgency, information,
+readiness, ordered reasons/missing inputs, action, blocking prerequisites, validation
+steps, candidate identifier/purpose/status/parameter selection/prerequisite support/
+validation and classical concerns. Candidate/claim/source identities remain attached
+to their exact target; semantic equality never transfers support claims. Technical
+observation/parameter differences remain accessible in member details and original
+assessment data. Urgent groups sort first; empty input produces no groups.
+
+The self-contained HTML contains one typed interned archive of the full assessment,
+common bilingual copy and numeric lexemes, plus work-group membership indexes.
+Objects/arrays reference shared nodes; number lexemes preserve integers beyond JS's
+safe range. Only bounded work/evidence/claim/source pages are rendered. The first20
+work items have a no-JS fallback. The client decodes selected details and can export
+the complete assessment without numeric rounding. Inert JSON escapes raw-text close
+tags; untrusted displayed values remain escaped. No external asset/decompressor or
+new compression dependency is required. The64MiB writer limit and pre-render-before-
+replacement behavior remain enforced; JSON/Markdown stay complete and ungrouped.
+
+The writer exposes an additive phase callback while its existing signature delegates
+to a no-op callback. The local session uses it for background progress; report-set
+publication remains individually atomic, not transactional. Browser acceptance,
+real large/non-Keycloak measurements and review evidence are tracked in the existing
+[production design](../product/MIGRATION-REVIEW-GROUPING.md).
+
+
+## Approved planning-month amendment (2026-11-20)
+
+The maintainer explicitly approved optional `migration_goal_month` in the existing
+unpublished format. A known value is an ASCII `YYYY-MM` string, years 0001–9999
+and months 01–12; unknown/omission retain ordinary scoped claim semantics and
+provenance. The value has month precision and no timezone/instant conversion.
+It is carried in assessment declaration evidence but is never read by policy
+branches, missing-input checks, urgency or readiness calculations, and does not
+replace the reference-backed `deadline`. IDs still bind the exact context digest.
+The UI calendar-duration estimate adds years/months to an explicit Japan-time
+anchor with end-of-month clamping and converts elapsed calendar days to exact
+seconds within the existing 315576000 bound. Only seconds are canonical; imported
+contexts remain read-only/lossless and are never reverse-converted to months.
+See the thirteen-item follow-up in [LOCAL-SCAN-UI](../product/LOCAL-SCAN-UI.md).

@@ -26,11 +26,32 @@ const root = fixture.root;
 const policy = () => structuredClone(fixture.policy);
 test.after(fixture.cleanup);
 
-test('current finite policy binds every actual source after reviewed source changes', () => {
-  for (const file of read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json').files) {
-    assert.equal(createHash('sha256').update(fs.readFileSync(path.join(repositoryRoot, file.path))).digest('hex'), file.sha256, file.path);
+test('current finite policy verifies matching bytes and retains observations after source drift', () => {
+  const current=read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json');
+  const after=JSON.parse(require('node:zlib').gunzipSync(fs.readFileSync(path.join(repositoryRoot,
+    'docs/quality/self-scan/html-report-20261118/AFTER-CHANGED-FILES.sarif.gz')))).runs.flatMap(run=>run.results);
+  const known=[...ledger.files.flatMap(file=>file.results),...after];
+  const empty={version:'2.1.0',runs:[{tool:{driver:{name:'pqc-scan'}},results:[]}]};
+  const checked=prepareCodeScanning(empty,current,repositoryRoot);
+  assert.equal(checked.audit.sourceChecks.length,current.files.length);
+  for (const file of current.files) {
+    const hash=createHash('sha256').update(fs.readFileSync(path.join(repositoryRoot,file.path))).digest('hex');
+    const expected=hash===file.sha256 ? 'verified' : 'changed';
+    assert.equal(checked.audit.sourceChecks.find(row=>row.path===file.path).status,expected,file.path);
+    if(expected==='changed') {
+      // Exercise a payload that WOULD qualify for this exact finite allowance
+      // if the whole-file hash were still valid. Never refresh that allowance.
+      const row=known.find(row=>row.locations[0].physicalLocation.artifactLocation.uri===file.path && file.results.some(r=>r.sha256===resultDigest(row)));
+      if(!row) continue; // Other archives' payloads have separate fixture tests.
+      const count=file.results.find(r=>r.sha256===resultDigest(row)).count;
+      const raw=structuredClone(empty);raw.runs[0].results=Array.from({length:count},()=>structuredClone(row));
+      const prepared=prepareCodeScanning(raw,current,repositoryRoot);
+      assert.deepEqual(prepared.sarif.runs[0].results,raw.runs[0].results,file.path);
+      assert.equal(prepared.audit.expectedResults,0,file.path);
+    }
   }
 });
+
 const input = () => ({ version: '2.1.0', runs: [{ tool: { driver: { name: 'pqc-scan' } },
   results: structuredClone([...ledger.files.flatMap(file => file.results), ...ledger.remaining]) }] });
 const filename = result => result.locations[0].physicalLocation.artifactLocation.uri;
@@ -171,22 +192,24 @@ test('historical product audit preserves its original source-bound review queue'
   } finally {historical.cleanup();}
 });
 
-test('current rebound references retain unchanged source lines and actual before/after result digests', () => {
+test('historical rebound references retain frozen source lines and actual before/after result digests', () => {
   const directory='docs/quality/self-scan/html-report-20261118/';
   const review=read(directory+'POLICY-REBIND.json');
   const zipped=name=>JSON.parse(require('node:zlib').gunzipSync(fs.readFileSync(path.join(repositoryRoot,directory+name))));
   const sources=zipped('REBIND-SOURCES.json.gz');
+  const frozen=JSON.parse(require('node:zlib').gunzipSync(fs.readFileSync(path.join(__dirname,'fixtures/rebound-after-sources-20261118.json.gz')))).files;
   const before=zipped('BEFORE-CHANGED-FILES.sarif.gz').runs.flatMap(run=>run.results);
   const after=zipped('AFTER-CHANGED-FILES.sarif.gz').runs.flatMap(run=>run.results);
   const current=read('docs/quality/self-scan/SELF-SCAN-EXPECTATIONS.json');
   assert.equal(before.length,243);assert.equal(after.length,243);assert.equal(review.rows.length,203);
   for(const [name,source] of Object.entries(sources)) {
     assert.equal(createHash('sha256').update(source.beforeText).digest('hex'),source.beforeSha256);
-    assert.equal(createHash('sha256').update(fs.readFileSync(path.join(repositoryRoot,name))).digest('hex'),source.afterSha256);
+    assert.equal(frozen[name].sha256,source.afterSha256);
+    assert.equal(createHash('sha256').update(frozen[name].text).digest('hex'),source.afterSha256);
   }
   for(const row of review.rows) {
     const original=sources[row.path].beforeText.split('\n')[row.oldLine-1];
-    const line=fs.readFileSync(path.join(repositoryRoot,row.path),'utf8').split('\n')[row.newLine-1];
+    const line=frozen[row.path].text.split('\n')[row.newLine-1];
     assert.equal(original,line);assert.equal(createHash('sha256').update(line).digest('hex'),row.sourceLineSha256);
     assert.equal(before.filter(result=>resultDigest(result)===row.oldResultSha256).length,row.count);
     assert.equal(after.filter(result=>resultDigest(result)===row.newResultSha256).length,row.count);

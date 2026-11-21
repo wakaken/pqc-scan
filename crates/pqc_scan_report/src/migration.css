@@ -52,3 +52,38 @@
 [data-theme="dark"] .migration-badge.plan { background:#3d311a;color:#eac178;border-color:#6b542a; }
 @media(max-width:850px) { .migration-layout { grid-template-columns:minmax(0,1fr); }.migration-index { position:static; }.migration-index a { display:inline-block;margin-right:16px; }.decision-card { padding:16px; }.decision-card header { flex-wrap:wrap; }.migration .top h1 { font-size:24px; }.migration .summary { display:grid;grid-template-columns:1fr 1fr; }.migration .metric { border-bottom:1px solid var(--border); }.reference-section { padding:14px; }.migration th,.migration td { padding:8px; } }
 @media print { .migration-index,.report-settings,.skip-link { display:none; }.migration-layout { display:block; }.migration details > * { display:block; }.decision-card { break-inside:avoid; }.migration footer { display:none; } }
+/* Only the selected decision and a bounded page of targets/claims enter the DOM. */
+.migration-controls { display:grid;gap:12px;margin-bottom:16px; }
+.migration-controls label { display:grid;gap:6px;font-size:12px;color:var(--muted); }
+.migration-controls input,.migration-controls select { width:100%;min-width:0; }
+.migration-index [data-migration-list] { max-height:440px;overflow:auto; }
+.migration-index [aria-current="true"] { color:var(--text);background:var(--bg);border-left:3px solid var(--info);padding-left:8px; }
+.migration-pager { display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;font-size:12px; }
+.migration-pager button { padding:7px 10px; }
+@media(max-width:850px) { .migration-index a { display:block;margin:0; }.migration-index [data-migration-list] { max-height:260px; } }
+
+/* Shared-data grouped response view. */
+.migration .decision-card{padding:22px;margin:16px 0}.group-heading{display:flex;gap:16px;justify-content:space-between;align-items:flex-start}.group-heading h2{margin:0;font-size:19px}.group-meta{color:var(--muted);font-size:13px}.migration .next-checks{margin-top:16px;padding-top:12px;border-top:1px solid var(--line,var(--border))}.migration .next-checks h3{font-size:15px}.migration .decision-card li{margin:6px 0}.migration .evidence-open{margin-top:12px}.migration button{font:inherit;cursor:pointer;padding:7px 12px;border:1px solid var(--line,var(--border));border-radius:6px;background:var(--panel,var(--card));color:var(--text)}.migration button:disabled{opacity:.45;cursor:not-allowed}.migration input,.migration select{font:inherit;background:var(--panel,var(--card));color:var(--text);border:1px solid var(--line,var(--border));border-radius:5px;padding:8px;max-width:100%}.migration-links{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:24px 0}.migration .path{overflow-wrap:anywhere;font-family:ui-monospace,monospace}.migration-dialog{background:var(--panel,var(--card));color:var(--text);border:1px solid var(--line,var(--border));border-radius:12px;width:min(1000px,calc(100% - 32px));max-height:85vh;padding:24px}.migration-dialog::backdrop{background:#0009}.dialog-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}.dialog-close{width:38px;height:38px;font-size:24px!important;padding:0!important;flex-shrink:0}.migration-dialog .table-scroll{max-height:50vh;overflow:auto}.migration-dialog td,.migration-dialog th{overflow-wrap:anywhere}.migration .target-pagination{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:18px 0}.migration .target-pagination>div{display:flex;gap:8px}.migration .assessment-scope{margin-top:25px}.migration-dialog section+section{border-top:1px solid var(--line,var(--border));margin-top:18px;padding-top:16px}@media(max-width:700px){.group-heading{flex-direction:column}.migration .decision-card{padding:16px}.migration-dialog{padding:16px}.migration .migration-controls{display:flex;flex-wrap:wrap;gap:12px}.migration-controls label{max-width:100%}}
+
+.migration .summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:18px;border:1px solid var(--border,var(--line));border-radius:8px}.migration .metric-value{font-size:28px}.migration .metric-label{font-size:12px;color:var(--muted)}.migration .migration-controls{display:flex;flex-wrap:wrap;gap:18px;margin:20px 0}.migration .migration-controls label{display:flex;flex-direction:column;gap:6px}.migration .migration-controls input{min-width:0}.migration .state{font-size:12px;white-space:normal}.migration .decision-card ul{padding-left:20px}@media(max-width:700px){.migration .summary{grid-template-columns:1fr}.migration .top{display:block}.migration .top time{overflow-wrap:anywhere}}
+
+/* Match local form controls and USWDS spacing in embedded and saved views. */
+.migration { font-size:16px; line-height:1.6; }
+.migration .decision-card,.migration .summary,.migration-index,.reference-section,.migration-dialog { border-radius:4px; box-shadow:none; }
+.migration button,.migration input,.migration select { min-height:44px; border-radius:4px; }
+.migration a { text-underline-offset:4px; }
+.migration :focus-visible { outline:3px solid var(--info,var(--blue)); outline-offset:4px; }
+.migration .migration-controls label,.migration .group-meta { font-size:14px; }
+
+/* Saved-evidence clarity: declarations and observations remain distinct. */
+.migration .summary { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.migration .top time { max-width: 28rem; text-align: right; overflow-wrap: anywhere; }
+.migration .declared-fact { margin: 8px 0; }
+.migration .missing-facts { border-left: 3px solid var(--border); padding-left: 16px; margin: 20px 0; }
+.migration .decision-reasoning { margin: 20px 0; }
+.migration .single-urgency { align-self: end; margin: 0; }
+@media(max-width: 700px) { .migration .summary { grid-template-columns: repeat(2,minmax(0,1fr)); }.migration .top time { text-align: left; } }
+
+.report-scope { overflow-wrap:anywhere; font-weight:600; margin-top:10px; }
+.planning-basis,.binding-limit { border-left:3px solid var(--border); padding:4px 14px; margin:16px 0; overflow-wrap:anywhere; }
+.binding-limit { border-left-color:var(--medium); }

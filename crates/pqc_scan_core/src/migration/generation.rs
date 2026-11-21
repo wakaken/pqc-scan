@@ -34,7 +34,16 @@ pub struct ClaimAnswer {
 pub struct ContextClaims(std::sync::Arc<ClaimSet>);
 impl ContextClaims {
     pub fn from_answers(answers: &[ClaimAnswer], provenance: Provenance) -> Result<Self> {
-        if answers.len() > 18 {
+        Self::from_answers_with_references(answers, provenance, &[])
+    }
+
+    /// Author existing sourced claims without bypassing reference validation.
+    pub fn from_answers_with_references(
+        answers: &[ClaimAnswer],
+        provenance: Provenance,
+        references: &[ContextReference],
+    ) -> Result<Self> {
+        if answers.len() > 20 {
             return Err(Error::ResourceLimit);
         }
         let mut set = serde_json::Map::new();
@@ -65,15 +74,21 @@ impl ContextClaims {
                 set.insert(answer.field.clone(), claim);
             }
         }
-        Self::from_bytes(&serde_json::to_vec(&set).map_err(|_| Error::InvalidInput)?)
+        Self::parse_with_references(
+            &serde_json::to_vec(&set).map_err(|_| Error::InvalidInput)?,
+            references,
+        )
     }
 
     pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
+        Self::parse_with_references(bytes, &[])
+    }
+    fn parse_with_references(bytes: &[u8], references: &[ContextReference]) -> Result<Self> {
         let value = bounded::parse(bytes, LIMIT)?;
         reject_null(&value)?;
         let mut claims: ClaimSet =
             serde_json::from_value(value).map_err(|_| Error::InvalidInput)?;
-        validate_set(&mut claims, &BTreeSet::new())?;
+        validate_set(&mut claims, &reference_ids(references)?)?;
         Ok(Self(std::sync::Arc::new(claims)))
     }
 }
@@ -107,6 +122,18 @@ pub fn generate_context(
     selections: &[ContextSelection],
     as_of: &str,
 ) -> Result<Vec<u8>> {
+    generate_context_with_references(evidence, organization_id, selections, as_of, &[])
+}
+
+/// Generate the existing context schema with explicitly supplied scoped references.
+pub fn generate_context_with_references(
+    evidence: &SavedEvidence,
+    organization_id: &str,
+    selections: &[ContextSelection],
+    as_of: &str,
+    references: &[ContextReference],
+) -> Result<Vec<u8>> {
+    reference_ids(references)?;
     if selections.len() > 4096 {
         return Err(Error::ResourceLimit);
     }
@@ -171,7 +198,7 @@ pub fn generate_context(
             .collect(),
         bindings: Vec::new(),
         organization_defaults: None,
-        references: Vec::new(),
+        references: references.to_vec(),
     };
     let mut value = serde_json::to_value(&input).map_err(|_| Error::InvalidInput)?;
     value["bindings"] = Value::Array(bindings);

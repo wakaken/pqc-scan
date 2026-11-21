@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-11-13",
+  "reviewed_at": "2026-11-20",
   "base_commit": "1bb45f891c3b39f5e784e9b10cff23a1ee94ab0c",
   "fixture_layer": "compiled_pattern_target_only",
   "license": "MIT; original synthetic fixtures and review text, references linked not copied",
@@ -12,7 +12,7 @@
     },
     {
       "path": "rules/default/crypto_api.yml",
-      "sha256": "a6c60fbde7e835d463f855167d67f893c2ed9c61645713c219305c8506aa8ec2"
+      "sha256": "ac1a6ee684390ea37ca6d783468016f8e896512737eeca6640e8ba735a583006"
     },
     {
       "path": "rules/default/jwt.yml",
@@ -6087,6 +6087,96 @@
         },
         {
           "target": "NOTMLKEM768",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "API_RUBY_OPENSSL_CIPHER",
+      "rule_snapshot": {
+        "id": "API_RUBY_OPENSSL_CIPHER",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.55,
+        "migration_hint": "Review the referenced cipher candidates and actual runtime configuration; this is not proof of active encryption or completed migration.",
+        "pattern": "OpenSSL::Cipher\\.new",
+        "scope": "ruby",
+        "description": "Ruby OpenSSL cipher construction with bounded same-class candidate references; runtime overrides remain unknown."
+      },
+      "purpose": "cipher_candidate_reference",
+      "algorithm_families": [
+        "AES"
+      ],
+      "quantum": "uncertain_api_reference_not_effective_configuration",
+      "classical": "runtime_configuration_not_assessed",
+      "reference_ids": [
+        "NIST-PQ-FAQ"
+      ],
+      "reference_application": "Primitive versus protocol distinctions only; detector semantics are verified by source-flow controls, not certified by this reference.",
+      "method_limits": [
+        "Bounded syntax and local provenance; no execution, external traversal or runtime negotiation.",
+        "Candidate references do not establish enabled configuration or complete source coverage."
+      ],
+      "known_gaps": [
+        "Dynamic overrides, generated methods, inheritance and unmodeled aliases remain unresolved."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "OpenSSL::Cipher.new",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "API_RUST_OPENSSL_TLS",
+      "rule_snapshot": {
+        "id": "API_RUST_OPENSSL_TLS",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.55,
+        "migration_hint": "Verify effective TLS versions, groups and peer support; construction alone does not establish negotiated algorithms or PQC readiness.",
+        "pattern": "(?:SslConnector|SslAcceptor|SslContext|SslMethod)::(?:builder|new|mozilla_intermediate|mozilla_modern|tls|tls_client|tls_server)",
+        "scope": "rust",
+        "description": "Rust OpenSSL TLS construction reference; negotiated algorithms remain unknown."
+      },
+      "purpose": "tls_construction_reference",
+      "algorithm_families": [
+        "TLS-unspecified"
+      ],
+      "quantum": "uncertain_api_reference_not_effective_configuration",
+      "classical": "runtime_configuration_not_assessed",
+      "reference_ids": [
+        "NIST-PQ-FAQ"
+      ],
+      "reference_application": "Primitive versus protocol distinctions only; detector semantics are verified by source-flow controls, not certified by this reference.",
+      "method_limits": [
+        "Bounded syntax and local provenance; no execution, external traversal or runtime negotiation.",
+        "Candidate references do not establish enabled configuration or complete source coverage."
+      ],
+      "known_gaps": [
+        "Dynamic overrides, generated methods, inheritance and unmodeled aliases remain unresolved."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "SslConnector::builder",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
           "desired_positive": false,
           "expected_pattern_match": false
         }

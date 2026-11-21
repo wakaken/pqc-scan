@@ -30,13 +30,18 @@ impl Directory {
                 .insert(rest, path);
         }
     }
-    fn render(&self, out: &mut String, id: &mut usize, lang: ReportLanguage) {
+    fn render(&self, out: &mut String, id: &mut usize, lang: ReportLanguage, prefix: &str) {
         out.push_str("<ul>");
         for (name, directory) in &self.directories {
             let current = *id;
             *id += 1;
-            write!(out, "<li><details id=\"tree-dir-{current}\"><summary>{CHEVRON}{FOLDER}<span class=\"tree-name\">{}</span><span class=\"tree-count\">{}</span></summary>", h(name), directory.count).unwrap();
-            directory.render(out, id, lang);
+            let path = if prefix.is_empty() {
+                name.clone()
+            } else {
+                format!("{prefix}/{name}")
+            };
+            write!(out, "<li><details id=\"tree-dir-{current}\"><summary title=\"{}\">{CHEVRON}{FOLDER}<span class=\"tree-name\">{}</span><span class=\"tree-count\">{}</span></summary>", h(&path), h(name), directory.count).unwrap();
+            directory.render(out, id, lang, &path);
             out.push_str("</details></li>");
         }
         for (name, (path, count)) in &self.files {
@@ -68,26 +73,20 @@ pub(crate) fn render(result: &ScanResult, lang: ReportLanguage) -> String {
         }
     }
     let mut out = String::new();
-    let (title, note, clear, empty) = if lang == ReportLanguage::Ja {
+    let (title, clear, empty) = if lang == ReportLanguage::Ja {
         (
             "ファイル",
-            "検出のあるファイル · 件数は全検出",
-            "すべてのファイル",
+            "すべての結果を表示",
             "検出のあるファイルはありません。",
         )
     } else {
-        (
-            "Files",
-            "Files with findings · counts include all findings",
-            "All files",
-            "No files with findings.",
-        )
+        ("Files", "Show all results", "No files with findings.")
     };
-    write!(out, "<section id=\"report-file-tree\" class=\"file-tree\" data-file-tree hidden aria-label=\"{title}\"><h2>{title}</h2><p>{note}</p><button type=\"button\" data-tree-clear>{clear}</button>").unwrap();
+    write!(out, "<details id=\"report-file-tree\" class=\"file-tree\" data-file-tree hidden open aria-label=\"{title}\"><summary><span class=\"panel-icon\">{FOLDER}</span>{title}</summary><div class=\"tree-body\"><a href=\"#findings\" data-tree-clear>{clear}</a>").unwrap();
     if root.count == 0 {
         write!(out, "<p>{empty}</p>").unwrap();
     }
-    root.render(&mut out, &mut 0, lang);
-    out.push_str("</section>");
+    root.render(&mut out, &mut 0, lang, "");
+    out.push_str("</div></details>");
     out
 }

@@ -529,7 +529,7 @@ fn gemspec_receivers_end_with_their_block_and_rebindings() {
 }
 
 #[test]
-fn built_in_source_facts_enforce_alias_depth_ast_depth_and_candidate_budgets() {
+fn built_in_source_facts_enforce_alias_scope_and_node_budgets() {
     for (count, expected) in [
         (8, pqc_scan_core::DetectorStatus::Complete),
         (9, pqc_scan_core::DetectorStatus::Truncated),
@@ -555,27 +555,39 @@ fn built_in_source_facts_enforce_alias_depth_ast_depth_and_candidate_budgets() {
             usize::from(count == 8)
         );
     }
-    for text in [
-        format!(
-            "{}generateKeyPairSync('ml-kem-768');{}",
-            "{".repeat(70),
-            "}".repeat(70)
-        ),
-        format!(
-            "{}generateKeyPairSync('ml-kem-768');",
-            "ordinary();\n".repeat(4097)
-        ),
+    for (depth, status, hits) in [
+        (70, pqc_scan_core::DetectorStatus::Complete, 1),
+        (140, pqc_scan_core::DetectorStatus::Truncated, 0),
     ] {
+        let text = format!(
+            "{}generateKeyPairSync('ml-kem-768');{}",
+            "{".repeat(depth),
+            "}".repeat(depth)
+        );
         let file = ScannableFile::from_bytes(PathBuf::from("use.js"), text.into_bytes());
-        let out = TreeSitterDetector::with_budget(pqc_scan_detectors::DetectorBudget {
-            max_ast_nodes: 4096,
-            ..Default::default()
-        })
-        .detect_detailed(&file, &rules())
-        .unwrap();
-        assert_eq!(out.status(), pqc_scan_core::DetectorStatus::Truncated);
-        assert!(!out.detections().iter().any(|d| d.rule_id == "PQC_NODE_API"));
+        let out = TreeSitterDetector.detect_detailed(&file, &rules()).unwrap();
+        assert_eq!(out.status(), status);
+        assert_eq!(
+            out.detections()
+                .iter()
+                .filter(|d| d.rule_id == "PQC_NODE_API")
+                .count(),
+            hits
+        );
     }
+    let text = format!(
+        "{}generateKeyPairSync('ml-kem-768');",
+        "ordinary();\n".repeat(4097)
+    );
+    let file = ScannableFile::from_bytes(PathBuf::from("use.js"), text.into_bytes());
+    let out = TreeSitterDetector::with_budget(pqc_scan_detectors::DetectorBudget {
+        max_ast_nodes: 4096,
+        ..Default::default()
+    })
+    .detect_detailed(&file, &rules())
+    .unwrap();
+    assert_eq!(out.status(), pqc_scan_core::DetectorStatus::Truncated);
+    assert!(!out.detections().iter().any(|d| d.rule_id == "PQC_NODE_API"));
 }
 
 #[test]

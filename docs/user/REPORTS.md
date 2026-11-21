@@ -8,6 +8,14 @@ After a scan, use the human report to investigate findings, then choose machine-
 
 Reports show findings, locations and suggested next steps. The inspection overview separately identifies incomplete checks and files needing follow-up.
 
+
+HTML and Markdown count equivalent findings once when file, line, column, algorithm evidence and issue agree. Details retain every matched rule, description, severity and check; actions are combined and the highest severity is displayed. Missing positions and empty or masked evidence are not merged. Summaries, charts and file-tree counts use this projection. Files inspected is a file count, not a count of cryptographic detections. JSON, SARIF, inventories and stable finding IDs retain original rule-level records, so their counts can differ from HTML and Markdown.
+
+Result-card headings show the finding description without a rule ID or a programming-language label. Expanded **Matched rules** details put the description first and retain each rule ID as supplementary information. Rule IDs in saved data, search and filters remain unchanged.
+
+
+The sidebar's icon-labelled **Search conditions** and **Files** sections collapse independently. **Show all results** clears every filter. **Show test code results** is checked by default; unchecking hides findings using the scanner's conservative test-path/filename conventions. Mixed inline tests remain visible. This changes only the displayed results, not saved data, global summary counts or tree counts. Rule explanation links open an embedded native dialog without network requests. Escape/Close restores focus and retains filters. Without JavaScript, links still open the companion `report.rules.html`; keep both files together.
+
 ## Contents
 
 - [Review findings](#review)
@@ -51,7 +59,7 @@ TLS guidance prefers TLS 1.3, retaining securely configured TLS 1.2 only for an
 identified interoperability need. PQC override settings receive setting-specific
 checks rather than an assertion of RSA usage.
 
-HTML includes Japanese and English views in one self-contained file. Use the language selector to switch descriptions, recommendations and labels while retaining filters, pagination and opened occurrences. `--lang` selects the initial HTML view and the Markdown language. JavaScript-free viewing retains that initial language. The rule selector includes short explanations; its help link and each expanded rule link to the companion `report.rules.html`, which explains the rules found in this scan. Keep both HTML files together for those local links. No remote translation service is used.
+HTML includes Japanese and English views in one self-contained file. Use the language selector to switch descriptions, recommendations and labels while retaining filters, pagination and opened occurrences. `--lang` selects the initial HTML view and the Markdown language. JavaScript-free viewing retains that initial language. The rule selector includes short explanations; its help link and each expanded rule open an embedded dialog explaining the rules found in this scan. The companion `report.rules.html` remains available as the no-JavaScript fallback. Keep both HTML files for that fallback. No remote translation service is used.
 
 The theme selector offers Light and Dark, defaulting to Light; an explicitly selected theme is saved locally when browser storage is available. Printing uses the light palette. HTML creation times use the viewer’s timezone (for example Asia/Tokyo/JST), while preserving the original instant in the time element. With JavaScript unavailable, the generation host’s local time and explicit offset remain visible. Markdown uses the generation host’s local time; machine timestamps remain unchanged. There is no IP or geolocation lookup.
 
@@ -327,8 +335,16 @@ scan settings. See the [v0.3.0 compatibility notes](../releases/v0.3.0.md).
 
 ### File tree and panel visibility
 
-The **Filters** and **File tree** buttons independently show or hide each panel without clearing conditions. The tree lists only files with findings, grouped by directory. The badge counts all finding occurrences (including informational ones), regardless of active filters; it is not a vulnerability count. Select a file to apply the exact file filter, combined with other conditions. **All files** clears only that file condition. Folder expansion, selected file, panel visibility and pagination carry across language changes. These navigation panels are hidden in print and when JavaScript is unavailable.
+The **Search conditions** and **Files** headings independently collapse or expand each section without clearing conditions. The tree lists only files with findings, grouped by directory. Names stay on one line; deep or long paths scroll horizontally inside the tree. Hover a folder or file to see its full path. The badge counts all finding occurrences (including informational ones), regardless of active filters; it is not a vulnerability count. Select a file to apply the exact file filter, combined with other conditions. **Show all results** clears every condition and restores test results. Folder expansion, selected file, panel visibility and pagination carry across language changes. These navigation panels are hidden in print and when JavaScript is unavailable.
 
 For `CERT_EXPIRY_2026_OR_BEFORE`, the human report identifies expiry before January 1, 2027 UTC and explains that the cutoff alone does not establish expiry at scan time. Check the parsed expiry and `CERT_EXPIRED` findings. The rule ID, detector predicate and machine descriptions are unchanged.
 
 Folder rows use blue folder icons, file rows use outlined document icons, and the selected file has a leading blue marker. Icons are inline SVG and decorative; file names and counts remain accessible without them.
+
+Migration HTML can carry a bounded non-secret report label. It separates detector record counts from distinct recorded locations, names observation methods, explains known binding limitations, and shows applied active deadline/lead-time pairs in Japan time and human durations. Mixed pairs retain their own record counts; exact machine assessment data is unchanged. See local migration input for scoped organization/contract deadline authoring.
+
+An input with zero assessment targets has a dedicated empty-state explanation: it does not establish absence of cryptography, safety or no required action. This is distinct from a search/filter returning no matching work items.
+
+Reports generated with test exclusion or `.pqcignore` list those conditions in the existing inspection scope. Mixed Rust files are still analyzed; omitting syntax-proven test-only findings does not necessarily reduce file counts, and source context may show adjacent tests. See [scan exclusion settings](SCANNING.md#exclude-test-code).
+
+Known unfinished-inspection causes are grouped separately, with diagnostic record counts, distinct file counts, example paths and next checks. The existing diagnostics JSON message retains the detail. Algorithm references in recognised human error text appear under reference information rather than migration candidates; expand the location to inspect the source.

@@ -6,6 +6,29 @@ use pqc_scan_rules::RuleSet;
 use serde_json::Value;
 use std::{path::PathBuf, sync::Arc};
 struct Fixture(PathBuf);
+
+#[test]
+fn versionless_cargo_package_inventory_has_explicit_completeness() {
+    let f = Fixture::new("cargo-legacy");
+    let result = f.inspect(
+        "Cargo.lock",
+        "[[package]]\nname = 'autocfg'\nversion = '1.5.0'\n",
+    );
+    assert_eq!(result.status(), DetectorStatus::Complete);
+    assert_eq!(result.detections().len(), 1);
+    assert_eq!(
+        result.detections()[0].evidence.metadata["dep_name"],
+        "autocfg"
+    );
+    // Unknown future versions and the historical root table stay unresolved.
+    for text in [
+        "version = 99\n[[package]]\nname = 'ring'\nversion = '1.2.3'\n",
+        "[root]\nname = 'ring'\nversion = '1.2.3'\n[[package]]\nname = 'autocfg'\nversion = '1.5.0'\n",
+        "unrecognized = true\n",
+    ] {
+        assert_ne!(f.inspect("Cargo.lock", text).status(), DetectorStatus::Complete);
+    }
+}
 impl Fixture {
     fn new(tag: &str) -> Self {
         let p = std::env::temp_dir().join(format!("pqc027-{}-{tag}", std::process::id()));

@@ -5,6 +5,7 @@ use super::{
 use crate::{
     assessment::AlgorithmAssessment,
     inventory::{CryptoAsset, NativeScan},
+    observation::Observation,
 };
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
@@ -91,6 +92,7 @@ pub(super) fn project(value: Value, hash: String) -> Result<SavedEvidence> {
             *occurrence_counts.entry(key.as_str()).or_insert(0usize) += 1;
         }
     }
+    let local_sources = distinguishable_sources(&native, &index, &occurrence_counts);
     let mut targets = vec![];
     for observation in &native.observations {
         let observation_facts = ObservationFacts {
@@ -120,14 +122,14 @@ pub(super) fn project(value: Value, hash: String) -> Result<SavedEvidence> {
             .occurrence_key
             .as_deref()
             .is_none_or(|key| occurrence_counts[key] == 1)
-            && matches!(
-                observation.identity_confidence.as_str(),
-                "weak_structural_anchor" | "run_local_only"
-            )
-            && !observation
-                .asset_ids
-                .iter()
-                .any(|id| index[id.as_str()].attributes["ambiguous"] == true);
+            && (local_sources.contains(observation.id.as_str())
+                || matches!(
+                    observation.identity_confidence.as_str(),
+                    "weak_structural_anchor" | "run_local_only"
+                ) && !observation
+                    .asset_ids
+                    .iter()
+                    .any(|id| index[id.as_str()].attributes["ambiguous"] == true));
         let path = observation
             .target
             .path
@@ -209,7 +211,10 @@ pub(super) fn project(value: Value, hash: String) -> Result<SavedEvidence> {
                     None,
                     bindable,
                 );
-                if algorithm.is_none() {
+                if algorithm.is_none()
+                    || local_sources.contains(observation.id.as_str())
+                        && t.technical.algorithm.identifier == "unknown"
+                {
                     t.limitations.push("unresolved_role".into());
                     t.bindable = false;
                 }
@@ -293,6 +298,183 @@ fn tolerate_extensions(schema: &mut Value) {
         }
         _ => {}
     }
+}
+
+#[derive(Default)]
+struct SourceGroup<'a> {
+    count: usize,
+    invalid: bool,
+    members: Vec<&'a str>,
+    spans: BTreeSet<(usize, usize)>,
+    locations: BTreeSet<(usize, usize)>,
+}
+
+// Native weak anchors deliberately remain ambiguous across scans. This exception
+// establishes only selection of exact records inside this immutable input, never
+// cross-scan correspondence, active use or an algorithm inferred from a position.
+fn distinguishable_sources<'a>(
+    native: &'a NativeScan,
+    index: &BTreeMap<&str, &'a CryptoAsset>,
+    occurrence_counts: &BTreeMap<&str, usize>,
+) -> BTreeSet<&'a str> {
+    let mut owners = BTreeMap::new();
+    for observation in &native.observations {
+        for id in &observation.asset_ids {
+            if index[id.as_str()].kind == "usage" {
+                *owners.entry(id.as_str()).or_insert(0usize) += 1;
+            }
+        }
+    }
+    let mut groups: BTreeMap<(&str, &str), SourceGroup<'_>> = BTreeMap::new();
+    let mut ungrouped_paths = BTreeSet::new();
+    let mut unlocated_anchors = BTreeSet::new();
+    let mut unknown_group = false;
+    for observation in &native.observations {
+        let usages: Vec<_> = observation
+            .asset_ids
+            .iter()
+            .map(|id| index[id.as_str()])
+            .filter(|a| a.kind == "usage")
+            .collect();
+        if observation.identity_confidence == "ambiguous_duplicate_anchor"
+            && observation.target.path.is_none()
+            && usages
+                .iter()
+                .all(|u| u.attributes["path"].as_str().is_none())
+        {
+            let anchors: Vec<_> = usages
+                .iter()
+                .filter_map(|u| u.attributes["anchor"].as_str())
+                .collect();
+            // A pathless member can belong to any file with this anchor. If no
+            // group key survives, no source exception can be established safely.
+            unknown_group |= anchors.is_empty();
+            unlocated_anchors.extend(anchors);
+        }
+        if observation.identity_confidence == "ambiguous_duplicate_anchor"
+            && (usages.len() != 1
+                || usages.iter().any(|u| {
+                    u.attributes["path"].as_str() != observation.target.path.as_deref()
+                        || u.attributes["anchor"]
+                            .as_str()
+                            .is_none_or(|a| !crate::assessment::valid_id(a, "anchor"))
+                }))
+        {
+            // Do not drop an ungrouped neighbor from the file's uniqueness checks.
+            ungrouped_paths.extend(observation.target.path.as_deref());
+            ungrouped_paths.extend(usages.iter().filter_map(|u| u.attributes["path"].as_str()));
+        }
+        for usage in &usages {
+            let (Some(path), Some(anchor)) = (
+                usage.attributes["path"].as_str(),
+                usage.attributes["anchor"].as_str(),
+            ) else {
+                continue;
+            };
+            // Count all members before checking eligibility. A malformed or
+            // unlocated neighbor must not make a collision appear unique.
+            let group = groups.entry((path, anchor)).or_default();
+            group.count += 1;
+            if usages.len() != 1
+                || owners[usage.id.as_str()] != 1
+                || observation
+                    .occurrence_key
+                    .as_deref()
+                    .is_some_and(|key| occurrence_counts[key] != 1)
+                || !crate::assessment::valid_id(anchor, "anchor")
+                || !source_usage_consistent(observation, usage, index)
+            {
+                group.invalid = true;
+                continue;
+            }
+            let t = &observation.target;
+            let (Some(start), Some(end), Some(line), Some(column)) =
+                (t.byte_start, t.byte_end, t.line, t.column)
+            else {
+                group.invalid = true;
+                continue;
+            };
+            if start >= end
+                || line == 0
+                || column == 0
+                || !matches!(
+                    t.column_kind.as_str(),
+                    "legacy_mixed" | "unicode_code_points"
+                )
+                || !group.spans.insert((start, end))
+                || !group.locations.insert((line, column))
+            {
+                group.invalid = true;
+                continue;
+            }
+            group.members.push(observation.id.as_str());
+        }
+    }
+    groups
+        .into_iter()
+        .filter(|((path, anchor), g)| {
+            !unknown_group
+                && !unlocated_anchors.contains(anchor)
+                && !ungrouped_paths.contains(path)
+                && !g.invalid
+                && g.count > 1
+                && g.members.len() == g.count
+                && g.spans
+                    .iter()
+                    .zip(g.spans.iter().skip(1))
+                    .all(|(a, b)| a.1 <= b.0)
+        })
+        .flat_map(|(_, g)| g.members)
+        .collect()
+}
+
+fn source_usage_consistent(
+    observation: &Observation,
+    usage: &CryptoAsset,
+    index: &BTreeMap<&str, &CryptoAsset>,
+) -> bool {
+    let expected_assurance = match observation.method.as_str() {
+        "ast_pattern" => "syntactic",
+        "lexical_match" | "configuration_match" => "lexical",
+        _ => return false,
+    };
+    let refs: BTreeSet<_> = observation
+        .asset_ids
+        .iter()
+        .filter(|id| id.as_str() != usage.id)
+        .map(String::as_str)
+        .collect();
+    observation.identity_confidence == "ambiguous_duplicate_anchor"
+        && observation.assurance == expected_assurance
+        && matches!(observation.usage.as_str(), "referenced" | "configured")
+        && observation
+            .target
+            .path
+            .as_deref()
+            .is_some_and(|p| !p.is_empty() && usage.attributes["path"] == p)
+        && observation.target.object_index.is_none()
+        && usage.attributes["method"] == observation.method
+        && usage.attributes["ambiguous"] == true
+        && usage.identity_basis
+            == if observation.occurrence_key.is_some() {
+                "scoped_weak_source_anchor"
+            } else {
+                "run_local_only"
+            }
+        && refs
+            .iter()
+            .all(|id| index[id].attributes["ambiguous"] != true)
+        && usage.relations.len() == refs.len()
+        && usage
+            .relations
+            .iter()
+            .all(|r| r.relationship == "references")
+        && usage
+            .relations
+            .iter()
+            .map(|r| r.target.as_str())
+            .collect::<BTreeSet<_>>()
+            == refs
 }
 
 fn related<'a>(

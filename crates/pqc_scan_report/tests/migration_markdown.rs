@@ -178,7 +178,7 @@ fn markdown_locations_neutralize_html_links_images_controls_and_raw_metadata() {
         let html = String::from_utf8(migration_html_bytes(&r, l).unwrap()).unwrap();
         assert!(!html.contains("<script>alert(1)"));
         assert!(!html.contains("<img"));
-        assert!(html.contains("&lt;script&gt;"));
+        assert!(html.contains("\\u003cscript>"));
         assert!(!html.contains("SECRET_CANARY_070"));
     }
 }
@@ -242,11 +242,11 @@ fn tls_key_establishment_and_certificate_authentication_and_failed_collection_st
 }
 
 #[test]
-fn html_limit_rejects_without_replacing_existing_json_markdown_or_html() {
+fn report_byte_limit_rejects_without_replacing_existing_json_markdown_or_html() {
     let mut v = fixture::inventory("RSA");
     let observation = v["observations"][0].clone();
     v["observations"] = Value::Array(
-        (0..16000)
+        (0..28000)
             .map(|i| {
                 let mut o = observation.clone();
                 o["id"] = pqc_scan_core::identity::native_id(
@@ -263,10 +263,9 @@ fn html_limit_rejects_without_replacing_existing_json_markdown_or_html() {
     );
     let evidence = fixture::ingest(&v, InputFormat::InventoryV1).unwrap();
     let r = evaluate(&evidence, None, ctx::AS_OF).unwrap();
-    // Both existing representations fit; the new bilingual HTML must enforce
-    // its own byte boundary before any member of the report set is replaced.
-    assert!(pqc_scan_report::migration_json_bytes(&r).is_ok());
-    assert!(migration_markdown_bytes(&r, ReportLanguage::En).is_ok());
+    // Structural sharing now makes the old16k HTML-only overflow fixture fit.
+    // A genuinely oversized report still fails before replacing any artifact.
+    assert!(pqc_scan_report::migration_json_bytes(&r).is_err());
     let path = std::env::temp_dir().join(format!("pqc-html-limit-{}", std::process::id()));
     std::fs::create_dir_all(&path).unwrap();
     for name in [
@@ -283,7 +282,7 @@ fn html_limit_rejects_without_replacing_existing_json_markdown_or_html() {
         &path,
         ReportLanguage::En,
     );
-    assert!(result.is_err(), "oversized HTML accepted");
+    assert!(result.is_err(), "oversized report accepted");
     assert!(result.unwrap_err().to_string().contains("resource_limit"));
     for name in [
         "migration.assessment.v1.json",
@@ -306,7 +305,22 @@ fn symmetric_hash_and_failed_runtime_states_use_plain_bilingual_terms() {
             let md = text(&r, language);
             let html = String::from_utf8(migration_html_bytes(&r, language).unwrap()).unwrap();
             let active = html.split("<template").next().unwrap();
-            for view in [md.as_str(), active] {
+            let data = embedded(&html, "migration-shared-data");
+            let label = data["words"]["generic_search"][if language == ReportLanguage::Ja {
+                "ja"
+            } else {
+                "en"
+            }]
+            .as_str()
+            .unwrap();
+            assert!(label.contains(if language == ReportLanguage::Ja {
+                "汎用の量子探索による影響"
+            } else {
+                "Generic quantum search effects"
+            }));
+            assert!(!active.contains("generic_search"));
+            {
+                let view = md.as_str();
                 assert!(view.contains(if language == ReportLanguage::Ja {
                     "汎用の量子探索による影響"
                 } else {
@@ -322,7 +336,22 @@ fn symmetric_hash_and_failed_runtime_states_use_plain_bilingual_terms() {
         let md = text(&r, language);
         let html = String::from_utf8(migration_html_bytes(&r, language).unwrap()).unwrap();
         let active = html.split("<template").next().unwrap();
-        for view in [md.as_str(), active] {
+        let data = embedded(&html, "migration-shared-data");
+        let label = data["words"]["unverified_or_incomplete"][if language == ReportLanguage::Ja {
+            "ja"
+        } else {
+            "en"
+        }]
+        .as_str()
+        .unwrap();
+        assert!(label.contains(if language == ReportLanguage::Ja {
+            "検証未完了、または収集情報が不完全"
+        } else {
+            "Verification not completed or collection incomplete"
+        }));
+        assert!(!active.contains("unverified_or_incomplete"));
+        {
+            let view = md.as_str();
             assert!(view.contains(if language == ReportLanguage::Ja {
                 "検証未完了、または収集情報が不完全"
             } else {
@@ -333,4 +362,226 @@ fn symmetric_hash_and_failed_runtime_states_use_plain_bilingual_terms() {
             assert!(!view.contains("Negotiated key establishment"));
         }
     }
+}
+
+fn embedded(html: &str, id: &str) -> Value {
+    let start = format!("<script type=\"application/json\" id=\"{id}\">");
+    let body = html
+        .split_once(&start)
+        .unwrap()
+        .1
+        .split_once("</script>")
+        .unwrap()
+        .0;
+    serde_json::from_str(body).unwrap()
+}
+#[test]
+fn large_html_defers_every_target_and_claim_but_bounds_initial_elements() {
+    let mut input = fixture::inventory("RSA");
+    let observation = input["observations"][0].clone();
+    input["observations"] = (0..45)
+        .map(|i| {
+            let mut o = observation.clone();
+            o["id"] =
+                pqc_scan_core::identity::native_id("observation", &[&format!("paged-{i}")]).into();
+            o["occurrence_key"] =
+                pqc_scan_core::identity::native_id("occurrence", &[&format!("paged-{i}")]).into();
+            o["target"]["path"] = format!("src/target-{i}.java").into();
+            o
+        })
+        .collect();
+    let e = fixture::ingest(&input, InputFormat::InventoryV1).unwrap();
+    let mut context = ctx::context(&e, ctx::critical_signing());
+    context["bindings"] = e
+        .targets()
+        .iter()
+        .map(|t| json!({"target_id":t.id,"system_id":"system-a","claims":ctx::critical_signing()}))
+        .collect();
+    let context = ctx::parse(&context);
+    let r = evaluate(&e, Some(&context), ctx::AS_OF).unwrap();
+    assert_eq!(r.decisions().len(), 45);
+    assert!(r.claims().len() > 20);
+    for language in [ReportLanguage::En, ReportLanguage::Ja] {
+        let html = String::from_utf8(migration_html_bytes(&r, language).unwrap()).unwrap();
+        let initial = html.split("<template").next().unwrap();
+        assert_eq!(initial.matches("<article class=\"decision-card").count(), 1);
+        assert_eq!(initial.matches("<a href=\"#target-").count(), 0);
+        assert_eq!(initial.matches("<tr id=\"claim-").count(), 0);
+        // Member-specific quantum/assurance facts must not masquerade as group facts.
+        assert!(!initial.contains("Quantum exposure"));
+        assert!(!initial.contains("解析した属性"));
+        let payload = embedded(&html, "migration-shared-data");
+        assert_eq!(
+            restore_archive(
+                &payload["archive"],
+                payload["archive"]["root"].as_u64().unwrap() as usize
+            ),
+            serde_json::to_value(&r).unwrap()
+        );
+        let groups = payload["groups"].as_array().unwrap();
+        assert_eq!(groups.len(), 1);
+        let mut members = groups
+            .iter()
+            .flat_map(|g| {
+                g["members"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|v| v.as_u64().unwrap())
+            })
+            .collect::<Vec<_>>();
+        members.sort();
+        assert_eq!(members, (0..45).collect::<Vec<_>>());
+        assert!(!html.contains("migration-cards-"));
+        assert!(!html.contains("migration-claims-"));
+    }
+}
+
+fn restore_archive(archive: &Value, reference: usize) -> Value {
+    let node = &archive["nodes"][reference];
+    match node[0].as_str().unwrap() {
+        "o" => Value::Object(
+            node[1]
+                .as_array()
+                .unwrap()
+                .chunks(2)
+                .map(|pair| {
+                    (
+                        restore_archive(archive, pair[0].as_u64().unwrap() as usize)
+                            .as_str()
+                            .unwrap()
+                            .to_owned(),
+                        restore_archive(archive, pair[1].as_u64().unwrap() as usize),
+                    )
+                })
+                .collect(),
+        ),
+        "a" => Value::Array(
+            node[1]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|reference| restore_archive(archive, reference.as_u64().unwrap() as usize))
+                .collect(),
+        ),
+        "n" => serde_json::from_str(node[1].as_str().unwrap()).unwrap(),
+        "z" => Value::Null,
+        _ => node[1].clone(),
+    }
+}
+#[test]
+fn repeated_observations_share_one_work_item_but_different_systems_do_not() {
+    let mut input = fixture::inventory("RSA");
+    let original = input["observations"][0].clone();
+    input["observations"] = (0..2)
+        .map(|i| {
+            let mut o = original.clone();
+            o["id"] =
+                pqc_scan_core::identity::native_id("observation", &[&format!("distinct-{i}")])
+                    .into();
+            o["occurrence_key"] =
+                pqc_scan_core::identity::native_id("occurrence", &[&format!("distinct-{i}")])
+                    .into();
+            o["target"]["path"] = format!("different-product/src/use-{i}.java").into();
+            o
+        })
+        .collect();
+    let evidence = fixture::ingest(&input, InputFormat::InventoryV1).unwrap();
+    let mut context = ctx::context(&evidence, ctx::critical_signing());
+    context["systems"] = json!([{"id":"system-a"},{"id":"system-b"}]);
+    context["bindings"]=evidence.targets().iter().enumerate().map(|(i,t)|json!({"target_id":t.id,"system_id":if i==0 {"system-a"} else {"system-b"},"claims":ctx::critical_signing()})).collect();
+    let context = ctx::parse(&context);
+    let r = evaluate(&evidence, Some(&context), ctx::AS_OF).unwrap();
+    let html = String::from_utf8(migration_html_bytes(&r, ReportLanguage::Ja).unwrap()).unwrap();
+    let data = embedded(&html, "migration-shared-data");
+    assert_eq!(data["groups"].as_array().unwrap().len(), 2);
+    assert_eq!(
+        restore_archive(
+            &data["archive"],
+            data["archive"]["root"].as_u64().unwrap() as usize
+        ),
+        serde_json::to_value(r).unwrap()
+    );
+}
+#[test]
+fn empty_and_blocked_scopes_keep_their_actual_work_item_counts() {
+    let mut empty = fixture::inventory("RSA");
+    empty["assets"] = json!([]);
+    empty["observations"] = json!([]);
+    let e = fixture::ingest(&empty, InputFormat::InventoryV1).unwrap();
+    let r = evaluate(&e, None, ctx::AS_OF).unwrap();
+    let html = String::from_utf8(migration_html_bytes(&r, ReportLanguage::En).unwrap()).unwrap();
+    assert_eq!(
+        embedded(&html, "migration-shared-data")["groups"],
+        json!([])
+    );
+    let mut blocked = ctx::critical_signing();
+    blocked["support"] = ctx::support();
+    blocked["support"]["peer"] = ctx::claim(json!(false));
+    let r = report(fixture::inventory("RSA"), Some(blocked));
+    let html = String::from_utf8(migration_html_bytes(&r, ReportLanguage::Ja).unwrap()).unwrap();
+    let data = embedded(&html, "migration-shared-data");
+    assert_eq!(data["groups"].as_array().unwrap().len(), 1);
+    let restored = restore_archive(
+        &data["archive"],
+        data["archive"]["root"].as_u64().unwrap() as usize,
+    );
+    assert_eq!(restored["decisions"][0]["readiness"], "blocked");
+    assert!(
+        !restored["decisions"][0]["action"]["blocking_prerequisites"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+}
+
+#[test]
+fn writer_progress_tracks_real_phases_and_never_finishes_on_output_failure() {
+    use pqc_scan_report::MigrationReportProgress as P;
+    let e = fixture::ingest(&fixture::inventory("RSA"), InputFormat::InventoryV1).unwrap();
+    let r = evaluate(&e, None, ctx::AS_OF).unwrap();
+    let dir = std::env::temp_dir().join(format!("pqc-grouped-progress-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let mut phases = vec![];
+    let paths = pqc_scan_report::write_migration_assessment_reports_with_progress(
+        &r,
+        &e,
+        None,
+        &dir,
+        ReportLanguage::Ja,
+        |p| phases.push(p),
+    )
+    .unwrap();
+    assert_eq!(paths.len(), 3);
+    assert!(paths.iter().all(|p| p.is_file()));
+    assert!(matches!(phases[0], P::Validating));
+    assert!(matches!(
+        phases.last(),
+        Some(P::Writing {
+            completed: 3,
+            total: 3
+        })
+    ));
+    assert!(phases.iter().any(|p| matches!(p, P::Json)));
+    assert!(phases.iter().any(|p| matches!(p, P::Markdown)));
+    assert!(phases.iter().any(|p| matches!(p, P::Html)));
+    let blocked = dir.join("file-not-directory");
+    std::fs::write(&blocked, b"KEEP").unwrap();
+    phases.clear();
+    assert!(
+        pqc_scan_report::write_migration_assessment_reports_with_progress(
+            &r,
+            &e,
+            None,
+            &blocked,
+            ReportLanguage::Ja,
+            |p| phases.push(p)
+        )
+        .is_err()
+    );
+    assert!(!phases
+        .iter()
+        .any(|p| matches!(p, P::Writing { completed: 3, .. })));
+    assert_eq!(std::fs::read(blocked).unwrap(), b"KEEP");
+    std::fs::remove_dir_all(dir).unwrap();
 }

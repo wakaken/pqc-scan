@@ -36,7 +36,7 @@ fn crypto_module(ctx: &Context<'_, '_>, node: Node<'_>) -> bool {
 }
 fn namespace(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> bool {
     if depth > MAX_DEPTH {
-        ctx.truncated.set(true);
+        ctx.limit("source_alias_depth", MAX_DEPTH, MAX_DEPTH);
         return false;
     }
     let node = unwrap_expression(node);
@@ -59,7 +59,7 @@ fn namespace(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> bool {
 }
 fn canonical(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> Option<String> {
     if depth > MAX_DEPTH {
-        ctx.truncated.set(true);
+        ctx.limit("source_alias_depth", MAX_DEPTH, MAX_DEPTH);
         return None;
     }
     let node = unwrap_expression(node);
@@ -102,7 +102,7 @@ fn canonical(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> Option<Stri
 }
 fn scalar_values(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> Option<Vec<String>> {
     if depth > MAX_DEPTH {
-        ctx.truncated.set(true);
+        ctx.limit("source_alias_depth", MAX_DEPTH, MAX_DEPTH);
         return None;
     }
     let node = unwrap_expression(node);
@@ -139,7 +139,7 @@ fn scalar_values(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> Option<
         }
         let items = array_elements(values)?;
         if items.len() > 32 {
-            ctx.truncated.set(true);
+            ctx.limit("literal_array_items", 32, 0);
             return None;
         }
         let projection = b
@@ -202,7 +202,7 @@ fn arguments(node: Node<'_>) -> Vec<Node<'_>> {
 }
 fn generated_rsa(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> bool {
     if depth > MAX_DEPTH {
-        ctx.truncated.set(true);
+        ctx.limit("source_alias_depth", MAX_DEPTH, MAX_DEPTH);
         return false;
     }
     let node = unwrap_expression(node);
@@ -223,7 +223,7 @@ fn generated_rsa(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> bool {
 }
 fn rsa_key(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> bool {
     if depth > MAX_DEPTH {
-        ctx.truncated.set(true);
+        ctx.limit("source_alias_depth", MAX_DEPTH, MAX_DEPTH);
         return false;
     }
     let node = unwrap_expression(node);
@@ -271,7 +271,7 @@ fn signer<'a>(
     depth: usize,
 ) -> Option<Node<'a>> {
     if depth > MAX_DEPTH {
-        ctx.truncated.set(true);
+        ctx.limit("source_alias_depth", MAX_DEPTH, MAX_DEPTH);
         return None;
     }
     let b = ctx.lookup(node, ctx.source(node))?;
@@ -303,10 +303,11 @@ pub(super) fn inspect<'a>(
         let scope = ctx.scope(*node);
         match node.kind() {
             "import_statement" => {
-                let trusted = node
+                let source = node
                     .child_by_field_name("source")
-                    .and_then(|n| literal(ctx.text, n))
-                    .is_some_and(|s| matches!(s, "crypto" | "node:crypto"));
+                    .and_then(|n| literal(ctx.text, n));
+                let trusted = source.is_some_and(|s| matches!(s, "crypto" | "node:crypto"));
+                let jwt = source == Some("jsonwebtoken");
                 let first = nodes.partition_point(|n| n.start_byte() < node.start_byte());
                 let last = nodes.partition_point(|n| n.start_byte() < node.end_byte());
                 for n in nodes[first..last]
@@ -324,7 +325,11 @@ pub(super) fn inspect<'a>(
                                 ctx.source(alias),
                                 None,
                                 None,
-                                trusted.then(|| format!("api:{}", ctx.source(name))),
+                                if jwt {
+                                    Some(format!("jwt:{}", ctx.source(name)))
+                                } else {
+                                    trusted.then(|| format!("api:{}", ctx.source(name)))
+                                },
                                 alias.id(),
                             );
                         }
@@ -335,7 +340,11 @@ pub(super) fn inspect<'a>(
                                     ctx.source(name),
                                     None,
                                     None,
-                                    trusted.then(|| "@crypto".into()),
+                                    if jwt {
+                                        Some("@jsonwebtoken".into())
+                                    } else {
+                                        trusted.then(|| "@crypto".into())
+                                    },
                                     name.id(),
                                 );
                             }
@@ -350,7 +359,11 @@ pub(super) fn inspect<'a>(
                                     ctx.source(name),
                                     None,
                                     None,
-                                    trusted.then(|| "@crypto".into()),
+                                    if jwt {
+                                        Some("@jsonwebtoken".into())
+                                    } else {
+                                        trusted.then(|| "@crypto".into())
+                                    },
                                     name.id(),
                                 );
                             }

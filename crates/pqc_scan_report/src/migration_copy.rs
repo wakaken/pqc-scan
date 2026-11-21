@@ -81,6 +81,8 @@ impl Labels {
             "unknown_primitive" => ("The primitive is unidentified.", "暗号方式を特定できていません。"),
             "unknown_parameter_encoding" => ("The exact parameter encoding is unknown.", "正確なパラメーターの符号化は不明です。"),
             "unknown_binding" => ("The business-system binding is unknown.", "業務システムとの対応付けは不明です。"),
+            "unverified_combiner_no_resistance_inference" => ("Combiner unverified; no combined resistance conclusion", "結合処理は未検証。組み合わせ全体の耐性は未判定"),
+            "standard_specified_implementation_unverified" => ("Combiner specified by the standard; implementation unverified", "標準で結合方法を規定。実装は未検証"),
             "combiner_implementation_unverified" => ("The hybrid combiner implementation has not been verified.", "ハイブリッド方式の結合処理の実装は未検証です。"),
             "stale_claim" => ("A used claim is not currently active; refresh it.", "判断に関係する申告が現在有効ではありません。更新が必要です。"),
             "purpose_mismatch" => ("The declared purpose conflicts with the known primitive purpose.", "申告された用途が、既知の暗号方式の用途と矛盾しています。"),
@@ -90,6 +92,10 @@ impl Labels {
             "validate_implementation_and_interoperability_separately" => ("Validate the implementation and interoperability separately.", "実装と相互運用性を別途検証してください。"),
             "verify_exact_parameters_and_protocol_encoding" => ("Verify exact parameters and protocol encoding before rollout.", "展開前に正確なパラメーターとプロトコルの符号化を確認してください。"),
             "test_runtime_provider_peer_and_rollout" => ("Test runtime, provider, peers and rollout.", "実行環境、プロバイダー、接続相手、展開手順を検証してください。"),
+            "explicit_parameter_selection_required" => ("Choose an exact parameter set", "使用する設定を選ぶ必要があります"),
+            "candidate_primitive_integration_unverified" => ("Candidate primitive; integration unverified", "方式の候補。組込みは未検証"),
+            "migration_goal_month" => ("Migration goal month (planning only)", "移行の目標年月（計画情報）"),
+            "migration_target" => ("Declared migration algorithm / configuration", "検討する方式・設定の申告"),
             "runtime" | "support.runtime" => ("Runtime support", "実行環境の対応"),
             "provider" | "support.provider" => ("Provider support", "プロバイダーの対応"),
             "parameters" | "support.parameters" => ("Exact parameter support", "正確なパラメーターへの対応"),
@@ -233,6 +239,14 @@ impl Labels {
         }
         if let Some(v) = value.as_u64() {
             return format!("{v} {}", self.pick("seconds", "秒"));
+        }
+        if c.field == "migration_target" {
+            return format!(
+                "{} / {} · {}",
+                value["algorithm"].as_str().unwrap_or("unknown"),
+                value["parameters"].as_str().unwrap_or("unknown"),
+                self.token(value["use_case"].as_str().unwrap_or("unknown"))
+            );
         }
         if c.field == "deadline" {
             if value["kind"] == "none" {

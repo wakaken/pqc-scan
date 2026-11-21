@@ -20,6 +20,9 @@ pub(crate) struct AssessArgs {
     /// Initial HTML and Markdown language: en or ja.
     #[arg(long, default_value = "en")]
     lang: String,
+    /// Optional non-secret display label for the HTML report (up to 256 bytes).
+    #[arg(long)]
+    report_label: Option<String>,
 }
 pub(crate) fn run(args: AssessArgs, stdout: &mut impl Write) -> anyhow::Result<()> {
     let language = match args.lang.as_str() {
@@ -41,12 +44,14 @@ pub(crate) fn run(args: AssessArgs, stdout: &mut impl Write) -> anyhow::Result<(
             other => anyhow::Error::from(other),
         })?;
     let report = evaluate(&evidence, context.as_ref(), &args.as_of)?;
-    pqc_scan_report::write_migration_assessment_reports(
+    pqc_scan_report::write_migration_assessment_reports_with_label_and_progress(
         &report,
         &evidence,
         context.as_ref(),
         &args.out_dir,
         language,
+        args.report_label.as_deref(),
+        |_| {},
     )?;
     writeln!(
         stdout,

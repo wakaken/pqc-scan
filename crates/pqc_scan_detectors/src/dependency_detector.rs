@@ -126,12 +126,14 @@ impl DependencyDetector {
         let outcome = DetectorOutcome::new(detections, parsed.status).with_observations(drafts);
         Ok(
             if parsed.status == pqc_scan_core::DetectorStatus::Partial
-                && matches!(
+                && (matches!(
                     file.file_name(),
                     Some("Gemfile" | "gems.rb" | "requirements.txt")
-                )
+                ) || file
+                    .ext()
+                    .is_some_and(|e| e.eq_ignore_ascii_case("gemspec")))
             {
-                outcome.with_explanation("Conditional or dynamic declarations: available static candidates inspected; effective values were not evaluated.")
+                outcome.with_explanation("Conditional or dynamic declarations: available static candidates inspected; effective values were not evaluated. Compare the deployed lockfile or installed dependency inventory; no source code was executed.")
             } else {
                 outcome
             },

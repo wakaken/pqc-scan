@@ -1,0 +1,208 @@
+{
+  "scope": "Labelled display-vs-candidate controls, not whole-repository cryptographic ground truth. Unknown calls remain candidates conservatively.",
+  "cases": [
+    {
+      "id": "java_display",
+      "extension": "java",
+      "source": "class A { void f() { throw new IllegalArgumentException(\"Unsupported RS256 algorithm\"); } }",
+      "expected": "display_text",
+      "meaning": "Human error phrase in error-producing syntax."
+    },
+    {
+      "id": "java_configuration",
+      "extension": "java",
+      "source": "class A { String algorithm = \"RS256\"; }",
+      "expected": "candidate",
+      "meaning": "Plain explicit algorithm value; must not be demoted."
+    },
+    {
+      "id": "java_unresolved_call",
+      "extension": "java",
+      "source": "class A { void f() { configure(\"Unsupported RS256 algorithm\"); } }",
+      "expected": "candidate",
+      "meaning": "Unknown callee: phrase alone cannot prove display-only use."
+    },
+    {
+      "id": "java_display_unicode",
+      "extension": "java",
+      "source": "class A { void f() { throw new IllegalArgumentException(\"Unsupported \u6697\u53f7 RS256 algorithm\"); } }",
+      "expected": "display_text",
+      "meaning": "Human error phrase with UTF-8 before the algorithm token."
+    },
+    {
+      "id": "go_display",
+      "extension": "go",
+      "source": "package p\nimport \"errors\"\nfunc f() error { return errors.New(\"Unsupported RS256 algorithm\") }",
+      "expected": "display_text",
+      "meaning": "Human error phrase in error-producing syntax."
+    },
+    {
+      "id": "go_configuration",
+      "extension": "go",
+      "source": "package p\nconst algorithm = \"RS256\"",
+      "expected": "candidate",
+      "meaning": "Plain explicit algorithm value; must not be demoted."
+    },
+    {
+      "id": "go_unresolved_call",
+      "extension": "go",
+      "source": "package p\nfunc f() { configure(\"Unsupported RS256 algorithm\") }",
+      "expected": "candidate",
+      "meaning": "Unknown callee: phrase alone cannot prove display-only use."
+    },
+    {
+      "id": "go_display_unicode",
+      "extension": "go",
+      "source": "package p\nimport \"errors\"\nfunc f() error { return errors.New(\"Unsupported \u6697\u53f7 RS256 algorithm\") }",
+      "expected": "display_text",
+      "meaning": "Human error phrase with UTF-8 before the algorithm token."
+    },
+    {
+      "id": "py_display",
+      "extension": "py",
+      "source": "raise ValueError('Unsupported RS256 algorithm')",
+      "expected": "display_text",
+      "meaning": "Human error phrase in error-producing syntax."
+    },
+    {
+      "id": "py_configuration",
+      "extension": "py",
+      "source": "algorithm = 'RS256'",
+      "expected": "candidate",
+      "meaning": "Plain explicit algorithm value; must not be demoted."
+    },
+    {
+      "id": "py_unresolved_call",
+      "extension": "py",
+      "source": "configure('Unsupported RS256 algorithm')",
+      "expected": "candidate",
+      "meaning": "Unknown callee: phrase alone cannot prove display-only use."
+    },
+    {
+      "id": "py_display_unicode",
+      "extension": "py",
+      "source": "raise ValueError('Unsupported \u6697\u53f7 RS256 algorithm')",
+      "expected": "display_text",
+      "meaning": "Human error phrase with UTF-8 before the algorithm token."
+    },
+    {
+      "id": "rs_display",
+      "extension": "rs",
+      "source": "fn main() { panic!(\"Unsupported RS256 algorithm\"); }",
+      "expected": "display_text",
+      "meaning": "Human error phrase in error-producing syntax."
+    },
+    {
+      "id": "rs_configuration",
+      "extension": "rs",
+      "source": "const ALGORITHM: &str = \"RS256\";",
+      "expected": "candidate",
+      "meaning": "Plain explicit algorithm value; must not be demoted."
+    },
+    {
+      "id": "rs_unresolved_call",
+      "extension": "rs",
+      "source": "fn main() { configure(\"Unsupported RS256 algorithm\"); }",
+      "expected": "candidate",
+      "meaning": "Unknown callee: phrase alone cannot prove display-only use."
+    },
+    {
+      "id": "rs_display_unicode",
+      "extension": "rs",
+      "source": "fn main() { panic!(\"Unsupported \u6697\u53f7 RS256 algorithm\"); }",
+      "expected": "display_text",
+      "meaning": "Human error phrase with UTF-8 before the algorithm token."
+    },
+    {
+      "id": "rb_display",
+      "extension": "rb",
+      "source": "raise ArgumentError, 'Unsupported RS256 algorithm'",
+      "expected": "display_text",
+      "meaning": "Human error phrase in error-producing syntax."
+    },
+    {
+      "id": "rb_configuration",
+      "extension": "rb",
+      "source": "ALGORITHM = 'RS256'",
+      "expected": "candidate",
+      "meaning": "Plain explicit algorithm value; must not be demoted."
+    },
+    {
+      "id": "rb_unresolved_call",
+      "extension": "rb",
+      "source": "configure('Unsupported RS256 algorithm')",
+      "expected": "candidate",
+      "meaning": "Unknown callee: phrase alone cannot prove display-only use."
+    },
+    {
+      "id": "rb_display_unicode",
+      "extension": "rb",
+      "source": "raise ArgumentError, 'Unsupported \u6697\u53f7 RS256 algorithm'",
+      "expected": "display_text",
+      "meaning": "Human error phrase with UTF-8 before the algorithm token."
+    },
+    {
+      "id": "js_display",
+      "extension": "js",
+      "source": "throw new Error('Unsupported RS256 algorithm');",
+      "expected": "display_text",
+      "meaning": "Human error phrase in error-producing syntax."
+    },
+    {
+      "id": "js_configuration",
+      "extension": "js",
+      "source": "const algorithm = 'RS256';",
+      "expected": "candidate",
+      "meaning": "Plain explicit algorithm value; must not be demoted."
+    },
+    {
+      "id": "js_unresolved_call",
+      "extension": "js",
+      "source": "configure('Unsupported RS256 algorithm');",
+      "expected": "candidate",
+      "meaning": "Unknown callee: phrase alone cannot prove display-only use."
+    },
+    {
+      "id": "js_display_unicode",
+      "extension": "js",
+      "source": "throw new Error('Unsupported \u6697\u53f7 RS256 algorithm');",
+      "expected": "display_text",
+      "meaning": "Human error phrase with UTF-8 before the algorithm token."
+    },
+    {
+      "id": "ts_display",
+      "extension": "ts",
+      "source": "throw new Error('Unsupported RS256 algorithm');",
+      "expected": "display_text",
+      "meaning": "Human error phrase in error-producing syntax."
+    },
+    {
+      "id": "ts_configuration",
+      "extension": "ts",
+      "source": "const algorithm: string = 'RS256';",
+      "expected": "candidate",
+      "meaning": "Plain explicit algorithm value; must not be demoted."
+    },
+    {
+      "id": "ts_unresolved_call",
+      "extension": "ts",
+      "source": "configure('Unsupported RS256 algorithm');",
+      "expected": "candidate",
+      "meaning": "Unknown callee: phrase alone cannot prove display-only use."
+    },
+    {
+      "id": "ts_display_unicode",
+      "extension": "ts",
+      "source": "throw new Error('Unsupported \u6697\u53f7 RS256 algorithm');",
+      "expected": "display_text",
+      "meaning": "Human error phrase with UTF-8 before the algorithm token."
+    },
+    {
+      "id": "vue_real_shape",
+      "extension": "vue",
+      "source": "<script setup lang=\"ts\">const NODE_API_AUTH_ERROR_MESSAGES = ['secretOrPrivateKey must be an asymmetric key when using RS256'];</script><template></template>",
+      "expected": "display_text",
+      "meaning": "Reduced n8n error-array syntax; actual source is separately pinned."
+    }
+  ]
+}

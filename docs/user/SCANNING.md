@@ -18,7 +18,7 @@ Use this guide after the first scan when you need to select outputs, change CI e
 ## Command and options
 
 ```bash
-pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--diagnostics] [--require-complete] [--include-non-scannable] [--cyclonedx-17] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
+pqc-scan scan <path> [--format json|html|md|sarif|all] [--lang en|ja] [--out-dir ./pqc-report] [--rules-dir ./rules] [--fail-on high|critical] [--threads N] [--max-file-size-mib N] [--diagnostics] [--require-complete] [--include-non-scannable] [--exclude-tests] [--cyclonedx-17] [--inventory-json] [--repository-scope ID] [--policy-profile migration-review-v1] [--assessment-context PATH]
 pqc-scan rules list [--rules-dir ./rules]
 pqc-scan rules show <rule-id> [--rules-dir ./rules]
 pqc-scan diff <before-inventory> <after-inventory> --repository-scope ID --out-dir DIR
@@ -31,6 +31,12 @@ Defaults are `--format all`, `--lang en`, `--out-dir ./pqc-report`, `--rules-dir
 Add `--cyclonedx-17` to write separate CycloneDX 1.7 inventories. The [report guide](REPORTS.md#cyclonedx)
 explains these documents and the completeness limits of [inventory comparison](REPORTS.md#diff).
 
+
+### File size limit
+
+`--max-file-size-mib N` selects a per-file limit of 1–64 MiB (whole numbers; default 2). For example, `pqc-scan scan . --max-file-size-mib 16 --threads 1 --diagnostics` includes files up to 16 MiB. One MiB is 1,048,576 bytes. The configured value appears in the existing diagnostic/inventory scope; files above it remain explicitly excluded. Other ignore/type/test policies and detector work limits still apply. A larger read limit does not guarantee complete parsing; inspect diagnostics. More selected data and parallel workers can increase time and peak memory.
+
+`serve --max-file-size-mib N` supplies the initial value in the folder picker. The “File size limit (MB)” field can change it for the next batch; all folders in that batch use its captured value. The control is locked while scanning. No saved report or history is rewritten by changing it. MB is the picker’s display label for the existing binary-sized setting: one displayed unit remains 1,048,576 bytes, consistent with the unchanged CLI MiB option and byte limit. The field accepts integers 1–64; empty or invalid values show an error and disable scan submission.
 
 ### Output destination safety
 
@@ -220,11 +226,13 @@ string. See the [candidate compatibility notes](../releases/v0.3.0.md).
 pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
 ```
 
-The default browser opens the session's local page. Browse subfolders of `--root`, then choose **Scan this folder**. The UI shows scan progress and opens the HTML report automatically when generation succeeds. Completed scans remain listed on the start page; use browser Back to return. The report shows incomplete inspection separately from successful report generation. Scanner errors leave a failed entry and allow retry; they are not presented as zero findings.
+The default browser opens the session's local page. Click folders or their checkboxes to select multiple folders, then **Scan selected folders**. Click again to deselect; review exact paths below the list, remove individual selections or clear them all. Double-click to open and select a folder; use its **›** button to browse without selecting it. Navigate with **Back**, **Forward** or the path above the list. Selection survives navigation; clicking the current path toggles selection of the current directory, including `--root`. Use Up/Down to move focus, Space to toggle selection, Enter to open, and Alt+Up to go to the parent. The startup boundary is separate from the selected folder; no folder is preselected when the page first opens. The modal dialog blocks other page actions and Escape throughout the queue, shows the folder and its position, and reports the current phase: finding files, inspecting files (processed/selected counts), aggregating results and writing reports. Counts include read/inspection failures and do not measure successful inspection or total elapsed-time progress. A single default-mode scan opens its HTML report automatically when generation succeeds; multiple scans finish on the results screen with individual results listed. Completed scans remain listed on the start page; **Back to results** in a served report restores that scan without running it again. The report shows incomplete inspection separately from successful report generation. Scanner errors leave a failed entry and allow retry; they are not presented as zero findings.
 
-`--root` defaults to the current directory; the picker cannot leave that boundary and omits symbolic links. `--port` defaults to 8787; use `--port 0` for an available port. `--threads` defaults to 4. `--no-open` prints the URL without opening a browser. The picker UI offers Japanese and English; reports retain their own language and theme selectors.
+The picker groups selected folders and Clear selection together; test exclusion and the per-file size limit are grouped under Scan settings. Remaining session capacity is no longer displayed continuously; the 20-job limit still applies.
 
-The server binds only to `127.0.0.1`. Open the full random session URL printed in the terminal; `localhost` aliases or a bare `/` URL are not accepted. Keep that URL private. No source file contents are served. Each scan uses the CLI's default rules/selection behavior and writes the seven `--format all` outputs plus `diagnostics.json`; filters, thresholds and network probing cannot be configured from this UI. One scan runs at a time, with at most 20 scans per server session. Folder listings show up to 1,000 subfolders and state when entries were omitted.
+`--root` defaults to the current directory; the picker cannot leave that boundary and omits symbolic links. `--port` defaults to 8787; use `--port 0` for an available port. `--threads` defaults to 4. `--no-open` prints the URL without opening a browser. The picker UI offers Japanese and English. Reports inherit the current language and light/dark theme; changes in the report also carry back to the results screen. Theme preferences are applied before report content renders, including when browser preference storage is unavailable. Offline exports keep their language/theme selectors but do not include a live-session return link.
+
+The server binds only to `127.0.0.1`. Open the full random session URL printed in the terminal; `localhost` aliases or a bare `/` URL are not accepted. Keep that URL private. No source file contents are served. Each scan uses the same scanner pipeline as the CLI and writes the seven `--format all` outputs plus `diagnostics.json`; file size and test exclusion are editable above, while rule sets, severity thresholds and network probing cannot be configured from this picker. One scan runs at a time, with at most 20 scans per server session. Folder listings show up to 1,000 subfolders and state when entries were omitted. Select at most 20 folders and fit the remaining session capacity (saved-result imports also consume a slot); the UI rejects an oversized selection before starting. Folders scan in selection order, including separate scans of overlapping parent/child selections. A failed scan stays listed and the next starts. A failed or uncertain start stops the remaining queue without automatically retrying the request. During connection loss, the modal remains open until the server status is available. Pending folders stay only in page memory: keep the page open until completion; reloading or closing abandons pending requests but does not cancel an already running scan or remove its server result.
 
 Reports are retained in the private `pqc-scan-web-*` session directory printed in the terminal. Stop with Ctrl+C. To keep an offline report, retain both `report.html` and `report.rules.html`; exports are also available at the corresponding filenames under the report URL. This mode does not upload source or reports. It does not run project build scripts or package commands. A folder containing the session output directory cannot be selected for scanning.
 
@@ -234,49 +242,148 @@ Reports are retained in the private `pqc-scan-web-*` session directory printed i
 pqc-scan serve --migration --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
 ```
 
-This opt-in mode additionally records Inventory v1 for new web scans. On completion,
-it opens optional migration input instead of navigating directly to the scan report;
-the ordinary scan-report link remains available. Select **Review migration** on a
-completed session job, or explicitly choose a saved Inventory v1 file (32MiB maximum).
-No file is uploaded outside this local session and no project code is executed.
+This opt-in mode records saved scan results for new web scans. On completion,
+the results screen offers **Open scan report ↗** and **Review migration**
+action. You can also choose **Load saved results** on the input screen and select
+`scan.inventory.v1.json` (32MiB maximum). Files stay within the local session.
+The folder picker supports multiple selections; each queued job uses one folder and keeps its own result.
+Ordinary `serve` retains automatic scan-report navigation for one selected folder.
+The migration review has three views: **Overview**, **Confirm use** and
+**Response work items**. Overview counts and algorithm/location distributions come
+from the selected saved results, for any scanned product. It does not repeat the
+response report. **Next** opens common input; you may also proceed without context.
 
-Select only the targets to which your declarations apply. Lists are paged100 at a
-time, with at most4096 selected targets; ambiguous targets cannot acquire bindings.
-Personal/organization guidance does not change policy or criticality. Company and
-department names are not required; generated organization/system aliases can be kept.
-Answer only known relevant questions, explicitly choose Unknown, or leave them
-unanswered. False and Not applicable are separate choices. Show all optional
-questions to review other fields. An already supplied answer stays visible when
-purpose changes; it is never silently removed.
+Scope proposals use observed purpose, exact role and folder/file hints. Select
+matching scopes and, if needed, a first-level module. Test-folder labels describe
+paths, not verified test-only use. The summary shows eligible records, excluded
+ambiguous records and records already assigned elsewhere. **Next** applies the
+answers to the displayed exact membership and generates the report; no extra
+confirmation checkbox is required. Different uses remain separate systems in the
+saved context. Scope size is not a quality or urgency score.
 
-Answers require an actor alias and assertion instant. The current-time button is an
-explicit way to supply that instant; expiry is optional and never generated. Without
-expiry, existing freshness remains unknown. Review the evaluation instant separately.
-You may instead continue without context. Known technical concerns and missing
-information remain visible in the resulting report.
+**Inspect records / split scope** opens the detailed selector, with algorithm/
+filename search, role filters and20-row pages. At most4096 targets across256 uses
+can be assigned; oversize selection is rejected rather than partly applied.
+Targets that cannot be distinguished within the saved input cannot acquire declarations. Repeated source references with complete unique saved positions can be selected explicitly. **Edit individually** creates a
+full per-target exception; later shared edits preserve it. **Restore shared context**
+explicitly removes it. Groups are editing conveniences, not organization defaults.
+Unsaved drafts are excluded and stay in page memory; reload loses them and the
+editing groups. Save canonical context to retain declarations. Personal/organization
+guidance does not change policy or criticality; company/department names are not required.
 
-**Import existing context** accepts the adopted migration-context v1 (1MiB maximum),
-validates its exact saved-input binding and preserves every supported field, default,
-reference and provenance. Advanced fields remain read-only rather than disappearing
-into the simple form. To change those fields, edit and import the original context
-again. Selecting another input resets declarations/selections and requires new review.
+**Unanswered** omits a declaration; **Unknown** explicitly records that the situation
+is not known. False and Out of scope are distinct. Choosing Out of scope hides other
+migration questions and excludes those answers from generated context, while retaining
+the draft for restoration. Purpose-dependent questions follow the same rule.
 
-Choose **Review declarations and scope** to see the exact targets, supplied claims,
-actor/dates, applicable freshness and purpose conflicts. **Save context** downloads the
-validated canonical document; use it unchanged with CLI assess for the same result.
-After confirming that review, **Reassess** opens the real bilingual migration HTML,
-with urgency/information/readiness, reasons, evidence, missing information and next
-checks. It evaluates the same saved bytes without rescanning or outbound connections.
-The existing language/theme report controls work independently of the input page.
+Choose a candidate algorithm and a key-size/configuration preset, or **Other (enter
+manually)**. Presets name available standard parameter sets; they are not deployment
+recommendations. Custom configuration validity is not verified. Support questions
+refer to that purpose, algorithm and exact configuration. Changing their basis requires
+resetting known support answers before saving. The selected configuration and its
+provenance are retained in context and assessment evidence; declarations do not
+establish implementation correctness, protocol compatibility or verified deployment.
 
-You can cancel a pending review before confirmation. Confirmed synchronous evaluation
-runs to completion; cancellation during writes is not promised. Errors are shown and
-invalid settings are not applied. Each output replacement is atomic individually,
-not a transaction across files. A changed input rejects a stale review token.
+Answers require an actor alias and assertion time. Inputs use Japan time (UTC+09:00)
+and serialize whole seconds with an explicit offset; reviews show Japan time as well.
+The current-time button is explicit, and expiry is optional and never generated.
+Without expiry, freshness is unknown. Enter migration duration in years and months
+with an explicit calendar anchor in Japan time. The UI adds the months to that date,
+clamps month ends to the destination month and shows the exact day/second conversion.
+It saves only the existing exact seconds (maximum 315,576,000); it never assumes
+30 days per month. The initial anchor is the evaluation date; later evaluation-time
+edits do not silently change a saved estimate. Imported seconds remain unchanged.
+The separate goal month (`YYYY-MM`, years 0001–9999) is planning information,
+without a day or timezone conversion. It does not set a policy/contractual deadline
+or change urgency or readiness. Review the evaluation time separately. You may continue without
+context; known concerns and missing information remain visible in the report.
+
+**Use saved input** preserves every supported field, default, reference
+and provenance (1MiB maximum). Imported context is read-only; edit the original file
+and import it again to change it. Selecting another scan input resets bindings and
+requires a new review. Existing context without a selected configuration retains its
+previous generic support meaning. A configuration cannot silently adopt known support
+from another declaration scope; such a mixed binding is rejected.
+
+**Next** validates the canonical context against the exact saved input and starts
+background generation using the real evaluator. No rescan or outbound connection
+occurs. A spinner shows loading, evaluation, JSON/Markdown/HTML preparation and
+saving; file counts are shown only during actual writes. These are processing
+stages, not a guessed overall percentage. Evaluation cannot be cancelled after it
+starts. Failure preserves input, shows no completed result and allows a new attempt.
+
+Response work items combine decisions only when their system, observed purpose/
+role, statuses, reasons, missing facts, actions, blockers and candidate support
+semantics agree. Their number depends on the data, including zero. Next checks are
+visible; **View evidence** opens exact records20 at a time with one selected detail.
+The report does not infer migration completion from a group. **Edit use**
+returns to the retained input. Language/theme remain available. **Save report (HTML)**
+exports a self-contained bilingual HTML file with the current initial language/theme;
+**Save input (JSON)** retains canonical input for CLI `assess` with the same saved bytes
+and evaluation time. See [report navigation](SAVED-EVIDENCE.md) for offline limits.
+Each output replacement is atomic individually, not a transaction across files.
 
 The private job subdirectory migration/ retains the3 migration report files and,
 when supplied, migration-context.json. Only completed allowlisted reports/context
 are served. Imports count toward the existing20-job session limit; one context draft
 per job is bounded, with a3MiB request and16MiB response limit. The ordinary serve
-mode, scan/report defaults, legacy contexts and schemas remain unchanged. Original
+mode and scan/report defaults retain their behavior. Existing context inputs retain
+their meaning; migration context and assessment schema versions remain1. The
+approved optional planning-month claim extends their accepted fields. Original
 practitioner evaluation and release approval are separate from this workflow.
+
+
+The input method choices are **New input** and **Use saved input**. Choose scope,
+purpose and usage first; candidate/configuration/support prerequisites appear where
+needed. Unanswered declarations can inherit defaults; explicit unknown can override
+an inherited known value. Neither state alone determines urgency. Scope exclusion
+records a declaration, not deletion or proof of safety; technical concerns remain.
+Location-filtered categories and counts use the exact server scope, excluding
+ambiguous and already assigned records from eligible counts. A saved use can be
+deleted with its individual overrides and restored with **Undo** while this page
+remains open. Undo refuses conflicting reassignment instead of overwriting another
+use. Edits, deletion and undo invalidate the current generated view, without deleting
+existing artifact files. Download a new HTML report and input JSON after changes.
+The session result list is newest first and shows project/import name, request time
+in Japan time and status; it is not persistent multi-session history. Unknown
+historical names/times are labelled rather than invented. Scan reports open in a
+separate tab carrying the current language/theme, preserving this page's inputs.
+
+
+Use Cancel remaining scans in the progress dialog to stop all unsubmitted folders. The active folder finishes and its result remains in Scan history. Migration loading and preparation also show a blocking dialog. Opening Response work items does not generate anything; use Prepare review items explicitly. Evaluation time appears beside the input method; optional declaration expiry is folded into details. Explicitly choosing a duration or goal month clears the other field. Existing imported formats and meanings are preserved.
+
+Omitting declaration expiry leaves purpose/support claims with unknown validity. Entered declarations and currently usable assessment claims are distinct; supply the intended expiry explicitly.
+
+
+Migration HTML separates observed purpose/algorithm from current declarations of purpose, usage and proposed configuration; declarations alone do not verify deployed cryptography. Concrete missing facts, locations and next checks precede the full original assessment reasoning/evidence. Evaluation time uses Japan time. Search appears for multiple work items and matches algorithms, purposes, filenames and related text (e.g. RSA, encryption, package.json). A single urgency category has no dropdown. Undetermined urgency does not mean low risk. JSON decisions, declarations and UTC timestamps remain unchanged.
+
+### Follow-up report usability
+
+The optional **Organization or contractual deadline** section accepts the actual scoped deadline, its organization-policy/contract basis, and non-secret issuer/document/edition/clause identifiers. It uses the existing context reference schema; it is separate from goal month and can affect urgency together with lead time. No deadline, omitted answer and explicit uncertainty remain distinct. Source records that cannot be uniquely bound are disabled with an explanation: adding normal answers cannot resolve that scanner limitation.
+
+Migration work items show applicable declared deadlines in Japan time and lead time in days/hours, retaining exact UTC/seconds in JSON. Record counts and distinct recorded locations are separate; repeated observations are not independent uses or vulnerabilities. Evidence lists identify each observation method. Web reports carry the selected relative scope as a display label. CLI `assess --report-label "Project / scope"` can name an HTML report (non-secret text, at most 256 UTF-8 bytes, no control characters). This display metadata and known binding limitations do not alter canonical assessment JSON.
+
+### Exclude test code
+
+Tests are included by default because they can reveal supported algorithms and compatibility requirements. Keep them for a full inventory; use `--exclude-tests` to focus migration review on product files. In the browser, select “Exclude test code” below “Clear selection”. The setting is captured at scan start for every folder in the sequential batch.
+
+```bash
+pqc-scan scan . --exclude-tests --diagnostics --out-dir /path/to/reports/product-only --rules-dir /path/to/pqc-scan/rules
+```
+
+Matching is case-sensitive and relative to the selected root. Files below `test/`, `tests/`, `__test__/`, `__tests__/`, `spec/`, `specs/`, `testsuite/`, `test-suite/` or `test-framework/`, and filenames `test_*.py`, `*_test.py`, `*_test.go`, `*_test.rb`, `*_spec.rb`, `*.test.{js,jsx,ts,tsx,mjs,cjs,mts,cts}`, `*.spec.{js,jsx,ts,tsx,mjs,cjs,mts,cts}`, `*Test.java` and `*Tests.java` are excluded. Ancestor names outside the root do not affect selection; the role of the root itself is not inferred.
+
+The standalone names `tests.py` and `tests.rs` are also excluded. For syntactically valid Rust, exact source matches entirely inside explicit `#[cfg(test)]` items or `#[test]` functions are omitted. Mixed `cfg(any(test, ...))`, custom macros, functions where imports/globs or unresolved attribute macros may override or remove `test`, and matches with unresolved positions or normalized/masked text remain. Nested `#[cfg(test)]` regions under an unresolved outer attribute macro are also retained. Mixed files are still analyzed, so their file counts do not decrease; surrounding source snippets can include adjacent tests. Unusual test names may remain, and exclusion does not establish production use of every remaining finding. Root dependency manifests remain selected. Applied exclusions are recorded in the inspection scope, diagnostics.json and native inventory. Do not directly compare totals from different scopes.
+
+### Custom excluded paths
+
+Place a UTF-8 `.pqcignore` at the selected directory root to apply Gitignore-style patterns in both CLI and browser scans. For example, omit custom validation files while retaining one control:
+
+```gitignore
+/integration-fixtures/*
+!/integration-fixtures/production-control.rs
+```
+
+Only the selected root's policy is loaded; ancestor and nested `.pqcignore` files are not inherited. The policy file itself is excluded. Invalid patterns/encoding or a read failure stop the scan with a generic error; policy text is not exported. Symlink policies are not followed. The existing inspection scope records that custom exclusions applied, and enumerated excluded files are counted. Negations cannot restore Git-ignored files, default exclusions or `--exclude-tests` matches. Excluding a mixed file by path also excludes its product code.
+
+Default directory exclusions such as `target` and `docs` are relative to the selected root. Names in ancestors outside that root do not discard the selected project.

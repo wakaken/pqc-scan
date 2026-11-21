@@ -1,4 +1,6 @@
 //! Ruby declaration inventory, never DSL execution or installation resolution.
+mod loads;
+mod versions;
 use super::parse::*;
 use pqc_scan_core::RepositoryContext;
 use tree_sitter::{Node, Parser};
@@ -64,6 +66,13 @@ pub(super) fn inspect(
     file: &ScannableFile,
     repo: Option<&RepositoryContext>,
 ) -> anyhow::Result<Parsed> {
+    inspect_level(file, repo, true)
+}
+fn inspect_level(
+    file: &ScannableFile,
+    repo: Option<&RepositoryContext>,
+    allow_delegation: bool,
+) -> anyhow::Result<Parsed> {
     let Some(text) = file.text.as_deref() else {
         return failure(Failure::Unsupported);
     };
@@ -81,11 +90,13 @@ pub(super) fn inspect(
     let mut rebound = std::collections::BTreeSet::new();
     let mut nodes = vec![tree.root_node()];
     let mut preflight = 200000usize;
+    let mut visited = Vec::new();
     while let Some(n) = nodes.pop() {
         if preflight == 0 {
             return failure(Failure::Limit);
         }
         preflight -= 1;
+        visited.push(n);
         if matches!(
             n.kind(),
             "assignment" | "operator_assignment" | "multiple_assignment"
@@ -109,6 +120,9 @@ pub(super) fn inspect(
         let mut c = n.walk();
         nodes.extend(n.named_children(&mut c));
     }
+    let mut version_values = versions::Versions::new(&visited, text, file, repo);
+    let loads = loads::Loads::new(tree.root_node(), text, file, repo);
+    let mut delegated_status = None;
     let mut b = Build::new(DetectorStatus::Complete);
     let mut incomplete = tree.root_node().has_error();
     let mut stack = vec![tree.root_node()];
@@ -119,8 +133,25 @@ pub(super) fn inspect(
             break;
         }
         work -= 1;
-        if n.kind() == "call" {
-            let name = method(n, text).unwrap_or("");
+        if matches!(n.kind(), "alias" | "undef") {
+            incomplete = true;
+        }
+        // A no-argument Ruby DSL directive is an identifier in this grammar.
+        // Model only the direct top-level gemspec form, never a bound local.
+        let bare_gemspec = n.kind() == "identifier"
+            && &text[n.byte_range()] == "gemspec"
+            && n.parent().is_some_and(|p| {
+                matches!(p.kind(), "program" | "body_statement" | "then" | "else")
+            });
+        if n.kind() == "call" || bare_gemspec {
+            let name = if bare_gemspec {
+                "gemspec"
+            } else {
+                method(n, text).unwrap_or("")
+            };
+            if matches!(name, "require" | "require_relative") && !loads.approved(n) {
+                incomplete = true;
+            }
             if matches!(
                 name,
                 "eval"
@@ -134,31 +165,39 @@ pub(super) fn inspect(
                 incomplete = true;
             }
             if name == "gemspec" && n.child_by_field_name("receiver").is_none() {
-                let simple = n.child_by_field_name("arguments").is_none();
-                let candidates = repo
-                    .map(|r| r.sibling_files(&file.path, "gemspec"))
-                    .unwrap_or_default();
-                // Delegated dependencies retain the gemspec's own source path/positions in
-                // its separately selected scan; this directive must not relabel them here.
-                if !simple || candidates.len() != 1 {
+                let simple = n.child_by_field_name("arguments").is_none()
+                    && !rebound.contains("gemspec")
+                    && n.parent().is_some_and(|p| p.kind() == "program");
+                if !allow_delegation || !simple {
                     incomplete = true;
-                } else if let Some(repo) = repo {
-                    if let Some(child) = repo
-                        .read_relative(&file.path, Path::new(candidates[0].file_name().unwrap()))
-                    {
-                        let child = inspect(&child, None)?;
-                        if child.status != DetectorStatus::Complete {
-                            incomplete = true;
+                } else {
+                    let status = memoized_status(&mut delegated_status, || {
+                        let candidates = repo
+                            .map(|r| r.sibling_files(&file.path, "gemspec"))
+                            .unwrap_or_default();
+                        if candidates.len() != 1 {
+                            return Ok(DetectorStatus::Partial);
                         }
-                        if child.status == DetectorStatus::Truncated {
-                            b.status = DetectorStatus::Truncated;
-                        }
-                    } else {
-                        incomplete = true;
+                        let Some(child) = repo.and_then(|r| {
+                            r.read_relative(
+                                &file.path,
+                                Path::new(candidates[0].file_name().unwrap()),
+                            )
+                        }) else {
+                            return Ok(DetectorStatus::Partial);
+                        };
+                        // The child's declarations keep their own separately selected
+                        // source path. One child parse per parent; never delegate again.
+                        Ok(inspect_level(&child, repo, false)?.status)
+                    })?;
+                    incomplete |= status != DetectorStatus::Complete;
+                    if status == DetectorStatus::Truncated {
+                        b.status = status;
                     }
                 }
             }
             if n.child_by_field_name("receiver").is_none()
+                && !loads.approved(n)
                 && !matches!(
                     name,
                     "gem" | "gemspec" | "group" | "platforms" | "platform" | "source" | "ruby"
@@ -238,8 +277,11 @@ pub(super) fn inspect(
                 let mut versions = vec![];
                 let mut dynamic = false;
                 for arg in args.iter().skip(1) {
-                    if let Some(value) = literal(*arg, text) {
-                        versions.push(value.to_string());
+                    if let Some(value) = literal(*arg, text)
+                        .map(str::to_string)
+                        .or_else(|| version_values.value(*arg))
+                    {
+                        versions.push(value);
                     } else if arg.kind() == "pair" {
                         if let Some(key) = arg
                             .child_by_field_name("key")
@@ -292,6 +334,9 @@ pub(super) fn inspect(
             stack.push(child);
         }
     }
+    if version_values.limited || loads.limited {
+        b.status = DetectorStatus::Truncated;
+    }
     b.items.sort_by_key(|i| i.line);
     for (ordinal, item) in b.items.iter_mut().enumerate() {
         item.ordinal = ordinal;
@@ -302,3 +347,41 @@ pub(super) fn inspect(
     b.finish()
 }
 use std::path::Path;
+
+fn memoized_status(
+    cache: &mut Option<DetectorStatus>,
+    load: impl FnOnce() -> anyhow::Result<DetectorStatus>,
+) -> anyhow::Result<DetectorStatus> {
+    if let Some(status) = *cache {
+        return Ok(status);
+    }
+    let status = load()?;
+    *cache = Some(status);
+    Ok(status)
+}
+#[cfg(test)]
+mod cache_tests {
+    use super::*;
+    #[test]
+    fn repeated_delegation_spends_one_child_inspection_even_when_partial() {
+        for result in [
+            DetectorStatus::Complete,
+            DetectorStatus::Partial,
+            DetectorStatus::Truncated,
+        ] {
+            let mut cache = None;
+            let mut calls = 0;
+            for _ in 0..1000 {
+                assert_eq!(
+                    memoized_status(&mut cache, || {
+                        calls += 1;
+                        Ok(result)
+                    })
+                    .unwrap(),
+                    result
+                );
+            }
+            assert_eq!(calls, 1);
+        }
+    }
+}

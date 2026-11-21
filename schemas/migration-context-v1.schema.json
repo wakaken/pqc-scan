@@ -828,9 +828,127 @@
             }
           },
           "required": []
+        },
+        "migration_target": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "$ref": "#/$defs/configuration"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
+        },
+        "migration_goal_month": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "known"
+                },
+                "value": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+                  "not": {
+                    "pattern": "^0000-"
+                  }
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "provenance"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "const": "unknown"
+                },
+                "provenance": {
+                  "$ref": "#/$defs/provenance"
+                }
+              },
+              "required": [
+                "state",
+                "provenance"
+              ]
+            }
+          ]
         }
       },
       "required": []
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "use_case": {
+          "enum": [
+            "signature",
+            "jwt",
+            "pki",
+            "key_establishment",
+            "encryption",
+            "hashing"
+          ]
+        },
+        "algorithm": {
+          "enum": [
+            "ML-DSA",
+            "ML-KEM",
+            "AES",
+            "SHA-256"
+          ]
+        },
+        "parameters": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "use_case",
+        "algorithm",
+        "parameters"
+      ]
     }
   },
   "type": "object",

@@ -34,7 +34,7 @@
 
 1. Load rules from `rules/default/` (or custom `--rules-dir`)
 2. Walk repository files with `.gitignore` awareness
-3. Exclude default paths and large files (`> 2 MB`)
+3. Exclude default paths and large files (default `> 2 MiB`; CLI/UI expose an explicit integer 1–64 MiB selection limit)
 4. Run detectors in parallel (file-level concurrency via `rayon`)
 5. Convert detector output (`Detection`) into normalized findings (`Finding`)
 6. Apply risk-aware severity adjustment
@@ -191,6 +191,8 @@ See [the task024 evidence](../tasks/024/TASK-024-AST-OCCURRENCES.md).
 - Produces line/column offsets and masked evidence previews
 
 ### Dependency detector
+
+Ruby version variables can retain literal/selected plain-file constraints through a bounded syntax-only reader. The shared selected-file/no-follow context is reused; no Ruby code, `require` or package manager is executed. Values remain declarations rather than lock resolutions. See [dependency provenance](architecture/DEPENDENCY-PROVENANCE.md) and [coverage](user/COVERAGE.md#static-context-and-conditional-declarations).
 
 - Parses common manifests and lock files
 - Parses CycloneDX/SPDX JSON files as dependency input
@@ -455,7 +457,7 @@ The current AST adapter borrows full source slices rather than clipping matching
 
 ## Selected-file repository context
 
-The pipeline supplies an optional `RepositoryContext` to detectors through a backwards-compatible default trait adapter. References are restricted to the walker-selected file set, normalized inside the root and read via `safe_read`, retaining size and no-link protections. Context does not widen the scan scope. Maven uses validated local parents for properties only; gemspec delegation retains observations at their actual source files. Conditional assertions use existing metadata/capture-status/uncertainty fields, without changing inventory schemas or claiming effective dependency resolution. Detector explanations are fixed strings in the existing diagnostic message field, never arbitrary parser or I/O error text.
+The pipeline supplies an optional `RepositoryContext` to detectors through a backwards-compatible default trait adapter. References are restricted to the walker-selected file set, normalized inside the root and read via `safe_read`, retaining size and no-link protections. Context does not widen the scan scope. Maven uses validated local parents for properties only; gemspec delegation retains observations at their actual source files. Conditional assertions use existing metadata/capture-status/uncertainty fields, without changing inventory schemas or claiming effective dependency resolution. Detector explanations use fixed reason text and bounded numeric counters in the existing diagnostic message field, never arbitrary parser or I/O error text. Relative JS/TS ESM source facts reuse the selected-file context for string constants and pure JWT forwarding wrappers under explicit depth/read/byte/node limits. Discovery has its own bounded cache/probe/file/byte budget; impossible jsonwebtoken wrappers are excluded before consuming cryptographic-validation budgets. Imported constants and unused initialization dependencies retain full validation. Display-string ranges are ephemeral annotations; exact source matches gain informational metadata without changing finding identity or persisted object shapes.
 
 
 ## Report destination boundary
@@ -494,3 +496,31 @@ evaluator and070's real report writers; no JS policy or rescan. Context/selectio
 changes require a new token. Concrete routes, bounds and cancellation/output behavior
 are recorded in tasks/074/TASK-074-PLAN.md and paired user scanning guides. Default
 serve options and output behavior are retained when the extension is not selected.
+
+
+The approved2026-11-19 local UI uses staged input/results/context views and grouped
+editing with per-target snapshots. Bundled assets remain session protected. Filtered
+20-row target queries preserve original target numbers; grouped transport feeds the
+shared typed generator. The unpublished context adds a provenanced migration_target
+configuration with same-scope support binding. Existing generic contexts retain their
+meaning. See [local scan workflow](product/LOCAL-SCAN-UI.md) for the exact amendment,
+compatibility, state model, acceptance and verification evidence.
+
+
+The approved grouped migration workflow adds a data-only overview/scope projection
+and the report crate's shared work-item renderer. Purpose, exact role and path hints
+propose input scopes; the operator submits exact bindable membership with the input
+digest. Different uses serialize distinct systems; exceptions retain scoped full
+snapshots. No product-specific name or fixed work-item count is used. Read
+[production grouping](product/MIGRATION-REVIEW-GROUPING.md#approved-production-implementation-2026-11-19)
+for the equality key and lossless shared HTML representation.
+
+Session-protected overview/scope routes reuse typed saved evidence. Compact previews
+retain the canonical context and confirmation token without a large review payload.
+The new start/progress routes bind background generation to session/job/token and
+share the existing one-active-job coordinator with scanning. Actual evaluator,
+serialization and write phases are polled; ready is published only after every
+report and supplied context is saved. Failure clears the pending preview and hides
+unfinished artifacts. The synchronous assess route remains compatible. The served
+report mounts the same renderer as standalone HTML; return-to-input retains edits,
+and HTML export seeds current language/theme without changing machine contracts.

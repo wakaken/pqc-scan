@@ -398,7 +398,7 @@ fn assess_emits_a_real_styled_html_report_and_guards_its_input_context_aliases()
     assert_ok(&f.run(&input, "inventory-v1", None, &out, ctx::AS_OF));
     let html = std::fs::read_to_string(out.join("migration.assessment.html")).unwrap();
     assert!(html.starts_with("<!doctype html>"));
-    assert!(html.contains("Organization migration review"));
+    assert!(html.contains("Migration response work items"));
     assert!(html.contains("data-report-translation"));
     assert!(html.contains("--card:"));
     assert!(html.contains("decision-card"));

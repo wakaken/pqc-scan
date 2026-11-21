@@ -61,3 +61,35 @@ serialization; absent optional empty references need not be added. Supported dat
 not dropped to fit. Readiness question hints reuse the evaluator's existing support
 requirements; they do not create claims, freshness or decisions. Core semantics and
 stored schemas remain unchanged; original conformance cases remain required.
+
+
+The2026-11-19 unpublished-format amendment adds the optional provenanced
+migration_target configuration, validated family/purpose/string shape and same-scope
+support binding. Inactive configuration/use cannot establish scoped support. Old
+contexts without it retain generic support semantics. See the amended adopted
+contract and [local UI implementation scope](../product/LOCAL-SCAN-UI.md).
+
+
+## Approved planning-month amendment (2026-11-20)
+
+The maintainer explicitly approved optional `migration_goal_month` in the existing
+unpublished format. A known value is an ASCII `YYYY-MM` string, years 0001–9999
+and months 01–12; unknown/omission retain ordinary scoped claim semantics and
+provenance. The value has month precision and no timezone/instant conversion.
+It is carried in assessment declaration evidence but is never read by policy
+branches, missing-input checks, urgency or readiness calculations, and does not
+replace the reference-backed `deadline`. IDs still bind the exact context digest.
+The UI calendar-duration estimate adds years/months to an explicit Japan-time
+anchor with end-of-month clamping and converts elapsed calendar days to exact
+seconds within the existing 315576000 bound. Only seconds are canonical; imported
+contexts remain read-only/lossless and are never reverse-converted to months.
+See the thirteen-item follow-up in [LOCAL-SCAN-UI](../product/LOCAL-SCAN-UI.md).
+
+
+The approved 2026-11-21 source-binding exception distinguishes exact records inside
+one immutable input from weak-anchor correspondence across scans. Repeated source
+anchors with complete, consistent and unique saved positions can receive explicit
+target-ID claims; unsafe collisions and unresolved component roles remain rejected.
+Reference-only targets retain unknown algorithms after business-use declarations.
+The adopted contract specifies the checks; native schemas/IDs/ambiguity flags and
+exact input-digest binding are preserved.

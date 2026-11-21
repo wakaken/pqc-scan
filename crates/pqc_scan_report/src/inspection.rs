@@ -59,6 +59,104 @@ fn state(value: &str, lang: ReportLanguage) -> String {
     };
     format!("{translated} ({value})")
 }
+fn detail(message: &str, lang: ReportLanguage) -> String {
+    if lang == ReportLanguage::En {
+        return message.into();
+    }
+    if let Some(rest) = message.strip_prefix("Inspection limit: ") {
+        let counters = rest.split('.').next().unwrap_or(rest);
+        let translated = counters
+            .replace("source_ast_nodes", "構文ノード数")
+            .replace("same_name_bindings", "同じ名前の宣言数")
+            .replace("lexical_scope_lookup_depth", "変数の参照先を探す階層数")
+            .replace("source_alias_depth", "別名の追跡段数")
+            .replace("source_match_bytes", "参照文字列のバイト数")
+            .replace("relative_export_cache", "公開値の検証記録数")
+            .replace("relative_module_parses", "import先の解析回数")
+            .replace("relative_module_depth", "相対importの追跡階層数")
+            .replace("relative_module_reads", "暗号解析対象のモジュール数")
+            .replace("relative_discovery_probes", "import候補パスの探索回数")
+            .replace("relative_discovery_files", "import先の探索ファイル数")
+            .replace("relative_discovery_bytes", "import先の探索バイト数")
+            .replace("relative_module_bytes", "import先1ファイルのバイト数")
+            .replace("relative_total_bytes", "import先の合計バイト数")
+            .replace("relative_module_nodes", "import先の構文ノード数")
+            .replace("lexical_match_candidates", "文字列一致の検査候補数")
+            .replace("lexical_rule_hits", "1ルールの検出数")
+            .replace("literal_array_items", "定数配列の要素数")
+            .replace("ruby_value_candidates", "Rubyの値の検査候補数")
+            .replace("ruby_algorithm_values", "Rubyの方式候補数")
+            .replace("limit=", "上限=")
+            .replace("processed=", "処理済み=");
+        return format!("静的な参照追跡の上限に達しました（{translated}）。取得済みの検出結果は残しています。未処理部分の検出件数は不明です。該当ファイルの残りを別途確認してください。");
+    }
+    if let Some(rest) = message.strip_prefix("File size limit: ") {
+        return format!("ファイルサイズの上限を超えたため検査していません（{}）。必要に応じてサイズ上限を変更するか、このファイルを別途確認してください。", rest.split('.').next().unwrap_or(rest).replace("limit=", "上限バイト数=").replace("file_bytes=", "ファイルのバイト数="));
+    }
+    let (prefix, ja) = if message.starts_with("Symbolic link not followed") {
+        ("Symbolic link", "シンボリックリンクを追跡しない設定により、このパスのリンク先は検査していません。必要な場合は、実体のフォルダを指定してスキャンしてください。")
+    } else if message.starts_with("Non-regular filesystem") {
+        ("Non-regular", "通常のファイルではないため読み込んでいません。実体のファイルを指定するか、別途確認してください。")
+    } else if message.starts_with("Conditional or dynamic declarations") {
+        ("Conditional", "条件分岐や実行時に決まる依存宣言があります。静的に読める候補は検査済みです。コードは実行していません。配備時のロックファイルやインストール済みの依存一覧で実際の値を確認してください。")
+    } else if message.starts_with("Unrendered template") {
+        ("Unrendered", "未展開のテンプレートです。元の記述は検査していますが、生成後の値や分岐は未確認です。ビルド後の生成ファイルもスキャンしてください。")
+    } else if message.starts_with("AST inspection limit")
+        || message.starts_with("Lexical inspection limit")
+    {
+        ("limit", "構文・文字列の検査または参照追跡の上限に達しました。取得済みの検出結果は残しています。この診断から上限の種類や未処理件数までは確定できません。該当ファイルを別途確認してください。")
+    } else if message.starts_with("PKCS#12 encrypted") {
+        ("encrypted", "PKCS#12の暗号化された内容は復号・検査していません。公開証明書だけを別ファイルに出力してスキャンしてください。秘密鍵やパスワードの入力は不要です。")
+    } else if message.starts_with("PKCS#12 contains unsupported") {
+        ("container", "PKCS#12に未対応の格納形式が含まれています。読み取れた公開証明書は保持しています。残りの公開証明書を別ファイルに出力して確認してください。")
+    } else if message.starts_with("PKCS#12 structural") {
+        ("container", "PKCS#12の構造解析で作業上限に達しました。読み取れた公開証明書は保持しています。未処理の検出件数は不明です。公開証明書を分けてスキャンしてください。")
+    } else if message.starts_with("Certificate/container structure") {
+        ("container", "証明書・コンテナの構造を完全に解釈できませんでした。読み取れた公開情報は保持しています。形式を確認し、公開証明書を分けてスキャンしてください。復号や信頼性の検証は実施していません。")
+    } else if message.starts_with("DSA algorithm identified") {
+        ("dsa", "DSA方式は確認できましたが、公開鍵パラメーターが含まれていないため鍵の属性を確定できません。パラメーターを含む公開証明書・公開鍵を別途確認してください。")
+    } else if message.starts_with("Source syntax") {
+        ("syntax", "ソースの構文またはルールを完全に解釈できませんでした。解析できた範囲の検出結果は残しています。言語のバージョン、生成コード、ソース構文を確認してください。")
+    } else {
+        ("", "")
+    };
+    if !prefix.is_empty() {
+        ja.into()
+    } else {
+        message.into()
+    }
+}
+
+fn reason_title(code: DiagnosticCode, message: &str, lang: ReportLanguage) -> String {
+    if message.starts_with("Symbolic link not followed") {
+        return text(lang, "Symbolic link not followed", "リンクを追跡しない設定").into();
+    }
+    if message.starts_with("Non-regular filesystem") {
+        return text(
+            lang,
+            "Non-regular filesystem entry",
+            "通常のファイルではない項目",
+        )
+        .into();
+    }
+    if message.starts_with("Conditional or dynamic declarations") {
+        return text(
+            lang,
+            "Conditional or dynamic dependency declarations",
+            "条件分岐・実行時に決まる依存宣言",
+        )
+        .into();
+    }
+    if message.starts_with("Inspection limit: same_name_bindings") {
+        return text(
+            lang,
+            "Same-name declaration limit",
+            "同じ名前の宣言数の上限",
+        )
+        .into();
+    }
+    diagnostic_text(code, lang).into()
+}
 fn diagnostic_text(code: DiagnosticCode, lang: ReportLanguage) -> &'static str {
     use DiagnosticCode::*;
     let (en, ja) = match code {
@@ -132,7 +230,7 @@ fn sections(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<Vec<Sect
         ("Selected files", "選択したファイル", c.selected_files()),
         ("Read successfully", "読み込み成功", c.read_ok_files()),
         ("Read failed", "読み込み失敗", c.read_failed_files()),
-        ("Analyzed", "解析完了", c.analyzed_files()),
+        ("Analyzed", "解析完了ファイル数", c.analyzed_files()),
         ("Partial", "部分成功", c.partial_files()),
         ("Analysis failed", "解析失敗", c.analysis_failed_files()),
         ("Unsupported", "未対応", c.unsupported_files()),
@@ -160,22 +258,59 @@ fn sections(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<Vec<Sect
         }
         .into(),
     ));
+    if context
+        .document
+        .scope()
+        .default_excludes()
+        .contains(&"test directories and test filename conventions (explicit opt-out)")
+    {
+        rows.push((
+            text(lang, "Test code selection", "テストコードの選択").into(),
+            text(
+                lang,
+                if context
+                    .document
+                    .scope()
+                    .default_excludes()
+                    .contains(&"syntax-proven Rust inline test findings (explicit opt-out)")
+                {
+                    "Conventional test paths and syntax-proven Rust test-only findings excluded"
+                } else {
+                    "Conventional test paths excluded; inline tests remain"
+                },
+                if context
+                    .document
+                    .scope()
+                    .default_excludes()
+                    .contains(&"syntax-proven Rust inline test findings (explicit opt-out)")
+                {
+                    "テスト用のパスを除外し、Rustのテスト専用と確認できた検出も除外"
+                } else {
+                    "テスト用のパスを除外（同一ファイル内のテストは対象）"
+                },
+            )
+            .into(),
+        ));
+    }
     let mut result = vec![Section {
         heading: text(lang, "Inspection coverage", "検査範囲と完了状況").into(),
         intro: text(lang, "Completeness covers supported inspection within the declared scope, after ignore settings, exclusions and size limits. It does not prove runtime use, certificate trust or security. Unenumerated files remain unknown.", "完了は、ignore設定・除外・サイズ制限を適用した範囲内で、対応する検査を終えたという意味です。実際の稼働、証明書の信頼性、安全性を保証しません。列挙されなかったファイルは不明です。").into(), rows,
     }];
     if context.diagnostics {
-        let mut grouped: BTreeMap<DiagnosticCode, Vec<_>> = BTreeMap::new();
+        let mut grouped: BTreeMap<(DiagnosticCode, &str), Vec<_>> = BTreeMap::new();
         for record in context.document.diagnostics() {
-            grouped.entry(record.code()).or_default().push(record);
+            grouped
+                .entry((record.code(), record.message()))
+                .or_default()
+                .push(record);
         }
         let rows = grouped
             .into_iter()
-            .map(|(code, records)| {
+            .map(|((code, message), records)| {
                 let files: BTreeSet<_> = records.iter().filter_map(|d| d.file()).collect();
                 let examples = files.iter().take(3).copied().collect::<Vec<_>>().join("; ");
                 Ok((
-                    diagnostic(code, lang)?,
+                    format!("{}: {}", diagnostic(code, lang)?, detail(message, lang)),
                     format!(
                         "{}{}; {}",
                         records.len(),
@@ -264,10 +399,20 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
         + c.unsupported_files()
         + c.unknown_files();
     for (label, count) in [
-        (text(lang, "Files selected", "検査対象"), c.selected_files()),
-        (text(lang, "Files analyzed", "解析完了"), c.analyzed_files()),
         (
-            text(lang, "Files needing follow-up", "追加確認が必要"),
+            text(lang, "Files selected", "検査対象ファイル数"),
+            c.selected_files(),
+        ),
+        (
+            text(lang, "Files analyzed", "解析完了ファイル数"),
+            c.analyzed_files(),
+        ),
+        (
+            text(
+                lang,
+                "Files needing follow-up",
+                "追加確認が必要なファイル数",
+            ),
             needs_check,
         ),
     ] {
@@ -280,7 +425,7 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
     writeln!(
         out,
         "<li>{}: <code>{}</code></li>",
-        text(lang, "Pre-inspection exclusions", "検査前に除外するもの"),
+        text(lang, "Exclusions", "除外条件"),
         h(&scope
             .default_excludes()
             .iter()
@@ -288,6 +433,20 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
             .map(
                 |s| if s == "known non-scannable media, archives and binary data" {
                     text(lang, s, "画像・アーカイブ・検査できないバイナリ")
+                } else if s == "test directories and test filename conventions (explicit opt-out)" {
+                    text(
+                        lang,
+                        s,
+                        "テスト用ディレクトリ・ファイル名（指定により除外）",
+                    )
+                } else if s == "root .pqcignore patterns (explicit opt-out)" {
+                    text(lang, s, ".pqcignore で指定したパス")
+                } else if s == "syntax-proven Rust inline test findings (explicit opt-out)" {
+                    text(
+                        lang,
+                        s,
+                        "Rustのテスト専用と確認できた範囲の検出（指定により除外）",
+                    )
                 } else {
                     s
                 }
@@ -436,9 +595,9 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
         )?;
     }
     if context.diagnostics {
-        let mut grouped: BTreeMap<DiagnosticCode, Vec<_>> = BTreeMap::new();
+        let mut grouped: BTreeMap<(DiagnosticCode, &str), Vec<_>> = BTreeMap::new();
         for d in context.document.diagnostics() {
-            grouped.entry(d.code()).or_default().push(d);
+            grouped.entry((d.code(), d.message())).or_default().push(d);
         }
         if !grouped.is_empty() {
             writeln!(
@@ -446,14 +605,23 @@ pub(crate) fn html(context: &HumanContext<'_>, lang: ReportLanguage) -> Result<S
                 "<details class=\"inspection-diagnostics\" id=\"inspection-diagnostics\"><summary>{}</summary>",
                 text(lang, "Reasons and example files", "理由とファイルの例")
             )?;
-            for (code, records) in grouped {
+            for ((code, message), records) in grouped {
                 let files: BTreeSet<_> = records.iter().filter_map(|d| d.file()).collect();
                 writeln!(
                     out,
                     "<div class=\"inspection-reason\"><p><strong>{}</strong> — {}{}</p><ul>",
-                    h(diagnostic_text(code, lang)),
+                    h(&reason_title(code, message, lang)),
                     records.len(),
                     text(lang, " records", "件")
+                )?;
+                writeln!(
+                    out,
+                    "<li>{}</li><li>{}: {} / {}: {}</li>",
+                    h(&detail(message, lang)),
+                    text(lang, "Diagnostic records", "診断記録数"),
+                    records.len(),
+                    text(lang, "Files", "ファイル数"),
+                    files.len()
                 )?;
                 for file in files.iter().take(3) {
                     writeln!(out, "<li><code>{}</code></li>", h(file))?;

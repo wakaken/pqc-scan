@@ -18,8 +18,10 @@ Each target identifies an observation and a fixed technical role in the exact
 saved bytes. An algorithm definition shared by two observations does not merge
 their targets. Changing a byte, including JSON whitespace, changes the input
 digest and target IDs. Native run/observation/asset IDs remain unchanged.
-Ambiguous native anchors retain technical facts but cannot identify a business
-binding. The digest establishes content identity, not collector authenticity.
+Repeated source references can receive explicit declarations when their saved
+positions and records are uniquely distinguishable inside this exact input.
+Incomplete or colliding source locations remain unbindable; native cross-scan
+ambiguity flags are preserved. The digest establishes content identity, not collector authenticity.
 
 Static references retain lexical/syntactic assurance; parsed certificate facts
 remain parsed attributes. Dependency declarations and resolution remain distinct
@@ -62,7 +64,8 @@ Experimental TLS/SSH collection and publication status are unchanged.
 Read a technical manifest first, then explicitly bind its input format, exact
 SHA-256 and target IDs to declared system aliases. `bind` requires that same
 `SavedEvidence` and an explicit evaluation time. Another file, reformatted content,
-unknown/duplicate target, ambiguous native anchor or unknown system is rejected.
+unknown/duplicate target, source identity that cannot be distinguished within the
+input, or unknown system is rejected.
 The mapping remains an operator declaration about the real business system.
 
 Claims may declare applicability, intended purpose/use, criticality,
@@ -113,6 +116,22 @@ product output; no Markdown preview server or conversion is required. The page
 uses the scan report's styles and local language/theme controls. `--lang en`
 (default) or `--lang ja` chooses the HTML initial language and Markdown language;
 JSON, IDs, facts and decisions are language-independent.
+
+Response work items combine decisions with matching system, observed purpose/role
+and decision semantics,20 at a time. Their count comes from scan/context data, not
+a fixed three. Reasons and next checks are visible. **View evidence** pages exact
+records20 at a time and renders one detail on request. Search covers all member
+algorithms/locations; urgency filters and language changes retain page/selection.
+Declarations and sources are also paged20 at a time; existing target/claim/source
+fragments open their exact references.
+
+Complete facts and decisions remain in a shared local HTML data archive, reducing
+per-target/per-language duplication. No external assets are required. JavaScript
+is needed to browse all records; without it, the first20 work items remain visible.
+Printing covers the visible items. Use Markdown or JSON for the complete report;
+the original assessment data can also be saved from the page. **Unidentified**
+means the saved record does not identify the algorithm. Grouping preserves each
+target's uncertainty, limitations and provenance.
 The library entry is `migration::evaluate(&saved, context.as_ref(), as_of)`;
 `evaluate_with_versions` selects explicit supported catalog, policy and model
 versions and rejects unknown versions without falling back to legacy v1.
@@ -170,8 +189,8 @@ support names for prerequisites. String values require JSON quotes; booleans and
 seconds use JSON types. `--unknown FIELD` explicitly records uncertainty; omission
 leaves no answer. Answers require an actor and assertion instant; optional
 `--valid-until` is never generated. Without expiry the existing freshness rules
-remain unknown. Reference-backed deadlines and advanced inheritance can be authored
-in the adopted context document; the simple answer builder does not invent references.
+remain unknown. The local form can author reference-backed deadlines; advanced inheritance can be authored
+in the adopted context document. References are explicit declarations, never invented by the simple answer builder.
 No personal-use shortcut changes criticality. Use the generated file with `assess`.
 
 Output uses the existing safe writer and1MiB context limit. Input aliases, hardlinks,
@@ -180,3 +199,35 @@ replacement. The shared library `generate_context`, `ContextSelection`, `Context
 and `ClaimAnswer` use the same reader/binding rules; `MigrationContext::to_bytes`
 exports all supported fields with normalized times, preserving claims and references.
 This is separate from legacy Context v1 and does not change existing scan defaults.
+
+
+### Selected migration configuration
+
+The optional `migration_target` claim saves purpose, algorithm, key-size/configuration
+and provenance. Supply it through the local UI or `context-template --set`. The reader
+validates the family/purpose combination, not the cryptographic validity of custom
+settings or real deployment compatibility. Support is bound to the configuration in
+the same claim scope; inherited known answers from another scope cannot be rebound.
+Inactive configuration or use cannot establish configuration-specific known support.
+Existing files without this field retain generic support semantics. See the
+[local workflow](SCANNING.md#optional-migration-context-and-reassessment).
+
+The optional provenanced `migration_goal_month` claim retains a planning goal at
+month precision (`YYYY-MM`, years 0001–9999), or explicit unknown. It does not
+convert to an instant, replace `deadline`, or affect policy decisions. Contexts
+without it retain their existing meaning. The local UI converts calendar durations
+to the existing exact `migration_lead_seconds` value; importing does not reinterpret
+that value.
+
+Reference-backed deadlines can also be authored through the local form. The reference-aware generation API accepts explicitly supplied references and validates them with the existing schema; old no-reference builder entrypoints retain their behavior. `assess --report-label` names only the HTML presentation and does not change saved machine decisions.
+
+### Distinguishable repeated source records
+
+Explicit target selection may bind separate source references with the same weak
+matching anchor when their complete saved byte spans and line/column locations are
+unique and their usage records are consistent. A malformed or unlocated neighbor
+in that group prevents the exception. This only identifies a record in the held
+file; it does not identify the same place in another scan or verify active use.
+Fixed reference-only targets can receive a declared purpose while the algorithm
+remains unknown. Unsupported algorithm components and unresolved component roles
+stay ineligible. Regenerating or reformatting the input still requires new bindings.

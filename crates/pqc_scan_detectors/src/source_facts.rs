@@ -2,9 +2,13 @@
 //! Unrelated/custom patterns retain the generic matching path.
 mod bindings;
 mod context;
+mod cross_file;
 mod javascript;
+mod jwt;
 mod python;
+mod ruby;
 mod rust;
+mod rust_tls;
 #[cfg(test)]
 mod selectors_tests;
 use bindings::{handler, Handler};
@@ -19,6 +23,7 @@ pub(crate) struct SourceMatch {
     pub start: usize,
     pub end: usize,
     pub reason: &'static str,
+    pub algorithm_references: Vec<String>,
     retained_prefix_bytes: usize,
 }
 impl SourceMatch {
@@ -30,6 +35,7 @@ impl SourceMatch {
 pub(crate) struct Facts {
     hits: HashMap<&'static str, Vec<SourceMatch>>,
     pub truncated: bool,
+    pub limit_reason: Option<(&'static str, usize, usize)>,
     pub partial: bool,
     remaining_candidates: Option<usize>,
     remaining_bytes: Option<usize>,
@@ -57,6 +63,7 @@ impl Facts {
                 start,
                 end,
                 reason,
+                algorithm_references: vec![],
                 retained_prefix_bytes: 0,
             });
         }
@@ -98,6 +105,14 @@ impl Facts {
     pub fn replaces(&self, rule: &Rule) -> bool {
         handler(rule).is_some_and(Handler::replaces_generic)
     }
+    pub fn references_at(&self, rule: &Rule, start: usize, end: usize) -> &[String] {
+        let hits = self.rule_matches(rule);
+        hits.binary_search_by_key(&start, |h| h.start)
+            .ok()
+            .and_then(|i| hits.get(i))
+            .filter(|h| h.end == end)
+            .map_or(&[], |h| h.algorithm_references.as_slice())
+    }
 
     pub fn status(&self) -> DetectorStatus {
         if self.truncated {
@@ -128,6 +143,17 @@ pub(crate) fn inspect(
     rules: &RuleSet,
     budget: crate::DetectorBudget,
 ) -> Facts {
+    inspect_in_repository(root, text, language, rules, budget, None, None)
+}
+pub(crate) fn inspect_in_repository(
+    root: Node<'_>,
+    text: &str,
+    language: &str,
+    rules: &RuleSet,
+    budget: crate::DetectorBudget,
+    file: Option<&std::path::Path>,
+    repository: Option<&pqc_scan_core::RepositoryContext>,
+) -> Facts {
     let mut facts = Facts {
         partial: root.has_error(),
         remaining_candidates: Some(budget.max_ast_candidates),
@@ -144,12 +170,31 @@ pub(crate) fn inspect(
     let mut context = Context::new(root, text, language, budget);
     if context.truncated.get() {
         facts.truncated = true;
+        facts.limit_reason = context.limit_reason.get();
         return facts;
     }
     match language {
-        "javascript" | "typescript" => javascript::inspect(&mut context, &mut facts, rules),
+        "javascript" | "typescript" => {
+            javascript::inspect(&mut context, &mut facts, rules);
+            if rules.get("TS_NODE_JOSE_USAGE").is_some_and(builtin) {
+                jwt::inspect(&context, &mut facts);
+                if let (Some(file), Some(repository)) = (file, repository) {
+                    cross_file::inspect(&context, &mut facts, file, repository);
+                }
+            }
+        }
         "python" => python::inspect(&mut context, &mut facts, rules),
-        "rust" => rust::inspect(&mut context, &mut facts),
+        "rust" => {
+            rust::inspect(
+                &mut context,
+                &mut facts,
+                rules.get("PQC_RUST_API").is_some_and(builtin),
+            );
+            if rules.get("API_RUST_OPENSSL_TLS").is_some_and(builtin) {
+                rust_tls::inspect(&mut context, &mut facts);
+            }
+        }
+        "ruby" => ruby::inspect(&context, &mut facts),
         "java" => {
             if let Some(rule) = rules.get("PQC_JAVA_API").filter(|r| builtin(r)) {
                 for node in &context.nodes {
@@ -188,6 +233,7 @@ pub(crate) fn inspect(
         _ => {}
     }
     facts.truncated |= context.truncated.get();
+    facts.limit_reason = facts.limit_reason.or(context.limit_reason.get());
     for (id, matches) in &mut facts.hits {
         if let Some(pattern) = rules
             .get(id)

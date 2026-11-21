@@ -22,6 +22,7 @@ pub(super) struct Context<'a, 's> {
     pub nodes: Vec<Node<'a>>,
     pub text: &'s str,
     pub truncated: Cell<bool>,
+    pub limit_reason: Cell<Option<(&'static str, usize, usize)>>,
     pub budget: crate::DetectorBudget,
     language: &'s str,
     scopes: Vec<Scope<'a>>,
@@ -30,8 +31,15 @@ pub(super) struct Context<'a, 's> {
     writes: HashSet<usize>,
     protected: Vec<(usize, usize)>,
     dangling_strings: Vec<(usize, usize)>,
+    unresolved_binding: Binding<'a>,
 }
 impl<'a, 's> Context<'a, 's> {
+    pub fn limit(&self, reason: &'static str, limit: usize, processed: usize) {
+        self.truncated.set(true);
+        if self.limit_reason.get().is_none() {
+            self.limit_reason.set(Some((reason, limit, processed)));
+        }
+    }
     pub fn new(
         root: Node<'a>,
         text: &'s str,
@@ -45,6 +53,7 @@ impl<'a, 's> Context<'a, 's> {
             text,
             language,
             truncated: Cell::new(false),
+            limit_reason: Cell::new(None),
             scopes: vec![Scope {
                 parent: None,
                 function: true,
@@ -56,16 +65,26 @@ impl<'a, 's> Context<'a, 's> {
             writes: HashSet::new(),
             protected: Vec::new(),
             dangling_strings: Vec::new(),
+            unresolved_binding: Binding {
+                id: usize::MAX,
+                declared_at: 0,
+                value: None,
+                projection: None,
+                imported: None,
+            },
         };
         if max_nodes == 0 {
-            result.truncated.set(true);
+            result.limit("source_ast_nodes", max_nodes, result.nodes.len());
             return result;
         }
-        let mut stack = vec![(root, 0, 0)];
+        let mut stack = vec![(root, 0)];
         let mut scheduled = 1;
-        while let Some((node, parent_scope, depth)) = stack.pop() {
-            if depth > 64 || node.named_child_count() > max_nodes {
-                result.truncated.set(true);
+        while let Some((node, parent_scope)) = stack.pop() {
+            // This traversal is iterative and already bounded by scheduled
+            // nodes. AST depth also grows with ordinary fluent call chains and
+            // union types; it is not a recursive evaluation/alias budget.
+            if node.named_child_count() > max_nodes {
+                result.limit("source_ast_nodes", max_nodes, result.nodes.len());
                 continue;
             }
             let kind = node.kind();
@@ -82,6 +101,11 @@ impl<'a, 's> Context<'a, 's> {
                     | "lambda"
                     | "method_definition"
                     | "method_signature"
+                    | "function_signature"
+                    | "function_type"
+                    | "constructor_type"
+                    | "call_signature"
+                    | "construct_signature"
             );
             let block = matches!(
                 kind,
@@ -149,10 +173,10 @@ impl<'a, 's> Context<'a, 's> {
             let mut cursor = node.walk();
             for child in node.named_children(&mut cursor) {
                 if scheduled >= max_nodes {
-                    result.truncated.set(true);
+                    result.limit("source_ast_nodes", max_nodes, result.nodes.len());
                     break;
                 }
-                stack.push((child, scope, depth + 1));
+                stack.push((child, scope));
                 scheduled += 1;
             }
         }
@@ -175,8 +199,13 @@ impl<'a, 's> Context<'a, 's> {
         while !raw.is_char_boundary(boundary) {
             boundary -= 1;
         }
-        self.truncated
-            .set(self.truncated.get() || boundary < raw.len());
+        if boundary < raw.len() {
+            self.limit(
+                "source_match_bytes",
+                self.budget.max_ast_match_bytes,
+                boundary,
+            );
+        }
         &raw[..boundary]
     }
     pub fn source(&self, node: Node<'_>) -> &'s str {
@@ -203,6 +232,7 @@ impl<'a, 's> Context<'a, 's> {
             .or_default();
         if bindings.len() == 64 {
             self.truncated.set(true);
+            self.limit_reason.set(Some(("same_name_bindings", 64, 64)));
             // An omitted later declaration must not expose an older crypto
             // binding. Keep an unresolved sentinel from the point of overflow.
             if let Some(last) = bindings.last_mut() {
@@ -227,7 +257,7 @@ impl<'a, 's> Context<'a, 's> {
             }
             scope = self.scopes[scope].parent.unwrap_or(0);
         }
-        self.truncated.set(true);
+        self.limit("lexical_scope_lookup_depth", 128, 128);
         0
     }
     pub fn add_hoisted(&mut self, scope: usize, name: &str, imported: Option<String>, id: usize) {
@@ -262,8 +292,11 @@ impl<'a, 's> Context<'a, 's> {
             function_seen |= self.scopes[scope].function;
             scope = self.scopes[scope].parent?;
         }
-        self.truncated.set(true);
-        None
+        self.limit("lexical_scope_lookup_depth", 128, 128);
+        // An exhausted lookup is not proof that the name is unbound. Existing
+        // consumers treat this opaque binding as shadowed/unresolved instead
+        // of taking their unbound standard-library-name fallback.
+        Some(&self.unresolved_binding)
     }
     pub fn unchanged(&self, binding: &Binding<'_>) -> bool {
         !self.writes.contains(&binding.id)

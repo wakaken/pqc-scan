@@ -922,6 +922,11 @@ fn decide(
             Readiness::Ready
         }
     };
+    if let Some(claim) = c.and_then(|c| c.claim("migration_target")) {
+        if row != 1 && row != 7 {
+            used.insert(claim.id.clone(), claim.clone());
+        }
+    }
     for field in fields {
         if let Some(claim) = c.and_then(|c| c.claim(field)) {
             used.insert(claim.id.clone(), claim.clone());
@@ -988,6 +993,10 @@ fn decide(
     source_ids.push("F14".into());
     if fields_time(&used) {
         source_ids.push("F13".into());
+    }
+    // Planning metadata is retained for review without entering any policy branch.
+    if let Some(claim) = c.and_then(|c| c.claim("migration_goal_month")) {
+        used.insert(claim.id.clone(), claim.clone());
     }
     let id = decision_id(&t.id, digest, as_of);
     let d = Decision {

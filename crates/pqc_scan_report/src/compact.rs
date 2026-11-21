@@ -54,6 +54,20 @@ fn text(finding: &Finding, lang: ReportLanguage) -> Finding {
     ) {
         display.migration_hint = format!("{} {}", label(lang, "First distinguish constants, comments and test references from effective configuration.", "まず定数・コメント・テストの参照と有効な設定を区別してください。"), display.migration_hint);
     }
+    if finding
+        .evidence
+        .metadata
+        .get("reference_kind")
+        .is_some_and(|s| s == "display_text")
+    {
+        display.description = label(
+            lang,
+            "An algorithm name appears in diagnostic or display text.",
+            "エラー文・表示文に暗号方式名が含まれています。",
+        )
+        .into();
+        display.migration_hint = label(lang, "This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.", "この文言だけでは暗号処理での利用は確認できません。実装と実際の設定を別途確認してください。").into();
+    }
     display
 }
 
@@ -165,12 +179,18 @@ pub(crate) fn html_report_with_context(
     Ok(())
 }
 
+const FILTER_ICON: &str = r#"<svg class="panel-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5h18M6 12h12M9 19h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>"#;
+
 fn html_view(
     result: &ScanResult,
     lang: ReportLanguage,
     context: Option<&crate::inspection::HumanContext<'_>>,
     guide_url: &str,
 ) -> Result<String> {
+    let raw = result;
+    let view = crate::deduplicated::project(raw);
+    let result = &view.result;
+    let guide_groups = groups(raw);
     let groups = groups(result);
     let title = label(
         lang,
@@ -184,23 +204,23 @@ fn html_view(
     writeln!(out, "<section class=\"summary\">")?;
     let mut metrics = vec![
         (
-            label(lang, "Risk candidates", "対応を確認する候補"),
+            label(lang, "Findings to review", "確認が必要な指摘"),
             result.findings.len() - inv,
         ),
-        (label(lang, "Inventory findings", "参考情報"), inv),
+        (label(lang, "Informational findings", "参考情報"), inv),
     ];
     if context.is_none() {
         metrics.push((
-            label(lang, "Scanned Files", "調査したファイル"),
+            label(lang, "Files inspected", "検査対象ファイル数"),
             result.summary.scanned_files,
         ));
         metrics.push((
-            label(lang, "Skipped Files", "対象外のファイル"),
+            label(lang, "Files skipped", "対象外ファイル数"),
             result.summary.skipped_files,
         ));
     }
     metrics.push((
-        label(lang, "Affected files", "該当ファイル"),
+        label(lang, "Files with findings", "検出のあったファイル数"),
         result
             .findings
             .iter()
@@ -208,16 +228,27 @@ fn html_view(
             .collect::<BTreeSet<_>>()
             .len(),
     ));
-    for (name, count) in metrics {
-        writeln!(out,"<div class=\"metric\"><div class=\"metric-label\">{name}</div><div class=\"metric-value\">{count}</div></div>")?;
+    for (index, (name, count)) in metrics.into_iter().enumerate() {
+        let unit = if index < 2 {
+            format!(
+                " <small class=\"metric-unit\">{}</small>",
+                label(lang, "items", "件")
+            )
+        } else {
+            String::new()
+        };
+        writeln!(out,"<div class=\"metric\"><div class=\"metric-label\">{name}</div><div class=\"metric-value\">{count}{unit}</div></div>")?;
     }
     writeln!(out, "</section>")?;
     render_severity_distribution(&mut out, result, lang)?;
     if let Some(context) = context {
         writeln!(out, "{}", crate::inspection::html(context, lang)?)?;
     }
-    writeln!(out,"<nav data-panel-toggles hidden class=\"panel-toggles\" aria-label=\"{}\"><button type=\"button\" data-toggle-filters aria-controls=\"report-filters\" aria-pressed=\"true\">{}</button><button type=\"button\" data-toggle-tree aria-controls=\"report-file-tree\" aria-pressed=\"true\">{}</button></nav><div class=\"report-workspace\"><aside data-report-sidebar hidden>",label(lang,"Report panels","表示パネル"),label(lang,"Filters","絞り込み"),label(lang,"File tree","ファイルツリー"))?;
-    writeln!(out,"<section id=\"report-filters\" data-report-controls hidden aria-label=\"{}\"><h2>{}</h2><label>{}<select data-mode><option value=\"candidate\">{}</option><option value=\"inventory\">{}</option><option value=\"all\">{}</option></select></label><label>{}<input data-search type=\"search\" placeholder=\"{}\"></label><label>{}<select data-severity><option value=\"\">{}</option>",label(lang,"Report filters","表示の絞り込み"),label(lang,"Filters","絞り込み"),label(lang,"View","表示対象"),label(lang,"Risk candidates","対応候補"),label(lang,"Inventory","参考情報"),label(lang,"All","すべて"),label(lang,"Search","検索"),label(lang,"Rule, title or file","ルール・説明・ファイル名"),label(lang,"Severity","重大度"),label(lang,"All severities","すべて"))?;
+    writeln!(
+        out,
+        "<div class=\"report-workspace\"><aside data-report-sidebar hidden>"
+    )?;
+    writeln!(out,"<details id=\"report-filters\" data-report-controls hidden open aria-label=\"{}\"><summary>{FILTER_ICON}{}</summary><div class=\"panel-body\"><label>{}<select data-mode><option value=\"candidate\">{}</option><option value=\"inventory\">{}</option><option value=\"all\">{}</option></select></label><label>{}<input data-search type=\"search\" placeholder=\"{}\"></label><label>{}<select data-severity><option value=\"\">{}</option>",label(lang,"Search conditions","検索条件"),label(lang,"Search conditions","検索条件"),label(lang,"View","表示対象"),label(lang,"Risk candidates","対応候補"),label(lang,"Inventory","参考情報"),label(lang,"All","すべて"),label(lang,"Search","検索"),label(lang,"Rule, title or file","ルール・説明・ファイル名"),label(lang,"Severity","重大度"),label(lang,"All severities","すべて"))?;
     for s in ["critical", "high", "medium", "low", "info"] {
         writeln!(out, "<option value=\"{s}\">{}</option>", severity(lang, s))?;
     }
@@ -241,7 +272,7 @@ fn html_view(
         label(lang, "Rule", "ルール"),
         label(lang, "All rules", "すべてのルール")
     )?;
-    for group in &groups {
+    for group in &guide_groups {
         writeln!(
             out,
             "<option value=\"{}\">{}</option>",
@@ -255,7 +286,7 @@ fn html_view(
     }
     writeln!(
         out,
-        "</select></label><a class=\"rule-guide-link\" href=\"{guide_url}?lang={}\">{}</a><label>{}<select data-file-filter><option value=\"\">{}</option>",
+        "</select></label><a class=\"rule-guide-link\" data-rule-help=\"all\" href=\"{guide_url}?lang={}\">{}</a><label>{}<select data-file-filter><option value=\"\">{}</option>",
         label(lang, "en", "ja"),
         label(lang, "Rule explanations", "ルールの説明"),
         label(lang, "File", "ファイル"),
@@ -269,7 +300,7 @@ fn html_view(
     {
         writeln!(out, "<option value=\"{}\">{}</option>", h(file), h(file))?;
     }
-    writeln!(out, "</select></label><button type=\"button\" data-reset>{}</button></section>{}</aside><section class=\"results\" id=\"findings\" tabindex=\"-1\" aria-label=\"{}\"><div class=\"results-heading\"><h2>{}</h2><p data-report-status role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"></p></div>", label(lang,"Clear all filters","条件をすべて解除"), crate::file_tree::render(result, lang), label(lang,"Findings","検出結果"), label(lang,"Findings","検出結果"))?;
+    writeln!(out, "</select></label><label class=\"test-results-option\"><input type=\"checkbox\" data-show-tests checked>{}</label><button type=\"button\" data-reset>{}</button></div></details>{}</aside><section class=\"results\" id=\"findings\" tabindex=\"-1\" aria-label=\"{}\"><div class=\"results-heading\"><h2>{}</h2><p data-report-status role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"></p></div>", label(lang,"Show test code results","テストコードの結果を表示"),label(lang,"Clear all filters","条件をすべて解除"), crate::file_tree::render(result, lang), label(lang,"Findings","検出結果"), label(lang,"Findings","検出結果"))?;
     writeln!(out,"<noscript><p>{}</p></noscript><p class=\"empty-state\" data-empty hidden>{}</p><p class=\"print-note\">{}</p><nav data-group-pager hidden aria-label=\"{}\"><button type=\"button\" data-prev>{}</button><span data-page></span><button type=\"button\" data-next>{}</button></nav>",label(lang,"JavaScript is unavailable. All findings are shown below; native details still work. Interactive filters and pagination are unavailable.","JavaScriptを使わない場合は、全件を表示します。折りたたみは開けますが、検索・絞り込み・ページ切替は使えません。"),label(lang,"No findings match these filters. Clear the filters to see the full report.","条件に一致する検出はありません。条件を解除すると全体の結果を確認できます。"),label(lang,"Print view includes all findings, regardless of screen filters or pagination.","印刷には、画面の絞り込みやページに関係なく、すべての検出結果を含みます。"),label(lang,"Rule pages","ルール一覧のページ"),label(lang,"Previous","前へ"),label(lang,"Next","次へ"))?;
     let mut finding_index = 0;
     let mut related: BTreeMap<(&str, usize, usize), BTreeSet<usize>> = BTreeMap::new();
@@ -290,11 +321,12 @@ fn html_view(
             .unwrap()
             .severity
             .as_str();
+        let guide_index = guide_groups.iter().position(|r| r.id == group.id).unwrap();
         let total = group.occurrences.len();
-        writeln!(out,"<details class=\"rule-card\" id=\"rule-{g}\" data-rule data-rule-id=\"{}\" data-page-size=\"20\"><summary><span class=\"rule-title\"><strong>{}</strong><code>{}</code></span><span class=\"sev {max_s}\">{}</span><span class=\"count\">{} {}</span><span class=\"rule-meta\">{} {} · {} <span data-match-count>{total} / {total}</span></span></summary><div class=\"rule-body\"><p>{}</p>",h(group.id),h(&short(&representative.description,110)),h(group.id),severity(lang,max_s),group.occurrences.len(),label(lang,"hits","件"),label(lang,"Files","ファイル"),group.occurrences.iter().map(|f|&f.location.file).collect::<BTreeSet<_>>().len(),label(lang,"matches","表示対象"),h(&representative.migration_hint))?;
+        writeln!(out,"<details class=\"rule-card\" id=\"rule-{g}\" data-rule data-rule-id=\"{}\" data-page-size=\"20\"><summary><span class=\"rule-title\"><strong>{}</strong></span><span class=\"sev {max_s}\">{}</span><span class=\"count\">{} {}</span><span class=\"rule-meta\">{} {} · {} <span data-match-count>{total} / {total}</span></span></summary><div class=\"rule-body\"><p>{}</p>",h(group.id),h(&short(&representative.description,110)),severity(lang,max_s),group.occurrences.len(),label(lang,"hits","件"),label(lang,"Files","ファイル"),group.occurrences.iter().map(|f|&f.location.file).collect::<BTreeSet<_>>().len(),label(lang,"matches","表示対象"),h(&representative.migration_hint))?;
         writeln!(
             out,
-            "<p><a class=\"rule-guide-link\" href=\"{guide_url}?lang={}#rule-{g}\">{}</a></p>",
+            "<p><a class=\"rule-guide-link\" data-rule-help=\"{guide_index}\" href=\"{guide_url}?lang={}#rule-{guide_index}\">{}</a></p>",
             label(lang, "en", "ja"),
             label(lang, "About this rule", "このルールの説明")
         )?;
@@ -303,11 +335,37 @@ fn html_view(
             let index = finding_index;
             finding_index += 1;
             let display = text(f, lang);
+            let originals = &view.originals[&f.finding_id];
+            let rule_ids: Vec<_> = originals.iter().map(|o| o.rule_id.as_str()).collect();
             let search = format!(
                 "{} {} {}",
-                group.id, representative.description, f.location.file
+                rule_ids.join(" "),
+                originals
+                    .iter()
+                    .map(|o| text(o, lang).description)
+                    .collect::<Vec<_>>()
+                    .join(" "),
+                f.location.file
             );
-            writeln!(out,"<details class=\"occurrence\" id=\"finding-{index}\" data-finding-id=\"{}\" data-inventory=\"{}\" data-severity=\"{}\" data-risk=\"{}\" data-search=\"{}\" data-file=\"{}\"><summary><code>{}</code><span class=\"occ-match\">{}</span><span class=\"next-step\">{}: {}</span></summary><p class=\"finding-description\">{}</p><p>{}: {}</p><p>{}: {}</p><p>{}: <code>{}</code></p>",h(&f.finding_id),inventory(f),f.severity.as_str(),f.risk.as_str(),h(&search),h(&f.location.file),h(&location(f,lang)),h(&short(&f.evidence.r#match,90)),label(lang,"Next","対応"),h(&short(&next(f,group,lang),150)),h(&display.description),label(lang,"Risk","判断の目安"),risk(lang,f.risk.as_str()),label(lang,"Check","確認すること"),h(&display.migration_hint),label(lang,"Evidence","検出した記述"),h(&f.evidence.r#match))?;
+            writeln!(out,"<details class=\"occurrence\" id=\"finding-{index}\" data-finding-id=\"{}\" data-rules=\"{}\" data-inventory=\"{}\" data-severity=\"{}\" data-risk=\"{}\" data-search=\"{}\" data-file=\"{}\" data-test=\"{}\"><summary><code>{}</code><span class=\"occ-match\">{}</span><span class=\"next-step\">{}: {}</span></summary><p class=\"finding-description\">{}</p><p>{}: {}</p><p>{}: {}</p><p>{}: <code>{}</code></p>",h(&f.finding_id),h(&serde_json::to_string(&rule_ids)?),inventory(f),f.severity.as_str(),f.risk.as_str(),h(&search),h(&f.location.file),pqc_scan_core::file_selection::is_test_path(Path::new(&f.location.file)),h(&location(f,lang)),h(&short(&f.evidence.r#match,90)),label(lang,"Next","対応"),h(&short(&next(f,group,lang),150)),h(&display.description),label(lang,"Risk","判断の目安"),risk(lang,f.risk.as_str()),label(lang,"Check","確認すること"),h(&display.migration_hint),label(lang,"Evidence","検出した記述"),h(&f.evidence.r#match))?;
+            writeln!(
+                out,
+                "<details class=\"matched-rules\" id=\"matched-rules-{index}\"><summary>{} ({})</summary>",
+                label(lang, "Matched rules", "一致したルール"),
+                originals.len()
+            )?;
+            for original in originals {
+                let copy = text(original, lang);
+                writeln!(
+                    out,
+                    "<section><h4>{}</h4><p><code>{}</code> · {}</p><p>{}</p></section>",
+                    h(&copy.description),
+                    h(&original.rule_id),
+                    severity(lang, original.severity.as_str()),
+                    h(&copy.migration_hint)
+                )?;
+            }
+            writeln!(out, "</details>")?;
             if let Some(snippet) = &f.source_snippet {
                 writeln!(
                     out,
@@ -421,7 +479,7 @@ fn html_view(
             )
         )?;
     }
-    writeln!(out, "</section></div></main>")?;
+    writeln!(out, "</section></div><dialog class=\"rule-dialog\" data-rule-dialog aria-label=\"{}\"><header><h2>{}</h2><button type=\"button\" data-close-rule-dialog>{}</button></header><div data-rule-dialog-body></div></dialog><template data-rule-explanations>{}</template></main>", label(lang,"Rule explanations","ルールの説明"),label(lang,"Rule explanations","ルールの説明"),label(lang,"Close","閉じる"),rule_guide(raw,lang,"")?)?;
     Ok(out)
 }
 
@@ -429,11 +487,23 @@ fn rule_guide(result: &ScanResult, lang: ReportLanguage, report_url: &str) -> Re
     let mut out = String::new();
     writeln!(out, "<main class=\"container rule-guide\" data-report-view lang=\"{}\"><header class=\"top\"><div><p class=\"eyebrow\">pqc-scan / {}</p><h1>{}</h1></div><a href=\"{report_url}?lang={}\">{}</a></header><p>{}</p>",label(lang,"en","ja"),label(lang,"Reference","解説"),label(lang,"Rule explanations","ルールの説明"),label(lang,"en","ja"),label(lang,"Back to report","レポートに戻る"),label(lang,"Rules found in this report. Findings identify references to investigate, not confirmed vulnerabilities or runtime use.","このレポートで検出されたルールを説明します。所見は調査の手掛かりであり、脆弱性や稼働時の利用を確定するものではありません。"))?;
     writeln!(out,"<section class=\"rule-guide-intro\"><h2>{}</h2><p>{}</p><p>{}</p></section>",label(lang,"How to read the labels","表示の読み方"),label(lang,"Severity prioritizes investigation; it is not a count of confirmed vulnerabilities. Risk describes the matched cryptographic signal. Informational PQC references do not establish migration completion.","重大度は調査の優先順位です。確認済みの脆弱性の数ではありません。リスクは一致した暗号の手掛かりを分類します。PQC方式の参照も移行完了を保証しません。"),label(lang,"Review the file role (product, test, fixture or documentation), source context and actual deployment before applying the suggested action.","推奨対応を適用する前に、製品・テスト・fixture・文書のどこにある記述か、周辺コードと実際の稼働環境を確認してください。"))?;
+    let projection = crate::deduplicated::project(result);
+    let projected_groups = groups(&projection.result);
     let groups = groups(result);
     if groups.is_empty() {
         writeln!(out,"<p>{}</p>",label(lang,"No rules produced findings in this scan. This does not establish absence of cryptography. Scope and inspection limits remain in the report.","このスキャンでは、所見を出したルールはありません。暗号利用の不存在を示すものではありません。検査範囲と制約はレポートで確認してください。"))?;
     }
     for (g, group) in groups.iter().enumerate() {
+        let report_group = projected_groups
+            .iter()
+            .position(|p| {
+                p.occurrences.iter().any(|f| {
+                    projection.originals[&f.finding_id]
+                        .iter()
+                        .any(|o| o.rule_id == group.id)
+                })
+            })
+            .unwrap();
         let f = text(group.occurrences[0], lang);
         let severities: BTreeSet<_> = group
             .occurrences
@@ -445,7 +515,7 @@ fn rule_guide(result: &ScanResult, lang: ReportLanguage, report_url: &str) -> Re
             .iter()
             .map(|f| risk(lang, f.risk.as_str()))
             .collect();
-        writeln!(out,"<section class=\"rule-explanation\" id=\"rule-{g}\" tabindex=\"-1\"><h2>{}</h2><code>{}</code><p>{}</p><dl><dt>{}</dt><dd>{}</dd><dt>{}</dt><dd>{}</dd><dt>{}</dt><dd>{}</dd><dt>{}</dt><dd>{}</dd></dl><h3>{}</h3><p>{}</p><a href=\"{report_url}?lang={}#rule-{g}\">{}</a></section>",h(&f.description),h(group.id),h(&f.migration_hint),label(lang,"Category","分類"),h(&f.category),label(lang,"Observed severities","今回の重大度"),h(&severities.into_iter().collect::<Vec<_>>().join(", ")),label(lang,"Observed risks","今回のリスク"),h(&risks.into_iter().collect::<Vec<_>>().join(", ")),label(lang,"Occurrences","検出箇所"),group.occurrences.len(),label(lang,"Example follow-up; confirm the advice at each location","確認事項の例（各検出箇所の案内も確認してください）"),h(&next(group.occurrences[0], group,lang)),label(lang,"en","ja"),label(lang,"View locations and evidence","検出箇所と根拠を見る"))?;
+        writeln!(out,"<section class=\"rule-explanation\" id=\"rule-{g}\" tabindex=\"-1\"><h2>{}</h2><code>{}</code><p>{}</p><dl><dt>{}</dt><dd>{}</dd><dt>{}</dt><dd>{}</dd><dt>{}</dt><dd>{}</dd><dt>{}</dt><dd>{}</dd></dl><h3>{}</h3><p>{}</p><a href=\"{report_url}?lang={}#rule-{report_group}\">{}</a></section>",h(&f.description),h(group.id),h(&f.migration_hint),label(lang,"Category","分類"),h(&f.category),label(lang,"Observed severities","今回の重大度"),h(&severities.into_iter().collect::<Vec<_>>().join(", ")),label(lang,"Observed risks","今回のリスク"),h(&risks.into_iter().collect::<Vec<_>>().join(", ")),label(lang,"Occurrences","検出箇所"),group.occurrences.len(),label(lang,"Example follow-up; confirm the advice at each location","確認事項の例（各検出箇所の案内も確認してください）"),h(&next(group.occurrences[0], group,lang)),label(lang,"en","ja"),label(lang,"View locations and evidence","検出箇所と根拠を見る"))?;
     }
     writeln!(out, "</main>")?;
     Ok(out)
@@ -549,6 +619,8 @@ pub(crate) fn markdown_report_with_context(
     lang: ReportLanguage,
     context: Option<&crate::inspection::HumanContext<'_>>,
 ) -> Result<()> {
+    let view = crate::deduplicated::project(result);
+    let result = &view.result;
     let groups = groups(result);
     let mut out = String::new();
     let inv = result.findings.iter().filter(|f| inventory(f)).count();
@@ -565,11 +637,11 @@ pub(crate) fn markdown_report_with_context(
             .generated_at
             .with_timezone(&chrono::Local)
             .format("%Y-%m-%d %H:%M:%S %Z (UTC%:z)"),
-        label(lang, "Risk candidates", "対応を確認する候補"),
+        label(lang, "Findings to review (items)", "確認が必要な指摘（件）"),
         result.findings.len() - inv,
-        label(lang, "Inventory findings", "参考情報"),
+        label(lang, "Informational findings (items)", "参考情報（件）"),
         inv,
-        label(lang, "Scanned files", "調査したファイル"),
+        label(lang, "Files inspected", "検査対象ファイル数"),
         result.summary.scanned_files
     )?;
     writeln!(
@@ -727,6 +799,23 @@ pub(crate) fn markdown_report_with_context(
             }
         }
         for (offset, f) in group.occurrences.iter().enumerate() {
+            writeln!(
+                out,
+                "\n### {} — {}\n",
+                m(&location(f, lang)),
+                label(lang, "Matched rules", "一致したルール")
+            )?;
+            for original in &view.originals[&f.finding_id] {
+                let copy = text(original, lang);
+                writeln!(
+                    out,
+                    "- `{}` ({}): {} — {}",
+                    m(&original.rule_id),
+                    severity(lang, original.severity.as_str()),
+                    m(&copy.description),
+                    m(&copy.migration_hint)
+                )?;
+            }
             if let Some(snippet) = &f.source_snippet {
                 writeln!(
                     out,

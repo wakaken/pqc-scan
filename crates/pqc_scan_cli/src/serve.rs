@@ -25,6 +25,9 @@ pub(super) struct ServeArgs {
     rules_dir: PathBuf,
     #[arg(long, default_value_t = 4usize)]
     threads: usize,
+    /// Initial per-file size limit in MiB (1..64), editable in the folder picker.
+    #[arg(long, default_value_t = super::file_limits::DEFAULT_MIB, value_parser = super::file_limits::parse_mib)]
+    max_file_size_mib: usize,
     /// Do not open the default browser automatically.
     #[arg(long)]
     no_open: bool,
@@ -45,9 +48,11 @@ struct State {
     origin: String,
     prefix: String,
     threads: usize,
+    max_file_size_mib: usize,
     jobs: Mutex<Jobs>,
     migration: bool,
     drafts: Mutex<BTreeMap<u64, migration_ui::Draft>>,
+    generations: Mutex<BTreeMap<u64, migration_ui::Generation>>,
 }
 fn random_token() -> Result<String> {
     let mut bytes = [0u8; 32];
@@ -92,9 +97,11 @@ pub(super) fn run(args: ServeArgs, stdout: &mut impl Write) -> Result<()> {
         origin,
         prefix: format!("/{}/", random_token()?),
         threads: args.threads,
+        max_file_size_mib: args.max_file_size_mib,
         jobs: Mutex::new(Jobs::default()),
         migration: args.migration,
         drafts: Mutex::new(BTreeMap::new()),
+        generations: Mutex::new(BTreeMap::new()),
     });
     let url = format!("{}{}", state.origin, state.prefix);
     writeln!(stdout, "pqc-scan local web UI: {url}")?;
@@ -134,6 +141,21 @@ fn reply(request: Request, code: u16, mime: &str, bytes: Vec<u8>) {
     let mut response = Response::from_data(bytes).with_status_code(StatusCode(code));
     for (name,value) in [("Content-Type",mime),("Cache-Control","no-store"),("Referrer-Policy","no-referrer"),("X-Content-Type-Options","nosniff"),("Content-Security-Policy","default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")] {
         if let Ok(h)=Header::from_bytes(name,value) {response.add_header(h);}
+    }
+    if code == 200
+        && request
+            .url()
+            .split('?')
+            .next()
+            .is_some_and(|path| path.ends_with("/migration-context.json"))
+    {
+        response.add_header(
+            Header::from_bytes(
+                "Content-Disposition",
+                "attachment; filename=\"migration-context.json\"",
+            )
+            .expect("fixed download header"),
+        );
     }
     let _ = request.respond(response);
 }
@@ -193,7 +215,41 @@ fn handle(request: Request, state: &Arc<State>) {
     }
     if request.method() == &Method::Get {
         match route {
-            "api/config" => json_reply(request, 200, json!({"migration":state.migration})),
+            "api/config" => json_reply(
+                request,
+                200,
+                json!({"migration":state.migration,"max_file_size_mib":state.max_file_size_mib}),
+            ),
+            "style.css" => reply(
+                request,
+                200,
+                "text/css; charset=utf-8",
+                include_bytes!("serve.css").to_vec(),
+            ),
+            "context-model.js" if state.migration => reply(
+                request,
+                200,
+                "text/javascript; charset=utf-8",
+                include_bytes!("serve-context.js").to_vec(),
+            ),
+            "migration-form.html" if state.migration => reply(
+                request,
+                200,
+                "text/html; charset=utf-8",
+                include_bytes!("serve-migration.html").to_vec(),
+            ),
+            "report-view.js" if state.migration => reply(
+                request,
+                200,
+                "text/javascript; charset=utf-8",
+                pqc_scan_report::migration_view_script().as_bytes().to_vec(),
+            ),
+            "report-view.css" if state.migration => reply(
+                request,
+                200,
+                "text/css; charset=utf-8",
+                pqc_scan_report::migration_view_styles().as_bytes().to_vec(),
+            ),
             "migration.js" if state.migration => reply(
                 request,
                 200,
@@ -205,6 +261,12 @@ fn handle(request: Request, state: &Arc<State>) {
                 200,
                 "text/html; charset=utf-8",
                 include_bytes!("serve.html").to_vec(),
+            ),
+            "report-session.js" => reply(
+                request,
+                200,
+                "text/javascript; charset=utf-8",
+                include_bytes!("report-session.js").to_vec(),
             ),
             "app.js" => reply(
                 request,
@@ -230,8 +292,9 @@ fn handle(request: Request, state: &Arc<State>) {
             _ => report_file(request, state, route),
         }
     } else if request.method() == &Method::Post && route == "api/scan" {
-        let input = decode(query.strip_prefix("path=").unwrap_or(""));
-        match input.and_then(|path| start_scan(state, &path)) {
+        match scan_query(query)
+            .and_then(|(path, exclude_tests, limit)| start_scan(state, &path, exclude_tests, limit))
+        {
             Ok(id) => json_reply(request, 202, json!({"id":id})),
             Err(_) => json_reply(
                 request,
@@ -330,7 +393,46 @@ fn directories(state: &State, relative: &str) -> Result<Value> {
         json!({"path":relative,"root":state.root.display().to_string(),"directories":children,"omitted":omitted}),
     )
 }
-fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
+fn session_time_ms() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64
+}
+fn scan_query(query: &str) -> Result<(String, bool, Option<usize>)> {
+    let mut path = None;
+    let mut tests = None;
+    let mut limit = None;
+    for pair in query.split('&').filter(|p| !p.is_empty()) {
+        let (key, value) = pair
+            .split_once('=')
+            .ok_or_else(|| anyhow::anyhow!("invalid scan query"))?;
+        match key {
+            "path" if path.is_none() => path = Some(decode(value)?),
+            "max_file_size_mib" if limit.is_none() => {
+                limit = Some(super::file_limits::parse_mib(value).map_err(anyhow::Error::msg)?)
+            }
+            "exclude_tests" if tests.is_none() => {
+                tests = Some(match value {
+                    "true" => true,
+                    "false" => false,
+                    _ => bail!("invalid test selection"),
+                })
+            }
+            _ => bail!("unknown or duplicate scan option"),
+        }
+    }
+    Ok((path.unwrap_or_default(), tests.unwrap_or(false), limit))
+}
+
+fn start_scan(
+    state: &Arc<State>,
+    relative: &str,
+    exclude_tests: bool,
+    limit: Option<usize>,
+) -> Result<u64> {
+    let max_file_size_mib = limit.unwrap_or(state.max_file_size_mib);
+    super::file_limits::bytes(max_file_size_mib)?;
     let path = target(&state.root, relative)?;
     if state.output.starts_with(&path) {
         bail!("session reports are inside selected source");
@@ -342,8 +444,13 @@ fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
     jobs.next += 1;
     let id = jobs.next;
     jobs.active = true;
-    jobs.entries
-        .insert(id, json!({"id":id,"path":relative,"status":"running"}));
+    let created_at_ms = session_time_ms();
+    let display_name = path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("/")
+        .to_owned();
+    jobs.entries.insert(id, json!({"id":id,"path":relative,"display_name":display_name,"created_at_ms":created_at_ms,"exclude_tests":exclude_tests,"max_file_size_mib":max_file_size_mib,"status":"running"}));
     let owner = Arc::clone(state);
     let relative = relative.to_string();
     drop(jobs);
@@ -358,7 +465,9 @@ fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
             rules_dir: owner.rules.clone(),
             fail_on: None,
             threads: owner.threads,
+            max_file_size_mib,
             include_non_scannable: false,
+            exclude_tests,
             diagnostics: true,
             inventory_json: owner.migration,
             policy_profile: None,
@@ -366,8 +475,28 @@ fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
             repository_scope: None,
             require_complete: false,
         };
+        let observer = |event| {
+            use pqc_scan_core::pipeline::ScanProgress as P;
+            let mut jobs = owner.jobs.lock().unwrap();
+            if let Some(job) = jobs.entries.get_mut(&id) {
+                job["progress"] = match event {
+                    P::Enumerating => json!({"phase":"enumerating"}),
+                    P::Inspecting { processed, total } => {
+                        let previous = job["progress"]["processed"].as_u64().unwrap_or(0);
+                        json!({"phase":"inspecting","processed":processed.max(previous),"total":total})
+                    }
+                    P::Aggregating => json!({"phase":"aggregating"}),
+                    P::WritingReports => json!({"phase":"writing"}),
+                };
+            }
+        };
         let result = std::panic::catch_unwind(|| {
-            super::scan_cmd(args, &mut std::io::sink(), &mut std::io::sink())
+            super::scan_cmd_with_progress(
+                args,
+                &mut std::io::sink(),
+                &mut std::io::sink(),
+                Some(&observer),
+            )
         });
         let mut value = match result {
             Ok(Ok(_)) => match fs::read(output.join("diagnostics.json"))
@@ -381,6 +510,10 @@ fn start_scan(state: &Arc<State>, relative: &str) -> Result<u64> {
             },
             _ => json!({"id":id,"path":relative,"status":"failed"}),
         };
+        value["display_name"] = display_name.into();
+        value["created_at_ms"] = created_at_ms.into();
+        value["exclude_tests"] = exclude_tests.into();
+        value["max_file_size_mib"] = max_file_size_mib.into();
         if owner.migration && value["status"] == "ready" {
             value["migration_input"] = true.into();
         }
@@ -456,6 +589,12 @@ fn report_file(request: Request, state: &State, route: &str) {
         directory.join(parts[2])
     };
     match fs::read(file) {
+        Ok(bytes) if mime.starts_with("text/html") => {
+            let html = String::from_utf8_lossy(&bytes)
+                .replacen("</head>", "<script defer src=\"../../report-session.js\"></script></head>", 1)
+                .replacen("<body>", &format!("<body><nav class=\"report-settings\" aria-label=\"Session / セッション\"><a id=\"pqc-session-back\" href=\"../../?result={id}\">結果に戻る</a></nav>"), 1);
+            reply(request, 200, mime, html.into_bytes());
+        }
         Ok(bytes) => reply(request, 200, mime, bytes),
         Err(_) => json_reply(request, 404, json!({"error":"Report is unavailable"})),
     }
@@ -468,6 +607,35 @@ mod tests {
     impl Drop for Fixture {
         fn drop(&mut self) {
             let _ = fs::remove_dir_all(&self.0);
+        }
+    }
+    #[test]
+    fn scan_options_decode_path_once_and_reject_ambiguous_flags() {
+        assert_eq!(
+            scan_query("path=project%20%26%20name&exclude_tests=true").unwrap(),
+            ("project & name".into(), true, None)
+        );
+        assert_eq!(
+            scan_query("path=tests").unwrap(),
+            ("tests".into(), false, None)
+        );
+        assert_eq!(scan_query("").unwrap(), ("".into(), false, None));
+        assert_eq!(
+            scan_query("path=a&max_file_size_mib=16").unwrap(),
+            ("a".into(), false, Some(16))
+        );
+        for query in [
+            "path=a&path=b",
+            "path=a&exclude_tests=1",
+            "path=a&exclude_tests=true&exclude_tests=false",
+            "unknown=x",
+            "path=a&max_file_size_mib=0",
+            "path=a&max_file_size_mib=65",
+            "path=a&max_file_size_mib=2.5",
+            "path=a&max_file_size_mib=99999999999999999999",
+            "path=a&max_file_size_mib=16&max_file_size_mib=4",
+        ] {
+            assert!(scan_query(query).is_err(), "{query}");
         }
     }
     #[test]
@@ -495,26 +663,28 @@ mod tests {
             origin: "http://127.0.0.1:1".into(),
             prefix: "/token/".into(),
             threads: 1,
+            max_file_size_mib: 2,
             jobs: Mutex::new(Jobs::default()),
             migration: false,
             drafts: Mutex::new(BTreeMap::new()),
+            generations: Mutex::new(BTreeMap::new()),
         });
         let listing = directories(&state, "").unwrap();
         assert_eq!(listing["directories"].as_array().unwrap().len(), 1);
         assert_eq!(listing["directories"][0]["name"], "project & 日本語");
         assert!(
-            start_scan(&state, "").is_err(),
+            start_scan(&state, "", false, None).is_err(),
             "do not scan own session artifacts"
         );
         state.jobs.lock().unwrap().active = true;
         assert!(
-            start_scan(&state, "project & 日本語").is_err(),
+            start_scan(&state, "project & 日本語", false, None).is_err(),
             "single active job"
         );
         state.jobs.lock().unwrap().active = false;
         state.jobs.lock().unwrap().next = 20;
         assert!(
-            start_scan(&state, "project & 日本語").is_err(),
+            start_scan(&state, "project & 日本語", false, None).is_err(),
             "bounded session"
         );
     }
@@ -531,9 +701,11 @@ mod tests {
             origin: "http://127.0.0.1:1".into(),
             prefix: "/token/".into(),
             threads: 1,
+            max_file_size_mib: 2,
             jobs: Mutex::new(Jobs::default()),
             migration: false,
             drafts: Mutex::new(BTreeMap::new()),
+            generations: Mutex::new(BTreeMap::new()),
         };
         let exact = directories(&state, "").unwrap();
         assert_eq!(exact["directories"].as_array().unwrap().len(), 1000);
@@ -557,6 +729,61 @@ mod tests {
 mod failure_test {
     use super::*;
     #[test]
+    fn completed_jobs_retain_scope_for_success_failure_and_both_choices() {
+        for exclude_tests in [false, true] {
+            for fail in [false, true] {
+                let root = session_directory().unwrap();
+                fs::create_dir_all(root.join("project/tests")).unwrap();
+                fs::write(root.join("project/main.py"), "alg = 'RS256'").unwrap();
+                fs::write(root.join("project/tests/test_main.py"), "alg = 'RS512'").unwrap();
+                let state = Arc::new(State {
+                    root: root.canonicalize().unwrap(),
+                    rules: if fail {
+                        root.join("missing-rules")
+                    } else {
+                        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../rules/default")
+                    },
+                    output: root.join("reports"),
+                    origin: "http://127.0.0.1:1".into(),
+                    prefix: "/token/".into(),
+                    threads: 1,
+                    max_file_size_mib: 2,
+                    jobs: Mutex::new(Jobs::default()),
+                    migration: false,
+                    drafts: Mutex::new(BTreeMap::new()),
+                    generations: Mutex::new(BTreeMap::new()),
+                });
+                let id = start_scan(&state, "project", exclude_tests, None).unwrap();
+                let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+                loop {
+                    let jobs = state.jobs.lock().unwrap();
+                    if !jobs.active {
+                        assert_eq!(jobs.entries[&id]["exclude_tests"], exclude_tests);
+                        assert_eq!(
+                            jobs.entries[&id]["status"],
+                            if fail { "failed" } else { "ready" }
+                        );
+                        break;
+                    }
+                    drop(jobs);
+                    assert!(std::time::Instant::now() < deadline);
+                    std::thread::sleep(std::time::Duration::from_millis(5));
+                }
+                if !fail {
+                    let d: Value = serde_json::from_slice(
+                        &fs::read(root.join(format!("reports/{id}/diagnostics.json"))).unwrap(),
+                    )
+                    .unwrap();
+                    assert_eq!(
+                        d["coverage"]["selected_files"],
+                        if exclude_tests { 1 } else { 2 }
+                    );
+                }
+                fs::remove_dir_all(root).unwrap();
+            }
+        }
+    }
+    #[test]
     fn scan_failure_is_recorded_and_releases_the_busy_state() {
         let root = session_directory().unwrap();
         fs::create_dir(root.join("project")).unwrap();
@@ -567,11 +794,13 @@ mod failure_test {
             origin: "http://127.0.0.1:1".into(),
             prefix: "/token/".into(),
             threads: 1,
+            max_file_size_mib: 2,
             jobs: Mutex::new(Jobs::default()),
             migration: false,
             drafts: Mutex::new(BTreeMap::new()),
+            generations: Mutex::new(BTreeMap::new()),
         });
-        let id = start_scan(&state, "project").unwrap();
+        let id = start_scan(&state, "project", false, None).unwrap();
         let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
         loop {
             let jobs = state.jobs.lock().unwrap();
