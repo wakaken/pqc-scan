@@ -10,7 +10,8 @@ import unittest
 import report
 
 ROOT = Path(__file__).resolve().parents[2]
-CURRENT = 'tests/quality/applicability-v040-release-20261123/assessment.json'
+CURRENT = 'tests/quality/applicability-v040-guide-20261123/assessment.json'
+PREVIOUS_V040 = 'tests/quality/applicability-v040-release-20261123/assessment.json'
 PREVIOUS_V030 = 'tests/quality/applicability-v030-publication-20261117/assessment.json'
 PREVIOUS_PUBLICATION = 'tests/quality/applicability-v030-docs-20261117/assessment.json'
 PREVIOUS_GUIDES = 'tests/quality/applicability-054-f054-20261117/assessment.json'
@@ -70,6 +71,10 @@ class CIApplicabilityTests(unittest.TestCase):
     def test_previous_v030_publication_binding_is_not_relabelled_current(self):
         with self.assertRaisesRegex(ValueError, 'binding changed'):
             scoped(ROOT, PREVIOUS_V030)
+
+    def test_previous_v040_binding_is_not_relabelled_current_after_count_correction(self):
+        with self.assertRaisesRegex(ValueError, 'binding changed'):
+            scoped(ROOT, PREVIOUS_V040)
 
     def test_actual_ci_input_rejects_source_and_review_corruption(self):
         selected = ci_assessment()

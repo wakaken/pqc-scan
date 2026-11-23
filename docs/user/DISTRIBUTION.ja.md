@@ -126,7 +126,9 @@ featureとツールのバージョンを記録します。記録したソース�
 /absolute/path/to/bundle/bin/pqc-scan serve --root /absolute/path/to/projects --rules-dir /absolute/path/to/bundle/rules/default
 ```
 
-**このフォルダをスキャン**を選ぶと、生成後にレポートが開きます。終了はCtrl+Cです。
+フォルダを1つ以上選び、「選択したフォルダをスキャン」を押します。通常の `serve` で1フォルダなら
+スキャンレポートが自動で開き、複数なら対象名の付いた結果カードを表示します。`--migration` を
+加えると、スキャンレポートと移行確認を選べます。[画面付きの手順](SCANNING.ja.md#web-migration-walkthrough)も参照してください。終了はCtrl+Cです。
 サーバーは `127.0.0.1` だけで待ち受けます。ターミナルに表示された完全なセッションURLを開いてください。
 配布物には日英の[スキャン手順](SCANNING.ja.md#ローカルwebスキャン)と[レポートの読み方](REPORTS.ja.md)も含みます。
 

@@ -2,6 +2,8 @@
 
 [日本語](SAVED-EVIDENCE.ja.md)
 
+For the browser workflow, start with the [illustrated scan and migration steps](SCANNING.md#web-migration-walkthrough). This guide explains saved-input/context binding, declaration semantics and CLI/library contracts.
+
 The core library's `migration::SavedEvidence` reads one explicitly selected saved
 Inventory v1, TLS v1, SSH offers v1 or SSH KEX v1 file. `read` accepts a regular
 local file; `from_bytes` accepts immutable bytes. These readers are available in

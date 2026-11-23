@@ -76,7 +76,7 @@ class PackageTests(unittest.TestCase):
             required = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md',
                         'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md',
                         'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md', 'docs/releases/v0.2.0.md', 'docs/releases/v0.2.0.ja.md', 'Cargo.lock', 'rust-toolchain.toml',
-                        'third_party/notices/manifest.json', 'third_party/notices/README.md', 'schemas/migration-context-v1.schema.json']
+                        'third_party/notices/manifest.json', 'third_party/notices/README.md', 'schemas/migration-context-v1.schema.json', 'docs/images/v0.4/web-01-folders-en.jpg', 'docs/images/v0.4/CAPTURES.json']
             for name in required:
                 path = root/name
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -118,6 +118,10 @@ class PackageTests(unittest.TestCase):
                 schema = '/schemas/migration-context-v1.schema.json'
                 self.assertTrue(any(n.endswith(schema) for n in names))
                 self.assertEqual(tar.extractfile(next(n for n in names if n.endswith(schema))).read(), b'fixture')
+                for asset in ['web-01-folders-en.jpg', 'CAPTURES.json']:
+                    suffix = '/docs/images/v0.4/' + asset
+                    self.assertTrue(any(n.endswith(suffix) for n in names), asset)
+                    self.assertEqual(tar.extractfile(next(n for n in names if n.endswith(suffix))).read(), b'fixture')
                 prefix = archive.name.removesuffix('.tar.gz')
                 provenance = json.load(tar.extractfile(prefix+'/PROVENANCE.json'))
                 notices = json.load(tar.extractfile(prefix+'/DEPENDENCY-LICENSES.json'))

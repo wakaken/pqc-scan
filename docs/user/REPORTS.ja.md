@@ -258,6 +258,8 @@ pqc-scan assess saved.inventory.v1.json --input-format inventory-v1 \
 `migration.assessment.md`と`migration.assessment.v1.json`も同時に出力します。
 入力形式と前提情報の作成方法は[保存済み入力のガイド](SAVED-EVIDENCE.ja.md)を参照してください。
 
+ブラウザーでの入力から保存までは、[画面付きの8ステップ](SCANNING.ja.md#web-migration-walkthrough)を参照してください。以下は生成された移行確認の読み方です。
+
 ### 移行の判断を読む
 
 評価日時と日程を確認し、「早急に対応」から読み進めます。各カードには「やること」と
@@ -275,6 +277,10 @@ pqc-scan assess saved.inventory.v1.json --input-format inventory-v1 \
 残りのカードを「ほかの確認項目」に折り畳みます。ただし早急な調査は初期表示します。
 そのような手順がなければ、折り畳まず緊急度別に表示します。「緊急度を判断できない」は
 低リスクを意味せず、追加の情報が必要な状態です。対応項目は20件ずつ表示します。
+
+以下は、JWTの用途・利用状況・計画を明示したKubernetesの検証入力による表示例です。着手目安と移行期限を区別し、各段階で進める条件を確認します。この日程や件数は例の入力に限り、すべてのプロジェクトに適用するものではありません。
+
+![日程と3ステップの移行計画](../images/v0.4/migration-plan-ja.jpg)
 
 ### 日程と申告を確認する
 

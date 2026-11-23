@@ -8,6 +8,7 @@ Use this guide after the first scan when you need to select outputs, change CI e
 
 ## Contents
 
+- [Illustrated browser scan and migration workflow](#web-migration-walkthrough)
 - [Command and options](#command)
 - [GitHub Actions](#github-actions)
 - [Running from source](#from-source)
@@ -241,6 +242,79 @@ Reports are retained in the private `pqc-scan-web-*` session directory printed i
 ```console
 pqc-scan serve --migration --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
 ```
+
+<a id="web-migration-walkthrough"></a>
+
+The walkthrough uses public samples from the source repository (`examples/go` and `examples/python`), which are not included in the binary bundle. Apply the same steps to your own folders. Counts and entered values describe this example only. Screenshots were captured with v0.4.0.
+
+#### 1. Select folders and scan
+
+Open the complete session URL printed at startup. Check one or more folders, review the selected list, then choose **Scan selected folders**. This example selects the public `go` and `python` samples.
+
+Tests are included by default. Choose **Exclude test code** or change the per-file size limit when needed. A progress dialog opens during processing; **Cancel remaining scans** stops only folders not yet submitted.
+
+![Select folders and scan](../images/v0.4/web-01-folders-en.jpg)
+
+#### 2. Open the intended result
+
+Check the folder name on each result card. **Open scan report ↗** opens its findings in a new tab; **Review migration** opens that folder’s migration workflow. Choose `python` in this example.
+
+**Scan history** offers the same actions. History belongs to this server session and does not persist across restarts. Ordinary `serve` automatically opens the scan report for a single selected folder.
+
+![Open the intended result](../images/v0.4/web-02-results-en.jpg)
+
+#### 3. Review the overview
+
+In **Overview**, inspect record counts, identified algorithms and recorded locations. These describe saved detections, not a count of deployed uses.
+
+Choose **Next** to enter context. If no context is known, choose **View report without context** to inspect the investigation items.
+
+![Review the overview](../images/v0.4/web-03-overview-en.jpg)
+
+#### 4. Enter scope, purpose and usage
+
+Choose **New input** and check the exact records covered by your answer. This example selects the six signature/authentication source records, names the use `jwt-demo`, and selects **JWT** and **In use**. Check the affected record count; use **Inspect records / split scope** to separate exceptions.
+
+Answer only what you know. **Unanswered** means no claim; **Unknown** explicitly records uncertainty. Personal/organization mode changes input guidance, not urgency. Add candidate settings, support or sourced deadlines when relevant.
+
+![Enter scope, purpose and usage](../images/v0.4/web-04-purpose-en.jpg)
+
+#### 5. Check assertion dates and prepare the report
+
+Answers need an actor alias and assertion time. Expand the claim-expiry details to enter how long that information remains valid. `sample-owner` and the dates shown are demonstration values; use the actual reviewer and confirmation/expiry dates.
+
+Omitting expiry leaves validity unknown. This expiry is separate from migration deadline and goal month. Check **Evaluation time** near the top, then **Next** to apply the input and generate the report. Opening **Response work items** alone does not generate it; use **Prepare review items** in that view.
+
+![Check assertion dates and prepare the report](../images/v0.4/web-05-validity-en.jpg)
+
+#### 6. Read migration decisions
+
+Check the conclusion, evaluation time, and each card’s **What to do** and **When to proceed**. This sparse-input example still needs effective algorithm/settings facts and shows undetermined urgency. Entering a purpose alone does not guarantee a three-step plan or readiness.
+
+Eligible migration plans show current-use discovery, compatibility testing and staged rollout. Urgent investigations stay visible; when use-specific workflows exist, remaining checks are grouped under **Other checks**. See the [report guide](REPORTS.md#saved-assessment) for schedules and decision conditions.
+
+![Read migration decisions](../images/v0.4/web-06-review-en.jpg)
+
+#### 7. Inspect locations and original findings
+
+Choose **View detection locations** and search by algorithm or filename. **Details** shows detection methods, matched rules, reasons and applied declarations. Equivalent records at the same location share the view.
+
+When the same local job has the original scan report, **Open scan finding** links in details lead to it. Imported evidence and standalone HTML without that report have no such links.
+
+![Inspect locations and original findings](../images/v0.4/web-07-locations-en.jpg)
+
+#### 8. Save reports and reusable input
+
+At the top, **Save report (HTML)** saves the readable report and **Save input (JSON)** saves reusable context declarations. **Save assessment data** at the bottom saves the complete evaluation, not reusable context.
+
+For reassessment, retain the same job’s `scan.inventory.v1.json` alongside context. The original input remains in a per-job subdirectory under the private `pqc-scan-web-*` directory printed in the terminal. Choose **Load saved results** for that inventory, then **Use saved input** on the context screen for its matching context. Review evaluation time and prepare the report again. Preserve original inventory bytes: even reformatting changes its binding.
+
+After **Edit use**, regenerate and save fresh HTML/input JSON. Stop the server with **Ctrl+C** in the terminal.
+
+![Save reports and reusable input](../images/v0.4/web-08-save-en.jpg)
+
+#### Input, saving and reassessment details
+
 
 This opt-in mode records saved scan results for new web scans. On completion,
 the results screen offers **Open scan report ↗** and **Review migration** for the selected folder. After scanning multiple folders, use **Review migration** on the intended folder’s result card. Returning from migration review in the same tab restores the results list. You can also choose **Load saved results** on the input screen and select

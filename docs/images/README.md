@@ -1,3 +1,34 @@
+# Current v0.4 screenshots — 2026-11-23
+
+The current README and illustrated user guides use the unedited captures under
+`v0.4/`. [CAPTURES.json](v0.4/CAPTURES.json) binds each JPEG, dimensions, scanner
+source/binary, inputs, dates and generation conditions. The browser viewport was
+1280×720 CSS pixels. The folder picker is a full-page capture; purpose, validity,
+location and saving steps use the actual scrolled viewport. Overview/plan page
+clips include the documented content below the fold.
+No image was resized, annotated or generated. Language/theme choices are actual
+product controls.
+
+- `scan-{light,dark}-{en,ja}.jpg`: a fresh scan of the same clean Keycloak revision
+  used below, using v0.4.0 at d3b6d769. Human totals are2301 projected findings,
+  with2283 review candidates and18 reference entries. Tests remain included.
+  Old and new human totals use different product behavior and counting, so the
+  difference is not an accuracy or risk-reduction measurement.
+- `web-01` through `web-08`: actual local-web operations on copies of public
+  `examples/go` and `examples/python`. The python walkthrough declares JWT/active
+  for6 source records with explicit example provenance/expiry. It still produces
+  investigations with undetermined urgency; adding input does not imply readiness.
+- `migration-plan-{en,ja}.jpg`: the current binary's fixed-time Kubernetes example
+  with an explicit JWT context and schedule. Its three phases are conditional;
+  the dates and claims are demonstration inputs, not a universal migration date.
+
+The captures contain no browser chrome, random session URLs, user home path or
+private-key payload. Counts are snapshot-specific references, not confirmed
+vulnerabilities or production-use counts. Earlier captures below remain unchanged
+as historical evidence and are no longer the README previews.
+
+## Historical captures — 2026-11-18
+
 # Report screenshots
 
 These are unedited Chrome page captures taken on 2026-11-18 at a 1484 × 1073

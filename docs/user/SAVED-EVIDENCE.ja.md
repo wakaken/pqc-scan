@@ -2,6 +2,8 @@
 
 [English](SAVED-EVIDENCE.md)
 
+ブラウザーから使う場合は、[画面付きのスキャン・移行確認手順](SCANNING.ja.md#web-migration-walkthrough)から始めてください。このガイドでは、保存した入力とcontextの対応付け、申告の意味、CLI・ライブラリの仕様を説明します。
+
 コアライブラリの`migration::SavedEvidence`は、保存済みのInventory v1、TLS v1、SSH offers v1、SSH KEX v1から、明示指定した1形式を読み込みます。`read`は通常のローカルファイル、`from_bytes`は変更しないバイト列を受け取ります。既定の静的ビルドで利用でき、ソースのスキャン、接続先への通信、TLS・SSHプロバイダーの初期化、信頼・署名の再検証は行いません。
 
 ライブラリと明示的に呼び出す`assess`コマンドで、適用範囲を定めた組織情報を使うオフラインの移行判断を行います。既存のスキャンコマンドとレポートはv1の動作を維持します。

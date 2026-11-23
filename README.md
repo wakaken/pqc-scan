@@ -1,9 +1,5 @@
 # pqc-scan
 
-This checkout prepares **v0.4.0** for static scanning and offline migration review on macOS Apple Silicon (`aarch64-apple-darwin`). See the [release notes](docs/releases/v0.4.0.md) for changes, compatibility and evaluation limits. Final-source distribution checks and bounded maintainer acceptance/publication approval are required before a v0.4.0 Release.
-
-Check [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets; local preparation and Actions artifacts are not published Releases. Historical [v0.2.0 notes](docs/releases/v0.2.0.md) remain available. Static scanning is the formal scope; TLS/SSH probes remain experimental and network binary publication remains on hold.
-
 [日本語](README.ja.md)
 
 `pqc-scan` is a Rust command-line tool for investigating migration to post-quantum cryptography (PQC).
@@ -22,6 +18,7 @@ Reports show findings, locations and suggested next steps. The inspection overvi
 - [What does it do?](#features)
 - [Run your first scan](#quick-start)
 - [Scan in your browser](#web-scan)
+- [Review migration](#migration-review)
 - [Report preview](#report-preview)
 - [Read the results](#results)
 - [User guides](#guides)
@@ -115,7 +112,9 @@ pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
 
 The server listens only on `127.0.0.1` and runs the same static scanner as the CLI, without uploading source or reports. Use `--port 0` if the default port is occupied, or `--no-open` to open the printed URL yourself. With an extracted distribution, replace the command and rules paths with `/path/to/bundle/bin/pqc-scan` and `/path/to/bundle/rules/default`. See [local web scanning](docs/user/SCANNING.md#local-web-scanning) for limits and options.
 
-<a id="report-preview"></a>
+<a id="migration-review"></a>
+
+## Review migration
 
 Add `--migration` to `serve` to move from scan results to optional purpose and
 usage input, then **Prepare review items**. For multiple folders or history, choose
@@ -124,26 +123,29 @@ opens its saved input/result. The migration report groups decisions and shows wh
 to do and when to proceed. Review the evaluation date, schedule and urgent
 investigations first; inspect locations for the underlying evidence.
 
+Follow the [eight illustrated steps](docs/user/SCANNING.md#web-migration-walkthrough).
 See [migration input and reassessment](docs/user/SCANNING.md#optional-migration-context-and-reassessment),
 [reading the migration report](docs/user/REPORTS.md#saved-assessment), and
 [saved evidence and declarations](docs/user/SAVED-EVIDENCE.md). Save input JSON with
 the exact inventory used to create it; **Save assessment data** saves the evaluation,
 not a reusable context file.
 
+<a id="report-preview"></a>
+
 ## Report preview
 
 The scan HTML report includes a severity summary, rule groups, search/filters, and a file tree with finding counts. Expand findings for locations, source evidence and recommended checks; follow the rule guide for explanations. Filters and the tree can be hidden independently. Language (English/Japanese), light/dark theme and browser-local time display work offline.
 
-![Light HTML report with inspection status, file tree and grouped findings](docs/images/report-light-en.jpg)
+![Light HTML report with inspection status, file tree and grouped findings](docs/images/v0.4/scan-light-en.jpg)
 
 <details>
 <summary>Dark theme</summary>
 
-![Dark HTML report](docs/images/report-dark-en.jpg)
+![Dark HTML report](docs/images/v0.4/scan-dark-en.jpg)
 
 </details>
 
-Actual Keycloak scan, captured on 2026-11-18 with the default risk-candidate view and filters hidden. Counts describe that scan snapshot, including test fixtures; they are references requiring investigation, not confirmed vulnerability counts. The incomplete-inspection notice remains visible. [Capture source and settings](docs/images/README.md).
+Actual Keycloak scan with v0.4.0, captured on 2026-11-23 with the default risk-candidate view and filters hidden. Counts describe that scan snapshot, including test fixtures; they are references requiring investigation, not confirmed vulnerability counts. The incomplete-inspection notice remains visible. [Capture source and settings](docs/images/README.md).
 
 <a id="results"></a>
 
@@ -182,6 +184,7 @@ Tests remain included by default. Use `--exclude-tests` or the browser’s “Ex
 | [Supported inputs and inspection limits](docs/user/COVERAGE.md) | Check languages, file formats, certificate handling, rule packs, exclusions and privacy boundaries |
 | [Explicit TLS/SSH diagnostics](docs/user/PROBING.md) | Inspect one authorized endpoint with optional protocol commands |
 | [Installation and local packages](docs/user/DISTRIBUTION.md) | Rule assets, package verification, updates and support scope |
+| [Saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) | Exact-input/context binding, claim expiry and offline reassessment |
 
 For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
 

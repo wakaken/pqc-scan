@@ -131,7 +131,7 @@ for adjacent references. Custom patterns/scopes keep their generic ranges. See
 ### Built-in Rule Set
 
 - Default rules live under `rules/default/`
-- Current built-in rules: 123
+- Current built-in rules: 125
 - Full reference (all rule IDs + severity definitions): [docs/rules-reference.md](../rules-reference.md)
 
 Rule packs reject blank IDs, non-finite confidence or values outside `0..1`, duplicate IDs, invalid patterns and traversal failures. Invalid packs return operational error 1 instead of a partial pack. Valid custom scopes retain their per-detector semantics; unknown scope labels are not rejected. Check [scope compatibility](../architecture/RULE-VALIDATION.md) when upgrading a custom pack.

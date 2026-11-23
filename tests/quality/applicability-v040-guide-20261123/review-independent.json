@@ -1,0 +1,27 @@
+{
+  "reviewer": "/root/v04_release_implementation_review",
+  "timestampUtc": "2026-11-23T09:02:52Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "437bcb3d76a6e920b9303a79812f3935124e41103874eafb1b481490d9287839",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "009a74b5e97ad80db53b8d901b3ac41a54b61aa013ecbee11a3d846eaf022227",
+    "docs/user/COVERAGE.ja.md": "77dff8b3124a5695edafa505e6596a0de7a0dcdee23af8e7b4e05365fc81166c",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "remainingScopeReason": "Revalidated applicability of the preceding independently reviewed 246-unit source assessment against d3b6d769 and the current exact bindings. Both COVERAGE files differ only by the built-in rule count correction from 123 to 125; the rule reference states 125 and the unchanged default sources contain 125 rule IDs. Support and limit paragraphs, PKCS12 parser, rules, corpus, truth and all nominated questions are unchanged. Independently rehashed all 203 original input files and checked their hashes against both frozen corpus and provenance. Current corpus, truth, protocol and all three contract bindings match SOURCE-BINDINGS.json. Consequently the previous examination of every remaining 240 source/API/configuration/dependency/SBOM/marker/certificate scope, including malformed, unsupported and ambiguous distinctions, remains applicable without narrowing eligibility. Optional test exclusion does not change defaults. The same six inner encrypted-container properties remain unsupported; outer container signals and unencrypted public-certificate controls remain applicable. No specimen execution or detector prediction was used. Historical measurements and preceding applicability records were exposed; this new main review and aggregate were not read. This is post-observation source-binding revalidation, not new truth labels, accuracy measurement or publication acceptance.",
+  "unresolved": [],
+  "dispositions": [
+    {"id": "x154", "status": "unsupported", "reason": "The unchanged hash-bound public-only.p12 contains encryptedData within its Data AuthenticatedSafe. Its original nominal negative ECDSA-signature truth remains intact, while access to that inner signature attribute is outside the unchanged non-decrypting parser and paired coverage contract. The container signal remains applicable."},
+    {"id": "x156", "status": "unsupported", "reason": "The original public-only.pfx remains byte-identical to public-only.p12, including encryptedData. Preserve its nominal negative ECDSA-signature truth; certificate-only provenance and an empty password do not establish unencrypted access to the inner attribute."},
+    {"id": "v2-audit4", "status": "unsupported", "reason": "The original public RSA3072 provenance preserves the positive key-size fact. Reading that inner modulus from public-only.p12 requires entering encryptedData, which the unchanged parser and support contract exclude. Only this inner property is excluded."},
+    {"id": "v2-audit5", "status": "unsupported", "reason": "The original certificate manifest preserves the positive sha256WithRSAEncryption signature fact. Extraction of that signature attribute from public-only.p12 requires access to encryptedData, outside the unchanged non-decrypting subset."},
+    {"id": "v2-audit6", "status": "unsupported", "reason": "The hash-identical encrypted public-only.pfx retains the same RSA3072 source-certificate provenance. Preserve the positive nominal modulus-size truth while excluding extraction of this inner attribute; filename recognition does not establish accessible SPKI attributes."},
+    {"id": "v2-audit7", "status": "unsupported", "reason": "The original public-only.pfx carries its known certificate inside encryptedData rather than the supported Data/SafeContents certificate-bag path. Preserve the positive RSA-signature truth from original provenance and classify only access to this inner signature attribute as unsupported."}
+  ]
+}

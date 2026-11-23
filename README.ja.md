@@ -1,9 +1,5 @@
 # pqc-scan
 
-このチェックアウトでは、macOS Apple Silicon（`aarch64-apple-darwin`）向け静的スキャン・オフライン移行確認の **v0.4.0** を準備しています。変更点、互換性、評価範囲は[リリースノート](docs/releases/v0.4.0.md)を参照してください。公開には最終ソースの配布検証と、維持者による範囲を限定した製品受入・公開承認が必要です。
-
-公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。ローカルの準備物やActions成果物は、公開済みReleaseとは別です。過去の[v0.2.0のノート](docs/releases/v0.2.0.ja.md)も保持しています。正式対象は静的スキャンです。TLS・SSH診断は実験的機能とし、ネットワーク診断のバイナリ公開は引き続き保留します。
-
 [English](README.md)
 
 `pqc-scan` は、耐量子暗号（PQC）への移行調査に使うRust製のコマンドラインツールです。
@@ -22,6 +18,7 @@ JWT、TLS、PKI、SSHなどの暗号処理を変更する前に、調査する�
 - [ツールの主な機能](#features)
 - [使い始める](#quick-start)
 - [ブラウザでスキャンする](#web-scan)
+- [移行確認を使う](#migration-review)
 - [レポートの画面](#report-preview)
 - [結果を確認する](#results)
 - [利用ガイド](#guides)
@@ -118,7 +115,9 @@ pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
 
 サーバーは `127.0.0.1` だけで待ち受け、CLIと同じ静的スキャンを実行します。ソースやレポートの外部送信は行いません。ポートが使用中なら `--port 0`、ブラウザを自動で開かない場合は `--no-open` を指定します。配布物を展開して使う場合は、コマンドを `/path/to/bundle/bin/pqc-scan`、ルールを `/path/to/bundle/rules/default` に置き換えます。詳しい制約とオプションは[ローカルWebスキャン](docs/user/SCANNING.ja.md#ローカルwebスキャン)を参照してください。
 
-<a id="report-preview"></a>
+<a id="migration-review"></a>
+
+## 移行確認を使う
 
 `serve` に `--migration` を加えると、スキャン結果から用途・利用状況を入力し、
 「確認事項を作成」で移行確認へ進めます。複数フォルダや履歴では、対象名の付いたカードから
@@ -126,26 +125,28 @@ pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
 移行確認は判断ごとに「やること」と「次に進める条件」を示します。評価日時、日程、早急な
 調査から確認し、検出箇所で根拠を調べてください。
 
-詳しくは[入力と再評価](docs/user/SCANNING.ja.md#移行情報の任意入力と再評価)、
+[画面付きの8ステップ](docs/user/SCANNING.ja.md#web-migration-walkthrough)に沿って操作できます。詳しくは[入力と再評価](docs/user/SCANNING.ja.md#移行情報の任意入力と再評価)、
 [移行確認の読み方](docs/user/REPORTS.ja.md#saved-assessment)、
 [保存済み入力と申告](docs/user/SAVED-EVIDENCE.ja.md)を参照してください。入力JSONは対応する
 棚卸しと一緒に保存します。「評価データを保存」は評価結果の保存であり、再利用する入力
 contextの保存とは別です。
 
+<a id="report-preview"></a>
+
 ## レポートの画面
 
 スキャンのHTMLレポートでは、重大度の分布、ルールごとの一覧、検索・絞り込み、検出件数付きのファイルツリーを表示します。所見を展開すると場所・コードの根拠・推奨する確認事項を読め、ルールの意味は解説ページで確認できます。絞り込みとツリーは個別に表示・非表示を切り替えられます。日本語・Englishの選択、ライト・ダーク表示、閲覧環境のタイムゾーンでの時刻表示もオフラインで利用できます。
 
-![検査状況、ファイルツリー、ルールごとの検出一覧を表示したライトモード](docs/images/report-light-ja.jpg)
+![検査状況、ファイルツリー、ルールごとの検出一覧を表示したライトモード](docs/images/v0.4/scan-light-ja.jpg)
 
 <details>
 <summary>ダークモード</summary>
 
-![HTMLレポートのダークモード](docs/images/report-dark-ja.jpg)
+![HTMLレポートのダークモード](docs/images/v0.4/scan-dark-ja.jpg)
 
 </details>
 
-2026年11月18日に実際のKeycloakをスキャンした画面です。既定の対応候補を表示し、絞り込みパネルを非表示にしています。件数はテスト用のデータを含むこの時点の参照の検出数で、確定した脆弱性の数ではありません。検査が未完了の範囲も画面に示しています。[撮影元と設定](docs/images/README.md)。
+2026年11月23日にv0.4.0で実際のKeycloakをスキャンした画面です。既定の対応候補を表示し、絞り込みパネルを非表示にしています。件数はテスト用のデータを含むこの時点の参照の検出数で、確定した脆弱性の数ではありません。検査が未完了の範囲も画面に示しています。[撮影元と設定](docs/images/README.md)。
 
 <a id="results"></a>
 
@@ -184,6 +185,7 @@ HTML・Markdownは同じ位置・方式・指摘内容を1件にまとめ、一�
 | [結果の読み方](docs/user/REPORTS.ja.md) | リスク・PQC所見の意味、棚卸しの選び方、CBOM・SBOM、ローカル評価 |
 | [対応する入力と検査範囲](docs/user/COVERAGE.ja.md) | 対象言語・ファイル、証明書、ルール集、除外範囲、秘密情報の扱い |
 | [TLS・SSH接続先の明示的な診断](docs/user/PROBING.ja.md) | 任意の機能を有効にして、許可済みの接続先を1つ調べる |
+| [保存済み入力と申告](docs/user/SAVED-EVIDENCE.ja.md) | 元の棚卸しとcontextの対応付け、有効期限、オフライン再評価 |
 | [インストールとローカル配布物](docs/user/DISTRIBUTION.ja.md) | ルールの配置、配布物の検証、更新方法、サポート範囲 |
 
 脆弱性の報告方法は[SECURITY.md](SECURITY.ja.md)を参照してください。

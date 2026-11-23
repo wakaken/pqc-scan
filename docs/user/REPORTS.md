@@ -273,6 +273,8 @@ command is required. The browser does not open automatically. The command also
 writes `migration.assessment.md` and `migration.assessment.v1.json`. See the
 [saved-input guide](SAVED-EVIDENCE.md) for formats and context preparation.
 
+For browser input through saving, follow the [eight illustrated steps](SCANNING.md#web-migration-walkthrough). The sections below explain the generated migration review.
+
 ### Read the migration decisions
 
 Start with the evaluation time and schedule, then review **Urgent** items. Each
@@ -295,6 +297,10 @@ exclusion), **Other checks** initially folds remaining cards without a workflow,
 except urgent investigations, which stay visible. Without such a workflow, all
 cards appear by urgency without this fold. Undetermined urgency needs more
 information; it is not low risk. Work items are paged 20 at a time.
+
+The example below uses saved Kubernetes evidence with explicit JWT purpose, usage and planning declarations. Start-by and migration deadline are separate; each phase states its condition for proceeding. These dates and counts belong to this example, not every project.
+
+![Schedule and three-step migration plan](../images/v0.4/migration-plan-en.jpg)
 
 ### Check dates and declarations
 
