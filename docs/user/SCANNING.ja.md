@@ -1,11 +1,11 @@
 # リポジトリのスキャン方法
 
-[English](SCANNING.md) · [README](../../README.ja.md)
+[English](SCANNING.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.ja.md)
 
 このガイドはv0.4.0の静的スキャンを対象とします。バージョン間の変更点は[リリースノート](../releases/v0.4.0.md)を参照してください。
 
 静的スキャンの出力オプション、CIの終了判定、検査できなかった箇所の確認方法を説明します。
-棚卸しや評価の見方は[結果の読み方](REPORTS.ja.md)、形式ごとの制約は[対応する入力と検査範囲](COVERAGE.ja.md)を参照してください。
+棚卸しや評価の見方は[結果の読み方](REPORTS.ja.md)、形式ごとの制約は[対応する入力と検査範囲](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/docs/user/COVERAGE.ja.md)を参照してください。
 
 ## 目次
 

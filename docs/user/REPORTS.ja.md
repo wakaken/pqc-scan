@@ -1,6 +1,6 @@
 # 結果の読み方
 
-[English](REPORTS.md) · [README](../../README.ja.md)
+[English](REPORTS.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.ja.md)
 
 このガイドはv0.4.0の静的スキャンを対象とします。バージョン間の変更点は[リリースノート](../releases/v0.4.0.md)を参照してください。
 
@@ -103,7 +103,7 @@ ML-KEM（鍵共有）、ML-DSA・SLH-DSA（署名）の名前や、Kyber・Dilit
 | Kyber・Dilithiumなどの旧名称 | どの実装・仕様のバージョンを指すか。旧草案と最終仕様を同じものとして扱わない |
 | PQC・ハイブリッド方式を無効にするTLS設定 | 実際に有効な設定と接続相手の対応。通信して決まった方式を観測した結果ではない |
 
-対象には、[対象一覧](../../README.ja.md#targets)の7言語のML-KEM・ML-DSA参照、Java・Node・Rubyの一部のSLH-DSA API参照、対応候補のライブラリ、Java・Rubyの古典方式限定TLS設定、Goの `GODEBUG=tlsmlkem=0` があります。
+対象には、[対象一覧](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.ja.md#targets)の7言語のML-KEM・ML-DSA参照、Java・Node・Rubyの一部のSLH-DSA API参照、対応候補のライブラリ、Java・Rubyの古典方式限定TLS設定、Goの `GODEBUG=tlsmlkem=0` があります。
 証明書ではML-DSA・SLH-DSAの署名OIDと公開鍵OIDを別々に照合し、ファイル名では方式を判定しません。
 OIDの解析だけで、署名・信頼チェーンやPQC鍵の妥当性を検証したことにはなりません。
 

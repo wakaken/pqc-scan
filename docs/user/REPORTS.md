@@ -1,6 +1,6 @@
 # Understanding reports
 
-[日本語](REPORTS.ja.md) · [README](../../README.md)
+[日本語](REPORTS.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.md)
 
 This guide covers v0.4.0 static scanning. See the [release notes](../releases/v0.4.0.md) for changes between versions.
 

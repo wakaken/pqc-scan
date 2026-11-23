@@ -1,6 +1,6 @@
 # インストールと配布物
 
-[English](DISTRIBUTION.md) · [README](../../README.ja.md)
+[English](DISTRIBUTION.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.ja.md)
 
 このガイドは、macOS Apple Silicon（`aarch64-apple-darwin`）向けの
 **v0.4.0 静的版**の導入方法を説明します。変更点は[v0.4.0のリリースノート](../releases/v0.4.0.md)を参照してください。
@@ -77,4 +77,4 @@ pqc-scan scan /absolute/path/to/authorized/repository --rules-dir /absolute/path
 
 同梱の `DEPENDENCY-LICENSES.json` と `licenses/` に依存パッケージのライセンス資料を収録しています。
 共有するレポートにはソース断片やパスが含まれるため、内容を確認してください。
-脆弱性の報告は[SECURITY.ja.md](../../SECURITY.ja.md)を参照してください。
+脆弱性の報告は[SECURITY.ja.md](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/SECURITY.ja.md)を参照してください。

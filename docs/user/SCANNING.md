@@ -1,10 +1,10 @@
 # Scanning repositories
 
-[日本語](SCANNING.ja.md) · [README](../../README.md)
+[日本語](SCANNING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.md)
 
 This guide covers v0.4.0 static scanning. See the [release notes](../releases/v0.4.0.md) for changes between versions.
 
-Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
+Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/docs/user/COVERAGE.md) for format-specific limits.
 
 ## Contents
 

@@ -1,6 +1,6 @@
 # Installation and distribution
 
-[日本語](DISTRIBUTION.ja.md) · [README](../../README.md)
+[日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.md)
 
 This guide describes installation of **v0.4.0 static** for macOS Apple Silicon
 (`aarch64-apple-darwin`). See the [v0.4.0 release notes](../releases/v0.4.0.md) for changes.
