@@ -1,6 +1,6 @@
 use super::{
     assess_primitive, bounded, target, Error, InputFormat, InputReference, ObservationFacts,
-    Result, SavedEvidence, SourceReference,
+    Result, SavedEvidence, ScanReference, SourceReference,
 };
 use crate::{
     assessment::AlgorithmAssessment,
@@ -272,9 +272,45 @@ pub(super) fn project(value: Value, hash: String) -> Result<SavedEvidence> {
             ));
         }
     }
+    let mut scan_references: BTreeMap<_, _> = native
+        .observations
+        .iter()
+        .filter_map(|observation| {
+            let rule = observation.rule_id.as_ref().filter(|rule| {
+                rule.len() <= 128
+                    && !rule.starts_with("__")
+                    && rule
+                        .bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || b"_.-".contains(&b))
+            })?;
+            Some((
+                observation.id.clone(),
+                ScanReference {
+                    rule: Some(rule.clone()),
+                    findings: Vec::new(),
+                },
+            ))
+        })
+        .collect();
+    for association in &native.legacy_associations {
+        if crate::assessment::valid_id(&association.legacy_id, "finding") {
+            for observation in &association.observation_ids {
+                scan_references
+                    .entry(observation.clone())
+                    .or_default()
+                    .findings
+                    .push(association.legacy_id.clone());
+            }
+        }
+    }
+    for reference in scan_references.values_mut() {
+        reference.findings.sort_unstable();
+        reference.findings.dedup();
+    }
     Ok(SavedEvidence {
         input,
         targets,
+        scan_references,
         collection_outcome: outcome,
         file: None,
         path: None,

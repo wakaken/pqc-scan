@@ -9,7 +9,7 @@ mod technical;
 use crate::{assessment::AlgorithmAssessment, identity::native_id};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{fs::File, path::Path, str::FromStr};
+use std::{collections::BTreeMap, fs::File, path::Path, str::FromStr};
 
 pub use context::generation::{
     generate_context, generate_context_with_references, ClaimAnswer, ClaimValue, ContextClaims,
@@ -183,12 +183,20 @@ impl Target {
     }
 }
 
+/// Lookup information from the exact saved scan, used only for HTML evidence.
+#[derive(Debug, Default, Serialize)]
+pub struct ScanReference {
+    pub rule: Option<String>,
+    pub findings: Vec<String>,
+}
+
 /// Validated projection; callers cannot substitute input identity or targets.
 /// Hashes bind saved bytes, not collector authenticity or business identity.
 #[derive(Debug)]
 pub struct SavedEvidence {
     input: InputReference,
     targets: Vec<Target>,
+    scan_references: BTreeMap<String, ScanReference>,
     collection_outcome: String,
     // Keep the opened identity for input/output alias protection in the CLI.
     pub(crate) file: Option<File>,
@@ -248,6 +256,9 @@ impl SavedEvidence {
     }
     pub fn targets(&self) -> &[Target] {
         &self.targets
+    }
+    pub fn scan_references(&self) -> &BTreeMap<String, ScanReference> {
+        &self.scan_references
     }
     pub fn collection_outcome(&self) -> &str {
         &self.collection_outcome

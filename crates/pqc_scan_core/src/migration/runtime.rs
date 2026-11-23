@@ -57,6 +57,7 @@ pub(super) fn project(value: Value, format: InputFormat, hash: String) -> Result
     Ok(SavedEvidence {
         input,
         targets,
+        scan_references: Default::default(),
         collection_outcome: string(&value["outcome"])?.into(),
         file: None,
         path: None,

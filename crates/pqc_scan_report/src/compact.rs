@@ -358,7 +358,8 @@ fn html_view(
                 let copy = text(original, lang);
                 writeln!(
                     out,
-                    "<section><h4>{}</h4><p><code>{}</code> · {}</p><p>{}</p></section>",
+                    "<section id=\"scan-match-{}\" tabindex=\"-1\"><h4>{}</h4><p><code>{}</code> · {}</p><p>{}</p></section>",
+                    h(&original.finding_id),
                     h(&copy.description),
                     h(&original.rule_id),
                     severity(lang, original.severity.as_str()),

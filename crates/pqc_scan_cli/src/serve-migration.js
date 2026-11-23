@@ -704,6 +704,7 @@
         body,
         false,
         `reports/${id}/`,
+        documentView.querySelector("[data-scan-report]") !== null,
       );
       setBusy(false);
       if (progressPanel.open) progressPanel.close();
@@ -1688,11 +1689,12 @@
       $("role-filter").value = value;
     }
     function renderSource() {
+      const path = job?.display_path || job?.path || job?.display_name || "/";
+      const label = job?.kind === "saved"
+        ? job.display_name || t("保存したスキャン結果", "Saved scan results")
+        : job?.path === "" ? t(`${path}（スキャンの起点）`, `${path} (scan root)`) : path;
       for (const n of root.querySelectorAll("[data-current-folder]"))
-        n.textContent =
-          job?.display_name || (job?.kind === "saved"
-            ? t("保存したスキャン結果", "Saved scan results")
-            : job?.display_path || job?.path || "/");
+        n.textContent = label;
     }
     loadJob = async (next) => {
       if (loading) return;

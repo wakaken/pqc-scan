@@ -116,9 +116,16 @@ fn paired_reports_preserve_decisions_with_human_tables_and_no_json_dump() {
             assert!(active.contains("decision-card"));
             assert!(!active.contains("\"claimed_support\":"));
             assert!(active.contains("migration.assessment.v1.json"));
-            for source in r.sources() {
-                assert!(active.contains(&source.edition));
-            }
+            assert!(!active.contains("migration.assessment.md"));
+            assert!(!active.contains("<summary>Sources</summary>"));
+            assert!(!active.contains("<summary>出典</summary>"));
+            let footer = active.split_once("<footer").unwrap().1;
+            assert_eq!(footer.matches("<a ").count(), 1);
+            assert!(footer.contains(if md == &a {
+                "Save assessment data"
+            } else {
+                "評価データを保存"
+            }));
         }
         assert!(a.find("## Response overview").unwrap() < a.find("## Declared context").unwrap());
         assert!(b.contains("次の確認"));

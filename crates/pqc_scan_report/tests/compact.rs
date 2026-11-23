@@ -101,12 +101,14 @@ fn compact_reports_keep_all_locations_and_only_share_identical_actions() {
         );
         let matched = html.split("class=\"matched-rules\"").nth(1).unwrap();
         let section = matched
-            .split("<section>")
+            .split("<section id=\"scan-match-occurrence-")
             .nth(1)
             .unwrap()
             .split("</section>")
             .next()
             .unwrap();
+        let (anchor, section) = section.split_once('>').unwrap();
+        assert!(anchor.contains("tabindex=\"-1\""));
         assert!(section.starts_with("<h4>"));
         assert!(!section.split("</h4>").next().unwrap().contains("JWT_RS256"));
         assert!(

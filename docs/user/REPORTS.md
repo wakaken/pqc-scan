@@ -273,12 +273,7 @@ command is required. The browser does not open automatically. The command also
 writes `migration.assessment.md` and `migration.assessment.v1.json`. See the
 [saved-input guide](SAVED-EVIDENCE.md) for formats and context preparation.
 
-HTML provides response counts, a target index and cards by system/location.
-Urgency and readiness stay separate, distinguishing urgent-but-unsupported peers
-from cases needing investigation. Expand a candidate to see its primitive,
-prerequisites, declared support and required checks. Raw JSON is kept in the
-linked machine-readable file; human evidence, claims and source details remain
-available when needed.
+When a record has an active migration deadline and lead time, the timeline shows the start-by date, lead time and migration deadline in separate labelled fields. Each date uses Japan time and carries its own reached or past status. The conclusion shows work-item counts by urgency and flags incomplete collection. Expand **Applied declarations** to see values and their record counts by field. The HTML groups compatible records for the same declared system and use into migration decisions. Each card shows **What to do** and **When to proceed**. Migration plans show the order of investigation, compatibility tests and staged rollout. Monitoring and declared exclusions show what would trigger reassessment. Urgent checks appear together under **Urgent**, including those that still need investigation. When the report includes a migration workflow, expand **Other checks** to see the remaining checks without a workflow. Expand **Assessment details** to see the reasons, recorded evidence and **Applied declarations and planning**, including an active goal month. **Assessment details** lists declared blockers. Where the report shows a migration workflow, its compatibility step also includes the conditions to verify. **View detection locations** opens the list. Select a record to see its location, detection method and decision reasons. **Details** combines records at the same file and line when their findings and decisions agree, and shows the matching rules. **Save assessment data** at the bottom exports the assessment JSON. The evidence view links to a finding when the same local job has the original scan report. JSON decisions, declarations and UTC timestamps stay the same.
 
 The page reuses the scan HTML's styles and local language/theme controls.
 `--lang ja` selects the HTML initial language and Markdown language; English is

@@ -123,6 +123,7 @@ pub fn write_migration_assessment_reports_with_label_and_progress(
         language,
         label,
         &unbindable,
+        evidence.scan_references(),
     )?;
     let paths = vec![
         out_dir.join(MIGRATION_JSON),

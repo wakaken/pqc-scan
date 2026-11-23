@@ -5,7 +5,7 @@ use crate::{
     migration_view::{copy_table, work_groups, Archive},
     ReportLanguage,
 };
-use pqc_scan_core::migration::MigrationAssessment;
+use pqc_scan_core::migration::{MigrationAssessment, ScanReference};
 use serde_json::json;
 use std::{collections::BTreeMap, io::Write};
 pub const MIGRATION_HTML: &str = "migration.assessment.html";
@@ -38,7 +38,7 @@ pub fn migration_html_bytes(
     r: &MigrationAssessment,
     language: ReportLanguage,
 ) -> anyhow::Result<Vec<u8>> {
-    migration_html_bytes_with_presentation(r, language, None, &[])
+    migration_html_bytes_with_presentation(r, language, None, &[], &BTreeMap::new())
 }
 
 pub(crate) fn validate_label(label: Option<&str>) -> anyhow::Result<()> {
@@ -55,6 +55,7 @@ pub(crate) fn migration_html_bytes_with_presentation(
     language: ReportLanguage,
     label: Option<&str>,
     unbindable: &[&str],
+    scan_references: &BTreeMap<String, ScanReference>,
 ) -> anyhow::Result<Vec<u8>> {
     validate_label(label)?;
     let mut out = LimitedBuffer::default();
@@ -114,7 +115,7 @@ pub(crate) fn migration_html_bytes_with_presentation(
     data_block(
         &mut out,
         "migration-shared-data",
-        &json!({"archive":Archive::new(&raw),"groups":groups,"words":words,"states":states,"label":label,"unbindable":unbindable}),
+        &json!({"archive":Archive::new(&raw),"groups":groups,"words":words,"states":states,"label":label,"unbindable":unbindable,"scanReferences":scan_references}),
     )?;
     write!(
         out,
@@ -132,7 +133,20 @@ fn fallback(
 ) -> anyhow::Result<()> {
     let c = Labels(language);
     let groups = work_groups(r);
-    write!(out,"<main class=\"container migration\" data-report-view lang=\"{lang}\"><header class=\"top\"><h1>{}</h1><time>{}</time></header><p>{}: {} · {}: {}</p><section id=\"decisions\">",c.pick("Migration response work items","移行に向けた確認事項"),h(r.as_of()),c.pick("Work items","確認項目"),groups.len(),c.pick("Saved records","保存された記録"),r.decisions().len())?;
+    write!(
+        out,
+        "<main class=\"container migration\" data-report-view lang=\"{lang}\"><header class=\"top\"><h1>{}</h1><time>{}</time></header><noscript>{}</noscript><p>{}: {} · {}: {}</p><section id=\"decisions\">",
+        c.pick("Migration response work items", "移行に向けた確認事項"),
+        h(r.as_of()),
+        c.pick(
+            "Enable JavaScript to browse every work item and its evidence.",
+            "すべての確認項目と根拠を見るにはJavaScriptを有効にしてください。"
+        ),
+        c.pick("Work items", "確認項目"),
+        groups.len(),
+        c.pick("Saved records", "保存された記録"),
+        r.decisions().len()
+    )?;
     for g in groups.iter().take(20) {
         let d = &r.decisions()[g.members[0]];
         write!(
@@ -155,13 +169,9 @@ fn fallback(
     }
     write!(
         out,
-        "</section><details><summary>{}</summary><ul>",
-        c.pick("Sources", "出典")
+        "</section><footer><a href=\"migration.assessment.v1.json\" download>{}</a></footer></main>",
+        c.pick("Save assessment data", "評価データを保存")
     )?;
-    for source in r.sources().iter().take(20) {
-        write!(out, "<li>{}</li>", h(&source.edition))?;
-    }
-    write!(out,"</ul></details><footer><a href=\"migration.assessment.v1.json\" download>JSON</a> <a href=\"migration.assessment.md\">Markdown</a></footer><noscript>{}</noscript></main>",c.pick("Enable JavaScript to browse every work item and its evidence.","すべての確認項目と根拠を見るにはJavaScriptを有効にしてください。"))?;
     Ok(())
 }
 

@@ -43,6 +43,11 @@ function report(spec, hash = '', modal = false) {
       row.id = `finding-${g}-${i}`; row.tagName = 'DETAILS'; row.parentElement = rule;
       row.closest = s => s === '[data-rule]' ? rule : row;
       row.querySelector = () => row;
+      if (data.matchedRuleId) {
+        row.matchedDetails = {...node(), tagName:'DETAILS', parentElement:row};
+        row.matchedRule = {...node(), id:data.matchedRuleId, parentElement:row.matchedDetails,
+          closest:s=>s==='[data-rule]' ? rule : row, querySelector:()=>null};
+      }
       return row;
     });
     rule.querySelector = s => parts[s.slice(1,-1)] || rule;
@@ -50,7 +55,8 @@ function report(spec, hash = '', modal = false) {
     return rule;
   });
   const treeFiles = [...new Set(rules.flatMap(r=>r.rows.map(x=>x.dataset.file)))].map(file=>node({treeFile:file}));
-  const details = rules.flatMap(r => [r,...r.rows]);
+  const details = rules.flatMap(r => [r,...r.rows.flatMap(row =>
+    row.matchedRule ? [row, row.matchedDetails, row.matchedRule] : [row])]);
   root.querySelectorAll = s => s === '[data-rule]' ? rules : s === '[data-tree-file]' ? treeFiles : details;
   root.contains = n => n === root || details.includes(n);
   const window = node();
@@ -206,4 +212,13 @@ test('offline rule help preserves filters on close and reveals targets even for 
  r.link('all');r.link('#rule-0',true);
  assert.equal(r.dialog.open,false);assert.equal(r.rules[0].hidden,false);assert.equal(r.rules[0].open,true);
  assert.equal(r.ui['data-rule-filter'].value,'');assert.equal(r.ui['data-show-tests'].checked,true);assert.equal(r.rules[0].focused,true);
+});
+
+test('a matched-rule hash opens and focuses that individual finding inside a merged occurrence', () => {
+  const id = 'scan-match-finding-v1-' + 'b'.repeat(64);
+  const r = report([[{matchedRuleId:id}]], '#' + id);
+  const occurrence = r.rules[0].rows[0];
+  assert.equal(occurrence.open,true);
+  assert.equal(occurrence.matchedDetails.open,true);
+  assert.equal(occurrence.matchedRule.focused,true);
 });

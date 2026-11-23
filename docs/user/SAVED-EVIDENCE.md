@@ -119,9 +119,10 @@ JSON, IDs, facts and decisions are language-independent.
 
 Response work items combine decisions with matching system, observed purpose/role
 and decision semantics,20 at a time. Their count comes from scan/context data, not
-a fixed three. Reasons and next checks are visible. **View evidence** pages exact
-records20 at a time and renders one detail on request. Search covers all member
-algorithms/locations; urgency filters and language changes retain page/selection.
+a fixed three. Reasons and next checks are visible. **View detection locations**
+opens 20 locations at a time. Search by algorithm or filename, then open a record
+to see its detection method and decision reasons.
+**Details** combines records at the same file and line when their findings and decisions agree, and shows the matching rules.
 Declarations and sources are also paged20 at a time; existing target/claim/source
 fragments open their exact references.
 

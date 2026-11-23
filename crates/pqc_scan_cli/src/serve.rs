@@ -590,9 +590,14 @@ fn report_file(request: Request, state: &State, route: &str) {
     };
     match fs::read(file) {
         Ok(bytes) if mime.starts_with("text/html") => {
+            let scan_reference = if migration_artifact && directory.join("report.html").is_file() {
+                " data-scan-report"
+            } else {
+                ""
+            };
             let html = String::from_utf8_lossy(&bytes)
                 .replacen("</head>", "<script defer src=\"../../report-session.js\"></script></head>", 1)
-                .replacen("<body>", &format!("<body><nav class=\"report-settings\" aria-label=\"Session / セッション\"><a id=\"pqc-session-back\" href=\"../../?result={id}\">結果に戻る</a></nav>"), 1);
+                .replacen("<body>", &format!("<body><nav class=\"report-settings\" aria-label=\"Session / セッション\"><a id=\"pqc-session-back\" href=\"../../?result={id}\"{scan_reference}>結果に戻る</a></nav>"), 1);
             reply(request, 200, mime, html.into_bytes());
         }
         Ok(bytes) => reply(request, 200, mime, bytes),

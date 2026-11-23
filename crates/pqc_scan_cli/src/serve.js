@@ -17,6 +17,7 @@
   let selectedJob = null,
     currentJobs = [],
     activeJob = null,
+    resultBatch = null,
     migrationEnabled = false,
     migrationReady = false,
     view = "input",
@@ -24,6 +25,11 @@
   const preferences = new URLSearchParams(location.search);
   let restoreJob = /^\d+$/.test(preferences.get("result") || "")
     ? Number(preferences.get("result")) : null;
+  const batchIds = (preferences.get("results") || "").split(",", 21).map(id =>
+    /^[1-9]\d*$/.test(id) ? Number(id) : NaN);
+  let restoreBatch = restoreJob === null && batchIds.length > 1 && batchIds.length <= 20 &&
+    batchIds.every(Number.isSafeInteger) && new Set(batchIds).size === batchIds.length ? batchIds : null;
+
   if (["ja", "en"].includes(preferences.get("lang")))
     $("language").value = preferences.get("lang");
   const t = (ja, en) => (language === "ja" ? ja : en);
@@ -234,89 +240,122 @@
       feedback(t("フォルダを開けません。アクセス権を確認してください。", "Cannot open this folder. Check access permissions."), true);
     }
   }
+  function jobName(job) {
+    return job.display_name || (job.kind === "saved"
+      ? t("保存したスキャン結果", "Saved scan results")
+      : job.path || listing?.root?.split("/").filter(Boolean).pop() || t("名前未記録", "Name not recorded"));
+  }
+  function jobSource(job) {
+    const name = jobName(job);
+    if (job.kind === "saved") return name;
+    if (job.path === "") return t(`${name}（スキャンの起点）`, `${name} (scan root)`);
+    return job.path || name;
+  }
+  function coverageMessage(job) {
+    if (job.kind === "saved") return "";
+    return job.coverage === "complete_within_scope"
+      ? t("対象範囲の解析が完了", "Inspection completed within scope")
+      : t("一部の解析が未完了です。理由はスキャンレポートで確認してください。",
+          "Some inspection is unfinished. See the scan report for reasons.");
+  }
   function renderResult() {
+    $("result-single").hidden = Boolean(resultBatch);
+    $("batch-results").hidden = !resultBatch;
+    if (resultBatch) {
+      $("result-title").textContent = t("フォルダごとのスキャン結果", "Scan results by folder");
+      $("batch-results").replaceChildren(...resultBatch.map(job => jobCard(job)));
+      return;
+    }
     if (!activeJob) return;
-    const j = activeJob;
-    $("result-title").textContent =
-      j.kind === "saved"
-        ? t("保存した結果を読み込みました", "Saved results loaded")
-        : t("スキャン完了", "Scan complete");
-    $("result-path").textContent =
-      j.display_name || (j.kind === "saved"
-        ? t("保存したスキャン結果", "Saved scan results")
-        : j.path || listing?.root || "/");
-    $("result-status").textContent =
-      j.kind === "saved"
-        ? ""
-        : j.coverage === "complete_within_scope"
-          ? t("対象範囲の解析が完了", "Inspection completed within scope")
-          : t(
-              "一部の解析が未完了です。理由はスキャンレポートで確認してください。",
-              "Some inspection is unfinished. See the scan report for reasons.",
-            );
-    $("scan-report-card").hidden = !j.report;
-    if (j.report) $("result-report").href = reportURL(j.report);
-    $("migration-card").hidden = !j.migration_input;
+    const job = activeJob;
+    $("result-title").textContent = job.kind === "saved"
+      ? t("保存した結果を読み込みました", "Saved results loaded")
+      : t("スキャン完了", "Scan complete");
+    $("result-path").textContent = jobSource(job);
+    $("result-status").textContent = coverageMessage(job);
+    $("scan-report-card").hidden = !job.report;
+    if (job.report) $("result-report").href = reportURL(job.report);
+    $("migration-card").hidden = !job.migration_input;
     $("result-migration").disabled = !migrationReady;
   }
   function showResult(job, focus = true) {
     if (locked()) return;
     activeJob = job;
+    resultBatch = null;
     const url = new URL(location.href);
+    url.searchParams.delete("results");
     url.searchParams.set("result", job.id);
     history.replaceState(null, "", url);
     renderResult();
     stage("result", focus);
     feedback("");
   }
+  function showBatchResults(jobs, focus = true) {
+    if (locked()) return;
+    resultBatch = jobs;
+    activeJob = null;
+    const url = new URL(location.href);
+    url.searchParams.delete("result");
+    url.searchParams.set("results", jobs.map(job => job.id).join(","));
+    history.replaceState(null, "", url);
+    renderResult();
+    stage("result", focus);
+    feedback("");
+  }
+  function openMigration(job) {
+    if (locked() || !migrationReady || !job?.migration_input) return;
+    if (!resultBatch?.some(result => result.id === job.id)) showResult(job, false);
+    activeJob = job;
+    stage("migration", false);
+    window.dispatchEvent(new CustomEvent("pqc-migration-job", {
+      detail: { ...job, display_path: job.path === "" ? jobName(job) : jobSource(job) },
+    }));
+  }
+  function jobCard(job, latest = false) {
+    const row = text("article", "", "job");
+    const name = jobName(job);
+    const source = jobSource(job);
+    row.append(text("h2", name, "path"));
+    if (source !== name) row.append(text("p", source, "mono small"));
+    row.append(text("p", job.status === "running" ? t("スキャン中…", "Scanning…")
+      : job.status === "failed" ? t("スキャンに失敗しました。フォルダとルールを確認し、再実行してください。",
+          "Scan failed. Check folder and rules, then retry.")
+      : t("完了", "Ready")));
+    if (latest) row.append(text("span", t("最新", "Latest"), "latest-tag"));
+    const time = text("time", Number.isSafeInteger(job.created_at_ms)
+      ? new Date(job.created_at_ms).toLocaleString(language === "ja" ? "ja-JP" : "en-US", { timeZone: "Asia/Tokyo", hour12: false }) + t("（日本時間）", " (Japan time)")
+      : t("日時未記録", "Time not recorded"), "job-time");
+    if (Number.isSafeInteger(job.created_at_ms)) time.dateTime = new Date(job.created_at_ms).toISOString();
+    row.append(time);
+    if (job.status !== "ready") return row;
+    if (job.report && job.coverage && job.coverage !== "complete_within_scope")
+      row.append(text("p", t("一部の解析が未完了", "Inspection incomplete"), "small muted"));
+    const actions = text("div", "", "job-actions");
+    if (job.report) {
+      const scan = text("a", t("スキャンレポートを開く ↗", "Open scan report ↗"), "btn small-btn");
+      scan.href = reportURL(job.report);
+      scan.target = "_blank";
+      scan.rel = "noopener";
+      scan.setAttribute("aria-label", t(`${source} のスキャンレポートを開く（新しいタブ）`,
+        `Open scan report for ${source} (new tab)`));
+      actions.append(scan);
+    }
+    if (job.migration_input && migrationReady) {
+      const button = text("button", t("移行の確認へ進む", "Review migration"), "btn small-btn");
+      button.type = "button";
+      button.setAttribute("aria-label", t(`${source} の移行の確認へ進む`, `Review migration for ${source}`));
+      button.addEventListener("click", () => openMigration(job));
+      actions.append(button);
+    }
+    if (actions.children.length) row.append(actions);
+    return row;
+  }
   function renderJobs() {
-    const signature = JSON.stringify([currentJobs, language]);
+    const signature = JSON.stringify([currentJobs, language, document.documentElement.dataset.theme, migrationReady]);
     if (historySignature === signature) return;
     historySignature = signature;
-    $("jobs").replaceChildren();
-    for (const [index, job] of currentJobs.slice().sort((a, b) => b.id - a.id).entries()) {
-      const row = text("div", "", "job");
-      row.append(
-        text(
-          "strong",
-          job.display_name || (job.kind === "saved"
-            ? t("保存したスキャン結果", "Saved scan results")
-            : job.path || listing?.root?.split("/").filter(Boolean).pop() || t("名前未記録", "Name not recorded")),
-          "path",
-        ),
-      );
-      if (job.kind !== "saved" && job.path && job.path !== job.display_name) row.append(text("p", job.path, "mono small"));
-      row.append(
-        text(
-          "p",
-          job.status === "running"
-            ? t("スキャン中…", "Scanning…")
-            : job.status === "failed"
-              ? t(
-                  "スキャンに失敗しました。フォルダとルールを確認し、再実行してください。",
-                  "Scan failed. Check folder and rules, then retry.",
-                )
-              : t("完了", "Ready"),
-        ),
-      );
-      if (index === 0) row.append(text("span", t("最新", "Latest"), "latest-tag"));
-      const time = text("time", Number.isSafeInteger(job.created_at_ms)
-        ? new Date(job.created_at_ms).toLocaleString(language === "ja" ? "ja-JP" : "en-US", { timeZone: "Asia/Tokyo", hour12: false }) + t("（日本時間）", " (Japan time)")
-        : t("日時未記録", "Time not recorded"), "job-time");
-      if (Number.isSafeInteger(job.created_at_ms)) time.dateTime = new Date(job.created_at_ms).toISOString();
-      row.append(time);
-      if (job.status === "ready") {
-        const b = text(
-          "button",
-          t("結果を確認", "Review results"),
-          "btn small-btn",
-        );
-        b.type = "button";
-        b.addEventListener("click", () => showResult(job));
-        row.append(b);
-      }
-      $("jobs").append(row);
-    }
+    $("jobs").replaceChildren(...currentJobs.slice().sort((a, b) => b.id - a.id)
+      .map((job, index) => jobCard(job, index === 0)));
     $("history").hidden = !currentJobs.length || view === "migration";
   }
   function reportURL(path) {
@@ -376,9 +415,10 @@
       location.href = reportURL(ready[0].report);
       return;
     }
-    if (ready.length) showResult(ready[ready.length - 1]);
+    if (ready.length && finished.results.length > 1) showBatchResults(finished.results);
+    else if (ready.length) showResult(ready[0]);
     else stage("input");
-    $("history").open = true;
+    if (!resultBatch) $("history").open = true;
     feedback(cancelled ? t(`残りのスキャンをキャンセルしました。完了${ready.length}件、失敗${failed}件。実行済みの結果は履歴に残ります。`, `Remaining scans cancelled. ${ready.length} ready, ${failed} failed. Existing results remain in history.`) : startError !== null
       ? t(`スキャンの開始を確認できませんでした：${startError || listing?.root || "/"}。残り${remaining}フォルダの追加実行を停止しました。開始済みの処理と完了済みの結果は、下の一覧で確認できます。`,
           `Could not confirm scan start for ${startError || listing?.root || "/"}. Stopped further requests for ${remaining} remaining folders. Accepted scans and completed results remain listed below.`)
@@ -425,6 +465,13 @@
           if (restored?.status === "ready") { showResult(restored, false); if (restored.kind !== "saved") loadFolder(restored.path || ""); }
           else feedback(t("このセッションでは結果を開けません。", "These results are unavailable in this session."), true);
         }
+      }
+      if (restoreBatch && !locked()) {
+        const results = restoreBatch.map(id => currentJobs.find(job => job.id === id &&
+          job.kind !== "saved" && ["ready", "failed"].includes(job.status)));
+        restoreBatch = null;
+        if (results.every(Boolean)) showBatchResults(results, false);
+        else feedback(t("このセッションでは結果を開けません。", "These results are unavailable in this session."), true);
       }
       renderJobs();
       if (batch && batch.startError !== undefined) finishBatch(batch.startError);
@@ -519,19 +566,14 @@
   });
   $("choose-input").addEventListener("click", () => {
     if (locked()) return;
-    const url = new URL(location.href); url.searchParams.delete("result");
+    const url = new URL(location.href);
+    url.searchParams.delete("result");
+    url.searchParams.delete("results");
     history.replaceState(null, "", url);
+    resultBatch = activeJob = null;
     stage("input");
   });
-  $("result-migration").addEventListener("click", () => {
-    if (locked() || !migrationReady || !activeJob) return;
-    stage("migration", false);
-    window.dispatchEvent(
-      new CustomEvent("pqc-migration-job", {
-        detail: { ...activeJob, display_path: $("result-path").textContent },
-      }),
-    );
-  });
+  $("result-migration").addEventListener("click", () => openMigration(activeJob));
   function inputMode(saved) {
     if (locked()) return;
     $("folder-pane").hidden = saved;
@@ -599,6 +641,7 @@
     url.searchParams.set("theme", document.documentElement.dataset.theme);
     history.replaceState(null, "", url);
     theme();
+    renderJobs();
     renderResult();
   });
   function applyLanguage() {
@@ -624,7 +667,8 @@
   });
   window.addEventListener("pageshow", applyLanguage);
   window.addEventListener("pqc-migration-back", () => {
-    if (activeJob) showResult(activeJob);
+    if (resultBatch) showBatchResults(resultBatch);
+    else if (activeJob) showResult(activeJob);
   });
   window.addEventListener("pqc-open-report", event => {
     if (locked()) return;
