@@ -488,3 +488,34 @@ verified; no required work remains for this follow-up.
 ## Authorized OSS-persona follow-up (2026-11-20)
 
 The maintainer requested fixes for all five findings in `target/oss-persona-20261120/evidence/persona/REVIEW.md` and further real-OSS language comparisons. The follow-up preserves decision policy, grouping membership and canonical JSON schemas. Known unbindable target IDs and an optional bounded scope label are presentation metadata outside the lossless assessment archive. Existing report writer entrypoints delegate to the optional-label writer. Deadline authoring supplies explicit issuer/document/edition/clause references through the existing schema and validator. Applied active deadline/lead-time pairs are aggregated per member with counts and a bounded variant display; mixed groups never inherit the first member's dates. Distinct recorded locations are not distinct runtime uses. New detector gaps measured by the language review do not authorize rule changes.
+
+## Current decision presentation (2026-11-23)
+
+This section describes the implementation at `87e27cd`; earlier dated mock,
+filter, ledger and review records above remain historical. No evaluator, schema
+or supported distribution scope is changed by this documentation update.
+
+The HTML derives use-specific scopes from active applied claims. A system,
+non-conflicting information, supported use and active/planned usage are required
+for plan/unblock/migrate/monitor scopes. Explicit applicable exclusions have their
+own scope. Only plan/unblock/migrate render three phases: current-use discovery,
+compatibility testing and staged rollout. Monitor/exclusion render one check;
+other decisions render investigation actions and reassessment conditions.
+
+Cards with scopes render first by urgency. Urgent unscoped investigations also
+remain visible. When any scope exists, remaining unscoped nonurgent cards start
+inside Other checks; without scopes, every card renders by urgency. There is no
+work-item search or urgency filter. Location-dialog search remains.
+
+The top schedule uses up to three active per-record deadline/lead-time pairs,
+with separate start-by/deadline status. Goal month remains a declaration, never a
+policy deadline. Card details contain the applied assumptions and blockers.
+The location dialog groups a known path/line once; semantically equivalent
+records share details while their rule/method sets remain visible. Unknown
+locations and differing facts/decisions stay distinguishable. Long paths wrap.
+
+The bottom exposes Save assessment data. Separate checklist, owner list,
+request-copy and trailing claim/source ledgers are removed from the human page.
+Canonical JSON, CLI Markdown and lossless embedded assessment remain available.
+Original-scan navigation requires the matching completed local job; standalone
+HTML does not invent that dependency. See the paired [user guide](../user/REPORTS.md#saved-assessment).

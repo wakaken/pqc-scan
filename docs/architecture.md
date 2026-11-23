@@ -524,3 +524,18 @@ report and supplied context is saved. Failure clears the pending preview and hid
 unfinished artifacts. The synchronous assess route remains compatible. The served
 report mounts the same renderer as standalone HTML; return-to-input retains edits,
 and HTML export seeds current language/theme without changing machine contracts.
+
+## Decision-oriented migration presentation (2026-11-23)
+
+The reporting projection and `migration.js` preserve the canonical assessment
+while presenting conditional use-specific workflows, urgent investigations and
+reassessment conditions. Scope derives only from applied active claims and
+compatible decisions; additional inputs alone do not guarantee three phases.
+Known-location records share a path/line row and equivalent details retain
+method/rule sets. The schedule distinguishes start-by and migration deadlines;
+goal month stays planning metadata. Work-list filters and trailing human ledgers
+are removed; embedded assessment JSON and CLI Markdown remain complete.
+`serve` links each folder result/history entry to its own scan and optional
+migration workflow. Original-scan links require that same completed local job.
+See [current presentation](product/MIGRATION-REVIEW-GROUPING.md#current-decision-presentation-2026-11-23)
+and [folder navigation](product/LOCAL-SCAN-UI.md#current-per-folder-result-navigation-2026-11-23).

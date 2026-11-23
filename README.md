@@ -117,7 +117,18 @@ The server listens only on `127.0.0.1` and runs the same static scanner as the C
 
 <a id="report-preview"></a>
 
-Optional migration input is available with `serve --migration`: the results screen links to the scan report and migration input. Review the scan overview, enter shared context for a chosen use and open grouped response work items. Exact evidence and individual exceptions remain available; generation shows its current stage. See [the local workflow](docs/user/SCANNING.md#optional-migration-context-and-reassessment).
+Add `--migration` to `serve` to move from scan results to optional purpose and
+usage input, then **Prepare review items**. For multiple folders or history, choose
+the named folder card: **Open scan report ↗** opens its detections and **Review migration**
+opens its saved input/result. The migration report groups decisions and shows what
+to do and when to proceed. Review the evaluation date, schedule and urgent
+investigations first; inspect locations for the underlying evidence.
+
+See [migration input and reassessment](docs/user/SCANNING.md#optional-migration-context-and-reassessment),
+[reading the migration report](docs/user/REPORTS.md#saved-assessment), and
+[saved evidence and declarations](docs/user/SAVED-EVIDENCE.md). Save input JSON with
+the exact inventory used to create it; **Save assessment data** saves the evaluation,
+not a reusable context file.
 
 ## Report preview
 
@@ -155,6 +166,10 @@ Use `--cyclonedx-17` for separate CycloneDX 1.7 exports, or `diff` to compare
 inventories with the same explicit repository scope. See the [report guide](docs/user/REPORTS.md).
 
 Finding IDs use `finding-v1-<SHA-256>` with length-prefixed fields and repository-relative paths. With the same binary, rules, selected input and scan settings, identical findings keep their IDs across checkout locations. Position/evidence corrections between versions can change affected IDs and counts; see [versions and identity](docs/user/REPORTS.md#versions-and-identity).
+
+HTML and Markdown merge equivalent findings at the same position and algorithm, retaining matched rules in details. Inspection totals count files; finding totals count merged items. Machine exports such as JSON retain original rule-level records.
+
+Tests remain included by default. Use `--exclude-tests` or the browser’s “Exclude test code” option below “Clear selection” to omit conventional test paths and filenames. See [scanning](docs/user/SCANNING.md) for matching conventions and limits. Custom exclusions can be configured with `.pqcignore`; syntax-proven Rust test-only findings can also be omitted.
 
 <a id="guides"></a>
 
@@ -259,17 +274,3 @@ required checks pending.
 
 [MIT](LICENSE). Bundled dependencies have their own licenses; see the archive’s
 `DEPENDENCY-LICENSES.json` and `licenses/` directory.
-
-
-Use Cancel remaining scans in the progress dialog to stop all unsubmitted folders. The active folder finishes and its result remains in Scan history. Migration loading and preparation also show a blocking dialog. Opening Response work items does not generate anything; use Prepare review items explicitly. Evaluation time appears beside the input method; optional declaration expiry is folded into details. Explicitly choosing a duration or goal month clears the other field. Existing imported formats and meanings are preserved.
-
-Omitting declaration expiry leaves purpose/support claims with unknown validity. Entered declarations and currently usable assessment claims are distinct; supply the intended expiry explicitly.
-
-
-When a record has an active migration deadline and lead time, the timeline shows the start-by date, lead time and migration deadline in separate labelled fields. Each date uses Japan time and carries its own reached or past status. The conclusion shows work-item counts by urgency and flags incomplete collection. Expand **Applied declarations** to see values and their record counts by field. The HTML groups compatible records for the same declared system and use into migration decisions. Each card shows **What to do** and **When to proceed**. Migration plans show the order of investigation, compatibility tests and staged rollout. Monitoring and declared exclusions show what would trigger reassessment. Urgent checks appear together under **Urgent**, including those that still need investigation. When the report includes a migration workflow, expand **Other checks** to see the remaining checks without a workflow. Expand **Assessment details** to see the reasons, recorded evidence and **Applied declarations and planning**, including an active goal month. **Assessment details** lists declared blockers. Where the report shows a migration workflow, its compatibility step also includes the conditions to verify. **Save assessment data** at the bottom exports the assessment JSON. The evidence view links to a finding when the same local job has the original scan report. JSON decisions, declarations and UTC timestamps stay the same.
-
-The optional migration form also accepts sourced organization/contract deadlines. HTML work items distinguish records from recorded locations, explain binding limitations and show applied deadlines/lead times; `assess --report-label` identifies a saved HTML report. See the local workflow for details.
-
-HTML and Markdown merge equivalent findings at the same position and algorithm, retaining matched rules in details. Inspection totals count files; finding totals count merged items. Machine exports such as JSON retain original rule-level records.
-
-Tests remain included by default. Use `--exclude-tests` or the browser’s “Exclude test code” option below “Clear selection” to omit conventional test paths and filenames. See [scanning](docs/user/SCANNING.md) for matching conventions and limits. Custom exclusions can be configured with `.pqcignore`; syntax-proven Rust test-only findings can also be omitted.

@@ -273,7 +273,60 @@ command is required. The browser does not open automatically. The command also
 writes `migration.assessment.md` and `migration.assessment.v1.json`. See the
 [saved-input guide](SAVED-EVIDENCE.md) for formats and context preparation.
 
-When a record has an active migration deadline and lead time, the timeline shows the start-by date, lead time and migration deadline in separate labelled fields. Each date uses Japan time and carries its own reached or past status. The conclusion shows work-item counts by urgency and flags incomplete collection. Expand **Applied declarations** to see values and their record counts by field. The HTML groups compatible records for the same declared system and use into migration decisions. Each card shows **What to do** and **When to proceed**. Migration plans show the order of investigation, compatibility tests and staged rollout. Monitoring and declared exclusions show what would trigger reassessment. Urgent checks appear together under **Urgent**, including those that still need investigation. When the report includes a migration workflow, expand **Other checks** to see the remaining checks without a workflow. Expand **Assessment details** to see the reasons, recorded evidence and **Applied declarations and planning**, including an active goal month. **Assessment details** lists declared blockers. Where the report shows a migration workflow, its compatibility step also includes the conditions to verify. **View detection locations** opens the list. Select a record to see its location, detection method and decision reasons. **Details** combines records at the same file and line when their findings and decisions agree, and shows the matching rules. **Save assessment data** at the bottom exports the assessment JSON. The evidence view links to a finding when the same local job has the original scan report. JSON decisions, declarations and UTC timestamps stay the same.
+### Read the migration decisions
+
+Start with the evaluation time and schedule, then review **Urgent** items. Each
+card gives **What to do** and **When to proceed**. The number of cards depends
+on the saved evidence and declarations; it is not a fixed three.
+
+A three-step migration plan (identify current use, test compatibility, roll out
+in stages) appears when active, non-conflicting declarations identify a system,
+a supported use (JWT, signature, PKI, key establishment, encryption or hashing),
+and active/planned usage, and the assessed action is plan, unblock or migrate.
+Adding more detail alone does not create a plan. Investigation cards show the
+next fact to establish; monitoring and declared exclusions show reassessment
+conditions instead. Test-only usage alone does not override known classical
+concerns such as RSA-SHA1 or short RSA keys. An applicable explicit scope
+exclusion takes precedence; it retains the original detection and conditions
+for reassessment if live processing uses it.
+
+When at least one card has a use-specific workflow (including monitoring or an
+exclusion), **Other checks** initially folds remaining cards without a workflow,
+except urgent investigations, which stay visible. Without such a workflow, all
+cards appear by urgency without this fold. Undetermined urgency needs more
+information; it is not low risk. Work items are paged 20 at a time.
+
+### Check dates and declarations
+
+The top of the report shows evaluation time. An active deadline and lead time on
+the same record produce separate **Start by**, **Lead time** and **Migration
+deadline** fields in Japan time. Passing the start-by date and passing the
+migration deadline have separate labels. The top shows up to three date pairs;
+remaining pairs are available in the cards. A goal month is planning information
+shown under **Assessment details → Applied declarations and planning**; it does
+not set a deadline or change urgency. Declared blockers also appear in details
+and, for migration plans, in the compatibility step.
+
+**Applied declarations** summarizes values and record counts. Open a card's
+**Assessment details** for its reasons, evidence and planning assumptions.
+Counts distinguish assessment records from distinct recorded locations; neither
+is a count of deployed uses or confirmed vulnerabilities.
+
+### Inspect locations and save the result
+
+**View detection locations** opens **Detection locations**. Search there by
+algorithm or filename and browse 20 locations at a time. Long paths wrap; each
+row has a **Details** button. Equivalent detections at the same file and line
+share the row and detail view, retaining their matched rules and methods.
+Migration decisions themselves have no search box or urgency filter.
+
+When the same local job has the original scan report, the location details can
+open the corresponding finding. A standalone assessment HTML does not carry
+that original report or create this link. The bottom action, **Save assessment
+data**, exports the complete assessment JSON. There is no separate end-of-page
+checklist, owner list or request-copy control. CLI `assess` still writes HTML,
+Markdown and JSON; simplifying HTML controls does not remove those files or the
+original detection data.
 
 The page reuses the scan HTML's styles and local language/theme controls.
 `--lang ja` selects the HTML initial language and Markdown language; English is
@@ -338,7 +391,7 @@ Folder rows use blue folder icons, file rows use outlined document icons, and th
 
 Migration HTML can carry a bounded non-secret report label. It separates detector record counts from distinct recorded locations, names observation methods, explains known binding limitations, and shows applied active deadline/lead-time pairs in Japan time and human durations. Mixed pairs retain their own record counts; exact machine assessment data is unchanged. See local migration input for scoped organization/contract deadline authoring.
 
-An input with zero assessment targets has a dedicated empty-state explanation: it does not establish absence of cryptography, safety or no required action. This is distinct from a search/filter returning no matching work items.
+An input with zero assessment targets has a dedicated empty-state explanation: it does not establish absence of cryptography, safety or no required action. It is separate from having assessment targets whose urgency remains undetermined.
 
 Reports generated with test exclusion or `.pqcignore` list those conditions in the existing inspection scope. Mixed Rust files are still analyzed; omitting syntax-proven test-only findings does not necessarily reduce file counts, and source context may show adjacent tests. See [scan exclusion settings](SCANNING.md#exclude-test-code).
 

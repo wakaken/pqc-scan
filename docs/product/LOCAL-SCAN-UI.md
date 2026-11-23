@@ -702,3 +702,21 @@ remain available. User's original tabs/servers were preserved; main scratch tab
 and owned r3 server were closed. No commit/push/publication. All specified UI
 changes and the requested additional user-perspective review are complete; the
 two additional report UX proposals are distinct from the verified deliverables.
+
+## Current per-folder result navigation (2026-11-23)
+
+The implementation at `87e27cd` gives every completed folder in a multi-scan
+batch and session history a named result card. Open scan report opens that
+folder's original report in a separate tab with current language/theme. Review
+migration, when enabled/available, restores that folder's input or generated
+review. Imported inventory can be reviewed but has no original scan HTML.
+History is session-local, newest first, and retains the existing job limits.
+
+Opening the work-items tab does not generate a report. Prepare review items
+starts generation explicitly, with blocking progress and actual phase labels.
+Cancel remaining scans affects unsubmitted folders; the active scan finishes.
+The generated review uses the shared decision presentation documented in
+[MIGRATION-REVIEW-GROUPING](MIGRATION-REVIEW-GROUPING.md#current-decision-presentation-2026-11-23).
+Save report (HTML) and Save input (JSON) belong to the local input workflow;
+Save assessment data inside the report exports evaluation JSON instead of
+context. Context remains bound to the exact saved inventory bytes.

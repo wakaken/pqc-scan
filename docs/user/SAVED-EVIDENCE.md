@@ -117,14 +117,17 @@ uses the scan report's styles and local language/theme controls. `--lang en`
 (default) or `--lang ja` chooses the HTML initial language and Markdown language;
 JSON, IDs, facts and decisions are language-independent.
 
-Response work items combine decisions with matching system, observed purpose/role
-and decision semantics,20 at a time. Their count comes from scan/context data, not
-a fixed three. Reasons and next checks are visible. **View detection locations**
-opens 20 locations at a time. Search by algorithm or filename, then open a record
-to see its detection method and decision reasons.
-**Details** combines records at the same file and line when their findings and decisions agree, and shows the matching rules.
-Declarations and sources are also paged20 at a time; existing target/claim/source
-fragments open their exact references.
+Migration cards group compatible decisions and show actions and conditions for proceeding.
+Use **View detection locations** for the searchable, paged location list and
+**Details** for matched rules, methods and reasons. Declarations used by the
+decision appear within details; there is no separate paged declaration/source
+ledger at the bottom. See the [report guide](REPORTS.md#saved-assessment) for
+workflow conditions, schedules, urgency and saving.
+
+Distinguish **test-only usage** from an explicit **outside-scope** declaration.
+Test-only usage alone does not lower urgent known classical concerns. A valid
+explicit scope exclusion takes precedence while retaining facts and reassessment
+conditions.
 
 Complete facts and decisions remain in a shared local HTML data archive, reducing
 per-target/per-language duplication. No external assets are required. JavaScript
