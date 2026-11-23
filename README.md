@@ -6,7 +6,7 @@
 It reads local project files, finds references to cryptographic algorithms and libraries, and reports the locations and suggested follow-up work.
 Use it to decide what to investigate before changing JWT, TLS, PKI, SSH or other cryptographic components.
 
-pqc-scan is local-first: scanning and report generation run entirely in your local environment. During these operations, it does not connect to external services over the internet. It does not automatically connect to external AI services or LLMs, and it does not send the scanned source code to external services.
+`pqc-scan` is local-first: scanning and report generation run entirely in your local environment. During these operations, it does not connect to external services over the internet. It does not automatically connect to external AI services or LLMs, and it does not send the scanned source code to external services.
 
 ## Contents
 
@@ -36,19 +36,17 @@ Point the scanner at a local repository. It inspects the following artifacts wit
 | Dependency manifests and locks | `Cargo.toml`, `Cargo.lock`, `package.json`, npm/pnpm locks, Python/Ruby/Java/Go dependency files | Relevant libraries, declared version constraints and supported resolution records |
 | Existing SBOM files | CycloneDX JSON and SPDX JSON | Reported dependency components/packages; not proof of installation |
 
-File selection defaults to 2 MiB per file. Use `scan --max-file-size-mib 16` or the folder picker’s size field to change it (1–64 MiB). See [file-size limits](docs/user/SCANNING.md#file-size-limit).
+File selection defaults to 2 MiB per file. See [file-size limits](docs/user/SCANNING.md#file-size-limit).
 
 <a id="features"></a>
 
 ## What does it do?
 
 - Locates cryptographic references and attaches severity, risk labels and source context.
-- Provides migration guidance for the affected language or runtime.
-- Writes HTML/Markdown for investigation and JSON/SARIF for automation.
-- Lists cryptographic findings and software dependencies in separate inventory files.
-- Optionally records richer observations, local advisory assessments and inspection diagnostics.
-- The explicit `assess` command can [reassess saved evidence offline](docs/user/SAVED-EVIDENCE.md), keeping technical roles, scoped claims and migration decisions separate.
-- Add purpose and usage information to scan results to organize migration checks.
+- Provides checks for migration to post-quantum cryptography (PQC), tailored to the language and runtime.
+- Writes HTML/Markdown for investigation and JSON/SARIF for integration with other tools.
+- Lists cryptographic scan results and software dependencies separately.
+- Lets you enter the purpose and usage of cryptography to organize the checks needed for migration to PQC.
 
 A reference to a PQC algorithm is useful evidence, but it does not establish that the application uses it successfully. The [report guide](docs/user/REPORTS.md#pqc-findings) explains these findings with examples.
 
@@ -56,7 +54,7 @@ A reference to a PQC algorithm is useful evidence, but it does not establish tha
 
 ## Run your first scan
 
-Use the Rust toolchain pinned in [`rust-toolchain.toml`](rust-toolchain.toml) (currently Rust 1.93.1) and install from this checkout:
+Install from this repository’s source with the following commands:
 
 ```bash
 cd /path/to/pqc-scan
