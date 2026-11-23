@@ -18,8 +18,7 @@ commands at build time using the pinned Rust toolchain:
 cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh
 ```
 
-The published binary targets macOS on Apple Silicon. An isolated Linux protocol/OpenSSH test harness is available, but the repository's `protocols` CI job is currently paused, including manual workflow runs. Do not infer a fresh protocol pass from a successful `quality`, `baseline` or `scan` job. The generic suite's read-only-target write failure was corrected and the [candidate validation](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md) completed the original suite, separately from protocol049. That evidence does not resume hosted CI; resumption needs a maintainer decision and verification of current inputs/environment/limits. The harness does not qualify a Linux binary distribution or other OS/architecture combinations. TLS adds a native cryptographic provider
-build; static builds/tests do not require that provider. No AI service is used.
+Distributed binaries target macOS Apple Silicon. To use endpoint diagnostics, install from source with the required optional features.
 
 ## TLS
 
@@ -45,10 +44,8 @@ is mandatory. The effective DNS verification name is also SNI; IP verification
 sends no SNI. `--server-name` never changes the pinned destination. OS trust
 constraints and revocation checking are not supplied by this bundled-root mode.
 
-A failed verifier never yields verified negotiated fields, even if internal
-accessors contain provisional values. Client-authentication requests are locally
-unsupported. Chain collection is limited to16 certificates/256 KiB; the TLS library
-may hit its smaller internal message limit first. Failures/limits are incomplete
+A connection that fails verification is not shown as a verified negotiated result. Client-authentication requests are locally
+unsupported. Chain collection is limited to16 certificates/256 KiB; other processing limits can also prevent completion. Failures/limits are incomplete
 inspection, not evidence that the server lacks PQC or is unsafe.
 
 ## SSH offers
@@ -138,7 +135,5 @@ failed/partial observations. HTML presents the result/reason first, with technic
 details closed. Existing `probe ssh` remains advertisement-only; no existing
 static/TLS/SSH-offer output format changes. Enable `probe-tls,probe-ssh,probe-ssh-kex`
 for all three commands. New distribution archives use `static` (no probes) and
-`network` (TLS, SSH offers and SSH KEX, plus static scanning). Individual feature
-switches remain available for custom source builds. The historical v0.2 candidate
-used three variants; its validation does not clear `network` for publication.
+`network` (TLS, SSH offers and SSH KEX, plus static scanning). The experimental `network` variant is not included in public distribution.
 See the [distribution guide](DISTRIBUTION.md#release-status).

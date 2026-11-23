@@ -1,8 +1,8 @@
 # Understanding reports
 
-[日本語](REPORTS.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.md)
+[日本語](REPORTS.ja.md) · [README](../../README.md)
 
-This guide describes the static v0.4.0 candidate. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.4.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
+This guide covers v0.4.0 static scanning. See the [release notes](../releases/v0.4.0.md) for changes between versions.
 
 After a scan, use the human report to investigate findings, then choose machine-readable files for tracking or automation. A finding records evidence and suggested checks; it is not an instruction to replace an algorithm without investigating its use.
 
@@ -106,8 +106,6 @@ For example:
 
 The rule set includes ML-KEM/ML-DSA references across the seven listed languages, selected Java, Node and Ruby SLH-DSA API references, selected libraries, Java/Ruby classical-only TLS group settings and Go `GODEBUG=tlsmlkem=0`.
 Certificate signature OIDs and subject-public-key OIDs for ML-DSA/SLH-DSA are checked separately; a filename does not establish the certificate's algorithm. Parsed OIDs do not verify a signature, trust chain or valid PQC key.
-
-Selected built-in rules use [bounded local source analysis](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.md#source-facts) to distinguish supported API calls from shadowed names or display strings. Other rules remain nominal pattern checks. In either case, review the evidence and inspection status; local reference tracing does not establish execution.
 
 These references can appear as informational findings in CBOM and SARIF too. Read `quantum-safe` as a classification of the primitive, not “migration complete.” Dependency findings remain `quantum-uncertain`.
 Node crypto/WebCrypto, browser and TypeScript runtime support must be checked individually; their version requirements differ. JWT signature changes also need compatible JOSE formats, libraries and verifiers.
@@ -347,45 +345,22 @@ validation before adoption. Outside scope is a scoped declaration; monitor appli
 to the recorded technical role. Unknown is not low priority; no aggregate safety
 or independently measured practitioner-usefulness verdict is presented.
 
-All three files render within64MiB/file and validate output aliases against input
-and context before any write. Replacement is atomic per file. JSON-only library
-output remains available. Existing scan HTML, rule guide, serve, migration-review-v1
-and publication status retain their behavior.
-
 <a id="sarif-locations"></a>
 
 ## Read SARIF locations
 
-SARIF remains version 2.1.0. File paths are percent-encoded UTF-8 URI references
-(literal `%`, spaces, `#` and `?` are encoded); absolute paths become file URIs.
-Windows native separators are normalized on Windows; Unix backslashes are literal.
-An unknown line (`0` in `report.json`) produces an artifact-only location. A known
-line with unknown column omits `startColumn`; an empty path omits `locations`.
-Columns are one-based Unicode code points (`columnKind: unicodeCodePoints`),
-including one column per emoji, combining code point or tab, rather than visual
-width or UTF-16 units. Legacy AST columns mix byte and character offsets: SARIF
-keeps a column only when the existing unmasked snippet proves an ASCII prefix;
-otherwise it retains the line only. Missing, masked or clipped prefixes cannot
-prove a column. Selecting SARIF does not rewrite `report.json` locations or finding IDs.
-Version-to-version changes to the underlying source evidence are a separate
-compatibility matter; the output format alone does not guarantee stable IDs. See the [contract and validation record](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/tasks/022/SARIF-LOCATION-CONTRACT-022.md).
+SARIF 2.1.0 lets compatible development tools display finding locations.
+File, line and column are included when known; an unknown column leaves the line
+available. Selecting SARIF does not change finding IDs or locations in other outputs.
 
 <a id="versions-and-identity"></a>
 
 ## Product versions and record identity
 
-Finding identity is stable for identical findings with the same binary, rules,
-selected input and settings at the same repository-relative paths. Enabling an
-additional output or changing the human report language is not a version upgrade.
-Native assets/occurrences have separate identity and repository-scope contracts;
-duplicate weak anchors can remain ambiguous. Run/observation records can also
-contain execution-specific identifiers. Do not expect every exported byte or ID
-to be identical across runs.
-
-Across product or rule versions, corrected positions, evidence, attributes or
-newly detected references can change IDs and counts without changing the identity
-algorithm or schema. Compare the binary/source and rule versions alongside your
-scan settings. See the [v0.4.0 compatibility notes](../releases/v0.4.0.md).
+Identical findings produced with the same binary, rules, input and settings can
+be compared by ID. Version upgrades or changes to inputs and settings can change
+IDs and counts. Compare binary/rule versions, selected scope and settings together.
+See the [v0.4.0 compatibility notes](../releases/v0.4.0.md).
 
 ### File tree and panel visibility
 

@@ -15,8 +15,7 @@ TLS・SSH提示方式・SSH KEXは、静的版v0.3.0と併せても実験的機�
 cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh
 ```
 
-公開バイナリの対象環境はApple SiliconのmacOSです。Linuxの隔離環境でプロトコルとOpenSSHを検証する仕組みはありますが、現在は`protocols` CIジョブを手動実行も含めて停止しています。`quality`・`baseline`・`scan`の成功を、新たなプロトコル検証の成功と解釈しないでください。汎用suiteの読取り専用の出力先への書込み問題は修正済みで、[候補の検証](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md)では元のsuite全体を完了しています。protocol049とは別の証拠で、ホスト型CIの再開を意味しません。再開には維持者の判断と現在の入力・環境・上限での確認が必要です。この検証環境があることと、Linuxや他のOS・アーキテクチャーの配布対応は別です。
-TLS機能では暗号プロバイダーのネイティブビルドが加わります。静的スキャンだけのビルド・テストには不要で、AIサービスも使いません。
+配布バイナリの対象環境はmacOS Apple Siliconです。接続先診断を使う場合は、必要な機能を有効にしてソースから導入してください。
 
 ## TLS
 
@@ -38,7 +37,7 @@ pqc-scan probe tls 127.0.0.1 --port 8443 --allow-cidr 127.0.0.1/32 --server-name
 信頼チェーン、名前、有効期間の通常検証は必須です。DNS名の検証対象はSNIにも使い、IPアドレスの検証ではSNIを送りません。`--server-name` で実際の接続先を変更することはできません。
 このモードはOS固有の信頼制約や失効確認を提供しません。
 
-内部APIから値が得られても、検証失敗後に「検証済みの交渉結果」として出力することはありません。
+検証に失敗した接続は、「検証済みの交渉結果」として表示しません。
 クライアント認証の要求は未対応です。証明書の収集上限は16個・256 KiBで、TLSライブラリ内部の小さなメッセージ上限に先に達する場合もあります。
 失敗や上限到達は検査の不完全さを示し、サーバーのPQC非対応や危険性を断定するものではありません。
 
@@ -117,4 +116,4 @@ Unixではシンボリックリンクや通常ファイル以外の入力も拒�
 HTMLは結果と理由を先に示し、技術情報は閉じた状態にします。
 既存の `probe ssh` は提示方式の収集のままで、従来の出力形式も維持します。
 全コマンドが必要なら `probe-tls,probe-ssh,probe-ssh-kex` を有効にしてください。
-新しい配布物は`static`（probeなし）と`network`（静的スキャンに加え、TLS・SSH提示方式・SSH KEX）の2構成です。内部のfeatureは個別ビルド用に残します。過去のv0.2候補は3構成でしたが、その検証は`network`の公開承認とは別です。[配布構成と確認事項](DISTRIBUTION.ja.md#release-status)を参照してください。
+新しい配布物は`static`（probeなし）と`network`（静的スキャンに加え、TLS・SSH提示方式・SSH KEX）の2構成です。実験的な`network`版は公開対象に含みません。[配布構成と確認事項](DISTRIBUTION.ja.md#release-status)を参照してください。

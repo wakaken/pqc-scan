@@ -6,11 +6,7 @@
 It reads local project files, finds references to cryptographic algorithms and libraries, and reports the locations and suggested follow-up work.
 Use it to decide what to investigate before changing JWT, TLS, PKI, SSH or other cryptographic components.
 
-Scanning and report generation run entirely on your machine using local rules and parsers. No LLM or AI service is required: pqc-scan makes no outbound connections during these operations and does not send source code or scan results to external services. No AI-service API key or subscription is needed.
-
-Downloading build/install dependencies, uploading reports through CI you configure, and opening external reference links are separate network activities. Once the tool and rules are available locally, scanning works offline.
-
-Reports show findings, locations and suggested next steps. The inspection overview separately identifies incomplete checks and files needing follow-up.
+pqc-scan is local-first: scanning and report generation run entirely in your local environment. During these operations, it does not connect to external services over the internet. It does not automatically connect to external AI services or LLMs, and it does not send the scanned source code to external services.
 
 ## Contents
 
@@ -23,12 +19,9 @@ Reports show findings, locations and suggested next steps. The inspection overvi
 - [Read the results](#results)
 - [User guides](#guides)
 - [Limits and privacy](#limits)
-- [Repository CI](#repository-ci)
 - [License](#license)
 
 <a id="targets"></a>
-
-Selected source rules now follow bounded relative JS/TS constant imports and simple JWT forwarding functions. Error-message algorithm references remain visible as informational entries; inspection diagnostics show known causes and next checks. See [coverage](docs/user/COVERAGE.md#source-facts).
 
 ## What can I scan?
 
@@ -36,21 +29,14 @@ Point the scanner at a local repository. It inspects the following artifacts wit
 
 | Artifact | Languages or file examples | What the scanner looks for |
 |---|---|---|
-| Source code | Java, Go, JavaScript, TypeScript/TSX, Python, Rust, Ruby | Cryptographic APIs, algorithm names and related usage patterns, with dedicated TypeScript and TSX grammars |
+| Source code | Java, Go, JavaScript, TypeScript/TSX, Python, Rust, Ruby | Cryptographic APIs, algorithm names and related usage patterns |
 | Configuration files | Kubernetes/Ingress, nginx, Apache httpd, Envoy, Istio, HAProxy, Traefik | TLS/cipher/group settings and other cryptographic configuration signals |
 | Public certificates | `.pem`, `.crt`, `.cer`, `.der` | Signature and subject-key algorithms, supported key sizes/curves, validity periods and public fingerprints |
 | Private-key markers | RSA, generic PKCS#8 and OpenSSH private-key headers | The presence of supported headers; no decryption or private-key validation |
 | Dependency manifests and locks | `Cargo.toml`, `Cargo.lock`, `package.json`, npm/pnpm locks, Python/Ruby/Java/Go dependency files | Relevant libraries, declared version constraints and supported resolution records |
 | Existing SBOM files | CycloneDX JSON and SPDX JSON | Reported dependency components/packages; not proof of installation |
 
-Selected source rules follow bounded local bindings. Explicit JOSE ES384/ES512/EdDSA references and RSA/Ed25519 module/type names retain algorithm facts; jsonwebtoken signing options and Ruby optional defaults are followed within the documented bounds. Ruby OpenSSL cipher calls can retain same-class AES-GCM/CBC candidates; Rust OpenSSL TLS construction is recognized through explicit imports and aliases. These are source references, not deployed configuration or negotiated algorithms. See [source analysis limits](docs/user/COVERAGE.md#source-facts).
-
-PKCS#12 (`.p12`/`.pfx`) supports unencrypted public-certificate extraction. Encrypted contents and private-key bags remain unsupported; no password, decryption or integrity/trust verification is performed.
-See [supported inputs and inspection limits](docs/user/COVERAGE.md) for the full file list, supported versions and parser boundaries.
-Live endpoints are inspected only through separately enabled, explicit [TLS/SSH probes](docs/user/PROBING.md).
-They are not repository scan targets. Arbitrary programming languages are not supported.
-
-File selection defaults to 2 MiB per file. Use `scan --max-file-size-mib 16` or the folder picker’s size field to change it (1–64 MiB); [other inspection budgets remain](docs/user/SCANNING.md#file-size-limit).
+File selection defaults to 2 MiB per file. Use `scan --max-file-size-mib 16` or the folder picker’s size field to change it (1–64 MiB). See [file-size limits](docs/user/SCANNING.md#file-size-limit).
 
 <a id="features"></a>
 
@@ -62,13 +48,11 @@ File selection defaults to 2 MiB per file. Use `scan --max-file-size-mib 16` or 
 - Lists cryptographic findings and software dependencies in separate inventory files.
 - Optionally records richer observations, local advisory assessments and inspection diagnostics.
 - The explicit `assess` command can [reassess saved evidence offline](docs/user/SAVED-EVIDENCE.md), keeping technical roles, scoped claims and migration decisions separate.
-- Repeated source references can receive explicit use declarations when records and saved locations are unique within the same input. Collisions and missing positions remain excluded; cross-scan ambiguity and exact-input binding are preserved.
+- Add purpose and usage information to scan results to organize migration checks.
 
 A reference to a PQC algorithm is useful evidence, but it does not establish that the application uses it successfully. The [report guide](docs/user/REPORTS.md#pqc-findings) explains these findings with examples.
 
 <a id="quick-start"></a>
-
-The Rust RSA/JWT dependency rule matches the exact Cargo package names `rsa` and `jsonwebtoken`; names such as `universal-hash` are excluded. Package presence does not prove use of RSA.
 
 ## Run your first scan
 
@@ -78,8 +62,6 @@ Use the Rust toolchain pinned in [`rust-toolchain.toml`](rust-toolchain.toml) (c
 cd /path/to/pqc-scan
 cargo install --locked --path crates/pqc_scan_cli
 ```
-
-This development checkout prepares two archive configurations: `static` (local scanning) and `network` (static scanning plus TLS/SSH diagnostics). `network` remains experimental and unpublished. Internal feature switches remain available for custom source builds.
 
 For archive verification and installation, see the [installation guide](docs/user/DISTRIBUTION.md). Static macOS Apple Silicon binaries are distributed through [GitHub Releases](https://github.com/wakaken/pqc-scan/releases); probe bundles are not cleared for public distribution.
 
@@ -167,8 +149,6 @@ Additional inventory, assessment and diagnostic files require explicit options.
 Use `--cyclonedx-17` for separate CycloneDX 1.7 exports, or `diff` to compare
 inventories with the same explicit repository scope. See the [report guide](docs/user/REPORTS.md).
 
-Finding IDs use `finding-v1-<SHA-256>` with length-prefixed fields and repository-relative paths. With the same binary, rules, selected input and scan settings, identical findings keep their IDs across checkout locations. Position/evidence corrections between versions can change affected IDs and counts; see [versions and identity](docs/user/REPORTS.md#versions-and-identity).
-
 HTML and Markdown merge equivalent findings at the same position and algorithm, retaining matched rules in details. Inspection totals count files; finding totals count merged items. Machine exports such as JSON retain original rule-level records.
 
 Tests remain included by default. Use `--exclude-tests` or the browser’s “Exclude test code” option below “Clear selection” to omit conventional test paths and filenames. See [scanning](docs/user/SCANNING.md) for matching conventions and limits. Custom exclusions can be configured with `.pqcignore`; syntax-proven Rust test-only findings can also be omitted.
@@ -187,10 +167,6 @@ Tests remain included by default. Use `--exclude-tests` or the browser’s “Ex
 | [Saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) | Exact-input/context binding, claim expiry and offline reassessment |
 
 For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
-
-Selected built-in source rules follow imports, aliases and bounded local bindings. Node checks also follow literal `for...of` algorithm lists and locally generated RSA keys into signing/verification. See [source analysis and its limits](docs/user/COVERAGE.md#source-facts); these observations do not prove execution or enabled PQC support.
-
-For the current candidate's source versions, measurements and remaining limits, start with the [static candidate evaluation](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md) and [individual rule/branch assessments](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/QUALITY-COMPLETION.md). These are bounded evaluations, not a guarantee of accuracy for every rule or product. The [2026-11-11 PQS-QAM assessment](tasks/041/QUALITY-ASSESSMENT.md) is historical; it is not the current candidate's quality verdict. The offline benchmark produces separate [JSON/Markdown quality reports](tests/quality/README.md).
 
 Each guide has a Japanese version linked at the top.
 
@@ -214,62 +190,6 @@ parsing retains available findings; it does not make the rest of a file disappea
 Use `--diagnostics` to see the reasons, and `--require-complete` if incomplete
 inspection should fail CI. See [inspection status](docs/user/SCANNING.md#diagnostics)
 and [supported inputs and limits](docs/user/COVERAGE.md).
-
-<a id="repository-ci"></a>
-
-## Repository CI
-
-The `pqc-scan` workflow runs automatically for pull requests and pushes to
-`develop`. Working-branch and tag pushes do not start it; updating an open PR
-still triggers PR validation.
-
-| Event | Jobs |
-|---|---|
-| Pull request | `quality` |
-| Push to `develop` | `baseline`, `scan` |
-| Manual execution | `quality`, `baseline`, `scan` |
-
-On `develop`, `baseline` and `scan` run independently of `quality`; PR validation
-provides the pre-merge quality check. Manual execution remains available for
-running all three enabled jobs together.
-
-The CI self-scan reads a separate product input: `crates/*/src/**`, Cargo manifests
-and the root lockfile, build scripts when present, and `rules/default/*.yml`.
-Standalone tests, examples, task evidence, CI scripts and documentation are outside
-this scan. Source bytes and repository-relative locations are preserved; colocated
-Rust unit tests remain in their source files. This scope applies to repository CI.
-
-The summary separates results requiring review from exact reviewed references.
-The `pqc-self-scan-evidence` artifact contains the input inventory/hashes, scoped
-expectations, all results for that scope, upload results, diagnostics and summary.
-New or changed results still appear for review. These counts describe detected
-references, not confirmed vulnerabilities. See [the product scan scope](docs/quality/self-scan/CI-SELF-SCAN.md#product-scope-20261116).
-
-The existing `quality` and `baseline` jobs also aggregate all six quality axes
-offline from recorded evidence. Missing facts and stale measurements remain
-visible; aggregation does not run the high-cost studies or grant release acceptance.
-Integrated reports are uploaded even after a failed step, with 30-day retention.
-See the [measurement and retention plan](docs/quality/CI-MEASUREMENT-PLAN.md).
-
-It skips eligible pushes and pull requests whose changed paths all
-match its documentation list: the root README files, `AGENTS.md`, `SECURITY.md`,
-Markdown under `docs/` and `prompts/`, and `tasks/README.md`.
-Other changes in eligible events, including mixed documentation/code changes,
-rules, workflow files and JSON data under `docs/`, still run CI. The exact list is maintained in
-[the workflow](.github/workflows/pqc-scan.yml). Run it manually from GitHub Actions
-when validation is needed for an otherwise skipped change.
-
-The `protocols` job is disabled for every trigger, including manual runs. Its
-`if: ${{ false }}` condition remains in place. The generic isolated suite's
-read-only-target write failure has been corrected and its tests, Clippy, previews
-and SSH KEX completed in the [candidate validation](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md). This is separate evidence from the dedicated protocol049 path and does not resume the hosted job. Re-enabling it requires a maintainer decision and validation of its current inputs, environment and resource limits; the three enabled jobs do not establish a protocol pass.
-
-GitHub limits the number of changed files considered
-by path filtering; for large changes, manually run CI if it was omitted.
-
-Before making these checks required for merging, replace workflow-level path
-filtering with job-level gating so skipped documentation changes do not leave
-required checks pending.
 
 <a id="license"></a>
 

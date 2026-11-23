@@ -192,7 +192,7 @@ See [the task024 evidence](../tasks/024/TASK-024-AST-OCCURRENCES.md).
 
 ### Dependency detector
 
-Ruby version variables can retain literal/selected plain-file constraints through a bounded syntax-only reader. The shared selected-file/no-follow context is reused; no Ruby code, `require` or package manager is executed. Values remain declarations rather than lock resolutions. See [dependency provenance](architecture/DEPENDENCY-PROVENANCE.md) and [coverage](user/COVERAGE.md#static-context-and-conditional-declarations).
+Ruby version variables can retain literal/selected plain-file constraints through a bounded syntax-only reader. The shared selected-file/no-follow context is reused; no Ruby code, `require` or package manager is executed. Values remain declarations rather than lock resolutions. See [dependency provenance](architecture/DEPENDENCY-PROVENANCE.md) and [coverage](architecture/STATIC-ANALYSIS.md#static-context-and-conditional-declarations).
 
 - Parses common manifests and lock files
 - Parses CycloneDX/SPDX JSON files as dependency input
@@ -539,3 +539,9 @@ are removed; embedded assessment JSON and CLI Markdown remain complete.
 migration workflow. Original-scan links require that same completed local job.
 See [current presentation](product/MIGRATION-REVIEW-GROUPING.md#current-decision-presentation-2026-11-23)
 and [folder navigation](product/LOCAL-SCAN-UI.md#current-per-folder-result-navigation-2026-11-23).
+
+## Developer references
+
+- [Static analysis implementation and limits](architecture/STATIC-ANALYSIS.md)
+- [Repository CI](quality/REPOSITORY-CI.md)
+- [Distribution engineering](releases/DISTRIBUTION-ENGINEERING.md)

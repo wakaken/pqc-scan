@@ -2,17 +2,10 @@
 
 [日本語](SAVED-EVIDENCE.ja.md)
 
-For the browser workflow, start with the [illustrated scan and migration steps](SCANNING.md#web-migration-walkthrough). This guide explains saved-input/context binding, declaration semantics and CLI/library contracts.
+For the browser workflow, start with the [illustrated scan and migration steps](SCANNING.md#web-migration-walkthrough). This guide explains saved-input/context binding, declaration semantics and CLI usage.
 
-The core library's `migration::SavedEvidence` reads one explicitly selected saved
-Inventory v1, TLS v1, SSH offers v1 or SSH KEX v1 file. `read` accepts a regular
-local file; `from_bytes` accepts immutable bytes. These readers are available in
-the default static build. They do not scan source, contact endpoints, load TLS/SSH
-providers or repeat trust/signature verification.
-
-The library and the explicit `assess` CLI support offline migration decisions
-with scoped organization context. Existing scan commands and reports retain
-their v1 behavior.
+Use `assess` to read saved findings and reassess them offline with purpose and usage information.
+It does not rescan source or contact endpoints.
 
 ## What the targets mean
 
@@ -46,12 +39,7 @@ identities and a stated combiner scope; a PQC component is not whole-system safe
 
 ## Input limits and errors
 
-Inventory input is at most32 MiB; each runtime input is at most1 MiB. Readers
-reject duplicate keys, malformed UTF-8/JSON, BOM, trailing JSON values, depth over16,
-objects over64 fields and strings over1024 UTF-8 bytes. Inventory limits are16384
-assets,32768 observations,65536 projected targets and64 relations/references per
-record. Existing smaller protocol limits also apply. Native reader extensions
-remain tolerated within those bounds; TLS/SSH unknown fields reject.
+Inventory input is limited to 32 MiB; each runtime input is limited to 1 MiB. Invalid, unsupported or oversized inputs are rejected.
 
 Unsupported formats/versions, invalid references, contradictory facts and resource
 overflow produce fixed errors without echoing rejected input. Safe typed output
@@ -61,11 +49,10 @@ Experimental TLS/SSH collection and publication status are unchanged.
 
 ## Bind organization and system claims
 
-`migration::MigrationContext` accepts the separate
+The input JSON follows the separate
 [`pqc-scan.migration-context` v1 schema](../../schemas/migration-context-v1.schema.json).
 Read a technical manifest first, then explicitly bind its input format, exact
-SHA-256 and target IDs to declared system aliases. `bind` requires that same
-`SavedEvidence` and an explicit evaluation time. Another file, reformatted content,
+SHA-256 and target IDs to declared system aliases. Use the same saved input and an explicit evaluation time for this binding. Another file, reformatted content,
 unknown/duplicate target, source identity that cannot be distinguished within the
 input, or unknown system is rejected.
 The mapping remains an operator declaration about the real business system.
@@ -87,14 +74,10 @@ Claims are active from their assertion time, inclusive, until expiry, exclusive.
 Future, expired or expiry-unknown claims remain visible and cannot establish an
 active favorable claim. An external-review label remains a claim, not scanner
 verification. All new claim/evaluation times require an offset and whole seconds;
-the library normalizes them to UTC and rejects evaluation before collection.
+evaluation before collection is rejected.
 
-Context is bounded to1 MiB,256 systems and4096 bindings. Organization/system/actor
-aliases use lower-case ASCII identifiers up to64 bytes; reference identifiers are
-visible ASCII up to128 bytes. Unknown/duplicate fields, null, wrong types and
-invalid intervals/references reject with fixed errors. Local references are
-declarations; optional HTTPS links reject credentials/query/control characters
-and are never fetched. Context v1 for `migration-review-v1` remains separate.
+Context JSON is limited to 1 MiB. Use the documented fields and valid dates.
+Reference links are retained as declarations and are never fetched.
 
 ## Reassess saved evidence offline
 
@@ -107,9 +90,7 @@ pqc-scan assess saved.inventory.v1.json --input-format inventory-v1 \
 Choose `inventory-v1`, `tls-v1`, `ssh-offers-v1` or `ssh-kex-v1` explicitly.
 `--context` is optional. Without it, technical concerns remain visible while
 business applicability, urgency and deployment readiness can remain unknown.
-To author bindings, inspect `migration::SavedEvidence::targets()` in the library,
-or the context-free report's `targets` array, then bind those exact target IDs
-and the `input.sha256`. Reformatting the input requires new bindings.
+Use `context-template`, described below, to create configuration bound to the original input. Reformatting the input requires new bindings.
 
 The command writes `migration.assessment.html`, `migration.assessment.md` and
 `migration.assessment.v1.json`, separately from the existing scan reports.
@@ -131,18 +112,12 @@ Test-only usage alone does not lower urgent known classical concerns. A valid
 explicit scope exclusion takes precedence while retaining facts and reassessment
 conditions.
 
-Complete facts and decisions remain in a shared local HTML data archive, reducing
-per-target/per-language duplication. No external assets are required. JavaScript
+The HTML can be read as a standalone file. No external assets are required. JavaScript
 is needed to browse all records; without it, the first20 work items remain visible.
 Printing covers the visible items. Use Markdown or JSON for the complete report;
 the original assessment data can also be saved from the page. **Unidentified**
 means the saved record does not identify the algorithm. Grouping preserves each
 target's uncertainty, limitations and provenance.
-The library entry is `migration::evaluate(&saved, context.as_ref(), as_of)`;
-`evaluate_with_versions` selects explicit supported catalog, policy and model
-versions and rejects unknown versions without falling back to legacy v1.
-The output uses catalog `migration-facts-v1/1.0.0`, local advisory policy
-`migration-decision-v1/1.0.0` and model `decision_table/1.0.0`.
 
 Each target has independent urgency (`urgent`, `plan`, `monitor`, `undetermined`,
 `not_applicable`), information (`sufficient`, `incomplete`, `conflicting`),
@@ -163,7 +138,7 @@ verdict, numerical migration score or invented quantum-arrival date.
 
 Successful advisory assessment exits0, including urgent/incomplete results.
 Invalid input, context, time or output exits1 with fixed errors. Input and context
-must not alias an output name/inode. Each report is bounded to64 MiB and written
+must not refer to the same file as an output. Each report is bounded to64 MiB and written
 using the existing safe output boundary; oversized reports reject without
 truncation. Existing files are atomically replaced individually. The command
 never executes input, fetches references, rescans source or contacts endpoints,
@@ -201,11 +176,7 @@ No personal-use shortcut changes criticality. Use the generated file with `asses
 
 Output uses the existing safe writer and1MiB context limit. Input aliases, hardlinks,
 linked destinations, bad values/provenance and oversized output reject before
-replacement. The shared library `generate_context`, `ContextSelection`, `ContextClaims`
-and `ClaimAnswer` use the same reader/binding rules; `MigrationContext::to_bytes`
-exports all supported fields with normalized times, preserving claims and references.
-This is separate from legacy Context v1 and does not change existing scan defaults.
-
+replacement.
 
 ### Selected migration configuration
 
@@ -225,15 +196,14 @@ without it retain their existing meaning. The local UI converts calendar duratio
 to the existing exact `migration_lead_seconds` value; importing does not reinterpret
 that value.
 
-Reference-backed deadlines can also be authored through the local form. The reference-aware generation API accepts explicitly supplied references and validates them with the existing schema; old no-reference builder entrypoints retain their behavior. `assess --report-label` names only the HTML presentation and does not change saved machine decisions.
+Reference-backed deadlines can also be authored through the local form. `assess --report-label` names only the HTML presentation and does not change saved machine decisions.
 
-### Distinguishable repeated source records
+### When a record cannot be selected
 
-Explicit target selection may bind separate source references with the same weak
-matching anchor when their complete saved byte spans and line/column locations are
-unique and their usage records are consistent. A malformed or unlocated neighbor
-in that group prevents the exception. This only identifies a record in the held
-file; it does not identify the same place in another scan or verify active use.
-Fixed reference-only targets can receive a declared purpose while the algorithm
-remains unknown. Unsupported algorithm components and unresolved component roles
-stay ineligible. Regenerating or reformatting the input still requires new bindings.
+Records that cannot receive use declarations are disabled with an explanation.
+Adding ordinary answers does not resolve an unidentified record; inspect the
+original location and explanation. Reference-only records may accept a declared
+purpose while their algorithm remains unknown. Entering a purpose does not identify the algorithm.
+
+Bindings apply only to the exact saved file and cannot be carried over to another
+scan. Regenerating or reformatting the input requires matching configuration to be created again.

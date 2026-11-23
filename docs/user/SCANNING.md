@@ -1,10 +1,10 @@
 # Scanning repositories
 
-[日本語](SCANNING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.md)
+[日本語](SCANNING.ja.md) · [README](../../README.md)
 
-This guide describes the static v0.4.0 candidate. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.4.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
+This guide covers v0.4.0 static scanning. See the [release notes](../releases/v0.4.0.md) for changes between versions.
 
-Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.md) for format-specific limits.
+Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
 
 ## Contents
 
@@ -48,16 +48,10 @@ inside them receive the same checks. Use the physical path for other directory
 aliases. This applies to scan, inventory, assessment, diagnostics, CycloneDX, diff
 and probe reports.
 
-Missing directories are created. Existing regular report files can be overwritten,
-including on repeated runs. Each file is replaced atomically rather than truncated;
-an external file sharing a hard link is not modified. Published files have private
-permissions (0600, subject to umask); replacing a file does not preserve its inode,
-old permissions, ACLs or extended attributes. Directory write permission is needed.
-A failed report set may leave earlier files from that run; the set is not one
-transaction. Concurrent modifications by someone who can write the destination
-can still remove or alter reports; this protection prevents redirected writes,
-not tamper-proof storage. Unsupported non-Unix platforms fail explicitly instead
-of falling back to unsafe output.
+Missing directories are created, and existing regular reports can be overwritten.
+You need write permission for the destination. A failed run can leave a partial set
+of output files. Store reports where others cannot modify them.
+
 
 ### Recommended usage from your product repository
 
@@ -93,8 +87,7 @@ pqc-scan rules show JWT_RS256 --rules-dir /path/to/pqc-scan/rules
 
 For a CI scan of your product, generate SARIF with `--format sarif` and choose `--fail-on high|critical` if findings should fail the job. Add `--require-complete` only if incomplete inspection must also fail; its exit 3 takes precedence over the finding threshold. The selected scope and unsupported formats still matter.
 
-The checked-in [workflow](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/.github/workflows/pqc-scan.yml) shows GitHub Code Scanning upload and artifact storage. Its `quality` job runs on PRs, while `baseline` and `scan` run on develop pushes; manual runs enable all three. Documentation-only automatic runs are skipped, and `protocols` is temporarily disabled even for manual runs. See [repository CI](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.md#repository-ci) for the event conditions. These are this repository's CI choices; select exit gates explicitly for your own product. Retain the raw report so findings remain available for review.
-This repository applies an additional source/result-bound policy to its own reviewed test/catalog references; it is not a general exclusion of test directories. See [self-scan policy](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/quality/self-scan/CI-SELF-SCAN.md) before reusing that preparation step in another project.
+Choose failure gates for your own product and retain the original reports for review.
 
 <a id="from-source"></a>
 
@@ -155,24 +148,14 @@ Distinguish file selection from completed analysis. `scanned_files` means files 
 Diagnostics separately count selected, read-ok, read-failed, analyzed, partial, analysis-failed, unsupported, not-applicable and unknown files.
 Enumerated policy exclusions and enumeration failures are separate; the ignore-hidden population remains unknown.
 
-### Finding and work limits
+### When inspection reaches a processing limit
 
-Default accepted-hit limits are 4,096 per rule/file for regex and AST inspection,
-and 8 for private-key markers. Regex counts hits after its language-specific
-comment filter. Exactly reaching the cap does not prove truncation: an additional
-eligible hit or unfinished search reports `detector_truncated`. Earlier findings
-remain available, and omitted counts are not inferred.
-
-Regex and AST each examine at most 65,536 match candidates per rule/file. AST also
-limits semantic candidates to 262,144, scheduled tree nodes to 2,000,000 and
-cumulative candidate text examined across rules to 256 MiB per file. Matching uses
-full candidate text; clipping a displayed preview does not limit inspection.
-Large numbers of accepted findings can increase report size, memory use and output time even within these limits. These are finite resource bounds, not performance guarantees. See the
-[coverage guide](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.md#source-limits) for syntax and encoding limits.
+Available findings are retained when processing limits prevent complete inspection.
+Review the diagnostic reason, then split the scan scope or inspect the affected files directly.
 
 ### Parsing errors and unsupported formats
 
-AST syntax errors retain available findings and yield `detector_partial`. Parser initialization or no-tree failures are detector errors.
+Syntax errors retain available findings and mark inspection as incomplete.
 Binary inputs, unsupported source languages and absence of applicable rules are outside that detector's scope.
 
 For certificates, malformed input, unknown key attributes or mixed unsupported blocks yield `detector_partial`; unsupported containers yield `detector_unsupported`.
@@ -190,36 +173,12 @@ See [dependency declarations and resolution evidence](https://github.com/wakaken
 `scan` excludes known media/archive/compiled-data extensions and otherwise non-text binary inputs before selecting files. These exclusions are counted separately from unfinished checks. `--include-non-scannable` restores their inclusion for forensic/custom-detector runs; it does not add parsers for those formats and can increase “not applicable” counts. Existing directory, Markdown, Git-ignore and size policies still apply. Cryptographic container extensions are retained by default even when unsupported, so their inspection gaps remain visible. Full exclusion paths remain in diagnostic JSON, while human diagnostics show counts and at most three examples per reason.
 
 
-### Reference positions
+<a id="reference-positions"></a>
 
-Explicit Python PQC imports are located at the module reference after `from `;
-the evidence range includes imported symbols and continuation lines. Only regex
-rules whose `scope` is exactly `config` omit leading whitespace from a nonempty
-reference range. This is not a rule for every configuration file or every regex.
-Whitespace-only custom matches retain their full range.
+### Check finding locations
 
-The exact built-in `TLS_VERSION_1_0` pattern/scope selects the protocol token and
-reuses its trailing delimiter for an adjacent reference. Modified patterns/scopes
-and unrelated custom IDs retain generic matching ranges and non-overlapping
-iteration. A name reference does not establish effective configuration or a
-negotiated protocol. Locations use original decoded text and character columns;
-see [version-to-version identity changes](REPORTS.md#versions-and-identity).
-
-### Java RSA, Maven and certificate facts
-
-Java `RSAKeyGenParameterSpec` constructors are inspected for explicit
-1024/2048/3072-bit RSA references. They do not prove an effective key size or
-runtime use. Existing candidates are inspected before additional constructors
-consume the remaining budgets; incomplete inspection stays explicit.
-Rejected Maven dependency coordinates cannot change the context annotations of
-earlier valid declarations.
-
-Certificate parameter OIDs and named curves require the corresponding universal
-ASN.1 type and encoding shape. Content bytes alone do not establish an OID, curve
-or key-size fact. Uninterpreted or malformed attributes retain inspection limits;
-no signature/trust validation follows. A NULL parameter has no parameter OID, so
-the optional `parameters_oid` metadata entry is absent, rather than an empty
-string. See the [candidate compatibility notes](../releases/v0.4.0.md).
+Use the reported file and position to inspect the original source or configuration.
+A detected reference does not establish the algorithm used at runtime.
 
 ## Local web scanning
 
@@ -394,16 +353,11 @@ returns to the retained input. Language/theme remain available. **Save report (H
 exports a self-contained bilingual HTML file with the current initial language/theme;
 **Save input (JSON)** retains canonical input for CLI `assess` with the same saved bytes
 and evaluation time. See [report navigation](SAVED-EVIDENCE.md) for offline limits.
-Each output replacement is atomic individually, not a transaction across files.
+A failed save can leave only some output files.
 
-The private job subdirectory migration/ retains the3 migration report files and,
-when supplied, migration-context.json. Only completed allowlisted reports/context
-are served. Imports count toward the existing20-job session limit; one context draft
-per job is bounded, with a3MiB request and16MiB response limit. The ordinary serve
-mode and scan/report defaults retain their behavior. Existing context inputs retain
-their meaning; migration context and assessment schema versions remain1. The
-approved optional planning-month claim extends their accepted fields. Original
-practitioner evaluation and release approval are separate from this workflow.
+The job’s `migration/` folder stores three migration reports and, when supplied,
+`migration-context.json`. Only completed files can be opened. Imported inputs
+count toward the session limit of 20 jobs.
 
 
 The input method choices are **New input** and **Use saved input**. Choose scope,
