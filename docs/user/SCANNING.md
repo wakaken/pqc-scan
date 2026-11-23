@@ -2,7 +2,7 @@
 
 [日本語](SCANNING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.md)
 
-This guide describes static v0.3.0. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.3.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
+This guide describes the static v0.4.0 candidate. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.4.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
 
 Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.md) for format-specific limits.
 
@@ -218,7 +218,7 @@ ASN.1 type and encoding shape. Content bytes alone do not establish an OID, curv
 or key-size fact. Uninterpreted or malformed attributes retain inspection limits;
 no signature/trust validation follows. A NULL parameter has no parameter OID, so
 the optional `parameters_oid` metadata entry is absent, rather than an empty
-string. See the [candidate compatibility notes](../releases/v0.3.0.md).
+string. See the [candidate compatibility notes](../releases/v0.4.0.md).
 
 ## Local web scanning
 

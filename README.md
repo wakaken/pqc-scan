@@ -1,6 +1,6 @@
 # pqc-scan
 
-This checkout contains **v0.3.0** for static scanning on macOS Apple Silicon (`aarch64-apple-darwin`). See the [release notes](docs/releases/v0.3.0.md) for changes and compatibility. The maintainer has accepted its bounded scope and authorized publication after final build-provenance verification.
+This checkout prepares **v0.4.0** for static scanning and offline migration review on macOS Apple Silicon (`aarch64-apple-darwin`). See the [release notes](docs/releases/v0.4.0.md) for changes, compatibility and evaluation limits. Final-source distribution checks and bounded maintainer acceptance/publication approval are required before a v0.4.0 Release.
 
 Check [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets; local preparation and Actions artifacts are not published Releases. Historical [v0.2.0 notes](docs/releases/v0.2.0.md) remain available. Static scanning is the formal scope; TLS/SSH probes remain experimental and network binary publication remains on hold.
 
@@ -132,7 +132,7 @@ not a reusable context file.
 
 ## Report preview
 
-The v0.3.0 HTML report includes a severity summary, rule groups, search/filters, and a file tree with finding counts. Expand findings for locations, source evidence and recommended checks; follow the rule guide for explanations. Filters and the tree can be hidden independently. Language (English/Japanese), light/dark theme and browser-local time display work offline.
+The scan HTML report includes a severity summary, rule groups, search/filters, and a file tree with finding counts. Expand findings for locations, source evidence and recommended checks; follow the rule guide for explanations. Filters and the tree can be hidden independently. Language (English/Japanese), light/dark theme and browser-local time display work offline.
 
 ![Light HTML report with inspection status, file tree and grouped findings](docs/images/report-light-en.jpg)
 

@@ -2,7 +2,7 @@
 
 [English](SCANNING.md) · [README](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.ja.md)
 
-このガイドは静的版v0.3.0を対象とします。バージョンによって検出内容・根拠・IDが異なる場合があります。互換性は[リリースノート](../releases/v0.3.0.ja.md)、公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。ローカルの準備物やActions成果物は、公開済みReleaseとは別です。
+このガイドは静的版v0.4.0候補を対象とします。バージョンによって検出内容・根拠・IDが異なる場合があります。互換性は[リリースノート](../releases/v0.4.0.md)、公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。ローカルの準備物やActions成果物は、公開済みReleaseとは別です。
 
 静的スキャンの出力オプション、CIの終了判定、検査できなかった箇所の確認方法を説明します。
 棚卸しや評価の見方は[結果の読み方](REPORTS.ja.md)、形式ごとの制約は[対応する入力と検査範囲](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/user/COVERAGE.ja.md)を参照してください。
@@ -209,7 +209,7 @@ RSA参照として検査します。実際に使われる鍵長や実行を確�
 確認してから記録します。内容のバイト列だけでOID・曲線・鍵長を推定しません。
 未解釈・不正な属性には検査上の制約が残り、署名や信頼を検証したことにもなりません。
 NULLパラメータにはパラメータOIDがないため、任意項目の`parameters_oid`は
-空文字列ではなく未出力になります。[候補の互換性情報](../releases/v0.3.0.ja.md)も参照してください。
+空文字列ではなく未出力になります。[候補の互換性情報](../releases/v0.4.0.md)も参照してください。
 
 ## ローカルWebスキャン
 

@@ -2,7 +2,7 @@
 
 [日本語](REPORTS.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.md)
 
-This guide describes static v0.3.0. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.3.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
+This guide describes the static v0.4.0 candidate. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.4.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
 
 After a scan, use the human report to investigate findings, then choose machine-readable files for tracking or automation. A finding records evidence and suggested checks; it is not an instruction to replace an algorithm without investigating its use.
 
@@ -149,7 +149,7 @@ exports and the HTML rule guide (eleven files in total):
 pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang en --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
-A policy assessment is an additional, separate opt-in. Product version 0.3.0 is separate from Inventory v1, SARIF 2.1.0 and CycloneDX 1.7; it does not rename these formats. Separate
+A policy assessment is an additional, separate opt-in. Product version 0.4.0 is separate from Inventory v1, SARIF 2.1.0 and CycloneDX 1.7; it does not rename these formats. Separate
 probe reports are described in the [probe guide](PROBING.md).
 
 ### What CBOM and SBOM mean here
@@ -379,7 +379,7 @@ to be identical across runs.
 Across product or rule versions, corrected positions, evidence, attributes or
 newly detected references can change IDs and counts without changing the identity
 algorithm or schema. Compare the binary/source and rule versions alongside your
-scan settings. See the [v0.3.0 compatibility notes](../releases/v0.3.0.md).
+scan settings. See the [v0.4.0 compatibility notes](../releases/v0.4.0.md).
 
 ### File tree and panel visibility
 

@@ -2,7 +2,7 @@
 
 [English](COVERAGE.md) · [README](../../README.ja.md)
 
-このガイドは静的版v0.3.0を対象とします。バージョンによって検出内容・根拠・IDが異なる場合があります。互換性は[リリースノート](../releases/v0.3.0.ja.md)、公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。ローカルの準備物やActions成果物は、公開済みReleaseとは別です。
+このガイドは静的版v0.4.0候補を対象とします。バージョンによって検出内容・根拠・IDが異なる場合があります。互換性は[リリースノート](../releases/v0.4.0.md)、公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。ローカルの準備物やActions成果物は、公開済みReleaseとは別です。
 
 まず[スキャン対象の一覧](../../README.ja.md#targets)を確認してください。このガイドでは、一覧に挙げた形式の対応範囲と制約を説明します。
 対象形式でも、すべての暗号処理や実行経路を見つけられるとは限りません。

@@ -2,13 +2,13 @@
 
 [日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/7bcbca20bc61380873005be71440bd53889ff5dd/README.md)
 
-This guide covers **v0.3.0 static** distribution on macOS Apple Silicon
+This guide covers **v0.4.0 static candidate** distribution on macOS Apple Silicon
 (`aarch64-apple-darwin`). Download published assets from
 [GitHub Releases](https://github.com/wakaken/pqc-scan/releases), keeping the binary,
 matching rules/notices, SHA-256 checksums and hosted build provenance together.
 Local preparation and Actions artifacts are not published Releases. See the
 [v0.3.0 notes](../releases/v0.3.0.md) and historical [v0.2.0 notes](../releases/v0.2.0.md).
-The v0.2.0 download does not include v0.3.0 changes.
+Earlier downloads do not contain v0.4.0 changes. See the [v0.4.0 notes](../releases/v0.4.0.md).
 
 The latest verified snapshots in 0.2.x and 0.3.x receive best-effort maintenance.
 No SLA or older-version backport guarantee is declared. Probes remain experimental;
@@ -16,7 +16,26 @@ the `network` package retains its notice review flags and publication hold.
 Other binary platforms and crates.io publication are outside this release scope.
 See [security reporting](../../SECURITY.md).
 
-## Static 0.3.0
+## Static 0.4.0 preparation
+
+The candidate adds offline `assess`, `context-template`, and `serve --migration`.
+Keep saved `scan.inventory.v1.json` bytes with their context JSON. The bundled
+[report guide](REPORTS.md#saved-assessment) explains schedules, actions and
+conditions for proceeding; [saved evidence](SAVED-EVIDENCE.md) explains binding.
+The archive contains both language versions of these guides and the matching
+rules and notices. `uuid-simd 0.8.0` and `vsimd 0.8.0` now have exact-revision
+upstream notices registered under the existing offline verification guards.
+
+A candidate is not a published release. Prepare it twice on the final clean SHA,
+compare bytes, verify checksums and perform clean offline installation. Obtain
+hosted CI, static build provenance and exact-source verification. Then record
+bounded maintainer product/publication approval before tagging and uploading.
+The existing manual preparation workflow also packages `network`; its overall
+result and the static step's result must be distinguished. Static success does
+not approve a network release. Existing maintenance promises below remain
+unchanged; v0.4 acceptance is a separate recorded decision.
+
+## Static 0.3.0 (previous release)
 
 The maintainer accepted the bounded static macOS Apple Silicon product and
 authorized publication after final hosted build-provenance verification.
@@ -44,7 +63,7 @@ for those historical assets; current published static assets are listed in
 
 | Variant | Optional commands | Public distribution status |
 |---|---|---|
-| `static` | None | v0.3.0 accepted for release; obtain published assets from GitHub Releases and verify the selected release's provenance |
+| `static` | None | v0.4.0 candidate in preparation; v0.3.0 published separately; verify the chosen release's provenance |
 | `network` (network diagnostics included) | `probe tls`, `probe ssh`, `probe ssh-kex`, plus static scanning | Unpublished; four dependency notice reviews remain |
 
 The unresolved dependency checks are recorded in the
@@ -80,7 +99,7 @@ completed technical checks. `review_required` is not an end-user setting to disa
 
 ## Source installation
 
-This checkout declares product version `0.3.0` for static scanning. Record the source commit and keep its binary/rules together; `--version` alone does not identify the candidate snapshot. Local package filenames below follow the Cargo version and do not establish a new official release.
+This checkout declares candidate product version `0.4.0` for static scanning. Record the source commit and keep its binary/rules together; `--version` alone does not identify the candidate snapshot. Local package filenames below follow the Cargo version and do not establish a new official release.
 
 Use the toolchain pinned in `rust-toolchain.toml`, retain this checkout's reviewed
 rules, and run from its root:
@@ -110,7 +129,7 @@ cargo build --locked --release --package pqc_scan_cli
 python3 scripts/package-release.py --binary target/release/pqc-scan --variant static --out-dir target/task-038/static
 cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/network-release-build
 python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network
-python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.3.0-aarch64-apple-darwin-static.tar.gz
+python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz
 ```
 
 Preparation uses offline Cargo metadata: fetch dependencies during an authorized
@@ -194,7 +213,7 @@ unsigned, unpublished technical preparation.
 ## Verify hosted build identity
 
 The following example is for the published v0.2.0 archive. A locally prepared
-0.3.0 candidate has no hosted attestation by default. For an archive generated
+0.4.0 candidate has no hosted attestation by default. For an archive generated
 by the hosted preparation workflow, verify provenance
 against the repository, workflow and the exact source commit intended for release:
 

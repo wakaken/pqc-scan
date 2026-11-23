@@ -75,8 +75,8 @@ class PackageTests(unittest.TestCase):
             root = pathlib.Path(tmp)
             required = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md',
                         'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md',
-                        'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'docs/releases/v0.2.0.md', 'docs/releases/v0.2.0.ja.md', 'Cargo.lock', 'rust-toolchain.toml',
-                        'third_party/notices/manifest.json', 'third_party/notices/README.md']
+                        'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md', 'docs/releases/v0.2.0.md', 'docs/releases/v0.2.0.ja.md', 'Cargo.lock', 'rust-toolchain.toml',
+                        'third_party/notices/manifest.json', 'third_party/notices/README.md', 'schemas/migration-context-v1.schema.json']
             for name in required:
                 path = root/name
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -111,9 +111,13 @@ class PackageTests(unittest.TestCase):
                 names = tar.getnames()
                 self.assertTrue(any(n.endswith('/docs/releases/v0.2.0.md') for n in names))
                 self.assertTrue(any(n.endswith('/docs/releases/v0.2.0.ja.md') for n in names))
-                for guide in ['SCANNING.md', 'SCANNING.ja.md', 'REPORTS.md', 'REPORTS.ja.md']:
+                for guide in ['SCANNING.md', 'SCANNING.ja.md', 'REPORTS.md', 'REPORTS.ja.md', 'SAVED-EVIDENCE.md', 'SAVED-EVIDENCE.ja.md']:
+                    self.assertTrue(any(n.endswith('/docs/user/'+guide) for n in names), guide)
                     member = next(n for n in names if n.endswith('/docs/user/'+guide))
                     self.assertEqual(tar.extractfile(member).read(), b'fixture')
+                schema = '/schemas/migration-context-v1.schema.json'
+                self.assertTrue(any(n.endswith(schema) for n in names))
+                self.assertEqual(tar.extractfile(next(n for n in names if n.endswith(schema))).read(), b'fixture')
                 prefix = archive.name.removesuffix('.tar.gz')
                 provenance = json.load(tar.extractfile(prefix+'/PROVENANCE.json'))
                 notices = json.load(tar.extractfile(prefix+'/DEPENDENCY-LICENSES.json'))

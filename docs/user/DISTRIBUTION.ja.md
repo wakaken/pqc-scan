@@ -2,19 +2,35 @@
 
 [English](DISTRIBUTION.md) · [README](https://github.com/wakaken/pqc-scan/blob/7bcbca20bc61380873005be71440bd53889ff5dd/README.ja.md)
 
-このガイドは、macOS Apple Silicon（`aarch64-apple-darwin`）向けの**v0.3.0静的版**を扱います。
+このガイドは、macOS Apple Silicon（`aarch64-apple-darwin`）向けの**v0.4.0静的版候補**を扱います。
 公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認し、
 バイナリ・対応するルールとライセンス文書・SHA-256・ホスト型のビルド来歴証明を一組で管理してください。
 ローカルの準備物やActions成果物は、公開済みReleaseとは別です。
 [v0.3.0のノート](../releases/v0.3.0.ja.md)と、過去の[v0.2.0のノート](../releases/v0.2.0.ja.md)も参照してください。
-v0.2.0の配布物にv0.3.0の変更は含まれません。
+以前の配布物にv0.4.0の変更は含まれません。[v0.4.0のノート](../releases/v0.4.0.md)も参照してください。
 
 0.2.x・0.3.xの各系列で最新の検証済みバージョンを可能な範囲で保守し、SLAや旧バージョンへの修正提供は保証しません。
 TLS／SSHは実験的機能です。probe同梱アーカイブのライセンス確認フラグと公開保留は維持します。
 他のバイナリ環境やcrates.io公開は今回の範囲に含めません。
 [脆弱性の連絡方法](https://github.com/wakaken/pqc-scan/blob/7bcbca20bc61380873005be71440bd53889ff5dd/SECURITY.ja.md)も確認してください。
 
-## 静的版0.3.0
+## 静的版0.4.0の準備
+
+候補版では、オフラインの `assess`、`context-template`、`serve --migration` を使えます。
+保存した `scan.inventory.v1.json` の元のバイト列と、対応するcontext JSONを一緒に管理します。
+日程・やること・次に進める条件は[レポートガイド](REPORTS.ja.md#saved-assessment)、
+対応付けは[保存済み入力](SAVED-EVIDENCE.ja.md)を参照してください。これらのガイドの日英版、
+対応するルールと通知文を同梱します。`uuid-simd 0.8.0` と `vsimd 0.8.0` は、既存の
+オフライン検証を保ったまま、正確な上流リビジョンの通知文を登録しました。
+
+候補の準備と公開は別です。最終のcleanなSHAで2回梱包し、バイト一致、チェックサム、
+クリーンな環境へのオフライン導入を確認します。ホスト型CI、静的版のビルド来歴と
+対象ソースの照合後、維持者の範囲を限定した製品受入・公開承認を記録してからタグ・公開へ
+進みます。既存の手動workflowは続けて `network` も梱包するため、静的版の結果と
+workflow全体の結果を区別してください。静的版の成功でネットワーク版の公開は承認されません。
+下記の既存の保守方針は維持し、v0.4の受入は別途記録します。
+
+## 静的版0.3.0（以前の公開版）
 
 維持者はmacOS Apple Silicon向け静的版を評価範囲と制約を踏まえて受け入れ、
 最終ホスト型ビルドの来歴検証後の公開を承認しています。
@@ -32,7 +48,7 @@ v0.2候補では、macOS arm64向けの3構成すべてでホスト型CI、同�
 
 | 構成 | 追加コマンド | 公開までの状況 |
 |---|---|---|
-| `static` | なし | v0.3.0は受入済み。GitHub Releasesで公開物を確認し、選んだ公開バージョンのビルド来歴を検証する |
+| `static` | なし | v0.4.0候補を準備中。v0.3.0の公開物とは別に、選んだバージョンの来歴を検証する |
 | `network`（接続先診断付き） | 静的スキャンに加え、`probe tls`、`probe ssh`、`probe ssh-kex` | 未公開。依存パッケージ4件の通知文・再配布条件の確認が残る |
 
 確認対象は、[バージョンを固定した通知文の記録](../../third_party/notices/manifest.json)に残しています。
@@ -51,7 +67,7 @@ probe同梱版も公開する場合は、上の確認に加え、その構成の
 
 ## ソースから導入する
 
-このチェックアウトの製品バージョンは、静的版`0.3.0`です。ソースのコミットを記録し、対応するバイナリとルールを一緒に管理してください。`--version`だけでは候補のどのスナップショットかを区別できません。以下のローカル配布物の名前もCargoのバージョンに従い、新しい正式リリースを示すものではありません。
+このチェックアウトの候補の製品バージョンは、静的版`0.4.0`です。ソースのコミットを記録し、対応するバイナリとルールを一緒に管理してください。`--version`だけでは候補のどのスナップショットかを区別できません。以下のローカル配布物の名前もCargoのバージョンに従い、新しい正式リリースを示すものではありません。
 
 `rust-toolchain.toml`で指定したツールチェーンを使い、チェックアウト直下で実行します。
 ルールはこのチェックアウトとともに保管してください。
@@ -80,7 +96,7 @@ cargo build --locked --release --package pqc_scan_cli
 python3 scripts/package-release.py --binary target/release/pqc-scan --variant static --out-dir target/task-038/static
 cargo build --locked --release --package pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex --target-dir target/network-release-build
 python3 scripts/package-release.py --binary target/network-release-build/release/pqc-scan --variant network --out-dir target/task-038/network
-python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.3.0-aarch64-apple-darwin-static.tar.gz
+python3 scripts/package-release.py --verify target/task-038/static/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz
 ```
 
 準備処理はオフラインのCargoメタデータを使うため、依存物は先にビルドで取得します。
@@ -151,7 +167,7 @@ python3 tests/distribution/check-install.py target/task-038/network/*.tar.gz --o
 
 ## ホスト型ビルドの来歴を検証する
 
-次の例は公開済みv0.2.0のアーカイブ用です。ローカルで準備した0.3.0候補にホスト型の来歴証明は付きません。配布準備workflowが生成したアーカイブでは、リポジトリ・workflow・公開対象のソースコミットを指定して検証します。
+次の例は公開済みv0.2.0のアーカイブ用です。ローカルで準備した0.4.0候補にホスト型の来歴証明は付きません。配布準備workflowが生成したアーカイブでは、リポジトリ・workflow・公開対象のソースコミットを指定して検証します。
 
 ```sh
 gh attestation verify pqc-scan-0.2.0-aarch64-apple-darwin-static.tar.gz --repo wakaken/pqc-scan --signer-workflow wakaken/pqc-scan/.github/workflows/release.yml --source-digest FULL_RELEASE_COMMIT_SHA

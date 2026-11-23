@@ -2,7 +2,7 @@
 
 [English](REPORTS.md) · [README](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/README.ja.md)
 
-このガイドは静的版v0.3.0を対象とします。バージョンによって検出内容・根拠・IDが異なる場合があります。互換性は[リリースノート](../releases/v0.3.0.ja.md)、公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。ローカルの準備物やActions成果物は、公開済みReleaseとは別です。
+このガイドは静的版v0.4.0候補を対象とします。バージョンによって検出内容・根拠・IDが異なる場合があります。互換性は[リリースノート](../releases/v0.4.0.md)、公開済みの配布物は[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で確認してください。ローカルの準備物やActions成果物は、公開済みReleaseとは別です。
 
 スキャンが終わったら、まず人が読むレポートで所見を確認し、追跡や自動処理に必要なファイルを選びます。
 所見には検出根拠と確認事項が含まれますが、それだけを理由に暗号方式を置き換える必要はありません。
@@ -149,7 +149,7 @@ JWT署名を変更する際は、JOSE形式・ライブラリ・検証側の互�
 pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang ja --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
-ローカル方針による評価を加える場合は、別途指定が必要です。製品バージョン0.3.0と、出力形式のInventory v1、SARIF 2.1.0、CycloneDX 1.7は別のバージョン番号です。製品の更新に合わせて形式名が変わるわけではありません。probeの独立した出力は[診断ガイド](PROBING.ja.md)を参照してください。
+ローカル方針による評価を加える場合は、別途指定が必要です。製品バージョン0.4.0と、出力形式のInventory v1、SARIF 2.1.0、CycloneDX 1.7は別のバージョン番号です。製品の更新に合わせて形式名が変わるわけではありません。probeの独立した出力は[診断ガイド](PROBING.ja.md)を参照してください。
 
 ### このツールでいうCBOMとSBOM
 
@@ -348,7 +348,7 @@ IDは安定します。出力の追加や表示言語の切替は、製品のバ
 製品やルールのバージョンをまたぐと、位置・根拠・属性の補正や新たな検出により、IDや件数が
 変わる場合があります。IDの計算方式やスキーマが同じでも起こる差分です。バイナリ・
 ソース・ルールのバージョンとスキャン設定を一緒に比較してください。
-[v0.3.0の互換性情報](../releases/v0.3.0.ja.md)も参照してください。
+[v0.4.0の互換性情報](../releases/v0.4.0.md)も参照してください。
 
 ### ファイルツリーとパネルの表示切替
 

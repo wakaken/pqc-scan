@@ -2,7 +2,7 @@
 
 [日本語](COVERAGE.ja.md) · [README](../../README.md)
 
-This guide describes static v0.3.0. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.3.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
+This guide describes the static v0.4.0 candidate. Detected references, evidence and IDs can differ between versions. See the [release notes](../releases/v0.4.0.md) for compatibility and [GitHub Releases](https://github.com/wakaken/pqc-scan/releases) for published assets. Local preparation and Actions artifacts are not published Releases.
 
 Start with the [input overview](../../README.md#targets). This guide gives the supported formats and boundaries behind that table. Support for a file type means the documented subset can be inspected; it does not mean every cryptographic operation or runtime path can be found.
 
