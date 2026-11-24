@@ -2,7 +2,7 @@
 
 [日本語](PROBING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.md)
 
-TLS, SSH offer collection and hybrid SSH key exchange are experimental v0.4 features, available in the macOS Apple Silicon `network` variant. The `static` variant has no `probe` command. See [choosing a download](DISTRIBUTION.md#release-status).
+TLS, SSH offer collection and hybrid SSH key exchange diagnostics are supported v0.4 features in the macOS Apple Silicon `network` variant. The `static` variant has no `probe` command. See [choosing a download](DISTRIBUTION.md#release-status).
 
 Use probes only for a host/port you are authorized to inspect. A probe exchanges
 protocol traffic with that endpoint. Repository `scan` and report generation stay
@@ -94,7 +94,7 @@ Exit0 means the requested observation completed, not that the endpoint is safe.
 Exit1 is setup/output failure; exit3 is denied/failed/partial/cancelled/unsupported
 inspection. Existing scan exit0/1/2/3 behavior is unchanged.
 
-## Verified hybrid SSH key exchange (experimental)
+## Verified hybrid SSH key exchange
 
 Enable this separate optional feature when installing:
 
@@ -133,5 +133,5 @@ failed/partial observations. HTML presents the result/reason first, with technic
 details closed. Existing `probe ssh` remains advertisement-only; no existing
 static/TLS/SSH-offer output format changes. Enable `probe-tls,probe-ssh,probe-ssh-kex`
 for all three commands. New distribution archives use `static` (no probes) and
-`network` (TLS, SSH offers and SSH KEX, plus static scanning). The `network` diagnostic features remain experimental.
+`network` (TLS, SSH offers and SSH KEX, plus static scanning).
 See the [distribution guide](DISTRIBUTION.md#release-status).

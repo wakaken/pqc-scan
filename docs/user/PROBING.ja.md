@@ -2,7 +2,7 @@
 
 [English](PROBING.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.ja.md)
 
-TLS・SSH提示方式・SSHハイブリッド鍵交換は、v0.4の実験的機能です。macOS Apple Silicon向けの `network` 版で利用できます。`static` 版には `probe` コマンドを含みません。[配布物の選び方](DISTRIBUTION.ja.md#release-status)を参照してください。
+TLS・SSH提示方式・SSHハイブリッド鍵交換の診断は、v0.4の正式機能としてmacOS Apple Silicon向けの `network` 版で提供します。`static` 版には `probe` コマンドを含みません。[配布物の選び方](DISTRIBUTION.ja.md#release-status)を参照してください。
 
 管理者から検査の許可を得たホスト・ポートだけを指定してください。
 `probe` は指定先と通信します。リポジトリの `scan` とレポート生成はローカルで完結し、ソース内のURL、証明書のSAN、所見を根拠に自動接続することはありません。
@@ -80,7 +80,7 @@ TLSは `probe.tls.v1.json`、SSHは `probe.ssh-offers.v1.json` と、それぞ�
 終了コード0は要求した観測の完了で、安全性の保証ではありません。1は準備・出力のエラー、3は拒否・失敗・部分成功・取消・未対応です。
 既存 `scan` の終了コード0／1／2／3は変わりません。
 
-## SSHハイブリッド鍵交換と接続先の確認（実験的機能）
+## SSHハイブリッド鍵交換と接続先の確認
 
 この検査には、別の任意機能を有効にしてインストールします。
 
@@ -116,4 +116,4 @@ Unixではシンボリックリンクや通常ファイル以外の入力も拒�
 HTMLは結果と理由を先に示し、技術情報は閉じた状態にします。
 既存の `probe ssh` は提示方式の収集のままで、従来の出力形式も維持します。
 全コマンドが必要なら `probe-tls,probe-ssh,probe-ssh-kex` を有効にしてください。
-新しい配布物は`static`（probeなし）と`network`（静的スキャンに加え、TLS・SSH提示方式・SSH KEX）の2構成です。`network`版の診断機能は実験的です。[配布構成と確認事項](DISTRIBUTION.ja.md#release-status)を参照してください。
+新しい配布物は`static`（probeなし）と`network`（静的スキャンに加え、TLS・SSH提示方式・SSH KEX）の2構成です。[配布構成と確認事項](DISTRIBUTION.ja.md#release-status)を参照してください。

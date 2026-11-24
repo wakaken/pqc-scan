@@ -1,3 +1,30 @@
+<!-- README hero -->
+<p align="center">
+  <img src="docs/images/pqc-scan-banner.webp" alt="pqc-scan / Post-Quantum Cryptography Migration Scanner" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/wakaken/pqc-scan/actions/workflows/pqc-scan.yml"><img alt="CI" src="https://github.com/wakaken/pqc-scan/actions/workflows/pqc-scan.yml/badge.svg?branch=develop"></a>
+  <a href="https://github.com/wakaken/pqc-scan/releases"><img alt="Release" src="https://img.shields.io/github/v/release/wakaken/pqc-scan?display_name=tag"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <img alt="Rust" src="https://img.shields.io/badge/built%20with-Rust-CE422B?logo=rust&logoColor=white">
+</p>
+
+<p align="center"><strong>Discover cryptographic references. Investigate migration risks. Prepare for the post-quantum era.</strong></p>
+
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#report-preview">Report preview</a> ·
+  <a href="docs/user/COVERAGE.md">Coverage & limits</a> ·
+  <a href="README.ja.md">日本語</a>
+</p>
+
+| Discover | Investigate | Report |
+| :--- | :--- | :--- |
+| Identify supported cryptographic references in local source, config, certificates, and manifests. | Review locations, migration guidance, and inspection completeness. | Read results in HTML/Markdown and share JSON/SARIF with other tools. |
+
+<!-- /README hero -->
+
 # pqc-scan
 
 [日本語](README.ja.md)
@@ -17,6 +44,7 @@ Use it to decide what to investigate before changing JWT, TLS, PKI, SSH or other
 - [Report preview](#report-preview)
 - [Read the results](#results)
 - [Use migration review](#migration-review)
+- [Inspect TLS/SSH endpoints](#endpoint-probing)
 - [User guides](#guides)
 - [Limits and privacy](#limits)
 - [License](#license)
@@ -202,6 +230,59 @@ for the workflow and [reading the migration report](docs/user/REPORTS.md#saved-a
 for decision meanings. See [input and reassessment](docs/user/SCANNING.md#optional-migration-context-and-reassessment)
 and [saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) to reuse saved input.
 
+<a id="endpoint-probing"></a>
+
+## Inspect TLS/SSH endpoints
+
+`probe` connects to an authorized endpoint to inspect the cryptographic algorithms used by TLS or SSH.
+In v0.4, these diagnostics are supported features in the macOS Apple Silicon `network` variant. The `static` variant does not include it.
+
+### 1. Get the diagnostic commands
+
+For a binary installation, choose `network` in the [installation guide](docs/user/DISTRIBUTION.md).
+Replace `pqc-scan` below with the path to `bin/pqc-scan` in the extracted bundle.
+
+For a source installation, run this from the repository root:
+
+```bash
+cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex
+```
+
+### 2. Inspect an authorized endpoint
+
+Replace `service.example` and the port with an endpoint whose administrator has authorized the inspection.
+Use a new report directory for each diagnostic run.
+
+Establish a TLS connection and inspect the selected version, algorithms and public certificates:
+
+```bash
+pqc-scan probe tls service.example --port 443 --out-dir /path/to/reports/tls
+```
+
+Collect the algorithms advertised by an SSH server. This command performs no key exchange or login:
+
+```bash
+pqc-scan probe ssh service.example --port 22 --out-dir /path/to/reports/ssh
+```
+
+To check SSH hybrid ML-KEM768+X25519 key exchange, supply a trusted Ed25519 public host key.
+Obtain it from the administrator or another independently trusted channel. Do not supply a private key.
+
+```bash
+pqc-scan probe ssh-kex service.example --port 22 --host-key-file /path/to/trusted-host.pub --out-dir /path/to/reports/ssh-kex
+```
+
+`ssh-kex` verifies the public host key and key exchange, then disconnects without user authentication or login.
+
+### 3. Open the report
+
+Open `report.html` in the chosen output directory to inspect the result and reasons for failure or incomplete inspection.
+Use `report.md` for text, or the JSON in the same directory for other tools.
+
+TLS verifies the certificate and endpoint name. `probe ssh` records unauthenticated advertisements.
+None of these checks certifies the safety or completed PQC migration of the entire server.
+See the [TLS/SSH guide](docs/user/PROBING.md) for internal/local endpoint authorization, public CA selection, supported algorithms and diagnostic limits.
+
 <a id="guides"></a>
 
 ## User guides
@@ -213,29 +294,34 @@ and [saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) to reuse save
 | [Understanding reports](docs/user/REPORTS.md) | Interpret findings and migration decisions, and choose the right output files |
 | [Supported inputs and inspection limits](docs/user/COVERAGE.md) | Check supported languages and files, excluded inputs, and what to review before sharing reports |
 | [Saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) | Save and reuse purpose and usage input, set its expiry, and reassess saved findings |
-| [Explicit TLS/SSH diagnostics (experimental)](docs/user/PROBING.md) | Use the `network` variant to inspect an authorized endpoint over TLS or SSH |
+| [Explicit TLS/SSH diagnostics](docs/user/PROBING.md) | Use the `network` variant to inspect an authorized endpoint over TLS or SSH |
 
 <a id="limits"></a>
 
 ## Limits and privacy
 
-`pqc-scan` is a static scanner, so false positives and missed references are possible.
-A finding does not prove runtime use, and zero findings does not prove complete inspection or safety.
-Artifact scans do not contact endpoints, validate certificate trust chains, install dependencies or certify PQC migration completion.
-Optional experimental `probe ssh-kex` (`probe-ssh-kex` feature) verifies hybrid ML-KEM768+X25519 key exchange against an explicitly supplied trusted Ed25519 public host key, then disconnects without user authentication/login. It writes separate `probe.ssh-kex.v1.json` and bilingual HTML/Markdown; existing outputs remain unchanged. See the [probe guide](docs/user/PROBING.md).
+### When interpreting findings
 
-Optional `probe` commands contact only the explicitly selected endpoint; TLS uses
-ordinary certificate/name validation, while `probe ssh` collects unauthenticated offers.
+Findings identify algorithm references and places to investigate; they do not establish runtime use.
+False positives and missed references are possible, so check the actual purpose before deciding what to change.
+Zero findings do not establish safety or completed PQC migration.
 
-Recognized private-key/credential syntax is masked, with deliberately conservative previews. This is not universal secret detection: unknown/obfuscated content and secrets placed in paths or identifiers can remain outside the policy.
-Review the [privacy and scan-scope limits](docs/user/COVERAGE.md#privacy) before sharing reports.
+Artifact scans do not contact endpoints, install dependencies or validate certificate trust chains.
+Invoke `probe` explicitly for endpoint diagnostics as shown above.
 
-Only regular files are read, within the configured file-size limit. Git-ignore rules,
-excluded directories and known binary formats limit the selected scope. Incomplete
-parsing retains available findings; it does not make the rest of a file disappear.
-Use `--diagnostics` to see the reasons, and `--require-complete` if incomplete
-inspection should fail CI. See [inspection status](docs/user/SCANNING.md#diagnostics)
-and [supported inputs and limits](docs/user/COVERAGE.md).
+### When choosing scan inputs
+
+The scanner reads regular files within the configured size limit. Git-ignore rules, excluded directories and known binary formats limit the selected scope.
+If parsing stops partway through a file, available findings are retained. Check **Inspection scope and completion** in the report for unfinished inspection.
+
+See [supported inputs and inspection limits](docs/user/COVERAGE.md) for languages, formats and bounds,
+and [inspection status](docs/user/SCANNING.md#diagnostics) for ways to investigate incomplete checks.
+
+### Before sharing reports
+
+Supported private-key and credential syntax is masked, but this is not a universal secret detector.
+Unknown or obfuscated content, and information in paths or identifiers, can remain visible.
+Inspect the report before sharing and review the [privacy and scan-scope limits](docs/user/COVERAGE.md#privacy).
 
 <a id="license"></a>
 

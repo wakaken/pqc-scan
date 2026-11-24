@@ -50,3 +50,12 @@ Counts include test fixtures and do not represent confirmed vulnerabilities.
 - `report-dark-ja.jpg`: SHA-256 `ce78fd4b7a40fa50bec63018501dd09543767fb3a6eb6081e49a4ed2bfba8af7`.
 - `report-light-en.jpg`: SHA-256 `665ac5b3572602dabf2ed11872a263a139071bc5a57b823b1ade1b722bc4d361`.
 - `report-light-ja.jpg`: SHA-256 `493ad1439edb3d90cde1c97a655579e7522ae0bac7d6dc763596ac99349ca8dd`.
+
+## README branding
+
+`pqc-scan-banner.webp` is the original, unmodified banner restored from commit
+`00854e1`. Its SHA-256 is
+`353465643131e70951c87345f5729f6391726313c8b76ebad9d9b8f78dc40a73`.
+Both README languages use this asset. The release badge follows the latest
+published GitHub Release; it is not a hard-coded candidate version or publication
+claim. The report captures above remain unchanged.

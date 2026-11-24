@@ -1,3 +1,30 @@
+<!-- README hero -->
+<p align="center">
+  <img src="docs/images/pqc-scan-banner.webp" alt="pqc-scan / 耐量子暗号移行スキャナー" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/wakaken/pqc-scan/actions/workflows/pqc-scan.yml"><img alt="CI" src="https://github.com/wakaken/pqc-scan/actions/workflows/pqc-scan.yml/badge.svg?branch=develop"></a>
+  <a href="https://github.com/wakaken/pqc-scan/releases"><img alt="Release" src="https://img.shields.io/github/v/release/wakaken/pqc-scan?display_name=tag"></a>
+  <a href="LICENSE"><img alt="MITライセンス" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <img alt="Rust" src="https://img.shields.io/badge/built%20with-Rust-CE422B?logo=rust&logoColor=white">
+</p>
+
+<p align="center"><strong>暗号利用の手掛かりを発見し、移行リスクを調査し、耐量子暗号時代に備える。</strong></p>
+
+<p align="center">
+  <a href="#quick-start">クイックスタート</a> ·
+  <a href="#report-preview">レポート画面</a> ·
+  <a href="docs/user/COVERAGE.ja.md">対応範囲と制約</a> ·
+  <a href="README.md">English</a>
+</p>
+
+| 発見 | 調査 | レポート |
+| :--- | :--- | :--- |
+| 対応するソースコード・設定・証明書・依存ファイル内の暗号利用を調査。 | 検出場所・移行時の確認事項・検査の完了状況を確認。 | HTML・Markdownで結果を読み、JSON・SARIFで他のツールと連携。 |
+
+<!-- /README hero -->
+
 # pqc-scan
 
 [English](README.md)
@@ -19,6 +46,7 @@ JWT、TLS、PKI、SSHなどの暗号処理を変更する前に、調査する�
 - [レポートの画面](#report-preview)
 - [結果を確認する](#results)
 - [移行確認機能を使う](#migration-review)
+- [TLS・SSH接続先を診断する](#endpoint-probing)
 - [利用ガイド](#guides)
 - [制約と秘密情報の扱い](#limits)
 - [ライセンス](#license)
@@ -204,6 +232,60 @@ pqc-scan serve --migration --root /path/to/projects --rules-dir /path/to/pqc-sca
 操作は[画面付きの8ステップ](docs/user/SCANNING.ja.md#web-migration-walkthrough)、判断の意味は[移行確認の読み方](docs/user/REPORTS.ja.md#saved-assessment)で説明しています。
 保存した入力の使い方は、[入力と再評価](docs/user/SCANNING.ja.md#移行情報の任意入力と再評価)と[保存済み入力と申告](docs/user/SAVED-EVIDENCE.ja.md)を参照してください。
 
+<a id="endpoint-probing"></a>
+
+## TLS・SSH接続先を診断する
+
+`probe` は、許可された接続先と通信し、TLS・SSHで使われる暗号方式を確認します。
+v0.4では、macOS Apple Silicon向けの `network` 版で正式機能として提供します。`static` 版には含まれません。
+
+### 1. 診断コマンドを用意する
+
+バイナリ版を使う場合は、[インストールガイド](docs/user/DISTRIBUTION.ja.md)から `network` 版を選びます。
+以下の `pqc-scan` は、展開先の `bin/pqc-scan` のパスに置き換えてください。
+
+ソースからインストールする場合は、リポジトリのルートで次を実行します。
+
+```bash
+cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh,probe-ssh-kex
+```
+
+### 2. 許可された接続先を診断する
+
+`service.example` とポート番号を、管理者から検査の許可を得た接続先に置き換えます。
+レポートの保存先には、診断ごとに新しいフォルダを指定してください。
+
+TLSの接続を確立し、選ばれたバージョン・暗号方式と公開証明書を確認します。
+
+```bash
+pqc-scan probe tls service.example --port 443 --lang ja --out-dir /path/to/reports/tls
+```
+
+SSHサーバーが提示する暗号方式を調べます。このコマンドでは鍵交換やログインは行いません。
+
+```bash
+pqc-scan probe ssh service.example --port 22 --lang ja --out-dir /path/to/reports/ssh
+```
+
+SSHのML-KEM768＋X25519ハイブリッド鍵交換を確認する場合は、信頼済みのEd25519ホスト公開鍵を指定します。
+公開鍵は管理者などから別の信頼できる経路で入手してください。秘密鍵は指定しません。
+
+```bash
+pqc-scan probe ssh-kex service.example --port 22 --host-key-file /path/to/trusted-host.pub --lang ja --out-dir /path/to/reports/ssh-kex
+```
+
+`ssh-kex` はホスト公開鍵と鍵交換を確認して切断し、ユーザー認証・ログインは行いません。
+
+### 3. レポートを開く
+
+指定した保存先の `report.html` で、結果と失敗・未完了の理由を確認します。
+テキストで読む場合は `report.md`、他のツールで扱う場合は同じフォルダのJSONを使います。
+
+TLSは証明書と接続先の名前を検証します。`probe ssh` の結果は未認証の提示情報です。
+いずれも、サーバー全体の安全性やPQC移行完了を保証するものではありません。
+社内・ローカルの接続先を許可する方法、公開CAの指定、対応方式と診断の上限は
+[TLS・SSH診断ガイド](docs/user/PROBING.ja.md)を参照してください。
+
 <a id="guides"></a>
 
 ## 利用ガイド
@@ -215,27 +297,34 @@ pqc-scan serve --migration --root /path/to/projects --rules-dir /path/to/pqc-sca
 | [結果の読み方](docs/user/REPORTS.ja.md) | 検出結果と移行判断の読み方、出力ファイルの使い分け |
 | [対応する入力と検査範囲](docs/user/COVERAGE.ja.md) | 対応する言語・ファイル、検査対象から外れるもの、レポートを共有する際の注意点 |
 | [保存済み入力と申告](docs/user/SAVED-EVIDENCE.ja.md) | 用途・利用状況の入力を保存・再利用する方法、有効期限の設定、保存した検出結果の再評価 |
-| [TLS・SSH接続先の明示的な診断（実験的）](docs/user/PROBING.ja.md) | `network` 版を使い、許可された接続先をTLS・SSHで調べる方法 |
+| [TLS・SSH接続先の明示的な診断](docs/user/PROBING.ja.md) | `network` 版を使い、許可された接続先をTLS・SSHで調べる方法 |
 
 <a id="limits"></a>
 
 ## 制約と秘密情報の扱い
 
-`pqc-scan`は静的スキャンツールであるため、誤検出や見逃しの可能性があります。  
-検出結果は実際に稼働している証拠ではなく、検出がゼロでも検査の完了や安全性は保証しません。  
-成果物のスキャンでは、接続先との通信、証明書の信頼チェーンの検証、依存関係のインストール、PQC移行完了の認定は行いません。  
-  
-実験的な `probe ssh-kex`（`probe-ssh-kex` 機能）は、指定した信頼済みEd25519ホスト公開鍵と照合し、ML-KEM768＋X25519のハイブリッド鍵交換を確認します。  
-ユーザー認証・ログインは行いません。独立した `probe.ssh-kex.v1.json` と日本語・英語のHTML／Markdownを出力し、従来の出力形式は維持します。詳細は[診断ガイド](docs/user/PROBING.ja.md)を参照してください。
+### 検出結果を判断するとき
 
-任意の `probe` コマンドは、明示した接続先へ通信します。TLSは通常の証明書・名前検証、`probe ssh` は未認証の提示方式の収集を行います。
+検出結果は、暗号方式への参照や確認が必要な箇所を示します。実際に稼働している証拠ではありません。
+誤検出や見逃しもあるため、見つかった箇所の用途を確かめてから対応を決めてください。
+検出がゼロでも、安全性やPQC移行完了は保証しません。
 
-対応する秘密鍵・認証情報の構文をマスクし、プレビューも保守的に扱います。
-あらゆる秘密情報を見つける機能ではなく、未知・難読化された内容や、パス・識別子に含まれる秘密は対象外になる場合があります。
-レポートを共有する前に[秘密情報の扱いと除外範囲](docs/user/COVERAGE.ja.md#privacy)を確認してください。
+成果物のスキャンでは、接続先との通信や依存関係のインストール、証明書の信頼チェーンの検証は行いません。
+接続先の診断には、上記の `probe` を明示的に実行します。
 
-読み取るのは、指定したサイズ上限内の通常ファイルです。Gitのignore設定、除外ディレクトリ、既知のバイナリ形式は検査範囲に含めません。解析を完了できなくても、読み取れた部分の検出結果は残します。
-理由を確認するには `--diagnostics`、未完了の検査でCIを失敗させるには `--require-complete` を使ってください。[検査状態の読み方](docs/user/SCANNING.ja.md#diagnostics)と[対応範囲・上限](docs/user/COVERAGE.ja.md)に詳しい説明があります。
+### スキャン対象を選ぶとき
+
+読み取るのは、指定したサイズ上限内の通常ファイルです。Gitのignore設定、除外ディレクトリ、既知のバイナリ形式などは検査範囲から外れます。
+解析が途中で止まった場合も、読み取れた部分の検出結果は残します。検査できなかった箇所はレポートの「検査範囲と完了状況」で確認してください。
+
+対応する言語・ファイルと上限は[対応する入力と検査範囲](docs/user/COVERAGE.ja.md)、
+未完了の理由の調べ方は[検査状態の読み方](docs/user/SCANNING.ja.md#diagnostics)で説明しています。
+
+### レポートを共有するとき
+
+対応する秘密鍵・認証情報の構文はマスクしますが、すべての秘密情報を検出する機能ではありません。
+未知・難読化された内容や、パス・識別子に含まれる情報が残る場合があります。
+共有前にレポートの内容を確認し、[秘密情報の扱いと除外範囲](docs/user/COVERAGE.ja.md#privacy)も参照してください。
 
 <a id="license"></a>
 

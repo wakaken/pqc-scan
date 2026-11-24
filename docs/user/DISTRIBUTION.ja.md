@@ -15,7 +15,7 @@
 | 構成 | ファイル名 | 使える機能 |
 |---|---|---|
 | `static` | `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz` | ローカルスキャン、ローカルWeb画面、移行確認 |
-| `network`（実験的） | `pqc-scan-0.4.0-aarch64-apple-darwin-network.tar.gz` | 静的版の全機能に加え、明示したTLS・SSH接続先の診断 |
+| `network` | `pqc-scan-0.4.0-aarch64-apple-darwin-network.tar.gz` | 静的版の全機能に加え、明示したTLS・SSH接続先の診断 |
 
 選んだアーカイブに対応する `.sha256` ファイルも取得してください。
 接続先の診断には管理者の許可が必要です。[TLS・SSH診断ガイド](PROBING.ja.md)に沿って実行します。

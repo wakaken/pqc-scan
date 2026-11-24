@@ -65,3 +65,23 @@ publication pending until a compatible replacement is implemented and verified.
 Final maintainer product/support/publication acceptance must name the candidate
 and both actual archives, acknowledge bounded experimental probe support and
 resolve this warning explicitly. No public tag, merge or release has been created.
+
+## Subsequent maintainer direction — supported probe scope
+
+After reviewing the successful technical verification, the maintainer requested
+that probes become supported v0.4 features if all verification was complete and
+there were no remaining technical release blockers. The implementation/test
+reviewers accepted source `4e800e811cb7c60b2b377796e69bffc6326be1c8` and both
+actual hosted archives. The exact-source CI/preparation receipts are
+[runs 45304498763](https://github.com/wakaken/pqc-scan/actions/runs/45304498763) and
+[45304503424](https://github.com/wakaken/pqc-scan/actions/runs/45304503424).
+
+On that basis, current README, installation/probe guides and v0.4 notes describe
+TLS, unauthenticated SSH advertisements and pinned hybrid SSH key exchange as
+supported features in the macOS Apple Silicon network distribution. This changes
+the product designation, not algorithms, supported platforms, authentication,
+trust verification, command behavior or output contracts. The earlier experimental
+checkpoint above remains historical. The chrono maintenance-warning decision and
+actual publication authorization remain pending. Documentation changes after this
+source require refreshed archive/source binding; the old archives are not the new
+publication assets. No old measurements or audit exceptions are rewritten.

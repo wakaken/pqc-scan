@@ -15,7 +15,7 @@ Check the Release page for availability. Actions artifacts are separate from pub
 | Variant | Filename | Features |
 |---|---|---|
 | `static` | `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz` | Local scanning, local web interface and migration review |
-| `network` (experimental) | `pqc-scan-0.4.0-aarch64-apple-darwin-network.tar.gz` | All static features plus explicit TLS/SSH endpoint diagnostics |
+| `network` | `pqc-scan-0.4.0-aarch64-apple-darwin-network.tar.gz` | All static features plus explicit TLS/SSH endpoint diagnostics |
 
 Download the matching `.sha256` file too. Endpoint diagnostics require the
 administrator's authorization; follow the [TLS/SSH guide](PROBING.md).

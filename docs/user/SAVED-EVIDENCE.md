@@ -45,7 +45,7 @@ Unsupported formats/versions, invalid references, contradictory facts and resour
 overflow produce fixed errors without echoing rejected input. Safe typed output
 omits raw evidence, arbitrary metadata and unknown names. Existing source paths,
 public fingerprints and identifiers can still be sensitive operational metadata.
-Experimental TLS/SSH collection and publication status are unchanged.
+See the [probe guide](PROBING.md) for TLS/SSH collection procedures and supported distributions.
 
 ## Bind organization and system claims
 
@@ -142,7 +142,7 @@ must not refer to the same file as an output. Each report is bounded to64 MiB an
 using the existing safe output boundary; oversized reports reject without
 truncation. Existing files are atomically replaced individually. The command
 never executes input, fetches references, rescans source or contacts endpoints,
-including builds with experimental probe features enabled.
+including builds with probe features enabled.
 
 ## Generate context without copying target IDs
 
