@@ -1,36 +1,102 @@
-# Read saved cryptographic evidence
+# Review migration using saved results
 
 [日本語](SAVED-EVIDENCE.ja.md)
 
-Reassess saved findings with reusable purpose and usage input. `assess` runs
-offline without rescanning source or contacting endpoints.
+Load an earlier scan result and your purpose/usage input to prepare migration
+review items again. This uses detections from the saved scan; run a new scan to
+inspect source changes.
+
+In the browser, choose files and records on screen. For terminal use,
+**`pqc-scan assess` is the command that evaluates saved detection results**.
+Neither reassessment path rescans source or contacts endpoints.
 
 | Workflow | Start here |
 |---|---|
-| Browser | Follow the [illustrated scan and migration steps](SCANNING.md#web-migration-walkthrough), then [save and reload input](#browser-save) |
-| CLI | [List targets and generate context](#context-template), then [reassess and open the result](#reassess) |
+| Browser | Follow the [four illustrated steps](#browser-save) below. For an initial scan and purpose input, see [SCANNING](SCANNING.md#web-migration-walkthrough) |
+| Terminal | [Enter purpose and usage](#context-template), then [reassess saved results](#reassess) |
 
 <a id="browser-save"></a>
 
 ## Saving and reassessing in the browser
 
-1. Choose **Save input (JSON)**, check retrieval status and confirm `migration-context.json` in the browser's download location. It is separate from assessment-data JSON.
-2. Reload this context with the same original findings for reassessment.
-3. Normally use the current time when preparing items. Choose a specific time for a past situation; the page warns that later assertions will not apply then.
+The screenshots use v0.4.0 with the public `examples/python` sample. Counts and
+input values are examples, not verified deployed use.
 
-Omitting expiry leaves validity unknown. See [time and validity](#claim-validity).
+### 1. Keep detection results and your input together
+
+After preparing migration review items, choose **Save input (JSON)**. Check the
+**Download started** notice and `migration-context.json` in the browser's download
+location. If retrieval fails, retry from this screen.
+
+![Save input as JSON and check the download-started notice](../images/v0.4/saved-01-save-en.jpg)
+
+Keep these two files for reassessment:
+
+| File | Content and location |
+|---|---|
+| `scan.inventory.v1.json` | Original detections. Web scans retain it in each job's subdirectory under the `pqc-scan-web-*` output directory printed at server startup. For CLI scans, request it with `--inventory-json` |
+| `migration-context.json` | Your purpose and usage input, downloaded with **Save input (JSON)** |
+
+**Save report (HTML)** saves a viewable report; **Save assessment data** saves the
+assessment result. Neither replaces the reusable input in `migration-context.json`.
+Keep original detection files unchanged: reformatting or editing changes their binding to the input.
+
+### 2. Open saved detection results
+
+In the local web interface started with migration review enabled, choose **Load
+saved results**. Select `scan.inventory.v1.json` (up to 32 MiB) and choose **Use
+these results**. On the loaded-results screen, choose **Review migration**, inspect
+the overview and choose **Next**. See [local web scanning](SCANNING.md#local-web-scanning)
+for startup instructions.
+
+![Select the saved scan JSON and use these results](../images/v0.4/saved-02-load-en.jpg)
+
+This file supplies detections. Load purpose and usage input on the next screen.
+
+### 3. Reuse saved purpose and usage input
+
+Choose **Use saved input** and select the matching `migration-context.json`
+(up to 1 MiB). Normally use **Current time when preparing items (default)** under
+**When to evaluate**. Choose a specific time only to review a past situation,
+at or after detection collection. Assertions later than that time will not apply.
+
+![Load saved input and confirm the evaluation time](../images/v0.4/saved-03-context-en.jpg)
+
+Imported fields are retained and read-only on screen. To change them, edit the
+original JSON and import it again. If you have no saved input, choose **New input**
+and [enter purpose and usage](SCANNING.md#web-migration-walkthrough). Answer what
+you know.
+
+### 4. Prepare review items again and read the result
+
+Choose **Next** to prepare items from the loaded results and input. Check the
+conclusion, evaluation time, **What to do** and **When to proceed**.
+Use **View detection locations** to inspect the saved records and decision evidence.
+
+![Read the reassessment conclusion and next checks](../images/v0.4/saved-04-review-en.jpg)
+
+**Urgency undetermined** in this example means more information is needed, not
+low risk. Claims without expiry retain unknown validity. See the [report guide](REPORTS.md#saved-assessment)
+for interpretation and [validity details](#claim-validity) for time conditions.
+Reassessment from saved results does not include the original scan report, so
+there is no same-job link back to it.
 
 <a id="context-template"></a>
+<a id="generate-context-without-copying-target-ids"></a>
 
-## Generate context without copying target IDs
+## Enter purpose and usage from the terminal
 
-### 1. List targets and create context
+### 1. Select the detection records to describe
 
-Use noninteractive `context-template` to inspect target numbers, algorithms, roles
-and locations, then select the numbers to bind. Replace paths and timestamps below.
-`YYYY-MM-DDTHH:MM:SS+09:00` is a placeholder, not an executable value. Evaluation
-must be at or after collection; assertion time is when information was confirmed.
-Include seconds and an explicit timezone offset.
+`context-template` creates purpose/usage input JSON for selected records in saved
+detection results. Run the first command to list records, then use the number,
+algorithm, role, file and line to choose where your answers apply. `--target 1`
+in the second command selects number 1 from that list; replace it with the number
+you checked. One location can have several records with different rules or technical roles.
+
+Replace file paths too. `YYYY-MM-DDTHH:MM:SS+09:00` is a placeholder, not an
+executable value. Evaluation must be at or after collection; assertion time is
+when the information was confirmed. Include seconds and a timezone offset.
 
 ```console
 pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 --list-targets
@@ -41,14 +107,22 @@ pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 \
   --actor owner --asserted-at 'YYYY-MM-DDTHH:MM:SS+09:00'
 ```
 
+This example answers **Signature**, **In use** and other fields for the selected
+record and saves `migration-context.json`. Selecting a list number lets the command
+set record identifiers and input-file checks automatically; you do not need to find
+or copy target IDs.
+
+<details>
+<summary>Selecting multiple records, answer options and input conditions</summary>
+
 | Setting | Control or condition |
 |---|---|
 | Targets | Select displayed numbers with `--target`; repeat for a group. Numbers apply only to this exact saved input |
-| Hash and target IDs | Calculated by the command. Ambiguous targets, duplicates, invalid numbers and existing context bound to other bytes are rejected |
+| Record bindings | Calculated by the command. Ambiguous targets, duplicates, invalid numbers and existing context bound to other bytes are rejected |
 | No selected target | Writes a valid unbound template and refuses claims; never selects every target implicitly |
 | Organization/system aliases | Defaults `organization` and `system-1` need no company/department. Customize with `--organization` and `--system` |
 
-### 2. Supply the required answers
+### Answer options
 
 | Option | Input |
 |---|---|
@@ -61,14 +135,18 @@ Enter reference-backed deadlines through the local form. Personal use does not
 change criticality. See [claim binding](#claims) and its JSON schema for inheritance
 and advanced settings, then use the generated context with `assess` below.
 
+</details>
+
 <a id="reassess"></a>
 
-## Reassess saved evidence offline
+## Reassess saved results from the terminal
 
-### 3. Reassess and open the result
+### 2. Prepare review items and open the HTML
 
-Supply saved `saved.inventory.v1.json` and matching `migration-context.json`.
-Replace evaluation time with the actual time to review, at or after collection.
+`assess` reads saved detections and optional purpose/usage input to prepare migration
+review items. Supply original `saved.inventory.v1.json` and its matching
+`migration-context.json`. Replace evaluation time with the actual time to review,
+at or after collection.
 
 ```console
 pqc-scan assess saved.inventory.v1.json --input-format inventory-v1 \
@@ -76,9 +154,10 @@ pqc-scan assess saved.inventory.v1.json --input-format inventory-v1 \
   --out-dir ./migration-report
 ```
 
-1. Open `migration.assessment.html` in a browser. It is direct product output; no Markdown conversion or preview server is required.
-2. Read actions and conditions for proceeding. Use **View detection locations** to search and page through the evidence when needed.
-3. Retain the original input and context. If input changes, including regeneration or reformatting, review the target list and create matching context again. Bindings cannot be carried over to another scan.
+Open `migration.assessment.html` in the output directory. This is direct product
+output, so no Markdown conversion or preview server is needed. If detections are
+regenerated, reformatted or replaced with another scan, check the list and create
+matching context again.
 
 | Input/output | Meaning |
 |---|---|
@@ -94,6 +173,8 @@ schedules, urgency and saving. Cards group compatible decisions while preserving
 each target's uncertainty, limits and provenance. **Details** shows rules, methods,
 reasons and declarations used by the decision; no separate declaration/source
 ledger is appended.
+
+## Viewing and input reference
 
 ### Viewing and saving limits
 
@@ -143,9 +224,16 @@ Ordinary answers cannot resolve an unidentified record; inspect its original
 location and explanation. Reference-only records may accept a purpose while the
 algorithm stays unknown. Entering a purpose does not identify the algorithm.
 
-## What the targets mean
+<details>
+<summary>Manual JSON inspection: identifiers, claims and validity</summary>
 
-A target identifies an observation and technical role in the exact saved bytes.
+<a id="what-the-targets-mean"></a>
+
+## How records and input are matched (details)
+
+You do not need to enter or edit identifiers during normal use. For manual JSON
+inspection, a target ID distinguishes a detection record and technical role in one
+exact saved file, preventing purpose/usage answers from being applied to the wrong record.
 Observations sharing an algorithm definition are not merged. Changing any byte,
 including JSON whitespace, changes the input digest and target IDs; native
 run/observation/asset IDs stay unchanged. A digest establishes content identity,
@@ -195,6 +283,8 @@ label is still a claim, not scanner verification.
 
 New assertion/evaluation times require seconds and an explicit offset and are
 normalized to UTC. Evaluation before collection is rejected.
+
+</details>
 
 ## Input limits and errors
 
