@@ -14,9 +14,9 @@ Use it to decide what to investigate before changing JWT, TLS, PKI, SSH or other
 - [What does it do?](#features)
 - [Run your first scan](#quick-start)
 - [Scan in your browser](#web-scan)
-- [Review migration](#migration-review)
 - [Report preview](#report-preview)
 - [Read the results](#results)
+- [Use migration review](#migration-review)
 - [User guides](#guides)
 - [Limits and privacy](#limits)
 - [License](#license)
@@ -30,11 +30,11 @@ Point the scanner at a local repository. It inspects the following artifacts wit
 | Artifact | Languages or file examples | What the scanner looks for |
 |---|---|---|
 | Source code | Java, Go, JavaScript, TypeScript/TSX, Python, Rust, Ruby | Cryptographic APIs, algorithm names and related usage patterns |
-| Configuration files | Kubernetes/Ingress, nginx, Apache httpd, Envoy, Istio, HAProxy, Traefik | TLS/cipher/group settings and other cryptographic configuration signals |
-| Public certificates | `.pem`, `.crt`, `.cer`, `.der` | Signature and subject-key algorithms, supported key sizes/curves, validity periods and public fingerprints |
-| Private-key markers | RSA, generic PKCS#8 and OpenSSH private-key headers | The presence of supported headers; no decryption or private-key validation |
+| Middleware configuration files | Kubernetes/Ingress, nginx, Apache httpd, Envoy, Istio, HAProxy, Traefik | TLS/cipher/group settings and other cryptographic configuration signals |
+| Certificate files | `.pem`, `.crt`, `.cer`, `.der` | Signature and subject-key algorithms, supported key sizes/curves, validity periods and public fingerprints |
+| Private-key headers | RSA, generic PKCS#8 and OpenSSH private-key headers | The presence of supported headers; no decryption or private-key validation |
 | Dependency manifests and locks | `Cargo.toml`, `Cargo.lock`, `package.json`, npm/pnpm locks, Python/Ruby/Java/Go dependency files | Relevant libraries, declared version constraints and supported resolution records |
-| Existing SBOM files | CycloneDX JSON and SPDX JSON | Reported dependency components/packages; not proof of installation |
+| SBOM files | CycloneDX JSON and SPDX JSON | SBOMs used for the scanned project, describing its dependency components and packages |
 
 File selection defaults to 2 MiB per file. See [file-size limits](docs/user/SCANNING.md#file-size-limit).
 
@@ -54,67 +54,78 @@ A reference to a PQC algorithm is useful evidence, but it does not establish tha
 
 ## Run your first scan
 
-Install from this repository’s source with the following commands:
+Choose one of three ways to run the tool.
+
+| Method | Requirements and instructions |
+|---|---|
+| Install from source | Requires Rust. Follow the installation and scan steps below |
+| Use a macOS Apple Silicon binary | No Rust installation is required. Follow the [installation guide](docs/user/DISTRIBUTION.md) to download and extract a published archive |
+| Run from source without installing | Requires Rust. Use `cargo run` to build and run instead of `cargo install`. See the [instructions](docs/user/SCANNING.md#from-source) |
+
+The following steps cover **installing from source and running a scan**.
+
+### 1. Install
+
+Obtain this repository and install with the following commands:
 
 ```bash
 cd /path/to/pqc-scan
 cargo install --locked --path crates/pqc_scan_cli
 ```
 
-For archive verification and installation, see the [installation guide](docs/user/DISTRIBUTION.md). Static macOS Apple Silicon binaries are distributed through [GitHub Releases](https://github.com/wakaken/pqc-scan/releases); probe bundles are not cleared for public distribution.
-
-Keep the checkout's `rules` directory available after installation. The binary does not bundle that directory; use an absolute `--rules-dir` path when scanning another project.
+Keep this checkout's `rules` directory after installation; the scan needs it.
+Check the installation with `pqc-scan --help` or `pqc-scan --version`.
 If the command is not found, check that `~/.cargo/bin` is in `PATH`.
-Use `pqc-scan --help` or `pqc-scan --version` to check the installed command; both exit successfully without scanning or networking.
+
+### 2. Scan
+
+Use the `pqc-scan` command installed above. Replace these paths for your environment:
+
+- `/path/to/your-product`: the project folder to inspect
+- `/path/to/pqc-scan/rules`: the absolute path to the rules directory you retained
+- `/path/to/reports/product-scan`: a new report directory outside the scanned project
 
 ```bash
 pqc-scan scan /path/to/your-product --format all --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
-Use a new output directory outside the scanned repository when comparing scans, so old/generated reports do not become part of the input or get confused with current output.
-Output paths containing symbolic links are rejected; existing regular reports remain replaceable. See [output destination safety](docs/user/SCANNING.md#output-destination-safety).
-To produce Japanese HTML/Markdown, add `--lang ja`. [Running from source](docs/user/SCANNING.md#from-source) is also supported.
+Add `--lang ja` to produce Japanese HTML and Markdown.
+
+### 3. Open the report
+
+Open `report.html` from the output directory in your browser to review the results.
+Keep `report.rules.html` alongside it when moving the HTML report elsewhere.
+Use `report.md` to read or share a text version.
+
+See the [scanning guide](docs/user/SCANNING.md) for output formats, input selection
+and output paths, and the [report guide](docs/user/REPORTS.md) for interpretation.
+To select folders and scan in your browser, continue with the next section.
 
 <a id="web-scan"></a>
 
 ## Scan in your browser
 
-After installing the CLI above, start the local server:
+After installing from source, start the local server with the command below. For a binary archive, see the [installation guide](docs/user/DISTRIBUTION.md#use-the-browser-interface).
 
 ```bash
 pqc-scan serve --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
 ```
 
-1. The default browser opens the local start page. If it does not, open the complete `http://127.0.0.1:8787/<session>/` URL printed in the terminal.
-2. Select one or more project folders within `--root` using the rows or checkboxes, then **Scan selected folders**. Double-click to open a folder; use Back/Forward or the path above the list to navigate. The picker stays within this root and skips symbolic links.
-3. The progress dialog blocks other page actions while folders scan in selection order. Each folder keeps its own result. For multiple folders, use each folder’s card to open its scan report or start migration review when available. Scan history offers the same direct actions. A single default-mode scan opens its HTML report automatically. Review inspection completion as well as findings. Browser Back returns to the start page for another scan.
-4. Stop the server with **Ctrl+C**. Reports remain in the private `pqc-scan-web-*` directory printed in the terminal. Keep `report.html` and `report.rules.html` together for offline reading.
+1. The default browser opens the start page. If it does not, copy the complete `http://127.0.0.1:8787/<session>/` URL printed in the terminal into your browser.
+2. Select one or more folders within `--root` using the rows or checkboxes, then choose **Scan selected folders**. Double-click to open a folder; use Back/Forward or the path above the list to navigate. You cannot move outside the root, and symbolic links are not shown.
+3. Folders are scanned in selection order, and each keeps its own results. For multiple folders, use each folder's result to open its scan report or continue to migration review when available. Browser Back lets you scan another folder.
+4. Stop the server with **Ctrl+C** in the terminal where you started it. Reports remain in the printed `pqc-scan-web-*` directory. Keep `report.html` and `report.rules.html` together for offline reading.
 
-The server listens only on `127.0.0.1` and runs the same static scanner as the CLI, without uploading source or reports. Use `--port 0` if the default port is occupied, or `--no-open` to open the printed URL yourself. With an extracted distribution, replace the command and rules paths with `/path/to/bundle/bin/pqc-scan` and `/path/to/bundle/rules/default`. See [local web scanning](docs/user/SCANNING.md#local-web-scanning) for limits and options.
-
-<a id="migration-review"></a>
-
-## Review migration
-
-Add `--migration` to `serve` to move from scan results to optional purpose and
-usage input, then **Prepare review items**. For multiple folders or history, choose
-the named folder card: **Open scan report ↗** opens its detections and **Review migration**
-opens its saved input/result. The migration report groups decisions and shows what
-to do and when to proceed. Review the evaluation date, schedule and urgent
-investigations first; inspect locations for the underlying evidence.
-
-Follow the [eight illustrated steps](docs/user/SCANNING.md#web-migration-walkthrough).
-See [migration input and reassessment](docs/user/SCANNING.md#optional-migration-context-and-reassessment),
-[reading the migration report](docs/user/REPORTS.md#saved-assessment), and
-[saved evidence and declarations](docs/user/SAVED-EVIDENCE.md). Save input JSON with
-the exact inventory used to create it; **Save assessment data** saves the evaluation,
-not a reusable context file.
+The server listens only on `127.0.0.1` and runs the same static scan as the CLI.
+Scanning stays on the machine running the server, without sending source code or
+reports to external services. See [local web scanning](docs/user/SCANNING.md#local-web-scanning)
+for constraints and options.
 
 <a id="report-preview"></a>
 
 ## Report preview
 
-The scan HTML report includes a severity summary, rule groups, search/filters, and a file tree with finding counts. Expand findings for locations, source evidence and recommended checks; follow the rule guide for explanations. Filters and the tree can be hidden independently. Language (English/Japanese), light/dark theme and browser-local time display work offline.
+The scan HTML report includes a severity summary, rule groups, search/filters, and a file tree with finding counts. Expand findings for locations, source evidence and recommended checks; follow the rule guide for explanations. Language (English/Japanese), light/dark theme and browser-local time display work offline.
 
 ![Light HTML report with inspection status, file tree and grouped findings](docs/images/v0.4/scan-light-en.jpg)
 
@@ -125,54 +136,93 @@ The scan HTML report includes a severity summary, rule groups, search/filters, a
 
 </details>
 
-Actual Keycloak scan with v0.4.0, captured on 2026-11-23 with the default risk-candidate view and filters hidden. Counts describe that scan snapshot, including test fixtures; they are references requiring investigation, not confirmed vulnerability counts. The incomplete-inspection notice remains visible. [Capture source and settings](docs/images/README.md).
+The screenshots above show a scan of [Keycloak](https://github.com/keycloak/keycloak).
 
 <a id="results"></a>
 
 ## Read the results
 
-HTML summarizes findings, inspection scope and unfinished checks; detailed observation and asset ledgers remain in JSON/Markdown.
-Advisory policy decisions are kept in explicitly requested JSON/Markdown exports.
+Open `report.html` in your browser and review it in this order:
 
-Open `report.html` first. Review a finding's file location, source context and suggested checks before deciding on a change.
-Search and filters help you work through repeated findings; `report.md` provides a portable text version.
-Markdown keeps multiline source excerpts and code examples inside code blocks, including CR/LF input.
-Both show inspection status. Local assessment decisions appear only in Markdown and explicitly requested JSON; HTML does not display them.
+1. Check **Inspection scope and completion** to see what was inspected and which files need follow-up.
+2. Open a finding and review its file location, surrounding code and suggested checks. Investigate its actual use before deciding whether to make a change.
+3. Use search and filters for repeated findings. Follow the report's rule explanations to understand a matched rule.
 
-See [browser scanning](#web-scan) to select a folder and generate reports from the local web interface.
+With `--format all`, the CLI saves these files:
 
-`--format all` writes six original files: `report.html`, `report.md`, `report.json`, `report.sarif`, `cbom.json` and `dependency-sbom.json`, plus the local rule guide `report.rules.html`.
-`cbom.json` and `dependency-sbom.json` list cryptographic findings and software dependencies respectively. Their purpose and relationship are explained in [choosing a report](docs/user/REPORTS.md#choose-report).
-Additional inventory, assessment and diagnostic files require explicit options.
-Use `--cyclonedx-17` for separate CycloneDX 1.7 exports, or `diff` to compare
-inventories with the same explicit repository scope. See the [report guide](docs/user/REPORTS.md).
+| File | Purpose |
+|---|---|
+| `report.html` | Review findings and inspection status in a browser |
+| `report.rules.html` | Read matched rule explanations; keep it alongside `report.html` |
+| `report.md` | Read or share findings and inspection status as text, with multiline source excerpts and code examples kept inside code blocks |
+| `report.json` | Use findings with other tools |
+| `report.sarif` | Pass findings to SARIF-compatible tools |
+| `cbom.json` | Review the cryptographic findings inventory |
+| `dependency-sbom.json` | Review the software dependency inventory |
 
-HTML and Markdown merge equivalent findings at the same position and algorithm, retaining matched rules in details. Inspection totals count files; finding totals count merged items. Machine exports such as JSON retain original rule-level records.
+HTML and Markdown combine equivalent findings at the same location and retain
+matched rules in the details. Inspection totals count files.
 
-Tests remain included by default. Use `--exclude-tests` or the browser’s “Exclude test code” option below “Clear selection” to omit conventional test paths and filenames. See [scanning](docs/user/SCANNING.md) for matching conventions and limits. Custom exclusions can be configured with `.pqcignore`; syntax-proven Rust test-only findings can also be omitted.
+See the [report guide](docs/user/REPORTS.md) for additional inventory, assessment
+and diagnostic output, CycloneDX 1.7 exports (`--cyclonedx-17`) and inventory
+comparison (`diff`).
+
+Test code is included by default. See [scanning](docs/user/SCANNING.md#exclude-test-code)
+for `--exclude-tests`, the **Exclude test code** option and custom `.pqcignore` paths.
+
+<a id="migration-review"></a>
+
+## Use migration review
+
+Enter the purpose and usage of detected cryptography to see what to do for
+migration to PQC and when to proceed. After installing from source, start it with:
+
+```bash
+pqc-scan serve --migration --root /path/to/projects --rules-dir /path/to/pqc-scan/rules
+```
+
+1. Select folders in the opened page and scan them, then choose **Review migration**.
+   For multiple folders or history, check the target name before selecting its card.
+   **Open scan report ↗** opens the original findings.
+2. Enter the purpose and usage of cryptography, then choose **Prepare review items**.
+3. Check the evaluation time and schedule, starting with urgent investigations.
+   Read each decision's **What to do** and **When to proceed**, then use
+   **View detection locations** to inspect its evidence.
+
+Choose the save action for the content you need:
+
+| Action | Saved content |
+|---|---|
+| Save report (HTML) | The migration review report for later reading |
+| Save input (JSON) | Purpose, usage and other input for reassessment |
+| Save assessment data | The complete evaluation; separate from the input JSON used for reassessment |
+
+Follow the [eight illustrated steps](docs/user/SCANNING.md#web-migration-walkthrough)
+for the workflow and [reading the migration report](docs/user/REPORTS.md#saved-assessment)
+for decision meanings. See [input and reassessment](docs/user/SCANNING.md#optional-migration-context-and-reassessment)
+and [saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) to reuse saved input.
 
 <a id="guides"></a>
 
 ## User guides
 
-| Guide | Use it when you need to… |
+| Guide | What you can learn |
 |---|---|
-| [Scanning repositories](docs/user/SCANNING.md) | Select outputs, configure CI exit codes, inspect incomplete scans or run from source |
-| [Understanding reports](docs/user/REPORTS.md) | Interpret risk/PQC findings, choose an inventory, understand CBOM/SBOM or use local policy assessment |
-| [Supported inputs and inspection limits](docs/user/COVERAGE.md) | Check languages, file formats, certificate handling, rule packs, exclusions and privacy boundaries |
-| [Explicit TLS/SSH diagnostics](docs/user/PROBING.md) | Inspect one authorized endpoint with optional protocol commands |
-| [Installation and local packages](docs/user/DISTRIBUTION.md) | Rule assets, package verification, updates and support scope |
-| [Saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) | Exact-input/context binding, claim expiry and offline reassessment |
+| [Installation and local packages](docs/user/DISTRIBUTION.md) | Install a binary or build from source, upgrade, and return to an earlier version |
+| [Scanning repositories](docs/user/SCANNING.md) | Select folders, run scans, choose an output directory, and check files that could not be fully inspected |
+| [Understanding reports](docs/user/REPORTS.md) | Interpret findings and migration decisions, and choose the right output files |
+| [Supported inputs and inspection limits](docs/user/COVERAGE.md) | Check supported languages and files, excluded inputs, and what to review before sharing reports |
+| [Saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) | Save and reuse purpose and usage input, set its expiry, and reassess saved findings |
+| [Explicit TLS/SSH diagnostics (experimental)](docs/user/PROBING.md) | Enable the features in a source build to inspect an authorized endpoint; excluded from v0.4 distribution |
 
 For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
-
-Each guide has a Japanese version linked at the top.
 
 <a id="limits"></a>
 
 ## Limits and privacy
 
-This is static, advisory analysis. False positives and missed references are possible; a finding does not prove runtime use, and zero findings does not prove complete inspection or safety.
+`pqc-scan` is a static scanner, so false positives and missed references are possible.
+A finding does not prove runtime use, and zero findings does not prove complete inspection or safety.
 Repository scans do not contact endpoints, validate certificate trust chains, install dependencies or certify PQC migration completion.
 Optional experimental `probe ssh-kex` (`probe-ssh-kex` feature) verifies hybrid ML-KEM768+X25519 key exchange against an explicitly supplied trusted Ed25519 public host key, then disconnects without user authentication/login. It writes separate `probe.ssh-kex.v1.json` and bilingual HTML/Markdown; existing outputs remain unchanged. See the [probe guide](docs/user/PROBING.md).
 
