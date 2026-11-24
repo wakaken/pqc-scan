@@ -217,6 +217,10 @@ pqc-scan serve --migration --root /path/to/projects --rules-dir /path/to/pqc-sca
    Read each decision's **What to do** and **When to proceed**, then use
    **View detection locations** to inspect its evidence.
 
+Normally, leave **When to evaluate** at **Current time when preparing items**.
+Choose **a specific time** to review a past situation.
+The page warns when an assertion is later than the evaluation time and will not apply to that assessment.
+
 Choose the save action for the content you need:
 
 | Action | Saved content |
@@ -224,6 +228,10 @@ Choose the save action for the content you need:
 | Save report (HTML) | The migration review report for later reading |
 | Save input (JSON) | Purpose, usage and other input for reassessment |
 | Save assessment data | The complete evaluation; separate from the input JSON used for reassessment |
+
+**Save input (JSON)** shows retrieval status.
+After the download starts, check your browser’s download location for `migration-context.json`.
+If it fails, follow the message and try again from the current result.
 
 Follow the [eight illustrated steps](docs/user/SCANNING.md#web-migration-walkthrough)
 for the workflow and [reading the migration report](docs/user/REPORTS.md#saved-assessment)

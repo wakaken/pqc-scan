@@ -7,6 +7,15 @@ For the browser workflow, start with the [illustrated scan and migration steps](
 Use `assess` to read saved findings and reassess them offline with purpose and usage information.
 It does not rescan source or contact endpoints.
 
+## Saving and reassessing in the browser
+
+Use **Save input (JSON)** and check retrieval status, then confirm `migration-context.json` in your browser’s download location.
+This differs from the assessment-data JSON.
+For reassessment, load it with the same original findings.
+Normally evaluate at the current time when preparing items; choose a specific time for a past situation.
+The page warns when an assertion is later than that time and will not apply then.
+Omitting expiry still leaves validity unknown.
+
 ## What the targets mean
 
 Each target identifies an observation and a fixed technical role in the exact

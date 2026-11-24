@@ -686,14 +686,15 @@
       openReport.textContent = t(openReport.dataset.ja, openReport.dataset.en);
       tools.append(openReport);
       if (result.context) {
-        const contextLink = document.createElement("a");
-        contextLink.className = "btn";
-        contextLink.href = `reports/${id}/migration-context.json`;
-        contextLink.download = "migration-context.json";
+        const contextStatus = textNode("p", "", "small");
+        contextStatus.setAttribute("role", "status");
+        contextStatus.hidden = true;
+        const contextLink = button(t("入力内容を保存（JSON）", "Save input (JSON)"),
+          () => saveInput(contextLink, contextStatus, `reports/${id}/migration-context.json`), "btn");
         contextLink.dataset.ja = "入力内容を保存（JSON）";
         contextLink.dataset.en = "Save input (JSON)";
         contextLink.textContent = t("入力内容を保存（JSON）", "Save input (JSON)");
-        tools.append(contextLink);
+        tools.append(contextLink, contextStatus);
       }
       const body = document.createElement("div");
       body.className = "migration";
@@ -713,6 +714,102 @@
     }
 
     $("as-of").value = japanNow(true);
+    function evaluationTime() {
+      if ($("evaluation-mode").value === "now") $("as-of").value = japanNow(true);
+      return PqcContext.timestamp($("as-of").value);
+    }
+    function updateTimeWarning() {
+      const warning = $("evaluation-time-warning");
+      const importing = $("context-mode").value === "import_context";
+      const local = importing ? [] : [$("asserted-at").value];
+      for (const group of importing ? [] : groups) {
+        if (group.ids.some(id => !group.exceptions.has(id))) local.push(group.common.values["asserted-at"]);
+        for (const snapshot of group.exceptions.values()) local.push(snapshot.values["asserted-at"]);
+      }
+      const times = [];
+      for (const value of local) {
+        try { if (value) times.push(Date.parse(PqcContext.timestamp(value))); } catch {}
+      }
+      if (importing && imported) {
+        try {
+          const pending = [JSON.parse(imported)];
+          while (pending.length) {
+            const value = pending.pop();
+            if (value && typeof value === "object") {
+              if (value.provenance?.asserted_at) times.push(Date.parse(value.provenance.asserted_at));
+              for (const item of Object.values(value)) pending.push(item);
+            }
+          }
+        } catch {} // Invalid imports are explained by the existing validator.
+      }
+      const raw = $("evaluation-mode").value === "now" ? japanNow(true) : $("as-of").value;
+      let at = NaN;
+      try { at = Date.parse(PqcContext.timestamp(raw)); } catch {}
+      warning.hidden = !times.some(time => time > at);
+      warning.textContent = t(
+        "申告日時が評価日時より後の情報は、今回の評価には使われません。申告日時を確認するか、評価する時点を変更してください。",
+        "Declarations later than the evaluation time are not used in this assessment. Check the assertion time or change when to evaluate.",
+      );
+      const inline = $("assertion-time-warning");
+      let draftTime = NaN;
+      try { draftTime = Date.parse(PqcContext.timestamp($("asserted-at").value)); } catch {}
+      inline.hidden = importing || !(draftTime > at);
+      inline.textContent = warning.textContent;
+    }
+    function updateEvaluationTime() {
+      const automatic = $("evaluation-mode").value === "now";
+      $("evaluation-fixed").hidden = automatic;
+      $("as-of").disabled = loading || automatic;
+      $("evaluation-time-hint").textContent = automatic
+        ? t("確認事項を作成する時点の時刻で評価します。過去の状況を確認する場合は「日時を指定」を選んでください。",
+            "Evaluate at the time you prepare the review items. Choose a specific time to review a past situation.")
+        : t("指定した日時を保持して評価します。検出情報の収集日時以降を指定してください。申告日時と有効期限が、この時点で使える情報かを確認します。日時は日本時間です。",
+            "Keep the specified time for evaluation, at or after collection of the detection data. Assertion times and expiry determine which declarations apply then. Enter Japan time.");
+      updateTimeWarning();
+    }
+    async function saveInput(control, status, route) {
+      if (control.disabled) return;
+      const v = version, navigation = navigationSequence, report = mountedReport;
+      const current = () => version === v && navigationSequence === navigation &&
+        mountedReport === report && reportPanel.contains(control);
+      const say = (ja, en) => {
+        status.hidden = false;
+        status.dataset.ja = ja;
+        status.dataset.en = en;
+        status.textContent = t(ja, en);
+      };
+      control.disabled = true;
+      say("入力内容を取得しています…", "Retrieving input…");
+      const abort = new AbortController();
+      const timeout = setTimeout(() => abort.abort(), 15000);
+      try {
+        const response = await fetch(route, {signal: abort.signal});
+        if (!response.ok || response.headers.get("content-type")?.split(";")[0] !== "application/json")
+          throw new Error("context_unavailable");
+        const blob = await response.blob();
+        if (blob.size > 1024 * 1024) throw new Error("resource_limit");
+        const data = JSON.parse(await blob.text());
+        if (data.format !== "pqc-scan.migration-context" || data.version !== 1)
+          throw new Error("invalid_context");
+        if (!current()) return;
+        const url = URL.createObjectURL(blob), link = document.createElement("a");
+        link.href = url;
+        link.download = "migration-context.json";
+        document.body.append(link);
+        try { link.click(); } finally {
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        }
+        say("保存を開始しました。ブラウザの保存先を確認してください。",
+          "Download started. Check your browser's download location.");
+      } catch {
+        if (current()) say("入力内容を保存できません。現在の結果で、もう一度お試しください。",
+          "Cannot save the input. Try again from the current result.");
+      } finally {
+        clearTimeout(timeout);
+        control.disabled = false;
+      }
+    }
     function textNode(tag, text, className = "") {
       const n = document.createElement(tag);
       n.textContent = text;
@@ -942,6 +1039,7 @@
         hasActiveKnownSupport() && supportBasis !== basisKey()
       );
       supportHadKnown = hasActiveKnownSupport();
+      updateTimeWarning();
     }
     function load(snapshot) {
       const s = snapshot || {
@@ -1418,6 +1516,7 @@
     });
     form.addEventListener("input", (e) => {
       resetConfirmation();
+      updateTimeWarning();
       if (e.target.id === "candidate-custom") {
         syncParameters();
         updateQuestions();
@@ -1441,6 +1540,7 @@
     });
     $("assertion-now").addEventListener("click", () => {
       $("asserted-at").value = japanNow();
+      updateTimeWarning();
       resetConfirmation();
       stash();
     });
@@ -1452,7 +1552,14 @@
       resetConfirmation();
       stash();
     });
-    $("as-of").addEventListener("input", resetConfirmation);
+    $("evaluation-mode").addEventListener("change", () => {
+      resetConfirmation();
+      updateEvaluationTime();
+    });
+    $("as-of").addEventListener("input", () => {
+      resetConfirmation();
+      updateTimeWarning();
+    });
     $("restore-common").addEventListener("click", () => {
       store.restore(groupId, individualId);
       drafts.delete(draftKey());
@@ -1735,6 +1842,8 @@
       $("target-search").value = "";
       $("role-filter").value = "";
       $("as-of").value = japanNow(true);
+      $("evaluation-mode").value = "now";
+      updateEvaluationTime();
       renderSource();
       load(null);
       generationProgress({phase:"loading"});
@@ -1843,7 +1952,7 @@
     function requestBody(without) {
       const common = {
         input_sha256: input.sha256,
-        as_of: PqcContext.timestamp($("as-of").value),
+        as_of: evaluationTime(),
       };
       if (without) return { mode: "without_context", ...common };
       if ($("context-mode").value === "import_context") {
@@ -2086,7 +2195,9 @@
       message("", "");
       resetConfirmation();
       stash();
-      if (!$("as-of").value)
+      if ($("evaluation-mode").value === "now") $("as-of").value = japanNow(true);
+      updateTimeWarning();
+      if (!$("as-of").value || !$("as-of").validity.valid)
         return fail(
           t("評価日時を入力してください。", "Enter an evaluation time."),
           $("as-of"),
@@ -2167,10 +2278,12 @@
       cancelScope();
       $("context-import").hidden = !importing;
       $("generated-editor").hidden = importing;
+      updateTimeWarning();
     });
     $("context-file").addEventListener("change", async () => {
       invalidate();
       imported = null;
+      updateTimeWarning();
       const file = $("context-file").files[0],
         v = version;
       if (!file) return;
@@ -2185,6 +2298,7 @@
           fatal: true,
           ignoreBOM: true,
         }).decode(bytes);
+        updateTimeWarning();
       } catch (e) {
         reportError(e);
       }
@@ -2195,6 +2309,7 @@
       $("context-import").hidden = $("context-mode").value !== "import_context";
     });
     localize = () => {
+      updateEvaluationTime();
       progressPanel.setAttribute("aria-label", t("確認事項を準備しています", "Preparing review items"));
       closeRecords.setAttribute("aria-label", t("閉じる", "Close"));
       generationBar.setAttribute(

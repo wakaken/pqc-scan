@@ -26,15 +26,19 @@
     <label><input type="radio" name="context-input-method" value="import_context" /><span data-ja="保存した入力内容を使う" data-en="Use saved input">保存した入力内容を使う</span></label>
   </fieldset>
   <div class="global-as-of">
-    <label class="field"
-      ><span
-        ><span
-          data-ja="評価日時"
-          data-en="Evaluation time"
-          >評価日時</span
-        ></span
-      ><input id="as-of" type="datetime-local" step="1"
-    /></label>
+    <label class="field">
+      <span data-ja="評価する時点" data-en="When to evaluate">評価する時点</span>
+      <select id="evaluation-mode" aria-describedby="evaluation-time-hint">
+        <option value="now" data-ja="作成時の現在時刻（通常）" data-en="Current time when preparing items (default)">作成時の現在時刻（通常）</option>
+        <option value="fixed" data-ja="日時を指定" data-en="Choose a specific time">日時を指定</option>
+      </select>
+    </label>
+    <label class="field" id="evaluation-fixed" hidden>
+      <span data-ja="評価日時（日本時間）" data-en="Evaluation time (Japan time)">評価日時（日本時間）</span>
+      <input id="as-of" type="datetime-local" step="1" aria-describedby="evaluation-time-hint evaluation-time-warning" />
+    </label>
+    <p class="hint" id="evaluation-time-hint"></p>
+    <p class="answer-help" id="evaluation-time-warning" role="status" hidden></p>
   </div>
   <input id="context-mode" type="hidden" value="generate" />
   <p class="hint" data-ja="範囲・用途・利用状況を入力します。方式・設定・対応状況は後から追加できます。" data-en="Choose a scope, then enter purpose and usage. Add a candidate, configuration and support details when available.">範囲・用途・利用状況を入力します。方式・設定・対応状況は後から追加できます。</p>
@@ -977,7 +981,7 @@
                 ></label
               >
               <div class="date-with-action">
-                <input id="asserted-at" type="datetime-local" step="1" /><button
+                <input id="asserted-at" type="datetime-local" step="1" aria-describedby="assertion-time-warning" /><button
                   type="button"
                   id="assertion-now"
                   class="btn small-btn"
@@ -988,6 +992,7 @@
                 </button>
               </div>
             </div>
+            <p class="hint" id="assertion-time-warning" hidden></p>
             <p class="hint" data-ja="期限を指定しない場合、用途や対応状況などの申告は、有効性を確認できない情報として評価されます。" data-en="Without an expiry, purpose and support declarations are assessed with unknown validity.">期限を指定しない場合、用途や対応状況などの申告は、有効性を確認できない情報として評価されます。</p><details class="expiry-options"><summary data-ja="情報を評価に使う期限（省略すると有効性不明）" data-en="Declaration expiry (omitting it leaves validity unknown)">情報を評価に使う期限（省略すると有効性不明）</summary>
             <label class="field"
               ><span

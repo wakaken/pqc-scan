@@ -1,3 +1,16 @@
+# Context-input screenshots — 2026-11-24
+
+The illustrated scanning guides now use `web-04-purpose-clock-*`,
+`web-05-validity-clock-*` and `web-08-save-status-*`, plus
+`web-evaluation-time-*` for the fixed-time warning. These are fresh Chrome
+captures of the same public Python example and six selected source records.
+The default creation-time evaluation, explicit historical time and JSON saving
+status are visible in the corresponding steps.
+[CAPTURES-context-20261124.json](v0.4/CAPTURES-context-20261124.json) records
+source assets, reviewed patch, binary, inputs, demonstration dates and image hashes.
+The screenshots are unedited and use actual focus/scroll positions at the existing
+browser viewport. Earlier images and their metadata below remain unchanged.
+
 # Current v0.4 screenshots — 2026-11-23
 
 The current README and illustrated user guides use the unedited captures under

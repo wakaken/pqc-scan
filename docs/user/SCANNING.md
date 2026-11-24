@@ -236,15 +236,19 @@ Choose **New input** and check the exact records covered by your answer. This ex
 
 Answer only what you know. **Unanswered** means no claim; **Unknown** explicitly records uncertainty. Personal/organization mode changes input guidance, not urgency. Add candidate settings, support or sourced deadlines when relevant.
 
-![Enter scope, purpose and usage](../images/v0.4/web-04-purpose-en.jpg)
+![Enter scope, purpose and usage](../images/v0.4/web-04-purpose-clock-en.jpg)
 
 #### 5. Check assertion dates and prepare the report
 
 Answers need an actor alias and assertion time. Expand the claim-expiry details to enter how long that information remains valid. `sample-owner` and the dates shown are demonstration values; use the actual reviewer and confirmation/expiry dates.
 
-Omitting expiry leaves validity unknown. This expiry is separate from migration deadline and goal month. Check **Evaluation time** near the top, then **Next** to apply the input and generate the report. Opening **Response work items** alone does not generate it; use **Prepare review items** in that view.
+Omitting expiry leaves validity unknown. This expiry is separate from migration deadline and goal month. Normally leave **When to evaluate** at **Current time when preparing items**. For a past situation, choose **a specific time** and enter Japan time, at or after collection of the detection data. The page warns about assertions later than the selected evaluation time; they will not apply then. Choose **Next** to apply the input and generate the report. Opening **Response work items** alone does not generate it; use **Prepare review items** in that view.
 
-![Check assertion dates and prepare the report](../images/v0.4/web-05-validity-en.jpg)
+![Check assertion dates and prepare the report](../images/v0.4/web-05-validity-clock-en.jpg)
+
+This example shows the warning when a declaration is later than a chosen evaluation time. Return to current-time evaluation for normal use.
+
+![Evaluation time and declaration warning](../images/v0.4/web-evaluation-time-en.jpg)
 
 #### 6. Read migration decisions
 
@@ -264,13 +268,15 @@ When the same local job has the original scan report, **Open scan finding** link
 
 #### 8. Save reports and reusable input
 
+**Save input (JSON)** shows retrieval status and explains failures. After download starts, check your browser’s download location for `migration-context.json`. Retry from the current result if retrieval fails.
+
 At the top, **Save report (HTML)** saves the readable report and **Save input (JSON)** saves reusable context declarations. **Save assessment data** at the bottom saves the complete evaluation, not reusable context.
 
 For reassessment, retain the same job’s `scan.inventory.v1.json` alongside context. The original input remains in a per-job subdirectory under the private `pqc-scan-web-*` directory printed in the terminal. Choose **Load saved results** for that inventory, then **Use saved input** on the context screen for its matching context. Review evaluation time and prepare the report again. Preserve original inventory bytes: even reformatting changes its binding.
 
 After **Edit use**, regenerate and save fresh HTML/input JSON. Stop the server with **Ctrl+C** in the terminal.
 
-![Save reports and reusable input](../images/v0.4/web-08-save-en.jpg)
+![Save reports and reusable input](../images/v0.4/web-08-save-status-en.jpg)
 
 #### Input, saving and reassessment details
 
@@ -318,7 +324,7 @@ establish implementation correctness, protocol compatibility or verified deploym
 
 Answers require an actor alias and assertion time. Inputs use Japan time (UTC+09:00)
 and serialize whole seconds with an explicit offset; reviews show Japan time as well.
-The current-time button is explicit, and expiry is optional and never generated.
+The assertion-time **Current time** button records when the information was confirmed. Evaluation normally uses the current time when review items are prepared. Choosing a specific evaluation time preserves that value, with a warning when an assertion postdates it. Expiry is optional and never generated.
 Without expiry, freshness is unknown. Enter migration duration in years and months
 with an explicit calendar anchor in Japan time. The UI adds the months to that date,
 clamps month ends to the destination month and shows the exact day/second conversion.
