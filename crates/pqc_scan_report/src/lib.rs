@@ -1,5 +1,6 @@
 mod compact;
 pub mod cyclonedx;
+mod deduplicated;
 pub use cyclonedx::write_cyclonedx_17;
 mod file_tree;
 mod grouping;
@@ -11,6 +12,33 @@ pub use probe_report::write_probe_reports;
 mod japanese;
 mod json_report;
 mod markdown_report;
+mod migration_copy;
+mod migration_html;
+mod migration_view;
+pub use migration_html::{migration_html_bytes, MIGRATION_HTML};
+pub use migration_view::{
+    migration_location, migration_location_label, migration_overview, migration_scope_key,
+};
+/// Identical offline/served report renderer; contains no policy engine.
+pub fn migration_view_script() -> &'static str {
+    include_str!("migration.js")
+}
+pub fn migration_view_styles() -> &'static str {
+    include_str!("migration.css")
+}
+/// Share saved-role terminology with optional local workflow selectors.
+pub fn migration_role_label(role: &str, language: ReportLanguage) -> &str {
+    migration_copy::Labels(language).token(role)
+}
+mod migration_markdown;
+mod migration_report;
+pub use migration_markdown::{migration_markdown_bytes, MIGRATION_MARKDOWN};
+pub use migration_report::{
+    migration_json_bytes, write_migration_assessment_json, write_migration_assessment_reports,
+    write_migration_assessment_reports_with_label_and_progress,
+    write_migration_assessment_reports_with_progress, MigrationReportProgress,
+    MAX_MIGRATION_REPORT_BYTES, MIGRATION_JSON,
+};
 mod sarif_report;
 
 use std::path::{Path, PathBuf};

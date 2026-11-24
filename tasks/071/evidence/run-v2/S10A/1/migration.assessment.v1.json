@@ -1,0 +1,221 @@
+{
+  "format": "pqc-scan.migration-assessment",
+  "version": 1,
+  "input": {
+    "format": "inventory-v1",
+    "sha256": "6e6e6678cbe9436825c3d6b5d4f1e7d50840d53c2b23cb469f3221954b38582c",
+    "schema_version": 1,
+    "collection_time": "2026-11-01T00:00:00Z",
+    "run_id": "scan-v1-fa4c756fc31dcc3f79b452499f25e948e4b32e9e775446534aff34c903559495"
+  },
+  "context": {
+    "format": "pqc-scan.migration-context",
+    "version": 1,
+    "sha256": "f90f0566efde96277474d9bb6598724bf21357334bb096c1cb9ef680c93ac0a1"
+  },
+  "catalog": {
+    "id": "migration-facts-v1",
+    "version": "1.0.0"
+  },
+  "policy": {
+    "id": "migration-decision-v1",
+    "version": "1.0.0"
+  },
+  "model": {
+    "id": "decision_table",
+    "version": "1.0.0"
+  },
+  "as_of": "2026-11-19T00:00:00Z",
+  "targets": [
+    {
+      "id": "migration_target-v1-31fc2a82e51ce9ca6b3f08375a4a6a8a08e4cd7921366254be1448998710750b",
+      "source_ref": {
+        "run_id": "scan-v1-fa4c756fc31dcc3f79b452499f25e948e4b32e9e775446534aff34c903559495",
+        "observation_id": "observation-v1-01531ad9e868377c36ae8ce3a28eb891528b3f0a5f87f3c4e9a547dafc6db8c3",
+        "root_asset_id": "asset-v1-209bcfbf231090362586c6f48d3f13ef44a88d13f1158f9e6235c9e7415ff5e0",
+        "role": "algorithm",
+        "path": "S10A/captured-record.txt",
+        "line": 1
+      },
+      "technical": {
+        "identifier": "SLH-DSA-SHA2-128s",
+        "construction": "post_quantum",
+        "standardization": "nist_final",
+        "quantum": "designed_resistant",
+        "purpose": "signature",
+        "parameters_known": true,
+        "classical_concerns": [],
+        "attack_models": [],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "F12",
+          "LOCAL026",
+          "S205"
+        ],
+        "encoding_assurance": "unknown",
+        "protocol_ref": null,
+        "role": "algorithm"
+      },
+      "observation": {
+        "method": "ast_pattern",
+        "assurance": "syntactic",
+        "usage": "referenced",
+        "collection_outcome": "complete"
+      },
+      "limitations": [
+        "unknown_parameter_encoding"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "migration_claim-v1-25d8f3679ba9f385e42f9798eef80f45cd69d74422fa1df4a84c0b432beecc03",
+      "context_pointer": "/bindings/0/claims/signature_verification_until",
+      "field": "signature_verification_until",
+      "state": "known",
+      "value": "2040-11-01T00:00:00Z",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-4c96d636611fb4dbae5875dd1d889b7f2e7fafd6ea07b0572381eed053840951",
+      "context_pointer": "/bindings/0/claims/usage_state",
+      "field": "usage_state",
+      "state": "known",
+      "value": "active",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-67094a1f39668b1ff5d519e6cee3bd54b09f447ee8f299091cfe0b5389171791",
+      "context_pointer": "/bindings/0/claims/applicability",
+      "field": "applicability",
+      "state": "known",
+      "value": "applicable",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-b255aacaf03c66f49a6ba826be6c878411f51c19b84a0db305b3607cc8beed63",
+      "context_pointer": "/bindings/0/claims/use_case",
+      "field": "use_case",
+      "state": "known",
+      "value": "signature",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    }
+  ],
+  "candidates": [],
+  "decisions": [
+    {
+      "id": "migration_decision-v1-70f68a28cf67af3cc1c94f979b2abcefb2158e3db893d4e8ecfcd7ea8ab23a25",
+      "target_id": "migration_target-v1-31fc2a82e51ce9ca6b3f08375a4a6a8a08e4cd7921366254be1448998710750b",
+      "system_id": "f10",
+      "urgency": "monitor",
+      "information": "sufficient",
+      "readiness": "not_applicable",
+      "reason_codes": [
+        "bounded_role_no_known_concern",
+        "unknown_parameter_encoding"
+      ],
+      "missing_inputs": [],
+      "applied_claim_ids": [
+        "migration_claim-v1-25d8f3679ba9f385e42f9798eef80f45cd69d74422fa1df4a84c0b432beecc03",
+        "migration_claim-v1-4c96d636611fb4dbae5875dd1d889b7f2e7fafd6ea07b0572381eed053840951",
+        "migration_claim-v1-67094a1f39668b1ff5d519e6cee3bd54b09f447ee8f299091cfe0b5389171791",
+        "migration_claim-v1-b255aacaf03c66f49a6ba826be6c878411f51c19b84a0db305b3607cc8beed63"
+      ],
+      "action": {
+        "kind": "monitor",
+        "candidate_ids": [],
+        "blocking_prerequisites": [],
+        "validation_steps": []
+      },
+      "source_ids": [
+        "F12",
+        "F13",
+        "F14",
+        "LOCAL026",
+        "S205"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "F12",
+      "edition": "task066 adopted contract 2026-11-18",
+      "clause": "technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "saved claims preserve assurance; digest does not attest collector truth"
+    },
+    {
+      "id": "F13",
+      "edition": "task066 adopted time contract 2026-11-18",
+      "clause": "time and policy semantics; FACT-SOURCE-MAPPING F13",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "scoped declared lifetimes/deadlines; no quantum forecast or universal deadline"
+    },
+    {
+      "id": "F14",
+      "edition": "migration-decision-v1 1.0.0; adopted 2026-11-18",
+      "clause": "P1-P8; readiness and action precedence",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "local advisory policy; conformance is not practitioner usefulness"
+    },
+    {
+      "id": "LOCAL026",
+      "edition": "local-assessment-1",
+      "clause": "finite vocabulary and evidence limits",
+      "uri": null,
+      "local_source_id": "docs/architecture/LOCAL-ASSESSMENT-V1.md",
+      "scope_limit": "advisory facts; no deployment or cryptographic verification"
+    },
+    {
+      "id": "S205",
+      "edition": "FIPS205 Final 2024-08-13",
+      "clause": "10.2.1; 10.2.2; 11 Table2",
+      "uri": "https://csrc.nist.gov/pubs/fips/205/final",
+      "local_source_id": null,
+      "scope_limit": "exact pure signature names/purpose only"
+    }
+  ],
+  "coverage": {
+    "collection_outcome": "complete",
+    "input_count": 1,
+    "target_count": 1,
+    "unknown_identity_or_parameters_targets": 0,
+    "unresolved_target_count": 0,
+    "limits": [
+      "inventory_not_exhaustive"
+    ]
+  },
+  "limitations": [
+    "saved_content_not_collector_attestation",
+    "no_offline_cryptographic_reverification",
+    "local_advisory_policy_not_practitioner_validation"
+  ]
+}

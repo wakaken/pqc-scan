@@ -16,6 +16,56 @@ pub struct AlgorithmSpec {
 impl AlgorithmSpec {
     /// Exact recognized vocabulary only. No arbitrary scanned identifier is retained.
     pub fn recognized(raw: &str) -> Option<Self> {
+        // Normalize into the existing primitive catalog without changing its
+        // meaning for a held input. JOSE spelling remains at the source span.
+        if let Some((identifier, parameters)) = match raw {
+            "ES384" => Some((
+                "ECDSA",
+                BTreeMap::from([
+                    ("key_bits".into(), "384".into()),
+                    ("named_curve_oid".into(), "1.3.132.0.34".into()),
+                ]),
+            )),
+            "ES512" => Some((
+                "ECDSA",
+                BTreeMap::from([
+                    ("key_bits".into(), "521".into()),
+                    ("named_curve_oid".into(), "1.3.132.0.35".into()),
+                ]),
+            )),
+            // EC is a conservative public-key family, not an ECDSA/Ed25519
+            // assertion. Neither the curve nor its parameters are inferred.
+            "EdDSA" => Some(("EC", BTreeMap::new())),
+            _ => None,
+        } {
+            return Some(Self {
+                namespace: "named".into(),
+                identifier: identifier.into(),
+                purpose: "reference".into(),
+                parameters,
+            });
+        }
+        // OpenSSL names describe a referenced cipher, never an effective runtime
+        // configuration. Preserve its mode without inventing a key value.
+        if let Some((bits, mode)) = match raw {
+            "aes-128-gcm" | "AES-128-GCM" => Some((128, "GCM")),
+            "aes-192-gcm" | "AES-192-GCM" => Some((192, "GCM")),
+            "aes-256-gcm" | "AES-256-GCM" => Some((256, "GCM")),
+            "aes-128-cbc" | "AES-128-CBC" => Some((128, "CBC")),
+            "aes-192-cbc" | "AES-192-CBC" => Some((192, "CBC")),
+            "aes-256-cbc" | "AES-256-CBC" => Some((256, "CBC")),
+            _ => None,
+        } {
+            return Some(Self {
+                namespace: "named".into(),
+                identifier: format!("AES-{bits}"),
+                purpose: "reference".into(),
+                parameters: BTreeMap::from([
+                    ("key_bits".into(), bits.to_string()),
+                    ("mode".into(), mode.into()),
+                ]),
+            });
+        }
         let canonical = match raw {
             "ml-kem-512" | "ML-KEM-512" => "ML-KEM-512",
             "ml-kem-768" | "ML-KEM-768" | "MlKem768" | "MLKEM768PrivateKey" => "ML-KEM-768",
@@ -26,6 +76,8 @@ impl AlgorithmSpec {
             "ML-DSA-65" | "ml-dsa-65" | "MLDSA65PrivateKey" => "ML-DSA-65",
             "ML-DSA-87" | "ml-dsa-87" | "MLDSA87PrivateKey" => "ML-DSA-87",
             "SLH-DSA" | "slh_dsa" => "SLH-DSA",
+            "rsa" => "RSA",
+            "ed25519" | "Ed25519PrivateKey" | "Ed25519PublicKey" => "Ed25519",
             "RSA" | "RS256" | "RS384" | "RS512" | "ES256" | "Ed25519" => raw,
             "Kyber512"
             | "Kyber768"
@@ -445,6 +497,25 @@ pub struct ObservationDraft {
     pub(crate) bindings: Vec<LegacyBinding>,
 }
 impl ObservationDraft {
+    /// Add bounded, allowlisted algorithm references resolved from source. These
+    /// remain syntactic references; callers cannot promote them to active usage.
+    pub fn with_algorithm_references(mut self, names: &[String]) -> Self {
+        if self.method != "ast_pattern"
+            || self.assurance != "syntactic"
+            || self.usage != "referenced"
+        {
+            return self;
+        }
+        self.algorithms.extend(
+            names
+                .iter()
+                .take(16)
+                .filter_map(|n| AlgorithmSpec::recognized(n)),
+        );
+        self.algorithms.sort_by_key(AlgorithmSpec::key);
+        self.algorithms.dedup();
+        self
+    }
     pub fn source(
         d: &Detection,
         method: ObservationMethod,

@@ -1,0 +1,240 @@
+{
+  "format": "pqc-scan.migration-assessment",
+  "version": 1,
+  "input": {
+    "format": "inventory-v1",
+    "sha256": "d0b08ab55e55d8f5a3b893e9b6d2a7f4c15f8fcafe590c6b5c94d4a5a50db7a2",
+    "schema_version": 1,
+    "collection_time": "2026-11-01T00:00:00Z",
+    "run_id": "scan-v1-ae061749dfedf9de01db4eb16ebbf96365f0d969acf6ead8ecf19ba73dfdf300"
+  },
+  "context": {
+    "format": "pqc-scan.migration-context",
+    "version": 1,
+    "sha256": "778dcc0b2ef4747b7fa9c6d0e701a42d5d7f00050029fc1093360a5cf4f45953"
+  },
+  "catalog": {
+    "id": "migration-facts-v1",
+    "version": "1.0.0"
+  },
+  "policy": {
+    "id": "migration-decision-v1",
+    "version": "1.0.0"
+  },
+  "model": {
+    "id": "decision_table",
+    "version": "1.0.0"
+  },
+  "as_of": "2026-11-19T00:00:00Z",
+  "targets": [
+    {
+      "id": "migration_target-v1-b7c403dac1ab7eecc09e6c048d95ef4265b7329afd4dd415e01cdaa993898f41",
+      "source_ref": {
+        "run_id": "scan-v1-ae061749dfedf9de01db4eb16ebbf96365f0d969acf6ead8ecf19ba73dfdf300",
+        "observation_id": "observation-v1-3fb1f187f19a6d820342dbae3aceb6635ac20b1399eafa2fb44d6b388fe593d8",
+        "root_asset_id": "asset-v1-328c0afd671f8cf092e9528ec0877d5c55222e38ed797654797b266aad3fd41e",
+        "role": "algorithm",
+        "path": "S06A/captured-record.txt",
+        "line": 1
+      },
+      "technical": {
+        "identifier": "MD5",
+        "construction": "hash",
+        "standardization": "classical_standard",
+        "quantum": "generic_search",
+        "purpose": "hash",
+        "parameters_known": true,
+        "classical_concerns": [
+          "weak_collision_resistance"
+        ],
+        "attack_models": [
+          {
+            "attack": "generic_preimage",
+            "exponent_numerator": 128,
+            "exponent_denominator": 2,
+            "assumption": "ideal_oracle_queries_not_operational_security_bits; memory_parallelism_and_circuit_cost_not_estimated"
+          },
+          {
+            "attack": "generic_collision",
+            "exponent_numerator": 128,
+            "exponent_denominator": 3,
+            "assumption": "ideal_oracle_queries_not_operational_security_bits; memory_parallelism_and_circuit_cost_not_estimated"
+          }
+        ],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "BHT1997",
+          "F12",
+          "LOCAL026",
+          "NIST-PQ-FAQ",
+          "R6151"
+        ],
+        "encoding_assurance": "unknown",
+        "protocol_ref": null,
+        "role": "algorithm"
+      },
+      "observation": {
+        "method": "ast_pattern",
+        "assurance": "syntactic",
+        "usage": "referenced",
+        "collection_outcome": "complete"
+      },
+      "limitations": [
+        "unknown_parameter_encoding"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "migration_claim-v1-00fc71452742a6e5df4449617fd9debd86a0e380e9fa73fdebaee563646c7c1f",
+      "context_pointer": "/bindings/0/claims/use_case",
+      "field": "use_case",
+      "state": "known",
+      "value": "hashing",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-467f24eb80f5d639ec44f117be62f5f403e4cfaceb257061b7e80ccf099458c3",
+      "context_pointer": "/bindings/0/claims/applicability",
+      "field": "applicability",
+      "state": "known",
+      "value": "applicable",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-46a9e1160b7e092aefa15ed5145753690bb3885b064a769d740c30a78a2941ef",
+      "context_pointer": "/bindings/0/claims/usage_state",
+      "field": "usage_state",
+      "state": "known",
+      "value": "active",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    }
+  ],
+  "candidates": [],
+  "decisions": [
+    {
+      "id": "migration_decision-v1-de6b08d7c5f7eb5ab86794b72c4bdfbc30cb2655c55ad10793971c9739e3d43e",
+      "target_id": "migration_target-v1-b7c403dac1ab7eecc09e6c048d95ef4265b7329afd4dd415e01cdaa993898f41",
+      "system_id": "f06",
+      "urgency": "undetermined",
+      "information": "incomplete",
+      "readiness": "unknown",
+      "reason_codes": [
+        "insufficient_information",
+        "unknown_parameter_encoding"
+      ],
+      "missing_inputs": [
+        "support.parameters",
+        "support.provider",
+        "support.runtime",
+        "technical.collision_sensitive_use"
+      ],
+      "applied_claim_ids": [
+        "migration_claim-v1-00fc71452742a6e5df4449617fd9debd86a0e380e9fa73fdebaee563646c7c1f",
+        "migration_claim-v1-467f24eb80f5d639ec44f117be62f5f403e4cfaceb257061b7e80ccf099458c3",
+        "migration_claim-v1-46a9e1160b7e092aefa15ed5145753690bb3885b064a769d740c30a78a2941ef"
+      ],
+      "action": {
+        "kind": "investigate",
+        "candidate_ids": [],
+        "blocking_prerequisites": [],
+        "validation_steps": [
+          "confirm_actual_use_and_required_purpose",
+          "refresh_missing_or_stale_scoped_claims"
+        ]
+      },
+      "source_ids": [
+        "BHT1997",
+        "F12",
+        "F14",
+        "LOCAL026",
+        "NIST-PQ-FAQ",
+        "R6151"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "BHT1997",
+      "edition": "1997",
+      "clause": "ideal quantum collision-query model",
+      "uri": "https://arxiv.org/abs/quant-ph/9705002",
+      "local_source_id": null,
+      "scope_limit": "oracle queries only; circuit and memory cost excluded"
+    },
+    {
+      "id": "F12",
+      "edition": "task066 adopted contract 2026-11-18",
+      "clause": "technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "saved claims preserve assurance; digest does not attest collector truth"
+    },
+    {
+      "id": "F14",
+      "edition": "migration-decision-v1 1.0.0; adopted 2026-11-18",
+      "clause": "P1-P8; readiness and action precedence",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "local advisory policy; conformance is not practitioner usefulness"
+    },
+    {
+      "id": "LOCAL026",
+      "edition": "local-assessment-1",
+      "clause": "finite vocabulary and evidence limits",
+      "uri": null,
+      "local_source_id": "docs/architecture/LOCAL-ASSESSMENT-V1.md",
+      "scope_limit": "advisory facts; no deployment or cryptographic verification"
+    },
+    {
+      "id": "NIST-PQ-FAQ",
+      "edition": "task056 pinned FAQ snapshot",
+      "clause": "quantum public-key and generic-search models",
+      "uri": "https://csrc.nist.gov/projects/post-quantum-cryptography/faqs",
+      "local_source_id": null,
+      "scope_limit": "not quantum arrival, probability or operational security bits"
+    },
+    {
+      "id": "R6151",
+      "edition": "RFC6151 2011",
+      "clause": "2",
+      "uri": "https://www.rfc-editor.org/rfc/rfc6151.html",
+      "local_source_id": null,
+      "scope_limit": "MD5 collision-sensitive use; not every hash use"
+    }
+  ],
+  "coverage": {
+    "collection_outcome": "complete",
+    "input_count": 1,
+    "target_count": 1,
+    "unknown_identity_or_parameters_targets": 0,
+    "unresolved_target_count": 0,
+    "limits": [
+      "inventory_not_exhaustive"
+    ]
+  },
+  "limitations": [
+    "saved_content_not_collector_attestation",
+    "no_offline_cryptographic_reverification",
+    "local_advisory_policy_not_practitioner_validation"
+  ]
+}

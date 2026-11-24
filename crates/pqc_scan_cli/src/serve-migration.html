@@ -1,0 +1,1097 @@
+<div class="migration-heading">
+  <h1>
+    <span data-ja="移行情報を入力" data-en="Enter migration context"
+      >移行情報を入力</span
+    >
+  </h1>
+  <a class="text-link" href="#review" id="skip-context"
+    ><span data-ja="入力せずに進む" data-en="Continue without context"
+      >入力せずに進む</span
+    ></a
+  >
+</div>
+<button class="btn small-btn" type="button" id="cancel-review" hidden>
+  <span data-ja="確認を取り消す" data-en="Cancel review">確認を取り消す</span>
+</button>
+<div class="migration-source">
+  <span class="mono" data-current-folder></span
+  ><a href="#" id="migration-back"
+    ><span data-ja="結果に戻る" data-en="Back to results">結果に戻る</span></a
+  >
+</div>
+<div class="import-controls">
+  <fieldset class="input-methods">
+    <legend><span data-ja="入力方法" data-en="Input method">入力方法</span></legend>
+    <label><input type="radio" name="context-input-method" value="generate" checked /><span data-ja="新しく入力する" data-en="New input">新しく入力する</span></label>
+    <label><input type="radio" name="context-input-method" value="import_context" /><span data-ja="保存した入力内容を使う" data-en="Use saved input">保存した入力内容を使う</span></label>
+  </fieldset>
+  <div class="global-as-of">
+    <label class="field">
+      <span data-ja="評価する時点" data-en="When to evaluate">評価する時点</span>
+      <select id="evaluation-mode" aria-describedby="evaluation-time-hint">
+        <option value="now" data-ja="作成時の現在時刻（通常）" data-en="Current time when preparing items (default)">作成時の現在時刻（通常）</option>
+        <option value="fixed" data-ja="日時を指定" data-en="Choose a specific time">日時を指定</option>
+      </select>
+    </label>
+    <label class="field" id="evaluation-fixed" hidden>
+      <span data-ja="評価日時（日本時間）" data-en="Evaluation time (Japan time)">評価日時（日本時間）</span>
+      <input id="as-of" type="datetime-local" step="1" aria-describedby="evaluation-time-hint evaluation-time-warning" />
+    </label>
+    <p class="hint" id="evaluation-time-hint"></p>
+    <p class="answer-help" id="evaluation-time-warning" role="status" hidden></p>
+  </div>
+  <input id="context-mode" type="hidden" value="generate" />
+  <p class="hint" data-ja="範囲・用途・利用状況を入力します。方式・設定・対応状況は後から追加できます。" data-en="Choose a scope, then enter purpose and usage. Add a candidate, configuration and support details when available.">範囲・用途・利用状況を入力します。方式・設定・対応状況は後から追加できます。</p>
+  <div id="context-import" hidden>
+    <label class="field"
+      ><span
+        ><span data-ja="保存した移行情報" data-en="Saved migration context"
+          >保存した移行情報</span
+        ></span
+      ><input id="context-file" type="file" accept=".json,application/json" aria-describedby="context-file-hint"
+    /></label>
+    <p class="hint" id="context-file-hint" data-ja="この画面から保存した migration-context.json（JSON、1 MiB以下）を選択してください。スキャン結果のJSONとは別のファイルです。" data-en="Choose migration-context.json saved from this screen (JSON, up to 1 MiB). This is separate from the saved scan inventory.">この画面から保存した migration-context.json（JSON、1 MiB以下）を選択してください。スキャン結果のJSONとは別のファイルです。</p>
+    <p class="small muted">
+      <span
+        data-ja="読み込んだ項目はすべて保持します。変更する場合は元のファイルを編集して読み込み直してください。"
+        data-en="All imported fields are preserved. To change them, edit and import the original file again."
+        >読み込んだ項目はすべて保持します。変更する場合は元のファイルを編集して読み込み直してください。</span
+      >
+    </p>
+    <button type="button" class="btn" id="import-review">
+      <span data-ja="次へ" data-en="Next"
+        >次へ</span
+      >
+    </button>
+  </div>
+</div>
+<p id="migration-status" role="status" aria-live="polite" tabindex="-1"></p>
+<div id="migration-editor">
+  <p id="form-error" class="form-error" role="alert" tabindex="-1" hidden></p>
+  <div id="generated-editor">
+    <form id="migration-form" novalidate>
+      <section class="panel migration-panel targets-panel">
+        <div class="section-title">
+          <h2>
+            <span data-ja="適用する対象" data-en="Targets in scope"
+              >適用する対象</span
+            >
+          </h2>
+          <span id="selection-count" class="small muted" role="status"
+            ><span data-ja="選択0件" data-en="0 selected">選択0件</span></span
+          >
+        </div>
+        <div class="target-tools">
+          <input
+            id="target-search"
+            type="search"
+            placeholder="方式・ファイル名で検索"
+            data-placeholder-ja="方式・ファイル名で検索"
+            data-placeholder-en="Search algorithms or filenames"
+            aria-label="方式・ファイル名で検索"
+            data-aria-label-ja="方式・ファイル名で検索"
+            data-aria-label-en="Search algorithms or filenames"
+          /><select
+            id="role-filter"
+            aria-label="役割で絞り込む"
+            data-aria-label-ja="役割で絞り込む"
+            data-aria-label-en="Filter by role"
+          >
+            <option value="" data-ja="すべての役割" data-en="All roles">
+              すべての役割
+            </option>
+            <option value="signature" data-ja="署名" data-en="Signature">
+              署名
+            </option>
+            <option
+              value="key_establishment"
+              data-ja="鍵の共有"
+              data-en="Key sharing"
+            >
+              鍵の共有
+            </option>
+            <option value="pki" data-ja="証明書" data-en="Certificates">
+              証明書
+            </option>
+            <option value="encryption" data-ja="暗号化" data-en="Encryption">
+              暗号化
+            </option>
+            <option value="hashing" data-ja="ハッシュ" data-en="Hashing">
+              ハッシュ
+            </option></select
+          ><button type="button" class="btn small-btn" id="clear-selection">
+            <span
+              data-ja="選択と入力をクリア"
+              data-en="Clear selection and draft"
+              >選択と入力をクリア</span
+            >
+          </button>
+        </div>
+        <div class="target-table-scroll">
+          <table class="target-table">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    id="select-page"
+                    aria-label="このページの未入力の対象をすべて選ぶ"
+                    data-aria-label-ja="このページの未入力の対象をすべて選ぶ"
+                    data-aria-label-en="Select all unassigned targets on this page"
+                  />
+                </th>
+                <th><span data-ja="方式" data-en="Algorithm">方式</span></th>
+                <th><span data-ja="役割" data-en="Role">役割</span></th>
+                <th><span data-ja="場所" data-en="Location">場所</span></th>
+                <th>
+                  <span data-ja="入力内容" data-en="Context">入力内容</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="target-rows"></tbody>
+          </table>
+        </div>
+        <div class="target-pagination">
+          <span id="target-range" class="small muted"></span>
+          <div>
+            <button type="button" id="targets-prev" class="btn small-btn">
+              <span data-ja="前へ" data-en="Previous">前へ</span></button
+            ><button type="button" id="targets-next" class="btn small-btn">
+              <span data-ja="次へ" data-en="Next">次へ</span>
+            </button>
+          </div>
+        </div>
+      </section>
+      <section class="panel migration-panel" id="groups-panel" hidden>
+        <div class="section-title">
+          <h2>
+            <span data-ja="入力済みの用途" data-en="Saved uses"
+              >入力済みの用途</span
+            >
+          </h2>
+          <button type="button" class="btn small-btn" id="new-group">
+            <span
+              data-ja="別の対象に入力"
+              data-en="Enter context for other targets"
+              >別の対象に入力</span
+            >
+          </button>
+        </div>
+        <div id="groups-list"></div>
+        <div class="groups-footer">
+          <span id="group-coverage" class="small muted"></span
+          ><button type="button" id="review-all" class="btn primary">
+            <span data-ja="レポートを見る" data-en="View report"
+              >レポートを見る</span
+            >
+          </button>
+        </div>
+      </section>
+      <div id="draft-editor" hidden>
+        <div class="draft-heading">
+          <h2 id="draft-title" tabindex="-1">
+            <span
+              data-ja="選択した対象にまとめて入力"
+              data-en="Enter shared context"
+              >選択した対象にまとめて入力</span
+            >
+          </h2>
+          <button
+            type="button"
+            id="restore-common"
+            class="btn small-btn"
+            hidden
+          >
+            <span data-ja="共通の内容に戻す" data-en="Restore shared context"
+              >共通の内容に戻す</span
+            >
+          </button>
+        </div>
+        <label class="field group-name" id="group-name-field"
+          ><span
+            ><span data-ja="用途名" data-en="Use name">用途名</span>
+            <span class="small muted"
+              ><span data-ja="任意" data-en="Optional">任意</span></span
+            ></span
+          ><input
+            id="group-name"
+            type="text"
+            maxlength="80"
+            placeholder="例：認証サービスの署名"
+            data-placeholder-ja="例：認証サービスの署名"
+            data-placeholder-en="e.g. Authentication service signatures"
+        /></label>
+        <p id="individual-note" class="small muted" hidden>
+          <span
+            data-ja="この対象だけを変更します。"
+            data-en="Changes apply only to this target."
+            >この対象だけを変更します。</span
+          >
+        </p>
+        <section class="panel migration-panel">
+          <div class="section-title">
+            <h2>
+              <span data-ja="用途・利用状況" data-en="Purpose and usage"
+                >用途・利用状況</span
+              >
+            </h2>
+            <fieldset class="audience-options">
+              <legend class="sr-only">
+                <span
+                  data-ja="利用場面（入力の案内のみ）"
+                  data-en="Project setting (guidance only)"
+                  >利用場面（入力の案内のみ）</span
+                >
+              </legend>
+              <label
+                ><input
+                  type="radio"
+                  name="audience"
+                  value="personal"
+                  checked
+                /><span data-ja="個人" data-en="Personal">個人</span></label
+              ><label
+                ><input
+                  type="radio"
+                  name="audience"
+                  value="organization"
+                /><span data-ja="組織" data-en="Organization">組織</span></label
+              >
+            </fieldset>
+          </div>
+          <div class="field-grid">
+            <label class="field"
+              ><span
+                ><span data-ja="検討の対象" data-en="Scope"
+                  >検討の対象</span
+                ></span
+              ><select
+                id="applicability"
+                name="applicability"
+                data-answer
+                data-label="検討の対象"
+              >
+                <option value="" data-ja="未入力" data-en="Unanswered">
+                  未入力
+                </option>
+                <option value="?" data-ja="分からない" data-en="Unknown">
+                  分からない
+                </option>
+                <option
+                  value="applicable"
+                  data-ja="対象に含める"
+                  data-en="In scope"
+                >
+                  対象に含める
+                </option>
+                <option
+                  value="not_applicable"
+                  data-ja="対象外"
+                  data-en="Out of scope"
+                >
+                  対象外
+                </option>
+              </select></label
+            ><label class="field"
+              ><span><span data-ja="用途" data-en="Purpose">用途</span></span
+              ><select
+                id="use-case"
+                name="use-case"
+                data-answer
+                data-label="用途"
+              >
+                <option value="" data-ja="未入力" data-en="Unanswered">
+                  未入力
+                </option>
+                <option value="?" data-ja="分からない" data-en="Unknown">
+                  分からない
+                </option>
+                <option value="signature" data-ja="署名" data-en="Signature">
+                  署名
+                </option>
+                <option value="jwt" data-ja="JWT" data-en="JWT">JWT</option>
+                <option
+                  value="pki"
+                  data-ja="証明書・PKI"
+                  data-en="Certificates / PKI"
+                >
+                  証明書・PKI
+                </option>
+                <option
+                  value="key_establishment"
+                  data-ja="鍵の共有"
+                  data-en="Key sharing"
+                >
+                  鍵の共有
+                </option>
+                <option
+                  value="encryption"
+                  data-ja="暗号化"
+                  data-en="Encryption"
+                >
+                  暗号化
+                </option>
+                <option value="hashing" data-ja="ハッシュ" data-en="Hashing">
+                  ハッシュ
+                </option>
+              </select></label
+            ><label class="field"
+              ><span
+                ><span data-ja="利用状況" data-en="Usage">利用状況</span></span
+              ><select
+                id="usage-state"
+                name="usage-state"
+                data-answer
+                data-label="利用状況"
+              >
+                <option value="" data-ja="未入力" data-en="Unanswered">
+                  未入力
+                </option>
+                <option value="?" data-ja="分からない" data-en="Unknown">
+                  分からない
+                </option>
+                <option value="active" data-ja="利用中" data-en="In use">
+                  利用中
+                </option>
+                <option value="planned" data-ja="利用予定" data-en="Planned">
+                  利用予定
+                </option>
+                <option
+                  value="test_only"
+                  data-ja="試験のみ"
+                  data-en="Test only"
+                >
+                  試験のみ
+                </option>
+                <option value="unused" data-ja="未使用" data-en="Unused">
+                  未使用
+                </option>
+              </select></label
+            ><label class="field"
+              ><span
+                ><span
+                  data-ja="業務上重要な用途で使う"
+                  data-en="Used for business-critical purposes"
+                  >業務上重要な用途で使う</span
+                ></span
+              ><select
+                id="business-critical"
+                name="business-critical"
+                data-answer
+                data-label="業務上重要な用途で使う"
+              >
+                <option value="" data-ja="未入力" data-en="Unanswered">
+                  未入力
+                </option>
+                <option value="?" data-ja="分からない" data-en="Unknown">
+                  分からない
+                </option>
+                <option value="true" data-ja="はい" data-en="Yes">はい</option>
+                <option value="false" data-ja="いいえ" data-en="No">
+                  いいえ
+                </option>
+              </select></label
+            ><label class="field" data-relevant="encryption,key_establishment"
+              ><span
+                ><span
+                  data-ja="機密情報を扱う"
+                  data-en="Handles confidential information"
+                  >機密情報を扱う</span
+                ></span
+              ><select
+                id="confidential"
+                name="confidential"
+                data-answer
+                data-label="機密情報を扱う"
+              >
+                <option value="" data-ja="未入力" data-en="Unanswered">
+                  未入力
+                </option>
+                <option value="?" data-ja="分からない" data-en="Unknown">
+                  分からない
+                </option>
+                <option value="true" data-ja="はい" data-en="Yes">はい</option>
+                <option value="false" data-ja="いいえ" data-en="No">
+                  いいえ
+                </option>
+              </select></label
+            >
+            <div class="field" data-relevant="encryption,key_establishment">
+              <label for="confidentiality-until"
+                ><span
+                  data-ja="機密性を保つ期限"
+                  data-en="Protect confidentiality until"
+                  >機密性を保つ期限</span
+                ></label
+              ><select
+                id="confidentiality-until"
+                name="confidentiality-until"
+                data-answer
+                data-label="機密性を保つ期限"
+              >
+                <option value="" data-ja="未入力" data-en="Unanswered">
+                  未入力
+                </option>
+                <option value="?" data-ja="分からない" data-en="Unknown">
+                  分からない
+                </option>
+                <option
+                  value="specified"
+                  data-ja="日時を指定"
+                  data-en="Specify date and time"
+                >
+                  日時を指定
+                </option></select
+              ><input
+                type="datetime-local"
+                step="1"
+                id="confidentiality-until-value"
+                data-detail-for="confidentiality-until"
+                aria-label="機密性を保つ期限の日時（日本時間）"
+                data-aria-label-ja="機密性を保つ期限の日時（日本時間）"
+                data-aria-label-en="Confidentiality deadline (Japan time)"
+                hidden
+              />
+            </div>
+            <label class="field" data-relevant="encryption,key_establishment"
+              ><span
+                ><span
+                  data-ja="過去の暗号文も検討する"
+                  data-en="Include historical ciphertext"
+                  >過去の暗号文も検討する</span
+                ></span
+              ><select
+                id="historical-ciphertext"
+                name="historical-ciphertext"
+                data-answer
+                data-label="過去の暗号文も検討する"
+              >
+                <option value="" data-ja="未入力" data-en="Unanswered">
+                  未入力
+                </option>
+                <option value="?" data-ja="分からない" data-en="Unknown">
+                  分からない
+                </option>
+                <option value="true" data-ja="はい" data-en="Yes">はい</option>
+                <option value="false" data-ja="いいえ" data-en="No">
+                  いいえ
+                </option>
+              </select></label
+            >
+            <div class="field" data-relevant="signature,jwt,pki">
+              <label for="signature-until"
+                ><span
+                  data-ja="署名の検証が必要な期限"
+                  data-en="Verify signatures until"
+                  >署名の検証が必要な期限</span
+                ></label
+              ><select
+                id="signature-until"
+                name="signature-until"
+                data-answer
+                data-label="署名の検証が必要な期限"
+              >
+                <option value="" data-ja="未入力" data-en="Unanswered">
+                  未入力
+                </option>
+                <option value="?" data-ja="分からない" data-en="Unknown">
+                  分からない
+                </option>
+                <option
+                  value="specified"
+                  data-ja="日時を指定"
+                  data-en="Specify date and time"
+                >
+                  日時を指定
+                </option></select
+              ><input
+                type="datetime-local"
+                step="1"
+                id="signature-until-value"
+                data-detail-for="signature-until"
+                aria-label="署名の検証が必要な期限の日時（日本時間）"
+                data-aria-label-ja="署名の検証が必要な期限の日時（日本時間）"
+                data-aria-label-en="Signature verification deadline (Japan time)"
+                hidden
+              />
+            </div>
+          </div>
+          <p id="not-applicable-note" class="small muted" hidden>
+            <span
+              data-ja="この範囲を検討対象外と申告します。記録の削除や安全性の確認を意味しません。ほかの入力内容は保持しますが、対象外の間は適用しません。技術上の懸念はレポートに残ります。"
+              data-en="This declares the selected scope out of review; it neither deletes evidence nor establishes safety. Other draft values are retained but not applied. Technical concerns remain in the report."
+              >この範囲を検討対象外と申告します。記録の削除や安全性の確認を意味しません。ほかの入力内容は保持しますが、対象外の間は適用しません。技術上の懸念はレポートに残ります。</span
+            >
+          </p>
+          <details class="answer-help">
+            <summary>
+              <span
+                data-ja="「未入力」と「分からない」の違い"
+                data-en="Unanswered versus unknown"
+                >「未入力」と「分からない」の違い</span
+              >
+            </summary>
+            <p>
+              <span
+                data-ja="未入力は回答を省略し、組織やシステムの既定値があれば引き継ぎます。「分からない」は明示的な申告となり、既定値の既知情報を上書きする場合があります。既定値がなければ、どちらも情報不足になり得ます。「分からない」だけで緊急度が高くなるわけではありません。"
+                data-en="Unanswered omits a declaration and may inherit organization or system defaults. Explicit unknown may override an inherited known claim. Without defaults, either may leave information missing. Unknown alone does not imply high urgency."
+                >未入力は回答を省略し、組織やシステムの既定値があれば引き継ぎます。「分からない」は明示的な申告となり、既定値の既知情報を上書きする場合があります。既定値がなければ、どちらも情報不足になり得ます。「分からない」だけで緊急度が高くなるわけではありません。</span
+              >
+            </p>
+          </details>
+          <details class="more-questions" id="support-details">
+            <summary>
+              <span
+                data-ja="移行後に使う環境での対応状況"
+                data-en="Check support for the migration target"
+                >移行後に使う環境での対応状況</span
+              >
+            </summary>
+            <div class="field-grid candidate-fields">
+              <label class="field" id="candidate-field"
+                ><span
+                  ><span data-ja="検討する方式" data-en="Candidate algorithm"
+                    >検討する方式</span
+                  ></span
+                ><select id="candidate" aria-describedby="candidate-note">
+                  <option value="" data-ja="未定" data-en="Undecided">
+                    未定
+                  </option>
+                </select></label
+              >
+              <div class="field" id="parameters-field" hidden>
+                <label for="parameter-choice"
+                  ><span
+                    data-ja="鍵長・方式の設定"
+                    data-en="Key size / algorithm configuration"
+                    >鍵長・方式の設定</span
+                  ></label
+                ><select
+                  id="parameter-choice"
+                  aria-describedby="custom-parameter-note"
+                >
+                  <option value="" data-ja="未定" data-en="Undecided">
+                    未定
+                  </option></select
+                ><input id="candidate-parameters" type="hidden" /><input
+                  id="candidate-custom"
+                  type="text"
+                  maxlength="80"
+                  aria-label="その他の鍵長・方式の設定"
+                  data-aria-label-ja="その他の鍵長・方式の設定"
+                  data-aria-label-en="Other key size / algorithm configuration"
+                  placeholder="設定を入力"
+                  data-placeholder-ja="設定を入力"
+                  data-placeholder-en="Enter configuration"
+                  hidden
+                />
+                <p id="custom-parameter-note" class="small muted" hidden>
+                  <span
+                    data-ja="手入力した設定の妥当性は検証しません。"
+                    data-en="Custom configuration validity is not verified."
+                    >手入力した設定の妥当性は検証しません。</span
+                  >
+                </p>
+              </div>
+            </div>
+            <p id="candidate-note" class="small muted candidate-note">
+              <span
+                data-ja="用途を選ぶと、検討する方式を選べます。"
+                data-en="Choose a purpose to select a candidate algorithm."
+                >用途を選ぶと、検討する方式を選べます。</span
+              >
+            </p>
+            <div id="support-basis-warning" class="review-warning" hidden>
+              <p>
+                <span
+                  data-ja="方式・設定が変わりました。以前の回答はそのまま適用できません。"
+                  data-en="The algorithm or configuration changed. Previous support answers cannot be applied unchanged."
+                  >方式・設定が変わりました。以前の回答はそのまま適用できません。</span
+                >
+              </p>
+              <button type="button" class="btn small-btn" id="reset-support">
+                <span
+                  data-ja="対応状況を回答し直す"
+                  data-en="Reset support answers"
+                  >対応状況を回答し直す</span
+                >
+              </button>
+            </div>
+            <p id="basis-incomplete" class="small muted" hidden>
+              <span
+                data-ja="設定が未定でも進められます。選択すると対応状況を入力できます。"
+                data-en="You can continue without a configuration. Choose one to enter support answers."
+                >設定が未定でも進められます。選択すると対応状況を入力できます。</span
+              >
+            </p>
+            <p id="support-empty" class="hint" hidden data-ja="この範囲には追加の対応状況の質問はありません。" data-en="No additional support questions apply to this scope.">この範囲には追加の対応状況の質問はありません。</p>
+            <div class="field-grid" id="support-questions">
+              <label class="field" data-support="runtime"
+                ><span
+                  ><span
+                    data-ja="この方式を実行環境で利用できるか"
+                    data-en="Can the runtime use this algorithm?"
+                    >この方式を実行環境で利用できるか</span
+                  ></span
+                ><select
+                  id="support-runtime"
+                  name="support-runtime"
+                  data-answer
+                  data-label="この方式を実行環境で利用できるか"
+                >
+                  <option value="" data-ja="未入力" data-en="Unanswered">
+                    未入力
+                  </option>
+                  <option value="?" data-ja="分からない" data-en="Unknown">
+                    分からない
+                  </option>
+                  <option value="true" data-ja="利用できる" data-en="Can use">
+                    利用できる
+                  </option>
+                  <option
+                    value="false"
+                    data-ja="利用できない"
+                    data-en="Cannot use"
+                  >
+                    利用できない
+                  </option>
+                </select></label
+              ><label class="field" data-support="provider"
+                ><span
+                  ><span
+                    data-ja="暗号ライブラリがこの方式を扱えるか"
+                    data-en="Can the cryptographic library handle this algorithm?"
+                    >暗号ライブラリがこの方式を扱えるか</span
+                  ></span
+                ><select
+                  id="support-provider"
+                  name="support-provider"
+                  data-answer
+                  data-label="暗号ライブラリがこの方式を扱えるか"
+                >
+                  <option value="" data-ja="未入力" data-en="Unanswered">
+                    未入力
+                  </option>
+                  <option value="?" data-ja="分からない" data-en="Unknown">
+                    分からない
+                  </option>
+                  <option value="true" data-ja="扱える" data-en="Supported">
+                    扱える
+                  </option>
+                  <option
+                    value="false"
+                    data-ja="扱えない"
+                    data-en="Unsupported"
+                  >
+                    扱えない
+                  </option>
+                </select></label
+              ><label class="field" data-support="parameters"
+                ><span
+                  ><span
+                    data-ja="指定した鍵長・方式の設定で利用できるか"
+                    data-en="Can the specified key size / configuration be used?"
+                    >指定した鍵長・方式の設定で利用できるか</span
+                  ></span
+                ><select
+                  id="support-parameters"
+                  name="support-parameters"
+                  data-answer
+                  data-label="指定した鍵長・方式の設定で利用できるか"
+                >
+                  <option value="" data-ja="未入力" data-en="Unanswered">
+                    未入力
+                  </option>
+                  <option value="?" data-ja="分からない" data-en="Unknown">
+                    分からない
+                  </option>
+                  <option value="true" data-ja="利用できる" data-en="Can use">
+                    利用できる
+                  </option>
+                  <option
+                    value="false"
+                    data-ja="利用できない"
+                    data-en="Cannot use"
+                  >
+                    利用できない
+                  </option>
+                </select></label
+              ><label class="field" data-support="peer"
+                ><span
+                  ><span
+                    data-ja="連携先が同じ方式に対応しているか"
+                    data-en="Do peers support the same algorithm?"
+                    >連携先が同じ方式に対応しているか</span
+                  ></span
+                ><select
+                  id="support-peer"
+                  name="support-peer"
+                  data-answer
+                  data-label="連携先が同じ方式に対応しているか"
+                >
+                  <option value="" data-ja="未入力" data-en="Unanswered">
+                    未入力
+                  </option>
+                  <option value="?" data-ja="分からない" data-en="Unknown">
+                    分からない
+                  </option>
+                  <option
+                    value="true"
+                    data-ja="対応している"
+                    data-en="Supported"
+                  >
+                    対応している
+                  </option>
+                  <option
+                    value="false"
+                    data-ja="対応していない"
+                    data-en="Unsupported"
+                  >
+                    対応していない
+                  </option>
+                </select></label
+              ><label class="field" data-support="protocol"
+                ><span
+                  ><span
+                    data-ja="通信やデータの形式がこの方式に対応しているか"
+                    data-en="Does the protocol or data format support this algorithm?"
+                    >通信やデータの形式がこの方式に対応しているか</span
+                  ></span
+                ><select
+                  id="support-protocol"
+                  name="support-protocol"
+                  data-answer
+                  data-label="通信やデータの形式がこの方式に対応しているか"
+                >
+                  <option value="" data-ja="未入力" data-en="Unanswered">
+                    未入力
+                  </option>
+                  <option value="?" data-ja="分からない" data-en="Unknown">
+                    分からない
+                  </option>
+                  <option
+                    value="true"
+                    data-ja="対応している"
+                    data-en="Supported"
+                  >
+                    対応している
+                  </option>
+                  <option
+                    value="false"
+                    data-ja="対応していない"
+                    data-en="Unsupported"
+                  >
+                    対応していない
+                  </option>
+                </select></label
+              ><label class="field" data-support="verifiers"
+                ><span
+                  ><span
+                    data-ja="トークンの受け取り側がこの方式の署名を検証できるか"
+                    data-en="Can token recipients verify signatures using this algorithm?"
+                    >トークンの受け取り側がこの方式の署名を検証できるか</span
+                  ></span
+                ><select
+                  id="support-verifiers"
+                  name="support-verifiers"
+                  data-answer
+                  data-label="トークンの受け取り側がこの方式の署名を検証できるか"
+                >
+                  <option value="" data-ja="未入力" data-en="Unanswered">
+                    未入力
+                  </option>
+                  <option value="?" data-ja="分からない" data-en="Unknown">
+                    分からない
+                  </option>
+                  <option
+                    value="true"
+                    data-ja="検証できる"
+                    data-en="Can verify"
+                  >
+                    検証できる
+                  </option>
+                  <option
+                    value="false"
+                    data-ja="検証できない"
+                    data-en="Cannot verify"
+                  >
+                    検証できない
+                  </option>
+                </select></label
+              ><label class="field" data-support="jose"
+                ><span
+                  ><span
+                    data-ja="JWTを作成・検証する機能がこの署名方式を扱えるか"
+                    data-en="Can JWT creation and verification handle this signature algorithm?"
+                    >JWTを作成・検証する機能がこの署名方式を扱えるか</span
+                  ></span
+                ><select
+                  id="support-jose"
+                  name="support-jose"
+                  data-answer
+                  data-label="JWTを作成・検証する機能がこの署名方式を扱えるか"
+                >
+                  <option value="" data-ja="未入力" data-en="Unanswered">
+                    未入力
+                  </option>
+                  <option value="?" data-ja="分からない" data-en="Unknown">
+                    分からない
+                  </option>
+                  <option value="true" data-ja="扱える" data-en="Supported">
+                    扱える
+                  </option>
+                  <option
+                    value="false"
+                    data-ja="扱えない"
+                    data-en="Unsupported"
+                  >
+                    扱えない
+                  </option>
+                </select></label
+              ><label class="field" data-support="pki"
+                ><span
+                  ><span
+                    data-ja="証明書の発行元や利用先がこの方式に対応しているか"
+                    data-en="Do certificate issuers and relying parties support this algorithm?"
+                    >証明書の発行元や利用先がこの方式に対応しているか</span
+                  ></span
+                ><select
+                  id="support-pki"
+                  name="support-pki"
+                  data-answer
+                  data-label="証明書の発行元や利用先がこの方式に対応しているか"
+                >
+                  <option value="" data-ja="未入力" data-en="Unanswered">
+                    未入力
+                  </option>
+                  <option value="?" data-ja="分からない" data-en="Unknown">
+                    分からない
+                  </option>
+                  <option
+                    value="true"
+                    data-ja="対応している"
+                    data-en="Supported"
+                  >
+                    対応している
+                  </option>
+                  <option
+                    value="false"
+                    data-ja="対応していない"
+                    data-en="Unsupported"
+                  >
+                    対応していない
+                  </option>
+                </select></label
+              >
+            </div>
+          </details>
+          <details class="more-questions">
+            <summary>
+              <span data-ja="移行に必要な期間" data-en="Time needed to migrate"
+                >移行に必要な期間</span
+              >
+            </summary>
+            <div class="field-grid">
+              <div class="field">
+                <label for="lead-time"
+                  ><span
+                    data-ja="移行に必要な期間"
+                    data-en="Time needed to migrate"
+                    >移行に必要な期間</span
+                  ></label
+                ><select
+                  id="lead-time"
+                  name="lead-time"
+                  data-answer
+                  data-label="移行に必要な期間"
+                >
+                  <option value="" data-ja="未入力" data-en="Unanswered">
+                    未入力
+                  </option>
+                  <option value="?" data-ja="分からない" data-en="Unknown">
+                    分からない
+                  </option>
+                  <option
+                    value="specified"
+                    data-ja="期間を指定"
+                    data-en="Specify duration"
+                  >
+                    期間を指定
+                  </option>
+                </select>
+                <div
+                  class="number-with-unit"
+                  data-detail-for="lead-time"
+                  hidden
+                >
+                  <label><span data-ja="換算の基準日（日本時間）" data-en="Calendar anchor (Japan time)">換算の基準日（日本時間）</span><input type="date" id="lead-anchor" min="0001-01-01" max="9999-12-31" /></label>
+                  <label><span data-ja="年" data-en="Years">年</span><input type="number" id="lead-years" min="0" max="10" step="1" value="0" /></label>
+                  <label><span data-ja="か月" data-en="Months">か月</span><input type="number" id="lead-months" min="0" max="11" step="1" value="0" /></label>
+
+                  <input type="hidden" id="lead-time-value" />
+                  <p id="duration-note" class="hint" role="status"></p>
+                </div>
+              </div>
+            </div>
+            <p class="hint" data-ja="必要な期間または目標年月の、どちらかを指定します。" data-en="Specify either a duration or a goal month.">必要な期間または目標年月の、どちらかを指定します。</p><div class="field">
+              <label for="goal-month"><span data-ja="移行の目標年月" data-en="Migration goal month">移行の目標年月</span></label>
+              <select id="goal-month" data-answer data-label="移行の目標年月"><option value="" data-ja="未入力" data-en="Unanswered">未入力</option><option value="?" data-ja="分からない" data-en="Unknown">分からない</option><option value="specified" data-ja="年月を指定" data-en="Specify month">年月を指定</option></select>
+              <input type="month" min="0001-01" max="9999-12" id="goal-month-value" data-detail-for="goal-month" inputmode="numeric" pattern="[0-9]{4}-(0[1-9]|1[0-2])" maxlength="7" placeholder="2030-09" aria-label="目標年月 / Goal month YYYY-MM" aria-describedby="goal-month-hint" hidden />
+              <p id="goal-month-hint" class="hint" data-ja="例：2030-09（2030年9月）。計画の目安として保存します。組織や契約上の期限、緊急度の判定には使いません。" data-en="For example, 2030-09 (September 2030). Saved as planning information; it does not set a policy or contractual deadline or change urgency.">例：2030-09（2030年9月）。計画の目安として保存します。組織や契約上の期限、緊急度の判定には使いません。</p>
+            </div>
+          </details>
+        </section>
+        <details class="panel migration-panel" id="deadline-details">
+          <summary data-ja="組織・契約で決まった期限" data-en="Organization or contractual deadline">組織・契約で決まった期限</summary>
+          <p class="hint" data-ja="選んだ対象に適用される期限と、その根拠を入力します。計画上の目標年月とは別に、緊急度の判定に使います。" data-en="Enter a deadline and its source for the selected scope. Unlike a planning goal month, this can affect urgency.">選んだ対象に適用される期限と、その根拠を入力します。計画上の目標年月とは別に、緊急度の判定に使います。</p>
+          <label class="field"><span data-ja="適用される期限" data-en="Applicable deadline">適用される期限</span><select id="deadline" data-answer data-label="適用される期限"><option value="" data-ja="選択してください" data-en="Choose">選択してください</option><option value="specified" data-ja="期限が決まっている" data-en="A deadline is set">期限が決まっている</option><option value="none" data-ja="期限の指定はない" data-en="No deadline specified">期限の指定はない</option><option value="?" data-ja="確認が必要" data-en="Needs confirmation">確認が必要</option></select></label>
+          <div class="field-grid" data-detail-for="deadline" hidden>
+            <label class="field"><span data-ja="期限（日本時間）" data-en="Deadline (Japan time)">期限（日本時間）</span><input id="deadline-value" type="datetime-local" step="1" /></label>
+            <label class="field"><span data-ja="期限の根拠" data-en="Deadline basis">期限の根拠</span><select id="deadline-reason"><option value="" data-ja="選択してください" data-en="Choose">選択してください</option><option value="organization_policy" data-ja="組織の方針" data-en="Organization policy">組織の方針</option><option value="contractual_requirement" data-ja="契約上の要件" data-en="Contractual requirement">契約上の要件</option></select></label>
+            <label class="field"><span data-ja="発行元の別名" data-en="Issuer alias">発行元の別名</span><input id="deadline-issuer" maxlength="128" autocomplete="off" /></label>
+            <label class="field"><span data-ja="規程・契約の識別名" data-en="Policy or contract identifier">規程・契約の識別名</span><input id="deadline-document" maxlength="128" autocomplete="off" /></label>
+            <label class="field"><span data-ja="版・改訂の識別名" data-en="Edition identifier">版・改訂の識別名</span><input id="deadline-edition" maxlength="128" autocomplete="off" /></label>
+            <label class="field"><span data-ja="該当する条項の識別名" data-en="Clause identifier">該当する条項の識別名</span><input id="deadline-clause" maxlength="128" autocomplete="off" /></label>
+            <p class="hint" data-ja="識別名は空白を含まない半角英数字・記号で入力してください（各128文字以内）。公開してよい別名を使い、機密情報は入力しないでください。" data-en="Use non-secret aliases with visible ASCII characters, no spaces, up to 128 characters each.">識別名は空白を含まない半角英数字・記号で入力してください（各128文字以内）。公開してよい別名を使い、機密情報は入力しないでください。</p>
+          </div>
+        </details>
+        <section class="panel migration-panel">
+          <h2>
+            <span data-ja="入力者・日時" data-en="Declaration provenance"
+              >入力者・日時</span
+            >
+          </h2>
+          <div class="field-grid provenance-grid">
+            <label class="field"
+              ><span
+                ><span data-ja="入力者の別名" data-en="Actor alias"
+                  >入力者の別名</span
+                ></span
+              ><input
+                id="actor"
+                type="text"
+                maxlength="64"
+                placeholder="owner"
+                autocomplete="off"
+            /></label>
+            <div class="field">
+              <label for="asserted-at"
+                ><span data-ja="申告日時" data-en="Assertion time"
+                  >申告日時</span
+                ></label
+              >
+              <div class="date-with-action">
+                <input id="asserted-at" type="datetime-local" step="1" aria-describedby="assertion-time-warning" /><button
+                  type="button"
+                  id="assertion-now"
+                  class="btn small-btn"
+                >
+                  <span data-ja="現在時刻" data-en="Current time"
+                    >現在時刻</span
+                  >
+                </button>
+              </div>
+            </div>
+            <p class="hint" id="assertion-time-warning" hidden></p>
+            <p class="hint" data-ja="期限を指定しない場合、用途や対応状況などの申告は、有効性を確認できない情報として評価されます。" data-en="Without an expiry, purpose and support declarations are assessed with unknown validity.">期限を指定しない場合、用途や対応状況などの申告は、有効性を確認できない情報として評価されます。</p><details class="expiry-options"><summary data-ja="情報を評価に使う期限（省略すると有効性不明）" data-en="Declaration expiry (omitting it leaves validity unknown)">情報を評価に使う期限（省略すると有効性不明）</summary>
+            <label class="field"
+              ><span
+                ><span data-ja="有効期限" data-en="Expiry">有効期限</span>
+                <span class="muted small"
+                  ><span data-ja="任意" data-en="Optional">任意</span></span
+                ></span
+              ><input id="valid-until" type="datetime-local" step="1"
+            /></label><p class="hint" data-ja="この情報を判断に使える期限です。移行の目標年月とは別の項目です。" data-en="How long this declaration may be used for assessment; separate from the migration goal.">この情報を判断に使える期限です。移行の目標年月とは別の項目です。</p></details>
+          </div>
+          <p class="timezone-note">
+            <span
+              data-ja="日時は日本時間"
+              data-en="Dates use Japan time (UTC+09:00)"
+              >日時は日本時間</span
+            >
+          </p>
+        </section>
+
+        <div class="form-actions">
+          <span class="muted small" id="draft-note"
+            ><span
+              data-ja=""
+              data-en=""
+              ></span
+            ></span
+          ><button class="btn primary" id="save-group" type="submit">
+            <span
+              data-ja="選択した対象に保存"
+              data-en="Save for selected targets"
+              >選択した対象に保存</span
+            >
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+</div>
+<section id="review" class="panel migration-panel review-panel" hidden>
+  <div class="section-title">
+    <h2 tabindex="-1" id="review-heading">
+      <span data-ja="入力内容を確認" data-en="Review context"
+        >入力内容を確認</span
+      >
+    </h2>
+    <button type="button" id="edit-context" class="btn small-btn">
+      <span data-ja="修正する" data-en="Edit">修正する</span>
+    </button>
+  </div>
+  <dl class="review-meta">
+    <div>
+      <dt>
+        <span data-ja="スキャン結果" data-en="Scan results">スキャン結果</span>
+      </dt>
+      <dd class="mono" data-current-folder></dd>
+    </div>
+    <div>
+      <dt>
+        <span data-ja="適用する対象" data-en="Targets in scope"
+          >適用する対象</span
+        >
+      </dt>
+      <dd id="review-target"></dd>
+    </div>
+    <div>
+      <dt>
+        <span data-ja="評価日時" data-en="Evaluation time">評価日時</span>
+      </dt>
+      <dd id="review-as-of"></dd>
+    </div>
+  </dl>
+  <div id="review-answers"></div>
+  <p id="review-warning" class="review-warning" hidden></p>
+  <a
+    class="btn small-btn"
+    id="download-context"
+    download="migration-context.json"
+    hidden
+    ><span data-ja="移行情報を保存" data-en="Save migration context"
+      >移行情報を保存</span
+    ></a
+  >
+  <div class="review-final">
+    <label class="confirm-label"
+      ><input type="checkbox" id="context-reviewed" /><span
+        data-ja="対象と入力内容を確認しました"
+        data-en="I reviewed the targets and context"
+        >対象と入力内容を確認しました</span
+      ></label
+    ><button
+      type="button"
+      class="btn primary"
+      id="show-migration-report"
+      disabled
+    >
+      <span data-ja="この内容でレポートを表示" data-en="Show migration report"
+        >この内容でレポートを表示</span
+      >
+    </button>
+  </div>
+</section>

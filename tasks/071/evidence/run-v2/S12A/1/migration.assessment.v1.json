@@ -1,0 +1,402 @@
+{
+  "format": "pqc-scan.migration-assessment",
+  "version": 1,
+  "input": {
+    "format": "ssh-offers-v1",
+    "sha256": "9234ed125428e7b12dec2d871f09ae629982bd19cffc7962a85e315a599a3e3c",
+    "schema_version": 1,
+    "collection_time": "2026-11-01T00:00:00Z",
+    "attempt_id": 1,
+    "protocol": "ssh_offers"
+  },
+  "context": {
+    "format": "pqc-scan.migration-context",
+    "version": 1,
+    "sha256": "38a7fc9bdc2a843ab34d0412158e79cf0200e0885f133cbeaa691770e193641f"
+  },
+  "catalog": {
+    "id": "migration-facts-v1",
+    "version": "1.0.0"
+  },
+  "policy": {
+    "id": "migration-decision-v1",
+    "version": "1.0.0"
+  },
+  "model": {
+    "id": "decision_table",
+    "version": "1.0.0"
+  },
+  "as_of": "2026-11-19T00:00:00Z",
+  "targets": [
+    {
+      "id": "migration_target-v1-f3a0127271975e8bd5d73fd73668f6d3cb5e1a5da8900503a608a7517a70ea32",
+      "source_ref": {
+        "role": "advertised_key_establishment",
+        "attempt_id": 1,
+        "detail_path": "/details/offers/kex_algorithms/0"
+      },
+      "technical": {
+        "identifier": "mlkem768nistp256-sha256",
+        "construction": "hybrid",
+        "standardization": "rfc_informational",
+        "quantum": "unknown",
+        "purpose": "key_establishment",
+        "parameters_known": true,
+        "classical_concerns": [],
+        "attack_models": [],
+        "components": [
+          {
+            "role": "classical_component",
+            "assessment": {
+              "identifier": "ECDH",
+              "construction": "classical_public_key",
+              "standardization": "classical_standard",
+              "quantum": "vulnerable",
+              "purpose": "key_establishment",
+              "parameters_known": true,
+              "classical_concerns": [],
+              "attack_models": [],
+              "components": [],
+              "combiner_assessment": null,
+              "source_ids": [
+                "F12",
+                "LOCAL026",
+                "NIST-PQ-FAQ"
+              ]
+            }
+          },
+          {
+            "role": "post_quantum_component",
+            "assessment": {
+              "identifier": "ML-KEM-768",
+              "construction": "post_quantum",
+              "standardization": "nist_final",
+              "quantum": "designed_resistant",
+              "purpose": "key_establishment",
+              "parameters_known": true,
+              "classical_concerns": [],
+              "attack_models": [],
+              "components": [],
+              "combiner_assessment": null,
+              "source_ids": [
+                "F12",
+                "LOCAL026",
+                "S203"
+              ]
+            }
+          }
+        ],
+        "combiner_assessment": "standard_specified_implementation_unverified",
+        "source_ids": [
+          "F09",
+          "F10",
+          "F12"
+        ],
+        "encoding_assurance": "unknown",
+        "protocol_ref": "F09",
+        "role": "advertised_key_establishment"
+      },
+      "observation": {
+        "method": "ssh_saved_offers",
+        "assurance": "unauthenticated_advertisement",
+        "usage": "unknown",
+        "collection_outcome": "partial"
+      },
+      "limitations": [
+        "unknown_parameter_encoding",
+        "collection_incomplete",
+        "unauthenticated_advertisement",
+        "combiner_implementation_unverified"
+      ]
+    },
+    {
+      "id": "migration_target-v1-465f39314d07735640800c00d8d768a7d9a32a79954572fdd72519297164eca0",
+      "source_ref": {
+        "role": "advertised_host_signature",
+        "attempt_id": 1,
+        "detail_path": "/details/offers/server_host_key_algorithms/0"
+      },
+      "technical": {
+        "identifier": "ECDSA",
+        "construction": "classical_public_key",
+        "standardization": "classical_standard",
+        "quantum": "vulnerable",
+        "purpose": "signature",
+        "parameters_known": true,
+        "classical_concerns": [],
+        "attack_models": [],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "F09",
+          "F12",
+          "LOCAL026",
+          "NIST-PQ-FAQ"
+        ],
+        "encoding_assurance": "unknown",
+        "protocol_ref": "F09",
+        "role": "advertised_host_signature"
+      },
+      "observation": {
+        "method": "ssh_saved_offers",
+        "assurance": "unauthenticated_advertisement",
+        "usage": "unknown",
+        "collection_outcome": "partial"
+      },
+      "limitations": [
+        "unknown_parameter_encoding",
+        "collection_incomplete",
+        "unauthenticated_advertisement"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "migration_claim-v1-0ae098de561695dd259d58e01e29e5a540e13903f62886bd84b5f40cfb57cac6",
+      "context_pointer": "/bindings/0/claims/use_case",
+      "field": "use_case",
+      "state": "known",
+      "value": "key_establishment",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    },
+    {
+      "id": "migration_claim-v1-241dea1632cef4c22e6e7561412a0a00a875f473c9ae8a6cf04f75a9680a7713",
+      "context_pointer": "/bindings/0/claims/applicability",
+      "field": "applicability",
+      "state": "known",
+      "value": "applicable",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z",
+        "valid_until": "2027-11-01T00:00:00Z"
+      },
+      "freshness": "active"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "migration_candidate-v1-a6fb07b16c773cee0b99aead3881a44d94bf375cf0d04726d36d9753a29d1f38",
+      "target_id": "migration_target-v1-465f39314d07735640800c00d8d768a7d9a32a79954572fdd72519297164eca0",
+      "identifier": "ML-DSA",
+      "purpose": "signature",
+      "status": "candidate_primitive_integration_unverified",
+      "parameter_selection": "explicit_parameter_selection_required",
+      "prerequisites": [
+        {
+          "name": "runtime",
+          "claimed_support": null,
+          "applied_claim_ids": []
+        },
+        {
+          "name": "provider",
+          "claimed_support": null,
+          "applied_claim_ids": []
+        },
+        {
+          "name": "parameters",
+          "claimed_support": null,
+          "applied_claim_ids": []
+        },
+        {
+          "name": "peer",
+          "claimed_support": null,
+          "applied_claim_ids": []
+        },
+        {
+          "name": "protocol",
+          "claimed_support": null,
+          "applied_claim_ids": []
+        }
+      ],
+      "validation_steps": [
+        "confirm_actual_use_and_required_purpose",
+        "verify_exact_parameters_and_protocol_encoding",
+        "test_runtime_provider_peer_and_rollout",
+        "validate_implementation_and_interoperability_separately"
+      ],
+      "source_ids": [
+        "S204",
+        "LOCAL026"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "migration_decision-v1-bb0657a62cf22232d3775d621ab09a1c9afcf3e1726ee14463adac6a21b5ba4f",
+      "target_id": "migration_target-v1-f3a0127271975e8bd5d73fd73668f6d3cb5e1a5da8900503a608a7517a70ea32",
+      "system_id": "f12",
+      "urgency": "undetermined",
+      "information": "incomplete",
+      "readiness": "unknown",
+      "reason_codes": [
+        "insufficient_information",
+        "unauthenticated_advertisement",
+        "collection_incomplete",
+        "unknown_parameter_encoding",
+        "combiner_implementation_unverified"
+      ],
+      "missing_inputs": [
+        "observation.selected_use",
+        "support.parameters",
+        "support.peer",
+        "support.protocol",
+        "support.provider",
+        "support.runtime",
+        "usage_state"
+      ],
+      "applied_claim_ids": [
+        "migration_claim-v1-0ae098de561695dd259d58e01e29e5a540e13903f62886bd84b5f40cfb57cac6",
+        "migration_claim-v1-241dea1632cef4c22e6e7561412a0a00a875f473c9ae8a6cf04f75a9680a7713"
+      ],
+      "action": {
+        "kind": "investigate",
+        "candidate_ids": [],
+        "blocking_prerequisites": [],
+        "validation_steps": [
+          "confirm_actual_use_and_required_purpose",
+          "refresh_missing_or_stale_scoped_claims"
+        ]
+      },
+      "source_ids": [
+        "F09",
+        "F10",
+        "F12",
+        "F14"
+      ]
+    },
+    {
+      "id": "migration_decision-v1-14389a1b63a3e4baf49cb0360129b92ec74d737c1996100a832532999cd77f04",
+      "target_id": "migration_target-v1-465f39314d07735640800c00d8d768a7d9a32a79954572fdd72519297164eca0",
+      "system_id": null,
+      "urgency": "undetermined",
+      "information": "incomplete",
+      "readiness": "unknown",
+      "reason_codes": [
+        "insufficient_information",
+        "unauthenticated_advertisement",
+        "collection_incomplete",
+        "unknown_parameter_encoding",
+        "unknown_binding"
+      ],
+      "missing_inputs": [
+        "applicability",
+        "context.binding",
+        "observation.selected_use",
+        "support.parameters",
+        "support.peer",
+        "support.protocol",
+        "support.provider",
+        "support.runtime",
+        "usage_state",
+        "use_case"
+      ],
+      "applied_claim_ids": [],
+      "action": {
+        "kind": "investigate",
+        "candidate_ids": [
+          "migration_candidate-v1-a6fb07b16c773cee0b99aead3881a44d94bf375cf0d04726d36d9753a29d1f38"
+        ],
+        "blocking_prerequisites": [],
+        "validation_steps": [
+          "confirm_actual_use_and_required_purpose",
+          "refresh_missing_or_stale_scoped_claims"
+        ]
+      },
+      "source_ids": [
+        "F09",
+        "F12",
+        "F14",
+        "LOCAL026",
+        "NIST-PQ-FAQ"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "F09",
+      "edition": "RFC4253 2006",
+      "clause": "7.1",
+      "uri": "https://www.rfc-editor.org/rfc/rfc4253.html",
+      "local_source_id": null,
+      "scope_limit": "ordered unauthenticated offers; markers are not algorithms"
+    },
+    {
+      "id": "F10",
+      "edition": "RFC10042 August2026",
+      "clause": "2.3.1-2.3.3; 2.4; 2.5; 5",
+      "uri": "https://www.rfc-editor.org/rfc/rfc10042.html",
+      "local_source_id": null,
+      "scope_limit": "specified hybrid SSH KEX, not user authentication or verified combiner implementation"
+    },
+    {
+      "id": "F12",
+      "edition": "task066 adopted contract 2026-11-18",
+      "clause": "technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "saved claims preserve assurance; digest does not attest collector truth"
+    },
+    {
+      "id": "F14",
+      "edition": "migration-decision-v1 1.0.0; adopted 2026-11-18",
+      "clause": "P1-P8; readiness and action precedence",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "local advisory policy; conformance is not practitioner usefulness"
+    },
+    {
+      "id": "LOCAL026",
+      "edition": "local-assessment-1",
+      "clause": "finite vocabulary and evidence limits",
+      "uri": null,
+      "local_source_id": "docs/architecture/LOCAL-ASSESSMENT-V1.md",
+      "scope_limit": "advisory facts; no deployment or cryptographic verification"
+    },
+    {
+      "id": "NIST-PQ-FAQ",
+      "edition": "task056 pinned FAQ snapshot",
+      "clause": "quantum public-key and generic-search models",
+      "uri": "https://csrc.nist.gov/projects/post-quantum-cryptography/faqs",
+      "local_source_id": null,
+      "scope_limit": "not quantum arrival, probability or operational security bits"
+    },
+    {
+      "id": "S203",
+      "edition": "FIPS203 Final 2024-08-13",
+      "clause": "1.1; 3.1; 7; 8 Table2",
+      "uri": "https://csrc.nist.gov/pubs/fips/203/final",
+      "local_source_id": null,
+      "scope_limit": "KEM parameter names/purpose only"
+    },
+    {
+      "id": "S204",
+      "edition": "FIPS204 Final 2024-08-13",
+      "clause": "1.1; 4 Table1",
+      "uri": "https://csrc.nist.gov/pubs/fips/204/final",
+      "local_source_id": null,
+      "scope_limit": "pure signature names/purpose; no prehash equivalence"
+    }
+  ],
+  "coverage": {
+    "collection_outcome": "partial",
+    "input_count": 1,
+    "target_count": 2,
+    "unknown_identity_or_parameters_targets": 0,
+    "unresolved_target_count": 0,
+    "limits": [
+      "one_saved_attempt_not_endpoint_coverage"
+    ]
+  },
+  "limitations": [
+    "saved_content_not_collector_attestation",
+    "no_offline_cryptographic_reverification",
+    "local_advisory_policy_not_practitioner_validation"
+  ]
+}

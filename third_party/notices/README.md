@@ -6,7 +6,7 @@ registry checksum to the archive's `.cargo_vcs_info.json` revision/path. Each co
 file is byte-for-byte upstream text, with its SHA-256 and immutable retrieval URL.
 Packaging never fetches these URLs; mismatched packages/revisions/hashes fail closed.
 
-The five static dependencies have full upstream license texts: asn1-rs-impl's
+The original five static fallback dependencies have full upstream license texts: asn1-rs-impl's
 MIT/Apache texts and four tree-sitter grammar MIT texts with original attribution.
 
 The four objc2-family entries are **upstream license statements**, not complete
@@ -34,3 +34,18 @@ only by the package version (0.51.0 to 0.52.0). Its normalized dependency declar
 match the upstream workspace. The archived dirty=true record is retained; source
 comparison does not imply publication approval. The four objc-family review flags
 remain unresolved. See [the follow-up record](https://github.com/wakaken/pqc-scan/blob/27b14f9d8ecaae34b7aae837999438512a55472f/tasks/063/TASK-063-RESULTS.md).
+
+The static graph also requires `uuid-simd 0.8.0` and `vsimd 0.8.0`. Their registry
+archives omit the repository-root MIT notice. Both bind to simd revision
+`d74c030d9dc4f3cae02146d1f497ff62726ef09a`; each exact package entry records
+its own Cargo checksum/path and the unmodified upstream notice hash. No
+review-required network statement or packaging guard is changed.
+
+## v0.4 Unix network graph
+
+Unix probe cancellation uses signal-hook 0.4.6 and its registry/errno dependencies,
+whose exact registry archives include complete license texts. Non-Unix retains
+ctrlc. The macOS network graph no longer selects the four Objective-C packages;
+their pinned records and review flags above remain unchanged for historical or
+other selected graphs. Native archive preparation must still verify the actual
+selected packages and require no missing/review-required notices before publication.

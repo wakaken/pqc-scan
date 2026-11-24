@@ -1,0 +1,28 @@
+   Compiling pqc_scan_core v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_core)
+error[E0608]: cannot index into a value of type `impl Iterator<Item = &ResolvedClaim>`
+  --> crates/pqc_scan_core/tests/migration073.rs:36:30
+   |
+36 |             assert_eq!(claims["confidential"].active_value(),Some(&json!(false)));
+   |                              ^^^^^^^^^^^^^^^^
+
+error[E0608]: cannot index into a value of type `impl Iterator<Item = &ResolvedClaim>`
+  --> crates/pqc_scan_core/tests/migration073.rs:37:27
+   |
+37 |             assert!(claims["usage_state"].explicit_unknown);
+   |                           ^^^^^^^^^^^^^^^
+
+error[E0599]: no method named `contains_key` found for opaque type `impl Iterator<Item = &ResolvedClaim>` in the current scope
+  --> crates/pqc_scan_core/tests/migration073.rs:38:29
+   |
+38 |             assert!(!claims.contains_key("business_critical"));
+   |                             ^^^^^^^^^^^^ method not found in `impl Iterator<Item = &ResolvedClaim>`
+
+error[E0608]: cannot index into a value of type `impl Iterator<Item = &ResolvedClaim>`
+  --> crates/pqc_scan_core/tests/migration073.rs:92:66
+   |
+92 |     assert_eq!(bound.target(&e.targets()[0].id).unwrap().claims()["business_critical"].freshness,ClaimFreshness::Stale);
+   |                                                                  ^^^^^^^^^^^^^^^^^^^^^
+
+Some errors have detailed explanations: E0599, E0608.
+For more information about an error, try `rustc --explain E0599`.
+error: could not compile `pqc_scan_core` (test "migration073") due to 4 previous errors

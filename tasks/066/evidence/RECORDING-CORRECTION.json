@@ -1,0 +1,15 @@
+{
+  "scope": "Evidence-log collector only; no product/test source changes.",
+  "attempts": [
+    {
+      "attempt": "inline R1",
+      "result": "AssertionError during Python package-log summary check; no product command was rerun or relabeled."
+    },
+    {
+      "attempt": "named collector R2",
+      "result": "Located incorrect assumption that unittest OK must be the final log line."
+    }
+  ],
+  "actual_log": "25 tests passed and an anchored OK line exists; a packaging test additionally emits archive JSON after the unittest summary. Its invalid-image-ID message is an expected negative control.",
+  "correction": "Recognize anchored OK anywhere in the completed log and retain the raw log; package command actual exit0 remains unchanged."
+}

@@ -1,0 +1,100 @@
+id: '065'
+title: Audit all built-in rule judgments using the existing evidence
+type: improvement
+priority: high
+status: done
+owner: Main agent
+phase: '1'
+description: >
+  Establish the selected v0.4 source and complete the all-rule audit by reusing
+  the source-bound companion and task-028/task-056 records. Identify missing
+  rationales and compatibility impacts without silently changing rule behavior.
+plan_reference: docs/roadmap/v0.4/ROADMAP.md
+requirements_reference: docs/roadmap/v0.4/REQUIREMENTS.md
+quality_requirements:
+  - R1-01
+  - R1-02
+  - R1-03
+  - R1-04
+depends_on:
+  - '028'
+  - '056'
+target_components:
+  - rules/default/
+  - docs/quality/rules/
+  - crates/pqc_scan_core/src/risk.rs
+  - tests/quality/judgment/
+existing_assets:
+  - E-RULE
+  - E-RISK
+  - E-JUDGMENT
+  - E-COMPAT
+problem:
+  - Rule population, source bindings and historical findings need current-source reconciliation.
+  - Value snapshots alone do not explain severity, confidence or promotion rationale.
+acceptance:
+  - 'R1-01: Every shipped rule has exactly one source-bound audit entry; IDs are unique, missing/extra rows are rejected, and custom-pack acceptance is characterized.'
+  - 'R1-02: Each rule records purpose, family, parameters, quantum/classical concerns, method, references, limits and current FP/FN dispositions, with unsupported facts explicitly unknown.'
+  - 'R1-03: Base severity/confidence and every promotion condition have a rationale or explicit unknown; category/risk/evidence/threshold boundaries are checked without treating confidence as probability or impact.'
+  - 'R1-04: Every correction proposal identifies affected rules, output/exit/custom-pack effects, review needs and positive/negative cases; no bulk rule rewrite or unapproved correction is performed.'
+deliverables:
+  - tasks/065/TASK-065-RESULTS.md
+  - tasks/065/evidence/
+  - Reused or extended rule companion, current population/source bindings, rationale gaps and correction impact analysis.
+implementation_steps:
+  - Pin the selected source, dirty changes and reusable evidence; enumerate direct built-in rules rather than retaining a historical count.
+  - Reconcile the existing companion and later repairs; add only missing audit information and source references.
+  - Analyze severity/confidence promotion and custom-pack boundaries using applicable existing evidence and targeted additional checks where needed.
+  - Record discrepancies and D5 decision inputs; preserve rule values, 0.45 and historical truth.
+  - Verify all four acceptance clauses against final sources and record applicable review and evidence reuse.
+testing_requirements:
+  - Check population equality, duplicate/missing/extra rejection, source snapshots and reference resolution.
+  - Cover promotion saturation, category/risk/evidence gates and values below, at and above 0.45.
+  - Distinguish an explicitly unknown empirical rationale from an unperformed required audit.
+  - Apply docs/agent/VERIFICATION.md; executable changes, if separately needed and authorized, require both review stages.
+out_of_scope:
+  - Bulk rule changes, numerical calibration, a replacement audit platform and automatic follow-up task creation.
+risks:
+  - Historical companion prose or resolved findings may be mistaken for current facts.
+  - Compatibility characterization may be misrepresented as empirical validation of 0.45.
+approval_boundary:
+  - Task execution requires a subsequent selection instruction; registration alone does not start work.
+  - Rule meaning, Risk/Severity/confidence changes and other AGENTS human-review gates remain separate decisions.
+planning_record:
+  date: '2026-11-18'
+  scope: Task definition only; no audit execution, product change or measurement has started.
+  work_packages: [W1]
+  primary_requirements: [R1-01, R1-02, R1-03, R1-04]
+  supporting_requirements: []
+  completion_evidence: All original task clauses need applicable final-source evidence; registering this definition proves none of them.
+
+execution_record:
+  date: '2026-11-18'
+  source_head: 3f2bc6e6209e1f2813caac8077c8d7a7198832cc
+  plan: tasks/065/TASK-065-PLAN.md
+  authorization: Maintainer selected task 065 only; preserve staged planning additions.
+  transitions:
+    - from: pending
+      to: planned
+      reason: Original criteria, completed dependencies, source and applicable rules inspected.
+    - from: planned
+      to: in-progress
+      reason: Source and existing evidence pinned; current-source rule audit started.
+    - from: in-progress
+      to: review
+      reason: All-rule supplement, correction impacts and applicable current-source checks are ready for assessment.
+    - from: review
+      to: done
+      reason: All four original audit criteria and deliverables passed final-source reconciliation; executable review exemption confirmed.
+  results: tasks/065/TASK-065-RESULTS.md
+  audit: tasks/065/RULE-AUDIT.json
+  evidence: tasks/065/evidence/
+  review_disposition: Research and documentation-only audit; both independent executable review stages exempt under docs/agent/REVIEWS.md; no reviewer identities allocated.
+  completion_record:
+    date: '2026-11-18'
+    verification: tasks/065/evidence/FINAL-SOURCE.json
+    commands: tasks/065/evidence/COMMANDS.json
+    correction_impacts: tasks/065/CORRECTION-IMPACTS.md
+    decision: Audit complete; empirical numeric justification and proposed behavioral repairs remain explicit limitations, not unperformed audit work.
+    next_eligible_task: '066'
+    next_task_authorization: Not selected or executed; a separate maintainer instruction is required.

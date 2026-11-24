@@ -1,0 +1,191 @@
+{
+  "format": "pqc-scan.migration-assessment",
+  "version": 1,
+  "input": {
+    "format": "inventory-v1",
+    "sha256": "c86ddbff05dce63403a7c98bab611f8938a6933caa0f787a1f62973a1756709e",
+    "schema_version": 1,
+    "collection_time": "2026-11-01T00:00:00Z",
+    "run_id": "scan-v1-283b496ff4317e85174bc83afb2f0edd4d162e807b4db1ad0c86aa92d2115201"
+  },
+  "context": {
+    "format": "pqc-scan.migration-context",
+    "version": 1,
+    "sha256": "3758b164aad42d85bbda9682f3da006772847c207684f87bf4c025acc0e98f97"
+  },
+  "catalog": {
+    "id": "migration-facts-v1",
+    "version": "1.0.0"
+  },
+  "policy": {
+    "id": "migration-decision-v1",
+    "version": "1.0.0"
+  },
+  "model": {
+    "id": "decision_table",
+    "version": "1.0.0"
+  },
+  "as_of": "2026-11-19T00:00:00Z",
+  "targets": [
+    {
+      "id": "migration_target-v1-15aca320cd0447580add331c4e46a48270f977ee17caaad0061e18e86ceb3a50",
+      "source_ref": {
+        "run_id": "scan-v1-283b496ff4317e85174bc83afb2f0edd4d162e807b4db1ad0c86aa92d2115201",
+        "observation_id": "observation-v1-202dcde2548583f3fd72fe43333f0ab7b5d748b8b8641384c7e6fd275a3d2a1a",
+        "root_asset_id": "asset-v1-babd06d8861a6b9dc41ad491b7ff3d63a5386fd869cc6d421ce113de662f553f",
+        "role": "algorithm",
+        "path": "S04B/captured-record.txt",
+        "line": 1
+      },
+      "technical": {
+        "identifier": "RSA",
+        "construction": "classical_public_key",
+        "standardization": "classical_standard",
+        "quantum": "vulnerable",
+        "purpose": "unknown",
+        "parameters_known": true,
+        "classical_concerns": [],
+        "attack_models": [],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "F12",
+          "LOCAL026",
+          "NIST-PQ-FAQ"
+        ],
+        "encoding_assurance": "unknown",
+        "protocol_ref": null,
+        "role": "algorithm"
+      },
+      "observation": {
+        "method": "ast_pattern",
+        "assurance": "syntactic",
+        "usage": "referenced",
+        "collection_outcome": "complete"
+      },
+      "limitations": [
+        "unknown_parameter_encoding"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "migration_claim-v1-8fe107bd57b0ddf869b91019295fa10a0083b0a5c09f89ad5d981f22f03b7dba",
+      "context_pointer": "/bindings/0/claims/applicability",
+      "field": "applicability",
+      "state": "known",
+      "value": "applicable",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z"
+      },
+      "freshness": "unknown"
+    },
+    {
+      "id": "migration_claim-v1-cf04d30be14a085d579191aceb8dbe7f3760634cbfba17198b8678aa5263ebdd",
+      "context_pointer": "/bindings/0/claims/use_case",
+      "field": "use_case",
+      "state": "known",
+      "value": "signature",
+      "provenance": {
+        "source_kind": "operator_claim",
+        "actor_id": "synthetic-owner",
+        "asserted_at": "2026-11-01T00:00:00Z"
+      },
+      "freshness": "unknown"
+    }
+  ],
+  "candidates": [],
+  "decisions": [
+    {
+      "id": "migration_decision-v1-672434974f3fd4a01d25c91b1ad7ffb27bf9d2057551f4437abd40db2e4ad2ec",
+      "target_id": "migration_target-v1-15aca320cd0447580add331c4e46a48270f977ee17caaad0061e18e86ceb3a50",
+      "system_id": "f04",
+      "urgency": "undetermined",
+      "information": "incomplete",
+      "readiness": "unknown",
+      "reason_codes": [
+        "insufficient_information",
+        "unknown_parameter_encoding",
+        "stale_claim"
+      ],
+      "missing_inputs": [
+        "applicability",
+        "support.parameters",
+        "support.provider",
+        "support.runtime",
+        "usage_state",
+        "use_case"
+      ],
+      "applied_claim_ids": [
+        "migration_claim-v1-8fe107bd57b0ddf869b91019295fa10a0083b0a5c09f89ad5d981f22f03b7dba",
+        "migration_claim-v1-cf04d30be14a085d579191aceb8dbe7f3760634cbfba17198b8678aa5263ebdd"
+      ],
+      "action": {
+        "kind": "investigate",
+        "candidate_ids": [],
+        "blocking_prerequisites": [],
+        "validation_steps": [
+          "confirm_actual_use_and_required_purpose",
+          "refresh_missing_or_stale_scoped_claims"
+        ]
+      },
+      "source_ids": [
+        "F12",
+        "F14",
+        "LOCAL026",
+        "NIST-PQ-FAQ"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "F12",
+      "edition": "task066 adopted contract 2026-11-18",
+      "clause": "technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "saved claims preserve assurance; digest does not attest collector truth"
+    },
+    {
+      "id": "F14",
+      "edition": "migration-decision-v1 1.0.0; adopted 2026-11-18",
+      "clause": "P1-P8; readiness and action precedence",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "local advisory policy; conformance is not practitioner usefulness"
+    },
+    {
+      "id": "LOCAL026",
+      "edition": "local-assessment-1",
+      "clause": "finite vocabulary and evidence limits",
+      "uri": null,
+      "local_source_id": "docs/architecture/LOCAL-ASSESSMENT-V1.md",
+      "scope_limit": "advisory facts; no deployment or cryptographic verification"
+    },
+    {
+      "id": "NIST-PQ-FAQ",
+      "edition": "task056 pinned FAQ snapshot",
+      "clause": "quantum public-key and generic-search models",
+      "uri": "https://csrc.nist.gov/projects/post-quantum-cryptography/faqs",
+      "local_source_id": null,
+      "scope_limit": "not quantum arrival, probability or operational security bits"
+    }
+  ],
+  "coverage": {
+    "collection_outcome": "complete",
+    "input_count": 1,
+    "target_count": 1,
+    "unknown_identity_or_parameters_targets": 0,
+    "unresolved_target_count": 0,
+    "limits": [
+      "inventory_not_exhaustive"
+    ]
+  },
+  "limitations": [
+    "saved_content_not_collector_attestation",
+    "no_offline_cryptographic_reverification",
+    "local_advisory_policy_not_practitioner_validation"
+  ]
+}

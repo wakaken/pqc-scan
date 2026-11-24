@@ -1,0 +1,666 @@
+{
+  "scope": "Selected source-backed semantic controls, not complete OSS ground truth or an accuracy estimate. No third-party source text copied.",
+  "products": [
+    {
+      "name": "keycloak",
+      "language": "Java",
+      "head": "18559075f50c8934d315035aea0c9a96314d37a9",
+      "sources": [
+        {
+          "path": "core/src/main/java/org/keycloak/jose/jws/crypto/RSAProvider.java",
+          "sha256": "ba0827547e6fe973e489ca5a645b4b52bc567809bfb8ab89e4c1f85b656b920e",
+          "bytes": 3081,
+          "url": "https://github.com/keycloak/keycloak/blob/18559075f50c8934d315035aea0c9a96314d37a9/core/src/main/java/org/keycloak/jose/jws/crypto/RSAProvider.java"
+        },
+        {
+          "path": "common/src/main/java/org/keycloak/common/util/KeyUtils.java",
+          "sha256": "2b89ded142678e7de19e086bd9c3dc4b28775dc3f3874623a0ea35a5c8e2f416",
+          "bytes": 3661,
+          "url": "https://github.com/keycloak/keycloak/blob/18559075f50c8934d315035aea0c9a96314d37a9/common/src/main/java/org/keycloak/common/util/KeyUtils.java"
+        }
+      ],
+      "expectations": [
+        {
+          "rule": "TS_JWT_RSA_ALGS",
+          "suffix": "RSAProvider.java",
+          "line": 38,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "Algorithm switch reference; source does not prove deployment."
+        },
+        {
+          "rule": "TS_JAVA_RSA_API",
+          "suffix": "common/src/main/java/org/keycloak/common/util/KeyUtils.java",
+          "line": 70,
+          "algorithms": [
+            "RSA"
+          ],
+          "meaning": "Explicit RSA KeyFactory request for encoded-key conversion; not a deployed key-size claim.",
+          "column": 37
+        }
+      ],
+      "negative_expectations": [
+        {
+          "suffix": "RSAProvider.java",
+          "line": 45,
+          "rule": "PQC_JAVA_API",
+          "meaning": "An exception message mentioning RSA is not a PQC provider invocation."
+        }
+      ]
+    },
+    {
+      "name": "airflow",
+      "language": "Python",
+      "head": "c4e2d0054bd0649d9db9af41837f46cb0dcbc31d",
+      "sources": [
+        {
+          "path": "airflow-core/src/airflow/api_fastapi/auth/tokens.py",
+          "sha256": "4e77a1a5a7180280cbf3d0c6f57fb11d11c5bc2c0c48832526aed9dbefa49baf",
+          "bytes": 20878,
+          "url": "https://github.com/apache/airflow/blob/c4e2d0054bd0649d9db9af41837f46cb0dcbc31d/airflow-core/src/airflow/api_fastapi/auth/tokens.py"
+        },
+        {
+          "path": "providers/snowflake/src/airflow/providers/snowflake/utils/sql_api_generate_jwt.py",
+          "sha256": "f6647ebc722abafeb4b5f0278bcedfe850232ac8911d40c3aec561cf0e0cf6f3",
+          "bytes": 6762,
+          "url": "https://github.com/apache/airflow/blob/c4e2d0054bd0649d9db9af41837f46cb0dcbc31d/providers/snowflake/src/airflow/providers/snowflake/utils/sql_api_generate_jwt.py"
+        }
+      ],
+      "expectations": [
+        {
+          "rule": "TS_JWT_RSA_ALGS",
+          "suffix": "tokens.py",
+          "line": 96,
+          "algorithms": [
+            "RS512"
+          ],
+          "meaning": "RSA-key algorithm branch; chosen key/configuration remains dynamic."
+        },
+        {
+          "rule": "TS_PY_RSA_USAGE",
+          "suffix": "tokens.py",
+          "line": 491,
+          "column": 16,
+          "algorithms": [
+            "RSA"
+          ],
+          "meaning": "Explicit source reference or call option; not proof of deployed usage or effective key parameters."
+        },
+        {
+          "rule": "TS_CLASSICAL_EDDSA_API",
+          "suffix": "tokens.py",
+          "line": 493,
+          "column": 16,
+          "algorithms": [
+            "Ed25519"
+          ],
+          "meaning": "Explicit source reference or call option; not proof of deployed usage or effective key parameters."
+        },
+        {
+          "rule": "API_PY_RSA_MODULE",
+          "suffix": "tokens.py",
+          "line": 69,
+          "column": 10,
+          "algorithms": [
+            "RSA"
+          ],
+          "meaning": "Explicit source reference or call option; not proof of deployed usage or effective key parameters."
+        },
+        {
+          "rule": "API_PY_RSA_MODULE",
+          "suffix": "tokens.py",
+          "line": 93,
+          "column": 10,
+          "algorithms": [
+            "RSA"
+          ],
+          "meaning": "Explicit source reference or call option; not proof of deployed usage or effective key parameters."
+        },
+        {
+          "rule": "TS_JWT_EDDSA_ALG",
+          "suffix": "tokens.py",
+          "line": 98,
+          "column": 17,
+          "algorithms": [
+            "EC"
+          ],
+          "meaning": "Explicit EdDSA reference normalizes only to the generic EC public-key family; curve, parameters and primitive purpose remain unknown.",
+          "parameters": {}
+        },
+        {
+          "rule": "TS_JWT_RSA_ALGS",
+          "suffix": "providers/snowflake/src/airflow/providers/snowflake/utils/sql_api_generate_jwt.py",
+          "line": 63,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "Static JWT algorithm constant; actual key/deployment is separate evidence.",
+          "column": 18
+        }
+      ],
+      "negative_expectations": [
+        {
+          "suffix": "tokens.py",
+          "line": 489,
+          "rule": "TS_PY_RSA_USAGE",
+          "meaning": "Comment describing RSA generation is not a generation call."
+        },
+        {
+          "suffix": "tokens.py",
+          "line": 98,
+          "rule": "TS_JWT_RSA_ALGS",
+          "meaning": "EdDSA branch is not an RSA JOSE algorithm."
+        }
+      ]
+    },
+    {
+      "name": "kubernetes",
+      "language": "Go",
+      "head": "a0594a28a435f392360f5e6b360cfc9e156d5ef3",
+      "sources": [
+        {
+          "path": "pkg/serviceaccount/externaljwt/plugin/plugin.go",
+          "sha256": "01110dd3801086d5bd685ea21cb8ac1a51619d5b9d2ab01155a11eac92abbabc",
+          "bytes": 7215,
+          "url": "https://github.com/kubernetes/kubernetes/blob/a0594a28a435f392360f5e6b360cfc9e156d5ef3/pkg/serviceaccount/externaljwt/plugin/plugin.go"
+        },
+        {
+          "path": "pkg/serviceaccount/jwt.go",
+          "sha256": "68b69726573f4ea69bb1d1f481fd7f451d0f4cabbe9422be0568af8cecf16879",
+          "bytes": 14566,
+          "url": "https://github.com/kubernetes/kubernetes/blob/a0594a28a435f392360f5e6b360cfc9e156d5ef3/pkg/serviceaccount/jwt.go"
+        },
+        {
+          "path": "staging/src/k8s.io/client-go/util/keyutil/key.go",
+          "sha256": "e651bb5ca0a29037c5c9ff0df05b0e95349504161ed5d41ab2d1b7937a76cff4",
+          "bytes": 9840,
+          "url": "https://github.com/kubernetes/kubernetes/blob/a0594a28a435f392360f5e6b360cfc9e156d5ef3/staging/src/k8s.io/client-go/util/keyutil/key.go"
+        }
+      ],
+      "expectations": [
+        {
+          "rule": "TS_JWT_RSA_ALGS",
+          "suffix": "externaljwt/plugin/plugin.go",
+          "line": 180,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "Allowed header algorithm reference, not an observed signature."
+        },
+        {
+          "rule": "TS_GO_RSA_USAGE",
+          "suffix": "serviceaccount/jwt.go",
+          "line": 24,
+          "column": 3,
+          "algorithms": [
+            "RSA"
+          ],
+          "meaning": "Explicit source reference or call option; not proof of deployed usage or effective key parameters."
+        },
+        {
+          "rule": "API_GO_CRYPTO_RSA",
+          "suffix": "serviceaccount/jwt.go",
+          "line": 24,
+          "column": 3,
+          "algorithms": [
+            "RSA"
+          ],
+          "meaning": "Explicit source reference or call option; not proof of deployed usage or effective key parameters."
+        },
+        {
+          "rule": "GO_TLS_RSA_IMPORT",
+          "suffix": "serviceaccount/jwt.go",
+          "line": 24,
+          "column": 3,
+          "algorithms": [
+            "RSA"
+          ],
+          "meaning": "Explicit source reference or call option; not proof of deployed usage or effective key parameters."
+        },
+        {
+          "rule": "TS_JWT_ES_ALG",
+          "suffix": "serviceaccount/jwt.go",
+          "line": 159,
+          "column": 14,
+          "algorithms": [
+            "ECDSA"
+          ],
+          "meaning": "ES384 source reference normalizes to the existing ECDSA catalog with its RFC7518 curve; deployment remains unverified.",
+          "parameters": {
+            "key_bits": "384",
+            "named_curve_oid": "1.3.132.0.34"
+          }
+        },
+        {
+          "rule": "TS_JWT_ES_ALG",
+          "suffix": "serviceaccount/jwt.go",
+          "line": 161,
+          "column": 14,
+          "algorithms": [
+            "ECDSA"
+          ],
+          "meaning": "ES512 source reference normalizes to the existing ECDSA catalog with its RFC7518 curve; deployment remains unverified.",
+          "parameters": {
+            "key_bits": "521",
+            "named_curve_oid": "1.3.132.0.35"
+          }
+        },
+        {
+          "rule": "TS_JWT_ES_ALG",
+          "suffix": "externaljwt/plugin/plugin.go",
+          "line": 180,
+          "column": 26,
+          "algorithms": [
+            "ECDSA"
+          ],
+          "meaning": "ES384 source reference normalizes to the existing ECDSA catalog with its RFC7518 curve; deployment remains unverified.",
+          "parameters": {
+            "key_bits": "384",
+            "named_curve_oid": "1.3.132.0.34"
+          }
+        },
+        {
+          "rule": "TS_JWT_ES_ALG",
+          "suffix": "externaljwt/plugin/plugin.go",
+          "line": 180,
+          "column": 35,
+          "algorithms": [
+            "ECDSA"
+          ],
+          "meaning": "ES512 source reference normalizes to the existing ECDSA catalog with its RFC7518 curve; deployment remains unverified.",
+          "parameters": {
+            "key_bits": "521",
+            "named_curve_oid": "1.3.132.0.35"
+          }
+        },
+        {
+          "rule": "TS_GO_RSA_USAGE",
+          "suffix": "staging/src/k8s.io/client-go/util/keyutil/key.go",
+          "line": 25,
+          "algorithms": [
+            "RSA"
+          ],
+          "meaning": "Explicit crypto/rsa import in key utilities; import alone does not prove active use.",
+          "column": 3
+        }
+      ],
+      "negative_expectations": [
+        {
+          "suffix": "externaljwt/plugin/plugin.go",
+          "line": 178,
+          "rule": "TS_GO_RSA_USAGE",
+          "meaning": "A comment naming RSA signer helpers is not an API call."
+        },
+        {
+          "suffix": "serviceaccount/jwt.go",
+          "line": 60,
+          "rule": "TS_GO_RSA_USAGE",
+          "meaning": "Private-key documentation is not a crypto/rsa call."
+        }
+      ]
+    },
+    {
+      "name": "node",
+      "language": "JavaScript",
+      "head": "330e3ee67e84e0d4845ff29898f22908a6a6b727",
+      "sources": [
+        {
+          "path": "lib/internal/crypto/hashnames.js",
+          "sha256": "ed7278f15c582de1d17ea6e9d71fdeb2b4340dc2884a747452aa3d8af327a7b4",
+          "bytes": 2814,
+          "url": "https://github.com/nodejs/node/blob/330e3ee67e84e0d4845ff29898f22908a6a6b727/lib/internal/crypto/hashnames.js"
+        },
+        {
+          "path": "lib/internal/crypto/rsa.js",
+          "sha256": "bbbfd6c1b2cbc8b8e1020f44b36864e2d3120c6887a1d1d3ad3de2248aead8fa",
+          "bytes": 9335,
+          "url": "https://github.com/nodejs/node/blob/330e3ee67e84e0d4845ff29898f22908a6a6b727/lib/internal/crypto/rsa.js"
+        }
+      ],
+      "expectations": [
+        {
+          "rule": "TS_JWT_RSA_ALGS",
+          "suffix": "hashnames.js",
+          "line": 31,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "JWK vocabulary mapping, not a signing operation."
+        },
+        {
+          "rule": "TS_NODE_RSA_USAGE",
+          "suffix": "lib/internal/crypto/rsa.js",
+          "line": 155,
+          "algorithms": [
+            "RSA"
+          ],
+          "meaning": "Explicit RSA generation option in a product implementation; actual modulus length is an argument.",
+          "column": 21
+        }
+      ],
+      "negative_expectations": [
+        {
+          "suffix": "hashnames.js",
+          "line": 31,
+          "rule": "PQC_NODE_API",
+          "meaning": "Hash-to-JOSE name mapping is not a PQC API invocation."
+        },
+        {
+          "suffix": "hashnames.js",
+          "line": 31,
+          "rule": "TS_NODE_JOSE_USAGE",
+          "meaning": "A JOSE name in a mapping is not a jsonwebtoken sign call."
+        }
+      ]
+    },
+    {
+      "name": "n8n",
+      "language": "TypeScript",
+      "head": "9a84403d2fae449bf5dbff8fc4fc9a5158ccf37c",
+      "sources": [
+        {
+          "path": "packages/nodes-base/nodes/Google/GenericFunctions.ts",
+          "sha256": "4de4cd05ce2487adecd9f69858567d9ff962d8da02596854be23fb13bafd9b71",
+          "bytes": 3653,
+          "url": "https://github.com/n8n-io/n8n/blob/9a84403d2fae449bf5dbff8fc4fc9a5158ccf37c/packages/nodes-base/nodes/Google/GenericFunctions.ts"
+        },
+        {
+          "path": "packages/nodes-base/credentials/GoogleApi.credentials.ts",
+          "sha256": "92326b0645e40fad9b8abdb82e970126c0f5c789159ac4a4f67c4b4012c850a1",
+          "bytes": 7705,
+          "url": "https://github.com/n8n-io/n8n/blob/9a84403d2fae449bf5dbff8fc4fc9a5158ccf37c/packages/nodes-base/credentials/GoogleApi.credentials.ts"
+        }
+      ],
+      "expectations": [
+        {
+          "rule": "TS_JWT_RSA_ALGS",
+          "suffix": "GenericFunctions.ts",
+          "line": 90,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "Explicit JWT signing option/header reference."
+        },
+        {
+          "rule": "TS_JWT_RSA_ALGS",
+          "suffix": "GenericFunctions.ts",
+          "line": 94,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "Explicit JWT signing option/header reference."
+        },
+        {
+          "rule": "TS_NODE_JOSE_USAGE",
+          "suffix": "GenericFunctions.ts",
+          "line": 79,
+          "column": 20,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "Explicit source reference or call option; not proof of deployed usage or effective key parameters."
+        },
+        {
+          "rule": "TS_NODE_JOSE_USAGE",
+          "suffix": "packages/nodes-base/credentials/GoogleApi.credentials.ts",
+          "line": 336,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "Same-call explicit RSA JWT signing option; credential key parameters remain runtime inputs.",
+          "column": 21
+        }
+      ],
+      "negative_expectations": [
+        {
+          "suffix": "GenericFunctions.ts",
+          "line": 90,
+          "rule": "TS_NODE_JOSE_USAGE",
+          "meaning": "The option literal is not another signing call; its algorithm belongs to the call on line 79."
+        }
+      ]
+    },
+    {
+      "name": "discourse",
+      "language": "Ruby",
+      "head": "6dfa59ea612b2ddf1bc57e1204f0410b6618a092",
+      "sources": [
+        {
+          "path": "lib/auth/google_oauth2_authenticator.rb",
+          "sha256": "469827aed498811064e8222e982873210efcdb0288b8413de0b5ec0893ed4a73",
+          "bytes": 4818,
+          "url": "https://github.com/discourse/discourse/blob/6dfa59ea612b2ddf1bc57e1204f0410b6618a092/lib/auth/google_oauth2_authenticator.rb"
+        },
+        {
+          "path": "lib/freedom_patches/cose_rsapkcs1.rb",
+          "sha256": "1b1c0016aefb6d7abb06ddfc11013e224af5b6a3019abb18f1948a75d93f5c6f",
+          "bytes": 1083,
+          "url": "https://github.com/discourse/discourse/blob/6dfa59ea612b2ddf1bc57e1204f0410b6618a092/lib/freedom_patches/cose_rsapkcs1.rb"
+        }
+      ],
+      "expectations": [
+        {
+          "rule": "TS_JWT_RSA_ALGS",
+          "suffix": "google_oauth2_authenticator.rb",
+          "line": 127,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "Explicit JWT header/encode argument reference."
+        },
+        {
+          "rule": "TS_JWT_RSA_ALGS",
+          "suffix": "google_oauth2_authenticator.rb",
+          "line": 130,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "Explicit JWT header/encode argument reference."
+        },
+        {
+          "rule": "TS_RUBY_RSA_USAGE",
+          "suffix": "lib/freedom_patches/cose_rsapkcs1.rb",
+          "line": 38,
+          "algorithms": [
+            "RSA"
+          ],
+          "meaning": "Explicit OpenSSL RSA key class branch; not evidence of a deployed key.",
+          "column": 14
+        },
+        {
+          "rule": "TS_JWT_RSA_ALGS",
+          "suffix": "lib/freedom_patches/cose_rsapkcs1.rb",
+          "line": 46,
+          "algorithms": [
+            "RS256"
+          ],
+          "meaning": "COSE RSA algorithm registration with an RS256 name; a reference, not JWT execution.",
+          "column": 34
+        }
+      ],
+      "negative_expectations": [
+        {
+          "suffix": "google_oauth2_authenticator.rb",
+          "line": 128,
+          "rule": "API_RUBY_OPENSSL_CIPHER",
+          "meaning": "RSA key loading is not symmetric cipher construction."
+        }
+      ]
+    },
+    {
+      "name": "rails",
+      "language": "Ruby",
+      "head": "ee9b18fdb0fca18fee96bf992ed476c9daf946f9",
+      "sources": [
+        {
+          "path": "activesupport/lib/active_support/message_encryptor.rb",
+          "sha256": "3fa347043a2a81168c06dfd08231ae8cacacd7e61c8ebfdaee5f9c15b416c043",
+          "bytes": 14315,
+          "url": "https://github.com/rails/rails/blob/ee9b18fdb0fca18fee96bf992ed476c9daf946f9/activesupport/lib/active_support/message_encryptor.rb"
+        },
+        {
+          "path": "activerecord/lib/active_record/encryption/cipher/aes256_gcm.rb",
+          "sha256": "9bb4de4a612c32e89ef0a1dd1e337699f13316c601c0f00b805c50e45d2d4252",
+          "bytes": 3446,
+          "url": "https://github.com/rails/rails/blob/ee9b18fdb0fca18fee96bf992ed476c9daf946f9/activerecord/lib/active_record/encryption/cipher/aes256_gcm.rb"
+        }
+      ],
+      "expectations": [
+        {
+          "rule": "API_RUBY_OPENSSL_CIPHER",
+          "suffix": "message_encryptor.rb",
+          "line": 371,
+          "algorithms": [
+            "AES-256",
+            "AES-256"
+          ],
+          "modes": [
+            "CBC",
+            "GCM"
+          ],
+          "meaning": "Dynamic cipher construction with same-class GCM/CBC candidate references. Override/deployed mode not established."
+        },
+        {
+          "rule": "API_RUBY_OPENSSL_CIPHER",
+          "suffix": "message_encryptor.rb",
+          "line": 254,
+          "algorithms": [
+            "AES-256",
+            "AES-256"
+          ],
+          "meaning": "Optional cipher parameter default resolves same-class AES candidates for the key-length query; caller overrides and effective runtime mode remain unknown.",
+          "modes": [
+            "CBC",
+            "GCM"
+          ]
+        },
+        {
+          "rule": "API_RUBY_OPENSSL_CIPHER",
+          "suffix": "activerecord/lib/active_record/encryption/cipher/aes256_gcm.rb",
+          "line": 20,
+          "algorithms": [
+            "AES-256"
+          ],
+          "meaning": "Same-class literal cipher constant selects an AES-256-GCM candidate for this OpenSSL construction; runtime override/activation is unproven.",
+          "modes": [
+            "GCM"
+          ]
+        },
+        {
+          "rule": "API_RUBY_OPENSSL_CIPHER",
+          "suffix": "activerecord/lib/active_record/encryption/cipher/aes256_gcm.rb",
+          "line": 24,
+          "algorithms": [
+            "AES-256"
+          ],
+          "meaning": "Same-class literal cipher constant selects an AES-256-GCM candidate for this OpenSSL construction; runtime override/activation is unproven.",
+          "modes": [
+            "GCM"
+          ]
+        },
+        {
+          "rule": "API_RUBY_OPENSSL_CIPHER",
+          "suffix": "activerecord/lib/active_record/encryption/cipher/aes256_gcm.rb",
+          "line": 40,
+          "algorithms": [
+            "AES-256"
+          ],
+          "meaning": "Same-class literal cipher constant selects an AES-256-GCM candidate for this OpenSSL construction; runtime override/activation is unproven.",
+          "modes": [
+            "GCM"
+          ]
+        },
+        {
+          "rule": "API_RUBY_OPENSSL_CIPHER",
+          "suffix": "activerecord/lib/active_record/encryption/cipher/aes256_gcm.rb",
+          "line": 66,
+          "algorithms": [
+            "AES-256"
+          ],
+          "meaning": "Same-class literal cipher constant selects an AES-256-GCM candidate for this OpenSSL construction; runtime override/activation is unproven.",
+          "modes": [
+            "GCM"
+          ]
+        }
+      ],
+      "negative_expectations": [
+        {
+          "suffix": "message_encryptor.rb",
+          "line": 79,
+          "rule": "API_RUBY_OPENSSL_CIPHER",
+          "meaning": "Documentation example must not become an OpenSSL cipher call."
+        },
+        {
+          "suffix": "message_encryptor.rb",
+          "line": 85,
+          "rule": "API_RUBY_OPENSSL_CIPHER",
+          "meaning": "Documented rotation example must not become an OpenSSL cipher call."
+        }
+      ]
+    },
+    {
+      "name": "vector",
+      "language": "Rust",
+      "head": "7e97ead1775c1cadd882ca176aa2497d8b7ee1b5",
+      "sources": [
+        {
+          "path": "lib/vector-core/src/tls/mod.rs",
+          "sha256": "7d4345b8acb10632d373b729d57318f623a62e962fa0721b56d291989ca29980",
+          "bytes": 7494,
+          "url": "https://github.com/vectordotdev/vector/blob/7e97ead1775c1cadd882ca176aa2497d8b7ee1b5/lib/vector-core/src/tls/mod.rs"
+        },
+        {
+          "path": "lib/vector-core/src/tls/incoming.rs",
+          "sha256": "3f923002fa2f1644dee1f73ad6f95df2bedc8f8ae016aad40819b10c70b217bb",
+          "bytes": 17126,
+          "url": "https://github.com/vectordotdev/vector/blob/7e97ead1775c1cadd882ca176aa2497d8b7ee1b5/lib/vector-core/src/tls/incoming.rs"
+        },
+        {
+          "path": "lib/vector-core/src/tls/settings.rs",
+          "sha256": "58ea358f984073dcd056301ab724af2ea98c7fc99bb3b26908c82f63d0e6678a",
+          "bytes": 31661,
+          "url": "https://github.com/vectordotdev/vector/blob/7e97ead1775c1cadd882ca176aa2497d8b7ee1b5/lib/vector-core/src/tls/settings.rs"
+        },
+        {
+          "path": "lib/vector-core/Cargo.toml",
+          "sha256": "6808b9df16fb4b456f24f9a4264237a03c132e75b57724b0eea07ec321fbd690",
+          "bytes": 4061,
+          "url": "https://github.com/vectordotdev/vector/blob/7e97ead1775c1cadd882ca176aa2497d8b7ee1b5/lib/vector-core/Cargo.toml"
+        }
+      ],
+      "expectations": [
+        {
+          "rule": "API_RUST_OPENSSL_TLS",
+          "suffix": "tls/mod.rs",
+          "line": 179,
+          "algorithms": [],
+          "count": 2,
+          "meaning": "Standard OpenSSL TLS construction and method selector; no negotiated cipher/group identified."
+        },
+        {
+          "rule": "API_RUST_OPENSSL_TLS",
+          "suffix": "tls/incoming.rs",
+          "line": 37,
+          "algorithms": [],
+          "count": 2,
+          "meaning": "Standard OpenSSL TLS construction and method selector; no negotiated cipher/group identified."
+        }
+      ],
+      "negative_expectations": [
+        {
+          "suffix": "tls/mod.rs",
+          "line": 7,
+          "rule": "API_RUST_OPENSSL_TLS",
+          "meaning": "Type import is not another TLS construction call."
+        },
+        {
+          "suffix": "tls/incoming.rs",
+          "line": 22,
+          "rule": "API_RUST_OPENSSL_TLS",
+          "meaning": "Tokio stream import does not select TLS algorithms."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "20698af7d8acbf66be55f71f6f64ee7ddbcfd16d0a33d78ded5600900b258ff6",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "0f1577c1179a14a6091306e2f226401b107418fbc54ace8babe7d9617f30dcf8",
+    "docs/user/COVERAGE.ja.md": "061221356da8ed97b0f505c9ea25d8346ab4164f0acd0cfe02220caf3abfd2d2",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The held P12 contains encryptedData; the current public contract and unchanged non-decrypting content branch do not expose its inner certificate-signature property. Outer container facts remain inspectable."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The PFX is byte-identical to that encrypted P12. Certificate conversion provenance does not remove encryption, so its inner signature-property question is outside the readable subset."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "The known source certificate RSA key width is nominal object truth; the encrypted P12 does not expose the inner SPKI attribute to this parser."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The source certificate RSA signature family remains nominal truth; deriving it from the encrypted P12 requires decryption outside this contract."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The identical encrypted PFX retains the source-certificate provenance but cannot expose the inner RSA public-key width without decryption."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "Certificate-only conversion provenance excludes private-key bags, not encryption. The PFX inner signature attribute remains outside the non-decrypting subset."
+    }
+  ],
+  "timestampUtc": "2026-11-23T08:24:14.602368+00:00",
+  "version": 1,
+  "scope": "documented-public-input-subset",
+  "corpusDirectory": "tests/quality/expanded-v2",
+  "reason": "Current-source v0.4 release revalidation. All203 corpus input bytes and246 original unit scopes reviewed; same six encrypted inner properties excluded; original corpus/truth/dispositions/numeric thresholds unchanged. Historical records preserved; no fresh accuracy measurement or publication approval.",
+  "reviewSources": {
+    "review-main.json": "73ab7a682eb6c4caa2a216b95b6ee87202e3a5572982e878ff3ad2b9aa4c7866",
+    "review-independent.json": "04210e9334e2ffe2ab6f5c41c4d32e2d7e558cd7aa8228aea9688d62950b2b4f"
+  }
+}

@@ -149,7 +149,16 @@ impl RuntimeProfile {
 
 pub fn annotate_findings(findings: &mut [Finding], profile: &RuntimeProfile) {
     for finding in findings {
-        finding.recommended_actions = recommend_for_finding(finding, profile);
+        finding.recommended_actions = if finding
+            .evidence
+            .metadata
+            .get("reference_kind")
+            .is_some_and(|s| s == "display_text")
+        {
+            Vec::new()
+        } else {
+            recommend_for_finding(finding, profile)
+        };
     }
 }
 

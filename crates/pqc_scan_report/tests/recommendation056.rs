@@ -89,7 +89,7 @@ fn corrected_recommendations_reach_both_languages_without_changing_machine_facts
             );
         }
         for text in [
-            "版が不明",
+            "バージョンが不明",
             "新しいML-DSA鍵ペア",
             "BC",
             "構成と符号化形式",

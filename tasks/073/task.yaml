@@ -1,0 +1,86 @@
+id: '073'
+title: Generate scoped migration context through shared helpers and templates
+type: improvement
+priority: high
+status: done
+owner: Main agent
+plan_reference: docs/roadmap/v0.4/ROADMAP.md
+requirements_reference: docs/roadmap/v0.4/REQUIREMENTS.md
+description: Implement the authorized input-assistance increment only after later task selection; reuse
+  existing contracts and components and preserve completed history.
+quality_requirements:
+- U01
+- U02
+depends_on:
+- '068'
+- '069'
+target_components:
+- crates/pqc_scan_core/src/migration/
+- crates/pqc_scan_cli/src/
+- docs/user/
+problem:
+- Manual JSON editing and hash/target transcription burden personal users; adding UI must retain exact
+  scope, uncertainty and existing behavior.
+acceptance:
+- 'U01: Use existing saved-evidence targets and context validation/binding; produce adopted v1 JSON with
+  exact input digest/IDs; valid partial or empty claims are allowed. No second evaluator/schema or invented
+  claims.'
+- 'U02: A separately selected noninteractive CLI entrypoint writes a validated template through safe output,
+  with readable target selection, configurable known claims and generated aliases. No manual digest/ID
+  transcription, default binding of all targets, or CLI conversation. Unknown/sparse inputs remain valid;
+  invalid/stale bindings fail safely.'
+deliverables:
+- tasks/073/TASK-073-RESULTS.md
+- tasks/073/evidence/
+- Implemented behavior, meaningful tests, paired user documentation and applicable final-source implementation/test
+  reviews.
+implementation_steps:
+- Specify the explicit noninteractive template entrypoint, readable target selection, partial-input semantics
+  and D4 supplement before implementation; use adopted v1 unless a separate D1 change is approved.
+- Implement one typed generation layer using existing readers, identity, validation and safe output; keep
+  engine and old Context v1 unchanged.
+- Exercise actual template generation and round-trip validation with sparse/personal claims, precise scope
+  and invalid bindings; include meaningful tests and paired guides in this task.
+testing_requirements:
+- Apply docs/agent/VERIFICATION.md and both independent review stages for executable changes; reuse reviewer
+  identities within the authorized request and retain source/input/context/version/time bindings.
+- Check actual generated/imported configurations, exact target scope, missing/unknown/false/N/A, stale
+  claims, substitution and invalid input; do not silently create positive claims.
+- Verify CLI/template/web agreement for identical inputs where applicable; preserve v1, 0.45, scan/report
+  defaults and no-outbound reassessment.
+out_of_scope:
+- No CLI conversational input, web frontend, new schema, automatic business claims or new decision engine.
+risks:
+- UI convenience can invent facts, widen target scope, erase unknowns or falsely imply verified readiness;
+  prior accepted evidence may be inapplicable after integration.
+approval_boundary:
+- Registration only; execution requires later selection and completed dependencies. Record D4 details
+  before affected implementation; any storage-contract or high-risk architectural change requires the
+  applicable human decision.
+- No external contact, fees, release or publication is authorized. Missing required evaluation resources
+  keep affected work unfinished.
+planning_record:
+  date: '2026-11-18'
+  scope: Definition only; no implementation, product execution or measurement selected.
+  primary_requirements:
+  - U01
+  - U02
+  supporting_requirements: []
+  completion_evidence: Original criteria, applicable tests, final-source evidence and required reviews
+    must all be complete; completed historical tasks remain unchanged.
+
+execution_record:
+  selected_on: '2026-11-18'
+  source_head: c1f8a4bc5478eefb2b1babb6b2aa86295f9c8d34
+  plan: tasks/073/TASK-073-PLAN.md
+  lifecycle:
+  - 'pending -> planned: main-agent plan and concrete D4 supplement recorded against U01/U02.'
+  - 'planned -> in-progress: implement shared typed generation and explicit CLI; no schema or policy change.'
+  reviewer_continuity: Reuse /root/v04_implementation_review and /root/v04_test_review.
+  review_transition: "in-progress -> review: implementation accepted, final required checks passed; test review pending."
+  results: tasks/073/TASK-073-RESULTS.md
+  reviews: tasks/073/TASK-073-REVIEWS.md
+  completion_transition: "review -> done: both original reviewer identities accepted final source, all U01/U02 criteria and required checks passed."
+  integration_followup: "Reopened during074: compact valid-context export and raw nested-duplicate authoring boundaries require correction; prior reviews/results preserved."
+  integration_review_transition: "in-progress -> review: combined074 corrections accepted and final718/225/23 plus browser passed; independent test review pending."
+  final_completion_transition: "review -> done: final combined source6459a573, both original reviewer confirmations, original criteria and applicable broad/scoped/browser gates passed."

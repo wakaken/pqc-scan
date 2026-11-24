@@ -1,7 +1,7 @@
 mod repository_context;
 pub use repository_context::RepositoryContext;
 pub mod file_selection;
-pub use file_selection::FileSelection;
+pub use file_selection::{FileSelection, ScanSelection};
 pub mod assessment;
 pub mod classifier;
 pub mod compat;
@@ -10,6 +10,7 @@ pub mod diff;
 pub mod error;
 pub mod identity;
 pub mod inventory;
+pub mod migration;
 pub mod model;
 pub mod observation;
 pub mod pipeline;

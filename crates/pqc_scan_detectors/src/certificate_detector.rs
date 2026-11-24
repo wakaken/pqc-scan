@@ -202,7 +202,8 @@ impl CertificateDetector {
                         DetectorStatus::NotApplicable
                     },
                 )
-                .with_observations(drafts));
+                .with_observations(drafts)
+                .with_explanation(container_explanation(p12_reason)));
             }
         }
         let missing_dsa_parameters = objects.iter().any(|o| {
@@ -384,10 +385,20 @@ impl CertificateDetector {
         Ok(
             if missing_dsa_parameters && status == DetectorStatus::Partial {
                 outcome.with_explanation("DSA algorithm identified; absent public-key parameters prevent complete key-attribute inspection.")
+            } else if p12_reason.is_some() && status != DetectorStatus::Complete {
+                outcome.with_explanation(container_explanation(p12_reason))
             } else {
                 outcome
             },
         )
+    }
+}
+fn container_explanation(reason: Option<&str>) -> &'static str {
+    match reason {
+        Some("encrypted_contents_unsupported") => "PKCS#12 encrypted contents were not decrypted or inspected. Export the public certificate separately and scan it; do not provide private keys or passwords.",
+        Some("bag_or_content_type_unsupported") => "PKCS#12 contains unsupported bags or content types. Readable public certificates were retained. Export the remaining public certificates separately and scan them.",
+        Some("inspection_limit_reached") => "PKCS#12 structural inspection reached a resource limit. Readable public certificates were retained; omitted findings are unknown. Export public certificates separately and scan them.",
+        _ => "Certificate/container structure could not be fully interpreted. Retained public facts remain available. Check the format and export public certificates separately; no decryption or trust verification was performed.",
     }
 }
 

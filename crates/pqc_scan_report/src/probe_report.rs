@@ -157,9 +157,9 @@ fn label(key: &str, language: ReportLanguage) -> &str {
         "user_authentication_attempted" => ("User authentication attempted", "ユーザー認証の実施"),
         "offered_kex" => ("Fixed offered key exchange", "提示した固定の鍵交換方式"),
         "offered_host_key" => ("Fixed offered host-key type", "提示した固定のホスト鍵方式"),
-        "russh_version" => ("russh version", "russhの版"),
-        "schema_version" => ("Schema version", "スキーマの版"),
-        "scanner_version" => ("Scanner version", "スキャナーの版"),
+        "russh_version" => ("russh version", "russhのバージョン"),
+        "schema_version" => ("Schema version", "スキーマのバージョン"),
+        "scanner_version" => ("Scanner version", "スキャナーのバージョン"),
         "generated_at" => ("Generated at", "作成日時"),
         "protocol" => ("Observation method", "観測方法"),
         "attempt_id" => ("Attempt within this invocation", "今回の実行内の試行番号"),
@@ -186,9 +186,12 @@ fn label(key: &str, language: ReportLanguage) -> &str {
         "name" => ("Name", "名前"),
         "id" => ("Identifier", "識別子"),
         "provider" => ("Provider", "プロバイダー"),
-        "provider_version" => ("Provider version", "プロバイダーの版"),
-        "rustls_version" => ("rustls version", "rustlsの版"),
-        "protocol_versions" => ("Configured protocol version", "設定したプロトコルの版"),
+        "provider_version" => ("Provider version", "プロバイダーのバージョン"),
+        "rustls_version" => ("rustls version", "rustlsのバージョン"),
+        "protocol_versions" => (
+            "Configured protocol version",
+            "設定したプロトコルのバージョン",
+        ),
         "cipher_suites" => ("Configured cipher suite", "設定した暗号スイート"),
         "key_exchange_groups" => ("Configured key exchange group", "設定した鍵共有グループ"),
         "verification_name" => ("Verification name", "検証する名前"),
@@ -385,7 +388,11 @@ fn protocol_summary(
                     Some(771) => "TLS 1.2",
                     _ => value_text(value, "/details/negotiated/version/name").unwrap_or(unknown),
                 };
-                summary_item(out, text(language, "TLS version", "TLSの版"), version)?;
+                summary_item(
+                    out,
+                    text(language, "TLS version", "TLSのバージョン"),
+                    version,
+                )?;
                 summary_item(
                     out,
                     text(language, "Cipher suite", "暗号スイート"),

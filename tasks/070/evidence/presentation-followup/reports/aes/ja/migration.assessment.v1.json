@@ -1,0 +1,166 @@
+{
+  "format": "pqc-scan.migration-assessment",
+  "version": 1,
+  "input": {
+    "format": "inventory-v1",
+    "sha256": "4fa26ce90d52873a004322244dfa411da64b2898cd5a2308898a8eec3b4f5762",
+    "schema_version": 1,
+    "collection_time": "2026-11-17T00:00:00Z",
+    "run_id": "scan-v1-a9ff06a933b8f9ebe359562fad7005b81895235c5435bb91a62562566eb479b7"
+  },
+  "context": null,
+  "catalog": {
+    "id": "migration-facts-v1",
+    "version": "1.0.0"
+  },
+  "policy": {
+    "id": "migration-decision-v1",
+    "version": "1.0.0"
+  },
+  "model": {
+    "id": "decision_table",
+    "version": "1.0.0"
+  },
+  "as_of": "2026-11-18T00:00:00Z",
+  "targets": [
+    {
+      "id": "migration_target-v1-9087c234ac21045402107c59e5964b597d752e36454cf4798ad90f371a06b8b2",
+      "source_ref": {
+        "run_id": "scan-v1-a9ff06a933b8f9ebe359562fad7005b81895235c5435bb91a62562566eb479b7",
+        "observation_id": "observation-v1-b75202b15a37ec57748d93b99e1538e2c70f9b0a81bb14f7b908c113e0bae108",
+        "root_asset_id": "asset-v1-b906c9530415a98ca87ef26dc0052d78b041f629830c031b9ad5f34aa437800d",
+        "role": "algorithm",
+        "path": "app.txt",
+        "line": 1
+      },
+      "technical": {
+        "identifier": "AES-256",
+        "construction": "symmetric",
+        "standardization": "classical_standard",
+        "quantum": "generic_search",
+        "purpose": "encryption",
+        "parameters_known": true,
+        "classical_concerns": [],
+        "attack_models": [
+          {
+            "attack": "generic_key_search",
+            "exponent_numerator": 256,
+            "exponent_denominator": 2,
+            "assumption": "ideal_oracle_queries_not_operational_security_bits; memory_parallelism_and_circuit_cost_not_estimated"
+          }
+        ],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "F12",
+          "LOCAL026",
+          "NIST-PQ-FAQ"
+        ],
+        "encoding_assurance": "unknown",
+        "protocol_ref": null,
+        "role": "algorithm"
+      },
+      "observation": {
+        "method": "ast_pattern",
+        "assurance": "syntactic",
+        "usage": "referenced",
+        "collection_outcome": "complete"
+      },
+      "limitations": [
+        "unknown_parameter_encoding"
+      ]
+    }
+  ],
+  "claims": [],
+  "candidates": [],
+  "decisions": [
+    {
+      "id": "migration_decision-v1-ad6800ebe0c58748c2108b911ab60f47c2e970652161613282195a11c439355b",
+      "target_id": "migration_target-v1-9087c234ac21045402107c59e5964b597d752e36454cf4798ad90f371a06b8b2",
+      "system_id": null,
+      "urgency": "undetermined",
+      "information": "incomplete",
+      "readiness": "unknown",
+      "reason_codes": [
+        "insufficient_information",
+        "unknown_parameter_encoding",
+        "unknown_binding"
+      ],
+      "missing_inputs": [
+        "applicability",
+        "context.binding",
+        "support.parameters",
+        "support.protocol",
+        "support.provider",
+        "support.runtime",
+        "usage_state",
+        "use_case"
+      ],
+      "applied_claim_ids": [],
+      "action": {
+        "kind": "investigate",
+        "candidate_ids": [],
+        "blocking_prerequisites": [],
+        "validation_steps": [
+          "confirm_actual_use_and_required_purpose",
+          "refresh_missing_or_stale_scoped_claims"
+        ]
+      },
+      "source_ids": [
+        "F12",
+        "F14",
+        "LOCAL026",
+        "NIST-PQ-FAQ"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "F12",
+      "edition": "task066 adopted contract 2026-11-18",
+      "clause": "technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "saved claims preserve assurance; digest does not attest collector truth"
+    },
+    {
+      "id": "F14",
+      "edition": "migration-decision-v1 1.0.0; adopted 2026-11-18",
+      "clause": "P1-P8; readiness and action precedence",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "local advisory policy; conformance is not practitioner usefulness"
+    },
+    {
+      "id": "LOCAL026",
+      "edition": "local-assessment-1",
+      "clause": "finite vocabulary and evidence limits",
+      "uri": null,
+      "local_source_id": "docs/architecture/LOCAL-ASSESSMENT-V1.md",
+      "scope_limit": "advisory facts; no deployment or cryptographic verification"
+    },
+    {
+      "id": "NIST-PQ-FAQ",
+      "edition": "task056 pinned FAQ snapshot",
+      "clause": "quantum public-key and generic-search models",
+      "uri": "https://csrc.nist.gov/projects/post-quantum-cryptography/faqs",
+      "local_source_id": null,
+      "scope_limit": "not quantum arrival, probability or operational security bits"
+    }
+  ],
+  "coverage": {
+    "collection_outcome": "complete",
+    "input_count": 1,
+    "target_count": 1,
+    "unknown_identity_or_parameters_targets": 0,
+    "unresolved_target_count": 0,
+    "limits": [
+      "inventory_not_exhaustive"
+    ]
+  },
+  "limitations": [
+    "saved_content_not_collector_attestation",
+    "no_offline_cryptographic_reverification",
+    "local_advisory_policy_not_practitioner_validation"
+  ]
+}

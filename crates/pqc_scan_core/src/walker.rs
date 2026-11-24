@@ -24,6 +24,7 @@ pub(crate) struct WalkOutcome {
     pub diagnostics: Vec<ScanDiagnostic>,
     pub excluded: u64,
     pub failed_entries: u64,
+    pub custom_excludes: bool,
 }
 
 pub(crate) fn walk_repository_detailed(root: &Path, max_size_bytes: usize) -> Result<WalkOutcome> {
@@ -35,6 +36,14 @@ pub(crate) fn walk_repository_detailed_with_selection(
     max_size_bytes: usize,
     selection: crate::FileSelection,
 ) -> Result<WalkOutcome> {
+    walk_repository_detailed_with_scope(root, max_size_bytes, selection.into())
+}
+
+pub(crate) fn walk_repository_detailed_with_scope(
+    root: &Path,
+    max_size_bytes: usize,
+    selection: crate::ScanSelection,
+) -> Result<WalkOutcome> {
     std::fs::metadata(root).with_context(|| "failed to access scan root")?;
     let mut builder = WalkBuilder::new(root);
     builder
@@ -45,7 +54,7 @@ pub(crate) fn walk_repository_detailed_with_selection(
         .git_global(true)
         .git_exclude(true);
 
-    collect_entries_with_selection(root, max_size_bytes, builder.build(), selection)
+    collect_entries_with_scope(root, max_size_bytes, builder.build(), selection)
 }
 
 #[cfg(test)]
@@ -61,12 +70,53 @@ fn collect_entries(
         crate::FileSelection::default(),
     )
 }
+#[cfg(test)]
 fn collect_entries_with_selection(
     root: &Path,
     max_size_bytes: usize,
     entries: impl IntoIterator<Item = std::result::Result<ignore::DirEntry, ignore::Error>>,
     selection: crate::FileSelection,
 ) -> Result<WalkOutcome> {
+    collect_entries_with_scope(root, max_size_bytes, entries, selection.into())
+}
+fn collect_entries_with_scope(
+    root: &Path,
+    max_size_bytes: usize,
+    entries: impl IntoIterator<Item = std::result::Result<ignore::DirEntry, ignore::Error>>,
+    selection: crate::ScanSelection,
+) -> Result<WalkOutcome> {
+    // Read only the selected root's policy through the same bounded, no-follow
+    // reader as source files. Do not inherit a policy from outside that root.
+    let policy = root.join(".pqcignore");
+    let has_policy = if root.is_dir() {
+        match std::fs::symlink_metadata(&policy) {
+            Ok(_) => true,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => false,
+            Err(_) => anyhow::bail!("failed to access .pqcignore"),
+        }
+    } else {
+        false
+    };
+    let custom = if has_policy {
+        let bytes = crate::safe_read::read(root, &policy, max_size_bytes)
+            .map_err(|_| anyhow::anyhow!("failed to read .pqcignore"))?;
+        let text =
+            std::str::from_utf8(&bytes).map_err(|_| anyhow::anyhow!(".pqcignore must be UTF-8"))?;
+        let text = text.strip_prefix('\u{feff}').unwrap_or(text);
+        let mut builder = ignore::gitignore::GitignoreBuilder::new(root);
+        for line in text.lines() {
+            builder
+                .add_line(Some(policy.clone()), line)
+                .map_err(|_| anyhow::anyhow!("invalid .pqcignore pattern"))?;
+        }
+        Some(
+            builder
+                .build()
+                .map_err(|_| anyhow::anyhow!("invalid .pqcignore policy"))?,
+        )
+    } else {
+        None
+    };
     let mut files = Vec::new();
     let mut stats = WalkStats::default();
     let mut diagnostics = Vec::new();
@@ -95,8 +145,17 @@ fn collect_entries_with_selection(
             continue;
         }
 
-        if excluded_directory_or_markdown(path)
-            || (!selection.include_non_scannable && crate::file_selection::known_extension(path))
+        if (selection.exclude_tests && crate::file_selection::test_path(root, path))
+            || excluded_directory_or_markdown(if path == root {
+                path.file_name().map(Path::new).unwrap_or(path)
+            } else {
+                path.strip_prefix(root).unwrap_or(path)
+            })
+            || custom.as_ref().is_some_and(|matcher| {
+                path == policy || matcher.matched_path_or_any_parents(path, false).is_ignore()
+            })
+            || (!selection.files.include_non_scannable
+                && crate::file_selection::known_extension(path))
         {
             stats.skipped += 1;
             excluded += 1;
@@ -115,7 +174,11 @@ fn collect_entries_with_selection(
                 DiagnosticCode::ReadFailed,
                 Some(relative_path(root, path)),
                 None,
-            ));
+            ).with_explanation(Some(if entry.file_type().is_some_and(|t| t.is_symlink()) {
+                "Symbolic link not followed by scan policy. Its target was not inspected through this path. Select the real target folder explicitly if needed."
+            } else {
+                "Non-regular filesystem entry not read by scan policy. Select a regular file or inspect this entry separately."
+            })));
             continue;
         }
 
@@ -136,17 +199,20 @@ fn collect_entries_with_selection(
         if meta.len() as usize > max_size_bytes {
             stats.skipped += 1;
             excluded += 1;
-            diagnostics.push(ScanDiagnostic::new(
-                DiagnosticCode::FileTooLarge,
-                Some(relative_path(root, path)),
-                None,
-            ));
+            diagnostics.push(
+                ScanDiagnostic::new(
+                    DiagnosticCode::FileTooLarge,
+                    Some(relative_path(root, path)),
+                    None,
+                )
+                .with_size_limit(max_size_bytes, meta.len()),
+            );
             continue;
         }
 
         // Failure to preflight must not turn a read/metadata error into an exclusion.
         // safe_read retains no-follow, regular-file and size checks here too.
-        if !selection.include_non_scannable && !crate::file_selection::protects_crypto(path) {
+        if !selection.files.include_non_scannable && !crate::file_selection::protects_crypto(path) {
             if let Ok(bytes) = crate::safe_read::read(root, path, max_size_bytes) {
                 if crate::file_selection::non_text(path, &bytes) {
                     stats.skipped += 1;
@@ -170,6 +236,7 @@ fn collect_entries_with_selection(
         diagnostics,
         excluded,
         failed_entries,
+        custom_excludes: custom.is_some(),
     })
 }
 
@@ -206,6 +273,67 @@ mod tests {
     use std::fs;
     use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn selected_root_is_not_excluded_by_ancestor_names() {
+        let parent = temp_dir("relative-excludes");
+        let root = parent.join("target/docs/product");
+        fs::create_dir_all(root.join("target")).unwrap();
+        fs::write(root.join("main.rs"), "fn main() {}").unwrap();
+        fs::write(root.join("target/generated.rs"), "fn ignored() {}").unwrap();
+        let outcome = walk_repository_detailed(&root, 4096).unwrap();
+        assert_eq!(outcome.files, vec![root.join("main.rs")]);
+        assert_eq!(outcome.excluded, 1);
+        // Explicit file roots still honor the markdown exclusion.
+        fs::write(root.join("notes.md"), "notes").unwrap();
+        assert!(walk_repository_detailed(&root.join("notes.md"), 4096)
+            .unwrap()
+            .files
+            .is_empty());
+        fs::remove_dir_all(parent).unwrap();
+    }
+
+    #[test]
+    fn custom_policy_is_root_local_supports_negation_and_rejects_invalid_input() {
+        let parent = temp_dir("custom-excludes");
+        let root = parent.join("product");
+        fs::create_dir_all(root.join("fixtures")).unwrap();
+        fs::write(parent.join(".pqcignore"), "*\n").unwrap();
+        fs::write(
+            root.join(".pqcignore"),
+            "\u{feff}fixtures/*.rs\r\n!fixtures/keep.rs\r\n",
+        )
+        .unwrap();
+        fs::write(root.join("main.rs"), "fn main() {}").unwrap();
+        fs::write(root.join("fixtures/drop.rs"), "fn test() {}").unwrap();
+        fs::write(root.join("fixtures/keep.rs"), "fn keep() {}").unwrap();
+        let outcome = walk_repository_detailed(&root, 4096).unwrap();
+        assert!(outcome.custom_excludes);
+        assert_eq!(outcome.files.len(), 2);
+        assert!(outcome.files.contains(&root.join("main.rs")));
+        assert!(outcome.files.contains(&root.join("fixtures/keep.rs")));
+        assert_eq!(outcome.excluded, 2);
+        fs::write(root.join(".pqcignore"), "[z-a]PRIVATE_PATTERN\n").unwrap();
+        let error = walk_repository_detailed(&root, 4096).err().unwrap();
+        assert!(!error.to_string().contains("PRIVATE_PATTERN"));
+        fs::write(root.join(".pqcignore"), [255]).unwrap();
+        assert!(walk_repository_detailed(&root, 4096).is_err());
+        fs::write(root.join(".pqcignore"), "fixtures/*.rs\n").unwrap();
+        assert!(walk_repository_detailed(&root, 4).is_err());
+        fs::remove_dir_all(parent).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn custom_policy_does_not_follow_symlinks() {
+        let root = temp_dir("custom-policy-link");
+        let outside = temp_dir("custom-policy-outside");
+        fs::write(outside.join("policy"), "*\n").unwrap();
+        std::os::unix::fs::symlink(outside.join("policy"), root.join(".pqcignore")).unwrap();
+        assert!(walk_repository_detailed(&root, 4096).is_err());
+        fs::remove_dir_all(root).unwrap();
+        fs::remove_dir_all(outside).unwrap();
+    }
 
     fn temp_dir(prefix: &str) -> PathBuf {
         let mut dir = std::env::temp_dir();

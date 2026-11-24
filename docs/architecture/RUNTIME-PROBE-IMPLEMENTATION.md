@@ -174,6 +174,10 @@ Use task030 authorization, nonblocking metered transport, cancellation/idle shut
 and fixed phase/aggregate deadlines. No alternate DNS resolution, implicit retry,
 proxy environment, SSH config, manifest/SAN-derived target or certificate URL fetch.
 Signal cancellation must reach the token, close sockets and reap a resolver child.
+Unix CLI SIGINT delivery uses signal-hook 0.4.6 on a dedicated worker thread,
+which calls the same cancellation path outside the asynchronous signal handler.
+Non-Unix keeps ctrlc. Handler setup failures retain the fixed operational error;
+probe diagnostics, deadlines, socket shutdown and resolver cleanup are unchanged.
 
 TLS: actual classical/hybrid/HRR facts, verifier negatives, missing/unknown group,
 large chains, local limits, alerts/slow peers, no application/clientauth/resumption,

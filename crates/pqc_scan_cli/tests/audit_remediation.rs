@@ -236,8 +236,11 @@ fn human_headers_omit_internal_explanations_but_keep_findings_and_inspection_sta
                 .unwrap()
                 .matches("data-finding-id=")
                 .count(),
-            scan.findings().len()
+            2 // RS256 is one item with three supporting rules; rustls remains separate.
         );
+        assert_eq!(scan.findings().len(), 4);
+        assert!(html.contains("API_JOSE_RSA_ALG"));
+        assert!(html.contains("TS_JWT_RSA_ALGS"));
         assert!(html.contains("data-inspection-status=\"partial\""));
         assert!(md.contains("partial"));
         assert!(html.contains("JWT_RS256"));

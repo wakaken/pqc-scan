@@ -279,9 +279,10 @@ def prepare(args):
     if binary_data[:8] != bytes.fromhex('cffaedfe0c000001'):
         raise ValueError('expected thin Mach-O aarch64 binary for declared target')
     entries = {'bin/pqc-scan': (binary_data, 0o755)}
-    explicit = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md', 'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json', 'third_party/notices/README.md']
+    explicit = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md', 'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md', 'schemas/migration-context-v1.schema.json', 'docs/images/v0.4/CAPTURES.json', 'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json', 'third_party/notices/README.md']
     paths = ([root/p for p in explicit] + sorted((root/'rules/default').glob('*.yml'))
-             + sorted((root/'docs/releases').glob('*.md')))
+             + sorted((root/'docs/releases').glob('*.md'))
+             + sorted((root/'docs/images/v0.4').glob('*.jpg')))
     source_hashes = {}
     for path in paths:
         if path.is_symlink() or not path.resolve().is_relative_to(root):

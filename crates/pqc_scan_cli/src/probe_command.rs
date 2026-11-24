@@ -52,6 +52,23 @@ pub(crate) struct SshKexArgs {
 fn cancellation() -> Result<Cancellation> {
     let cancellation = Cancellation::new();
     let signal = cancellation.clone();
+    #[cfg(unix)]
+    {
+        let mut signals = signal_hook::iterator::Signals::new([signal_hook::consts::SIGINT])
+            .map_err(|_| anyhow::anyhow!("failed to install probe cancellation handler"))?;
+        // Cancellation also locks and shuts down the socket: run it on a worker,
+        // never in the asynchronous signal handler. Like ctrlc's handler, this
+        // worker serves the single probe command for the lifetime of the process.
+        std::thread::Builder::new()
+            .name("pqc-probe-sigint".into())
+            .spawn(move || {
+                for _ in signals.forever() {
+                    signal.cancel();
+                }
+            })
+            .map_err(|_| anyhow::anyhow!("failed to install probe cancellation handler"))?;
+    }
+    #[cfg(not(unix))]
     ctrlc::set_handler(move || signal.cancel())
         .map_err(|_| anyhow::anyhow!("failed to install probe cancellation handler"))?;
     Ok(cancellation)

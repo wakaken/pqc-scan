@@ -1,0 +1,92 @@
+id: '067'
+title: Extend technical assessment and ingest approved saved evidence formats
+type: improvement
+priority: high
+status: done
+owner: Main agent
+phase: '3'
+description: >
+  Implement only the approved technical classification gaps and bounded saved-input
+  adapters using the existing catalog and assessment functions. Preserve static
+  and runtime source contracts and the existing migration-review-v1 behavior.
+plan_reference: docs/roadmap/v0.4/ROADMAP.md
+requirements_reference: docs/roadmap/v0.4/REQUIREMENTS.md
+quality_requirements:
+  - R2-01
+  - R2-02
+  - R2-03
+  - R2-04
+  - R2-05
+depends_on:
+  - '066'
+target_components:
+  - crates/pqc_scan_core/src/assessment.rs
+  - crates/pqc_scan_core/src/inventory.rs
+  - schemas/
+  - crates/pqc_scan_core/tests/
+existing_assets:
+  - E-TECH
+  - E-POLICY
+  - E-ID
+  - E-RUNTIME
+  - E-JUDGMENT
+problem:
+  - Selected saved runtime records do not enter the current static technical evaluator.
+  - Approved classification/capture gaps must be closed without changing legacy judgments through shared helpers.
+acceptance:
+  - 'R2-01: Identity, parameters, purpose, standardization, quantum exposure and classical concerns remain distinct across approved positive/negative/unknown cases.'
+  - 'R2-02: Exact draft/final identifiers, hybrid components/combiner, certificate roles, establishment/authentication and integration readiness retain their approved meanings.'
+  - 'R2-03: Static references, dependency declarations/resolution, parsed attributes, advertisements, negotiated facts and operator claims retain their original assurance; failed or missing evidence is not promoted.'
+  - 'R2-04: Inventory v1 and TLS v1 are ingested offline under the approved contract; selected SSH formats meet D3 or are explicitly unsupported; content/version/reference and partial/failure gates are checked.'
+  - 'R2-05: New judgments trace to adopted catalog/standard clauses and versions; dispatch preserves v1 policy/catalog, Risk and existing output/ID contracts.'
+deliverables:
+  - tasks/067/TASK-067-RESULTS.md
+  - tasks/067/evidence/
+  - Approved shared technical-assessment extensions and bounded saved-input adapters with meaningful tests and affected documentation.
+implementation_steps:
+  - Verify task-066 contracts, actual D3/D5 decisions and the selected source before implementation.
+  - Add only missing shared classification and format mappings; reuse existing public-certificate facts and reference validation.
+  - Implement approved input limits, version rejection and assurance gates without modifying collectors or initiating network requests.
+  - Run independent expected cases, retained v1 goldens and affected failure/feature checks; update relevant guidance with the behavior.
+  - Obtain implementation review, finish all applicable checks, obtain test review and bind final evidence to the actual sources.
+testing_requirements:
+  - Cover the technical/ingestion assertions of A01, A04-A06, A10-A11 and A16-A17 plus exact-identifier, malformed-parameter and source-content substitution boundaries; business decisions and human rendering belong to tasks 069/070.
+  - Reject invalid versions/references, unsupported selected facts and failed-verification promotion; preserve safe partial facts.
+  - Exercise the approved adapters without live endpoint access and verify legacy catalog/policy/schema/ID behavior.
+  - Apply all relevant Rust and optional-configuration checks in docs/agent/VERIFICATION.md and both independent review stages.
+out_of_scope:
+  - Replacing the scanner/catalog, new probe transports, integrated-inventory migration without separate approval and business-priority implementation.
+risks:
+  - Normalizing a draft identifier or shared helper change may silently alter old policy outcomes.
+  - A session's key-exchange evidence may be misrepresented as PQC authentication or whole-system safety.
+approval_boundary:
+  - Execute only after selection and task-066 prerequisite completion; gated D1/D3/D5 decisions must be recorded first.
+  - Existing rule/crypto/storage/support boundaries remain in force; network publication and live probing are not authorized by this task.
+planning_record:
+  date: '2026-11-18'
+  scope: Definition only; no code, adapter, schema or test has been changed or executed.
+  work_packages: [W2, W4]
+  primary_requirements: [R2-01, R2-02, R2-03, R2-04, R2-05]
+  supporting_requirements: []
+  completion_evidence: Each R2 clause needs implemented behavior, independent expected cases, applicable final-source checks and both review stages.
+execution_record:
+  selected_on: '2026-11-18'
+  source_head: c7e76b59da44ffdc8a60da86efd5393e70a039e3
+  plan: tasks/067/TASK-067-PLAN.md
+  lifecycle:
+    - '2026-11-18: pending -> planned; selected task067 onward in dependency order; adopted task066 contract retained.'
+    - '2026-11-18: planned -> in-progress; implementing bounded adapters and new-only technical dispatch.'
+    - '2026-11-18: in-progress -> review; initial implementation and targeted tests ready for /root/v04_implementation_review.'
+    - '2026-11-18: review -> in-progress; correcting I067-01 parameter uncertainty and I067-02 TLS identity/SNI consistency.'
+    - '2026-11-18: in-progress -> review; implementation fixes accepted by the same reviewer; required final checks passed; test review remains.'
+    - '2026-11-18: review -> done; both independent stages accepted; all R2-01..05 clauses and required final-source checks verified.'
+  reviews: tasks/067/TASK-067-REVIEWS.md
+  results: tasks/067/TASK-067-RESULTS.md
+  reopened_on: '2026-11-18'
+  reopening_reason: Task069 integration exposed accepted contradictory AES size and known EC curve/size facts; R2-01/R2-04 require correction before renewed completion. Original results and review evidence remain historical and unchanged.
+  correction_scope: New-dispatch parameter consistency only; legacy catalog/rules/outputs remain unchanged. Reuse the same two reviewers with the combined067-correction/069 package.
+
+  renewed_review: Combined067 correction/069 implementation and test review accepted by the original identities; final checks passed.
+
+  final_completion: All original criteria verified against final source; same implementation and test reviewer identities accepted, with final required checks recorded in tasks/069/evidence/COMMANDS.json.
+  completion_transition: "2026-11-18: review -> done; renewed067 and069 accepted after both stages and final-source checks; original067 history retained."

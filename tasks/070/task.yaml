@@ -1,0 +1,92 @@
+id: '070'
+title: Present migration decisions in paired English and Japanese reports
+type: improvement
+priority: high
+status: done
+owner: Main agent
+phase: '6'
+description: >
+  Add the approved explicitly selected human decision view to the existing report
+  system, reusing task-069 structured decisions. Keep English/Japanese meaning,
+  uncertainty and actions consistent without changing default report behavior.
+plan_reference: docs/roadmap/v0.4/ROADMAP.md
+requirements_reference: docs/roadmap/v0.4/REQUIREMENTS.md
+quality_requirements:
+  - X03
+depends_on:
+  - '069'
+target_components:
+  - crates/pqc_scan_report/src/
+  - crates/pqc_scan_cli/src/
+  - docs/user/REPORTS.md
+  - docs/user/REPORTS.ja.md
+existing_assets:
+  - E-COMPAT
+  - E-OUTPUT
+  - E-POLICY
+problem:
+  - Structured decision output alone does not deliver the human-readable migration guidance required by v0.4.
+  - Existing default HTML has a different purpose and must not be repurposed implicitly.
+acceptance:
+  - 'X03: At least the approved opt-in bilingual Markdown view explains result, location, response, reason and next check; human and machine output agree on claims, uncertainty and scope.'
+  - Complete D4-selected presentation only; any opt-in HTML follows the recorded decision rather than creating a new UI or changing default views.
+  - Preserve evidence, missing information, urgency/readiness distinctions, localization-independent IDs and safe output handling without evaluating policy in writers.
+  - Verify paired rendered output, escaping/privacy, terminology and applicable browser behavior against final source; update paired user documentation together.
+deliverables:
+  - tasks/070/TASK-070-RESULTS.md
+  - tasks/070/evidence/
+  - Approved paired decision views, affected user documentation and rendered/compatibility/browser evidence.
+implementation_steps:
+  - Confirm D4 scope and consume task-069 decisions and source references without recomputing them in a writer.
+  - Add the explicitly selected Markdown view and only the additional presentation approved under D4.
+  - Write natural Japanese with humanizer-jp and maintain factual parity with English and the structured output.
+  - Verify output safety, escaping, meaningful next actions, unknown/blocked cases and unchanged default views.
+  - Complete implementation review, required final checks and applicable real-browser observations, then test review and final-source binding.
+testing_requirements:
+  - Render paired cases including A01-A02, A07, A09-A15 and A17-A18, retaining scope, reason and uncertainty across formats.
+  - Check generated English/Japanese output meaning, reference integrity, escaping, secret canaries and default-output compatibility.
+  - Follow docs/agent/REPORTS.md for applicable layout, keyboard and loaded-offline checks using a dedicated loopback directory; missing required browser evidence prevents completion.
+  - Apply relevant Rust/report/configuration checks and both independent review stages; source inspection is not rendered verification.
+out_of_scope:
+  - A new web application, new policy logic in renderers, arbitrary runtime translation and implicit default-report redesign.
+risks:
+  - Translation or summaries may turn unverified claims into verified usage or conceal urgency behind missing information.
+  - Source/DOM assertions alone may miss a materially unusable rendered report.
+approval_boundary:
+  - Execution requires later selection and task-069 completion; the D4 presentation and output contract must already be recorded.
+  - No support expansion, publication or storage-contract change beyond the approved scope is implied.
+planning_record:
+  date: '2026-11-18'
+  scope: Definition only; no generated report, product UI or browser acceptance has been executed.
+  work_packages: [W5]
+  primary_requirements: [X03]
+  supporting_requirements: []
+  completion_evidence: Paired final rendered behavior, applicable browser checks, required tests and both review stages must establish X03; structured JSON alone is insufficient.
+
+execution_record:
+  selected_on: '2026-11-18'
+  source_head: c7e76b59da44ffdc8a60da86efd5393e70a039e3
+  plan: tasks/070/TASK-070-PLAN.md
+  lifecycle:
+    - '2026-11-18: pending -> planned; 069 and renewed067 completed with both original reviewer identities; adopted D4 retained.'
+    - '2026-11-18: planned -> in-progress; paired Markdown consumes the reviewed structured decisions; no product HTML or serve change.'
+  user_steering: Complete067-070 before deciding071 resources; no external recruitment/contact, fees, numeric adoption or publication/release.
+
+  implementation_review: tasks/070/TASK-070-REVIEWS.md
+  results: tasks/070/TASK-070-RESULTS.md
+  review_transition: '2026-11-18: in-progress -> review; implementation accepted, required checks and real-browser observations passed; test review pending.'
+
+  completion_transition: '2026-11-18: review -> done; both original independent reviewer identities accepted; all originalX03/D4 deliverables and final-source Rust/rendered/browser checks passed.'
+  test_review: tasks/070/TASK-070-REVIEWS.md
+
+presentation_followup:
+  date: '2026-11-18'
+  status: done
+  approval: Maintainer explicitly requested understandable organization migration reports styled like scan HTML and asked for assess-generated HTML. This selects additive HTML output under D4 and repairs human Markdown readability; no policy/schema change.
+  lifecycle: 'done -> in-progress; user found the raw-record presentation incomprehensible; preserve prior conformance/review history and reopen X03 presentation acceptance.'
+  plan: tasks/070/TASK-070-PRESENTATION-FOLLOWUP.md
+  reviewer_continuity: Reuse /root/v04_implementation_review and /root/v04_test_review; no delegation or extra identities.
+  review_transition: "2026-11-18: in-progress -> review; final checks/browser passed, implementation accepted; test review pending."
+  results: tasks/070/TASK-070-PRESENTATION-RESULTS.md
+  completion_transition: "2026-11-18: review -> done; original implementation/test reviewers accepted final X03 repair and D4-selected HTML; all criteria/checks and final-source evidence passed."
+  test_review: tasks/070/TASK-070-REVIEWS.md

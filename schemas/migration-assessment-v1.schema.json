@@ -1,0 +1,1683 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pqc-scan.local/schemas/migration-assessment-v1.schema.json",
+  "title": "Saved-evidence local migration decision assessment v1",
+  "description": "Adopted D1/D2/D4 output. Shape is not authenticity, policy usefulness or whole-system safety. Actual input/context/target/claim/source/candidate binding is additionally validated by core.",
+  "$defs": {
+    "algorithm": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "construction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "standardization": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "quantum": {
+          "enum": [
+            "vulnerable",
+            "designed_resistant",
+            "generic_search",
+            "unknown"
+          ]
+        },
+        "purpose": {
+          "enum": [
+            "key_establishment",
+            "signature",
+            "encryption",
+            "hash",
+            "unknown"
+          ]
+        },
+        "parameters_known": {
+          "type": "boolean"
+        },
+        "classical_concerns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 16
+        },
+        "attack_models": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "attack": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "exponent_numerator": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "exponent_denominator": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "assumption": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              }
+            },
+            "required": [
+              "attack",
+              "exponent_numerator",
+              "exponent_denominator",
+              "assumption"
+            ]
+          },
+          "maxItems": 4
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "assessment": {
+                "$ref": "#/$defs/algorithm"
+              }
+            },
+            "required": [
+              "role",
+              "assessment"
+            ]
+          },
+          "maxItems": 4
+        },
+        "combiner_assessment": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        }
+      },
+      "required": [
+        "identifier",
+        "construction",
+        "standardization",
+        "quantum",
+        "purpose",
+        "parameters_known",
+        "classical_concerns",
+        "attack_models",
+        "components",
+        "combiner_assessment",
+        "source_ids"
+      ]
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_kind": {
+          "enum": [
+            "operator_claim",
+            "external_review_claim"
+          ]
+        },
+        "actor_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]{0,63}$"
+        },
+        "asserted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reference_id": {
+          "type": "string",
+          "pattern": "^[!-~]{1,128}$"
+        }
+      },
+      "required": [
+        "source_kind",
+        "actor_id",
+        "asserted_at"
+      ]
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^migration_claim-v1-[0-9a-f]{64}$"
+        },
+        "context_pointer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "field": {
+          "enum": [
+            "applicability",
+            "use_case",
+            "usage_state",
+            "business_critical",
+            "confidential",
+            "historical_ciphertext",
+            "confidentiality_until",
+            "signature_verification_until",
+            "migration_lead_seconds",
+            "deadline",
+            "support.runtime",
+            "support.provider",
+            "support.parameters",
+            "support.peer",
+            "support.protocol",
+            "support.jose",
+            "support.verifiers",
+            "support.pki",
+            "migration_target",
+            "migration_goal_month"
+          ]
+        },
+        "state": {
+          "enum": [
+            "known",
+            "unknown"
+          ]
+        },
+        "value": {},
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "freshness": {
+          "enum": [
+            "active",
+            "stale",
+            "not_yet_effective",
+            "unknown"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "context_pointer",
+        "field",
+        "state",
+        "provenance",
+        "freshness"
+      ],
+      "oneOf": [
+        {
+          "properties": {
+            "state": {
+              "const": "known"
+            }
+          },
+          "required": [
+            "value"
+          ]
+        },
+        {
+          "properties": {
+            "state": {
+              "const": "unknown"
+            }
+          },
+          "not": {
+            "required": [
+              "value"
+            ]
+          }
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "applicability"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "enum": [
+                  "applicable",
+                  "not_applicable"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "use_case"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "enum": [
+                  "key_establishment",
+                  "signature",
+                  "jwt",
+                  "pki",
+                  "encryption",
+                  "hashing"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "usage_state"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "enum": [
+                  "active",
+                  "planned",
+                  "test_only",
+                  "unused"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "business_critical"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "confidential"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "historical_ciphertext"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "confidentiality_until"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "signature_verification_until"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "migration_lead_seconds"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 315576000
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "deadline"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "none"
+                      }
+                    },
+                    "required": [
+                      "kind"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "at"
+                      },
+                      "at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "reference_id": {
+                        "type": "string",
+                        "pattern": "^[!-~]{1,128}$"
+                      },
+                      "scope_reason": {
+                        "enum": [
+                          "organization_policy",
+                          "contractual_requirement"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "at",
+                      "reference_id",
+                      "scope_reason"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "support.runtime"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "support.provider"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "support.parameters"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "support.peer"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "support.protocol"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "support.jose"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "support.verifiers"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "support.pki"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "migration_target"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "$ref": "#/$defs/configuration"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "field": {
+                "const": "migration_goal_month"
+              },
+              "state": {
+                "const": "known"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+                "not": {
+                  "pattern": "^0000-"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "use_case": {
+          "enum": [
+            "signature",
+            "jwt",
+            "pki",
+            "key_establishment",
+            "encryption",
+            "hashing"
+          ]
+        },
+        "algorithm": {
+          "enum": [
+            "ML-DSA",
+            "ML-KEM",
+            "AES",
+            "SHA-256"
+          ]
+        },
+        "parameters": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "use_case",
+        "algorithm",
+        "parameters"
+      ]
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "pqc-scan.migration-assessment"
+    },
+    "version": {
+      "const": 1
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "enum": [
+            "inventory-v1",
+            "tls-v1",
+            "ssh-offers-v1",
+            "ssh-kex-v1"
+          ]
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "schema_version": {
+          "const": 1
+        },
+        "collection_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^scan-v1-[0-9a-f]{64}$"
+        },
+        "attempt_id": {
+          "const": 1
+        },
+        "protocol": {
+          "enum": [
+            "tls",
+            "ssh_offers",
+            "ssh_kex"
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "sha256",
+        "schema_version",
+        "collection_time"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "format": {
+                "const": "inventory-v1"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "run_id"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "attempt_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "protocol"
+                  ]
+                }
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "attempt_id",
+              "protocol"
+            ],
+            "not": {
+              "required": [
+                "run_id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "context": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "format": {
+              "const": "pqc-scan.migration-context"
+            },
+            "version": {
+              "const": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "format",
+            "version",
+            "sha256"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "catalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "const": "migration-facts-v1"
+        },
+        "version": {
+          "const": "1.0.0"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "const": "migration-decision-v1"
+        },
+        "version": {
+          "const": "1.0.0"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ]
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "const": "decision_table"
+        },
+        "version": {
+          "const": "1.0.0"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ]
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^migration_target-v1-[0-9a-f]{64}$"
+          },
+          "source_ref": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "run_id": {
+                "type": "string",
+                "pattern": "^scan-v1-[0-9a-f]{64}$"
+              },
+              "observation_id": {
+                "type": "string",
+                "pattern": "^observation-v1-[0-9a-f]{64}$"
+              },
+              "root_asset_id": {
+                "type": "string",
+                "pattern": "^asset-v1-[0-9a-f]{64}$"
+              },
+              "role": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "attempt_id": {
+                "const": 1
+              },
+              "detail_path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "certificate_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "spki_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "line": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "dependency_provenance": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "protocol_version": {
+                "$ref": "#/$defs/registry"
+              },
+              "cipher_suite": {
+                "$ref": "#/$defs/registry"
+              },
+              "key_exchange_group": {
+                "$ref": "#/$defs/registry"
+              },
+              "not_before_unix": {
+                "type": "integer"
+              },
+              "not_after_unix": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "technical": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "identifier": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "construction": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "standardization": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "quantum": {
+                "enum": [
+                  "vulnerable",
+                  "designed_resistant",
+                  "generic_search",
+                  "unknown"
+                ]
+              },
+              "purpose": {
+                "enum": [
+                  "key_establishment",
+                  "signature",
+                  "encryption",
+                  "hash",
+                  "unknown"
+                ]
+              },
+              "parameters_known": {
+                "type": "boolean"
+              },
+              "classical_concerns": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "maxItems": 16
+              },
+              "attack_models": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "attack": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "exponent_numerator": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "exponent_denominator": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "assumption": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1024
+                    }
+                  },
+                  "required": [
+                    "attack",
+                    "exponent_numerator",
+                    "exponent_denominator",
+                    "assumption"
+                  ]
+                },
+                "maxItems": 4
+              },
+              "components": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "assessment": {
+                      "$ref": "#/$defs/algorithm"
+                    }
+                  },
+                  "required": [
+                    "role",
+                    "assessment"
+                  ]
+                },
+                "maxItems": 4
+              },
+              "combiner_assessment": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                }
+              },
+              "encoding_assurance": {
+                "enum": [
+                  "known",
+                  "unknown"
+                ]
+              },
+              "protocol_ref": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "role": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            },
+            "required": [
+              "identifier",
+              "construction",
+              "standardization",
+              "quantum",
+              "purpose",
+              "parameters_known",
+              "classical_concerns",
+              "attack_models",
+              "components",
+              "combiner_assessment",
+              "source_ids",
+              "encoding_assurance",
+              "protocol_ref",
+              "role"
+            ]
+          },
+          "observation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "method": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "assurance": {
+                "enum": [
+                  "lexical",
+                  "syntactic",
+                  "parsed",
+                  "unknown",
+                  "collector_reported_verified_session",
+                  "unauthenticated_advertisement",
+                  "unverified_or_incomplete"
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "referenced",
+                  "configured",
+                  "unknown",
+                  "negotiated"
+                ]
+              },
+              "collection_outcome": {
+                "enum": [
+                  "complete",
+                  "completed",
+                  "partial",
+                  "failed",
+                  "unknown"
+                ]
+              }
+            },
+            "required": [
+              "method",
+              "assurance",
+              "usage",
+              "collection_outcome"
+            ]
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "maxItems": 16
+          }
+        },
+        "required": [
+          "id",
+          "source_ref",
+          "technical",
+          "observation",
+          "limitations"
+        ]
+      },
+      "maxItems": 65536
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/claim"
+      },
+      "maxItems": 65536
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^migration_candidate-v1-[0-9a-f]{64}$"
+          },
+          "target_id": {
+            "type": "string",
+            "pattern": "^migration_target-v1-[0-9a-f]{64}$"
+          },
+          "identifier": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "purpose": {
+            "enum": [
+              "key_establishment",
+              "signature",
+              "encryption",
+              "hash",
+              "unknown"
+            ]
+          },
+          "status": {
+            "const": "candidate_primitive_integration_unverified"
+          },
+          "parameter_selection": {
+            "const": "explicit_parameter_selection_required"
+          },
+          "prerequisites": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "enum": [
+                    "runtime",
+                    "provider",
+                    "parameters",
+                    "peer",
+                    "protocol",
+                    "jose",
+                    "verifiers",
+                    "pki"
+                  ]
+                },
+                "claimed_support": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "applied_claim_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^migration_claim-v1-[0-9a-f]{64}$"
+                  },
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "name",
+                "claimed_support",
+                "applied_claim_ids"
+              ]
+            },
+            "maxItems": 8
+          },
+          "validation_steps": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "maxItems": 16
+          },
+          "source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          }
+        },
+        "required": [
+          "id",
+          "target_id",
+          "identifier",
+          "purpose",
+          "status",
+          "parameter_selection",
+          "prerequisites",
+          "validation_steps",
+          "source_ids"
+        ]
+      },
+      "maxItems": 65536
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^migration_decision-v1-[0-9a-f]{64}$"
+          },
+          "target_id": {
+            "type": "string",
+            "pattern": "^migration_target-v1-[0-9a-f]{64}$"
+          },
+          "system_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9._-]{0,63}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "urgency": {
+            "enum": [
+              "urgent",
+              "plan",
+              "monitor",
+              "undetermined",
+              "not_applicable"
+            ]
+          },
+          "information": {
+            "enum": [
+              "sufficient",
+              "incomplete",
+              "conflicting"
+            ]
+          },
+          "readiness": {
+            "enum": [
+              "ready",
+              "blocked",
+              "unknown",
+              "not_applicable"
+            ]
+          },
+          "reason_codes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "outside_declared_scope",
+                "known_classical_concern",
+                "deadline_reached_or_lead_time_boundary",
+                "critical_use_declared",
+                "long_protection_or_historical_ciphertext",
+                "stale_urgent_claim_requires_refresh",
+                "known_concern_plan",
+                "bounded_role_no_known_concern",
+                "insufficient_information",
+                "reference_only",
+                "unauthenticated_advertisement",
+                "collection_incomplete",
+                "verification_not_completed",
+                "unknown_primitive",
+                "unknown_parameter_encoding",
+                "unknown_binding",
+                "stale_claim",
+                "purpose_mismatch",
+                "combiner_implementation_unverified"
+              ]
+            },
+            "maxItems": 16
+          },
+          "missing_inputs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "maxItems": 16
+          },
+          "applied_claim_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^migration_claim-v1-[0-9a-f]{64}$"
+            },
+            "maxItems": 16
+          },
+          "action": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "enum": [
+                  "investigate",
+                  "plan",
+                  "unblock",
+                  "migrate",
+                  "monitor",
+                  "none"
+                ]
+              },
+              "candidate_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^migration_candidate-v1-[0-9a-f]{64}$"
+                },
+                "maxItems": 4
+              },
+              "blocking_prerequisites": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "runtime",
+                    "provider",
+                    "parameters",
+                    "peer",
+                    "protocol",
+                    "jose",
+                    "verifiers",
+                    "pki"
+                  ]
+                },
+                "maxItems": 8
+              },
+              "validation_steps": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "maxItems": 16
+              }
+            },
+            "required": [
+              "kind",
+              "candidate_ids",
+              "blocking_prerequisites",
+              "validation_steps"
+            ]
+          },
+          "source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          }
+        },
+        "required": [
+          "id",
+          "target_id",
+          "system_id",
+          "urgency",
+          "information",
+          "readiness",
+          "reason_codes",
+          "missing_inputs",
+          "applied_claim_ids",
+          "action",
+          "source_ids"
+        ]
+      },
+      "maxItems": 65536
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "edition": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "clause": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "uri": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^https://",
+                "maxLength": 1024
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "local_source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scope_limit": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "id",
+          "edition",
+          "clause",
+          "uri",
+          "local_source_id",
+          "scope_limit"
+        ]
+      },
+      "maxItems": 65536
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "collection_outcome": {
+          "enum": [
+            "complete",
+            "completed",
+            "partial",
+            "failed",
+            "unknown"
+          ]
+        },
+        "input_count": {
+          "const": 1
+        },
+        "target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unknown_identity_or_parameters_targets": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unresolved_target_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "collection_outcome",
+        "input_count",
+        "target_count",
+        "unknown_identity_or_parameters_targets",
+        "unresolved_target_count",
+        "limits"
+      ]
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      },
+      "maxItems": 16
+    }
+  },
+  "required": [
+    "format",
+    "version",
+    "input",
+    "context",
+    "catalog",
+    "policy",
+    "model",
+    "as_of",
+    "targets",
+    "claims",
+    "candidates",
+    "decisions",
+    "sources",
+    "coverage",
+    "limitations"
+  ]
+}

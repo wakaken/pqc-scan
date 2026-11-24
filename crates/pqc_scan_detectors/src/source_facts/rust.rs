@@ -22,7 +22,7 @@ fn root_name(ctx: &Context<'_, '_>, mut node: Node<'_>) -> String {
         }
         return ctx.source(node).trim_start_matches("::").to_string();
     }
-    ctx.truncated.set(true);
+    ctx.limit("source_alias_depth", MAX_DEPTH, MAX_DEPTH);
     String::new()
 }
 fn external(ctx: &Context<'_, '_>, node: Node<'_>) -> bool {
@@ -79,7 +79,7 @@ fn generation(ctx: &Context<'_, '_>, node: Node<'_>) -> Option<&'static str> {
 }
 fn role(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> Option<usize> {
     if depth > MAX_DEPTH {
-        ctx.truncated.set(true);
+        ctx.limit("source_alias_depth", MAX_DEPTH, MAX_DEPTH);
         return None;
     }
     if node.kind() != "identifier" {
@@ -101,7 +101,7 @@ fn role(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> Option<usize> {
     }
     None
 }
-pub(super) fn inspect<'a>(ctx: &mut Context<'a, '_>, facts: &mut Facts) {
+pub(super) fn inspect<'a>(ctx: &mut Context<'a, '_>, facts: &mut Facts, enabled: bool) {
     let nodes = ctx.nodes.clone();
     for node in &nodes {
         let scope = ctx.scope(*node);
@@ -166,6 +166,9 @@ pub(super) fn inspect<'a>(ctx: &mut Context<'a, '_>, facts: &mut Facts) {
             }
             _ => {}
         }
+    }
+    if !enabled {
+        return;
     }
     for node in &nodes {
         if node.kind() != "use_declaration" {

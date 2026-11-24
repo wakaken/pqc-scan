@@ -2,9 +2,9 @@
 
 This document lists all built-in detection rules shipped in `rules/default/` and explains severity levels used in reports.
 
-- Total rules: **123**
+- Total rules: **125**
 - Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`
-- Kind breakdown: `certificate`: 18, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 26
+- Kind breakdown: `certificate`: 18, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 28
 
 ## Validation and quality review
 
@@ -24,7 +24,7 @@ for blank ID/confidence/traversal errors and unchanged scope behavior.
 | `high` (41) | Strong crypto risk in production paths. | Prioritize in active migration backlog. |
 | `medium` (56) | Meaningful migration signal requiring design/planning. | Schedule remediation with clear owner and target release. |
 | `low` (6) | Contextual or lower-confidence finding. | Triage and backlog when confirmed. |
-| `info` (12) | Inventory-only informational signal. | Track for visibility and architecture review. |
+| `info` (15) | Inventory-only informational signal. | Track for visibility and architecture review. |
 
 Note: final severity can be adjusted by context in the risk engine (for example TLS/PKI/JWT/authentication paths).
 
@@ -268,3 +268,19 @@ corrected locations/evidence change affected IDs. Severity/risk/confidence remai
 unchanged. Modified patterns/scopes and unrelated/custom IDs retain generic regex
 ranges and non-overlapping iteration, including empty-match behavior. References
 do not establish effective configuration or runtime negotiation.
+
+## Bounded source API references (2026-11-20)
+
+| Rule | Interpretation |
+|---|---|
+| API_RUBY_OPENSSL_CIPHER | Standard `OpenSSL::Cipher.new` calls; exact AES-GCM/CBC names can be followed through same-class variables, zero-argument methods and branch alternatives. Names are candidate references, never effective configuration. |
+| API_RUST_OPENSSL_TLS | Standard OpenSSL TLS constructors/method selectors through explicit imports, aliases or qualified paths. No negotiated algorithm is inferred. |
+
+Both rules are additive info/quantum-uncertain signals. The bounded source handlers
+apply only to the exact installed built-in definitions; modified/custom definitions
+retain generic AST-pattern semantics. Ruby dynamic overrides, inheritance, generated
+accessors and external methods remain unresolved. Rust wildcard/module aliases and
+external wrapper implementations are not followed. Existing rule definitions and inventory
+identity encoding are unchanged; added typed facts can change affected observation IDs. Positive, negative, renamed-wrapper, shadowing and
+resource controls are in `framework_source.rs`; pinned real-source results are
+separate from regex-target quality fixtures.

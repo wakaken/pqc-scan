@@ -1,0 +1,181 @@
+{
+  "format": "pqc-scan.migration-assessment",
+  "version": 1,
+  "input": {
+    "format": "inventory-v1",
+    "sha256": "82ea7b77065b43177faf3f46792283e2d442e8c0906a02a4b0fdad83ec8749cc",
+    "schema_version": 1,
+    "collection_time": "2026-11-17T00:00:00Z",
+    "run_id": "scan-v1-a9ff06a933b8f9ebe359562fad7005b81895235c5435bb91a62562566eb479b7"
+  },
+  "context": null,
+  "catalog": {
+    "id": "migration-facts-v1",
+    "version": "1.0.0"
+  },
+  "policy": {
+    "id": "migration-decision-v1",
+    "version": "1.0.0"
+  },
+  "model": {
+    "id": "decision_table",
+    "version": "1.0.0"
+  },
+  "as_of": "2026-11-18T00:00:00Z",
+  "targets": [
+    {
+      "id": "migration_target-v1-97d0163974543a2fcdefade0751d91200e974bbf49443ea9290263582e269da8",
+      "source_ref": {
+        "run_id": "scan-v1-a9ff06a933b8f9ebe359562fad7005b81895235c5435bb91a62562566eb479b7",
+        "observation_id": "observation-v1-b75202b15a37ec57748d93b99e1538e2c70f9b0a81bb14f7b908c113e0bae108",
+        "root_asset_id": "asset-v1-54cb8d240a78e4557e10a0d7a3c3f0d3e667392c02f5fb7617d239ff729d2952",
+        "role": "algorithm",
+        "path": "app.txt",
+        "line": 1
+      },
+      "technical": {
+        "identifier": "SHA-256",
+        "construction": "hash",
+        "standardization": "classical_standard",
+        "quantum": "generic_search",
+        "purpose": "hash",
+        "parameters_known": true,
+        "classical_concerns": [],
+        "attack_models": [
+          {
+            "attack": "generic_preimage",
+            "exponent_numerator": 256,
+            "exponent_denominator": 2,
+            "assumption": "ideal_oracle_queries_not_operational_security_bits; memory_parallelism_and_circuit_cost_not_estimated"
+          },
+          {
+            "attack": "generic_collision",
+            "exponent_numerator": 256,
+            "exponent_denominator": 3,
+            "assumption": "ideal_oracle_queries_not_operational_security_bits; memory_parallelism_and_circuit_cost_not_estimated"
+          }
+        ],
+        "components": [],
+        "combiner_assessment": null,
+        "source_ids": [
+          "BHT1997",
+          "F12",
+          "LOCAL026",
+          "NIST-PQ-FAQ"
+        ],
+        "encoding_assurance": "unknown",
+        "protocol_ref": null,
+        "role": "algorithm"
+      },
+      "observation": {
+        "method": "ast_pattern",
+        "assurance": "syntactic",
+        "usage": "referenced",
+        "collection_outcome": "complete"
+      },
+      "limitations": [
+        "unknown_parameter_encoding"
+      ]
+    }
+  ],
+  "claims": [],
+  "candidates": [],
+  "decisions": [
+    {
+      "id": "migration_decision-v1-c2202c8f344bcb4f892de00c4d9feaccd19554cf35cf9b06093ba61ab7cd2cf4",
+      "target_id": "migration_target-v1-97d0163974543a2fcdefade0751d91200e974bbf49443ea9290263582e269da8",
+      "system_id": null,
+      "urgency": "undetermined",
+      "information": "incomplete",
+      "readiness": "unknown",
+      "reason_codes": [
+        "insufficient_information",
+        "unknown_parameter_encoding",
+        "unknown_binding"
+      ],
+      "missing_inputs": [
+        "applicability",
+        "context.binding",
+        "support.parameters",
+        "support.provider",
+        "support.runtime",
+        "usage_state",
+        "use_case"
+      ],
+      "applied_claim_ids": [],
+      "action": {
+        "kind": "investigate",
+        "candidate_ids": [],
+        "blocking_prerequisites": [],
+        "validation_steps": [
+          "confirm_actual_use_and_required_purpose",
+          "refresh_missing_or_stale_scoped_claims"
+        ]
+      },
+      "source_ids": [
+        "BHT1997",
+        "F12",
+        "F14",
+        "LOCAL026",
+        "NIST-PQ-FAQ"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "BHT1997",
+      "edition": "1997",
+      "clause": "ideal quantum collision-query model",
+      "uri": "https://arxiv.org/abs/quant-ph/9705002",
+      "local_source_id": null,
+      "scope_limit": "oracle queries only; circuit and memory cost excluded"
+    },
+    {
+      "id": "F12",
+      "edition": "task066 adopted contract 2026-11-18",
+      "clause": "technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "saved claims preserve assurance; digest does not attest collector truth"
+    },
+    {
+      "id": "F14",
+      "edition": "migration-decision-v1 1.0.0; adopted 2026-11-18",
+      "clause": "P1-P8; readiness and action precedence",
+      "uri": null,
+      "local_source_id": "docs/architecture/MIGRATION-ASSESSMENT-V1.md",
+      "scope_limit": "local advisory policy; conformance is not practitioner usefulness"
+    },
+    {
+      "id": "LOCAL026",
+      "edition": "local-assessment-1",
+      "clause": "finite vocabulary and evidence limits",
+      "uri": null,
+      "local_source_id": "docs/architecture/LOCAL-ASSESSMENT-V1.md",
+      "scope_limit": "advisory facts; no deployment or cryptographic verification"
+    },
+    {
+      "id": "NIST-PQ-FAQ",
+      "edition": "task056 pinned FAQ snapshot",
+      "clause": "quantum public-key and generic-search models",
+      "uri": "https://csrc.nist.gov/projects/post-quantum-cryptography/faqs",
+      "local_source_id": null,
+      "scope_limit": "not quantum arrival, probability or operational security bits"
+    }
+  ],
+  "coverage": {
+    "collection_outcome": "complete",
+    "input_count": 1,
+    "target_count": 1,
+    "unknown_identity_or_parameters_targets": 0,
+    "unresolved_target_count": 0,
+    "limits": [
+      "inventory_not_exhaustive"
+    ]
+  },
+  "limitations": [
+    "saved_content_not_collector_attestation",
+    "no_offline_cryptographic_reverification",
+    "local_advisory_policy_not_practitioner_validation"
+  ]
+}

@@ -1,3 +1,265 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>pqc-scan · Local scanner</title><style>
-:root{color-scheme:light;--bg:#f6f8fa;--card:white;--text:#1f2328;--line:#d1d9e0;--muted:#59636e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui}main{max-width:1000px;margin:auto;padding:32px 20px}header{display:flex;justify-content:space-between;gap:24px;align-items:start}h1{font-size:28px;margin:4px 0}h2{font-size:18px;margin:0 0 16px}p{margin:8px 0 16px}small,.muted{color:var(--muted)}section{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:24px 0;padding:24px}button,select{font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text);padding:8px 12px;cursor:pointer;min-height:40px}button:hover{background:#eef1f4}button:disabled{opacity:.5;cursor:default}.primary{background:#1f883d;color:white;border-color:#1f883d}.primary:hover{background:#1a7f37}.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.path{font-family:ui-monospace,monospace;overflow-wrap:anywhere;min-width:0}.folder{display:flex;width:100%;text-align:left;gap:12px;align-items:center;border:0;border-bottom:1px solid var(--line);border-radius:0}.folder span:first-child{overflow-wrap:anywhere}.folder span:last-child{margin-left:auto}ul{list-style:none;padding:0}li{margin:4px 0}#feedback{white-space:pre-wrap;overflow-wrap:anywhere}a{color:#0969da;overflow-wrap:anywhere}:focus-visible{outline:3px solid #0969da;outline-offset:3px}.error{color:#b42318}.job{border-top:1px solid var(--line);padding:12px 0}@media(max-width:600px){section{padding:16px}header{flex-wrap:wrap}main{padding:20px 12px}}@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0d1117;--card:#161b22;--text:#e6edf3;--line:#3d444d;--muted:#a8b3c0}button:hover{background:#21262d}a{color:#79c0ff}.error{color:#ff7b72}}
-</style></head><body><main><header><div><small>pqc-scan / Local scanner</small><h1 data-en="Scan a local project" data-ja="ローカルプロジェクトをスキャン">ローカルプロジェクトをスキャン</h1><p class="muted" data-en="Choose a folder, run a static scan and open its report." data-ja="フォルダを選び、静的スキャンとレポート表示を実行します。">フォルダを選び、静的スキャンとレポート表示を実行します。</p></div><label>Language / 言語 <select id="language"><option value="ja">日本語</option><option value="en">English</option></select></label></header><noscript>JavaScript is required for the local scanner. CLI scanning remains available.</noscript><section><h2 data-en="Choose a folder" data-ja="対象フォルダを選択">対象フォルダを選択</h2><p class="muted" data-en="Folder boundary (set with --root):" data-ja="参照起点（起動時の --root で指定）：">参照起点（起動時の --root で指定）：</p><p id="root" class="path"></p><div class="toolbar"><button type="button" id="up" data-en="↑ Parent folder" data-ja="↑ 親フォルダ">↑ 親フォルダ</button><strong id="selected" class="path">/</strong></div><ul id="folders" aria-label="Folders / フォルダ"></ul><p id="folder-note" class="muted"></p><div class="toolbar"><button class="primary" id="scan" disabled data-en="Scan this folder" data-ja="このフォルダをスキャン">このフォルダをスキャン</button><span class="muted" data-en="Uses the same rules and exclusions as the CLI." data-ja="CLIと同じルール・除外条件で解析します。">CLIと同じルール・除外条件で解析します。</span></div></section><p id="feedback" role="status" aria-live="polite"></p><section><h2 data-en="Scans in this session" data-ja="このセッションのスキャン">このセッションのスキャン</h2><div id="jobs"></div></section><p class="muted" data-en="Source files stay on this computer. Stop the server with Ctrl+C. Reports are kept in the private session folder printed in the terminal." data-ja="ソースファイルはこのコンピューター上で処理します。終了はCtrl+C。レポートはターミナルに表示した専用フォルダに保存します。">ソースファイルはこのコンピューター上で処理します。終了はCtrl+C。レポートはターミナルに表示した専用フォルダに保存します。</p></main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="ja" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="data:," />
+    <title>pqc-scan · Local scanner</title>
+    <script>
+      (() => {
+        let theme = new URLSearchParams(location.search).get("theme");
+        if (!["light", "dark"].includes(theme)) {
+          try { theme = localStorage.getItem("pqc-scan-theme"); } catch { /* Optional preference. */ }
+        }
+        if (["light", "dark"].includes(theme)) document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main" data-ja="本文へ移動" data-en="Skip to content"
+      >本文へ移動</a
+    >
+    <div class="shell">
+      <header class="app-header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">◇</span
+          ><span class="brand-name">pqc-scan</span>
+        </div>
+        <div class="header-tools">
+          <label
+            ><span class="sr-only">Language / 言語</span
+            ><select id="language">
+              <option value="ja">日本語</option>
+              <option value="en">English</option>
+            </select></label
+          ><button class="theme" id="theme" type="button">ライト表示</button>
+        </div>
+      </header>
+      <ol class="steps" aria-label="操作の流れ" id="steps">
+        <li aria-current="step">
+          <span class="step-index">1</span
+          ><span data-ja="入力を選ぶ" data-en="Choose input">入力を選ぶ</span>
+        </li>
+        <li>
+          <span class="step-index">2</span
+          ><span data-ja="結果を確認" data-en="Review results">結果を確認</span>
+        </li>
+        <li id="migration-step" hidden>
+          <span class="step-index">3</span
+          ><span
+            ><span data-ja="移行の対応を確認" data-en="Review migration"
+              >移行の対応を確認</span
+            ></span
+          >
+        </li>
+      </ol>
+      <main id="main">
+        <noscript
+          >JavaScript is required for the local scanner. CLI scanning remains
+          available.</noscript
+        >
+        <p id="feedback" role="status" aria-live="polite" tabindex="-1"></p>
+        <div id="input-screen">
+          <div class="intro">
+            <h1
+              id="input-title"
+              tabindex="-1"
+              data-ja="スキャンするフォルダを選ぶ"
+              data-en="Choose a folder to scan"
+            >
+              スキャンするフォルダを選ぶ
+            </h1>
+          </div>
+          <section class="panel input-panel">
+            <div class="tabs" role="group" aria-label="入力方法 / Input method">
+              <button
+                type="button"
+                id="folder-tab"
+                class="active"
+                aria-pressed="true"
+                aria-controls="folder-pane"
+                data-ja="フォルダをスキャン"
+                data-en="Scan a folder"
+              >
+                フォルダをスキャン</button
+              ><button
+                type="button"
+                id="saved-tab"
+                aria-pressed="false"
+                aria-controls="saved-pane"
+                hidden
+                data-ja="保存した結果を読み込む"
+                data-en="Load saved results"
+              >
+                保存した結果を読み込む
+              </button>
+            </div>
+            <div class="input-body">
+              <div id="folder-pane">
+                <p class="hint" id="boundary-note" data-ja="選択の起点となるフォルダ（起動時に --rootスイッチで指定したフォルダ）" data-en="Starting folder (specified with --root at startup)">選択の起点となるフォルダ（起動時に --rootスイッチで指定したフォルダ）</p>
+                <p id="root" class="mono root-path"></p>
+                <div class="folder-toolbar">
+                  <div class="folder-history" role="group" aria-label="フォルダの履歴 / Folder history">
+                    <button class="btn" id="folder-back" type="button" disabled aria-label="戻る / Back" title="戻る / Back">‹</button>
+                    <button class="btn" id="folder-forward" type="button" disabled aria-label="進む / Forward" title="進む / Forward">›</button>
+                  </div>
+                  <nav id="folder-path" aria-label="現在の場所 / Current location"></nav>
+                </div>
+                <ul
+                  id="folders"
+                  class="folders"
+                  aria-label="フォルダ / Folders"
+                ></ul>
+                <p id="folder-note" class="muted small"></p>
+                <section class="folder-selection" aria-labelledby="selected-folders-title">
+                  <div class="section-heading"><h2 id="selected-folders-title" data-ja="選択したフォルダ" data-en="Selected folders">選択したフォルダ</h2>
+                  <button class="btn small-btn" id="clear-folders" type="button" disabled data-ja="選択をすべて解除" data-en="Clear selection">選択をすべて解除</button></div>
+                  <ul id="selected-folders" class="selected-folders" aria-label="選択したフォルダ / Selected folders"></ul>
+                  <strong id="selected" class="mono small" role="status" aria-live="polite"></strong>
+                </section>
+                <fieldset class="scan-settings"><legend data-ja="スキャン設定" data-en="Scan settings">スキャン設定</legend><div class="scan-settings-grid">
+                <div class="test-exclusion">
+                  <label class="hint"><input type="checkbox" id="exclude-tests"><span data-ja="テストコードを除外" data-en="Exclude test code">テストコードを除外</span></label>
+                </div>
+                <div class="file-size-limit">
+                  <label for="max-file-size-mib" data-ja="1ファイルのサイズ上限（MB）" data-en="File size limit (MB)">1ファイルのサイズ上限（MB）</label>
+                  <input id="max-file-size-mib" type="number" inputmode="numeric" min="1" max="64" step="1" value="2" required aria-describedby="file-size-hint file-size-error">
+                  <p id="file-size-hint" class="hint" data-ja="最大64MBまで" data-en="Up to 64 MB">最大64MBまで</p>
+                  <p id="file-size-error" class="field-error" role="alert" hidden></p>
+                </div>
+                </div></fieldset>
+                <div class="selection">
+                  <button
+                    class="btn primary"
+                    id="scan"
+                    disabled
+                    data-ja="選択したフォルダをスキャン"
+                    data-en="Scan selected folders"
+                  >
+                    選択したフォルダをスキャン
+                  </button>
+                </div>
+              </div>
+              <div id="saved-pane" hidden>
+                <div class="import-area">
+                  <label
+                    class="file-label"
+                    for="saved-file"
+                    data-ja="保存したスキャン結果"
+                    data-en="Saved scan results"
+                    >保存したスキャン結果</label
+                  ><input
+                    id="saved-file"
+                    class="file-picker"
+                    type="file"
+                    accept=".json,application/json" aria-describedby="saved-file-hint"
+                  /><p class="hint" id="saved-file-hint" data-ja="pqc-scan が保存した scan.inventory.v1.json（JSON、32 MiB以下）を選択してください。移行の入力内容は次の画面で読み込みます。" data-en="Choose scan.inventory.v1.json saved by pqc-scan (JSON, up to 32 MiB). Saved migration input is loaded on the next screen.">pqc-scan が保存した scan.inventory.v1.json（JSON、32 MiB以下）を選択してください。移行の入力内容は次の画面で読み込みます。</p><button
+                    id="saved-next"
+                    class="btn primary"
+                    type="button"
+                    disabled
+                    data-ja="この結果を使う"
+                    data-en="Use these results"
+                  >
+                    この結果を使う
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div id="result-screen" hidden>
+          <div class="success-intro">
+            <h1 id="result-title" tabindex="-1"></h1>
+          </div>
+          <div id="result-single">
+            <section class="panel source-panel">
+              <h2 id="result-path" class="mono"></h2>
+              <p id="result-status" class="inspection small"></p>
+            </section>
+            <div class="action-grid">
+              <section
+                class="panel action-card main-action"
+                id="scan-report-card"
+              >
+                <div class="action-icon" aria-hidden="true">▤</div>
+                <h2 data-ja="スキャンレポート" data-en="Scan report">
+                  スキャンレポート
+                </h2>
+                <a
+                  class="btn primary"
+                  id="result-report" aria-label="スキャンレポートを開く（新しいタブ） / Open scan report in new tab"
+                  target="_blank" rel="noopener"
+                  data-ja="スキャンレポートを開く ↗"
+                  data-en="Open scan report ↗"
+                  >スキャンレポートを開く ↗</a
+                >
+              </section>
+              <section class="panel action-card" id="migration-card" hidden>
+                <div class="action-label">
+                  <div class="action-icon" aria-hidden="true">→</div>
+
+                </div>
+                <h2 data-ja="移行の確認" data-en="Migration review">
+                  移行の確認
+                </h2>
+                <p
+                  data-ja="用途や利用状況を加えて、対応を検討します。"
+                  data-en="Add purpose and usage to review migration actions."
+                >
+                  用途や利用状況を加えて、対応を検討します。
+                </p>
+                <button
+                  class="btn"
+                  id="result-migration"
+                  data-ja="移行の確認へ進む"
+                  data-en="Review migration"
+                >
+                  移行の確認へ進む
+                </button>
+              </section>
+            </div>
+          </div>
+          <section id="batch-results" class="history-content" aria-labelledby="result-title" hidden></section>
+          <div class="afterword">
+            <button
+              class="btn small-btn"
+              type="button"
+              id="choose-input"
+              data-ja="スキャンするフォルダを選び直す"
+              data-en="Choose folders for another scan"
+            >
+              スキャンするフォルダを選び直す
+            </button>
+          </div>
+        </div>
+        <div id="migration-screen" hidden></div>
+        <details id="history" class="history" hidden>
+          <summary
+            data-ja="過去のスキャン履歴"
+            data-en="Scan history"
+          >
+            過去のスキャン履歴
+          </summary>
+          <div class="history-content" id="jobs"></div>
+        </details>
+      </main>
+    </div>
+    <dialog id="scan-progress" class="scan-progress" aria-modal="true" aria-labelledby="progress-title" aria-describedby="progress-folder progress-label" tabindex="-1">
+      <h2 id="progress-title" data-ja="スキャンしています" data-en="Scanning folders">スキャンしています</h2>
+      <p id="progress-position" class="muted"></p>
+      <p id="progress-folder" class="mono"></p>
+      <div class="progress-content">
+        <span class="spinner" aria-hidden="true"></span>
+        <p id="progress-label" role="status" aria-live="polite"></p>
+      </div>
+      <progress id="progress-bar" aria-labelledby="progress-label" hidden></progress>
+      <p id="progress-error" role="alert"></p>
+      <p class="hint" data-ja="完了するまで、このページを開いたままお待ちください。" data-en="Keep this page open until scanning finishes.">完了するまで、このページを開いたままお待ちください。</p>
+      <button id="cancel-scans" class="btn" type="button" data-ja="残りのスキャンをキャンセル" data-en="Cancel remaining scans">残りのスキャンをキャンセル</button>
+    </dialog>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -10,7 +10,10 @@ import unittest
 import report
 
 ROOT = Path(__file__).resolve().parents[2]
-CURRENT = 'tests/quality/applicability-v030-publication-20261117/assessment.json'
+CURRENT = 'tests/quality/applicability-v040-readme-20261123/assessment.json'
+PREVIOUS_ILLUSTRATED = 'tests/quality/applicability-v040-guide-20261123/assessment.json'
+PREVIOUS_V040 = 'tests/quality/applicability-v040-release-20261123/assessment.json'
+PREVIOUS_V030 = 'tests/quality/applicability-v030-publication-20261117/assessment.json'
 PREVIOUS_PUBLICATION = 'tests/quality/applicability-v030-docs-20261117/assessment.json'
 PREVIOUS_GUIDES = 'tests/quality/applicability-054-f054-20261117/assessment.json'
 PREVIOUS = 'tests/quality/applicability-document-relocation-20261114/assessment.json'
@@ -66,10 +69,22 @@ class CIApplicabilityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'binding changed'):
             scoped(ROOT, PREVIOUS_PUBLICATION)
 
+    def test_previous_v030_publication_binding_is_not_relabelled_current(self):
+        with self.assertRaisesRegex(ValueError, 'binding changed'):
+            scoped(ROOT, PREVIOUS_V030)
+
+    def test_previous_v040_binding_is_not_relabelled_current_after_count_correction(self):
+        with self.assertRaisesRegex(ValueError, 'binding changed'):
+            scoped(ROOT, PREVIOUS_V040)
+
+    def test_previous_illustrated_guide_binding_is_not_relabelled_after_relocation(self):
+        with self.assertRaisesRegex(ValueError, 'binding changed'):
+            scoped(ROOT, PREVIOUS_ILLUSTRATED)
+
     def test_actual_ci_input_rejects_source_and_review_corruption(self):
         selected = ci_assessment()
         original = json.loads((ROOT/selected).read_text())
-        mutations = ['contract', 'paired_contract', 'parser', 'protocol', 'corpus', 'truth', 'review_bytes',
+        mutations = ['contract', 'paired_contract', 'technical_contract', 'parser', 'protocol', 'corpus', 'truth', 'review_bytes',
                      'missing_review', 'same_identity', 'unresolved', 'decision', 'review_binding']
         for mutation in mutations:
             with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temp:
@@ -86,9 +101,10 @@ class CIApplicabilityTests(unittest.TestCase):
                 review_name = list(manifest['reviewSources'])[1]
                 review_path = folder/review_name
                 review = json.loads(review_path.read_text())
-                if mutation in ['contract', 'paired_contract', 'parser']:
+                if mutation in ['contract', 'paired_contract', 'technical_contract', 'parser']:
                     name = {'contract': 'docs/user/COVERAGE.md',
                             'paired_contract': 'docs/user/COVERAGE.ja.md',
+                            'technical_contract': 'docs/architecture/STATIC-ANALYSIS.md',
                             'parser': 'crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs'}[mutation]
                     with (repo/name).open('a') as stream: stream.write('\nchanged\n')
                 if mutation == 'protocol': (folder/'PROTOCOL.md').write_text('changed')

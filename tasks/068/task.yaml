@@ -1,0 +1,83 @@
+id: '068'
+title: Implement scoped organization context and immutable-evidence bindings
+type: improvement
+priority: high
+status: done
+owner: Main agent
+phase: '4'
+description: >
+  Implement the approved bounded context parser and explicit organization/system
+  bindings to saved usage and observation records. Reuse existing validation and
+  identity helpers while keeping Context v1 scan-wide and unverified.
+plan_reference: docs/roadmap/v0.4/ROADMAP.md
+requirements_reference: docs/roadmap/v0.4/REQUIREMENTS.md
+quality_requirements:
+  - R4-01
+  - R4-02
+  - R4-03
+  - R4-04
+  - R4-06
+depends_on:
+  - '066'
+  - '067'
+target_components:
+  - crates/pqc_scan_core/src/policy.rs
+  - crates/pqc_scan_core/src/identity.rs
+  - crates/pqc_scan_core/tests/
+  - schemas/
+existing_assets:
+  - E-POLICY
+  - E-ID
+  - E-OUTPUT
+problem:
+  - Existing context is a scan-wide declaration rather than per-system/per-usage information.
+  - Shared algorithm IDs and run IDs alone do not bind claims to the intended immutable input and business system.
+acceptance:
+  - 'R4-01: The approved typed fields support decision-relevant organization policy, applicability, purpose, impact, lifetimes, deadlines, lead time and constraints without making irrelevant fields mandatory; missing, false and N/A remain distinct.'
+  - 'R4-02: Explicit bindings validate immutable input content and selected usage/observation targets; shared RSA algorithms do not merge systems; old IDs remain unchanged; invalid or ambiguous bindings follow the approved reject/unresolved policy.'
+  - 'R4-03: Defaults, overrides, applicability, duplicates and conflicts have deterministic scope and precedence; claims cannot cross systems, purposes, organizations or arbitrary later scans.'
+  - 'R4-04: Claim source, actor, scope, date, references and freshness remain visible; a verified label is not scanner verification; stale and contradictory claims do not pass silently.'
+  - 'R4-06: Approved finite input limits and safe errors handle malformed types, unknown/duplicate fields and invalid paths/references; credentials are not required and synthetic secrets do not leak.'
+deliverables:
+  - tasks/068/TASK-068-RESULTS.md
+  - tasks/068/evidence/
+  - Approved context parsing/binding/provenance support, negative controls and affected paired user documentation.
+implementation_steps:
+  - Verify the approved D1 context contract and task-067 input/identity interfaces before coding.
+  - Implement only decision-relevant fields and explicit content/target binding; retain v1 parsing and semantics separately.
+  - Add precedence, freshness, provenance and conflict handling without guessing real-world system identity.
+  - Test bounded parsing, cross-scope rejection, safe errors and disclosure limits with synthetic data.
+  - Complete implementation review, applicable final checks, test review and source-bound evidence.
+testing_requirements:
+  - Cover the parsing/binding/provenance assertions of A02, A07 and A12-A15/A17-A18; pair two systems sharing an algorithm with independently scoped claims. Full decision-response reassessment in A13 belongs to task 069, not this prerequisite component.
+  - Check altered input content, missing/duplicate/ambiguous IDs, conflicts, expired claims, false versus missing and operator-supplied verification labels.
+  - Exercise size/depth/count/string/path limits, safe diagnostics, no-network behavior and secret canaries.
+  - Preserve old context/profile/ID behavior and apply relevant Rust/configuration checks and both review stages.
+out_of_scope:
+  - Automatic cross-scan tracking, a CMDB, arbitrary policy code, external claim certification and replacing existing identity algorithms.
+risks:
+  - A structurally valid binding may still contain an operator's false real-world claim; that limit must remain explicit.
+  - Global defaults or stale references may accidentally transfer claims across unrelated targets.
+approval_boundary:
+  - Execution requires later selection and completed prerequisites; D1/D2 binding/precedence/storage decisions must exist before affected implementation.
+  - Registration does not approve storage changes, support expansion or external verification services.
+planning_record:
+  date: '2026-11-18'
+  scope: Definition only; no context schema, parser or binding has been implemented.
+  work_packages: [W4]
+  primary_requirements: [R4-01, R4-02, R4-03, R4-04, R4-06]
+  supporting_requirements: []
+  completion_evidence: Each assigned context clause needs final-source behavior, meaningful negative/boundary evidence and both independent review stages.
+execution_record:
+  selected_on: '2026-11-18'
+  source_head: c7e76b59da44ffdc8a60da86efd5393e70a039e3
+  preexisting_changes: Preserved task067 implementation and source-bound evidence; no unrelated changes selected.
+  plan: tasks/068/TASK-068-PLAN.md
+  lifecycle:
+    - '2026-11-18: pending -> planned; 066/067 completed; adopted D1/D2 context contract retained.'
+    - '2026-11-18: planned -> in-progress; implementing typed claims, immutable bindings and provenance.'
+  study_resource_steering: Maintainer chose to proceed through067-070 and decide task071 resources later; no outreach authorized.
+  review_record: tasks/068/TASK-068-REVIEWS.md
+  review_transition: '2026-11-18: in-progress -> review; same implementation reviewer accepted; final checks and same test reviewer remain.'
+  completion_transition: '2026-11-18: review -> done; all original context clauses, final checks and both same-identity review stages accepted.'
+  results: tasks/068/TASK-068-RESULTS.md
