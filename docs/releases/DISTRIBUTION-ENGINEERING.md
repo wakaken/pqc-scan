@@ -96,7 +96,9 @@ python3 tests/distribution/check-install.py target/task-038/network/*.tar.gz --o
 
 Dependency notices and provenance use the same feature set. Installation validation
 checks exact TLS/SSH/SSH KEX command availability and the public host-key pin option.
-The four existing objc2-family review flags remain. The russh-util source
+The four historical objc2-family review flags remain in the notice manifest, but
+the v0.4 Unix network graph does not select them. Validate the actual selected
+archive inventory rather than clearing those historical flags. The russh-util source
 comparison is resolved in the task 063 evidence; its archived dirty=true fact is
 preserved. Full license text from the fixed revision is bundled. This remains
 unsigned, unpublished technical preparation.

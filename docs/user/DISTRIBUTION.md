@@ -2,22 +2,24 @@
 
 [日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.md)
 
-This guide describes installation of **v0.4.0 static** for macOS Apple Silicon
+This guide describes installation of **v0.4.0** for macOS Apple Silicon
 (`aarch64-apple-darwin`). See the [v0.4.0 release notes](../releases/v0.4.0.md) for changes.
 
 <a id="release-status"></a>
 
 ## Choose a download
 
-On [GitHub Releases](https://github.com/wakaken/pqc-scan/releases), look for
-`pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz` and its matching `.sha256` file
-under the version you want to use. Check the Release page for availability.
-Actions artifacts are separate from published Releases.
+Choose a version and variant on [GitHub Releases](https://github.com/wakaken/pqc-scan/releases).
+Check the Release page for availability. Actions artifacts are separate from published Releases.
 
-This guide covers `static`, which scans local repositories and includes the local
-web interface and migration review. The experimental `network` variant with
-TLS/SSH endpoint diagnostics is excluded from public distribution. Binaries for
-other operating systems or CPUs and installation through crates.io are outside this scope.
+| Variant | Filename | Features |
+|---|---|---|
+| `static` | `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz` | Local scanning, local web interface and migration review |
+| `network` (experimental) | `pqc-scan-0.4.0-aarch64-apple-darwin-network.tar.gz` | All static features plus explicit TLS/SSH endpoint diagnostics |
+
+Download the matching `.sha256` file too. Endpoint diagnostics require the
+administrator's authorization; follow the [TLS/SSH guide](PROBING.md).
+Binaries for other operating systems or CPUs and installation through crates.io are outside this scope.
 
 ## Install an archive
 

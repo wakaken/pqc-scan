@@ -49,8 +49,12 @@ class VariantContractTests(unittest.TestCase):
         self.assertIn('workflow_dispatch:', text)
         self.assertNotIn('gh release ', text)
         self.assertNotIn('git push', text)
-        self.assertEqual(text.count('subject-path:'), 1)
-        self.assertIn('subject-path: target/task-038/static-first/*.tar.gz', text)
+        self.assertEqual(text.count('subject-path:'), 2)
+        for variant in ['static', 'network']:
+            self.assertIn(f'subject-path: target/task-038/{variant}-first/*.tar.gz', text)
+            self.assertIn(f'ATTESTATION_BUNDLE: ${{{{ steps.{variant}-provenance.outputs.bundle-path }}}}', text)
+            self.assertIn(f'cp "$ATTESTATION_BUNDLE" target/task-038/{variant}-first/build-provenance.jsonl', text)
+        self.assertEqual(text.count('--source-digest "$SOURCE_COMMIT"'), 2)
 
 
 if __name__ == '__main__':

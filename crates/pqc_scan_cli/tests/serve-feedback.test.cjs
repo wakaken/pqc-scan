@@ -247,13 +247,24 @@ test('two scans are strictly sequential and remain individually reviewable witho
  assert.equal(p.get('input-screen').hidden,false,'intermediate result cannot navigate');
  p.state.jobs=[ready(1,'alpha'),ready(2,'beta')];await p.tick();
  assert.equal(p.get('scan-progress').open,false);
- assert.equal(p.get('result-path').textContent,'beta');
- assert.equal(p.get('history').open,true);
- assert.equal(p.get('jobs').children.length,2);
+ assert.equal(p.get('result-screen').hidden,false);
+ assert.equal(p.get('result-single').hidden,true,'a batch must not select the last folder implicitly');
+ assert.equal(p.get('batch-results').hidden,false);
+ const cards=p.get('batch-results').children;
+ assert.deepEqual(cards.map(card=>card.children[0].textContent),['alpha','beta']);
+ const reportLink=card=>card.children.find(n=>n.className==='job-actions').children[0];
+ for(const [index,card] of cards.entries()) {
+  const link=reportLink(card);
+  assert.equal(link.href,`http://127.0.0.1:8787/session/reports/${index+1}/report.html?theme=dark&lang=ja`);
+  assert.equal(link.target,'_blank');
+  assert.match(link.attributes['aria-label'],new RegExp(index===0?'alpha':'beta'));
+ }
+ assert.deepEqual(p.get('jobs').children.map(card=>card.children[0].textContent),['beta','alpha']);
+ assert.equal(reportLink(p.get('jobs').children[1]).href,reportLink(cards[0]).href,'history preserves the same folder/report association');
  assert.match(p.get('feedback').textContent,/2フォルダ完了、0フォルダ失敗/);
- assert.ok(p.location.href.includes('result=2'));
- p.get('jobs').children[1].children.find(n=>n.className==='btn small-btn').click();
- assert.equal(p.get('result-path').textContent,'alpha','each successful folder keeps its own result');
+ const url=new URL(p.location.href);
+ assert.equal(url.searchParams.get('results'),'1,2');
+ assert.equal(url.searchParams.has('result'),false);
 });
 test('modal cannot cancel; page changes, selection and duplicate submission are blocked until all work ends',async()=>{
  const p=await page('',[],folders);row(p,0).click();row(p,1).click();await p.get('scan').click();

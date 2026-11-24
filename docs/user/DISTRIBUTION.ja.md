@@ -3,19 +3,23 @@
 [English](DISTRIBUTION.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.ja.md)
 
 このガイドは、macOS Apple Silicon（`aarch64-apple-darwin`）向けの
-**v0.4.0 静的版**の導入方法を説明します。変更点は[v0.4.0のリリースノート](../releases/v0.4.0.md)を参照してください。
+**v0.4.0**の導入方法を説明します。変更点は[v0.4.0のリリースノート](../releases/v0.4.0.md)を参照してください。
 
 <a id="release-status"></a>
 
 ## 配布物を選ぶ
 
-[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で、利用するバージョンの
-`pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz` と、対応する `.sha256` ファイルを確認します。
+[GitHub Releases](https://github.com/wakaken/pqc-scan/releases)で、利用するバージョンと構成を選びます。
 公開物の有無はReleaseページで確認してください。Actions成果物は公開済みReleaseとは別です。
 
-このガイドの対象は、リポジトリをローカルでスキャンする `static` 版です。
-ローカルWeb画面と移行確認も利用できます。TLS・SSH接続先診断付きの `network` 版は
-実験的機能を含み、公開対象には含みません。他のOS・CPU向けバイナリとcrates.ioからの導入は対象外です。
+| 構成 | ファイル名 | 使える機能 |
+|---|---|---|
+| `static` | `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz` | ローカルスキャン、ローカルWeb画面、移行確認 |
+| `network`（実験的） | `pqc-scan-0.4.0-aarch64-apple-darwin-network.tar.gz` | 静的版の全機能に加え、明示したTLS・SSH接続先の診断 |
+
+選んだアーカイブに対応する `.sha256` ファイルも取得してください。
+接続先の診断には管理者の許可が必要です。[TLS・SSH診断ガイド](PROBING.ja.md)に沿って実行します。
+他のOS・CPU向けバイナリとcrates.ioからの導入は対象外です。
 
 ## アーカイブから導入する
 

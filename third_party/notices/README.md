@@ -40,3 +40,12 @@ archives omit the repository-root MIT notice. Both bind to simd revision
 `d74c030d9dc4f3cae02146d1f497ff62726ef09a`; each exact package entry records
 its own Cargo checksum/path and the unmodified upstream notice hash. No
 review-required network statement or packaging guard is changed.
+
+## v0.4 Unix network graph
+
+Unix probe cancellation uses signal-hook 0.4.6 and its registry/errno dependencies,
+whose exact registry archives include complete license texts. Non-Unix retains
+ctrlc. The macOS network graph no longer selects the four Objective-C packages;
+their pinned records and review flags above remain unchanged for historical or
+other selected graphs. Native archive preparation must still verify the actual
+selected packages and require no missing/review-required notices before publication.

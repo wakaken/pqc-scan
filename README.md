@@ -213,9 +213,7 @@ and [saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) to reuse save
 | [Understanding reports](docs/user/REPORTS.md) | Interpret findings and migration decisions, and choose the right output files |
 | [Supported inputs and inspection limits](docs/user/COVERAGE.md) | Check supported languages and files, excluded inputs, and what to review before sharing reports |
 | [Saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) | Save and reuse purpose and usage input, set its expiry, and reassess saved findings |
-| [Explicit TLS/SSH diagnostics (experimental)](docs/user/PROBING.md) | Enable the features in a source build to inspect an authorized endpoint; excluded from v0.4 distribution |
-
-For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
+| [Explicit TLS/SSH diagnostics (experimental)](docs/user/PROBING.md) | Use the `network` variant to inspect an authorized endpoint over TLS or SSH |
 
 <a id="limits"></a>
 
@@ -223,7 +221,7 @@ For reporting a suspected vulnerability, see [SECURITY.md](SECURITY.md).
 
 `pqc-scan` is a static scanner, so false positives and missed references are possible.
 A finding does not prove runtime use, and zero findings does not prove complete inspection or safety.
-Repository scans do not contact endpoints, validate certificate trust chains, install dependencies or certify PQC migration completion.
+Artifact scans do not contact endpoints, validate certificate trust chains, install dependencies or certify PQC migration completion.
 Optional experimental `probe ssh-kex` (`probe-ssh-kex` feature) verifies hybrid ML-KEM768+X25519 key exchange against an explicitly supplied trusted Ed25519 public host key, then disconnects without user authentication/login. It writes separate `probe.ssh-kex.v1.json` and bilingual HTML/Markdown; existing outputs remain unchanged. See the [probe guide](docs/user/PROBING.md).
 
 Optional `probe` commands contact only the explicitly selected endpoint; TLS uses

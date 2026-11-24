@@ -2,20 +2,20 @@
 
 [English](PROBING.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.ja.md)
 
-TLS・SSH提示方式・SSH KEXは、静的版v0.3.0と併せても実験的機能です。v0.3.0とv0.2.0の静的版バイナリに、`probe`コマンドは含みません。probe同梱版は配布・導入の技術検証を終えていますが、公開前の確認が残っています。[配布状況](DISTRIBUTION.ja.md#release-status)を参照してください。
+TLS・SSH提示方式・SSHハイブリッド鍵交換は、v0.4の実験的機能です。macOS Apple Silicon向けの `network` 版で利用できます。`static` 版には `probe` コマンドを含みません。[配布物の選び方](DISTRIBUTION.ja.md#release-status)を参照してください。
 
 管理者から検査の許可を得たホスト・ポートだけを指定してください。
 `probe` は指定先と通信します。リポジトリの `scan` とレポート生成はローカルで完結し、ソース内のURL、証明書のSAN、所見を根拠に自動接続することはありません。
 
 ## 任意のコマンドを有効にする
 
-既定のインストールは静的スキャン用です。固定されたRustツールチェーンで、必要な診断機能を付けてビルドします。
+`network` 版のバイナリには診断コマンドを同梱しています。ソースからインストールする場合は、必要な機能を付けてビルドします。
 
 ```bash
 cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh
 ```
 
-配布バイナリの対象環境はmacOS Apple Siliconです。接続先診断を使う場合は、必要な機能を有効にしてソースから導入してください。
+配布バイナリの対象環境はmacOS Apple Siliconです。ソースから導入する場合も、以下の診断手順は共通です。
 
 ## TLS
 
@@ -116,4 +116,4 @@ Unixではシンボリックリンクや通常ファイル以外の入力も拒�
 HTMLは結果と理由を先に示し、技術情報は閉じた状態にします。
 既存の `probe ssh` は提示方式の収集のままで、従来の出力形式も維持します。
 全コマンドが必要なら `probe-tls,probe-ssh,probe-ssh-kex` を有効にしてください。
-新しい配布物は`static`（probeなし）と`network`（静的スキャンに加え、TLS・SSH提示方式・SSH KEX）の2構成です。実験的な`network`版は公開対象に含みません。[配布構成と確認事項](DISTRIBUTION.ja.md#release-status)を参照してください。
+新しい配布物は`static`（probeなし）と`network`（静的スキャンに加え、TLS・SSH提示方式・SSH KEX）の2構成です。`network`版の診断機能は実験的です。[配布構成と確認事項](DISTRIBUTION.ja.md#release-status)を参照してください。

@@ -88,6 +88,31 @@ class HostBoundaryTests(unittest.TestCase):
             self.assertEqual((base/'snapshot/tasks/001/task.yaml').read_bytes(), current.read_bytes())
             self.assertFalse((base/'snapshot/tasks/001/evidence').exists())
 
+    def test_snapshot_includes_exact_frozen_migration_shape_inputs_only(self):
+        repository = HERE.parents[1]
+        manifest_path = 'tasks/071/evidence/study-v2/manifest.json'
+        manifest = json.loads((repository/manifest_path).read_text())
+        expected = {manifest_path}
+        for case in manifest['cases']:
+            expected.update([case['input'], case['context']])
+        self.assertEqual(len(expected), 49)
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp); root = base/'root'; root.mkdir()
+            subprocess.run(['git', '-C', str(root), 'init', '-q'], check=True)
+            for name in expected:
+                target = root/name; target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes((repository/name).read_bytes())
+            for name in ['tasks/071/evidence/study-v2/private.key',
+                         'tasks/071/evidence/study-v2/S01A/result.json',
+                         'tasks/071/evidence/other-study/input.json']:
+                target = root/name; target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text('excluded historical output')
+            bindings = runner.snapshot(root, base/'snapshot')
+            self.assertEqual(set(bindings), expected)
+            for name in expected:
+                self.assertEqual((base/'snapshot'/name).read_bytes(), (repository/name).read_bytes())
+                self.assertEqual((base/'snapshot'/name).stat().st_mode & 0o222, 0)
+
     def test_snapshot_skips_known_deletions_but_rejects_copy_time_disappearance(self):
         from unittest import mock
         with tempfile.TemporaryDirectory() as temp:
