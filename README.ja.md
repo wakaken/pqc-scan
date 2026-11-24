@@ -264,9 +264,7 @@ pqc-scan serve --migration --root /path/to/projects --rules-dir /path/to/pqc-sca
 
 ## TLS・SSH接続先を診断する
 
-`probe` は、許可された接続先と通信し、TLS・SSHで使われる暗号方式を確認します。\
-v0.4では、macOS Apple Silicon向けの `network` 版で正式機能として提供します。\
-`static` 版には含まれません。
+接続先の診断機能(`probe`) は、許可された接続先と通信し、TLS・SSHで使われる暗号方式を確認します。\
 
 ### 1. 診断コマンドを用意する
 

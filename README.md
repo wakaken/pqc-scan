@@ -242,8 +242,7 @@ and [saved evidence and declarations](docs/user/SAVED-EVIDENCE.md) to reuse save
 
 ## Inspect TLS/SSH endpoints
 
-`probe` connects to an authorized endpoint to inspect the cryptographic algorithms used by TLS or SSH.
-In v0.4, these diagnostics are supported features in the macOS Apple Silicon `network` variant. The `static` variant does not include it.
+Endpoint diagnostics (`probe`) connect to an authorized endpoint to inspect the cryptographic algorithms used by TLS or SSH.
 
 ### 1. Get the diagnostic commands
 

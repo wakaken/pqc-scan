@@ -85,3 +85,21 @@ checkpoint above remains historical. The chrono maintenance-warning decision and
 actual publication authorization remain pending. Documentation changes after this
 source require refreshed archive/source binding; the old archives are not the new
 publication assets. No old measurements or audit exceptions are rewritten.
+
+## Subsequent maintainer acceptance — 2026-11-24
+
+After final user-journey corrections, both existing reviewers accepted candidate
+`58a44cc95d829593237bf8ad069afe65a9360b5f` and its actual hosted static/network
+archives. Exact-source [CI45321673049](https://github.com/wakaken/pqc-scan/actions/runs/45321673049)
+and [preparation45321678259](https://github.com/wakaken/pqc-scan/actions/runs/45321678259)
+passed. Hosted protocols was skipped; it is not counted as a pass.
+
+The maintainer then explicitly accepted the chrono maintenance warning as a
+v0.4-only exception through 2027-01-23 and authorized publishing both variants
+under the presented best-effort/no-SLA/no-backport maintenance terms. The same
+request requires synchronizing additional Japanese README edits into English
+before publication. The final release is therefore a documentation-only descendant
+of `58a44cc` and requires refreshed exact-source hosted archives and attestations.
+See [v0.4 notes](../v0.4.0.md#maintainer-acceptance) for the current
+acceptance. Earlier checkpoints and the original accepted:false audit evidence
+above remain historical; this section records a later decision, not a rerun.
