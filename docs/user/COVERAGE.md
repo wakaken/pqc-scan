@@ -2,7 +2,7 @@
 
 [日本語](COVERAGE.ja.md) · [README](../../README.md)
 
-This guide explains supported v0.4.0 inputs and how to interpret their results.
+This guide explains supported v0.4.0 inputs and what to consider when reading scan reports.
 See the [input overview](../../README.md#targets) and [scanning guide](SCANNING.md).
 
 ## Contents
@@ -72,7 +72,8 @@ There are 125 built-in rules. Use the matching bundled `rules/default` directory
 Checks cover cryptographic API and algorithm references in Java, Go, JavaScript,
 TypeScript/TSX, Python, Rust and Ruby. Code is not executed. Supported usage
 patterns are limited, so not every cryptographic operation can be found.
-An algorithm reference does not establish runtime use or completed PQC migration.
+Finding the name of a cryptographic algorithm in code does not confirm that the
+operation is actually used or that PQC migration is complete.
 
 Syntax errors, unsupported constructs and processing limits can leave inspection
 incomplete while retaining available findings. Review the stated reasons and next
@@ -80,18 +81,30 @@ checks in [inspection status](SCANNING.md#diagnostics).
 
 <a id="privacy"></a>
 
-## Privacy and excluded files
+<a id="privacy-and-excluded-files"></a>
 
-Recognized private keys and credentials are masked in reports, but this is not a
-universal secret scanner. Source snippets, paths and public certificate details
-may remain. Review reports before sharing them.
+## Privacy and inspection exclusions
 
-Git ignore settings are respected. Default exclusions include `.git`,
-`node_modules`, `target`, `dist`, `docs`, Markdown and known image, archive and
-binary formats. The default file-size limit is 2 MiB; CLI and folder-picker
-settings accept 1–64 MiB. See [file-size limits](SCANNING.md#file-size-limit) and
-[file selection](SCANNING.md).
+<a id="before-sharing-a-report"></a>
 
-Tests are included by default. Use `--exclude-tests` or **Exclude test code** to
-omit them, and `.pqcignore` for custom paths. Symbolic-link targets are not read.
-Excluded and unsupported inputs mean that zero findings do not prove safety.
+### What to check before sharing a report
+
+The tool masks recognized private keys and credentials in reports, but does not
+detect every secret. Reports can retain source excerpts containing the matched
+location, file paths and public certificate information. Inspect the actual report
+before sharing it with your organization or a third party.
+
+### Conditions that exclude input
+
+| Condition | Default or control |
+|---|---|
+| Git ignore settings | Respected when selecting files |
+| Directories and formats | Exclude `.git`, `node_modules`, `target`, `dist`, `docs`, Markdown and known image, archive and binary formats |
+| File size | Up to 2 MiB by default; CLI and folder-picker settings accept 1–64 MiB |
+| Test code | Included by default; omit with `--exclude-tests` or **Exclude test code** |
+| Custom paths | List them in `.pqcignore` |
+| Symbolic links | Link targets are not read |
+
+See [file-size limits](SCANNING.md#file-size-limit) and [file selection](SCANNING.md)
+for settings. Remember that zero findings do not prove safety: some input may be
+excluded or unsupported.
