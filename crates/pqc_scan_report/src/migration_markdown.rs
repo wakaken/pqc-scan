@@ -42,8 +42,27 @@ pub fn migration_markdown_bytes(
     let targets: BTreeMap<_, _> = r.targets().iter().map(|t| (t.id.as_str(), t)).collect();
     let candidates: BTreeMap<_, _> = r.candidates().iter().map(|v| (v.id.as_str(), v)).collect();
     let candidate_index = index(r.candidates(), |v| &v.id);
+    let target_index: BTreeMap<_, _> = r
+        .decisions()
+        .iter()
+        .enumerate()
+        .map(|(i, d)| (d.target_id.as_str(), i + 1))
+        .collect();
     let claim_index = index(r.claims(), |v| &v.id);
     let source_index = index(r.sources(), |v| &v.id);
+    let mut check_counts = BTreeMap::new();
+    for d in r.decisions() {
+        *check_counts
+            .entry(d.action.validation_steps.clone())
+            .or_insert(0usize) += 1;
+    }
+    let mut shared_checks = BTreeMap::new();
+    for d in r.decisions() {
+        let steps = &d.action.validation_steps;
+        if check_counts[steps] > 1 && !shared_checks.contains_key(steps) {
+            shared_checks.insert(steps.clone(), shared_checks.len() + 1);
+        }
+    }
     writeln!(
         out,
         "# {}\n",
@@ -151,10 +170,13 @@ pub fn migration_markdown_bytes(
             }
         }
         writeln!(out, "**{}**\n", c.pick("Next checks", "次の確認"))?;
-        for s in &d.action.validation_steps {
-            writeln!(out, "- {}", c.code(s))?;
-        }
-        if d.action.validation_steps.is_empty() {
+        if let Some(index) = shared_checks.get(&d.action.validation_steps) {
+            writeln!(
+                out,
+                "[{} {index}](#checks-{index})\n",
+                c.pick("Shared checks", "共通の確認事項")
+            )?;
+        } else if d.action.validation_steps.is_empty() {
             writeln!(
                 out,
                 "- {}",
@@ -163,48 +185,46 @@ pub fn migration_markdown_bytes(
                     "事実・対象範囲・申告が変わった際に再評価してください。"
                 )
             )?;
+        } else {
+            for step in &d.action.validation_steps {
+                writeln!(out, "- {}", c.code(step))?;
+            }
         }
-        writeln!(
-            out,
-            "\n### {}\n",
-            c.pick("Migration candidates", "移行の検討候補")
-        )?;
         if d.action.candidate_ids.is_empty() {
             writeln!(
                 out,
-                "{}\n",
+                "\n{}\n",
                 c.pick(
                     "No candidate selected for this decision.",
                     "この判断で選んだ候補はありません。"
                 )
             )?;
-        }
-        for id in &d.action.candidate_ids {
-            let v = candidates[id.as_str()];
+        } else {
             writeln!(
                 out,
-                "<a id=\"candidate-{}\"></a>\n\n**{} · {}**\n",
-                candidate_index[id.as_str()],
-                code(&v.identifier),
-                c.token(&enum_token(&v.purpose))
+                "\n**{}**\n",
+                c.pick("Migration candidates", "移行の検討候補")
             )?;
-            writeln!(out,"{}\n",c.pick("Integration is unverified. Select exact parameters and validate compatibility before adoption.","組込みは未検証です。採用前に正確なパラメーターを選び、互換性を検証してください。"))?;
-            writeln!(
-                out,
-                "| {} | {} |\n|---|---|",
-                c.pick("Prerequisite", "必要な条件"),
-                c.pick("Declared support", "申告上の対応状況")
-            )?;
-            for p in &v.prerequisites {
+            for id in &d.action.candidate_ids {
+                let v = candidates[id.as_str()];
                 writeln!(
                     out,
-                    "| {} | {} |",
-                    c.code(&p.name),
-                    c.support(p.claimed_support)
+                    "- [{} · {}](#candidate-{})",
+                    code(&v.identifier),
+                    c.token(&enum_token(&v.purpose)),
+                    candidate_index[id.as_str()]
                 )?;
             }
             writeln!(out)?;
         }
+        writeln!(
+            out,
+            "<details><summary>{}</summary>\n",
+            c.pick(
+                "Evidence, declarations and reference IDs",
+                "根拠・申告・照合用ID"
+            )
+        )?;
         writeln!(
             out,
             "<a id=\"evidence-{}\"></a>\n\n### {}\n",
@@ -268,6 +288,74 @@ pub fn migration_markdown_bytes(
             c.pick("Decision", "判断"),
             code(&d.id)
         )?;
+        writeln!(out, "</details>\n")?;
+    }
+    let mut check_sections: Vec<_> = shared_checks.iter().collect();
+    check_sections.sort_by_key(|(_, index)| **index);
+    for (steps, index) in check_sections {
+        writeln!(
+            out,
+            "<a id=\"checks-{index}\"></a>\n\n## {} {index}\n",
+            c.pick("Shared checks", "共通の確認事項")
+        )?;
+        if steps.is_empty() {
+            writeln!(
+                out,
+                "- {}",
+                c.pick(
+                    "Reassess when facts, scope or claims change.",
+                    "事実・対象範囲・申告が変わった際に再評価してください。"
+                )
+            )?;
+        }
+        for step in steps {
+            writeln!(out, "- {}", c.code(step))?;
+        }
+        writeln!(out)?;
+    }
+    if !r.candidates().is_empty() {
+        writeln!(out, "## {}\n\n{}\n", c.pick("Migration candidate details", "移行候補の詳細"), c.pick("Integration is unverified. Select exact parameters and validate compatibility before adoption.", "組込みは未検証です。採用前に正確なパラメーターを選び、互換性を検証してください。"))?;
+    }
+    for (i, v) in r.candidates().iter().enumerate() {
+        writeln!(
+            out,
+            "<a id=\"candidate-{}\"></a>\n\n### {} · {}\n",
+            i + 1,
+            code(&v.identifier),
+            c.token(&enum_token(&v.purpose))
+        )?;
+        let target = targets
+            .get(v.target_id.as_str())
+            .ok_or_else(|| anyhow::anyhow!("invalid_reference"))?;
+        let owner = target_index
+            .get(v.target_id.as_str())
+            .ok_or_else(|| anyhow::anyhow!("invalid_reference"))?;
+        let system = r.decisions()[owner - 1]
+            .system_id
+            .as_deref()
+            .unwrap_or(c.pick("System not bound", "システム未設定"));
+        writeln!(
+            out,
+            "{}: [{} · {}](#target-{owner})\n",
+            c.pick("Applies to", "対象"),
+            code(system),
+            code(&location(target))
+        )?;
+        writeln!(
+            out,
+            "| {} | {} |\n|---|---|",
+            c.pick("Prerequisite", "必要な条件"),
+            c.pick("Declared support", "申告上の対応状況")
+        )?;
+        for p in &v.prerequisites {
+            writeln!(
+                out,
+                "| {} | {} |",
+                c.code(&p.name),
+                c.support(p.claimed_support)
+            )?;
+        }
+        writeln!(out)?;
     }
     writeln!(out,"## {}\n\n{}\n",c.pick("Declared context and provenance","判断に使った申告と由来"),c.pick("These are unverified declarations, including those labeled external review. Readiness describes active declarations, not verified deployment.","外部レビュー由来のものを含め、申告は未検証です。移行準備の表示は有効な申告に基づき、配備の検証結果ではありません。"))?;
     for (i, v) in r.claims().iter().enumerate() {

@@ -124,12 +124,12 @@ test('historical rule hashes remain recorded and changed source bindings fail cl
 });
 
 test('historical static candidate references retain frozen source lines and payloads', () => {
-  const review = read('docs/releases/static-candidate-20261117/evidence/POLICY-REBIND.json');
-  const results = read('docs/releases/static-candidate-20261117/evidence/REVIEWED-RESULTS.json');
+  const review = read('docs/quality/release-evidence/STATIC-POLICY-REBIND.json');
+  const results = read('docs/quality/release-evidence/STATIC-REVIEWED-RESULTS.json');
   assert.equal(results.length, 98);
   assert.equal(new Set(review.rows.map(row => row.path)).size, 4);
   const frozen = JSON.parse(require('node:zlib').gunzipSync(fs.readFileSync(path.join(repositoryRoot,
-    'docs/releases/static-candidate-20261117/audit-fixes/STATIC-REFERENCE-SOURCES.json.gz'))));
+    'docs/quality/release-evidence/STATIC-REFERENCE-SOURCES.json.gz'))));
   for (const source of Object.values(frozen.files)) assert.equal(createHash('sha256').update(source.text).digest('hex'), source.sha256);
   for (const row of review.rows) {
     const lines = frozen.files[row.path].text.split('\n');
@@ -165,7 +165,7 @@ test('historical static candidate references retain frozen source lines and payl
 
 test('historical product audit preserves its original source-bound review queue', () => {
   const bytes=fs.readFileSync(path.join(repositoryRoot,
-    'docs/releases/static-candidate-20261117/audit-fixes/evidence/self-scan/report.sarif.gz'));
+    'docs/quality/release-evidence/HISTORICAL-PRODUCT-REPORT.sarif.gz'));
   const raw=JSON.parse(require('node:zlib').gunzipSync(bytes));
   const original=read('docs/quality/self-scan/html-report-20261118/HISTORICAL-PRODUCT-EXPECTATIONS.json');
   const sources=JSON.parse(require('node:zlib').gunzipSync(fs.readFileSync(path.join(repositoryRoot,

@@ -1,6 +1,6 @@
 # Installation and distribution
 
-[日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.md)
+[日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
 
 This guide describes installation of **v0.4.0** for macOS Apple Silicon
 (`aarch64-apple-darwin`). See the [v0.4.0 release notes](../releases/v0.4.0.md) for changes.
@@ -12,19 +12,32 @@ This guide describes installation of **v0.4.0** for macOS Apple Silicon
 Choose a version and variant on [GitHub Releases](https://github.com/wakaken/pqc-scan/releases).
 Check the Release page for availability. Actions artifacts are separate from published Releases.
 
+The compressed distribution file (`.tar.gz`) bundles the executable, rules and user guides.
+
 | Variant | Filename | Features |
 |---|---|---|
 | `static` | `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz` | Local scanning, local web interface and migration review |
 | `network` | `pqc-scan-0.4.0-aarch64-apple-darwin-network.tar.gz` | All static features plus explicit TLS/SSH endpoint diagnostics |
 
-Download the matching `.sha256` file too. Endpoint diagnostics require the
-administrator's authorization; follow the [TLS/SSH guide](PROBING.md).
+Download both the compressed file and its matching `.sha256` file separately from
+**Assets** on the same release page. The `.sha256` file checks the downloaded
+compressed file for corruption; it is distributed alongside it, not inside it.
+Its name is the compressed filename with `.sha256` appended.
+
+For example, download these two files for `static`:
+
+- `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz`
+- `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz.sha256`
+
+Endpoint diagnostics require the administrator's authorization; follow the [TLS/SSH guide](PROBING.md).
 Binaries for other operating systems or CPUs and installation through crates.io are outside this scope.
 
-## Install an archive
+<a id="install-an-archive"></a>
 
-1. Save the archive and its `.sha256` file in the same directory.
-2. In that directory, run `shasum -a 256 -c FILE.sha256`, replacing `FILE.sha256` with the downloaded filename. Confirm that verification succeeds.
+## Install from a compressed file
+
+1. Save the compressed file and its `.sha256` file in the same folder.
+2. In that folder, run `shasum -a 256 -c FILE.sha256`, replacing `FILE.sha256` with the downloaded filename. Confirm that verification succeeds.
 3. Create a new empty directory and extract with `tar -xzf FILE.tar.gz -C EMPTY_DIRECTORY`, replacing the filename and destination.
 4. Keep `bin/pqc-scan` and `rules/default` together. Extraction does not change your PATH.
 
@@ -42,11 +55,12 @@ release notes. Replace `/absolute/path/to/bundle` below with the bundle's top-le
 /absolute/path/to/bundle/bin/pqc-scan serve --root /absolute/path/to/projects --rules-dir /absolute/path/to/bundle/rules/default
 ```
 
-Open the complete session URL printed in the terminal, select folders and choose
-**Scan selected folders**. Ordinary mode opens the scan report automatically for
-one folder; multiple folders show named result cards. Add `--migration` when
-starting the server to use migration review. Follow the
-[eight illustrated steps](SCANNING.md#web-migration-walkthrough). Stop with Ctrl+C.
+1. Open the complete session URL printed in the terminal.
+2. Select folders and choose **Scan selected folders**. Ordinary mode opens the scan report automatically for one folder; multiple folders show named results.
+3. Stop the server with Ctrl+C in the terminal.
+
+Add `--migration` at startup to use migration review. See the
+[eight illustrated steps](SCANNING.md#web-migration-walkthrough) for the full workflow.
 
 ## Install from source
 
@@ -61,20 +75,21 @@ pqc-scan scan /absolute/path/to/authorized/repository --rules-dir /absolute/path
 
 Building may require dependency downloads. Keep report output outside the scanned repository.
 
-## Use migration review in v0.4
+<a id="use-migration-review-in-v04"></a>
 
-With `serve --migration`, enter purpose and usage information to see actions and
-conditions for proceeding. Use `assess` to reassess saved findings and
-`context-template` to prepare an input template. Retain the original
-`scan.inventory.v1.json` together with its matching input JSON. See the
-[migration report guide](REPORTS.md#saved-assessment) and [saved-input guide](SAVED-EVIDENCE.md).
+## Use the migration review feature introduced in v0.4
+
+| Goal | Feature and guide |
+|---|---|
+| Enter purpose/usage and review actions and conditions for proceeding | `serve --migration`; see the [migration report guide](REPORTS.md#saved-assessment) |
+| Reassess saved findings | Generate input with `context-template`, then evaluate with `assess`; see the [saved-input guide](SAVED-EVIDENCE.md) |
 
 ## Upgrade and rollback
 
-Extract the new bundle into a separate empty directory. Retain the previous binary
-and its rules together. Check `--help`, `rules list` and a scan of a nonsecret
-folder before switching paths. To roll back, use the previous bundle's path.
-Do not overlay rule packs. Automatic updates are not provided; retain settings and reports for comparison.
+1. Extract the new bundle into a separate empty directory. Retain the previous binary and its rules together; do not overlay rule packs.
+2. Check `--help`, `rules list` and a scan of a nonsecret folder with the new binary.
+3. Switch paths after checking, and retain settings and reports for comparison.
+4. To roll back, use the previous bundle's path.
 
 ## Licenses and reporting issues
 

@@ -182,7 +182,7 @@ With `--format all`, the CLI saves these files:
 |---|---|
 | `report.html` | Review findings and inspection status in a browser |
 | `report.rules.html` | Read matched rule explanations; keep it alongside `report.html` |
-| `report.md` | Read or share findings and inspection status as text, with multiline source excerpts and code examples kept inside code blocks |
+| `report.md` | Read or share findings and inspection status as text |
 | `report.json` | Use findings with other tools |
 | `report.sarif` | Pass findings to SARIF-compatible tools |
 | `cbom.json` | Review the cryptographic findings inventory |

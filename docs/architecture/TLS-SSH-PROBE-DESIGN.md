@@ -160,3 +160,12 @@ See [product validation](../../tasks/039/SSH-KEX-PRODUCT-VALIDATION.md) and bili
 [usage](../user/PROBING.md). This supersedes the earlier study-only limitation for
 the specifically authorized integration; it does not claim stable/hosted-CI or
 all-platform release acceptance.
+
+## SSH KEX verification boundary
+
+The transport library can send NEWKEYS before the application checks the supplied
+host-key pin, including when that later pin comparison fails. A mismatch never
+produces a verified result. The saved `user_authentication_attempted: false` field
+describes the client mode; it is not a per-connection packet trace. See the
+[user procedure](../user/PROBING.md) for the trusted public-key input and the
+separate meanings of hybrid key exchange and classical host authentication.

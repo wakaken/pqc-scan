@@ -1,74 +1,129 @@
 # Explicit TLS and SSH diagnostics
 
-[日本語](PROBING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.md)
+[日本語](PROBING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
 
-TLS, SSH offer collection and hybrid SSH key exchange diagnostics are supported v0.4 features in the macOS Apple Silicon `network` variant. The `static` variant has no `probe` command. See [choosing a download](DISTRIBUTION.md#release-status).
+The macOS Apple Silicon v0.4 `network` variant includes three diagnostic commands.
+The `static` variant has no `probe` command. See [choosing a download](DISTRIBUTION.md#release-status).
 
-Use probes only for a host/port you are authorized to inspect. A probe exchanges
-protocol traffic with that endpoint. Repository `scan` and report generation stay
-local; source files, URLs, certificate SANs and findings never start a probe.
+| Goal | Command | What it establishes |
+|---|---|---|
+| TLS selection and public certificates | [`probe tls`](#tls) | Results of a successfully verified handshake |
+| SSH advertised methods | [`probe ssh`](#ssh-offers) | Unauthenticated advertisements; no key exchange |
+| Hybrid SSH key exchange | [`probe ssh-kex`](#verified-hybrid-ssh-key-exchange) | Match to a trusted host-key pin and initial exchange using a fixed profile |
 
-## Install the optional commands
+Use `probe` only for a host/port the administrator has authorized you to inspect.
+It exchanges traffic with the specified endpoint and may be logged there.
+Repository `scan` and report generation run locally; source URLs, certificate
+SANs and findings do not cause connections to external services.
 
-The `network` binary includes the diagnostic commands. For a source installation, enable the required optional features:
+<a id="install-the-optional-commands"></a>
+
+## Enable the probe commands
+
+The `network` binary includes all three commands. For TLS and SSH offers in a
+source installation, enable the following features with `--features`:
 
 ```bash
 cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh
 ```
 
-Distributed binaries target macOS Apple Silicon. The diagnostic steps below also apply to source installations.
+Hybrid SSH key exchange uses the [separate feature below](#verified-hybrid-ssh-key-exchange).
+For all commands, pass `probe-tls,probe-ssh,probe-ssh-kex` to `--features`.
 
-## TLS
+<a id="tls"></a>
+
+## 1. TLS
+
+Run the command with the hostname and port as shown below.
 
 ```bash
 pqc-scan probe tls service.example --port 443 --out-dir /path/to/new-tls-report
 ```
 
-Replace the example host with your authorized endpoint. Port is mandatory. One
-fresh TLS1.2/1.3 handshake records the actual version, suite, key-exchange group
-and bounded public certificate facts. The configured client profile is included.
-No application request, client credential, session resumption, 0-RTT or key log
-is used. A TLS1.3 suite alone does not identify classical or hybrid exchange.
+One fresh TLS 1.2/1.3 handshake records the selected version, suite, key-exchange
+group, bounded public certificate facts and configured client profile.
 
-Trust uses a fixed local Mozilla root bundle. To use a local public CA instead:
+### Select a trusted CA
+
+The default uses a fixed local Mozilla root bundle. To replace it with a local public CA:
 
 ```bash
 pqc-scan probe tls 127.0.0.1 --port 8443 --allow-cidr 127.0.0.1/32 --server-name localhost --ca-file /path/to/public-ca.pem --out-dir /path/to/new-local-tls-report
 ```
 
-`--ca-file` replaces the bundle; it accepts at most16 public certificate PEM
-blocks/256 KiB, never private keys or passwords. Ordinary chain/name/time validation
-is mandatory. The effective DNS verification name is also SNI; IP verification
-sends no SNI. `--server-name` never changes the pinned destination. OS trust
-constraints and revocation checking are not supplied by this bundled-root mode.
+| Item | Behavior or condition |
+|---|---|
+| `--ca-file` | Replaces the root bundle; public certificate PEM only, up to 16 blocks/256 KiB. No private keys or passwords |
+| Certificate validation | Ordinary chain/name/time validation is mandatory. OS trust constraints and revocation checking are not supplied |
+| `--server-name` | Selects the verification name. DNS names also provide SNI; IP verification sends no SNI. The pinned destination does not change |
+| Certificate collection | Up to 16 certificates/256 KiB; other processing limits may be reached first |
+| Operations not performed | Application requests, client credentials, session resumption, 0-RTT and key logging. Client-authentication requests are unsupported |
 
-A connection that fails verification is not shown as a verified negotiated result. Client-authentication requests are locally
-unsupported. Chain collection is limited to16 certificates/256 KiB; other processing limits can also prevent completion. Failures/limits are incomplete
-inspection, not evidence that the server lacks PQC or is unsafe.
+Verification failures are not shown as verified negotiated results. Failures and
+limits mean incomplete inspection, not that the server lacks PQC or is unsafe.
+A TLS 1.3 suite alone does not distinguish classical from hybrid key exchange.
 
-## SSH offers
+<a id="ssh-offers"></a>
+
+## 2. SSH offers
 
 ```bash
 pqc-scan probe ssh service.example --port 22 --out-dir /path/to/new-ssh-report
 ```
 
-The collector exchanges identification and KEXINIT, records all ten ordered remote
-name lists and extension markers, and closes before executing key exchange. It
-sends no service/userauth/channel requests, including no `none` authentication.
-There is no username, agent, private key, SSH configuration or system-SSH backend.
-The diagnostic client proposal is recorded; it does not claim implemented crypto.
+Identification and KEXINIT are exchanged; all ten ordered remote name lists and
+extension markers are recorded. The connection closes before executing key exchange.
 
-Results are **unauthenticated advertisements**. They do not prove a selected
-method, verified host key, completed session or server-wide migration readiness.
-A version banner is an unverified peer claim. Unknown identifiers remain unknown.
+| Recorded information | Interpretation |
+|---|---|
+| Remote methods and banner | Unauthenticated advertisements, not proof of a selected method, verified host key, completed session or server-wide readiness |
+| Diagnostic client proposal | Listing an algorithm does not claim that the client implements it |
+| Banner version and unknown identifiers | The version is a peer claim; unknown identifiers remain unknown |
+
+No service/userauth/channel requests or `none` authentication are sent. No username,
+agent, private key, SSH configuration or system-SSH backend is used.
+
+<a id="verified-hybrid-ssh-key-exchange"></a>
+
+## 3. Verified hybrid SSH key exchange
+
+For source installation, specify `--features probe-ssh-kex` as shown below. Supply one OpenSSH
+Ed25519 **public host key** from a trusted administrator or another independent
+trusted channel. Do not fetch a key from an untrusted server and treat it as trusted.
+
+```sh
+cargo install --locked --path crates/pqc_scan_cli --features probe-ssh-kex
+pqc-scan probe ssh-kex service.example --port 22 --host-key-file /path/to/trusted-host.pub --out-dir /path/to/new-ssh-kex-report
+```
+
+| Check | Condition |
+|---|---|
+| Host public key | Pins the explicitly requested endpoint. Up to 4096 bytes, validated before DNS/connections; Unix symlinks and nonregular files are rejected |
+| Key exchange | Fixed to `mlkem768x25519-sha256` (ML-KEM768+X25519), without classical-only fallback |
+| Host signature | Fixed to `ssh-ed25519`. Verify the exchange signature, match the pin and complete the initial exchange, then disconnect |
+| Inputs and operations not used | Private keys, host certificates, known_hosts, ambient SSH configuration/agents. No authentication service request, username, password, `none` authentication, login, channel or remote command |
+
+Unknown or mismatched keys are rejected; failed/partial observations leave verified
+selection fields null. Failure or no overlap does not establish server-wide lack
+of PQC. Ed25519 authentication is classical, so this does not establish PQ host
+signatures or completed migration. The shared conditions below cover the single
+attempt, pinned peer, address authorization, time/traffic limits and cancellation.
 
 ## Authorization, limits and outputs
 
-Public unicast is allowed by default. Internal/loopback/special-purpose unicast
-requires explicit `--allow-cidr`; unspecified, multicast and limited broadcast
-addresses remain denied. Every DNS answer is checked, including mapped IPv6;
-mixed denied results fail closed. The selected socket address is pinned and its
-peer checked. No proxy, redirect, config expansion, address retry or re-resolution.
+### Allowed addresses
+
+| Destination | Condition |
+|---|---|
+| Public unicast | Allowed by default |
+| Internal/loopback/special-purpose unicast | Requires `--allow-cidr` |
+| Unspecified, multicast and limited broadcast | Cannot be allowed |
+
+Every DNS answer is checked, including mapped IPv6; mixed denied results fail
+closed. The validated socket address is pinned and its actual peer checked.
+No proxy, redirect, config expansion, address retry or re-resolution is used.
+
+### Processing limits and cancellation
 
 | Limit | Initial ceiling |
 |---|---|
@@ -79,59 +134,29 @@ peer checked. No proxy, redirect, config expansion, address retry or re-resoluti
 | SSH banner / complete unencrypted frame | 8 KiB / 256 KiB |
 
 Counters measure bytes delivered through the protocol socket, excluding OS DNS
-traffic and TCP overhead/retransmissions. Cancellation closes sockets and reaps
-the resolver child; already initiated OS resolver service work is outside that
-process boundary. Unsupported or oversized data never silently becomes complete.
+traffic and TCP overhead/retransmissions. Cancellation closes the connection, but
+OS name resolution already in progress may continue. Unsupported or oversized
+data never silently becomes complete.
 
-TLS writes `probe.tls.v1.json`, SSH writes `probe.ssh-offers.v1.json`; each also
-writes `report.html` and `report.md`. Defaults are `./pqc-probe/tls` and
-`./pqc-probe/ssh`; choose fresh directories to avoid stale outputs. `--lang ja`
-changes human copy only. These outputs do not replace the six static reports or
-`scan.inventory.v1.json`. Known secret syntax is masked consistently in exports;
+### Output files and exit codes
+
+| Command | JSON | Default directory |
+|---|---|---|
+| `probe tls` | `probe.tls.v1.json` | `./pqc-probe/tls` |
+| `probe ssh` | `probe.ssh-offers.v1.json` | `./pqc-probe/ssh` |
+| `probe ssh-kex` | `probe.ssh-kex.v1.json` | `./pqc-probe/ssh-kex` |
+
+Each also writes `report.html` and `report.md`. SSH KEX HTML presents the result
+and reason first, with technical details closed. Its JSON contract is
+`schemas/probe-ssh-kex-v1.schema.json`. Choose a fresh directory to avoid stale
+outputs. `--lang ja` changes human copy only; outputs do not replace the six static
+reports or `scan.inventory.v1.json`. Known secret syntax is masked in every export;
 `redaction_applied` indicates that affected original strings are unavailable.
 
-Exit0 means the requested observation completed, not that the endpoint is safe.
-Exit1 is setup/output failure; exit3 is denied/failed/partial/cancelled/unsupported
-inspection. Existing scan exit0/1/2/3 behavior is unchanged.
+| Exit code | Meaning |
+|---|---|
+| 0 | Requested observation completed; not a safety verdict |
+| 1 | Setup/output error |
+| 3 | Denied, failed, partial, cancelled or unsupported inspection |
 
-## Verified hybrid SSH key exchange
-
-Enable this separate optional feature when installing:
-
-```sh
-cargo install --locked --path crates/pqc_scan_cli --features probe-ssh-kex
-pqc-scan probe ssh-kex service.example --port 22 --host-key-file /path/to/trusted-host.pub --out-dir /path/to/new-ssh-kex-report
-```
-
-The file must contain one OpenSSH Ed25519 **public host key**, obtained from a
-trusted administrator or another independent trusted channel. It is the pin for
-this explicitly requested endpoint. Do not fetch a key from the untrusted server
-and treat it as trusted. Private keys, host certificates, known_hosts files and
-ambient SSH config/agents are not used. Input is limited to4096 bytes and checked
-before DNS or connections; Unix symlinks/nonregular files are rejected.
-
-The fixed profile offers only `mlkem768x25519-sha256` (ML-KEM768+X25519 hybrid)
-and `ssh-ed25519` host signatures. No fallback to classical-only key exchange.
-The library verifies the exchange signature; the peer key must match the supplied
-pin and the initial exchange must complete. The library may send NEWKEYS before
-the application checks the pin, including on a later pin mismatch. A mismatch
-never produces a verified result. `user_authentication_attempted: false` records
-the client mode; it is not a per-connection packet trace. The connection is then closed without
-an authentication service request, username, password, `none` authentication,
-login, channel or remote command. Ed25519 authentication is classical: this does
-not establish PQ host signatures or complete PQC migration.
-
-One attempt, pinned peer, address allowlist, DNS/time/traffic/cancellation caps
-above also apply. This mode is explicit network activity and may be logged by the
-server. Failure/no overlap means this exact profile could not be verified; it does
-not enumerate every server capability. Unknown or mismatched keys fail closed.
-
-Separate outputs: `probe.ssh-kex.v1.json`, `report.html`, `report.md`; default
-folder `./pqc-probe/ssh-kex`. JSON contract:
-`schemas/probe-ssh-kex-v1.schema.json`. Verified selection fields remain null on
-failed/partial observations. HTML presents the result/reason first, with technical
-details closed. Existing `probe ssh` remains advertisement-only; no existing
-static/TLS/SSH-offer output format changes. Enable `probe-tls,probe-ssh,probe-ssh-kex`
-for all three commands. New distribution archives use `static` (no probes) and
-`network` (TLS, SSH offers and SSH KEX, plus static scanning).
-See the [distribution guide](DISTRIBUTION.md#release-status).
+Existing `scan` exit codes 0/1/2/3 remain unchanged; see [scan exit codes](SCANNING.md#diagnostics).

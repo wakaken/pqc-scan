@@ -97,7 +97,7 @@ Before future implementation, pin the then-selected source and reassess evidence
 applicability rather than assuming this baseline is still current.
 
 The baseline product version is `0.3.0`. Its [release notes](../../releases/v0.3.0.md)
-and [publication decision](../../releases/static-candidate-20261117/PUBLICATION-APPROVAL.md)
+and [publication decision](https://github.com/wakaken/pqc-scan/blob/a915b3d4f4381aa8308f18a50bb864b54493c72c/docs/releases/static-candidate-20261117/PUBLICATION-APPROVAL.md)
 record bounded acceptance of static macOS Apple Silicon operation and conditional
 publication authorization. Preparation is not proof that release assets have
 been published. TLS/SSH source-build features remain experimental; network
