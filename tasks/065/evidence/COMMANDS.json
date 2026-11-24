@@ -1,0 +1,181 @@
+{
+  "worktree": "/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan",
+  "feature_configuration": "Default only. No network/protocol feature matrices claimed.",
+  "runs": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "pqc_scan_rules"
+      ],
+      "environment": {},
+      "configuration": "default features; offline locked resolution",
+      "exit_code": 0,
+      "passed_tests": 14,
+      "log": "tasks/065/evidence/rules-tests.log",
+      "log_sha256": "c0c27b0cb02509bd0975513b2f1f6c95e9489757a851239be201a2dc868e6ec7"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "pqc_scan_detectors",
+        "--test",
+        "rule_scope_compatibility",
+        "--test",
+        "semantic_repairs",
+        "--test",
+        "f054_dependency_identity",
+        "--test",
+        "tls_reference_boundaries"
+      ],
+      "environment": {},
+      "configuration": "default features; offline locked resolution",
+      "exit_code": 0,
+      "passed_tests": 56,
+      "log": "tasks/065/evidence/detector-tests.log",
+      "log_sha256": "f11174d3e3d17a22a8263f43115fd0500bcba690104ce09a940b27be7c0bb6ee"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "pqc_scan_core",
+        "--test",
+        "quality056",
+        "--",
+        "--nocapture"
+      ],
+      "environment": {},
+      "configuration": "default features; offline locked resolution",
+      "exit_code": 0,
+      "passed_tests": 1,
+      "log": "tasks/065/evidence/judgment-probe.log",
+      "log_sha256": "3f002f062da22010e7d26da38eff658dcf83f726de471c33adb6fac2f3b77296"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "pqc_scan_core",
+        "--lib",
+        "risk::tests"
+      ],
+      "environment": {},
+      "configuration": "default features; offline locked resolution",
+      "exit_code": 0,
+      "passed_tests": 5,
+      "log": "tasks/065/evidence/risk-tests.log",
+      "log_sha256": "0997806b58efc43c217d5d95448921721b04e36cbb6ab5cdd929cb118db22623"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "pqc_scan_core",
+        "--lib",
+        "normalization_preserves_declared_confidence_and_metadata_exactly"
+      ],
+      "environment": {},
+      "configuration": "default features; offline locked resolution",
+      "exit_code": 0,
+      "passed_tests": 1,
+      "log": "tasks/065/evidence/confidence-preservation.log",
+      "log_sha256": "2b0ae9a062a56f2fe774cf46ad1b4789061ca4ef470a3917bf6b361fa7af1a68"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_judgment.py",
+        "-v"
+      ],
+      "environment": {
+        "PYTHONPATH": "tests/quality"
+      },
+      "configuration": "existing comparator controls",
+      "exit_code": 0,
+      "passed_tests": 8,
+      "log": "tasks/065/evidence/comparator-tests.log",
+      "log_sha256": "1601369dc5245fefcb2dae3b31d518267c29afc73f33b4f7bc44c6363e559c2f"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "pqc_scan_cli",
+        "--test",
+        "rule_validation"
+      ],
+      "environment": {},
+      "configuration": "default features; offline locked resolution",
+      "exit_code": 0,
+      "passed_tests": 1,
+      "log": "tasks/065/evidence/cli-validation.log",
+      "log_sha256": "6df2ff6a8134007a0630f1af02a75bc3801cc1fce239d53ac027b885d598842c"
+    }
+  ],
+  "derived_comparison": {
+    "command": "python3 inline; load oracle.json + supplement.json; judgment.canonical_cases; select kind == severity; parse QUALITY056_OBSERVATIONS; select identical IDs; judgment.compare",
+    "exit_code": 0,
+    "correct": 960,
+    "incorrect": 0,
+    "unassessed": 0,
+    "artifact": "tasks/065/evidence/SEVERITY-COMPARISON.json"
+  },
+  "negative_controls": {
+    "command": "python3 /tmp/pqc065-negative.py; exact original script in negative-controls-transcript.log",
+    "exit_code": 0,
+    "expected_rejections": 7,
+    "expected_validator_exit_code": 101,
+    "restored_validator_exit_code": 0
+  },
+  "population_audit": {
+    "command": "ruby -rjson -ryaml enumeration of direct rules/default/*.{yml,yaml}; python3 /tmp/pqc065-audit.py; original controller in audit-generation-transcript.log",
+    "exit_code": 0
+  },
+  "tool_versions": {
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8",
+    "cargo": "cargo 1.93.1 (083ac5135 2025-12-15)",
+    "ruby": "ruby 2.6.10p210 (2022-04-12 revision 67958) [universal.arm64e-darwin26]",
+    "python3": "Python 3.14.5"
+  },
+  "post_run_binary_sha256": {
+    "target/debug/deps/pqc_scan_rules-304d1688adfbd2f9": "18660c4be83943db8a86bb5069f663311cfd23743247df20a2a2c6b7ac1dbb57",
+    "target/debug/deps/quality_metadata-2ae8c53e38f5381b": "62fc68e52756512989438c2b19efd015d918ebb37b282b0b990db7c2d125a494",
+    "target/debug/deps/validation-f9f2257f1e2bc4db": "786d25198fe7a21db937073241b0a996d000ca807fa786913028948416111060",
+    "target/debug/deps/f054_dependency_identity-a810e232d26b27b2": "71b78a5c7b1c6d12dd97384c4fef5862ea96571027fba9ae65ce28e27ddb6d9b",
+    "target/debug/deps/rule_scope_compatibility-ed7ae0899aefd361": "92ab170fb1438b2cbd2b1296db89b47221817ea07cbcd415fa9fe40fd1dad169",
+    "target/debug/deps/semantic_repairs-d793b1b69a21dd0d": "34264c343840ee5e9fedeb9fb124c90c471442f96f4d36bc23df75348d5bd479",
+    "target/debug/deps/tls_reference_boundaries-51e2eb76626d5d8f": "af4f2769407457a5f688458c994a003adcbcfc9e5ea0fd1edcca7c7f0082bbab",
+    "target/debug/deps/quality056-4178016c97bf4428": "404d5e914de0d1f93cc5f5c775315602669dc9af326b4c3adfa79899f8b69c57",
+    "target/debug/deps/pqc_scan_core-28ba2318ab096d3b": "8da931aad91357573853315bfb83f373de15d62ebb3475014e94bd1b042c2c72",
+    "target/debug/deps/rule_validation-07dd84d7737ade9a": "69496e8b0436a2ec8b14627a85e2512fc9415a08a0e74609d49d73686eab7499",
+    "target/debug/pqc-scan": "5ba4c473cc6652e2f449780707ec05e7821475dfb95e35553ec8a9dabdf0d12e"
+  },
+  "binary_binding_limit": "Hashes captured after successful runs. No executable source edits or concurrent target-directory builds occurred; no pre-execution hash claim or protocol-feature evidence.",
+  "unexecuted": "Workspace-wide build/test/fmt/clippy, optional-feature probes, browser, calibration, new detection-accuracy study and release checks; not required by this prose/audit-record change."
+}

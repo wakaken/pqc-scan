@@ -45,6 +45,7 @@ impl RegexDetector {
             }
         };
 
+        let mut limit_detail = None;
         let mut observations = Vec::new();
         let mut out = Vec::new();
         let is_go = file.ext().is_some_and(|e| e.eq_ignore_ascii_case("go"))
@@ -149,6 +150,11 @@ impl RegexDetector {
             'targets: for (base, target) in targets {
                 for found in reference_matches(regex, target, rule) {
                     if examined >= budget.max_match_candidates {
+                        limit_detail = Some((
+                            "lexical_match_candidates",
+                            budget.max_match_candidates,
+                            examined,
+                        ));
                         status = DetectorStatus::Truncated;
                         break 'targets;
                     }
@@ -162,6 +168,8 @@ impl RegexDetector {
                         continue;
                     }
                     if accepted == budget.max_hits_per_rule {
+                        limit_detail =
+                            Some(("lexical_rule_hits", budget.max_hits_per_rule, accepted));
                         status = DetectorStatus::Truncated;
                         break 'targets;
                     }
@@ -211,7 +219,22 @@ impl RegexDetector {
             }
         }
 
-        Ok(DetectorOutcome::new(out, status).with_observations(observations))
+        let outcome = DetectorOutcome::new(out, status).with_observations(observations);
+        Ok(
+            if let Some((reason, limit, processed)) = source_facts
+                .as_ref()
+                .and_then(|f| f.limit_reason)
+                .or(limit_detail)
+            {
+                outcome.with_limit(reason, limit, processed)
+            } else if status == DetectorStatus::Truncated {
+                outcome.with_explanation("Lexical inspection limit: match, candidate or source-binding work was bounded. Retained findings remain available; omitted findings are unknown. Inspect the remaining source separately.")
+            } else if status == DetectorStatus::Partial {
+                outcome.with_explanation("Source syntax or a matching rule could not be fully interpreted. Retained findings remain available. Check source syntax and the rule separately.")
+            } else {
+                outcome
+            },
+        )
     }
 }
 

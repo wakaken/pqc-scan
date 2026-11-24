@@ -7,10 +7,10 @@ authors.workspace = true
 
 [features]
 default = []
-probe-ssh-kex = ["probe-transport", "dep:pqc_scan_probe_ssh", "pqc_scan_probe_ssh/negotiated", "dep:ctrlc"]
+probe-ssh-kex = ["probe-transport", "dep:pqc_scan_probe_ssh", "pqc_scan_probe_ssh/negotiated", "dep:ctrlc", "dep:signal-hook"]
 probe-transport = ["pqc_scan_core/probe-transport"]
-probe-tls = ["probe-transport", "dep:pqc_scan_probe_tls", "pqc_scan_probe_tls/runtime", "dep:ctrlc"]
-probe-ssh = ["probe-transport", "dep:pqc_scan_probe_ssh", "pqc_scan_probe_ssh/runtime", "dep:ctrlc"]
+probe-tls = ["probe-transport", "dep:pqc_scan_probe_tls", "pqc_scan_probe_tls/runtime", "dep:ctrlc", "dep:signal-hook"]
+probe-ssh = ["probe-transport", "dep:pqc_scan_probe_ssh", "pqc_scan_probe_ssh/runtime", "dep:ctrlc", "dep:signal-hook"]
 
 [[bin]]
 name = "pqc-scan"
@@ -23,13 +23,18 @@ anyhow.workspace = true
 clap.workspace = true
 serde_json.workspace = true
 serde.workspace = true
-ctrlc = { version = "=3.5.1", optional = true }
 pqc_scan_probe_tls = { path = "../pqc_scan_probe_tls", optional = true }
 pqc_scan_probe_ssh = { path = "../pqc_scan_probe_ssh", optional = true }
 pqc_scan_core = { path = "../pqc_scan_core" }
 pqc_scan_rules = { path = "../pqc_scan_rules" }
 pqc_scan_detectors = { path = "../pqc_scan_detectors" }
 pqc_scan_report = { path = "../pqc_scan_report" }
+
+[target.'cfg(unix)'.dependencies]
+signal-hook = { version = "=0.4.6", default-features = false, features = ["iterator"], optional = true }
+
+[target.'cfg(not(unix))'.dependencies]
+ctrlc = { version = "=3.5.1", optional = true }
 
 [dev-dependencies]
 libc = "0.2"

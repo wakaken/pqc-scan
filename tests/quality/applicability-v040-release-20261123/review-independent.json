@@ -1,0 +1,51 @@
+{
+  "reviewer": "/root/v04_release_implementation_review",
+  "timestampUtc": "2026-11-23T08:22:40Z",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "20698af7d8acbf66be55f71f6f64ee7ddbcfd16d0a33d78ded5600900b258ff6",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "0f1577c1179a14a6091306e2f226401b107418fbc54ace8babe7d9617f30dcf8",
+    "docs/user/COVERAGE.ja.md": "061221356da8ed97b0f505c9ea25d8346ab4164f0acd0cfe02220caf3abfd2d2",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "remainingScopeReason": "Reviewed all 246 nominated scopes, including every remaining 240 scope, against the 203 original source inputs, frozen questions and truth, original provenance, current English/Japanese coverage contracts and the complete PKCS12 parser. All 203 input hashes match both corpus and provenance; provenance, license bindings, corpus, truth, new protocol and current contract hashes also match their recorded bindings. Inspected source/API/import, alias/shadowing, literal finite-loop, configuration, dependency-manifest, SBOM, marker, malformed, ambiguous and unsupported-language cases without invoking specimens or detector predictions. Original nominal-reference properties remain distinct from execution, enabled functionality and deployment. Current additions for bounded ESM tracking, source-reference classification, Ruby analysis, syntax compatibility, optional file-size selection and test exclusion neither remove these original questions nor authorize enlarging the unsupported set. Test exclusion is optional and defaults retain tests. Supported SBOM versions, manifest kinds, source languages, public PEM/DER attributes, complete-marker questions and unencrypted PKCS12 controls retain their original applicability; malformed and ambiguous annotations remain unchanged rather than being converted into supported negative evidence. Static inspection of the original PFX bytes shows encryptedData for the two public-only containers and Data for the separate unencrypted controls. The unchanged parser does not enter encryptedData. Container-presence questions remain in scope even where inner attributes are unsupported. This is a post-observation applicability review, not new labels, new accuracy measurements, blind adjudication or a claim of complete detection. Historical measurements and a historical independent applicability review were exposed; the current main review and current proposed aggregate were not read.",
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The hash-bound public-only.p12 is PFX v3 with outer Data and an AuthenticatedSafe ContentInfo OID 1.2.840.113549.1.7.6 (encryptedData). The original public RSA3072 conversion provenance preserves the nominal negative ECDSA-signature fact, but the current paired contract excludes decryption and the unchanged parser leaves this inner content opaque. Only this inner signature question is unsupported; the container signal remains applicable."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The original public-only.pfx has the same hash and encryptedData structure as public-only.p12. Certificate-only provenance and an empty export password do not make its certificate contents unencrypted. Preserve the original negative ECDSA-signature truth while treating extraction of that attribute as outside the non-decrypting supported subset."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "The original provenance binds public-only.p12 to the known public RSA3072 certificate, preserving its positive nominal key-size fact. Its certificate-bearing content is encryptedData, which the current coverage contract and parser do not decode. Exclude only this inner modulus-size property from supported applicability, without changing truth or the outer container question."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The original RSA3072 public-certificate manifest records sha256WithRSAEncryption, preserving the positive signature-property truth. Recovering that attribute from public-only.p12 requires entering encryptedData. The paired current guides exclude that operation and the unchanged parser returns without decoding the content."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The hash-bound public-only.pfx is byte-identical to the encrypted public-only.p12 and retains the same RSA3072 source provenance. The nominal positive modulus-size fact is unchanged, but extraction through its encryptedData content is unsupported. Neither filename recognition nor container presence establishes accessible public-key attributes."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The original public-only.pfx carries its known public certificate inside encryptedData rather than the supported Data/SafeContents certificate-bag path. Preserve the positive RSA-signature truth from the original provenance and public attribute manifest; classify only access to this inner signature attribute as unsupported under the current unchanged non-decrypting contract."
+    }
+  ]
+}

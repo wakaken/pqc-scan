@@ -1,5 +1,8 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
-use std::sync::Arc;
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Arc,
+};
 
 use anyhow::Result;
 use chrono::Utc;
@@ -15,6 +18,16 @@ use crate::{
     recommendation, risk, walker, CoverageSummary, Detector, DetectorStatus, DiagnosticCode,
     ScanDiagnostic, ScanDocument,
 };
+
+/// Work completed, not evidence of successful or complete inspection.
+/// Callbacks may run concurrently; consumers must tolerate out-of-order counts.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ScanProgress {
+    Enumerating,
+    Inspecting { processed: u64, total: u64 },
+    Aggregating,
+    WritingReports,
+}
 
 pub fn scan_repository(
     config: &ScanConfig,
@@ -81,7 +94,36 @@ fn scan_observed_with_reader<F>(
 where
     F: Fn(&std::path::Path) -> std::io::Result<Vec<u8>> + Sync,
 {
-    let walk = walker::walk_repository_detailed_with_selection(
+    scan_with_progress_reader(
+        config,
+        rules,
+        detectors,
+        read,
+        native,
+        selection.into(),
+        None,
+    )
+}
+
+fn scan_with_progress_reader<F>(
+    config: &ScanConfig,
+    rules: &RuleSet,
+    detectors: &[Arc<dyn Detector>],
+    read: &F,
+    native: Option<&crate::NativeOptions>,
+    selection: crate::ScanSelection,
+    observer: Option<&(dyn Fn(ScanProgress) + Sync)>,
+) -> Result<ScanDocument>
+where
+    F: Fn(&std::path::Path) -> std::io::Result<Vec<u8>> + Sync,
+{
+    let notify = |event| {
+        if let Some(observer) = observer {
+            observer(event);
+        }
+    };
+    notify(ScanProgress::Enumerating);
+    let walk = walker::walk_repository_detailed_with_scope(
         &config.root,
         config.max_file_size_bytes,
         selection,
@@ -103,6 +145,12 @@ where
         .num_threads(thread_count)
         .build()?;
 
+    let total = files.len() as u64;
+    let processed = AtomicU64::new(0);
+    notify(ScanProgress::Inspecting {
+        processed: 0,
+        total,
+    });
     let outcomes: Vec<FileOutcome> = pool.install(|| {
         files
             .par_iter()
@@ -121,22 +169,32 @@ where
                             )],
                             disposition: FileDisposition::ReadFailed,
                             privacy: None,
+                            test_ranges: Vec::new(),
                         }
                     }
                 };
 
                 let file = ScannableFile::from_bytes(path.clone(), bytes);
-                inspect_file(
+                let mut outcome = inspect_file(
                     &file,
                     &relative,
                     rules,
                     detectors,
                     native.is_some(),
                     context.as_ref(),
-                )
+                );
+                if selection.exclude_tests {
+                    outcome.exclude_test_findings(&file);
+                }
+                outcome
+            })
+            .inspect(|_| {
+                let processed = processed.fetch_add(1, Ordering::Relaxed) + 1;
+                notify(ScanProgress::Inspecting { processed, total });
             })
             .collect()
     });
+    notify(ScanProgress::Aggregating);
 
     let mut detections = Vec::new();
     let mut observations = Vec::new();
@@ -245,8 +303,14 @@ where
         summary,
     };
     let mut document = ScanDocument::new(legacy, diagnostics, coverage, config);
-    if !selection.include_non_scannable {
+    if !selection.files.include_non_scannable {
         document.record_binary_exclusion_policy();
+    }
+    if selection.exclude_tests {
+        document.record_test_exclusion_policy();
+    }
+    if walk.custom_excludes {
+        document.record_custom_exclusion_policy();
     }
     if let Some(options) = native {
         let native = crate::inventory::NativeScan::build(
@@ -281,6 +345,77 @@ struct FileOutcome {
     diagnostics: Vec<ScanDiagnostic>,
     disposition: FileDisposition,
     privacy: Option<(String, crate::privacy::SourcePrivacy)>,
+    test_ranges: Vec<std::ops::Range<usize>>,
+}
+
+impl FileOutcome {
+    fn exclude_test_findings(&mut self, file: &ScannableFile) {
+        let Some(text) = file.text.as_deref() else {
+            return;
+        };
+        if self.test_ranges.is_empty() {
+            return;
+        }
+        let starts: Vec<_> = std::iter::once(0)
+            .chain(text.match_indices('\n').map(|(i, _)| i + 1))
+            .collect();
+        let mut omitted = std::collections::HashSet::new();
+        self.detections.retain(|d| {
+            let line = d
+                .location
+                .line
+                .checked_sub(1)
+                .and_then(|line| starts.get(line))
+                .copied();
+            let column = d.location.column.checked_sub(1);
+            // Legacy producers use character or UTF-8 byte columns. Accept only
+            // exact source matches and retain any ambiguity crossing the scope.
+            let candidates = line
+                .zip(column)
+                .map(|(line, column)| {
+                    let rest = text[line..].split('\n').next().unwrap_or("");
+                    [
+                        (column < rest.len()).then(|| line + column),
+                        rest.char_indices()
+                            .nth(column)
+                            .map(|(offset, _)| line + offset),
+                    ]
+                })
+                .unwrap_or([None, None]);
+            let mut exact = candidates
+                .into_iter()
+                .flatten()
+                .filter_map(|start| {
+                    let end = start.checked_add(d.evidence.r#match.len())?;
+                    (start < end && text.get(start..end) == Some(d.evidence.r#match.as_str()))
+                        .then_some(start..end)
+                })
+                .peekable();
+            let drop = exact.peek().is_some()
+                && exact.all(|span| {
+                    self.test_ranges
+                        .iter()
+                        .any(|r| r.start <= span.start && span.end <= r.end && r.end <= text.len())
+                });
+            if drop {
+                omitted.insert((
+                    Some(d.rule_id.clone()),
+                    Some(d.location.line),
+                    Some(d.location.column),
+                ));
+            }
+            !drop
+        });
+        for d in &self.detections {
+            omitted.remove(&(
+                Some(d.rule_id.clone()),
+                Some(d.location.line),
+                Some(d.location.column),
+            ));
+        }
+        self.observations
+            .retain(|o| !omitted.contains(&(o.rule_id.clone(), o.target.line, o.target.column)));
+    }
 }
 
 fn inspect_file(
@@ -307,6 +442,8 @@ fn inspect_file(
     let mut observations = Vec::new();
     let mut detections = Vec::new();
     let mut diagnostics = Vec::new();
+    let mut test_ranges = Vec::new();
+    let mut display_ranges = Vec::new();
     let (mut complete, mut failed, mut unsupported, mut partial, mut unknown) =
         (false, false, false, false, detectors.is_empty());
     if detectors.is_empty() {
@@ -320,7 +457,9 @@ fn inspect_file(
                 Some(DiagnosticCode::DetectorFailed)
             }
             Ok(outcome) => {
-                explanation = outcome.explanation();
+                test_ranges.extend_from_slice(outcome.test_ranges());
+                display_ranges.extend_from_slice(outcome.display_ranges());
+                explanation = outcome.diagnostic_message().map(str::to_owned);
                 let code = match outcome.status() {
                     DetectorStatus::Complete => {
                         complete = true;
@@ -374,7 +513,7 @@ fn inspect_file(
                 (code != DiagnosticCode::DetectorNotReported).then(|| relative.to_string());
             diagnostics.push(
                 ScanDiagnostic::new(code, target, Some(detector.name().into()))
-                    .with_explanation(explanation),
+                    .with_explanation(explanation.as_deref()),
             );
         }
     }
@@ -391,6 +530,7 @@ fn inspect_file(
             Some("text_decoder".into()),
         ));
     }
+    mark_display_references(&mut detections, file, &display_ranges);
     let usable = complete || !detections.is_empty();
     let disposition = if partial || ((failed || unsupported) && usable) {
         FileDisposition::Partial
@@ -411,6 +551,101 @@ fn inspect_file(
         diagnostics,
         disposition,
         privacy,
+        test_ranges,
+    }
+}
+
+fn mark_display_references(
+    detections: &mut [Detection],
+    file: &ScannableFile,
+    ranges: &[std::ops::Range<usize>],
+) {
+    let Some(text) = file.text.as_deref() else {
+        return;
+    };
+    if ranges.is_empty() {
+        return;
+    }
+    let starts: Vec<_> = std::iter::once(0)
+        .chain(text.match_indices('\n').map(|(i, _)| i + 1))
+        .collect();
+    for d in detections {
+        if !matches!(
+            d.evidence.r#type.as_str(),
+            "regex_match" | "tree_sitter_match"
+        ) {
+            continue;
+        }
+        // A display annotation applies to algorithm-name references only, never
+        // arbitrary custom matches, private-key material or other security facts.
+        let token = d
+            .evidence
+            .r#match
+            .trim_matches(['\'', '"'])
+            .to_ascii_uppercase();
+        if !matches!(
+            token.as_str(),
+            "RSA"
+                | "RS256"
+                | "RS384"
+                | "RS512"
+                | "ES256"
+                | "ES384"
+                | "ES512"
+                | "EDDSA"
+                | "AES"
+                | "AES-128-GCM"
+                | "AES-192-GCM"
+                | "AES-256-GCM"
+                | "AES-128-CBC"
+                | "AES-192-CBC"
+                | "AES-256-CBC"
+                | "TLS1.0"
+                | "TLS1.1"
+                | "TLSV1"
+                | "TLSV1.0"
+                | "TLSV1.1"
+        ) {
+            continue;
+        }
+
+        let Some(line) = d
+            .location
+            .line
+            .checked_sub(1)
+            .and_then(|i| starts.get(i))
+            .copied()
+        else {
+            continue;
+        };
+        let Some(column) = d.location.column.checked_sub(1) else {
+            continue;
+        };
+        let rest = text[line..].split('\n').next().unwrap_or("");
+        let offsets = [
+            (column < rest.len()).then(|| line + column),
+            rest.char_indices().nth(column).map(|(i, _)| line + i),
+        ];
+        let mut exact = offsets
+            .into_iter()
+            .flatten()
+            .filter_map(|start| {
+                let end = start.checked_add(d.evidence.r#match.len())?;
+                (start < end && text.get(start..end) == Some(d.evidence.r#match.as_str()))
+                    .then_some(start..end)
+            })
+            .peekable();
+        if exact.peek().is_some()
+            && exact.all(|span| {
+                ranges
+                    .iter()
+                    .any(|r| r.start <= span.start && span.end <= r.end && r.end <= text.len())
+            })
+        {
+            d.evidence
+                .metadata
+                .insert("reference_kind".into(), "display_text".into());
+        }
     }
 }
 
@@ -439,7 +674,16 @@ fn normalize_findings(
         if !dedup.insert(finding_id.clone()) {
             continue;
         }
-        let severity = risk::adjusted_severity(rule, &detection);
+        let display_reference = detection
+            .evidence
+            .metadata
+            .get("reference_kind")
+            .is_some_and(|s| s == "display_text");
+        let severity = if display_reference {
+            pqc_scan_rules::Severity::Info
+        } else {
+            risk::adjusted_severity(rule, &detection)
+        };
 
         let description = rule
             .description
@@ -453,8 +697,8 @@ fn normalize_findings(
             risk: rule.risk,
             severity,
             confidence: rule.confidence,
-            description,
-            migration_hint: rule.migration_hint.clone(),
+            description: if display_reference { "An algorithm name appears in diagnostic or display text.".into() } else { description },
+            migration_hint: if display_reference { "This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.".into() } else { rule.migration_hint.clone() },
             location: crate::model::Location {
                 file: relative_file,
                 line: detection.location.line,
@@ -813,6 +1057,221 @@ mod tests {
         dir.push(format!("pqc-scan-{prefix}-{}-{nanos}", std::process::id()));
         fs::create_dir_all(&dir).expect("create temp dir");
         dir
+    }
+
+    #[test]
+    fn inline_test_filter_retains_masked_normalized_and_shared_location_observations() {
+        let text = "#[cfg(test)] mod checks {\nconst ALG: &str = \"RS256\";\nconst KEY: &str = \"-----BEGIN PRIVATE KEY-----\";\nfn example() { alias_call(); }\n}\n";
+        let file = ScannableFile::from_bytes(PathBuf::from("sample.rs"), text.as_bytes().to_vec());
+        let make = |original: &str, reported: String| {
+            let offset = text.find(original).unwrap();
+            let (line, column) = crate::model::line_col_for_offset(text, offset);
+            Detection {
+                rule_id: "SOURCE_FACT".into(),
+                location: crate::Location {
+                    file: "sample.rs".into(),
+                    line,
+                    column,
+                },
+                evidence: crate::Evidence {
+                    r#type: "test".into(),
+                    r#match: reported,
+                    snippet_preview: String::new(),
+                    metadata: BTreeMap::new(),
+                },
+            }
+        };
+        let header = "-----BEGIN PRIVATE KEY-----";
+        let masked = crate::model::mask_preview(header);
+        assert_ne!(masked, header);
+        let detections = vec![
+            make("RS256", "RS256".into()),
+            make(header, header.into()),
+            make(header, masked.clone()),
+            make("alias_call()", "canonical_api()".into()),
+        ];
+        let observations = detections
+            .iter()
+            .map(|d| {
+                crate::ObservationDraft::source(d, crate::ObservationMethod::AstPattern, "", None)
+            })
+            .collect();
+        let range = 0..text.len();
+        let mut outcome = FileOutcome {
+            detections,
+            observations,
+            diagnostics: vec![],
+            disposition: FileDisposition::Analyzed,
+            privacy: None,
+            test_ranges: vec![range],
+        };
+        outcome.exclude_test_findings(&file);
+        let retained: Vec<_> = outcome
+            .detections
+            .iter()
+            .map(|d| d.evidence.r#match.as_str())
+            .collect();
+        assert_eq!(retained, [masked.as_str(), "canonical_api()"]);
+        assert_eq!(outcome.observations.len(), 3);
+        let exact_line = crate::model::line_col_for_offset(text, text.find("RS256").unwrap()).0;
+        assert!(outcome
+            .observations
+            .iter()
+            .all(|o| o.target.line != Some(exact_line)));
+        // A kept masked record shares the header's source position. Preserve
+        // both native observations there instead of deleting by position alone.
+        let header_line = crate::model::line_col_for_offset(text, text.find(header).unwrap()).0;
+        assert_eq!(
+            outcome
+                .observations
+                .iter()
+                .filter(|o| o.target.line == Some(header_line))
+                .count(),
+            2
+        );
+    }
+
+    #[test]
+    fn inline_test_filter_retains_cross_boundary_unlocated_and_ambiguous_columns() {
+        for (text, range, line, column, reported) in [
+            ("RS256", 0..3, 1, 1, "RS256"),
+            ("RS256", 0..5, 0, 1, "RS256"),
+            ("RS256", 0..5, 1, 0, "RS256"),
+            ("RS256", 0..5, 1, usize::MAX, "RS256"),
+            ("RS256", 0..99, 1, 1, "RS256"),
+            // The byte-column reading points outside the scope, while the
+            // character-column reading points inside it. Keep the ambiguity.
+            ("😀RSARSA", 7..10, 1, 5, "RSA"),
+        ] {
+            let file =
+                ScannableFile::from_bytes(PathBuf::from("sample.rs"), text.as_bytes().to_vec());
+            let d = Detection {
+                rule_id: "SOURCE_FACT".into(),
+                location: crate::Location {
+                    file: "sample.rs".into(),
+                    line,
+                    column,
+                },
+                evidence: crate::Evidence {
+                    r#type: "test".into(),
+                    r#match: reported.into(),
+                    snippet_preview: String::new(),
+                    metadata: BTreeMap::new(),
+                },
+            };
+            let observations = vec![crate::ObservationDraft::source(
+                &d,
+                crate::ObservationMethod::AstPattern,
+                "",
+                None,
+            )];
+            let mut outcome = FileOutcome {
+                detections: vec![d],
+                observations,
+                diagnostics: vec![],
+                disposition: FileDisposition::Analyzed,
+                privacy: None,
+                test_ranges: vec![range],
+            };
+            outcome.exclude_test_findings(&file);
+            assert_eq!(outcome.detections.len(), 1, "{text}: {line}:{column}");
+            assert_eq!(outcome.observations.len(), 1);
+        }
+    }
+
+    #[test]
+    fn progress_counts_attempts_including_read_failures_without_changing_results() {
+        let root = temp_dir("progress");
+        fs::write(root.join("ok.js"), "RS256").unwrap();
+        fs::write(root.join("unreadable.js"), "RS256").unwrap();
+        let config = test_config(root.clone());
+        let rules = test_rules();
+        let detectors: Vec<Arc<dyn Detector>> = vec![Arc::new(CompleteDetector)];
+        let read = |path: &std::path::Path| {
+            if path.ends_with("unreadable.js") {
+                Err(std::io::ErrorKind::PermissionDenied.into())
+            } else {
+                fs::read(path)
+            }
+        };
+        let events = std::sync::Mutex::new(Vec::new());
+        let observer = |event| events.lock().unwrap().push(event);
+        let observed = scan_with_progress_reader(
+            &config,
+            &rules,
+            &detectors,
+            &read,
+            None,
+            crate::ScanSelection::default(),
+            Some(&observer),
+        )
+        .unwrap();
+        let ordinary = scan_with_reader(&config, &rules, &detectors, &read).unwrap();
+        assert_eq!(
+            serde_json::to_value(&observed.legacy().findings).unwrap(),
+            serde_json::to_value(&ordinary.legacy().findings).unwrap()
+        );
+        assert_eq!(
+            serde_json::to_value(observed.coverage()).unwrap(),
+            serde_json::to_value(ordinary.coverage()).unwrap()
+        );
+        assert_eq!(observed.coverage().read_failed_files, 1);
+        let events = events.into_inner().unwrap();
+        assert_eq!(events.first(), Some(&ScanProgress::Enumerating));
+        assert_eq!(events.last(), Some(&ScanProgress::Aggregating));
+        let mut counts: Vec<_> = events
+            .iter()
+            .filter_map(|e| match e {
+                ScanProgress::Inspecting { processed, total } => {
+                    assert_eq!(*total, 2);
+                    Some(*processed)
+                }
+                _ => None,
+            })
+            .collect();
+        counts.sort();
+        assert_eq!(counts, vec![0, 1, 2]);
+        fs::remove_dir_all(&root).unwrap();
+    }
+
+    #[test]
+    fn empty_scan_reports_zero_work_and_enumeration_error_is_not_completion() {
+        let root = temp_dir("empty-progress");
+        let events = std::sync::Mutex::new(Vec::new());
+        let observer = |event| events.lock().unwrap().push(event);
+        let config = test_config(root.clone());
+        scan_repository_with_progress(
+            &config,
+            &test_rules(),
+            &[],
+            crate::FileSelection::default(),
+            None,
+            Some(&observer),
+        )
+        .unwrap();
+        assert_eq!(
+            *events.lock().unwrap(),
+            vec![
+                ScanProgress::Enumerating,
+                ScanProgress::Inspecting {
+                    processed: 0,
+                    total: 0
+                },
+                ScanProgress::Aggregating
+            ]
+        );
+        fs::remove_dir_all(&root).unwrap();
+        events.lock().unwrap().clear();
+        assert!(scan_repository_with_progress(
+            &config,
+            &test_rules(),
+            &[],
+            crate::FileSelection::default(),
+            None,
+            Some(&observer)
+        )
+        .is_err());
+        assert_eq!(*events.lock().unwrap(), vec![ScanProgress::Enumerating]);
     }
 
     #[test]
@@ -1328,6 +1787,26 @@ pub fn scan_repository_with_selection(
     )
 }
 
+/// Observe bounded work counters without changing the selected files or scan result.
+pub fn scan_repository_with_progress(
+    config: &ScanConfig,
+    rules: &RuleSet,
+    detectors: &[Arc<dyn Detector>],
+    selection: crate::FileSelection,
+    native: Option<&crate::NativeOptions>,
+    observer: Option<&(dyn Fn(ScanProgress) + Sync)>,
+) -> Result<ScanDocument> {
+    scan_with_progress_reader(
+        config,
+        rules,
+        detectors,
+        &|path| crate::safe_read::read(&config.root, path, config.max_file_size_bytes),
+        native,
+        selection.into(),
+        observer,
+    )
+}
+
 #[cfg(test)]
 #[path = "quality055.rs"]
 mod quality055;
@@ -1335,3 +1814,23 @@ mod quality055;
 #[cfg(test)]
 #[path = "../tests/support/pipeline_quality.rs"]
 mod individual_quality;
+
+/// Scan with an explicit, recorded scope while preserving older entry points.
+pub fn scan_repository_with_scope(
+    config: &ScanConfig,
+    rules: &RuleSet,
+    detectors: &[Arc<dyn Detector>],
+    selection: crate::ScanSelection,
+    native: Option<&crate::NativeOptions>,
+    observer: Option<&(dyn Fn(ScanProgress) + Sync)>,
+) -> Result<ScanDocument> {
+    scan_with_progress_reader(
+        config,
+        rules,
+        detectors,
+        &|path| crate::safe_read::read(&config.root, path, config.max_file_size_bytes),
+        native,
+        selection,
+        observer,
+    )
+}

@@ -67,3 +67,28 @@ were reopened to confirm KEM/signature purposes. Additional primary references:
 
 These are reviewed source references; runtime evaluation stays offline. Existing
 rule risk tags, IDs, legacy severity and RecommendedAction remain unchanged.
+
+## Task 066 proposed saved-evidence mapping (2026-11-18)
+
+The [task066 mapping](../../tasks/066/FACT-SOURCE-MAPPING.md) pins exact
+purpose/parameter/role clauses, acquired source bytes and errata dispositions for
+proposed `migration-facts-v1`. The maintainer adopted this D5 specification on2026-11-18; it is not implemented
+catalog support, a change to `local-assessment-1`/`migration-review-v1`, cryptographic
+validation or a new universal deadline. See the
+[proposed contract](../architecture/MIGRATION-ASSESSMENT-V1.md) and
+[actual decision status](../../tasks/066/DECISIONS.md).
+
+RFC9846 (July2026) obsoletes RFC8446 and supplies the new mapping's TLS1.3 section
+numbers, including Supported Groups4.3.7, KeyShare4.3.8 and authentication4.5.
+RFC10024 sections4/7 supply final group IDs/components; RFC9954 sections3/6 supply
+the combiner construction scope. RFC10042 sections2.3-2.5/5 describe SSH hybrid
+methods and remain Informational. Reusing those facts does not change collectors,
+prove an implementation's combiner or supply PQC authentication.
+
+The new official errata snapshot/dispositions retain Verified9136 (9954 corrected
+TLS13 cross-reference), Verified9159/9160 (10042), Verified9040 and the four
+Reported9846 records separately; no matching10024 errata appeared in that acquired
+snapshot. Existing task056's fourteen FIPS potential-update and forty-three RFC
+record dispositions remain historical source-bound evidence for their stated
+classifier scope. No unknown/reported/potential correction becomes an enacted
+normative amendment by being listed here.

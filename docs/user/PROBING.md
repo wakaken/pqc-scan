@@ -2,8 +2,7 @@
 
 [日本語](PROBING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/README.md)
 
-All three probe modes remain experimental alongside static v0.3.0. The v0.3.0 and v0.2.0 static binaries have no `probe` command. Probe bundles have completed
-technical preparation but retain publication checks; see [distribution status](DISTRIBUTION.md#release-status).
+TLS, SSH offer collection and hybrid SSH key exchange diagnostics are supported v0.4 features in the macOS Apple Silicon `network` variant. The `static` variant has no `probe` command. See [choosing a download](DISTRIBUTION.md#release-status).
 
 Use probes only for a host/port you are authorized to inspect. A probe exchanges
 protocol traffic with that endpoint. Repository `scan` and report generation stay
@@ -11,15 +10,13 @@ local; source files, URLs, certificate SANs and findings never start a probe.
 
 ## Install the optional commands
 
-The default installation includes static scanning. Enable either or both optional
-commands at build time using the pinned Rust toolchain:
+The `network` binary includes the diagnostic commands. For a source installation, enable the required optional features:
 
 ```bash
 cargo install --locked --path crates/pqc_scan_cli --features probe-tls,probe-ssh
 ```
 
-The published binary targets macOS on Apple Silicon. An isolated Linux protocol/OpenSSH test harness is available, but the repository's `protocols` CI job is currently paused, including manual workflow runs. Do not infer a fresh protocol pass from a successful `quality`, `baseline` or `scan` job. The generic suite's read-only-target write failure was corrected and the [candidate validation](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md) completed the original suite, separately from protocol049. That evidence does not resume hosted CI; resumption needs a maintainer decision and verification of current inputs/environment/limits. The harness does not qualify a Linux binary distribution or other OS/architecture combinations. TLS adds a native cryptographic provider
-build; static builds/tests do not require that provider. No AI service is used.
+Distributed binaries target macOS Apple Silicon. The diagnostic steps below also apply to source installations.
 
 ## TLS
 
@@ -45,10 +42,8 @@ is mandatory. The effective DNS verification name is also SNI; IP verification
 sends no SNI. `--server-name` never changes the pinned destination. OS trust
 constraints and revocation checking are not supplied by this bundled-root mode.
 
-A failed verifier never yields verified negotiated fields, even if internal
-accessors contain provisional values. Client-authentication requests are locally
-unsupported. Chain collection is limited to16 certificates/256 KiB; the TLS library
-may hit its smaller internal message limit first. Failures/limits are incomplete
+A connection that fails verification is not shown as a verified negotiated result. Client-authentication requests are locally
+unsupported. Chain collection is limited to16 certificates/256 KiB; other processing limits can also prevent completion. Failures/limits are incomplete
 inspection, not evidence that the server lacks PQC or is unsafe.
 
 ## SSH offers
@@ -99,7 +94,7 @@ Exit0 means the requested observation completed, not that the endpoint is safe.
 Exit1 is setup/output failure; exit3 is denied/failed/partial/cancelled/unsupported
 inspection. Existing scan exit0/1/2/3 behavior is unchanged.
 
-## Verified hybrid SSH key exchange (experimental)
+## Verified hybrid SSH key exchange
 
 Enable this separate optional feature when installing:
 
@@ -138,7 +133,5 @@ failed/partial observations. HTML presents the result/reason first, with technic
 details closed. Existing `probe ssh` remains advertisement-only; no existing
 static/TLS/SSH-offer output format changes. Enable `probe-tls,probe-ssh,probe-ssh-kex`
 for all three commands. New distribution archives use `static` (no probes) and
-`network` (TLS, SSH offers and SSH KEX, plus static scanning). Individual feature
-switches remain available for custom source builds. The historical v0.2 candidate
-used three variants; its validation does not clear `network` for publication.
+`network` (TLS, SSH offers and SSH KEX, plus static scanning).
 See the [distribution guide](DISTRIBUTION.md#release-status).

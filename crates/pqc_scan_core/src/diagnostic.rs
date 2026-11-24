@@ -25,6 +25,9 @@ pub struct DetectorOutcome {
     status: DetectorStatus,
     observations: Vec<crate::observation::ObservationDraft>,
     explanation: Option<&'static str>,
+    limit_detail: Option<String>,
+    test_ranges: Vec<std::ops::Range<usize>>,
+    display_ranges: Vec<std::ops::Range<usize>>,
 }
 
 impl DetectorOutcome {
@@ -40,6 +43,9 @@ impl DetectorOutcome {
             status,
             observations: Vec::new(),
             explanation: None,
+            limit_detail: None,
+            test_ranges: Vec::new(),
+            display_ranges: Vec::new(),
         }
     }
 
@@ -47,8 +53,33 @@ impl DetectorOutcome {
         self.explanation = Some(explanation);
         self
     }
+    /// Optional syntax-proven test-only regions in decoded UTF-8 source.
+    /// This ephemeral scope annotation is never part of stored detector output.
+    pub fn with_test_ranges(mut self, ranges: Vec<std::ops::Range<usize>>) -> Self {
+        self.test_ranges = ranges;
+        self
+    }
+    pub fn test_ranges(&self) -> &[std::ops::Range<usize>] {
+        &self.test_ranges
+    }
+    /// Ephemeral syntax-proven diagnostic/display text, never stored as source.
+    pub fn with_display_ranges(mut self, ranges: Vec<std::ops::Range<usize>>) -> Self {
+        self.display_ranges = ranges;
+        self
+    }
+    pub fn display_ranges(&self) -> &[std::ops::Range<usize>] {
+        &self.display_ranges
+    }
+    /// Fixed reason code and bounded numeric work counters only; never source text.
+    pub fn with_limit(mut self, reason: &'static str, limit: usize, processed: usize) -> Self {
+        self.limit_detail = Some(format!("Inspection limit: {reason}; limit={limit}; processed={processed}. Retained findings remain available; omitted findings are unknown. Inspect the remaining source separately."));
+        self
+    }
     pub fn explanation(&self) -> Option<&'static str> {
         self.explanation
+    }
+    pub fn diagnostic_message(&self) -> Option<&str> {
+        self.limit_detail.as_deref().or(self.explanation)
     }
     pub fn complete(detections: Vec<Detection>) -> Self {
         Self::new(detections, DetectorStatus::Complete)
@@ -125,13 +156,13 @@ pub struct ScanDiagnostic {
     file: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     detector: Option<String>,
-    message: &'static str,
+    message: String,
 }
 
 impl ScanDiagnostic {
-    pub(crate) fn with_explanation(mut self, explanation: Option<&'static str>) -> Self {
+    pub(crate) fn with_explanation(mut self, explanation: Option<&str>) -> Self {
         if let Some(message) = explanation {
-            self.message = message;
+            self.message = message.into();
         }
         self
     }
@@ -198,10 +229,17 @@ impl ScanDiagnostic {
             disposition,
             file,
             detector,
-            message,
+            message: message.into(),
         }
     }
 
+    pub fn message(&self) -> &str {
+        &self.message
+    }
+    pub(crate) fn with_size_limit(mut self, limit: usize, bytes: u64) -> Self {
+        self.message = format!("File size limit: limit={limit}; file_bytes={bytes}. File was not inspected. Increase the size limit deliberately or inspect the file separately.");
+        self
+    }
     pub fn code(&self) -> DiagnosticCode {
         self.code
     }
@@ -363,6 +401,19 @@ pub struct ScanDocument {
 }
 
 impl ScanDocument {
+    pub(crate) fn record_custom_exclusion_policy(&mut self) {
+        self.scope
+            .default_excludes
+            .push("root .pqcignore patterns (explicit opt-out)");
+    }
+    pub(crate) fn record_test_exclusion_policy(&mut self) {
+        self.scope
+            .default_excludes
+            .push(crate::file_selection::TEST_POLICY_LABEL);
+        self.scope
+            .default_excludes
+            .push("syntax-proven Rust inline test findings (explicit opt-out)");
+    }
     pub(crate) fn record_binary_exclusion_policy(&mut self) {
         self.scope
             .default_excludes

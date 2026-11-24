@@ -566,3 +566,447 @@ fn javascript_unicode_whitespace_does_not_hide_intrinsic_expression_boundaries()
         DetectorStatus::Partial
     );
 }
+
+#[test]
+fn separate_typescript_signatures_do_not_share_parameter_budgets() {
+    let rules = rules();
+    for shape in [
+        "declare function f{n}(key: string): void;",
+        "type F{n} = (key: string) => void;",
+        "type F{n} = new (key: string) => object;",
+    ] {
+        let mut text = (0..80)
+            .map(|i| shape.replace("{n}", &i.to_string()))
+            .collect::<Vec<_>>()
+            .join("\n");
+        text.push_str("\nconst algorithm = 'RS256';");
+        let file = ScannableFile::from_bytes("sample.d.ts".into(), text.into_bytes());
+        for detector in [
+            Box::new(TreeSitterDetector) as Box<dyn Detector>,
+            Box::new(pqc_scan_detectors::regex_detector::RegexDetector),
+        ] {
+            let o = detector.detect_detailed(&file, &rules).unwrap();
+            assert_eq!(o.status(), DetectorStatus::Complete, "{shape}");
+            assert!(o
+                .detections()
+                .iter()
+                .any(|d| d.evidence.r#match.contains("RS256")));
+        }
+    }
+}
+
+#[test]
+fn ruby_selected_plain_version_files_are_declared_not_resolved() {
+    let f = Fixture::new("ruby-version-file");
+    f.put("VERSION", "3.4.0\n");
+    f.put("pkg/Gemfile", "source 'https://rubygems.org'\ngemspec\n");
+    f.put("pkg/sample.gemspec", "version = File.read(File.expand_path('../VERSION', __dir__)).strip\nGem::Specification.new do |s|\n s.version = version\n s.requirements << 'none'\n s.rdoc_options << '--exclude' << '.'\n s.rdoc_options.concat ['--main', 'README']\n s.extra_rdoc_files = ['README']\n s.add_dependency 'openssl', version\nend\n");
+    let n = f.scan();
+    assert_eq!(n["coverage"]["partial_files"], 0);
+    let a = n["assets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|a| a["attributes"]["name"] == "openssl")
+        .unwrap();
+    assert_eq!(a["attributes"]["declared_constraint"], "3.4.0");
+    assert!(a["attributes"]["resolved_version"].is_null());
+}
+
+#[test]
+fn ruby_version_inputs_reject_mutation_escape_dynamic_code_and_bad_values() {
+    let expression = "File.read(File.expand_path('../VERSION', __dir__)).strip";
+    for (extra, value) in [
+        ("version.replace('9.9.9')", "3.4.0\n"),
+        ("File.write('../VERSION', '9.9.9')", "3.4.0\n"),
+        ("helper.rewrite_version_file", "3.4.0\n"),
+        ("alias_version = version", "3.4.0\n"),
+        ("mutate(version)", "3.4.0\n"),
+        ("arbitrary.add_dependency('x', version)", "3.4.0\n"),
+        ("version = '9.9.9'", "3.4.0\n"),
+        ("version += '0'", "3.4.0\n"),
+        ("require 'something'", "3.4.0\n"),
+        ("File = CustomFile", "3.4.0\n"),
+        ("Gem = CustomGem", "3.4.0\n"),
+        ("def f(version); end", "3.4.0\n"),
+        ("", "not-a-version"),
+        ("", "\u{2003}3.4.0"),
+        ("", "3.4.0\nFile.write('marker', 'executed')"),
+    ] {
+        let f = Fixture::new("ruby-version-negative");
+        f.put("VERSION", value);
+        f.put("pkg/sample.gemspec", &format!("version = {expression}\n{extra}\nGem::Specification.new do |s|\n s.add_dependency 'openssl', version\nend\n"));
+        let n = f.scan();
+        assert_eq!(n["coverage"]["partial_files"], 1, "{extra}: {value}");
+        assert!(
+            n["assets"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|a| a["attributes"]["name"] == "openssl")
+                .all(|a| a["attributes"]["declared_constraint"].is_null()),
+            "{extra}"
+        );
+        assert!(!f.0.join("marker").exists());
+    }
+}
+
+#[test]
+fn ruby_version_files_respect_selection_size_and_no_follow() {
+    for mode in ["ignored", "missing", "outside", "large", "wrong_expression"] {
+        let f = Fixture::new("ruby-version-selection");
+        f.put(
+            "VERSION",
+            &if mode == "large" {
+                "3".repeat(129)
+            } else {
+                "3.4.0\n".into()
+            },
+        );
+        if mode == "ignored" {
+            f.put(".gitignore", "VERSION\n");
+        }
+        let path = match mode {
+            "outside" => "../../VERSION",
+            "missing" => "../ABSENT",
+            _ => "../VERSION",
+        };
+        let expr = if mode == "wrong_expression" {
+            "File.read('../VERSION').strip".into()
+        } else {
+            format!("File.read(File.expand_path('{path}', __dir__)).strip")
+        };
+        f.put("pkg/sample.gemspec", &format!("version = {expr}\nGem::Specification.new do |s|\n s.add_dependency 'openssl', version\nend\n"));
+        let n = f.scan();
+        assert_eq!(n["coverage"]["partial_files"], 1, "{mode}");
+    }
+    #[cfg(unix)]
+    {
+        let f = Fixture::new("ruby-version-link");
+        f.put("REAL_VERSION", "3.4.0\n");
+        std::os::unix::fs::symlink("REAL_VERSION", f.0.join("VERSION")).unwrap();
+        f.put("sample.gemspec", "version = File.read(File.expand_path('VERSION', __dir__)).strip\nGem::Specification.new do |s|\n s.add_dependency 'openssl', version\nend\n");
+        assert_eq!(f.scan()["coverage"]["partial_files"], 1);
+    }
+}
+
+#[test]
+fn ruby_version_input_budget_is_explicit_and_literal_aliases_are_not_installation_facts() {
+    let f = Fixture::new("ruby-version-budget");
+    let mut text = String::new();
+    for i in 0..9 {
+        f.put(&format!("V{i}"), "3.4.0\n");
+        text.push_str(&format!(
+            "v{i} = File.read(File.expand_path('V{i}', __dir__)).strip\n"
+        ));
+    }
+    text.push_str("Gem::Specification.new do |s|\n");
+    for i in 0..9 {
+        text.push_str(&format!(" s.add_dependency 'package{i}', v{i}\n"));
+    }
+    text.push_str("end\n");
+    f.put("sample.gemspec", &text);
+    let n = f.scan();
+    assert_eq!(n["coverage"]["partial_files"], 1);
+    assert!(n["diagnostics"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|d| d["code"] == "detector_truncated"));
+    assert_eq!(
+        n["assets"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|a| a["attributes"]["declared_constraint"] == "3.4.0")
+            .count(),
+        8
+    );
+    let o = DependencyDetector.detect_observed(&ScannableFile::from_bytes("sample.gemspec".into(), b"version = '3.4.0'\nGem::Specification.new do |s|\n s.add_dependency 'openssl', version\nend\n".to_vec()), &rules()).unwrap();
+    assert_eq!(o.status(), DetectorStatus::Complete);
+    assert!(o.detections().iter().any(|d| d
+        .evidence
+        .metadata
+        .get("dep_version")
+        .is_some_and(|v| v == "3.4.0")));
+}
+
+#[test]
+fn independent_functions_keep_complete_inspection_across_all_supported_languages() {
+    let rules = rules();
+    let cases = [
+        (
+            "java",
+            "class C {",
+            "void f{n}(String key){String algorithm = \"RS256\";}",
+            "}",
+        ),
+        (
+            "go",
+            "package p\n",
+            "func f{n}(key string){var algorithm = \"RS256\"; _ = algorithm}",
+            "",
+        ),
+        ("py", "", "def f{n}(key):\n return 'RS256'", ""),
+        (
+            "rs",
+            "",
+            "fn f{n}(key: &str){let algorithm = \"RS256\";}",
+            "",
+        ),
+        ("rb", "", "def f{n}(key); 'RS256'; end", ""),
+        ("js", "", "function f{n}(key){return 'RS256';}", ""),
+        ("ts", "", "function f{n}(key: string){return 'RS256';}", ""),
+    ];
+    for (ext, prefix, body, suffix) in cases {
+        let source = format!(
+            "{prefix}\n{}{suffix}",
+            (0..80)
+                .map(|i| body.replace("{n}", &i.to_string()))
+                .collect::<Vec<_>>()
+                .join("\n")
+        );
+        let file = ScannableFile::from_bytes(format!("input.{ext}").into(), source.into_bytes());
+        for detector in [
+            Box::new(TreeSitterDetector) as Box<dyn Detector>,
+            Box::new(pqc_scan_detectors::regex_detector::RegexDetector),
+        ] {
+            let o = detector.detect_detailed(&file, &rules).unwrap();
+            assert_eq!(o.status(), DetectorStatus::Complete, "{ext}");
+            assert!(!o.detections().is_empty(), "{ext}");
+        }
+    }
+}
+
+#[test]
+fn real_same_scope_binding_exhaustion_still_reports_truncation() {
+    let text = format!(
+        "{}\nconst algorithm = 'RS256';\n",
+        "var repeated = unknown;\n".repeat(80)
+    );
+    let file = ScannableFile::from_bytes("sample.js".into(), text.into_bytes());
+    for detector in [
+        Box::new(TreeSitterDetector) as Box<dyn Detector>,
+        Box::new(pqc_scan_detectors::regex_detector::RegexDetector),
+    ] {
+        let o = detector.detect_detailed(&file, &rules()).unwrap();
+        assert_eq!(o.status(), DetectorStatus::Truncated);
+        assert!(o
+            .detections()
+            .iter()
+            .any(|d| d.evidence.r#match.contains("RS256")));
+    }
+}
+
+#[test]
+fn signature_parameters_do_not_shadow_outer_runtime_signer_imports() {
+    let file = ScannableFile::from_bytes("sample.ts".into(), b"import { sign } from 'jsonwebtoken';\ndeclare function f(sign: string): void;\ntype F = (sign: string) => void;\nsign({}, key, { algorithm: 'RS256' });\n".to_vec());
+    let o = TreeSitterDetector.detect_detailed(&file, &rules()).unwrap();
+    assert_eq!(o.status(), DetectorStatus::Complete);
+    assert!(o
+        .detections()
+        .iter()
+        .any(|d| d.rule_id == "TS_NODE_JOSE_USAGE" && d.location.line == 4));
+}
+
+#[test]
+fn delegated_ruby_version_context_does_not_recurse_through_gemspec_cycles() {
+    let f = Fixture::new("ruby-version-cycle");
+    f.put("Gemfile", "gemspec\n");
+    f.put("sample.gemspec", "gemspec\n");
+    assert_eq!(f.scan()["coverage"]["partial_files"], 2);
+}
+
+#[test]
+fn bare_gemspec_needs_one_selected_sibling_and_bound_locals_are_not_directives() {
+    for text in [
+        "gemspec\n",
+        "gemspec = false\ngemspec\n",
+        "group :development do\n gemspec\nend\n",
+        "group :development do\n gemspec()\nend\n",
+        "if ENV['LOCAL']\n gemspec\nend\n",
+    ] {
+        let f = Fixture::new("ruby-gemspec-missing");
+        f.put("Gemfile", text);
+        assert_eq!(f.scan()["coverage"]["partial_files"], 1);
+    }
+    let f = Fixture::new("ruby-gemspec-ignored");
+    f.put("Gemfile", "gemspec\n");
+    f.put(
+        "hidden.gemspec",
+        "Gem::Specification.new do |s|\n s.add_dependency 'openssl', '3.4.0'\nend\n",
+    );
+    f.put(".gitignore", "hidden.gemspec\n");
+    let n = f.scan();
+    assert_eq!(n["coverage"]["partial_files"], 1);
+    assert!(n["assets"].as_array().unwrap().is_empty());
+}
+
+#[test]
+fn ruby_version_declarations_do_not_borrow_a_later_assignment() {
+    let o = DependencyDetector.detect_observed(&ScannableFile::from_bytes("sample.gemspec".into(), b"Gem::Specification.new do |s|\n s.add_dependency 'openssl', version\nend\nversion = '3.4.0'\n".to_vec()), &rules()).unwrap();
+    assert_eq!(o.status(), DetectorStatus::Partial);
+    assert!(o.detections().iter().all(|d| d
+        .evidence
+        .metadata
+        .get("dep_version")
+        .is_none_or(|v| v == "unknown")));
+}
+
+#[test]
+fn ruby_method_and_directory_shadowing_do_not_certify_version_paths() {
+    for prefix in [
+        "alias __dir__ to_s",
+        "undef __dir__",
+        "__dir__ = '/not-the-manifest-directory'",
+        "alias require_relative to_s",
+    ] {
+        let f = Fixture::new("ruby-version-methods");
+        f.put("VERSION", "3.4.0\n");
+        f.put("sample.gemspec", &format!("{prefix}\nversion = File.read(File.expand_path('VERSION', __dir__)).strip\nGem::Specification.new do |s|\n s.add_dependency 'openssl', version\nend\n"));
+        let n = f.scan();
+        assert_eq!(n["coverage"]["partial_files"], 1, "{prefix}");
+        assert!(n["assets"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|a| a["attributes"]["declared_constraint"].is_null()));
+    }
+}
+
+#[test]
+fn ruby_constant_only_relative_loads_do_not_execute_or_duplicate_dependencies() {
+    let f = Fixture::new("ruby-constant-module");
+    f.put(
+        "lib/version.rb",
+        "module Example\n VERSION = '0.0.2'\nend\n",
+    );
+    let mut text = "require_relative 'lib/version'\n".repeat(200);
+    text.push_str("Gem::Specification.new do |s|\n s.version = Example::VERSION\n s.add_dependency 'openssl', '~> 3.4'\nend\n");
+    f.put("sample.gemspec", &text);
+    let n = f.scan();
+    assert_eq!(n["coverage"]["partial_files"], 0);
+    assert_eq!(
+        n["assets"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|a| a["attributes"]["name"] == "openssl")
+            .count(),
+        1
+    );
+}
+
+#[test]
+fn ruby_relative_modules_with_code_or_ambiguous_loader_context_remain_partial() {
+    for (prefix, module) in [
+        (
+            "",
+            "module Example\n File.write('marker', 'executed')\n VERSION = '0.0.2'\nend\n",
+        ),
+        (
+            "",
+            "module Example\n def self.modify; end\n VERSION = '0.0.2'\nend\n",
+        ),
+        (
+            "",
+            "module Example\n require 'another'\n VERSION = '0.0.2'\nend\n",
+        ),
+        ("", "module Example\n VERSION = dynamic\nend\n"),
+        ("", "module Gem\n VERSION = '0.0.2'\nend\n"),
+        (
+            "alias require_relative to_s\n",
+            "module Example\n VERSION = '0.0.2'\nend\n",
+        ),
+        (
+            "setup_environment\n",
+            "module Example\n VERSION = '0.0.2'\nend\n",
+        ),
+    ] {
+        let f = Fixture::new("ruby-relative-code");
+        f.put("lib/version.rb", module);
+        f.put("sample.gemspec", &format!("{prefix}require_relative 'lib/version'\nGem::Specification.new do |s|\n s.add_dependency 'openssl', '~> 3.4'\nend\n"));
+        assert_eq!(
+            f.scan()["coverage"]["partial_files"],
+            1,
+            "{prefix}: {module}"
+        );
+        assert!(!f.0.join("marker").exists());
+    }
+}
+
+#[test]
+fn ruby_relative_module_readers_keep_selection_and_real_resource_limits() {
+    for mode in ["ignored", "outside", "large", "nodes", "depth"] {
+        let f = Fixture::new("ruby-relative-boundary");
+        let module = match mode {
+            "large" => format!("#{}\n", "x".repeat(16384)),
+            "nodes" => format!("module Example\n{}end\n", "VERSION='v'\n".repeat(1100)),
+            "depth" => format!(
+                "{}VERSION='v'\n{}",
+                "module Example\n".repeat(9),
+                "end\n".repeat(9)
+            ),
+            _ => "module Example\n VERSION = '0.0.2'\nend\n".into(),
+        };
+        f.put("version.rb", &module);
+        if mode == "ignored" {
+            f.put(".gitignore", "version.rb\n");
+        }
+        let target = if mode == "outside" {
+            "../../version"
+        } else {
+            "version"
+        };
+        f.put("sample.gemspec", &format!("require_relative '{target}'\nGem::Specification.new do |s|\n s.add_dependency 'openssl', '~> 3.4'\nend\n"));
+        let n = f.scan();
+        assert_eq!(n["coverage"]["partial_files"], 1, "{mode}");
+        if ["large", "nodes", "depth"].contains(&mode) {
+            assert!(
+                n["diagnostics"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|d| d["code"] == "detector_truncated"),
+                "{mode}"
+            );
+        }
+    }
+    let f = Fixture::new("ruby-relative-count");
+    let mut text = String::new();
+    for i in 0..9 {
+        f.put(&format!("v{i}.rb"), "module Example\n VERSION='v'\nend\n");
+        text.push_str(&format!("require_relative 'v{i}'\n"));
+    }
+    text.push_str("Gem::Specification.new do |s|\n s.add_dependency 'openssl', '~> 3.4'\nend\n");
+    f.put("sample.gemspec", &text);
+    let n = f.scan();
+    assert_eq!(n["coverage"]["partial_files"], 1);
+    assert!(n["diagnostics"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|d| d["code"] == "detector_truncated"));
+}
+
+#[test]
+fn ruby_qualified_loads_and_linked_relative_modules_stay_unresolved() {
+    for directive in [
+        "Kernel.require_relative 'version'",
+        "Kernel.require 'version'",
+        "require_relative('version') { arbitrary_code }",
+    ] {
+        let f = Fixture::new("ruby-qualified-load");
+        f.put("version.rb", "module Example\n VERSION='v'\nend\n");
+        f.put("sample.gemspec", &format!("{directive}\nGem::Specification.new do |s|\n s.add_dependency 'openssl', '~> 3.4'\nend\n"));
+        assert_eq!(f.scan()["coverage"]["partial_files"], 1, "{directive}");
+    }
+    #[cfg(unix)]
+    {
+        let f = Fixture::new("ruby-relative-link");
+        f.put("real.rb", "module Example\n VERSION='v'\nend\n");
+        std::os::unix::fs::symlink("real.rb", f.0.join("version.rb")).unwrap();
+        f.put("sample.gemspec", "require_relative 'version'\nGem::Specification.new do |s|\n s.add_dependency 'openssl', '~> 3.4'\nend\n");
+        assert_eq!(f.scan()["coverage"]["partial_files"], 1);
+    }
+}

@@ -1,0 +1,14 @@
+    Checking pqc_scan_cli v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_cli)
+error: this boolean expression can be simplified
+   --> crates/pqc_scan_cli/src/serve_migration.rs:342:16
+    |
+342 |             if !drafts.get(&id).is_some_and(|d| d.token == c.token) {
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `drafts.get(&id).is_none_or(|d| d.token != c.token)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#nonminimal_bool
+    = note: `-D clippy::nonminimal-bool` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::nonminimal_bool)]`
+
+error: could not compile `pqc_scan_cli` (bin "pqc-scan") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `pqc_scan_cli` (bin "pqc-scan" test) due to 1 previous error

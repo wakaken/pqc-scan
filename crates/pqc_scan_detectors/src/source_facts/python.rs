@@ -5,7 +5,7 @@ use super::{
 use tree_sitter::Node;
 fn canonical(ctx: &Context<'_, '_>, node: Node<'_>, depth: usize) -> Option<String> {
     if depth > MAX_DEPTH {
-        ctx.truncated.set(true);
+        ctx.limit("source_alias_depth", MAX_DEPTH, MAX_DEPTH);
         return None;
     }
     if node.kind() == "attribute" {

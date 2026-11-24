@@ -1,0 +1,53 @@
+[
+  {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests/distribution",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 0.502,
+    "log": "target/v04-release-readiness-20261119/distribution-tests.log"
+  },
+  {
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--release",
+      "--package",
+      "pqc_scan_cli"
+    ],
+    "exit_code": 0,
+    "seconds": 24.432,
+    "log": "target/v04-release-readiness-20261119/release-build.log"
+  },
+  {
+    "command": [
+      "target/release/pqc-scan",
+      "--version"
+    ],
+    "exit_code": 0,
+    "seconds": 0.612,
+    "log": "target/v04-release-readiness-20261119/release-version.log"
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/package-release.py",
+      "--binary",
+      "target/release/pqc-scan",
+      "--variant",
+      "static",
+      "--out-dir",
+      "target/v04-release-readiness-20261119/static-first"
+    ],
+    "exit_code": 1,
+    "seconds": 0.899,
+    "log": "target/v04-release-readiness-20261119/package-first.log"
+  }
+]

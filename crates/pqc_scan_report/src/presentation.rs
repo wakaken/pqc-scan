@@ -13,9 +13,10 @@ pub(crate) fn page(en: &str, ja: &str, language: ReportLanguage) -> String {
         "pqc-scan report"
     };
     format!(
-        r#"<!doctype html><html lang="{lang}" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><style>{base}
+        r#"<!doctype html><html lang="{lang}" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><script>{theme_init}</script><style>{base}
 {style}</style></head><body><div class="report-settings" data-settings hidden><label>Language / 言語<select data-language aria-label="Language / 言語"><option value="en">English</option><option value="ja">日本語</option></select></label><label>Theme / 表示<select data-theme-select aria-label="Theme / 表示"><option value="light">Light / ライト</option><option value="dark">Dark / ダーク</option></select></label></div>{active}<template data-report-translation lang="{alternate_lang}">{alternate}</template><script>{controller}
 {preferences}</script></body></html>"#,
+        theme_init = include_str!("theme-init.js"),
         base = crate::html_report::css(),
         style = include_str!("compact.css"),
         controller = include_str!("compact.js"),

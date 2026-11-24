@@ -666,7 +666,13 @@ fn cargo_tables(value: &Value, text: &str, workspace: bool, b: &mut Build) {
     }
 }
 fn cargo_lock(value: &Value, text: &str) -> anyhow::Result<Parsed> {
-    let known = matches!(value["version"].as_u64(), Some(1..=4));
+    // Cargo's V1/V2 encoding omits the format version. Recognize its package
+    // table inventory, but do not silently ignore the older `root` encoding.
+    // Cargo reference: core/resolver/encode.rs (0.85.0), EncodableResolve.
+    let legacy = value.get("version").is_none()
+        && value.get("package").is_some_and(Value::is_array)
+        && value.get("root").is_none();
+    let known = matches!(value["version"].as_u64(), Some(1..=4)) || legacy;
     let mut b = Build::new(if known {
         DetectorStatus::Complete
     } else if value.get("version").is_some() {

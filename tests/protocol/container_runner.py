@@ -17,6 +17,12 @@ import uuid
 ROOT = Path(__file__).resolve().parents[2]
 ALLOWED_DIRS = {'crates', 'rules', 'schemas', 'tests', 'tasks', 'shell', 'examples'}
 ALLOWED_FILES = {'Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', '.gitignore', 'README.md', 'README.ja.md', 'LICENSE', 'docs/quality/rules/RULE-QUALITY-METADATA.json'}
+# These frozen synthetic JSON inputs are consumed by migration071_shapes.rs;
+# preserve all other historical task evidence exclusions.
+STUDY_SHAPE_FIXTURES = {'tasks/071/evidence/study-v2/manifest.json'} | {
+    f'tasks/071/evidence/study-v2/S{pair:02}{side}/{kind}.json'
+    for pair in range(1, 13) for side in 'AB' for kind in ('input', 'context')
+}
 ENV = {'PATH':'/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
        'HOME':'/scratch/home', 'TMPDIR':'/scratch/tmp', 'CARGO_HOME':'/scratch/cargo',
        'RUSTUP_HOME':'/usr/local/rustup', 'CARGO_NET_OFFLINE':'true', 'CARGO_BUILD_JOBS':'2',
@@ -72,8 +78,10 @@ def snapshot(root, destination):
         if name not in ALLOWED_FILES and path.parts[0] not in ALLOWED_DIRS:
             continue
         # Task outputs are historical records, not build inputs. Keep only the
-        # direct definitions used by queue validation and their operational guide.
-        if path.parts[0] == 'tasks' and name != 'tasks/README.md' and not re.fullmatch(r'tasks/[0-9]{3}/task\.yaml', name):
+        # direct definitions, their guide and the exact frozen shape-test inputs.
+        if (path.parts[0] == 'tasks' and name != 'tasks/README.md'
+                and name not in STUDY_SHAPE_FIXTURES
+                and not re.fullmatch(r'tasks/[0-9]{3}/task\.yaml', name)):
             continue
         if any(p == '.git' or p.startswith('.env') or p == '__pycache__' for p in path.parts):
             continue

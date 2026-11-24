@@ -1,0 +1,36 @@
+   Compiling pqc_scan_core v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.37s
+     Running tests/migration069.rs (target/debug/deps/migration069-d4560df4ce2d7dea)
+
+running 15 tests
+test a15_stale_due_claim_is_urgent_investigation_and_never_current_authority ... ok
+test a18_not_applicable_preserves_known_concern_and_exact_versions_and_clock_reject ... ok
+test a12_a13_same_rsa_targets_and_context_reassessment_have_stable_source_but_distinct_decisions ... ok
+test a03_protection_and_historical_ciphertext_are_independent_of_criticality_and_current_use ... ok
+test a07_unknown_use_preserves_concern_and_a08_same_context_clock_changes_only_decision ... ok
+test a01_a04_a06_context_free_references_and_declarations_never_establish_deployment ... ok
+test a07_purpose_conflict_and_purpose_specific_readiness_prevent_kem_signature_substitution ... ok
+test pki_support_is_required_but_hashing_does_not_require_peer_or_protocol ... ok
+test a02_a09_urgent_ready_blocked_unknown_and_false_plus_missing_keep_independent_axes ... ok
+test a08_deadline_boundaries_none_missing_lead_and_irrelevant_fields_are_exact ... ok
+test a16_ssh_offers_and_negotiation_remain_distinct_and_no_user_authentication_is_invented ... ok
+test a05_unknown_and_draft_groups_never_inherit_final_monitor_decisions ... FAILED
+test a08_signature_verification_lifetime_is_not_replaced_by_certificate_expiry ... ok
+test contradictory_exact_parameters_cannot_enter_favorable_decision_branches ... ok
+test a05_a10_a11_tls_roles_partial_unknowns_and_failed_verification_do_not_merge ... ok
+
+failures:
+
+---- a05_unknown_and_draft_groups_never_inherit_final_monitor_decisions stdout ----
+
+thread 'a05_unknown_and_draft_groups_never_inherit_final_monitor_decisions' (10801415) panicked at crates/pqc_scan_core/tests/migration069.rs:20:31:
+called `Result::unwrap()` on an `Err` value: ContradictorySavedFacts
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a05_unknown_and_draft_groups_never_inherit_final_monitor_decisions
+
+test result: FAILED. 14 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+error: test failed, to rerun pass `-p pqc_scan_core --test migration069`

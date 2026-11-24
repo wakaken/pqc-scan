@@ -702,3 +702,94 @@ fn human_reports_summarize_exclusions_while_machine_diagnostics_keep_all_paths()
         100
     );
 }
+
+#[test]
+fn concrete_limit_reasons_remain_separate_and_keep_the_diagnostic_shape() {
+    struct Limit(&'static str);
+    impl Detector for Limit {
+        fn name(&self) -> &'static str {
+            self.0
+        }
+        fn detect(&self, _: &ScannableFile, _: &RuleSet) -> anyhow::Result<Vec<Detection>> {
+            Ok(vec![])
+        }
+        fn detect_detailed(
+            &self,
+            _: &ScannableFile,
+            _: &RuleSet,
+        ) -> anyhow::Result<DetectorOutcome> {
+            Ok(DetectorOutcome::new(vec![], DetectorStatus::Truncated).with_limit(self.0, 64, 64))
+        }
+    }
+    let fixture = Fixture::new();
+    let doc = scan_repository_native(
+        &ScanConfig {
+            root: fixture.0.join("input"),
+            threads: 1,
+            ..Default::default()
+        },
+        &RuleSet::load_from_dir(&fixture.0.join("rules")).unwrap(),
+        &[
+            std::sync::Arc::new(Limit("same_name_bindings")),
+            std::sync::Arc::new(Limit("lexical_scope_lookup_depth")),
+        ],
+        &NativeOptions::new(Some("test/project")).unwrap(),
+    )
+    .unwrap();
+    let raw = serde_json::to_value(doc.diagnostics_report()).unwrap();
+    for record in raw["diagnostics"].as_array().unwrap() {
+        let keys: std::collections::BTreeSet<_> = record
+            .as_object()
+            .unwrap()
+            .keys()
+            .map(String::as_str)
+            .collect();
+        assert_eq!(
+            keys,
+            [
+                "code",
+                "stage",
+                "disposition",
+                "file",
+                "detector",
+                "message"
+            ]
+            .into_iter()
+            .collect()
+        );
+        assert!(record["message"]
+            .as_str()
+            .unwrap()
+            .contains("limit=64; processed=64"));
+    }
+    let out = fixture.0.join("concrete-limits");
+    write_document_reports(
+        &doc,
+        None,
+        true,
+        &out,
+        ReportFormat::All,
+        ReportLanguage::Ja,
+    )
+    .unwrap();
+    let html = fs::read_to_string(out.join("report.html")).unwrap();
+    assert_eq!(
+        html.split("<template")
+            .next()
+            .unwrap()
+            .matches("class=\"inspection-reason\"")
+            .count(),
+        2
+    );
+    for phrase in [
+        "同じ名前の宣言数",
+        "変数の参照先を探す階層数",
+        "上限=64",
+        "処理済み=64",
+        "診断記録数: 1 / ファイル数: 1",
+        "未処理部分の検出件数は不明",
+    ] {
+        assert!(html.contains(phrase), "{phrase}");
+    }
+    assert!(html.contains("&lt;untrusted&gt;&amp;.txt"));
+}

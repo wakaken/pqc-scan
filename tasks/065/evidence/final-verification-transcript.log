@@ -1,0 +1,78 @@
+Raw final verification transcript; not a maintained executable test or product script.
+Command: python3 /tmp/pqc065-final.py
+Source used:
+from pathlib import Path
+from urllib.parse import urlsplit,unquote
+import json,hashlib,subprocess,re,struct
+root=Path.cwd();out=Path('tasks/065/evidence')
+sha=lambda b:hashlib.sha256(b).hexdigest()
+def h(p):return sha(Path(p).read_bytes())
+def git(*a):return subprocess.check_output(['git',*a],text=True).strip()
+f32=lambda x:struct.unpack('f',struct.pack('f',x))[0]
+initial=json.load(open(out/'SOURCE.json'));reuse=json.load(open(out/'REUSE.json'))
+assert git('rev-parse','HEAD')==initial['head'] and git('branch','--show-current')==initial['branch']
+assert set(git('diff','--cached','--name-only').splitlines())==set(initial['preexisting_index'])
+for p,d in initial['preexisting_index'].items():
+ assert sha(subprocess.check_output(['git','show',':'+p]))==d,('index',p)
+ if p!='tasks/065/task.yaml':assert h(p)==d,('preexisting worktree',p)
+for p,d in initial['product_and_audit_inputs'].items():assert h(p)==d,('product/source changed',p)
+for p,d in reuse['record_hashes'].items():assert h(p)==d,('historical/reused record changed',p)
+changed=git('diff','--name-only').splitlines()+git('ls-files','--others','--exclude-standard').splitlines()
+assert all(p.startswith('tasks/065/') or p=='docs/quality/rules/RULE-QUALITY.md' for p in changed),changed
+ruby="require 'yaml'; require 'json'; puts Dir['tasks/[0-9][0-9][0-9]/task.yaml'].sort.map { |p| [p,YAML.load_file(p)] }.to_h.to_json"
+tasks=json.loads(subprocess.check_output(['ruby','-e',ruby],text=True));assert len(tasks)==72
+for p,t in tasks.items():assert isinstance(t['id'],str) and t['id']==Path(p).parent.name
+assert tasks['tasks/028/task.yaml']['status']==tasks['tasks/056/task.yaml']['status']=='done'
+assert tasks['tasks/065/task.yaml']['status'] in ['review','done']
+assert all(tasks[f'tasks/{i:03d}/task.yaml']['status']=='pending' for i in range(66,73))
+original=json.loads(subprocess.check_output(['ruby','-rjson','-ryaml','-e','puts YAML.load(STDIN.read).to_json'],input=subprocess.check_output(['git','show',':tasks/065/task.yaml']),text=False))
+current=tasks['tasks/065/task.yaml']
+assert {k:v for k,v in current.items() if k not in ['status','execution_record']}=={k:v for k,v in original.items() if k!='status'}
+a=json.load(open('tasks/065/RULE-AUDIT.json'));m=json.load(open(a['companion']['path']));pop=json.load(open(out/'POPULATION.json'))
+assert h(a['companion']['path'])==a['companion']['sha256']
+actual={r['rule']['id']:r for r in pop['rules']};rows=a['rules'];ids=[r['id'] for r in rows]
+assert len(ids)==len(set(ids))==len(actual)==123 and set(ids)==set(actual)=={r['id'] for r in m['rules']}
+for row in rows:
+ id=row['id'];raw=actual[id]['rule'];src=row['source'];assert h(src['path'])==src['sha256']
+ assert id in Path(src['path']).read_text().splitlines()[src['line']-1]
+ path,pointer=row['companion_pointer'].split('#');assert path==a['companion']['path']
+ inherited=m['rules'][int(pointer.rsplit('/',1)[1])];assert inherited['id']==id
+ for k in row['inherited_fields']:assert k in inherited
+ for k,v in inherited['rule_snapshot'].items():assert f32(v)==f32(raw[k]) if k=='confidence' else v==raw.get(k),(id,k)
+ for k in ['purpose','algorithm_families','parameters','quantum','classical','method','reference_ids','fp_fn']:assert row[k],(id,k)
+ assert row['base_severity']==raw['severity'] and f32(row['base_confidence'])==f32(raw['confidence'])
+ assert row['severity_rationale_id'] in a['rationale_definitions'] and row['confidence_rationale_id'] in a['rationale_definitions']
+ for r in row['promotion']['rationale_ids']:assert r in a['rationale_definitions']
+ for r in row['reference_ids']:assert r in a['references']
+for r,v in a['references'].items():
+ assert v['edition'] and v['scope_limit']
+ u=urlsplit(v['url']);assert (u.scheme=='https' and u.netloc) or (not u.scheme and Path(v['url']).is_file()),(r,v['url'])
+for r in ['PQC_JAVA_API','PQC_RUBY_API']:
+ row=next(x for x in rows if x['id']==r);assert 'SLH-DSA' in row['algorithm_families'] and 'FIPS205' in row['reference_ids']
+neg=json.load(open(out/'NEGATIVE-CONTROLS.json'));assert len(neg['rows'])==7 and all(r['passed'] and r['exit_code']==101 for r in neg['rows']) and neg['restored_exit_code']==0
+cmp=json.load(open(out/'SEVERITY-COMPARISON.json'));assert (cmp['correct'],cmp['incorrect'],cmp['unassessed'])==(960,0,0)
+commands=json.load(open(out/'COMMANDS.json'))
+for r in commands['runs']:assert h(r['log'])==r['log_sha256'] and r['exit_code']==0
+for p,d in commands['post_run_binary_sha256'].items():assert h(p)==d
+for p in sorted(Path('tasks/065').rglob('*.json')):json.loads(p.read_text())
+for cmd in [['git','diff','--check'],['git','diff','--cached','--check']]:subprocess.run(cmd,check=True)
+# This manifest excludes itself and the open final log to avoid recursive hashes.
+files=[p for p in Path('tasks/065').rglob('*') if p.is_file() and p.name not in ['FINAL-SOURCE.json','final-validation.log','final-verification-transcript.log']]
+manifest=dict(head=initial['head'],branch=initial['branch'],task_status=current['status'],original_criteria_preserved=True,original_index_preserved=True,other_tasks_unchanged=True,product_and_test_input_hashes_unchanged=True,source_manifest='tasks/065/evidence/SOURCE.json',audited_rules=len(rows),inherited_pattern_controls=pop['pattern_controls'],reference_definitions=len(a['references']),reference_scope='Every effective reference ID/edition/scope and local target exists; web syntax validated for all HTTPS entries, three official pages additionally retrieved. No assertion that every remote URL was fetched.',negative_rejections=7,severity_comparison=dict(correct=960,incorrect=0,unassessed=0),applicable_review='Research/prose/data-record exemption; no executable changes; no reviewer identities allocated.',artifact_sha256={str(p):h(p) for p in sorted(files)},maintained_guide=dict(path='docs/quality/rules/RULE-QUALITY.md',sha256=h('docs/quality/rules/RULE-QUALITY.md')),exclusions='This manifest and its open log/transcript are excluded from recursive artifact hashes. Initial source inputs, all audit deliverables and completed run logs remain bound.')
+(out/'FINAL-SOURCE.json').write_text(json.dumps(manifest,indent=2)+'\n')
+links=[]
+for p in [Path('docs/quality/rules/RULE-QUALITY.md'),*Path('tasks/065').glob('*.md')]:
+ for link in re.findall(r'\[[^\]]*\]\(([^)]+)\)',p.read_text()):
+  if urlsplit(link).scheme:continue
+  target=unquote(link.split('#',1)[0]);assert (p.parent/target).exists(),(str(p),link)
+  links.append(dict(file=str(p),target=link))
+print('PASS: HEAD/branch; thirteen original index entries; 219 product/audit inputs; historical/reused records; all task definitions and original criteria; task066-072 untouched.')
+print('PASS: 123 unique composed audit rows, exact source/snapshots, 268 controls, all effective references and local targets, two SLH-DSA augmentations.')
+print('PASS: seven expected negative rejections; 960 compared severity cases; command log/binary hashes; all task JSON; both Git whitespace checks;',len(links),'local Markdown links.')
+print('Final task state:',current['status'])
+
+Process exit: 0
+PASS: HEAD/branch; thirteen original index entries; 219 product/audit inputs; historical/reused records; all task definitions and original criteria; task066-072 untouched.
+PASS: 123 unique composed audit rows, exact source/snapshots, 268 controls, all effective references and local targets, two SLH-DSA augmentations.
+PASS: seven expected negative rejections; 960 compared severity cases; command log/binary hashes; all task JSON; both Git whitespace checks; 22 local Markdown links.
+Final task state: done

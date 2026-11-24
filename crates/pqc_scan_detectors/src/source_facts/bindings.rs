@@ -10,15 +10,21 @@ pub(super) enum Handler {
     RustPqc,
     NodeRsa,
     NodeRsaSign,
+    RubyCipher,
+    RustTls,
+    NodeJose,
 }
 impl Handler {
-    pub const ALL: [Self; 6] = [
+    pub const ALL: [Self; 9] = [
         Self::JavaPqc,
         Self::NodePqc,
         Self::PythonPqc,
         Self::RustPqc,
         Self::NodeRsa,
         Self::NodeRsaSign,
+        Self::RubyCipher,
+        Self::RustTls,
+        Self::NodeJose,
     ];
     pub fn id(self) -> &'static str {
         match self {
@@ -28,6 +34,9 @@ impl Handler {
             Self::RustPqc => "PQC_RUST_API",
             Self::NodeRsa => "TS_NODE_RSA_USAGE",
             Self::NodeRsaSign => "API_NODE_CRYPTO_SIGN_RSA",
+            Self::RubyCipher => "API_RUBY_OPENSSL_CIPHER",
+            Self::RustTls => "API_RUST_OPENSSL_TLS",
+            Self::NodeJose => "TS_NODE_JOSE_USAGE",
         }
     }
     pub fn handles(self, language: &str) -> bool {
@@ -35,13 +44,15 @@ impl Handler {
             Self::JavaPqc => language == "java",
             Self::PythonPqc => language == "python",
             Self::RustPqc => language == "rust",
-            Self::NodePqc | Self::NodeRsa | Self::NodeRsaSign => {
+            Self::RustTls => language == "rust",
+            Self::RubyCipher => language == "ruby",
+            Self::NodePqc | Self::NodeRsa | Self::NodeRsaSign | Self::NodeJose => {
                 matches!(language, "javascript" | "typescript")
             }
         }
     }
     pub fn replaces_generic(self) -> bool {
-        !matches!(self, Self::NodeRsa | Self::NodeRsaSign)
+        !matches!(self, Self::NodeRsa | Self::NodeRsaSign | Self::NodeJose)
     }
 }
 

@@ -32,8 +32,18 @@
     }
     language.value = active.lang;
     document.documentElement.lang = active.lang;
-    document.title = active.querySelector('h1').textContent;
+    const scope = active.querySelector('.report-scope')?.textContent;
+    document.title = (scope ? scope + ' | ' : '') + active.querySelector('h1').textContent;
     localTime();
+    rememberURL();
+  }
+  function rememberURL() {
+    try {
+      const url = new URL(location.href);
+      url.searchParams.set('theme', document.documentElement.dataset.theme);
+      url.searchParams.set('lang', document.documentElement.lang);
+      history.replaceState(null, '', url);
+    } catch { /* Standalone exports also work without history updates. */ }
   }
   function applyTheme(value) {
     if (!['light', 'dark'].includes(value)) value = 'light';
@@ -43,9 +53,10 @@
   language.addEventListener('change', () => switchLanguage(language.value));
   theme.addEventListener('change', () => {
     applyTheme(theme.value);
+    rememberURL();
     try { localStorage.setItem('pqc-scan-theme', theme.value); } catch { /* Optional preference. */ }
   });
-  try { applyTheme(localStorage.getItem('pqc-scan-theme')); } catch { applyTheme('light'); }
+  applyTheme(document.documentElement.dataset.theme);
   let requested;
   try { requested = new URLSearchParams(location.search).get('lang'); } catch { /* CLI default. */ }
   switchLanguage(requested || active.lang);

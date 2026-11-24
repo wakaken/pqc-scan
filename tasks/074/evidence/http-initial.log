@@ -1,0 +1,39 @@
+   Compiling pqc_scan_cli v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_cli)
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`
+   --> crates/pqc_scan_cli/tests/serve.rs:537:18
+    |
+537 |     let as_of = (chrono::Utc::now() + chrono::Duration::seconds(1))
+    |                  ^^^^^^ use of unresolved module or unlinked crate `chrono`
+    |
+    = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`
+   --> crates/pqc_scan_cli/tests/serve.rs:538:26
+    |
+538 |         .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
+    |                          ^^^^^^ use of unresolved module or unlinked crate `chrono`
+    |
+    = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`
+   --> crates/pqc_scan_cli/tests/serve.rs:537:39
+    |
+537 |     let as_of = (chrono::Utc::now() + chrono::Duration::seconds(1))
+    |                                       ^^^^^^ use of unresolved module or unlinked crate `chrono`
+    |
+    = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+help: consider importing one of these structs
+    |
+  1 + use crate::Duration;
+    |
+  1 + use std::time::Duration;
+    |
+help: if you import `Duration`, refer to it directly
+    |
+537 -     let as_of = (chrono::Utc::now() + chrono::Duration::seconds(1))
+537 +     let as_of = (chrono::Utc::now() + Duration::seconds(1))
+    |
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `pqc_scan_cli` (test "serve") due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...

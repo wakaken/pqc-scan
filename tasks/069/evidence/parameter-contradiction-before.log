@@ -1,0 +1,22 @@
+   Compiling pqc_scan_core v0.3.0 (/Users/waka/.codex/worktrees/v04-roadmap-20261118/pqc-scan/crates/pqc_scan_core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.56s
+     Running tests/migration069.rs (target/debug/deps/migration069-d4560df4ce2d7dea)
+
+running 1 test
+test contradictory_exact_parameters_cannot_enter_favorable_decision_branches ... FAILED
+
+failures:
+
+---- contradictory_exact_parameters_cannot_enter_favorable_decision_branches stdout ----
+
+thread 'contradictory_exact_parameters_cannot_enter_favorable_decision_branches' (10753225) panicked at crates/pqc_scan_core/tests/migration069.rs:425:56:
+called `Result::unwrap_err()` on an `Ok` value: SavedEvidence { input: InputReference { format: InventoryV1, sha256: "5da197be505428df6e9e3b5c4d4caefd3ec428fbfb7260dd8e21262bb334920f", schema_version: 1, collection_time: "2026-11-17T00:00:00Z", run_id: Some("scan-v1-a9ff06a933b8f9ebe359562fad7005b81895235c5435bb91a62562566eb479b7"), attempt_id: None, protocol: None }, targets: [Target { id: "migration_target-v1-7dccbeb479599df01da3df833726af703e3356efb07926a797f3771c647f1463", source_ref: SourceReference { run_id: Some("scan-v1-a9ff06a933b8f9ebe359562fad7005b81895235c5435bb91a62562566eb479b7"), observation_id: Some("observation-v1-b75202b15a37ec57748d93b99e1538e2c70f9b0a81bb14f7b908c113e0bae108"), root_asset_id: Some("asset-v1-7e961b619707fc5ce80f6755cdf1af67f6f152ed01cfe04d16cb201f6baf435e"), role: "algorithm", attempt_id: None, detail_path: None, certificate_sha256: None, spki_sha256: None, path: Some("app.txt"), line: Some(1), dependency_provenance: None, protocol_version: None, cipher_suite: None, key_exchange_group: None, not_before_unix: None, not_after_unix: None }, technical: TechnicalFacts { algorithm: AlgorithmAssessment { identifier: "AES-128", construction: "symmetric", standardization: "classical_standard", quantum: GenericSearch, purpose: Encryption, parameters_known: true, classical_concerns: [], attack_models: [AttackModel { attack: "generic_key_search", exponent_numerator: 128, exponent_denominator: 2, assumption: "ideal_oracle_queries_not_operational_security_bits; memory_parallelism_and_circuit_cost_not_estimated" }], components: [], combiner_assessment: None, source_ids: ["F12", "LOCAL026", "NIST-PQ-FAQ"] }, encoding_assurance: "unknown", protocol_ref: None, role: "algorithm" }, observation: ObservationFacts { method: "ast_pattern", assurance: "syntactic", usage: "referenced", collection_outcome: "complete" }, limitations: ["unknown_parameter_encoding"], bindable: true }], collection_outcome: "complete", file: None, path: None }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    contradictory_exact_parameters_cannot_enter_favorable_decision_branches
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.03s
+
+error: test failed, to rerun pass `-p pqc_scan_core --test migration069`

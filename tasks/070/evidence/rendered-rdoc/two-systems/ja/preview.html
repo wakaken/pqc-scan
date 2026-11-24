@@ -1,0 +1,698 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>two-systems — ja migration assessment</title>
+<style>body{font:16px/1.65 system-ui,sans-serif;max-width:960px;margin:24px auto;padding:0 18px;color:#172234;background:#fff}h1,h2,h3{line-height:1.3}h2{margin-top:2rem;border-bottom:1px solid #ccd4de;padding-bottom:.5rem}a{color:#125ba2}a:focus-visible{outline:3px solid #cd6800;outline-offset:3px}pre{background:#f3f5f8;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}code{font-size:.85em;overflow-wrap:anywhere}li{margin:.4em 0}p{overflow-wrap:anywhere}</style>
+<body id="top"><main>
+<h1 id="label-E7-A7-BB-E8-A1-8C-E5-88-A4-E6-96-AD">移行判断<span><a href="#label-E7-A7-BB-E8-A1-8C-E5-88-A4-E6-96-AD">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>対象数: 2 · 評価時刻: <code>2026-11-18T00:00:00Z</code></p>
+
+<h2 id="label-1.+RSA+-E2-80-94+-E6-97-A9-E6-80-A5-E3-81-AB-E5-AF-BE-E5-BF-9C">1. <code>RSA</code> — 早急に対応<span><a href="#label-1.+RSA+-E2-80-94+-E6-97-A9-E6-80-A5-E3-81-AB-E5-AF-BE-E5-BF-9C">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p><strong>場所:</strong> <code>system-b/auth.rs:1</code> · <code>algorithm</code></p>
+
+<p><strong>申告されたシステム:</strong> <code>system-a</code></p>
+
+<p><strong>対応:</strong> 調査</p>
+
+<p><strong>理由:</strong> 業務上重要な署名用途での利用中・利用予定が申告されています。</p>
+
+<p><strong>次の確認:</strong></p>
+<ul><li>
+<p>実際の利用状況と必要な暗号用途を確認してください。</p>
+</li><li>
+<p>不足・不明・失効している対象範囲の申告を確認し、更新してください。</p>
+</li></ul>
+
+<p><strong>情報の状態:</strong> 不足情報あり</p>
+
+<p><strong>移行準備:</strong> 準備状況は不明</p>
+
+<p><strong>不足情報:</strong></p>
+<ul><li>
+<p>正確なパラメーターへの対応</p>
+</li><li>
+<p>接続相手の対応</p>
+</li><li>
+<p>プロトコルの対応</p>
+</li><li>
+<p>プロバイダーの対応</p>
+</li><li>
+<p>実行環境の対応</p>
+</li></ul>
+
+<p><strong>補足:</strong></p>
+<ul><li>
+<p>正確なパラメーターの符号化は不明です。</p>
+</li></ul>
+
+<p><a href="#evidence-1">根拠・申告・候補の詳細</a></p>
+
+<h2 id="label-2.+RSA+-E2-80-94+-E8-A8-88-E7-94-BB-E3-81-97-E3-81-A6-E5-AF-BE-E5-BF-9C">2. <code>RSA</code> — 計画して対応<span><a href="#label-2.+RSA+-E2-80-94+-E8-A8-88-E7-94-BB-E3-81-97-E3-81-A6-E5-AF-BE-E5-BF-9C">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p><strong>場所:</strong> <code>system-a/auth.rs:1</code> · <code>algorithm</code></p>
+
+<p><strong>申告されたシステム:</strong> <code>system-b</code></p>
+
+<p><strong>対応:</strong> 調査</p>
+
+<p><strong>理由:</strong> 有効な対象範囲と前提情報を踏まえ、既知の懸念への対応を計画します。</p>
+
+<p><strong>次の確認:</strong></p>
+<ul><li>
+<p>実際の利用状況と必要な暗号用途を確認してください。</p>
+</li><li>
+<p>不足・不明・失効している対象範囲の申告を確認し、更新してください。</p>
+</li></ul>
+
+<p><strong>情報の状態:</strong> 不足情報あり</p>
+
+<p><strong>移行準備:</strong> 準備状況は不明</p>
+
+<p><strong>不足情報:</strong></p>
+<ul><li>
+<p>正確なパラメーターへの対応</p>
+</li><li>
+<p>接続相手の対応</p>
+</li><li>
+<p>プロトコルの対応</p>
+</li><li>
+<p>プロバイダーの対応</p>
+</li><li>
+<p>実行環境の対応</p>
+</li></ul>
+
+<p><strong>補足:</strong></p>
+<ul><li>
+<p>正確なパラメーターの符号化は不明です。</p>
+</li></ul>
+
+<p><a href="#evidence-2">根拠・申告・候補の詳細</a></p>
+
+<h2 id="label-E6-A0-B9-E6-8B-A0-E3-81-A8-E5-AF-BE-E8-B1-A1-E7-AF-84-E5-9B-B2">根拠と対象範囲<span><a href="#label-E6-A0-B9-E6-8B-A0-E3-81-A8-E5-AF-BE-E8-B1-A1-E7-AF-84-E5-9B-B2">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>準備が整っているという表示は申告上の対応状況であり、配備を検証した結果ではありません。候補には、パラメーター、符号化、相互運用性の検証が別途必要です。継続確認は記載された役割の範囲に限り、対象外という判断も安全性の判定ではありません。</p>
+<a id="evidence-1"></a>
+<h3 id="label-E6-A0-B9-E6-8B-A0+1">根拠 1<span><a href="#label-E6-A0-B9-E6-8B-A0+1">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>判断: <code>migration_decision-v1-a13a31e84c1cb6fbdaab7091ecce8931f2c0bdaebc583dc2e244bc5ee3bf15c5</code></p>
+
+<p>対象: <code>migration_target-v1-384b866a8a9b7b9727239252d160bad0bd6fda711b26fe088c952e2e0ceeaf7d</code></p>
+
+<p>使った申告: <a href="#claim-1">migration_claim-v1-084dc0d2d241642a0109dec9d764cf216f7f585b4f537abf777525b81ed8483b</a>, <a href="#claim-5">migration_claim-v1-74b10ebedafb1906e69f08d266b3ed4fb37763fd6c0e4c82fd0bff573a02f548</a>, <a href="#claim-7">migration_claim-v1-95c3c16ae97b9c1d5149b80d3e883979db7ded5021a6244403f275eaa7f60517</a>, <a href="#claim-8">migration_claim-v1-c319572a55500ade79c402969f7db3bc3c70e3adccdb3edc12a450baa42ade5e</a></p>
+
+<p>検討候補: <a href="#candidate-1">migration_candidate-v1-2c53efdcac9c0b8036d19728ed16dbdb6e0f96efa880ff53c3e1e8b6cb210881</a></p>
+
+<p>出典: <a href="#source-1">F12</a>, <a href="#source-3">F14</a>, <a href="#source-4">LOCAL026</a>, <a href="#source-5">NIST-PQ-FAQ</a></p>
+
+<p>保存された観測、技術上の事実、固定の理由コード：</p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_target-v1-384b866a8a9b7b9727239252d160bad0bd6fda711b26fe088c952e2e0ceeaf7d&quot;</span>,
+  <span class="ruby-value">&quot;source_ref&quot;:</span> {
+    <span class="ruby-value">&quot;run_id&quot;:</span> <span class="ruby-string">&quot;scan-v1-a9ff06a933b8f9ebe359562fad7005b81895235c5435bb91a62562566eb479b7&quot;</span>,
+    <span class="ruby-value">&quot;observation_id&quot;:</span> <span class="ruby-string">&quot;observation-v1-08264b952b8ae33a085393934b509d1ef2160387e28a2339c4c8ecff01550be8&quot;</span>,
+    <span class="ruby-value">&quot;root_asset_id&quot;:</span> <span class="ruby-string">&quot;asset-v1-e30d0455518fa3502bcd153e2d7d70096c2ac56e9d275847e8c1488261964b33&quot;</span>,
+    <span class="ruby-value">&quot;role&quot;:</span> <span class="ruby-string">&quot;algorithm&quot;</span>,
+    <span class="ruby-value">&quot;path&quot;:</span> <span class="ruby-string">&quot;system-b/auth.rs&quot;</span>,
+    <span class="ruby-value">&quot;line&quot;:</span> <span class="ruby-value">1</span>
+  },
+  <span class="ruby-value">&quot;technical&quot;:</span> {
+    <span class="ruby-value">&quot;identifier&quot;:</span> <span class="ruby-string">&quot;RSA&quot;</span>,
+    <span class="ruby-value">&quot;construction&quot;:</span> <span class="ruby-string">&quot;classical_public_key&quot;</span>,
+    <span class="ruby-value">&quot;standardization&quot;:</span> <span class="ruby-string">&quot;classical_standard&quot;</span>,
+    <span class="ruby-value">&quot;quantum&quot;:</span> <span class="ruby-string">&quot;vulnerable&quot;</span>,
+    <span class="ruby-value">&quot;purpose&quot;:</span> <span class="ruby-string">&quot;unknown&quot;</span>,
+    <span class="ruby-value">&quot;parameters_known&quot;:</span> <span class="ruby-keyword">true</span>,
+    <span class="ruby-value">&quot;classical_concerns&quot;:</span> [],
+    <span class="ruby-value">&quot;attack_models&quot;:</span> [],
+    <span class="ruby-value">&quot;components&quot;:</span> [],
+    <span class="ruby-value">&quot;combiner_assessment&quot;:</span> <span class="ruby-identifier">null</span>,
+    <span class="ruby-value">&quot;source_ids&quot;:</span> [
+      <span class="ruby-string">&quot;F12&quot;</span>,
+      <span class="ruby-string">&quot;LOCAL026&quot;</span>,
+      <span class="ruby-string">&quot;NIST-PQ-FAQ&quot;</span>
+    ],
+    <span class="ruby-value">&quot;encoding_assurance&quot;:</span> <span class="ruby-string">&quot;unknown&quot;</span>,
+    <span class="ruby-value">&quot;protocol_ref&quot;:</span> <span class="ruby-identifier">null</span>,
+    <span class="ruby-value">&quot;role&quot;:</span> <span class="ruby-string">&quot;algorithm&quot;</span>
+  },
+  <span class="ruby-value">&quot;observation&quot;:</span> {
+    <span class="ruby-value">&quot;method&quot;:</span> <span class="ruby-string">&quot;ast_pattern&quot;</span>,
+    <span class="ruby-value">&quot;assurance&quot;:</span> <span class="ruby-string">&quot;syntactic&quot;</span>,
+    <span class="ruby-value">&quot;usage&quot;:</span> <span class="ruby-string">&quot;referenced&quot;</span>,
+    <span class="ruby-value">&quot;collection_outcome&quot;:</span> <span class="ruby-string">&quot;complete&quot;</span>
+  },
+  <span class="ruby-value">&quot;limitations&quot;:</span> [
+    <span class="ruby-string">&quot;unknown_parameter_encoding&quot;</span>
+  ]
+}
+
+[
+  <span class="ruby-string">&quot;critical_use_declared&quot;</span>,
+  <span class="ruby-string">&quot;unknown_parameter_encoding&quot;</span>
+]
+</pre>
+<a id="evidence-2"></a>
+<h3 id="label-E6-A0-B9-E6-8B-A0+2">根拠 2<span><a href="#label-E6-A0-B9-E6-8B-A0+2">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>判断: <code>migration_decision-v1-742f70ed1829883b0b93c67ddd7eb8a92df0f9560a6d341c89c88438af0e96b7</code></p>
+
+<p>対象: <code>migration_target-v1-ae577ba87f4660ddb0c2d95b7d14dea300b9050d2cc7e560c804421e854bf622</code></p>
+
+<p>使った申告: <a href="#claim-2">migration_claim-v1-0a6d7bbd4fd099f812c42393e9fdd8fe8d876bae174f9fe29bc754e70d8eb3ed</a>, <a href="#claim-3">migration_claim-v1-4dd8de68a4b95ad71a2778c20ef5d180467e9946cea5af4866e6f6e506d84fd2</a>, <a href="#claim-4">migration_claim-v1-7391d9522b9b50e2aa00b378d6843bdd72263a70004e5603a658abf916ab15d5</a>, <a href="#claim-6">migration_claim-v1-88ee3c5f8c8f8fd09a81ecfdc62f2a8c01ae71fb2b6d7121a8cf33fc8ff06865</a>, <a href="#claim-9">migration_claim-v1-ff62d040f2d7a2b163baabf5fbad9d4d5dda74e67fd3141fadce68e69b8d51a1</a></p>
+
+<p>検討候補: <a href="#candidate-2">migration_candidate-v1-1797317ec15d8f16fe14ccea8a5cf1ac8f0c0d7e01e3c892b972394bbe5859b6</a></p>
+
+<p>出典: <a href="#source-1">F12</a>, <a href="#source-2">F13</a>, <a href="#source-3">F14</a>, <a href="#source-4">LOCAL026</a>, <a href="#source-5">NIST-PQ-FAQ</a></p>
+
+<p>保存された観測、技術上の事実、固定の理由コード：</p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_target-v1-ae577ba87f4660ddb0c2d95b7d14dea300b9050d2cc7e560c804421e854bf622&quot;</span>,
+  <span class="ruby-value">&quot;source_ref&quot;:</span> {
+    <span class="ruby-value">&quot;run_id&quot;:</span> <span class="ruby-string">&quot;scan-v1-a9ff06a933b8f9ebe359562fad7005b81895235c5435bb91a62562566eb479b7&quot;</span>,
+    <span class="ruby-value">&quot;observation_id&quot;:</span> <span class="ruby-string">&quot;observation-v1-b75202b15a37ec57748d93b99e1538e2c70f9b0a81bb14f7b908c113e0bae108&quot;</span>,
+    <span class="ruby-value">&quot;root_asset_id&quot;:</span> <span class="ruby-string">&quot;asset-v1-e30d0455518fa3502bcd153e2d7d70096c2ac56e9d275847e8c1488261964b33&quot;</span>,
+    <span class="ruby-value">&quot;role&quot;:</span> <span class="ruby-string">&quot;algorithm&quot;</span>,
+    <span class="ruby-value">&quot;path&quot;:</span> <span class="ruby-string">&quot;system-a/auth.rs&quot;</span>,
+    <span class="ruby-value">&quot;line&quot;:</span> <span class="ruby-value">1</span>
+  },
+  <span class="ruby-value">&quot;technical&quot;:</span> {
+    <span class="ruby-value">&quot;identifier&quot;:</span> <span class="ruby-string">&quot;RSA&quot;</span>,
+    <span class="ruby-value">&quot;construction&quot;:</span> <span class="ruby-string">&quot;classical_public_key&quot;</span>,
+    <span class="ruby-value">&quot;standardization&quot;:</span> <span class="ruby-string">&quot;classical_standard&quot;</span>,
+    <span class="ruby-value">&quot;quantum&quot;:</span> <span class="ruby-string">&quot;vulnerable&quot;</span>,
+    <span class="ruby-value">&quot;purpose&quot;:</span> <span class="ruby-string">&quot;unknown&quot;</span>,
+    <span class="ruby-value">&quot;parameters_known&quot;:</span> <span class="ruby-keyword">true</span>,
+    <span class="ruby-value">&quot;classical_concerns&quot;:</span> [],
+    <span class="ruby-value">&quot;attack_models&quot;:</span> [],
+    <span class="ruby-value">&quot;components&quot;:</span> [],
+    <span class="ruby-value">&quot;combiner_assessment&quot;:</span> <span class="ruby-identifier">null</span>,
+    <span class="ruby-value">&quot;source_ids&quot;:</span> [
+      <span class="ruby-string">&quot;F12&quot;</span>,
+      <span class="ruby-string">&quot;LOCAL026&quot;</span>,
+      <span class="ruby-string">&quot;NIST-PQ-FAQ&quot;</span>
+    ],
+    <span class="ruby-value">&quot;encoding_assurance&quot;:</span> <span class="ruby-string">&quot;unknown&quot;</span>,
+    <span class="ruby-value">&quot;protocol_ref&quot;:</span> <span class="ruby-identifier">null</span>,
+    <span class="ruby-value">&quot;role&quot;:</span> <span class="ruby-string">&quot;algorithm&quot;</span>
+  },
+  <span class="ruby-value">&quot;observation&quot;:</span> {
+    <span class="ruby-value">&quot;method&quot;:</span> <span class="ruby-string">&quot;ast_pattern&quot;</span>,
+    <span class="ruby-value">&quot;assurance&quot;:</span> <span class="ruby-string">&quot;syntactic&quot;</span>,
+    <span class="ruby-value">&quot;usage&quot;:</span> <span class="ruby-string">&quot;referenced&quot;</span>,
+    <span class="ruby-value">&quot;collection_outcome&quot;:</span> <span class="ruby-string">&quot;complete&quot;</span>
+  },
+  <span class="ruby-value">&quot;limitations&quot;:</span> [
+    <span class="ruby-string">&quot;unknown_parameter_encoding&quot;</span>
+  ]
+}
+
+[
+  <span class="ruby-string">&quot;known_concern_plan&quot;</span>,
+  <span class="ruby-string">&quot;unknown_parameter_encoding&quot;</span>
+]
+</pre>
+
+<h2 id="label-E4-BD-BF-E7-94-A8-E3-81-97-E3-81-9F-E7-94-B3-E5-91-8A-E3-81-AE-E7-94-B1-E6-9D-A5">使用した申告の由来<span><a href="#label-E4-BD-BF-E7-94-A8-E3-81-97-E3-81-9F-E7-94-B3-E5-91-8A-E3-81-AE-E7-94-B1-E6-9D-A5">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>利用者や外部レビュー由来の申告は未検証です。有効性の表示は申告された期間を表し、独立した確認結果ではありません。</p>
+<a id="claim-1"></a>
+<h3 id="label-E7-94-B3-E5-91-8A-3A+-E5-88-A9-E7-94-A8-E4-B8-AD-E3-83-BB-E5-88-A9-E7-94-A8-E4-BA-88-E5-AE-9A-E3-81-AE-E7-8A-B6-E6-B3-81">申告: 利用中・利用予定の状況<span><a href="#label-E7-94-B3-E5-91-8A-3A+-E5-88-A9-E7-94-A8-E4-B8-AD-E3-83-BB-E5-88-A9-E7-94-A8-E4-BA-88-E5-AE-9A-E3-81-AE-E7-8A-B6-E6-B3-81">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>利用者の申告（未検証） · 申告期間内</p>
+
+<p>申告値: <code>&quot;active&quot;</code></p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_claim-v1-084dc0d2d241642a0109dec9d764cf216f7f585b4f537abf777525b81ed8483b&quot;</span>,
+  <span class="ruby-value">&quot;context_pointer&quot;:</span> <span class="ruby-string">&quot;/bindings/0/claims/usage_state&quot;</span>,
+  <span class="ruby-value">&quot;field&quot;:</span> <span class="ruby-string">&quot;usage_state&quot;</span>,
+  <span class="ruby-value">&quot;state&quot;:</span> <span class="ruby-string">&quot;known&quot;</span>,
+  <span class="ruby-value">&quot;value&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>,
+  <span class="ruby-value">&quot;provenance&quot;:</span> {
+    <span class="ruby-value">&quot;source_kind&quot;:</span> <span class="ruby-string">&quot;operator_claim&quot;</span>,
+    <span class="ruby-value">&quot;actor_id&quot;:</span> <span class="ruby-string">&quot;owner&quot;</span>,
+    <span class="ruby-value">&quot;asserted_at&quot;:</span> <span class="ruby-string">&quot;2026-11-17T00:00:00Z&quot;</span>,
+    <span class="ruby-value">&quot;valid_until&quot;:</span> <span class="ruby-string">&quot;2027-11-17T00:00:00Z&quot;</span>
+  },
+  <span class="ruby-value">&quot;freshness&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>
+}
+</pre>
+<a id="claim-2"></a>
+<h3 id="label-E7-94-B3-E5-91-8A-3A+-E9-81-A9-E7-94-A8-E7-AF-84-E5-9B-B2">申告: 適用範囲<span><a href="#label-E7-94-B3-E5-91-8A-3A+-E9-81-A9-E7-94-A8-E7-AF-84-E5-9B-B2">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>利用者の申告（未検証） · 申告期間内</p>
+
+<p>申告値: <code>&quot;applicable&quot;</code></p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_claim-v1-0a6d7bbd4fd099f812c42393e9fdd8fe8d876bae174f9fe29bc754e70d8eb3ed&quot;</span>,
+  <span class="ruby-value">&quot;context_pointer&quot;:</span> <span class="ruby-string">&quot;/bindings/1/claims/applicability&quot;</span>,
+  <span class="ruby-value">&quot;field&quot;:</span> <span class="ruby-string">&quot;applicability&quot;</span>,
+  <span class="ruby-value">&quot;state&quot;:</span> <span class="ruby-string">&quot;known&quot;</span>,
+  <span class="ruby-value">&quot;value&quot;:</span> <span class="ruby-string">&quot;applicable&quot;</span>,
+  <span class="ruby-value">&quot;provenance&quot;:</span> {
+    <span class="ruby-value">&quot;source_kind&quot;:</span> <span class="ruby-string">&quot;operator_claim&quot;</span>,
+    <span class="ruby-value">&quot;actor_id&quot;:</span> <span class="ruby-string">&quot;owner&quot;</span>,
+    <span class="ruby-value">&quot;asserted_at&quot;:</span> <span class="ruby-string">&quot;2026-11-17T00:00:00Z&quot;</span>,
+    <span class="ruby-value">&quot;valid_until&quot;:</span> <span class="ruby-string">&quot;2027-11-17T00:00:00Z&quot;</span>
+  },
+  <span class="ruby-value">&quot;freshness&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>
+}
+</pre>
+<a id="claim-3"></a>
+<h3 id="label-E7-94-B3-E5-91-8A-3A+-E5-BF-85-E8-A6-81-E3-81-AA-E7-94-A8-E9-80-94">申告: 必要な用途<span><a href="#label-E7-94-B3-E5-91-8A-3A+-E5-BF-85-E8-A6-81-E3-81-AA-E7-94-A8-E9-80-94">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>利用者の申告（未検証） · 申告期間内</p>
+
+<p>申告値: <code>&quot;signature&quot;</code></p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_claim-v1-4dd8de68a4b95ad71a2778c20ef5d180467e9946cea5af4866e6f6e506d84fd2&quot;</span>,
+  <span class="ruby-value">&quot;context_pointer&quot;:</span> <span class="ruby-string">&quot;/bindings/1/claims/use_case&quot;</span>,
+  <span class="ruby-value">&quot;field&quot;:</span> <span class="ruby-string">&quot;use_case&quot;</span>,
+  <span class="ruby-value">&quot;state&quot;:</span> <span class="ruby-string">&quot;known&quot;</span>,
+  <span class="ruby-value">&quot;value&quot;:</span> <span class="ruby-string">&quot;signature&quot;</span>,
+  <span class="ruby-value">&quot;provenance&quot;:</span> {
+    <span class="ruby-value">&quot;source_kind&quot;:</span> <span class="ruby-string">&quot;operator_claim&quot;</span>,
+    <span class="ruby-value">&quot;actor_id&quot;:</span> <span class="ruby-string">&quot;owner&quot;</span>,
+    <span class="ruby-value">&quot;asserted_at&quot;:</span> <span class="ruby-string">&quot;2026-11-17T00:00:00Z&quot;</span>,
+    <span class="ruby-value">&quot;valid_until&quot;:</span> <span class="ruby-string">&quot;2027-11-17T00:00:00Z&quot;</span>
+  },
+  <span class="ruby-value">&quot;freshness&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>
+}
+</pre>
+<a id="claim-4"></a>
+<h3 id="label-E7-94-B3-E5-91-8A-3A+-E5-88-A9-E7-94-A8-E4-B8-AD-E3-83-BB-E5-88-A9-E7-94-A8-E4-BA-88-E5-AE-9A-E3-81-AE-E7-8A-B6-E6-B3-81">申告: 利用中・利用予定の状況<span><a href="#label-E7-94-B3-E5-91-8A-3A+-E5-88-A9-E7-94-A8-E4-B8-AD-E3-83-BB-E5-88-A9-E7-94-A8-E4-BA-88-E5-AE-9A-E3-81-AE-E7-8A-B6-E6-B3-81">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>利用者の申告（未検証） · 申告期間内</p>
+
+<p>申告値: <code>&quot;active&quot;</code></p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_claim-v1-7391d9522b9b50e2aa00b378d6843bdd72263a70004e5603a658abf916ab15d5&quot;</span>,
+  <span class="ruby-value">&quot;context_pointer&quot;:</span> <span class="ruby-string">&quot;/bindings/1/claims/usage_state&quot;</span>,
+  <span class="ruby-value">&quot;field&quot;:</span> <span class="ruby-string">&quot;usage_state&quot;</span>,
+  <span class="ruby-value">&quot;state&quot;:</span> <span class="ruby-string">&quot;known&quot;</span>,
+  <span class="ruby-value">&quot;value&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>,
+  <span class="ruby-value">&quot;provenance&quot;:</span> {
+    <span class="ruby-value">&quot;source_kind&quot;:</span> <span class="ruby-string">&quot;operator_claim&quot;</span>,
+    <span class="ruby-value">&quot;actor_id&quot;:</span> <span class="ruby-string">&quot;owner&quot;</span>,
+    <span class="ruby-value">&quot;asserted_at&quot;:</span> <span class="ruby-string">&quot;2026-11-17T00:00:00Z&quot;</span>,
+    <span class="ruby-value">&quot;valid_until&quot;:</span> <span class="ruby-string">&quot;2027-11-17T00:00:00Z&quot;</span>
+  },
+  <span class="ruby-value">&quot;freshness&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>
+}
+</pre>
+<a id="claim-5"></a>
+<h3 id="label-E7-94-B3-E5-91-8A-3A+-E9-81-A9-E7-94-A8-E7-AF-84-E5-9B-B2">申告: 適用範囲<span><a href="#label-E7-94-B3-E5-91-8A-3A+-E9-81-A9-E7-94-A8-E7-AF-84-E5-9B-B2">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>利用者の申告（未検証） · 申告期間内</p>
+
+<p>申告値: <code>&quot;applicable&quot;</code></p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_claim-v1-74b10ebedafb1906e69f08d266b3ed4fb37763fd6c0e4c82fd0bff573a02f548&quot;</span>,
+  <span class="ruby-value">&quot;context_pointer&quot;:</span> <span class="ruby-string">&quot;/bindings/0/claims/applicability&quot;</span>,
+  <span class="ruby-value">&quot;field&quot;:</span> <span class="ruby-string">&quot;applicability&quot;</span>,
+  <span class="ruby-value">&quot;state&quot;:</span> <span class="ruby-string">&quot;known&quot;</span>,
+  <span class="ruby-value">&quot;value&quot;:</span> <span class="ruby-string">&quot;applicable&quot;</span>,
+  <span class="ruby-value">&quot;provenance&quot;:</span> {
+    <span class="ruby-value">&quot;source_kind&quot;:</span> <span class="ruby-string">&quot;operator_claim&quot;</span>,
+    <span class="ruby-value">&quot;actor_id&quot;:</span> <span class="ruby-string">&quot;owner&quot;</span>,
+    <span class="ruby-value">&quot;asserted_at&quot;:</span> <span class="ruby-string">&quot;2026-11-17T00:00:00Z&quot;</span>,
+    <span class="ruby-value">&quot;valid_until&quot;:</span> <span class="ruby-string">&quot;2027-11-17T00:00:00Z&quot;</span>
+  },
+  <span class="ruby-value">&quot;freshness&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>
+}
+</pre>
+<a id="claim-6"></a>
+<h3 id="label-E7-94-B3-E5-91-8A-3A+-E6-A5-AD-E5-8B-99-E4-B8-8A-E3-81-AE-E9-87-8D-E8-A6-81-E6-80-A7">申告: 業務上の重要性<span><a href="#label-E7-94-B3-E5-91-8A-3A+-E6-A5-AD-E5-8B-99-E4-B8-8A-E3-81-AE-E9-87-8D-E8-A6-81-E6-80-A7">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>利用者の申告（未検証） · 申告期間内</p>
+
+<p>申告値: <code>false</code></p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_claim-v1-88ee3c5f8c8f8fd09a81ecfdc62f2a8c01ae71fb2b6d7121a8cf33fc8ff06865&quot;</span>,
+  <span class="ruby-value">&quot;context_pointer&quot;:</span> <span class="ruby-string">&quot;/bindings/1/claims/business_critical&quot;</span>,
+  <span class="ruby-value">&quot;field&quot;:</span> <span class="ruby-string">&quot;business_critical&quot;</span>,
+  <span class="ruby-value">&quot;state&quot;:</span> <span class="ruby-string">&quot;known&quot;</span>,
+  <span class="ruby-value">&quot;value&quot;:</span> <span class="ruby-keyword">false</span>,
+  <span class="ruby-value">&quot;provenance&quot;:</span> {
+    <span class="ruby-value">&quot;source_kind&quot;:</span> <span class="ruby-string">&quot;operator_claim&quot;</span>,
+    <span class="ruby-value">&quot;actor_id&quot;:</span> <span class="ruby-string">&quot;owner&quot;</span>,
+    <span class="ruby-value">&quot;asserted_at&quot;:</span> <span class="ruby-string">&quot;2026-11-17T00:00:00Z&quot;</span>,
+    <span class="ruby-value">&quot;valid_until&quot;:</span> <span class="ruby-string">&quot;2027-11-17T00:00:00Z&quot;</span>
+  },
+  <span class="ruby-value">&quot;freshness&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>
+}
+</pre>
+<a id="claim-7"></a>
+<h3 id="label-E7-94-B3-E5-91-8A-3A+-E5-BF-85-E8-A6-81-E3-81-AA-E7-94-A8-E9-80-94">申告: 必要な用途<span><a href="#label-E7-94-B3-E5-91-8A-3A+-E5-BF-85-E8-A6-81-E3-81-AA-E7-94-A8-E9-80-94">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>利用者の申告（未検証） · 申告期間内</p>
+
+<p>申告値: <code>&quot;signature&quot;</code></p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_claim-v1-95c3c16ae97b9c1d5149b80d3e883979db7ded5021a6244403f275eaa7f60517&quot;</span>,
+  <span class="ruby-value">&quot;context_pointer&quot;:</span> <span class="ruby-string">&quot;/bindings/0/claims/use_case&quot;</span>,
+  <span class="ruby-value">&quot;field&quot;:</span> <span class="ruby-string">&quot;use_case&quot;</span>,
+  <span class="ruby-value">&quot;state&quot;:</span> <span class="ruby-string">&quot;known&quot;</span>,
+  <span class="ruby-value">&quot;value&quot;:</span> <span class="ruby-string">&quot;signature&quot;</span>,
+  <span class="ruby-value">&quot;provenance&quot;:</span> {
+    <span class="ruby-value">&quot;source_kind&quot;:</span> <span class="ruby-string">&quot;operator_claim&quot;</span>,
+    <span class="ruby-value">&quot;actor_id&quot;:</span> <span class="ruby-string">&quot;owner&quot;</span>,
+    <span class="ruby-value">&quot;asserted_at&quot;:</span> <span class="ruby-string">&quot;2026-11-17T00:00:00Z&quot;</span>,
+    <span class="ruby-value">&quot;valid_until&quot;:</span> <span class="ruby-string">&quot;2027-11-17T00:00:00Z&quot;</span>
+  },
+  <span class="ruby-value">&quot;freshness&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>
+}
+</pre>
+<a id="claim-8"></a>
+<h3 id="label-E7-94-B3-E5-91-8A-3A+-E6-A5-AD-E5-8B-99-E4-B8-8A-E3-81-AE-E9-87-8D-E8-A6-81-E6-80-A7">申告: 業務上の重要性<span><a href="#label-E7-94-B3-E5-91-8A-3A+-E6-A5-AD-E5-8B-99-E4-B8-8A-E3-81-AE-E9-87-8D-E8-A6-81-E6-80-A7">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>利用者の申告（未検証） · 申告期間内</p>
+
+<p>申告値: <code>true</code></p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_claim-v1-c319572a55500ade79c402969f7db3bc3c70e3adccdb3edc12a450baa42ade5e&quot;</span>,
+  <span class="ruby-value">&quot;context_pointer&quot;:</span> <span class="ruby-string">&quot;/bindings/0/claims/business_critical&quot;</span>,
+  <span class="ruby-value">&quot;field&quot;:</span> <span class="ruby-string">&quot;business_critical&quot;</span>,
+  <span class="ruby-value">&quot;state&quot;:</span> <span class="ruby-string">&quot;known&quot;</span>,
+  <span class="ruby-value">&quot;value&quot;:</span> <span class="ruby-keyword">true</span>,
+  <span class="ruby-value">&quot;provenance&quot;:</span> {
+    <span class="ruby-value">&quot;source_kind&quot;:</span> <span class="ruby-string">&quot;operator_claim&quot;</span>,
+    <span class="ruby-value">&quot;actor_id&quot;:</span> <span class="ruby-string">&quot;owner&quot;</span>,
+    <span class="ruby-value">&quot;asserted_at&quot;:</span> <span class="ruby-string">&quot;2026-11-17T00:00:00Z&quot;</span>,
+    <span class="ruby-value">&quot;valid_until&quot;:</span> <span class="ruby-string">&quot;2027-11-17T00:00:00Z&quot;</span>
+  },
+  <span class="ruby-value">&quot;freshness&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>
+}
+</pre>
+<a id="claim-9"></a>
+<h3 id="label-E7-94-B3-E5-91-8A-3A+-E5-AF-BE-E8-B1-A1-E7-AF-84-E5-9B-B2-E3-81-AE-E6-9C-9F-E9-99-90">申告: 対象範囲の期限<span><a href="#label-E7-94-B3-E5-91-8A-3A+-E5-AF-BE-E8-B1-A1-E7-AF-84-E5-9B-B2-E3-81-AE-E6-9C-9F-E9-99-90">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>利用者の申告（未検証） · 申告期間内</p>
+
+<p>申告値: <code>{&quot;kind&quot;:&quot;none&quot;}</code></p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_claim-v1-ff62d040f2d7a2b163baabf5fbad9d4d5dda74e67fd3141fadce68e69b8d51a1&quot;</span>,
+  <span class="ruby-value">&quot;context_pointer&quot;:</span> <span class="ruby-string">&quot;/bindings/1/claims/deadline&quot;</span>,
+  <span class="ruby-value">&quot;field&quot;:</span> <span class="ruby-string">&quot;deadline&quot;</span>,
+  <span class="ruby-value">&quot;state&quot;:</span> <span class="ruby-string">&quot;known&quot;</span>,
+  <span class="ruby-value">&quot;value&quot;:</span> {
+    <span class="ruby-value">&quot;kind&quot;:</span> <span class="ruby-string">&quot;none&quot;</span>
+  },
+  <span class="ruby-value">&quot;provenance&quot;:</span> {
+    <span class="ruby-value">&quot;source_kind&quot;:</span> <span class="ruby-string">&quot;operator_claim&quot;</span>,
+    <span class="ruby-value">&quot;actor_id&quot;:</span> <span class="ruby-string">&quot;owner&quot;</span>,
+    <span class="ruby-value">&quot;asserted_at&quot;:</span> <span class="ruby-string">&quot;2026-11-17T00:00:00Z&quot;</span>,
+    <span class="ruby-value">&quot;valid_until&quot;:</span> <span class="ruby-string">&quot;2027-11-17T00:00:00Z&quot;</span>
+  },
+  <span class="ruby-value">&quot;freshness&quot;:</span> <span class="ruby-string">&quot;active&quot;</span>
+}
+</pre>
+
+<h2 id="label-E6-A4-9C-E8-A8-8E-E5-80-99-E8-A3-9C-E3-81-A8-E6-A4-9C-E8-A8-BC">検討候補と検証<span><a href="#label-E6-A4-9C-E8-A8-8E-E5-80-99-E8-A3-9C-E3-81-A8-E6-A4-9C-E8-A8-BC">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<a id="candidate-1"></a>
+<h3 id="label-ML-DSA"><code>ML-DSA</code><span><a href="#label-ML-DSA">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>出典: <a href="#source-6">S204</a>, <a href="#source-4">LOCAL026</a></p>
+<ul><li>
+<p>実行環境の対応: 不明</p>
+</li><li>
+<p>プロバイダーの対応: 不明</p>
+</li><li>
+<p>正確なパラメーターへの対応: 不明</p>
+</li><li>
+<p>接続相手の対応: 不明</p>
+</li><li>
+<p>プロトコルの対応: 不明</p>
+</li></ul>
+
+<p><strong>検証事項:</strong></p>
+<ul><li>
+<p>実際の利用状況と必要な暗号用途を確認してください。</p>
+</li><li>
+<p>展開前に正確なパラメーターとプロトコルの符号化を確認してください。</p>
+</li><li>
+<p>実行環境、プロバイダー、接続相手、展開手順を検証してください。</p>
+</li><li>
+<p>実装と相互運用性を別途検証してください。</p>
+</li></ul>
+
+<p>正確な候補の記録：</p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_candidate-v1-2c53efdcac9c0b8036d19728ed16dbdb6e0f96efa880ff53c3e1e8b6cb210881&quot;</span>,
+  <span class="ruby-value">&quot;target_id&quot;:</span> <span class="ruby-string">&quot;migration_target-v1-384b866a8a9b7b9727239252d160bad0bd6fda711b26fe088c952e2e0ceeaf7d&quot;</span>,
+  <span class="ruby-value">&quot;identifier&quot;:</span> <span class="ruby-string">&quot;ML-DSA&quot;</span>,
+  <span class="ruby-value">&quot;purpose&quot;:</span> <span class="ruby-string">&quot;signature&quot;</span>,
+  <span class="ruby-value">&quot;status&quot;:</span> <span class="ruby-string">&quot;candidate_primitive_integration_unverified&quot;</span>,
+  <span class="ruby-value">&quot;parameter_selection&quot;:</span> <span class="ruby-string">&quot;explicit_parameter_selection_required&quot;</span>,
+  <span class="ruby-value">&quot;prerequisites&quot;:</span> [
+    {
+      <span class="ruby-value">&quot;name&quot;:</span> <span class="ruby-string">&quot;runtime&quot;</span>,
+      <span class="ruby-value">&quot;claimed_support&quot;:</span> <span class="ruby-identifier">null</span>,
+      <span class="ruby-value">&quot;applied_claim_ids&quot;:</span> []
+    },
+    {
+      <span class="ruby-value">&quot;name&quot;:</span> <span class="ruby-string">&quot;provider&quot;</span>,
+      <span class="ruby-value">&quot;claimed_support&quot;:</span> <span class="ruby-identifier">null</span>,
+      <span class="ruby-value">&quot;applied_claim_ids&quot;:</span> []
+    },
+    {
+      <span class="ruby-value">&quot;name&quot;:</span> <span class="ruby-string">&quot;parameters&quot;</span>,
+      <span class="ruby-value">&quot;claimed_support&quot;:</span> <span class="ruby-identifier">null</span>,
+      <span class="ruby-value">&quot;applied_claim_ids&quot;:</span> []
+    },
+    {
+      <span class="ruby-value">&quot;name&quot;:</span> <span class="ruby-string">&quot;peer&quot;</span>,
+      <span class="ruby-value">&quot;claimed_support&quot;:</span> <span class="ruby-identifier">null</span>,
+      <span class="ruby-value">&quot;applied_claim_ids&quot;:</span> []
+    },
+    {
+      <span class="ruby-value">&quot;name&quot;:</span> <span class="ruby-string">&quot;protocol&quot;</span>,
+      <span class="ruby-value">&quot;claimed_support&quot;:</span> <span class="ruby-identifier">null</span>,
+      <span class="ruby-value">&quot;applied_claim_ids&quot;:</span> []
+    }
+  ],
+  <span class="ruby-value">&quot;validation_steps&quot;:</span> [
+    <span class="ruby-string">&quot;confirm_actual_use_and_required_purpose&quot;</span>,
+    <span class="ruby-string">&quot;verify_exact_parameters_and_protocol_encoding&quot;</span>,
+    <span class="ruby-string">&quot;test_runtime_provider_peer_and_rollout&quot;</span>,
+    <span class="ruby-string">&quot;validate_implementation_and_interoperability_separately&quot;</span>
+  ],
+  <span class="ruby-value">&quot;source_ids&quot;:</span> [
+    <span class="ruby-string">&quot;S204&quot;</span>,
+    <span class="ruby-string">&quot;LOCAL026&quot;</span>
+  ]
+}
+</pre>
+<a id="candidate-2"></a>
+<h3 id="label-ML-DSA"><code>ML-DSA</code><span><a href="#label-ML-DSA">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>出典: <a href="#source-6">S204</a>, <a href="#source-4">LOCAL026</a></p>
+<ul><li>
+<p>実行環境の対応: 不明</p>
+</li><li>
+<p>プロバイダーの対応: 不明</p>
+</li><li>
+<p>正確なパラメーターへの対応: 不明</p>
+</li><li>
+<p>接続相手の対応: 不明</p>
+</li><li>
+<p>プロトコルの対応: 不明</p>
+</li></ul>
+
+<p><strong>検証事項:</strong></p>
+<ul><li>
+<p>実際の利用状況と必要な暗号用途を確認してください。</p>
+</li><li>
+<p>展開前に正確なパラメーターとプロトコルの符号化を確認してください。</p>
+</li><li>
+<p>実行環境、プロバイダー、接続相手、展開手順を検証してください。</p>
+</li><li>
+<p>実装と相互運用性を別途検証してください。</p>
+</li></ul>
+
+<p>正確な候補の記録：</p>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration_candidate-v1-1797317ec15d8f16fe14ccea8a5cf1ac8f0c0d7e01e3c892b972394bbe5859b6&quot;</span>,
+  <span class="ruby-value">&quot;target_id&quot;:</span> <span class="ruby-string">&quot;migration_target-v1-ae577ba87f4660ddb0c2d95b7d14dea300b9050d2cc7e560c804421e854bf622&quot;</span>,
+  <span class="ruby-value">&quot;identifier&quot;:</span> <span class="ruby-string">&quot;ML-DSA&quot;</span>,
+  <span class="ruby-value">&quot;purpose&quot;:</span> <span class="ruby-string">&quot;signature&quot;</span>,
+  <span class="ruby-value">&quot;status&quot;:</span> <span class="ruby-string">&quot;candidate_primitive_integration_unverified&quot;</span>,
+  <span class="ruby-value">&quot;parameter_selection&quot;:</span> <span class="ruby-string">&quot;explicit_parameter_selection_required&quot;</span>,
+  <span class="ruby-value">&quot;prerequisites&quot;:</span> [
+    {
+      <span class="ruby-value">&quot;name&quot;:</span> <span class="ruby-string">&quot;runtime&quot;</span>,
+      <span class="ruby-value">&quot;claimed_support&quot;:</span> <span class="ruby-identifier">null</span>,
+      <span class="ruby-value">&quot;applied_claim_ids&quot;:</span> []
+    },
+    {
+      <span class="ruby-value">&quot;name&quot;:</span> <span class="ruby-string">&quot;provider&quot;</span>,
+      <span class="ruby-value">&quot;claimed_support&quot;:</span> <span class="ruby-identifier">null</span>,
+      <span class="ruby-value">&quot;applied_claim_ids&quot;:</span> []
+    },
+    {
+      <span class="ruby-value">&quot;name&quot;:</span> <span class="ruby-string">&quot;parameters&quot;</span>,
+      <span class="ruby-value">&quot;claimed_support&quot;:</span> <span class="ruby-identifier">null</span>,
+      <span class="ruby-value">&quot;applied_claim_ids&quot;:</span> []
+    },
+    {
+      <span class="ruby-value">&quot;name&quot;:</span> <span class="ruby-string">&quot;peer&quot;</span>,
+      <span class="ruby-value">&quot;claimed_support&quot;:</span> <span class="ruby-identifier">null</span>,
+      <span class="ruby-value">&quot;applied_claim_ids&quot;:</span> []
+    },
+    {
+      <span class="ruby-value">&quot;name&quot;:</span> <span class="ruby-string">&quot;protocol&quot;</span>,
+      <span class="ruby-value">&quot;claimed_support&quot;:</span> <span class="ruby-identifier">null</span>,
+      <span class="ruby-value">&quot;applied_claim_ids&quot;:</span> []
+    }
+  ],
+  <span class="ruby-value">&quot;validation_steps&quot;:</span> [
+    <span class="ruby-string">&quot;confirm_actual_use_and_required_purpose&quot;</span>,
+    <span class="ruby-string">&quot;verify_exact_parameters_and_protocol_encoding&quot;</span>,
+    <span class="ruby-string">&quot;test_runtime_provider_peer_and_rollout&quot;</span>,
+    <span class="ruby-string">&quot;validate_implementation_and_interoperability_separately&quot;</span>
+  ],
+  <span class="ruby-value">&quot;source_ids&quot;:</span> [
+    <span class="ruby-string">&quot;S204&quot;</span>,
+    <span class="ruby-string">&quot;LOCAL026&quot;</span>
+  ]
+}
+</pre>
+
+<h2 id="label-E5-87-BA-E5-85-B8-E3-81-AE-E7-89-88-E3-81-A8-E9-81-A9-E7-94-A8-E7-AF-84-E5-9B-B2">出典の版と適用範囲<span><a href="#label-E5-87-BA-E5-85-B8-E3-81-AE-E7-89-88-E3-81-A8-E9-81-A9-E7-94-A8-E7-AF-84-E5-9B-B2">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<a id="source-1"></a>
+<h3 id="label-F12"><code>F12</code><span><a href="#label-F12">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;F12&quot;</span>,
+  <span class="ruby-value">&quot;edition&quot;:</span> <span class="ruby-string">&quot;task066 adopted contract 2026-11-18&quot;</span>,
+  <span class="ruby-value">&quot;clause&quot;:</span> <span class="ruby-string">&quot;technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12&quot;</span>,
+  <span class="ruby-value">&quot;uri&quot;:</span> <span class="ruby-identifier">null</span>,
+  <span class="ruby-value">&quot;local_source_id&quot;:</span> <span class="ruby-string">&quot;docs/architecture/MIGRATION-ASSESSMENT-V1.md&quot;</span>,
+  <span class="ruby-value">&quot;scope_limit&quot;:</span> <span class="ruby-string">&quot;saved claims preserve assurance; digest does not attest collector truth&quot;</span>
+}
+</pre>
+<a id="source-2"></a>
+<h3 id="label-F13"><code>F13</code><span><a href="#label-F13">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;F13&quot;</span>,
+  <span class="ruby-value">&quot;edition&quot;:</span> <span class="ruby-string">&quot;task066 adopted time contract 2026-11-18&quot;</span>,
+  <span class="ruby-value">&quot;clause&quot;:</span> <span class="ruby-string">&quot;time and policy semantics; FACT-SOURCE-MAPPING F13&quot;</span>,
+  <span class="ruby-value">&quot;uri&quot;:</span> <span class="ruby-identifier">null</span>,
+  <span class="ruby-value">&quot;local_source_id&quot;:</span> <span class="ruby-string">&quot;docs/architecture/MIGRATION-ASSESSMENT-V1.md&quot;</span>,
+  <span class="ruby-value">&quot;scope_limit&quot;:</span> <span class="ruby-string">&quot;scoped declared lifetimes/deadlines; no quantum forecast or universal deadline&quot;</span>
+}
+</pre>
+<a id="source-3"></a>
+<h3 id="label-F14"><code>F14</code><span><a href="#label-F14">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;F14&quot;</span>,
+  <span class="ruby-value">&quot;edition&quot;:</span> <span class="ruby-string">&quot;migration-decision-v1 1.0.0; adopted 2026-11-18&quot;</span>,
+  <span class="ruby-value">&quot;clause&quot;:</span> <span class="ruby-string">&quot;P1-P8; readiness and action precedence&quot;</span>,
+  <span class="ruby-value">&quot;uri&quot;:</span> <span class="ruby-identifier">null</span>,
+  <span class="ruby-value">&quot;local_source_id&quot;:</span> <span class="ruby-string">&quot;docs/architecture/MIGRATION-ASSESSMENT-V1.md&quot;</span>,
+  <span class="ruby-value">&quot;scope_limit&quot;:</span> <span class="ruby-string">&quot;local advisory policy; conformance is not practitioner usefulness&quot;</span>
+}
+</pre>
+<a id="source-4"></a>
+<h3 id="label-LOCAL026"><code>LOCAL026</code><span><a href="#label-LOCAL026">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;LOCAL026&quot;</span>,
+  <span class="ruby-value">&quot;edition&quot;:</span> <span class="ruby-string">&quot;local-assessment-1&quot;</span>,
+  <span class="ruby-value">&quot;clause&quot;:</span> <span class="ruby-string">&quot;finite vocabulary and evidence limits&quot;</span>,
+  <span class="ruby-value">&quot;uri&quot;:</span> <span class="ruby-identifier">null</span>,
+  <span class="ruby-value">&quot;local_source_id&quot;:</span> <span class="ruby-string">&quot;docs/architecture/LOCAL-ASSESSMENT-V1.md&quot;</span>,
+  <span class="ruby-value">&quot;scope_limit&quot;:</span> <span class="ruby-string">&quot;advisory facts; no deployment or cryptographic verification&quot;</span>
+}
+</pre>
+<a id="source-5"></a>
+<h3 id="label-NIST-PQ-FAQ"><code>NIST-PQ-FAQ</code><span><a href="#label-NIST-PQ-FAQ">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;NIST-PQ-FAQ&quot;</span>,
+  <span class="ruby-value">&quot;edition&quot;:</span> <span class="ruby-string">&quot;task056 pinned FAQ snapshot&quot;</span>,
+  <span class="ruby-value">&quot;clause&quot;:</span> <span class="ruby-string">&quot;quantum public-key and generic-search models&quot;</span>,
+  <span class="ruby-value">&quot;uri&quot;:</span> <span class="ruby-string">&quot;https://csrc.nist.gov/projects/post-quantum-cryptography/faqs&quot;</span>,
+  <span class="ruby-value">&quot;local_source_id&quot;:</span> <span class="ruby-identifier">null</span>,
+  <span class="ruby-value">&quot;scope_limit&quot;:</span> <span class="ruby-string">&quot;not quantum arrival, probability or operational security bits&quot;</span>
+}
+</pre>
+<a id="source-6"></a>
+<h3 id="label-S204"><code>S204</code><span><a href="#label-S204">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;S204&quot;</span>,
+  <span class="ruby-value">&quot;edition&quot;:</span> <span class="ruby-string">&quot;FIPS204 Final 2024-08-13&quot;</span>,
+  <span class="ruby-value">&quot;clause&quot;:</span> <span class="ruby-string">&quot;1.1; 4 Table1&quot;</span>,
+  <span class="ruby-value">&quot;uri&quot;:</span> <span class="ruby-string">&quot;https://csrc.nist.gov/pubs/fips/204/final&quot;</span>,
+  <span class="ruby-value">&quot;local_source_id&quot;:</span> <span class="ruby-identifier">null</span>,
+  <span class="ruby-value">&quot;scope_limit&quot;:</span> <span class="ruby-string">&quot;pure signature names/purpose; no prehash equivalence&quot;</span>
+}
+</pre>
+
+<h2 id="label-E5-85-A5-E5-8A-9B-E3-83-BB-E7-89-88-E3-83-BB-E7-A2-BA-E8-AA-8D-E7-AF-84-E5-9B-B2-E3-81-AE-E5-88-B6-E7-B4-84">入力・版・確認範囲の制約<span><a href="#label-E5-85-A5-E5-8A-9B-E3-83-BB-E7-89-88-E3-83-BB-E7-A2-BA-E8-AA-8D-E7-AF-84-E5-9B-B2-E3-81-AE-E5-88-B6-E7-B4-84">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<pre class="ruby">{
+  <span class="ruby-value">&quot;format&quot;:</span> <span class="ruby-string">&quot;inventory-v1&quot;</span>,
+  <span class="ruby-value">&quot;sha256&quot;:</span> <span class="ruby-string">&quot;3fedf0e044766d249d6ed9632c1cd119c5c5f3a51ef8114466a1ebb10d70fcf5&quot;</span>,
+  <span class="ruby-value">&quot;schema_version&quot;:</span> <span class="ruby-value">1</span>,
+  <span class="ruby-value">&quot;collection_time&quot;:</span> <span class="ruby-string">&quot;2026-11-17T00:00:00Z&quot;</span>,
+  <span class="ruby-value">&quot;run_id&quot;:</span> <span class="ruby-string">&quot;scan-v1-a9ff06a933b8f9ebe359562fad7005b81895235c5435bb91a62562566eb479b7&quot;</span>
+}
+
+{
+  <span class="ruby-value">&quot;format&quot;:</span> <span class="ruby-string">&quot;pqc-scan.migration-context&quot;</span>,
+  <span class="ruby-value">&quot;version&quot;:</span> <span class="ruby-value">1</span>,
+  <span class="ruby-value">&quot;sha256&quot;:</span> <span class="ruby-string">&quot;5c19886cf84206871143d0b3792befe0587f087614cdaede11a921ef3debe137&quot;</span>
+}
+
+{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration-facts-v1&quot;</span>,
+  <span class="ruby-value">&quot;version&quot;:</span> <span class="ruby-string">&quot;1.0.0&quot;</span>
+}
+
+{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;migration-decision-v1&quot;</span>,
+  <span class="ruby-value">&quot;version&quot;:</span> <span class="ruby-string">&quot;1.0.0&quot;</span>
+}
+
+{
+  <span class="ruby-value">&quot;id&quot;:</span> <span class="ruby-string">&quot;decision_table&quot;</span>,
+  <span class="ruby-value">&quot;version&quot;:</span> <span class="ruby-string">&quot;1.0.0&quot;</span>
+}
+
+{
+  <span class="ruby-value">&quot;collection_outcome&quot;:</span> <span class="ruby-string">&quot;complete&quot;</span>,
+  <span class="ruby-value">&quot;input_count&quot;:</span> <span class="ruby-value">1</span>,
+  <span class="ruby-value">&quot;target_count&quot;:</span> <span class="ruby-value">2</span>,
+  <span class="ruby-value">&quot;unknown_identity_or_parameters_targets&quot;:</span> <span class="ruby-value">0</span>,
+  <span class="ruby-value">&quot;unresolved_target_count&quot;:</span> <span class="ruby-value">0</span>,
+  <span class="ruby-value">&quot;limits&quot;:</span> [
+    <span class="ruby-string">&quot;inventory_not_exhaustive&quot;</span>
+  ]
+}
+</pre>
+<ul><li>
+<p>棚卸しの結果だけでは、網羅的に確認したとは判断できません。</p>
+</li><li>
+<p>ダイジェストは保存内容の同一性を示し、収集者の真正性を証明しません。</p>
+</li><li>
+<p>オフライン評価では暗号学的な再検証を行いません。</p>
+</li><li>
+<p>このローカルな助言方針が実務に役立つかどうかは、まだ評価していません。</p>
+</li></ul>
+</main></body></html>

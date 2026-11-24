@@ -2,14 +2,19 @@ const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const {readFileSync} = require('node:fs');
 const {runInNewContext} = require('node:vm');
+const themeInit = readFileSync(require('node:path').join(__dirname,'../../crates/pqc_scan_report/src/theme-init.js'),'utf8');
 const source = readFileSync(require('node:path').join(__dirname,'../../crates/pqc_scan_report/src/presentation.js'),'utf8');
-function fixture({blocked=false, saved=null, query='', date='2026-11-18T00:30:00Z'}={}) {
+function fixture({blocked=false, saved=null, query='', date='2026-11-18T00:30:00Z', scope=null}={}) {
   const input=()=>({value:'',listeners:{},addEventListener(t,f){this.listeners[t]=f;}});
   const language=input(),theme=input();
-  const document={documentElement:{dataset:{},lang:'ja'},title:'',dispatchEvent(e){this.events.push(e);},events:[]};
+  const document={documentElement:{dataset:{theme:'light'},lang:'ja'},title:'',dispatchEvent(e){this.events.push(e);},events:[]};
   const settings={hidden:true,querySelector(s){return s==='[data-language]'?language:theme;}};
   const view=lang=>({lang,time:{dateTime:date,textContent:'HOST +09:00'},details:[{id:'finding-20',open:lang==='ja'},{id:'inspection-scope',open:lang==='ja'},{id:'shared-group-0',open:lang==='ja'}],events:[],
-    querySelector(){return {textContent:lang==='ja'?'日本語レポート':'English report'};},
+    querySelector(selector){
+      if(selector==='h1')return {textContent:lang==='ja'?'日本語レポート':'English report'};
+      if(selector==='.report-scope')return scope ? {textContent:scope} : null;
+      throw Error('Unexpected view selector: '+selector);
+    },
     querySelectorAll(s){return s==='[data-local-time]'?[this.time]:this.details;},
     dispatchEvent(e){this.events.push(e);if(e.type==='pqc-report-capture')Object.assign(e.detail,{page:2,fields:{'data-file-filter':'src/a.py'}});},
     replaceWith(next){document.active=next;}});
@@ -19,8 +24,13 @@ function fixture({blocked=false, saved=null, query='', date='2026-11-18T00:30:00
   const writes=[];
   const localStorage={getItem(){if(blocked)throw Error('blocked');return saved;},setItem(k,v){if(blocked)throw Error('blocked');writes.push([k,v]);}};
   class CustomEvent {constructor(type,{detail}){this.type=type;this.detail=detail;}}
-  runInNewContext(source,{document,localStorage,CustomEvent,Intl,Date,URLSearchParams,location:{search:query}});
-  return {document,settings,language,theme,ja,en,alternate,writes,
+  const location={href:'http://127.0.0.1/report.html'+query,search:query};
+  const history={replaceState(_state,_title,url){const next=new URL(url);location.href=next.href;location.search=next.search;}};
+  const context={document,localStorage,CustomEvent,Intl,Date,URL,URLSearchParams,location,history};
+  // The generated HTML runs theme-init before styles and presentation afterwards.
+  runInNewContext(themeInit,context);
+  runInNewContext(source,context);
+  return {document,settings,language,theme,ja,en,alternate,writes,location,
     changeLanguage(value){language.value=value;language.listeners.change();},
     changeTheme(value){theme.value=value;theme.listeners.change();}};
 }
@@ -55,4 +65,14 @@ test('explicit theme persists, invalid theme defaults light, blocked storage sta
  assert.deepEqual(f.writes,[['pqc-scan-theme','light']]);
  const blocked=fixture({blocked:true});blocked.changeTheme('dark');assert.equal(blocked.document.documentElement.dataset.theme,'dark');assert.equal(blocked.settings.hidden,false);
  assert.equal(fixture({saved:'unknown'}).document.documentElement.dataset.theme,'light');
+});
+
+test('scope appears once in the title and URL theme/language survive language changes',()=>{
+ const f=fixture({scope:'Payments',query:'?theme=dark&lang=en',saved:'light'});
+ assert.equal(f.document.title,'Payments | English report');
+ assert.equal(f.theme.value,'dark');
+ f.changeLanguage('ja');
+ assert.equal(f.document.title,'Payments | 日本語レポート');
+ const url=new URL(f.location.href);assert.equal(url.searchParams.get('theme'),'dark');assert.equal(url.searchParams.get('lang'),'ja');
+ assert.equal(fixture().document.title,'日本語レポート');
 });

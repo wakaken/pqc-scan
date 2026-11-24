@@ -1,0 +1,108 @@
+{
+  "recorded_at": "2026-11-18T14:17:28.879574+00:00",
+  "commands": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "--",
+        "tasks/071",
+        "tasks/072"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ruby",
+        "-rpsych",
+        "-rjson",
+        "-e",
+        "puts JSON.generate(ARGV.to_h { |x| [x, Psych.safe_load(File.read(\"tasks/#{x}/task.yaml\"))[\"status\"]] })",
+        "071",
+        "072",
+        "073",
+        "074",
+        "075"
+      ],
+      "exit": 0,
+      "stdout": "{\"071\":\"blocked\",\"072\":\"pending\",\"073\":\"done\",\"074\":\"done\",\"075\":\"in-progress\"}\n",
+      "stderr": ""
+    }
+  ],
+  "checks": [
+    {
+      "check": "Python syntax run_cli_observation.py",
+      "exit": 0
+    },
+    {
+      "check": "Python syntax verify_observations.py",
+      "exit": 0
+    },
+    {
+      "check": "Frozen protocol unchanged",
+      "exit": 0
+    },
+    {
+      "check": "Affected local documentation links",
+      "files": [
+        "README.md",
+        "README.ja.md",
+        "docs/user/SAVED-EVIDENCE.md",
+        "docs/user/SAVED-EVIDENCE.ja.md",
+        "docs/user/SCANNING.md",
+        "docs/user/SCANNING.ja.md",
+        "docs/architecture.md",
+        "docs/architecture/SCOPED-MIGRATION-CONTEXT.md",
+        "docs/roadmap/v0.4/TASKS.md",
+        "tasks/073/TASK-073-PLAN.md",
+        "tasks/074/TASK-074-PLAN.md",
+        "tasks/075/TASK-075-RECONCILIATION.md"
+      ],
+      "exit": 0
+    },
+    {
+      "check": "All6 raw times/errors/retries/initial artifact hashes equal summary",
+      "exit": 0
+    },
+    {
+      "check": "Exactly39 original/added rows, no missing/duplicate/extra row; final acceptance false",
+      "exit": 0
+    },
+    {
+      "check": "All283 product/build/test inputs still match final source",
+      "exit": 0
+    }
+  ],
+  "negative_consistency_controls": [
+    {
+      "mutation": "missing",
+      "rejected": true
+    },
+    {
+      "mutation": "duplicate",
+      "rejected": true
+    },
+    {
+      "mutation": "denominator",
+      "rejected": true
+    },
+    {
+      "mutation": "time",
+      "rejected": true
+    }
+  ],
+  "broad_reuse": "No product changes during075;074 final broad/feature/clippy/Node/browser and scoped transport checks apply, not newly rerun."
+}

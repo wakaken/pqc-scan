@@ -195,3 +195,25 @@
   pattern: "(?i)pkg:gem/[^\\s]*jwt"
   scope: dependency
   description: Ruby JWT dependency detected.
+
+- id: API_RUBY_OPENSSL_CIPHER
+  kind: tree_sitter
+  category: CryptoAPI
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.55
+  migration_hint: Review the referenced cipher candidates and actual runtime configuration; this is not proof of active encryption or completed migration.
+  pattern: 'OpenSSL::Cipher\.new'
+  scope: ruby
+  description: Ruby OpenSSL cipher construction with bounded same-class candidate references; runtime overrides remain unknown.
+
+- id: API_RUST_OPENSSL_TLS
+  kind: tree_sitter
+  category: CryptoAPI
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.55
+  migration_hint: Verify effective TLS versions, groups and peer support; construction alone does not establish negotiated algorithms or PQC readiness.
+  pattern: '(?:SslConnector|SslAcceptor|SslContext|SslMethod)::(?:builder|new|mozilla_intermediate|mozilla_modern|tls|tls_client|tls_server)'
+  scope: rust
+  description: Rust OpenSSL TLS construction reference; negotiated algorithms remain unknown.

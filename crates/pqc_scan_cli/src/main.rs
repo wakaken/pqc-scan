@@ -14,7 +14,10 @@ use pqc_scan_report::{
     write_inventory_json, ReportFormat, ReportLanguage,
 };
 use pqc_scan_rules::{RuleSet, Severity};
+mod assess_command;
+mod context_command;
 mod diff_command;
+mod file_limits;
 #[cfg(any(
     feature = "probe-tls",
     feature = "probe-ssh",
@@ -39,6 +42,10 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    /// Reassess explicitly selected saved evidence offline, with scoped claims.
+    Assess(assess_command::AssessArgs),
+    /// List saved-evidence targets or generate explicitly scoped migration context.
+    ContextTemplate(context_command::ContextArgs),
     #[cfg(any(
         feature = "probe-tls",
         feature = "probe-ssh",
@@ -101,9 +108,17 @@ struct ScanArgs {
     #[arg(long, default_value_t = 0usize)]
     threads: usize,
 
+    /// Maximum size of each selected file in MiB (1..64); detector work limits remain.
+    #[arg(long, default_value_t = file_limits::DEFAULT_MIB, value_parser = file_limits::parse_mib)]
+    max_file_size_mib: usize,
+
     /// Include known media, archives and binary data normally excluded before inspection.
     #[arg(long)]
     include_non_scannable: bool,
+
+    /// Exclude files under conventional test directories or with test filenames.
+    #[arg(long)]
+    exclude_tests: bool,
 
     /// Write inspection coverage and safe failure reasons to diagnostics.json.
     #[arg(long)]
@@ -271,6 +286,14 @@ fn run_cli<WOut: Write, WErr: Write>(
     stderr: &mut WErr,
 ) -> Result<ExitStatus> {
     match cli.command {
+        Commands::Assess(args) => {
+            assess_command::run(args, stdout)?;
+            Ok(ExitStatus::Success)
+        }
+        Commands::ContextTemplate(args) => {
+            context_command::run(args, stdout)?;
+            Ok(ExitStatus::Success)
+        }
         #[cfg(any(
             feature = "probe-tls",
             feature = "probe-ssh",
@@ -316,6 +339,15 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     stdout: &mut WOut,
     stderr: &mut WErr,
 ) -> Result<ExitStatus> {
+    scan_cmd_with_progress(args, stdout, stderr, None)
+}
+
+fn scan_cmd_with_progress<WOut: Write, WErr: Write>(
+    args: ScanArgs,
+    stdout: &mut WOut,
+    stderr: &mut WErr,
+    observer: Option<&(dyn Fn(pipeline::ScanProgress) + Sync)>,
+) -> Result<ExitStatus> {
     let assessment_context = if let Some(path) = &args.assessment_context {
         let file = std::fs::File::open(path)
             .map_err(|_| anyhow::anyhow!("failed to read assessment context"))?;
@@ -338,7 +370,7 @@ fn scan_cmd<WOut: Write, WErr: Write>(
 
     let config = ScanConfig {
         root: args.path,
-        max_file_size_bytes: 2 * 1024 * 1024,
+        max_file_size_bytes: file_limits::bytes(args.max_file_size_mib)?,
         threads: args.threads,
     };
 
@@ -348,14 +380,18 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     } else {
         None
     };
-    let document = pipeline::scan_repository_with_selection(
+    let document = pipeline::scan_repository_with_scope(
         &config,
         &rules,
         &detectors,
-        pqc_scan_core::FileSelection {
-            include_non_scannable: args.include_non_scannable,
+        pqc_scan_core::ScanSelection {
+            files: pqc_scan_core::FileSelection {
+                include_non_scannable: args.include_non_scannable,
+            },
+            exclude_tests: args.exclude_tests,
         },
         native_options.as_ref(),
+        observer,
     )?;
     let assessment = if let Some(profile) = &args.policy_profile {
         Some(pqc_scan_core::policy::evaluate(
@@ -370,6 +406,9 @@ fn scan_cmd<WOut: Write, WErr: Write>(
     };
     let result = document.legacy();
 
+    if let Some(observer) = observer {
+        observer(pipeline::ScanProgress::WritingReports);
+    }
     let mut outputs = write_document_reports(
         &document,
         assessment.as_ref(),

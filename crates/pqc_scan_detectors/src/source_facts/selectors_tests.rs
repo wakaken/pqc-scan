@@ -48,6 +48,43 @@ fn count(facts: &Facts, id: &str) -> usize {
     facts.hits.get(id).map_or(0, Vec::len)
 }
 #[test]
+fn jwt_option_analysis_charges_argument_bytes_and_keeps_truncation_visible() {
+    let rules = RuleSet::load_from_dir(
+        &std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules/default"),
+    )
+    .unwrap();
+    let text = format!(
+        "import * as jwt from 'jsonwebtoken'; jwt.sign({{data:'{}'}}, key, {{algorithm:'RS256'}});",
+        "x".repeat(1024)
+    );
+    let mut parser = tree_sitter::Parser::new();
+    parser
+        .set_language(&tree_sitter_javascript::LANGUAGE.into())
+        .unwrap();
+    let tree = parser.parse(&text, None).unwrap();
+    let full = super::inspect(
+        tree.root_node(),
+        &text,
+        "javascript",
+        &rules,
+        crate::DetectorBudget::default(),
+    );
+    assert_eq!(count(&full, "TS_NODE_JOSE_USAGE"), 1);
+    assert!(!full.truncated);
+    let limited = super::inspect(
+        tree.root_node(),
+        &text,
+        "javascript",
+        &rules,
+        crate::DetectorBudget {
+            max_ast_match_bytes: 256,
+            ..Default::default()
+        },
+    );
+    assert!(limited.truncated);
+    assert_eq!(count(&limited, "TS_NODE_JOSE_USAGE"), 0);
+}
+#[test]
 fn node_alias_and_literal_loop_follow_the_supplied_selector() {
     // This hypothetical name deliberately appears only in the test YAML.
     let pattern = r#"\bgenerateKeyPairSync\(\s*['"]future-kem['"]"#;
@@ -82,4 +119,40 @@ fn quoting_and_partial_algorithm_names_do_not_forge_a_selected_argument() {
             0
         );
     }
+}
+
+#[test]
+fn rust_tls_only_selection_does_not_consume_disabled_pqc_candidate_budget() {
+    let rules = RuleSet::load_from_dir(
+        &std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules/default"),
+    )
+    .unwrap();
+    let root = std::env::temp_dir().join(format!("pqc-tls-budget-{}", std::process::id()));
+    std::fs::create_dir_all(&root).unwrap();
+    std::fs::write(
+        root.join("tls.yml"),
+        serde_json::to_vec(&vec![rules.get("API_RUST_OPENSSL_TLS").unwrap()]).unwrap(),
+    )
+    .unwrap();
+    let rules = RuleSet::load_from_dir(&root).unwrap();
+    let text = "use ml_kem::MlKem768; fn setup() { openssl::ssl::SslMethod::tls(); }";
+    let mut parser = tree_sitter::Parser::new();
+    parser
+        .set_language(&tree_sitter_rust::LANGUAGE.into())
+        .unwrap();
+    let tree = parser.parse(text, None).unwrap();
+    let facts = super::inspect(
+        tree.root_node(),
+        text,
+        "rust",
+        &rules,
+        crate::DetectorBudget {
+            max_ast_candidates: 1,
+            ..Default::default()
+        },
+    );
+    assert!(!facts.truncated);
+    assert_eq!(count(&facts, "API_RUST_OPENSSL_TLS"), 1);
+    assert_eq!(count(&facts, "PQC_RUST_API"), 0);
+    std::fs::remove_dir_all(root).unwrap();
 }

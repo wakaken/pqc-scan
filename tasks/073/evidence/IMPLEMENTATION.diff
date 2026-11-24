@@ -1,0 +1,1056 @@
+diff --git a/crates/pqc_scan_cli/src/main.rs b/crates/pqc_scan_cli/src/main.rs
+index 07b0b55..156fa70 100644
+--- a/crates/pqc_scan_cli/src/main.rs
++++ b/crates/pqc_scan_cli/src/main.rs
+@@ -15,6 +15,7 @@ use pqc_scan_report::{
+ };
+ use pqc_scan_rules::{RuleSet, Severity};
+ mod assess_command;
++mod context_command;
+ mod diff_command;
+ #[cfg(any(
+     feature = "probe-tls",
+@@ -42,6 +43,8 @@ struct Cli {
+ enum Commands {
+     /// Reassess explicitly selected saved evidence offline, with scoped claims.
+     Assess(assess_command::AssessArgs),
++    /// List saved-evidence targets or generate explicitly scoped migration context.
++    ContextTemplate(context_command::ContextArgs),
+     #[cfg(any(
+         feature = "probe-tls",
+         feature = "probe-ssh",
+@@ -278,6 +281,10 @@ fn run_cli<WOut: Write, WErr: Write>(
+             assess_command::run(args, stdout)?;
+             Ok(ExitStatus::Success)
+         }
++        Commands::ContextTemplate(args) => {
++            context_command::run(args, stdout)?;
++            Ok(ExitStatus::Success)
++        }
+         #[cfg(any(
+             feature = "probe-tls",
+             feature = "probe-ssh",
+diff --git a/crates/pqc_scan_core/src/migration/context.rs b/crates/pqc_scan_core/src/migration/context.rs
+index b26737f..5746d0f 100644
+--- a/crates/pqc_scan_core/src/migration/context.rs
++++ b/crates/pqc_scan_core/src/migration/context.rs
+@@ -11,6 +11,8 @@ use std::{
+ 
+ const LIMIT: usize = 1024 * 1024;
+ const FORMAT: &str = "pqc-scan.migration-context";
++#[path = "generation.rs"]
++pub mod generation;
+ pub(crate) const SUPPORT_NAMES: [&str; 8] = [
+     "runtime",
+     "provider",
+@@ -170,7 +172,7 @@ pub struct ContextReference {
+     #[serde(skip_serializing_if = "Option::is_none")]
+     pub https_uri: Option<String>,
+ }
+-#[derive(Debug, Deserialize)]
++#[derive(Debug, Serialize, Deserialize)]
+ #[serde(deny_unknown_fields)]
+ struct Input {
+     format: String,
+diff --git a/crates/pqc_scan_core/src/migration/mod.rs b/crates/pqc_scan_core/src/migration/mod.rs
+index bc583df..7ac1b38 100644
+--- a/crates/pqc_scan_core/src/migration/mod.rs
++++ b/crates/pqc_scan_core/src/migration/mod.rs
+@@ -11,9 +11,10 @@ use serde::{Deserialize, Serialize};
+ use serde_json::Value;
+ use std::{fs::File, path::Path, str::FromStr};
+ 
++pub use context::generation::{generate_context, ClaimAnswer, ContextClaims, ContextSelection};
+ pub use context::{
+-    parse_as_of, BoundContext, ClaimFreshness, ContextReference, MigrationContext, ResolvedClaim,
+-    TargetContext,
++    parse_as_of, BoundContext, ClaimFreshness, ContextReference, MigrationContext, Provenance,
++    ResolvedClaim, TargetContext,
+ };
+ pub use decision::{
+     evaluate, evaluate_with_versions, Action, ActionKind, Candidate, ContextDescriptor, Coverage,
+@@ -173,6 +174,11 @@ pub struct Target {
+     #[serde(skip)]
+     pub(crate) bindable: bool,
+ }
++impl Target {
++    pub fn is_bindable(&self) -> bool {
++        self.bindable
++    }
++}
+ 
+ /// Validated projection; callers cannot substitute input identity or targets.
+ /// Hashes bind saved bytes, not collector authenticity or business identity.
+diff --git a/docs/architecture/SCOPED-MIGRATION-CONTEXT.md b/docs/architecture/SCOPED-MIGRATION-CONTEXT.md
+index 84f08b0..419a82f 100644
+--- a/docs/architecture/SCOPED-MIGRATION-CONTEXT.md
++++ b/docs/architecture/SCOPED-MIGRATION-CONTEXT.md
+@@ -43,3 +43,12 @@ ownership and conflicts. This is not a business-priority evaluator or proof that
+ an operator mapped the real system correctly. Task069 consumes it for pure policy
+ and saved-evidence reassessment; task070 renders those results. Existing policy,
+ rules, native IDs/schemas and scan-wide context semantics are untouched.
++
++
++Task073 adds a shared typed generator and canonical complete export, using the same
++ClaimSet/Provenance validator and final context parser/bind. Explicit target indices
++resolve only within the held SavedEvidence; duplicate/ambiguous/unselected targets
++never receive implicit claims. Aggregate cloning is bounded before serialization;
++canonical output omits absent Option fields rather than emitting forbidden null.
++No storage schema, inheritance/evaluator, existing reader or default scan behavior
++changes. The concrete opt-in CLI D4 supplement is in task073's plan.
+diff --git a/docs/user/SAVED-EVIDENCE.ja.md b/docs/user/SAVED-EVIDENCE.ja.md
+index 0c8610a..48c3a72 100644
+--- a/docs/user/SAVED-EVIDENCE.ja.md
++++ b/docs/user/SAVED-EVIDENCE.ja.md
+@@ -81,3 +81,39 @@ HTMLの初期言語とMarkdownの言語を指定します。JSON、ID、事実
+ 拒否します。既存の安全な出力処理を使い、ファイル単位で置き換えます。
+ 入力の実行、参照先の取得、ソースの再スキャン、接続先への通信は行いません。
+ 実験的なプローブ機能を有効にしたビルドでも同じです。
++
++## 対象IDを転記せずに設定を作る
++
++非対話の`context-template`コマンドで、対象の番号・方式・役割・位置を確認します。
++
++```console
++pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 --list-targets
++pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 \
++  --target 1 --out migration-context.json --as-of 2026-11-18T00:00:00Z \
++  --set 'use_case="signature"' --set 'usage_state="active"' \
++  --set 'business_critical=false' --unknown confidential \
++  --actor owner --asserted-at 2026-11-17T00:00:00Z
++```
++
++対応付ける番号だけを選びます。複数をまとめて扱う場合は`--target`を繰り返します。
++ハッシュと対象IDはコマンドが設定します。対象を選ばなければ、対応付けのない有効な
++ひな形を作り、申告の指定は拒否します。全対象への自動適用は行いません。
++曖昧な対象、重複、不正な番号は拒否します。別名は既定の`organization`と`system-1`を
++使えるので、会社や部署の入力は不要です。変更には`--organization`と`--system`を使います。
++番号はその保存済みファイルに対する指定です。入力を変えたら一覧を確認し直してください。
++別の内容に結び付いた既存の設定は拒否します。
++
++`--set 項目=JSON値`には既存の項目名を指定します。対応状況は`support.peer`などです。
++文字列はJSONの引用符で囲み、真偽値や秒数にはJSONの型を使います。
++`--unknown 項目`は不明という回答、省略は未回答として扱います。
++回答には申告者と申告日時が必要です。`--valid-until`は任意で、自動では補いません。
++期限がなければ、既存の規則に従って有効性は不明になります。資料を根拠とする期限や
++継承を使う詳細な設定は、既存形式の文書で指定してください。簡易入力から資料の参照を
++捏造しません。個人利用でも重要度の意味は変わりません。生成した設定は`assess`で使います。
++
++既存の安全な出力処理と1MiBの上限を適用します。入力と同じ名前・ハードリンク、
++リンク先への出力、不正な値・由来、上限超過は置換前に拒否します。
++ライブラリの`generate_context`、`ContextSelection`、`ContextClaims`、`ClaimAnswer`も
++同じ読み込み・対応付け規則を使います。`MigrationContext::to_bytes`は、日時を正規化し、
++対応する全項目・申告・資料参照を保持して出力します。従来のContext v1とは別で、
++既定のスキャン動作は変わりません。
+diff --git a/docs/user/SAVED-EVIDENCE.md b/docs/user/SAVED-EVIDENCE.md
+index 35a2404..0b05607 100644
+--- a/docs/user/SAVED-EVIDENCE.md
++++ b/docs/user/SAVED-EVIDENCE.md
+@@ -143,3 +143,40 @@ using the existing safe output boundary; oversized reports reject without
+ truncation. Existing files are atomically replaced individually. The command
+ never executes input, fetches references, rescans source or contacts endpoints,
+ including builds with experimental probe features enabled.
++
++## Generate context without copying target IDs
++
++The explicit noninteractive `context-template` command lists readable target numbers:
++
++```console
++pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 --list-targets
++pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 \
++  --target 1 --out migration-context.json --as-of 2026-11-18T00:00:00Z \
++  --set 'use_case="signature"' --set 'usage_state="active"' \
++  --set 'business_critical=false' --unknown confidential \
++  --actor owner --asserted-at 2026-11-17T00:00:00Z
++```
++
++Select only the displayed numbers you intend to bind; repeat `--target` for an
++explicit group. The command calculates the exact input hash/IDs. Without selected
++targets it writes a valid unbound template and refuses claims. It never selects all
++targets implicitly. Ambiguous targets, duplicates and invalid numbers reject.
++Default aliases `organization` and `system-1` need no company or department;
++`--organization`/`--system` customize them. Numbers apply to this exact saved file;
++review the list again if it changes. Existing context bound to other bytes rejects.
++
++`--set FIELD=JSON_VALUE` uses adopted field names, with `support.peer` and other
++support names for prerequisites. String values require JSON quotes; booleans and
++seconds use JSON types. `--unknown FIELD` explicitly records uncertainty; omission
++leaves no answer. Answers require an actor and assertion instant; optional
++`--valid-until` is never generated. Without expiry the existing freshness rules
++remain unknown. Reference-backed deadlines and advanced inheritance can be authored
++in the adopted context document; the simple answer builder does not invent references.
++No personal-use shortcut changes criticality. Use the generated file with `assess`.
++
++Output uses the existing safe writer and1MiB context limit. Input aliases, hardlinks,
++linked destinations, bad values/provenance and oversized output reject before
++replacement. The shared library `generate_context`, `ContextSelection`, `ContextClaims`
++and `ClaimAnswer` use the same reader/binding rules; `MigrationContext::to_bytes`
++exports all supported fields with normalized times, preserving claims and references.
++This is separate from legacy Context v1 and does not change existing scan defaults.
+diff --git a/tasks/073/task.yaml b/tasks/073/task.yaml
+index d54df07..e15fb8b 100644
+--- a/tasks/073/task.yaml
++++ b/tasks/073/task.yaml
+@@ -2,7 +2,7 @@ id: '073'
+ title: Generate scoped migration context through shared helpers and templates
+ type: improvement
+ priority: high
+-status: pending
++status: in-progress
+ owner: Main agent
+ plan_reference: docs/roadmap/v0.4/ROADMAP.md
+ requirements_reference: docs/roadmap/v0.4/REQUIREMENTS.md
+@@ -68,3 +68,12 @@ planning_record:
+   supporting_requirements: []
+   completion_evidence: Original criteria, applicable tests, final-source evidence and required reviews
+     must all be complete; completed historical tasks remain unchanged.
++
++execution_record:
++  selected_on: '2026-11-18'
++  source_head: c1f8a4bc5478eefb2b1babb6b2aa86295f9c8d34
++  plan: tasks/073/TASK-073-PLAN.md
++  lifecycle:
++  - 'pending -> planned: main-agent plan and concrete D4 supplement recorded against U01/U02.'
++  - 'planned -> in-progress: implement shared typed generation and explicit CLI; no schema or policy change.'
++  reviewer_continuity: Reuse /root/v04_implementation_review and /root/v04_test_review.
+diff --git a/crates/pqc_scan_cli/src/context_command.rs b/crates/pqc_scan_cli/src/context_command.rs
+new file mode 100644
+index 0000000..10b97bf
+--- /dev/null
++++ b/crates/pqc_scan_cli/src/context_command.rs
+@@ -0,0 +1,141 @@
++use clap::Args;
++use pqc_scan_core::migration::{
++    generate_context, ClaimAnswer, ContextClaims, ContextSelection, Error, InputFormat, Provenance,
++    SavedEvidence,
++};
++use std::{io::Write, path::PathBuf};
++
++#[derive(Debug, Args)]
++pub(crate) struct ContextArgs {
++    input: PathBuf,
++    #[arg(long)]
++    input_format: String,
++    /// Show one-based target numbers, roles and locations without writing context.
++    #[arg(long)]
++    list_targets: bool,
++    /// Select a displayed target number. Repeat for an explicitly reviewed group.
++    #[arg(long)]
++    target: Vec<usize>,
++    #[arg(long)]
++    out: Option<PathBuf>,
++    #[arg(long)]
++    as_of: Option<String>,
++    #[arg(long, default_value = "organization")]
++    organization: String,
++    #[arg(long, default_value = "system-1")]
++    system: String,
++    /// Known claim as FIELD=JSON_VALUE; strings require JSON quotes.
++    #[arg(long = "set")]
++    values: Vec<String>,
++    /// Explicit unknown claim field; omitted fields are not answered.
++    #[arg(long)]
++    unknown: Vec<String>,
++    #[arg(long)]
++    actor: Option<String>,
++    #[arg(long)]
++    asserted_at: Option<String>,
++    #[arg(long)]
++    valid_until: Option<String>,
++}
++
++pub(crate) fn run(args: ContextArgs, stdout: &mut impl Write) -> anyhow::Result<()> {
++    let evidence = SavedEvidence::read(&args.input, args.input_format.parse::<InputFormat>()?)?;
++    if args.list_targets {
++        if args.out.is_some()
++            || !args.target.is_empty()
++            || !args.values.is_empty()
++            || !args.unknown.is_empty()
++        {
++            return Err(Error::InvalidInput.into());
++        }
++        for (i, target) in evidence.targets().iter().enumerate() {
++            let location = target
++                .source_ref
++                .path
++                .as_deref()
++                .or(target.source_ref.detail_path.as_deref())
++                .unwrap_or("(saved record)");
++            writeln!(
++                stdout,
++                "{}\t{}\t{}\t{}{}\t{}",
++                i + 1,
++                target.technical.algorithm.identifier,
++                target.source_ref.role,
++                serde_json::to_string(location)?,
++                target
++                    .source_ref
++                    .line
++                    .map(|n| format!(":{n}"))
++                    .unwrap_or_default(),
++                if target.is_bindable() {
++                    "selectable"
++                } else {
++                    "ambiguous; cannot bind"
++                }
++            )?;
++        }
++        return Ok(());
++    }
++    let out = args.out.ok_or(Error::InvalidInput)?;
++    let as_of = args.as_of.ok_or(Error::InvalidTime)?;
++    let mut answers = Vec::new();
++    for value in &args.values {
++        if value.len() > 1024 * 1024 {
++            return Err(Error::ResourceLimit.into());
++        }
++        let (field, value) = value.split_once('=').ok_or(Error::InvalidInput)?;
++        answers.push(ClaimAnswer {
++            field: field.to_owned(),
++            value: Some(serde_json::from_str(value).map_err(|_| Error::InvalidInput)?),
++        });
++    }
++    answers.extend(
++        args.unknown
++            .into_iter()
++            .map(|field| ClaimAnswer { field, value: None }),
++    );
++    let claims = if answers.is_empty() {
++        if args.actor.is_some() || args.asserted_at.is_some() || args.valid_until.is_some() {
++            return Err(Error::InvalidInput.into());
++        }
++        ContextClaims::default()
++    } else {
++        if args.target.is_empty() {
++            return Err(Error::InvalidContextBinding.into());
++        }
++        ContextClaims::from_answers(
++            &answers,
++            Provenance::operator(
++                args.actor.as_deref().ok_or(Error::InvalidInput)?,
++                args.asserted_at.as_deref().ok_or(Error::InvalidTime)?,
++                args.valid_until.as_deref(),
++            )?,
++        )?
++    };
++    let selections = args
++        .target
++        .into_iter()
++        .map(|n| {
++            Ok(ContextSelection {
++                target_index: n.checked_sub(1).ok_or(Error::InvalidReference)?,
++                system_id: args.system.clone(),
++                claims: claims.clone(),
++            })
++        })
++        .collect::<pqc_scan_core::migration::Result<Vec<_>>>()?;
++    let bytes = generate_context(&evidence, &args.organization, &selections, &as_of)?;
++    evidence.validate_output_paths(None, std::slice::from_ref(&out))?;
++    pqc_scan_core::safe_output::create_dir_all(
++        out.parent()
++            .filter(|p| !p.as_os_str().is_empty())
++            .unwrap_or(std::path::Path::new(".")),
++    )
++    .map_err(|_| Error::UnsafeOutput)?;
++    pqc_scan_core::safe_output::write(&out, bytes).map_err(|_| Error::UnsafeOutput)?;
++    writeln!(
++        stdout,
++        "written migration-context v1; {} explicitly selected targets",
++        selections.len()
++    )?;
++    Ok(())
++}
+diff --git a/crates/pqc_scan_cli/tests/context_template.rs b/crates/pqc_scan_cli/tests/context_template.rs
+new file mode 100644
+index 0000000..ecccfe0
+--- /dev/null
++++ b/crates/pqc_scan_cli/tests/context_template.rs
+@@ -0,0 +1,232 @@
++#[path = "../../pqc_scan_core/tests/support/migration/mod.rs"]
++#[allow(dead_code)]
++mod fixture;
++use pqc_scan_core::migration::*;
++use serde_json::{json, Value};
++use std::{
++    path::PathBuf,
++    process::{Command, Output},
++    sync::atomic::{AtomicU64, Ordering},
++};
++const NOW: &str = "2026-11-18T00:00:00Z";
++struct Files(PathBuf);
++impl Files {
++    fn new() -> Self {
++        static NEXT: AtomicU64 = AtomicU64::new(0);
++        let p = std::env::temp_dir().join(format!(
++            "pqc-template073-{}-{}",
++            std::process::id(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        std::fs::create_dir_all(&p).unwrap();
++        Self(p)
++    }
++    fn input(&self, value: &Value) -> PathBuf {
++        let p = self.0.join("input.json");
++        std::fs::write(&p, serde_json::to_vec(value).unwrap()).unwrap();
++        p
++    }
++    fn run(&self, input: &std::path::Path, format: &str, extra: &[&str]) -> Output {
++        Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++            .arg("context-template")
++            .arg(input)
++            .args(["--input-format", format])
++            .args(extra)
++            .output()
++            .unwrap()
++    }
++}
++impl Drop for Files {
++    fn drop(&mut self) {
++        let _ = std::fs::remove_dir_all(&self.0);
++    }
++}
++fn ok(o: &Output) {
++    assert!(o.status.success(), "{}", String::from_utf8_lossy(&o.stderr));
++    assert!(o.stderr.is_empty());
++}
++#[test]
++fn actual_headless_cli_list_sparse_template_and_assess_roundtrip() {
++    let f = Files::new();
++    let input = f.input(&fixture::inventory("RSA"));
++    let original = std::fs::read(&input).unwrap();
++    let list = f.run(&input, "inventory-v1", &["--list-targets"]);
++    ok(&list);
++    let text = String::from_utf8(list.stdout).unwrap();
++    assert!(text.starts_with("1\tRSA\t"));
++    assert!(text.contains("app.txt"));
++    assert!(text.contains("selectable"));
++    let out = f.0.join("context.json");
++    ok(&f.run(
++        &input,
++        "inventory-v1",
++        &[
++            "--out",
++            out.to_str().unwrap(),
++            "--as-of",
++            NOW,
++            "--target",
++            "1",
++            "--set",
++            "usage_state=\"active\"",
++            "--set",
++            "business_critical=false",
++            "--unknown",
++            "confidential",
++            "--actor",
++            "owner",
++            "--asserted-at",
++            "2026-11-17T00:00:00Z",
++        ],
++    ));
++    let bytes = std::fs::read(&out).unwrap();
++    let v: Value = serde_json::from_slice(&bytes).unwrap();
++    assert_eq!(v["bindings"].as_array().unwrap().len(), 1);
++    assert_eq!(
++        v["bindings"][0]["claims"]["business_critical"]["value"],
++        false
++    );
++    assert_eq!(
++        v["bindings"][0]["claims"]["confidential"]["state"],
++        "unknown"
++    );
++    assert!(v["bindings"][0]["claims"].get("use_case").is_none());
++    let e = SavedEvidence::read(&input, InputFormat::InventoryV1).unwrap();
++    let c = MigrationContext::read(&out).unwrap();
++    let expected = evaluate(&e, Some(&c), NOW).unwrap();
++    let report = f.0.join("report");
++    let run = Command::new(env!("CARGO_BIN_EXE_pqc-scan"))
++        .arg("assess")
++        .arg(&input)
++        .args(["--input-format", "inventory-v1", "--context"])
++        .arg(&out)
++        .args(["--as-of", NOW, "--out-dir"])
++        .arg(&report)
++        .output()
++        .unwrap();
++    ok(&run);
++    let actual: Value = serde_json::from_slice(
++        &std::fs::read(report.join("migration.assessment.v1.json")).unwrap(),
++    )
++    .unwrap();
++    assert_eq!(actual, serde_json::to_value(expected).unwrap());
++    assert_eq!(std::fs::read(input).unwrap(), original);
++}
++#[test]
++fn no_selection_is_unbound_and_each_adopted_format_works() {
++    let f = Files::new();
++    for (i, (v, format)) in [
++        (fixture::inventory("RSA"), "inventory-v1"),
++        (fixture::tls(), "tls-v1"),
++        (fixture::offers(), "ssh-offers-v1"),
++        (fixture::kex(), "ssh-kex-v1"),
++    ]
++    .into_iter()
++    .enumerate()
++    {
++        let input = f.input(&v);
++        let out = f.0.join(format!("{i}.json"));
++        ok(&f.run(
++            &input,
++            format,
++            &["--out", out.to_str().unwrap(), "--as-of", NOW],
++        ));
++        let c: Value = serde_json::from_slice(&std::fs::read(&out).unwrap()).unwrap();
++        assert_eq!(c["bindings"], json!([]));
++        assert_eq!(c["systems"], json!([]));
++        ok(&f.run(
++            &input,
++            format,
++            &[
++                "--out",
++                out.to_str().unwrap(),
++                "--as-of",
++                NOW,
++                "--target",
++                "1",
++            ],
++        ));
++        let e = SavedEvidence::read(&input, format.parse().unwrap()).unwrap();
++        MigrationContext::read(&out).unwrap().bind(&e, NOW).unwrap();
++    }
++}
++#[test]
++fn invalid_answers_targets_and_times_leave_existing_output_untouched() {
++    let f = Files::new();
++    let input = f.input(&fixture::inventory("RSA"));
++    let out = f.0.join("keep.json");
++    std::fs::write(&out, b"KEEP").unwrap();
++    for args in [
++        vec!["--target", "0"],
++        vec!["--target", "999"],
++        vec!["--target", "1", "--target", "1"],
++        vec![
++            "--target",
++            "1",
++            "--set",
++            "business_critical=\"SECRET_CANARY_073\"",
++            "--actor",
++            "owner",
++            "--asserted-at",
++            NOW,
++        ],
++        vec!["--target", "1", "--unknown", "usage_state"],
++        vec!["--set", "usage_state=\"active\""],
++        vec![
++            "--target",
++            "1",
++            "--set",
++            "confidential=null",
++            "--actor",
++            "owner",
++            "--asserted-at",
++            NOW,
++        ],
++    ] {
++        let mut extra = vec!["--out", out.to_str().unwrap(), "--as-of", NOW];
++        extra.extend(args);
++        let o = f.run(&input, "inventory-v1", &extra);
++        assert_eq!(o.status.code(), Some(1));
++        assert!(!String::from_utf8_lossy(&o.stderr).contains("SECRET_CANARY_073"));
++        assert_eq!(std::fs::read(&out).unwrap(), b"KEEP");
++    }
++}
++#[test]
++fn output_name_inode_and_link_boundaries_preserve_input() {
++    let f = Files::new();
++    let input = f.input(&fixture::inventory("RSA"));
++    let original = std::fs::read(&input).unwrap();
++    let hard = f.0.join("hard.json");
++    std::fs::hard_link(&input, &hard).unwrap();
++    for out in [&input, &hard] {
++        let o = f.run(
++            &input,
++            "inventory-v1",
++            &[
++                "--out",
++                out.to_str().unwrap(),
++                "--as-of",
++                NOW,
++                "--target",
++                "1",
++            ],
++        );
++        assert_eq!(o.status.code(), Some(1));
++        assert!(String::from_utf8_lossy(&o.stderr).contains("unsafe_output"));
++    }
++    #[cfg(unix)]
++    {
++        let linked = f.0.join("link.json");
++        std::os::unix::fs::symlink(&input, &linked).unwrap();
++        assert!(!f
++            .run(
++                &input,
++                "inventory-v1",
++                &["--out", linked.to_str().unwrap(), "--as-of", NOW]
++            )
++            .status
++            .success());
++    }
++    assert_eq!(std::fs::read(&input).unwrap(), original);
++    assert_eq!(std::fs::read(hard).unwrap(), original);
++}
+diff --git a/crates/pqc_scan_core/src/migration/generation.rs b/crates/pqc_scan_core/src/migration/generation.rs
+new file mode 100644
+index 0000000..d16f843
+--- /dev/null
++++ b/crates/pqc_scan_core/src/migration/generation.rs
+@@ -0,0 +1,169 @@
++//! Generate the adopted context from explicit selections; never infer claims.
++use super::*;
++
++/// One explicitly supplied answer. `None` means explicit unknown, not omission.
++#[derive(Debug, Clone)]
++pub struct ClaimAnswer {
++    pub field: String,
++    pub value: Option<Value>,
++}
++
++/// Validated existing claim set, shared by headless and local UI callers.
++#[derive(Debug, Clone, Default)]
++pub struct ContextClaims(ClaimSet);
++impl ContextClaims {
++    pub fn from_answers(answers: &[ClaimAnswer], provenance: Provenance) -> Result<Self> {
++        if answers.len() > 18 {
++            return Err(Error::ResourceLimit);
++        }
++        let mut set = serde_json::Map::new();
++        let mut seen = BTreeSet::new();
++        for answer in answers {
++            if !seen.insert(&answer.field) {
++                return Err(Error::InvalidInput);
++            }
++            let claim = match &answer.value {
++                Some(value) => {
++                    serde_json::json!({"state":"known","value":value,"provenance":provenance})
++                }
++                None => serde_json::json!({"state":"unknown","provenance":provenance}),
++            };
++            if let Some(name) = answer.field.strip_prefix("support.") {
++                if !SUPPORT_NAMES.contains(&name) {
++                    return Err(Error::InvalidInput);
++                }
++                set.entry("support")
++                    .or_insert_with(|| serde_json::json!({}))
++                    .as_object_mut()
++                    .ok_or(Error::InvalidInput)?
++                    .insert(name.to_owned(), claim);
++            } else {
++                if answer.field == "support" {
++                    return Err(Error::InvalidInput);
++                }
++                set.insert(answer.field.clone(), claim);
++            }
++        }
++        Self::from_bytes(&serde_json::to_vec(&set).map_err(|_| Error::InvalidInput)?)
++    }
++
++    pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
++        let value = bounded::parse(bytes, LIMIT)?;
++        reject_null(&value)?;
++        let mut claims: ClaimSet =
++            serde_json::from_value(value).map_err(|_| Error::InvalidInput)?;
++        validate_set(&mut claims, &BTreeSet::new())?;
++        Ok(Self(claims))
++    }
++}
++
++impl Provenance {
++    /// The caller supplies the assertion instant; absence of expiry stays unknown.
++    pub fn operator(actor: &str, asserted_at: &str, valid_until: Option<&str>) -> Result<Self> {
++        let mut result = Self {
++            source_kind: SourceKind::OperatorClaim,
++            actor_id: actor.to_owned(),
++            asserted_at: asserted_at.to_owned(),
++            valid_until: valid_until.map(str::to_owned),
++            reference_id: None,
++        };
++        provenance(&mut result, &BTreeSet::new())?;
++        Ok(result)
++    }
++}
++
++/// Zero-based index into the exact SavedEvidence target list, never an asset-wide match.
++#[derive(Debug, Clone)]
++pub struct ContextSelection {
++    pub target_index: usize,
++    pub system_id: String,
++    pub claims: ContextClaims,
++}
++
++pub fn generate_context(
++    evidence: &SavedEvidence,
++    organization_id: &str,
++    selections: &[ContextSelection],
++    as_of: &str,
++) -> Result<Vec<u8>> {
++    if selections.len() > 4096 {
++        return Err(Error::ResourceLimit);
++    }
++    let mut systems = BTreeSet::new();
++    let mut bindings = Vec::new();
++    let mut size = 256usize;
++    for selection in selections {
++        if selection.system_id.len() > 64 {
++            return Err(Error::ResourceLimit);
++        }
++        if !alias(&selection.system_id) {
++            return Err(Error::InvalidInput);
++        }
++        // Bound aggregate allocations before cloning a claim set into each binding.
++        let claims_size = serde_json::to_vec(&selection.claims.0)
++            .map_err(|_| Error::InvalidInput)?
++            .len();
++        size = size
++            .checked_add(claims_size + 256)
++            .filter(|n| *n <= LIMIT)
++            .ok_or(Error::ResourceLimit)?;
++        let target = evidence
++            .targets()
++            .get(selection.target_index)
++            .ok_or(Error::InvalidReference)?;
++        systems.insert(selection.system_id.clone());
++        bindings.push(Binding {
++            target_id: target.id.clone(),
++            system_id: selection.system_id.clone(),
++            claims: Some(selection.claims.0.clone()),
++        });
++    }
++    let input = Input {
++        format: FORMAT.to_owned(),
++        version: 1,
++        input: InputBinding {
++            format: evidence.input().format,
++            sha256: evidence.input().sha256.clone(),
++        },
++        organization_id: organization_id.to_owned(),
++        systems: systems
++            .into_iter()
++            .map(|id| System { id, defaults: None })
++            .collect(),
++        bindings,
++        organization_defaults: None,
++        references: Vec::new(),
++    };
++    let bytes = encode(&input)?;
++    let context = MigrationContext::from_bytes(&bytes)?;
++    context.bind(evidence, as_of)?;
++    Ok(bytes)
++}
++
++fn encode(input: &Input) -> Result<Vec<u8>> {
++    fn omit_absent(value: &mut Value) {
++        match value {
++            Value::Object(map) => {
++                map.retain(|_, v| !v.is_null());
++                map.values_mut().for_each(omit_absent);
++            }
++            Value::Array(values) => values.iter_mut().for_each(omit_absent),
++            _ => {}
++        }
++    }
++    let mut value = serde_json::to_value(input).map_err(|_| Error::InvalidInput)?;
++    omit_absent(&mut value);
++    let bytes = serde_json::to_vec_pretty(&value).map_err(|_| Error::InvalidInput)?;
++    if bytes.len() > LIMIT {
++        return Err(Error::ResourceLimit);
++    }
++    Ok(bytes)
++}
++
++impl MigrationContext {
++    /// Export every supported field; typed validation has normalized timestamps.
++    /// Call bind against the selected evidence before applying imported context.
++    pub fn to_bytes(&self) -> Result<Vec<u8>> {
++        encode(&self.input)
++    }
++}
+diff --git a/crates/pqc_scan_core/tests/migration073.rs b/crates/pqc_scan_core/tests/migration073.rs
+new file mode 100644
+index 0000000..7fa7910
+--- /dev/null
++++ b/crates/pqc_scan_core/tests/migration073.rs
+@@ -0,0 +1,220 @@
++#[path = "support/migration/context.rs"]
++mod ctx;
++#[path = "support/migration/mod.rs"]
++#[allow(dead_code)]
++mod fixture;
++use pqc_scan_core::migration::*;
++use serde_json::{json, Value};
++fn evidence() -> SavedEvidence {
++    fixture::ingest(&fixture::inventory("RSA"), InputFormat::InventoryV1).unwrap()
++}
++fn selection(claims: ContextClaims) -> ContextSelection {
++    ContextSelection {
++        target_index: 0,
++        system_id: "system-1".into(),
++        claims,
++    }
++}
++fn answer(field: &str, value: Option<Value>) -> ClaimAnswer {
++    ClaimAnswer {
++        field: field.into(),
++        value,
++    }
++}
++#[test]
++fn empty_sparse_false_unknown_and_na_preserve_meaning_and_schema() {
++    let e = evidence();
++    let empty = generate_context(&e, "organization", &[], ctx::AS_OF).unwrap();
++    let c = MigrationContext::from_bytes(&empty).unwrap();
++    assert!(c
++        .bind(&e, ctx::AS_OF)
++        .unwrap()
++        .target(&e.targets()[0].id)
++        .is_none());
++    for value in [
++        json!({}),
++        json!({"usage_state":ctx::unknown(),"confidential":ctx::claim(json!(false)),"applicability":ctx::claim(json!("not_applicable"))}),
++    ] {
++        let claims = ContextClaims::from_bytes(&serde_json::to_vec(&value).unwrap()).unwrap();
++        let bytes = generate_context(&e, "organization", &[selection(claims)], ctx::AS_OF).unwrap();
++        let v: Value = serde_json::from_slice(&bytes).unwrap();
++        let schema: Value = serde_json::from_str(include_str!(
++            "../../../schemas/migration-context-v1.schema.json"
++        ))
++        .unwrap();
++        assert!(jsonschema::validator_for(&schema).unwrap().is_valid(&v));
++        assert_eq!(v["bindings"][0]["claims"], value);
++        assert_eq!(v["input"]["sha256"], e.input().sha256);
++        assert!(!String::from_utf8(bytes.clone()).unwrap().contains("null"));
++        let imported = MigrationContext::from_bytes(&bytes).unwrap();
++        assert_eq!(imported.to_bytes().unwrap(), bytes);
++        if value != json!({}) {
++            let bound = imported.bind(&e, ctx::AS_OF).unwrap();
++            let claims = bound.target(&e.targets()[0].id).unwrap();
++            assert_eq!(
++                claims.claim("confidential").unwrap().active_value(),
++                Some(&json!(false))
++            );
++            assert!(claims.claim("usage_state").unwrap().state == "unknown");
++            assert!(claims.claim("business_critical").is_none());
++            assert_eq!(
++                evaluate(&e, Some(&imported), ctx::AS_OF)
++                    .unwrap()
++                    .decisions()[0]
++                    .urgency,
++                Urgency::NotApplicable
++            );
++        }
++    }
++}
++#[test]
++fn explicit_scope_duplicates_ambiguity_substitution_and_time_are_checked() {
++    let e = evidence();
++    let s = selection(ContextClaims::default());
++    assert_eq!(
++        generate_context(&e, "organization", &[s.clone(), s.clone()], ctx::AS_OF).unwrap_err(),
++        Error::AmbiguousContextBinding
++    );
++    let mut invalid = s.clone();
++    invalid.target_index = 1;
++    assert_eq!(
++        generate_context(&e, "organization", &[invalid], ctx::AS_OF).unwrap_err(),
++        Error::InvalidReference
++    );
++    assert_eq!(
++        generate_context(&e, "INVALID alias", std::slice::from_ref(&s), ctx::AS_OF).unwrap_err(),
++        Error::InvalidInput
++    );
++    assert_eq!(
++        generate_context(
++            &e,
++            "organization",
++            std::slice::from_ref(&s),
++            "2000-01-01T00:00:00Z"
++        )
++        .unwrap_err(),
++        Error::InvalidTime
++    );
++    let bytes = generate_context(&e, "organization", std::slice::from_ref(&s), ctx::AS_OF).unwrap();
++    let mut other = fixture::inventory("RSA");
++    other["producer"]["version"] = "changed".into();
++    let other = fixture::ingest(&other, InputFormat::InventoryV1).unwrap();
++    assert_eq!(
++        MigrationContext::from_bytes(&bytes)
++            .unwrap()
++            .bind(&other, ctx::AS_OF)
++            .unwrap_err(),
++        Error::InputBindingMismatch
++    );
++    let mut ambiguous = fixture::inventory("RSA");
++    ambiguous["observations"][0]["identity_confidence"] = "ambiguous_duplicate_anchor".into();
++    let ambiguous = fixture::ingest(&ambiguous, InputFormat::InventoryV1).unwrap();
++    assert!(!ambiguous.targets()[0].is_bindable());
++    assert_eq!(
++        generate_context(
++            &ambiguous,
++            "organization",
++            std::slice::from_ref(&s),
++            ctx::AS_OF
++        )
++        .unwrap_err(),
++        Error::AmbiguousContextBinding
++    );
++    assert_eq!(
++        generate_context(&e, "organization", &vec![s; 4097], ctx::AS_OF).unwrap_err(),
++        Error::ResourceLimit
++    );
++}
++#[test]
++fn selected_target_does_not_apply_to_other_occurrences() {
++    let mut input = fixture::inventory("RSA");
++    let mut second = input["observations"][0].clone();
++    second["id"] = pqc_scan_core::identity::native_id("observation", &["second"]).into();
++    second["occurrence_key"] = pqc_scan_core::identity::native_id("occurrence", &["second"]).into();
++    second["target"]["path"] = "other.rs".into();
++    input["observations"].as_array_mut().unwrap().push(second);
++    let e = fixture::ingest(&input, InputFormat::InventoryV1).unwrap();
++    assert_eq!(e.targets().len(), 2);
++    let c = MigrationContext::from_bytes(
++        &generate_context(
++            &e,
++            "organization",
++            &[selection(ContextClaims::default())],
++            ctx::AS_OF,
++        )
++        .unwrap(),
++    )
++    .unwrap();
++    let b = c.bind(&e, ctx::AS_OF).unwrap();
++    assert!(b.target(&e.targets()[0].id).is_some());
++    assert!(b.target(&e.targets()[1].id).is_none());
++}
++#[test]
++fn answers_use_existing_types_and_never_invent_expiry() {
++    let p = Provenance::operator("owner", "2026-11-17T09:00:00+09:00", None).unwrap();
++    let claims = ContextClaims::from_answers(
++        &[
++            answer("usage_state", Some(json!("active"))),
++            answer("support.peer", Some(json!(false))),
++            answer("confidential", None),
++        ],
++        p.clone(),
++    )
++    .unwrap();
++    let e = evidence();
++    let bytes = generate_context(&e, "organization", &[selection(claims)], ctx::AS_OF).unwrap();
++    let v: Value = serde_json::from_slice(&bytes).unwrap();
++    assert_eq!(
++        v["bindings"][0]["claims"]["support"]["peer"]["value"],
++        false
++    );
++    assert_eq!(
++        v["bindings"][0]["claims"]["usage_state"]["provenance"]["asserted_at"],
++        "2026-11-17T00:00:00Z"
++    );
++    assert!(v["bindings"][0]["claims"]["usage_state"]["provenance"]
++        .get("valid_until")
++        .is_none());
++    for a in [
++        vec![answer("business_critical", Some(json!("false")))],
++        vec![answer("usage_state", Some(json!("guessed")))],
++        vec![answer("support.missing", Some(json!(true)))],
++        vec![answer("confidential", Some(Value::Null))],
++        vec![
++            answer("usage_state", None),
++            answer("usage_state", Some(json!("active"))),
++        ],
++    ] {
++        assert!(ContextClaims::from_answers(&a, p.clone()).is_err());
++    }
++    assert!(Provenance::operator("owner", ctx::AS_OF, Some("2026-01-01T00:00:00Z")).is_err());
++}
++#[test]
++fn imported_all_supported_fields_references_and_stale_provenance_roundtrip() {
++    let e = evidence();
++    let mut v = ctx::context(&e, ctx::ordinary_signing());
++    v["organization_defaults"] = json!({"historical_ciphertext":ctx::unknown(),"confidentiality_until":ctx::claim(json!("2030-01-01T00:00:00Z")),"migration_lead_seconds":ctx::claim(json!(123))});
++    v["bindings"][0]["claims"]["deadline"] = ctx::claim(
++        json!({"kind":"at","at":"2030-01-01T00:00:00Z","reference_id":"org-deadline","scope_reason":"contractual_requirement"}),
++    );
++    v["bindings"][0]["claims"]["business_critical"]["provenance"]["valid_until"] =
++        "2026-11-17T12:00:00Z".into();
++    let c = ctx::parse(&v);
++    let exported = c.to_bytes().unwrap();
++    assert_eq!(serde_json::from_slice::<Value>(&exported).unwrap(), v);
++    let restored = MigrationContext::from_bytes(&exported).unwrap();
++    let bound = restored.bind(&e, ctx::AS_OF).unwrap();
++    assert_eq!(
++        bound
++            .target(&e.targets()[0].id)
++            .unwrap()
++            .claim("business_critical")
++            .unwrap()
++            .freshness,
++        ClaimFreshness::Stale
++    );
++    assert_eq!(
++        bound.references()[0].https_uri.as_deref(),
++        Some("https://synthetic.invalid/never-fetch")
++    );
++}
+diff --git a/tasks/073/TASK-073-PLAN.md b/tasks/073/TASK-073-PLAN.md
+new file mode 100644
+index 0000000..ffafb55
+--- /dev/null
++++ b/tasks/073/TASK-073-PLAN.md
+@@ -0,0 +1,49 @@
++# Task073 plan and D4 supplement
++
++Selected by maintainer on2026-11-18 after commit c1f8a4bc5478eefb2b1babb6b2aa86295f9c8d34,
++in the existing worktree and branch. U01/U02 and original criteria remain unchanged.
++071/072 remain untouched;075 final reconciliation remains dependent on them.
++
++## Outcome, compatibility and choices
++
++Generate the adopted migration-context v1 without hash/ID transcription or invented
++claims. Reuse SavedEvidence, typed ClaimSet/Provenance validation, bind, and safe_output.
++A shared typed generation API accepts explicit target selections and optional typed
++claims, generates default aliases and validates final bytes against the same reader
++and evaluator binding. No new stored schema, policy, rule or cryptographic behavior.
++Import/export uses the adopted closed context and preserves all supported information;
++no lossy form projection. No CLI conversation, web implementation or default scan change.
++
++D4 supplement: add explicit context-template INPUT --input-format FORMAT. --list-targets
++prints a one-based readable list (algorithm, role, source/location and bindability).
++Generation requires --out FILE and --as-of TIME; repeat --target N to select only those
++rows from this exact input. No selections produce a valid unbound empty template;
++claims without selected targets reject. Default aliases are organization/system-1,
++customizable via --organization and --system. Optional repeated --set FIELD=JSON_VALUE
++and --unknown FIELD provide known/explicit-unknown claims; omitted fields stay omitted.
++Known strings use JSON quoting. Support fields use support.peer, etc. Any answers
++require --actor and --asserted-at; --valid-until is optional and never invented.
++No guessed positive values or all-target selection. Invalid/duplicate/ambiguous indices,
++fields, provenance and stale imported input bindings fail using existing fixed errors.
++
++Use existing1MiB context and256-system/4096-binding ceilings. Bound parsing applies
++before generation/import. Complete rendering and input/context alias checks precede
++safe atomic file replacement. No new dependency, output bypass or outbound operation.
++A cosmetic JSON example would leave ID transcription unresolved; generating defaults
++for every target would silently widen scope. Explicit selections and shared validation
++meet both usability and ownership requirements.
++
++## Steps and acceptance evidence
++
++1. Add shared claims/selection generation and complete context export over existing
++   typed records. Keep normalized semantic values and all provenance/references.
++2. Add thin headless CLI, readable list and safe write; document EN/JA examples.
++3. Test sparse/empty, unknown/false/N/A, exact grouped scope, malformed answers,
++   duplicate/ambiguous targets, stale/substituted inputs, roundtrip and output aliases.
++   Run actual generation followed by assess, retained legacy contracts and features.
++4. Inspect combined diff, reuse original implementation/test reviewers, run required
++   fmt/workspace/build/strict clippy and affected optional-feature checks, bind final
++   source/logs/binaries and record results. Main agent closes only all criteria passed.
++
++Main agent owns all development/testing/docs. Same reviewer identities are
++/root/v04_implementation_review and /root/v04_test_review; no extra delegation.
