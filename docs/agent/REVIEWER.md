@@ -1,3 +1,10 @@
+> **Inactive during the Open Pstack trial.** [AGENTS.override.md](../../AGENTS.override.md)
+> selects pstack as the development harness. This file preserves the legacy two-stage review request template
+> for historical interpretation and rollback; its execution instructions are not
+> active, including when an old task or skill links here. Original task acceptance
+> criteria and evidence remain binding; retirement of a process does not complete
+> or cancel any task.
+
 # Independent Review Request Template
 
 The main agent fills the request below for each required review stage and sends

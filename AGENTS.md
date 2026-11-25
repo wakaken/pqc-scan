@@ -111,6 +111,18 @@ before the affected work.
   do not create separate tasks, PRs or reviewers. Keep prerequisite feasibility
   studies separate when their results determine whether/how implementation proceeds.
 
+## Open Pstack Integration
+
+- Open Pstack is an optional development aid. Invoke `pstack:poteto-mode`
+  explicitly when using it; installation alone does not enable it for every chat.
+- Follow this file and the linked verification/review guides when a pstack
+  playbook suggests delegation, extra reviewers, automatic task creation,
+  monitoring or external writes. A model-role assignment grants no authorization.
+- Keep investigation, design, implementation, debugging, tests and documentation
+  in the main agent. Use only the two required reviewer identities for executable
+  changes; reuse each reviewer for fixes. Other agents require explicit approval
+  of purpose and maximum count.
+
 ## Security and Compatibility
 
 - Validate inputs; never expose secrets, private key material or sensitive
