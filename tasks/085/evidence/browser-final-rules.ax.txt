@@ -1,0 +1,466 @@
+Browser tab: 2, Title: "ルールの説明", URL: "http://127.0.0.1:57384/scan/report.rules.html?lang=ja&theme=light".
+1 AXWebArea ルールの説明, URL: 127.0.0.1:57384/scan/report.rules.html?lang=ja&theme=light
+	2 container
+		3 text Language / 言語
+		4 pop up button (collapsed, settable) Description: Language / 言語, Value: 日本語, Secondary Actions: Expand
+			5 menu
+				6 English
+				7 (selected) 日本語
+	8 container
+		9 text Theme / 表示
+		10 pop up button (collapsed, settable) Description: Theme / 表示, Value: Light / ライト, Secondary Actions: Expand
+			11 menu
+				12 (selected) Light / ライト
+				13 Dark / ダーク
+	14 container
+		15 text pqc-scan / 解説
+		16 heading ルールの説明, Value: 1
+			17 text ルールの説明
+		18 link Description: レポートに戻る, Value: 127.0.0.1:57384/scan/report.html?lang=ja
+		19 text このレポートで検出されたルールを説明します。所見は調査の手掛かりであり、脆弱性や稼働時の利用を確定するものではありません。
+		20 heading 表示の読み方, Value: 2
+			21 text 表示の読み方
+		22 text 重大度は調査の優先順位です。確認済みの脆弱性の数ではありません。リスクは一致した暗号の手掛かりを分類します。PQC方式の参照も移行完了を保証しません。
+		23 text 推奨対応を適用する前に、製品・テスト・fixture・文書のどこにある記述か、周辺コードと実際の稼働環境を確認してください。
+		24 container rule-0
+			25 heading OpenSSLの低水準RSA APIの参照が見つかりました。, Value: 2
+				26 text OpenSSLの低水準RSA APIの参照が見つかりました。
+			27 text OPENSSL_RSA_API
+			28 text 暗号方式の変更に備え、EVPなどの高水準APIを使う構成を検討してください。
+			29 definition list
+				30 container 分類
+					31 text 分類
+				32 text TLS
+				33 container 今回の重大度
+					34 text 今回の重大度
+				35 text 高
+				36 container 今回のリスク
+					37 text 今回のリスク
+				38 text 量子計算によるリスクあり
+				39 container 検出箇所
+					40 text 検出箇所
+				41 text 1
+			42 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				43 text 確認事項の例（各検出箇所の案内も確認してください）
+			44 text C/C++のライブラリ・プロバイダー・ビルド設定を確認する
+			45 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-0
+		46 container rule-1
+			47 heading OpenSSLのEVP_PKEYをRSA用に使う記述が見つかりました。, Value: 2
+				48 text OpenSSLのEVP_PKEYをRSA用に使う記述が見つかりました。
+			49 text API_EVP_PKEY_RSA
+			50 text 鍵の種類を切り替えられる構成か確認し、PQC対応への移行に備えてください。
+			51 definition list
+				52 container 分類
+					53 text 分類
+				54 text CryptoAPI
+				55 container 今回の重大度
+					56 text 今回の重大度
+				57 text 中
+				58 container 今回のリスク
+					59 text 今回のリスク
+				60 text 量子計算によるリスクあり
+				61 container 検出箇所
+					62 text 検出箇所
+				63 text 1
+			64 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				65 text 確認事項の例（各検出箇所の案内も確認してください）
+			66 text C/C++のライブラリ・プロバイダー・ビルド設定を確認する
+			67 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-1
+		68 container rule-2
+			69 heading OpenSSLの低水準RSA APIの参照が見つかりました。, Value: 2
+				70 text OpenSSLの低水準RSA APIの参照が見つかりました。
+			71 text API_OPENSSL_RSA_NEW
+			72 text 暗号方式の変更に備え、EVPなどの高水準APIを使う構成を検討してください。
+			73 definition list
+				74 container 分類
+					75 text 分類
+				76 text CryptoAPI
+				77 container 今回の重大度
+					78 text 今回の重大度
+				79 text 中
+				80 container 今回のリスク
+					81 text 今回のリスク
+				82 text 量子計算によるリスクあり
+				83 container 検出箇所
+					84 text 検出箇所
+				85 text 1
+			86 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				87 text 確認事項の例（各検出箇所の案内も確認してください）
+			88 text C/C++のライブラリ・プロバイダー・ビルド設定を確認する
+			89 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-2
+		90 container rule-3
+			91 heading C#の暗号APIまたはライブラリの参照が見つかりました。, Value: 2
+				92 text C#の暗号APIまたはライブラリの参照が見つかりました。
+			93 text CSHARP_CRYPTO_API
+			94 text 型と用途、鍵を生成する側と利用する側の対応、OSとプロバイダーを確認してください。ソースの参照だけでは実行時の有効性を判断できません。
+			95 definition list
+				96 container 分類
+					97 text 分類
+				98 text CryptoAPI
+				99 container 今回の重大度
+					100 text 今回の重大度
+				101 text 中
+				102 container 今回のリスク
+					103 text 今回のリスク
+				104 text 要確認（実装や設定の確認が必要）
+				105 container 検出箇所
+					106 text 検出箇所
+				107 text 3
+			108 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				109 text 確認事項の例（各検出箇所の案内も確認してください）
+			110 text 型と用途、鍵を生成する側と利用する側の対応、OSとプロバイダーを確認してください。ソースの参照だけでは実行時の有効性を判断できません。
+			111 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-3
+		112 container rule-4
+			113 heading C/C++の暗号APIまたは設定の参照が見つかりました。, Value: 2
+				114 text C/C++の暗号APIまたは設定の参照が見つかりました。
+			115 text C_FAMILY_CRYPTO_API
+			116 text 方式、鍵の役割、リンクするプロバイダーとビルド設定を確認してください。プロバイダーやTLSグループの指定だけでは、実行時の有効性や通信での合意を判断できません。
+			117 definition list
+				118 container 分類
+					119 text 分類
+				120 text CryptoAPI
+				121 container 今回の重大度
+					122 text 今回の重大度
+				123 text 中
+				124 container 今回のリスク
+					125 text 今回のリスク
+				126 text 要確認（実装や設定の確認が必要）
+				127 container 検出箇所
+					128 text 検出箇所
+				129 text 2
+			130 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				131 text 確認事項の例（各検出箇所の案内も確認してください）
+			132 text 方式、鍵の役割、リンクするプロバイダーとビルド設定を確認してください。プロバイダーやTLSグループの指定だけでは、実行時の有効性や通信での合意を判断できません。
+			133 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-4
+		134 container rule-5
+			135 heading 暗号処理に関係するライブラリへの依存が見つかりました。, Value: 2
+				136 text 暗号処理に関係するライブラリへの依存が見つかりました。
+			137 text DEP_BOUNCYCASTLE
+			138 text 表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。
+			139 definition list
+				140 container 分類
+					141 text 分類
+				142 text TLS
+				143 container 今回の重大度
+					144 text 今回の重大度
+				145 text 中
+				146 container 今回のリスク
+					147 text 今回のリスク
+				148 text 要確認（実装や設定の確認が必要）
+				149 container 検出箇所
+					150 text 検出箇所
+				151 text 1
+			152 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				153 text 確認事項の例（各検出箇所の案内も確認してください）
+			154 text .NETの対象・パッケージ・OSの対応を確認する
+			155 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-5
+		156 container rule-6
+			157 heading PHPの暗号APIまたはライブラリの参照が見つかりました。, Value: 2
+				158 text PHPの暗号APIまたはライブラリの参照が見つかりました。
+			159 text PHP_CRYPTO_API
+			160 text 検出された方式と用途を確認してください。汎用の署名処理や外部から読み込む鍵、OQSラッパーの参照だけでは、方式や実行時の有効性を判断できません。
+			161 definition list
+				162 container 分類
+					163 text 分類
+				164 text CryptoAPI
+				165 container 今回の重大度
+					166 text 今回の重大度
+				167 text 中
+				168 container 今回のリスク
+					169 text 今回のリスク
+				170 text 要確認（実装や設定の確認が必要）
+				171 container 検出箇所
+					172 text 検出箇所
+				173 text 1
+			174 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				175 text 確認事項の例（各検出箇所の案内も確認してください）
+			176 text PHPの拡張機能とネイティブライブラリを確認する
+			177 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-6
+		178 container rule-7
+			179 heading C#のTLSライブラリまたはOQSラッパーの参照が見つかりました。, Value: 2
+				180 text C#のTLSライブラリまたはOQSラッパーの参照が見つかりました。
+			181 text CSHARP_CRYPTO_REFERENCE
+			182 text Bouncy CastleのTLS、廃止済みの公式dotnetOQS、独立したOpenForgeを区別してください。通信設定やnativeライブラリ、方式の有効性は別途確認してください。
+			183 definition list
+				184 container 分類
+					185 text 分類
+				186 text CryptoAPI
+				187 container 今回の重大度
+					188 text 今回の重大度
+				189 text 参考情報
+				190 container 今回のリスク
+					191 text 今回のリスク
+				192 text 要確認（実装や設定の確認が必要）
+				193 container 検出箇所
+					194 text 検出箇所
+				195 text 1
+			196 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				197 text 確認事項の例（各検出箇所の案内も確認してください）
+			198 text .NETの対象・パッケージ・OSの対応を確認する
+			199 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-7
+		200 container rule-8
+			201 heading C#のPQC方式または複合方式・HPKEの参照が見つかりました。, Value: 2
+				202 text C#のPQC方式または複合方式・HPKEの参照が見つかりました。
+			203 text CSHARP_PQC_API
+			204 text 正確な方式とパラメーター、.NETやBouncy Castleの実装とバージョンを確認してください。複合方式や汎用のHPKEを単独のPQC方式と同一視せず、構成と実行環境を確認してください。
+			205 definition list
+				206 container 分類
+					207 text 分類
+				208 text PQC
+				209 container 今回の重大度
+					210 text 今回の重大度
+				211 text 参考情報
+				212 container 今回のリスク
+					213 text 今回のリスク
+				214 text 要確認（実装や設定の確認が必要）
+				215 container 検出箇所
+					216 text 検出箇所
+				217 text 1
+			218 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				219 text 確認事項の例（各検出箇所の案内も確認してください）
+			220 text .NETの対象・パッケージ・OSの対応を確認する
+			221 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-8
+		222 container rule-9
+			223 heading C/C++のPQC方式の参照が見つかりました。, Value: 2
+				224 text C/C++のPQC方式の参照が見つかりました。
+			225 text C_FAMILY_PQC_API
+			226 text 標準とドラフトの方式名・パラメーター、OQSやOpenSSLのバージョンとビルド設定を確認してください。方式の指定だけで、有効化済み・移行完了とは判断できません。
+			227 definition list
+				228 container 分類
+					229 text 分類
+				230 text PQC
+				231 container 今回の重大度
+					232 text 今回の重大度
+				233 text 参考情報
+				234 container 今回のリスク
+					235 text 今回のリスク
+				236 text 要確認（実装や設定の確認が必要）
+				237 container 検出箇所
+					238 text 検出箇所
+				239 text 1
+			240 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				241 text 確認事項の例（各検出箇所の案内も確認してください）
+			242 text C/C++のライブラリ・プロバイダー・ビルド設定を確認する
+			243 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-9
+		244 container rule-10
+			245 heading C/C++の暗号ライブラリをincludeする記述が見つかりました。, Value: 2
+				246 text C/C++の暗号ライブラリをincludeする記述が見つかりました。
+			247 text C_FAMILY_TLS_REFERENCE
+			248 text OpenSSL・liboqs・liboqs-cppを区別し、リンク先やTLS設定を確認してください。includeだけでは、導入済みの実装や方式の有効性、通信での合意を判断できません。
+			249 definition list
+				250 container 分類
+					251 text 分類
+				252 text CryptoAPI
+				253 container 今回の重大度
+					254 text 今回の重大度
+				255 text 参考情報
+				256 container 今回のリスク
+					257 text 今回のリスク
+				258 text 要確認（実装や設定の確認が必要）
+				259 container 検出箇所
+					260 text 検出箇所
+				261 text 1
+			262 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				263 text 確認事項の例（各検出箇所の案内も確認してください）
+			264 text C/C++のライブラリ・プロバイダー・ビルド設定を確認する
+			265 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-10
+		266 container rule-11
+			267 heading C/C++の暗号ライブラリへの依存やビルド設定の参照が見つかりました。, Value: 2
+				268 text C/C++の暗号ライブラリへの依存やビルド設定の参照が見つかりました。
+			269 text DEP_NATIVE_CRYPTO
+			270 text ネイティブライブラリ、ビルド設定、プロバイダーを確認してください。vcpkg・Conan・CMakeの宣言だけでは、導入済み・方式の選択済み・TLSの合意済みとは判断できません。
+			271 definition list
+				272 container 分類
+					273 text 分類
+				274 text CryptoAPI
+				275 container 今回の重大度
+					276 text 今回の重大度
+				277 text 参考情報
+				278 container 今回のリスク
+					279 text 今回のリスク
+				280 text 要確認（実装や設定の確認が必要）
+				281 container 検出箇所
+					282 text 検出箇所
+				283 text 1
+			284 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				285 text 確認事項の例（各検出箇所の案内も確認してください）
+			286 text C/C++のライブラリ・プロバイダー・ビルド設定を確認する
+			287 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-11
+		288 container rule-12
+			289 heading NuGetの暗号パッケージに関する記録が見つかりました。, Value: 2
+				290 text NuGetの暗号パッケージに関する記録が見つかりました。
+			291 text DEP_NUGET_CRYPTO
+			292 text 正確なパッケージ、対象フレームワーク、実行環境、OSとネイティブバックエンドを確認してください。ロックの記録は、導入済み環境やTLSの有効化を示しません。
+			293 definition list
+				294 container 分類
+					295 text 分類
+				296 text CryptoAPI
+				297 container 今回の重大度
+					298 text 今回の重大度
+				299 text 参考情報
+				300 container 今回のリスク
+					301 text 今回のリスク
+				302 text 要確認（実装や設定の確認が必要）
+				303 container 検出箇所
+					304 text 検出箇所
+				305 text 1
+			306 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				307 text 確認事項の例（各検出箇所の案内も確認してください）
+			308 text .NETの対象・パッケージ・OSの対応を確認する
+			309 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-12
+		310 container rule-13
+			311 heading PHPの暗号ライブラリや拡張機能への依存宣言が見つかりました。, Value: 2
+				312 text PHPの暗号ライブラリや拡張機能への依存宣言が見つかりました。
+			313 text DEP_PHP_CRYPTO
+			314 text Composerの宣言、実際にロードする拡張機能、ネイティブライブラリを別々に確認してください。platformのエミュレート設定は、配備先の環境を示しません。
+			315 definition list
+				316 container 分類
+					317 text 分類
+				318 text CryptoAPI
+				319 container 今回の重大度
+					320 text 今回の重大度
+				321 text 参考情報
+				322 container 今回のリスク
+					323 text 今回のリスク
+				324 text 要確認（実装や設定の確認が必要）
+				325 container 検出箇所
+					326 text 検出箇所
+				327 text 1
+			328 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				329 text 確認事項の例（各検出箇所の案内も確認してください）
+			330 text PHPの拡張機能とネイティブライブラリを確認する
+			331 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-13
+		332 container rule-14
+			333 heading PHPのOQS鍵カプセル化ラッパーの参照が見つかりました。, Value: 2
+				334 text PHPのOQS鍵カプセル化ラッパーの参照が見つかりました。
+			335 text PHP_CRYPTO_REFERENCE
+			336 text native oqsphpとComposer/FFIのラッパーを区別し、対象のプロジェクトとnativeライブラリを確認してください。参照だけでは導入済み・有効・方式選択済みとは判断できません。
+			337 definition list
+				338 container 分類
+					339 text 分類
+				340 text CryptoAPI
+				341 container 今回の重大度
+					342 text 今回の重大度
+				343 text 参考情報
+				344 container 今回のリスク
+					345 text 今回のリスク
+				346 text 要確認（実装や設定の確認が必要）
+				347 container 検出箇所
+					348 text 検出箇所
+				349 text 2
+			350 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				351 text 確認事項の例（各検出箇所の案内も確認してください）
+			352 text native oqsphpとComposer/FFIのラッパーを区別し、対象のプロジェクトとnativeライブラリを確認してください。参照だけでは導入済み・有効・方式選択済みとは判断できません。
+			353 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-14
+		354 container rule-15
+			355 heading PHPのPQC方式またはX-Wingの参照が見つかりました。, Value: 2
+				356 text PHPのPQC方式またはX-Wingの参照が見つかりました。
+			357 text PHP_PQC_API
+			358 text 方式名とパラメーター、Sodium・ParagonIEの実装とバージョンを確認してください。X-Wingは単独のML-KEMやTLSの複合方式と区別し、実行環境で利用できるかも確認してください。
+			359 definition list
+				360 container 分類
+					361 text 分類
+				362 text PQC
+				363 container 今回の重大度
+					364 text 今回の重大度
+				365 text 参考情報
+				366 container 今回のリスク
+					367 text 今回のリスク
+				368 text PQC方式の参照あり（対応完了の保証ではありません）
+				369 container 検出箇所
+					370 text 検出箇所
+				371 text 1
+			372 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				373 text 確認事項の例（各検出箇所の案内も確認してください）
+			374 text PHPの拡張機能とネイティブライブラリを確認する
+			375 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-15
+		376 container rule-16
+			377 heading 条件付きのハイブリッド方式、または複合方式の実装要素の参照が見つかりました。, Value: 2
+				378 text 条件付きのハイブリッド方式、または複合方式の実装要素の参照が見つかりました。
+			379 text SOURCE_CONSTRUCTION_REFERENCE
+			380 text 両方の構成要素、正確な構成、ビルド条件、結合処理を別々に確認してください。構成要素や条件の記述だけでは、通信での合意や構成全体の安全性を判断できません。
+			381 definition list
+				382 container 分類
+					383 text 分類
+				384 text PQC
+				385 container 今回の重大度
+					386 text 今回の重大度
+				387 text 参考情報
+				388 container 今回のリスク
+					389 text 今回のリスク
+				390 text 要確認（実装や設定の確認が必要）
+				391 container 検出箇所
+					392 text 検出箇所
+				393 text 1
+			394 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				395 text 確認事項の例（各検出箇所の案内も確認してください）
+			396 text C/C++のライブラリ・プロバイダー・ビルド設定を確認する
+			397 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-16
+		398 container rule-17
+			399 heading 暗号実装の入口となる関数定義が見つかりました。, Value: 2
+				400 text 暗号実装の入口となる関数定義が見つかりました。
+			401 text SOURCE_IMPLEMENTATION_REFERENCE
+			402 text 実装の提供元、呼び出し元、ビルドへの組込みを確認してください。関数の定義だけでは、仕様への適合や実行、移行完了を判断できません。
+			403 definition list
+				404 container 分類
+					405 text 分類
+				406 text CryptoAPI
+				407 container 今回の重大度
+					408 text 今回の重大度
+				409 text 参考情報
+				410 container 今回のリスク
+					411 text 今回のリスク
+				412 text 要確認（実装や設定の確認が必要）
+				413 container 検出箇所
+					414 text 検出箇所
+				415 text 1
+			416 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				417 text 確認事項の例（各検出箇所の案内も確認してください）
+			418 text C/C++のライブラリ・プロバイダー・ビルド設定を確認する
+			419 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-17
+		420 container rule-18
+			421 heading 注釈・宣言・記録に暗号方式名が含まれています。, Value: 2
+				422 text 注釈・宣言・記録に暗号方式名が含まれています。
+			423 text TLS_ECDHE_RSA
+			424 text この文言だけでは暗号処理での利用は確認できません。実装と実際の設定を別途確認してください。
+			425 definition list
+				426 container 分類
+					427 text 分類
+				428 text TLS
+				429 container 今回の重大度
+					430 text 今回の重大度
+				431 text 参考情報
+				432 container 今回のリスク
+					433 text 今回のリスク
+				434 text 要確認（実装や設定の確認が必要）
+				435 container 検出箇所
+					436 text 検出箇所
+				437 text 1
+			438 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				439 text 確認事項の例（各検出箇所の案内も確認してください）
+			440 text この文言だけでは暗号処理での利用は確認できません。実装と実際の設定を別途確認してください。
+			441 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-18
+		442 container rule-19
+			443 heading 注釈・宣言・記録に暗号方式名が含まれています。, Value: 2
+				444 text 注釈・宣言・記録に暗号方式名が含まれています。
+			445 text TLS_RSA_CIPHER_SUITE
+			446 text この文言だけでは暗号処理での利用は確認できません。実装と実際の設定を別途確認してください。
+			447 definition list
+				448 container 分類
+					449 text 分類
+				450 text TLS
+				451 container 今回の重大度
+					452 text 今回の重大度
+				453 text 参考情報
+				454 container 今回のリスク
+					455 text 今回のリスク
+				456 text 量子計算によるリスクあり
+				457 container 検出箇所
+					458 text 検出箇所
+				459 text 1
+			460 heading 確認事項の例（各検出箇所の案内も確認してください）, Value: 3
+				461 text 確認事項の例（各検出箇所の案内も確認してください）
+			462 text この文言だけでは暗号処理での利用は確認できません。実装と実際の設定を別途確認してください。
+			463 link Description: 検出箇所と根拠を見る, Value: 127.0.0.1:57384/scan/report.html?lang=ja#rule-19
+
+The focused UI element is 1 AXWebArea ルールの説明, URL: 127.0.0.1:57384/scan/report.rules.html?lang=ja&theme=light

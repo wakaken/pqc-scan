@@ -1,0 +1,76 @@
+{
+  "sourceManifest": "tasks/085/evidence/IMPLEMENTATION-SOURCE-02.json",
+  "sourceManifestSha256": "d834095501c0a75b7c4b4790126d69a2b87af3dfc658f9b487738bc40e7c5e4d",
+  "environment": {
+    "CARGO_INCREMENTAL": "0"
+  },
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "exitCode": 101,
+      "wallSeconds": 88.50815941602923,
+      "log": "tasks/085/evidence/workspace-tests-01.log",
+      "sha256": "0430cbb2b79fa0181a9db2b497cf8d06a405b6b75fc8aaebfddc61d7899f0f55"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.7331527500646189,
+      "log": "tasks/085/evidence/fmt-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.0407859580591321,
+      "log": "tasks/085/evidence/diff-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 7.292059750063345,
+      "log": "tasks/085/evidence/clippy-01.log",
+      "sha256": "dba0a340047e669114aa2301e40988814d8c02e04ce977e446c632a994a61db3"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features",
+        "--locked",
+        "--target-dir",
+        "target/v05-feature"
+      ],
+      "exitCode": 101,
+      "wallSeconds": 85.0090292498935,
+      "log": "tasks/085/evidence/allfeatures-tests-01.log",
+      "sha256": "0007ef95c380a3b8d70ec9e6be9e9154926d882e6861d76554e8673746a9d6f0"
+    }
+  ]
+}

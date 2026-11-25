@@ -1,0 +1,1059 @@
+--- a/crates/pqc_scan_detectors/src/source_facts/c_family.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/c_family.rs
+@@ -26,7 +26,12 @@
+     OqsSig,
+ }
+ fn exact_algorithm(value: &str) -> Option<String> {
++    let value = match value {
++        "ED25519" => "Ed25519",
++        value => value,
++    };
+     if !(matches!(value, "RSA" | "DSA" | "DH" | "EC")
++        || matches!(value, "Ed25519" | "X25519")
+         || value.starts_with("ML-KEM-")
+         || value.starts_with("ML-DSA-")
+         || value.starts_with("SLH-DSA-")
+@@ -103,6 +108,15 @@
+             | "EVP_PKEY_CTX_new"
+             | "EVP_PKEY_CTX_new_from_pkey"
+             | "EVP_PKEY_CTX_dup"
++    )
++}
++fn raw_key_constructor(name: &str) -> bool {
++    matches!(
++        name,
++        "EVP_PKEY_new_raw_private_key"
++            | "EVP_PKEY_new_raw_public_key"
++            | "EVP_PKEY_new_raw_private_key_ex"
++            | "EVP_PKEY_new_raw_public_key_ex"
+     )
+ }
+ fn context_operation(name: &str) -> bool {
+@@ -151,6 +165,7 @@
+ fn known(name: &str) -> bool {
+     low_level(name).is_some()
+         || context_constructor(name)
++        || raw_key_constructor(name)
+         || context_operation(name)
+         || digest_operation(name)
+         || configuration(name)
+@@ -457,6 +472,7 @@
+             continue;
+         }
+         if context_constructor(name)
++            || raw_key_constructor(name)
+             || matches!(
+                 name,
+                 "OQS_KEM_new" | "OQS_SIG_new" | "oqs::KeyEncapsulation" | "oqs::Signature"
+--- a/crates/pqc_scan_detectors/src/source_facts/c_family/values.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/c_family/values.rs
+@@ -1,6 +1,6 @@
+ use super::{
+-    args, conditional, context_constructor, function_name, known, low_level, selected_literal,
+-    SelectorKind,
++    args, conditional, context_constructor, function_name, known, low_level, raw_key_constructor,
++    selected_literal, SelectorKind,
+ };
+ use crate::source_facts::context::{children, Context};
+ use std::{
+@@ -648,8 +648,8 @@
+             if kind == SelectorKind::EvpId {
+                 return name
+                     .strip_prefix("EVP_PKEY_")
+-                    .filter(|s| matches!(*s, "RSA" | "DSA" | "DH" | "EC"))
+-                    .map(str::to_owned);
++                    .filter(|s| matches!(*s, "RSA" | "DSA" | "DH" | "EC" | "ED25519" | "X25519"))
++                    .map(|s| if s == "ED25519" { "Ed25519" } else { s }.to_owned());
+             }
+             if let Some(s) = name.strip_prefix("OQS_KEM_alg_ml_kem_") {
+                 return selected_literal(&format!("ML-KEM-{s}"), kind);
+@@ -690,6 +690,10 @@
+         let (role, selector) = match name {
+             "EVP_PKEY_CTX_new_id" => (Role::Context, arguments.first().copied()),
+             "EVP_PKEY_CTX_new_from_name" => (Role::Context, arguments.get(1).copied()),
++            name if raw_key_constructor(name) => (
++                Role::Key,
++                arguments.get(usize::from(name.ends_with("_ex"))).copied(),
++            ),
+             "OQS_KEM_new" => (Role::OqsKem, arguments.first().copied()),
+             "OQS_SIG_new" => (Role::OqsSig, arguments.first().copied()),
+             "oqs::KeyEncapsulation" => (Role::CppKem, arguments.first().copied()),
+@@ -722,7 +726,9 @@
+                 });
+             }
+         };
+-        let kind = if name == "EVP_PKEY_CTX_new_id" {
++        let kind = if name == "EVP_PKEY_CTX_new_id"
++            || (raw_key_constructor(name) && !name.ends_with("_ex"))
++        {
+             SelectorKind::EvpId
+         } else {
+             match role {
+@@ -732,6 +738,13 @@
+             }
+         };
+         let algorithm = self.selector(selector, at, 0, kind)?;
++        if raw_key_constructor(name)
++            && !matches!(algorithm.as_str(), "Ed25519" | "X25519")
++            && !algorithm.starts_with("ML-KEM-")
++            && !algorithm.starts_with("ML-DSA-")
++        {
++            return None;
++        }
+         Self::valid_role(role, &algorithm).then_some(Key { role, algorithm })
+     }
+     fn valid_role(role: Role, algorithm: &str) -> bool {
+--- a/crates/pqc_scan_detectors/src/source_facts/csharp.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/csharp.rs
+@@ -103,6 +103,7 @@
+         "Generators.SlhDsaKeyPairGenerator" => Kind::Generator("SLH-DSA"),
+         "Engines.RsaEngine" => Kind::Engine("RSA"),
+         "Signers.DsaSigner" => Kind::Signer("DSA"),
++        "Signers.RsaDigestSigner" => Kind::Signer("RSA"),
+         "Signers.ECDsaSigner" => Kind::Signer("EC"),
+         "Agreement.ECDHBasicAgreement" => Kind::Engine("ECDH"),
+         "Kems.MLKemEncapsulator" => Kind::Encap,
+--- a/crates/pqc_scan_detectors/src/source_facts/php.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/php.rs
+@@ -501,6 +501,9 @@
+             _ => {}
+         }
+     }
++    if values.binding_limited {
++        ctx.limit("php_same_name_bindings", 64, 64);
++    }
+     facts.partial |= names.partial.get();
+ }
+ fn in_error(mut node: Node<'_>, ctx: &Context<'_, '_>) -> bool {
+--- a/crates/pqc_scan_detectors/src/source_facts/php/values.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/php/values.rs
+@@ -21,6 +21,7 @@
+     pub names: &'n Names<'a, 's, 'c>,
+     bindings: HashMap<(usize, &'s str), Vec<Binding<'a>>>,
+     overflows: HashMap<(usize, &'s str), usize>,
++    pub(super) binding_limited: bool,
+ }
+ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
+     pub fn new(names: &'n Names<'a, 's, 'c>) -> Self {
+@@ -28,6 +29,7 @@
+             names,
+             bindings: HashMap::new(),
+             overflows: HashMap::new(),
++            binding_limited: false,
+         };
+         for n in &names.ctx.nodes {
+             match n.kind() {
+@@ -223,7 +225,9 @@
+                 .entry(key)
+                 .and_modify(|at| *at = (*at).min(end))
+                 .or_insert(end);
+-            self.names.ctx.limit("php_same_name_bindings", 64, 64);
++            // The cutoff invalidates this variable's later values. Other
++            // variables/functions still have independent, bounded facts.
++            self.binding_limited = true;
+             return;
+         }
+         list.push(Binding {
+--- a/crates/pqc_scan_detectors/tests/c_family_source.rs
++++ b/crates/pqc_scan_detectors/tests/c_family_source.rs
+@@ -77,6 +77,91 @@
+         })
+         .map(|a| a["attributes"]["identifier"].as_str().unwrap().into())
+         .collect()
++}
++
++#[test]
++fn c_family_raw_key_imports_retain_documented_selectors_and_local_key_roles() {
++    let f = Fixture::new();
++    for extension in ["c", "cpp"] {
++        for (constructor, expected) in [
++            (
++                "EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519,NULL,bytes,size)",
++                "Ed25519",
++            ),
++            (
++                "EVP_PKEY_new_raw_public_key(EVP_PKEY_X25519,NULL,bytes,size)",
++                "X25519",
++            ),
++            (
++                "EVP_PKEY_new_raw_private_key_ex(libctx,\"ED25519\",NULL,bytes,size)",
++                "Ed25519",
++            ),
++            (
++                "EVP_PKEY_new_raw_public_key_ex(libctx,\"ML-KEM-768\",NULL,bytes,size)",
++                "ML-KEM-768",
++            ),
++        ] {
++            let source = format!("void f(){{ EVP_PKEY *key={constructor}; EVP_PKEY_CTX_new_from_pkey(libctx,key,NULL); }}");
++            let native = f.native(&source, extension);
++            for expression in [constructor, "EVP_PKEY_CTX_new_from_pkey(libctx,key,NULL)"] {
++                let start = source.find(expression).unwrap();
++                let observations = focal(&native, start, start + expression.len());
++                assert_eq!(
++                    observations.len(),
++                    1,
++                    "documented raw key request was omitted: {constructor}"
++                );
++                assert_eq!(algorithm_names(&native, observations[0]), vec![expected]);
++                assert_eq!(observations[0]["assurance"], "syntactic");
++                assert_eq!(observations[0]["usage"], "referenced");
++            }
++        }
++    }
++}
++
++#[test]
++fn c_family_raw_imports_do_not_guess_wrong_selector_dialects_or_expose_key_arguments() {
++    let f = Fixture::new();
++    for constructor in [
++        "EVP_PKEY_new_raw_private_key(\"ED25519\",NULL,\"PRIVATE084_RAW_IMPORT_CANARY\",32)",
++        "EVP_PKEY_new_raw_private_key_ex(NULL,EVP_PKEY_ED25519,NULL,\"PRIVATE084_RAW_IMPORT_CANARY\",32)",
++        "EVP_PKEY_new_raw_private_key_ex(NULL,\"HMAC\",NULL,\"PRIVATE084_RAW_IMPORT_CANARY\",32)",
++        "EVP_PKEY_new_raw_private_key(EVP_PKEY_RSA,NULL,\"PRIVATE084_RAW_IMPORT_CANARY\",32)",
++        "EVP_PKEY_new_raw_private_key_ex(NULL,\"RSA\",NULL,\"PRIVATE084_RAW_IMPORT_CANARY\",32)",
++    ] {
++        let source = format!("void f(){{ EVP_PKEY *key={constructor}; EVP_PKEY_CTX_new_from_pkey(libctx,key,NULL); }}");
++        let (native, legacy) = f.document(&source, "c");
++        let start = source.find(constructor).unwrap();
++        let observations = focal(&native, start, start + constructor.len());
++        assert_eq!(observations.len(), 1, "unresolved source request still needs an observation");
++        assert!(algorithm_names(&native, observations[0]).is_empty());
++        assert!(!native.to_string().contains("PRIVATE084_RAW_IMPORT_CANARY"));
++        assert!(!legacy.to_string().contains("PRIVATE084_RAW_IMPORT_CANARY"));
++    }
++    let shadowed = "#define EVP_PKEY_new_raw_private_key(a,b,c,d) local(a)\nvoid f(){EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519,NULL,data,size);}";
++    let native = f.native(shadowed, "c");
++    assert!(native["observations"].as_array().unwrap().is_empty());
++    for source in [
++        "void f(){int EVP_PKEY_ED25519=7; EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519,NULL,data,size);}",
++        "#define EVP_PKEY_ED25519 7\nvoid f(){EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519,NULL,data,size);}",
++    ] {
++        let native = f.native(source, "c");
++        let expression = "EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519,NULL,data,size)";
++        let start = source.find(expression).unwrap();
++        let observations = focal(&native, start, start + expression.len());
++        assert_eq!(observations.len(), 1);
++        assert!(algorithm_names(&native, observations[0]).is_empty(), "a local selector namesake cannot assert Ed25519");
++    }
++    let source="void f(){EVP_PKEY *key=EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519,NULL,data,size); opaque(&key); EVP_DigestSignInit(md,NULL,NULL,NULL,key);}";
++    let native = f.native(source, "c");
++    let expression = "EVP_DigestSignInit(md,NULL,NULL,NULL,key)";
++    let start = source.find(expression).unwrap();
++    let observations = focal(&native, start, start + expression.len());
++    assert_eq!(observations.len(), 1);
++    assert!(
++        algorithm_names(&native, observations[0]).is_empty(),
++        "opaque writes must invalidate the imported key fact"
++    );
+ }
+ #[test]
+ fn every_frozen_c_family_case_matches_its_original_focal_expectation() {
+--- a/crates/pqc_scan_detectors/tests/csharp_source.rs
++++ b/crates/pqc_scan_detectors/tests/csharp_source.rs
+@@ -160,6 +160,32 @@
+ }
+ 
+ #[test]
++fn csharp_bouncy_castle_rsa_digest_signer_tracks_only_resolved_library_types() {
++    let f = Fixture::new();
++    for (source, constructor) in [
++        ("using Org.BouncyCastle.Crypto.Signers; class C { void M(){ var unrelated=\"PRIVATE084_CS_SIGNER_CANARY\"; var signer=new RsaDigestSigner(digest); signer.GenerateSignature(); }}", "new RsaDigestSigner(digest)"),
++        ("using S=Org.BouncyCastle.Crypto.Signers.RsaDigestSigner; class C { void M(){ var signer=new S(digest); signer.GenerateSignature(); }}", "new S(digest)"),
++    ] {
++        let (native, legacy) = f.document(source);
++        for expression in [constructor, "signer.GenerateSignature()"] {
++            let start = source.find(expression).unwrap();
++            let observations = focal(&native, start, start + expression.len());
++            assert_eq!(observations.len(), 1, "a resolved RSA signature reference was omitted");
++            assert_eq!(algorithm_names(&native, observations[0]), vec!["RSA"]);
++            assert_eq!(observations[0]["assurance"], "syntactic");
++            assert_eq!(observations[0]["usage"], "referenced");
++        }
++        assert!(!native.to_string().contains("PRIVATE084_CS_SIGNER_CANARY"));
++        assert!(!legacy.to_string().contains("PRIVATE084_CS_SIGNER_CANARY"));
++    }
++    let source="using Org.BouncyCastle.Crypto.Signers; class RsaDigestSigner {} class C {void M(){var signer=new RsaDigestSigner(digest); signer.GenerateSignature();}}";
++    assert!(f.native(source)["observations"]
++        .as_array()
++        .unwrap()
++        .is_empty());
++}
++
++#[test]
+ fn csharp_aliases_local_global_usings_namespaces_and_static_imports_are_local() {
+     let f = Fixture::new();
+     for (source,expression,name) in [
+--- a/crates/pqc_scan_detectors/tests/php_source.rs
++++ b/crates/pqc_scan_detectors/tests/php_source.rs
+@@ -424,7 +424,9 @@
+         if count <= 64 {
+             assert_eq!(algorithm_names(&native, o[0]), vec!["RSA"]);
+         } else {
+-            assert!(o.is_empty());
++            // Retain the known API request without reviving an overflowed key type.
++            assert_eq!(o.len(), 1);
++            assert!(algorithm_names(&native, o[0]).is_empty());
+         }
+     }
+ }
+@@ -450,6 +452,74 @@
+         assert_eq!(o[0]["usage"], "referenced");
+         assert_eq!(algorithm_names(&native, o[0]), vec![name]);
+     }
++}
++
++#[test]
++fn php_local_binding_limit_retains_unaffected_api_requests_and_masking() {
++    let f = Fixture::new();
++    let source = format!(
++        "<?php function noisy(){{ {} }} function signing(){{ $key=openssl_pkey_new(['private_key_type'=>OPENSSL_KEYTYPE_RSA]); openssl_sign('PRIVATE084_PHP_BINDING_CANARY',$sig,$key); }}",
++        "$noise=1;".repeat(65)
++    );
++    let input = ScannableFile::from_bytes("case.php".into(), source.as_bytes().to_vec());
++    let outcome = TreeSitterDetector
++        .detect_observed(&input, &f.rules)
++        .unwrap();
++    assert_eq!(outcome.status(), DetectorStatus::Truncated);
++    let (native, legacy) = f.document(&source);
++    let expression = "openssl_sign('PRIVATE084_PHP_BINDING_CANARY',$sig,$key)";
++    let start = source.find(expression).unwrap();
++    let observations = focal(&native, start, start + expression.len());
++    assert_eq!(
++        observations.len(),
++        1,
++        "an unrelated local binding cap erased an explicit API request"
++    );
++    assert_eq!(algorithm_names(&native, observations[0]), vec!["RSA"]);
++    assert_eq!(observations[0]["assurance"], "syntactic");
++    assert_eq!(observations[0]["usage"], "referenced");
++    assert!(!native.to_string().contains("PRIVATE084_PHP_BINDING_CANARY"));
++    assert!(!legacy.to_string().contains("PRIVATE084_PHP_BINDING_CANARY"));
++}
++
++#[test]
++fn php_local_binding_limit_keeps_overflowed_values_unknown_and_shadows_closed() {
++    let f = Fixture::new();
++    let source = format!(
++        "<?php function limited(){{ {} $key=openssl_pkey_new($options); openssl_sign($message,$signature,$key); }}",
++        "$options=['private_key_type'=>OPENSSL_KEYTYPE_RSA];".repeat(65)
++    );
++    let input = ScannableFile::from_bytes("case.php".into(), source.as_bytes().to_vec());
++    assert_eq!(
++        TreeSitterDetector
++            .detect_observed(&input, &f.rules)
++            .unwrap()
++            .status(),
++        DetectorStatus::Truncated
++    );
++    let native = f.native(&source);
++    for expression in [
++        "openssl_pkey_new($options)",
++        "openssl_sign($message,$signature,$key)",
++    ] {
++        let start = source.find(expression).unwrap();
++        let observations = focal(&native, start, start + expression.len());
++        assert_eq!(
++            observations.len(),
++            1,
++            "explicit API reference must survive without a guessed key type"
++        );
++        assert!(algorithm_names(&native, observations[0]).is_empty());
++    }
++    let shadowed = format!(
++        "<?php namespace Project; function openssl_sign($a,$b,$c){{}} function noisy(){{ {} openssl_sign($m,$s,$k); }}",
++        "$noise=1;".repeat(65)
++    );
++    let native = f.native(&shadowed);
++    assert!(
++        native["observations"].as_array().unwrap().is_empty(),
++        "a local namesake must remain suppressed"
++    );
+ }
+ 
+ #[test]
+--- a/docs/architecture.md
++++ b/docs/architecture.md
+@@ -189,6 +189,12 @@
+   typed draft-to-finding bindings permit fixed label restoration; arbitrary match
+   text, metadata, argument payloads and source context remain protected. No new
+   serialized field/schema or held-input meaning changes.
++
++PHP local binding saturation retains the fixed limit of 64 records per variable and
++invalidates later values of that variable. It does not abort independent API
++inspection after the name index has completed. The local cap is reported as
++Truncated after retaining those references; structural/name/candidate limits
++still fail closed before unproven identities can be emitted.
+ 
+ ### AST occurrence identity (task 024)
+ 
+@@ -577,7 +583,7 @@
+ are unchanged. Ordered bindings use a64-record per-name cap, depth8 aliases and
+ bounded ancestor/declarator traversal. Unknown calls/indirect writes use ordered
+ mutation barriers; an incomplete name index cannot expose a hidden built-in.
+-Explicit EVP contexts, generated out-parameter keys, OQS C objects and C++ local
++Explicit EVP contexts, keys from generation or raw imports, OQS C objects and C++ local
+ objects retain distinct roles. No graph/include/preprocessor/compiler evaluation
+ occurs. Qualified C++ local lists/multiple declarations use precise ranges and
+ normal shared budgets; pointer flow from new remains unresolved.
+--- a/docs/user/COVERAGE.ja.md
++++ b/docs/user/COVERAGE.ja.md
+@@ -94,9 +94,12 @@
+ 暗号方式名に似た鍵データも、方式として登録しません。明示的なAPI由来の方式情報は保持します。
+ 独自ルールは従来の汎用動作を維持し、任意のファイル間解決は対象外です。
+ 
++1つの変数の追跡上限に達した後の値は、不明として扱います。\
++影響を受けないAPI参照は残しますが、検査状況は未完了です。
++
+ C#では標準のRSA/DSA/EC/ECDHの型、局所的に追跡できる操作、.NETのMLKem・
+ MLDsa・SlhDsaの生成・インポートと正確なpureパラメーター、対応するBouncy Castleの
+-鍵生成・KEM・署名を調べます。.NETのPQCクラスをAsymmetricAlgorithmの派生型とは
++鍵生成・KEM・署名（RSAの`RsaDigestSigner`を含む）を調べます。.NETのPQCクラスをAsymmetricAlgorithmの派生型とは
+ 仮定しません。インポートや型の参照だけでは操作の成功と判定しません。
+ 名前付き引数と局所変数を扱います。名前空間の別名はAlias.TypeとAlias::Typeに対応し、
+ 型パラメーターやプロパティの同名を所有する型・メソッドの範囲で扱います。
+@@ -124,6 +127,9 @@
+ マクロや条件分岐は実行せず、条件付きの参照は未完了として残します。
+ 不明な呼び出し、間接的な書き込み、同名の宣言、鍵の役割の矛盾では古い束縛を流用しません。
+ 低水準の鍵やOQSのオブジェクトをEVP鍵と同一視しません。
++
++EVPのraw公開鍵・秘密鍵の取り込みは、Ed25519／X25519の数値IDと`_ex`形式の方式名、ML-KEM／ML-DSAの`_ex`形式の明示的なパラメーターセットを調べます。\
++その他の指定は未解決とし、渡された鍵データの妥当性は検証しません。
+ 
+ 対応するincludeはライブラリの参照として扱います。有限のプロバイダー・プロパティ値と
+ 単純なコロン区切りのTLSグループは、公開された固定ラベル・マーカーに残します。
+--- a/docs/user/COVERAGE.md
++++ b/docs/user/COVERAGE.md
+@@ -103,9 +103,14 @@
+ payload tokens do not become algorithm assets. Explicit API identities remain. Unrelated/custom rules
+ retain their generic behavior. Arbitrary cross-file resolution is excluded.
+ 
++When a variable reaches its tracking limit, later values of that variable remain
++unknown. Independent API references are retained, and inspection still reports
++truncation.
++
+ C# covers explicit standard RSA/DSA/EC/ECDH providers and bounded local operations,
+ .NET MLKem/MLDsa/SlhDsa generation/import and exact pure parameter symbols, and
+-supported Bouncy Castle generators/KEM/signers. The .NET PQC classes are handled
++supported Bouncy Castle generators/KEM/signers, including RSA `RsaDigestSigner`
++references. The .NET PQC classes are handled
+ independently of AsymmetricAlgorithm. Imports/type references do not establish
+ successful operations. Named arguments and locally known receiver roles are
+ supported. Namespace aliases accept Alias.Type and Alias::Type; type parameters
+@@ -136,6 +141,10 @@
+ Unknown calls, indirect writes, name shadows and conflicting roles invalidate
+ older bindings. Raw low-level/OQS objects do not become EVP keys.
+ 
++Raw public/private EVP key imports retain Ed25519/X25519 numeric IDs or `_ex`
++names, and exact ML-KEM/ML-DSA `_ex` parameter sets. Other raw-import selectors
++remain unresolved; supplied key data is not validated.
++
+ Recognized includes remain library references. Finite provider/property values
+ and bare colon-separated TLS groups retain exact public labels/markers without
+ algorithm assets, loading or negotiation claims. Standalone MLKEM names, standard
+--- /dev/null
++++ b/tests/quality/external.py
+@@ -0,0 +1,177 @@
++"""Bounded exploratory OSS scoring; existing corpus/license contracts stay intact.
++
++Only annotated intervals are scored. Other locations are unattributed, so this
++adapter cannot establish full-file or repository precision. No independent-label
++claim is made here. Source acquisition, licenses and annotation completeness must
++be recorded separately by the study owner.
++"""
++import gzip
++import hashlib
++import json
++import os
++import pathlib
++import re
++import stat
++
++from evaluate import bytes_digest, safe_relative, score, validate_labels
++
++
++def source_language(name):
++    """Inventory-based grouping; headers and untagged INC remain unresolved."""
++    suffix = pathlib.PurePosixPath(name).suffix
++    if suffix == '.C':
++        return 'C++'
++    languages = {'.java': 'Java', '.go': 'Go', '.js': 'JavaScript', '.ts': 'TypeScript',
++                 '.tsx': 'TSX', '.py': 'Python', '.rs': 'Rust', '.rb': 'Ruby',
++                 '.swift': 'Unsupported Swift', '.php': 'PHP', '.phtml': 'PHP',
++                 '.inc': 'Unresolved INC', '.cs': 'C#', '.c': 'C', '.cc': 'C++',
++                 '.cpp': 'C++', '.cxx': 'C++', '.hpp': 'C++', '.hxx': 'C++',
++                 '.hh': 'C++', '.h': 'Ambiguous C/C++ header'}
++    return languages.get(suffix.lower(), 'Not Applicable')
++
++
++def bound_source(root, name, expected_sha256):
++    # The operator-selected root may use a system alias such as /tmp on macOS.
++    # Only descendants must remain exact, non-symlinked source paths.
++    root = pathlib.Path(root).resolve(strict=True)
++    path = root / safe_relative(name)
++    if path.resolve() != path or not path.is_file() or bytes_digest(path) != expected_sha256:
++        raise ValueError('External source changed, unavailable or symlinked')
++    return path
++
++
++def validate_tree(root, files):
++    """Bind every non-Git-metadata file, retaining but never following symlinks."""
++    root = pathlib.Path(root).resolve(strict=True)
++    expected = {}
++    for item in files:
++        name = item['path']
++        safe_relative(name)
++        if name in expected or '.git' in pathlib.PurePosixPath(name).parts:
++            raise ValueError('Duplicate input or Git metadata in source population')
++        expected[name] = item
++    actual = set()
++    for directory, dirs, names in os.walk(root, followlinks=False):
++        if pathlib.Path(directory) != root and ('.git' in dirs or '.git' in names):
++            raise ValueError('Unexpected nested Git metadata could change file selection')
++        dirs[:] = [d for d in dirs if d != '.git']
++        for name in list(dirs):
++            path = pathlib.Path(directory)/name
++            if path.is_symlink():
++                actual.add(path.relative_to(root).as_posix())
++                dirs.remove(name)
++        actual.update((pathlib.Path(directory)/n).relative_to(root).as_posix() for n in names if n != '.git')
++    if actual != expected.keys():
++        raise ValueError('External input population changed')
++    for name, item in expected.items():
++        path = root / name
++        mode = path.lstat().st_mode
++        if item.get('mode') == '120000':
++            if not stat.S_ISLNK(mode) or os.readlink(path) != item['symlink']:
++                raise ValueError('Pinned source symlink changed')
++        elif not stat.S_ISREG(mode) or path.is_symlink() or path.stat().st_size != item['bytes']:
++            raise ValueError('Pinned source mode/size changed')
++        else:
++            bound_source(root, name, item['sha256'])
++
++
++def load_bound_report(receipt, truth_paths):
++    """Reject changed truth or compressed/plain output before parsing a report."""
++    if not receipt['truthBindings'] or receipt['truthBindings'].keys() != truth_paths.keys():
++        raise ValueError('Missing frozen truth binding')
++    for name, path in truth_paths.items():
++        if bytes_digest(path) != receipt['truthBindings'][name]:
++            raise ValueError('Frozen truth changed')
++    item = receipt['artifacts']['report.json']
++    compressed = pathlib.Path(item['compressedPath']).read_bytes()
++    if hashlib.sha256(compressed).hexdigest() != item['compressedSha256']:
++        raise ValueError('Compressed output changed')
++    with gzip.open(item['compressedPath'], 'rb') as stream:
++        raw = stream.read(item['bytes'] + 1)
++    if len(raw) != item['bytes'] or hashlib.sha256(raw).hexdigest() != item['sha256']:
++        raise ValueError('Plain output changed')
++    return json.loads(raw)
++
++
++def selection_bindings(root, *, home=None, xdg=None, cwd=None):
++    """Bind ignore-0.4.25's external selection inputs without copying secrets.
++
++    The scanner reads ~/.gitconfig itself; GIT_CONFIG_GLOBAL does not isolate
++    this dependency. Preserve its actual precedence, including absent files.
++    Config contents stay private; only paths and digests enter study evidence.
++    """
++    root = pathlib.Path(root).resolve(strict=True)
++    cwd = (pathlib.Path.cwd() if cwd is None else pathlib.Path(cwd)).resolve()
++    home = pathlib.Path.home() if home is None else pathlib.Path(home)
++    home = (home if home.is_absolute() else cwd/home).resolve()
++    xdg = pathlib.Path(os.environ.get('XDG_CONFIG_HOME') or home/'.config') if xdg is None else pathlib.Path(xdg)
++    xdg = (xdg if xdg.is_absolute() else cwd/xdg).resolve()
++    paths = {home/'.gitconfig', xdg/'git/config', xdg/'git/ignore',
++             root/'.git/config', root/'.git/info/exclude'}
++    effective = xdg/'git/ignore'
++    pattern = re.compile(rb'^\s*excludesfile\s*=\s*"?\s*(\S+?)\s*"?\s*$', re.I | re.M | re.ASCII)
++    for config in (home/'.gitconfig', xdg/'git/config'):
++        if config.is_file():
++            match = pattern.search(config.read_bytes())
++            if match:
++                try:
++                    effective = pathlib.Path(match[1].decode('utf-8').replace('~', str(home)))
++                except UnicodeDecodeError:
++                    continue
++                break
++    if not effective.is_absolute():
++        effective = cwd/effective
++    paths.add(effective)
++    for directory in (root, *root.parents):
++        paths.update(directory/name for name in ('.ignore', '.gitignore', '.git/info/exclude'))
++    bindings = {}
++    for path in sorted(paths):
++        if not path.exists() and not path.is_symlink():
++            bindings[str(path)] = dict(exists=False)
++        elif not path.is_file():
++            raise ValueError('Selection input is not a regular file')
++        else:
++            bindings[str(path)] = dict(exists=True, resolved=str(path.resolve()), sha256=bytes_digest(path))
++    return dict(effectiveGlobalIgnore=str(effective), files=bindings)
++
++
++def score_annotated(data, labels, findings):
++    """Use unchanged one-to-one scorer inside frozen annotated intervals only."""
++    validate_labels(data, labels)
++    files = {f['path'] for f in data['files']}
++    nominated = {r for rules in data['families'].values() for r in rules}
++    if len(files) != len(data['files']) or len(nominated) != sum(map(len, data['families'].values())):
++        raise ValueError('Duplicate files or rule families')
++    intervals = {}
++    ids = set()
++    for unit in data['units']:
++        safe_relative(unit['path'])
++        if unit['id'] in ids or unit['path'] not in files or unit['ruleId'] not in nominated:
++            raise ValueError('Invalid unit identity')
++        ids.add(unit['id'])
++        if any(type(unit[k]) is not int for k in ('line', 'startColumn', 'endColumn')) or not (
++                unit['line'] > 0 and 0 < unit['startColumn'] < unit['endColumn']):
++            raise ValueError('Invalid truth interval')
++        key = (unit['path'], unit['ruleId'], unit['line'])
++        for previous in intervals.setdefault(key, []):
++            if max(previous['startColumn'], unit['startColumn']) < min(previous['endColumn'], unit['endColumn']):
++                raise ValueError('Overlapping truth intervals')
++        intervals[key].append(unit)
++    selected, unattributed, other_rules = [], [], []
++    for finding in findings:
++        loc = finding['location']
++        if finding['rule_id'] not in nominated:
++            other_rules.append(finding)
++            continue
++        candidates = intervals.get((loc['file'], finding['rule_id'], loc['line']), [])
++        if loc['line'] == 0:
++            name = finding.get('evidence', {}).get('metadata', {}).get('dep_name')
++            candidates = [u for u in data['units'] if u['path'] == loc['file'] and
++                          u['ruleId'] == finding['rule_id'] and name is not None and u.get('dependencyName') == name]
++        if any(loc['line'] == 0 or u['startColumn'] <= loc['column'] < u['endColumn'] for u in candidates):
++            selected.append(finding)
++        else:
++            unattributed.append(finding)
++    return dict(accuracy=score(data, labels, selected), unattributed=unattributed,
++                other_rules=other_rules,
++                scope='Annotated intervals only; not full-file or repository accuracy')
+--- /dev/null
++++ b/tests/quality/test_external.py
+@@ -0,0 +1,199 @@
++"""External OSS measurement boundaries; hand-derived counts, no upstream execution."""
++import copy
++import hashlib
++import gzip
++import importlib.util
++import pathlib
++import tempfile
++import unittest
++
++class ExternalStudyTests(unittest.TestCase):
++    def test_language_does_not_pool_uppercase_c_or_ambiguous_headers(self):
++        classify = getattr(self.external(), 'source_language', None)
++        self.assertTrue(callable(classify), 'new languages require source-based grouping')
++        for name, expected in [('a.c', 'C'), ('a.C', 'C++'), ('a.cpp', 'C++'),
++                               ('a.h', 'Ambiguous C/C++ header'), ('a.hpp', 'C++'),
++                               ('a.cs', 'C#'), ('a.php', 'PHP'), ('a.phtml', 'PHP'),
++                               ('a.PHP', 'PHP'), ('a.H', 'Ambiguous C/C++ header'),
++                               ('a.inc', 'Unresolved INC'), ('a.tsx', 'TSX'),
++                               ('a.swift', 'Unsupported Swift'), ('LICENSE', 'Not Applicable')]:
++            with self.subTest(name=name):
++                self.assertEqual(classify(name), expected)
++
++    def external(self):
++        spec = importlib.util.find_spec('external')
++        self.assertIsNotNone(spec, 'external source validation/score adapter is missing')
++        import external
++        return external
++
++    def test_partial_annotation_preserves_unattributed_and_duplicate_predictions(self):
++        external = self.external()
++        data = dict(files=[dict(path='a.php', split='tuning')], families=dict(api=['R']),
++                    units=[dict(id='p', path='a.php', ruleId='R', line=2, startColumn=1, endColumn=5),
++                           dict(id='n', path='a.php', ruleId='R', line=3, startColumn=1, endColumn=5),
++                           dict(id='miss', path='a.php', ruleId='R', line=4, startColumn=1, endColumn=5)])
++        labels = dict(p='positive', n='negative', miss='positive')
++        def prediction(line, column=1, rule='R'):
++            return dict(rule_id=rule, location=dict(file='a.php', line=line, column=column))
++        predictions = [prediction(2), prediction(2), prediction(3), prediction(4, 5),
++                       prediction(99), prediction(2, rule='OTHER')]
++        scored = external.score_annotated(data, labels, predictions)
++        group = scored['accuracy']['groups']['tuning/api']
++        self.assertEqual({k: group[k] for k in ('tp', 'fp', 'fn', 'tn')},
++                         dict(tp=1, fp=2, fn=1, tn=0))
++        self.assertEqual(len(scored['unattributed']), 2)
++        self.assertEqual(len(scored['other_rules']), 1)
++        self.assertEqual(len(predictions), 6)
++        # Reject overlapping truth, including overlaps with the same label.
++        invalid = copy.deepcopy(data)
++        invalid['units'].append(dict(id='overlap', path='a.php', ruleId='R', line=2, startColumn=2, endColumn=4))
++        with self.assertRaises(ValueError):
++            external.score_annotated(invalid, dict(labels, overlap='positive'), predictions)
++
++    def test_dependency_unknown_position_matches_only_exact_name(self):
++        external = self.external()
++        data = dict(files=[dict(path='composer.json', split='tuning')],
++                    families=dict(dependency=['D']), units=[dict(id='d', path='composer.json',
++                    ruleId='D', line=4, startColumn=2, endColumn=20, dependencyName='ext-openssl')])
++        finding = dict(rule_id='D', location=dict(file='composer.json', line=0, column=0),
++                       evidence=dict(metadata=dict(dep_name='ext-openssl')))
++        good = external.score_annotated(data, {'d': 'positive'}, [finding])
++        self.assertEqual(good['accuracy']['groups']['tuning/dependency']['tp'], 1)
++        finding['evidence']['metadata']['dep_name'] = 'ext-sodium'
++        unknown = external.score_annotated(data, {'d': 'positive'}, [finding])
++        self.assertEqual(unknown['accuracy']['groups']['tuning/dependency']['fn'], 1)
++        self.assertEqual(len(unknown['unattributed']), 1)
++
++    def test_bound_source_rejects_changes_traversal_and_symlink(self):
++        external = self.external()
++        with tempfile.TemporaryDirectory() as tmp:
++            root = pathlib.Path(tmp)
++            source = root/'a.php'
++            source.write_bytes(b'<?php echo 1;\n')
++            expected = hashlib.sha256(b'<?php echo 1;\n').hexdigest()
++            self.assertEqual(external.bound_source(root, 'a.php', expected), source.resolve())
++            source.write_bytes(b'changed')
++            with self.assertRaises(ValueError):
++                external.bound_source(root, 'a.php', expected)
++            with self.assertRaises(ValueError):
++                external.bound_source(root, '../a.php', expected)
++            (root/'link').symlink_to(source)
++            with self.assertRaises(ValueError):
++                external.bound_source(root, 'link', hashlib.sha256(b'changed').hexdigest())
++            (root/'dirlink').symlink_to(root, target_is_directory=True)
++            with self.assertRaises(ValueError):
++                external.bound_source(root, 'dirlink/a.php', hashlib.sha256(b'changed').hexdigest())
++
++    def test_tree_binding_rejects_added_files_changed_links_and_changed_bytes(self):
++        external = self.external()
++        validate = getattr(external, 'validate_tree', None)
++        self.assertTrue(callable(validate), 'full input population must be bound')
++        with tempfile.TemporaryDirectory() as tmp:
++            root = pathlib.Path(tmp)
++            (root/'a.c').write_bytes(b'abc')
++            (root/'link').symlink_to('a.c')
++            (root/'.git').mkdir()
++            (root/'.git/index').write_bytes(b'non-input Git metadata')
++            files = [dict(path='a.c', mode='100644', bytes=3,
++                          sha256='ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'),
++                     dict(path='link', mode='120000', symlink='a.c')]
++            validate(root, files)
++            (root/'added.c').write_bytes(b'not in pinned population')
++            with self.assertRaises(ValueError):
++                validate(root, files)
++            (root/'added.c').unlink()
++            (root/'link').unlink()
++            (root/'link').symlink_to('elsewhere')
++            with self.assertRaises(ValueError):
++                validate(root, files)
++            (root/'link').unlink()
++            (root/'link').symlink_to('a.c')
++            (root/'a.c').write_bytes(b'abd')
++            with self.assertRaises(ValueError):
++                validate(root, files)
++            (root/'a.c').write_bytes(b'abc')
++            (root/'nested/.git/info').mkdir(parents=True)
++            with self.assertRaises(ValueError):
++                validate(root, files)
++
++    def test_scoring_input_rejects_modified_truth_and_compressed_or_plain_report(self):
++        external = self.external()
++        load = getattr(external, 'load_bound_report', None)
++        self.assertTrue(callable(load), 'scoring must verify actual frozen truth and output bytes')
++        with tempfile.TemporaryDirectory() as tmp:
++            root = pathlib.Path(tmp)
++            truth = root/'truth.json'
++            truth.write_bytes(b'{}\n')
++            output = root/'report.json.gz'
++            raw = b'{"findings": []}\n'
++            compressed = gzip.compress(raw)
++            output.write_bytes(compressed)
++            receipt = dict(truthBindings={'truth.json': hashlib.sha256(b'{}\n').hexdigest()},
++                           artifacts={'report.json': dict(compressedPath=str(output),
++                           compressedSha256=hashlib.sha256(compressed).hexdigest(),
++                           sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw))})
++            self.assertEqual(load(receipt, {'truth.json': truth}), {'findings': []})
++            truth.write_bytes(b'changed')
++            with self.assertRaises(ValueError):
++                load(receipt, {'truth.json': truth})
++            truth.write_bytes(b'{}\n')
++            output.write_bytes(gzip.compress(b'{"findings": [1]}\n'))
++            with self.assertRaises(ValueError):
++                load(receipt, {'truth.json': truth})
++            changed = copy.deepcopy(receipt)
++            changed['artifacts']['report.json']['compressedSha256'] = hashlib.sha256(output.read_bytes()).hexdigest()
++            with self.assertRaises(ValueError):
++                load(changed, {'truth.json': truth})
++            with self.assertRaises(ValueError):
++                load(receipt, {})
++
++    def test_selection_binding_tracks_effective_global_parent_and_local_ignores(self):
++        external = self.external()
++        bind = getattr(external, 'selection_bindings', None)
++        self.assertTrue(callable(bind), 'ignore sources must be frozen without rewriting HOME')
++        with tempfile.TemporaryDirectory() as tmp:
++            base = pathlib.Path(tmp).resolve()
++            home, xdg, root = base/'home', base/'xdg', base/'repos/project'
++            home.mkdir()
++            (xdg/'git').mkdir(parents=True)
++            (root/'.git/info').mkdir(parents=True)
++            (home/'.gitconfig').write_text('[core]\n excludesFile = ~/excluded\n')
++            (home/'excluded').write_text('*.pem\n')
++            (xdg/'git/config').write_text('[core]\nexcludesFile = ~/other\n')
++            first = bind(root, home=home, xdg=xdg, cwd=base)
++            self.assertEqual(first['effectiveGlobalIgnore'], str(home/'excluded'))
++            self.assertIn(str(root.parent/'.ignore'), first['files'])
++            (root/'.git/info/exclude').write_text('*.c\n')
++            self.assertNotEqual(first, bind(root, home=home, xdg=xdg, cwd=base))
++            (root/'.git/info/exclude').unlink()
++            (home/'excluded').write_text('*.cs\n')
++            self.assertNotEqual(first, bind(root, home=home, xdg=xdg, cwd=base))
++            (home/'.gitconfig').unlink()
++            self.assertEqual(bind(root, home=home, xdg=xdg, cwd=base)['effectiveGlobalIgnore'], str(home/'other'))
++            (xdg/'git/config').unlink()
++            default = bind(root, home=home, xdg=xdg, cwd=base)
++            self.assertEqual(default['effectiveGlobalIgnore'], str(xdg/'git/ignore'))
++            (root.parent/'.ignore').write_text('project/a.php\n')
++            self.assertNotEqual(default, bind(root, home=home, xdg=xdg, cwd=base))
++            (root.parent/'.ignore').unlink()
++            (root.parent/'.git/info').mkdir(parents=True)
++            (root.parent/'.git/info/exclude').write_text('*.c\n')
++            self.assertNotEqual(default, bind(root, home=home, xdg=xdg, cwd=base))
++
++    def test_relative_global_selection_paths_use_child_working_directory(self):
++        external = self.external()
++        with tempfile.TemporaryDirectory() as tmp:
++            base = pathlib.Path(tmp).resolve()
++            root = base/'repo'
++            root.mkdir()
++            (base/'cfg/git').mkdir(parents=True)
++            (base/'home').mkdir()
++            (base/'cfg/git/config').write_text('[core]\nexcludesFile = relative-ignore\n')
++            (base/'relative-ignore').write_text('*.php\n')
++            bound = external.selection_bindings(root, home=pathlib.Path('home'), xdg=pathlib.Path('cfg'), cwd=base)
++            self.assertEqual(bound['effectiveGlobalIgnore'], str(base/'relative-ignore'))
++            self.assertTrue(bound['files'][str(base/'relative-ignore')]['exists'])
++
++
++if __name__ == '__main__':
++    unittest.main()
+--- /dev/null
++++ b/tasks/084/evidence/oss_inspection_observer.rs
+@@ -0,0 +1,222 @@
++//! Task084-only metadata observer. Target repositories are data, never executed.
++//! Compile against the separately bound scanner source; never ship this binary.
++use anyhow::{ensure, Result};
++use pqc_scan_core::{
++    scan_repository_native, Detection, Detector, DetectorOutcome, NativeOptions, RepositoryContext,
++    ScanConfig, ScanDocument, ScannableFile,
++};
++use pqc_scan_rules::RuleSet;
++use serde_json::{json, Value};
++use std::{
++    fs,
++    path::{Path, PathBuf},
++    sync::{Arc, Mutex},
++};
++
++struct Observed {
++    inner: Arc<dyn Detector>,
++    rows: Arc<Mutex<Vec<Value>>>,
++}
++impl Detector for Observed {
++    fn name(&self) -> &'static str {
++        self.inner.name()
++    }
++    fn detect(&self, file: &ScannableFile, rules: &RuleSet) -> Result<Vec<Detection>> {
++        self.inner.detect(file, rules)
++    }
++    fn detect_detailed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
++        self.inner.detect_detailed(file, rules)
++    }
++    fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
++        self.inner.detect_observed(file, rules)
++    }
++    fn detect_in_repository(
++        &self,
++        file: &ScannableFile,
++        rules: &RuleSet,
++        context: Option<&RepositoryContext>,
++        observed: bool,
++    ) -> Result<DetectorOutcome> {
++        let result = self
++            .inner
++            .detect_in_repository(file, rules, context, observed);
++        let status = result
++            .as_ref()
++            .map(|outcome| format!("{:?}", outcome.status()))
++            .unwrap_or_else(|_| "Failed".to_owned());
++        self.rows.lock().unwrap().push(json!({
++            "file": file.path.to_string_lossy(),
++            "detector": self.inner.name(),
++            "status": status,
++        }));
++        result
++    }
++}
++
++fn config(root: &Path) -> ScanConfig {
++    ScanConfig {
++        root: root.to_path_buf(),
++        threads: 1,
++        max_file_size_bytes: 2 * 1024 * 1024,
++    }
++}
++fn run(root: &Path, rules: &RuleSet, scope: &str) -> Result<(ScanDocument, Vec<Value>)> {
++    let rows = Arc::new(Mutex::new(Vec::new()));
++    let detectors: Vec<Arc<dyn Detector>> = pqc_scan_detectors::default_detectors()
++        .into_iter()
++        .map(|inner| {
++            Arc::new(Observed {
++                inner,
++                rows: Arc::clone(&rows),
++            }) as Arc<dyn Detector>
++        })
++        .collect();
++    let document = scan_repository_native(
++        &config(root),
++        rules,
++        &detectors,
++        &NativeOptions::new(Some(scope))?,
++    )?;
++    let captured = rows.lock().unwrap().clone();
++    Ok((document, captured))
++}
++fn main() -> Result<()> {
++    let args: Vec<String> = std::env::args().collect();
++    ensure!(
++        args.len() == 5,
++        "expected root rules repository-scope output.json"
++    );
++    let root = PathBuf::from(&args[1]).canonicalize()?;
++    let output = PathBuf::from(&args[4]);
++    ensure!(!output.exists(), "refusing to overwrite observer output");
++    let rules = RuleSet::load_from_dir(Path::new(&args[2]))?;
++    let (selected, _) = pqc_scan_core::walker::walk_repository(&root, 2 * 1024 * 1024)?;
++    let (document, mut rows) = run(&root, &rules, &args[3])?;
++    rows.sort_by_key(Value::to_string);
++    let inventory = serde_json::to_value(document.native().unwrap())?;
++    let selected: Vec<_> = selected
++        .iter()
++        .map(|p| {
++            p.strip_prefix(&root)
++                .unwrap_or(p)
++                .to_string_lossy()
++                .into_owned()
++        })
++        .collect();
++    let value = json!({
++        "observer": "task084-default-detector-forwarder",
++        "repositoryScope": args[3],
++        "selectedPaths": selected,
++        "detectorRows": rows,
++        "coverage": inventory["coverage"],
++        "findingCount": document.legacy().findings.len(),
++        "purpose": "Per-file detector states only; not a performance sample or a new crypto matcher"
++    });
++    let file = fs::OpenOptions::new()
++        .write(true)
++        .create_new(true)
++        .open(output)?;
++    serde_json::to_writer(file, &value)?;
++    Ok(())
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    struct Fixture(PathBuf);
++    impl Fixture {
++        fn new() -> Self {
++            let root = std::env::temp_dir()
++                .join(format!("pqc084-observer-control-{}", std::process::id()));
++            fs::create_dir(&root).unwrap();
++            for (name, source) in [
++                ("a.php", "<?php openssl_sign($message,$sig,$key);"),
++                ("a.c", "void f(){EVP_PKEY_CTX_new_id(EVP_PKEY_RSA,0);}"),
++                ("a.cpp", "void f(){OQS_KEM_new(\"ML-KEM-768\");}"),
++                ("a.cs", "using System.Security.Cryptography; class C {void M(){RSA.Create();}}"),
++                ("Directory.Packages.props", "<Project><PropertyGroup><ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally></PropertyGroup><ItemGroup><PackageVersion Include=\"BouncyCastle.Cryptography\" Version=\"2.6.2\"/></ItemGroup></Project>"),
++                ("a.csproj", "<Project><ItemGroup><PackageReference Include=\"BouncyCastle.Cryptography\"/></ItemGroup></Project>"),
++            ] {
++                fs::write(root.join(name), source).unwrap();
++            }
++            Self(root)
++        }
++    }
++    impl Drop for Fixture {
++        fn drop(&mut self) {
++            let _ = fs::remove_dir_all(&self.0);
++        }
++    }
++    fn rules() -> RuleSet {
++        RuleSet::load_from_dir(
++            Path::new(env!("CARGO_MANIFEST_DIR"))
++                .join("../../rules")
++                .as_path(),
++        )
++        .unwrap()
++    }
++    fn legacy(document: &ScanDocument) -> Value {
++        let mut value = serde_json::to_value(document.legacy()).unwrap();
++        value.as_object_mut().unwrap().remove("generated_at");
++        value
++    }
++    #[test]
++    fn records_every_file_detector_without_changing_results_or_repository_context() {
++        let fixture = Fixture::new();
++        let rules = rules();
++        let plain = scan_repository_native(
++            &config(&fixture.0),
++            &rules,
++            &pqc_scan_detectors::default_detectors(),
++            &NativeOptions::new(Some("oss084/control")).unwrap(),
++        )
++        .unwrap();
++        let (captured, rows) = run(&fixture.0, &rules, "oss084/control").unwrap();
++        assert_eq!(legacy(&plain), legacy(&captured));
++        let plain_native = serde_json::to_value(plain.native().unwrap()).unwrap();
++        let captured_native = serde_json::to_value(captured.native().unwrap()).unwrap();
++        assert_eq!(plain_native["coverage"], captured_native["coverage"]);
++        assert!(!plain.legacy().findings.is_empty());
++        assert_eq!(
++            rows.len(),
++            6 * 5,
++            "all six selected files must have every default detector state"
++        );
++        let unique: std::collections::HashSet<_> = rows
++            .iter()
++            .map(|r| (r["file"].as_str().unwrap(), r["detector"].as_str().unwrap()))
++            .collect();
++        assert_eq!(unique.len(), rows.len());
++        assert!(rows
++            .iter()
++            .any(|r| r["detector"] == "tree_sitter_detector" && r["status"] == "Complete"));
++    }
++    struct Failed;
++    impl Detector for Failed {
++        fn name(&self) -> &'static str {
++            "controlled_failure"
++        }
++        fn detect(&self, _: &ScannableFile, _: &RuleSet) -> Result<Vec<Detection>> {
++            anyhow::bail!("PRIVATE084_OBSERVER_ERROR_CANARY")
++        }
++    }
++    #[test]
++    fn failed_status_is_recorded_without_logging_error_payload() {
++        let rows = Arc::new(Mutex::new(Vec::new()));
++        let detector = Observed {
++            inner: Arc::new(Failed),
++            rows: Arc::clone(&rows),
++        };
++        let file = ScannableFile::from_bytes("a.cs".into(), b"class C{}".to_vec());
++        assert!(detector
++            .detect_in_repository(&file, &rules(), None, true)
++            .is_err());
++        let rows = rows.lock().unwrap();
++        assert_eq!(rows.len(), 1);
++        assert_eq!(rows[0]["status"], "Failed");
++        assert!(!serde_json::to_string(&*rows)
++            .unwrap()
++            .contains("PRIVATE084_OBSERVER_ERROR_CANARY"));
++    }
++}

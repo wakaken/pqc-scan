@@ -1,0 +1,363 @@
+{
+  "generated_at": "2026-11-24T08:19:54.796788Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-718a085f6ab532c8755f54063adc3b1d1f810a40702aad48153e2f32edaa2f80",
+      "rule_id": "DEP_BOUNCYCASTLE",
+      "category": "TLS",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.45,
+      "description": "BouncyCastle dependency detected.",
+      "migration_hint": "Verify BouncyCastle PQC support status.",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "bouncyca***@2.8.0",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "nuget",
+          "dep_name": "bouncycastle.cryptography",
+          "dep_purl": "pkg:nuget/bouncycastle.cryptography",
+          "dep_source_type": "manifest",
+          "dep_version": "2.8.0",
+          "detector": "dependency_detector",
+          "manifest": "Directory.Packages.props"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dotnet.verify-pqc-environment",
+          "title": "Verify .NET target, package and operating-system support",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed runtime, OS, provider and native backend versions are unknown. Target frameworks, global.json SDK selection and NuGet package declarations are separate source claims, not the installed runtime.",
+            ".NET 10 documents MLKem, MLDsa and SlhDsa. Check the selected parameter, OS/backend support and IsSupported or IsAlgorithmSupported in the deployed environment; Linux facilities may require OpenSSL 3.5 or later. Do not generalize platform support across Windows, Linux and macOS.",
+            ".NET 11 CompositeMLKem and Hpke facilities require review of the exact API and experimental diagnostics. HPKE alone does not identify a PQC KEM. Check Bouncy Castle package/version independently of the .NET target.",
+            "ASP.NET/Kestrel TLS depends on the OS/TLS backend and peer negotiation; cryptographic API availability does not enable PQC TLS. Data Protection AES payloads are not a reason to replace symmetric encryption with a KEM."
+          ],
+          "references": [
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/standard/security/cross-platform-cryptography",
+            "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-10.0"
+          ]
+        },
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-f9831e31a292e96e89c0dd8b18cfe4afdcad32c86acdb10e42274a2d10341b96",
+      "rule_id": "DEP_BOUNCYCASTLE",
+      "category": "TLS",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.45,
+      "description": "BouncyCastle dependency detected.",
+      "migration_hint": "Verify BouncyCastle PQC support status.",
+      "location": {
+        "file": "a.csproj",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "bouncyca***@2.8.0",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "nuget",
+          "dep_locator_omitted": "true",
+          "dep_name": "bouncycastle.cryptography",
+          "dep_purl": "",
+          "dep_source_type": "manifest",
+          "dep_version": "2.8.0",
+          "detector": "dependency_detector",
+          "manifest": "a.csproj"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dotnet.verify-pqc-environment",
+          "title": "Verify .NET target, package and operating-system support",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed runtime, OS, provider and native backend versions are unknown. Target frameworks, global.json SDK selection and NuGet package declarations are separate source claims, not the installed runtime.",
+            ".NET 10 documents MLKem, MLDsa and SlhDsa. Check the selected parameter, OS/backend support and IsSupported or IsAlgorithmSupported in the deployed environment; Linux facilities may require OpenSSL 3.5 or later. Do not generalize platform support across Windows, Linux and macOS.",
+            ".NET 11 CompositeMLKem and Hpke facilities require review of the exact API and experimental diagnostics. HPKE alone does not identify a PQC KEM. Check Bouncy Castle package/version independently of the .NET target.",
+            "ASP.NET/Kestrel TLS depends on the OS/TLS backend and peer negotiation; cryptographic API availability does not enable PQC TLS. Data Protection AES payloads are not a reason to replace symmetric encryption with a KEM."
+          ],
+          "references": [
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/standard/security/cross-platform-cryptography",
+            "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-10.0"
+          ]
+        },
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-9c991694be906e34fa3026d1b8f6bedbe7d947aa9ed1b306c36debb20142c0d6",
+      "rule_id": "DEP_NUGET_CRYPTO",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "NuGet cryptographic package assertion; wrapper ownership and runtime support require verification.",
+      "migration_hint": "Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider.",
+      "location": {
+        "file": "Directory.Packages.props",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "bouncyca***@2.8.0",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "nuget",
+          "dep_name": "bouncycastle.cryptography",
+          "dep_purl": "pkg:nuget/bouncycastle.cryptography",
+          "dep_source_type": "manifest",
+          "dep_version": "2.8.0",
+          "detector": "dependency_detector",
+          "manifest": "Directory.Packages.props"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dotnet.verify-pqc-environment",
+          "title": "Verify .NET target, package and operating-system support",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed runtime, OS, provider and native backend versions are unknown. Target frameworks, global.json SDK selection and NuGet package declarations are separate source claims, not the installed runtime.",
+            ".NET 10 documents MLKem, MLDsa and SlhDsa. Check the selected parameter, OS/backend support and IsSupported or IsAlgorithmSupported in the deployed environment; Linux facilities may require OpenSSL 3.5 or later. Do not generalize platform support across Windows, Linux and macOS.",
+            ".NET 11 CompositeMLKem and Hpke facilities require review of the exact API and experimental diagnostics. HPKE alone does not identify a PQC KEM. Check Bouncy Castle package/version independently of the .NET target.",
+            "ASP.NET/Kestrel TLS depends on the OS/TLS backend and peer negotiation; cryptographic API availability does not enable PQC TLS. Data Protection AES payloads are not a reason to replace symmetric encryption with a KEM."
+          ],
+          "references": [
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/standard/security/cross-platform-cryptography",
+            "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-10.0"
+          ]
+        },
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-fef318068628b95e807c48cb69543f848ea1be4570b47c2ff55def786710b433",
+      "rule_id": "DEP_NUGET_CRYPTO",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "NuGet cryptographic package assertion; wrapper ownership and runtime support require verification.",
+      "migration_hint": "Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider.",
+      "location": {
+        "file": "a.csproj",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "bouncyca***@2.8.0",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "nuget",
+          "dep_locator_omitted": "true",
+          "dep_name": "bouncycastle.cryptography",
+          "dep_purl": "",
+          "dep_source_type": "manifest",
+          "dep_version": "2.8.0",
+          "detector": "dependency_detector",
+          "manifest": "a.csproj"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dotnet.verify-pqc-environment",
+          "title": "Verify .NET target, package and operating-system support",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed runtime, OS, provider and native backend versions are unknown. Target frameworks, global.json SDK selection and NuGet package declarations are separate source claims, not the installed runtime.",
+            ".NET 10 documents MLKem, MLDsa and SlhDsa. Check the selected parameter, OS/backend support and IsSupported or IsAlgorithmSupported in the deployed environment; Linux facilities may require OpenSSL 3.5 or later. Do not generalize platform support across Windows, Linux and macOS.",
+            ".NET 11 CompositeMLKem and Hpke facilities require review of the exact API and experimental diagnostics. HPKE alone does not identify a PQC KEM. Check Bouncy Castle package/version independently of the .NET target.",
+            "ASP.NET/Kestrel TLS depends on the OS/TLS backend and peer negotiation; cryptographic API availability does not enable PQC TLS. Data Protection AES payloads are not a reason to replace symmetric encryption with a KEM."
+          ],
+          "references": [
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/standard/security/cross-platform-cryptography",
+            "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-10.0"
+          ]
+        },
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "Directory.Packages.props",
+      "algorithm": "bouncyca***@2.8.0",
+      "usage_type": "TLS",
+      "location": "Directory.Packages.props:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify BouncyCastle PQC support status."
+    },
+    {
+      "component": "a.csproj",
+      "algorithm": "bouncyca***@2.8.0",
+      "usage_type": "TLS",
+      "location": "a.csproj:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify BouncyCastle PQC support status."
+    },
+    {
+      "component": "Directory.Packages.props",
+      "algorithm": "bouncyca***@2.8.0",
+      "usage_type": "CryptoAPI",
+      "location": "Directory.Packages.props:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider."
+    },
+    {
+      "component": "a.csproj",
+      "algorithm": "bouncyca***@2.8.0",
+      "usage_type": "CryptoAPI",
+      "location": "a.csproj:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider."
+    }
+  ],
+  "dependency_sbom": [
+    {
+      "name": "bouncycastle.cryptography",
+      "version": "2.8.0",
+      "ecosystem": "nuget",
+      "source_file": "Directory.Packages.props",
+      "source_type": "manifest",
+      "purl": "pkg:nuget/bouncycastle.cryptography"
+    },
+    {
+      "name": "bouncycastle.cryptography",
+      "version": "2.8.0",
+      "ecosystem": "nuget",
+      "source_file": "a.csproj",
+      "source_type": "manifest",
+      "purl": ""
+    }
+  ],
+  "summary": {
+    "total_findings": 4,
+    "by_severity": {
+      "info": 2,
+      "medium": 2
+    },
+    "by_risk": {
+      "quantum-uncertain": 4
+    },
+    "scanned_files": 2,
+    "skipped_files": 0
+  }
+}

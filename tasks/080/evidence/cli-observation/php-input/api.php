@@ -1,0 +1,1 @@
+<?php $key=\PQCrypto\MLDSA44\SigningKey::fromBytes('PRIVATE078_KEY_CANARY_abcdefghijklmnopqrstuv0123456789'); $key->sign('message'); openssl_sign('message',$sig,$imported);

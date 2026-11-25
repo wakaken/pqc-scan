@@ -230,7 +230,7 @@ test('multiple checkbox selections survive navigation; remove/clear and deselect
  assert.equal(p.get('selected-folders').children.length,0);
  assert.equal(row(p,0).attributes['aria-pressed'],'false');
 });
-test('two scans are strictly sequential and remain individually reviewable without navigating early',async()=>{
+test('two scans are strictly sequential and finish with a result card for each folder without navigating early',async()=>{
  const p=await page('',[],folders);row(p,0).click();row(p,1).click();
  await p.get('scan').click();
  assert.deepEqual(posts(p),['api/scan?path=alpha&max_file_size_mib=2']);
@@ -247,13 +247,22 @@ test('two scans are strictly sequential and remain individually reviewable witho
  assert.equal(p.get('input-screen').hidden,false,'intermediate result cannot navigate');
  p.state.jobs=[ready(1,'alpha'),ready(2,'beta')];await p.tick();
  assert.equal(p.get('scan-progress').open,false);
- assert.equal(p.get('result-path').textContent,'beta');
- assert.equal(p.get('history').open,true);
+ assert.equal(p.get('result-screen').hidden,false);
+ assert.equal(p.get('result-single').hidden,true);
+ assert.equal(p.get('batch-results').hidden,false);
+ const cards=p.get('batch-results').children;
+ assert.deepEqual(cards.map(card=>card.children[0].textContent),['alpha','beta']);
+ const reports=cards.map(card=>card.children.find(n=>n.className==='job-actions').children.find(n=>n.target==='_blank'));
+ assert.deepEqual(reports.map(link=>[link.href,link.target,link.rel,link.attributes['aria-label']]),[
+  ['http://127.0.0.1:8787/session/reports/1/report.html?theme=dark&lang=ja','_blank','noopener','alpha のスキャンレポートを開く（新しいタブ）'],
+  ['http://127.0.0.1:8787/session/reports/2/report.html?theme=dark&lang=ja','_blank','noopener','beta のスキャンレポートを開く（新しいタブ）'],
+ ]);
  assert.equal(p.get('jobs').children.length,2);
  assert.match(p.get('feedback').textContent,/2フォルダ完了、0フォルダ失敗/);
- assert.ok(p.location.href.includes('result=2'));
- p.get('jobs').children[1].children.find(n=>n.className==='btn small-btn').click();
- assert.equal(p.get('result-path').textContent,'alpha','each successful folder keeps its own result');
+ const resultURL=new URL(p.location.href);
+ assert.equal(resultURL.searchParams.get('results'),'1,2');
+ assert.equal(resultURL.searchParams.has('result'),false);
+ assert.equal(posts(p).length,2,'reviewing the batch does not rescan either folder');
 });
 test('modal cannot cancel; page changes, selection and duplicate submission are blocked until all work ends',async()=>{
  const p=await page('',[],folders);row(p,0).click();row(p,1).click();await p.get('scan').click();

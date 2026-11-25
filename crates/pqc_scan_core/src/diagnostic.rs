@@ -24,6 +24,8 @@ pub struct DetectorOutcome {
     limit_detail: Option<String>,
     test_ranges: Vec<std::ops::Range<usize>>,
     display_ranges: Vec<std::ops::Range<usize>>,
+    sensitive_ranges: Vec<std::ops::Range<usize>>,
+    sensitive_source_context: bool,
 }
 
 impl DetectorOutcome {
@@ -42,6 +44,8 @@ impl DetectorOutcome {
             limit_detail: None,
             test_ranges: Vec::new(),
             display_ranges: Vec::new(),
+            sensitive_ranges: Vec::new(),
+            sensitive_source_context: false,
         }
     }
 
@@ -65,6 +69,25 @@ impl DetectorOutcome {
     }
     pub fn display_ranges(&self) -> &[std::ops::Range<usize>] {
         &self.display_ranges
+    }
+    /// Ephemeral decoded UTF-8 argument ranges that may contain key material.
+    /// The pipeline protects overlapping evidence and source context, including
+    /// context requested by other detectors. No payload or range is serialized.
+    pub fn with_sensitive_ranges(mut self, ranges: Vec<std::ops::Range<usize>>) -> Self {
+        self.sensitive_ranges = ranges;
+        self
+    }
+    pub fn sensitive_ranges(&self) -> &[std::ops::Range<usize>] {
+        &self.sensitive_ranges
+    }
+    /// Suppress source context independently of successful parsing/binding.
+    /// Ephemeral only; useful when partial analysis cannot enumerate key arguments.
+    pub fn with_sensitive_source_context(mut self, sensitive: bool) -> Self {
+        self.sensitive_source_context = sensitive;
+        self
+    }
+    pub fn sensitive_source_context(&self) -> bool {
+        self.sensitive_source_context
     }
     /// Fixed reason code and bounded numeric work counters only; never source text.
     pub fn with_limit(mut self, reason: &'static str, limit: usize, processed: usize) -> Self {

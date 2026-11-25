@@ -1,0 +1,2512 @@
+{
+  "source_corpus_sha256": "c2d5114feaa4285121cc94d76f648ea5c2df1c76a02143528dba604f9e3cd939",
+  "api_matrix_sha256": "1a1db761692823ccad041728576ddc1a020dbdb6de5b480aab51ff2f5af3a603",
+  "rows": [
+    {
+      "id": "php-openssl",
+      "language": "php",
+      "sources": [
+        "php",
+        "openssl"
+      ],
+      "operations": [
+        {
+          "operation": "openssl_pkey_new",
+          "descriptor": "openssl_pkey_new",
+          "case_ids": [
+            "php-openssl-rsa-positive",
+            "php-openssl-ec-positive",
+            "php-openssl-dh-positive"
+          ]
+        },
+        {
+          "operation": "openssl_public_encrypt",
+          "descriptor": "openssl_public_encrypt",
+          "case_ids": [
+            "php-openssl-public_encrypt-positive"
+          ]
+        },
+        {
+          "operation": "openssl_private_decrypt",
+          "descriptor": "openssl_private_decrypt",
+          "case_ids": [
+            "php-openssl-private_decrypt-positive"
+          ]
+        },
+        {
+          "operation": "openssl_private_encrypt",
+          "descriptor": "openssl_private_encrypt",
+          "case_ids": [
+            "php-openssl-private_encrypt-positive"
+          ]
+        },
+        {
+          "operation": "openssl_public_decrypt",
+          "descriptor": "openssl_public_decrypt",
+          "case_ids": [
+            "php-openssl-public_decrypt-positive"
+          ]
+        },
+        {
+          "operation": "openssl_sign",
+          "descriptor": "openssl_sign",
+          "case_ids": [
+            "php-openssl-sign-positive",
+            "php-generic-sign-positive"
+          ]
+        },
+        {
+          "operation": "openssl_verify",
+          "descriptor": "openssl_verify",
+          "case_ids": [
+            "php-openssl-verify-positive"
+          ]
+        },
+        {
+          "operation": "openssl_pkey_derive",
+          "descriptor": "openssl_pkey_derive",
+          "case_ids": [
+            "php-openssl-pkey_derive-positive",
+            "php-known-derive-dh",
+            "php-known-derive-dh-reassigned",
+            "php-known-derive-ec",
+            "php-known-derive-ec-reassigned"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "OPENSSL_KEYTYPE_RSA",
+          "case_ids": [
+            "php-openssl-rsa-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "OPENSSL_KEYTYPE_EC",
+          "case_ids": [
+            "php-openssl-ec-positive",
+            "php-known-derive-ec",
+            "php-known-derive-ec-reassigned"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "OPENSSL_KEYTYPE_DH",
+          "case_ids": [
+            "php-openssl-dh-positive",
+            "php-known-derive-dh",
+            "php-known-derive-dh-reassigned"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "Generic imported keys and sign/verify alone have no inferred RSA identity; EC derive means ECDH only with an established local EC key."
+    },
+    {
+      "id": "php-sodium",
+      "language": "php",
+      "sources": [
+        "php"
+      ],
+      "operations": [
+        {
+          "operation": "sign_keypair",
+          "descriptor": "sign_keypair",
+          "case_ids": [
+            "php-sodium-sign_keypair-positive"
+          ]
+        },
+        {
+          "operation": "sign_detached",
+          "descriptor": "sign_detached",
+          "case_ids": [
+            "php-sodium-sign_detached-positive"
+          ]
+        },
+        {
+          "operation": "sign_verify_detached",
+          "descriptor": "sign_verify_detached",
+          "case_ids": [
+            "php-sodium-sign_verify_detached-positive"
+          ]
+        },
+        {
+          "operation": "scalarmult",
+          "descriptor": "scalarmult",
+          "case_ids": [
+            "php-sodium-scalarmult-positive"
+          ]
+        },
+        {
+          "operation": "box_keypair",
+          "descriptor": "box_keypair",
+          "case_ids": [
+            "php-sodium-box_keypair-positive"
+          ]
+        },
+        {
+          "operation": "box",
+          "descriptor": "box",
+          "case_ids": [
+            "php-sodium-box-positive"
+          ]
+        },
+        {
+          "operation": "box_open",
+          "descriptor": "box_open",
+          "case_ids": [
+            "php-sodium-box_open-positive"
+          ]
+        },
+        {
+          "operation": "kx_keypair",
+          "descriptor": "kx_keypair",
+          "case_ids": [
+            "php-sodium-kx_keypair-positive"
+          ]
+        },
+        {
+          "operation": "kx_client_session_keys",
+          "descriptor": "kx_client_session_keys",
+          "case_ids": [
+            "php-sodium-kx_client_session_keys-positive"
+          ]
+        },
+        {
+          "operation": "kx_server_session_keys",
+          "descriptor": "kx_server_session_keys",
+          "case_ids": [
+            "php-sodium-kx_server_session_keys-positive"
+          ]
+        },
+        {
+          "operation": "kem_keypair",
+          "descriptor": "kem_keypair",
+          "case_ids": [
+            "php-sodium-kem_keypair-positive"
+          ]
+        },
+        {
+          "operation": "kem_enc",
+          "descriptor": "kem_enc",
+          "case_ids": [
+            "php-sodium-kem_enc-positive"
+          ]
+        },
+        {
+          "operation": "kem_dec",
+          "descriptor": "kem_dec",
+          "case_ids": [
+            "php-sodium-kem_dec-positive"
+          ]
+        },
+        {
+          "operation": "kem_mlkem768_keypair",
+          "descriptor": "kem_mlkem768_keypair",
+          "case_ids": [
+            "php-sodium-kem_mlkem768_keypair-positive",
+            "php-utf8-positive"
+          ]
+        },
+        {
+          "operation": "kem_mlkem768_enc",
+          "descriptor": "kem_mlkem768_enc",
+          "case_ids": [
+            "php-sodium-kem_mlkem768_enc-positive"
+          ]
+        },
+        {
+          "operation": "kem_mlkem768_dec",
+          "descriptor": "kem_mlkem768_dec",
+          "case_ids": [
+            "php-sodium-kem_mlkem768_dec-positive"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "Ed25519",
+          "case_ids": [
+            "php-sodium-sign_keypair-positive",
+            "php-sodium-sign_detached-positive",
+            "php-sodium-sign_verify_detached-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "X25519",
+          "case_ids": [
+            "php-sodium-scalarmult-positive",
+            "php-sodium-box_keypair-positive",
+            "php-sodium-box-positive",
+            "php-sodium-box_open-positive",
+            "php-sodium-kx_keypair-positive",
+            "php-sodium-kx_client_session_keys-positive",
+            "php-sodium-kx_server_session_keys-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "X-Wing",
+          "case_ids": [
+            "php-sodium-kem_keypair-positive",
+            "php-sodium-kem_enc-positive",
+            "php-sodium-kem_dec-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-KEM-768",
+          "case_ids": [
+            "php-sodium-kem_mlkem768_keypair-positive",
+            "php-sodium-kem_mlkem768_enc-positive",
+            "php-sodium-kem_mlkem768_dec-positive",
+            "php-utf8-positive",
+            "php-use-function-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "Only syntactic references and bounded local facts; no runtime/backend success."
+    },
+    {
+      "id": "php-paragonie",
+      "language": "php",
+      "sources": [
+        "ext-pqcrypto",
+        "pqcrypto-compat"
+      ],
+      "operations": [
+        {
+          "operation": "generateKeypair",
+          "descriptor": "generateKeypair",
+          "case_ids": [
+            "php-ext-mlkem512-positive",
+            "php-ext-mlkem768-positive",
+            "php-ext-mlkem1024-positive",
+            "php-ext-mldsa44-positive",
+            "php-ext-mldsa65-positive",
+            "php-ext-mldsa87-positive",
+            "php-ext-xwing-positive",
+            "php-polyfill-mlkem512-positive",
+            "php-polyfill-mlkem768-positive",
+            "php-polyfill-mlkem1024-positive",
+            "php-polyfill-mldsa44-positive",
+            "php-polyfill-mldsa65-positive",
+            "php-polyfill-mldsa87-positive",
+            "php-polyfill-xwing-positive",
+            "php-class-alias-positive"
+          ]
+        },
+        {
+          "operation": "encapsulate",
+          "descriptor": "encapsulate",
+          "case_ids": [
+            "php-ext-mlkem512-encapsulate-positive",
+            "php-ext-mlkem768-encapsulate-positive",
+            "php-ext-mlkem1024-encapsulate-positive",
+            "php-ext-xwing-encapsulate-positive",
+            "php-polyfill-mlkem512-encapsulate-positive",
+            "php-polyfill-mlkem768-encapsulate-positive",
+            "php-polyfill-mlkem1024-encapsulate-positive",
+            "php-polyfill-xwing-encapsulate-positive"
+          ]
+        },
+        {
+          "operation": "decapsulate",
+          "descriptor": "decapsulate",
+          "case_ids": [
+            "php-ext-mlkem512-decapsulate-positive",
+            "php-ext-mlkem768-decapsulate-positive",
+            "php-ext-mlkem1024-decapsulate-positive",
+            "php-ext-xwing-decapsulate-positive",
+            "php-polyfill-mlkem512-decapsulate-positive",
+            "php-polyfill-mlkem768-decapsulate-positive",
+            "php-polyfill-mlkem1024-decapsulate-positive",
+            "php-polyfill-xwing-decapsulate-positive"
+          ]
+        },
+        {
+          "operation": "sign",
+          "descriptor": "sign",
+          "case_ids": [
+            "php-ext-mldsa44-sign-positive",
+            "php-ext-mldsa65-sign-positive",
+            "php-ext-mldsa87-sign-positive",
+            "php-polyfill-mldsa44-sign-positive",
+            "php-polyfill-mldsa65-sign-positive",
+            "php-polyfill-mldsa87-sign-positive"
+          ]
+        },
+        {
+          "operation": "verify",
+          "descriptor": "verify",
+          "case_ids": [
+            "php-ext-mldsa44-verify-positive",
+            "php-ext-mldsa65-verify-positive",
+            "php-ext-mldsa87-verify-positive",
+            "php-polyfill-mldsa44-verify-positive",
+            "php-polyfill-mldsa65-verify-positive",
+            "php-polyfill-mldsa87-verify-positive"
+          ]
+        },
+        {
+          "operation": "Compat::*_keygen",
+          "descriptor": "Compat::*_keygen",
+          "case_ids": [
+            "php-compat-mlkem512-keygen-positive",
+            "php-compat-mlkem768-keygen-positive",
+            "php-compat-mlkem1024-keygen-positive",
+            "php-compat-mldsa44-keygen-positive",
+            "php-compat-mldsa65-keygen-positive",
+            "php-compat-mldsa87-keygen-positive",
+            "php-compat-xwing-keygen-positive"
+          ]
+        },
+        {
+          "operation": "Compat::*_encaps",
+          "descriptor": "Compat::*_encaps",
+          "case_ids": [
+            "php-compat-mlkem512-encaps-positive",
+            "php-compat-mlkem768-encaps-positive",
+            "php-compat-mlkem1024-encaps-positive",
+            "php-compat-xwing-encaps-positive"
+          ]
+        },
+        {
+          "operation": "Compat::*_decaps",
+          "descriptor": "Compat::*_decaps",
+          "case_ids": [
+            "php-compat-mlkem512-decaps-positive",
+            "php-compat-mlkem768-decaps-positive",
+            "php-compat-mlkem1024-decaps-positive",
+            "php-compat-xwing-decaps-positive"
+          ]
+        },
+        {
+          "operation": "Compat::*_sign",
+          "descriptor": "Compat::*_sign",
+          "case_ids": [
+            "php-compat-mldsa44-sign-positive",
+            "php-compat-mldsa65-sign-positive",
+            "php-compat-mldsa87-sign-positive"
+          ]
+        },
+        {
+          "operation": "Compat::*_verify",
+          "descriptor": "Compat::*_verify",
+          "case_ids": [
+            "php-compat-mldsa44-verify-positive",
+            "php-compat-mldsa65-verify-positive",
+            "php-compat-mldsa87-verify-positive"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "ML-KEM-512",
+          "case_ids": [
+            "php-ext-mlkem512-positive",
+            "php-ext-mlkem512-decapsulate-positive",
+            "php-ext-mlkem512-encapsulate-positive",
+            "php-polyfill-mlkem512-positive",
+            "php-polyfill-mlkem512-decapsulate-positive",
+            "php-polyfill-mlkem512-encapsulate-positive",
+            "php-compat-mlkem512-keygen-positive",
+            "php-compat-mlkem512-encaps-positive",
+            "php-compat-mlkem512-decaps-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-KEM-768",
+          "case_ids": [
+            "php-ext-mlkem768-positive",
+            "php-ext-mlkem768-decapsulate-positive",
+            "php-ext-mlkem768-encapsulate-positive",
+            "php-polyfill-mlkem768-positive",
+            "php-polyfill-mlkem768-decapsulate-positive",
+            "php-polyfill-mlkem768-encapsulate-positive",
+            "php-compat-mlkem768-keygen-positive",
+            "php-compat-mlkem768-encaps-positive",
+            "php-compat-mlkem768-decaps-positive",
+            "php-class-alias-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-KEM-1024",
+          "case_ids": [
+            "php-ext-mlkem1024-positive",
+            "php-ext-mlkem1024-decapsulate-positive",
+            "php-ext-mlkem1024-encapsulate-positive",
+            "php-polyfill-mlkem1024-positive",
+            "php-polyfill-mlkem1024-decapsulate-positive",
+            "php-polyfill-mlkem1024-encapsulate-positive",
+            "php-compat-mlkem1024-keygen-positive",
+            "php-compat-mlkem1024-encaps-positive",
+            "php-compat-mlkem1024-decaps-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-44",
+          "case_ids": [
+            "php-ext-mldsa44-positive",
+            "php-ext-mldsa44-sign-positive",
+            "php-ext-mldsa44-verify-positive",
+            "php-polyfill-mldsa44-positive",
+            "php-polyfill-mldsa44-sign-positive",
+            "php-polyfill-mldsa44-verify-positive",
+            "php-compat-mldsa44-keygen-positive",
+            "php-compat-mldsa44-sign-positive",
+            "php-compat-mldsa44-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-65",
+          "case_ids": [
+            "php-ext-mldsa65-positive",
+            "php-ext-mldsa65-sign-positive",
+            "php-ext-mldsa65-verify-positive",
+            "php-polyfill-mldsa65-positive",
+            "php-polyfill-mldsa65-sign-positive",
+            "php-polyfill-mldsa65-verify-positive",
+            "php-compat-mldsa65-keygen-positive",
+            "php-compat-mldsa65-sign-positive",
+            "php-compat-mldsa65-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-87",
+          "case_ids": [
+            "php-ext-mldsa87-positive",
+            "php-ext-mldsa87-sign-positive",
+            "php-ext-mldsa87-verify-positive",
+            "php-polyfill-mldsa87-positive",
+            "php-polyfill-mldsa87-sign-positive",
+            "php-polyfill-mldsa87-verify-positive",
+            "php-compat-mldsa87-keygen-positive",
+            "php-compat-mldsa87-sign-positive",
+            "php-compat-mldsa87-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "X-Wing",
+          "case_ids": [
+            "php-ext-xwing-positive",
+            "php-ext-xwing-decapsulate-positive",
+            "php-ext-xwing-encapsulate-positive",
+            "php-polyfill-xwing-positive",
+            "php-polyfill-xwing-decapsulate-positive",
+            "php-polyfill-xwing-encapsulate-positive",
+            "php-compat-xwing-keygen-positive",
+            "php-compat-xwing-encaps-positive",
+            "php-compat-xwing-decaps-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "PQCrypto and ParagonIE\\PQCrypto are distinct namespaces; bounded tuple roles, keys and reassignment; ext SLHDSA is a qualified reference only."
+    },
+    {
+      "id": "php-reference",
+      "language": "php",
+      "sources": [
+        "phpseclib",
+        "ext-pqcrypto"
+      ],
+      "operations": [
+        {
+          "operation": "phpseclib3\\Crypt\\RSA",
+          "descriptor": "phpseclib3\\Crypt\\RSA",
+          "case_ids": [
+            "phpseclib-rsa-positive"
+          ]
+        },
+        {
+          "operation": "phpseclib3\\Crypt\\EC",
+          "descriptor": "phpseclib3\\Crypt\\EC",
+          "case_ids": [
+            "phpseclib-ec-positive"
+          ]
+        },
+        {
+          "operation": "phpseclib3\\Crypt\\DH",
+          "descriptor": "phpseclib3\\Crypt\\DH",
+          "case_ids": [
+            "phpseclib-dh-positive"
+          ]
+        },
+        {
+          "operation": "PQCrypto\\SLHDSA",
+          "descriptor": "PQCrypto\\SLHDSA",
+          "case_ids": [
+            "php-slh-reference-positive"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "RSA",
+          "case_ids": [
+            "phpseclib-rsa-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "EC",
+          "case_ids": [
+            "phpseclib-ec-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "DH",
+          "case_ids": [
+            "phpseclib-dh-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA",
+          "case_ids": [
+            "php-slh-reference-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "Qualified references do not prove operations; ext SLH parameters remain unasserted for reference-only coverage."
+    },
+    {
+      "id": "csharp-standard",
+      "language": "csharp",
+      "sources": [
+        "dotnet"
+      ],
+      "operations": [
+        {
+          "operation": "RSA.Create",
+          "descriptor": "RSA.Create",
+          "case_ids": [
+            "cs-standard-rsa-positive"
+          ]
+        },
+        {
+          "operation": "DSA.Create",
+          "descriptor": "DSA.Create",
+          "case_ids": [
+            "cs-standard-dsa-positive"
+          ]
+        },
+        {
+          "operation": "ECDsa.Create",
+          "descriptor": "ECDsa.Create",
+          "case_ids": [
+            "cs-standard-ecdsa-positive"
+          ]
+        },
+        {
+          "operation": "ECDiffieHellman.Create",
+          "descriptor": "ECDiffieHellman.Create",
+          "case_ids": [
+            "cs-standard-ecdiffiehellman-positive"
+          ]
+        },
+        {
+          "operation": "RSACryptoServiceProvider",
+          "descriptor": "RSACryptoServiceProvider",
+          "case_ids": [
+            "cs-provider-rsacryptoserviceprovider-positive"
+          ]
+        },
+        {
+          "operation": "RSACng",
+          "descriptor": "RSACng",
+          "case_ids": [
+            "cs-provider-rsacng-positive"
+          ]
+        },
+        {
+          "operation": "RSAOpenSsl",
+          "descriptor": "RSAOpenSsl",
+          "case_ids": [
+            "cs-provider-rsaopenssl-positive"
+          ]
+        },
+        {
+          "operation": "DSACryptoServiceProvider",
+          "descriptor": "DSACryptoServiceProvider",
+          "case_ids": [
+            "cs-provider-dsacryptoserviceprovider-positive"
+          ]
+        },
+        {
+          "operation": "DSACng",
+          "descriptor": "DSACng",
+          "case_ids": [
+            "cs-provider-dsacng-positive"
+          ]
+        },
+        {
+          "operation": "DSAOpenSsl",
+          "descriptor": "DSAOpenSsl",
+          "case_ids": [
+            "cs-provider-dsaopenssl-positive"
+          ]
+        },
+        {
+          "operation": "ECDsaCng",
+          "descriptor": "ECDsaCng",
+          "case_ids": [
+            "cs-provider-ecdsacng-positive"
+          ]
+        },
+        {
+          "operation": "ECDsaOpenSsl",
+          "descriptor": "ECDsaOpenSsl",
+          "case_ids": [
+            "cs-provider-ecdsaopenssl-positive"
+          ]
+        },
+        {
+          "operation": "ECDiffieHellmanCng",
+          "descriptor": "ECDiffieHellmanCng",
+          "case_ids": [
+            "cs-provider-ecdiffiehellmancng-positive"
+          ]
+        },
+        {
+          "operation": "ECDiffieHellmanOpenSsl",
+          "descriptor": "ECDiffieHellmanOpenSsl",
+          "case_ids": [
+            "cs-provider-ecdiffiehellmanopenssl-positive"
+          ]
+        },
+        {
+          "operation": "SignData",
+          "descriptor": "SignData",
+          "case_ids": [
+            "cs-standard-rsa-signdata-positive",
+            "cs-standard-dsa-signdata-positive",
+            "cs-standard-ecdsa-signdata-positive",
+            "cs-mldsa-mldsa44-signdata-positive",
+            "cs-mldsa-mldsa65-signdata-positive",
+            "cs-mldsa-mldsa87-signdata-positive",
+            "cs-slhdsa-sha2_128s-signdata-positive",
+            "cs-slhdsa-sha2_128f-signdata-positive",
+            "cs-slhdsa-sha2_192s-signdata-positive",
+            "cs-slhdsa-sha2_192f-signdata-positive",
+            "cs-slhdsa-sha2_256s-signdata-positive",
+            "cs-slhdsa-sha2_256f-signdata-positive",
+            "cs-slhdsa-shake128s-signdata-positive",
+            "cs-slhdsa-shake128f-signdata-positive",
+            "cs-slhdsa-shake192s-signdata-positive",
+            "cs-slhdsa-shake192f-signdata-positive",
+            "cs-slhdsa-shake256s-signdata-positive",
+            "cs-slhdsa-shake256f-signdata-positive"
+          ]
+        },
+        {
+          "operation": "VerifyData",
+          "descriptor": "VerifyData",
+          "case_ids": [
+            "cs-standard-rsa-verifydata-positive",
+            "cs-standard-dsa-verifydata-positive",
+            "cs-standard-ecdsa-verifydata-positive",
+            "cs-mldsa-mldsa44-verifydata-positive",
+            "cs-mldsa-mldsa65-verifydata-positive",
+            "cs-mldsa-mldsa87-verifydata-positive",
+            "cs-slhdsa-sha2_128s-verifydata-positive",
+            "cs-slhdsa-sha2_128f-verifydata-positive",
+            "cs-slhdsa-sha2_192s-verifydata-positive",
+            "cs-slhdsa-sha2_192f-verifydata-positive",
+            "cs-slhdsa-sha2_256s-verifydata-positive",
+            "cs-slhdsa-sha2_256f-verifydata-positive",
+            "cs-slhdsa-shake128s-verifydata-positive",
+            "cs-slhdsa-shake128f-verifydata-positive",
+            "cs-slhdsa-shake192s-verifydata-positive",
+            "cs-slhdsa-shake192f-verifydata-positive",
+            "cs-slhdsa-shake256s-verifydata-positive",
+            "cs-slhdsa-shake256f-verifydata-positive"
+          ]
+        },
+        {
+          "operation": "Encrypt",
+          "descriptor": "Encrypt",
+          "case_ids": [
+            "cs-rsa-encrypt"
+          ]
+        },
+        {
+          "operation": "Decrypt",
+          "descriptor": "Decrypt",
+          "case_ids": [
+            "cs-rsa-decrypt"
+          ]
+        },
+        {
+          "operation": "DeriveKeyMaterial",
+          "descriptor": "DeriveKeyMaterial",
+          "case_ids": [
+            "cs-standard-ecdiffiehellman-derivekeymaterial-positive"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "RSA",
+          "case_ids": [
+            "cs-standard-rsa-positive",
+            "cs-standard-rsa-signdata-positive",
+            "cs-standard-rsa-verifydata-positive",
+            "cs-provider-rsacryptoserviceprovider-positive",
+            "cs-provider-rsacng-positive",
+            "cs-provider-rsaopenssl-positive",
+            "cs-rsa-encrypt",
+            "cs-rsa-decrypt"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "DSA",
+          "case_ids": [
+            "cs-standard-dsa-positive",
+            "cs-standard-dsa-signdata-positive",
+            "cs-standard-dsa-verifydata-positive",
+            "cs-provider-dsacryptoserviceprovider-positive",
+            "cs-provider-dsacng-positive",
+            "cs-provider-dsaopenssl-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "EC",
+          "case_ids": [
+            "cs-standard-ecdsa-positive",
+            "cs-standard-ecdsa-signdata-positive",
+            "cs-standard-ecdsa-verifydata-positive",
+            "cs-provider-ecdsacng-positive",
+            "cs-provider-ecdsaopenssl-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ECDH",
+          "case_ids": [
+            "cs-standard-ecdiffiehellman-positive",
+            "cs-standard-ecdiffiehellman-derivekeymaterial-positive",
+            "cs-provider-ecdiffiehellmancng-positive",
+            "cs-provider-ecdiffiehellmanopenssl-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "Only syntactic references and bounded local facts; no runtime/backend success."
+    },
+    {
+      "id": "csharp-dotnet-pqc",
+      "language": "csharp",
+      "sources": [
+        "dotnet"
+      ],
+      "operations": [
+        {
+          "operation": "MLKem.GenerateKey",
+          "descriptor": "MLKem.GenerateKey",
+          "case_ids": [
+            "cs-mlkem-mlkem512-positive",
+            "cs-mlkem-mlkem768-positive",
+            "cs-mlkem-mlkem1024-positive",
+            "cs-alias-positive"
+          ]
+        },
+        {
+          "operation": "MLDsa.GenerateKey",
+          "descriptor": "MLDsa.GenerateKey",
+          "case_ids": [
+            "cs-mldsa-mldsa44-positive",
+            "cs-mldsa-mldsa65-positive",
+            "cs-mldsa-mldsa87-positive"
+          ]
+        },
+        {
+          "operation": "SlhDsa.GenerateKey",
+          "descriptor": "SlhDsa.GenerateKey",
+          "case_ids": [
+            "cs-slhdsa-sha2_128s-positive",
+            "cs-slhdsa-sha2_128f-positive",
+            "cs-slhdsa-sha2_192s-positive",
+            "cs-slhdsa-sha2_192f-positive",
+            "cs-slhdsa-sha2_256s-positive",
+            "cs-slhdsa-sha2_256f-positive",
+            "cs-slhdsa-shake128s-positive",
+            "cs-slhdsa-shake128f-positive",
+            "cs-slhdsa-shake192s-positive",
+            "cs-slhdsa-shake192f-positive",
+            "cs-slhdsa-shake256s-positive",
+            "cs-slhdsa-shake256f-positive"
+          ]
+        },
+        {
+          "operation": "Import*",
+          "descriptor": "Import*",
+          "case_ids": [
+            "cs-mlkem-importfrompem-positive",
+            "cs-mlkem-importsubjectpublickeyinfo-positive",
+            "cs-mlkem-importpkcs8privatekey-positive",
+            "cs-mldsa-importfrompem-positive",
+            "cs-mldsa-importsubjectpublickeyinfo-positive",
+            "cs-mldsa-importpkcs8privatekey-positive",
+            "cs-slhdsa-importfrompem-positive",
+            "cs-slhdsa-importsubjectpublickeyinfo-positive",
+            "cs-slhdsa-importpkcs8privatekey-positive",
+            "cs-selected-import-mlkem",
+            "cs-selected-import-mldsa",
+            "cs-selected-import-slhdsa"
+          ]
+        },
+        {
+          "operation": "Encapsulate",
+          "descriptor": "Encapsulate",
+          "case_ids": [
+            "cs-mlkem-mlkem512-encapsulate-positive",
+            "cs-mlkem-mlkem768-encapsulate-positive",
+            "cs-mlkem-mlkem1024-encapsulate-positive"
+          ]
+        },
+        {
+          "operation": "Decapsulate",
+          "descriptor": "Decapsulate",
+          "case_ids": [
+            "cs-mlkem-mlkem512-decapsulate-positive",
+            "cs-mlkem-mlkem768-decapsulate-positive",
+            "cs-mlkem-mlkem1024-decapsulate-positive"
+          ]
+        },
+        {
+          "operation": "SignData",
+          "descriptor": "SignData",
+          "case_ids": [
+            "cs-standard-rsa-signdata-positive",
+            "cs-standard-dsa-signdata-positive",
+            "cs-standard-ecdsa-signdata-positive",
+            "cs-mldsa-mldsa44-signdata-positive",
+            "cs-mldsa-mldsa65-signdata-positive",
+            "cs-mldsa-mldsa87-signdata-positive",
+            "cs-slhdsa-sha2_128s-signdata-positive",
+            "cs-slhdsa-sha2_128f-signdata-positive",
+            "cs-slhdsa-sha2_192s-signdata-positive",
+            "cs-slhdsa-sha2_192f-signdata-positive",
+            "cs-slhdsa-sha2_256s-signdata-positive",
+            "cs-slhdsa-sha2_256f-signdata-positive",
+            "cs-slhdsa-shake128s-signdata-positive",
+            "cs-slhdsa-shake128f-signdata-positive",
+            "cs-slhdsa-shake192s-signdata-positive",
+            "cs-slhdsa-shake192f-signdata-positive",
+            "cs-slhdsa-shake256s-signdata-positive",
+            "cs-slhdsa-shake256f-signdata-positive"
+          ]
+        },
+        {
+          "operation": "VerifyData",
+          "descriptor": "VerifyData",
+          "case_ids": [
+            "cs-standard-rsa-verifydata-positive",
+            "cs-standard-dsa-verifydata-positive",
+            "cs-standard-ecdsa-verifydata-positive",
+            "cs-mldsa-mldsa44-verifydata-positive",
+            "cs-mldsa-mldsa65-verifydata-positive",
+            "cs-mldsa-mldsa87-verifydata-positive",
+            "cs-slhdsa-sha2_128s-verifydata-positive",
+            "cs-slhdsa-sha2_128f-verifydata-positive",
+            "cs-slhdsa-sha2_192s-verifydata-positive",
+            "cs-slhdsa-sha2_192f-verifydata-positive",
+            "cs-slhdsa-sha2_256s-verifydata-positive",
+            "cs-slhdsa-sha2_256f-verifydata-positive",
+            "cs-slhdsa-shake128s-verifydata-positive",
+            "cs-slhdsa-shake128f-verifydata-positive",
+            "cs-slhdsa-shake192s-verifydata-positive",
+            "cs-slhdsa-shake192f-verifydata-positive",
+            "cs-slhdsa-shake256s-verifydata-positive",
+            "cs-slhdsa-shake256f-verifydata-positive"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "ML-KEM-512",
+          "case_ids": [
+            "cs-mlkem-mlkem512-positive",
+            "cs-mlkem-mlkem512-encapsulate-positive",
+            "cs-mlkem-mlkem512-decapsulate-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-KEM-768",
+          "case_ids": [
+            "cs-mlkem-mlkem768-positive",
+            "cs-mlkem-mlkem768-encapsulate-positive",
+            "cs-mlkem-mlkem768-decapsulate-positive",
+            "cs-alias-positive",
+            "cs-selected-import-mlkem"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-KEM-1024",
+          "case_ids": [
+            "cs-mlkem-mlkem1024-positive",
+            "cs-mlkem-mlkem1024-encapsulate-positive",
+            "cs-mlkem-mlkem1024-decapsulate-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-44",
+          "case_ids": [
+            "cs-mldsa-mldsa44-positive",
+            "cs-mldsa-mldsa44-signdata-positive",
+            "cs-mldsa-mldsa44-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-65",
+          "case_ids": [
+            "cs-mldsa-mldsa65-positive",
+            "cs-mldsa-mldsa65-signdata-positive",
+            "cs-mldsa-mldsa65-verifydata-positive",
+            "cs-selected-import-mldsa"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-87",
+          "case_ids": [
+            "cs-mldsa-mldsa87-positive",
+            "cs-mldsa-mldsa87-signdata-positive",
+            "cs-mldsa-mldsa87-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-128s",
+          "case_ids": [
+            "cs-slhdsa-sha2_128s-positive",
+            "cs-slhdsa-sha2_128s-signdata-positive",
+            "cs-slhdsa-sha2_128s-verifydata-positive",
+            "cs-selected-import-slhdsa"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-128f",
+          "case_ids": [
+            "cs-slhdsa-sha2_128f-positive",
+            "cs-slhdsa-sha2_128f-signdata-positive",
+            "cs-slhdsa-sha2_128f-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-192s",
+          "case_ids": [
+            "cs-slhdsa-sha2_192s-positive",
+            "cs-slhdsa-sha2_192s-signdata-positive",
+            "cs-slhdsa-sha2_192s-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-192f",
+          "case_ids": [
+            "cs-slhdsa-sha2_192f-positive",
+            "cs-slhdsa-sha2_192f-signdata-positive",
+            "cs-slhdsa-sha2_192f-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-256s",
+          "case_ids": [
+            "cs-slhdsa-sha2_256s-positive",
+            "cs-slhdsa-sha2_256s-signdata-positive",
+            "cs-slhdsa-sha2_256s-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-256f",
+          "case_ids": [
+            "cs-slhdsa-sha2_256f-positive",
+            "cs-slhdsa-sha2_256f-signdata-positive",
+            "cs-slhdsa-sha2_256f-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-128s",
+          "case_ids": [
+            "cs-slhdsa-shake128s-positive",
+            "cs-slhdsa-shake128s-signdata-positive",
+            "cs-slhdsa-shake128s-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-128f",
+          "case_ids": [
+            "cs-slhdsa-shake128f-positive",
+            "cs-slhdsa-shake128f-signdata-positive",
+            "cs-slhdsa-shake128f-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-192s",
+          "case_ids": [
+            "cs-slhdsa-shake192s-positive",
+            "cs-slhdsa-shake192s-signdata-positive",
+            "cs-slhdsa-shake192s-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-192f",
+          "case_ids": [
+            "cs-slhdsa-shake192f-positive",
+            "cs-slhdsa-shake192f-signdata-positive",
+            "cs-slhdsa-shake192f-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-256s",
+          "case_ids": [
+            "cs-slhdsa-shake256s-positive",
+            "cs-slhdsa-shake256s-signdata-positive",
+            "cs-slhdsa-shake256s-verifydata-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-256f",
+          "case_ids": [
+            "cs-slhdsa-shake256f-positive",
+            "cs-slhdsa-shake256f-signdata-positive",
+            "cs-slhdsa-shake256f-verifydata-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "PQC classes derive from IDisposable rather than AsymmetricAlgorithm; imports without explicit parameter selectors retain generic family identity only."
+    },
+    {
+      "id": "csharp-bc",
+      "language": "csharp",
+      "sources": [
+        "bc-csharp"
+      ],
+      "operations": [
+        {
+          "operation": "RsaKeyPairGenerator",
+          "descriptor": "RsaKeyPairGenerator",
+          "case_ids": [
+            "cs-bc-rsa-positive"
+          ]
+        },
+        {
+          "operation": "DsaKeyPairGenerator",
+          "descriptor": "DsaKeyPairGenerator",
+          "case_ids": [
+            "cs-bc-dsa-positive"
+          ]
+        },
+        {
+          "operation": "ECKeyPairGenerator",
+          "descriptor": "ECKeyPairGenerator",
+          "case_ids": [
+            "cs-bc-ec-positive"
+          ]
+        },
+        {
+          "operation": "MLKemKeyPairGenerator",
+          "descriptor": "MLKemKeyPairGenerator",
+          "case_ids": [
+            "cs-bc-mlkemkeypairgenerator-positive"
+          ]
+        },
+        {
+          "operation": "MLDsaKeyPairGenerator",
+          "descriptor": "MLDsaKeyPairGenerator",
+          "case_ids": [
+            "cs-bc-mldsakeypairgenerator-positive"
+          ]
+        },
+        {
+          "operation": "SlhDsaKeyPairGenerator",
+          "descriptor": "SlhDsaKeyPairGenerator",
+          "case_ids": [
+            "cs-bc-slhdsakeypairgenerator-positive"
+          ]
+        },
+        {
+          "operation": "MLKemEncapsulator",
+          "descriptor": "MLKemEncapsulator",
+          "case_ids": [
+            "cs-bc-operation-mlkemencapsulator-encapsulate-positive"
+          ]
+        },
+        {
+          "operation": "MLKemDecapsulator",
+          "descriptor": "MLKemDecapsulator",
+          "case_ids": [
+            "cs-bc-operation-mlkemdecapsulator-decapsulate-positive"
+          ]
+        },
+        {
+          "operation": "MLDsaSigner",
+          "descriptor": "MLDsaSigner",
+          "case_ids": [
+            "cs-bc-operation-mldsasigner-generatesignature-positive",
+            "cs-bc-operation-mldsasigner-verifysignature-positive"
+          ]
+        },
+        {
+          "operation": "SlhDsaSigner",
+          "descriptor": "SlhDsaSigner",
+          "case_ids": [
+            "cs-bc-operation-slhdsasigner-generatesignature-positive",
+            "cs-bc-operation-slhdsasigner-verifysignature-positive"
+          ]
+        },
+        {
+          "operation": "RsaEngine.ProcessBlock",
+          "descriptor": "RsaEngine.ProcessBlock",
+          "case_ids": [
+            "cs-bc-classical-rsaengine-processblock"
+          ]
+        },
+        {
+          "operation": "DsaSigner.GenerateSignature",
+          "descriptor": "DsaSigner.GenerateSignature/VerifySignature",
+          "case_ids": [
+            "cs-bc-classical-dsasigner-generatesignature"
+          ]
+        },
+        {
+          "operation": "DsaSigner.VerifySignature",
+          "descriptor": "DsaSigner.GenerateSignature/VerifySignature",
+          "case_ids": [
+            "cs-bc-classical-dsasigner-verifysignature"
+          ]
+        },
+        {
+          "operation": "ECDsaSigner.GenerateSignature",
+          "descriptor": "ECDsaSigner.GenerateSignature/VerifySignature",
+          "case_ids": [
+            "cs-bc-classical-ecdsasigner-generatesignature"
+          ]
+        },
+        {
+          "operation": "ECDsaSigner.VerifySignature",
+          "descriptor": "ECDsaSigner.GenerateSignature/VerifySignature",
+          "case_ids": [
+            "cs-bc-classical-ecdsasigner-verifysignature"
+          ]
+        },
+        {
+          "operation": "ECDHBasicAgreement.CalculateAgreement",
+          "descriptor": "ECDHBasicAgreement.CalculateAgreement",
+          "case_ids": [
+            "cs-bc-classical-ecdhbasicagreement-calculateagreement"
+          ]
+        },
+        {
+          "operation": "GenerateKeyPair",
+          "descriptor": "GenerateKeyPair",
+          "case_ids": [
+            "cs-bc-keypair-mlkem",
+            "cs-bc-keypair-mldsa",
+            "cs-bc-keypair-slhdsa"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "ml_kem_512",
+          "case_ids": [
+            "cs-bc-ml_kem_512-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ml_kem_768",
+          "case_ids": [
+            "cs-bc-ml_kem_768-positive",
+            "cs-bc-operation-mlkemencapsulator-encapsulate-positive",
+            "cs-bc-operation-mlkemdecapsulator-decapsulate-positive",
+            "cs-bc-keypair-mlkem"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ml_kem_1024",
+          "case_ids": [
+            "cs-bc-ml_kem_1024-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ml_dsa_44",
+          "case_ids": [
+            "cs-bc-ml_dsa_44-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ml_dsa_65",
+          "case_ids": [
+            "cs-bc-ml_dsa_65-positive",
+            "cs-bc-operation-mldsasigner-generatesignature-positive",
+            "cs-bc-operation-mldsasigner-verifysignature-positive",
+            "cs-bc-keypair-mldsa"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ml_dsa_87",
+          "case_ids": [
+            "cs-bc-ml_dsa_87-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_sha2_128s",
+          "case_ids": [
+            "cs-bc-slh_dsa_sha2_128s-positive",
+            "cs-bc-operation-slhdsasigner-generatesignature-positive",
+            "cs-bc-operation-slhdsasigner-verifysignature-positive",
+            "cs-bc-keypair-slhdsa"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_sha2_128f",
+          "case_ids": [
+            "cs-bc-slh_dsa_sha2_128f-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_sha2_192s",
+          "case_ids": [
+            "cs-bc-slh_dsa_sha2_192s-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_sha2_192f",
+          "case_ids": [
+            "cs-bc-slh_dsa_sha2_192f-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_sha2_256s",
+          "case_ids": [
+            "cs-bc-slh_dsa_sha2_256s-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_sha2_256f",
+          "case_ids": [
+            "cs-bc-slh_dsa_sha2_256f-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_shake_128s",
+          "case_ids": [
+            "cs-bc-slh_dsa_shake_128s-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_shake_128f",
+          "case_ids": [
+            "cs-bc-slh_dsa_shake_128f-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_shake_192s",
+          "case_ids": [
+            "cs-bc-slh_dsa_shake_192s-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_shake_192f",
+          "case_ids": [
+            "cs-bc-slh_dsa_shake_192f-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_shake_256s",
+          "case_ids": [
+            "cs-bc-slh_dsa_shake_256s-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "slh_dsa_shake_256f",
+          "case_ids": [
+            "cs-bc-slh_dsa_shake_256f-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "Only syntactic references and bounded local facts; no runtime/backend success."
+    },
+    {
+      "id": "csharp-construction",
+      "language": "csharp",
+      "sources": [
+        "dotnet"
+      ],
+      "operations": [
+        {
+          "operation": "CompositeMLKem",
+          "descriptor": "CompositeMLKem",
+          "case_ids": [
+            "cs-construction-compositemlkem-positive"
+          ]
+        },
+        {
+          "operation": "CompositeMLDsa",
+          "descriptor": "CompositeMLDsa",
+          "case_ids": [
+            "cs-construction-compositemldsa-positive"
+          ]
+        },
+        {
+          "operation": "Hpke",
+          "descriptor": "Hpke",
+          "case_ids": [
+            "cs-construction-hpke-positive"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "CompositeMLKem",
+          "case_ids": [
+            "cs-construction-compositemlkem-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "CompositeMLDsa",
+          "case_ids": [
+            "cs-construction-compositemldsa-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "HPKE; suite unresolved",
+          "case_ids": [
+            "cs-construction-hpke-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "Exact construction reference only; no universal TLS/JOSE/HPKE or PQC readiness claim."
+    },
+    {
+      "id": "c-openssl",
+      "language": "c",
+      "sources": [
+        "openssl"
+      ],
+      "operations": [
+        {
+          "operation": "RSA_new",
+          "descriptor": "RSA_new",
+          "case_ids": [
+            "c-openssl-rsa_new-positive"
+          ]
+        },
+        {
+          "operation": "RSA_generate_key_ex",
+          "descriptor": "RSA_generate_key_ex",
+          "case_ids": [
+            "c-openssl-rsa_generate_key_ex-positive"
+          ]
+        },
+        {
+          "operation": "RSA_public_encrypt",
+          "descriptor": "RSA_public_encrypt",
+          "case_ids": [
+            "c-openssl-rsa_public_encrypt-positive"
+          ]
+        },
+        {
+          "operation": "RSA_private_decrypt",
+          "descriptor": "RSA_private_decrypt",
+          "case_ids": [
+            "c-openssl-rsa_private_decrypt-positive"
+          ]
+        },
+        {
+          "operation": "RSA_sign",
+          "descriptor": "RSA_sign",
+          "case_ids": [
+            "c-openssl-rsa_sign-positive"
+          ]
+        },
+        {
+          "operation": "RSA_verify",
+          "descriptor": "RSA_verify",
+          "case_ids": [
+            "c-openssl-rsa_verify-positive"
+          ]
+        },
+        {
+          "operation": "DSA_new",
+          "descriptor": "DSA_new",
+          "case_ids": [
+            "c-openssl-dsa_new-positive"
+          ]
+        },
+        {
+          "operation": "DSA_generate_key",
+          "descriptor": "DSA_generate_key",
+          "case_ids": [
+            "c-openssl-dsa_generate_key-positive"
+          ]
+        },
+        {
+          "operation": "DSA_sign",
+          "descriptor": "DSA_sign",
+          "case_ids": [
+            "c-openssl-dsa_sign-positive"
+          ]
+        },
+        {
+          "operation": "DSA_verify",
+          "descriptor": "DSA_verify",
+          "case_ids": [
+            "c-openssl-dsa_verify-positive"
+          ]
+        },
+        {
+          "operation": "DH_new",
+          "descriptor": "DH_new",
+          "case_ids": [
+            "c-openssl-dh_new-positive"
+          ]
+        },
+        {
+          "operation": "DH_generate_key",
+          "descriptor": "DH_generate_key",
+          "case_ids": [
+            "c-openssl-dh_generate_key-positive"
+          ]
+        },
+        {
+          "operation": "DH_compute_key",
+          "descriptor": "DH_compute_key",
+          "case_ids": [
+            "c-openssl-dh_compute_key-positive"
+          ]
+        },
+        {
+          "operation": "EC_KEY_new_by_curve_name",
+          "descriptor": "EC_KEY_new_by_curve_name",
+          "case_ids": [
+            "c-openssl-ec_key_new_by_curve_name-positive"
+          ]
+        },
+        {
+          "operation": "EC_KEY_generate_key",
+          "descriptor": "EC_KEY_generate_key",
+          "case_ids": [
+            "c-openssl-ec_key_generate_key-positive"
+          ]
+        },
+        {
+          "operation": "ECDSA_sign",
+          "descriptor": "ECDSA_sign",
+          "case_ids": [
+            "c-openssl-ecdsa_sign-positive"
+          ]
+        },
+        {
+          "operation": "ECDSA_verify",
+          "descriptor": "ECDSA_verify",
+          "case_ids": [
+            "c-openssl-ecdsa_verify-positive"
+          ]
+        },
+        {
+          "operation": "ECDH_compute_key",
+          "descriptor": "ECDH_compute_key",
+          "case_ids": [
+            "c-openssl-ecdh_compute_key-positive"
+          ]
+        },
+        {
+          "operation": "EVP_PKEY_CTX_new_id",
+          "descriptor": "EVP_PKEY_CTX_new_id",
+          "case_ids": [
+            "c-evp-id-rsa",
+            "c-evp-id-dsa",
+            "c-evp-id-dh",
+            "c-evp-id-ec"
+          ]
+        },
+        {
+          "operation": "EVP_PKEY_CTX_new_from_name",
+          "descriptor": "EVP_PKEY_CTX_new_from_name",
+          "case_ids": [
+            "c-evp-rsa-positive",
+            "c-evp-dsa-positive",
+            "c-evp-dh-positive",
+            "c-evp-ec-positive",
+            "c-evp-ml-kem-512-positive",
+            "c-evp-ml-kem-768-positive",
+            "c-evp-ml-kem-1024-positive",
+            "c-evp-ml-dsa-44-positive",
+            "c-evp-ml-dsa-65-positive",
+            "c-evp-ml-dsa-87-positive",
+            "c-evp-slh-dsa-sha2-128s-positive",
+            "c-evp-slh-dsa-sha2-128f-positive",
+            "c-evp-slh-dsa-sha2-192s-positive",
+            "c-evp-slh-dsa-sha2-192f-positive",
+            "c-evp-slh-dsa-sha2-256s-positive",
+            "c-evp-slh-dsa-sha2-256f-positive",
+            "c-evp-slh-dsa-shake-128s-positive",
+            "c-evp-slh-dsa-shake-128f-positive",
+            "c-evp-slh-dsa-shake-192s-positive",
+            "c-evp-slh-dsa-shake-192f-positive",
+            "c-evp-slh-dsa-shake-256s-positive",
+            "c-evp-slh-dsa-shake-256f-positive",
+            "c-dynamic-evp-positive"
+          ]
+        },
+        {
+          "operation": "EVP_PKEY_keygen_init",
+          "descriptor": "EVP_PKEY_keygen_init",
+          "case_ids": [
+            "c-evp-keygen-init"
+          ]
+        },
+        {
+          "operation": "EVP_PKEY_keygen",
+          "descriptor": "EVP_PKEY_keygen",
+          "case_ids": [
+            "c-evp-rsa-evp_pkey_keygen-positive",
+            "c-evp-dsa-evp_pkey_keygen-positive",
+            "c-evp-dh-evp_pkey_keygen-positive",
+            "c-evp-ec-evp_pkey_keygen-positive",
+            "c-evp-ml-dsa-44-evp_pkey_keygen-positive",
+            "c-evp-ml-dsa-65-evp_pkey_keygen-positive",
+            "c-evp-ml-dsa-87-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-128s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-128f-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-192s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-192f-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-256s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-256f-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-128s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-128f-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-192s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-192f-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-256s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-256f-evp_pkey_keygen-positive"
+          ]
+        },
+        {
+          "operation": "EVP_PKEY_encapsulate",
+          "descriptor": "EVP_PKEY_encapsulate",
+          "case_ids": [
+            "c-evp-ml-kem-512-evp_pkey_encapsulate-positive",
+            "c-evp-ml-kem-768-evp_pkey_encapsulate-positive",
+            "c-evp-ml-kem-1024-evp_pkey_encapsulate-positive"
+          ]
+        },
+        {
+          "operation": "EVP_PKEY_decapsulate",
+          "descriptor": "EVP_PKEY_decapsulate",
+          "case_ids": [
+            "c-evp-ml-kem-512-evp_pkey_decapsulate-positive",
+            "c-evp-ml-kem-768-evp_pkey_decapsulate-positive",
+            "c-evp-ml-kem-1024-evp_pkey_decapsulate-positive"
+          ]
+        },
+        {
+          "operation": "EVP_DigestSignInit",
+          "descriptor": "EVP_DigestSignInit",
+          "case_ids": [
+            "c-evp-generic-positive",
+            "c-known-evp_digestsigninit",
+            "c-known-evp_digestsigninit-reassigned",
+            "c-known-evp_digestsigninit-unknown"
+          ]
+        },
+        {
+          "operation": "EVP_DigestVerifyInit",
+          "descriptor": "EVP_DigestVerifyInit",
+          "case_ids": [
+            "c-known-evp_digestverifyinit",
+            "c-known-evp_digestverifyinit-reassigned",
+            "c-known-evp_digestverifyinit-unknown"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "RSA",
+          "case_ids": [
+            "c-openssl-rsa_new-positive",
+            "c-openssl-rsa_generate_key_ex-positive",
+            "c-openssl-rsa_public_encrypt-positive",
+            "c-openssl-rsa_private_decrypt-positive",
+            "c-openssl-rsa_sign-positive",
+            "c-openssl-rsa_verify-positive",
+            "c-evp-rsa-positive",
+            "c-evp-rsa-evp_pkey_keygen-positive",
+            "c-evp-id-rsa",
+            "c-known-evp_digestsigninit",
+            "c-known-evp_digestverifyinit"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "DSA",
+          "case_ids": [
+            "c-openssl-dsa_new-positive",
+            "c-openssl-dsa_generate_key-positive",
+            "c-openssl-dsa_sign-positive",
+            "c-openssl-dsa_verify-positive",
+            "c-evp-dsa-positive",
+            "c-evp-dsa-evp_pkey_keygen-positive",
+            "c-evp-ml-dsa-44-positive",
+            "c-evp-ml-dsa-44-evp_pkey_keygen-positive",
+            "c-evp-ml-dsa-65-positive",
+            "c-evp-ml-dsa-65-evp_pkey_keygen-positive",
+            "c-evp-ml-dsa-87-positive",
+            "c-evp-ml-dsa-87-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-128s-positive",
+            "c-evp-slh-dsa-sha2-128s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-128f-positive",
+            "c-evp-slh-dsa-sha2-128f-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-192s-positive",
+            "c-evp-slh-dsa-sha2-192s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-192f-positive",
+            "c-evp-slh-dsa-sha2-192f-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-256s-positive",
+            "c-evp-slh-dsa-sha2-256s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-sha2-256f-positive",
+            "c-evp-slh-dsa-sha2-256f-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-128s-positive",
+            "c-evp-slh-dsa-shake-128s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-128f-positive",
+            "c-evp-slh-dsa-shake-128f-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-192s-positive",
+            "c-evp-slh-dsa-shake-192s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-192f-positive",
+            "c-evp-slh-dsa-shake-192f-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-256s-positive",
+            "c-evp-slh-dsa-shake-256s-evp_pkey_keygen-positive",
+            "c-evp-slh-dsa-shake-256f-positive",
+            "c-evp-slh-dsa-shake-256f-evp_pkey_keygen-positive",
+            "c-evp-id-dsa"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "DH",
+          "case_ids": [
+            "c-openssl-dh_new-positive",
+            "c-openssl-dh_generate_key-positive",
+            "c-openssl-dh_compute_key-positive",
+            "c-evp-dh-positive",
+            "c-evp-dh-evp_pkey_keygen-positive",
+            "c-evp-id-dh"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "EC",
+          "case_ids": [
+            "c-openssl-ec_key_new_by_curve_name-positive",
+            "c-openssl-ec_key_generate_key-positive",
+            "c-openssl-ecdsa_sign-positive",
+            "c-openssl-ecdsa_verify-positive",
+            "c-evp-ec-positive",
+            "c-evp-ec-evp_pkey_keygen-positive",
+            "c-evp-id-ec"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-KEM-512",
+          "case_ids": [
+            "c-evp-ml-kem-512-positive",
+            "c-evp-ml-kem-512-evp_pkey_encapsulate-positive",
+            "c-evp-ml-kem-512-evp_pkey_decapsulate-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-KEM-768",
+          "case_ids": [
+            "c-evp-ml-kem-768-positive",
+            "c-evp-ml-kem-768-evp_pkey_encapsulate-positive",
+            "c-evp-ml-kem-768-evp_pkey_decapsulate-positive",
+            "c-evp-keygen-init"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-KEM-1024",
+          "case_ids": [
+            "c-evp-ml-kem-1024-positive",
+            "c-evp-ml-kem-1024-evp_pkey_encapsulate-positive",
+            "c-evp-ml-kem-1024-evp_pkey_decapsulate-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-44",
+          "case_ids": [
+            "c-evp-ml-dsa-44-positive",
+            "c-evp-ml-dsa-44-evp_pkey_keygen-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-65",
+          "case_ids": [
+            "c-evp-ml-dsa-65-positive",
+            "c-evp-ml-dsa-65-evp_pkey_keygen-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-87",
+          "case_ids": [
+            "c-evp-ml-dsa-87-positive",
+            "c-evp-ml-dsa-87-evp_pkey_keygen-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-128s",
+          "case_ids": [
+            "c-evp-slh-dsa-sha2-128s-positive",
+            "c-evp-slh-dsa-sha2-128s-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-128f",
+          "case_ids": [
+            "c-evp-slh-dsa-sha2-128f-positive",
+            "c-evp-slh-dsa-sha2-128f-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-192s",
+          "case_ids": [
+            "c-evp-slh-dsa-sha2-192s-positive",
+            "c-evp-slh-dsa-sha2-192s-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-192f",
+          "case_ids": [
+            "c-evp-slh-dsa-sha2-192f-positive",
+            "c-evp-slh-dsa-sha2-192f-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-256s",
+          "case_ids": [
+            "c-evp-slh-dsa-sha2-256s-positive",
+            "c-evp-slh-dsa-sha2-256s-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHA2-256f",
+          "case_ids": [
+            "c-evp-slh-dsa-sha2-256f-positive",
+            "c-evp-slh-dsa-sha2-256f-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-128s",
+          "case_ids": [
+            "c-evp-slh-dsa-shake-128s-positive",
+            "c-evp-slh-dsa-shake-128s-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-128f",
+          "case_ids": [
+            "c-evp-slh-dsa-shake-128f-positive",
+            "c-evp-slh-dsa-shake-128f-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-192s",
+          "case_ids": [
+            "c-evp-slh-dsa-shake-192s-positive",
+            "c-evp-slh-dsa-shake-192s-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-192f",
+          "case_ids": [
+            "c-evp-slh-dsa-shake-192f-positive",
+            "c-evp-slh-dsa-shake-192f-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-256s",
+          "case_ids": [
+            "c-evp-slh-dsa-shake-256s-positive",
+            "c-evp-slh-dsa-shake-256s-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH-DSA-SHAKE-256f",
+          "case_ids": [
+            "c-evp-slh-dsa-shake-256f-positive",
+            "c-evp-slh-dsa-shake-256f-evp_pkey_keygen-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-verify-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "No preprocessor/include evaluation, function-pointer resolution or linked provider assertion; untyped generic EVP operations stay unknown."
+    },
+    {
+      "id": "c-provider-tls",
+      "language": "c",
+      "sources": [
+        "openssl"
+      ],
+      "operations": [
+        {
+          "operation": "OSSL_PROVIDER_load",
+          "descriptor": "OSSL_PROVIDER_load",
+          "case_ids": [
+            "c-ossl_provider_load-positive"
+          ]
+        },
+        {
+          "operation": "EVP_set_default_properties",
+          "descriptor": "EVP_set_default_properties",
+          "case_ids": [
+            "c-evp_set_default_properties-positive"
+          ]
+        },
+        {
+          "operation": "SSL_CTX_set1_groups_list",
+          "descriptor": "SSL_CTX_set1_groups_list",
+          "case_ids": [
+            "c-ssl_ctx_set1_groups_list-positive"
+          ]
+        },
+        {
+          "operation": "SSL_set1_groups_list",
+          "descriptor": "SSL_set1_groups_list",
+          "case_ids": [
+            "c-ssl_set1_groups_list-positive"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "oqsprovider",
+          "case_ids": [
+            "c-ossl_provider_load-positive",
+            "c-evp_set_default_properties-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "provider=oqsprovider",
+          "case_ids": [
+            "c-evp_set_default_properties-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "X25519MLKEM768",
+          "case_ids": [
+            "c-ssl_ctx_set1_groups_list-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "MLKEM768",
+          "case_ids": [],
+          "supplemental": [
+            {
+              "path": "crates/pqc_scan_detectors/tests/c_family_source.rs",
+              "sha256": "0cf6d2c51e4b960e3ac3c116023426c9d8ae8c6b63972a06f435ef66fc56c9ea",
+              "test": "c_family_group_lists_retain_standard_draft_and_alias_spelling_and_reject_opaque_data",
+              "scope": "MLKEM768 retained as requested configuration, with no algorithm asset; final component run required"
+            }
+          ]
+        },
+        {
+          "parameter": "X25519",
+          "case_ids": [
+            "c-ssl_set1_groups_list-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "P-256",
+          "case_ids": [
+            "c-ssl_ctx_set1_groups_list-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "Configuration references only; no loaded provider or negotiated connection assertion."
+    },
+    {
+      "id": "c-oqs",
+      "language": "c",
+      "sources": [
+        "liboqs"
+      ],
+      "operations": [
+        {
+          "operation": "OQS_KEM_new",
+          "descriptor": "OQS_KEM_new",
+          "case_ids": [
+            "c-oqs-ml-kem-512-positive",
+            "c-oqs-ml-kem-768-positive",
+            "c-oqs-ml-kem-1024-positive",
+            "c-oqs-constant-ml_kem_768-positive",
+            "c-draft-kyber768-positive",
+            "c-conditional-positive"
+          ]
+        },
+        {
+          "operation": "OQS_SIG_new",
+          "descriptor": "OQS_SIG_new",
+          "case_ids": [
+            "c-oqs-ml-dsa-44-positive",
+            "c-oqs-ml-dsa-65-positive",
+            "c-oqs-ml-dsa-87-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-positive",
+            "c-oqs-constant-ml_dsa_65-positive",
+            "c-oqs-constant-slh_dsa_pure_sha2_128s-positive",
+            "c-draft-dilithium3-positive"
+          ]
+        },
+        {
+          "operation": "OQS_KEM_keypair",
+          "descriptor": "OQS_KEM_keypair",
+          "case_ids": [
+            "c-oqs-ml-kem-512-keypair-positive",
+            "c-oqs-ml-kem-768-keypair-positive",
+            "c-oqs-ml-kem-1024-keypair-positive"
+          ]
+        },
+        {
+          "operation": "OQS_KEM_encaps",
+          "descriptor": "OQS_KEM_encaps",
+          "case_ids": [
+            "c-oqs-ml-kem-512-encaps-positive",
+            "c-oqs-ml-kem-768-encaps-positive",
+            "c-oqs-ml-kem-1024-encaps-positive"
+          ]
+        },
+        {
+          "operation": "OQS_KEM_decaps",
+          "descriptor": "OQS_KEM_decaps",
+          "case_ids": [
+            "c-oqs-ml-kem-512-decaps-positive",
+            "c-oqs-ml-kem-768-decaps-positive",
+            "c-oqs-ml-kem-1024-decaps-positive"
+          ]
+        },
+        {
+          "operation": "OQS_SIG_keypair",
+          "descriptor": "OQS_SIG_keypair",
+          "case_ids": [
+            "c-oqs-ml-dsa-44-keypair-positive",
+            "c-oqs-ml-dsa-65-keypair-positive",
+            "c-oqs-ml-dsa-87-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-keypair-positive"
+          ]
+        },
+        {
+          "operation": "OQS_SIG_sign",
+          "descriptor": "OQS_SIG_sign",
+          "case_ids": [
+            "c-oqs-ml-dsa-44-sign-positive",
+            "c-oqs-ml-dsa-65-sign-positive",
+            "c-oqs-ml-dsa-87-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-sign-positive"
+          ]
+        },
+        {
+          "operation": "OQS_SIG_verify",
+          "descriptor": "OQS_SIG_verify",
+          "case_ids": [
+            "c-oqs-ml-dsa-44-verify-positive",
+            "c-oqs-ml-dsa-65-verify-positive",
+            "c-oqs-ml-dsa-87-verify-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-verify-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-verify-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-verify-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-verify-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-verify-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-verify-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-verify-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-verify-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-verify-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-verify-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-verify-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-verify-positive"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "ML-KEM-512",
+          "case_ids": [
+            "c-oqs-ml-kem-512-positive",
+            "c-oqs-ml-kem-512-keypair-positive",
+            "c-oqs-ml-kem-512-encaps-positive",
+            "c-oqs-ml-kem-512-decaps-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-KEM-768",
+          "case_ids": [
+            "c-oqs-ml-kem-768-positive",
+            "c-oqs-ml-kem-768-keypair-positive",
+            "c-oqs-ml-kem-768-encaps-positive",
+            "c-oqs-ml-kem-768-decaps-positive",
+            "c-oqs-constant-ml_kem_768-positive",
+            "c-conditional-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-KEM-1024",
+          "case_ids": [
+            "c-oqs-ml-kem-1024-positive",
+            "c-oqs-ml-kem-1024-keypair-positive",
+            "c-oqs-ml-kem-1024-encaps-positive",
+            "c-oqs-ml-kem-1024-decaps-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-44",
+          "case_ids": [
+            "c-oqs-ml-dsa-44-positive",
+            "c-oqs-ml-dsa-44-keypair-positive",
+            "c-oqs-ml-dsa-44-sign-positive",
+            "c-oqs-ml-dsa-44-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-65",
+          "case_ids": [
+            "c-oqs-ml-dsa-65-positive",
+            "c-oqs-ml-dsa-65-keypair-positive",
+            "c-oqs-ml-dsa-65-sign-positive",
+            "c-oqs-ml-dsa-65-verify-positive",
+            "c-oqs-constant-ml_dsa_65-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-87",
+          "case_ids": [
+            "c-oqs-ml-dsa-87-positive",
+            "c-oqs-ml-dsa-87-keypair-positive",
+            "c-oqs-ml-dsa-87-sign-positive",
+            "c-oqs-ml-dsa-87-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHA2_128S",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_sha2_128s-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_128s-verify-positive",
+            "c-oqs-constant-slh_dsa_pure_sha2_128s-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHA2_128F",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_sha2_128f-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_128f-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHA2_192S",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_sha2_192s-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_192s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHA2_192F",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_sha2_192f-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_192f-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHA2_256S",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_sha2_256s-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_256s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHA2_256F",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_sha2_256f-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-keypair-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-sign-positive",
+            "c-oqs-slh_dsa_pure_sha2_256f-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHAKE_128S",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_shake_128s-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_128s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHAKE_128F",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_shake_128f-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_128f-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHAKE_192S",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_shake_192s-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_192s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHAKE_192F",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_shake_192f-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_192f-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHAKE_256S",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_shake_256s-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_256s-verify-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "SLH_DSA_PURE_SHAKE_256F",
+          "case_ids": [
+            "c-oqs-slh_dsa_pure_shake_256f-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-keypair-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-sign-positive",
+            "c-oqs-slh_dsa_pure_shake_256f-verify-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "Requested name not enabled mechanism; old Kyber/Dilithium are draft families rather than standardized aliases."
+    },
+    {
+      "id": "cpp-oqs",
+      "language": "cpp",
+      "sources": [
+        "liboqs-cpp"
+      ],
+      "operations": [
+        {
+          "operation": "oqs::KeyEncapsulation",
+          "descriptor": "oqs::KeyEncapsulation",
+          "case_ids": [
+            "cpp-oqs-keyencapsulation-positive"
+          ]
+        },
+        {
+          "operation": "oqs::Signature",
+          "descriptor": "oqs::Signature",
+          "case_ids": [
+            "cpp-oqs-signature-positive"
+          ]
+        },
+        {
+          "operation": "generate_keypair",
+          "descriptor": "generate_keypair",
+          "case_ids": [
+            "cpp-oqs-keyencapsulation-generate_keypair-positive",
+            "cpp-oqs-signature-generate_keypair-positive"
+          ]
+        },
+        {
+          "operation": "encap_secret",
+          "descriptor": "encap_secret",
+          "case_ids": [
+            "cpp-oqs-keyencapsulation-encap_secret-positive"
+          ]
+        },
+        {
+          "operation": "decap_secret",
+          "descriptor": "decap_secret",
+          "case_ids": [
+            "cpp-oqs-keyencapsulation-decap_secret-positive"
+          ]
+        },
+        {
+          "operation": "sign",
+          "descriptor": "sign",
+          "case_ids": [
+            "cpp-oqs-signature-sign-positive"
+          ]
+        },
+        {
+          "operation": "verify",
+          "descriptor": "verify",
+          "case_ids": [
+            "cpp-oqs-signature-verify-positive"
+          ]
+        }
+      ],
+      "parameters": [
+        {
+          "parameter": "ML-KEM-768",
+          "case_ids": [
+            "cpp-oqs-keyencapsulation-positive",
+            "cpp-oqs-keyencapsulation-generate_keypair-positive",
+            "cpp-oqs-keyencapsulation-encap_secret-positive",
+            "cpp-oqs-keyencapsulation-decap_secret-positive"
+          ],
+          "supplemental": []
+        },
+        {
+          "parameter": "ML-DSA-65",
+          "case_ids": [
+            "cpp-oqs-signature-positive",
+            "cpp-oqs-signature-generate_keypair-positive",
+            "cpp-oqs-signature-sign-positive",
+            "cpp-oqs-signature-verify-positive"
+          ],
+          "supplemental": []
+        }
+      ],
+      "limits": "Only syntactic references and bounded local facts; no runtime/backend success."
+    },
+    {
+      "id": "third-party-wrapper-references",
+      "language": "php,csharp",
+      "sources": [
+        "oqs-php-ext",
+        "oqs-php-ffi",
+        "oqs-dotnet-old",
+        "oqs-dotnet"
+      ],
+      "operations": [
+        {
+          "operation": "\\OQS_KEYENCAPSULATION",
+          "descriptor": "\\OQS_KEYENCAPSULATION",
+          "case_ids": [
+            "php-oqs-native-reference"
+          ]
+        },
+        {
+          "operation": "\\OQS_SIGNATURE",
+          "descriptor": "\\OQS_SIGNATURE",
+          "case_ids": [
+            "php-oqs-native-sig"
+          ]
+        },
+        {
+          "operation": "Oqs\\OqsKem",
+          "descriptor": "Oqs\\OqsKem",
+          "case_ids": [
+            "php-oqs-ffi-reference"
+          ]
+        },
+        {
+          "operation": "Oqs\\OqsSig",
+          "descriptor": "Oqs\\OqsSig",
+          "case_ids": [
+            "php-oqs-ffi-sig"
+          ]
+        },
+        {
+          "operation": "dotnetOQS",
+          "descriptor": "dotnetOQS",
+          "case_ids": [
+            "cs-oqs-official-reference"
+          ]
+        },
+        {
+          "operation": "OpenForge.Cryptography.LibOqs",
+          "descriptor": "OpenForge.Cryptography.LibOqs",
+          "case_ids": [
+            "cs-oqs-openforge-reference"
+          ]
+        }
+      ],
+      "parameters": [],
+      "limits": "Qualified/reference and explicit package identity only; no primitive/runtime inference, project name does not invent a registry package. Exact source pin controls spelling."
+    }
+  ],
+  "missing": [],
+  "evidence_scope": "This text index is traceability, not a detection oracle. Each named focal case must pass the original assertion and saved-reader/evaluation integration in language_migration.rs on final source; no manager/compiler/runtime crypto executes. Alias/shadow/reassignment/help/comment and parameter/role cases remain in component suites. All rows remain incomplete until final-source test/review binding."
+}

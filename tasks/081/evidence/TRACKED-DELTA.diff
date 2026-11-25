@@ -1,0 +1,232 @@
+diff --git a/crates/pqc_scan_core/src/classifier.rs b/crates/pqc_scan_core/src/classifier.rs
+index a7f3900..fc0d39e 100644
+--- a/crates/pqc_scan_core/src/classifier.rs
++++ b/crates/pqc_scan_core/src/classifier.rs
+@@ -5,13 +5,25 @@ pub fn is_dependency_manifest(path: &Path) -> bool {
+         Some(v) => v,
+         None => return false,
+     };
+-    if name.ends_with(".gemspec") {
++    if name.ends_with(".gemspec") || name.ends_with(".csproj") || name.ends_with(".cmake") {
+         return true;
+     }
+ 
+     matches!(
+         name,
+         "Cargo.toml"
++            | "composer.json"
++            | "composer.lock"
++            | "Directory.Packages.props"
++            | "Directory.Build.props"
++            | "packages.config"
++            | "packages.lock.json"
++            | "global.json"
++            | "vcpkg.json"
++            | "vcpkg-configuration.json"
++            | "conanfile.txt"
++            | "conan.lock"
++            | "CMakeLists.txt"
+             | "Cargo.lock"
+             | "Gemfile"
+             | "Gemfile.lock"
+diff --git a/crates/pqc_scan_core/src/recommendation.rs b/crates/pqc_scan_core/src/recommendation.rs
+index f991772..b300beb 100644
+--- a/crates/pqc_scan_core/src/recommendation.rs
++++ b/crates/pqc_scan_core/src/recommendation.rs
+@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
+ use serde_json::Value as JsonValue;
+ 
+ use crate::model::{CodeExample, DependencySbomEntry, Finding, RecommendedAction};
++mod languages;
+ 
+ #[derive(Debug, Clone, Default)]
+ pub struct RuntimeProfile {
+@@ -125,7 +126,11 @@ impl RuntimeProfile {
+                     .dependency_signals
+                     .insert(dep.purl.to_ascii_lowercase());
+             }
+-            if name.contains("bouncycastle") || name.contains("bcprov") || name.contains("bcpkix") {
++            if dep.ecosystem != "nuget"
++                && (name.contains("bouncycastle")
++                    || name.contains("bcprov")
++                    || name.contains("bcpkix"))
++            {
+                 profile
+                     .dependency_signals
+                     .insert("java-bouncycastle".to_string());
+@@ -166,6 +171,7 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
+     let mut actions = Vec::new();
+     let language = detect_language(finding);
+     let category = finding.category.to_ascii_lowercase();
++    languages::append(&mut actions, finding, language);
+ 
+     if category == "middleware"
+         || finding
+@@ -916,6 +922,10 @@ fn detect_language(finding: &Finding) -> Option<&'static str> {
+         "go" => Some("go"),
+         "rs" => Some("rust"),
+         "rb" => Some("ruby"),
++        "php" | "phtml" => Some("php"),
++        "cs" => Some("csharp"),
++        "c" | "h" => Some("c"),
++        "cpp" | "cc" | "cxx" | "hpp" | "hh" | "hxx" => Some("cpp"),
+         _ => None,
+     }
+ }
+@@ -929,6 +939,10 @@ fn canonical_language_name(raw: &str) -> Option<&'static str> {
+         "go" | "golang" => Some("go"),
+         "rust" | "rs" => Some("rust"),
+         "ruby" | "rb" => Some("ruby"),
++        "php" => Some("php"),
++        "csharp" | "cs" => Some("csharp"),
++        "c" => Some("c"),
++        "cpp" | "c++" => Some("cpp"),
+         _ => None,
+     }
+ }
+diff --git a/crates/pqc_scan_detectors/src/dependency_detector.rs b/crates/pqc_scan_detectors/src/dependency_detector.rs
+index 7e66254..b539b8a 100644
+--- a/crates/pqc_scan_detectors/src/dependency_detector.rs
++++ b/crates/pqc_scan_detectors/src/dependency_detector.rs
+@@ -1,13 +1,14 @@
+ //! Dependency assertions and a compatible flat projection; no package resolution.
+ mod bounded;
+ mod decode;
++mod languages;
+ mod maven_context;
+ mod parse;
+ mod ruby;
+ mod yaml_preflight;
+ use anyhow::Result;
+ use pqc_scan_core::model::mask_preview;
+-use pqc_scan_core::observation::{DependencyOrigin, DependencyVersionFacts};
++use pqc_scan_core::observation::{DependencyContext, DependencyOrigin, DependencyVersionFacts};
+ use pqc_scan_core::{
+     Detection, Detector, DetectorOutcome, Evidence, Location, ObservationDraft, ScannableFile,
+ };
+@@ -31,6 +32,7 @@ struct DependencyItem {
+     ordinal: usize,
+     parsed: bool,
+     context: Option<&'static str>,
++    language_context: Option<DependencyContext>,
+ }
+ impl DependencyDetector {
+     fn inspect(
+@@ -40,7 +42,9 @@ impl DependencyDetector {
+         observe: bool,
+         context: Option<&pqc_scan_core::RepositoryContext>,
+     ) -> Result<DetectorOutcome> {
+-        let parsed = if file.file_name() == Some("pom.xml") && file.text.is_some() {
++        let parsed = if languages::accepts(file) {
++            languages::inspect(file, context)?
++        } else if file.file_name() == Some("pom.xml") && file.text.is_some() {
+             let props = maven_context::load(file, context);
+             bounded::pom_with_context(file.text.as_deref().unwrap_or(""), &props)?
+         } else if matches!(file.file_name(), Some("Gemfile" | "gems.rb"))
+@@ -108,7 +112,7 @@ impl DependencyDetector {
+             }
+             if observe {
+                 drafts.extend(hits.iter().map(|d| {
+-                    ObservationDraft::dependency_assertion(
++                    let draft = ObservationDraft::dependency_assertion(
+                         d,
+                         DependencyVersionFacts {
+                             declared: item.declared.as_deref(),
+@@ -118,7 +122,12 @@ impl DependencyDetector {
+                             ordinal: item.ordinal,
+                             parsed: item.parsed,
+                         },
+-                    )
++                    );
++                    if let Some(context) = item.language_context {
++                        draft.with_dependency_context(context)
++                    } else {
++                        draft
++                    }
+                 }));
+             }
+             detections.extend(hits);
+diff --git a/crates/pqc_scan_detectors/src/dependency_detector/parse.rs b/crates/pqc_scan_detectors/src/dependency_detector/parse.rs
+index 63dbe80..85c08af 100644
+--- a/crates/pqc_scan_detectors/src/dependency_detector/parse.rs
++++ b/crates/pqc_scan_detectors/src/dependency_detector/parse.rs
+@@ -7,8 +7,8 @@ pub(super) use super::{
+ };
+ pub(super) use pqc_scan_core::model::line_col_for_offset;
+ pub(super) use pqc_scan_core::observation::{
+-    exact_dependency_version, resolved_dependency_version, safe_dependency_version,
+-    valid_dependency_name, DependencyOrigin as Origin,
++    exact_dependency_version, resolved_dependency_version, safe_dependency_constraint,
++    safe_dependency_version, valid_dependency_name, DependencyOrigin as Origin,
+ };
+ pub(super) use pqc_scan_core::{classifier, DetectorStatus, ScannableFile};
+ pub(super) use regex::Regex;
+@@ -50,8 +50,8 @@ impl Build {
+             self.bad += 1;
+             return;
+         }
+-        if (declared.is_some_and(|s| !safe_dependency_version(s))
+-            || reported.is_some_and(|s| !safe_dependency_version(s)))
++        if (declared.is_some_and(|s| !safe_dependency_constraint(ecosystem, s))
++            || reported.is_some_and(|s| !safe_dependency_constraint(ecosystem, s)))
+             && !matches!(
+                 origin,
+                 Origin::Path
+@@ -65,7 +65,7 @@ impl Build {
+             origin = Origin::Unknown;
+         }
+         let declared = declared
+-            .filter(|s| safe_dependency_version(s))
++            .filter(|s| safe_dependency_constraint(ecosystem, s))
+             .map(str::to_string);
+         let resolved = resolved
+             .filter(|s| resolved_dependency_version(ecosystem, s))
+@@ -75,7 +75,7 @@ impl Build {
+             origin = Origin::LockUnverified;
+         }
+         let reported = reported
+-            .filter(|s| safe_dependency_version(s))
++            .filter(|s| safe_dependency_constraint(ecosystem, s))
+             .map(str::to_string);
+         let version = reported
+             .as_deref()
+@@ -83,6 +83,7 @@ impl Build {
+             .unwrap_or_else(|| "unknown".into());
+         self.items.push(DependencyItem {
+             context: None,
++            language_context: None,
+             name: name.into(),
+             version,
+             ecosystem: ecosystem.into(),
+@@ -108,6 +109,18 @@ impl Build {
+             parsed: true,
+         });
+     }
++    pub(super) fn reject(&mut self) {
++        self.bad += 1;
++    }
++    pub(super) fn context(
++        &mut self,
++        before: usize,
++        context: pqc_scan_core::observation::DependencyContext,
++    ) {
++        for item in &mut self.items[before..] {
++            item.language_context = Some(context);
++        }
++    }
+     pub(super) fn finish(self) -> anyhow::Result<Parsed> {
+         let status = if self.status == DetectorStatus::Truncated {
+             DetectorStatus::Truncated
+@@ -248,7 +261,11 @@ fn component(s: &str) -> String {
+         .collect()
+ }
+ fn purl(ecosystem: &str, name: &str, version: Option<&str>) -> String {
+-    if !["cargo", "npm", "pypi", "gem", "maven", "golang", "generic"].contains(&ecosystem) {
++    if ![
++        "cargo", "npm", "pypi", "gem", "maven", "golang", "generic", "composer", "nuget",
++    ]
++    .contains(&ecosystem)
++    {
+         return String::new();
+     }
+     let path = if ecosystem == "maven" {

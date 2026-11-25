@@ -1,0 +1,145 @@
+id: '081'
+title: Add bounded Composer, NuGet and C/C++ dependency inputs and migration guidance
+type: improvement
+priority: high
+status: done
+owner: Main agent
+milestone: v0.5
+phase: '6'
+plan_reference: docs/roadmap/v0.5/ROADMAP.md
+requirements_reference: docs/roadmap/v0.5/REQUIREMENTS.md
+task_map_reference: docs/roadmap/v0.5/TASKS.md
+design_reference: docs/product/PQC-LANGUAGE-IMPLEMENTATION-PLAN-20261119.md
+description: Implement every declared dependency subset and useful environment-aware guidance while preserving
+  source-local provenance.
+quality_requirements:
+- L09
+- L10
+- L11
+- L12
+- L13
+- L17
+- L20
+- L25
+- L27
+depends_on:
+- '077'
+target_components:
+- crates/pqc_scan_detectors/src/dependency_detector/
+- crates/pqc_scan_detectors/src/dependency_detector.rs
+- crates/pqc_scan_core/src/observation.rs
+- crates/pqc_scan_core/src/recommendation.rs
+- crates/pqc_scan_core/src/classifier.rs
+- crates/pqc_scan_detectors/tests/
+- crates/pqc_scan_core/tests/
+- rules/default/
+- docs/architecture/DEPENDENCY-PROVENANCE.md
+- docs/user/
+problem:
+- The required new-language outcomes are not delivered by current seven-language source routing, limited normalization
+  or dependency formats. Existing v0.4 correctness/privacy/contracts must remain intact.
+acceptance:
+- Implement every dependency-input row from ROADMAP.md section 4.2, including Composer manifests/locks/platform
+  emulation; NuGet/project/central/legacy/SDK inputs; packages.lock versions 1/2; vcpkg declarations/configuration;
+  Conan text/0.5 locks; and bounded literal CMake references.
+- Preserve declared, reported, locked, conditional, development/platform, Git/path/custom and SDK facts through
+  the existing six fields; concrete registry resolution/purls require eligible source evidence, never installation
+  or inferred graph.
+- NuGet identifiers compare case-insensitively without merging distinct source assertions; Composer vendor/package
+  names use narrow validated namespace handling. Do not invent a registry purl for CMake/Conan/vcpkg sources.
+- Nearest selected in-root literal central-package context works; dynamic properties, arbitrary imports, exclusion/symlink/out-of-root
+  inputs and unselected files are unresolved or rejected with bounded safe status.
+- Guidance separates PHP extension/native library, .NET target/package/OS/provider and C/C++ backend/build prerequisites,
+  plus distinct OQS wrapper maintenance identities. Missing versions and provider/peer/protocol support remain
+  unknown.
+deliverables:
+- tasks/081/TASK-081-RESULTS.md
+- tasks/081/evidence/
+- The scoped behavior or feasibility deliverable, meaningful verification, affected documentation and applicable
+  review evidence; no completion follows from registration.
+implementation_steps:
+- Write failing valid-empty/supported/unsupported/malformed/duplicate and provenance tests for every format
+  row.
+- Implement bounded parsers and explicit local context using current status/resource/identity contracts, without
+  invoking package managers.
+- Add narrow ecosystem validation/projection only where representable and retain unresolved source records safely.
+- Implement evidence-bound language/library guidance, affected rule quality updates, paired docs and parser/context/guidance
+  regression tests.
+testing_requirements:
+- Apply docs/agent/VERIFICATION.md for all affected categories, including targeted behavior, workspace tests,
+  formatting/diff inspection, Clippy, applicable builds/features and package/dependency provenance checks; record
+  actual commands/exits and final-source applicability.
+- For executable changes, obtain implementation review after initial checks and combined-diff inspection, then
+  test review after required tests. Reuse the same two stage reviewers within one authorized request; splitting
+  tasks or PRs grants no additional identities.
+- New source/rule/manifest coverage needs meaningful positive, negative, malformed/unknown, resource/position/identity
+  and private-data controls. Browser acceptance uses docs/agent/REPORTS.md where presentation/interaction is
+  affected.
+- Cover exact schema versions, custom sources, duplicate/malformed siblings, XML entities, central-package imports/conditions/multitargeting
+  and JSON depth/record/byte limits.
+- Check safe identifiers/versions/purls, no secret URL payloads, source-local assertion identity and no manifest-lock
+  graph joining.
+- Check explicit backend/version gaps, deprecated official versus independent wrappers, no AES-to-PQC blanket
+  replacement and no dependency-to-ready promotion.
+out_of_scope:
+- Project/package/build execution, package installation, network registry queries, arbitrary MSBuild/CMake/Python
+  evaluation, dependency-graph reconstruction and unapproved versioned-storage changes.
+risks:
+- An API/library name, dependency or syntactic reference may be promoted beyond its assurance, or historical
+  evidence may be mistaken for coverage of new final-source behavior.
+approval_boundary:
+- Definition and registration only under the 2026-11-24 steering; this task is not selected for execution. Dependencies
+  must complete and later explicit task selection is required.
+- Storage-format changes, high-risk architecture, unclear cryptographic logic and potentially incompatible rules
+  require the applicable AGENTS human decision; routine choices within agreed scope do not create a new approval
+  gate.
+- No extra agents, release/push/publication, outreach, fees or unagreed scope/criteria changes. Review budget
+  remains per authorized request.
+planning_record:
+  date: '2026-11-24'
+  source_head: 7e8cd91426fa21609a91c0511de44252eaa890d4
+  scope: Requirements/roadmap/task-definition work only; no new task execution, implementation acceptance or
+    measurement selected.
+  primary_requirements:
+  - L10
+  - L11
+  - L12
+  supporting_requirements:
+  - L09
+  - L13
+  - L17
+  - L20
+  - L25
+  - L27
+  scoped_acceptance: Primary clauses close only with all scoped supporting evidence; cross-cutting requirements
+    remain mandatory.
+  completion_evidence: Every original task criterion, applicable final-source validation and required reviews;
+    preserve failures, unknowns, prior evidence and source bindings.
+execution_authorization:
+  date: '2026-11-24'
+  request: Maintainer selected tasks 076 onward in roadmap dependency order. Continue implementation, applicable
+    checks, required reviews and final acceptance within original scope.
+  review_budget: Two identities for this combined request, implementation stage and test stage; reuse across
+    tasks and fixes.
+execution_record:
+  source_head: 7e8cd91426fa21609a91c0511de44252eaa890d4 plus accepted076-080 work
+  prerequisite: 077 foundation and sequential080 done; manifest5fb2fe9d
+  plan: tasks/081/TASK-081-PLAN.md
+  reviewers:
+    implementation: /root/implementation_review
+    test: /root/test_review
+  lifecycle:
+  - 'pending -> planned: current user selected076 onward sequentially;080 accepted; reuse frozen25dependency
+    cases and source editions'
+  - 'planned -> in-progress: frozen Composer case failed NotApplicable before product implementation; red logs preserved; parsers and boundary controls under implementation'
+  - 'in-progress -> review: 62-file combined source snapshot and passing initial parser/guidance/report/quality/fmt/diff/Clippy evidence; retained implementation review requested'
+  - 'review -> in-progress: retained reviewer requests threeP2 fixes: explicit version conflict, central record-cap bypass and JSON construction budget; old source/evidence preserved'
+  - 'in-progress -> review: threeP2 corrected;14 parser tests plus construction limits and Clippy/fmt/diff pass;63 source/four input snapshot for same reviewer confirmation'
+  - 'review -> done: retained test-stage P2 corrected with exact counts; both stages accepted; all original081 criteria and final-source/reused-product evidence verified'
+  final_acceptance:
+    source_manifest_sha256: 510e0e99bd9ea783db5b439b6179cadd64fc20619fd859e73f64087360438d79
+    implementation_review: accepted8c; test-only delta preserves all product hashes and conclusions
+    test_review: accepted510e;63source/fourinputs/278observations match; no findings
+    checks: evidence/FINAL-CHECKS.json;13top-level checks plus15CLI commands with expected0or3
+    results: tasks/081/TASK-081-RESULTS.md
+    remaining: 082-083 only; no original081 criterion deferred

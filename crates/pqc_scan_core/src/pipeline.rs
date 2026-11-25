@@ -295,6 +295,68 @@ where
             f.evidence.snippet_preview = "[masked-sensitive-content]".into();
         }
     }
+    // Associate finite public source labels before raw legacy equality material
+    // is discarded. Never whitelist source text or arbitrary detector metadata.
+    let mut public_source_labels = BTreeMap::new();
+    for draft in &observations {
+        if let Some(label) = draft.public_source_label() {
+            for binding in &draft.bindings {
+                if let Some(key) = binding.key(&config.root) {
+                    public_source_labels
+                        .entry(key)
+                        .and_modify(|old| {
+                            if *old != Some(label.clone()) {
+                                *old = None;
+                            }
+                        })
+                        .or_insert(Some(label.clone()));
+                }
+            }
+        }
+    }
+    let safe_finding_labels: Vec<_> = findings
+        .iter()
+        .map(|f| {
+            public_source_labels
+                .get(&(
+                    f.rule_id.clone(),
+                    f.location.file.clone(),
+                    f.location.line,
+                    f.location.column,
+                    f.evidence.r#match.clone(),
+                ))
+                .cloned()
+                .flatten()
+        })
+        .collect();
+    let safe_cbom_labels: BTreeMap<_, _> = findings
+        .iter()
+        .zip(&safe_finding_labels)
+        .filter_map(|(f, label)| {
+            label.as_ref().map(|label| {
+                (
+                    (
+                        format!("{}:{}", f.location.file, f.location.line),
+                        f.category.clone(),
+                        f.evidence.r#match.clone(),
+                    ),
+                    label.clone(),
+                )
+            })
+        })
+        .collect();
+    let safe_cbom_labels: Vec<_> = cbom
+        .iter()
+        .map(|r| {
+            safe_cbom_labels
+                .get(&(
+                    r.location.clone(),
+                    r.usage_type.clone(),
+                    r.algorithm.clone(),
+                ))
+                .cloned()
+        })
+        .collect();
     let legacy = ScanResult {
         generated_at: Utc::now(),
         findings,
@@ -324,7 +386,56 @@ where
         );
         document = document.with_native(native);
     }
+    let display_reference_ids: HashSet<_> = document
+        .legacy()
+        .findings
+        .iter()
+        .filter(|f| {
+            f.evidence
+                .metadata
+                .get("reference_kind")
+                .is_some_and(|s| s == "display_text")
+                && f.description
+                    == "An algorithm name appears in non-executable text or a symbol declaration."
+        })
+        .map(|f| f.finding_id.clone())
+        .collect();
     crate::privacy::sanitize_with_context(document.legacy_mut(), &sensitive_ids);
+    for finding in &mut document.legacy_mut().findings {
+        if privacy_by_file
+            .get(&finding.location.file)
+            .is_some_and(|p| p.restricts_source_matches())
+        {
+            // Metadata is detector-owned and may duplicate a secret token. Native
+            // typed facts have already been constructed without raw metadata.
+            for value in finding.evidence.metadata.values_mut() {
+                *value = "[masked-sensitive-content]".into();
+            }
+        }
+        // Restore only the fixed classification produced before sanitization,
+        // never a scanned token, preview or arbitrary detector metadata value.
+        if display_reference_ids.contains(&finding.finding_id) {
+            finding
+                .evidence
+                .metadata
+                .insert("reference_kind".into(), "display_text".into());
+        }
+    }
+    for (finding, label) in document
+        .legacy_mut()
+        .findings
+        .iter_mut()
+        .zip(safe_finding_labels)
+    {
+        if let Some(label) = label {
+            finding.evidence.r#match = label;
+        }
+    }
+    for (row, label) in document.legacy_mut().cbom.iter_mut().zip(safe_cbom_labels) {
+        if let Some(label) = label {
+            row.algorithm = label;
+        }
+    }
     Ok(document)
 }
 
@@ -426,12 +537,11 @@ fn inspect_file(
     native: bool,
     context: Option<&crate::RepositoryContext>,
 ) -> FileOutcome {
-    let privacy = file
+    let mut source_privacy = file
         .text
         .as_deref()
         .map(crate::privacy::SourcePrivacy::from_text)
-        .filter(|p| !p.is_empty())
-        .map(|p| (relative.to_string(), p));
+        .unwrap_or_default();
     let source_offsets = native
         .then(|| {
             file.text
@@ -457,8 +567,14 @@ fn inspect_file(
                 Some(DiagnosticCode::DetectorFailed)
             }
             Ok(outcome) => {
+                if outcome.sensitive_source_context() {
+                    source_privacy.protect_source_context();
+                }
                 test_ranges.extend_from_slice(outcome.test_ranges());
                 display_ranges.extend_from_slice(outcome.display_ranges());
+                if let Some(text) = &file.text {
+                    source_privacy.add_sensitive_ranges(text, outcome.sensitive_ranges());
+                }
                 explanation = outcome.diagnostic_message().map(str::to_owned);
                 let code = match outcome.status() {
                     DetectorStatus::Complete => {
@@ -530,6 +646,22 @@ fn inspect_file(
             Some("text_decoder".into()),
         ));
     }
+    if source_privacy.restricts_source_matches() {
+        // Opaque lexical tokens in a key-bearing source file may themselves be
+        // key payload. Preserve occurrences/links, but never promote payload
+        // vocabulary to an algorithm. Explicit finite source API facts survive.
+        for draft in &mut observations {
+            if !draft.source_api_typed
+                && matches!(
+                    draft.method.as_str(),
+                    "lexical_match" | "ast_pattern" | "configuration_match"
+                )
+            {
+                draft.algorithms.clear();
+            }
+        }
+    }
+    let privacy = (!source_privacy.is_empty()).then(|| (relative.to_owned(), source_privacy));
     mark_display_references(&mut detections, file, &display_ranges);
     let usable = complete || !detections.is_empty();
     let disposition = if partial || ((failed || unsupported) && usable) {
@@ -576,39 +708,6 @@ fn mark_display_references(
         ) {
             continue;
         }
-        // A display annotation applies to algorithm-name references only, never
-        // arbitrary custom matches, private-key material or other security facts.
-        let token = d
-            .evidence
-            .r#match
-            .trim_matches(['\'', '"'])
-            .to_ascii_uppercase();
-        if !matches!(
-            token.as_str(),
-            "RSA"
-                | "RS256"
-                | "RS384"
-                | "RS512"
-                | "ES256"
-                | "ES384"
-                | "ES512"
-                | "EDDSA"
-                | "AES"
-                | "AES-128-GCM"
-                | "AES-192-GCM"
-                | "AES-256-GCM"
-                | "AES-128-CBC"
-                | "AES-192-CBC"
-                | "AES-256-CBC"
-                | "TLS1.0"
-                | "TLS1.1"
-                | "TLSV1"
-                | "TLSV1.0"
-                | "TLSV1.1"
-        ) {
-            continue;
-        }
-
         let Some(line) = d
             .location
             .line
@@ -630,9 +729,68 @@ fn mark_display_references(
             .into_iter()
             .flatten()
             .filter_map(|start| {
-                let end = start.checked_add(d.evidence.r#match.len())?;
-                (start < end && text.get(start..end) == Some(d.evidence.r#match.as_str()))
-                    .then_some(start..end)
+                let matched = d.evidence.r#match.as_str();
+                let end = start.checked_add(matched.len())?;
+                let raw = if text.get(start..end) == Some(matched) {
+                    matched
+                } else {
+                    // Long regex previews are masked. Recover only a bounded
+                    // public TLS suite token, requiring the exact same preview;
+                    // never reconstruct arbitrary source or private-key data.
+                    let rest = text.get(start..)?;
+                    let size = rest
+                        .bytes()
+                        .take(129)
+                        .take_while(|b| b.is_ascii_uppercase() || b.is_ascii_digit() || *b == b'_')
+                        .count();
+                    if size > 128 {
+                        return None;
+                    }
+                    let token = rest.get(..size)?;
+                    if !token.starts_with("TLS_")
+                        || !token.contains("_WITH_")
+                        || crate::model::mask_preview(token) != matched
+                    {
+                        return None;
+                    }
+                    token
+                };
+                let token = raw.trim_matches(['\'', '"']).to_ascii_uppercase();
+                let suite = token.starts_with("TLS_")
+                    && token.contains("_WITH_")
+                    && token.len() <= 128
+                    && token
+                        .bytes()
+                        .all(|b| b.is_ascii_uppercase() || b.is_ascii_digit() || b == b'_');
+                if !suite
+                    && !matches!(
+                        token.as_str(),
+                        "RSA"
+                            | "RS256"
+                            | "RS384"
+                            | "RS512"
+                            | "ES256"
+                            | "ES384"
+                            | "ES512"
+                            | "EDDSA"
+                            | "AES"
+                            | "AES-128-GCM"
+                            | "AES-192-GCM"
+                            | "AES-256-GCM"
+                            | "AES-128-CBC"
+                            | "AES-192-CBC"
+                            | "AES-256-CBC"
+                            | "TLS1.0"
+                            | "TLS1.1"
+                            | "TLSV1"
+                            | "TLSV1.0"
+                            | "TLSV1.1"
+                            | "TLS_ECDHE_RSA"
+                    )
+                {
+                    return None;
+                }
+                Some(start..start.checked_add(raw.len())?)
             })
             .peekable();
         if exact.peek().is_some()
@@ -697,7 +855,7 @@ fn normalize_findings(
             risk: rule.risk,
             severity,
             confidence: rule.confidence,
-            description: if display_reference { "An algorithm name appears in diagnostic or display text.".into() } else { description },
+            description: if display_reference { "An algorithm name appears in non-executable text or a symbol declaration.".into() } else { description },
             migration_hint: if display_reference { "This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.".into() } else { rule.migration_hint.clone() },
             location: crate::model::Location {
                 file: relative_file,
@@ -861,7 +1019,10 @@ fn attach_source_snippets(
 
         let rel_file = finding.location.file.clone();
         let source = text_cache.entry(rel_file.clone()).or_insert_with(|| {
-            if privacy.get(&rel_file).is_some_and(|p| p.private_marker) {
+            if privacy
+                .get(&rel_file)
+                .is_some_and(|p| p.masks_source_context())
+            {
                 CachedSnippetSource::MaskedSensitiveFile
             } else {
                 load_snippet_source(root, &root.join(&rel_file), max_bytes)

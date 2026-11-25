@@ -1,0 +1,207 @@
+- text: Language / 言語
+- combobox "Language / 言語":
+  - option "English"
+  - option "日本語" [selected]
+- text: Theme / 表示
+- combobox "Theme / 表示":
+  - option "Light / ライト" [selected]
+  - option "Dark / ダーク"
+- main:
+  - link "検出結果へ移動":
+    - /url: "#findings"
+  - paragraph: pqc-scan / 静的解析
+  - heading "耐量子暗号への移行調査レポート" [level=1]
+  - paragraph:
+    - text: 作成日時
+    - time: 2026/11/24 16:30:09 JST (Asia/Tokyo)
+  - generic: 確認が必要な指摘
+  - generic: 6 件
+  - generic: 参考情報
+  - generic: 12 件
+  - generic: 検出のあったファイル数
+  - generic: "3"
+  - figure "重大度の分布 · 全検出":
+    - generic: 重大度の分布 · 全検出
+    - list:
+      - text: 中
+      - strong: "6"
+      - text: 参考情報
+      - strong: "12"
+  - heading "検査範囲と完了状況" [level=2]
+  - paragraph: 対象範囲の検査は完了しました
+  - paragraph: 下の所見を確認してください。検査完了は、安全性や移行完了を意味しません。
+  - text: 検査対象ファイル数
+  - strong: "3"
+  - text: 解析完了ファイル数
+  - strong: "3"
+  - text: 追加確認が必要なファイル数
+  - strong: "0"
+  - generic "検査範囲と除外条件"
+  - complementary:
+    - group "検索条件":
+      - generic "検索条件 ›":
+        - text: 検索条件 ›
+      - text: 表示対象
+      - combobox "表示対象":
+        - option "対応候補"
+        - option "参考情報"
+        - option "すべて" [selected]
+      - text: 検索
+      - searchbox "検索"
+      - text: 重大度
+      - combobox "重大度":
+        - option "すべて" [selected]
+        - option "緊急"
+        - option "高"
+        - option "中"
+        - option "低"
+        - option "参考情報"
+      - text: リスク
+      - combobox "リスク":
+        - option "すべて" [selected]
+        - option "量子計算によるリスクあり"
+        - option "要確認（実装や設定の確認が必要）"
+        - option "PQC方式の参照あり（対応完了の保証ではありません）"
+        - option "量子計算とは別のセキュリティ上の注意点"
+      - text: ルール
+      - combobox "ルール":
+        - option "すべてのルール" [selected]
+        - option "API_OPENSSL_RSA_NEW — OpenSSLの低水準RSA APIの参照が見つかりました。"
+        - option "C_FAMILY_CRYPTO_API — C/C++の暗号APIまたは設定の参照が見つかりました。"
+        - option "C_FAMILY_PQC_API — C/C++のPQC方式の参照が見つかりました。"
+        - option "C_FAMILY_TLS_REFERENCE — C/C++の暗号ライブラリをincludeする記述が見つかりました。"
+      - link "ルールの説明":
+        - /url: report.rules.html?lang=ja
+      - text: ファイル
+      - combobox "ファイル":
+        - option "すべてのファイル" [selected]
+        - option "api.c"
+        - option "api.cpp"
+        - option "common.h"
+      - checkbox "テストコードの結果を表示" [checked]
+      - text: テストコードの結果を表示
+      - button "条件をすべて解除"
+    - group "ファイル":
+      - generic "ファイル ›":
+        - text: ファイル ›
+      - link "すべての結果を表示":
+        - /url: "#findings"
+      - list:
+        - button "api.c、全検出11件":
+          - generic: api.c
+          - generic: "11"
+        - button "api.cpp、全検出5件":
+          - generic: api.cpp
+          - generic: "5"
+        - button "common.h、全検出2件":
+          - generic: common.h
+          - generic: "2"
+  - region "検出結果":
+    - heading "検出結果" [level=2]
+    - status: 表示対象：4 / 4グループ、18 / 18件
+    - generic "› OpenSSLの低水準RSA APIの参照が見つかりました。 中 1 件 ファイル 1 · 表示対象 1 / 1":
+      - text: ›
+      - strong: OpenSSLの低水準RSA APIの参照が見つかりました。
+      - generic: 中
+      - generic: 1 件
+      - generic: ファイル 1 · 表示対象 1 / 1
+    - generic "› C/C++の暗号APIまたは設定の参照が見つかりました。 中 5 件 ファイル 1 · 表示対象 5 / 5":
+      - text: ›
+      - strong: C/C++の暗号APIまたは設定の参照が見つかりました。
+      - generic: 中
+      - generic: 5 件
+      - generic: ファイル 1 · 表示対象 5 / 5
+    - paragraph: 方式、鍵の役割、リンクするプロバイダーとビルド設定を確認してください。プロバイダーやTLSグループの指定だけでは、実行時の有効性や通信での合意を判断できません。
+    - paragraph:
+      - link "このルールの説明":
+        - /url: report.rules.html?lang=ja#rule-1
+    - heading "検出箇所と対応" [level=4]
+    - 'generic "api.c:3:220 C/C++ provider configuration reference: oqsprovider"':
+      - code: api.c:3:220
+      - generic: "C/C++ provider configuration reference: oqsprovider"
+    - 'generic "api.c:3:259 C/C++ property configuration reference: provider=default"':
+      - code: api.c:3:259
+      - generic: "C/C++ property configuration reference: provider=default"
+    - 'generic "api.c:3:311 C/C++ TLS group configuration reference: X25519MLKEM768:P-256"':
+      - code: api.c:3:311
+      - generic: "C/C++ TLS group configuration reference: X25519MLKEM768:P-256"
+    - paragraph: C/C++の暗号APIまたは設定の参照が見つかりました。
+    - paragraph: "判断の目安: 要確認（実装や設定の確認が必要）"
+    - paragraph: "確認すること: 方式、鍵の役割、リンクするプロバイダーとビルド設定を確認してください。プロバイダーやTLSグループの指定だけでは、実行時の有効性や通信での合意を判断できません。"
+    - paragraph:
+      - text: "検出した記述:"
+      - code: "C/C++ TLS group configuration reference: X25519MLKEM768:P-256"
+    - generic "一致したルール (1)"
+    - generic: "3"
+    - generic: "[masked-sensitive-file-content]"
+    - heading "この箇所の対応" [level=4]
+    - paragraph: 共通の確認・計画（この行で確認済みの事実ではありません）：
+    - list:
+      - link "暗号方式を切り替えられる共通処理を設ける":
+        - /url: "#shared-1-0"
+    - generic "api.c:3:364 [masked-sensitive-content]":
+      - code: api.c:3:364
+      - generic: "[masked-sensitive-content]"
+    - generic "api.c:3:411 [masked-sensitive-content]":
+      - code: api.c:3:411
+      - generic: "[masked-sensitive-content]"
+    - generic "共通の確認・計画 (1)"
+    - generic "› C/C++のPQC方式の参照が見つかりました。 参考情報 9 件 ファイル 3 · 表示対象 9 / 9" [active]:
+      - text: ›
+      - strong: C/C++のPQC方式の参照が見つかりました。
+      - generic: 参考情報
+      - generic: 9 件
+      - generic: ファイル 3 · 表示対象 9 / 9
+    - paragraph: 標準とドラフトの方式名・パラメーター、OQSやOpenSSLのバージョンとビルド設定を確認してください。方式の指定だけで、有効化済み・移行完了とは判断できません。
+    - paragraph:
+      - link "このルールの説明":
+        - /url: report.rules.html?lang=ja#rule-2
+    - heading "検出箇所と対応" [level=4]
+    - generic "api.c:3:28 [masked-sensitive-content]":
+      - code: api.c:3:28
+      - generic: "[masked-sensitive-content]"
+    - generic "api.c:3:98 [masked-sensitive-content]":
+      - code: api.c:3:98
+      - generic: "[masked-sensitive-content]"
+    - generic "api.c:3:124 [masked-sensitive-content]":
+      - code: api.c:3:124
+      - generic: "[masked-sensitive-content]"
+    - generic "api.cpp:2:10 [masked-sensitive-content]":
+      - code: api.cpp:2:10
+      - generic: "[masked-sensitive-content]"
+    - generic "api.cpp:2:40 [masked-sensitive-content]":
+      - code: api.cpp:2:40
+      - generic: "[masked-sensitive-content]"
+    - generic "api.cpp:2:113 [masked-sensitive-content]":
+      - code: api.cpp:2:113
+      - generic: "[masked-sensitive-content]"
+    - generic "api.cpp:2:151 [masked-sensitive-content]":
+      - code: api.cpp:2:151
+      - generic: "[masked-sensitive-content]"
+    - generic "common.h:1:21 [masked-sensitive-content]":
+      - code: common.h:1:21
+      - generic: "[masked-sensitive-content]"
+    - generic "common.h:1:49 [masked-sensitive-content]":
+      - code: common.h:1:49
+      - generic: "[masked-sensitive-content]"
+    - generic "› C/C++の暗号ライブラリをincludeする記述が見つかりました。 参考情報 3 件 ファイル 2 · 表示対象 3 / 3":
+      - text: ›
+      - strong: C/C++の暗号ライブラリをincludeする記述が見つかりました。
+      - generic: 参考情報
+      - generic: 3 件
+      - generic: ファイル 2 · 表示対象 3 / 3
+    - paragraph: OpenSSL・liboqs・liboqs-cppを区別し、リンク先やTLS設定を確認してください。includeだけでは、導入済みの実装や方式の有効性、通信での合意を判断できません。
+    - paragraph:
+      - link "このルールの説明":
+        - /url: report.rules.html?lang=ja#rule-3
+    - heading "検出箇所と対応" [level=4]
+    - generic "api.c:1:1 C/C++ OpenSSL include reference":
+      - code: api.c:1:1
+      - generic: C/C++ OpenSSL include reference
+    - generic "api.c:2:1 C/C++ liboqs include reference":
+      - code: api.c:2:1
+      - generic: C/C++ liboqs include reference
+    - generic "api.cpp:1:1 C/C++ liboqs-cpp include reference":
+      - code: api.cpp:1:1
+      - generic: C/C++ liboqs-cpp include reference
+    - generic "共通の確認・計画 (1)"

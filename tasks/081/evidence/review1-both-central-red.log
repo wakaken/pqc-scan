@@ -1,0 +1,34 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.91s
+     Running tests/language_dependencies.rs (target/debug/deps/language_dependencies-bf2fcd7220ddc5e7)
+
+running 4 tests
+test central_malformed_explicit_versions_never_supply_inheritance ... FAILED
+test central_files_outside_the_root_unselected_or_linked_are_never_read ... ok
+test central_context_is_nearest_selected_literal_and_source_local ... ok
+test central_truncated_sources_never_supply_inheritance has been running for over 60 seconds
+test central_truncated_sources_never_supply_inheritance ... FAILED
+
+failures:
+
+---- central_malformed_explicit_versions_never_supply_inheritance stdout ----
+
+thread 'central_malformed_explicit_versions_never_supply_inheritance' (23893441) panicked at crates/pqc_scan_detectors/tests/language_dependencies.rs:275:9:
+assertion `left == right` failed: <Project><ItemGroup><PackageReference Include="BouncyCastle.Cryptography" Version="2.6.0" VersionOverride="2.7.0"/></ItemGroup></Project>
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- central_truncated_sources_never_supply_inheritance stdout ----
+
+thread 'central_truncated_sources_never_supply_inheritance' (23893442) panicked at crates/pqc_scan_detectors/tests/language_dependencies.rs:310:5:
+assertion failed: facts[0]["declared_constraint"].is_null()
+
+
+failures:
+    central_malformed_explicit_versions_never_supply_inheritance
+    central_truncated_sources_never_supply_inheritance
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 9 filtered out; finished in 81.31s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test language_dependencies`

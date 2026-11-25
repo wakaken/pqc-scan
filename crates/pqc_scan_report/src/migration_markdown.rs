@@ -125,6 +125,14 @@ pub fn migration_markdown_bytes(
             code(&location(t)),
             c.token(&t.source_ref.role)
         )?;
+        if let Some(provenance) = &t.source_ref.dependency_provenance {
+            writeln!(
+                out,
+                "{}: {}\n",
+                c.pick("Dependency declaration", "依存関係の宣言"),
+                code(c.code(provenance))
+            )?;
+        }
         writeln!(
             out,
             "### {}\n\n{}\n\n{}\n",
@@ -211,6 +219,9 @@ pub fn migration_markdown_bytes(
             i + 1,
             c.pick("Evidence for this response", "この対応とした根拠")
         )?;
+        if let Some(explanation) = crate::migration_copy::observation_explanation(t, language) {
+            writeln!(out, "{explanation}\n")?;
+        }
         writeln!(
             out,
             "| {} | {} |\n|---|---|",
@@ -229,6 +240,10 @@ pub fn migration_markdown_bytes(
             (
                 c.pick("Evidence assurance", "確認できている範囲"),
                 c.token(&t.observation.assurance).into(),
+            ),
+            (
+                c.pick("Observed use state", "検出時の利用状態"),
+                c.token(&t.observation.usage).into(),
             ),
             (
                 c.pick("Collection", "収集状況"),

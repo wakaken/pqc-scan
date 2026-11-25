@@ -1,0 +1,146 @@
+- text: Language / 言語
+- combobox "Language / 言語":
+  - option "English" [selected]
+  - option "日本語"
+- text: Theme / 表示
+- combobox "Theme / 表示":
+  - option "Light / ライト" [selected]
+  - option "Dark / ダーク"
+- main:
+  - link "Skip to findings":
+    - /url: "#findings"
+  - paragraph: pqc-scan / Static analysis
+  - heading "PQC Migration Scan Report" [level=1]
+  - paragraph:
+    - text: Generated
+    - time: Nov 24, 2026, 4:30:09 PM GMT+9 (Asia/Tokyo)
+  - generic: Findings to review
+  - generic: 6 items
+  - generic: Informational findings
+  - generic: 12 items
+  - generic: Files with findings
+  - generic: "3"
+  - figure "Severity distribution · all findings":
+    - generic: Severity distribution · all findings
+    - list:
+      - text: medium
+      - strong: "6"
+      - text: info
+      - strong: "12"
+  - heading "Inspection scope and completion" [level=2]
+  - paragraph: Supported inspection completed within the selected scope
+  - paragraph: Review the findings below. Completion does not mean the project is safe.
+  - text: Files selected
+  - strong: "3"
+  - text: Files analyzed
+  - strong: "3"
+  - text: Files needing follow-up
+  - strong: "0"
+  - generic "Scope and exclusions"
+  - complementary:
+    - group "Search conditions":
+      - generic "Search conditions ›":
+        - text: Search conditions ›
+      - text: View
+      - combobox "View":
+        - option "Risk candidates"
+        - option "Inventory"
+        - option "All" [selected]
+      - text: Search
+      - searchbox "Search"
+      - text: Severity
+      - combobox "Severity":
+        - option "All severities" [selected]
+        - option "critical"
+        - option "high"
+        - option "medium"
+        - option "low"
+        - option "info"
+      - text: Risk
+      - combobox "Risk":
+        - option "All risks" [selected]
+        - option "quantum-vulnerable"
+        - option "quantum-uncertain"
+        - option "quantum-safe"
+        - option "non-quantum-risk"
+      - text: Rule
+      - combobox "Rule":
+        - option "All rules" [selected]
+        - option "API_OPENSSL_RSA_NEW — OpenSSL low-level RSA API usage detected."
+        - option "C_FAMILY_CRYPTO_API — C/C++ cryptographic API or configuration reference; effective primitive ..."
+        - option "C_FAMILY_PQC_API — C/C++ PQC source reference; requested parameter sets do not prove enable..."
+        - option "C_FAMILY_TLS_REFERENCE — C/C++ cryptographic include or TLS library reference; linking and negoti..."
+      - link "Rule explanations":
+        - /url: report.rules.html?lang=en
+      - text: File
+      - combobox "File":
+        - option "All files" [selected]
+        - option "api.c"
+        - option "api.cpp"
+        - option "common.h"
+      - checkbox "Show test code results" [checked]
+      - text: Show test code results
+      - button "Clear all filters"
+    - group "Files":
+      - generic "Files ›":
+        - text: Files ›
+      - link "Show all results":
+        - /url: "#findings"
+      - list:
+        - button "api.c, 11 total findings":
+          - generic: api.c
+          - generic: "11"
+        - button "api.cpp, 5 total findings":
+          - generic: api.cpp
+          - generic: "5"
+        - button "common.h, 2 total findings":
+          - generic: common.h
+          - generic: "2"
+  - region "Findings":
+    - heading "Findings" [level=2]
+    - status: 4 / 4 finding groups; 18 / 18 findings match the current view.
+    - generic "› OpenSSL low-level RSA API usage detected. medium 1 hits Files 1 · matches 1 / 1":
+      - text: ›
+      - strong: OpenSSL low-level RSA API usage detected.
+      - generic: medium
+      - generic: 1 hits
+      - generic: Files 1 · matches 1 / 1
+    - generic "› C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification. medium 5 hits Files 1 · matches 5 / 5" [active]:
+      - text: ›
+      - strong: C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.
+      - generic: medium
+      - generic: 5 hits
+      - generic: Files 1 · matches 5 / 5
+    - paragraph: Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.
+    - paragraph:
+      - link "About this rule":
+        - /url: report.rules.html?lang=en#rule-1
+    - heading "Locations and next steps" [level=4]
+    - 'generic "api.c:3:220 C/C++ provider configuration reference: oqsprovider"':
+      - code: api.c:3:220
+      - generic: "C/C++ provider configuration reference: oqsprovider"
+    - 'generic "api.c:3:259 C/C++ property configuration reference: provider=default"':
+      - code: api.c:3:259
+      - generic: "C/C++ property configuration reference: provider=default"
+    - 'generic "api.c:3:311 C/C++ TLS group configuration reference: X25519MLKEM768:P-256"':
+      - code: api.c:3:311
+      - generic: "C/C++ TLS group configuration reference: X25519MLKEM768:P-256"
+    - generic "api.c:3:364 [masked-sensitive-content]":
+      - code: api.c:3:364
+      - generic: "[masked-sensitive-content]"
+    - generic "api.c:3:411 [masked-sensitive-content]":
+      - code: api.c:3:411
+      - generic: "[masked-sensitive-content]"
+    - generic "Shared checks and planning (1)"
+    - generic "› C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection. info 9 hits Files 3 · matches 9 / 9":
+      - text: ›
+      - strong: C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.
+      - generic: info
+      - generic: 9 hits
+      - generic: Files 3 · matches 9 / 9
+    - generic "› C/C++ cryptographic include or TLS library reference; linking and negotiation remain unverified. info 3 hits Files 2 · matches 3 / 3":
+      - text: ›
+      - strong: C/C++ cryptographic include or TLS library reference; linking and negotiation remain unverified.
+      - generic: info
+      - generic: 3 hits
+      - generic: Files 2 · matches 3 / 3

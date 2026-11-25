@@ -1,0 +1,1 @@
+class Sample { void Run() { var k = new Org.BouncyCastle.Crypto.Generators.MLDsaKeyPairGenerator(); k.Init(new Org.BouncyCastle.Crypto.Parameters.MLDsaKeyGenerationParameters(random,Org.BouncyCastle.Crypto.Parameters.MLDsaParameters.ml_dsa_65)); k.GenerateKeyPair(); } }

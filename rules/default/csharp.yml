@@ -1,0 +1,32 @@
+- id: CSHARP_CRYPTO_API
+  kind: tree_sitter
+  category: CryptoAPI
+  severity: medium
+  risk: quantum-uncertain
+  confidence: 0.80
+  migration_hint: Review the resolved primitive and purpose, platform and provider. A .NET or Bouncy Castle source reference does not establish effective runtime use.
+  pattern: '\b(?:System\.Security\.Cryptography\.(?:RSA|DSA|ECDsa|ECDiffieHellman)[A-Za-z]*|Org\.BouncyCastle\.Crypto\.(?:Generators|Engines|Signers|Agreement)\.[A-Za-z]+)'
+  scope: csharp
+  description: C# cryptographic API or qualified library reference; effective key use requires verification.
+
+- id: CSHARP_PQC_API
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.80
+  migration_hint: Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.
+  pattern: '\b(?:System\.Security\.Cryptography\.(?:MLKem|MLDsa|SlhDsa|CompositeMLKem|CompositeMLDsa|Hpke)[A-Za-z0-9_]*|Org\.BouncyCastle\.Crypto\.(?:Parameters|Generators|Kems|Signers)\.(?:MLKem|MLDsa|SlhDsa)[A-Za-z0-9_]*)'
+  scope: csharp
+  description: C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection.
+
+- id: CSHARP_CRYPTO_REFERENCE
+  kind: tree_sitter
+  category: CryptoAPI
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.60
+  migration_hint: Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately.
+  pattern: '\b(?:dotnetOQS|OpenForge\.Cryptography\.LibOqs|Org\.BouncyCastle\.Tls)(?:\.[A-Za-z_][A-Za-z0-9_]*)*\b'
+  scope: csharp
+  description: C# TLS library or OQS wrapper reference; identity and runtime capability require separate checks.

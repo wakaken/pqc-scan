@@ -1,0 +1,452 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "columnKind": "unicodeCodePoints",
+      "tool": {
+        "driver": {
+          "name": "pqc-scan",
+          "rules": [
+            {
+              "id": "CSHARP_PQC_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "C_FAMILY_CRYPTO_API",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "C_FAMILY_PQC_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "DEP_BOUNCYCASTLE",
+              "shortDescription": {
+                "text": "TLS"
+              },
+              "fullDescription": {
+                "text": "BouncyCastle dependency detected."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "DEP_NATIVE_CRYPTO",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "C/C++ cryptographic dependency or literal build reference; effective configuration is unknown."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "DEP_NUGET_CRYPTO",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "NuGet cryptographic package assertion; wrapper ownership and runtime support require verification."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "DEP_OPENSSL",
+              "shortDescription": {
+                "text": "TLS"
+              },
+              "fullDescription": {
+                "text": "OpenSSL dependency detected."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "DEP_PHP_CRYPTO",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "PHP cryptographic dependency or platform declaration; installed capability is unknown."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "PHP_CRYPTO_API",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "PHP cryptographic API or library reference; key type may be unresolved."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "PHP_PQC_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "PHP PQC algorithm or X-Wing reference; runtime support requires verification."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "DEP_BOUNCYCASTLE",
+          "level": "warning",
+          "message": {
+            "text": "BouncyCastle dependency detected. | migration_hint=Verify BouncyCastle PQC support status. | next_actions=Verify .NET target, package and operating-system support (planned); Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "packages.lock.json"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify BouncyCastle PQC support status.",
+            "recommended_actions": [
+              "Verify .NET target, package and operating-system support (planned)",
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "PHP_CRYPTO_API",
+          "level": "warning",
+          "message": {
+            "text": "PHP cryptographic API or library reference; key type may be unresolved. | migration_hint=Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use. | next_actions=Verify PHP extensions and their native cryptographic backends (planned); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "rsa.php"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+            "recommended_actions": [
+              "Verify PHP extensions and their native cryptographic backends (planned)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "C_FAMILY_CRYPTO_API",
+          "level": "warning",
+          "message": {
+            "text": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification. | migration_hint=Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation. | next_actions=Verify C/C++ library, provider and build capabilities (planned); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown.c"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+            "recommended_actions": [
+              "Verify C/C++ library, provider and build capabilities (planned)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_OPENSSL",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL dependency detected. | migration_hint=Review the OpenSSL PQC roadmap. | next_actions=Verify C/C++ library, provider and build capabilities (planned); Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "vcpkg.json"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Review the OpenSSL PQC roadmap.",
+            "recommended_actions": [
+              "Verify C/C++ library, provider and build capabilities (planned)",
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_PHP_CRYPTO",
+          "level": "note",
+          "message": {
+            "text": "PHP cryptographic dependency or platform declaration; installed capability is unknown. | migration_hint=Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence. | next_actions=Verify PHP extensions and their native cryptographic backends (planned); Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "composer.json"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence.",
+            "recommended_actions": [
+              "Verify PHP extensions and their native cryptographic backends (planned)",
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_PHP_CRYPTO",
+          "level": "note",
+          "message": {
+            "text": "PHP cryptographic dependency or platform declaration; installed capability is unknown. | migration_hint=Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence. | next_actions=Verify PHP extensions and their native cryptographic backends (planned); Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "composer.json"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence.",
+            "recommended_actions": [
+              "Verify PHP extensions and their native cryptographic backends (planned)",
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "PHP_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "PHP PQC algorithm or X-Wing reference; runtime support requires verification. | migration_hint=Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection. | next_actions=Verify PHP extensions and their native cryptographic backends (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "kem.php"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+            "recommended_actions": [
+              "Verify PHP extensions and their native cryptographic backends (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_NUGET_CRYPTO",
+          "level": "note",
+          "message": {
+            "text": "NuGet cryptographic package assertion; wrapper ownership and runtime support require verification. | migration_hint=Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider. | next_actions=Verify .NET target, package and operating-system support (planned); Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "packages.lock.json"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider.",
+            "recommended_actions": [
+              "Verify .NET target, package and operating-system support (planned)",
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "C_FAMILY_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection. | migration_hint=Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection. | next_actions=Verify C/C++ library, provider and build capabilities (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "signature.c"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+            "recommended_actions": [
+              "Verify C/C++ library, provider and build capabilities (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "C_FAMILY_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection. | migration_hint=Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection. | next_actions=Verify C/C++ library, provider and build capabilities (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "signature.cpp"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+            "recommended_actions": [
+              "Verify C/C++ library, provider and build capabilities (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "CSHARP_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection. | migration_hint=Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component. | next_actions=Verify .NET target, package and operating-system support (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "signature.cs"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.",
+            "recommended_actions": [
+              "Verify .NET target, package and operating-system support (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "DEP_NATIVE_CRYPTO",
+          "level": "note",
+          "message": {
+            "text": "C/C++ cryptographic dependency or literal build reference; effective configuration is unknown. | migration_hint=Verify the native library, build flags and provider versions. vcpkg, Conan and CMake source declarations do not prove installation, selected algorithms or negotiated TLS. | next_actions=Verify C/C++ library, provider and build capabilities (planned); Track PQC readiness of dependent libraries (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "vcpkg.json"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the native library, build flags and provider versions. vcpkg, Conan and CMake source declarations do not prove installation, selected algorithms or negotiated TLS.",
+            "recommended_actions": [
+              "Verify C/C++ library, provider and build capabilities (planned)",
+              "Track PQC readiness of dependent libraries (planned)"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

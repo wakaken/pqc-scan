@@ -1,0 +1,104 @@
+{
+  "source_manifest_sha256": "7c80ed8f10a849f2a912465139531f5e21a2bb3bba0a50783a7714e2578588b4",
+  "binary_sha256": "a18b6d6e22ebb9d6c2fc42bcb6300ca4eca2f9ee3d53e9d13909fa0b013988dc",
+  "profile": "dev/default features, local preparation only",
+  "checks": [
+    {
+      "label": "cli-scan",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-foundation-cli-v2/input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "target/v05-foundation-cli-v2/rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/foundation",
+        "--out-dir",
+        "target/v05-foundation-cli-v2/output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/077/evidence/cli-scan.log"
+    },
+    {
+      "label": "cli-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-foundation-cli-v2/input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "target/v05-foundation-cli-v2/rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/foundation",
+        "--out-dir",
+        "target/v05-foundation-cli-v2/strict-output",
+        "--require-complete"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/077/evidence/cli-strict.log"
+    },
+    {
+      "label": "package-prepare",
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--binary",
+        "target/debug/pqc-scan",
+        "--variant",
+        "static",
+        "--out-dir",
+        "target/v05-foundation-package"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/077/evidence/package-prepare.log"
+    },
+    {
+      "label": "package-verify",
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--verify",
+        "target/v05-foundation-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/077/evidence/package-verify.log"
+    },
+    {
+      "label": "package-install",
+      "command": [
+        "python3",
+        "tests/distribution/check-install.py",
+        "target/v05-foundation-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz",
+        "--out-dir",
+        "target/v05-foundation-install"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/077/evidence/package-install.log"
+    }
+  ],
+  "assertions": [
+    "7 files / 8 observations and legacy findings",
+    "real original-byte UTF16 and UTF8 spans",
+    "one header occurrence / distinct same-line IDs",
+    "strict exit3 for unrendered template",
+    "all four grammar notices present in verified package"
+  ],
+  "archive_sha256": "aa3151a04b0c6e568cb770846cdc7b8bf54a36aac80b7b218d648e6ea9f5e883",
+  "archive": "target/v05-foundation-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz"
+}

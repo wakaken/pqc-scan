@@ -1,0 +1,235 @@
+{
+  "source_manifest_sha256": "5fb2fe9db1ee0eb9c78ca0fcec7c64907ac0c1de22c4a4d7d859368a1f6b352a",
+  "binary_sha256": "a211e903e852588247bfb79f1d2972ac133d2103e82e62be8553c383a767a16e",
+  "profile": "dev/default features, local preparation only",
+  "checks": [
+    {
+      "label": "cli-scan",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-c-family-cli-v2/input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "target/v05-c-family-cli-v2/rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/foundation",
+        "--out-dir",
+        "target/v05-c-family-cli-v2/output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/080/evidence/cli-scan.log"
+    },
+    {
+      "label": "cli-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-c-family-cli-v2/input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "target/v05-c-family-cli-v2/rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/foundation",
+        "--out-dir",
+        "target/v05-c-family-cli-v2/strict-output",
+        "--require-complete"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/080/evidence/cli-strict.log"
+    },
+    {
+      "label": "package-prepare",
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--binary",
+        "target/debug/pqc-scan",
+        "--variant",
+        "static",
+        "--out-dir",
+        "target/v05-c-family-package"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/080/evidence/package-prepare.log"
+    },
+    {
+      "label": "package-verify",
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--verify",
+        "target/v05-c-family-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/080/evidence/package-verify.log"
+    },
+    {
+      "label": "package-install",
+      "command": [
+        "python3",
+        "tests/distribution/check-install.py",
+        "target/v05-c-family-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz",
+        "--out-dir",
+        "target/v05-c-family-install"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/080/evidence/package-install.log"
+    },
+    {
+      "label": "cli-php-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-c-family-cli-v2/php-input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/php",
+        "--out-dir",
+        "target/v05-c-family-cli-v2/php-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/080/evidence/cli-php-default.log"
+    },
+    {
+      "label": "cli-csharp-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-c-family-cli-v2/csharp-input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "rules",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/csharp",
+        "--out-dir",
+        "target/v05-c-family-cli-v2/csharp-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/080/evidence/cli-csharp-default.log"
+    },
+    {
+      "label": "cli-csharp-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-c-family-cli-v2/csharp-partial",
+        "--rules-dir",
+        "rules",
+        "--require-complete",
+        "--out-dir",
+        "target/v05-c-family-cli-v2/csharp-partial-output"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/080/evidence/cli-csharp-strict.log"
+    },
+    {
+      "label": "cli-c-family-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-c-family-cli-v2/c-family-input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "rules",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/c-family",
+        "--out-dir",
+        "target/v05-c-family-cli-v2/c-family-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/080/evidence/cli-c-family-default.log"
+    },
+    {
+      "label": "cli-c-family-assess",
+      "command": [
+        "target/debug/pqc-scan",
+        "assess",
+        "target/v05-c-family-cli-v2/c-family-output/scan.inventory.v1.json",
+        "--input-format",
+        "inventory-v1",
+        "--as-of",
+        "2026-11-24T07:30:08Z",
+        "--out-dir",
+        "target/v05-c-family-cli-v2/c-family-assessment"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/080/evidence/cli-c-family-assess.log"
+    },
+    {
+      "label": "cli-c-family-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-c-family-cli-v2/c-family-partial",
+        "--rules-dir",
+        "rules",
+        "--require-complete",
+        "--out-dir",
+        "target/v05-c-family-cli-v2/c-family-partial-output"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/080/evidence/cli-c-family-strict.log"
+    }
+  ],
+  "assertions": [
+    "7 files / 8 observations and legacy findings",
+    "real original-byte UTF16 and UTF8 spans",
+    "one header occurrence / distinct same-line IDs",
+    "strict exit3 for unrendered template",
+    "all four grammar notices present in verified package",
+    "Real PHP default-rule native and all report/export files omit private canary",
+    "Three PHP observations retain syntactic referenced assurance; imported OpenSSL key type stays unknown",
+    "Real C# default scan: eight observations; exact ML-KEM-768/RSA and unresolved HPKE; no canary in all reports or CycloneDX1.7 exports",
+    "C# unknown dynamic selector strict exit3",
+    "Each opaque library occurrence retains its own finite public label, native marker and exact legacy link after final export; source preview remains masked",
+    "C/C++ real default rules:17 typed source observations; exact5 primitives,3 include identities and3 provider/property/group references without algorithm assets; unknown digest key remains unknown",
+    "UTF16 shared header retains two original expression spans once each; legacy OpenSSL rule occurrences remain",
+    "All formats/CycloneDX1.7 omit key canary; saved native configuration/library markers ingest through existing inventory-v1 reader; dynamic selector strict3"
+  ],
+  "archive_sha256": "76a8c1ec13260d05a0678d4cb2caeabe91f4a46ff4aec8c77dda8c46bdf419f8",
+  "archive": "target/v05-c-family-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz",
+  "environment": {
+    "CARGO_INCREMENTAL": "0"
+  }
+}

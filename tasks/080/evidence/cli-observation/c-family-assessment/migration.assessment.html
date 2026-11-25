@@ -1,0 +1,2083 @@
+<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Migration review | pqc-scan</title><script>/* Apply before styles/large report content to avoid a light-theme flash. */
+(() => {
+  let value = new URLSearchParams(location.search).get('theme') || document.documentElement.dataset.exportTheme;
+  if (!['light', 'dark'].includes(value)) {
+    try { value = localStorage.getItem('pqc-scan-theme'); } catch { /* Optional preference. */ }
+  }
+  if (['light', 'dark'].includes(value)) document.documentElement.dataset.theme = value;
+})();
+</script><style>
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #1a2233;
+  --muted: #5e6b85;
+  --border: #dfe5f2;
+  --hl: #fff2c7;
+  --line: #f8fafc;
+  --critical: #9d0208;
+  --high: #d00000;
+  --medium: #ef8a17;
+  --low: #1f7a8c;
+  --info: #3d5a80;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", "Noto Sans", sans-serif;
+  background: linear-gradient(180deg, #eef3fb 0%, var(--bg) 100%);
+  color: var(--text);
+}
+.container {
+  width: min(1200px, 96vw);
+  margin: 0 auto;
+  padding: 20px 12px 40px;
+}
+.top h1 { margin: 0; font-size: 28px; }
+.meta { color: var(--muted); margin-top: 8px; }
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 18px 0 22px;
+}
+.metric {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.metric-label { color: var(--muted); font-size: 13px; }
+.metric-value { font-size: 24px; font-weight: 700; }
+.finding {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.finding h3 {
+  margin: 0;
+  font-size: 18px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.desc {
+  margin: 10px 0 10px;
+  color: #26324a;
+}
+.kv {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+.kv li {
+  margin: 4px 0;
+}
+.sev {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 3px 9px;
+  border: 1px solid transparent;
+}
+.sev.critical { background: #ffe5e8; color: var(--critical); border-color: #f3b8bf; }
+.sev.high { background: #ffe9e9; color: var(--high); border-color: #f7c0c0; }
+.sev.medium { background: #fff4df; color: var(--medium); border-color: #f7d7a2; }
+.sev.low { background: #e5f5f8; color: var(--low); border-color: #b8dde4; }
+.sev.info { background: #e7eef7; color: var(--info); border-color: #c7d6ea; }
+.count {
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid #d6dfef;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #f7f9fe;
+}
+.snippet-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.evidence-list {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: #fbfcff;
+}
+.occurrence-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: #fbfcff;
+}
+.occurrence-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+.snippet-title {
+  background: #f3f6fc;
+  border-bottom: 1px solid var(--border);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.code-lines {
+  background: #fbfcff;
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.2;
+}
+pre {
+  margin: 0;
+  overflow-x: auto;
+  background: #fbfcff;
+}
+code {
+  display: inline;
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+pre code {
+  display: block;
+  font-size: 13px;
+  line-height: 1.28;
+}
+.occ-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.occ-table th, .occ-table td {
+  border-top: 1px solid #e4ebf7;
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+.occ-table th {
+  background: #f8faff;
+  color: #3b4964;
+  font-weight: 600;
+}
+.occ-table th:nth-child(1),
+.occ-table td:nth-child(1) {
+  width: 54%;
+}
+.occ-table td:nth-child(2) {
+  width: 72px;
+  text-align: right;
+}
+.occ-table th:nth-child(3),
+.occ-table td:nth-child(3) {
+  width: 20%;
+}
+.occ-table th:nth-child(4),
+.occ-table td:nth-child(4) {
+  width: 20%;
+}
+.file-toggle {
+  border: 0;
+  background: transparent;
+  color: #1b5fbf;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.file-toggle code {
+  color: inherit;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.occ-table td code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.line {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  column-gap: 8px;
+  background: var(--line);
+  min-height: 1.5em;
+}
+.line.hl {
+  background: var(--hl);
+}
+.ln {
+  user-select: none;
+  text-align: right;
+  color: #73819c;
+  border-right: 1px solid #dfe5f2;
+  padding: 0 8px 0 0;
+  line-height: 1.5;
+}
+.tx {
+  white-space: pre;
+  line-height: 1.5;
+}
+.occ-snippet-row.hidden {
+  display: none;
+}
+.occ-snippet-inline {
+  background: #f9fbff;
+  border: 1px solid #e2e9f7;
+  border-radius: 8px;
+  padding: 8px;
+}
+.occ-snippet-inline .snippet-wrap {
+  margin-top: 8px;
+}
+.actions {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.actions h4 { margin: 0 0 8px; }
+.action {
+  border: 1px dashed #d7deed;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: #fafcff;
+}
+.action-title {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  font-size: 11px;
+  border: 1px solid #bfcbe3;
+  background: #edf2fb;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.refs {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+.code-example {
+  margin-top: 6px;
+}
+.code-label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+@media (max-width: 640px) {
+  .line { grid-template-columns: 46px 1fr; }
+  code { font-size: 12px; }
+  .occ-table th:nth-child(1),
+  .occ-table td:nth-child(1) {
+    width: 48%;
+  }
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f6f8fa;
+  --card: #fff;
+  --text: #1f2328;
+  --muted: #59636e;
+  --border: #d1d9e0;
+  --line: #d1d9e0;
+  --critical: #b42318;
+  --high: #9a3412;
+  --medium: #7a5500;
+  --low: #175cd3;
+  --info: #59636e;
+}
+[hidden] { display: none !important; }
+body { background: var(--bg); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif; }
+.container { width: min(1440px, 100%); padding: 28px 32px 56px; }
+a { color: #0969da; overflow-wrap: anywhere; }
+a:hover { text-decoration: underline; }
+.skip-link { position: absolute; top: 8px; left: 8px; transform: translateY(-180%); background: #fff; padding: 10px 16px; z-index: 10; }
+.skip-link:focus { transform: none; }
+.top { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+.eyebrow { color: var(--muted); font-size: 12px; font-weight: 600; margin: 0 0 7px; letter-spacing: .02em; }
+.eyebrow span { color: #8c959f; margin: 0 6px; }
+.top h1 { font-size: 25px; font-weight: 650; line-height: 1.3; letter-spacing: -.025em; }
+.report-description { margin: 8px 0 0; color: var(--muted); }
+.meta { margin: 0; font-size: 12px; text-align: right; flex-shrink: 0; }
+.summary { display: flex; margin: 0; gap: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; }
+.metric { flex: 1; min-width: 0; border: 0; border-right: 1px solid #e5e9ed; border-radius: 0; padding: 14px 20px; background: none; }
+.metric:last-child { border-right: 0; }
+.metric-label { color: var(--muted); font-size: 12px; }
+.metric-value { font-size: 26px; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.severity-distribution { display: grid; grid-template-columns: auto minmax(90px, 1fr) auto; align-items: center; gap: 16px; margin: 15px 0 20px; }
+.severity-distribution figcaption { color: var(--muted); font-size: 12px; }
+.severity-bar { display: flex; height: 8px; background: #d8dee4; border-radius: 4px; overflow: hidden; }
+.severity-segment { height: 100%; }
+.severity-segment.critical, .severity-dot.critical { background: #cf222e; }
+.severity-segment.high, .severity-dot.high { background: #bc4c00; }
+.severity-segment.medium, .severity-dot.medium { background: #bf8700; }
+.severity-segment.low, .severity-dot.low { background: #218bff; }
+.severity-segment.info, .severity-dot.info { background: #8c959f; }
+.severity-legend { display: flex; flex-wrap: wrap; gap: 14px; list-style: none; margin: 0; padding: 0; font-size: 12px; }
+.severity-legend li { display: inline-flex; align-items: center; gap: 5px; }
+.severity-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+.severity-legend strong { font-variant-numeric: tabular-nums; }
+.inspection-overview { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 24px; margin: 0 0 24px; padding: 14px 18px; border: 1px solid var(--border); border-left: 3px solid #218bff; border-radius: 8px; background: #fff; overflow-wrap: anywhere; }
+.inspection-overview h2 { margin: 0; font-size: 12px; color: var(--muted); font-weight: 500; }
+.inspection-status { grid-column: 1; margin: 2px 0; font-size: 14px; font-weight: 650; }
+.inspection-overview > p:not(.inspection-status) { grid-column: 1; margin: 0; color: var(--muted); font-size: 12px; }
+.inspection-overview[data-inspection-status="partial"], .inspection-overview[data-inspection-status="unknown"] { border-left-color: #bf8700; }
+.inspection-overview[data-inspection-status="failed"] { border-left-color: #cf222e; }
+.inspection-metrics { grid-column: 2; grid-row: 1 / 4; display: flex; align-items: center; gap: 22px; }
+.inspection-metrics > div { min-width: 65px; padding: 0; background: none; border: 0; text-align: right; color: var(--muted); font-size: 12px; }
+.inspection-metrics strong { display: block; font-size: 21px; color: var(--text); font-variant-numeric: tabular-nums; }
+.inspection-scope-details, .inspection-reasons { grid-column: 1 / -1; min-width: 0; font-size: 12px; }
+.inspection-scope-details { margin-top: 6px; }
+.inspection-scope-details > summary { padding: 3px 0; color: #0969da; }
+.inspection-scope { padding-left: 20px; }
+.inspection-reasons { margin-top: 3px; border: 0; }
+.inspection-reasons h3 { display: none; }
+.inspection-reasons > p { display: inline; margin: 0 12px 0 0; }
+.inspection-overview[data-inspection-status="complete_within_scope"] .inspection-reasons > p { display: none; }
+.inspection-diagnostics { margin-top: 4px; }
+.inspection-diagnostics > summary { padding: 3px 0; }
+.inspection-reason { border-top: 1px solid #e5e9ed; padding: 2px 8px; }
+.report-workspace { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 24px; align-items: start; }
+.report-workspace:has([data-report-controls][hidden]) { grid-template-columns: minmax(0, 1fr); }
+[data-report-controls] { display: flex; flex-direction: column; gap: 16px; padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: #fff; position: sticky; top: 16px; }
+[data-report-controls] h2 { font-size: 14px; margin: 0; }
+[data-report-controls] label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 600; min-width: 0; }
+input, select, button { font: inherit; color: var(--text); min-height: 34px; padding: 6px 9px; max-width: 100%; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+input, select { width: 100%; min-width: 0; }
+input[type="search"] { background: #f6f8fa; }
+button { cursor: pointer; font-size: 12px; font-weight: 600; background: #f6f8fa; }
+button:hover { background: #eef1f4; border-color: #8c959f; }
+button:disabled { cursor: default; opacity: .55; }
+summary { cursor: pointer; overflow-wrap: anywhere; }
+summary:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0969da; outline-offset: 3px; }
+.results { min-width: 0; }
+.results-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 32px; margin-bottom: 10px; }
+.results-heading h2 { font-size: 16px; margin: 0; }
+[data-report-status] { color: var(--muted); font-size: 12px; margin: 0; }
+.rule-card { border: 1px solid var(--border); border-radius: 6px; margin: 0 0 8px; background: #fff; }
+.rule-card > summary { display: flex; align-items: center; gap: 10px; padding: 12px 14px; list-style: none; }
+.rule-card > summary::-webkit-details-marker { display: none; }
+.rule-card > summary::before { content: "›"; color: var(--muted); font-size: 20px; line-height: 1; width: 10px; flex-shrink: 0; }
+.rule-card[open] > summary::before { transform: rotate(90deg); }
+.rule-card > summary:hover { background: #f6f8fa; }
+.rule-title { min-width: 0; flex: 1; }
+.rule-title strong { display: block; font-size: 14px; font-weight: 600; }
+.rule-title code { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+.rule-meta { display: block; color: var(--muted); font-size: 11px; max-width: 180px; text-align: right; }
+.sev { display: inline-block; flex-shrink: 0; white-space: nowrap; font-size: 11px; padding: 1px 7px; font-weight: 600; }
+.sev.critical { color: #b42318; background: #fff0ee; border-color: #f5b5ac; }
+.sev.high { color: #9a3412; background: #fff4ed; border-color: #f5c4a5; }
+.sev.medium { color: #7a5500; background: #fff8c5; border-color: #eac54f; }
+.sev.low { color: #175cd3; background: #eff8ff; border-color: #b2ddff; }
+.sev.info { color: #59636e; background: #f6f8fa; border-color: #d1d9e0; }
+.count { white-space: nowrap; font-size: 11px; }
+.rule-body { padding: 0 16px 14px 34px; }
+.rule-body > p { color: var(--muted); margin: 0 0 12px; }
+.rule-body h4 { font-size: 12px; margin: 12px 0 6px; }
+nav { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0; font-size: 12px; }
+.occurrence { border-top: 1px solid #e5e9ed; padding-bottom: 4px; }
+.occurrence > summary { padding: 10px 0; }
+.occurrence > summary code { font-weight: 600; color: #0969da; }
+.occurrence > :not(summary) { margin-left: 15px; margin-right: 0; }
+.occurrence p { font-size: 13px; }
+.occ-match { display: block; color: var(--muted); font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; margin: 3px 0 0 15px; }
+.next-step { display: none; }
+.action { border-left: 2px solid var(--border); padding: 2px 12px; margin: 14px 0; }
+.shared { margin-top: 14px; background: #f6f8fa; border-radius: 6px; padding: 8px 12px; }
+.shared > summary { padding: 2px 0; font-size: 12px; font-weight: 600; }
+.snippet-wrap { margin-top: 12px; min-width: 0; }
+.code-lines { line-height: 1.6; background: #f6f8fa; }
+.line { min-width: 0; }
+.tx { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+pre { overflow: auto; padding: 12px; background: #f6f8fa; }
+code { overflow-wrap: anywhere; }
+.empty-state { border: 1px dashed var(--border); border-radius: 6px; padding: 40px 20px; text-align: center; color: var(--muted); background: #fff; }
+.print-note { display: none; }
+.inspection-context table { width: 100%; table-layout: fixed; }
+.inspection-context th, .inspection-context td { overflow-wrap: anywhere; text-align: left; vertical-align: top; }
+@media (max-width: 1000px) {
+  .severity-distribution { grid-template-columns: auto 1fr; }
+  .severity-legend { grid-column: 1 / -1; }
+  .inspection-overview { grid-template-columns: 1fr; }
+  .inspection-metrics { grid-column: 1; grid-row: auto; margin: 6px 0; justify-content: flex-start; }
+  .inspection-metrics > div { text-align: left; }
+  .rule-meta { display: none; }
+}
+@media (max-width: 760px) {
+  .container { padding: 18px 16px 36px; }
+  .top { flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .top h1 { font-size: 21px; }
+  .meta { text-align: left; }
+  .meta br { display: none; }
+  .meta time { margin-left: 8px; }
+  .summary { flex-wrap: wrap; }
+  .metric { flex-basis: 33%; padding: 12px; }
+  .metric-value { font-size: 23px; }
+  .report-workspace { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  [data-report-controls] { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  [data-report-controls] h2 { grid-column: 1 / -1; }
+  .rule-card > summary { flex-wrap: wrap; gap: 8px; padding: 11px 12px; }
+  .rule-title { flex-basis: calc(100% - 28px); }
+  .rule-card > summary > .sev { margin-left: 20px; }
+  .rule-body { padding: 0 12px 12px; }
+  .inspection-overview { padding: 12px 14px; }
+  .severity-distribution { gap: 8px 12px; }
+  .severity-legend { gap: 12px; }
+}
+@media print {
+  @page { margin: 14mm; }
+  body { background: #fff; color: #000; font-size: 10pt; }
+  .container { width: 100%; padding: 0; }
+  .top { margin-bottom: 12px; }
+  .skip-link, [data-report-controls], [data-group-pager], [data-occ-pager], [data-report-status], [data-empty], noscript { display: none !important; }
+  .report-workspace { display: block; }
+  .rule-card[hidden], .occurrence[hidden] { display: block !important; }
+  .print-note { display: block; font-size: 9pt; }
+  details::details-content { content-visibility: visible; display: block; }
+  details > :not(summary) { display: block !important; }
+  .rule-card { break-inside: auto; margin-bottom: 12px; }
+  summary, h4 { break-after: avoid; }
+  .occurrence, .action, .snippet-wrap { break-inside: avoid; }
+  .rule-meta { display: none !important; }
+  .next-step { display: block; }
+  pre, .snippet-wrap { overflow: visible; }
+  pre code, .tx { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .inspection-metrics { display: flex; }
+  a { color: #000; }
+}
+.report-settings { width: min(1440px, 100%); margin: 0 auto; padding: 14px 32px 0; display: flex; justify-content: flex-end; gap: 16px; }
+.report-settings label { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.report-settings select { width: auto; }
+.rule-guide-link { font-size: 12px; }
+[data-report-controls] > .rule-guide-link { margin-top: -10px; }
+.rule-guide-intro, .rule-explanation { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+.rule-explanation h2 { font-size: 17px; margin: 0 0 6px; }
+.rule-explanation h3 { font-size: 14px; }
+.rule-explanation dl { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 8px 16px; }
+.rule-explanation dt { color: var(--muted); }
+.rule-explanation dd { margin: 0; overflow-wrap: anywhere; }
+@media screen {
+  html[data-theme="dark"] { color-scheme: dark; --bg: #0d1117; --card: #161b22; --text: #e6edf3; --muted: #a3aeba; --border: #3d444d; --line: #30363d; --hl: #493b12; }
+  [data-theme="dark"] .summary, [data-theme="dark"] .inspection-overview, [data-theme="dark"] [data-report-controls], [data-theme="dark"] .rule-card, [data-theme="dark"] .empty-state { background: var(--card); border-color: var(--border); }
+  [data-theme="dark"] .metric { border-color: var(--border); }
+  [data-theme="dark"] .action { background: var(--card); color: var(--text); border-color: var(--border); }
+  [data-theme="dark"] .action .badge { background: #21262d; color: var(--text); border-color: #484f58; }
+  [data-theme="dark"] a, [data-theme="dark"] .occurrence > summary code, [data-theme="dark"] .inspection-scope-details > summary { color: #79c0ff; }
+  [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] button { background: #21262d; border-color: var(--border); color: var(--text); }
+  [data-theme="dark"] button:hover, [data-theme="dark"] .rule-card > summary:hover, [data-theme="dark"] .shared { background: #262e38; }
+  [data-theme="dark"] .count, [data-theme="dark"] .sev.info { color: #c9d1d9; background: #21262d; border-color: #484f58; }
+  [data-theme="dark"] .sev.critical { color: #ffb4ae; background: #45201f; border-color: #a74540; }
+  [data-theme="dark"] .sev.high { color: #ffc49c; background: #432917; border-color: #975a16; }
+  [data-theme="dark"] .sev.medium { color: #f8de79; background: #3d3213; border-color: #8b741f; }
+  [data-theme="dark"] .sev.low { color: #a5d6ff; background: #142e49; border-color: #326fa4; }
+  [data-theme="dark"] .snippet-wrap, [data-theme="dark"] .occurrence, [data-theme="dark"] .inspection-reason { border-color: #3d444d; }
+  [data-theme="dark"] .code-lines, [data-theme="dark"] pre, [data-theme="dark"] .line { background: #0d1117; color: #e6edf3; }
+  [data-theme="dark"] .line.hl { background: #443819; }
+  [data-theme="dark"] .ln { color: #a3aeba; background: #161b22; border-color: #3d444d; }
+  [data-theme="dark"] .skip-link { background: var(--card); }
+  [data-theme="dark"] .severity-bar { background: #3d444d; }
+  [data-theme="dark"] :focus-visible { outline-color: #79c0ff; }
+}
+@media (max-width: 760px) {
+  .report-settings { padding: 12px 16px 0; gap: 12px; flex-wrap: wrap; }
+  .report-settings label { flex-wrap: wrap; gap: 3px; }
+  .rule-explanation dl { grid-template-columns: 1fr; gap: 4px; }
+  .rule-explanation dd { margin-bottom: 8px; }
+}
+@media print { .report-settings { display: none !important; } }
+
+/* Independently visible filters and finding-bearing paths. */
+.panel-toggles { display:flex; justify-content:flex-end; gap:8px; margin:0 0 12px; }
+.panel-toggles button[aria-pressed="true"] { color:#0969da; border-color:#0969da; }
+[data-report-sidebar] { display:grid; gap:16px; min-width:0; }
+.report-workspace:has([data-report-sidebar][hidden]) { grid-template-columns:minmax(0,1fr); }
+.report-workspace:has([data-report-sidebar]:not([hidden])) { grid-template-columns:260px minmax(0,1fr); }
+[data-report-controls] { position:static; }
+.file-tree { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; min-width:0; max-height:65vh; overflow:auto; }
+.file-tree h2 { font-size:14px; margin:0 0 4px; }
+.file-tree > p { color:var(--muted); font-size:12px; margin:4px 0 10px; }
+.file-tree ul { list-style:none; margin:2px 0; padding-left:16px; }
+.file-tree > ul { padding-left:0; margin-top:10px; min-width:max-content; }
+.file-tree li { margin:0; }
+.file-tree summary, .file-tree button[data-tree-file] { display:flex; align-items:center; gap:7px; width:100%; min-width:0; min-height:32px; padding:5px 6px; border:0; border-radius:6px; background:transparent; text-align:left; font-size:13px; font-weight:400; line-height:20px; }
+.file-tree summary { list-style:none; }
+.file-tree summary::-webkit-details-marker { display:none; }
+.file-tree summary:hover, .file-tree button[data-tree-file]:hover { background:#f0f2f5; }
+.tree-chevron, .tree-chevron-space { width:12px; height:16px; flex:0 0 12px; }
+.tree-chevron { fill:none; stroke:var(--muted); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.file-tree details[open] > summary > .tree-chevron { transform:rotate(90deg); }
+.tree-icon { flex:0 0 16px; }
+.tree-folder { fill:#54aeff; }
+.tree-file { fill:none; stroke:var(--muted); stroke-width:1.25; stroke-linecap:round; stroke-linejoin:round; }
+.tree-name { min-width:0; white-space:nowrap; overflow-wrap:normal; flex-shrink:0; }
+.tree-count { flex-shrink:0; margin-left:auto; padding:0 5px; border-radius:10px; background:#eaeef2; color:var(--muted); font-size:11px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.file-tree button[aria-pressed="true"] { position:relative; background:#eaeef2; color:var(--text); }
+.file-tree button[aria-pressed="true"]::before { content:""; position:absolute; top:5px; bottom:5px; left:-7px; width:3px; border-radius:2px; background:#0969da; }
+@media screen {
+  [data-theme="dark"] .panel-toggles button[aria-pressed="true"] { color:#79c0ff; border-color:#79c0ff; }
+  [data-theme="dark"] .file-tree summary:hover, [data-theme="dark"] .file-tree button[data-tree-file]:hover { background:#21262d; }
+  [data-theme="dark"] .tree-folder { fill:#79c0ff; }
+  [data-theme="dark"] .tree-count { background:#30363d; }
+  [data-theme="dark"] .file-tree button[aria-pressed="true"] { background:#30363d; color:var(--text); }
+  [data-theme="dark"] .file-tree button[aria-pressed="true"]::before { background:#58a6ff; }
+}
+@media (max-width:800px) { .report-workspace:has([data-report-sidebar]:not([hidden])) { grid-template-columns:minmax(0,1fr); } .file-tree { max-height:360px; } }
+@media print { .panel-toggles, [data-report-sidebar] { display:none !important; } .report-workspace:has([data-report-sidebar]:not([hidden])) { display:block; } }
+
+/* Consistent local workflow controls and USWDS-aligned spacing. */
+.report-settings { font-size:14px; }
+.report-settings input,.report-settings select,.report-settings button,[data-report-controls] input,[data-report-controls] select,[data-report-controls] button { min-height:44px; border-radius:4px; font-size:14px; }
+.rule-card,[data-report-controls],.inspection-overview { border-radius:4px; }
+[data-report-controls] label { font-size:14px; }
+nav a { min-height:44px; display:inline-flex; align-items:center; }
+
+/* Sidebar disclosures retain their headings when collapsed. */
+.metric-unit { font-size:13px; font-weight:400; color:var(--muted); }
+[data-report-sidebar] { align-content:start; }
+[data-report-controls] { padding:0; display:block; }
+[data-report-controls] > summary, .file-tree > summary { display:flex; align-items:center; gap:8px; padding:12px 14px; font-size:14px; font-weight:600; cursor:pointer; list-style:none; }
+[data-report-controls] > summary::-webkit-details-marker, .file-tree > summary::-webkit-details-marker { display:none; }
+[data-report-controls] > summary::after, .file-tree > summary::after { content:'›'; margin-left:auto; transform:rotate(90deg); }
+[data-report-controls]:not([open]) > summary::after, .file-tree:not([open]) > summary::after { transform:none; }
+.panel-icon { display:inline-flex; width:18px; height:18px; flex:0 0 18px; }
+.panel-body { display:grid; gap:10px; padding:0 14px 14px; }
+[data-report-controls] label { margin:0; font-size:12px; }
+[data-report-controls] input, [data-report-controls] select { min-height:34px; padding:5px 8px; font-size:13px; }
+[data-report-controls] button[data-reset] { min-height:32px; padding:5px 10px; font-size:12px; }
+[data-report-controls] .test-results-option { display:flex; flex-direction:row; align-items:center; gap:7px; font-weight:400; }
+[data-report-controls] .test-results-option input { width:16px; min-height:16px; height:16px; padding:0; margin:0; }
+.panel-body > .rule-guide-link { margin:0; }
+.file-tree { padding:0; overflow:visible; max-height:none; }
+.tree-body { max-height:60vh; overflow:auto; padding:0 10px 12px; }
+.tree-body > ul { padding-left:0; margin-top:10px; min-width:max-content; }
+.tree-body > a { display:inline-block; font-size:12px; padding:4px; }
+.rule-dialog { color:var(--text); background:var(--card); border:1px solid var(--border); border-radius:10px; width:min(800px,calc(100vw - 32px)); max-height:85vh; padding:0; }
+.rule-dialog::backdrop { background:#0008; }
+.rule-dialog > header { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 20px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--card); z-index:1; }
+.rule-dialog > header h2 { font-size:18px; margin:0; }
+[data-rule-dialog-body] { padding:0 20px 20px; }
+.rule-dialog .rule-explanation { border:0; padding:16px 0; margin:0; }
+@media(max-width:600px) { [data-rule-dialog-body] { padding:0 12px 12px; } .panel-body { gap:12px; } }
+@media print { .rule-dialog { display:none !important; } }
+
+/* Migration presentation extends the existing scan report design tokens. */
+.migration { max-width:1440px; }
+.migration .top h1 { font-size:28px; }
+.migration .summary { margin:24px 0; background:var(--card); }
+.migration-layout { display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;align-items:start; }
+.migration-index { display:block;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;position:sticky;top:20px; }
+.migration-index h2 { font-size:14px;margin:0 0 14px; }
+.migration-index a { display:block;padding:11px 0;border-top:1px solid var(--border);text-decoration:none; }
+.migration-index strong,.migration-index span { display:block;overflow-wrap:anywhere; }
+.migration-index span { color:var(--muted);font-size:12px;margin-top:5px; }
+.migration-results { min-width:0; }
+.decision-card { background:var(--card);border:1px solid var(--border);border-top:3px solid var(--info);border-radius:8px;padding:22px;margin-bottom:20px;scroll-margin-top:20px; }
+.decision-card.urgent { border-top-color:var(--critical); }
+.decision-card.plan { border-top-color:var(--medium); }
+.decision-card header { display:flex;justify-content:space-between;gap:16px;align-items:start; }
+.decision-card h3 { font-size:22px;margin:0;overflow-wrap:anywhere; }
+.role { font-weight:400;color:var(--muted);font-size:13px;margin-left:6px; }
+.migration-badge { flex-shrink:0;display:inline-block;font-size:12px;font-weight:650;padding:5px 10px;border:1px solid var(--border);border-radius:20px;color:var(--text); }
+.migration-badge.urgent { background:#fff1f0;color:#b42318;border-color:#f5b4ae; }
+.migration-badge.plan { background:#fff6e4;color:#7a5500;border-color:#e7cb8a; }
+.migration-location { color:var(--muted);font:12px/1.6 ui-monospace,monospace;overflow-wrap:anywhere;margin:10px 0; }
+.decision-status { display:flex;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:12px;margin:14px 0 18px; }
+.decision-status span { border:1px solid var(--border);padding:4px 8px;border-radius:4px; }
+.response-box { padding:16px 18px;border-radius:6px;background:var(--bg);border-left:3px solid #0969da; }
+.response-box > p:first-child { color:var(--muted);font-size:12px;margin:0 0 6px; }
+.response-box h4 { font-size:20px;margin:0 0 8px; }
+.decision-reason { margin:0;line-height:1.8; }
+.decision-card h4 { margin-top:18px;margin-bottom:8px; }
+.response-box h4 { margin-top:0; }
+.decision-note { border-left:3px solid var(--border);padding:2px 14px;margin:18px 0; }
+.decision-note.blockers { border-left-color:var(--medium); }
+.decision-note ul { margin:8px 0; }
+.migration li { margin:6px 0; }
+.next-checks ol { padding-left:22px; }
+.candidate-section { padding-top:4px; }
+.muted { color:var(--muted); }
+.migration details { border-top:1px solid var(--border);margin-top:14px; }
+.migration summary { padding:14px 0;font-weight:600; }
+.migration summary span { color:var(--muted);font-size:12px;font-weight:400; }
+.detail-body { padding:0 0 12px; }
+.table-scroll { overflow-x:auto;max-width:100%; }
+.migration table { width:100%;border-collapse:collapse;font-size:13px; }
+.migration caption { text-align:left;color:var(--muted);padding:8px 0; }
+.migration th,.migration td { text-align:left;padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:top;overflow-wrap:anywhere; }
+.migration th { color:var(--muted);font-weight:600; }
+.reference-section { margin-top:28px;background:var(--card);padding:20px;border:1px solid var(--border);border-radius:8px;min-width:0; }
+.reference-section h2 { font-size:18px;margin:0 0 12px; }
+.reference-section h3 { font-size:15px; }
+.reference-id { font:11px/1.7 ui-monospace,monospace;color:var(--muted);overflow-wrap:anywhere; }
+.migration footer { padding-top:24px;display:flex;gap:20px;flex-wrap:wrap;font-size:12px; }
+[data-theme="dark"] .migration-badge.urgent { background:#432326;color:#ffa198;border-color:#74363c; }
+[data-theme="dark"] .migration-badge.plan { background:#3d311a;color:#eac178;border-color:#6b542a; }
+@media(max-width:850px) { .migration-layout { grid-template-columns:minmax(0,1fr); }.migration-index { position:static; }.migration-index a { display:inline-block;margin-right:16px; }.decision-card { padding:16px; }.decision-card header { flex-wrap:wrap; }.migration .top h1 { font-size:24px; }.migration .summary { display:grid;grid-template-columns:1fr 1fr; }.migration .metric { border-bottom:1px solid var(--border); }.reference-section { padding:14px; }.migration th,.migration td { padding:8px; } }
+@media print { .migration-index,.report-settings,.skip-link { display:none; }.migration-layout { display:block; }.migration details > * { display:block; }.decision-card { break-inside:avoid; }.migration footer { display:none; } }
+/* Only the selected decision and a bounded page of targets/claims enter the DOM. */
+.migration-index [data-migration-list] { max-height:440px;overflow:auto; }
+.migration-index [aria-current="true"] { color:var(--text);background:var(--bg);border-left:3px solid var(--info);padding-left:8px; }
+.migration-pager { display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;font-size:12px; }
+.migration-pager button { padding:7px 10px; }
+@media(max-width:850px) { .migration-index a { display:block;margin:0; }.migration-index [data-migration-list] { max-height:260px; } }
+
+/* Shared-data grouped response view. */
+.migration .decision-card{padding:22px;margin:16px 0}.group-heading{display:flex;gap:16px;justify-content:space-between;align-items:flex-start}.group-heading h2{margin:0;font-size:19px}.group-meta{color:var(--muted);font-size:13px}.migration .next-checks{margin-top:16px;padding-top:12px;border-top:1px solid var(--line,var(--border))}.migration .next-checks h3{font-size:15px}.migration .decision-card li{margin:6px 0}.migration button{font:inherit;cursor:pointer;padding:7px 12px;border:1px solid var(--line,var(--border));border-radius:6px;background:var(--panel,var(--card));color:var(--text)}.migration button:disabled{opacity:.45;cursor:not-allowed}.migration input,.migration select{font:inherit;background:var(--panel,var(--card));color:var(--text);border:1px solid var(--line,var(--border));border-radius:5px;padding:8px;max-width:100%}.migration-links{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:24px 0}.migration .path{overflow-wrap:anywhere;font-family:ui-monospace,monospace}.migration-dialog{background:var(--panel,var(--card));color:var(--text);border:1px solid var(--line,var(--border));border-radius:12px;width:min(1000px,calc(100% - 32px));max-height:85vh;padding:24px}.migration-dialog::backdrop{background:#0009}.dialog-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}.dialog-close{width:38px;height:38px;font-size:24px!important;padding:0!important;flex-shrink:0}.migration-dialog .table-scroll{max-height:50vh;overflow:auto}.migration-dialog td,.migration-dialog th{overflow-wrap:anywhere}.migration .target-pagination{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:18px 0}.migration .target-pagination>div{display:flex;gap:8px}.migration-dialog section+section{border-top:1px solid var(--line,var(--border));margin-top:18px;padding-top:16px}@media(max-width:700px){.group-heading{flex-direction:column}.migration .decision-card{padding:16px}.migration-dialog{padding:16px}}
+
+.migration .summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:18px;border:1px solid var(--border,var(--line));border-radius:8px}.migration .metric-value{font-size:28px}.migration .metric-label{font-size:12px;color:var(--muted)}.migration .state{font-size:12px;white-space:normal}.migration .decision-card ul{padding-left:20px}@media(max-width:700px){.migration .summary{grid-template-columns:1fr}.migration .top{display:block}.migration .top time{overflow-wrap:anywhere}}
+
+/* Match local form controls and USWDS spacing in embedded and saved views. */
+.migration { font-size:16px; line-height:1.6; }
+.migration .decision-card,.migration .summary,.migration-index,.reference-section,.migration-dialog { border-radius:4px; box-shadow:none; }
+.migration button,.migration input,.migration select { min-height:44px; border-radius:4px; }
+.migration a { text-underline-offset:4px; }
+.migration :focus-visible { outline:3px solid var(--info,var(--blue)); outline-offset:4px; }
+.migration .group-meta { font-size:14px; }
+
+/* Saved-evidence clarity: declarations and observations remain distinct. */
+.migration .summary { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.migration .top time { max-width: 28rem; text-align: right; overflow-wrap: anywhere; }
+.migration .declared-fact { margin: 8px 0; }
+.migration .decision-card .next-checks { margin:0; padding:0; border:0; overflow-wrap:anywhere; }
+.migration .next-checks > p { margin:0; }
+.migration .next-checks > p strong { margin-inline-end:.5rem; }
+.migration .recorded-locations { display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 12px; margin:5px 0 0; font-size:.875rem; color:var(--muted); }
+.migration .check-locations { margin:5px 0 0; font-size:.875rem; overflow-wrap:anywhere; }
+.migration .decision-card .check-locations li { margin:2px 0; }
+.migration .recorded-locations .check-locations { display:flex; flex-wrap:wrap; gap:0 12px; list-style:none; padding:0; margin:0; }
+.migration .card-actions { display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin:8px 0 0; }
+.migration .card-actions button { max-width:100%; text-align:start; }
+.migration-dialog .detection-location-table { table-layout:fixed; min-width:43rem; }
+.detection-location-table .location-algorithm { width:7rem; }
+.detection-location-table .location-method { width:8rem; }
+.detection-location-table .location-rule { width:27%; }
+.detection-location-table .location-action { width:5.5rem; }
+.detection-location-table th:first-child,
+.detection-location-table [data-target] { white-space:nowrap; }
+.detection-location-table .path { overflow-wrap:anywhere; }
+.migration .card-details-toggle::before { content:"▸"; display:inline-block; margin-inline-end:.45rem; }
+.migration .card-details-toggle[aria-expanded="true"]::before { transform:rotate(90deg); }
+.migration .decision-reasoning { border-top:1px solid var(--border); margin:12px 0 0; padding-top:10px; overflow-wrap:anywhere; }
+.migration .decision-reasoning h5, .migration .decision-reasoning h6 { font-size:1rem; margin:0 0 4px; }
+.migration .decision-reasoning h6 { font-size:.875rem; }
+.migration .decision-reasoning p, .migration .decision-reasoning ul { margin:4px 0; }
+.migration .decision-reasoning section + section { margin-top:12px; }
+.migration .decision-reasoning .check-step + .check-step { margin-top:8px; }
+.migration .response-overview { color: var(--muted); margin: 12px 0; }
+@media(max-width: 700px) { .migration .summary { grid-template-columns: repeat(2,minmax(0,1fr)); }.migration .top time { text-align: left; } }
+
+.report-scope { overflow-wrap:anywhere; font-weight:600; margin-top:10px; }
+.planning-basis,.binding-limit { border-left:3px solid var(--border); padding:4px 14px; margin:16px 0; overflow-wrap:anywhere; }
+.binding-limit { border-left-color:var(--medium); }
+
+.migration .decision-card .start-due { margin: 8px 0; font-size: .95rem; }
+.migration .start-due p { display: inline; margin: 0 .75rem; }
+.migration .start-due time { font-weight: 650; }
+.migration .decision-card .group-meta { margin: 4px 0; }
+
+/* The conclusion and work-item view share the same layout in saved and session HTML. */
+.migration .migration-conclusion {
+  background:var(--card); border:1px solid var(--border); border-left:4px solid var(--info);
+  border-radius:4px; margin:12px 0 8px; padding:12px 16px;
+}
+.migration .migration-conclusion h2, .migration .migration-work h2 { font-size:1.125rem; margin:0 0 6px; }
+.migration .migration-work { margin-block-start:24px; }
+.migration .urgency-chips { display:flex; flex-wrap:wrap; gap:6px; list-style:none; padding:0; margin:0; }
+.migration .urgency-chip, .migration .start-chip {
+  border:1px solid var(--border); border-radius:999px; padding:2px 9px; font-size:.875rem;
+}
+.migration .urgency-chip.urgent, .migration .start-chip.overdue { border-color:var(--critical); }
+.migration .migration-headline { margin:6px 0 0; font-weight:650; overflow-wrap:anywhere; }
+.migration .summary-declarations { margin:4px 0 0; }
+.migration .migration-conclusion .group-meta, .migration .collection-status { margin:4px 0 0; }
+.migration .collection-status { color:var(--muted); font-size:.875rem; }
+.migration .conclusion-timing { display:flex; flex-wrap:wrap; gap:2px 24px; margin:6px 0 0; font-size:.875rem; }
+.migration .conclusion-timing > div { display:flex; align-items:baseline; gap:8px; }
+.migration .conclusion-timing dt { color:var(--muted); }
+.migration .conclusion-timing dd { margin:0; font-weight:650; font-variant-numeric:tabular-nums; }
+.migration .declaration-population { color:var(--muted); font-size:.875rem; margin:0 0 4px; }
+.migration .declaration-summary { display:grid; margin:0; font-size:.875rem; }
+.migration .declaration-summary > div {
+  display:grid; grid-template-columns:minmax(5.5rem, 8rem) minmax(0, 1fr); gap:2px 12px;
+  padding:5px 0; border-top:1px solid var(--border);
+}
+.migration .declaration-summary dt { font-weight:650; }
+.migration .declaration-summary dd, .migration .declaration-summary ul, .migration .declaration-summary p { margin:0; }
+.migration .declaration-summary ul { list-style:none; padding:0; }
+.migration .declaration-summary li {
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:0 12px; overflow-wrap:anywhere;
+}
+.migration .declaration-summary small, .migration .declaration-summary dd > p { color:var(--muted); }
+.migration [id^="migration-"], .migration #decisions { scroll-margin-top:16px; }
+.migration .migration-timeline { margin:0 0 12px; }
+.migration .timeline-evaluation { color:var(--muted); font-size:.875rem; }
+.migration .migration-timeline ol { margin:2px 0 0; padding:0; list-style:none; }
+.migration .migration-timeline li { margin-top:6px; }
+.migration .migration-timeline > p { margin:4px 0 0; font-size:.875rem; }
+.migration .timeline-track { position:relative; height:8px; margin:2px 4px; background:var(--border); border-radius:4px; }
+.migration .timeline-track::before, .migration .timeline-track::after {
+  content:""; position:absolute; top:-1px; width:2px; height:10px; background:var(--info); z-index:1;
+}
+.migration .timeline-track::before { left:var(--start); }
+.migration .timeline-track::after { left:var(--end); }
+.migration .timeline-track span {
+  position:absolute; left:var(--start); right:calc(100% - var(--end)); height:100%; background:var(--info);
+}
+.migration .timeline-track .assessed-mark {
+  position:absolute; left:var(--assessment); top:-1px; width:8px; height:8px;
+  border-radius:50%; background:var(--text); transform:translateX(-50%); z-index:2;
+}
+.migration .start-passed .timeline-track::before,
+.migration .deadline-passed .timeline-track::after { background:var(--critical); }
+.migration .timeline-period { border:1px solid var(--border); border-radius:4px; padding:8px 12px; background:var(--card); }
+.migration .timeline-dates {
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.65fr) minmax(0,1fr);
+  gap:14px; margin:7px 0 0;
+}
+.migration .timeline-dates > div + div { border-inline-start:1px solid var(--border); padding-inline-start:14px; }
+.migration .timeline-dates dt { color:var(--muted); font-size:.875rem; }
+.migration .timeline-dates dd { margin:1px 0 0; font-weight:650; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.migration .timeline-date-status { display:block; font-size:.8125rem; font-weight:500; }
+.migration .urgency-section > header { display:flex; flex-wrap:wrap; align-items:baseline; gap:0 12px; }
+.migration .urgency-section > header h3 { font-size:1rem; margin:0; }
+.migration .urgency-section .decision-card { margin:6px 0 14px; padding:14px; }
+.migration .urgency-section[data-urgency-group="urgent"] .decision-card { border-top-color:var(--critical); }
+.migration .urgency-section[data-urgency-group="plan"] .decision-card { border-top-color:var(--medium); }
+.migration .group-heading { align-items:baseline; gap:4px 16px; margin:0 0 8px; }
+.migration .group-heading h4 { margin:0; font-size:1.125rem; overflow-wrap:anywhere; }
+.migration .start-chip { margin:0; overflow-wrap:anywhere; }
+@media (max-width:560px) {
+  .migration .timeline-dates { grid-template-columns:minmax(0,1fr); gap:4px; }
+  .migration .timeline-dates > div { display:grid; grid-template-columns:minmax(5.5rem,38%) minmax(0,1fr); gap:4px; }
+  .migration .timeline-dates > div + div { border:0; border-top:1px solid var(--border); padding:4px 0 0; }
+  .migration .declaration-summary > div { grid-template-columns:minmax(0,1fr); }
+}
+.migration.container { padding-top:14px; }
+.migration .top { margin-bottom:8px; }
+.migration .top .report-scope { margin:4px 0 0; }
+.migration .conclusion-heading {
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px;
+}
+.migration .conclusion-heading h2 { margin:0; }
+.migration .urgency-chip { margin:0; }
+.migration { --decision-accent:#0969da; }
+[data-theme="dark"] .migration { --decision-accent:#82b6ee; }
+.migration .decision-fields {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 16px; margin:0;
+  overflow-wrap:anywhere;
+}
+.migration .decision-fields dt { font-weight:650; font-size:.875rem; color:var(--muted); }
+.migration .decision-fields dd { margin:2px 0 0; }
+.migration .decision-fields > div + div { border-inline-start:1px solid var(--border); padding-inline-start:16px; }
+.migration .decision-fields > div + div dt { color:var(--decision-accent); }
+.migration .migration-workflow { margin:6px 0 22px; }
+.migration .workflow-phase {
+  background:var(--card); border:1px solid var(--border); border-radius:6px;
+  margin:8px 0 0; padding:10px 14px;
+}
+.migration .workflow-phase:first-of-type { border-inline-start:4px solid var(--decision-accent); padding-inline-start:11px; }
+.migration .workflow-phase h5 { margin:0 0 4px; font-size:1rem; overflow-wrap:anywhere; }
+.migration .workflow-phase-label { color:var(--muted); margin-inline-end:10px; font-size:.8125rem; }
+.migration .workflow-phase:first-of-type .workflow-phase-label { color:var(--decision-accent); }
+.migration .conclusion-meta { display:flex; flex-wrap:wrap; align-items:baseline; gap:0 16px; margin:3px 0; }
+.migration .conclusion-meta > * { margin:3px 0 0; }
+.migration .compact-conclusion .summary-declarations > summary { padding-block:6px; }
+.migration .conclusion-jump { margin:4px 0 0; font-size:.875rem; }
+.migration [data-other-work] { margin:16px 0; }
+.migration [data-other-work] .urgency-section { margin-top:12px; }
+@media (max-width:650px) {
+  .migration .decision-fields { grid-template-columns:minmax(0,1fr); }
+  .migration .decision-fields > div + div { border:0; border-top:1px solid var(--border); padding:6px 0 0; }
+}
+</style></head><body><div class="report-settings" data-settings hidden><label>Language / 言語<select data-language aria-label="Language / 言語"><option value="en">English</option><option value="ja">日本語</option></select></label><label>Theme / 表示<select data-theme-select aria-label="Theme / 表示"><option value="light">Light / ライト</option><option value="dark">Dark / ダーク</option></select></label></div><main class="container migration" data-report-view lang="en"><header class="top"><h1>Migration response work items</h1><time>2026-11-24T07:30:08Z</time></header><noscript>Enable JavaScript to browse every work item and its evidence.</noscript><p>Work items: 4 · Saved records: 18</p><section id="decisions"><article class="decision-card"><h2>Investigate</h2><p>Urgency undetermined · Information missing · Readiness unknown</p><ul><li>The available facts do not establish a supported urgency branch.</li><li>The exact parameter encoding is unknown.</li><li>The business-system binding is unknown.</li><li>Confirm actual use and the required cryptographic purpose.</li><li>Obtain or refresh the missing, unknown or stale scoped claims.</li></ul><p>Records: 7</p></article><article class="decision-card"><h2>Investigate</h2><p>Urgency undetermined · Information missing · Readiness unknown</p><ul><li>The available facts do not establish a supported urgency branch.</li><li>The exact parameter encoding is unknown.</li><li>The business-system binding is unknown.</li><li>Confirm actual use and the required cryptographic purpose.</li><li>Obtain or refresh the missing, unknown or stale scoped claims.</li></ul><p>Records: 2</p></article><article class="decision-card"><h2>Investigate</h2><p>Urgency undetermined · Information missing · Readiness unknown</p><ul><li>The available facts do not establish a supported urgency branch.</li><li>The exact parameter encoding is unknown.</li><li>The business-system binding is unknown.</li><li>Confirm actual use and the required cryptographic purpose.</li><li>Obtain or refresh the missing, unknown or stale scoped claims.</li></ul><p>Records: 1</p></article><article class="decision-card"><h2>Investigate</h2><p>Urgency undetermined · Information missing · Readiness unknown</p><ul><li>The available facts do not establish a supported urgency branch.</li><li>A reference does not establish deployed use.</li><li>The primitive is unidentified.</li><li>The exact parameter encoding is unknown.</li><li>The business-system binding is unknown.</li><li>Confirm actual use and the required cryptographic purpose.</li><li>Obtain or refresh the missing, unknown or stale scoped claims.</li></ul><p>Records: 8</p></article></section><footer><a href="migration.assessment.v1.json" download>Save assessment data</a></footer></main><template data-report-translation lang="ja"><main class="container migration" data-report-view lang="ja"><header class="top"><h1>移行に向けた確認事項</h1><time>2026-11-24T07:30:08Z</time></header><noscript>すべての確認項目と根拠を見るにはJavaScriptを有効にしてください。</noscript><p>確認項目: 4 · 保存された記録: 18</p><section id="decisions"><article class="decision-card"><h2>調査</h2><p>緊急度を判断できない · 不足情報あり · 準備状況は不明</p><ul><li>現在の情報では、緊急度を裏付ける判断条件が揃いません。</li><li>正確なパラメーターの符号化は不明です。</li><li>業務システムとの対応付けは不明です。</li><li>実際の利用状況と必要な暗号用途を確認してください。</li><li>不足・不明・失効している対象範囲の申告を確認し、更新してください。</li></ul><p>記録: 7</p></article><article class="decision-card"><h2>調査</h2><p>緊急度を判断できない · 不足情報あり · 準備状況は不明</p><ul><li>現在の情報では、緊急度を裏付ける判断条件が揃いません。</li><li>正確なパラメーターの符号化は不明です。</li><li>業務システムとの対応付けは不明です。</li><li>実際の利用状況と必要な暗号用途を確認してください。</li><li>不足・不明・失効している対象範囲の申告を確認し、更新してください。</li></ul><p>記録: 2</p></article><article class="decision-card"><h2>調査</h2><p>緊急度を判断できない · 不足情報あり · 準備状況は不明</p><ul><li>現在の情報では、緊急度を裏付ける判断条件が揃いません。</li><li>正確なパラメーターの符号化は不明です。</li><li>業務システムとの対応付けは不明です。</li><li>実際の利用状況と必要な暗号用途を確認してください。</li><li>不足・不明・失効している対象範囲の申告を確認し、更新してください。</li></ul><p>記録: 1</p></article><article class="decision-card"><h2>調査</h2><p>緊急度を判断できない · 不足情報あり · 準備状況は不明</p><ul><li>現在の情報では、緊急度を裏付ける判断条件が揃いません。</li><li>参照の検出だけでは、実環境での利用は確認できません。</li><li>暗号方式を特定できていません。</li><li>正確なパラメーターの符号化は不明です。</li><li>業務システムとの対応付けは不明です。</li><li>実際の利用状況と必要な暗号用途を確認してください。</li><li>不足・不明・失効している対象範囲の申告を確認し、更新してください。</li></ul><p>記録: 8</p></article></section><footer><a href="migration.assessment.v1.json" download>評価データを保存</a></footer></main></template><script type="application/json" id="migration-shared-data">{"archive":{"nodes":[["s","as_of"],["s","2026-11-24T07:30:08Z"],["s","candidates"],["a",[]],["s","catalog"],["s","id"],["s","migration-facts-v1"],["s","version"],["s","1.0.0"],["o",[5,6,7,8]],["s","claims"],["s","context"],["z"],["s","coverage"],["s","collection_outcome"],["s","complete"],["s","input_count"],["n","1"],["s","limits"],["s","inventory_not_exhaustive"],["a",[19]],["s","target_count"],["n","18"],["s","unknown_identity_or_parameters_targets"],["n","9"],["s","unresolved_target_count"],["n","0"],["o",[14,15,16,17,18,20,21,22,23,24,25,26]],["s","decisions"],["s","action"],["s","blocking_prerequisites"],["s","candidate_ids"],["s","kind"],["s","investigate"],["s","validation_steps"],["s","confirm_actual_use_and_required_purpose"],["s","refresh_missing_or_stale_scoped_claims"],["a",[35,36]],["o",[30,3,31,3,32,33,34,37]],["s","applied_claim_ids"],["s","migration_decision-v1-c1c2dd91aad84524126c646e9ed25531b98e1a1e7a2f9724bb2b6b2a06feae77"],["s","information"],["s","incomplete"],["s","missing_inputs"],["s","applicability"],["s","context.binding"],["s","support.parameters"],["s","support.peer"],["s","support.protocol"],["s","support.provider"],["s","support.runtime"],["s","usage_state"],["s","use_case"],["a",[44,45,46,47,48,49,50,51,52]],["s","readiness"],["s","unknown"],["s","reason_codes"],["s","insufficient_information"],["s","unknown_parameter_encoding"],["s","unknown_binding"],["a",[57,58,59]],["s","source_ids"],["s","F12"],["s","F14"],["s","LOCAL026"],["s","S203"],["a",[62,63,64,65]],["s","system_id"],["s","target_id"],["s","migration_target-v1-075f848f9a534ea5f984874a668a393469f93270e1afeed7888404bf3e83764e"],["s","urgency"],["s","undetermined"],["o",[29,38,39,3,5,40,41,42,43,53,54,55,56,60,61,66,67,12,68,69,70,71]],["s","migration_decision-v1-85bf59e5f31da9c54b5f6d2341bedd5dd77bf558aa739d1ac0a85d3641a27879"],["s","migration_target-v1-90f03080617b72d42a698b177536b92b19fc47c9cb11116714d9c327edeb97b2"],["o",[29,38,39,3,5,73,41,42,43,53,54,55,56,60,61,66,67,12,68,74,70,71]],["s","migration_decision-v1-c2e46fec3e9d77ae2ca5ba508d406449b04eb0fafce808679a66d83f40af69ed"],["s","technical.identity"],["s","technical.parameters"],["a",[44,45,46,49,50,77,78,51,52]],["s","reference_only"],["s","unknown_primitive"],["a",[57,80,81,58,59]],["a",[63,64]],["s","migration_target-v1-5e1aecfe52d3a274f5fad35d5a9f126862b1702e3c6dc88239cdd140d2aed42d"],["o",[29,38,39,3,5,76,41,42,43,79,54,55,56,82,61,83,67,12,68,84,70,71]],["s","migration_decision-v1-ecc5a2993b3d1b84cd7af283df747f62d714e5c7d47f31b623d8efc553b2eac6"],["a",[44,45,46,49,50,78,51,52]],["s","NIST-PQ-FAQ"],["a",[62,63,64,88]],["s","migration_target-v1-9ef18fc3dd28b79db9a553cdc7ca700f0c49e8d2d41b544bf578df5eb3436443"],["o",[29,38,39,3,5,86,41,42,43,87,54,55,56,60,61,89,67,12,68,90,70,71]],["s","migration_decision-v1-519f8b95c1219d171662b2a50b45fbb4699037a06e71f07218781a64701255ef"],["s","migration_target-v1-fdedc50f41054caf563bebef61078a5b6bb96c9cbad3ef07375314d850908abc"],["o",[29,38,39,3,5,92,41,42,43,53,54,55,56,60,61,66,67,12,68,93,70,71]],["s","migration_decision-v1-72c942dc9e4525df735b8c74f59f12e696d8ba72fc8b7efcde8c56262184dcee"],["s","migration_target-v1-4c1ef6bab3f433c0e6ced0f58354a96ae87c7fce56bb84168dd93eab6a018be2"],["o",[29,38,39,3,5,95,41,42,43,79,54,55,56,82,61,83,67,12,68,96,70,71]],["s","migration_decision-v1-47bba4051508d64df206ba25cb6a56c2fe09f1c425789b971e96f26088db8ccb"],["s","migration_target-v1-a13b2cf075822e9c045601b770d654a20b3ac2cc903663e6d706a4ef1128b742"],["o",[29,38,39,3,5,98,41,42,43,53,54,55,56,60,61,66,67,12,68,99,70,71]],["s","migration_decision-v1-f0abeb84258e2701ebe3cd3fbae2ee0bfe9af759a029fcb71dc34143a6bd3687"],["s","migration_target-v1-f66eabbf4c3580539781c7d6dd32ca17e7dc43894d67648fcc956f4f197fea5d"],["o",[29,38,39,3,5,101,41,42,43,79,54,55,56,82,61,83,67,12,68,102,70,71]],["s","migration_decision-v1-846c313b134c97e01d796fa3c01200d8a09d7eb62ef70d820adc47cd69233f21"],["s","S204"],["a",[62,63,64,105]],["s","migration_target-v1-6aaacf1bf01cdb87fd172bdfdef0a61f078f7d054cd2547c7e8195e15cd36bf7"],["o",[29,38,39,3,5,104,41,42,43,53,54,55,56,60,61,106,67,12,68,107,70,71]],["s","migration_decision-v1-912d2116e44b16c0ff9c32a7546d38c1333d6326924d5728da8199a6d4e04e94"],["s","migration_target-v1-3900bec34586594f79901b03b1cb30b034d73ef54351a709e2dbe0527284637e"],["o",[29,38,39,3,5,109,41,42,43,79,54,55,56,82,61,83,67,12,68,110,70,71]],["s","migration_decision-v1-10ca642af0e79e519d30093949362d4d85fb4187f2f737c888e06834d7be3cdc"],["s","migration_target-v1-6c49e4efd21aa3f71bf4483b342a5b172eb11250ed86efad9835f240e23c74b9"],["o",[29,38,39,3,5,112,41,42,43,53,54,55,56,60,61,66,67,12,68,113,70,71]],["s","migration_decision-v1-b5f9a59a1a8311408febb5b9ef8ef2351f96d154412e82730dd9cf07d9c7da67"],["s","migration_target-v1-a7cad6554834de176879eab4433e834ecc24ab907c1bc6729ab57eb391d1928b"],["o",[29,38,39,3,5,115,41,42,43,53,54,55,56,60,61,66,67,12,68,116,70,71]],["s","migration_decision-v1-8e374716d8dfa14140dad7b229bb80d03ed9930a2ed15ed76de8dd3eaf371a0a"],["s","migration_target-v1-75da385017bd1c1dc59691ed2da14a408849df6314780b11531ec3d7d4cae303"],["o",[29,38,39,3,5,118,41,42,43,79,54,55,56,82,61,83,67,12,68,119,70,71]],["s","migration_decision-v1-d8f207839f8fc39992eba926234792bb0eb7958a542381ce523b85f7e6a3426d"],["s","migration_target-v1-6eee1a0be5aa3f74e1256ae328162738eeb9b01ccb074bfeea7ee5edf84cda3a"],["o",[29,38,39,3,5,121,41,42,43,53,54,55,56,60,61,66,67,12,68,122,70,71]],["s","migration_decision-v1-c65e62e566e298cd720d8323b0aa4025fd555ad0c3bec9da4e841de56f87af91"],["s","migration_target-v1-075a2b54ff848013e92dc77ff85637e8c202690c7b08372e6aafb030173f16fa"],["o",[29,38,39,3,5,124,41,42,43,79,54,55,56,82,61,83,67,12,68,125,70,71]],["s","migration_decision-v1-050b57b9d269e5d9abc2b5a8a8de61c4ab75ae6af114db7bcadcbc37e0a78c36"],["s","migration_target-v1-960a565772e5e49558febfea43a3862f13096150910d2a35dba2ec3faa0c3135"],["o",[29,38,39,3,5,127,41,42,43,53,54,55,56,60,61,106,67,12,68,128,70,71]],["s","migration_decision-v1-94cf1506326df62dd6b283442f88e180fd096343f0166d6697d9f1f191394394"],["s","migration_target-v1-5b3b3075d6b59cf1c382fb128879b7386297340a26241eb070b3863f6ef26c62"],["o",[29,38,39,3,5,130,41,42,43,79,54,55,56,82,61,83,67,12,68,131,70,71]],["s","migration_decision-v1-f5acf79c1f460fbc29f390fddb59c2c0d60459e1a352eb9008e4c460badb237b"],["s","migration_target-v1-c01f4600251a084b3f578bce11c3c22c8d95af5aa7f3233b913c8665007bea3d"],["o",[29,38,39,3,5,133,41,42,43,79,54,55,56,82,61,83,67,12,68,134,70,71]],["a",[72,75,85,91,94,97,100,103,108,111,114,117,120,123,126,129,132,135]],["s","format"],["s","pqc-scan.migration-assessment"],["s","input"],["s","collection_time"],["s","2026-11-24T07:30:07.078123+00:00"],["s","inventory-v1"],["s","run_id"],["s","scan-v1-38b19db8c25cdfae524e6ceb84646db33e5bf1d4a8db2a730c8a3a83afb128de"],["s","schema_version"],["s","sha256"],["s","11a003b7159f2cab33238178fbedbaf56fa443460621098a6c161137aa8a004f"],["o",[140,141,137,142,143,144,145,17,146,147]],["s","limitations"],["s","saved_content_not_collector_attestation"],["s","no_offline_cryptographic_reverification"],["s","local_advisory_policy_not_practitioner_validation"],["a",[150,151,152]],["s","model"],["s","decision_table"],["o",[5,155,7,8]],["s","policy"],["s","migration-decision-v1"],["o",[5,158,7,8]],["s","sources"],["s","clause"],["s","technical dispatch and ingestion invariants; FACT-SOURCE-MAPPING F12"],["s","edition"],["s","task066 adopted contract 2026-11-18"],["s","local_source_id"],["s","docs/architecture/MIGRATION-ASSESSMENT-V1.md"],["s","scope_limit"],["s","saved claims preserve assurance; digest does not attest collector truth"],["s","uri"],["o",[161,162,163,164,5,62,165,166,167,168,169,12]],["s","P1-P8; readiness and action precedence"],["s","migration-decision-v1 1.0.0; adopted 2026-11-18"],["s","local advisory policy; conformance is not practitioner usefulness"],["o",[161,171,163,172,5,63,165,166,167,173,169,12]],["s","finite vocabulary and evidence limits"],["s","local-assessment-1"],["s","docs/architecture/LOCAL-ASSESSMENT-V1.md"],["s","advisory facts; no deployment or cryptographic verification"],["o",[161,175,163,176,5,64,165,177,167,178,169,12]],["s","quantum public-key and generic-search models"],["s","task056 pinned FAQ snapshot"],["s","not quantum arrival, probability or operational security bits"],["s","https://csrc.nist.gov/projects/post-quantum-cryptography/faqs"],["o",[161,180,163,181,5,88,165,12,167,182,169,183]],["s","1.1; 3.1; 7; 8 Table2"],["s","FIPS203 Final 2024-08-13"],["s","KEM parameter names/purpose only"],["s","https://csrc.nist.gov/pubs/fips/203/final"],["o",[161,185,163,186,5,65,165,12,167,187,169,188]],["s","1.1; 4 Table1"],["s","FIPS204 Final 2024-08-13"],["s","pure signature names/purpose; no prehash equivalence"],["s","https://csrc.nist.gov/pubs/fips/204/final"],["o",[161,190,163,191,5,105,165,12,167,192,169,193]],["a",[170,174,179,184,189,194]],["s","targets"],["a",[58]],["s","observation"],["s","assurance"],["s","syntactic"],["s","method"],["s","ast_pattern"],["s","usage"],["s","referenced"],["o",[199,200,14,15,201,202,203,204]],["s","source_ref"],["s","line"],["s","observation_id"],["s","observation-v1-13bd7b0a4c0d323ed716289596aa6db3d3eb040cfc8286662c5c55887c6bcb9c"],["s","path"],["s","common.h"],["s","role"],["s","algorithm"],["s","root_asset_id"],["s","asset-v1-5f149502a5f747aee9b672a5730674c69d63e219d4acfc2e5bd20edf1ad08b91"],["o",[207,17,208,209,210,211,212,213,214,215,143,144]],["s","technical"],["s","attack_models"],["s","classical_concerns"],["s","combiner_assessment"],["s","components"],["s","construction"],["s","post_quantum"],["s","encoding_assurance"],["s","identifier"],["s","ML-KEM-1024"],["s","parameters_known"],["b",true],["s","protocol_ref"],["s","purpose"],["s","key_establishment"],["s","quantum"],["s","designed_resistant"],["a",[62,64,65]],["s","standardization"],["s","nist_final"],["o",[218,3,219,3,220,12,221,3,222,223,224,55,225,226,227,228,229,12,230,231,232,233,212,213,61,234,235,236]],["o",[5,69,149,197,198,205,206,216,217,237]],["n","2"],["s","observation-v1-1bef51794ff4a49da9b7b9a773dd61e6cd0cdde9f9f99d939af7140569cf2acc"],["s","api.cpp"],["s","asset-v1-c6a9cf3ebe5c9aec98a405c2685eeb92a85a6832af8b59f904bb9b3b574749ce"],["o",[207,239,208,240,210,241,212,213,214,242,143,144]],["s","ML-KEM-512"],["o",[218,3,219,3,220,12,221,3,222,223,224,55,225,244,227,228,229,12,230,231,232,233,212,213,61,234,235,236]],["o",[5,74,149,197,198,205,206,243,217,245]],["a",[81,58,80]],["s","observation-v1-2f8c91704e64d6466513cf5b269e6a9c547e984731dd7b6f787efe22c12b5741"],["s","reference-only"],["o",[207,17,208,248,210,241,212,249,143,144]],["b",false],["a",[64]],["o",[218,3,219,3,220,12,221,3,222,55,224,55,225,55,227,251,229,12,230,55,232,55,212,249,61,252,235,55]],["o",[5,84,149,247,198,205,206,250,217,253]],["n","3"],["s","observation-v1-56dc4cfa6a59bd91484391c2540ce35b5ce613d38f13fc4342417748ff78ec1a"],["s","api.c"],["s","asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3"],["o",[207,255,208,256,210,257,212,213,214,258,143,144]],["s","classical_public_key"],["s","RSA"],["s","vulnerable"],["a",[62,64,88]],["s","classical_standard"],["o",[218,3,219,3,220,12,221,3,222,260,224,55,225,261,227,251,229,12,230,55,232,262,212,213,61,263,235,264]],["o",[5,90,149,197,198,205,206,259,217,265]],["s","observation-v1-6ad2cc1560bf9989b639c017bb78df878de9bb04eabe3b65636d9f7b699d947a"],["s","asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"],["o",[207,255,208,267,210,257,212,213,214,268,143,144]],["s","ML-KEM-768"],["o",[218,3,219,3,220,12,221,3,222,223,224,55,225,270,227,228,229,12,230,231,232,233,212,213,61,234,235,236]],["o",[5,93,149,197,198,205,206,269,217,271]],["s","observation-v1-6fdf5f3a69951c34d426ab057eaf6eb8b13cd409aa1858b627463135419b5d94"],["o",[207,255,208,273,210,257,212,249,143,144]],["o",[5,96,149,247,198,205,206,274,217,253]],["s","observation-v1-7f22750cdea5f3028441465af6fb572d406862d9786fe37551c1b2cc7b0dd48c"],["o",[207,255,208,276,210,257,212,213,214,268,143,144]],["o",[5,99,149,197,198,205,206,277,217,271]],["s","lexical"],["s","lexical_match"],["o",[199,279,14,15,201,280,203,204]],["s","observation-v1-8720b73d4a88a86d4baa2b30099898497f3fed5e0d5264151a28dd9585fe16d2"],["o",[207,255,208,282,210,257,212,249,143,144]],["o",[5,102,149,247,198,281,206,283,217,253]],["s","observation-v1-93fe98067c4a0256336e374366883af9a74b103c49059cf8d8ef473222c9e015"],["s","asset-v1-8cb69b5f50fff51d31f5452e5c131ff2d2a917ecaafa71afb531d5e72c9d34dc"],["o",[207,239,208,285,210,241,212,213,214,286,143,144]],["s","ML-DSA-65"],["s","signature"],["a",[62,64,105]],["o",[218,3,219,3,220,12,221,3,222,223,224,55,225,288,227,228,229,12,230,289,232,233,212,213,61,290,235,236]],["o",[5,107,149,197,198,205,206,287,217,291]],["s","observation-v1-9a53c35dc6efcfc01e68839da976a298b5f02010243ee51f5e39fcf9e87a44b1"],["o",[207,255,208,293,210,257,212,249,143,144]],["o",[5,110,149,247,198,205,206,294,217,253]],["s","observation-v1-a30f74e85e6f529f90b3b7e5515ded5cc21958310dc347eea37a247b08235af9"],["o",[207,255,208,296,210,257,212,213,214,268,143,144]],["o",[5,113,149,197,198,205,206,297,217,271]],["s","observation-v1-c4145a057ef94cab5e769132f11865d7bd4afdd95831cfaa17f51af468c752d0"],["o",[207,17,208,299,210,211,212,213,214,215,143,144]],["o",[5,116,149,197,198,205,206,300,217,237]],["s","observation-v1-cdfa00e57263f35a829b96e4e6f65f14d07be42290030750944b7a5ddb2f40b8"],["o",[207,255,208,302,210,257,212,249,143,144]],["o",[5,119,149,247,198,205,206,303,217,253]],["s","observation-v1-d9eea2ea2f7b27c80826390ca32ceab71ac95aff292070c7a231f27015bd1ace"],["o",[207,239,208,305,210,241,212,213,214,242,143,144]],["o",[5,122,149,197,198,205,206,306,217,245]],["s","observation-v1-e3c5a27f14411c4ce9a565140f9db00f09ef24495c99da85640b9d96b1a9ae12"],["o",[207,17,208,308,210,257,212,249,143,144]],["o",[5,125,149,247,198,205,206,309,217,253]],["s","observation-v1-f41ee0413f00f6455629f1aaf5b5dbf8ebf2ad79359eeda2dbe6bc00a1dd6d7d"],["o",[207,239,208,311,210,241,212,213,214,286,143,144]],["o",[5,128,149,197,198,205,206,312,217,291]],["s","observation-v1-fadc53fbbbf83172651ccac9678f7f39d148672e9be73b043b3739e3e3568f46"],["o",[207,255,208,314,210,257,212,249,143,144]],["o",[5,131,149,247,198,205,206,315,217,253]],["s","observation-v1-fdc1c0d5e3910385e985b531713c9c7c1b7916ff27b0e529bbcd1624ef7f51f7"],["o",[207,239,208,317,210,257,212,249,143,144]],["o",[5,134,149,247,198,205,206,318,217,253]],["a",[238,246,254,266,272,275,278,284,292,295,298,301,304,307,310,313,316,319]],["o",[0,1,2,3,4,9,10,3,11,12,13,27,28,136,137,138,139,148,149,153,154,156,157,159,160,195,196,320,7,17]]],"root":321},"groups":[{"members":[0,1,4,6,10,11,13]},{"members":[8,15]},{"members":[3]},{"members":[2,5,7,9,12,14,16,17]}],"label":null,"scanReferences":{"observation-v1-13bd7b0a4c0d323ed716289596aa6db3d3eb040cfc8286662c5c55887c6bcb9c":{"findings":["finding-v1-b2d76a0164e9fdab6f562317f229b4a3dc6111f87e7516ac8ae646f5be47329f"],"rule":"C_FAMILY_PQC_API"},"observation-v1-1bef51794ff4a49da9b7b9a773dd61e6cd0cdde9f9f99d939af7140569cf2acc":{"findings":["finding-v1-1bc4c82f0b8df754874e805ac0ee6f2155eb47d25f877c51c59e4c428720ebcd"],"rule":"C_FAMILY_PQC_API"},"observation-v1-2f8c91704e64d6466513cf5b269e6a9c547e984731dd7b6f787efe22c12b5741":{"findings":["finding-v1-7af645fba4d4f05c6afb12f89e85fc09238e8bb941f6cd53d30e9ed7a2dc89d0"],"rule":"C_FAMILY_TLS_REFERENCE"},"observation-v1-56dc4cfa6a59bd91484391c2540ce35b5ce613d38f13fc4342417748ff78ec1a":{"findings":["finding-v1-098e4b8675aa785d21793a3c336d51851ce2d80e5f4aa27f38aca5ef18b97e16"],"rule":"C_FAMILY_CRYPTO_API"},"observation-v1-6ad2cc1560bf9989b639c017bb78df878de9bb04eabe3b65636d9f7b699d947a":{"findings":["finding-v1-8eaf9afaca631725b5df90e2b9f6d99508ed1d3b000095b0f332f887792c7a50"],"rule":"C_FAMILY_PQC_API"},"observation-v1-6fdf5f3a69951c34d426ab057eaf6eb8b13cd409aa1858b627463135419b5d94":{"findings":["finding-v1-e40945852ba56de9660830fedf45a34015831c1cb61b2a5e35861814c941083c"],"rule":"C_FAMILY_CRYPTO_API"},"observation-v1-7f22750cdea5f3028441465af6fb572d406862d9786fe37551c1b2cc7b0dd48c":{"findings":["finding-v1-fdc74472283e1419e9d5e305b597dc2c786500737d5c33a1bd4ee7b324807699"],"rule":"C_FAMILY_PQC_API"},"observation-v1-8720b73d4a88a86d4baa2b30099898497f3fed5e0d5264151a28dd9585fe16d2":{"findings":["finding-v1-db9985b76e5cd638d04c29141574d25cde54fab3dd564e3496347c7840810be0"],"rule":"API_OPENSSL_RSA_NEW"},"observation-v1-93fe98067c4a0256336e374366883af9a74b103c49059cf8d8ef473222c9e015":{"findings":["finding-v1-2ba10f372630463225d9deb462f431cc30a8834f9b16b4acdfb15dda2c365fdf"],"rule":"C_FAMILY_PQC_API"},"observation-v1-9a53c35dc6efcfc01e68839da976a298b5f02010243ee51f5e39fcf9e87a44b1":{"findings":["finding-v1-d6d5ee0250b926363281970264fac5532278a05ee67aff3b59ba8974e477a48c"],"rule":"C_FAMILY_CRYPTO_API"},"observation-v1-a30f74e85e6f529f90b3b7e5515ded5cc21958310dc347eea37a247b08235af9":{"findings":["finding-v1-e1c4fdef68afa137fa53128fb80551c7a1ae3864a6e06eb6e8c74ecb68bf5f19"],"rule":"C_FAMILY_PQC_API"},"observation-v1-c4145a057ef94cab5e769132f11865d7bd4afdd95831cfaa17f51af468c752d0":{"findings":["finding-v1-e1542714dfe532af3e065ededf982279ef28b0817f85f2e6ee7340386369b757"],"rule":"C_FAMILY_PQC_API"},"observation-v1-cdfa00e57263f35a829b96e4e6f65f14d07be42290030750944b7a5ddb2f40b8":{"findings":["finding-v1-2f5f13d33b656e2f4bbbd5d4c4d32f309e6e738890d0958f98f73e9bc3fea52a"],"rule":"C_FAMILY_CRYPTO_API"},"observation-v1-d9eea2ea2f7b27c80826390ca32ceab71ac95aff292070c7a231f27015bd1ace":{"findings":["finding-v1-2dd9c3d9269e1363e71ea463a63f38f8302472774003697a3cc72259fa63188e"],"rule":"C_FAMILY_PQC_API"},"observation-v1-e3c5a27f14411c4ce9a565140f9db00f09ef24495c99da85640b9d96b1a9ae12":{"findings":["finding-v1-e395352065891e71977836286e38167ae7594aa7c083f7d8464c37071efb976a"],"rule":"C_FAMILY_TLS_REFERENCE"},"observation-v1-f41ee0413f00f6455629f1aaf5b5dbf8ebf2ad79359eeda2dbe6bc00a1dd6d7d":{"findings":["finding-v1-b5e575fcb38d0a2972119944c968021124864c5817eb2aa6a36d46711c3e107f"],"rule":"C_FAMILY_PQC_API"},"observation-v1-fadc53fbbbf83172651ccac9678f7f39d148672e9be73b043b3739e3e3568f46":{"findings":["finding-v1-3042e16611f55e79aa73388b951ae911c599ce21efa4a6df18f3f46d1301e86c"],"rule":"C_FAMILY_CRYPTO_API"},"observation-v1-fdc1c0d5e3910385e985b531713c9c7c1b7916ff27b0e529bbcd1624ef7f51f7":{"findings":["finding-v1-92a819cc6f48c41962f0817b1de0d2f64870d5665e1065ff34e2bad77914a773"],"rule":"C_FAMILY_TLS_REFERENCE"}},"states":{"en":{"action:investigate":"Investigate","information:incomplete":"Information missing","readiness:unknown":"Readiness unknown","urgency:undetermined":"Urgency undetermined"},"ja":{"action:investigate":"調査","information:incomplete":"不足情報あり","readiness:unknown":"準備状況は不明","urgency:undetermined":"緊急度を判断できない"}},"unbindable":[],"words":{"algorithm":{"en":"Algorithm reference","ja":"暗号方式への参照"},"applicability":{"en":"Applicability","ja":"適用範囲"},"complete":{"en":"Completed within recorded scope","ja":"記録された範囲で収集完了"},"confirm_actual_use_and_required_purpose":{"en":"Confirm actual use and the required cryptographic purpose.","ja":"実際の利用状況と必要な暗号用途を確認してください。"},"context.binding":{"en":"Explicit system binding","ja":"システムとの明示的な対応付け"},"designed_resistant":{"en":"Designed for quantum resistance; deployment unverified","ja":"耐量子性を意図した方式・配備は未検証"},"insufficient_information":{"en":"The available facts do not establish a supported urgency branch.","ja":"現在の情報では、緊急度を裏付ける判断条件が揃いません。"},"inventory_not_exhaustive":{"en":"Inventory does not establish exhaustive coverage.","ja":"棚卸しの結果だけでは、網羅的に確認したとは判断できません。"},"key_establishment":{"en":"Key establishment","ja":"鍵確立"},"lexical":{"en":"Text match","ja":"文字列の一致"},"local_advisory_policy_not_practitioner_validation":{"en":"This local advisory policy has not established practitioner usefulness.","ja":"このローカルな助言方針が実務に役立つかどうかは、まだ評価していません。"},"no_offline_cryptographic_reverification":{"en":"Offline assessment does not repeat cryptographic verification.","ja":"オフライン評価では暗号学的な再検証を行いません。"},"reference-only":{"en":"Reference only","ja":"参照のみ"},"reference_only":{"en":"A reference does not establish deployed use.","ja":"参照の検出だけでは、実環境での利用は確認できません。"},"refresh_missing_or_stale_scoped_claims":{"en":"Obtain or refresh the missing, unknown or stale scoped claims.","ja":"不足・不明・失効している対象範囲の申告を確認し、更新してください。"},"saved_content_not_collector_attestation":{"en":"The digest binds saved content, not collector authenticity.","ja":"ダイジェストは保存内容の同一性を示し、収集者の真正性を証明しません。"},"signature":{"en":"Signing / authentication","ja":"署名・認証"},"support.parameters":{"en":"Exact parameter support","ja":"正確なパラメーターへの対応"},"support.peer":{"en":"Peer support","ja":"接続相手の対応"},"support.protocol":{"en":"Protocol support","ja":"プロトコルの対応"},"support.provider":{"en":"Provider support","ja":"プロバイダーの対応"},"support.runtime":{"en":"Runtime support","ja":"実行環境の対応"},"syntactic":{"en":"Syntactic reference","ja":"構文上の参照"},"technical.identity":{"en":"Exact primitive identity","ja":"正確な暗号方式の識別"},"technical.parameters":{"en":"Exact parameters","ja":"正確なパラメーター"},"unknown":{"en":"Unknown","ja":"不明"},"unknown_binding":{"en":"The business-system binding is unknown.","ja":"業務システムとの対応付けは不明です。"},"unknown_parameter_encoding":{"en":"The exact parameter encoding is unknown.","ja":"正確なパラメーターの符号化は不明です。"},"unknown_primitive":{"en":"The primitive is unidentified.","ja":"暗号方式を特定できていません。"},"usage_state":{"en":"Actual or planned use","ja":"利用中・利用予定の状況"},"use_case":{"en":"Required purpose","ja":"必要な用途"},"vulnerable":{"en":"Quantum exposure identified","ja":"量子計算に対する懸念あり"}}}</script><script>/* Human views of immutable saved decisions. No policy evaluation in JavaScript. */
+(() => {
+  function mount(payload, initialView, standalone = false, artifactBase = "", hasScanReport = false) {
+    const standaloneExport = standalone && document.documentElement?.dataset?.savedStandalone === "true";
+    const abort = new AbortController(),
+      events = { signal: abort.signal };
+    const nodes = payload.archive.nodes,
+      rootRef = payload.archive.root;
+    const h = (v) =>
+      String(v ?? "")
+        .replace(
+          /[\u0000-\u001f\u007f-\u009f]/g,
+          (c) => `\\u{${c.charCodeAt(0).toString(16)}}`,
+        )
+        .replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+    function value(ref) {
+      const n = nodes[ref];
+      if (n[0] === "o") {
+        const o = Object.create(null);
+        for (let i = 0; i < n[1].length; i += 2)
+          o[value(n[1][i])] = value(n[1][i + 1]);
+        return o;
+      }
+      if (n[0] === "a") return n[1].map(value);
+      return n[0] === "z" ? null : n[1];
+    }
+    function child(ref, key) {
+      const edges = nodes[ref][1];
+      for (let i = 0; i < edges.length; i += 2)
+        if (nodes[edges[i]][1] === key) return edges[i + 1];
+      return null;
+    }
+    const refs = (key) => nodes[child(rootRef, key)]?.[1] || [];
+    const decisions = refs("decisions"),
+      targets = refs("targets"),
+      claims = refs("claims"),
+      sources = refs("sources"),
+      candidates = refs("candidates");
+    const byId = (list) =>
+      new Map(
+        list.map((ref, i) => [value(child(ref, "id")), { ref, index: i }]),
+      );
+    const targetById = byId(targets),
+      claimById = byId(claims),
+      candidateById = byId(candidates);
+    const field = (key) => value(child(rootRef, key));
+    // Build report-only workflows from decisions with the same applied context.
+    // Keep the archive and the original evidence/decision indices intact.
+    const scopeClaims = new Map();
+    for (const [id, {ref}] of claimById) {
+      const claim = value(ref);
+      if (claim.state === "known" && claim.freshness === "active") {
+        scopeClaims.set(id, {field: claim.field, value: JSON.stringify(claim.value)});
+      }
+    }
+    const supportedUses = new Set(["jwt", "signature", "pki", "key_establishment", "encryption", "hashing"]);
+    const phaseActions = new Set(["plan", "unblock", "migrate", "monitor"]);
+    const candidateConditions = new Map();
+    function candidateCondition(id) {
+      if (!candidateConditions.has(id)) {
+        const c = value(candidateById.get(id).ref);
+        candidateConditions.set(id, [c.identifier, c.purpose, c.status, c.parameter_selection,
+          c.prerequisites.map(p => [p.name, p.claimed_support]), c.validation_steps]);
+      }
+      return candidateConditions.get(id);
+    }
+    function scopeFor(d) {
+      if (!d.system_id || d.information === "conflicting") return null;
+      const fields = new Map();
+      for (const id of d.applied_claim_ids) {
+        const claim = scopeClaims.get(id);
+        if (!claim) continue;
+        if (fields.has(claim.field) && fields.get(claim.field) !== claim.value) return null;
+        fields.set(claim.field, claim.value);
+      }
+      const use = JSON.parse(fields.get("use_case") ?? "null");
+      const usage = JSON.parse(fields.get("usage_state") ?? "null");
+      const kind = d.action.kind;
+      const excluded = kind === "none" && d.urgency === "not_applicable" &&
+        (fields.get("applicability") === '"not_applicable"' || ["unused", "test_only"].includes(usage));
+      if (!excluded && !(phaseActions.has(kind) && supportedUses.has(use) && ["active", "planned"].includes(usage))) return null;
+      const candidates = d.action.candidate_ids.map(candidateCondition);
+      // An explicit exclusion is the same decision for a known algorithm and
+      // an unidentified reference. Preserve both reason sets in the evidence.
+      const reasons = excluded ? d.reason_codes.filter(code =>
+        !["reference_only", "unknown_primitive", "unknown_parameter_encoding"].includes(code)) : d.reason_codes;
+      const key = JSON.stringify([d.system_id, kind, d.urgency, d.information, d.readiness,
+        reasons, d.missing_inputs, d.action.blocking_prerequisites, d.action.validation_steps, candidates,
+        [...fields].sort(([a], [b]) => a.localeCompare(b, "en"))]);
+      const constraints = Object.fromEntries(["signature_verification_until", "confidentiality_until", "historical_ciphertext"]
+        .filter(field => fields.has(field)).map(field => [field, JSON.parse(fields.get(field))]));
+      return {key, use, kind, constraints};
+    }
+    const groups = payload.groups.map(() => ({members: []}));
+    const aliases = new Map(), scopeIndices = new Map(), scopes = new Map();
+    for (const [original, group] of payload.groups.entries()) {
+      const partitions = new Map();
+      for (const member of group.members) {
+        const d = decisions[member];
+        // Most inventory records have no binding and cannot supply a workflow.
+        const system = child(d, "system_id");
+        const scope = system !== null && value(system) ? scopeFor(value(d)) : null;
+        const key = scope?.key ?? null;
+        if (!partitions.has(key)) partitions.set(key, {scope, members: []});
+        partitions.get(key).members.push(member);
+      }
+      for (const [part, {scope, members}] of [...partitions.values()].entries()) {
+        const index = part === 0 ? original : groups.length;
+        if (part > 0) groups.push({members: []});
+        const primary = scope ? scopeIndices.get(scope.key) ?? index : index;
+        if (scope && primary === index) {
+          scopeIndices.set(scope.key, index);
+          scopes.set(index, scope);
+        }
+        if (primary !== index) aliases.set(index, primary);
+        for (const member of members) groups[primary].members.push(member);
+      }
+    }
+    const scanReference = (id) => Object.hasOwn(payload.scanReferences || {}, id)
+      ? payload.scanReferences[id] : undefined;
+    const scanRule = (source) => scanReference(source.observation_id)?.rule;
+    const importRule = (rule) => rule === "GO_TLS_RSA_IMPORT";
+    const orderLocation = (a, b) => a.localeCompare(b, "en", { numeric: true });
+    const unbindable = new Set(payload.unbindable || []);
+    const relatedSourceRules = new Map();
+    const allDeclarations = new Map();
+    const groupAlgorithms = [],
+      groupFacts = [];
+    for (const group of groups) {
+      const names = new Set(),
+        purposes = new Map(), roles = new Set(), reasons = new Set(),
+        paths = new Set(), dependencyPaths = new Set(), referencePaths = new Set(), savedPaths = new Set(), sourceFiles = new Set(), rules = new Set(), declarations = new Map(), planning = new Map();
+      let developmentDeclarations = 0, dependencyRecords = 0, sourceRecords = 0, unbindableRecords = 0, libraryReferences = 0;
+      for (const i of group.members) {
+        const targetId = value(child(decisions[i], "target_id")),
+          ref = targetById.get(targetId).ref,
+          tech = child(ref, "technical"),
+          source = child(ref, "source_ref"),
+          name = value(child(tech, "identifier"));
+        names.add(name);
+        const purpose = value(child(tech, "purpose"));
+        purposes.set(purpose, (purposes.get(purpose) || 0) + 1);
+        roles.add(value(child(source, "role")));
+        for (const item of value(child(decisions[i], "reason_codes"))) reasons.add(item);
+        if (unbindable.has(targetId)) unbindableRecords++;
+        const pathRef = child(source, "path");
+        const sourcePath = pathRef === null ? "" : value(pathRef);
+        const provenance = child(source, "dependency_provenance");
+        const methodRef = child(child(ref, "observation"), "method");
+        const method = methodRef === null ? "" : value(methodRef);
+        const isDependency = (provenance !== null && value(provenance) !== null) ||
+          method === "dependency_report" ||
+          /(?:^|[/\\])(?:package(?:-lock)?\.json|pnpm-lock\.yaml|yarn\.lock|pom\.xml|Cargo\.(?:toml|lock)|go\.(?:mod|sum)|Gemfile(?:\.lock)?|requirements\.txt|pyproject\.toml)$/.test(sourcePath);
+        const isSource = !isDependency && sourcePath && ["ast_pattern", "lexical_match", "configuration_match"].includes(method);
+        if (isDependency) dependencyRecords++;
+        if (isSource) {
+          sourceRecords++;
+          sourceFiles.add(sourcePath);
+        }
+        const observationId = child(source, "observation_id");
+        const rule = observationId === null ? null : scanReference(value(observationId))?.rule;
+        if (rule) rules.add(rule);
+        if (isSource && importRule(rule)) libraryReferences++;
+        const systemRef = child(decisions[i], "system_id");
+        const system = systemRef === null ? null : value(systemRef);
+        if (system && isSource && rule) {
+          const key = JSON.stringify([system, sourcePath]);
+          if (!relatedSourceRules.has(key)) relatedSourceRules.set(key, new Set());
+          relatedSourceRules.get(key).add(rule);
+        }
+        if (provenance !== null && value(provenance) === "manifest_dev_declared") developmentDeclarations++;
+        for (const key of ["path", "detail_path"]) {
+          const id = child(source, key);
+          if (id !== null && value(id)) {
+            const line = key === "path" ? child(source, "line") : null;
+            const lineValue = line !== null ? value(line) : null;
+            const location = value(id) + (lineValue ? ":" + lineValue : "");
+            paths.add(location);
+            (isDependency ? dependencyPaths : isSource ? referencePaths : savedPaths).add(location);
+          }
+        }
+        const seen = new Set(), overviewSeen = new Set(), plan = {};
+        for (const id of value(child(decisions[i], "applied_claim_ids")) || []) {
+          const claimRef = claimById.get(id)?.ref;
+          if (claimRef === undefined) continue;
+          const fieldName = value(child(claimRef, "field"));
+          if (!["use_case", "usage_state", "migration_target", "deadline", "migration_lead_seconds", "migration_goal_month"].includes(fieldName)) continue;
+          const c = value(claimRef);
+          if (c.state !== "known" || c.freshness !== "active") continue;
+          if (["deadline", "migration_lead_seconds"].includes(fieldName)) plan[fieldName] = c.value;
+          const key = JSON.stringify([fieldName, c.value]);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          const entry = declarations.get(key) || { field: fieldName, value: c.value, count: 0 };
+          entry.count++;
+          declarations.set(key, entry);
+          // Count each record once per displayed value. The card and archive
+          // preserve the original deadline provenance.
+          const overviewValue = fieldName === "deadline"
+            ? c.value.kind === "at" ? {kind:"at", at:Date.parse(c.value.at)} : {kind:"none"}
+            : c.value;
+          const overviewKey = JSON.stringify([fieldName, overviewValue]);
+          if (!overviewSeen.has(overviewKey)) {
+            const overviewEntry = allDeclarations.get(overviewKey) || {field:fieldName, value:overviewValue, count:0};
+            overviewEntry.count++;
+            allDeclarations.set(overviewKey, overviewEntry);
+            overviewSeen.add(overviewKey);
+          }
+        }
+        if (Object.keys(plan).length) {
+          const key = JSON.stringify([plan.deadline || null, plan.migration_lead_seconds ?? null]), entry = planning.get(key) || { ...plan, count: 0 };
+          entry.count++; planning.set(key, entry);
+        }
+      }
+      groupAlgorithms.push([...names]);
+      groupFacts.push({paths: [...paths], dependencyPaths: [...dependencyPaths], referencePaths: [...referencePaths], savedPaths: [...savedPaths], sourceFiles, rules, roles, purposes, reasons, libraryReferences, libraryReferencesOnly: libraryReferences === group.members.length, sourceRecords, declarations: [...declarations.values()], planning: [...planning.values()], developmentDeclarations, dependencyRecords, unbindableRecords});
+    }
+
+    let active,
+      page = 0,
+      otherExpanded = false,
+      expandedCards = new Set(),
+      viewer = null,
+      detail = null,
+      detailPage = 0,
+      detailQuery = "",
+      recordPage = 0,
+      visibleLocations = new Map();
+    const size = 20,
+      bound = new WeakSet();
+    const ja = () => active.lang === "ja",
+      t = (en, jp) => (ja() ? jp : en);
+    const word = (code) =>
+      code === "resolve_declared_blocking_prerequisites"
+        ? t("Resolve the declared blocking requirements.", "申告された未対応の条件を解消する。")
+        : payload.words[code]?.[ja() ? "ja" : "en"] || code || t("Unentered", "未入力");
+    const state = (type, code) =>
+      (type === "information" && code === "sufficient" ? t("Required information available", "判断に必要な情報は揃っています") : null) ||
+      payload.states[ja() ? "ja" : "en"][`${type}:${code}`] || word(code);
+    const n = (v) => Number(v).toLocaleString(ja() ? "ja-JP" : "en-US");
+    const algorithm = (s) =>
+      s === "unknown" || !s ? t("Unidentified", "未特定") : s;
+    const decision = (i) => value(decisions[i]);
+    const target = (d) => value(targetById.get(d.target_id).ref);
+    const recordLocation = (tgt) =>
+      (tgt.source_ref.path ||
+        tgt.source_ref.detail_path ||
+        word(tgt.source_ref.role)) +
+      (tgt.source_ref.line ? ":" + tgt.source_ref.line : "");
+    const list = (values, translate = true) => {
+      const lines = [...new Set(values.map(v => translate ? word(v) : v))];
+      return lines.length ? `<ul>${lines.map(line => `<li>${h(line)}</li>`).join("")}</ul>` : "";
+    };
+    const section = (title, content, level = 3) =>
+      content ? `<h${level}>${h(title)}</h${level}>${content}` : "";
+    function serialize(ref) {
+      const node = nodes[ref];
+      if (node[0] === "o") {
+        const pairs = [];
+        for (let i = 0; i < node[1].length; i += 2)
+          pairs.push(serialize(node[1][i]) + ":" + serialize(node[1][i + 1]));
+        return "{" + pairs.join(",") + "}";
+      }
+      if (node[0] === "a") return "[" + node[1].map(serialize).join(",") + "]";
+      if (node[0] === "n") return node[1];
+      return node[0] === "z" ? "null" : JSON.stringify(node[1]);
+    }
+    function download() {
+      const url = URL.createObjectURL(
+        new Blob([serialize(rootRef)], { type: "application/json" }),
+      );
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "migration.assessment.v1.json";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+    function dateText(raw) {
+      const date = new Date(raw);
+      return Number.isNaN(date.getTime()) ? String(raw) : new Intl.DateTimeFormat(ja() ? "ja-JP" : "en-GB", {
+        timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
+      }).format(date);
+    }
+    function durationText(raw) {
+      let rest = Number(raw);
+      if (!Number.isSafeInteger(rest) || rest < 0) return String(raw);
+      const parts = [];
+      for (const [seconds, en, jp] of [[86400,"days","日"],[3600,"hours","時間"],[60,"minutes","分"],[1,"seconds","秒"]]) {
+        const amount = Math.floor(rest / seconds); rest %= seconds;
+        if (amount || seconds === 1 && !parts.length) parts.push(n(amount) + t(" " + (amount === 1 ? en.slice(0, -1) : en), jp));
+      }
+      return parts.join(t(" ", ""));
+    }
+    function bindingNotice(count = 1, heading = 3) {
+      return `<section class="binding-limit"><h${heading}>${t("Tool binding limitation", "ツール上の対応付け制約")}</h${heading}><p>${t("Records that cannot be bound", "対応付けできない記録")}: ${n(count)}</p><p>${t("Adding answers in this screen cannot resolve this limitation. The scanner could not uniquely identify these records. Inspect the listed source and configuration, and use separately identifiable evidence where available; the detection/binding issue may need investigation.", "この画面で回答を追加しても解消できません。検出された記録を一意に対応付けできないためです。記録された参照箇所・設定を調べ、対応付け可能な別の根拠を確認してください。検出・対応付け処理の調査が必要な場合もあります。")}</p></section>`;
+    }
+    function planningHtml(i) {
+      const rows = groupFacts[i].planning;
+      if (!rows.length) return "";
+      return `<section class="planning-basis"><h6>${t("Applied planning conditions (declared)", "判定に使った期限・期間（申告）")}</h6>${rows.slice(0,5).map(p => {
+        const deadline = p.deadline, lead = p.migration_lead_seconds;
+        const parts = [];
+        if (deadline?.kind === "none") parts.push(t("No deadline declared", "期限なしと申告"));
+        if (deadline?.kind === "at") {
+          const label = t("Migration deadline", "移行期限");
+          const date = dateText(deadline.at) + " " + t("(Japan time)", "（日本時間）");
+          const basis = deadline.scope_reason === "contractual_requirement"
+            ? t("Contractual requirement", "契約上の要件") : t("Organization policy", "組織の方針");
+          const status = deadlineStatus(epochSecond(deadline.at));
+          parts.push([`${label}: ${date}`, basis, deadline.reference_id, status].filter(Boolean).join(" · "));
+        }
+        if (lead !== undefined) parts.push(`${t("Migration lead time", "移行に必要な期間")}: ${durationText(lead)}`);
+        return `<p>${h(parts.join(" / "))} (${n(p.count)} / ${n(groups[i].members.length)} ${t("records", "記録")})</p>`;
+      }).join("")}${rows.length > 5 ? `<p>+${n(rows.length-5)} ${t("variants (see evidence)", "種類（根拠で確認）")}</p>` : ""}</section>`;
+    }
+    function evaluationTime() {
+      const raw = field("as_of"), date = new Date(raw);
+      const formatted = Number.isNaN(date.getTime()) ? raw : new Intl.DateTimeFormat(ja() ? "ja-JP" : "en-GB", {
+        timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
+      }).format(date);
+      return `<time datetime="${h(raw)}" title="${h(raw)}">${t("Evaluation time", "評価日時")}: ${h(formatted)} ${t("(Japan time, UTC+09:00)", "（日本時間）")}</time>`;
+    }
+    function declarationHtml(i, fieldName, label) {
+      const entries = groupFacts[i].declarations.filter(c => c.field === fieldName);
+      if (!entries.length) return "";
+      const values = entries.slice(0, 5).map(c => {
+        const v = fieldName === "migration_target"
+          ? [word(c.value.use_case), c.value.algorithm, c.value.parameters].filter(Boolean).join(" / ")
+          : word(c.value);
+        return h(v) + ` (${n(c.count)} / ${n(groups[i].members.length)} ${t("records", "記録")})`;
+      });
+      return `<p class="declared-fact"><strong>${label}:</strong> ${values.join(" · ")}${entries.length > 5 ? ` +${n(entries.length - 5)} ${t("more variants (see evidence)", "種類（根拠で確認）")}` : ""}</p>`;
+    }
+    function locationsHtml(paths, abbreviated = false) {
+      if (!paths.length) return "";
+      const shown = [...paths].sort(orderLocation).slice(0, 3);
+      const basename = path => path.split(/[/\x5c]/).at(-1);
+      const files = shown.map(path => path.replace(/:\d+$/, ""));
+      const labels = shown.map((path, i) =>
+        abbreviated && !path.startsWith("/") &&
+        !files.some(file => file !== files[i] && basename(file) === basename(files[i]))
+          ? basename(path) : path);
+      const remaining = paths.length - shown.length;
+      return `<ul class="check-locations">${shown.map((path, i) =>
+        `<li><code title="${h(path)}">${h(labels[i])}</code></li>`).join("")}${remaining ? `<li>${h(t(n(remaining) + " more locations in the list", "ほか" + n(remaining) + "箇所は一覧に掲載"))}</li>` : ""}</ul>`;
+    }
+
+    // Display arithmetic on the exact pairs of active declarations already used
+    // by the assessment. Both instants use the evaluator's whole-second precision.
+    const epochSecond = date => Math.floor(Date.parse(date) / 1000);
+    const asOf = epochSecond(field("as_of"));
+    const startDates = groupFacts.map(facts => facts.planning.flatMap(p => {
+      if (p.deadline?.kind !== "at" || p.migration_lead_seconds === undefined) return [];
+      const lead = Number(p.migration_lead_seconds);
+      const deadline = epochSecond(p.deadline.at);
+      const due = deadline - lead;
+      if (!Number.isSafeInteger(lead) || lead < 0 || !Number.isFinite(asOf) ||
+          !Number.isFinite(new Date(due * 1000).getTime())) return [];
+      return [{ due, deadline, lead, count: p.count }];
+    }).sort((a, b) => a.due - b.due || a.deadline - b.deadline));
+    const startStatus = due => due < asOf ? t("Start-by date passed at assessment", "評価日時点で着手目安を超過") :
+      due === asOf ? t("Start-by date reached at assessment", "評価日時点で着手目安に到来") : "";
+    const deadlineStatus = deadline => deadline < asOf ? t("Migration deadline passed at assessment", "評価日時点で移行期限を超過") :
+      deadline === asOf ? t("Migration deadline reached at assessment", "評価日時点で移行期限に到来") : "";
+    const timestamp = seconds => {
+      const label = dateText(seconds * 1000);
+      return `<time datetime="${new Date(seconds * 1000).toISOString()}" aria-label="${h(label)}">${h(label)}</time>`;
+    };
+    function startDue(i, compact = false) {
+      const dates = new Map();
+      for (const row of startDates[i]) dates.set(row.due, (dates.get(row.due) || 0) + row.count);
+      if (!dates.size) return "";
+      const total = groups[i].members.length;
+      if (compact) {
+        const [due, count] = dates.entries().next().value;
+        const status = startStatus(due);
+        return `<p class="start-chip${due < asOf ? " overdue" : ""}">${t("Start by (JST)", "着手目安（日本時間）")} ${timestamp(due)}${status ? " · " + h(status) : ""}${count < total ? ` · ${n(count)} / ${n(total)} ${t("records", "記録")}` : ""}</p>`;
+      }
+      return `<div class="start-due"><strong>${t("Start by (from declared dates, Japan time)", "着手期限の目安（申告から逆算・日本時間）")}</strong>${[...dates].slice(0, 3).map(([due, count]) => {
+        const status = startStatus(due);
+        const coverage = count < total ? ` · ${n(count)} / ${n(total)} ${t("records", "記録")}` : "";
+        return `<p>${timestamp(due)}${h(status ? " · " + status : "")}${coverage}</p>`;
+      }).join("")}${dates.size > 3 ? `<p>${t("See declarations for the remaining dates.", "残りの期限は申告欄で確認できます。")}</p>` : ""}</div>`;
+    }
+    function responseChecks(d, facts, names) {
+      const uses = new Set(facts.declarations.filter(c => c.field === "use_case").map(c => c.value));
+      const jwt = uses.size === 1 && uses.has("jwt") && facts.sourceFiles.size > 0;
+      const checks = [];
+      const hasRelatedRule = rule => facts.rules.has(rule) || Boolean(d.system_id &&
+        [...facts.sourceFiles].some(path => relatedSourceRules.get(JSON.stringify([d.system_id, path]))?.has(rule)));
+      if (d.action.kind === "none") {
+        checks.push(t("Reassess when a caller starts using this reference to choose a live cryptographic operation, or when its use enters the declared scope.", "呼び出し元がこの参照を使って実処理の暗号方式を選ぶようになったときや、利用が申告対象に入ったときに再評価する。"));
+      } else if (d.action.kind === "monitor") {
+        checks.push(uses.has("encryption")
+          ? t("Compare the effective cipher, mode and key size with defaults and application overrides. Reassess when any of them changes.", "既定値とアプリ側の上書きを照合し、実際に使う方式・モード・鍵長が変わったときに再評価する。")
+          : t("Reassess when the selected algorithm, parameters or business use changes.", "実際に選ぶ方式・設定値・業務用途が変わったときに再評価する。"));
+      } else if (d.action.kind === "unblock") {
+        const libraryCheck = t("Follow the library reference to the code or configuration that uses it. Check whether the deployed application reaches that path.", "ライブラリ名の参照から利用箇所をたどり、配備先でその処理が使われるか確認する。");
+        if (facts.libraryReferencesOnly) {
+          checks.push(libraryCheck);
+        } else if (jwt && facts.sourceFiles.size > 1) {
+          checks.push(t("Locate the signer and any JWT header validation in the listed files. Compare the signer's alg with the verifier's accepted values for the same token flow.", "下記のファイルから署名処理とヘッダー検証を探し、同じトークン経路で、署名時の alg と検証側の許可値を照合する。"));
+        } else if (jwt && ["API_PY_RSA_MODULE", "TS_PY_RSA_USAGE"].some(hasRelatedRule)) {
+          checks.push(t("Trace the configured signing key to the algorithm selection. Distinguish key generation from the signing path actually used.", "設定される署名鍵の種類から方式を選ぶ処理をたどり、鍵生成の補助処理と実際に署名する経路を区別する。"));
+        } else if (jwt && names.filter(name => name !== "unknown").length > 1) {
+          checks.push(t("Follow these alg references to the signing provider and compare the enabled signing algorithms with the verifier's accepted values.", "方式名の参照から署名プロバイダーの選択をたどり、有効な署名方式と検証側の許可値を照合する。"));
+        } else if (jwt) {
+          checks.push(t("Trace where the token is sent. Where present, use the signing call or aud as a starting point. Check its accepted alg values and key types against the issuer's configuration.", "トークンの送信先をたどる。署名呼び出しや aud があれば手掛かりにして、受け付ける alg と鍵の種類を発行側の設定と照合する。"));
+        }
+        if (!facts.libraryReferencesOnly && facts.libraryReferences && facts.paths.length === 1) {
+          checks.push(libraryCheck);
+        }
+        if (d.missing_inputs.includes("technical.identity") || d.missing_inputs.includes("technical.parameters")) {
+          const rsa = names.some(name => /^(RSA(?:-|$)|(?:RS|PS)\d)/.test(name));
+          checks.push(rsa
+            ? t("Check the key actually configured for this operation. For RSA, record the public key size.", "この処理に設定される鍵を確認し、RSA なら公開鍵のビット数を記録する。")
+            : t("Check the effective algorithm and parameters in this environment.", "この環境で実際に使う方式とパラメーターを確認する。"));
+        }
+      }
+      return checks.map((text, index) => ({
+        text,
+        paths: index === 0 && (jwt || facts.libraryReferencesOnly) ? facts.referencePaths : [],
+      }));
+    }
+    const requirementLabels = {
+      runtime: ["Runtime", "実行環境"],
+      provider: ["Crypto provider", "プロバイダー"],
+      parameters: ["Cryptographic parameters", "暗号パラメーター"],
+      peer: ["Peer support", "接続先"],
+      protocol: ["Protocol", "プロトコル"],
+      jose: ["JWT implementation", "JWT実装"],
+      verifiers: ["Token verification", "トークン検証"],
+      pki: ["Certificate infrastructure", "証明書基盤"],
+    };
+    const requirementLabel = code => Object.hasOwn(requirementLabels, code) ? t(...requirementLabels[code]) : word(code);
+    function nextChecks(d, facts, total) {
+      if (facts.unbindableRecords === total) {
+        return [{ text: t("Review the listed evidence and look for a record that can be linked to a use.", "参照箇所を調べ、用途を対応付けられる別の記録を探す。"), paths: facts.paths }];
+      }
+      const missingTechnicalFacts = d.missing_inputs.includes("technical.identity") ||
+        d.missing_inputs.includes("technical.parameters");
+      if (d.action.kind !== "investigate" || !d.missing_inputs.length) return [];
+      if (!missingTechnicalFacts) {
+        const checks = [];
+        if (d.missing_inputs.includes("technical.collision_sensitive_use")) {
+          checks.push({ text: t("Check whether the hash is used where collisions matter, such as signature verification or integrity checks.", "署名の検証や改ざん検知など、衝突耐性が必要な処理でこのハッシュを使うか確認する。"), paths: facts.paths });
+        }
+        if (d.missing_inputs.includes("observation.selected_use")) {
+          checks.push({ text: t("Check the connection record for the settings actually negotiated.", "接続時の記録で、双方が選んだ設定を確認する。"), paths: facts.savedPaths });
+        }
+        if (d.missing_inputs.includes("technical.encoding")) {
+          checks.push({ text: t("Inspect the original artifact for the encoded parameters.", "元の証拠から、符号化されているパラメーターを確認する。"), paths: facts.paths });
+        }
+        if (d.missing_inputs.some(field => field.startsWith("support."))) {
+          checks.push({ text: t("Check support for the proposed configuration with the runtime, provider or peer responsible for it.", "移行候補の設定に対応しているか、該当する実行環境・プロバイダー・接続先で確認する。"), paths: [] });
+        }
+        return checks;
+      }
+      const checks = [];
+      if (facts.sourceRecords) {
+        checks.push({
+          title: t("Check the referenced code", "参照箇所から実行時の設定をたどる"),
+          text: t("Use these locations to find the active configuration. Check which algorithm and parameters the application selects at runtime.", "以下の箇所から適用される設定を探し、実行時に選ばれる方式と設定値を確認する。"),
+          paths: facts.referencePaths,
+        });
+      }
+      if (facts.dependencyRecords) {
+        checks.push({
+          title: t("Check dependency use", "依存関係の利用箇所を確認する"),
+          text: t("Use the enabled build features and call sites to find where the dependency is used. Check the configured algorithm and parameters there.", "ビルドで有効な機能と呼び出し元から利用箇所を探し、そこで指定される暗号方式と設定値を確認する。"),
+          paths: facts.dependencyPaths,
+        });
+      }
+      if (facts.sourceRecords + facts.dependencyRecords < total) {
+        checks.push({
+          title: t("Review the saved evidence", "保存された根拠を確認する"),
+          text: t("Check the original evidence for the algorithm and parameters. For a connection, use a record of the actual negotiation.", "元の記録で方式と設定値を確認する。通信の場合は、実際の接続で選ばれた設定を確認する。"),
+          paths: facts.savedPaths,
+        });
+      }
+      return checks;
+    }
+    function workChecks(i, d) {
+      return d.action.kind === "investigate"
+        ? nextChecks(d, groupFacts[i], groups[i].members.length)
+        : responseChecks(d, groupFacts[i], groupAlgorithms[i]);
+    }
+    function workTitle(i, d, checks) {
+      const scope = scopes.get(i);
+      if (scope) return scope.use ? word(scope.use) : t("Declared exclusion", "対象外の申告");
+      const tg = target(d), facts = groupFacts[i], total = groups[i].members.length;
+      const classicalConcern = d.action.kind === "investigate" && d.reason_codes.includes("known_classical_concern");
+      let title = state("action", d.action.kind);
+      if (classicalConcern) {
+        title = t("Investigate the detected cryptographic concern", "検出された暗号方式の懸念を調査する");
+      } else if (checks.some(check => check.title)) {
+        if (facts.dependencyRecords === total) title = t("Dependency references", "依存関係の参照");
+        else if (facts.dependencyRecords) title = t("Dependency references and other evidence", "依存関係の参照と関連する根拠");
+        else if (facts.sourceRecords === total && tg.source_ref.role === "reference-only") title = t("Cryptographic references", "暗号に関わる参照箇所");
+        else title = t("Cryptographic configuration", "暗号方式・設定の確認");
+      }
+      const algorithms = groupAlgorithms[i].filter(name => name !== "unknown").slice(0, 3).join(" / ");
+      const declaration = facts.declarations.find(c => c.field === "use_case" && c.count === total);
+      const purpose = tg.technical.purpose === "unknown"
+        ? declaration ? word(declaration.value) + t(" (declared)", "（申告）") : ""
+        : word(tg.technical.purpose);
+      const subject = [algorithms, purpose].filter(Boolean).join(" · ");
+      if (["unblock", "monitor", "none"].includes(d.action.kind)) {
+        if (subject) title = subject;
+        else if (d.action.kind === "none") title = t("Recorded references", "記録された参照");
+        if (facts.libraryReferences) title = `${title} · ${t("Includes a library reference", "ライブラリ名の参照あり")}`;
+      } else if (subject) {
+        title = `${title} · ${subject}`;
+      }
+      return title;
+    }
+    function decisionFields(action, condition) {
+      return `<dl class="decision-fields">
+        <div><dt>${t("What to do", "やること")}</dt><dd>${h(action)}</dd></div>
+        <div><dt>${t("When to proceed", "次に進める条件")}</dt><dd>${h(condition)}</dd></div>
+      </dl>`;
+    }
+    function investigationCondition(d, facts, total) {
+      if (facts.unbindableRecords === total) return t(
+        "Reassess when a distinguishable record can be linked to the actual use.", "実際の用途に結び付けられる記録が見つかったら、再評価する。");
+      if (d.missing_inputs.some(input => input.startsWith("technical.") || input === "observation.selected_use")) return t(
+        "Reassess with the effective algorithm, settings and use confirmed from the code, configuration or observation.", "コード・設定・観測記録から実際の方式と利用箇所を確認できたら、再評価する。");
+      if (d.missing_inputs.some(input => input.startsWith("support.")) || d.action.blocking_prerequisites.length) return t(
+        "Reassess once the support evidence covers the required configuration and affected environments.", "必要な設定と配備先について、対応状況を示す根拠が揃ったら再評価する。");
+      if (d.action.kind === "monitor" || d.action.kind === "none") return t(
+        "Reassess if the selected settings or declared scope changes.", "使用する設定や申告した対象範囲が変わった時点で、再評価する。");
+      return t("Reassess after confirming where the evidence applies and how it is used.", "根拠が示す箇所と、実際にどの用途で使うかを確認できたら、再評価する。");
+    }
+    function phases(scope, d) {
+      const jwt = scope.use === "jwt";
+      const encryption = scope.use === "encryption";
+      const pki = scope.use === "pki";
+      const connection = scope.use === "key_establishment";
+      const hash = scope.use === "hashing";
+      if (scope.kind === "none") return [[
+        t("Check the declared exclusion", "申告した対象外の範囲を確認する"),
+        t("Review the declaration and check whether any live processing outside that scope relies on the listed references.", "対象外の申告を確認し、記録された参照が、申告範囲外の実処理に使われていないか確認する。"),
+        t("Reassess if a caller starts using a reference in scope or the declaration changes.", "実処理で使うことが分かった場合や申告範囲が変わった場合は、再評価する。"),
+      ]];
+      if (scope.kind === "monitor") return [[
+        encryption ? t("Monitor the active encryption configuration", "暗号化設定を継続確認する")
+          : t("Monitor the active settings", "利用中の設定を継続確認する"),
+        encryption ? t("Compare the code defaults and application overrides. Record the cipher, mode and key size that the application actually uses.", "コードの既定値とアプリ側の上書きを照合し、実際に使う暗号方式・モード・鍵長を記録する。")
+          : t("Compare the recorded evidence with the effective algorithm and parameters in the declared scope.", "記録された箇所をたどり、申告した用途で実際に選ぶ方式と設定値を照合する。"),
+        encryption ? t("If the effective settings differ from the recorded evidence or an override changes, reassess with the actual values.", "記録と実際の設定が異なる場合や、上書きで設定が変わった場合は、その値で再評価する。")
+          : t("Reassess when the effective settings or use changes.", "実際に使う方式・設定値・用途が変わった時点で再評価する。"),
+      ]];
+      const current = jwt ? [
+        t("Identify the current issuance and verification paths", "現在の発行・検証経路を特定する"),
+        t("Follow the signing locations to the effective configuration. Identify the services that verify the issued tokens.", "署名箇所から実際の設定をたどり、発行されたトークンを検証するサービスを洗い出す。"),
+        t("Begin compatibility testing after identifying the current signing algorithm, each verifier's accepted algorithms and key source, and choosing the candidate algorithm and key format to test.", "現在の署名方式と、検証先ごとの許可方式・公開鍵の取得元を調べ、試験する候補方式と鍵形式が決まれば互換性試験へ進む。"),
+      ] : [
+        t("Identify the current configuration and affected systems", "現在の設定と影響範囲を特定する"),
+        connection ? t("Trace the connection configuration and identify the peers and the negotiated groups or settings.", "接続設定をたどり、接続先と、実際に交渉されるグループ・設定を確認する。")
+          : pki ? t("Trace certificate issuance, trust stores and the consumers that validate the certificate chain.", "発行元・信頼ストア・証明書チェーンを検証する利用先を確認する。")
+          : encryption || hash ? t("Trace the algorithm and parameter selection, and identify operations that read or compare existing data.", "方式・設定値を選ぶ箇所と、既存データを読み出す、または照合する処理を確認する。")
+          : t("Trace the signing settings and identify the components that verify the resulting signatures.", "署名設定をたどり、生成された署名を検証する処理を確認する。"),
+        t("Start testing after identifying the effective configuration and affected systems and choosing the candidate and its parameters.", "実際の設定と影響範囲を特定し、試験する候補方式と設定値が決まれば互換性試験へ進む。"),
+      ];
+      const compatibility = jwt ? [
+        t("Can the verifiers accept the proposed algorithm?", "候補方式を検証先が受け入れられるか"),
+        t("Issue tokens with the proposed algorithm in a test environment. Try the new and existing tokens at each verifier.", "検証環境で候補方式のトークンを発行し、各検証先で新方式と既存方式の両方を試す。"),
+        t("Verify the new tokens at every affected verifier and keep existing valid tokens usable during the transition.", "対象の全検証先で候補方式を検証でき、切り替え中も有効な既存のトークンを使えること。"),
+      ] : [
+        t("Does the proposed configuration work with the affected systems?", "候補方式で対象システムが動作するか"),
+        connection ? t("Test negotiation with each affected peer and verify the connection settings on both ends.", "対象の各接続先と相互接続試験を行い、両端で成立した接続設定を確認する。")
+          : pki ? t("Test certificate issuance, distribution and chain verification with representative clients.", "検証環境で証明書を発行・配布し、代表的なクライアントでチェーン検証を試す。")
+          : encryption || hash ? t("Test the candidate with new data and verify that existing data can still be read or matched.", "候補方式を新規データで試し、既存データも引き続き読み出し・照合できるかを確認する。")
+          : t("Test signatures with the proposed configuration and verify both new and existing signatures at their consumers.", "候補方式で署名し、利用先で新旧両方の署名を検証する。"),
+        t("Pass the tests in the required environments and peers, keeping existing connections or data usable where required.", "必要な実行環境・利用先で試験に合格し、移行中に必要な既存の接続やデータも使えること。"),
+      ];
+      const remainingSupport = [...new Set([...d.action.blocking_prerequisites,
+        ...d.missing_inputs.filter(input => input.startsWith("support.")).map(input => input.slice(8))])];
+      const support = remainingSupport.map(requirementLabel);
+      const protection = [
+        scope.constraints.signature_verification_until && t(
+          "Keep existing signatures verifiable until " + localDate(scope.constraints.signature_verification_until) + " as declared.",
+          "申告された " + localDate(scope.constraints.signature_verification_until) + " まで既存の署名を検証できること。"),
+        scope.constraints.confidentiality_until && t(
+          "Confirm a protection plan through " + localDate(scope.constraints.confidentiality_until) + " as declared.",
+          "申告された " + localDate(scope.constraints.confidentiality_until) + " までデータを保護する計画を確認できること。"),
+        scope.constraints.historical_ciphertext === true && t(
+          "Confirm how to protect historical ciphertext.", "過去の暗号文の保護方法を確認できること。"),
+      ].filter(Boolean);
+      if (protection.length) compatibility[2] += " " + protection.join(" ");
+      if (remainingSupport.length || scope.kind === "unblock") {
+        const label = support.length ? t(" (" + support.join(", ") + ")", "（" + support.join("、") + "）") : "";
+        compatibility[1] += t(" Also verify the pending requirements" + label + ".", " 未対応の条件" + label + "も試験で確かめる。");
+        compatibility[2] += t(
+          " Proceed to staged rollout once open requirements" + label + " have been resolved and verified.",
+          " 未対応の条件を解消し、その根拠を確認できたら段階切り替えへ進む。");
+      } else {
+        compatibility[2] += t(" Then proceed to staged rollout.", " 確認できたら段階切り替えへ進む。");
+      }
+      return [current, compatibility, [
+        t("Can the rollout be expanded?", "切り替え対象を広げられるか"),
+        t("Start with a limited scope. Monitor relevant errors and test how to restore the previous configuration.", "限定した範囲で切り替えてエラーを監視し、旧設定へ戻す手順を試す。"),
+        t("Expand the rollout after the agreed error criteria are met and rollback has been tested.", "エラーが合意した基準内に収まり、復旧手順を確認できたら、対象を段階的に広げる。"),
+      ]];
+    }
+    function workflowPhases(scope, d, location) {
+      const labels = [
+        t("Start here", "最初に着手"),
+        t("After identifying the scope", "影響範囲の特定後"),
+        t("After compatibility testing", "互換性試験の合格後"),
+      ];
+      const steps = phases(scope, d);
+      return steps.map(([title, action, condition], index) => `<section class="workflow-phase" data-migration-phase="${index + 1}">
+        <h5>${steps.length > 1 ? `<span class="workflow-phase-label">${labels[index]}</span>` : ""}${h(title)}</h5>
+        ${decisionFields(action, condition)}
+        ${index === 0 ? location : ""}
+      </section>`).join("");
+    }
+    function card(group, i) {
+      const d = decision(group.members[0]);
+      const facts = groupFacts[i], total = group.members.length;
+      const scope = scopes.get(i);
+      const checks = workChecks(i, d);
+      const title = workTitle(i, d, checks);
+      const primaryReason = d.reason_codes.find(code => !["reference_only", "collection_incomplete", "unknown_primitive", "unknown_parameter_encoding"].includes(code));
+      const names = groupAlgorithms[i];
+      const observedPurposes = [...facts.purposes].map(([purpose, count]) =>
+        (purpose === "unknown" ? t("Unidentified", "未特定") : word(purpose)) +
+        (facts.purposes.size > 1 ? ` (${n(count)} ${t(count === 1 ? "record" : "records", "記録")})` : ""));
+      const observedPurpose = `${t("Observed purpose", "検出結果の用途")}: ${h(observedPurposes.join(" / "))}`;
+      const observedAlgorithms = `${t("Observed algorithm", "検出した方式")}: ${names.slice(0, 5).map(name => h(algorithm(name))).join(" · ")}${names.length > 5 ? ` +${n(names.length - 5)}` : ""}`;
+      const start = startDue(i);
+      const declarations = [
+        declarationHtml(i, "use_case", t("Declared purpose", "申告された用途")),
+        declarationHtml(i, "usage_state", t("Declared usage", "申告された利用状況")),
+        declarationHtml(i, "migration_target", t("Proposed configuration (declared)", "検討中の方式・設定（申告）")),
+        declarationHtml(i, "migration_goal_month", t("Migration goal month", "移行の目標年月")),
+        planningHtml(i),
+      ].join("");
+      const steps = checks.length ? checks : d.action.validation_steps.map(code => ({text: word(code), paths: []}));
+      const first = steps[0] || {text: t("Reassess when facts, scope or declarations change.", "事実・対象範囲・申告が変わった際に再評価してください。"), paths: []};
+      const paths = first.paths.length ? first.paths : facts.paths;
+      const location = paths.length ? `<div class="recorded-locations"><strong>${first.paths.length ? t("Check locations", "確認箇所") : t("Recorded locations", "記録された場所")}</strong>${locationsHtml(paths, true)}</div>` : "";
+      const checkHtml = ({title, text, paths}) => `<div class="check-step">${title ? `<strong>${h(title)}</strong>` : ""}<p>${h(text)}</p>${locationsHtml(paths)}</div>`;
+      const blockers = [...new Set(d.action.blocking_prerequisites)];
+      const recordRoles = [...facts.roles].map(word);
+      const recordMeta = `${h(recordRoles.join(" / "))} · ${t(n(facts.paths.length) + " recorded locations", "記録された場所: " + n(facts.paths.length) + "か所")} · ${n(total)} ${t("records", "記録")}`;
+      const expanded = expandedCards.has(i);
+      const tag = scope ? "section" : "article";
+      return `<${tag} class="${scope ? "migration-workflow" : "decision-card"}" id="work-${i + 1}" tabindex="-1">
+        <div class="group-heading"><h4>${h(title)}</h4>${!scope || scopes.size > 1 || timelinePairs.length > 1 ? startDue(i, true) : ""}</div>
+        ${scope ? workflowPhases(scope, d, location) : `<div class="next-checks">
+          ${decisionFields(first.text, investigationCondition(d, facts, total))}
+          ${location}
+        </div>`}
+        <div class="card-actions">
+          <button class="evidence-open" data-work="${i}">${t("View detection locations", "検出箇所を見る")}</button>
+          <button type="button" class="card-details-toggle" data-work-details="${i}" aria-controls="work-details-${i + 1}" aria-expanded="${expanded}">${t("Assessment details", "判定の詳細")}</button>
+        </div>
+        <div class="decision-reasoning" id="work-details-${i + 1}"${expanded ? "" : " hidden"}>
+          <section><h5>${t("Decision reasons", "判定理由")}</h5>
+            ${primaryReason ? `<p class="decision-basis">${h(word(primaryReason))}</p>` : ""}
+            <p>${h(state("information", d.information))} · ${h(state("readiness", d.readiness))}</p>
+            ${list([...facts.reasons].filter(code => code !== primaryReason))}
+            ${blockers.length ? `<p><strong>${t("Blocking requirements", "未対応の条件")}</strong> ${h(blockers.map(requirementLabel).join(t(", ", "、")))}</p>` : ""}
+            ${d.missing_inputs.length ? `<h6>${t("Facts still needed", "判断に必要な情報")}</h6>${list(d.missing_inputs)}` : ""}
+          </section>
+          ${declarations ? `<section class="card-declarations"><h5>${t("Applied declarations and planning", "申告された前提と計画")}</h5>${declarations}${start}</section>` : ""}
+          <section><h5>${t("Detected and saved evidence", "検出・保存された根拠")}</h5>
+            <p>${recordMeta}${facts.dependencyRecords ? ` · ${t(n(facts.dependencyRecords) + " dependency records", "依存関係 " + n(facts.dependencyRecords) + "件")}` : ""}</p>
+            <p>${observedPurpose}</p>
+            <p>${observedAlgorithms}</p>
+            ${facts.developmentDeclarations ? `<p>${t("Declared development dependencies", "開発用として宣言された依存関係")}: ${n(facts.developmentDeclarations)} / ${n(total)} ${t("records", "記録")}</p>` : ""}
+          </section>
+          ${facts.unbindableRecords ? bindingNotice(facts.unbindableRecords, 5) : ""}
+          ${(scope ? steps.length : steps.length > 1) || (checks.length && d.action.validation_steps.length) ? `<section><h5>${t("Additional checks", "追加の確認")}</h5>
+            ${steps.slice(scope ? 0 : 1).map(checkHtml).join("")}
+            ${checks.length ? list(d.action.validation_steps) : ""}
+          </section>` : ""}
+        </div>
+      </${tag}>`;
+    }
+    const urgencyRank = ["urgent", "plan", "undetermined", "monitor", "not_applicable"];
+    const urgencySymbol = {urgent: "▲", plan: "◆", undetermined: "？", monitor: "●", not_applicable: "—"};
+    const workUrgencies = groups.map(g => g.members.length ? value(child(decisions[g.members[0]], "urgency")) : null);
+    const workOrder = workUrgencies.flatMap((code, i) => code ? [i] : []).sort((a, b) =>
+      urgencyRank.indexOf(workUrgencies[a]) - urgencyRank.indexOf(workUrgencies[b]) ||
+      Number(scopes.has(b)) - Number(scopes.has(a)) ||
+      Number(groupFacts[a].libraryReferencesOnly) - Number(groupFacts[b].libraryReferencesOnly));
+    const firstOtherUrgent = workOrder.find(i => !scopes.has(i) && workUrgencies[i] === "urgent");
+    const isOtherCheck = i => !scopes.has(i) && workUrgencies[i] !== "urgent";
+    const timePairs = new Map();
+    for (const i of workOrder) {
+      for (const row of startDates[i]) timePairs.set(JSON.stringify([row.due, row.deadline]), row);
+    }
+    const timelinePairs = [...timePairs.values()].sort((a, b) => a.due - b.due || a.deadline - b.deadline);
+    function declarationSummary() {
+      const entries = [...allDeclarations.values()];
+      const fields = [
+        ["use_case", t("Purpose", "用途")],
+        ["usage_state", t("Use", "利用状況")],
+        ["migration_target", t("Candidate", "検討方式")],
+        ["deadline", t("Migration deadline", "移行期限")],
+        ["migration_lead_seconds", t("Lead time", "準備期間")],
+      ];
+      return fields.flatMap(([key, label]) => {
+        const values = entries.filter(c => c.field === key);
+        if (!values.length) return [];
+        const shown = values.slice(0, 3).map(({value: v, count}) => {
+          const result = key === "migration_target" ? [word(v.use_case), v.algorithm, v.parameters].filter(Boolean).join(" / ") :
+            key === "deadline" ? v.kind === "at" ? dateText(v.at) + " JST" : t("None declared", "期限なしと申告") :
+            key === "migration_lead_seconds" ? durationText(v) : word(v);
+          return `<li><span>${h(result)}</span><small>${t(n(count) + (count === 1 ? " record" : " records"), n(count) + "記録")}</small></li>`;
+        });
+        const remaining = values.length - shown.length;
+        const extra = remaining ? t(n(remaining) + " more values in card details", "ほか" + n(remaining) + "種類はカードの詳細へ") : "";
+        return [`<div><dt>${label}</dt><dd><ul>${shown.join("")}</ul>${extra ? `<p>${extra}</p>` : ""}</dd></div>`];
+      }).join("");
+    }
+    function conclusion(counts) {
+      const highest = urgencyRank.find(code => counts.has(code));
+      let headline = t("No assessment targets were found in this input.", "この入力から評価対象を検出できませんでした。");
+      let timing = "";
+      if (highest === "urgent" || highest === "plan") {
+        headline = highest === "urgent" ? t("Check the urgent items first.", "早急な対応の項目から確認してください。")
+          : t("Review the actions that need a plan.", "計画が必要な項目から確認してください。");
+        const cardDates = workOrder.filter(i => workUrgencies[i] === highest).map(i => startDates[i][0]?.due).filter(due => due !== undefined);
+        const overdue = cardDates.filter(due => due < asOf).length;
+        const total = counts.get(highest);
+        const passed = overdue ? `<div><dt>${t("Past the start-by date", "着手目安を過ぎた項目")}</dt><dd>${t(n(overdue) + (overdue === 1 ? " item" : " items"), n(overdue) + "件")}</dd></div>` : "";
+        const dated = cardDates.length > 0 && cardDates.length < total
+          ? `<div><dt>${t("With a start-by date", "着手目安あり")}</dt><dd>${n(cardDates.length)} / ${n(total)} ${t("items", "件")}</dd></div>` : "";
+        if (passed || dated) timing = `<dl class="conclusion-timing">${passed}${dated}</dl>`;
+      } else if (highest === "undetermined") {
+        headline = t("Start with the first check on each item to establish urgency.", "各項目の最初の確認から、緊急度の判断に必要な事実を集めてください。");
+      } else if (highest) {
+        headline = t("Review when to reassess each item.", "各項目の再評価のきっかけを確認してください。");
+      }
+      const outcome = field("coverage").collection_outcome;
+      const collectionText = outcome === "unknown" ? t("Collection status is unknown", "収集状況は不明") : word(outcome);
+      const collection = outcome && !["complete", "completed"].includes(outcome)
+        ? `<p class="collection-status">${h(collectionText)}</p>` : "";
+      const declarations = declarationSummary();
+      const otherUrgent = scopes.size && firstOtherUrgent !== undefined
+        ? `<p class="conclusion-jump"><a href="#work-${firstOtherUrgent + 1}" data-check-work="${firstOtherUrgent}">${t("Go to urgent investigations", "早急な調査項目へ")}</a></p>` : "";
+      return `<section class="migration-conclusion${scopes.size ? " compact-conclusion" : ""}" id="migration-conclusion"><div class="conclusion-heading"><h2>${t("Conclusion", "結論")}</h2>
+        ${counts.size ? `<ul class="urgency-chips">${urgencyRank.filter(code => counts.has(code)).map(code =>
+          `<li class="urgency-chip ${code}"><span aria-hidden="true">${urgencySymbol[code]}</span> ${h(state("urgency", code))}: ${n(counts.get(code))}</li>`).join("")}</ul>` : ""}</div>
+        ${scopes.size ? `<div class="conclusion-meta">${timing}${collection}${otherUrgent}</div>` :
+          `<p class="migration-headline">${h(headline)}</p>${timing}${collection}`}
+        ${declarations ? `<details class="summary-declarations"><summary>${t("Applied declarations", "反映した申告")}</summary>
+          <p class="declaration-population">${t("Assessed records", "評価対象")} ${t(n(decisions.length) + " records", n(decisions.length) + "記録")}</p>
+          <dl class="declaration-summary">${declarations}</dl>
+        </details>` : allDeclarations.size ? "" : `<p class="group-meta">${t("No purpose or planning declarations shown", "用途・利用状況・計画の申告なし")}</p>`}
+      </section>`;
+    }
+    function timeline() {
+      if (!timelinePairs.length) return "";
+      const rows = timelinePairs.slice(0, 3);
+      const min = Math.min(asOf, rows[0].due);
+      const max = Math.max(asOf, ...rows.map(row => row.deadline));
+      const scale = instant => (100 * (instant - min) / (max - min || 1)).toFixed(3);
+      const assessment = `${t("Evaluation time", "評価日時")} ${timestamp(asOf)} JST`;
+      return `<section id="migration-timeline" class="migration-timeline" aria-label="${t("Migration schedule", "移行日程")}">
+        <div class="timeline-evaluation">${assessment}</div>
+        <ol>${rows.map(({due, deadline, lead}) => {
+          const start = startStatus(due), end = deadlineStatus(deadline);
+          return `<li class="timeline-period${due < asOf ? " start-passed" : ""}${deadline < asOf ? " deadline-passed" : ""}">
+          <div class="timeline-track" aria-hidden="true" style="--start:${scale(due)}%;--end:${scale(deadline)}%;--assessment:${scale(asOf)}%"><span></span><b class="assessed-mark"></b></div>
+          <dl class="timeline-dates">
+            <div class="timeline-start"><dt>${t("Start by", "着手目安")}</dt><dd>
+              ${timestamp(due)}${start ? `<small class="timeline-date-status">${h(start)}</small>` : ""}</dd></div>
+            <div class="timeline-lead"><dt>${t("Lead time", "準備期間")}</dt><dd>${h(durationText(lead))}</dd></div>
+            <div class="timeline-deadline"><dt>${t("Migration deadline", "移行期限")}</dt><dd>
+              ${timestamp(deadline)}${end ? `<small class="timeline-date-status">${h(end)}</small>` : ""}</dd></div>
+          </dl>
+        </li>`;
+        }).join("")}</ol>${timelinePairs.length > rows.length ? `<p>${t(`${n(timelinePairs.length - rows.length)} more date pairs in the work items.`, `ほか${n(timelinePairs.length - rows.length)}組は各項目の申告欄で確認できます。`)}</p>` : ""}
+      </section>`;
+    }
+    function urgencySections(indices) {
+      const sections = new Map();
+      for (const i of indices) {
+        const code = workUrgencies[i];
+        if (!sections.has(code)) sections.set(code, []);
+        sections.get(code).push(i);
+      }
+      return [...sections].map(([code, items]) => `<section class="urgency-section" data-urgency-group="${h(code)}">
+        <header><h3><span aria-hidden="true">${urgencySymbol[code] || ""}</span> ${h(state("urgency", code))} · ${n(items.length)} ${workOrder.length > size ? t("on this page", "件（このページ）") : t("", "件")}</h3></header>
+        ${items.map(i => card(groups[i], i)).join("")}</section>`).join("");
+    }
+    function workList(indices) {
+      if (!scopes.size) return urgencySections(indices);
+      const other = indices.filter(isOtherCheck);
+      const main = urgencySections(indices.filter(i => !isOtherCheck(i)));
+      if (!other.length) return main;
+      const remaining = workOrder.filter(isOtherCheck).length;
+      const summary = t("Other checks", "ほかの確認項目") + ` · ${n(remaining)} ${t("items", "件")}`;
+      return `${main}<details data-other-work${otherExpanded ? " open" : ""}>
+        <summary>${h(summary)}</summary>${urgencySections(other)}</details>`;
+    }
+    function workCounts() {
+      const counts = new Map();
+      for (const i of workOrder) {
+        const code = workUrgencies[i];
+        counts.set(code, (counts.get(code) || 0) + 1);
+      }
+      return counts;
+    }
+    function render() {
+      page = Math.max(0, Math.min(page, Math.ceil(workOrder.length / size) - 1));
+      if (standalone && payload.label) document.title = `${payload.label} | ${t("Migration review", "移行レポート")} | pqc-scan`;
+      const counts = workCounts();
+      active.innerHTML = `<header class="top"><div><h1>${t("Migration response work items", "移行に向けた確認事項")}</h1>${payload.label ? `<p class="report-scope">${h(payload.label)}</p>` : ""}</div>${timelinePairs.length ? "" : evaluationTime()}</header>
+        ${timeline()}
+        ${conclusion(counts)}
+        <section id="decisions" class="migration-work"><h2>${t("Migration decisions", "移行の判断")}</h2>
+          ${workList(workOrder.slice(page * size, (page + 1) * size))}
+        </section>
+        ${workOrder.length > size ? `<div class="target-pagination"><span>${n(page * size + 1)}-${n(Math.min((page + 1) * size, workOrder.length))} / ${n(workOrder.length)}</span><div><button data-page="-1" ${page === 0 ? "disabled" : ""}>${t("Previous", "前へ")}</button><button data-page="1" ${(page + 1) * size >= workOrder.length ? "disabled" : ""}>${t("Next", "次へ")}</button></div></div>` : ""}
+        <footer class="migration-links"><button data-download>${t("Save assessment data", "評価データを保存")}</button></footer><dialog class="migration-dialog" aria-label="${t("Detection locations", "検出箇所")}"><div data-dialog-body></div></dialog>`;
+    }
+    function localDate(raw) {
+      return raw ? `${dateText(raw)} ${t("(Japan time)", "（日本時間）")}` : t("Unspecified", "指定なし");
+    }
+    function claimValue(c) {
+      if (c.value === null || c.value === undefined) return word("unknown");
+      if (typeof c.value === "boolean")
+        return c.field.startsWith("support.")
+          ? c.value
+            ? t("Declared supported", "申告上は対応")
+            : t("Declared unsupported", "申告上は未対応")
+          : c.value
+            ? t("Yes", "はい")
+            : t("No", "いいえ");
+      if (["signature_verification_until", "confidentiality_until"].includes(c.field)) return localDate(c.value);
+      if (c.field === "migration_target")
+        return [word(c.value.use_case), c.value.algorithm, c.value.parameters]
+          .filter(Boolean)
+          .join(" / ");
+      if (c.field === "deadline")
+        return c.value.kind === "none"
+          ? t("No deadline declared", "期限なしと申告")
+          : `${dateText(c.value.at)} ${t("(Japan time)", "（日本時間）")} / ${c.value.scope_reason === "contractual_requirement" ? t("Contractual requirement", "契約上の要件") : t("Organization policy", "組織の方針")} / ${c.value.reference_id}`;
+      if (c.field === "migration_lead_seconds")
+        return `${durationText(c.value)} (${n(c.value)} ${t("seconds", "秒")})`;
+      return word(c.value);
+    }
+    function row(label, text) {
+      return `<tr><th scope="row">${h(label)}</th><td>${h(text)}</td></tr>`;
+    }
+    function claimHtml(c, i, prefix = "") {
+      const freshness = {
+        active: t("Active declared interval", "申告期間内"),
+        stale: t("Expired declaration", "申告は失効"),
+        not_yet_effective: t("Not yet effective", "申告の開始前"),
+        unknown: t("Expiry unknown", "有効期限不明"),
+      };
+      return `<section id="${prefix}claim-${i + 1}"><h3>${h(word(c.field))}</h3><p>${h(claimValue(c))} · ${h(freshness[c.freshness] || word(c.freshness))}</p><p>${h(c.provenance?.actor_id || "")} · ${h(localDate(c.provenance?.asserted_at))}</p><details><summary>${t("Reference identity", "参照情報")}</summary><table><tbody>${row(t("Claim ID", "申告ID"), c.id)}${row(t("Declared source", "申告の由来"), c.provenance?.source_kind === "operator_claim" ? t("Operator declaration", "利用者による申告") : t("Declared external review (unverified)", "外部確認を受けたとの申告（未検証）"))}${row(t("Valid until", "有効期限"), localDate(c.provenance?.valid_until))}${row(t("Reference", "参照先"), c.provenance?.reference_id || t("Unspecified", "指定なし"))}${row(t("Context pointer", "入力内の場所"), c.context_pointer || "")}</tbody></table></details></section>`;
+    }
+    function methodLabel(method) {
+      const labels = {
+        lexical_match: t("Text match", "文字列一致"),
+        ast_pattern: t("Syntax pattern", "構文解析"),
+        configuration_match: t("Configuration match", "設定値との一致"),
+        dependency_report: t("Dependency inventory", "依存関係の読み取り"),
+        certificate_parse: t("Certificate parsing", "証明書の解析"),
+        private_key_marker: t("Key marker", "鍵ファイルの目印"),
+        legacy_adapter: t("Imported scan finding", "既存のスキャン所見"),
+        tls_saved_observation: t("Saved TLS observation", "保存したTLS観測"),
+        ssh_saved_offers: t("Saved SSH offers", "保存したSSHの方式提示"),
+        ssh_saved_kex: t("Saved SSH exchange", "保存したSSHの鍵交換"),
+      };
+      return Object.hasOwn(labels, method) ? labels[method] : word(method);
+    }
+    function appliedClaims(d) {
+      return d.applied_claim_ids.map(id => claimById.get(id)).filter(Boolean);
+    }
+    function recordVariants(members) {
+      const variants = new Map();
+      for (const i of members) {
+        const d = decision(i), tg = target(d);
+        const {observation_id, ...location} = tg.source_ref;
+        const {method, assurance, ...observation} = tg.observation;
+        const {id, target_id, applied_claim_ids, action, ...judgment} = d;
+        const {candidate_ids, ...response} = action;
+        // Rule identity, method and assurance can differ at one location.
+        // Show them together when the underlying facts and assessment agree.
+        const claimsUsed = appliedClaims(d).map(({ref}) => {
+          const {id, context_pointer, ...claim} = value(ref);
+          return JSON.stringify(claim);
+        }).sort();
+        const key = JSON.stringify([location, tg.technical, observation, tg.limitations,
+          unbindable.has(tg.id), judgment, response, claimsUsed, candidate_ids.map(candidateCondition)]);
+        if (!variants.has(key)) variants.set(key, []);
+        variants.get(key).push(i);
+      }
+      return [...variants.values()];
+    }
+    function recordHtml(members, separateLocation) {
+      const i = members[0];
+      const d = decision(i),
+        tg = target(d);
+      const applied = appliedClaims(d);
+      const records = members.map(index => index === i ? tg : target(decision(index)));
+      const methods = [...new Set(records.map(record => methodLabel(record.observation.method)))].join(" · ");
+      const rules = [...new Set(records.map(record => scanRule(record.source_ref)).filter(Boolean))].join(" · ");
+      const assurances = [...new Set(records.map(record => word(record.observation.assurance)))].join(" · ");
+      const scanIds = [...new Set(records.flatMap(record => scanReference(record.source_ref.observation_id)?.findings || []))]
+        .filter(id => /^finding-v1-[a-f0-9]{64}$/.test(id));
+      const scanLinks = !standaloneExport && hasScanReport ? scanIds
+        .map((id, index) => `<a href="${h(artifactBase)}report.html?lang=${ja() ? "ja" : "en"}#scan-match-${id}" target="_blank" rel="noopener">${t("Open scan finding", "スキャンの検出箇所を開く")}${scanIds.length > 1 ? " " + n(index + 1) : ""}</a>`)
+        .join(" · ") : "";
+      let html = `<section id="target-${i + 1}"><h3>${h(algorithm(tg.technical.identifier))}</h3>${separateLocation ? "" : `<p class="path">${h(recordLocation(tg))}</p>`}${scanLinks ? `<p>${scanLinks}</p>` : ""}<p>${h(state("urgency", d.urgency))} · ${h(state("information", d.information))} · ${h(state("readiness", d.readiness))}</p>${section(t("Decision reasons", "判定理由"), list(d.reason_codes), 4)}${unbindable.has(tg.id) ? bindingNotice() : ""}<table><tbody>${row(t("Observation method", "検出方法"), methods)}${rules ? row(t("Scan rule ID", "スキャンのルールID"), rules) : ""}${row(t("Role", "役割"), word(tg.source_ref.role))}${tg.source_ref.dependency_provenance ? row(t("Dependency declaration", "依存関係の宣言"), tg.source_ref.dependency_provenance === "manifest_dev_declared" ? t("Declared development dependency", "開発用依存関係として宣言") : word(tg.source_ref.dependency_provenance)) : ""}${row(t("Observed purpose", "検出結果の用途"), word(tg.technical.purpose))}${row(t("Assessment system ID", "評価上のシステムID"), d.system_id || t("Unbound", "未対応付け"))}${row(t("Quantum assessment", "量子計算に対する評価"), word(tg.technical.quantum))}${row(t("Evidence assurance", "確認できている範囲"), assurances)}${row(t("Collection", "収集状況"), word(tg.observation.collection_outcome))}${row(t("Parameter encoding", "パラメーターの符号化"), word(tg.technical.encoding_assurance))}${(tg.technical.classical_concerns || []).map((c) => row(t("Classical concern", "従来暗号の懸念"), word(c))).join("")}${(tg.technical.components || []).map((c) => row(t("Hybrid component", "ハイブリッド構成要素"), `${word(c.role)} / ${algorithm(c.assessment.identifier)} / ${word(c.assessment.quantum)}`)).join("")}${tg.technical.combiner_assessment ? row(t("Combiner assessment", "結合処理の確認範囲"), word(tg.technical.combiner_assessment)) : ""}</tbody></table>${section(t("Evidence limitations", "根拠の制約"), list(tg.limitations.filter(code => !d.reason_codes.some(reason => word(reason) === word(code)))), 4)}${section(t("Next checks", "次に確認すること"), list(d.action.validation_steps), 4)}${section(t("Claims used", "判断に使った申告"), applied.map(entry => claimHtml(value(entry.ref), entry.index, `target-${i + 1}-`)).join(""), 4)}`;
+      if (d.action.candidate_ids.length)
+        html +=
+          `<h4>${t("Candidates: integration unverified", "検討候補（組込みは未検証）")}</h4>` +
+          d.action.candidate_ids
+            .map((id) => {
+              const c = value(candidateById.get(id).ref);
+              const declared = applied.map(entry => value(entry.ref)).filter(claim =>
+                claim.field === "migration_target" && claim.freshness === "active" && claim.state === "known" &&
+                claim.value?.algorithm === c.identifier && (claim.value?.use_case === c.purpose || (claim.value?.use_case === "jwt" && c.purpose === "signature"))
+              );
+              const setting = declared.map(claim => claim.value.parameters).filter(Boolean);
+              const summary = setting.length
+                ? t("Declared configuration", "申告済みの設定") + " " + setting.join(" / ")
+                : word(c.parameter_selection);
+              return `<details id="candidate-${candidateById.get(id).index + 1}"><summary>${h(c.identifier)} · ${h(summary)}</summary>${c.status ? `<p>${h(word(c.status))}</p>` : ""}${setting.length ? `<p>${t("Check that the declared configuration works in the target environment.", "申告された設定が対象の環境で動作するか検証してください。")}</p>` : ""}<table><tbody>${c.prerequisites.map((p) => row(word(p.name), p.claimed_support === null ? word("unknown") : p.claimed_support ? t("Declared supported", "申告上は対応") : t("Declared unsupported", "申告上は未対応"))).join("")}</tbody></table>${list(c.validation_steps.filter(step => !d.action.validation_steps.includes(step)))}</details>`;
+            })
+            .join("");
+      return html + "</section>";
+    }
+    function sourceHtml(s, i) {
+      const external = /^https?:\/\//.test(s.uri || "");
+      const declared = s.id.startsWith("context:");
+      const description = declared
+        ? t("Reference supplied with a declaration", "申告に添えられた資料")
+        : external ? t("Reference used for the technical assessment", "技術評価で参照した資料")
+          : t("Local assessment basis", "ツール内の判定根拠");
+      return `<section id="source-${i + 1}"><p>${h(description)}${external ? ` · <a href="${h(s.uri)}" target="_blank" rel="noreferrer noopener">${t("Open reference", "資料を開く")}</a>` : ""}</p><details><summary>${t("Reference information", "参照情報")}</summary><p><code>${h(s.id)}</code></p><p>${h(s.edition)}</p><p>${h(s.clause)}</p><p>${h(s.scope_limit)}</p></details></section>`;
+    }
+    const closeButton = () =>
+      `<button class="dialog-close" data-close aria-label="${t("Close", "閉じる")}">×</button>`;
+    function locationGroups(rows) {
+      const locations = new Map();
+      for (const i of rows) {
+        const tg = target(decision(i));
+        const { path, line } = tg.source_ref;
+        const key = path && Number(line) > 0 ? JSON.stringify([path, line]) : i;
+        if (!locations.has(key)) locations.set(key, { label: recordLocation(tg), members: [] });
+        locations.get(key).members.push(i);
+      }
+      return [...locations.values()].sort((a, b) => orderLocation(a.label, b.label));
+    }
+    function evidenceRow(group) {
+      const records = group.members.map(i => target(decision(i)));
+      const preview = values => {
+        const unique = [...new Set(values)];
+        return h(unique.slice(0, 4).join(" · ")) + (unique.length > 4 ? ` +${n(unique.length - 4)}` : "");
+      };
+      return `<tr><td>${preview(records.map(tg => algorithm(tg.technical.identifier)))}</td><td class="path">${h(group.label)}</td><td>${preview(records.map(tg => methodLabel(tg.observation.method)))}</td><td>${preview(records.map(tg => scanRule(tg.source_ref)).filter(Boolean))}</td><td><button data-target="${group.members[0]}">${t("Details", "詳細")}</button></td></tr>`;
+    }
+    function renderDialog() {
+      const dialog = active.querySelector("dialog"),
+        body = dialog.querySelector("[data-dialog-body]");
+      const title =
+        viewer.kind === "claims"
+          ? t("Declarations", "申告内容")
+          : viewer.kind === "sources"
+            ? t("Sources", "出典")
+            : t("Detection locations", "検出箇所");
+      dialog.setAttribute("aria-label", title);
+      if (detail !== null) {
+        const multiple = detail.variants.length > 1;
+        const location = multiple ? `<p class="path">${h(recordLocation(target(decision(detail.first))))}</p>` : "";
+        const variants = detail.variants.slice(recordPage * size, (recordPage + 1) * size);
+        body.innerHTML = `<div class="dialog-head"><button data-list>${t("Back to list", "一覧に戻る")}</button>${closeButton()}</div>${location}${variants.map(members => recordHtml(members, multiple)).join("")}${
+          detail.variants.length > size ? dialogPager(recordPage, detail.variants.length, "data-record-page") : ""}`;
+        return;
+      }
+      let rows =
+        viewer.kind === "work"
+          ? groups[viewer.index].members
+          : viewer.kind === "target"
+            ? [viewer.index]
+            : viewer.kind === "claims"
+              ? claims.map((_, i) => i)
+              : sources.map((_, i) => i);
+      const evidenceView = viewer.kind === "work" || viewer.kind === "target";
+      if (evidenceView) {
+        const needle = detailQuery.toLowerCase();
+        rows = locationGroups(rows);
+        if (needle) rows = rows.filter(group => group.members.some(i => {
+          const tg = target(decision(i));
+          return [tg.technical.identifier, algorithm(tg.technical.identifier), group.label, scanRule(tg.source_ref)]
+            .join(" ").toLowerCase().includes(needle);
+        }));
+      }
+      detailPage = Math.max(
+        0,
+        Math.min(detailPage, Math.ceil(rows.length / size) - 1),
+      );
+
+      const selected = rows.slice(detailPage * size, (detailPage + 1) * size);
+      visibleLocations = new Map(evidenceView ? selected.map(group => [group.members[0], group.members]) : []);
+      body.innerHTML = `<div class="dialog-head"><h2>${title}</h2>${closeButton()}</div>${
+        evidenceView
+          ? `<input type="search" maxlength="512" data-detail-search aria-label="${t("Search records", "記録を検索")}" placeholder="${t("Algorithm or file", "方式・ファイル名")}" value="${h(detailQuery)}"><div class="table-scroll"><table class="detection-location-table"><colgroup><col class="location-algorithm"><col><col class="location-method"><col class="location-rule"><col class="location-action"></colgroup><thead><tr><th>${t("Algorithm", "暗号方式")}</th><th>${t("Location", "場所")}</th><th>${t("Observation method", "検出方法")}</th><th>${t("Scan rule ID", "スキャンのルールID")}</th><th></th></tr></thead><tbody>${
+              selected.map(evidenceRow).join("") ||
+              `<tr><td colspan="5">${t("No records match.", "一致する記録はありません。")}</td></tr>`
+            }</tbody></table></div>`
+          : selected
+              .map((i) =>
+                viewer.kind === "claims"
+                  ? claimHtml(value(claims[i]), i)
+                  : sourceHtml(value(sources[i]), i),
+              )
+              .join("")
+      }${dialogPager(detailPage, rows.length, "data-detail-page")}`;
+    }
+    function dialogPager(index, total, attribute) {
+      const range = total ? n(index * size + 1) + "-" + n(Math.min((index + 1) * size, total)) : "0";
+      return `<div class="target-pagination"><span>${range} / ${n(total)}</span><div><button ${attribute}="-1" ${index === 0 ? "disabled" : ""}>${t("Previous", "前へ")}</button><button ${attribute}="1" ${(index + 1) * size >= total ? "disabled" : ""}>${t("Next", "次へ")}</button></div></div>`;
+    }
+    function selectDetails(members) {
+      detail = {first: members[0], variants: recordVariants(members)};
+      recordPage = 0;
+    }
+    function open(kind, index, record = null) {
+      viewer = { kind, index };
+      detail = null;
+      if (record !== null) selectDetails([record]);
+      detailPage = 0;
+      detailQuery = "";
+      renderDialog();
+      active.querySelector("dialog").showModal();
+    }
+    function showWork(index) {
+      index = aliases.get(index) ?? index;
+      const position = workOrder.indexOf(index);
+      if (position < 0) return;
+      const nextPage = Math.floor(position / size);
+      if (page !== nextPage) {
+        page = nextPage;
+        render();
+      }
+      const card = active.querySelector(`#work-${index + 1}`);
+      const disclosure = card?.closest?.("details[data-other-work]");
+      if (disclosure?.hasAttribute("data-other-work")) disclosure.open = true;
+      card?.focus();
+      card?.scrollIntoView?.({block: "start"});
+    }
+    function jump() {
+      const match = /^#(target|evidence|claim|source|work)-(\d+)$/.exec(
+        location.hash,
+      );
+      if (!match) return;
+      const i = Number(match[2]) - 1;
+      if (!Number.isSafeInteger(i) || i < 0) return;
+      if (match[1] === "work") showWork(i);
+      else if (["target", "evidence"].includes(match[1]) && i < decisions.length)
+        open("target", i, i);
+      else if (match[1] === "claim" && i < claims.length) {
+        open("claims");
+        detailPage = Math.floor(i / size);
+        renderDialog();
+      } else if (match[1] === "source" && i < sources.length) {
+        open("sources");
+        detailPage = Math.floor(i / size);
+        renderDialog();
+      }
+    }
+    function attach(view) {
+      if (!view?.classList.contains("migration")) return;
+      active = view;
+      render();
+      if (bound.has(view)) return;
+      bound.add(view);
+      view.addEventListener("toggle", event => {
+        if (event.target.hasAttribute("data-other-work")) otherExpanded = event.target.open;
+      }, { ...events, capture: true });
+      let backdrop = false;
+      view.addEventListener(
+        "pointerdown",
+        (event) => {
+          const d = view.querySelector("dialog"),
+            r = d.getBoundingClientRect();
+          backdrop =
+            event.target === d &&
+            (event.clientX < r.left ||
+              event.clientX > r.right ||
+              event.clientY < r.top ||
+              event.clientY > r.bottom);
+        },
+        events,
+      );
+      view.addEventListener(
+        "click",
+        (event) => {
+          const d = view.querySelector("dialog");
+          const link = event.target.closest("a[data-check-work]");
+          if (link?.dataset.checkWork !== undefined && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+            event.preventDefault();
+            showWork(Number(link.dataset.checkWork));
+            return;
+          }
+          if (backdrop && event.target === d) {
+            d.close();
+            backdrop = false;
+            return;
+          }
+          backdrop = false;
+          const el = event.target.closest("button");
+          if (!el) return;
+          if (el.dataset.work !== undefined)
+            open("work", Number(el.dataset.work));
+          else if (el.hasAttribute("data-close")) d.close();
+          else if (el.hasAttribute("data-download")) download();
+          else if (el.dataset.workDetails !== undefined) {
+            const i = Number(el.dataset.workDetails);
+            const panel = view.querySelector(`#work-details-${i + 1}`);
+            if (!panel) return;
+            panel.hidden = !panel.hidden;
+            if (panel.hidden) expandedCards.delete(i);
+            else expandedCards.add(i);
+            el.setAttribute("aria-expanded", String(!panel.hidden));
+          } else if (el.dataset.page) {
+            page += Number(el.dataset.page);
+            render();
+          } else if (el.dataset.target !== undefined) {
+            const members = visibleLocations.get(Number(el.dataset.target));
+            if (!members) return;
+            selectDetails(members);
+            renderDialog();
+            active.querySelector("dialog [data-list]").focus();
+          } else if (el.hasAttribute("data-list")) {
+            const first = detail.first;
+            detail = null;
+            renderDialog();
+            active.querySelector(`dialog [data-target="${first}"]`)?.focus();
+          } else if (el.dataset.recordPage) {
+            recordPage += Number(el.dataset.recordPage);
+            renderDialog();
+            active.querySelector("dialog [data-list]").focus();
+          } else if (el.dataset.detailPage) {
+            detailPage += Number(el.dataset.detailPage);
+            renderDialog();
+          }
+        },
+        events,
+      );
+      view.addEventListener(
+        "input",
+        (event) => {
+          if (event.target.hasAttribute("data-detail-search")) {
+            detailQuery = event.target.value;
+            detailPage = 0;
+            renderDialog();
+            const control = active.querySelector("[data-detail-search]");
+            control.focus();
+          }
+        },
+        events,
+      );
+    }
+    if (standalone) {
+      document.addEventListener(
+        "pqc-report-view",
+        (event) => {
+          attach(event.detail);
+          jump();
+        },
+        events,
+      );
+      window.addEventListener("hashchange", jump, events);
+    }
+    attach(initialView);
+    if (standalone) jump();
+    return {
+      setLanguage(language) {
+        active.lang = language === "en" ? "en" : "ja";
+        render();
+      },
+      destroy() {
+        abort.abort();
+        active.replaceChildren();
+      },
+    };
+  }
+  window.PqcMigrationReport = Object.freeze({ mount });
+  const block = document.getElementById("migration-shared-data");
+  if (block)
+    mount(
+      JSON.parse(block.textContent),
+      document.querySelector("[data-report-view]"),
+      true,
+      "",
+      document.querySelector("[data-scan-report]") !== null,
+    );
+})();
+
+(() => {
+  const settings = document.querySelector('[data-settings]');
+  const alternate = document.querySelector('[data-report-translation]');
+  let active = document.querySelector('[data-report-view]');
+  if (!settings || !alternate || !active) return;
+  const language = settings.querySelector('[data-language]');
+  const theme = settings.querySelector('[data-theme-select]');
+  function localTime() {
+    const locale = active.lang === 'ja' ? 'ja-JP' : 'en-US';
+    for (const time of active.querySelectorAll('[data-local-time]')) {
+      try {
+        const formatter = new Intl.DateTimeFormat(locale, {dateStyle: 'medium', timeStyle: 'long'});
+        time.textContent = `${formatter.format(new Date(time.dateTime))} (${formatter.resolvedOptions().timeZone})`;
+      } catch { /* Keep the generation host's explicit offset if Intl is unavailable. */ }
+    }
+  }
+  function switchLanguage(value) {
+    if (!['en', 'ja'].includes(value)) return;
+    if (active.lang !== value && alternate.lang === value) {
+      const state = {};
+      active.dispatchEvent(new CustomEvent('pqc-report-capture', {detail: state}));
+      const opened = new Set(Array.from(active.querySelectorAll('details[id]')).filter(d => d.open).map(d => d.id));
+      const incoming = alternate.content.firstElementChild;
+      const outgoing = active;
+      active.replaceWith(incoming);
+      alternate.content.append(outgoing);
+      alternate.lang = outgoing.lang;
+      active = incoming;
+      document.dispatchEvent(new CustomEvent('pqc-report-view', {detail: active}));
+      active.dispatchEvent(new CustomEvent('pqc-report-restore', {detail: state}));
+      active.querySelectorAll('details[id]').forEach(d => { d.open = opened.has(d.id); });
+    }
+    language.value = active.lang;
+    document.documentElement.lang = active.lang;
+    const scope = active.querySelector('.report-scope')?.textContent;
+    document.title = (scope ? scope + ' | ' : '') + active.querySelector('h1').textContent;
+    localTime();
+    rememberURL();
+  }
+  function rememberURL() {
+    try {
+      const url = new URL(location.href);
+      url.searchParams.set('theme', document.documentElement.dataset.theme);
+      url.searchParams.set('lang', document.documentElement.lang);
+      history.replaceState(null, '', url);
+    } catch { /* Standalone exports also work without history updates. */ }
+  }
+  function applyTheme(value) {
+    if (!['light', 'dark'].includes(value)) value = 'light';
+    theme.value = value;
+    document.documentElement.dataset.theme = value;
+  }
+  language.addEventListener('change', () => switchLanguage(language.value));
+  theme.addEventListener('change', () => {
+    applyTheme(theme.value);
+    rememberURL();
+    try { localStorage.setItem('pqc-scan-theme', theme.value); } catch { /* Optional preference. */ }
+  });
+  applyTheme(document.documentElement.dataset.theme);
+  let requested;
+  try { requested = new URLSearchParams(location.search).get('lang'); } catch { /* CLI default. */ }
+  switchLanguage(requested || active.lang);
+  settings.hidden = false;
+})();
+</script></body></html>

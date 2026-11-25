@@ -1,0 +1,1 @@
+using Crypto = System.Security.Cryptography; class C {void M(){var k=Crypto::RSA.Create(); k.SignData(data);} }

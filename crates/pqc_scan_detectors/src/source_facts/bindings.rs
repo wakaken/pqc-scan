@@ -13,9 +13,20 @@ pub(super) enum Handler {
     RubyCipher,
     RustTls,
     NodeJose,
+    PhpClassical,
+    PhpPqc,
+    PhpReference,
+    CSharpClassical,
+    CSharpPqc,
+    CSharpReference,
+    CFamilyClassical,
+    CFamilyPqc,
+    CFamilyTls,
+    ImplementationReference,
+    ConstructionReference,
 }
 impl Handler {
-    pub const ALL: [Self; 9] = [
+    pub const ALL: [Self; 20] = [
         Self::JavaPqc,
         Self::NodePqc,
         Self::PythonPqc,
@@ -25,6 +36,17 @@ impl Handler {
         Self::RubyCipher,
         Self::RustTls,
         Self::NodeJose,
+        Self::PhpClassical,
+        Self::PhpPqc,
+        Self::PhpReference,
+        Self::CSharpClassical,
+        Self::CSharpPqc,
+        Self::CSharpReference,
+        Self::CFamilyClassical,
+        Self::CFamilyPqc,
+        Self::CFamilyTls,
+        Self::ImplementationReference,
+        Self::ConstructionReference,
     ];
     pub fn id(self) -> &'static str {
         match self {
@@ -37,15 +59,33 @@ impl Handler {
             Self::RubyCipher => "API_RUBY_OPENSSL_CIPHER",
             Self::RustTls => "API_RUST_OPENSSL_TLS",
             Self::NodeJose => "TS_NODE_JOSE_USAGE",
+            Self::PhpClassical => "PHP_CRYPTO_API",
+            Self::PhpPqc => "PHP_PQC_API",
+            Self::PhpReference => "PHP_CRYPTO_REFERENCE",
+            Self::CSharpClassical => "CSHARP_CRYPTO_API",
+            Self::CSharpPqc => "CSHARP_PQC_API",
+            Self::CSharpReference => "CSHARP_CRYPTO_REFERENCE",
+            Self::CFamilyClassical => "C_FAMILY_CRYPTO_API",
+            Self::CFamilyPqc => "C_FAMILY_PQC_API",
+            Self::CFamilyTls => "C_FAMILY_TLS_REFERENCE",
+            Self::ImplementationReference => "SOURCE_IMPLEMENTATION_REFERENCE",
+            Self::ConstructionReference => "SOURCE_CONSTRUCTION_REFERENCE",
         }
     }
     pub fn handles(self, language: &str) -> bool {
         match self {
+            Self::ImplementationReference => matches!(language, "c" | "cpp"),
+            Self::ConstructionReference => matches!(language, "c" | "cpp" | "csharp"),
             Self::JavaPqc => language == "java",
             Self::PythonPqc => language == "python",
             Self::RustPqc => language == "rust",
             Self::RustTls => language == "rust",
             Self::RubyCipher => language == "ruby",
+            Self::PhpClassical | Self::PhpPqc | Self::PhpReference => language == "php",
+            Self::CSharpClassical | Self::CSharpPqc | Self::CSharpReference => language == "csharp",
+            Self::CFamilyClassical | Self::CFamilyPqc | Self::CFamilyTls => {
+                matches!(language, "c" | "cpp")
+            }
             Self::NodePqc | Self::NodeRsa | Self::NodeRsaSign | Self::NodeJose => {
                 matches!(language, "javascript" | "typescript")
             }
@@ -58,10 +98,14 @@ impl Handler {
 
 // Build inputs, not a runtime read of mutable repository paths. A YAML edit
 // recompiles this crate; no copied pattern/scope/kind literals need updating.
-const SOURCES: [&str; 3] = [
+const SOURCES: [&str; 7] = [
     include_str!("../../../../rules/default/pqc.yml"),
     include_str!("../../../../rules/default/tree_sitter.yml"),
     include_str!("../../../../rules/default/crypto_api.yml"),
+    include_str!("../../../../rules/default/php.yml"),
+    include_str!("../../../../rules/default/csharp.yml"),
+    include_str!("../../../../rules/default/c_family.yml"),
+    include_str!("../../../../rules/default/source_references.yml"),
 ];
 static DEFAULTS: LazyLock<BTreeMap<String, Rule>> = LazyLock::new(|| {
     let mut rules = BTreeMap::new();

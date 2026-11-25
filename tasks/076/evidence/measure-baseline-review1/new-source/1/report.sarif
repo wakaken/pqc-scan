@@ -1,0 +1,1026 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "columnKind": "unicodeCodePoints",
+      "tool": {
+        "driver": {
+          "name": "pqc-scan",
+          "rules": [
+            {
+              "id": "API_EVP_PKEY_RSA",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "EVP_PKEY configured for RSA detected."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "API_OPENSSL_RSA_NEW",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "OpenSSL low-level RSA API usage detected."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "OPENSSL_RSA_API",
+              "shortDescription": {
+                "text": "TLS"
+              },
+              "fullDescription": {
+                "text": "OpenSSL RSA API call detected."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-openssl-rsa_generate_key_ex-negative-comment.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-openssl-rsa_generate_key_ex-positive.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-openssl-rsa_private_decrypt-negative-comment.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-openssl-rsa_private_decrypt-positive.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-openssl-rsa_public_encrypt-negative-comment.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-openssl-rsa_public_encrypt-positive.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-openssl-rsa_generate_key_ex-negative-comment.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-openssl-rsa_generate_key_ex-positive.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-openssl-rsa_private_decrypt-negative-comment.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-openssl-rsa_private_decrypt-positive.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-openssl-rsa_public_encrypt-negative-comment.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPENSSL_RSA_API",
+          "level": "error",
+          "message": {
+            "text": "OpenSSL RSA API call detected. | migration_hint=Replace with EVP_PKEY-based implementation suitable for PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Review the TLS reference before changing effective settings (planned)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-openssl-rsa_public_encrypt-positive.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Review the TLS reference before changing effective settings (planned)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-evp-id-rsa-negative-comment.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 62
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-evp-id-rsa.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 59
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-known-evp_digestsigninit-negative-comment.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 64
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-known-evp_digestsigninit-reassigned.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 61
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-known-evp_digestsigninit.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 61
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-known-evp_digestverifyinit-negative-comment.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 64
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-known-evp_digestverifyinit-reassigned.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 61
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-known-evp_digestverifyinit.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 61
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_OPENSSL_RSA_NEW",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL low-level RSA API usage detected. | migration_hint=Prefer high-level OpenSSL EVP APIs to ease PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-openssl-rsa_generate_key_ex-negative-comment.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_OPENSSL_RSA_NEW",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL low-level RSA API usage detected. | migration_hint=Prefer high-level OpenSSL EVP APIs to ease PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-openssl-rsa_generate_key_ex-positive.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_OPENSSL_RSA_NEW",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL low-level RSA API usage detected. | migration_hint=Prefer high-level OpenSSL EVP APIs to ease PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-openssl-rsa_new-negative-comment.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_OPENSSL_RSA_NEW",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL low-level RSA API usage detected. | migration_hint=Prefer high-level OpenSSL EVP APIs to ease PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "c-openssl-rsa_new-positive.c"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-known-evp_digestsigninit-negative-comment.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 64
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-known-evp_digestsigninit-reassigned.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 61
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-known-evp_digestsigninit.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 61
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-known-evp_digestverifyinit-negative-comment.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 64
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-known-evp_digestverifyinit-reassigned.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 61
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-known-evp_digestverifyinit.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 61
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-evp-id-rsa-negative-comment.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 62
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_EVP_PKEY_RSA",
+          "level": "warning",
+          "message": {
+            "text": "EVP_PKEY configured for RSA detected. | migration_hint=Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-evp-id-rsa.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 59
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_OPENSSL_RSA_NEW",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL low-level RSA API usage detected. | migration_hint=Prefer high-level OpenSSL EVP APIs to ease PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-openssl-rsa_generate_key_ex-negative-comment.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_OPENSSL_RSA_NEW",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL low-level RSA API usage detected. | migration_hint=Prefer high-level OpenSSL EVP APIs to ease PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-openssl-rsa_generate_key_ex-positive.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_OPENSSL_RSA_NEW",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL low-level RSA API usage detected. | migration_hint=Prefer high-level OpenSSL EVP APIs to ease PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-openssl-rsa_new-negative-comment.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_OPENSSL_RSA_NEW",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL low-level RSA API usage detected. | migration_hint=Prefer high-level OpenSSL EVP APIs to ease PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cpp-shared-c-openssl-rsa_new-positive.cpp"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 21
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

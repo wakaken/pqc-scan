@@ -1,0 +1,44 @@
+{
+  "truthSha256": "fe6067681670b1790ae072647f388e3e2c70f38fb198711cd4433620297c5e2c",
+  "source": "Pinned source and official API definitions; main-only exposed annotations",
+  "units": [
+    {
+      "unit": "cert-domain-001",
+      "sourceUrl": "https://github.com/openssl/openssl/blob/18d0baa70de7c59d0df5b899122335c93ccbe0e8/apps/lib/apps.c#L2580",
+      "primaryApiReference": "https://docs.openssl.org/3.5/man3/X509_verify_cert/",
+      "purpose": "certificate_chain_verification",
+      "sourceExpectation": "Source requests chain verification with X509_PURPOSE_ANY; no trust, hostname, revocation, runtime result or key algorithm inferred.",
+      "phases": {
+        "baseline-native-v1": {
+          "receiptSha256": "6a65560b19db5b2f383aae39e95c96299fb044ef4e076a5b566fc56caddd350d",
+          "observationsOnSourceLine": [],
+          "interpretation": "Same-line observations are shown without asserting equivalent semantics. This is an unscored source question; no deployed trust or algorithm claim."
+        },
+        "final-native-v1": {
+          "receiptSha256": "e14ac25ea39267ad653057a2c4b7ad8fb739f28b9640a5ef362ed49238e4eafa",
+          "observationsOnSourceLine": [],
+          "interpretation": "Same-line observations are shown without asserting equivalent semantics. This is an unscored source question; no deployed trust or algorithm claim."
+        }
+      }
+    },
+    {
+      "unit": "cert-domain-002",
+      "sourceUrl": "https://github.com/dotnet/aspnetcore/blob/a6110c23cfa4805ee95a6a00ee3812a1e9f1857f/src/Shared/CertificateGeneration/UnixCertificateManager.cs#L77",
+      "primaryApiReference": "https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509chain.build?view=net-10.0",
+      "purpose": "development_certificate_trust_heuristic",
+      "sourceExpectation": "Local new X509Chain and standard namespace import bind the request; source sets RevocationMode.NoCheck for a development-certificate trust heuristic. No runtime trust or algorithm is inferred.",
+      "phases": {
+        "baseline-native-v1": {
+          "receiptSha256": "cae7d02ea1c04a77fc2061f602e08e0ed6acd1f291534aa4557f3d742c5ef78a",
+          "observationsOnSourceLine": [],
+          "interpretation": "Same-line observations are shown without asserting equivalent semantics. This is an unscored source question; no deployed trust or algorithm claim."
+        },
+        "final-native-v1": {
+          "receiptSha256": "2802173450db24e9610cba27ff0c6a1997e892c5d513ac27a55bba560284de87",
+          "observationsOnSourceLine": [],
+          "interpretation": "Same-line observations are shown without asserting equivalent semantics. This is an unscored source question; no deployed trust or algorithm claim."
+        }
+      }
+    }
+  ]
+}

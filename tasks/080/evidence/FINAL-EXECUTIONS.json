@@ -1,0 +1,67 @@
+{
+  "source_manifest_sha256": "5fb2fe9db1ee0eb9c78ca0fcec7c64907ac0c1de22c4a4d7d859368a1f6b352a",
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "build-final.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/080/evidence/check_cli_package.py"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "cli-package-final.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/080/evidence/check_c_family_adversarial.py"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "header-adversarial-final.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/080/evidence/verify_compatibility.py"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "compat-final.log"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/distribution",
+        "-p",
+        "test_*.py"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "distribution-final.log"
+    }
+  ]
+}

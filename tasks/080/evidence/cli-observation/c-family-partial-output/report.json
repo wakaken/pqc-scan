@@ -1,0 +1,78 @@
+{
+  "generated_at": "2026-11-24T07:30:07.369616Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-b1228fced4423cebe7db988f2f2dc0ec1a34e8b3cf68c7a9ac0c2cd0b0e4dc47",
+      "rule_id": "C_FAMILY_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+      "location": {
+        "file": "unknown.c",
+        "line": 1,
+        "column": 10
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "unknown.c",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "unknown.c:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 1,
+    "by_severity": {
+      "medium": 1
+    },
+    "by_risk": {
+      "quantum-uncertain": 1
+    },
+    "scanned_files": 1,
+    "skipped_files": 0
+  }
+}

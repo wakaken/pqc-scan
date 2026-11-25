@@ -1,0 +1,1 @@
+template<class RSA_new> void f(){RSA_new();}

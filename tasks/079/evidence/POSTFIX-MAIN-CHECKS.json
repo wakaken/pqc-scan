@@ -1,0 +1,65 @@
+{
+  "source_manifest_sha256": "c73abf4448fe8172a544cd5ce4dabe3328d2d4c05b27ae0c46d2d5002ce12abb",
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "workspace-project-identity.log",
+      "tool_session": 6693
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "clippy-project-identity.log",
+      "tool_session": 57933
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "fmt-project-identity.log",
+      "tool_session": 6693
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "pqc_scan_detectors",
+        "--test",
+        "csharp_source",
+        "--test",
+        "php_source"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "project-identity-regression.log",
+      "tool_session": 15354
+    }
+  ]
+}

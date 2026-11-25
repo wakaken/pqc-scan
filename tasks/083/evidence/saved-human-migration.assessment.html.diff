@@ -1,0 +1,11 @@
+--- baseline/migration.assessment.html
++++ final/migration.assessment.html
+@@ -982,7 +982,7 @@
+           if (!relatedSourceRules.has(key)) relatedSourceRules.set(key, new Set());
+           relatedSourceRules.get(key).add(rule);
+         }
+-        if (provenance !== null && value(provenance) === "manifest_dev_declared") developmentDeclarations++;
++        if (provenance !== null && ["manifest_dev_declared", "platform_dev_required", "dev_path_dependency_unresolved", "dev_git_dependency_unresolved", "dev_archive_dependency_unresolved", "dev_lock_record_unverified", "dev_source_unresolved"].includes(value(provenance))) developmentDeclarations++;
+         for (const key of ["path", "detail_path"]) {
+           const id = child(source, key);
+           if (id !== null && value(id)) {

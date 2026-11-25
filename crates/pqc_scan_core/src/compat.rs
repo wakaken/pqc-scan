@@ -23,7 +23,7 @@ impl LegacyBinding {
             matched: d.evidence.r#match.clone(),
         }
     }
-    fn key(&self, root: &Path) -> Option<Key> {
+    pub(crate) fn key(&self, root: &Path) -> Option<Key> {
         Some((
             self.rule.clone(),
             Path::new(&self.path)

@@ -1,0 +1,70 @@
+{
+  "source_manifest_sha256": "c73abf4448fe8172a544cd5ce4dabe3328d2d4c05b27ae0c46d2d5002ce12abb",
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "exit": 0,
+      "log": "workspace-features-project-identity.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_TARGET_DIR": "target/v05-feature"
+      }
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace"
+      ],
+      "exit": 0,
+      "log": "build-project-identity.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/079/evidence/check_cli_package.py"
+      ],
+      "exit": 0,
+      "log": "cli-package-project-identity.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/079/evidence/verify_compatibility.py"
+      ],
+      "exit": 0,
+      "log": "compat-project-identity.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/distribution",
+        "-p",
+        "test_*.py"
+      ],
+      "exit": 0,
+      "log": "distribution-project-identity.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    }
+  ]
+}

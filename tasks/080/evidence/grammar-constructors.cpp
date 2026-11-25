@@ -1,0 +1,1 @@
+void f(){oqs::KeyEncapsulation a{"ML-KEM-768"},b("ML-KEM-512"); auto p=new oqs::Signature("ML-DSA-65"); auto q=oqs::Signature("ML-DSA-44");}

@@ -1,0 +1,740 @@
+{
+  "generated_at": "2026-11-24T02:12:09.738971Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-9048a6253be1238dccdf305150beff903afa5d82f9fb2256fa87b1d717badc49",
+      "rule_id": "OPENSSL_RSA_API",
+      "category": "TLS",
+      "risk": "quantum-vulnerable",
+      "severity": "high",
+      "confidence": 0.52,
+      "description": "OpenSSL RSA API call detected.",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+      "location": {
+        "file": "c-openssl-rsa_generate_key_ex-negative-comment.c",
+        "line": 1,
+        "column": 4
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_generate_key",
+        "snippet_preview": "// RSA_g***(arg);",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "tls.review-reference",
+          "title": "Review the TLS reference before changing effective settings",
+          "priority": "planned",
+          "rationale": "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.",
+          "steps": [
+            "Distinguish constants, comments, tests and active settings.",
+            "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration."
+          ],
+          "references": [
+            "https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "// RSA_generate_key_ex(arg);",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-4bdf996c2e35772b928c57b34c76a68f8eaa1e3f8a7254a4469ab0f3f0e6c6ab",
+      "rule_id": "OPENSSL_RSA_API",
+      "category": "TLS",
+      "risk": "quantum-vulnerable",
+      "severity": "high",
+      "confidence": 0.52,
+      "description": "OpenSSL RSA API call detected.",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+      "location": {
+        "file": "c-openssl-rsa_generate_key_ex-positive.c",
+        "line": 1,
+        "column": 21
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_generate_key",
+        "snippet_preview": "void sam***rg); }",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "tls.review-reference",
+          "title": "Review the TLS reference before changing effective settings",
+          "priority": "planned",
+          "rationale": "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.",
+          "steps": [
+            "Distinguish constants, comments, tests and active settings.",
+            "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration."
+          ],
+          "references": [
+            "https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "void sample(void) { RSA_generate_key_ex(arg); }",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-9d98456b526e0d0ad5e50ee9f7a9e4e8e74268a49848cc11bb57d974b2db4de0",
+      "rule_id": "OPENSSL_RSA_API",
+      "category": "TLS",
+      "risk": "quantum-vulnerable",
+      "severity": "high",
+      "confidence": 0.52,
+      "description": "OpenSSL RSA API call detected.",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+      "location": {
+        "file": "c-openssl-rsa_private_decrypt-negative-comment.c",
+        "line": 1,
+        "column": 4
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_private_decrypt",
+        "snippet_preview": "// RSA_p***(arg);",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "tls.review-reference",
+          "title": "Review the TLS reference before changing effective settings",
+          "priority": "planned",
+          "rationale": "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.",
+          "steps": [
+            "Distinguish constants, comments, tests and active settings.",
+            "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration."
+          ],
+          "references": [
+            "https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "// RSA_private_decrypt(arg);",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-1782117de6fd15b79a912eb9e6f94afbc10ecbc304d49626804171ba789eff76",
+      "rule_id": "OPENSSL_RSA_API",
+      "category": "TLS",
+      "risk": "quantum-vulnerable",
+      "severity": "high",
+      "confidence": 0.52,
+      "description": "OpenSSL RSA API call detected.",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+      "location": {
+        "file": "c-openssl-rsa_private_decrypt-positive.c",
+        "line": 1,
+        "column": 21
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_private_decrypt",
+        "snippet_preview": "void sam***rg); }",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "tls.review-reference",
+          "title": "Review the TLS reference before changing effective settings",
+          "priority": "planned",
+          "rationale": "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.",
+          "steps": [
+            "Distinguish constants, comments, tests and active settings.",
+            "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration."
+          ],
+          "references": [
+            "https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "void sample(void) { RSA_private_decrypt(arg); }",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-0759fe12d9d0cd806535f4d3c0684303a54cc1accd670abc6086f352bae1495c",
+      "rule_id": "OPENSSL_RSA_API",
+      "category": "TLS",
+      "risk": "quantum-vulnerable",
+      "severity": "high",
+      "confidence": 0.52,
+      "description": "OpenSSL RSA API call detected.",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+      "location": {
+        "file": "c-openssl-rsa_public_encrypt-negative-comment.c",
+        "line": 1,
+        "column": 4
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_public_encrypt",
+        "snippet_preview": "// RSA_p***(arg);",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "tls.review-reference",
+          "title": "Review the TLS reference before changing effective settings",
+          "priority": "planned",
+          "rationale": "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.",
+          "steps": [
+            "Distinguish constants, comments, tests and active settings.",
+            "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration."
+          ],
+          "references": [
+            "https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "// RSA_public_encrypt(arg);",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-81469c6107072d70163c9c0c492dffa69f1f6f465495d894018c44dba8c2656c",
+      "rule_id": "OPENSSL_RSA_API",
+      "category": "TLS",
+      "risk": "quantum-vulnerable",
+      "severity": "high",
+      "confidence": 0.52,
+      "description": "OpenSSL RSA API call detected.",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+      "location": {
+        "file": "c-openssl-rsa_public_encrypt-positive.c",
+        "line": 1,
+        "column": 21
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_public_encrypt",
+        "snippet_preview": "void sam***rg); }",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "tls.review-reference",
+          "title": "Review the TLS reference before changing effective settings",
+          "priority": "planned",
+          "rationale": "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.",
+          "steps": [
+            "Distinguish constants, comments, tests and active settings.",
+            "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration."
+          ],
+          "references": [
+            "https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "void sample(void) { RSA_public_encrypt(arg); }",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-e02caeca122d9d11726253efab82953f25d536e96b7c41500c5f333d12e6cc57",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "category": "CryptoAPI",
+      "risk": "quantum-vulnerable",
+      "severity": "medium",
+      "confidence": 0.55,
+      "description": "OpenSSL low-level RSA API usage detected.",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+      "location": {
+        "file": "c-openssl-rsa_generate_key_ex-negative-comment.c",
+        "line": 1,
+        "column": 4
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_generate_key_ex",
+        "snippet_preview": "// RSA_g***(arg);",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "// RSA_generate_key_ex(arg);",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-3b5bef9499fa0b473d13f63661f461277e578e22fde11ec557a0a4fa563e855c",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "category": "CryptoAPI",
+      "risk": "quantum-vulnerable",
+      "severity": "medium",
+      "confidence": 0.55,
+      "description": "OpenSSL low-level RSA API usage detected.",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+      "location": {
+        "file": "c-openssl-rsa_generate_key_ex-positive.c",
+        "line": 1,
+        "column": 21
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_generate_key_ex",
+        "snippet_preview": "void sam***rg); }",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "void sample(void) { RSA_generate_key_ex(arg); }",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-546d27774c97a2300c655153df0ed713899b83c7af56c1b918ed7caf0302d9f8",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "category": "CryptoAPI",
+      "risk": "quantum-vulnerable",
+      "severity": "medium",
+      "confidence": 0.55,
+      "description": "OpenSSL low-level RSA API usage detected.",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+      "location": {
+        "file": "c-openssl-rsa_new-negative-comment.c",
+        "line": 1,
+        "column": 4
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_new",
+        "snippet_preview": "// RSA_new(arg);",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "// RSA_new(arg);",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-a7fdee7076b40bf2c0d61e74bc5ae44e0632067bc54d3f2b0d9f4bdf161a735a",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "category": "CryptoAPI",
+      "risk": "quantum-vulnerable",
+      "severity": "medium",
+      "confidence": 0.55,
+      "description": "OpenSSL low-level RSA API usage detected.",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+      "location": {
+        "file": "c-openssl-rsa_new-positive.c",
+        "line": 1,
+        "column": 21
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_new",
+        "snippet_preview": "void sam***rg); }",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "void sample(void) { RSA_new(arg); }",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "c-openssl-rsa_generate_key_ex-negative-comment.c",
+      "algorithm": "RSA_generate_key",
+      "usage_type": "TLS",
+      "location": "c-openssl-rsa_generate_key_ex-negative-comment.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration."
+    },
+    {
+      "component": "c-openssl-rsa_generate_key_ex-positive.c",
+      "algorithm": "RSA_generate_key",
+      "usage_type": "TLS",
+      "location": "c-openssl-rsa_generate_key_ex-positive.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration."
+    },
+    {
+      "component": "c-openssl-rsa_private_decrypt-negative-comment.c",
+      "algorithm": "RSA_private_decrypt",
+      "usage_type": "TLS",
+      "location": "c-openssl-rsa_private_decrypt-negative-comment.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration."
+    },
+    {
+      "component": "c-openssl-rsa_private_decrypt-positive.c",
+      "algorithm": "RSA_private_decrypt",
+      "usage_type": "TLS",
+      "location": "c-openssl-rsa_private_decrypt-positive.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration."
+    },
+    {
+      "component": "c-openssl-rsa_public_encrypt-negative-comment.c",
+      "algorithm": "RSA_public_encrypt",
+      "usage_type": "TLS",
+      "location": "c-openssl-rsa_public_encrypt-negative-comment.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration."
+    },
+    {
+      "component": "c-openssl-rsa_public_encrypt-positive.c",
+      "algorithm": "RSA_public_encrypt",
+      "usage_type": "TLS",
+      "location": "c-openssl-rsa_public_encrypt-positive.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration."
+    },
+    {
+      "component": "c-openssl-rsa_generate_key_ex-negative-comment.c",
+      "algorithm": "RSA_generate_key_ex",
+      "usage_type": "CryptoAPI",
+      "location": "c-openssl-rsa_generate_key_ex-negative-comment.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration."
+    },
+    {
+      "component": "c-openssl-rsa_generate_key_ex-positive.c",
+      "algorithm": "RSA_generate_key_ex",
+      "usage_type": "CryptoAPI",
+      "location": "c-openssl-rsa_generate_key_ex-positive.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration."
+    },
+    {
+      "component": "c-openssl-rsa_new-negative-comment.c",
+      "algorithm": "RSA_new",
+      "usage_type": "CryptoAPI",
+      "location": "c-openssl-rsa_new-negative-comment.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration."
+    },
+    {
+      "component": "c-openssl-rsa_new-positive.c",
+      "algorithm": "RSA_new",
+      "usage_type": "CryptoAPI",
+      "location": "c-openssl-rsa_new-positive.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 10,
+    "by_severity": {
+      "high": 6,
+      "medium": 4
+    },
+    "by_risk": {
+      "quantum-vulnerable": 10
+    },
+    "scanned_files": 577,
+    "skipped_files": 0
+  }
+}

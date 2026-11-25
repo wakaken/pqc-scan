@@ -1,0 +1,119 @@
+{
+  "source_manifest_sha256": "c42ef837e89af5988c33353fb1dc40a882a08d975f380aafd18f0012a053bf1e",
+  "source_files_rechecked": true,
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exit": 0,
+      "log": "workspace-adopted-2.log",
+      "tool_session": 55645
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_TARGET_DIR": "target/v05-feature"
+      },
+      "exit": 0,
+      "log": "workspace-features-adopted-2.log",
+      "tool_session": 38376
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace"
+      ],
+      "exit": 0,
+      "log": "build-review2.log",
+      "tool_session": 49266
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "log": "clippy-review2.log",
+      "tool_session": 41256
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "fmt-final.log",
+      "tool_session": 20643
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/distribution",
+        "-p",
+        "test_*.py"
+      ],
+      "exit": 0,
+      "log": "distribution-final.log",
+      "tool_session": 94664,
+      "assertions": "25 tests passed"
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/078/evidence/check_cli_package.py"
+      ],
+      "exit": 0,
+      "log": "cli-package-review2.log",
+      "tool_session": 49266
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/078/evidence/verify_compatibility.py"
+      ],
+      "exit": 0,
+      "log": "compat-review2.log",
+      "tool_session": 49266
+    }
+  ],
+  "pending": [],
+  "historical_failures": [
+    "workspace-initial/all-features-initial: missing new Japanese copies; fixed",
+    "workspace-adopted/workspace-features-adopted: OS StorageFull/errno28; cache-only correction and sequential nonincremental retry"
+  ],
+  "evidence_helpers": {
+    "tasks/078/evidence/check_cli_package.py": "72f2b58042b8cea9323381f60c4615ae87be00b015e0f7c3c95978ae3d9017d1",
+    "tasks/078/evidence/verify_compatibility.py": "56795739a9ab9c611ba5b656646d1d6e804c918d3b06eb4d0e674f1f78dad405"
+  },
+  "observations": "OBSERVATION-FILES.json; BROWSER-GENERATION.json; BROWSER-OBSERVATIONS.json; CLI-PACKAGE-CHECKS.json; COMPATIBILITY.json",
+  "docs_only_applicability": "All product/test/rule/report/package inputs unchanged from0911e0c; four final docs confirmed by existing implementation reviewer. Original source-bound CLI/browser records remain retained, not rewritten as if generated later.",
+  "reviews": {
+    "implementation": "/root/implementation_review: accepted c42ef837; no findings",
+    "test": "/root/test_review: accepted c42ef837; no findings"
+  }
+}

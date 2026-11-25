@@ -1,0 +1,218 @@
+- text: Language / 言語
+- combobox "Language / 言語":
+  - option "English" [selected]
+  - option "日本語"
+- text: Theme / 表示
+- combobox "Theme / 表示":
+  - option "Light / ライト" [selected]
+  - option "Dark / ダーク"
+- main:
+  - link "Skip to findings":
+    - /url: "#findings"
+  - paragraph: pqc-scan / Static analysis
+  - heading "PQC Migration Scan Report" [level=1]
+  - paragraph:
+    - text: Generated
+    - time: Nov 24, 2026, 5:32:20 PM GMT+9 (Asia/Tokyo)
+  - generic: Findings to review
+  - generic: 14 items
+  - generic: Informational findings
+  - generic: 28 items
+  - generic: Files with findings
+  - generic: "17"
+  - figure "Severity distribution · all findings":
+    - generic: Severity distribution · all findings
+    - list:
+      - text: medium
+      - strong: "14"
+      - text: info
+      - strong: "28"
+  - heading "Inspection scope and completion" [level=2]
+  - paragraph: Some files or inspection steps could not be checked fully
+  - paragraph: Check the reasons below before relying on an absence of findings.
+  - text: Files selected
+  - strong: "25"
+  - text: Files analyzed
+  - strong: "20"
+  - text: Files needing follow-up
+  - strong: "5"
+  - generic "Scope and exclusions"
+  - paragraph: "Partially inspected files: 5"
+  - generic "Reasons and example files"
+  - complementary:
+    - group "Search conditions":
+      - generic "Search conditions ›":
+        - text: Search conditions ›
+      - text: View
+      - combobox "View":
+        - option "Risk candidates"
+        - option "Inventory"
+        - option "All" [selected]
+      - text: Search
+      - searchbox "Search"
+      - text: Severity
+      - combobox "Severity":
+        - option "All severities" [selected]
+        - option "critical"
+        - option "high"
+        - option "medium"
+        - option "low"
+        - option "info"
+      - text: Risk
+      - combobox "Risk":
+        - option "All risks" [selected]
+        - option "quantum-vulnerable"
+        - option "quantum-uncertain"
+        - option "quantum-safe"
+        - option "non-quantum-risk"
+      - text: Rule
+      - combobox "Rule":
+        - option "All rules"
+        - option "DEP_BOUNCYCASTLE — BouncyCastle dependency detected."
+        - option "DEP_OPENSSL — OpenSSL dependency detected."
+        - option "DEP_NATIVE_CRYPTO — C/C++ cryptographic dependency or literal build reference; effective con..."
+        - option "DEP_NUGET_CRYPTO — NuGet cryptographic package assertion; wrapper ownership and runtime sup..."
+        - option "DEP_PHP_CRYPTO — PHP cryptographic dependency or platform declaration; installed capabili..." [selected]
+      - link "Rule explanations":
+        - /url: report.rules.html?lang=en
+      - text: File
+      - combobox "File":
+        - option "All files" [selected]
+        - option "cmake-literals/CMakeLists.txt"
+        - option "composer-lock-git/composer.lock"
+        - option "composer-lock-path/composer.lock"
+        - option "composer-lock-zip/composer.lock"
+        - option "composer-manifest/composer.json"
+        - option "composer-wrappers/composer.json"
+        - option "conan-lock/conan.lock"
+        - option "conan-text/conanfile.txt"
+        - option "nuget-build/Directory.Build.props"
+        - option "nuget-central/Directory.Packages.props"
+        - option "nuget-conditional/sample.csproj"
+        - option "nuget-legacy/packages.config"
+        - option "nuget-lock-1/packages.lock.json"
+        - option "nuget-lock-2/packages.lock.json"
+        - option "nuget-project/sample.csproj"
+        - option "vcpkg-config/vcpkg-configuration.json"
+        - option "vcpkg-manifest/vcpkg.json"
+      - checkbox "Show test code results" [checked]
+      - text: Show test code results
+      - button "Clear all filters"
+    - group "Files":
+      - generic "Files ›":
+        - text: Files ›
+      - link "Show all results":
+        - /url: "#findings"
+      - list:
+        - generic "cmake-literals 6":
+          - generic: cmake-literals
+          - generic: "6"
+        - generic "composer-lock-git 1":
+          - generic: composer-lock-git
+          - generic: "1"
+        - generic "composer-lock-path 1":
+          - generic: composer-lock-path
+          - generic: "1"
+        - generic "composer-lock-zip 1":
+          - generic: composer-lock-zip
+          - generic: "1"
+        - generic "composer-manifest 4":
+          - generic: composer-manifest
+          - generic: "4"
+        - generic "composer-wrappers 3":
+          - generic: composer-wrappers
+          - generic: "3"
+        - generic "conan-lock 2":
+          - generic: conan-lock
+          - generic: "2"
+        - generic "conan-text 3":
+          - generic: conan-text
+          - generic: "3"
+        - generic "nuget-build 1":
+          - generic: nuget-build
+          - generic: "1"
+        - generic "nuget-central 2":
+          - generic: nuget-central
+          - generic: "2"
+        - generic "nuget-conditional 2":
+          - generic: nuget-conditional
+          - generic: "2"
+        - generic "nuget-legacy 2":
+          - generic: nuget-legacy
+          - generic: "2"
+        - generic "nuget-lock-1 2":
+          - generic: nuget-lock-1
+          - generic: "2"
+        - generic "nuget-lock-2 2":
+          - generic: nuget-lock-2
+          - generic: "2"
+        - generic "nuget-project 2":
+          - generic: nuget-project
+          - generic: "2"
+        - generic "vcpkg-config 2":
+          - generic: vcpkg-config
+          - generic: "2"
+        - generic "vcpkg-manifest 6":
+          - generic: vcpkg-manifest
+          - generic: "6"
+  - region "Findings":
+    - heading "Findings" [level=2]
+    - status: 1 / 5 finding groups; 10 / 42 findings match the current view.
+    - text: › › › ›
+    - generic "› PHP cryptographic dependency or platform declaration; installed capability is unknown. info 10 hits Files 5 · matches 10 / 10":
+      - text: ›
+      - strong: PHP cryptographic dependency or platform declaration; installed capability is unknown.
+      - generic: info
+      - generic: 10 hits
+      - generic: Files 5 · matches 10 / 10
+    - paragraph: Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence.
+    - paragraph:
+      - link "About this rule":
+        - /url: report.rules.html?lang=en#rule-4
+    - heading "Locations and next steps" [level=4]
+    - generic "composer-lock-git/composer.lock:4:1 paragoni***v1.0.0":
+      - code: composer-lock-git/composer.lock:4:1
+      - generic: paragoni***v1.0.0
+    - generic "composer-lock-path/composer.lock:4:1 paragoni***v1.0.0":
+      - code: composer-lock-path/composer.lock:4:1
+      - generic: paragoni***v1.0.0
+    - generic "composer-lock-zip/composer.lock:4:1 paragoni***v1.0.0":
+      - code: composer-lock-zip/composer.lock:4:1
+      - generic: paragoni***v1.0.0
+    - generic "composer-manifest/composer.json (line unavailable) ext-sodium@8.6.0":
+      - code: composer-manifest/composer.json (line unavailable)
+      - generic: ext-sodium@8.6.0
+    - generic "composer-manifest/composer.json (line unavailable) ext-sodium@*":
+      - code: composer-manifest/composer.json (line unavailable)
+      - generic: ext-sodium@*
+    - generic "composer-manifest/composer.json:5:1 paragoni***at@1.0":
+      - code: composer-manifest/composer.json:5:1
+      - generic: paragoni***at@1.0
+    - generic "composer-manifest/composer.json:8:1 phpsecli***ib@3.0":
+      - code: composer-manifest/composer.json:8:1
+      - generic: phpsecli***ib@3.0
+    - generic "composer-wrappers/composer.json:3:1 mir-evge***hp@1.0":
+      - code: composer-wrappers/composer.json:3:1
+      - generic: mir-evge***hp@1.0
+    - generic "composer-wrappers/composer.json:4:1 ext-oqsphp@*":
+      - code: composer-wrappers/composer.json:4:1
+      - generic: ext-oqsphp@*
+    - generic "composer-wrappers/composer.json:5:1 ext-pqcrypto@*":
+      - code: composer-wrappers/composer.json:5:1
+      - generic: ext-pqcrypto@*
+    - generic "Shared checks and planning (2)" [active]
+    - heading "Verify PHP extensions and their native cryptographic backends planned" [level=4]
+    - paragraph: Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.
+    - list:
+      - listitem: Deployed PHP, extension and native library versions are unknown from a source or manifest reference. Composer config.platform is emulated dependency resolution, not the deployed PHP version.
+      - listitem: PHP 8.6 Sodium KEM APIs require libsodium 1.0.22 or later. Keep X-Wing separate from pure ML-KEM-768 and TLS hybrid groups; confirm the actual loaded extension and operation.
+      - listitem: Check ext-pqcrypto and paragonie/pqcrypto_compat independently; a Composer package is not a native extension. Verify each documented algorithm, version and maintenance/audit status.
+      - listitem: For PHP OpenSSL calls, verify the linked OpenSSL/provider and exposed PHP API. OpenSSL PQC primitives alone do not establish PHP KEM or TLS support. Framework encryption using AES does not call for blanket replacement with a public-key KEM.
+    - generic "References and examples"
+    - heading "Track PQC readiness of dependent libraries planned" [level=4]
+    - paragraph: Dependency-level crypto libraries strongly influence migration options and operational timelines.
+    - list:
+      - listitem: Record current versions in dependency-sbom.json and define upgrade targets.
+      - listitem: Subscribe to release notes for PQC feature availability and API changes.
+      - listitem: Run integration tests for PQC or hybrid modes before promoting to production.
+    - generic "References and examples"

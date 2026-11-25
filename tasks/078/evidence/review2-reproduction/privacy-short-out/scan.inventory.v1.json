@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "identity_scheme": "pqc-scan-length-prefixed-sha256-v1",
+  "scanner_version": "0.4.0",
+  "catalog_version": "native-exact-identifiers-1",
+  "profile": "static-native-v1",
+  "rules_digest": "rules-v1-df05331aa04f7bf2bd554b7f20a08a6684b14eaf8b4e446fac9b880eee524239",
+  "run": {
+    "id": "scan-v1-b46855f2cbb62b64585a59739b6cfabe9490c951372692f5f4cb5a3f35f544f6",
+    "attempt_id": "static-1",
+    "generated_at": "2026-11-24T04:22:20.758792+00:00"
+  },
+  "repository_scope": null,
+  "scope": {
+    "default_excludes": [
+      ".git",
+      "node_modules",
+      "target",
+      "dist",
+      "docs",
+      "known non-scannable media, archives and binary data"
+    ],
+    "git_exclude": true,
+    "git_global": true,
+    "git_ignore": true,
+    "markdown_excluded": true,
+    "max_file_size_bytes": 2097152
+  },
+  "coverage": {
+    "analysis_failed_files": 0,
+    "analyzed_files": 0,
+    "enumeration_failed_entries": 0,
+    "excluded_enumerated_files": 0,
+    "not_applicable_files": 0,
+    "not_enumerated_population": true,
+    "partial_files": 1,
+    "read_failed_files": 0,
+    "read_ok_files": 1,
+    "selected_files": 1,
+    "status": "partial",
+    "unknown_files": 0,
+    "unsupported_files": 0
+  },
+  "diagnostics": [
+    {
+      "code": "detector_truncated",
+      "detector": "tree_sitter_detector",
+      "disposition": "truncated",
+      "file": "short.php",
+      "message": "Inspection limit: php_same_name_bindings; limit=64; processed=64. Retained findings remain available; omitted findings are unknown. Inspect the remaining source separately.",
+      "stage": "detection"
+    }
+  ],
+  "native_completeness": "not_exhaustive",
+  "assets": [
+    {
+      "id": "asset-v1-f9b0807c83fcd58d4c493d946e52184ab54da923f01d82b0a4d4e7fd59f8658e",
+      "kind": "algorithm",
+      "identity_basis": "normalized_identifier_and_reported_parameters",
+      "attributes": {
+        "identifier": "RS256",
+        "namespace": "named",
+        "parameters": {},
+        "purpose": "reference"
+      },
+      "relations": [],
+      "uncertainty": []
+    },
+    {
+      "id": "asset-v1-d7c2dbc393dfb00a3c8bfec1b811ffc2fbd7c6b5be6450e011d044a7156d8000",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-1a8b10201b81f08f2dab13b31b87f94db070b7c30a279670c961e10009975e53",
+        "local_ordinal": 0,
+        "method": "lexical_match",
+        "path": "short.php"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-f9b0807c83fcd58d4c493d946e52184ab54da923f01d82b0a4d4e7fd59f8658e"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-6ce6c117fb277b1985ed8cfe2fff9a31808160fee8b1bbddc2b6796f76890ade",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-d2ca66fb2b14cf3bc763255b75deec92e56cea886b5a73d76543bb3ac2002be5",
+        "local_ordinal": 0,
+        "method": "lexical_match",
+        "path": "short.php"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-f9b0807c83fcd58d4c493d946e52184ab54da923f01d82b0a4d4e7fd59f8658e"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-v1-8c503f931f98ced83ce756bbe109485f1c913b93bb4d47bb50100e0eb89cb6e7",
+      "occurrence_key": null,
+      "identity_confidence": "run_local_only",
+      "asset_ids": [
+        "asset-v1-f9b0807c83fcd58d4c493d946e52184ab54da923f01d82b0a4d4e7fd59f8658e",
+        "asset-v1-6ce6c117fb277b1985ed8cfe2fff9a31808160fee8b1bbddc2b6796f76890ade"
+      ],
+      "target": {
+        "path": "short.php",
+        "line": 1,
+        "column": 51,
+        "column_kind": "unicode_code_points",
+        "byte_start": 50,
+        "byte_end": 55,
+        "object_index": null
+      },
+      "method": "lexical_match",
+      "producer": "regex_detector",
+      "assurance": "lexical",
+      "usage": "referenced",
+      "rule_id": "API_JOSE_RSA_ALG",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-e9093f4c9ca95dc665d75b598626cc5dec87bfd155f30ad114cca1141e1c452f",
+      "occurrence_key": null,
+      "identity_confidence": "run_local_only",
+      "asset_ids": [
+        "asset-v1-f9b0807c83fcd58d4c493d946e52184ab54da923f01d82b0a4d4e7fd59f8658e",
+        "asset-v1-d7c2dbc393dfb00a3c8bfec1b811ffc2fbd7c6b5be6450e011d044a7156d8000"
+      ],
+      "target": {
+        "path": "short.php",
+        "line": 1,
+        "column": 51,
+        "column_kind": "unicode_code_points",
+        "byte_start": 50,
+        "byte_end": 55,
+        "object_index": null
+      },
+      "method": "lexical_match",
+      "producer": "regex_detector",
+      "assurance": "lexical",
+      "usage": "referenced",
+      "rule_id": "JWT_RS256",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": []
+    }
+  ],
+  "legacy_associations": [
+    {
+      "legacy_index": 0,
+      "legacy_id": "finding-v1-03464e04d8aab704a18bb3b185ce66fba587652709c6e5a5fbf0e0079851ed02",
+      "observation_ids": [
+        "observation-v1-e9093f4c9ca95dc665d75b598626cc5dec87bfd155f30ad114cca1141e1c452f"
+      ]
+    },
+    {
+      "legacy_index": 1,
+      "legacy_id": "finding-v1-9af32d2de86afb1367847a44bb139c3692938a12fecd3b5b8105a0bc3236b017",
+      "observation_ids": [
+        "observation-v1-8c503f931f98ced83ce756bbe109485f1c913b93bb4d47bb50100e0eb89cb6e7"
+      ]
+    }
+  ],
+  "unassociated_observation_ids": [],
+  "legacy_loss_records": [],
+  "assessment_status": "not_evaluated",
+  "assessments": [],
+  "export_loss_notes": [
+    "raw_matches_snippets_and_arbitrary_metadata_omitted",
+    "unknown_raw_identifiers_not_guessed",
+    "legacy_snapshot_not_derived_from_inventory",
+    "legacy_ids_are_not_native_identity",
+    "legacy_dependency_version_provenance_unavailable",
+    "legacy_applicability_coverage_is_not_native_inventory_completeness",
+    "weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity",
+    "cryptographic_trust_and_policy_not_evaluated"
+  ]
+}

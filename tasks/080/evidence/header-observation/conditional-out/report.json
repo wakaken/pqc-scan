@@ -1,0 +1,167 @@
+{
+  "generated_at": "2026-11-24T07:30:07.998380Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-b6d78402a6e57266e8f582920726654142cab38795cc7e007377d36f37888fda",
+      "rule_id": "C_FAMILY_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+      "location": {
+        "file": "case.h",
+        "line": 7,
+        "column": 1
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 7,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-e05407d10ad7257b2aed1a03143720228f5d6d33d9055f82f43257f35301f49e",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "case.h",
+        "line": 3,
+        "column": 5
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-d865305047ab6c0cadf3531eb709c871a282048692598c1133ed6e4cc5f1f728",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "case.h",
+        "line": 5,
+        "column": 5
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 5,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "case.h",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "case.h:7",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation."
+    },
+    {
+      "component": "case.h",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "case.h:3",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+    },
+    {
+      "component": "case.h",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "case.h:5",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 3,
+    "by_severity": {
+      "info": 2,
+      "medium": 1
+    },
+    "by_risk": {
+      "quantum-uncertain": 3
+    },
+    "scanned_files": 1,
+    "skipped_files": 0
+  }
+}

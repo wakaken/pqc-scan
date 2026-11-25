@@ -1,0 +1,54 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.87s
+     Running tests/csharp_source.rs (target/debug/deps/csharp_source-240f82a778562327)
+
+running 17 tests
+test csharp_prehash_parameter_reference_stays_unresolved_instead_of_becoming_pure ... ok
+test csharp_explicit_local_types_keep_only_nominal_family_for_unknown_initializers ... ok
+test csharp_deferred_captures_and_implicit_parameter_names_do_not_reuse_outer_values ... ok
+test csharp_global_aliases_do_not_cross_files_and_conditionals_stay_partial ... ok
+test csharp_namespace_alias_qualifiers_resolve_without_value_name_confusion ... FAILED
+test csharp_parameter_values_do_not_survive_a_possible_deferred_mutation ... FAILED
+test csharp_bc_initialization_resolves_only_the_expected_parameter_container ... ok
+test csharp_parameters_named_arguments_and_conflicts_do_not_guess_exact_sets ... ok
+test csharp_aliases_local_global_usings_namespaces_and_static_imports_are_local ... ok
+test csharp_local_writes_method_boundaries_and_unknown_mutations_stop_old_keys ... ok
+test csharp_import_name_and_variable_caps_bound_real_sources ... ok
+test csharp_type_parameters_and_properties_shadow_only_their_owning_type_or_method ... FAILED
+test csharp_wrapper_projects_and_bc_tls_are_distinct_opaque_references ... ok
+test csharp_unicode_same_line_calls_have_exact_original_wide_spans_and_distinct_ids ... ok
+test csharp_private_arguments_and_legacy_looking_payloads_are_protected_when_partial ... ok
+test csharp_alias_and_binding_limits_report_truncation_at_actual_boundaries ... ok
+test every_frozen_csharp_case_matches_its_original_focal_expectation ... ok
+
+failures:
+
+---- csharp_namespace_alias_qualifiers_resolve_without_value_name_confusion stdout ----
+
+thread 'csharp_namespace_alias_qualifiers_resolve_without_value_name_confusion' (23263662) panicked at crates/pqc_scan_detectors/tests/csharp_source.rs:626:9:
+assertion `left == right` failed: {"assessment_status":"not_evaluated","assessments":[],"assets":[],"catalog_version":"native-exact-identifiers-1","coverage":{"analysis_failed_files":0,"analyzed_files":0,"enumeration_failed_entries":0,"excluded_enumerated_files":0,"not_applicable_files":0,"not_enumerated_population":true,"partial_files":1,"read_failed_files":0,"read_ok_files":1,"selected_files":1,"status":"partial","unknown_files":0,"unsupported_files":0},"diagnostics":[{"code":"detector_partial","detector":"tree_sitter_detector","disposition":"partial","file":"case.cs","message":"Source syntax could not be fully interpreted. Parsed regions were inspected; unresolved syntax remains unknown. Check generated syntax, language version and the source file separately.","stage":"detection"}],"export_loss_notes":["raw_matches_snippets_and_arbitrary_metadata_omitted","unknown_raw_identifiers_not_guessed","legacy_snapshot_not_derived_from_inventory","legacy_ids_are_not_native_identity","legacy_dependency_version_provenance_unavailable","legacy_applicability_coverage_is_not_native_inventory_completeness","weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity","cryptographic_trust_and_policy_not_evaluated"],"identity_scheme":"pqc-scan-length-prefixed-sha256-v1","legacy_associations":[],"legacy_loss_records":[],"native_completeness":"not_exhaustive","observations":[],"profile":"static-native-v1","repository_scope":"v05/csharp","rules_digest":"rules-v1-75ecd3210a61c40afb70e940e45a8b8896be5410014608222886f1c11a96e47d","run":{"attempt_id":"static-1","generated_at":"2026-11-24T05:34:44.637218+00:00","id":"scan-v1-56ad96bb9966360ca451578abcf3a423b48249805141c8323f313c5fdc62dc61"},"scanner_version":"0.4.0","schema_version":1,"scope":{"default_excludes":[".git","node_modules","target","dist","docs","known non-scannable media, archives and binary data"],"git_exclude":true,"git_global":true,"git_ignore":true,"markdown_excluded":true,"max_file_size_bytes":2097152},"unassociated_observation_ids":[]}
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- csharp_parameter_values_do_not_survive_a_possible_deferred_mutation stdout ----
+
+thread 'csharp_parameter_values_do_not_survive_a_possible_deferred_mutation' (23263663) panicked at crates/pqc_scan_detectors/tests/csharp_source.rs:613:9:
+assertion `left == right` failed
+  left: ["ML-KEM-768"]
+ right: ["ML-KEM"]
+
+---- csharp_type_parameters_and_properties_shadow_only_their_owning_type_or_method stdout ----
+
+thread 'csharp_type_parameters_and_properties_shadow_only_their_owning_type_or_method' (23263686) panicked at crates/pqc_scan_detectors/tests/csharp_source.rs:600:146:
+class C<MLKem> where MLKem:IFactory {void M(){var k=MLKem.GenerateKey(MLKemAlgorithm.MLKem768);}}: {"assessment_status":"not_evaluated","assessments":[],"assets":[{"attributes":{"identifier":"ML-KEM-768","namespace":"named","parameters":{},"purpose":"reference"},"id":"asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d","identity_basis":"normalized_identifier_and_reported_parameters","kind":"algorithm","relations":[],"uncertainty":[]},{"attributes":{"ambiguous":true,"anchor":"anchor-v1-a8da1bcc397fcb18b415fa17594062df56d5c041f58acf7c7379e13bd7993e42","local_ordinal":0,"method":"ast_pattern","path":"case.cs"},"id":"asset-v1-09a83065dd87373b567c1653ccb7e7659912ddbdb5c6bf8815e734d3d555b6db","identity_basis":"scoped_weak_source_anchor","kind":"usage","relations":[{"relationship":"references","target":"asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"}],"uncertainty":["static_reference_not_active_use"]},{"attributes":{"ambiguous":true,"anchor":"anchor-v1-a8da1bcc397fcb18b415fa17594062df56d5c041f58acf7c7379e13bd7993e42","local_ordinal":1,"method":"ast_pattern","path":"case.cs"},"id":"asset-v1-463167c54a1e817473ce5bdc36449a47319e2307cf6c0fdbedc60a18081bc348","identity_basis":"scoped_weak_source_anchor","kind":"usage","relations":[{"relationship":"references","target":"asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"}],"uncertainty":["static_reference_not_active_use"]}],"catalog_version":"native-exact-identifiers-1","coverage":{"analysis_failed_files":0,"analyzed_files":1,"enumeration_failed_entries":0,"excluded_enumerated_files":0,"not_applicable_files":0,"not_enumerated_population":true,"partial_files":0,"read_failed_files":0,"read_ok_files":1,"selected_files":1,"status":"complete_within_scope","unknown_files":0,"unsupported_files":0},"diagnostics":[],"export_loss_notes":["raw_matches_snippets_and_arbitrary_metadata_omitted","unknown_raw_identifiers_not_guessed","legacy_snapshot_not_derived_from_inventory","legacy_ids_are_not_native_identity","legacy_dependency_version_provenance_unavailable","legacy_applicability_coverage_is_not_native_inventory_completeness","weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity","cryptographic_trust_and_policy_not_evaluated"],"identity_scheme":"pqc-scan-length-prefixed-sha256-v1","legacy_associations":[{"legacy_id":"finding-v1-533d36271929f620f0e56005417499c9ecc111c6acbb5318c26ef371f719e56f","legacy_index":0,"observation_ids":["observation-v1-32632b6e1d3a02906c66c1c66c32a6030ddae7829df078d984447e311d5b1782"]},{"legacy_id":"finding-v1-8ae3b62f1d2a9e02f7c851d1497a8f87c77d18c410709235e671f6c7dcbf33fe","legacy_index":1,"observation_ids":["observation-v1-daff0826df5e30ff807078b52d6a3af62fd7e5b647543da2143df2e2841faa33"]}],"legacy_loss_records":[],"native_completeness":"not_exhaustive","observations":[{"asset_ids":["asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d","asset-v1-09a83065dd87373b567c1653ccb7e7659912ddbdb5c6bf8815e734d3d555b6db"],"assurance":"syntactic","evidence":{"capture_status":"legacy_reported","marker_kind":null},"id":"observation-v1-32632b6e1d3a02906c66c1c66c32a6030ddae7829df078d984447e311d5b1782","identity_confidence":"ambiguous_duplicate_anchor","method":"ast_pattern","occurrence_key":"occurrence-v1-1cd49c73742a4a6bfcd9b1aed602bb8cd956993439ef2f57665b9cd2987b3f9d","producer":"tree_sitter_detector","rule_id":"CSHARP_PQC_API","target":{"byte_end":204,"byte_start":162,"column":163,"column_kind":"unicode_code_points","line":1,"object_index":null,"path":"case.cs"},"uncertainty":["duplicate_anchor_ordinals_can_shift"],"usage":"referenced"},{"asset_ids":["asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d","asset-v1-463167c54a1e817473ce5bdc36449a47319e2307cf6c0fdbedc60a18081bc348"],"assurance":"syntactic","evidence":{"capture_status":"legacy_reported","marker_kind":null},"id":"observation-v1-daff0826df5e30ff807078b52d6a3af62fd7e5b647543da2143df2e2841faa33","identity_confidence":"ambiguous_duplicate_anchor","method":"ast_pattern","occurrence_key":"occurrence-v1-c5bcc2dc9fef1b6be331ba8f4aedd50accada1e547646c0b8548a62a72b8cae4","producer":"tree_sitter_detector","rule_id":"CSHARP_PQC_API","target":{"byte_end":273,"byte_start":231,"column":232,"column_kind":"unicode_code_points","line":1,"object_index":null,"path":"case.cs"},"uncertainty":["duplicate_anchor_ordinals_can_shift"],"usage":"referenced"}],"profile":"static-native-v1","repository_scope":"v05/csharp","rules_digest":"rules-v1-75ecd3210a61c40afb70e940e45a8b8896be5410014608222886f1c11a96e47d","run":{"attempt_id":"static-1","generated_at":"2026-11-24T05:34:44.802369+00:00","id":"scan-v1-9c2e51354133b71ce3caf9492cfb74f0f2ee9e668bbc41677533a8bd55f20a41"},"scanner_version":"0.4.0","schema_version":1,"scope":{"default_excludes":[".git","node_modules","target","dist","docs","known non-scannable media, archives and binary data"],"git_exclude":true,"git_global":true,"git_ignore":true,"markdown_excluded":true,"max_file_size_bytes":2097152},"unassociated_observation_ids":[]}
+
+
+failures:
+    csharp_namespace_alias_qualifiers_resolve_without_value_name_confusion
+    csharp_parameter_values_do_not_survive_a_possible_deferred_mutation
+    csharp_type_parameters_and_properties_shadow_only_their_owning_type_or_method
+
+test result: FAILED. 14 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.78s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test csharp_source`

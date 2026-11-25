@@ -1,0 +1,431 @@
+{
+  "generated_at": "2026-11-24T06:18:02.150744Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-09a75e297f9d80a43a07d036e2d7e4bef96247766d49532e53a829e262a07376",
+      "rule_id": "CSHARP_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "C# cryptographic API or qualified library reference; effective key use requires verification.",
+      "migration_hint": "Review the resolved primitive and purpose, platform and provider. A .NET or Bouncy Castle source reference does not establish effective runtime use.",
+      "location": {
+        "file": "api.cs",
+        "line": 1,
+        "column": 395
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-1e9599aa0eace2dbb569462108c03efedaaa21ffed2ea99ed607c87b5c7fda7d",
+      "rule_id": "CSHARP_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "C# cryptographic API or qualified library reference; effective key use requires verification.",
+      "migration_hint": "Review the resolved primitive and purpose, platform and provider. A .NET or Bouncy Castle source reference does not establish effective runtime use.",
+      "location": {
+        "file": "api.cs",
+        "line": 1,
+        "column": 437
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-5cdb4241ce48d1f7ac22c051256f0816057c7cd5505ea8a2365a598d5bde2357",
+      "rule_id": "CSHARP_CRYPTO_REFERENCE",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "C# TLS library or OQS wrapper reference; identity and runtime capability require separate checks.",
+      "migration_hint": "Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately.",
+      "location": {
+        "file": "api.cs",
+        "line": 1,
+        "column": 7
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "C# obsolete official dotnetOQS wrapper reference",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-5ce5b42ae46223323851ddca97be99bebc19ec9666b3c39c3c3c22d331825f30",
+      "rule_id": "CSHARP_CRYPTO_REFERENCE",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "C# TLS library or OQS wrapper reference; identity and runtime capability require separate checks.",
+      "migration_hint": "Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately.",
+      "location": {
+        "file": "api.cs",
+        "line": 1,
+        "column": 24
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "C# OpenForge community OQS wrapper reference",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-c871949f08d178f6f7ff583d112a7482b46f6e312621996a35a8330825745f54",
+      "rule_id": "CSHARP_CRYPTO_REFERENCE",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "C# TLS library or OQS wrapper reference; identity and runtime capability require separate checks.",
+      "migration_hint": "Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately.",
+      "location": {
+        "file": "api.cs",
+        "line": 1,
+        "column": 65
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "C# Bouncy Castle TLS library reference",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-680063cef4c48c99cea83192d47e3ec05e6e71d0fa6d657ea2b388e4a967f608",
+      "rule_id": "CSHARP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection.",
+      "migration_hint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.",
+      "location": {
+        "file": "api.cs",
+        "line": 1,
+        "column": 110
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-ca7bb7ceb4218d621e628b72ada7609142f445844feccd705c9224d65cd5b79a",
+      "rule_id": "CSHARP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection.",
+      "migration_hint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.",
+      "location": {
+        "file": "api.cs",
+        "line": 1,
+        "column": 314
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-0600b62c5eb12fe906ac15382f5f35962d387cefd203aa400dcc95a19935e773",
+      "rule_id": "CSHARP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection.",
+      "migration_hint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.",
+      "location": {
+        "file": "api.cs",
+        "line": 1,
+        "column": 334
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "api.cs",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "api.cs:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the resolved primitive and purpose, platform and provider. A .NET or Bouncy Castle source reference does not establish effective runtime use."
+    },
+    {
+      "component": "api.cs",
+      "algorithm": "C# obsolete official dotnetOQS wrapper reference",
+      "usage_type": "CryptoAPI",
+      "location": "api.cs:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately."
+    },
+    {
+      "component": "api.cs",
+      "algorithm": "C# OpenForge community OQS wrapper reference",
+      "usage_type": "CryptoAPI",
+      "location": "api.cs:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately."
+    },
+    {
+      "component": "api.cs",
+      "algorithm": "C# Bouncy Castle TLS library reference",
+      "usage_type": "CryptoAPI",
+      "location": "api.cs:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately."
+    },
+    {
+      "component": "api.cs",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "api.cs:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component."
+    },
+    {
+      "component": "api.cs",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "api.cs:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 8,
+    "by_severity": {
+      "info": 6,
+      "medium": 2
+    },
+    "by_risk": {
+      "quantum-uncertain": 8
+    },
+    "scanned_files": 1,
+    "skipped_files": 0
+  }
+}

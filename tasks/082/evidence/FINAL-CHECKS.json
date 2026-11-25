@@ -1,0 +1,90 @@
+{
+  "source_manifest_sha256": "da260b6ad768560e1c033d76717d561a070e3fb8321a35bd83821b35192c7679",
+  "environment": {
+    "CARGO_INCREMENTAL": "0",
+    "all_features_target": "target/v05-feature",
+    "toolchain": "rust-toolchain.toml:1.93.1"
+  },
+  "checks": [
+    {
+      "command": "cargo test --workspace",
+      "exit": 0,
+      "log": "tasks/082/evidence/workspace-final.log",
+      "sha256": "a1eb186dd8875088a94068bfcaaf4c48c0f62a15b634483d6bbf0a0c8dc5daca"
+    },
+    {
+      "command": "cargo test --workspace --all-features",
+      "exit": 0,
+      "log": "tasks/082/evidence/all-features-final.log",
+      "sha256": "b2b8a1cc68e1e43828328ac04a756c26e7ea8627e4e69c087aab4fc7409ebf86"
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "exit": 0,
+      "log": "tasks/082/evidence/clippy-initial.log",
+      "sha256": "ccbb251e43b363a2b65505aad020b1d83395b3d9b4aa864da3e24b7c5eee6b9d"
+    },
+    {
+      "command": "cargo build --workspace",
+      "exit": 0,
+      "log": "tasks/082/evidence/build-final.log",
+      "sha256": "f44cef9000df6c90960ea18f4738a725b9337b6b11ad1a73f6ea296725066df0"
+    },
+    {
+      "command": "cargo test -p pqc_scan_detectors --test language_migration --test c_family_source --test csharp_source --test php_source --test language_dependencies",
+      "exit": 0,
+      "log": "tasks/082/evidence/components-initial.log",
+      "sha256": "eecad6918488c5dd173424513989604ce8565e1a7ff5997217442d00c2450b0d"
+    },
+    {
+      "command": "cargo test -p pqc_scan_cli --test serve language_serve -- --nocapture",
+      "exit": 0,
+      "log": "tasks/082/evidence/cli-web-round4.log",
+      "sha256": "5d6a651af17f4798e4d16011a147055e20de7de138b1ec29470524f54828fdbf"
+    },
+    {
+      "command": "cargo test -p pqc_scan_report new_provenance",
+      "exit": 0,
+      "log": "tasks/082/evidence/copy-test.log",
+      "sha256": "a9f6f93f13170cd90889a4dbebd08ae1bf346c9b2ea9d320b28c903acdb7f17f"
+    },
+    {
+      "command": "node --test crates/pqc_scan_report/tests/*.test.cjs",
+      "exit": 0,
+      "log": "tasks/082/evidence/node-report-final.log",
+      "sha256": "c18ccb25bd66a24457f2eb68c008fff274c58c758da0ea1f9bcb116386d0afd3"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "exit": 0,
+      "log": "tasks/082/evidence/fmt-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0,
+      "log": "tasks/082/evidence/diff-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python3 tasks/082/evidence/check_cli_package.py",
+      "exit": 0,
+      "log": "tasks/082/evidence/cli-package-final.log",
+      "sha256": "db3da9c08e4935c59827767010d52649630de969088941a7f2b53e1b2b628b19"
+    },
+    {
+      "command": "python3 tasks/082/evidence/verify_compatibility.py",
+      "exit": 0,
+      "log": "tasks/082/evidence/compatibility-final.log",
+      "sha256": "961f368937171d4a6e78f1a62803899a589771c41f01195a4a55b6830b7eb6a8"
+    }
+  ],
+  "extra_unaffected_baseline_failure": {
+    "command": "node --test crates/pqc_scan_cli/tests/*.test.cjs crates/pqc_scan_report/tests/*.test.cjs",
+    "exit": 1,
+    "log": "tasks/082/evidence/node-final.log",
+    "isolated_same_failure": "node-feedback-isolated.log",
+    "baseline_head_same_failure": "node-feedback-baseline-head.log",
+    "cause": "Unchanged v0.4 serve-feedback test line250 expects last single-result rendering after two-folder batch. Committed serve.js deliberately calls showBatchResults for >1 result. Same failure from exact git HEAD source+test in isolated tempdir. No affected082 file or native/context/report path involved; all applicable report Node and actual Rust serve tests pass. Unrelated remediation not authorized; reported as pre-existing proposal, not hidden/passed."
+  }
+}

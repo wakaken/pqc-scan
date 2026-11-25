@@ -7,8 +7,8 @@ pub(super) use super::{
 };
 pub(super) use pqc_scan_core::model::line_col_for_offset;
 pub(super) use pqc_scan_core::observation::{
-    exact_dependency_version, resolved_dependency_version, safe_dependency_version,
-    valid_dependency_name, DependencyOrigin as Origin,
+    exact_dependency_version, resolved_dependency_version, safe_dependency_constraint,
+    safe_dependency_version, valid_dependency_name, DependencyOrigin as Origin,
 };
 pub(super) use pqc_scan_core::{classifier, DetectorStatus, ScannableFile};
 pub(super) use regex::Regex;
@@ -50,8 +50,8 @@ impl Build {
             self.bad += 1;
             return;
         }
-        if (declared.is_some_and(|s| !safe_dependency_version(s))
-            || reported.is_some_and(|s| !safe_dependency_version(s)))
+        if (declared.is_some_and(|s| !safe_dependency_constraint(ecosystem, s))
+            || reported.is_some_and(|s| !safe_dependency_constraint(ecosystem, s)))
             && !matches!(
                 origin,
                 Origin::Path
@@ -65,7 +65,7 @@ impl Build {
             origin = Origin::Unknown;
         }
         let declared = declared
-            .filter(|s| safe_dependency_version(s))
+            .filter(|s| safe_dependency_constraint(ecosystem, s))
             .map(str::to_string);
         let resolved = resolved
             .filter(|s| resolved_dependency_version(ecosystem, s))
@@ -75,7 +75,7 @@ impl Build {
             origin = Origin::LockUnverified;
         }
         let reported = reported
-            .filter(|s| safe_dependency_version(s))
+            .filter(|s| safe_dependency_constraint(ecosystem, s))
             .map(str::to_string);
         let version = reported
             .as_deref()
@@ -83,6 +83,7 @@ impl Build {
             .unwrap_or_else(|| "unknown".into());
         self.items.push(DependencyItem {
             context: None,
+            language_context: None,
             name: name.into(),
             version,
             ecosystem: ecosystem.into(),
@@ -107,6 +108,18 @@ impl Build {
             ordinal: self.items.len(),
             parsed: true,
         });
+    }
+    pub(super) fn reject(&mut self) {
+        self.bad += 1;
+    }
+    pub(super) fn context(
+        &mut self,
+        before: usize,
+        context: pqc_scan_core::observation::DependencyContext,
+    ) {
+        for item in &mut self.items[before..] {
+            item.language_context = Some(context);
+        }
     }
     pub(super) fn finish(self) -> anyhow::Result<Parsed> {
         let status = if self.status == DetectorStatus::Truncated {
@@ -248,7 +261,11 @@ fn component(s: &str) -> String {
         .collect()
 }
 fn purl(ecosystem: &str, name: &str, version: Option<&str>) -> String {
-    if !["cargo", "npm", "pypi", "gem", "maven", "golang", "generic"].contains(&ecosystem) {
+    if ![
+        "cargo", "npm", "pypi", "gem", "maven", "golang", "generic", "composer", "nuget",
+    ]
+    .contains(&ecosystem)
+    {
         return String::new();
     }
     let path = if ecosystem == "maven" {

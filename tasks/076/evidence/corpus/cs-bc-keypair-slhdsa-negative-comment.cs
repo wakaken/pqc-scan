@@ -1,0 +1,2 @@
+// class Sample { void Run() { var k = new Org.BouncyCastle.Crypto.Generators.SlhDsaKeyPairGenerator(); k.Init(new Org.BouncyCastle.Crypto.Parameters.SlhDsaKeyGenerationParameters(random,Org.BouncyCastle.Crypto.Parameters.SlhDsaParameters.slh_dsa_sha2_128s)); k.GenerateKeyPair(); } }
+// 

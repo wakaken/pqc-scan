@@ -1,0 +1,1 @@
+template<class OQS_KEM_new> void f(){ OQS_KEM_new("ML-KEM-768"); }

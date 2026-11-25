@@ -1,0 +1,1 @@
+<?php use phpseclib3\Crypt\RSA; use phpseclib3\Crypt\EC; use phpseclib3\Crypt\DH; use PQCrypto\SLHDSA; $types=[\phpseclib3\Crypt\RSA::class, \PQCrypto\SLHDSA::class];

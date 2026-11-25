@@ -73,6 +73,39 @@ fn result(count: usize) -> ScanResult {
 }
 
 #[test]
+fn overlapping_non_equivalent_records_are_explained_without_merging_machine_evidence() {
+    let root = std::env::temp_dir().join(format!("pqc-overlap-{}", std::process::id()));
+    let mut raw = result(2);
+    raw.findings[1].location = raw.findings[0].location.clone();
+    raw.findings[0].location.line = 1;
+    raw.findings[1].location.line = 1;
+    raw.findings[1].rule_id = "OTHER_REFERENCE".into();
+    raw.findings[1].description = "Distinct source evidence".into();
+    raw.findings[1].risk = Risk::QuantumUncertain;
+    for (name, language, phrase) in [
+        ("ja", ReportLanguage::Ja, "この位置の検出記録"),
+        (
+            "en",
+            ReportLanguage::En,
+            "Detection records at this location",
+        ),
+    ] {
+        write_reports_with_language(&raw, &root.join(name), ReportFormat::All, language).unwrap();
+        let html = fs::read_to_string(root.join(name).join("report.html")).unwrap();
+        let md = fs::read_to_string(root.join(name).join("report.md")).unwrap();
+        assert!(html.contains(phrase));
+        assert!(md.contains(phrase));
+        assert!(html.contains("Distinct source evidence"));
+        let machine: serde_json::Value =
+            serde_json::from_slice(&fs::read(root.join(name).join("report.json")).unwrap())
+                .unwrap();
+        assert_eq!(machine["findings"].as_array().unwrap().len(), 2);
+        assert_eq!(machine["findings"][1]["risk"], "quantum-uncertain");
+    }
+    fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
 fn compact_reports_keep_all_locations_and_only_share_identical_actions() {
     let root = std::env::temp_dir().join(format!(
         "pqc-compact-{}-{}",

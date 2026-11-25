@@ -2,9 +2,9 @@
 
 This document lists all built-in detection rules shipped in `rules/default/` and explains severity levels used in reports.
 
-- Total rules: **125**
-- Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`
-- Kind breakdown: `certificate`: 18, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 28
+- Total rules: **139**
+- Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`, `php.yml`, `csharp.yml`, `c_family.yml`, `language_dependencies.yml`, `source_references.yml`
+- Kind breakdown: `certificate`: 18, `dependency`: 19, `key`: 3, `regex`: 60, `tree_sitter`: 39
 
 ## Validation and quality review
 
@@ -22,9 +22,9 @@ for blank ID/confidence/traversal errors and unchanged scope behavior.
 |---|---|---|
 | `critical` (7) | Immediate security impact or sensitive material exposure. | Treat as urgent; remediate before release when possible. |
 | `high` (41) | Strong crypto risk in production paths. | Prioritize in active migration backlog. |
-| `medium` (56) | Meaningful migration signal requiring design/planning. | Schedule remediation with clear owner and target release. |
+| `medium` (59) | Meaningful migration signal requiring design/planning. | Schedule remediation with clear owner and target release. |
 | `low` (6) | Contextual or lower-confidence finding. | Triage and backlog when confirmed. |
-| `info` (15) | Inventory-only informational signal. | Track for visibility and architecture review. |
+| `info` (26) | Inventory-only informational signal. | Track for visibility and architecture review. |
 
 Note: final severity can be adjusted by context in the risk engine (for example TLS/PKI/JWT/authentication paths).
 
@@ -284,3 +284,77 @@ external wrapper implementations are not followed. Existing rule definitions and
 identity encoding are unchanged; added typed facts can change affected observation IDs. Positive, negative, renamed-wrapper, shadowing and
 resource controls are in `framework_source.rs`; pinned real-source results are
 separate from regex-target quality fixtures.
+
+## PHP source rules (v0.5 development)
+
+`PHP_CRYPTO_API` captures exact OpenSSL/Sodium requests, qualified phpseclib references,
+and opaque signature-wrapper references. Generic signing keys remain unknown;
+locally typed DH/ECDH derivations differ from RSA encryption and signatures.
+`PHP_PQC_API` captures finite Sodium ML-KEM-768/X-Wing and ParagonIE native,
+polyfill and Compat names, including bounded key receiver roles. SLH-DSA is
+reference-only. `PHP_CRYPTO_REFERENCE` captures opaque native/FFI KEM wrappers.
+Both wrapper IDs inventory references only, with no primitive, installation or
+capability claim; the signature wrapper retains the frozen generic API ID.
+
+Default-definition identity, PHP scope, names, source order and local writes are
+checked before typed capture. Modified/custom definitions retain generic matching.
+Arguments are omitted from new built-in previews and protected across source
+context. Legacy confidence weights are uncalibrated conventions. See
+[user scope](user/COVERAGE.md#source-limits) and the current source-bound quality
+companion; historical audits remain unchanged.
+
+## C# source rules (v0.5 development)
+
+`CSHARP_CRYPTO_API` captures qualified standard RSA/DSA/EC/ECDH factories,
+concrete providers and bounded operations, plus BC classical types.
+`CSHARP_PQC_API` captures independent .NET MLKem/MLDsa/SlhDsa classes,
+exact pure .NET/BC parameter symbols and supported generator/KEM/signer operations.
+CompositeMLKem/CompositeMLDsa/Hpke remain construction references without a guessed
+KEM or parameter set. This mixed rule uses quantum-uncertain: generic HPKE need
+not use post-quantum cryptography. `CSHARP_CRYPTO_REFERENCE` distinguishes BC TLS,
+the obsolete official dotnetOQS wrapper and independent OpenForge namespaces,
+without inferring installed packages, effective TLS or enabled native algorithms.
+
+Aliases/global-using declarations are file-local. Names, declared parameter/local
+types, ordered assignments, ref/out and opaque writes are bounded. Captured outer
+locals in deferred functions remain unresolved. Private context/matches/metadata
+and opaque argument-token guesses are protected as in PHP. All observations are
+syntactic/referenced. No platform support is inferred from framework strings.
+The current quality companion binds all new definitions; previous128 rows/history
+remain intact. See [user scope](user/COVERAGE.md#source-limits).
+
+## C/C++ source rules (v0.5 development)
+
+`C_FAMILY_CRYPTO_API` captures the finite OpenSSL low-level APIs, explicit EVP
+contexts/operations, provider/property/group settings and preserved draft names.
+`C_FAMILY_PQC_API` captures exact final ML-KEM/ML-DSA/SLH-DSA parameter requests
+and bounded OQS C/qualified C++ operations. `C_FAMILY_TLS_REFERENCE` captures
+recognized OpenSSL/liboqs/liboqs-cpp includes without linking/capability claims.
+Existing lexical OpenSSL rules remain unchanged and may report the same location.
+
+Generic EVP operations receive a primitive only from an unambiguous local context
+or generated EVP key. Raw low-level keys, OQS objects and C++ wrapper objects do
+not masquerade as EVP keys. Macros, namespaces/namesakes, unknown calls, writes,
+conditionals and role conflicts prevent invented bindings. Omitted or unmodeled
+syntax remains incomplete where detected; this is not C/C++ compiler semantics.
+
+All observations stay syntactic/referenced. Exact supported provider/property and
+bare colon-separated group values use finite existing marker strings and safe
+labels, not algorithm assets; standalone, hybrid and draft spellings remain
+distinct. Arguments/context/metadata remain protected, including shared headers.
+See [user scope](user/COVERAGE.md#source-limits) and task080 final-source evidence.
+
+## Bounded new-language dependency references (task081)
+
+`DEP_PHP_CRYPTO`, `DEP_NUGET_CRYPTO` and `DEP_NATIVE_CRYPTO` are additive info/quantum-uncertain inventory predicates over exact safe names and ecosystems. They do not infer selected algorithms, active PQC, installed packages or TLS support. Legacy broad dependency rules can additionally match these new inputs; their historical risk labels are not algorithm selection evidence. See [dependency provenance](architecture/DEPENDENCY-PROVENANCE.md) for supported formats and incomplete cases.
+
+## Static implementation and construction references (task085)
+
+The137 earlier rule definitions remain byte-identical. Two additive informational, quantum-uncertain rules distinguish facts that must not be reported as API calls or active protection. The report rule guide is generated from rules that produced findings; this catalog lists all139 built-ins.
+
+| Rule ID | Kind | Scope | Meaning |
+|---|---|---|---|
+| SOURCE_IMPLEMENTATION_REFERENCE | tree_sitter | c,cpp | Exact ECDSA or finite BCM ML-KEM/ML-DSA entry definitions, excluding prototypes and ordinary calls. Explicit .c.inc/.cc.inc/.cpp.inc fragments are parsed without preprocessing. |
+| SOURCE_CONSTRUCTION_REFERENCE | tree_sitter | c,cpp,csharp | Exact conditional sntrup761/X25519 guard or canonical Bouncy Castle composite-generator component; not enabled/negotiated use or whole-construction safety. |
+
+Existing C/C++ API handlers additionally recognize finite wolfCrypt RSA, libsecp256k1 ECDSA, Botan signer/verifier and OpenSSL chain-verification requests. C# adds canonical RSA formatters, XML signatures and certificate-chain requests. PHP adds canonical Firebase JWT and XMLSecLibs requests plus explicitly unresolved key-type-check relationships. No selector absent from source is guessed. Built-in fingerprints retain their original YAML predicates; finite handler semantics and their target-level pattern controls have distinct coverage.

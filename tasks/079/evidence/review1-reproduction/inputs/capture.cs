@@ -1,0 +1,1 @@
+using System.Security.Cryptography; class C { void M(){var p=MLKemAlgorithm.MLKem768; void Change(){p=MLKemAlgorithm.MLKem512;} Change(); var k=MLKem.GenerateKey(p); k.Encapsulate(data);} }

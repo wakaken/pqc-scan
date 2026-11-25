@@ -1,0 +1,35 @@
+# Task079 C# source detection results
+
+Status: done; both retained reviewers accepted final source. Original079 acceptance and scoped L03-L07 contributions remain unchanged; this is not v0.5 completion.
+
+Source: HEAD7e8cd91426fa21609a91c0511de44252eaa890d4 plus43 dirty source items bound by `evidence/IMPLEMENTATION-SOURCE.json`, SHA256 `c73abf4448fe8172a544cd5ce4dabe3328d2d4c05b27ae0c46d2d5002ce12abb`. Accepted078c42ef837 is the prerequisite snapshot. Immutable076 freezec207aaa30adb88d397357f2a21f6b37ef1ccd328d72bf2030b8262b2783ae319 and all218 original C# focal expectations are retained.
+
+## Original criteria and delivered behavior
+
+| Original079 clause | Implementation and evidence |
+|---|---|
+| Required standard/BC families, exact parameters and receivers | Three scoped default-only handlers cover standard RSA/DSA/EC/ECDH concrete factories/providers/operations, independent .NET MLKem/MLDsa/SlhDsa generation/import/operations, BC pure parameter symbols/generators/KEM/signers/classical classes. All218 frozen focal rule/span/algorithm/status assertions pass. BC initialization recognizes only the pinned dedicated parameter containers; unrelated objects cannot lend a precise suite. |
+| File-local aliases/names/scopes/shadows/writes | Using, local global-using, static imports, namespace Alias.Type/Alias::Type and global qualifier are source-bound. Type/method generic parameters, properties/events, locals and implicit parameters shadow only their owning scope. Ordinary/file-scoped namespaces, source order, tuple/ref/out/opaque writes, conditionals and deferred function boundaries have actual tests. Common binding lookup applies mutation barriers to keys, scalar selectors and parameter containers. Cross-file globals remain unresolved. |
+| Independent .NET PQC classes and no false RSA | No AsymmetricAlgorithm inheritance rule exists. Exact declared parameter/local types establish nominal family only when an initializer remains unknown; conflicting types do not become precise bindings. Local namesakes and actual fake fully qualified types do not become the real factory. Imported/generic unknown values do not acquire RSA. No actual crypto execution or successful-operation assurance is claimed. |
+| Construction and project distinctions | CompositeMLKem/CompositeMLDsa/Hpke retain finite construction identities, never a guessed component KEM or suite. Generic HPKE need not be post-quantum, so the mixed source rule uses quantum-uncertain. Unsupported prehash/OID forms remain unresolved; HashML-DSA is not normalized to pure65. BC TLS, obsolete official dotnetOQS and independent OpenForge are separate opaque references, not installed/enabled capability. |
+| Scoped rules/quality/docs/platform limits | Current131 source-bound rule rows and284 compiled-pattern controls cover all definitions; prior128 rows/history are preserved. Paired README/COVERAGE, rule reference, architecture and three Japanese report copies describe shipped scope. Custom modified id/kind/pattern/scope retains generic matching. No platform/provider/version capability is inferred from framework declarations. No stored schema, public-required field, evaluator/catalog policy or confidence calibration changes. |
+
+The main agent authored the synthetic cohort and supplement tests; they are conformance controls, not independently labeled deployment accuracy. Full cross-language L03-L07 and context/quality closure remain with082/083 without reducing any079 criterion.
+
+## Final-source execution and observations
+
+FINAL-CHECKS records exact commands, environment, exits and source hashes. All required executed commands passed: default workspace, all-feature workspace in separate target, build, fmt, Clippy,25 distribution tests, real CLI/default rules, strict incomplete exit3, local package preparation/verify/install, old-seven and held saved-input compatibility.
+
+The19 C# tests include the218 immutable cases and additional namesake/alias/namespace/named/contradictory argument/receiver/write/conditional/deferred/prehash/unknown controls; alias7/8/9, bindings63/64/65, imports0/63/64/65, identifier511/512/513 and variable255/256/257 limits; original UTF16/code-point spans for two same-line Unicode calls and distinct IDs; all-detector private canaries before/after truncation. PHP12 tests/180 original cases also pass after shared-path changes.
+
+CLI-PACKAGE-CHECKS contains the real C# eight-observation scan, canonical ML-KEM-768/RSA and unresolved HPKE, default PHP regression, custom grammar routing/UTF16 spans, strict exits, grammar notices and installation. All generated reports/CycloneDX1.7 exports omit the synthetic private canary. This is a dev/default local package, not a release. COMPATIBILITY verifies all old semantic fields, expected rules-digest derivation from exact sorted snapshots and run-derived observation-ID/association bijections; it does not blanket-remove identity fields. Actual outputs are archived with92 hashes in OBSERVATION-FILES.
+
+Browser evidence uses the in-app browser at observed1280x720. Fresh EN/JA reports show three groups/eight findings, explicit HPKE uncertainty and separate BC TLS/official/community wrapper guidance. Enter-expanded detail and masked source remain usable after the dedicated127.0.0.1:8786 server exits. Captures/DOM/metrics are preserved; no horizontal overflow was observed. Prior visible PHP tab was left untouched. The test page was background-only and the server is stopped; reload needs the dedicated report-only server restarted.
+
+## Review and failures
+
+Implementation reviewer accepted finalc73abf444, no unresolved findings. The three review1 P2 issues (type/property shadowing, selector mutation barriers, Alias:: syntax) were reproduced, fixed by main and regression-tested; old manifest/diff/raw reproductions and red logs remain. Initial Clippy filter-next feedback was corrected. The first passing broad execution preceded review fixes and is historical; both final configurations were rerun against unchanged accepted product source with CARGO_INCREMENTAL=0. No required final execution is failed or unexecuted. Scoped independent test confirmation accepted finalc73abf444.
+
+## Post-test-review correction
+
+The pre-correction execution/browser evidence is retained as v2 history. Test review found loss of individual opaque project labels after redaction. The correction preserves only five finite public labels and existing native markers, never arguments/context/metadata. Position-specific pipeline/CLI assertions verify labels, CBOM, native markers, distinct anchors and legacy associations. Red reproduction and private-argument controls are retained. Scoped implementation confirmation accepted c73abf444. All10 final checks and92 final artifacts are now bound to the corrected unchanged source; fresh browser EN/JA details identify each occurrence while retaining masked context. The retained test reviewer accepted all43 source/92 artifact hashes and P2 resolution; no original079 criterion remains deferred.

@@ -1,0 +1,1 @@
+<?php $opts=["private_key_type"=>OPENSSL_KEYTYPE_RSA,...$dynamic]; $key=openssl_pkey_new($opts); openssl_sign($m,$sig,$key);

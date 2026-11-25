@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "identity_scheme": "pqc-scan-length-prefixed-sha256-v1",
+  "scanner_version": "0.4.0",
+  "catalog_version": "native-exact-identifiers-1",
+  "profile": "static-native-v1",
+  "rules_digest": "rules-v1-0f3d13623aa559fc0a1b047de65c4b03cc731d51ce7b3847e2700b1796214214",
+  "run": {
+    "id": "scan-v1-97c0e3850ca5ea4dd040a1b26bc0e2f9ed8d12ca12f634edd24b27780c2e0255",
+    "attempt_id": "static-1",
+    "generated_at": "2026-11-24T07:30:07.587631+00:00"
+  },
+  "repository_scope": "v05/header-control",
+  "scope": {
+    "default_excludes": [
+      ".git",
+      "node_modules",
+      "target",
+      "dist",
+      "docs",
+      "known non-scannable media, archives and binary data"
+    ],
+    "git_exclude": true,
+    "git_global": true,
+    "git_ignore": true,
+    "markdown_excluded": true,
+    "max_file_size_bytes": 2097152
+  },
+  "coverage": {
+    "analysis_failed_files": 0,
+    "analyzed_files": 0,
+    "enumeration_failed_entries": 0,
+    "excluded_enumerated_files": 0,
+    "not_applicable_files": 0,
+    "not_enumerated_population": true,
+    "partial_files": 1,
+    "read_failed_files": 0,
+    "read_ok_files": 1,
+    "selected_files": 1,
+    "status": "partial",
+    "unknown_files": 0,
+    "unsupported_files": 0
+  },
+  "diagnostics": [
+    {
+      "code": "detector_partial",
+      "detector": "tree_sitter_detector",
+      "disposition": "partial",
+      "file": "case.h",
+      "message": "Ambiguous C/C++ header: candidate syntax or source bindings differ; only agreeing facts and explicitly scoped references were retained. Configured build language is unknown.",
+      "stage": "detection"
+    }
+  ],
+  "native_completeness": "not_exhaustive",
+  "assets": [
+    {
+      "id": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+      "kind": "algorithm",
+      "identity_basis": "normalized_identifier_and_reported_parameters",
+      "attributes": {
+        "identifier": "ML-KEM-768",
+        "namespace": "named",
+        "parameters": {},
+        "purpose": "reference"
+      },
+      "relations": [],
+      "uncertainty": []
+    },
+    {
+      "id": "asset-v1-c8b8321dc964d44928bbbd4ba4b6254fa723662cf68a26c8632d3b3660afcc77",
+      "kind": "usage",
+      "identity_basis": "scoped_weak_source_anchor",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-e97d5d80c57565937eb30a0413adfd497f417729f36321f56043ab953b2eb002",
+        "local_ordinal": 0,
+        "method": "ast_pattern",
+        "path": "case.h"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-v1-36eb20cd0b649af2f1af3f138078f64492f193ad535fcb3299e824362fa649b0",
+      "occurrence_key": "occurrence-v1-68f4e4f613c23627dbe57755972a641773d106cb6f9316c018c5d3f20abac2c0",
+      "identity_confidence": "weak_structural_anchor",
+      "asset_ids": [
+        "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+        "asset-v1-c8b8321dc964d44928bbbd4ba4b6254fa723662cf68a26c8632d3b3660afcc77"
+      ],
+      "target": {
+        "path": "case.h",
+        "line": 1,
+        "column": 10,
+        "column_kind": "unicode_code_points",
+        "byte_start": 9,
+        "byte_end": 34,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "C_FAMILY_PQC_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": []
+    }
+  ],
+  "legacy_associations": [
+    {
+      "legacy_index": 0,
+      "legacy_id": "finding-v1-71542b6326fad9e5a55ea4f4b3a3471ec214768adc9edf95eb30dc34f843a3c6",
+      "observation_ids": [
+        "observation-v1-36eb20cd0b649af2f1af3f138078f64492f193ad535fcb3299e824362fa649b0"
+      ]
+    }
+  ],
+  "unassociated_observation_ids": [],
+  "legacy_loss_records": [],
+  "assessment_status": "not_evaluated",
+  "assessments": [],
+  "export_loss_notes": [
+    "raw_matches_snippets_and_arbitrary_metadata_omitted",
+    "unknown_raw_identifiers_not_guessed",
+    "legacy_snapshot_not_derived_from_inventory",
+    "legacy_ids_are_not_native_identity",
+    "legacy_dependency_version_provenance_unavailable",
+    "legacy_applicability_coverage_is_not_native_inventory_completeness",
+    "weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity",
+    "cryptographic_trust_and_policy_not_evaluated"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "cause": "Bound SignerUtilities.cs diagnostic csharp_same_name_bindings64; local overflow already tracked but Context truncated before independent references inspected.",
+  "sourceManifest": "IMPLEMENTATION-SOURCE-03.json",
+  "red": [
+    {
+      "test": "independent",
+      "exitCode": 101,
+      "log": "red-02-csharp-independent.log",
+      "sha256": "0a6afc4eafd8053fc0f0ce3ce233567f570bebe1ac17b5816cccbc3ef809e200"
+    },
+    {
+      "test": "overflow",
+      "exitCode": 101,
+      "log": "red-02-csharp-overflow.log",
+      "sha256": "1cbf5b7d5ceb6ff4c4f4a5045d16c18b3baaaf6685ac10f696123f0a9a4d82f2"
+    }
+  ],
+  "green": {
+    "command": "CARGO_INCREMENTAL=0 cargo test -p pqc_scan_detectors --locked --test csharp_source",
+    "exitCode": 0,
+    "passed": 22,
+    "log": "green-02-csharp-suite.log",
+    "sha256": "8582f84743116a6f77146e91e5cb7118fbc2d5c1c95abbc4c01a603163445377"
+  },
+  "scope": "Preserve cap64, exact overflow cutoff, global fail-closed limits, Truncated, no stale variants, canonical-name suppression and privacy. No frozen input/initial47 labels changed."
+}

@@ -40,3 +40,9 @@ archives omit the repository-root MIT notice. Both bind to simd revision
 `d74c030d9dc4f3cae02146d1f497ff62726ef09a`; each exact package entry records
 its own Cargo checksum/path and the unmodified upstream notice hash. No
 review-required network statement or packaging guard is changed.
+
+The v0.5 parser foundation adds `tree-sitter-cpp 0.23.4`, whose registry archive
+omits its root MIT notice. Its fallback binds Cargo checksum and recorded upstream
+revision `f41e1a044c8a84ea9fa8577fdd2eab92ec96de02` to the unmodified LICENSE.
+The pinned PHP, C# and C grammar archives already include their license files.
+Existing review-required statements and publication boundaries remain unchanged.

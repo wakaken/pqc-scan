@@ -1,0 +1,120 @@
+{
+  "source_manifest_sha256": "932fc7094d0a6c388f9a7a9d5c864330d5d932612b05186a81e5f7ff8939f130",
+  "source_files_rechecked": true,
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exit": 0,
+      "log": "workspace-final.log",
+      "tool_session": 12282
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_TARGET_DIR": "target/v05-feature"
+      },
+      "exit": 0,
+      "log": "workspace-features-final.log",
+      "tool_session": 88209
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exit": 0,
+      "log": "build-final.log",
+      "tool_session": 86566
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exit": 0,
+      "log": "clippy-review1.log",
+      "tool_session": 35715
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "fmt-review1.log",
+      "tool_session": 35715
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/079/evidence/check_cli_package.py"
+      ],
+      "exit": 0,
+      "log": "cli-package-initial.log",
+      "tool_session": 5470
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/079/evidence/verify_compatibility.py"
+      ],
+      "exit": 0,
+      "log": "compat-initial.log",
+      "tool_session": 5470
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/distribution",
+        "-p",
+        "test_*.py"
+      ],
+      "exit": 0,
+      "log": "distribution-final.log",
+      "tool_session": 5470,
+      "assertions": "25 pass"
+    }
+  ],
+  "evidence_helpers": {
+    "tasks/079/evidence/check_cli_package.py": "00f8b30b3cc58a60260edc17d76d4c082b4a2f61ff68e91336bebc379f2c95ed",
+    "tasks/079/evidence/verify_compatibility.py": "f8d2966dee45c7898b9214eef418246039f4b2d708b3ba58a723519ca87146ea"
+  },
+  "observations": "CLI-PACKAGE-CHECKS.json, COMPATIBILITY.json, BROWSER-GENERATION.json, BROWSER-OBSERVATIONS.json and OBSERVATION-FILES.json",
+  "pending": [
+    "independent test review"
+  ],
+  "implementation_review": "/root/implementation_review accepted932fc709; no outstanding findings",
+  "historical_failures": "Retain development reds and initial filter-next Clippy failure; review1 reproduction and corrections are recorded. No failed final-source required execution remains."
+}

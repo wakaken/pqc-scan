@@ -1,0 +1,1 @@
+@if($ok) <?php $CONTROL=1; ?> @endif

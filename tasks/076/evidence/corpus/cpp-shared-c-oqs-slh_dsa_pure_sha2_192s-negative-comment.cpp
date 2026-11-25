@@ -1,0 +1,1 @@
+// OQS_SIG *k = OQS_SIG_new("SLH_DSA_PURE_SHA2_192S");

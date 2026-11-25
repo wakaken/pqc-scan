@@ -1,0 +1,48 @@
+   Compiling pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.78s
+     Running tests/language_dependencies.rs (target/debug/deps/language_dependencies-bf2fcd7220ddc5e7)
+
+running 10 tests
+test cmake_comments_strings_nested_and_dynamic_expressions_cannot_fabricate_packages ... ok
+test central_files_outside_the_root_unselected_or_linked_are_never_read ... ok
+test source_assertions_do_not_merge_case_variants_sections_files_or_framework_buckets ... ok
+test development_platform_features_baselines_and_revisions_remain_non_installed_claims ... FAILED
+test malformed_siblings_survive_without_unsafe_identity_or_version_promotion ... ok
+test nuget_resolution_requires_a_concrete_version_in_its_supported_numeric_grammar ... FAILED
+test all_formats_distinguish_valid_empty_malformed_duplicate_and_future_editions ... ok
+test central_context_is_nearest_selected_literal_and_source_local ... FAILED
+test all_frozen_dependency_inputs_keep_their_original_status_and_scoped_facts ... ok
+test byte_depth_value_record_and_xml_node_limits_are_explicit ... ok
+
+failures:
+
+---- development_platform_features_baselines_and_revisions_remain_non_installed_claims stdout ----
+
+thread 'development_platform_features_baselines_and_revisions_remain_non_installed_claims' (23840043) panicked at crates/pqc_scan_detectors/tests/language_dependencies.rs:302:5:
+assertion `left == right` failed
+  left: String("3.5.0")
+ right: "3.5.0#abcdef%1234567890.1"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- nuget_resolution_requires_a_concrete_version_in_its_supported_numeric_grammar stdout ----
+
+thread 'nuget_resolution_requires_a_concrete_version_in_its_supported_numeric_grammar' (23840045) panicked at crates/pqc_scan_detectors/tests/language_dependencies.rs:325:9:
+assertion `left == right` failed: 2.7.0spoof
+  left: true
+ right: false
+
+---- central_context_is_nearest_selected_literal_and_source_local stdout ----
+
+thread 'central_context_is_nearest_selected_literal_and_source_local' (23840040) panicked at crates/pqc_scan_detectors/tests/language_dependencies.rs:223:9:
+<Project><ItemGroup><PackageVersion Update="BouncyCastle.Cryptography" Version="2.7.0"/></ItemGroup></Project>
+
+
+failures:
+    central_context_is_nearest_selected_literal_and_source_local
+    development_platform_features_baselines_and_revisions_remain_non_installed_claims
+    nuget_resolution_requires_a_concrete_version_in_its_supported_numeric_grammar
+
+test result: FAILED. 7 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.25s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test language_dependencies`

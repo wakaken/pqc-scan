@@ -1,0 +1,2008 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 7c4c24d..15af937 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -1964,9 +1964,13 @@ dependencies = [
+  "syn 3.0.10",
+  "toml",
+  "tree-sitter",
++ "tree-sitter-c",
++ "tree-sitter-c-sharp",
++ "tree-sitter-cpp",
+  "tree-sitter-go",
+  "tree-sitter-java",
+  "tree-sitter-javascript",
++ "tree-sitter-php",
+  "tree-sitter-python",
+  "tree-sitter-ruby",
+  "tree-sitter-rust",
+@@ -2904,6 +2908,36 @@ dependencies = [
+  "tree-sitter-language",
+ ]
+ 
++[[package]]
++name = "tree-sitter-c"
++version = "0.24.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "a9b2eb57a55fed6b00812912e730b7a275cf4fe98bfd6a5d76263d4438371728"
++dependencies = [
++ "cc",
++ "tree-sitter-language",
++]
++
++[[package]]
++name = "tree-sitter-c-sharp"
++version = "0.24.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "54b3cdb7aeae9018e60908aa18937708de29338c83ecf3701de534b23d365c30"
++dependencies = [
++ "cc",
++ "tree-sitter-language",
++]
++
++[[package]]
++name = "tree-sitter-cpp"
++version = "0.23.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "df2196ea9d47b4ab4a31b9297eaa5a5d19a0b121dceb9f118f6790ad0ab94743"
++dependencies = [
++ "cc",
++ "tree-sitter-language",
++]
++
+ [[package]]
+ name = "tree-sitter-go"
+ version = "0.25.0"
+@@ -2940,6 +2974,16 @@ version = "0.1.7"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "009994f150cc0cd50ff54917d5bc8bffe8cad10ca10d81c34da2ec421ae61782"
+ 
++[[package]]
++name = "tree-sitter-php"
++version = "0.25.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d9779e392d38af4254f48be0e57b7eed4d50ec7a6e55a7e5e2e74df8f8f032d3"
++dependencies = [
++ "cc",
++ "tree-sitter-language",
++]
++
+ [[package]]
+ name = "tree-sitter-python"
+ version = "0.25.0"
+diff --git a/Cargo.toml b/Cargo.toml
+index 0b9aebb..a45005b 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -43,6 +43,10 @@ tree-sitter-python = "0.25.0"
+ tree-sitter-rust = "0.24.0"
+ tree-sitter-ruby = "0.23.1"
+ tree-sitter-typescript = "=0.23.2"
++tree-sitter-php = "=0.25.1"
++tree-sitter-c-sharp = "=0.24.0"
++tree-sitter-c = "=0.24.2"
++tree-sitter-cpp = "=0.23.4"
+ 
+ # Parse-only, pinned local dependency metadata parser; never resolves packages.
+ toml = { version = "=0.8.23", default-features = false, features = ["parse"] }
+diff --git a/README.ja.md b/README.ja.md
+index eb9d717..3e9f798 100644
+--- a/README.ja.md
++++ b/README.ja.md
+@@ -29,7 +29,7 @@ JWT、TLS、PKI、SSHなどの暗号処理を変更する前に、調査する
+ 
+ | 成果物 | 対象言語・ファイルの例 | 確認する内容 |
+ |---|---|---|
+-| ソースコード | Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Ruby | 暗号API、方式名、関連する利用パターン |
++| ソースコード | Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Ruby、PHP、C# | 暗号API、方式名、関連する利用パターン |
+ | 各種ミドルウェアの設定ファイル | Kubernetes／Ingress、nginx、Apache httpd、Envoy、Istio、HAProxy、Traefik | TLS、暗号スイート、鍵交換グループなどの設定 |
+ | 証明書ファイル | `.pem`、`.crt`、`.cer`、`.der` | 署名方式と公開鍵の方式、対応する鍵長・曲線、有効期間、公開情報の指紋 |
+ | 秘密鍵ヘッダー | RSA、汎用PKCS#8、OpenSSHの秘密鍵ヘッダー | 対応するヘッダーの存在（復号や秘密鍵の妥当性確認は行いません） |
+@@ -48,6 +48,11 @@ JWT、TLS、PKI、SSHなどの暗号処理を変更する前に、調査する
+ - 暗号利用の検出結果とソフトウェアの依存関係を、別々の一覧にまとめます。
+ - 暗号の用途・利用状況を入力し、PQCへの移行に必要な確認事項を整理できます。
+ 
++PHPではOpenSSL・Sodium・ParagonIEの限定的なAPI呼び出しと修飾されたライブラリ参照を検出します。
++C#では.NETとBouncy Castleの対応する参照を検出します。
++独自のASTルールでは、開発中のC/C++用の構文解析も利用できます。
++対象範囲と組み込みAPI検出との違いは、[対応入力](docs/user/COVERAGE.ja.md#source-limits)を参照してください。
++
+ なお、スキャン時にPQC方式の名前が見つかっても、アプリケーションで正しく使われているとは限りません。
+ このような検出結果は、[結果の読み方](docs/user/REPORTS.ja.md#pqc-findings)で例を使って説明しています。
+ 
+diff --git a/README.md b/README.md
+index b1e9aa3..b3ba3f7 100644
+--- a/README.md
++++ b/README.md
+@@ -29,7 +29,7 @@ Point the scanner at a local repository. It inspects the following artifacts wit
+ 
+ | Artifact | Languages or file examples | What the scanner looks for |
+ |---|---|---|
+-| Source code | Java, Go, JavaScript, TypeScript/TSX, Python, Rust, Ruby | Cryptographic APIs, algorithm names and related usage patterns |
++| Source code | Java, Go, JavaScript, TypeScript/TSX, Python, Rust, Ruby, PHP, C# | Cryptographic APIs, algorithm names and related usage patterns |
+ | Middleware configuration files | Kubernetes/Ingress, nginx, Apache httpd, Envoy, Istio, HAProxy, Traefik | TLS/cipher/group settings and other cryptographic configuration signals |
+ | Certificate files | `.pem`, `.crt`, `.cer`, `.der` | Signature and subject-key algorithms, supported key sizes/curves, validity periods and public fingerprints |
+ | Private-key headers | RSA, generic PKCS#8 and OpenSSH private-key headers | The presence of supported headers; no decryption or private-key validation |
+@@ -48,6 +48,12 @@ File selection defaults to 2 MiB per file. See [file-size limits](docs/user/SCAN
+ - Lists cryptographic scan results and software dependencies separately.
+ - Lets you enter the purpose and usage of cryptography to organize the checks needed for migration to PQC.
+ 
++PHP built-ins now cover bounded OpenSSL, Sodium and ParagonIE requests and qualified library references.
++C# built-ins cover supported .NET and Bouncy Castle references.
++Custom AST rules can also use the development C/C++ parser routes.
++Their scope and the distinction from built-in API coverage are described in
++[supported inputs](docs/user/COVERAGE.md#source-limits).
++
+ A reference to a PQC algorithm is useful evidence, but it does not establish that the application uses it successfully. The [report guide](docs/user/REPORTS.md#pqc-findings) explains these findings with examples.
+ 
+ <a id="quick-start"></a>
+diff --git a/crates/pqc_scan_core/src/diagnostic.rs b/crates/pqc_scan_core/src/diagnostic.rs
+index f064b92..e7d1fa1 100644
+--- a/crates/pqc_scan_core/src/diagnostic.rs
++++ b/crates/pqc_scan_core/src/diagnostic.rs
+@@ -24,6 +24,8 @@ pub struct DetectorOutcome {
+     limit_detail: Option<String>,
+     test_ranges: Vec<std::ops::Range<usize>>,
+     display_ranges: Vec<std::ops::Range<usize>>,
++    sensitive_ranges: Vec<std::ops::Range<usize>>,
++    sensitive_source_context: bool,
+ }
+ 
+ impl DetectorOutcome {
+@@ -42,6 +44,8 @@ impl DetectorOutcome {
+             limit_detail: None,
+             test_ranges: Vec::new(),
+             display_ranges: Vec::new(),
++            sensitive_ranges: Vec::new(),
++            sensitive_source_context: false,
+         }
+     }
+ 
+@@ -66,6 +70,25 @@ impl DetectorOutcome {
+     pub fn display_ranges(&self) -> &[std::ops::Range<usize>] {
+         &self.display_ranges
+     }
++    /// Ephemeral decoded UTF-8 argument ranges that may contain key material.
++    /// The pipeline protects overlapping evidence and source context, including
++    /// context requested by other detectors. No payload or range is serialized.
++    pub fn with_sensitive_ranges(mut self, ranges: Vec<std::ops::Range<usize>>) -> Self {
++        self.sensitive_ranges = ranges;
++        self
++    }
++    pub fn sensitive_ranges(&self) -> &[std::ops::Range<usize>] {
++        &self.sensitive_ranges
++    }
++    /// Suppress source context independently of successful parsing/binding.
++    /// Ephemeral only; useful when partial analysis cannot enumerate key arguments.
++    pub fn with_sensitive_source_context(mut self, sensitive: bool) -> Self {
++        self.sensitive_source_context = sensitive;
++        self
++    }
++    pub fn sensitive_source_context(&self) -> bool {
++        self.sensitive_source_context
++    }
+     /// Fixed reason code and bounded numeric work counters only; never source text.
+     pub fn with_limit(mut self, reason: &'static str, limit: usize, processed: usize) -> Self {
+         self.limit_detail = Some(format!("Inspection limit: {reason}; limit={limit}; processed={processed}. Retained findings remain available; omitted findings are unknown. Inspect the remaining source separately."));
+diff --git a/crates/pqc_scan_core/src/observation.rs b/crates/pqc_scan_core/src/observation.rs
+index 5365222..39350d4 100644
+--- a/crates/pqc_scan_core/src/observation.rs
++++ b/crates/pqc_scan_core/src/observation.rs
+@@ -4,6 +4,7 @@ use crate::identity::safe_token;
+ use crate::{Detection, DetectorStatus};
+ use serde::{Deserialize, Serialize};
+ use std::collections::BTreeMap;
++mod source_api;
+ 
+ #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+ pub struct AlgorithmSpec {
+@@ -493,6 +494,7 @@ pub struct ObservationDraft {
+     pub(crate) certificate: Option<PublicCertificateFacts>,
+     pub(crate) dependency: Option<DependencyFacts>,
+     pub(crate) typed_dependency: bool,
++    pub(crate) source_api_typed: bool,
+     pub(crate) evidence: SafeEvidence,
+     pub(crate) bindings: Vec<LegacyBinding>,
+ }
+@@ -572,6 +574,7 @@ impl ObservationDraft {
+             certificate: None,
+             dependency: None,
+             typed_dependency: false,
++            source_api_typed: false,
+             evidence: SafeEvidence {
+                 marker_kind: matches!(method, ObservationMethod::PrivateKeyMarker)
+                     .then_some("private_marker".into()),
+diff --git a/crates/pqc_scan_core/src/pipeline.rs b/crates/pqc_scan_core/src/pipeline.rs
+index b27d01c..06ee196 100644
+--- a/crates/pqc_scan_core/src/pipeline.rs
++++ b/crates/pqc_scan_core/src/pipeline.rs
+@@ -325,6 +325,18 @@ where
+         document = document.with_native(native);
+     }
+     crate::privacy::sanitize_with_context(document.legacy_mut(), &sensitive_ids);
++    for finding in &mut document.legacy_mut().findings {
++        if privacy_by_file
++            .get(&finding.location.file)
++            .is_some_and(|p| p.restricts_source_matches())
++        {
++            // Metadata is detector-owned and may duplicate a secret token. Native
++            // typed facts have already been constructed without raw metadata.
++            for value in finding.evidence.metadata.values_mut() {
++                *value = "[masked-sensitive-content]".into();
++            }
++        }
++    }
+     Ok(document)
+ }
+ 
+@@ -426,12 +438,11 @@ fn inspect_file(
+     native: bool,
+     context: Option<&crate::RepositoryContext>,
+ ) -> FileOutcome {
+-    let privacy = file
++    let mut source_privacy = file
+         .text
+         .as_deref()
+         .map(crate::privacy::SourcePrivacy::from_text)
+-        .filter(|p| !p.is_empty())
+-        .map(|p| (relative.to_string(), p));
++        .unwrap_or_default();
+     let source_offsets = native
+         .then(|| {
+             file.text
+@@ -457,8 +468,14 @@ fn inspect_file(
+                 Some(DiagnosticCode::DetectorFailed)
+             }
+             Ok(outcome) => {
++                if outcome.sensitive_source_context() {
++                    source_privacy.protect_source_context();
++                }
+                 test_ranges.extend_from_slice(outcome.test_ranges());
+                 display_ranges.extend_from_slice(outcome.display_ranges());
++                if let Some(text) = &file.text {
++                    source_privacy.add_sensitive_ranges(text, outcome.sensitive_ranges());
++                }
+                 explanation = outcome.diagnostic_message().map(str::to_owned);
+                 let code = match outcome.status() {
+                     DetectorStatus::Complete => {
+@@ -530,6 +547,22 @@ fn inspect_file(
+             Some("text_decoder".into()),
+         ));
+     }
++    if source_privacy.restricts_source_matches() {
++        // Opaque lexical tokens in a key-bearing source file may themselves be
++        // key payload. Preserve occurrences/links, but never promote payload
++        // vocabulary to an algorithm. Explicit finite source API facts survive.
++        for draft in &mut observations {
++            if !draft.source_api_typed
++                && matches!(
++                    draft.method.as_str(),
++                    "lexical_match" | "ast_pattern" | "configuration_match"
++                )
++            {
++                draft.algorithms.clear();
++            }
++        }
++    }
++    let privacy = (!source_privacy.is_empty()).then(|| (relative.to_owned(), source_privacy));
+     mark_display_references(&mut detections, file, &display_ranges);
+     let usable = complete || !detections.is_empty();
+     let disposition = if partial || ((failed || unsupported) && usable) {
+@@ -861,7 +894,10 @@ fn attach_source_snippets(
+ 
+         let rel_file = finding.location.file.clone();
+         let source = text_cache.entry(rel_file.clone()).or_insert_with(|| {
+-            if privacy.get(&rel_file).is_some_and(|p| p.private_marker) {
++            if privacy
++                .get(&rel_file)
++                .is_some_and(|p| p.masks_source_context())
++            {
+                 CachedSnippetSource::MaskedSensitiveFile
+             } else {
+                 load_snippet_source(root, &root.join(&rel_file), max_bytes)
+diff --git a/crates/pqc_scan_core/src/privacy.rs b/crates/pqc_scan_core/src/privacy.rs
+index 30e972f..1e7fd64 100644
+--- a/crates/pqc_scan_core/src/privacy.rs
++++ b/crates/pqc_scan_core/src/privacy.rs
+@@ -246,6 +246,8 @@ pub(crate) fn sanitize_with_context(result: &mut ScanResult, sensitive_ids: &Has
+ #[derive(Debug, Default)]
+ pub(crate) struct SourcePrivacy {
+     pub(crate) private_marker: bool,
++    syntax_sensitive_context: bool,
++    restricted_source_matches: bool,
+     private_lines: Vec<(usize, usize)>,
+     // Only positions survive collection. Never retain payloads or secret digests.
+     credentials: BTreeMap<usize, Vec<(usize, usize, usize, usize)>>,
+@@ -332,9 +334,83 @@ impl SourcePrivacy {
+         }
+         out
+     }
++    pub(crate) fn add_sensitive_ranges(&mut self, text: &str, ranges: &[std::ops::Range<usize>]) {
++        if ranges.is_empty() {
++            return;
++        }
++        let mut ranges: Vec<_> = ranges
++            .iter()
++            .filter(|r| {
++                r.start < r.end
++                    && r.end <= text.len()
++                    && text.is_char_boundary(r.start)
++                    && text.is_char_boundary(r.end)
++            })
++            .cloned()
++            .collect();
++        ranges.sort_unstable_by_key(|r| (r.start, r.end));
++        // Merge first: nested calls must not multiply line/context work.
++        let mut merged: Vec<std::ops::Range<usize>> = Vec::new();
++        for range in ranges {
++            if let Some(last) = merged.last_mut() {
++                if range.start <= last.end {
++                    last.end = last.end.max(range.end);
++                    continue;
++                }
++            }
++            merged.push(range);
++        }
++        self.syntax_sensitive_context |= !merged.is_empty();
++        let (mut offset, mut first) = (0, 0);
++        for (index, line) in text.split_inclusive('\n').enumerate() {
++            let end = offset + line.len();
++            while first < merged.len() && merged[first].end <= offset {
++                first += 1;
++            }
++            for range in merged[first..].iter().take_while(|r| r.start < end) {
++                let a = range.start.max(offset) - offset;
++                let b = range.end.min(end) - offset;
++                let start = line[..a].chars().count() + 1;
++                let stop = start + line[a..b].chars().count();
++                self.credentials
++                    .entry(index + 1)
++                    .or_default()
++                    .push((start, stop, a + 1, b + 1));
++            }
++            offset = end;
++        }
++        for ranges in self.credentials.values_mut() {
++            ranges.sort_unstable();
++            let mut merged: Vec<(usize, usize, usize, usize)> = Vec::new();
++            for &(a, b, c, d) in ranges.iter() {
++                if let Some(last) = merged.last_mut() {
++                    if a <= last.1 {
++                        last.1 = last.1.max(b);
++                        last.3 = last.3.max(d);
++                        continue;
++                    }
++                }
++                merged.push((a, b, c, d));
++            }
++            *ranges = merged;
++        }
++    }
++    pub(crate) fn protect_source_context(&mut self) {
++        self.syntax_sensitive_context = true;
++        self.restricted_source_matches = true;
++    }
++    pub(crate) fn restricts_source_matches(&self) -> bool {
++        self.restricted_source_matches
++    }
++    pub(crate) fn masks_source_context(&self) -> bool {
++        self.private_marker || self.syntax_sensitive_context
++    }
+     pub(crate) fn sensitive(&self, line: usize, column: usize, mixed_ast: bool) -> bool {
++        if self.restricted_source_matches {
++            return true;
++        }
+         if line == 0 {
+-            return self.private_marker || !self.credentials.is_empty();
++            return self.masks_source_context() || !self.credentials.is_empty();
+         }
+         let i = self.private_lines.partition_point(|r| r.1 < line);
+         if self.private_lines.get(i).is_some_and(|r| r.0 <= line) {
+@@ -353,7 +429,7 @@ impl SourcePrivacy {
+         })
+     }
+     pub(crate) fn protects_preview(&self) -> bool {
+-        self.private_marker || !self.credentials.is_empty()
++        self.masks_source_context() || !self.credentials.is_empty()
+     }
+     pub(crate) fn sensitive_match(
+         &self,
+@@ -371,7 +447,7 @@ impl SourcePrivacy {
+             })
+     }
+     pub(crate) fn is_empty(&self) -> bool {
+-        !self.private_marker && self.credentials.is_empty()
++        !self.masks_source_context() && self.credentials.is_empty()
+     }
+ }
+ 
+@@ -379,6 +455,21 @@ impl SourcePrivacy {
+ mod tests {
+     use super::*;
+     #[test]
++    fn syntax_sensitive_ranges_merge_unicode_and_mask_only_bounded_context() {
++        let text = "é(a,\nβ) tail";
++        let mut p = SourcePrivacy::from_text(text);
++        p.add_sensitive_ranges(text, &[2..9, 3..8, 1..2, 9..999, 7..7]);
++        assert!(p.masks_source_context());
++        assert!(!p.sensitive(1, 1, false));
++        assert!(p.sensitive(1, 2, false));
++        assert!(p.sensitive(2, 1, false));
++        assert!(!p.sensitive(2, 3, false));
++        assert!(p.sensitive_match(1, 1, false, "é(a"));
++        let mut empty = SourcePrivacy::default();
++        empty.add_sensitive_ranges(text, &[1..2, 99..100]);
++        assert!(empty.is_empty());
++    }
++    #[test]
+     fn known_literals_keys_urls_and_encoded_value_strings_are_redacted() {
+         for text in [
+             "password='LEAK029A'",
+diff --git a/crates/pqc_scan_detectors/Cargo.toml b/crates/pqc_scan_detectors/Cargo.toml
+index 59d81a8..945ec66 100644
+--- a/crates/pqc_scan_detectors/Cargo.toml
++++ b/crates/pqc_scan_detectors/Cargo.toml
+@@ -25,6 +25,10 @@ tree-sitter-python.workspace = true
+ tree-sitter-rust.workspace = true
+ tree-sitter-ruby.workspace = true
+ tree-sitter-typescript.workspace = true
++tree-sitter-php.workspace = true
++tree-sitter-c-sharp.workspace = true
++tree-sitter-c.workspace = true
++tree-sitter-cpp.workspace = true
+ pqc_scan_core = { path = "../pqc_scan_core" }
+ pqc_scan_rules = { path = "../pqc_scan_rules" }
+ 
+diff --git a/crates/pqc_scan_detectors/src/source_facts.rs b/crates/pqc_scan_detectors/src/source_facts.rs
+index 44b538f..245cb22 100644
+--- a/crates/pqc_scan_detectors/src/source_facts.rs
++++ b/crates/pqc_scan_detectors/src/source_facts.rs
+@@ -3,8 +3,10 @@
+ mod bindings;
+ mod context;
+ mod cross_file;
++mod csharp;
+ mod javascript;
+ mod jwt;
++mod php;
+ mod python;
+ mod ruby;
+ mod rust;
+@@ -24,6 +26,7 @@ pub(crate) struct SourceMatch {
+     pub end: usize,
+     pub reason: &'static str,
+     pub algorithm_references: Vec<String>,
++    pub(crate) safe_preview: Option<String>,
+     retained_prefix_bytes: usize,
+ }
+ impl SourceMatch {
+@@ -37,6 +40,7 @@ pub(crate) struct Facts {
+     pub truncated: bool,
+     pub limit_reason: Option<(&'static str, usize, usize)>,
+     pub partial: bool,
++    pub sensitive_ranges: Vec<std::ops::Range<usize>>,
+     remaining_candidates: Option<usize>,
+     remaining_bytes: Option<usize>,
+ }
+@@ -64,10 +68,41 @@ impl Facts {
+                 end,
+                 reason,
+                 algorithm_references: vec![],
++                safe_preview: None,
+                 retained_prefix_bytes: 0,
+             });
+         }
+     }
++    fn source_api(
++        &mut self,
++        id: &'static str,
++        node: Node<'_>,
++        reason: &'static str,
++        names: &[&str],
++        label: &'static str,
++    ) {
++        if let Some(arguments) = node.child_by_field_name("arguments") {
++            self.sensitive_ranges.push(arguments.byte_range());
++        }
++        let before = self.hits.get(id).map_or(0, Vec::len);
++        self.node(id, node, reason);
++        if let Some(hit) = self.hits.get_mut(id).and_then(|hits| hits.get_mut(before)) {
++            hit.algorithm_references = names
++                .iter()
++                .take(16)
++                .filter(|n| {
++                    pqc_scan_core::observation::AlgorithmSpec::source_api(n, &Default::default())
++                        .is_some()
++                })
++                .map(|s| (*s).to_owned())
++                .collect();
++            hit.safe_preview = Some(if hit.algorithm_references.is_empty() {
++                label.into()
++            } else {
++                format!("{label}: {}", hit.algorithm_references.join(", "))
++            });
++        }
++    }
+     fn node(&mut self, id: &'static str, node: Node<'_>, reason: &'static str) {
+         self.push(id, node.start_byte(), node.end_byte(), reason);
+     }
+@@ -184,6 +219,8 @@ pub(crate) fn inspect_in_repository(
+             }
+         }
+         "python" => python::inspect(&mut context, &mut facts, rules),
++        "php" => php::inspect(&context, &mut facts, rules),
++        "csharp" => csharp::inspect(&context, &mut facts, rules),
+         "rust" => {
+             rust::inspect(
+                 &mut context,
+@@ -239,6 +276,7 @@ pub(crate) fn inspect_in_repository(
+             .get(id)
+             .filter(|r| builtin(r))
+             .and_then(|r| r.compiled_pattern())
++            .filter(|_| !matches!(language, "php" | "csharp"))
+         {
+             for hit in matches.iter_mut() {
+                 if let Some(original) = pattern
+@@ -250,7 +288,11 @@ pub(crate) fn inspect_in_repository(
+             }
+         }
+         matches.sort_by_key(|m| (m.start, m.end));
+-        matches.dedup_by_key(|m| m.start);
++        if matches!(language, "php" | "csharp") {
++            matches.dedup_by_key(|m| (m.start, m.end));
++        } else {
++            matches.dedup_by_key(|m| m.start);
++        }
+     }
+     facts
+ }
+diff --git a/crates/pqc_scan_detectors/src/source_facts/bindings.rs b/crates/pqc_scan_detectors/src/source_facts/bindings.rs
+index d8c70f0..72f7441 100644
+--- a/crates/pqc_scan_detectors/src/source_facts/bindings.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/bindings.rs
+@@ -13,9 +13,15 @@ pub(super) enum Handler {
+     RubyCipher,
+     RustTls,
+     NodeJose,
++    PhpClassical,
++    PhpPqc,
++    PhpReference,
++    CSharpClassical,
++    CSharpPqc,
++    CSharpReference,
+ }
+ impl Handler {
+-    pub const ALL: [Self; 9] = [
++    pub const ALL: [Self; 15] = [
+         Self::JavaPqc,
+         Self::NodePqc,
+         Self::PythonPqc,
+@@ -25,6 +31,12 @@ impl Handler {
+         Self::RubyCipher,
+         Self::RustTls,
+         Self::NodeJose,
++        Self::PhpClassical,
++        Self::PhpPqc,
++        Self::PhpReference,
++        Self::CSharpClassical,
++        Self::CSharpPqc,
++        Self::CSharpReference,
+     ];
+     pub fn id(self) -> &'static str {
+         match self {
+@@ -37,6 +49,12 @@ impl Handler {
+             Self::RubyCipher => "API_RUBY_OPENSSL_CIPHER",
+             Self::RustTls => "API_RUST_OPENSSL_TLS",
+             Self::NodeJose => "TS_NODE_JOSE_USAGE",
++            Self::PhpClassical => "PHP_CRYPTO_API",
++            Self::PhpPqc => "PHP_PQC_API",
++            Self::PhpReference => "PHP_CRYPTO_REFERENCE",
++            Self::CSharpClassical => "CSHARP_CRYPTO_API",
++            Self::CSharpPqc => "CSHARP_PQC_API",
++            Self::CSharpReference => "CSHARP_CRYPTO_REFERENCE",
+         }
+     }
+     pub fn handles(self, language: &str) -> bool {
+@@ -46,6 +64,8 @@ impl Handler {
+             Self::RustPqc => language == "rust",
+             Self::RustTls => language == "rust",
+             Self::RubyCipher => language == "ruby",
++            Self::PhpClassical | Self::PhpPqc | Self::PhpReference => language == "php",
++            Self::CSharpClassical | Self::CSharpPqc | Self::CSharpReference => language == "csharp",
+             Self::NodePqc | Self::NodeRsa | Self::NodeRsaSign | Self::NodeJose => {
+                 matches!(language, "javascript" | "typescript")
+             }
+@@ -58,10 +78,12 @@ impl Handler {
+ 
+ // Build inputs, not a runtime read of mutable repository paths. A YAML edit
+ // recompiles this crate; no copied pattern/scope/kind literals need updating.
+-const SOURCES: [&str; 3] = [
++const SOURCES: [&str; 5] = [
+     include_str!("../../../../rules/default/pqc.yml"),
+     include_str!("../../../../rules/default/tree_sitter.yml"),
+     include_str!("../../../../rules/default/crypto_api.yml"),
++    include_str!("../../../../rules/default/php.yml"),
++    include_str!("../../../../rules/default/csharp.yml"),
+ ];
+ static DEFAULTS: LazyLock<BTreeMap<String, Rule>> = LazyLock::new(|| {
+     let mut rules = BTreeMap::new();
+diff --git a/crates/pqc_scan_detectors/src/source_facts/context.rs b/crates/pqc_scan_detectors/src/source_facts/context.rs
+index 2ad073f..e77ad46 100644
+--- a/crates/pqc_scan_detectors/src/source_facts/context.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/context.rs
+@@ -88,37 +88,61 @@ impl<'a, 's> Context<'a, 's> {
+                 continue;
+             }
+             let kind = node.kind();
+-            let function = matches!(
+-                kind,
+-                "function_declaration"
+-                    | "function_expression"
+-                    | "generator_function_declaration"
+-                    | "generator_function"
+-                    | "arrow_function"
+-                    | "function_item"
+-                    | "closure_expression"
+-                    | "function_definition"
+-                    | "lambda"
+-                    | "method_definition"
+-                    | "method_signature"
+-                    | "function_signature"
+-                    | "function_type"
+-                    | "constructor_type"
+-                    | "call_signature"
+-                    | "construct_signature"
+-            );
+-            let block = matches!(
+-                kind,
+-                "statement_block"
+-                    | "for_in_statement"
+-                    | "for_statement"
+-                    | "catch_clause"
+-                    | "class_definition"
+-                    | "class_body"
+-                    | "declaration_list"
+-                    | "impl_item"
+-                    | "trait_item"
+-            ) && !(language == "python" && kind == "for_statement")
++            let function = (language == "csharp"
++                && matches!(
++                    kind,
++                    "method_declaration"
++                        | "constructor_declaration"
++                        | "local_function_statement"
++                        | "lambda_expression"
++                        | "anonymous_method_expression"
++                ))
++                || (language == "php"
++                    && matches!(kind, "method_declaration" | "anonymous_function"))
++                || matches!(
++                    kind,
++                    "function_declaration"
++                        | "function_expression"
++                        | "generator_function_declaration"
++                        | "generator_function"
++                        | "arrow_function"
++                        | "function_item"
++                        | "closure_expression"
++                        | "function_definition"
++                        | "lambda"
++                        | "method_definition"
++                        | "method_signature"
++                        | "function_signature"
++                        | "function_type"
++                        | "constructor_type"
++                        | "call_signature"
++                        | "construct_signature"
++                );
++            let block = (language == "csharp"
++                && matches!(
++                    kind,
++                    "foreach_statement"
++                        | "switch_section"
++                        | "using_statement"
++                        | "class_declaration"
++                        | "struct_declaration"
++                        | "interface_declaration"
++                        | "record_declaration"
++                        | "enum_declaration"
++                        | "delegate_declaration"
++                ))
++                || matches!(
++                    kind,
++                    "statement_block"
++                        | "for_in_statement"
++                        | "for_statement"
++                        | "catch_clause"
++                        | "class_definition"
++                        | "class_body"
++                        | "declaration_list"
++                        | "impl_item"
++                        | "trait_item"
++                ) && !(language == "python" && kind == "for_statement")
+                 || (kind == "block" && language != "python");
+             let scope = if function || block {
+                 let id = result.scopes.len();
+@@ -211,6 +235,9 @@ impl<'a, 's> Context<'a, 's> {
+     pub fn source(&self, node: Node<'_>) -> &'s str {
+         &self.text[node.start_byte()..node.end_byte()]
+     }
++    pub fn scope_parent(&self, scope: usize) -> Option<usize> {
++        self.scopes.get(scope).and_then(|s| s.parent)
++    }
+     pub fn scope(&self, node: Node<'_>) -> usize {
+         self.node_scopes.get(&node.id()).copied().unwrap_or(0)
+     }
+diff --git a/crates/pqc_scan_detectors/src/tree_sitter_detector.rs b/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+index cb3ffb1..89563b4 100644
+--- a/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
++++ b/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+@@ -1,6 +1,8 @@
+ mod display_references;
++mod header;
+ mod javascript_validation;
+ mod module_syntax;
++mod positions;
+ mod source_api;
+ mod syntax_compat;
+ mod test_scope;
+@@ -52,7 +54,20 @@ impl Detector for TreeSitterDetector {
+         let budget = crate::DetectorBudget::default();
+         self.detect_source(file, rules, observe, budget, repository)
+             .map(|outcome| {
+-                outcome.with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
++                outcome
++                    .with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
++                    .with_sensitive_source_context(
++                        file.text
++                            .as_deref()
++                            .and_then(|text| resolve_language(&file.path, text))
++                            .is_some_and(|(_, name)| {
++                                matches!(name, "php" | "csharp")
++                                    && rules
++                                        .all()
++                                        .iter()
++                                        .any(|r| r.scope == name && crate::source_facts::builtin(r))
++                            }),
++                    )
+             })
+     }
+     fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+@@ -69,7 +84,20 @@ impl TreeSitterDetector {
+     ) -> Result<DetectorOutcome> {
+         self.detect_source(file, rules, observe, budget, None)
+             .map(|outcome| {
+-                outcome.with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
++                outcome
++                    .with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
++                    .with_sensitive_source_context(
++                        file.text
++                            .as_deref()
++                            .and_then(|text| resolve_language(&file.path, text))
++                            .is_some_and(|(_, name)| {
++                                matches!(name, "php" | "csharp")
++                                    && rules
++                                        .all()
++                                        .iter()
++                                        .any(|r| r.scope == name && crate::source_facts::builtin(r))
++                            }),
++                    )
+             })
+     }
+     fn detect_source(
+@@ -79,6 +107,42 @@ impl TreeSitterDetector {
+         observe: bool,
+         budget: crate::DetectorBudget,
+         repository: Option<&pqc_scan_core::RepositoryContext>,
++    ) -> Result<DetectorOutcome> {
++        if file.text.is_none()
++            && !crate::source_kind::is_dockerfile(&file.path, "")
++            && file.ext().is_some_and(|e| {
++                matches!(
++                    e.to_ascii_lowercase().as_str(),
++                    "php"
++                        | "phtml"
++                        | "cs"
++                        | "c"
++                        | "cc"
++                        | "cpp"
++                        | "cxx"
++                        | "h"
++                        | "hpp"
++                        | "hh"
++                        | "hxx"
++                )
++            })
++        {
++            return Ok(DetectorOutcome::new(Vec::new(), DetectorStatus::Partial)
++                .with_explanation("Source text could not be decoded; syntax and cryptographic references remain uninspected."));
++        }
++        if file.path.extension().is_some_and(|e| e == "h") {
++            return header::inspect(self, file, rules, observe, budget, repository);
++        }
++        self.detect_candidate(file, rules, observe, budget, repository, None)
++    }
++    fn detect_candidate(
++        &self,
++        file: &ScannableFile,
++        rules: &RuleSet,
++        observe: bool,
++        budget: crate::DetectorBudget,
++        repository: Option<&pqc_scan_core::RepositoryContext>,
++        selected: Option<(Language, &'static str)>,
+     ) -> Result<DetectorOutcome> {
+         let text = match file.text.as_ref() {
+             Some(v) => v,
+@@ -90,15 +154,16 @@ impl TreeSitterDetector {
+             }
+         };
+ 
+-        let (language, language_name) = match resolve_language(&file.path, text) {
+-            Some(v) => v,
+-            None => {
+-                return Ok(DetectorOutcome::new(
+-                    Vec::new(),
+-                    DetectorStatus::NotApplicable,
+-                ))
+-            }
+-        };
++        let (language, language_name) =
++            match selected.or_else(|| resolve_language(&file.path, text)) {
++                Some(v) => v,
++                None => {
++                    return Ok(DetectorOutcome::new(
++                        Vec::new(),
++                        DetectorStatus::NotApplicable,
++                    ))
++                }
++            };
+ 
+         if !rules
+             .by_kind(RuleKind::TreeSitter)
+@@ -121,14 +186,30 @@ impl TreeSitterDetector {
+             && rules
+                 .get("TS_RSA_KEY_SIZE_LITERAL")
+                 .is_some_and(|r| r.kind == RuleKind::TreeSitter && scope_matches(&r.scope, "java"));
+-        let (mut candidates, mut status, mut constructors) =
+-            collect_candidate_nodes(text, &tree, budget, rsa_constructors);
++        let positions = is_new_language(language_name)
++            .then(|| positions::Positions::new(text, budget.max_ast_nodes));
++        let (mut candidates, mut status, mut constructors) = collect_candidate_nodes(
++            text,
++            &tree,
++            budget,
++            rsa_constructors,
++            language_name,
++            file.path.extension().is_some_and(|e| e == "h") && language_name == "cpp",
++            positions.as_ref(),
++        );
+         if compatibility_limited {
+             status = DetectorStatus::Truncated;
+         }
+         if tree.root_node().id() != original_tree.root_node().id() {
+-            let (original, original_status, extra_constructors) =
+-                collect_candidate_nodes(text, &original_tree, budget, rsa_constructors);
++            let (original, original_status, extra_constructors) = collect_candidate_nodes(
++                text,
++                &original_tree,
++                budget,
++                rsa_constructors,
++                language_name,
++                file.path.extension().is_some_and(|e| e == "h") && language_name == "cpp",
++                positions.as_ref(),
++            );
+             for candidate in extra_constructors {
+                 if !constructors.iter().any(|old| {
+                     old.byte_start == candidate.byte_start && old.text.len() == candidate.text.len()
+@@ -157,6 +238,9 @@ impl TreeSitterDetector {
+                 }
+             }
+         }
++        if positions.as_ref().is_some_and(|p| !p.complete) {
++            status = DetectorStatus::Truncated;
++        }
+         let (resolved_calls, binding_limited) = source_api::aliases(
+             text,
+             &tree,
+@@ -172,7 +256,10 @@ impl TreeSitterDetector {
+                 status = DetectorStatus::Truncated;
+                 break;
+             }
+-            let (line, column) = pqc_scan_core::model::line_col_for_offset(text, call.start);
++            let Some((line, column)) = source_position(text, call.start, positions.as_ref()) else {
++                status = DetectorStatus::Truncated;
++                continue;
++            };
+             candidates.push(CandidateNode {
+                 kind: "resolved_call",
+                 text: &text[call.start..call.end],
+@@ -209,6 +296,11 @@ impl TreeSitterDetector {
+         );
+         if facts.truncated {
+             status = DetectorStatus::Truncated;
++        } else if is_new_language(language_name)
++            && facts.partial
++            && status == DetectorStatus::Complete
++        {
++            status = DetectorStatus::Partial;
+         }
+ 
+         let mut observations = Vec::new();
+@@ -266,6 +358,7 @@ impl TreeSitterDetector {
+                     // Java constructors are included for the existing RSA parameter
+                     // rule only; other rules retain their original candidate scope.
+                     if candidate.kind == "object_creation_expression"
++                        && language_name == "java"
+                         && rule.id != "TS_RSA_KEY_SIZE_LITERAL"
+                     {
+                         continue;
+@@ -305,7 +398,9 @@ impl TreeSitterDetector {
+                             continue;
+                         }
+ 
+-                        let (relative_line, relative_col) =
++                        let (relative_line, relative_col) = if is_new_language(language_name) {
++                            (1, 1)
++                        } else {
+                             pqc_scan_core::model::line_col_for_offset(
+                                 candidate.text,
+                                 if candidate.canonical.is_some() {
+@@ -313,7 +408,8 @@ impl TreeSitterDetector {
+                                 } else {
+                                     hit.start()
+                                 },
+-                            );
++                            )
++                        };
+                         let line = candidate.line + relative_line.saturating_sub(1);
+                         let column = if relative_line == 1 {
+                             candidate.column + relative_col.saturating_sub(1)
+@@ -338,6 +434,14 @@ impl TreeSitterDetector {
+                         } else {
+                             source_start + token.len()
+                         };
++                        let Some((line, column)) = (if positions.is_some() {
++                            source_position(text, source_start, positions.as_ref())
++                        } else {
++                            Some((line, column))
++                        }) else {
++                            status = DetectorStatus::Truncated;
++                            continue;
++                        };
+                         let dedup_key = (source_start, source_end);
+                         if dedup.contains(&dedup_key) {
+                             continue;
+@@ -396,17 +500,20 @@ impl TreeSitterDetector {
+                             },
+                         });
+                         if observe {
+-                            observations.push(
+-                                pqc_scan_core::ObservationDraft::source(
+-                                    out.last().expect("accepted detection"),
+-                                    pqc_scan_core::ObservationMethod::AstPattern,
+-                                    hit.as_str(),
+-                                    Some((source_start, source_end)),
+-                                )
+-                                .with_algorithm_references(
+-                                    facts.references_at(rule, source_start, source_end),
+-                                ),
++                            let draft = pqc_scan_core::ObservationDraft::source(
++                                out.last().expect("accepted detection"),
++                                pqc_scan_core::ObservationMethod::AstPattern,
++                                hit.as_str(),
++                                Some((source_start, source_end)),
++                            )
++                            .with_algorithm_references(
++                                facts.references_at(rule, source_start, source_end),
+                             );
++                            observations.push(if is_new_language(language_name) {
++                                draft.with_code_point_columns()
++                            } else {
++                                draft
++                            });
+                         }
+                         rule_hits += 1;
+                     }
+@@ -416,10 +523,13 @@ impl TreeSitterDetector {
+                     .iter()
+                     .filter(|_| !constructor_pass)
+                 {
+-                    if dedup
+-                        .iter()
+-                        .any(|&(start, end)| found.start <= start && end <= found.end)
+-                    {
++                    if dedup.iter().any(|&(start, end)| {
++                        if matches!(language_name, "php" | "csharp") {
++                            (found.start, found.end) == (start, end)
++                        } else {
++                            found.start <= start && end <= found.end
++                        }
++                    }) {
+                         continue;
+                     }
+                     if rule_hits >= budget.max_hits_per_rule
+@@ -428,8 +538,12 @@ impl TreeSitterDetector {
+                         status = DetectorStatus::Truncated;
+                         break;
+                     }
+-                    let (line, column) =
+-                        pqc_scan_core::model::line_col_for_offset(text, found.start);
++                    let Some((line, column)) =
++                        source_position(text, found.start, positions.as_ref())
++                    else {
++                        status = DetectorStatus::Truncated;
++                        continue;
++                    };
+                     let raw = &text[found.start..found.end];
+                     if found.budget_bytes() > remaining_match_bytes {
+                         status = DetectorStatus::Truncated;
+@@ -446,13 +560,18 @@ impl TreeSitterDetector {
+                         },
+                         evidence: Evidence {
+                             r#type: "tree_sitter_match".into(),
+-                            r#match: mask_preview(raw),
+-                            snippet_preview: pqc_scan_core::model::snippet_around(
+-                                text,
+-                                found.start,
+-                                found.end,
+-                                64,
+-                            ),
++                            r#match: found
++                                .safe_preview
++                                .clone()
++                                .unwrap_or_else(|| mask_preview(raw)),
++                            snippet_preview: found.safe_preview.clone().unwrap_or_else(|| {
++                                pqc_scan_core::model::snippet_around(
++                                    text,
++                                    found.start,
++                                    found.end,
++                                    64,
++                                )
++                            }),
+                             metadata: BTreeMap::from([
+                                 ("detector".into(), self.name().into()),
+                                 ("language".into(), language_name.into()),
+@@ -463,15 +582,20 @@ impl TreeSitterDetector {
+                         },
+                     };
+                     if observe {
+-                        observations.push(
+-                            pqc_scan_core::ObservationDraft::source(
+-                                &detection,
+-                                pqc_scan_core::ObservationMethod::AstPattern,
+-                                raw,
+-                                Some((found.start, found.end)),
+-                            )
+-                            .with_algorithm_references(&found.algorithm_references),
+-                        );
++                        let draft = pqc_scan_core::ObservationDraft::source(
++                            &detection,
++                            pqc_scan_core::ObservationMethod::AstPattern,
++                            raw,
++                            Some((found.start, found.end)),
++                        )
++                        .with_algorithm_references(&found.algorithm_references);
++                        observations.push(if is_new_language(language_name) {
++                            draft
++                                .with_source_api_references(&found.algorithm_references)
++                                .with_code_point_columns()
++                        } else {
++                            draft
++                        });
+                     }
+                     dedup.insert((found.start, found.end));
+                     out.push(detection);
+@@ -496,9 +620,16 @@ impl TreeSitterDetector {
+         };
+         let outcome = DetectorOutcome::new(out, status)
+             .with_observations(observations)
+-            .with_test_ranges(test_ranges);
++            .with_test_ranges(test_ranges)
++            .with_sensitive_ranges(facts.sensitive_ranges.clone());
+         Ok(if template_pending {
+             outcome.with_explanation("Unrendered template: static source inspected; generated values and branches remain unknown.")
++        } else if positions.as_ref().is_some_and(|p| !p.complete) {
++            outcome.with_limit(
++                "source_position_entries",
++                budget.max_ast_nodes,
++                positions.as_ref().map_or(0, |p| p.entries()),
++            )
+         } else if let Some((reason, limit, processed)) = facts.limit_reason {
+             outcome.with_limit(reason, limit, processed)
+         } else if status == DetectorStatus::Truncated {
+@@ -516,6 +647,9 @@ fn collect_candidate_nodes<'a>(
+     tree: &tree_sitter::Tree,
+     budget: crate::DetectorBudget,
+     rsa_constructors: bool,
++    language: &str,
++    ambiguous_cpp: bool,
++    positions: Option<&positions::Positions>,
+ ) -> (
+     Vec<CandidateNode<'a>>,
+     DetectorStatus,
+@@ -580,13 +714,19 @@ fn collect_candidate_nodes<'a>(
+         }
+ 
+         let kind = node.kind();
++        if ambiguous_cpp && !header::c_kind_known(kind) && status == DetectorStatus::Complete {
++            // C's permissive macro/declaration recovery can accept C++ scope
++            // syntax as a different, error-free structure. Parser success alone
++            // must not resolve the header's configured language.
++            status = DetectorStatus::Partial;
++        }
+         let constructor = rsa_constructors
+             && kind == "object_creation_expression"
+             && node
+                 .child_by_field_name("type")
+                 .and_then(|n| n.utf8_text(text.as_bytes()).ok())
+                 .is_some_and(|name| name.rsplit('.').next() == Some("RSAKeyGenParameterSpec"));
+-        if !is_semantic_node_kind(kind) && !constructor {
++        if !is_semantic_node_kind(kind) && !new_semantic_node(language, kind) && !constructor {
+             continue;
+         }
+ 
+@@ -616,11 +756,19 @@ fn collect_candidate_nodes<'a>(
+             break;
+         }
+         let point = node.start_position();
++        let Some((line, column)) = (if positions.is_some() {
++            source_position(text, node.start_byte(), positions)
++        } else {
++            Some((point.row + 1, point.column + 1))
++        }) else {
++            status = DetectorStatus::Truncated;
++            continue;
++        };
+         target.push(CandidateNode {
+             kind,
+             text: raw_text,
+-            line: point.row + 1,
+-            column: point.column + 1,
++            line,
++            column,
+             byte_start: node.start_byte(),
+             canonical: None,
+         });
+@@ -653,6 +801,44 @@ fn is_semantic_node_kind(kind: &str) -> bool {
+         || kind == "scope_resolution"
+ }
+ 
++fn is_new_language(language: &str) -> bool {
++    matches!(language, "php" | "csharp" | "c" | "cpp")
++}
++fn source_position(
++    text: &str,
++    offset: usize,
++    positions: Option<&positions::Positions>,
++) -> Option<(usize, usize)> {
++    positions.map_or_else(
++        || Some(pqc_scan_core::model::line_col_for_offset(text, offset)),
++        |p| p.at(offset),
++    )
++}
++fn new_semantic_node(language: &str, kind: &str) -> bool {
++    match language {
++        "php" => matches!(
++            kind,
++            "name"
++                | "qualified_name"
++                | "variable_name"
++                | "function_call_expression"
++                | "member_call_expression"
++                | "scoped_call_expression"
++                | "object_creation_expression"
++        ),
++        "csharp" => matches!(
++            kind,
++            "invocation_expression"
++                | "member_access_expression"
++                | "qualified_name"
++                | "generic_name"
++                | "object_creation_expression"
++        ),
++        "c" | "cpp" => matches!(kind, "field_expression" | "new_expression"),
++        _ => false,
++    }
++}
++
+ fn scope_matches(scope: &str, language: &str) -> bool {
+     let scope_lower = scope.to_ascii_lowercase();
+     if scope_lower == "*" || scope_lower == "any" {
+@@ -679,6 +865,9 @@ pub(crate) fn resolve_language(path: &Path, text: &str) -> Option<(Language, &'s
+     if crate::source_kind::is_dockerfile(path, text) {
+         return None;
+     }
++    if path.extension().is_some_and(|e| e == "C") {
++        return Some((tree_sitter_cpp::LANGUAGE.into(), "cpp"));
++    }
+     let ext = path
+         .extension()
+         .and_then(|v| v.to_str())
+@@ -686,6 +875,13 @@ pub(crate) fn resolve_language(path: &Path, text: &str) -> Option<(Language, &'s
+         .to_ascii_lowercase();
+ 
+     match ext.as_str() {
++        "php" | "phtml" => Some((tree_sitter_php::LANGUAGE_PHP.into(), "php")),
++        "inc" if has_php_tag(text) => Some((tree_sitter_php::LANGUAGE_PHP.into(), "php")),
++        "cs" => Some((tree_sitter_c_sharp::LANGUAGE.into(), "csharp")),
++        "c" | "h" => Some((tree_sitter_c::LANGUAGE.into(), "c")),
++        "cc" | "cpp" | "cxx" | "hpp" | "hh" | "hxx" => {
++            Some((tree_sitter_cpp::LANGUAGE.into(), "cpp"))
++        }
+         "java" => Some((tree_sitter_java::LANGUAGE.into(), "java")),
+         "go" => Some((tree_sitter_go::LANGUAGE.into(), "go")),
+         "js" | "mjs" | "cjs" | "jsx" => {
+@@ -703,6 +899,17 @@ pub(crate) fn resolve_language(path: &Path, text: &str) -> Option<(Language, &'s
+     }
+ }
+ 
++fn has_php_tag(text: &str) -> bool {
++    text.match_indices("<?").any(|(i, _)| {
++        let rest = &text[i + 2..];
++        rest.starts_with('=')
++            || (rest.get(..3).is_some_and(|s| s.eq_ignore_ascii_case("php"))
++                && rest
++                    .get(3..)
++                    .is_some_and(|s| s.is_empty() || s.starts_with(char::is_whitespace)))
++    })
++}
++
+ fn is_match_boundary(c: char) -> bool {
+     c.is_whitespace() || matches!(c, '"' | '\'' | '`')
+ }
+@@ -806,7 +1013,12 @@ pub(crate) fn source_tree(
+         tree,
+         original_tree,
+         compatibility_limited,
+-        template_pending: template.as_ref().is_some_and(|v| v.found),
++        template_pending: template.as_ref().is_some_and(|v| v.found)
++            || (language_name == "php"
++                && path
++                    .file_name()
++                    .and_then(|p| p.to_str())
++                    .is_some_and(|p| p.ends_with(".blade.php"))),
+         template_limited: template.as_ref().is_some_and(|v| v.limited),
+     })
+ }
+diff --git a/crates/pqc_scan_report/src/japanese.rs b/crates/pqc_scan_report/src/japanese.rs
+index 0a987d7..699a248 100644
+--- a/crates/pqc_scan_report/src/japanese.rs
++++ b/crates/pqc_scan_report/src/japanese.rs
+@@ -7,6 +7,12 @@ type RuleCopy = (&'static str, &'static str);
+ 
+ fn rule_text(id: &str) -> Option<RuleCopy> {
+     Some(match id {
++        "CSHARP_CRYPTO_API" => ("C#の暗号APIまたはライブラリの参照が見つかりました。", "型と用途、鍵を生成する側と利用する側の対応、OSとプロバイダーを確認してください。ソースの参照だけでは実行時の有効性を判断できません。"),
++        "CSHARP_PQC_API" => ("C#のPQC方式または複合方式・HPKEの参照が見つかりました。", "正確な方式とパラメーター、.NETやBouncy Castleの実装とバージョンを確認してください。複合方式や汎用のHPKEを単独のPQC方式と同一視せず、構成と実行環境を確認してください。"),
++        "CSHARP_CRYPTO_REFERENCE" => ("C#のTLSライブラリまたはOQSラッパーの参照が見つかりました。", "Bouncy CastleのTLS、廃止済みの公式dotnetOQS、独立したOpenForgeを区別してください。通信設定やnativeライブラリ、方式の有効性は別途確認してください。"),
++        "PHP_CRYPTO_API" => ("PHPの暗号APIまたはライブラリの参照が見つかりました。", "検出された方式と用途を確認してください。汎用の署名処理や外部から読み込む鍵、OQSラッパーの参照だけでは、方式や実行時の有効性を判断できません。"),
++        "PHP_PQC_API" => ("PHPのPQC方式またはX-Wingの参照が見つかりました。", "方式名とパラメーター、Sodium・ParagonIEの実装とバージョンを確認してください。X-Wingは単独のML-KEMやTLSの複合方式と区別し、実行環境で利用できるかも確認してください。"),
++        "PHP_CRYPTO_REFERENCE" => ("PHPのOQS鍵カプセル化ラッパーの参照が見つかりました。", "native oqsphpとComposer/FFIのラッパーを区別し、対象のプロジェクトとnativeライブラリを確認してください。参照だけでは導入済み・有効・方式選択済みとは判断できません。"),
+         "JWT_RS256" | "JWT_RS384" | "JWT_RS512" | "JWT_PS256" | "JWT_PS384" | "JWT_PS512" | "JWT_SIGNING_METHOD_RS" | "TS_JWT_RSA_ALGS" | "API_JOSE_RSA_ALG" => ("RSA系のJWT・JOSE署名方式の参照が見つかりました。", "署名を発行する側と検証する側のライブラリ、鍵形式、対応方式を確認し、PQC署名への移行手順を決めてください。"),
+         "JWT_ES256" | "TS_JWT_ES_ALG" => ("ECDSA系のJWT署名方式の参照が見つかりました。", "ECDSAからPQC署名への移行候補を調べ、検証側との互換性を確認してください。"),
+         "JWT_LIB_JSONWEBTOKEN" => ("jsonwebtokenへの依存が見つかりました。", "利用しているバージョンと署名方式を確認し、PQC署名への対応予定を調べてください。"),
+diff --git a/crates/pqc_scan_rules/tests/quality_metadata.rs b/crates/pqc_scan_rules/tests/quality_metadata.rs
+index cf577bc..ab1466b 100644
+--- a/crates/pqc_scan_rules/tests/quality_metadata.rs
++++ b/crates/pqc_scan_rules/tests/quality_metadata.rs
+@@ -19,7 +19,7 @@ fn every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls() {
+         );
+     }
+     let rules = RuleSet::load_from_dir(&root.join("rules/default")).unwrap();
+-    assert_eq!(rules.len(), 125);
++    assert_eq!(rules.len(), 131);
+     let rows = metadata["rules"].as_array().unwrap();
+     assert_eq!(rows.len(), rules.len());
+     let mut seen = BTreeSet::new();
+diff --git a/docs/architecture.md b/docs/architecture.md
+index 3ccf2d2..1073918 100644
+--- a/docs/architecture.md
++++ b/docs/architecture.md
+@@ -165,6 +165,24 @@ strategy, not full semantic analysis or exhaustive private-key format support.
+   - Python
+   - Rust
+   - Ruby
++  - PHP (bounded built-in OpenSSL/Sodium/ParagonIE requests and qualified references)
++  - C# (bounded .NET/BC types, selectors and local operations)
++- The v0.5 foundation additionally routes PHP/PHTML/tagged INC (`php`), C# CS
++  (`csharp`), C (`c`) and C++ (`cpp`) for custom AST rules. Per-language built-in
++  C/C++ API packs remain separate deliverables. Uppercase `.C` is selected before
++  extension case folding; `.h` uses two candidate views sharing all five work
++  caps, consolidating equal original spans and opaque typed references once.
++  Candidate syntax/binding disagreement remains Partial. CPP-only node kinds
++  also retain ambiguity when C's permissive grammar accepts a different shape.
++- New source facts use the finite `AlgorithmSpec::source_api` vocabulary and
++  `with_source_api_references` to replace argument-token guesses. The older
++  `recognized` vocabulary and `with_algorithm_references` path remain unchanged.
++  New routes report code-point columns and retain original file-byte remapping
++  for encoded inputs. No source project, preprocessor or dependency manager runs.
++- Selected PHP/C# built-ins protect source context, match text and metadata independently
++  of parsing/binding completion. A private ephemeral typed-source bit preserves
++  finite explicit API identities while opaque token-derived algorithm guesses are
++  omitted on these PHP/C# paths. No serialized field, schema or held-input meaning changes.
+ 
+ ### AST occurrence identity (task 024)
+ 
+diff --git a/docs/quality/rules/RULE-QUALITY-METADATA.json b/docs/quality/rules/RULE-QUALITY-METADATA.json
+index e790033..3fe3c28 100644
+--- a/docs/quality/rules/RULE-QUALITY-METADATA.json
++++ b/docs/quality/rules/RULE-QUALITY-METADATA.json
+@@ -1,10 +1,10 @@
+ {
+   "schema_version": 1,
+-  "reviewed_at": "2026-11-20",
++  "reviewed_at": "2026-11-24",
+   "base_commit": "1bb45f891c3b39f5e784e9b10cff23a1ee94ab0c",
+   "fixture_layer": "compiled_pattern_target_only",
+   "license": "MIT; original synthetic fixtures and review text, references linked not copied",
+-  "scope": "Current integrated v0.3 rule companion. New source binding; inherits unchanged classifications and exact pattern fixtures from the two archived companions. Not an accuracy certification or a reassignment of historical review hashes.",
++  "scope": "Current integrated rule companion plus bounded PHP/C# source additions. Inherited128 rule rows remain unchanged by task079; historical classifications are retained. Compiled pattern controls are not detector accuracy measurements; tasks078/079 record separate source conformance and limits.",
+   "source_files": [
+     {
+       "path": "rules/default/cert.yml",
+@@ -37,6 +37,14 @@
+     {
+       "path": "rules/default/tree_sitter.yml",
+       "sha256": "9e3ee8bd1442bd99562565ab08f28e7c624f6100dcc858054f789d4a861d0edf"
++    },
++    {
++      "path": "rules/default/php.yml",
++      "sha256": "6a09be5f15b674205b6b8e482092f086c489f5f3805de28cbd67993d913c6499"
++    },
++    {
++      "path": "rules/default/csharp.yml",
++      "sha256": "4413e37c0c95840324e49ce79a05c7c23d9f85b72734a13dcd215c37280dfdc7"
+     }
+   ],
+   "references": {
+@@ -123,6 +131,66 @@
+       "edition": "repository companion v1, 2026-11-10",
+       "url": "docs/quality/RULE-QUALITY.md",
+       "scope_limit": "Current local heuristic behavior only; not a cryptographic standard or proof of detection accuracy."
++    },
++    "PHP-php": {
++      "title": "php/php-src",
++      "edition": "e0d4d57ac2de236058a7e2c5cabb61609a621d4f",
++      "url": "https://raw.githubusercontent.com/php/php-src/e0d4d57ac2de236058a7e2c5cabb61609a621d4f/ext/openssl/openssl.stub.php",
++      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
++    },
++    "PHP-ext-pqcrypto": {
++      "title": "paragonie/ext-pqcrypto",
++      "edition": "2d64b4a1dfc6fd34561947aed3ba442f54283a8f",
++      "url": "https://raw.githubusercontent.com/paragonie/ext-pqcrypto/2d64b4a1dfc6fd34561947aed3ba442f54283a8f/README.md",
++      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
++    },
++    "PHP-pqcrypto-compat": {
++      "title": "paragonie/pqcrypto_compat",
++      "edition": "d15b17cc6f2e922c780e928d27f4677aba0b8e05",
++      "url": "https://raw.githubusercontent.com/paragonie/pqcrypto_compat/d15b17cc6f2e922c780e928d27f4677aba0b8e05/README.md",
++      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
++    },
++    "PHP-phpseclib": {
++      "title": "phpseclib/phpseclib",
++      "edition": "13e0215be2c8c32ec577edba6139b64d376bcb7c",
++      "url": "https://raw.githubusercontent.com/phpseclib/phpseclib/13e0215be2c8c32ec577edba6139b64d376bcb7c/phpseclib/Crypt/RSA.php",
++      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
++    },
++    "PHP-oqs-php-ext": {
++      "title": "Muzosh/liboqs-php",
++      "edition": "8f929d29d6fbe58cfdb65a48c436510bd93b7da2",
++      "url": "https://raw.githubusercontent.com/Muzosh/liboqs-php/8f929d29d6fbe58cfdb65a48c436510bd93b7da2/README.md",
++      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
++    },
++    "PHP-oqs-php-ffi": {
++      "title": "mir-evgenii/liboqs-php",
++      "edition": "ae09b858eef7c3cf36ffe7ebcbfecf7bc4f91ac3",
++      "url": "https://raw.githubusercontent.com/mir-evgenii/liboqs-php/ae09b858eef7c3cf36ffe7ebcbfecf7bc4f91ac3/README.md",
++      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
++    },
++    "CSHARP-dotnet": {
++      "title": "dotnet/runtime",
++      "edition": "deae2e32bf0e018e09d64597b7c59b62b73bb3ce",
++      "url": "https://raw.githubusercontent.com/dotnet/runtime/deae2e32bf0e018e09d64597b7c59b62b73bb3ce/src/libraries/Common/src/System/Security/Cryptography/MLKem.cs",
++      "scope_limit": "Pinned API names, exact pure enum parameter sets and project identities only; not platform/runtime installation, active cryptography or .NET/BC parity. See source snapshots/hashes in tasks/076/evidence/SOURCES.json and task079 supplemental sources."
++    },
++    "CSHARP-bc-csharp": {
++      "title": "bcgit/bc-csharp",
++      "edition": "4007498b13582d90ee1eda5d9920c324428b98b3",
++      "url": "https://raw.githubusercontent.com/bcgit/bc-csharp/4007498b13582d90ee1eda5d9920c324428b98b3/README.md",
++      "scope_limit": "Pinned API names, exact pure enum parameter sets and project identities only; not platform/runtime installation, active cryptography or .NET/BC parity. See source snapshots/hashes in tasks/076/evidence/SOURCES.json and task079 supplemental sources."
++    },
++    "CSHARP-oqs-dotnet-old": {
++      "title": "open-quantum-safe/liboqs-dotnet",
++      "edition": "00c4c6b1a114579803c23329b41189da865f2672",
++      "url": "https://raw.githubusercontent.com/open-quantum-safe/liboqs-dotnet/00c4c6b1a114579803c23329b41189da865f2672/README.md",
++      "scope_limit": "Pinned API names, exact pure enum parameter sets and project identities only; not platform/runtime installation, active cryptography or .NET/BC parity. See source snapshots/hashes in tasks/076/evidence/SOURCES.json and task079 supplemental sources."
++    },
++    "CSHARP-oqs-dotnet": {
++      "title": "openforge-sh/liboqs-dotnet",
++      "edition": "b910a32eaa6b47bfab5769c7eaa2acbbb310f732",
++      "url": "https://raw.githubusercontent.com/openforge-sh/liboqs-dotnet/b910a32eaa6b47bfab5769c7eaa2acbbb310f732/README.md",
++      "scope_limit": "Pinned API names, exact pure enum parameter sets and project identities only; not platform/runtime installation, active cryptography or .NET/BC parity. See source snapshots/hashes in tasks/076/evidence/SOURCES.json and task079 supplemental sources."
+     }
+   },
+   "rules": [
+@@ -6181,6 +6249,303 @@
+           "expected_pattern_match": false
+         }
+       ]
++    },
++    {
++      "id": "PHP_CRYPTO_API",
++      "rule_snapshot": {
++        "id": "PHP_CRYPTO_API",
++        "kind": "tree_sitter",
++        "category": "CryptoAPI",
++        "severity": "medium",
++        "risk": "quantum-uncertain",
++        "confidence": 0.8,
++        "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
++        "pattern": "(?i)\\b(?:openssl_(?:pkey_new|pkey_derive|public_encrypt|private_decrypt|private_encrypt|public_decrypt|sign|verify)|sodium_crypto_(?:sign|scalarmult|box|kx)(?:_[A-Za-z0-9_]+)?|OQS_SIGNATURE|Oqs\\\\OqsSig|phpseclib3\\\\Crypt\\\\(?:RSA|EC|DH)::[A-Za-z_][A-Za-z0-9_]*)\\s*\\(",
++        "scope": "php",
++        "description": "PHP cryptographic API or library reference; key type may be unresolved."
++      },
++      "purpose": "primitive_request_or_unresolved_api_reference",
++      "algorithm_families": [],
++      "quantum": "finite_resolved_primitive_only_or_unknown; X-Wing distinct; wrapper unknown",
++      "classical": "not_a_classical_security_assessment",
++      "reference_ids": [
++        "PHP-php",
++        "PHP-ext-pqcrypto",
++        "PHP-pqcrypto-compat",
++        "PHP-phpseclib",
++        "PHP-oqs-php-ext",
++        "PHP-oqs-php-ffi"
++      ],
++      "reference_application": "Grammar-aware exact qualified identities and bounded local facts; legacy confidence weights 0.80/0.60 are conventions, not calibrated probabilities. Signature wrapper references retain the frozen PHP_CRYPTO_API ID without asserting a classical primitive.",
++      "method_limits": [
++        "No PHP, template, FFI, manager, dynamic code or arbitrary cross-file evaluation.",
++        "Private argument ranges are ephemeral; context is masked. Generic signing/imported keys do not imply RSA.",
++        "Compiled regex controls alone do not validate scope/binding semantics; detector tests and frozen 180-case cohort are separate evidence."
++      ],
++      "known_gaps": [
++        "Dynamic functions/classes, reflection, runtime aliases, unsupported receiver flow and external symbols remain unresolved; no absence-of-risk claim."
++      ],
++      "review_status": "source_classification_review_not_accuracy_certification",
++      "fixtures": [
++        {
++          "target": "openssl_sign(",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "unrelated(value)",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        }
++      ]
++    },
++    {
++      "id": "PHP_PQC_API",
++      "rule_snapshot": {
++        "id": "PHP_PQC_API",
++        "kind": "tree_sitter",
++        "category": "PQC",
++        "severity": "info",
++        "risk": "quantum-safe",
++        "confidence": 0.8,
++        "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
++        "pattern": "(?i)\\b(?:sodium_crypto_kem_[A-Za-z0-9_]+\\s*\\(|(?:PQCrypto|ParagonIE\\\\PQCrypto)\\\\(?:MLKem(?:512|768|1024)|MLDSA(?:44|65|87)|XWing|SLHDSA|Compat)(?:\\\\[A-Za-z_][A-Za-z0-9_]*)?\\s*(?:::|\\())",
++        "scope": "php",
++        "description": "PHP PQC algorithm or X-Wing reference; runtime support requires verification."
++      },
++      "purpose": "pqc_or_hybrid_source_reference",
++      "algorithm_families": [],
++      "quantum": "finite_resolved_primitive_only_or_unknown; X-Wing distinct; wrapper unknown",
++      "classical": "not_a_classical_security_assessment",
++      "reference_ids": [
++        "PHP-php",
++        "PHP-ext-pqcrypto",
++        "PHP-pqcrypto-compat",
++        "PHP-phpseclib",
++        "PHP-oqs-php-ext",
++        "PHP-oqs-php-ffi"
++      ],
++      "reference_application": "Grammar-aware exact qualified identities and bounded local facts; legacy confidence weights 0.80/0.60 are conventions, not calibrated probabilities. Signature wrapper references retain the frozen PHP_CRYPTO_API ID without asserting a classical primitive.",
++      "method_limits": [
++        "No PHP, template, FFI, manager, dynamic code or arbitrary cross-file evaluation.",
++        "Private argument ranges are ephemeral; context is masked. Generic signing/imported keys do not imply RSA.",
++        "Compiled regex controls alone do not validate scope/binding semantics; detector tests and frozen 180-case cohort are separate evidence."
++      ],
++      "known_gaps": [
++        "Dynamic functions/classes, reflection, runtime aliases, unsupported receiver flow and external symbols remain unresolved; no absence-of-risk claim."
++      ],
++      "review_status": "source_classification_review_not_accuracy_certification",
++      "fixtures": [
++        {
++          "target": "PQCrypto\\MLKem768::generateKeypair(",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "unrelated(value)",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        }
++      ]
++    },
++    {
++      "id": "PHP_CRYPTO_REFERENCE",
++      "rule_snapshot": {
++        "id": "PHP_CRYPTO_REFERENCE",
++        "kind": "tree_sitter",
++        "category": "CryptoAPI",
++        "severity": "info",
++        "risk": "quantum-uncertain",
++        "confidence": 0.6,
++        "migration_hint": "Identify the specific third-party OQS wrapper and native library. A qualified reference does not establish installation, algorithm selection or enabled functionality.",
++        "pattern": "(?i)\\b(?:OQS_KEYENCAPSULATION|Oqs\\\\OqsKem)\\b",
++        "scope": "php",
++        "description": "PHP OQS KEM wrapper reference; installation and selected algorithm are unresolved."
++      },
++      "purpose": "opaque_wrapper_reference",
++      "algorithm_families": [],
++      "quantum": "finite_resolved_primitive_only_or_unknown; X-Wing distinct; wrapper unknown",
++      "classical": "not_a_classical_security_assessment",
++      "reference_ids": [
++        "PHP-php",
++        "PHP-ext-pqcrypto",
++        "PHP-pqcrypto-compat",
++        "PHP-phpseclib",
++        "PHP-oqs-php-ext",
++        "PHP-oqs-php-ffi"
++      ],
++      "reference_application": "Grammar-aware exact qualified identities and bounded local facts; legacy confidence weights 0.80/0.60 are conventions, not calibrated probabilities. Signature wrapper references retain the frozen PHP_CRYPTO_API ID without asserting a classical primitive.",
++      "method_limits": [
++        "No PHP, template, FFI, manager, dynamic code or arbitrary cross-file evaluation.",
++        "Private argument ranges are ephemeral; context is masked. Generic signing/imported keys do not imply RSA.",
++        "Compiled regex controls alone do not validate scope/binding semantics; detector tests and frozen 180-case cohort are separate evidence."
++      ],
++      "known_gaps": [
++        "Dynamic functions/classes, reflection, runtime aliases, unsupported receiver flow and external symbols remain unresolved; no absence-of-risk claim."
++      ],
++      "review_status": "source_classification_review_not_accuracy_certification",
++      "fixtures": [
++        {
++          "target": "Oqs\\OqsKem",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "unrelated(value)",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        }
++      ]
++    },
++    {
++      "id": "CSHARP_CRYPTO_API",
++      "rule_snapshot": {
++        "id": "CSHARP_CRYPTO_API",
++        "kind": "tree_sitter",
++        "category": "CryptoAPI",
++        "severity": "medium",
++        "risk": "quantum-uncertain",
++        "confidence": 0.8,
++        "migration_hint": "Review the resolved primitive and purpose, platform and provider. A .NET or Bouncy Castle source reference does not establish effective runtime use.",
++        "pattern": "\\b(?:System\\.Security\\.Cryptography\\.(?:RSA|DSA|ECDsa|ECDiffieHellman)[A-Za-z]*|Org\\.BouncyCastle\\.Crypto\\.(?:Generators|Engines|Signers|Agreement)\\.[A-Za-z]+)",
++        "scope": "csharp",
++        "description": "C# cryptographic API or qualified library reference; effective key use requires verification."
++      },
++      "purpose": "nominal_classical_api_reference",
++      "algorithm_families": [],
++      "quantum": "resolved_classical_or_pqc_family_only; generic_HPKE_and_composites_unresolved",
++      "classical": "not_a_runtime_key_or_classical_security_assessment",
++      "reference_ids": [
++        "CSHARP-dotnet",
++        "CSHARP-bc-csharp",
++        "CSHARP-oqs-dotnet-old",
++        "CSHARP-oqs-dotnet"
++      ],
++      "reference_application": "Exact file-local qualified identities and finite pure parameter symbols. .NET PQC types are independent IDisposable classes. Official obsolete OQS differs from OpenForge; BC TLS does not imply a negotiated protocol. Legacy confidence0.80/0.60 weights are uncalibrated conventions. The mixed PQC/construction rule intentionally retains quantum-uncertain because HPKE need not be post-quantum.",
++      "method_limits": [
++        "No Roslyn/dotnet/MSBuild/NuGet execution, external/global-using traversal, reflection or generator evaluation.",
++        "No AsymmetricAlgorithm inheritance assumption, opaque argument-to-primitive guessing, generic HPKE-to-KEM coercion, or pure/prehash parameter conflation.",
++        "Qualified type/using references and calls remain syntactic/referenced, not successful operations. Custom definitions use generic matching.",
++        "Bounded local scopes/source order/writes and immutable selector symbols; unmodeled fields/inheritance/dynamic values stay unresolved. OID overloads are outside the finite selector table.",
++        "Source context/match/metadata protection and opaque algorithm quarantine reuse task078; explicit finite API identities survive."
++      ],
++      "known_gaps": [
++        "Project-wide overload resolution, assemblies, conditional compilation selection, partial/generated types and cross-file aliases remain unresolved.",
++        "Synthetic frozen detector cohort and compiled regex targets are separate layers, not an independently labeled accuracy population."
++      ],
++      "review_status": "source_classification_review_not_accuracy_certification",
++      "fixtures": [
++        {
++          "target": "System.Security.Cryptography.RSA.Create()",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "unrelated(value)",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        }
++      ]
++    },
++    {
++      "id": "CSHARP_PQC_API",
++      "rule_snapshot": {
++        "id": "CSHARP_PQC_API",
++        "kind": "tree_sitter",
++        "category": "PQC",
++        "severity": "info",
++        "risk": "quantum-uncertain",
++        "confidence": 0.8,
++        "migration_hint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.",
++        "pattern": "\\b(?:System\\.Security\\.Cryptography\\.(?:MLKem|MLDsa|SlhDsa|CompositeMLKem|CompositeMLDsa|Hpke)[A-Za-z0-9_]*|Org\\.BouncyCastle\\.Crypto\\.(?:Parameters|Generators|Kems|Signers)\\.(?:MLKem|MLDsa|SlhDsa)[A-Za-z0-9_]*)",
++        "scope": "csharp",
++        "description": "C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection."
++      },
++      "purpose": "pqc_or_construction_reference",
++      "algorithm_families": [],
++      "quantum": "resolved_classical_or_pqc_family_only; generic_HPKE_and_composites_unresolved",
++      "classical": "not_a_runtime_key_or_classical_security_assessment",
++      "reference_ids": [
++        "CSHARP-dotnet",
++        "CSHARP-bc-csharp",
++        "CSHARP-oqs-dotnet-old",
++        "CSHARP-oqs-dotnet"
++      ],
++      "reference_application": "Exact file-local qualified identities and finite pure parameter symbols. .NET PQC types are independent IDisposable classes. Official obsolete OQS differs from OpenForge; BC TLS does not imply a negotiated protocol. Legacy confidence0.80/0.60 weights are uncalibrated conventions. The mixed PQC/construction rule intentionally retains quantum-uncertain because HPKE need not be post-quantum.",
++      "method_limits": [
++        "No Roslyn/dotnet/MSBuild/NuGet execution, external/global-using traversal, reflection or generator evaluation.",
++        "No AsymmetricAlgorithm inheritance assumption, opaque argument-to-primitive guessing, generic HPKE-to-KEM coercion, or pure/prehash parameter conflation.",
++        "Qualified type/using references and calls remain syntactic/referenced, not successful operations. Custom definitions use generic matching.",
++        "Bounded local scopes/source order/writes and immutable selector symbols; unmodeled fields/inheritance/dynamic values stay unresolved. OID overloads are outside the finite selector table.",
++        "Source context/match/metadata protection and opaque algorithm quarantine reuse task078; explicit finite API identities survive."
++      ],
++      "known_gaps": [
++        "Project-wide overload resolution, assemblies, conditional compilation selection, partial/generated types and cross-file aliases remain unresolved.",
++        "Synthetic frozen detector cohort and compiled regex targets are separate layers, not an independently labeled accuracy population."
++      ],
++      "review_status": "source_classification_review_not_accuracy_certification",
++      "fixtures": [
++        {
++          "target": "System.Security.Cryptography.MLKem.GenerateKey()",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "unrelated(value)",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        }
++      ]
++    },
++    {
++      "id": "CSHARP_CRYPTO_REFERENCE",
++      "rule_snapshot": {
++        "id": "CSHARP_CRYPTO_REFERENCE",
++        "kind": "tree_sitter",
++        "category": "CryptoAPI",
++        "severity": "info",
++        "risk": "quantum-uncertain",
++        "confidence": 0.6,
++        "migration_hint": "Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately.",
++        "pattern": "\\b(?:dotnetOQS|OpenForge\\.Cryptography\\.LibOqs|Org\\.BouncyCastle\\.Tls)(?:\\.[A-Za-z_][A-Za-z0-9_]*)*\\b",
++        "scope": "csharp",
++        "description": "C# TLS library or OQS wrapper reference; identity and runtime capability require separate checks."
++      },
++      "purpose": "opaque_wrapper_or_tls_library_reference",
++      "algorithm_families": [],
++      "quantum": "resolved_classical_or_pqc_family_only; generic_HPKE_and_composites_unresolved",
++      "classical": "not_a_runtime_key_or_classical_security_assessment",
++      "reference_ids": [
++        "CSHARP-dotnet",
++        "CSHARP-bc-csharp",
++        "CSHARP-oqs-dotnet-old",
++        "CSHARP-oqs-dotnet"
++      ],
++      "reference_application": "Exact file-local qualified identities and finite pure parameter symbols. .NET PQC types are independent IDisposable classes. Official obsolete OQS differs from OpenForge; BC TLS does not imply a negotiated protocol. Legacy confidence0.80/0.60 weights are uncalibrated conventions. The mixed PQC/construction rule intentionally retains quantum-uncertain because HPKE need not be post-quantum.",
++      "method_limits": [
++        "No Roslyn/dotnet/MSBuild/NuGet execution, external/global-using traversal, reflection or generator evaluation.",
++        "No AsymmetricAlgorithm inheritance assumption, opaque argument-to-primitive guessing, generic HPKE-to-KEM coercion, or pure/prehash parameter conflation.",
++        "Qualified type/using references and calls remain syntactic/referenced, not successful operations. Custom definitions use generic matching.",
++        "Bounded local scopes/source order/writes and immutable selector symbols; unmodeled fields/inheritance/dynamic values stay unresolved. OID overloads are outside the finite selector table.",
++        "Source context/match/metadata protection and opaque algorithm quarantine reuse task078; explicit finite API identities survive."
++      ],
++      "known_gaps": [
++        "Project-wide overload resolution, assemblies, conditional compilation selection, partial/generated types and cross-file aliases remain unresolved.",
++        "Synthetic frozen detector cohort and compiled regex targets are separate layers, not an independently labeled accuracy population."
++      ],
++      "review_status": "source_classification_review_not_accuracy_certification",
++      "fixtures": [
++        {
++          "target": "dotnetOQS",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "unrelated(value)",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        }
++      ]
+     }
+   ],
+   "integrated_develop": "26fa19e7bd2434836d6c4dbed0185f34e15b9e45",
+diff --git a/docs/quality/rules/RULE-QUALITY.md b/docs/quality/rules/RULE-QUALITY.md
+index 07af4b8..7c9aa54 100644
+--- a/docs/quality/rules/RULE-QUALITY.md
++++ b/docs/quality/rules/RULE-QUALITY.md
+@@ -1,6 +1,6 @@
+ # Built-in rule quality companion (task028)
+ 
+-[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **125 current
++[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **131 current
+ built-in rules**, not the historical counts in task descriptions. Existing YAML is
+ the executable source of truth. This original MIT development-only companion is
+ not loaded by the CLI, does not add report fields, and does not certify accuracy.
+@@ -37,11 +37,11 @@ configuration grammar. No standard text or real private keys are copied.
+ 
+ ## Fixtures and known gaps
+ 
+-The 272 current examples exercise **compiled regex targets only**, with desired labels
++The 284 current examples exercise **compiled regex targets only**, with desired labels
+ separate from expected current matches. They are not end-to-end source truth,
+ symbol resolution, a key parser test, provider validation or performance evidence.
+ The existing detector/CLI/certificate/schema suites and frozen task023 corpus still
+-provide their own bounded integration evidence. Do not count these controls as125
++provide their own bounded integration evidence. Do not count these controls as131
+ new independently labeled accuracy units or as approved quality budgets.
+ 
+ The original task028 recorded eight negative controls with false positives. Four
+@@ -120,3 +120,12 @@ source descriptions and cryptographic-family facts do not calibrate those values
+ The existing 0.45 promotion policy remains compatibility behavior. Current
+ 268 compiled-target controls include four retained false-positive controls,
+ not an estimate of end-to-end false-positive/false-negative rates.
++
++Task078 adds three PHP rows and six pattern controls, while preserving the previous
++125 rows. Its 180 frozen source cases and supplementary scope/privacy tests are
++separate from these pattern controls; neither cohort estimates deployment accuracy.
++
++Task079 adds three C# rows and six pattern controls without changing the previous
++128 rows. Its218 frozen focal cases and supplemental source-flow/privacy tests are
++separate evidence. The mixed PQC/HPKE/composite source rule uses quantum-uncertain
++because a construction name does not identify a post-quantum component.
+diff --git a/docs/rules-reference.md b/docs/rules-reference.md
+index 4147879..5d8620f 100644
+--- a/docs/rules-reference.md
++++ b/docs/rules-reference.md
+@@ -2,9 +2,9 @@
+ 
+ This document lists all built-in detection rules shipped in `rules/default/` and explains severity levels used in reports.
+ 
+-- Total rules: **125**
+-- Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`
+-- Kind breakdown: `certificate`: 18, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 28
++- Total rules: **131**
++- Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`, `php.yml`, `csharp.yml`
++- Kind breakdown: `certificate`: 18, `dependency`: 16, `key`: 3, `regex`: 60, `tree_sitter`: 34
+ 
+ ## Validation and quality review
+ 
+@@ -284,3 +284,41 @@ external wrapper implementations are not followed. Existing rule definitions and
+ identity encoding are unchanged; added typed facts can change affected observation IDs. Positive, negative, renamed-wrapper, shadowing and
+ resource controls are in `framework_source.rs`; pinned real-source results are
+ separate from regex-target quality fixtures.
++
++## PHP source rules (v0.5 development)
++
++`PHP_CRYPTO_API` captures exact OpenSSL/Sodium requests, qualified phpseclib references,
++and opaque signature-wrapper references. Generic signing keys remain unknown;
++locally typed DH/ECDH derivations differ from RSA encryption and signatures.
++`PHP_PQC_API` captures finite Sodium ML-KEM-768/X-Wing and ParagonIE native,
++polyfill and Compat names, including bounded key receiver roles. SLH-DSA is
++reference-only. `PHP_CRYPTO_REFERENCE` captures opaque native/FFI KEM wrappers.
++Both wrapper IDs inventory references only, with no primitive, installation or
++capability claim; the signature wrapper retains the frozen generic API ID.
++
++Default-definition identity, PHP scope, names, source order and local writes are
++checked before typed capture. Modified/custom definitions retain generic matching.
++Arguments are omitted from new built-in previews and protected across source
++context. Legacy confidence weights are uncalibrated conventions. See
++[user scope](user/COVERAGE.md#source-limits) and the current source-bound quality
++companion; historical audits remain unchanged.
++
++## C# source rules (v0.5 development)
++
++`CSHARP_CRYPTO_API` captures qualified standard RSA/DSA/EC/ECDH factories,
++concrete providers and bounded operations, plus BC classical types.
++`CSHARP_PQC_API` captures independent .NET MLKem/MLDsa/SlhDsa classes,
++exact pure .NET/BC parameter symbols and supported generator/KEM/signer operations.
++CompositeMLKem/CompositeMLDsa/Hpke remain construction references without a guessed
++KEM or parameter set. This mixed rule uses quantum-uncertain: generic HPKE need
++not use post-quantum cryptography. `CSHARP_CRYPTO_REFERENCE` distinguishes BC TLS,
++the obsolete official dotnetOQS wrapper and independent OpenForge namespaces,
++without inferring installed packages, effective TLS or enabled native algorithms.
++
++Aliases/global-using declarations are file-local. Names, declared parameter/local
++types, ordered assignments, ref/out and opaque writes are bounded. Captured outer
++locals in deferred functions remain unresolved. Private context/matches/metadata
++and opaque argument-token guesses are protected as in PHP. All observations are
++syntactic/referenced. No platform support is inferred from framework strings.
++The current quality companion binds all new definitions; previous128 rows/history
++remain intact. See [user scope](user/COVERAGE.md#source-limits).
+diff --git a/docs/user/COVERAGE.ja.md b/docs/user/COVERAGE.ja.md
+index 5a07059..6e477a5 100644
+--- a/docs/user/COVERAGE.ja.md
++++ b/docs/user/COVERAGE.ja.md
+@@ -60,17 +60,58 @@ Kubernetes／Ingress、nginx、Apache httpd、Envoy、Istio、HAProxy、Traefik
+ TLS・暗号スイート・鍵交換グループなどの設定を調べます。
+ ファイル上の設定であり、稼働中の接続で有効な方式を確認した結果ではありません。
+ 
+-組み込みルールは125件です。同梱の `rules/default` を指定して使ってください。
++組み込みルールは131件です。同梱の `rules/default` を指定して使ってください。
+ 
+ <a id="source-limits"></a>
+ <a id="source-facts"></a>
+ 
+ ## ソースコードの検査範囲
+ 
+-Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Rubyの暗号APIや方式名の参照を調べます。
++Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Ruby、PHP、C#の暗号APIや方式名の参照を調べます。
+ コードは実行しません。対応する利用パターンに範囲があるため、すべての暗号処理を発見するものではありません。
+ 方式名が見つかっても、実行時の利用やPQC対応の完了を意味しません。
+ 
++開発中のスキャナーでは、独自のASTルールをPHP（`php`）、C#（`csharp`）、
++C（`c`）、C++（`cpp`）の構文で照合できます。C・C++の組み込みAPI検出は別途追加しており、
++構文解析ができるだけで、各APIの検出に対応したことにはなりません。
++PHPは`.php`、`.phtml`、明示的なPHP開始タグを持つ`.inc`が対象です。
++HTMLとの混在では静的なPHP部分を調べ、Bladeは描画せず未完了として扱います。
++C#は`.cs`が対象で、Razorやファイルをまたぐ意味解析は含みません。
++Cは`.c`、C++は`.C`、`.cc`、`.cpp`、`.cxx`、`.hpp`、`.hh`、`.hxx`を使います。
++`.h`はCとC++で処理上限を分け合い、同じ位置・同じ意味の観測を1件にまとめます。
++構文や束縛が食い違う範囲は未完了です。プリプロセッサー、include、ビルドは実行しません。
++
++PHPの組み込みルールはOpenSSLの明示的な鍵種別、RSA操作、局所的に追跡できる
++DH/ECDH導出を調べます。汎用署名やインポートした鍵の種別は推測しません。
++SodiumのEd25519/X25519、ML-KEM-768とX-Wingを区別し、ParagonIEのnative・
++polyfill・Compatではパラメーター族と署名/KEM用の局所変数の役割を保持します。
++SLH-DSAとphpseclibは修飾された参照、native oqsphpとComposer/FFIのOQSラッパーは
++別々の不透明な参照として扱います。導入済み・有効・実装同等・実行済みとは判定しません。
++名前空間、インポート、関数別名はソース順の限定的な範囲で追跡します。
++名前の衝突、再代入、不明な書き込み、動的呼び出し・リフレクション・FFIでは
++以前の鍵情報を流用しません。新しい組み込み検出では引数を表示しません。
++PHPの組み込みルールが選択されている場合、解析の途中停止時もソース文脈・検出文字列・メタデータを保護します。
++暗号方式名に似た鍵データも、方式として登録しません。明示的なAPI由来の方式情報は保持します。
++独自ルールは従来の汎用動作を維持し、任意のファイル間解決は対象外です。
++
++C#では標準のRSA/DSA/EC/ECDHの型、局所的に追跡できる操作、.NETのMLKem・
++MLDsa・SlhDsaの生成・インポートと正確なpureパラメーター、対応するBouncy Castleの
++鍵生成・KEM・署名を調べます。.NETのPQCクラスをAsymmetricAlgorithmの派生型とは
++仮定しません。インポートや型の参照だけでは操作の成功と判定しません。
++名前付き引数と局所変数を扱います。名前空間の別名はAlias.TypeとAlias::Typeに対応し、
++型パラメーターやプロパティの同名を所有する型・メソッドの範囲で扱います。
++不明な書き込みや遅延実行される関数の外側の変数では
++古い鍵情報を流用しません。ファイル間のglobal using、フィールド・継承、
++リフレクション、コード生成、プロジェクト全体のオーバーロード解決は対象外です。
++プリプロセッサーの条件も実行しません。
++
++CompositeMLKem・CompositeMLDsa・Hpkeは構成不明の参照として残します。
++汎用のHPKEはPQCとは限らず、表に含まれないprehashやOIDの選択も未解決として扱います。
++BC TLS、廃止済みの公式dotnetOQS、独立したOpenForgeの名前空間を区別し、
++ソースや対象フレームワークの記述だけでOS・プロバイダー・バージョンの実行能力を判断しません。
++C#の組み込みルールもPHPと同様に引数・ソース文脈・検出文字列・メタデータを保護し、
++明示的なAPI由来の方式情報はインベントリに保持します。
++
+ 構文エラー、未対応の記述、処理上限などで検査が終わらなかった場合も、取得できた検出結果は残ります。
+ [検査状況と未完了の確認](SCANNING.ja.md#diagnostics)を参照し、表示された理由と次の確認方法に沿って調べてください。
+ 
+diff --git a/docs/user/COVERAGE.md b/docs/user/COVERAGE.md
+index f47f332..445233b 100644
+--- a/docs/user/COVERAGE.md
++++ b/docs/user/COVERAGE.md
+@@ -62,7 +62,7 @@ Supported configurations include Kubernetes/Ingress, nginx, Apache httpd, Envoy,
+ Istio, HAProxy and Traefik. Checks cover TLS, cipher suites and key-exchange groups.
+ These are file settings, not confirmed algorithms in a live connection.
+ 
+-There are 125 built-in rules. Use the matching bundled `rules/default` directory.
++There are 131 built-in rules. Use the matching bundled `rules/default` directory.
+ 
+ <a id="source-limits"></a>
+ <a id="source-facts"></a>
+@@ -70,10 +70,57 @@ There are 125 built-in rules. Use the matching bundled `rules/default` directory
+ ## Source-code inspection limits
+ 
+ Checks cover cryptographic API and algorithm references in Java, Go, JavaScript,
+-TypeScript/TSX, Python, Rust and Ruby. Code is not executed. Supported usage
++TypeScript/TSX, Python, Rust, Ruby, PHP and C#. Code is not executed. Supported usage
+ patterns are limited, so not every cryptographic operation can be found.
+ An algorithm reference does not establish runtime use or completed PQC migration.
+ 
++The development scanner also routes custom AST rules to PHP (`php`), C#
++(`csharp`), C (`c`) and C++ (`cpp`). C/C++ built-in API coverage is being added separately; parser availability
++alone does not establish it.
++PHP includes `.php`, `.phtml` and `.inc` with an explicit PHP opening tag; mixed
++HTML is inspected only for static PHP. Blade remains incomplete and is never
++rendered. C# accepts `.cs`; Razor and cross-file semantic resolution are excluded.
++C uses `.c`, while `.C`, `.cc`, `.cpp`, `.cxx`, `.hpp`, `.hh` and `.hxx` use C++.
++A `.h` file has bounded C/C++ candidate views sharing work limits. Matching
++source facts are retained once; differing syntax/bindings remain incomplete.
++Neither preprocessing nor include/build execution selects an effective language.
++
++
++PHP built-ins inspect explicit OpenSSL key types and RSA operations, local DH/ECDH
++derivation and generic signatures without guessing an imported key type. Sodium
++Ed25519/X25519 and ML-KEM-768 differ from X-Wing. ParagonIE native/polyfill/Compat
++references preserve exact parameter families and local signing/KEM receiver roles;
++SLH-DSA and phpseclib are qualified references. Native oqsphp and Composer/FFI OQS
++wrappers remain distinct opaque references. These facts do not establish loaded
++extensions, implementation equivalence, installation or active protection.
++
++PHP namespaces, imports and function aliases use a bounded, source-ordered local
++subset. Shadowing, reassignment, unknown writes and dynamic/reflected/FFI calls do
++not inherit an older key identity. Argument payloads are omitted from these new
++built-in previews. When PHP built-ins are selected, source context is masked even
++if analysis stops early. Match text and metadata are protected too; opaque
++payload tokens do not become algorithm assets. Explicit API identities remain. Unrelated/custom rules
++retain their generic behavior. Arbitrary cross-file resolution is excluded.
++
++C# covers explicit standard RSA/DSA/EC/ECDH providers and bounded local operations,
++.NET MLKem/MLDsa/SlhDsa generation/import and exact pure parameter symbols, and
++supported Bouncy Castle generators/KEM/signers. The .NET PQC classes are handled
++independently of AsymmetricAlgorithm. Imports/type references do not establish
++successful operations. Named arguments and locally known receiver roles are
++supported. Namespace aliases accept Alias.Type and Alias::Type; type parameters
++and properties shadow imported names within their owning type/method scope.
++Unknown writes and captured outer variables in deferred functions stop
++older bindings. Cross-file globals, fields/inheritance, reflection, generators and
++project-wide overload resolution are excluded; preprocessor selection is not run.
++
++CompositeMLKem/CompositeMLDsa/Hpke remain construction-unresolved references.
++Generic HPKE is not necessarily post-quantum. Prehash/OID selectors outside the
++finite table remain unresolved. BC TLS, obsolete official dotnetOQS and independent
++OpenForge namespaces remain distinct opaque references. Platform/provider/version
++availability is not inferred from source or target-framework declarations. Selected
++C# built-ins apply the same argument/context/match/metadata protection as PHP;
++explicit finite API identities remain in inventory.
++
+ Syntax errors, unsupported constructs and processing limits can leave inspection
+ incomplete while retaining available findings. Review the stated reasons and next
+ checks in [inspection status](SCANNING.md#diagnostics).
+diff --git a/third_party/notices/README.md b/third_party/notices/README.md
+index 8392b6d..126b085 100644
+--- a/third_party/notices/README.md
++++ b/third_party/notices/README.md
+@@ -40,3 +40,9 @@ archives omit the repository-root MIT notice. Both bind to simd revision
+ `d74c030d9dc4f3cae02146d1f497ff62726ef09a`; each exact package entry records
+ its own Cargo checksum/path and the unmodified upstream notice hash. No
+ review-required network statement or packaging guard is changed.
++
++The v0.5 parser foundation adds `tree-sitter-cpp 0.23.4`, whose registry archive
++omits its root MIT notice. Its fallback binds Cargo checksum and recorded upstream
++revision `f41e1a044c8a84ea9fa8577fdd2eab92ec96de02` to the unmodified LICENSE.
++The pinned PHP, C# and C grammar archives already include their license files.
++Existing review-required statements and publication boundaries remain unchanged.
+diff --git a/third_party/notices/manifest.json b/third_party/notices/manifest.json
+index bb05c06..0f5bae4 100644
+--- a/third_party/notices/manifest.json
++++ b/third_party/notices/manifest.json
+@@ -312,6 +312,26 @@
+           "kind": "license_text"
+         }
+       ]
++    },
++    {
++      "name": "tree-sitter-cpp",
++      "version": "0.23.4",
++      "source": "registry+https://github.com/rust-lang/crates.io-index",
++      "registry_checksum": "df2196ea9d47b4ab4a31b9297eaa5a5d19a0b121dceb9f118f6790ad0ab94743",
++      "license_expression": "MIT",
++      "upstream_repository": "https://github.com/tree-sitter/tree-sitter-cpp",
++      "upstream_revision": "f41e1a044c8a84ea9fa8577fdd2eab92ec96de02",
++      "path_in_vcs": "",
++      "review_required": false,
++      "review_note": null,
++      "files": [
++        {
++          "path": "texts/tree-sitter-cpp-0.23.4/LICENSE",
++          "sha256": "2e0110e07abef7c2548b26ec9d6969775617ca539a0dc8dbeeb14d6452c711d1",
++          "upstream_url": "https://raw.githubusercontent.com/tree-sitter/tree-sitter-cpp/f41e1a044c8a84ea9fa8577fdd2eab92ec96de02/LICENSE",
++          "kind": "license_text"
++        }
++      ]
+     }
+   ]
+ }

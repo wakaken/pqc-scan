@@ -1186,3 +1186,6 @@ fn size_settings_flow_from_serve_default_or_request_into_real_report_scope() {
         assert_eq!(d["coverage"]["selected_files"], count);
     }
 }
+
+#[path = "support/language_serve.rs"]
+mod language_serve;

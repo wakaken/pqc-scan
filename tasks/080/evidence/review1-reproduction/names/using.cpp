@@ -1,0 +1,1 @@
+using Vendor::RSA_new; void f(){RSA_new();}

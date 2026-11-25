@@ -1,0 +1,3 @@
+#include <openssl/evp.h>
+#include <oqs/oqs.h>
+void f(){EVP_PKEY_CTX *ctx=EVP_PKEY_CTX_new_from_name(NULL,"ML-KEM-768",NULL);EVP_PKEY *key=NULL;EVP_PKEY_keygen(ctx,&key);EVP_PKEY_encapsulate(ctx,"PRIVATE080_CLI_KEY_CANARY_abcdefghijklmnopqrstuvwxyz0123456789",more);OSSL_PROVIDER_load(NULL,"oqsprovider");EVP_set_default_properties(NULL,"provider=default");SSL_CTX_set1_groups_list(ssl,"X25519MLKEM768:P-256");EVP_DigestSignInit(md,NULL,NULL,NULL,imported);RSA_new();}

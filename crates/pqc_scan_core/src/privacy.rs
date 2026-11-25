@@ -246,6 +246,8 @@ pub(crate) fn sanitize_with_context(result: &mut ScanResult, sensitive_ids: &Has
 #[derive(Debug, Default)]
 pub(crate) struct SourcePrivacy {
     pub(crate) private_marker: bool,
+    syntax_sensitive_context: bool,
+    restricted_source_matches: bool,
     private_lines: Vec<(usize, usize)>,
     // Only positions survive collection. Never retain payloads or secret digests.
     credentials: BTreeMap<usize, Vec<(usize, usize, usize, usize)>>,
@@ -332,9 +334,83 @@ impl SourcePrivacy {
         }
         out
     }
+    pub(crate) fn add_sensitive_ranges(&mut self, text: &str, ranges: &[std::ops::Range<usize>]) {
+        if ranges.is_empty() {
+            return;
+        }
+        let mut ranges: Vec<_> = ranges
+            .iter()
+            .filter(|r| {
+                r.start < r.end
+                    && r.end <= text.len()
+                    && text.is_char_boundary(r.start)
+                    && text.is_char_boundary(r.end)
+            })
+            .cloned()
+            .collect();
+        ranges.sort_unstable_by_key(|r| (r.start, r.end));
+        // Merge first: nested calls must not multiply line/context work.
+        let mut merged: Vec<std::ops::Range<usize>> = Vec::new();
+        for range in ranges {
+            if let Some(last) = merged.last_mut() {
+                if range.start <= last.end {
+                    last.end = last.end.max(range.end);
+                    continue;
+                }
+            }
+            merged.push(range);
+        }
+        self.syntax_sensitive_context |= !merged.is_empty();
+        let (mut offset, mut first) = (0, 0);
+        for (index, line) in text.split_inclusive('\n').enumerate() {
+            let end = offset + line.len();
+            while first < merged.len() && merged[first].end <= offset {
+                first += 1;
+            }
+            for range in merged[first..].iter().take_while(|r| r.start < end) {
+                let a = range.start.max(offset) - offset;
+                let b = range.end.min(end) - offset;
+                let start = line[..a].chars().count() + 1;
+                let stop = start + line[a..b].chars().count();
+                self.credentials
+                    .entry(index + 1)
+                    .or_default()
+                    .push((start, stop, a + 1, b + 1));
+            }
+            offset = end;
+        }
+        for ranges in self.credentials.values_mut() {
+            ranges.sort_unstable();
+            let mut merged: Vec<(usize, usize, usize, usize)> = Vec::new();
+            for &(a, b, c, d) in ranges.iter() {
+                if let Some(last) = merged.last_mut() {
+                    if a <= last.1 {
+                        last.1 = last.1.max(b);
+                        last.3 = last.3.max(d);
+                        continue;
+                    }
+                }
+                merged.push((a, b, c, d));
+            }
+            *ranges = merged;
+        }
+    }
+    pub(crate) fn protect_source_context(&mut self) {
+        self.syntax_sensitive_context = true;
+        self.restricted_source_matches = true;
+    }
+    pub(crate) fn restricts_source_matches(&self) -> bool {
+        self.restricted_source_matches
+    }
+    pub(crate) fn masks_source_context(&self) -> bool {
+        self.private_marker || self.syntax_sensitive_context
+    }
     pub(crate) fn sensitive(&self, line: usize, column: usize, mixed_ast: bool) -> bool {
+        if self.restricted_source_matches {
+            return true;
+        }
         if line == 0 {
-            return self.private_marker || !self.credentials.is_empty();
+            return self.masks_source_context() || !self.credentials.is_empty();
         }
         let i = self.private_lines.partition_point(|r| r.1 < line);
         if self.private_lines.get(i).is_some_and(|r| r.0 <= line) {
@@ -353,7 +429,7 @@ impl SourcePrivacy {
         })
     }
     pub(crate) fn protects_preview(&self) -> bool {
-        self.private_marker || !self.credentials.is_empty()
+        self.masks_source_context() || !self.credentials.is_empty()
     }
     pub(crate) fn sensitive_match(
         &self,
@@ -371,13 +447,28 @@ impl SourcePrivacy {
             })
     }
     pub(crate) fn is_empty(&self) -> bool {
-        !self.private_marker && self.credentials.is_empty()
+        !self.masks_source_context() && self.credentials.is_empty()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn syntax_sensitive_ranges_merge_unicode_and_mask_only_bounded_context() {
+        let text = "é(a,\nβ) tail";
+        let mut p = SourcePrivacy::from_text(text);
+        p.add_sensitive_ranges(text, &[2..9, 3..8, 1..2, 9..999, 7..7]);
+        assert!(p.masks_source_context());
+        assert!(!p.sensitive(1, 1, false));
+        assert!(p.sensitive(1, 2, false));
+        assert!(p.sensitive(2, 1, false));
+        assert!(!p.sensitive(2, 3, false));
+        assert!(p.sensitive_match(1, 1, false, "é(a"));
+        let mut empty = SourcePrivacy::default();
+        empty.add_sensitive_ranges(text, &[1..2, 99..100]);
+        assert!(empty.is_empty());
+    }
     #[test]
     fn known_literals_keys_urls_and_encoded_value_strings_are_redacted() {
         for text in [
