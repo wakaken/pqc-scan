@@ -1,5 +1,13 @@
 # Reviewed development baseline
 
+The [pinned full-repository OSS study](../../docs/quality/oss-corpus/REPORT.md)
+is a separate reference/coverage dataset: 18 additions and eight retained targets,
+with native scan artifacts, per-child resources and 64 source-checked observations.
+It reuses this runner's resource/source-binding helpers without changing the
+scored corpora, labels, evaluator, CI inputs or default commands below. Its targeted,
+single-analyst observations are not independently adjudicated truth and do not
+provide Precision/Recall denominators.
+
 Run the existing scanner; never execute or compile the corpus. Python 3.12 and
 standard library only; the public Rust CLI/report contracts are unchanged.
 
