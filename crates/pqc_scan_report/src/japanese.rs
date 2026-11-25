@@ -7,7 +7,13 @@ type RuleCopy = (&'static str, &'static str);
 
 fn rule_text(id: &str) -> Option<RuleCopy> {
     Some(match id {
-        "JWT_RS256" | "JWT_RS384" | "JWT_RS512" | "JWT_PS256" | "JWT_PS384" | "JWT_PS512" | "JWT_SIGNING_METHOD_RS" | "TS_JWT_RSA_ALGS" | "API_JOSE_RSA_ALG" => ("RSA系のJWT・JOSE署名方式の参照が見つかりました。", "署名を発行する側と検証する側のライブラリ、鍵形式、対応方式を確認し、PQC署名への移行手順を決めてください。"),
+        "JWT_RS256" => ("JWT・JOSEのRS256署名方式への参照が見つかりました。実際の署名処理で使われるかは未確認です。", "署名・検証・テストのどの記述かを確認し、JOSE形式と利用するライブラリ・検証側の対応を調べてください。"),
+        "JWT_RS384" => ("JWT・JOSEのRS384署名方式への参照が見つかりました。実際の署名処理で使われるかは未確認です。", "署名・検証・テストのどの記述かを確認し、JOSE形式と利用するライブラリ・検証側の対応を調べてください。"),
+        "JWT_RS512" => ("JWT・JOSEのRS512署名方式への参照が見つかりました。実際の署名処理で使われるかは未確認です。", "署名・検証・テストのどの記述かを確認し、JOSE形式と利用するライブラリ・検証側の対応を調べてください。"),
+        "JWT_PS256" => ("JWT・JOSEのPS256署名方式への参照が見つかりました。実際の署名処理で使われるかは未確認です。", "署名・検証・テストのどの記述かを確認し、JOSE形式と利用するライブラリ・検証側の対応を調べてください。"),
+        "JWT_PS384" => ("JWT・JOSEのPS384署名方式への参照が見つかりました。実際の署名処理で使われるかは未確認です。", "署名・検証・テストのどの記述かを確認し、JOSE形式と利用するライブラリ・検証側の対応を調べてください。"),
+        "JWT_PS512" => ("JWT・JOSEのPS512署名方式への参照が見つかりました。実際の署名処理で使われるかは未確認です。", "署名・検証・テストのどの記述かを確認し、JOSE形式と利用するライブラリ・検証側の対応を調べてください。"),
+        "JWT_SIGNING_METHOD_RS" | "TS_JWT_RSA_ALGS" | "API_JOSE_RSA_ALG" => ("RSA系のJWT・JOSE署名方式の参照が見つかりました。", "署名を発行する側と検証する側のライブラリ、鍵形式、対応方式を確認し、PQC署名への移行手順を決めてください。"),
         "JWT_ES256" | "TS_JWT_ES_ALG" => ("ECDSA系のJWT署名方式の参照が見つかりました。", "ECDSAからPQC署名への移行候補を調べ、検証側との互換性を確認してください。"),
         "JWT_LIB_JSONWEBTOKEN" => ("jsonwebtokenへの依存が見つかりました。", "利用しているバージョンと署名方式を確認し、PQC署名への対応予定を調べてください。"),
         "JWT_LIB_JOSE" => ("JOSEライブラリへの依存が見つかりました。", "利用しているJOSE実装で、PQC署名の方式名と鍵形式に対応しているか確認してください。"),
@@ -31,7 +37,9 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
         "API_OPENSSL_RSA_NEW" | "OPENSSL_RSA_API" => ("OpenSSLの低水準RSA APIの参照が見つかりました。", "暗号方式の変更に備え、EVPなどの高水準APIを使う構成を検討してください。"),
         "API_EVP_PKEY_RSA" => ("OpenSSLのEVP_PKEYをRSA用に使う記述が見つかりました。", "鍵の種類を切り替えられる構成か確認し、PQC対応への移行に備えてください。"),
         "API_BC_RSA_ENGINE" => ("BouncyCastleのRSA処理が見つかりました。", "利用中のバージョンとプロバイダーを確認し、PQC対応APIへの移行を検討してください。"),
-        "TLS_RSA_KEY_EXCHANGE" | "TLS_RSA_CIPHER_SUITE" | "TS_TLS_RSA_CIPHER_LITERAL" => ("RSAに関係するTLS暗号スイートの参照が見つかりました。", "RSA_WITHのRSA鍵交換と、ECDHE_RSA・DHE_RSAのRSA認証を区別してください。実際の利用を確認し、ハイブリッド鍵共有とPQC認証を別々に検討してください。"),
+        "TLS_RSA_KEY_EXCHANGE" => ("RSA鍵交換を使うTLS暗号スイートの参照が見つかりました。", "有効な設定と実際の利用を確認し、接続相手との互換性を確かめて鍵共有方式を検討してください。"),
+        "TLS_RSA_CIPHER_SUITE" => ("RSAを使うTLS暗号スイートの参照が見つかりました。", "RSA鍵交換とECDHE_RSA・DHE_RSAのRSA認証を区別し、実際の設定と接続相手の対応を確認してください。"),
+        "TS_TLS_RSA_CIPHER_LITERAL" => ("コードの構文からRSA系TLS暗号スイートの記述が見つかりました。", "RSA_WITHのRSA鍵交換と、ECDHE_RSA・DHE_RSAのRSA認証を区別してください。実際の利用を確認し、ハイブリッド鍵共有とPQC認証を別々に検討してください。"),
         "TLS_ECDHE_RSA" => ("ECDHE-RSAを使うTLS暗号スイートの記述が見つかりました。", "鍵共有とRSA署名を分けて確認し、ハイブリッド鍵共有とPQC認証の移行計画を立ててください。"),
         "TLS_VERSION_1_0" => ("TLS 1.0を示す記述が見つかりました。", "TLS 1.0・1.1を廃止し、TLS 1.3を優先してください。TLS 1.2は接続相手との互換性が必要な場合に限り、安全な設定で残してください。"),
         "TLS_VERSION_1_1" => ("TLS 1.1を示す記述が見つかりました。", "TLS 1.0・1.1を廃止し、TLS 1.3を優先してください。TLS 1.2は接続相手との互換性が必要な場合に限り、安全な設定で残してください。"),
@@ -96,7 +104,19 @@ fn rule_text(id: &str) -> Option<RuleCopy> {
         "ISTIO_DESTINATIONRULE_RSA_CIPHERS" => ("IstioにRSA依存・弱い暗号スイートの設定が見つかりました。", "暗号スイートの設定と接続先を確認し、RSAへの依存を減らす計画を立ててください。"),
         "HAPROXY_BIND_TLSV1" => ("HAProxyにTLS 1.0・1.1を有効にする記述が見つかりました。", "bindオプションからTLS 1.0・1.1を外し、TLS 1.3を優先してください。TLS 1.2を残す場合は互換性の理由を確認してください。"),
         "TRAEFIK_TLS_OPTIONS_LEGACY" => ("TraefikのTLS最低バージョンが低い設定になっています。", "TLSオプションのminVersionはTLS 1.3を優先してください。TLS 1.2は接続相手との互換性が必要な場合に限って検討してください。"),
-        "DEP_LIBSSH" | "DEP_PARAMIKO" | "DEP_OPENSSL" | "DEP_BOUNCYCASTLE" | "DEP_BORINGSSL" | "DEP_PYCRYPTODOME" | "DEP_PYCA_CRYPTOGRAPHY" | "DEP_GO_JOSE" | "DEP_JAVA_BOUNCYCASTLE" | "DEP_RUST_OPENSSL" | "DEP_RUST_RSA_CRATE" | "DEP_RUBY_OPENSSL" | "DEP_RUBY_JWT" => ("暗号処理に関係するライブラリへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_LIBSSH" => ("libsshへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_PARAMIKO" => ("paramikoへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_OPENSSL" => ("OpenSSLへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_BOUNCYCASTLE" => ("Bouncy Castleへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_BORINGSSL" => ("BoringSSLへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_PYCRYPTODOME" => ("pycryptodomeへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_PYCA_CRYPTOGRAPHY" => ("Python cryptographyへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_GO_JOSE" => ("go-joseへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_JAVA_BOUNCYCASTLE" => ("Java Bouncy Castleへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_RUST_OPENSSL" => ("Rust opensslへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_RUST_RSA_CRATE" => ("Rust rsaへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_RUBY_OPENSSL" => ("Ruby opensslへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
+        "DEP_RUBY_JWT" => ("Ruby jwtへの依存が見つかりました。", "表にあるライブラリ名とバージョンを確認し、実際に使う暗号方式とPQC対応状況を調べてください。依存しているだけで、特定の方式を使っているとは判断できません。"),
         _ => return None,
     })
 }
@@ -235,6 +255,27 @@ pub(crate) fn write_markdown(result: &ScanResult, path: &Path) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn translated_titles_keep_algorithm_and_dependency_distinctions() {
+        let ids = [
+            ("JWT_RS256", "RS256"),
+            ("JWT_PS256", "PS256"),
+            ("DEP_PYCA_CRYPTOGRAPHY", "cryptography"),
+            ("DEP_PYCRYPTODOME", "pycryptodome"),
+            ("DEP_PARAMIKO", "paramiko"),
+        ];
+        for (id, name) in ids {
+            assert!(
+                rule_text(id).unwrap().0.contains(name),
+                "missing {name} in {id}"
+            );
+        }
+        assert_ne!(
+            rule_text("TLS_RSA_KEY_EXCHANGE").unwrap().0,
+            rule_text("TLS_RSA_CIPHER_SUITE").unwrap().0
+        );
+    }
 
     #[test]
     fn private_key_markers_require_confirmation_before_incident_actions() {

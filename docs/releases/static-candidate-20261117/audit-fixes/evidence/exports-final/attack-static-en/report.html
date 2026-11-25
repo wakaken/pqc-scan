@@ -1,804 +1,0 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PQC Migration Scan Report</title><style>
-:root {
-  --bg: #f5f7fb;
-  --card: #ffffff;
-  --text: #1a2233;
-  --muted: #5e6b85;
-  --border: #dfe5f2;
-  --hl: #fff2c7;
-  --line: #f8fafc;
-  --critical: #9d0208;
-  --high: #d00000;
-  --medium: #ef8a17;
-  --low: #1f7a8c;
-  --info: #3d5a80;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: "IBM Plex Sans", "Noto Sans", sans-serif;
-  background: linear-gradient(180deg, #eef3fb 0%, var(--bg) 100%);
-  color: var(--text);
-}
-.container {
-  width: min(1200px, 96vw);
-  margin: 0 auto;
-  padding: 20px 12px 40px;
-}
-.top h1 { margin: 0; font-size: 28px; }
-.meta { color: var(--muted); margin-top: 8px; }
-.summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin: 18px 0 22px;
-}
-.metric {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px;
-}
-.metric-label { color: var(--muted); font-size: 13px; }
-.metric-value { font-size: 24px; font-weight: 700; }
-.finding {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 16px;
-}
-.finding h3 {
-  margin: 0;
-  font-size: 18px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.desc {
-  margin: 10px 0 10px;
-  color: #26324a;
-}
-.kv {
-  margin: 0 0 10px;
-  padding-left: 18px;
-}
-.kv li {
-  margin: 4px 0;
-}
-.sev {
-  font-size: 12px;
-  border-radius: 999px;
-  padding: 3px 9px;
-  border: 1px solid transparent;
-}
-.sev.critical { background: #ffe5e8; color: var(--critical); border-color: #f3b8bf; }
-.sev.high { background: #ffe9e9; color: var(--high); border-color: #f7c0c0; }
-.sev.medium { background: #fff4df; color: var(--medium); border-color: #f7d7a2; }
-.sev.low { background: #e5f5f8; color: var(--low); border-color: #b8dde4; }
-.sev.info { background: #e7eef7; color: var(--info); border-color: #c7d6ea; }
-.count {
-  font-size: 12px;
-  color: var(--muted);
-  border: 1px solid #d6dfef;
-  border-radius: 999px;
-  padding: 2px 8px;
-  background: #f7f9fe;
-}
-.snippet-wrap {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-.evidence-list {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 10px;
-  background: #fbfcff;
-}
-.occurrence-wrap {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 10px;
-  background: #fbfcff;
-}
-.occurrence-scroll {
-  width: 100%;
-  overflow-x: auto;
-}
-.snippet-title {
-  background: #f3f6fc;
-  border-bottom: 1px solid var(--border);
-  padding: 6px 10px;
-  font-size: 12px;
-  color: var(--muted);
-}
-.code-lines {
-  background: #fbfcff;
-  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.2;
-}
-pre {
-  margin: 0;
-  overflow-x: auto;
-  background: #fbfcff;
-}
-code {
-  display: inline;
-  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 12.5px;
-  line-height: 1.35;
-}
-pre code {
-  display: block;
-  font-size: 13px;
-  line-height: 1.28;
-}
-.occ-table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-.occ-table th, .occ-table td {
-  border-top: 1px solid #e4ebf7;
-  padding: 6px 8px;
-  text-align: left;
-  vertical-align: top;
-}
-.occ-table th {
-  background: #f8faff;
-  color: #3b4964;
-  font-weight: 600;
-}
-.occ-table th:nth-child(1),
-.occ-table td:nth-child(1) {
-  width: 54%;
-}
-.occ-table td:nth-child(2) {
-  width: 72px;
-  text-align: right;
-}
-.occ-table th:nth-child(3),
-.occ-table td:nth-child(3) {
-  width: 20%;
-}
-.occ-table th:nth-child(4),
-.occ-table td:nth-child(4) {
-  width: 20%;
-}
-.file-toggle {
-  border: 0;
-  background: transparent;
-  color: #1b5fbf;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 0;
-  width: 100%;
-  text-align: left;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-.file-toggle code {
-  color: inherit;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-.occ-table td code {
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-.line {
-  display: grid;
-  grid-template-columns: 56px 1fr;
-  column-gap: 8px;
-  background: var(--line);
-  min-height: 1.5em;
-}
-.line.hl {
-  background: var(--hl);
-}
-.ln {
-  user-select: none;
-  text-align: right;
-  color: #73819c;
-  border-right: 1px solid #dfe5f2;
-  padding: 0 8px 0 0;
-  line-height: 1.5;
-}
-.tx {
-  white-space: pre;
-  line-height: 1.5;
-}
-.occ-snippet-row.hidden {
-  display: none;
-}
-.occ-snippet-inline {
-  background: #f9fbff;
-  border: 1px solid #e2e9f7;
-  border-radius: 8px;
-  padding: 8px;
-}
-.occ-snippet-inline .snippet-wrap {
-  margin-top: 8px;
-}
-.actions {
-  border-top: 1px solid var(--border);
-  padding-top: 8px;
-}
-.actions h4 { margin: 0 0 8px; }
-.action {
-  border: 1px dashed #d7deed;
-  border-radius: 8px;
-  padding: 8px 10px;
-  margin-bottom: 8px;
-  background: #fafcff;
-}
-.action-title {
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.badge {
-  font-size: 11px;
-  border: 1px solid #bfcbe3;
-  background: #edf2fb;
-  border-radius: 999px;
-  padding: 2px 8px;
-}
-.refs {
-  margin: 6px 0;
-  padding-left: 18px;
-}
-.code-example {
-  margin-top: 6px;
-}
-.code-label {
-  color: var(--muted);
-  font-size: 12px;
-  margin-bottom: 3px;
-}
-@media (max-width: 640px) {
-  .line { grid-template-columns: 46px 1fr; }
-  code { font-size: 12px; }
-  .occ-table th:nth-child(1),
-  .occ-table td:nth-child(1) {
-    width: 48%;
-  }
-}
-
-[hidden] { display: none !important; }
-[data-report-controls] { display:flex; gap:12px; flex-wrap:wrap; padding:16px; border:1px solid var(--line, #ced8de); border-radius:12px; margin:18px 0; }
-[data-report-controls] label { display:flex; flex-direction:column; gap:5px; }
-input, select, button { font:inherit; padding:7px 10px; max-width:100%; }
-button { cursor:pointer; }
-button:disabled { cursor:default; opacity:.5; }
-nav { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin:14px 0; }
-summary { cursor:pointer; padding:14px; overflow-wrap:anywhere; }
-summary:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid #087f8c; outline-offset:3px; }
-.rule-card { border:1px solid #b9cbd2; border-radius:12px; margin:12px 0; background:#ffffffd9; }
-.rule-card > summary { display:list-item; }
-.rule-card > summary > span { margin-right:12px; }
-.rule-body { padding:0 18px 18px; }
-.occurrence { border-top:1px solid #dce4e8; padding-bottom:8px; }
-.occurrence > :not(summary) { margin-left:16px; margin-right:16px; }
-.occ-match { display:block; color:#576975; font-size:.9em; }
-.next-step { display:block; padding-top:5px; }
-.action { border-left:3px solid #087f8c; padding:4px 14px; margin:14px 0; }
-.shared { margin-top:16px; background:#f2f6f7; border-radius:8px; }
-pre { overflow:auto; padding:12px; background:#eef2f4; }
-code, .tx { overflow-wrap:anywhere; }
-a { overflow-wrap:anywhere; }
-@media (max-width:640px) { .rule-body { padding:0 8px 10px; } .rule-card > summary > span { display:block; margin:4px 0; } [data-report-controls] label { width:100%; } .occurrence > :not(summary) { margin-left:8px; margin-right:8px; } }
-/* Inventory identifiers must fit narrow screens without altering their values. */
-.inspection-context table { width: 100%; table-layout: fixed; }
-.inspection-context th, .inspection-context td { overflow-wrap: anywhere; word-break: break-word; text-align: left; vertical-align: top; }
-
-.inspection-overview { border:1px solid #b9cbd2; border-left:5px solid #087f8c; border-radius:12px; padding:18px; margin:20px 0; background:#f3f8f9; overflow-wrap:anywhere; }
-.inspection-status { font-size:1.15rem; font-weight:700; }
-.inspection-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-.inspection-metrics > div { background:#fff; border:1px solid #dce4e8; border-radius:8px; padding:12px; }
-.inspection-metrics strong { display:block; font-size:1.7rem; }
-.inspection-scope { padding-left:22px; }
-.inspection-reasons { border-top:1px solid #ced8de; margin-top:14px; }
-.inspection-reason { border-top:1px solid #dce4e8; padding:4px 12px; }
-@media (max-width:640px) { .inspection-metrics { grid-template-columns:1fr; } .inspection-overview { padding:12px; } }
-</style></head><body><main class="container" data-compact-report>
-<header class="top"><h1>PQC Migration Scan Report</h1><p class="meta">Generated: 2026-11-14 00:00:00 UTC</p><p>Cryptographic references found in source code and configuration.</p></header>
-<section class="summary">
-<div class="metric"><div class="metric-label">Risk candidates</div><div class="metric-value">25</div></div>
-<div class="metric"><div class="metric-label">Inventory findings</div><div class="metric-value">0</div></div>
-<div class="metric"><div class="metric-label">Scanned Files</div><div class="metric-value">25</div></div>
-<div class="metric"><div class="metric-label">Skipped Files</div><div class="metric-value">0</div></div>
-<div class="metric"><div class="metric-label">Affected files</div><div class="metric-value">25</div></div>
-</section>
-<p>Severity counts (all findings):</p><p>
-<span class="sev high">high: 25</span> </p>
-<section data-report-controls hidden aria-label="Report filters"><label>View<select data-mode><option value="candidate">Risk candidates</option><option value="inventory">Inventory</option><option value="all">All</option></select></label><label>Search<input data-search type="search" placeholder="Rule, title or file"></label><label>Severity<select data-severity><option value="">All severities</option>
-<option value="critical">critical</option>
-<option value="high">high</option>
-<option value="medium">medium</option>
-<option value="low">low</option>
-<option value="info">info</option>
-</select></label><label>Risk<select data-risk><option value="">All risks</option>
-<option value="quantum-vulnerable">quantum-vulnerable</option>
-<option value="quantum-uncertain">quantum-uncertain</option>
-<option value="quantum-safe">quantum-safe</option>
-<option value="non-quantum-risk">non-quantum-risk</option>
-</select></label><button type="button" data-reset>Reset</button></section><noscript><p>JavaScript is unavailable. All findings are shown below; native details still work. Interactive filters and pagination are unavailable.</p></noscript><p data-report-status role="status" aria-live="polite"></p><p data-empty hidden>No matches. Change the view or filters; this does not mean the entire scan found nothing.</p><nav data-group-pager hidden aria-label="Rule pages"><button type="button" data-prev>Previous</button><span data-page></span><button type="button" data-next>Next</button></nav>
-<details class="rule-card" id="rule-0" data-rule data-page-size="20"><summary><span><strong>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg o...</strong> <code>SYNTHETIC048</code></span><span class="sev high">high</span><span class="count">25 hits</span><span>Files 25 / matches <span data-match-count></span></span></summary><div class="rule-body"><p>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p>
-<h4>Locations and next steps</h4><nav data-occ-pager hidden><button type="button" data-occ-prev>Previous locations</button><span data-occ-status aria-live="polite"></span><button type="button" data-occ-next>Next locations</button></nav><div data-occurrence-list>
-<details class="occurrence" id="finding-0" data-finding-id="synthetic048-0" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;0&gt;.py"><summary><code>日本/unsafe-&quot;&lt;0&gt;.py:1:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">1</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-1" data-finding-id="synthetic048-10" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;10&gt;.py"><summary><code>日本/unsafe-&quot;&lt;10&gt;.py:11:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">11</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-2" data-finding-id="synthetic048-11" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;11&gt;.py"><summary><code>日本/unsafe-&quot;&lt;11&gt;.py:12:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">12</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-3" data-finding-id="synthetic048-12" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;12&gt;.py"><summary><code>日本/unsafe-&quot;&lt;12&gt;.py:13:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">13</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-4" data-finding-id="synthetic048-13" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;13&gt;.py"><summary><code>日本/unsafe-&quot;&lt;13&gt;.py:14:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">14</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-5" data-finding-id="synthetic048-14" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;14&gt;.py"><summary><code>日本/unsafe-&quot;&lt;14&gt;.py:15:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">15</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-6" data-finding-id="synthetic048-15" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;15&gt;.py"><summary><code>日本/unsafe-&quot;&lt;15&gt;.py:16:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">16</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-7" data-finding-id="synthetic048-16" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;16&gt;.py"><summary><code>日本/unsafe-&quot;&lt;16&gt;.py:17:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">17</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-8" data-finding-id="synthetic048-17" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;17&gt;.py"><summary><code>日本/unsafe-&quot;&lt;17&gt;.py:18:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">18</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-9" data-finding-id="synthetic048-18" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;18&gt;.py"><summary><code>日本/unsafe-&quot;&lt;18&gt;.py:19:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">19</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-10" data-finding-id="synthetic048-19" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;19&gt;.py"><summary><code>日本/unsafe-&quot;&lt;19&gt;.py:20:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">20</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-11" data-finding-id="synthetic048-1" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;1&gt;.py"><summary><code>日本/unsafe-&quot;&lt;1&gt;.py:2:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">2</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-12" data-finding-id="synthetic048-20" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;20&gt;.py"><summary><code>日本/unsafe-&quot;&lt;20&gt;.py:21:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">21</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-13" data-finding-id="synthetic048-21" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;21&gt;.py"><summary><code>日本/unsafe-&quot;&lt;21&gt;.py:22:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">22</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-14" data-finding-id="synthetic048-22" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;22&gt;.py"><summary><code>日本/unsafe-&quot;&lt;22&gt;.py:23:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">23</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-15" data-finding-id="synthetic048-23" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;23&gt;.py"><summary><code>日本/unsafe-&quot;&lt;23&gt;.py:24:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">24</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-16" data-finding-id="synthetic048-24" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;24&gt;.py"><summary><code>日本/unsafe-&quot;&lt;24&gt;.py:25:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">25</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-17" data-finding-id="synthetic048-2" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;2&gt;.py"><summary><code>日本/unsafe-&quot;&lt;2&gt;.py:3:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">3</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-18" data-finding-id="synthetic048-3" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;3&gt;.py"><summary><code>日本/unsafe-&quot;&lt;3&gt;.py:4:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">4</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-19" data-finding-id="synthetic048-4" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;4&gt;.py"><summary><code>日本/unsafe-&quot;&lt;4&gt;.py:5:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">5</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-20" data-finding-id="synthetic048-5" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;5&gt;.py"><summary><code>日本/unsafe-&quot;&lt;5&gt;.py:6:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">6</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-21" data-finding-id="synthetic048-6" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;6&gt;.py"><summary><code>日本/unsafe-&quot;&lt;6&gt;.py:7:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">7</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-22" data-finding-id="synthetic048-7" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;7&gt;.py"><summary><code>日本/unsafe-&quot;&lt;7&gt;.py:8:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">8</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-23" data-finding-id="synthetic048-8" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;8&gt;.py"><summary><code>日本/unsafe-&quot;&lt;8&gt;.py:9:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">9</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-<details class="occurrence" id="finding-24" data-finding-id="synthetic048-9" data-inventory="false" data-severity="high" data-risk="quantum-vulnerable" data-search="SYNTHETIC048 &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; 日本/unsafe-&quot;&lt;9&gt;.py"><summary><code>日本/unsafe-&quot;&lt;9&gt;.py:10:3</code><span class="occ-match">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;...</span><span class="next-step">Next: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [c...</span></summary><p>Risk: quantum-vulnerable</p><p>Check: &lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><p>Evidence: <code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></p>
-<div class="snippet-wrap"><div class="code-lines">
-<span class="line hl"><span class="ln">10</span><span class="tx">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; password=&#39;[masked-sensitive-value]&#39;</span></span>
-</div></div>
-<h4>Recommended Actions</h4>
-<p>Shared checks and planning (not verified facts about this line):</p><ul>
-<li><a href="#shared-0-0">&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</a></li>
-</ul>
-</details>
-</div>
-<details class="shared"><summary>Shared checks and planning (1)</summary>
-<section id="shared-0-0" tabindex="-1">
-<section class="action"><h4>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt; <span class="badge">high</span></h4><p>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p><ol>
-<li>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</li>
-</ol>
-<details><summary>References and examples</summary>
-<p>javascript:document.title=&#39;EXECUTED048&#39;</p>
-<p>data:text/html,&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</p>
-<p><a href="https://example.invalid/&quot; onmouseover=&quot;document.title=&#39;EXECUTED048&#39;" rel="noopener noreferrer">https://example.invalid/&quot; onmouseover=&quot;document.title=&#39;EXECUTED048&#39;</a></p>
-<p>Before (python)</p><pre><code>&lt;/script&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;svg onload=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt; [click](javascript:document.title=&#39;EXECUTED048&#39;) | ` ``` &quot; &amp; 日😀
-&lt;img src=x onerror=&quot;document.title=&#39;EXECUTED048&#39;&quot;&gt;&lt;script&gt;document.title=&#39;EXECUTED048&#39;&lt;/script&gt;</code></pre><p>After</p><pre><code>safe</code></pre>
-</details>
-</section>
-</section>
-</details>
-</div></details>
-</main><script>(() => {
-  const root = document.querySelector('[data-compact-report]');
-  if (!root) return;
-  const ja = document.documentElement.lang === 'ja';
-  const choose = (en, jp) => ja ? jp : en;
-  const controls = root.querySelector('[data-report-controls]');
-  const mode = controls.querySelector('[data-mode]');
-  const search = controls.querySelector('[data-search]');
-  const severity = controls.querySelector('[data-severity]');
-  const risk = controls.querySelector('[data-risk]');
-  const rules = Array.from(root.querySelectorAll('[data-rule]'));
-  const rows = new Map(rules.map(rule => [rule, Array.from(rule.querySelectorAll('[data-finding-id]'))]));
-  const pages = new Map();
-  let page = 0;
-  let visibleRules = [];
-  const matches = row => {
-    const inventory = row.dataset.inventory === 'true';
-    return (mode.value === 'all' || (mode.value === 'inventory' ? inventory : !inventory))
-      && (!severity.value || row.dataset.severity === severity.value)
-      && (!risk.value || row.dataset.risk === risk.value)
-      && row.dataset.search.toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase());
-  };
-  function refresh() {
-    let count = 0;
-    visibleRules = [];
-    for (const rule of rules) {
-      const all = rows.get(rule);
-      const matched = all.filter(matches);
-      count += matched.length;
-      if (matched.length) visibleRules.push(rule);
-      const last = Math.max(0, Math.ceil(matched.length / 20) - 1);
-      const p = Math.min(pages.get(rule) || 0, last);
-      pages.set(rule, p);
-      all.forEach(row => { const i = matched.indexOf(row); row.hidden = i < p * 20 || i >= (p + 1) * 20; });
-      rule.querySelector('[data-match-count]').textContent = `${matched.length} / ${all.length}`;
-      rule.querySelector('[data-occ-pager]').hidden = matched.length <= 20;
-      rule.querySelector('[data-occ-prev]').disabled = p === 0;
-      rule.querySelector('[data-occ-next]').disabled = p === last;
-      rule.querySelector('[data-occ-status]').textContent = `${matched.length ? p * 20 + 1 : 0}-${Math.min((p + 1) * 20, matched.length)} / ${matched.length}`;
-    }
-    const last = Math.max(0, Math.ceil(visibleRules.length / 20) - 1);
-    page = Math.min(page, last);
-    rules.forEach(rule => { const i = visibleRules.indexOf(rule); rule.hidden = i < page * 20 || i >= (page + 1) * 20; });
-    root.querySelector('[data-report-status]').textContent = choose(
-      `${visibleRules.length} / ${rules.length} rule groups; ${count} / ${Array.from(rows.values()).reduce((n,r) => n+r.length,0)} findings match the current view.`,
-      `表示対象：${visibleRules.length} / ${rules.length}ルール、${count} / ${Array.from(rows.values()).reduce((n,r) => n+r.length,0)}箇所`);
-    root.querySelector('[data-empty]').hidden = count !== 0;
-    root.querySelector('[data-group-pager]').hidden = visibleRules.length <= 20;
-    root.querySelector('[data-prev]').disabled = page === 0;
-    root.querySelector('[data-next]').disabled = page === last;
-    root.querySelector('[data-page]').textContent = `${visibleRules.length ? page * 20 + 1 : 0}-${Math.min((page + 1) * 20, visibleRules.length)} / ${visibleRules.length}`;
-  }
-  function reset() { mode.value = 'all'; search.value = ''; severity.value = ''; risk.value = ''; page = 0; pages.clear(); }
-  controls.hidden = false;
-  controls.addEventListener('input', () => {
-    if (severity.value === 'info' || risk.value === 'quantum-safe') mode.value = 'all';
-    page = 0; pages.clear(); refresh();
-  });
-  root.addEventListener('click', event => {
-    const button = event.target.closest('button');
-    if (!button || !root.contains(button)) return;
-    if (button.matches('[data-reset]')) reset();
-    else if (button.matches('[data-prev]')) page--;
-    else if (button.matches('[data-next]')) page++;
-    else if (button.matches('[data-occ-prev], [data-occ-next]')) {
-      const rule = button.closest('[data-rule]');
-      pages.set(rule, (pages.get(rule) || 0) + (button.matches('[data-occ-next]') ? 1 : -1));
-    } else return;
-    refresh();
-  });
-  function revealHash() {
-    let id;
-    try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
-    const target = document.getElementById(id);
-    if (!target || !root.contains(target)) return;
-    const rule = target.closest('[data-rule]');
-    if (!rule) return;
-    reset();
-    page = Math.floor(rules.indexOf(rule) / 20);
-    const occurrence = target.closest('[data-finding-id]');
-    if (occurrence) pages.set(rule, Math.floor(rows.get(rule).indexOf(occurrence) / 20));
-    refresh();
-    for (let element = target; element && element !== root; element = element.parentElement) {
-      if (element.tagName === 'DETAILS') element.open = true;
-    }
-    (target.querySelector('summary') || target).focus();
-    target.scrollIntoView({block: 'nearest'});
-  }
-  window.addEventListener('hashchange', revealHash);
-  refresh();
-  if (location.hash) revealHash();
-})();
-</script></body></html>

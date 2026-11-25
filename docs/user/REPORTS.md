@@ -1,20 +1,12 @@
 # Understanding reports
 
-[日本語](REPORTS.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.md)
+[日本語](REPORTS.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
 
 This guide covers v0.4.0 static scanning. See the [release notes](../releases/v0.4.0.md) for changes between versions.
 
 After a scan, use the human report to investigate findings, then choose machine-readable files for tracking or automation. A finding records evidence and suggested checks; it is not an instruction to replace an algorithm without investigating its use.
 
 Reports show findings, locations and suggested next steps. The inspection overview separately identifies incomplete checks and files needing follow-up.
-
-
-HTML and Markdown count equivalent findings once when file, line, column, algorithm evidence and issue agree. Details retain every matched rule, description, severity and check; actions are combined and the highest severity is displayed. Missing positions and empty or masked evidence are not merged. Summaries, charts and file-tree counts use this projection. Files inspected is a file count, not a count of cryptographic detections. JSON, SARIF, inventories and stable finding IDs retain original rule-level records, so their counts can differ from HTML and Markdown.
-
-Result-card headings show the finding description without a rule ID or a programming-language label. Expanded **Matched rules** details put the description first and retain each rule ID as supplementary information. Rule IDs in saved data, search and filters remain unchanged.
-
-
-The sidebar's icon-labelled **Search conditions** and **Files** sections collapse independently. **Show all results** clears every filter. **Show test code results** is checked by default; unchecking hides findings using the scanner's conservative test-path/filename conventions. Mixed inline tests remain visible. This changes only the displayed results, not saved data, global summary counts or tree counts. Rule explanation links open an embedded native dialog without network requests. Escape/Close restores focus and retains filters. Without JavaScript, links still open the companion `report.rules.html`; keep both files together.
 
 ## Contents
 
@@ -32,51 +24,110 @@ The sidebar's icon-labelled **Search conditions** and **Files** sections collaps
 
 ## Review findings
 
-Start with `report.html`:
+Open `report.html` in a browser and follow these four steps. The screenshots use
+v0.4.0 with the public `examples/python` sample. Counts, paths and code belong to
+this example; they do not establish deployed use.
 
-1. Check the inspection overview for selected, analyzed and follow-up file counts, exclusions and limits.
-2. Select a rule and a file location. Read the source context and the evidence that triggered it.
-3. Check whether the reference belongs to active application code, a setting, a dependency, an example or a test. Static matching cannot settle runtime use.
-4. Review the proposed action against the actual runtime, library, protocol and peers before making a change.
+### 1. Check what was inspected
 
-HTML reports start with compact result and inspection summaries and a severity
-distribution of all findings. The chart and summary totals stay fixed while you
-filter the results. Scope and exclusions are expandable; incomplete inspection
-remains visible. A side panel combines search with severity, risk, rule and exact
-file filters, and switches between risk candidates and informational inventory.
-On narrow screens, the filters move above the severity-sorted rule list. Clearing
-all filters shows every finding, including informational inventory. Printing
-includes all findings and expanded evidence, regardless of screen filters or pages. Rules and their occurrences are paginated in groups of 20. Expand a
-rule, then a location, to see its source context and applicable actions. Identical
-shared guidance is linked instead of repeating it at every location. Different
-recommendations sharing an action ID remain distinct. Without JavaScript, all
-records remain available through native expandable details. No external scripts
-or network connection are required. Long reference URLs wrap within the report, including on narrow screens. Markdown provides a linked rule/location index.
-Source excerpts and code examples normalize CRLF and CR line endings and indent
-every line so embedded markup remains code when rendered as Markdown.
+Start with **Inspection scope and completion**: selected files, analyzed files and
+files needing follow-up. If inspection is unfinished, open the reasons and file
+examples to decide what to inspect next. **Scope and exclusions** records the
+size limit, test exclusion and other conditions used for this scan.
 
-TLS guidance prefers TLS 1.3, retaining securely configured TLS 1.2 only for an
-identified interoperability need. PQC override settings receive setting-specific
-checks rather than an assertion of RSA usage.
+![Check inspection scope, completion and severity distribution](../images/v0.4/report-01-overview-en.jpg)
 
-HTML includes Japanese and English views in one self-contained file. Use the language selector to switch descriptions, recommendations and labels while retaining filters, pagination and opened occurrences. `--lang` selects the initial HTML view and the Markdown language. JavaScript-free viewing retains that initial language. The rule selector includes short explanations; its help link and each expanded rule open an embedded dialog explaining the rules found in this scan. The companion `report.rules.html` remains available as the no-JavaScript fallback. Keep both HTML files for that fallback. No remote translation service is used.
+All four files were analyzed in this example. Completed inspection or zero findings
+does not establish project-wide safety or completed PQC migration. The top totals
+and severity chart continue to show the whole report after filtering.
 
-The theme selector offers Light and Dark, defaulting to Light; an explicitly selected theme is saved locally when browser storage is available. Printing uses the light palette. HTML creation times use the viewer’s timezone (for example Asia/Tokyo/JST), while preserving the original instant in the time element. With JavaScript unavailable, the generation host’s local time and explicit offset remain visible. Markdown uses the generation host’s local time; machine timestamps remain unchanged. There is no IP or geolocation lookup.
+### 2. Narrow down the findings
 
-Use `--lang ja` for an initially Japanese HTML view and Japanese Markdown. English remains the default
-(`--lang en`). JSON, SARIF, CBOM and dependency SBOM retain their existing content
-regardless of this option. Finding IDs, paths, evidence, code and reference URLs
-are never translated. Japanese reports explain the findings and next steps using
-a built-in catalog; no repository data is sent to a translation service.
+Use **Search conditions** to combine an algorithm/description/filename search with
+severity, risk, rule and file filters. This example searches `RS256` and selects
+the rule and `src/security/token_service.py`, leaving two matching findings.
+You can also choose a file from the **Files** tree.
+
+![Filter by search text, rule and file](../images/v0.4/report-02-filters-en.jpg)
+
+Use **Show all results** to clear the conditions. PQC references are included in
+**Inventory**, so check that view when investigating algorithms already referenced
+in the project. Filters affect the display, not saved data or global/tree totals.
+
+### 3. Open a location and read the evidence and actions
+
+Expand the finding heading, then its filename and position. Read the **Evidence**,
+surrounding source and **Check** guidance. Establish whether the reference belongs
+to application code, configuration, dependencies, an example or a test.
+**Matched rules** retains the rules that matched this location.
+
+![Read the location, matched text, source context and actions](../images/v0.4/report-03-evidence-en.jpg)
+
+`ALGORITHM = "RS256"` in this example establishes a name reference, not execution
+of a signing operation or the effective configuration. Read **Recommended Actions** and **Shared checks and planning** and verify the runtime, library and
+peer conditions before considering a change. Shared guidance is separate from
+facts confirmed at an individual location.
+
+### 4. Check the meaning of a rule
+
+**About this rule** opens its meaning, category, severity/risk for this scan and
+example checks. The sidebar's **Rule explanations** link also opens explanations. The rule selector includes short explanations.
+Escape or **Close** returns to the original link while retaining your filters.
+
+![Open the RS256 rule explanation and review its checks](../images/v0.4/report-04-rules-en.jpg)
+
+### Search and file-display reference
+
+| Need | Control or interpretation |
+|---|---|
+| Switch between risk candidates and inventory | Use **View**. Clearing every condition includes informational findings |
+| Hide test results | **Show test code results** defaults to checked. Uncheck it to hide matching test paths/filenames; it does not identify just the inline tests in mixed files |
+| Collapse a panel | **Search conditions** and **Files** open and close independently without clearing filters. On narrow screens, filters move above the list |
+| Select a file | The tree contains only files with findings. Selection applies an exact file condition combined with other filters. Badges count all occurrences, including inventory, not vulnerabilities |
+| Read a long path | Scroll horizontally within the tree or hover a folder/file for the full path. Blue folder icons, document icons and a leading blue marker distinguish folders, files and the selected file. Names and counts remain readable without icons |
+| Browse more results | Rules and locations have separate 20-item pages. Finding headings use descriptions; find rule IDs in **Matched rules** or the rule filter |
+| Read shared actions | Identical guidance is linked once. Recommendations with the same action ID but different content remain distinct |
+
+**Scope and exclusions** records test exclusion and `.pqcignore`. Mixed Rust files
+remain analyzed while syntax-proven test-only findings are omitted, so file counts
+may not decrease and source context can include adjacent tests. See
+[scan exclusion settings](SCANNING.md#exclude-test-code).
+
+Unfinished-inspection details distinguish diagnostic records, file counts, examples
+and next checks; diagnostic JSON retains the detail in `message`. Algorithm names
+inside recognized error text appear under inventory. Open the location to read
+the original text.
+
+### Print, offline reading and Markdown
+
+| Reading mode | Content and required files |
+|---|---|
+| Print | All findings and expanded evidence, regardless of filters or pagination, using the light palette. Search/file panels are omitted |
+| Offline | Search, language switching and embedded rule help need no external scripts or connection. Long reference URLs wrap within the report |
+| Without JavaScript | All findings in the initial language remain available through native disclosures. Search/file panels are hidden. Keep `report.rules.html` alongside `report.html` for rule explanations |
+| Markdown | Rule/location indexes link to evidence. Source excerpts and examples normalize line endings and indent every line, keeping embedded HTML syntax inside code |
+
+### Language, theme and timestamps
+
+HTML carries both English and Japanese copy. Switch language and Light/Dark theme
+in the report while retaining filters, pages, opened locations, selected file, panel visibility and
+folder expansion. Light is the default; explicit theme choices are saved locally
+when browser storage is available.
+
+HTML creation times use the viewer's timezone while preserving the original instant. Without JavaScript, and in Markdown,
+the generation host's local time and explicit offset are shown. Machine timestamps
+do not change. There is no IP/geolocation lookup or external translation request.
+
+`--lang ja` selects the initial HTML language and Markdown language; English
+(`--lang en`) is the default.
 
 ```bash
 pqc-scan scan . --lang ja --format all --out-dir /path/to/reports/product-scan-ja --rules-dir /path/to/pqc-scan/rules
 ```
 
-Built-in rule descriptions and recommended actions have Japanese copy. Custom
-rules or actions without a translation show an explicit notice and retain the
-original text. `quantum-safe` is displayed as a PQC reference, not a declaration
-that the product is safe or migration is complete.
+Custom rules or actions lacking Japanese copy show a notice and retain the original
+text. Language selection does not rewrite JSON, SARIF, CBOM, dependency SBOM, IDs,
+paths, source code, algorithm names or reference URLs.
 
 <a id="pqc-findings"></a>
 
@@ -91,6 +142,8 @@ Risk labels describe the matched signal:
 | `non-quantum-risk` | A conventional weakness, such as a weak algorithm or certificate-related issue; it is a separate concern from PQC migration |
 | `quantum-uncertain` | The available evidence is insufficient to determine quantum readiness |
 | `quantum-safe` | The referenced primitive is classified as quantum-resistant; this is not a verdict on the application |
+
+TLS guidance prefers TLS 1.3, retaining securely configured TLS 1.2 only for an identified interoperability need. PQC override settings receive setting-specific checks rather than an assertion of RSA usage.
 
 ### Why PQC-related references appear
 
@@ -109,7 +162,7 @@ Certificate signature OIDs and subject-public-key OIDs for ML-DSA/SLH-DSA are ch
 
 These references can appear as informational findings in CBOM and SARIF too. Read `quantum-safe` as a classification of the primitive, not “migration complete.” Dependency findings remain `quantum-uncertain`.
 Node crypto/WebCrypto, browser and TypeScript runtime support must be checked individually; their version requirements differ. JWT signature changes also need compatible JOSE formats, libraries and verifiers.
-See [static examples and references](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/examples/pqc-readiness/README.md) for specific patterns.
+See [static examples and references](https://github.com/wakaken/pqc-scan/blob/develop/examples/pqc-readiness/README.md) for specific patterns.
 
 Before applying migration guidance:
 
@@ -118,6 +171,8 @@ Before applying migration guidance:
 - The BC example is scoped to BC Java 1.85 and the `BC` provider, not `BCPQC`. Verify the resolved library release, deployed JDK and algorithm support before using it.
 - For certificate migration, choose the exact construction and encoding and confirm provider, CA, client and trust-store support before a nonproduction pilot. FIPS 204/205 specify signature primitives, not a universal hybrid certificate format.
 - Envoy `cipher_suites` applies to TLS 1.0–1.2, not TLS 1.3. Retiring static RSA key exchange differs from removing RSA authentication in ECDHE_RSA suites; check certificate and peer compatibility separately.
+
+For `CERT_EXPIRY_2026_OR_BEFORE`, the human report identifies expiry before January 1, 2027 UTC and explains that the cutoff alone does not establish expiry at scan time. Check the parsed expiry and `CERT_EXPIRED` findings.
 
 <a id="choose-report"></a>
 
@@ -150,6 +205,10 @@ pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics 
 A policy assessment is an additional, separate opt-in. Product version 0.4.0 is separate from Inventory v1, SARIF 2.1.0 and CycloneDX 1.7; it does not rename these formats. Separate
 probe reports are described in the [probe guide](PROBING.md).
 
+### Why counts differ
+
+HTML and Markdown count equivalent findings once when file, line, column, algorithm evidence and issue agree. Details retain every matched rule, description, severity and check; actions are combined and the highest severity is displayed. Missing positions and empty or masked evidence are not merged. Summaries, charts and file-tree counts use this projection. Files inspected is a file count, not a count of cryptographic detections. JSON, SARIF, inventories and stable finding IDs retain original rule-level records, so their counts can differ from HTML and Markdown.
+
 ### What CBOM and SBOM mean here
 
 An SBOM (Software Bill of Materials) lists software components and dependencies. A CBOM (Cryptographic Bill of Materials) lists cryptographic algorithms and usages.
@@ -167,7 +226,7 @@ findings. This is pqc-scan's own JSON format. It is opt-in even with `--format a
 selecting it does not change the legacy report schemas or finding identity algorithm. Use `--repository-scope team/project`
 with inventory capture to enable weak cross-scan source correlation. Omit secret
 or absolute identifiers. The report does not assert active use, trust or a PQC
-assessment. See the [contract and limitations](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/architecture/INVENTORY-REPORT-V1.md).
+assessment. See the [contract and limitations](https://github.com/wakaken/pqc-scan/blob/develop/docs/architecture/INVENTORY-REPORT-V1.md).
 
 ```bash
 pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
@@ -248,7 +307,7 @@ pqc-scan scan . --inventory-json --policy-profile migration-review-v1 --rules-di
 Optional `--assessment-context ./context.json` supplies typed local context, e.g.
 `{"version":1,"use_case":"jwt"}`. Missing support stays unknown; provided values are
 unverified operator claims. Dependency presence does not prove PQC readiness.
-See [scope, prerequisites and context fields](https://github.com/wakaken/pqc-scan/blob/11ff0b0c3e6f8c9a17148fe0551256f29dee74f0/docs/architecture/LOCAL-ASSESSMENT-V1.md).
+See [scope, prerequisites and context fields](https://github.com/wakaken/pqc-scan/blob/develop/docs/architecture/LOCAL-ASSESSMENT-V1.md).
 
 <a id="saved-assessment"></a>
 
@@ -259,9 +318,13 @@ system context to explain where attention is needed, what blocks migration and
 what to check next. The scan HTML investigates source findings; the assess HTML
 supports migration decisions using saved evidence and business assumptions.
 
+Replace the input and context filenames and choose an evaluation time at or after collection.
+Replace `YYYY-MM-DDTHH:MM:SS+09:00` with the actual time, including seconds and timezone offset.
+See the [saved-input guide](SAVED-EVIDENCE.md) to prepare the context JSON.
+
 ```console
 pqc-scan assess saved.inventory.v1.json --input-format inventory-v1 \
-  --as-of 2026-11-18T00:00:00Z --context migration-context.json \
+  --as-of 'YYYY-MM-DDTHH:MM:SS+09:00' --context migration-context.json \
   --out-dir ./migration-report --lang ja
 ```
 
@@ -272,6 +335,9 @@ writes `migration.assessment.md` and `migration.assessment.v1.json`. See the
 [saved-input guide](SAVED-EVIDENCE.md) for formats and context preparation.
 
 For browser input through saving, follow the [eight illustrated steps](SCANNING.md#web-migration-walkthrough). The sections below explain the generated migration review.
+
+Migration Markdown links each record to shared check lists and candidate details.
+Each target retains its own decision and candidate references. Expand its details to read evidence, declarations and reference IDs.
 
 ### Read the migration decisions
 
@@ -345,6 +411,10 @@ validation before adoption. Outside scope is a scoped declaration; monitor appli
 to the recorded technical role. Unknown is not low priority; no aggregate safety
 or independently measured practitioner-usefulness verdict is presented.
 
+Migration HTML can carry a bounded non-secret report label. It separates detector record counts from distinct recorded locations, names observation methods, explains known binding limitations, and shows applied active deadline/lead-time pairs in Japan time and human durations. Mixed pairs retain their own record counts; exact UTC timestamps and seconds remain available in JSON. See local migration input for scoped organization/contract deadline authoring.
+
+Zero assessment targets do not establish absence of cryptography, safety or no required action. This differs from having targets whose urgency is undetermined, or finding no matching records in a detection-location search.
+
 <a id="sarif-locations"></a>
 
 ## Read SARIF locations
@@ -361,19 +431,3 @@ Identical findings produced with the same binary, rules, input and settings can
 be compared by ID. Version upgrades or changes to inputs and settings can change
 IDs and counts. Compare binary/rule versions, selected scope and settings together.
 See the [v0.4.0 compatibility notes](../releases/v0.4.0.md).
-
-### File tree and panel visibility
-
-The **Search conditions** and **Files** headings independently collapse or expand each section without clearing conditions. The tree lists only files with findings, grouped by directory. Names stay on one line; deep or long paths scroll horizontally inside the tree. Hover a folder or file to see its full path. The badge counts all finding occurrences (including informational ones), regardless of active filters; it is not a vulnerability count. Select a file to apply the exact file filter, combined with other conditions. **Show all results** clears every condition and restores test results. Folder expansion, selected file, panel visibility and pagination carry across language changes. These navigation panels are hidden in print and when JavaScript is unavailable.
-
-For `CERT_EXPIRY_2026_OR_BEFORE`, the human report identifies expiry before January 1, 2027 UTC and explains that the cutoff alone does not establish expiry at scan time. Check the parsed expiry and `CERT_EXPIRED` findings. The rule ID, detector predicate and machine descriptions are unchanged.
-
-Folder rows use blue folder icons, file rows use outlined document icons, and the selected file has a leading blue marker. Icons are inline SVG and decorative; file names and counts remain accessible without them.
-
-Migration HTML can carry a bounded non-secret report label. It separates detector record counts from distinct recorded locations, names observation methods, explains known binding limitations, and shows applied active deadline/lead-time pairs in Japan time and human durations. Mixed pairs retain their own record counts; exact machine assessment data is unchanged. See local migration input for scoped organization/contract deadline authoring.
-
-An input with zero assessment targets has a dedicated empty-state explanation: it does not establish absence of cryptography, safety or no required action. It is separate from having assessment targets whose urgency remains undetermined.
-
-Reports generated with test exclusion or `.pqcignore` list those conditions in the existing inspection scope. Mixed Rust files are still analyzed; omitting syntax-proven test-only findings does not necessarily reduce file counts, and source context may show adjacent tests. See [scan exclusion settings](SCANNING.md#exclude-test-code).
-
-Known unfinished-inspection causes are grouped separately, with diagnostic record counts, distinct file counts, example paths and next checks. The existing diagnostics JSON message retains the detail. Algorithm references in recognised human error text appear under reference information rather than migration candidates; expand the location to inspect the source.

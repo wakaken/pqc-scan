@@ -544,4 +544,3 @@ and [folder navigation](product/LOCAL-SCAN-UI.md#current-per-folder-result-navig
 
 - [Static analysis implementation and limits](architecture/STATIC-ANALYSIS.md)
 - [Repository CI](quality/REPOSITORY-CI.md)
-- [Distribution engineering](releases/DISTRIBUTION-ENGINEERING.md)

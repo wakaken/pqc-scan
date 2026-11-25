@@ -1,8 +1,9 @@
 # Verification and Completion
 
-These are mandatory details of [AGENTS.md](../../AGENTS.md). Read this file
-before any change and before claiming completion, including documentation-only
-work. Apply every relevant change category; overlapping categories accumulate.
+These are product quality requirements under [AGENTS.override.md](../../AGENTS.override.md)
+during the Open Pstack trial. Pstack owns development and review orchestration;
+this guide specifies validation coverage and evidence, not a parallel workflow.
+Apply every relevant change category; overlapping categories accumulate.
 
 # Development and Verification
 
@@ -101,8 +102,9 @@ affected checks to run again. These examples do not waive any required check:
 Checks required by the change categories above must have applicable passing
 evidence for final source. An unchanged file alone does not establish this:
 dependencies, generated inputs and invoked binaries can change its behavior.
-Use the [review revision rules](REVIEWS.md#revisions-and-resumption) to determine
-whether the existing reviewer must confirm affected conclusions.
+Reassess independent review conclusions through pstack when later changes affect
+the reviewed source or its evidence. The inactive legacy review procedure and
+reviewer-identity limits are not requirements of this guide.
 
 # Completion and Partial Results
 

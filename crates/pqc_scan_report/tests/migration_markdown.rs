@@ -592,3 +592,77 @@ fn writer_progress_tracks_real_phases_and_never_finishes_on_output_failure() {
     assert_eq!(std::fs::read(blocked).unwrap(), b"KEEP");
     std::fs::remove_dir_all(dir).unwrap();
 }
+
+#[test]
+fn shared_candidates_have_one_definition_and_retain_all_target_links() {
+    let mut v = fixture::inventory("RSA");
+    let mut second = v["observations"][0].clone();
+    second["id"] = pqc_scan_core::identity::native_id("observation", &["second"]).into();
+    second["target"]["path"] = "other.rs".into();
+    second["occurrence_key"] = pqc_scan_core::identity::native_id("occurrence", &["second"]).into();
+    v["observations"].as_array_mut().unwrap().push(second);
+    let evidence = fixture::ingest(&v, InputFormat::InventoryV1).unwrap();
+    let mut claims = ctx::critical_signing();
+    claims["support"] = ctx::support();
+    let mut context = ctx::context(&evidence, claims);
+    let mut second_binding = context["bindings"][0].clone();
+    second_binding["target_id"] = evidence.targets()[1].id.clone().into();
+    second_binding["claims"]["support"]["peer"] = ctx::claim(json!(false));
+    context["bindings"]
+        .as_array_mut()
+        .unwrap()
+        .push(second_binding);
+    let r = evaluate(&evidence, Some(&ctx::parse(&context)), ctx::AS_OF).unwrap();
+    assert_eq!(r.decisions().len(), 2);
+    assert!(!r.decisions()[0].action.candidate_ids.is_empty());
+    let before = serde_json::to_value(&r).unwrap();
+    for language in [ReportLanguage::En, ReportLanguage::Ja] {
+        let md = text(&r, language);
+        for i in 1..=r.decisions().len() {
+            assert_eq!(md.matches(&format!("<a id=\"target-{i}\"></a>")).count(), 1);
+        }
+        for (i, candidate) in r.candidates().iter().enumerate() {
+            let anchor = format!("candidate-{}", i + 1);
+            assert_eq!(md.matches(&format!("<a id=\"{anchor}\"></a>")).count(), 1);
+            let section = md
+                .split(&format!("<a id=\"{anchor}\"></a>"))
+                .nth(1)
+                .unwrap();
+            let section = section.split("<a id=").next().unwrap();
+            let owner = r
+                .decisions()
+                .iter()
+                .position(|d| d.target_id == candidate.target_id)
+                .unwrap()
+                + 1;
+            assert!(
+                section.contains(&format!("](#target-{owner})")),
+                "candidate owner missing"
+            );
+            assert!(section.contains(
+                if candidate
+                    .prerequisites
+                    .iter()
+                    .any(|p| p.claimed_support == Some(false))
+                {
+                    if language == ReportLanguage::Ja {
+                        "申告上は未対応"
+                    } else {
+                        "Declared unsupported"
+                    }
+                } else if language == ReportLanguage::Ja {
+                    "申告上は対応"
+                } else {
+                    "Declared supported"
+                }
+            ));
+            let references = r
+                .decisions()
+                .iter()
+                .filter(|d| d.action.candidate_ids.contains(&candidate.id))
+                .count();
+            assert_eq!(md.matches(&format!("](#{anchor})")).count(), references);
+        }
+        assert_eq!(serde_json::to_value(&r).unwrap(), before);
+    }
+}

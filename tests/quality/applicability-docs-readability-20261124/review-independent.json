@@ -1,0 +1,52 @@
+{
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "bdc49f00be95156f1b325e8b38598634088e5b34c970155215dd100cff6393e2",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "beac72e5f0b6872262bfad2a2b525ac2a06bc19ae5456d2adec2a9738f82db41",
+    "docs/user/COVERAGE.ja.md": "10884d5c4581eef829f3e3f74c7c9c10f5006687b8036fcd6723256b42e9c48a",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+    "docs/architecture/STATIC-ANALYSIS.md": "70ea76f42c56591634ebb5da5c319e2311132447692de426eb390c5044355429"
+  },
+  "reviewer": "/root/docs_implementation_review",
+  "timestampUtc": "2026-11-24T08:55:43.748232+00:00",
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "unresolved": [],
+  "remainingScopeReason": "Independently rehashed all 203 original inputs using each corpus source path and compared every digest with both corpus and provenance; zero mismatches. Corpus, truth, protocol and all four current contract bindings match SOURCE-BINDINGS.json. Inspected the complete 246-question ID/path/rule/label/algorithm/parameter/case mapping and the preceding source-based applicability reviews against the actual current bilingual COVERAGE text, its delta from a915b3d4, the unchanged STATIC-ANALYSIS reference and non-decrypting PKCS12 parser. Current edits clarify reference versus actual use, report sharing and default exclusions without changing eligibility. Preserve the remaining 240 questions, their original positive/negative/unsupported/ambiguous distinctions, malformed controls, static/dead/comment cases, dependency declarations, outer container signals and readable unencrypted certificate attributes. The same six encrypted-container inner properties remain outside the readable subset; no new exclusion is introduced. Original corpus/truth labels remain unchanged. Historical applicability reviews, their descriptions of prior measurements and restored-fixture hash provenance were exposed, so historicalMeasurementsSeen is conservatively true. The new review-main.json and new assessment aggregate were not read before freezing this record. No corpus specimen was executed and no detector prediction was used to determine eligibility. This is post-observation source-applicability revalidation, not new accuracy measurement or product/publication acceptance.",
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The original public-only.p12 bytes retain the encryptedData inner certificate content documented in the prior source review. Current bilingual coverage excludes decryption, and the unchanged parser leaves non-Data ContentInfo opaque. Preserve the nominal negative ECDSA-signature label while excluding only access to that inner signature attribute."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The original public-only.pfx remains hash-identical to public-only.p12. Public-certificate conversion provenance does not establish readable unencrypted contents. Preserve its nominal negative signature truth and exclude only the encrypted inner signature-property question."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "RSA3072 public-certificate provenance preserves the nominal positive modulus-size fact, but retrieving it from the unchanged encrypted P12 requires access outside the current non-decrypting contract. Outer container observations remain eligible."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The original provenance preserves the positive RSA certificate-signature truth. The unchanged P12 encryptedData content is opaque to the parser, so extracting that inner signature attribute remains unsupported independently of detector outcomes."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The byte-identical encrypted PFX preserves the known RSA3072 source-certificate fact without making its inner modulus readable. Current contracts and parser still exclude the required decryption; preserve nominal truth and exclude only this inner property."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The original PFX carries the public certificate inside encryptedData rather than the supported Data/SafeContents certificate-bag path. The current summaries and unchanged technical contract do not add decryption. Preserve the positive RSA-signature truth and exclude only extraction of this encrypted inner attribute."
+    }
+  ]
+}

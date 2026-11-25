@@ -1,6 +1,6 @@
 # Generated Reports and Browser Verification
 
-These are mandatory details of [AGENTS.md](../../AGENTS.md). Read before changing
+These are product requirements under [AGENTS.override.md](../../AGENTS.override.md). Read before changing
 report content, presentation or interaction, or performing report browser
 acceptance checks. Also read the affected report/user/design documentation.
 
