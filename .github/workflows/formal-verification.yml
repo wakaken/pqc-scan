@@ -9,6 +9,10 @@ on:
       - 'rust-toolchain.toml'
       - 'docs/formal-verification/**/*.lean'
       - 'docs/formal-verification/lean-toolchain'
+      - 'docs/formal-verification/Cargo.toml'
+      - 'docs/formal-verification/Cargo.lock'
+      - 'docs/formal-verification/rust-toolchain.toml'
+      - 'docs/formal-verification/why3find.json'
       - 'scripts/formal-verification.py'
       - 'tests/formal-verification/**'
       - '.github/workflows/formal-verification.yml'
@@ -20,6 +24,10 @@ on:
       - 'rust-toolchain.toml'
       - 'docs/formal-verification/**/*.lean'
       - 'docs/formal-verification/lean-toolchain'
+      - 'docs/formal-verification/Cargo.toml'
+      - 'docs/formal-verification/Cargo.lock'
+      - 'docs/formal-verification/rust-toolchain.toml'
+      - 'docs/formal-verification/why3find.json'
       - 'scripts/formal-verification.py'
       - 'tests/formal-verification/**'
       - '.github/workflows/formal-verification.yml'
@@ -36,11 +44,11 @@ jobs:
   verify:
     name: formal-${{ matrix.verifier }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        verifier: [kani, lean]
+        verifier: [kani, lean, creusot]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -65,6 +73,25 @@ jobs:
           "$RUNNER_TEMP/elan-installer/elan-init" -y --no-modify-path --default-toolchain none
           "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.36.0
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install pinned Creusot, Why3 and solvers
+        if: matrix.verifier == 'creusot'
+        env:
+          CREUSOT_DATA_HOME: /home/runner/.local/share/creusot
+          CARGO_PROFILE_RELEASE_DEBUG: '0'
+          CARGO_PROFILE_DEV_DEBUG: '0'
+          CARGO_INCREMENTAL: '0'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y opam automake libgmp-dev zlib1g-dev libzmq3-dev pkg-config
+          opam init --bare --disable-sandboxing --no-setup -y
+          opam --cli=2.1 var --global in-creusot-ci=true
+          git clone https://github.com/creusot-rs/creusot "$RUNNER_TEMP/creusot"
+          cd "$RUNNER_TEMP/creusot"
+          git checkout --detach fd4d85b2c237ef93147e99f6a0c04acfc89a6a17
+          rustup toolchain install nightly-2026-08-03 --profile minimal --component rustc-dev,llvm-tools,rustfmt
+          cargo install --locked --path cargo-creusot
+          cargo install --locked --path creusot-rustc --root "$CREUSOT_DATA_HOME/toolchains/nightly-2026-08-03"
+          cargo run --locked --bin creusot-install -- prelude why3 provers why3-conf
       - name: Verify
         run: python3 scripts/formal-verification.py --mode ${{ matrix.verifier }} --timeout 300 --out-dir target/formal-verification/ci
       - name: Preserve proof results and source bindings

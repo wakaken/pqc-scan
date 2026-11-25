@@ -15,14 +15,16 @@ production functions. Use Lean **4.36.0**, its bundled standard library only,
 for an independent mathematical policy specification and a model of coverage
 classification. Rust unit tests export exhaustive small-domain vectors; Lean
 executes its own models on those same inputs and the runner compares the results.
-Normal builds do not depend on either verifier.
+Normal builds do not depend on these verifiers.
 
 Kani is the smallest way to check existing Rust, including runtime safety within
 declared bounds. Lean adds unbounded list/natural-number reasoning, at the cost
-of a separately reviewed translation. Creusot (contracts, Why3/SMT) and Verus
-(specification/ghost code, SMT) remain future options for unbounded implementation
-invariants. Adding either now would add another toolchain and annotation system
-before this small boundary is measured. None of these tools proves detector
+of a separately reviewed translation. Creusot **0.15.0** now verifies the actual
+policy aggregation loop for arbitrary representable slice lengths, including
+termination. Its [contracts, toolchain, trust boundary and results](CREUSOT.md)
+complement Kani's bounded checks and Lean's independent model. Verus remains a
+future alternative; adding a fourth prover is not needed for this PoC.
+None of these tools proves detector
 accuracy, active cryptographic use, cryptographic primitive security or deployment
 readiness. Fuzzing, regression tests and accuracy studies remain separate evidence.
 
@@ -51,6 +53,9 @@ There are no list-length preconditions in Lean. Kani directly checks the allocat
 Applicability overrides and the wrapper are checked by Rust/Lean comparison tests. The report evaluator always supplies `inventory_exhaustive=false`
 for inventory v1; the harness verifies the aggregation function, not the complete
 inventory/report pipeline or reason strings.
+Creusot compiles that same function from `src/policy/aggregation.rs` through the
+proof-only Cargo manifest in this directory. Its quantified specification describes
+membership, independently of the implementation's flags and traversal order.
 
 ### Inspection coverage
 
@@ -122,7 +127,8 @@ python3 -m unittest discover -s tests/formal-verification -v
 python3 scripts/formal-verification.py --mode all --timeout 300
 ```
 
-Use `--mode kani` or `--mode lean` for separate lanes. Each command gets its own
+For `all`, also install the pinned [Creusot stack](CREUSOT.md#reproduce).
+Use `--mode kani`, `--mode lean` or `--mode creusot` for separate lanes. Each command gets its own
 timeout. A fresh UTC-named directory below `target/formal-verification/` contains
 `results.json`, command logs, the two vector tables and the compiled Lean module.
 An explicit `--out-dir` must not already exist, preventing stale-success reuse.
@@ -138,7 +144,7 @@ to `not_run`, not `passed`. Opting in makes it a required proof for that run.
 CI runs the default proof scope. A successful default run makes no proof claim
 about unrecognized names. See [measured results and limitations](RESULTS.md).
 `--assessment` requires Kani (`--mode kani` or `--mode all`); using it with
-`--mode lean` is rejected before any tool runs.
+`--mode lean` or `--mode creusot` is rejected before any tool runs.
 Lean warnings are errors; all seven theorem dependencies are audited against
 Lean's standard logical axioms `propext`, `Quot.sound`, `Classical.choice`, with no
 project-added axioms or native computation shortcuts permitted.
@@ -146,9 +152,9 @@ project-added axioms or native computation shortcuts permitted.
 The runner binds results to the HEAD plus SHA-256 hashes of Rust/Cargo/toolchain,
 proof, runner, runner-test and workflow inputs, and rejects source changes during
 execution. This is a drift guard and reproducibility record, not proof that the
-translation is correct. CI reruns both verifiers for source/dependency/proof input
+translation is correct. CI reruns all three verifiers for source/dependency/proof input
 changes, on pushes, pull requests and manual invocation, as separate jobs from
-ordinary tests. Each job has a 30-minute ceiling and artifacts survive verification
+ordinary tests. Each job has a 45-minute ceiling (including installation) and artifacts survive verification
 failure. A cancelled job or installation failure without `results.json` means
 verification did not complete; it is never proof success. Fork PRs need no secrets.
 An unchanged model could miss a Rust change outside the finite comparison domain;

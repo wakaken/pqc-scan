@@ -1,0 +1,17 @@
+[package]
+name = "pqc_scan_policy_proof"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[lib]
+path = "../../crates/pqc_scan_core/src/policy/aggregation.rs"
+
+[dependencies]
+creusot-std = "=0.15.0"
+serde = { version = "=1.0.228", features = ["derive"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(creusot)'] }

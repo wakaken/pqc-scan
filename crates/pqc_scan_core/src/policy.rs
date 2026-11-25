@@ -2,20 +2,16 @@
 use crate::assessment::{AlgorithmAssessment, Purpose, QuantumExposure};
 use serde::{Deserialize, Serialize};
 
+mod aggregation;
+use aggregation::aggregate_decision;
+pub use aggregation::Decision;
+
 #[cfg(kani)]
 #[path = "formal/policy.rs"]
 mod proofs;
 
 pub const PROFILE_ID: &str = "migration-review-v1";
 pub const PROFILE_VERSION: &str = "1.0.0";
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum Decision {
-    Pass,
-    Fail,
-    Indeterminate,
-    NotApplicable,
-}
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct DecisionRecord {
     pub decision: Decision,
@@ -292,26 +288,6 @@ pub fn assess_primitive_policy(a: &AlgorithmAssessment, c: &AssessmentContext) -
         &["bounded_primitive_review_only_operator_claims_unverified"],
     )
 }
-/// Aggregate Pass requires positive relevant results and both completeness conditions.
-/// Current inventory v1 is never exhaustive; its report evaluator always passes false.
-fn aggregate_decision(
-    decisions: &[Decision],
-    inspection_complete: bool,
-    inventory_exhaustive: bool,
-) -> Decision {
-    if decisions.contains(&Decision::Fail) {
-        Decision::Fail
-    } else if !decisions.contains(&Decision::Pass)
-        || decisions.contains(&Decision::Indeterminate)
-        || !inspection_complete
-        || !inventory_exhaustive
-    {
-        Decision::Indeterminate
-    } else {
-        Decision::Pass
-    }
-}
-
 /// Aggregate advisory decisions, retaining applicability and uncertainty reasons.
 pub fn summarize(
     decisions: &[Decision],

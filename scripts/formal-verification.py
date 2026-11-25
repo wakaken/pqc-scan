@@ -15,6 +15,14 @@ import time
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 LEAN_DIR = ROOT / "docs/formal-verification"
 KANI_VERSION = "0.68.0"
+CREUSOT_VERSION = "0.15.0"
+POLICY_SOURCE = ROOT / "crates/pqc_scan_core/src/policy/aggregation.rs"
+MUTATIONS = {
+    "omit_completeness": (" || !inspection_complete || !inventory_exhaustive", ""),
+    "forget_failure": ("Decision::Fail => has_fail = true,", "Decision::Fail => {},"),
+    "skip_last": ("while i < decisions.len() {",
+                  "while i < decisions.len() && i != decisions.len() - 1 {"),
+}
 THEOREMS = (
     "policy_correct", "pass_iff", "incomplete_never_pass", "indeterminate_never_pass",
     "fail_dominates", "complete_iff", "failure_never_complete",
@@ -76,6 +84,67 @@ def check_lean_axioms(output):
     return True
 
 
+def prepare_creusot_project(directory, source):
+    """Compile the real production file, with isolated proof-only dependencies."""
+    directory.mkdir()
+    directory = directory.resolve()
+    manifest = (LEAN_DIR / "Cargo.toml").read_text()
+    original = '"../../crates/pqc_scan_core/src/policy/aggregation.rs"'
+    if manifest.count(original) != 1:
+        raise ValueError("proof manifest no longer selects the production kernel")
+    relative = os.path.relpath(source, directory)
+    (directory / "Cargo.toml").write_text(manifest.replace(original, json.dumps(relative)) +
+        '\n[[test]]\nname = "contract_witnesses"\npath = "witnesses.rs"\n')
+    # Independent concrete counterexamples distinguish a bad mutant from solver incompleteness.
+    (directory / "witnesses.rs").write_text(f"#[path = {json.dumps(relative)}]\nmod aggregation;\n" + """
+use aggregation::{aggregate_decision, Decision::*};
+#[test]
+fn omit_completeness() {
+    assert_eq!(aggregate_decision(&[Pass], false, true), Indeterminate);
+    assert_eq!(aggregate_decision(&[Pass], true, false), Indeterminate);
+}
+#[test]
+fn forget_failure() {
+    assert_eq!(aggregate_decision(&[Pass, Fail], true, true), Fail);
+}
+#[test]
+fn skip_last() {
+    assert_eq!(aggregate_decision(&[Pass, Indeterminate], true, true), Indeterminate);
+}
+""")
+    for name in ("Cargo.lock", "rust-toolchain.toml", "why3find.json"):
+        shutil.copyfile(LEAN_DIR / name, directory / name)
+
+
+def creusot_goals(output):
+    """Require the selected goal, nonempty output, and no unproved goal summaries."""
+    goals = re.findall(r"^  Goal ([^:]+): (.+)$", output, re.MULTILINE)
+    proved = bool(goals) and all(re.fullmatch(r"✔ \([1-9][0-9]*\)", status)
+                                  for _, status in goals)
+    return {"proved": proved and any(name == "vc_aggregate_decision" for name, _ in goals),
+            "goals": dict(goals)}
+
+
+def mutate(source, name):
+    old, new = MUTATIONS[name]
+    if source.count(old) != 1:
+        raise ValueError(f"mutation anchor changed: {name}")
+    return source.replace(old, new)
+
+
+def solver_outcomes(path):
+    """Why3find writes consecutive JSON objects (not a JSON array)."""
+    remaining = path.read_text() if path.is_file() else ""
+    counts = {}
+    decoder = json.JSONDecoder()
+    while remaining.strip():
+        result, end = decoder.raw_decode(remaining.lstrip())
+        key = result["result"]
+        counts[key] = counts.get(key, 0) + 1
+        remaining = remaining.lstrip()[end:]
+    return counts
+
+
 def source_manifest():
     files = subprocess.check_output(
         ["git", "ls-files", "-c", "-o", "--exclude-standard"], cwd=ROOT, text=True
@@ -89,20 +158,21 @@ def source_manifest():
                             ".github/workflows/formal-verification.yml"}
                 or name.startswith("tests/formal-verification/") and path.suffix == ".py"
                 or name.startswith("docs/formal-verification/")
-                and (path.suffix == ".lean" or path.name == "lean-toolchain")):
+                and (path.suffix in {".lean", ".toml", ".lock", ".json"}
+                     or path.name == "lean-toolchain")):
             selected[name] = hashlib.sha256(path.read_bytes()).hexdigest()
     return selected
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=("all", "kani", "lean"), default="all")
+    parser.add_argument("--mode", choices=("all", "kani", "lean", "creusot"), default="all")
     parser.add_argument("--out-dir", type=pathlib.Path)
     parser.add_argument("--timeout", type=float, default=900, help="seconds per command")
     parser.add_argument("--assessment", action="store_true",
                         help="also attempt the experimental symbolic unknown-identifier proof")
     args = parser.parse_args()
-    if args.assessment and args.mode == "lean":
+    if args.assessment and args.mode not in {"all", "kani"}:
         parser.error("--assessment requires --mode kani or --mode all")
     if args.timeout <= 0:
         parser.error("--timeout must be positive")
@@ -118,6 +188,7 @@ def main():
         "selected_harnesses": list(HARNESSES + (ASSESSMENT_HARNESSES if args.assessment else ())),
         "experimental_assessment": {"status": "not_run", "reason": "unknown identifiers; opt in with --assessment"},
         "kani": {"status": "not_run"}, "lean": {"status": "not_run"},
+        "creusot": {"status": "not_run"},
     }
 
     def save():
@@ -166,6 +237,69 @@ def main():
             report["kani"]["reason"] = "pinned Kani unavailable; see version step"
         save()
 
+    if args.mode in {"all", "creusot"}:
+        project = out / "creusot"
+        prepare_creusot_project(project, POLICY_SOURCE)
+        ready = version("creusot-version", ["cargo", "creusot", "version"],
+                        rf"(?m)^cargo-creusot {re.escape(CREUSOT_VERSION)}$", project)
+        if ready:
+            output = (out / "creusot-version.log").read_text()
+            pins = (r"^Rust toolchain nightly-2026-08-03$", r"^Why3 platform, version 1\.8\.2\+git$",
+                    r"^why3find v1\.3\.0\+dev$", r"^z3 5\.3\.2$")
+            ready = all(re.search(pin, output, re.MULTILINE) for pin in pins)
+            if not ready:
+                report["steps"]["creusot-version"].update(status="failed", reason="dependency version mismatch")
+        if ready:
+            env = dict(os.environ, CARGO_TARGET_DIR=str(LEAN_DIR / "target/creusot"))
+
+            def prove(name, directory):
+                command = ["cargo", "creusot", "--no-cache", "--why3find-arg=--goals",
+                           "--why3find-arg=--log-prover-results",
+                           f"--why3find-arg={directory / 'solver-results.json'}", "--", "--locked"]
+                ok = step(name, command, directory, env)
+                goals = creusot_goals((out / f"{name}.log").read_text())
+                report["steps"][name]["verification"] = goals
+                report["steps"][name]["solver_outcomes"] = solver_outcomes(directory / "solver-results.json")
+                generated = directory / "verif/pqc_scan_policy_proof_rlib/aggregate_decision.coma"
+                report["steps"][name]["coma_generated"] = generated.is_file()
+                if ok and (not goals["proved"] or not generated.is_file()
+                           or not report["steps"][name]["solver_outcomes"].get("Valid")):
+                    report["steps"][name].update(status="failed", reason="expected proof goals missing or unproved")
+                    ok = False
+                save()
+                return ok
+
+            ok = prove("creusot-proof", project)
+            ok = step("creusot-witnesses", ["cargo", "test", "--locked", "--test", "contract_witnesses"],
+                      project, env) and ok
+            report["creusot"]["mutations"] = {}
+            if ok:
+                source = POLICY_SOURCE.read_text()
+                for name in MUTATIONS:
+                    mutant = out / f"mutant_{name}.rs"
+                    mutant.write_text(mutate(source, name))
+                    directory = out / f"creusot-{name}"
+                    prepare_creusot_project(directory, mutant)
+                    prove(f"creusot-{name}", directory)
+                    result = report["steps"][f"creusot-{name}"]
+                    step(f"witness-{name}", ["cargo", "test", "--locked", "--test", "contract_witnesses",
+                                             name, "--", "--exact"], directory, env)
+                    witness = report["steps"][f"witness-{name}"]
+                    witness_failed = (witness["status"] == "failed" and witness["exit_code"] == 101
+                                      and f"test {name} ... FAILED" in (out / f"witness-{name}.log").read_text())
+                    # Compiler/install errors, missing goals and process timeouts are not negative controls.
+                    rejected = (result["status"] == "failed" and result["exit_code"] not in {None, 0}
+                                and result["coma_generated"]
+                                and result["verification"]["goals"].get("vc_aggregate_decision", "").startswith("✘ ")
+                                and witness_failed)
+                    report["creusot"]["mutations"][name] = {"status": "passed" if rejected else "failed",
+                                                               "expected": "proof rejection"}
+                    ok = rejected and ok
+            report["creusot"]["status"] = "passed" if ok else "failed"
+        else:
+            report["creusot"]["reason"] = "pinned Creusot/dependencies unavailable; see version step"
+        save()
+
     if args.mode in {"all", "lean"}:
         lean = shutil.which("lean") or str(pathlib.Path.home() / ".elan/bin/lean")
         lean_version = (LEAN_DIR / "lean-toolchain").read_text().strip().split(":v")[-1]
@@ -198,7 +332,7 @@ def main():
         save()
 
     report["source_unchanged"] = initial == source_manifest()
-    requested = [report[key]["status"] for key in ("kani", "lean") if args.mode in {"all", key}]
+    requested = [report[key]["status"] for key in ("kani", "lean", "creusot") if args.mode in {"all", key}]
     report["status"] = "passed" if all(s == "passed" for s in requested) and report["source_unchanged"] else "failed"
     save()
     print(f"results: {out / 'results.json'}", flush=True)

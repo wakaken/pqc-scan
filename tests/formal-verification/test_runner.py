@@ -58,11 +58,14 @@ class RunnerTests(unittest.TestCase):
             proof = root / "docs/formal-verification/Model.lean"
             proof.parent.mkdir(parents=True)
             proof.write_text("example : True := by trivial\n")
+            config = proof.with_name("Cargo.toml")
+            config.write_text('[workspace]\n')
             old_root, runner.ROOT = runner.ROOT, root
             try:
                 initial = runner.source_manifest()
                 self.assertIn("crates/demo/src/lib.rs", initial)
                 self.assertIn("docs/formal-verification/Model.lean", initial)
+                self.assertIn("docs/formal-verification/Cargo.toml", initial)
                 source.write_text("pub fn decision() -> bool { true }\n")
                 self.assertNotEqual(initial, runner.source_manifest())
             finally:
@@ -75,6 +78,45 @@ class RunnerTests(unittest.TestCase):
             f"'PQC.{name}' depends on axioms: [propext, Quot.sound]"
             for name in runner.THEOREMS
         )))
+
+    def test_creusot_rejects_empty_missing_and_unproved_goals(self):
+        good = "  Goal vc_len_Decision: ✔ (1)\n  Goal vc_aggregate_decision: ✔ (1)\n"
+        self.assertTrue(runner.creusot_goals(good)["proved"])
+        for output in ("", "Proved (empty) ✔", "  Goal vc_len_Decision: ✔ (1)\n",
+                       good.replace("✔ (1)", "✘ (0/1)", 1), good + "  Goal new_contract: ✘ (0/1)\n",
+                       good.replace("✔ (1)", "✔ (0)")):
+            self.assertFalse(runner.creusot_goals(output)["proved"], output)
+
+    def test_creusot_project_uses_original_source_and_locked_dependencies(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = pathlib.Path(tmp) / "proof"
+            runner.prepare_creusot_project(directory, runner.POLICY_SOURCE)
+            import json
+            import re
+            path = re.search(r'^path = (".*")$', (directory / "Cargo.toml").read_text(), re.MULTILINE)
+            self.assertEqual((directory / json.loads(path[1])).resolve(), runner.POLICY_SOURCE)
+            self.assertEqual((directory / "Cargo.lock").read_bytes(), (runner.LEAN_DIR / "Cargo.lock").read_bytes())
+            self.assertFalse((directory / "aggregation.rs").exists())
+            with self.assertRaises(FileExistsError):
+                runner.prepare_creusot_project(directory, runner.POLICY_SOURCE)
+
+    def test_mutations_retain_contracts_and_require_unique_anchors(self):
+        source = runner.POLICY_SOURCE.read_text()
+        contracts = [line for line in source.splitlines() if "cfg_attr(creusot" in line]
+        for name in runner.MUTATIONS:
+            mutant = runner.mutate(source, name)
+            self.assertNotEqual(source, mutant)
+            self.assertEqual(contracts, [line for line in mutant.splitlines() if "cfg_attr(creusot" in line])
+            for bad in ("", source + source):
+                with self.assertRaises(ValueError):
+                    runner.mutate(bad, name)
+
+    def test_solver_timeouts_are_preserved_as_timeouts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / "solver.json"
+            self.assertEqual(runner.solver_outcomes(path), {})
+            path.write_text('{"result":"Timeout"}\n{\n"result":"Valid"\n}\n{"result":"Unknown"}')
+            self.assertEqual(runner.solver_outcomes(path), {"Timeout": 1, "Valid": 1, "Unknown": 1})
 
     def test_lean_version_uses_project_toolchain_directory(self):
         import json

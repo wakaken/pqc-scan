@@ -12,6 +12,42 @@ fn decision_code(d: Decision) -> char {
     }
 }
 
+#[test]
+fn long_decision_lists_preserve_uncertainty_and_order() {
+    let context = AssessmentContext::default();
+    for (last, expected) in [
+        (Decision::Pass, Decision::Pass),
+        (Decision::Fail, Decision::Fail),
+        (Decision::Indeterminate, Decision::Indeterminate),
+        (Decision::NotApplicable, Decision::Pass),
+    ] {
+        let mut decisions = vec![Decision::NotApplicable; 8193];
+        decisions[0] = Decision::Pass;
+        decisions[8192] = last;
+        let forward = summarize(&decisions, true, true, &context);
+        assert_eq!(forward.decision, expected);
+        decisions.reverse();
+        assert_eq!(forward, summarize(&decisions, true, true, &context));
+    }
+    let positive = vec![Decision::Pass; 8193];
+    assert_eq!(
+        summarize(&positive, false, true, &context).decision,
+        Decision::Indeterminate
+    );
+    assert_eq!(
+        summarize(&positive, true, false, &context).decision,
+        Decision::Indeterminate
+    );
+    assert_eq!(
+        summarize(&[], true, true, &context).decision,
+        Decision::Indeterminate
+    );
+    assert_eq!(
+        summarize(&vec![Decision::NotApplicable; 8193], true, true, &context).decision,
+        Decision::Indeterminate
+    );
+}
+
 fn coverage(counts: &[u64; 8]) -> CoverageSummary {
     let mut c = CoverageSummary::new();
     [

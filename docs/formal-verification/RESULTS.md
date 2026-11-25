@@ -1,5 +1,8 @@
 # PoC results
 
+The original Kani/Lean measurements below are historical. The dated Creusot
+extension at the end records the additional scope and its separate status.
+
 Status: the selected PoC is implemented and verified locally and in hosted CI;
 both independent review stages are accepted. Unproved scope is retained below.
 No project-wide security or completeness claim.
@@ -161,3 +164,69 @@ when a fresh measurement is needed. Local downloaded evidence is under
 Only this results prose changed after those reviewed/executed source bytes.
 The report update does not alter proof/build/test inputs, so the checks and review
 conclusions remain applicable. No PR merge or develop update is part of this PoC.
+
+## 2026-11-25: Creusot extension
+
+Status: implementation and local verification pass. Hosted CI and the independent
+test review are pending; this extension is not yet marked complete.
+
+Baseline: `6f94ba692995cb33640dd13af62e4da0606dfead`, including develop
+`b41ae987798d2908850c612634d2d2f220c73dc3`. Branch remains
+`codex/formal-verification`. See [the Creusot specification and trust boundary](CREUSOT.md).
+The final executable input manifest has 244 entries and SHA-256
+`b6f5f17479ed5be4b97437026b5b28ad489273ed3609691dce41f4ea9fdbc97d`
+(sorted compact JSON). Proof caches are artifacts, excluded from source inputs.
+
+Local macOS arm64 results, Creusot 0.15.0 / Why3 1.8.2+git / Why3find 1.3.0+dev /
+Z3 5.3.2 / proof nightly-2026-08-03:
+
+| Check | Actual result |
+|---|---|
+| Production aggregation kernel, arbitrary representable slice length | Both top-level VCs proved, including `vc_aggregate_decision`; Fail/Pass equivalences, no NotApplicable, index/increment safety, prefix invariants and termination |
+| Positive proof command | Exit 0, 4.453s with warm compilation caches; individual main SMT goal 0.012s, slice-length goal 0.003s |
+| Omit completeness guards | Proof exit 1, 23.083s; named runtime counterexample exit 101 |
+| Forget Fail | Proof exit 1, 16.455s; named runtime counterexample exit 101 |
+| Skip final element | Proof exit 1, 19.393s; named runtime counterexample exit 101 |
+| Positive runtime witnesses | Three passed, exit 0 |
+| Existing Kani / Lean | All 13 harnesses and seven theorems passed; 10,662 comparison rows equal |
+| Full policy records before/after the extraction | All 4,092 serialized records byte-identical, including reasons |
+| Default workspace tests | Exit 0; 825 passed, three existing ignored entries; 238.399s |
+| All-features workspace tests | Exit 0; 887 passed, five existing ignored entries; 232.837s |
+| Workspace build and clippy, default and all-features | All exit 0; warnings denied by clippy |
+| fmt, runner tests, actionlint, diff check | Exit 0; 13 Python tests |
+| Built CLI scan of examples, all output formats | Exit 0; 55 files scanned, 322 findings; reports produced |
+
+These timings are measurements, not performance guarantees; installation is
+excluded and two workspace test configurations ran concurrently. Negative VCs
+are **unproved**, not positive proofs of their negations. Raw solver responses,
+including Timeout and Unknown, are retained; concrete executed witnesses establish
+actual policy violations independently of solver incompleteness.
+
+Evidence: `target/formal-creusot-final/results.json` records the first complete
+all-lane success with source unchanged. `target/formal-creusot-final-inputs/` reruns
+the final source manifest after cache exclusion and precise CI path filters.
+Ordinary check receipts and logs are under `target/formal-creusot-checks/` and
+`target/formal-creusot-feature-checks/`. All Rust/Cargo/toolchain inputs in those
+receipts still match final source; only CI filters and generated-cache exclusion
+changed afterward. Those changes do not affect the ordinary test/build evidence.
+
+Installation attempts are retained under `target/formal-tools/`: missing macOS
+depexts, the initial data-directory mismatch, and the C SDK/linker incompatibility
+were failures, not proof success. Installing prerequisites, using Creusot's actual
+data path, and selecting the working SDK per command resolved them. An initial
+mutant filename containing a hyphen produced invalid generated span syntax;
+the runner rejected it as a negative control, and underscore filenames resolved it.
+Earlier witness runs with source changed during execution remain failed overall.
+
+Implementation review `/root/creusot_implementation_review` accepted the combined
+change, then the scoped cache/filter follow-up, with no unresolved findings.
+Reviewed diff SHA-256: `a29cf2e28b5e62c025af918090bdc73e1d759c3928e2ee7148bbf924a62a977d`.
+Prose-only measurement updates do not change executable proof inputs.
+
+No new Creusot claim covers the report wrapper, applicability/reasons, diagnostic
+counter production, assessment/catalog parsing, inventory references, identity,
+deduplication, detection accuracy or whole-program behavior. Compiler/translation,
+upstream library contracts/prelude axioms, Why3 and Z3 remain trusted. The other
+tools' earlier limitations, especially the unproved symbolic unknown-name Kani
+experiment, remain in effect. Next expansion is diagnostic terminal-count
+conservation, then inventory reference integrity and finding-set preservation.
