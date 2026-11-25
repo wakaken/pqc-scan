@@ -383,3 +383,10 @@ Known unfinished-inspection causes are grouped separately, with diagnostic recor
 The rule guide lists rules that produced findings in this scan; the complete built-in catalog is maintained in the rule reference. Source implementation definitions and conditional/composite components have separate informational rules. Comments, symbol declarations and literal Received-header records are informational references, while real configuration candidates and executable crypto tests remain visible. Raw rule identities and risk classifications remain available; an informational source reference is not a confirmed deployed vulnerability.
 
 Migration evidence details show the observed use state and explain what lexical, syntactic or dependency references establish. Confirm actual purpose/use before acting. Coincident detection records show their count and evidence overlap. Distinct algorithms or concerns are not automatically merged, and record counts are not asserted to be independent cryptographic uses. Test-folder and dependency-file categories are path hints only and do not automatically exclude a target or change its assessment.
+
+
+## Protected source excerpts
+
+Source excerpts show the detected line and up to two lines before and after it. Ordinary arguments, variable references, algorithm names and neighbouring code remain visible, including PHP, C#, C/C++, Java and Go. Recognized secrets are replaced with mask labels inside the code: credential values, private-key blocks and literal key data in supported cryptographic key-input positions. Masking happens before long lines are shortened; existing line-length limits still apply.
+
+A mask does not by itself establish that a valid private key was found. Unfinished or ambiguous source inspection can require conservative protection of the uninspected region; dependency manifests and binary key containers retain their separate protections. This is bounded syntax-based masking, not a universal secret detector. Original finding locations and IDs are retained. Saved reports keep their old contents; rescan to obtain source context instead of the previous API-only, arguments-omitted excerpt.

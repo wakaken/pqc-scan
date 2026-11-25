@@ -236,9 +236,9 @@ fn php_namespaces_aliases_tuple_roles_and_source_order_are_bounded() {
 #[test]
 fn php_unknown_keys_named_arguments_local_shadowing_and_privacy() {
     let f = Fixture::new();
-    let source="<?php $options=['private_key_type'=>OPENSSL_KEYTYPE_RSA]; $key=openssl_pkey_new(options:$options); openssl_sign(private_key:$key,data:'LEAKME',signature:$sig);";
+    let source="<?php $options=['private_key_type'=>OPENSSL_KEYTYPE_RSA]; $key=openssl_pkey_new(options:$options); openssl_sign(private_key:$key,data:'PUBLIC087_MESSAGE',signature:$sig);";
     let native = f.native(source);
-    let expression = "openssl_sign(private_key:$key,data:'LEAKME',signature:$sig)";
+    let expression = "openssl_sign(private_key:$key,data:'PUBLIC087_MESSAGE',signature:$sig)";
     let start = source.find(expression).unwrap();
     let o = focal(&native, start, start + expression.len());
     assert_eq!(o.len(), 1);
@@ -248,18 +248,22 @@ fn php_unknown_keys_named_arguments_local_shadowing_and_privacy() {
         .detect_detailed(&input, &f.rules)
         .unwrap();
     for d in outcome.detections() {
-        assert!(!d.evidence.r#match.contains("LEAKME"));
-        assert!(!d.evidence.snippet_preview.contains("LEAKME"));
+        assert!(!d.evidence.r#match.contains("PUBLIC087_MESSAGE"));
+        assert!(!d.evidence.snippet_preview.contains("PUBLIC087_MESSAGE"));
         assert!(!serde_json::to_string(&d.evidence.metadata)
             .unwrap()
-            .contains("LEAKME"));
+            .contains("PUBLIC087_MESSAGE"));
     }
     let (_, legacy) = f.document(source);
     assert!(
-        !serde_json::to_string(&legacy).unwrap().contains("LEAKME"),
+        serde_json::to_string(&legacy)
+            .unwrap()
+            .contains("PUBLIC087_MESSAGE"),
         "{legacy}"
     );
-    assert!(!serde_json::to_string(&native).unwrap().contains("LEAKME"));
+    assert!(!serde_json::to_string(&native)
+        .unwrap()
+        .contains("PUBLIC087_MESSAGE"));
     for source in [
         "<?php openssl_sign('RSA',$sig,$imported);",
         "<?php $key=openssl_pkey_get_private($pem); openssl_sign($m,$sig,$key);",
@@ -412,11 +416,13 @@ fn php_sensitive_arguments_protect_all_detector_context_and_wide_source() {
                 assert!(!serde_json::to_string(&legacy).unwrap().contains(canary));
                 assert!(!serde_json::to_string(&native).unwrap().contains(canary));
             }
-            for finding in legacy["findings"].as_array().unwrap() {
-                for line in finding["source_snippet"]["lines"].as_array().unwrap() {
-                    assert_eq!(line["text"], "[masked-sensitive-file-content]");
-                }
-            }
+            assert!(legacy["findings"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|finding| finding["source_snippet"]
+                    .to_string()
+                    .contains("sign('public')")));
         }
     }
 }
@@ -509,7 +515,7 @@ fn php_reference_only_imports_and_class_constants_are_not_runtime_operations() {
 fn php_local_binding_limit_retains_unaffected_api_requests_and_masking() {
     let f = Fixture::new();
     let source = format!(
-        "<?php function noisy(){{ {} }} function signing(){{ $key=openssl_pkey_new(['private_key_type'=>OPENSSL_KEYTYPE_RSA]); openssl_sign('PRIVATE084_PHP_BINDING_CANARY',$sig,$key); }}",
+        "<?php function noisy(){{ {} }} function signing(){{ $key=openssl_pkey_new(['private_key_type'=>OPENSSL_KEYTYPE_RSA]); $password='PRIVATE084_PHP_BINDING_CANARY'; openssl_sign('public message',$sig,$key); }}",
         "$noise=1;".repeat(65)
     );
     let input = ScannableFile::from_bytes("case.php".into(), source.as_bytes().to_vec());
@@ -518,7 +524,7 @@ fn php_local_binding_limit_retains_unaffected_api_requests_and_masking() {
         .unwrap();
     assert_eq!(outcome.status(), DetectorStatus::Truncated);
     let (native, legacy) = f.document(&source);
-    let expression = "openssl_sign('PRIVATE084_PHP_BINDING_CANARY',$sig,$key)";
+    let expression = "openssl_sign('public message',$sig,$key)";
     let start = source.find(expression).unwrap();
     let observations = focal(&native, start, start + expression.len());
     assert_eq!(
@@ -609,7 +615,8 @@ fn php_truncation_still_masks_source_context_for_other_detectors() {
     .detect_observed(&input, &f.rules)
     .unwrap();
     assert_eq!(outcome.status(), DetectorStatus::Truncated);
-    assert!(outcome.sensitive_source_context());
+    assert!(outcome.typed_source_references_only());
+    assert!(!outcome.sensitive_source_context());
 }
 
 #[test]
@@ -655,12 +662,12 @@ fn php_secret_that_looks_like_a_legacy_algorithm_is_not_exported_or_promoted() {
             )
             .unwrap();
             for finding in &doc.legacy().findings {
-                assert_eq!(finding.evidence.r#match, "[masked-sensitive-content]");
-                assert!(finding
-                    .evidence
-                    .metadata
-                    .values()
-                    .all(|v| v == "[masked-sensitive-content]"));
+                assert!(!serde_json::to_string(&finding.evidence)
+                    .unwrap()
+                    .contains(&format!("'{canary}'")));
+                assert!(!serde_json::to_string(&finding.source_snippet)
+                    .unwrap()
+                    .contains(&format!("'{canary}'")));
             }
             let native = serde_json::to_value(doc.native().unwrap()).unwrap();
             // RS256 is also part of preserved public rule IDs (JWT_RS256).
@@ -685,9 +692,9 @@ fn php_secret_that_looks_like_a_legacy_algorithm_is_not_exported_or_promoted() {
 }
 
 #[test]
-fn php_wrapper_projects_remain_distinct_in_final_outputs_without_arguments() {
+fn php_wrapper_projects_keep_public_arguments_out_of_typed_project_labels() {
     let f = Fixture::new();
-    let source = r#"<?php $a=new \OQS_KeyEncapsulation('PRIVATE079_OPAQUE_CANARY'); $b=new \OQS\OQSKem('PRIVATE079_OPAQUE_CANARY');"#;
+    let source = r#"<?php $a=new \OQS_KeyEncapsulation('PUBLIC087_SELECTOR'); $b=new \OQS\OQSKem('PUBLIC087_SELECTOR');"#;
     let (native, legacy) = f.document(source);
     let expected = [
         (
@@ -734,8 +741,8 @@ fn php_wrapper_projects_remain_distinct_in_final_outputs_without_arguments() {
             .any(|r| r["algorithm"] == label));
     }
     assert_eq!(markers.len(), 2);
-    assert!(!native.to_string().contains("PRIVATE079_OPAQUE_CANARY"));
-    assert!(!legacy.to_string().contains("PRIVATE079_OPAQUE_CANARY"));
+    assert!(!native.to_string().contains("PUBLIC087_SELECTOR"));
+    assert!(legacy.to_string().contains("PUBLIC087_SELECTOR"));
 }
 #[test]
 fn php_non_crypto_receiver_probes_do_not_change_inspection_status() {

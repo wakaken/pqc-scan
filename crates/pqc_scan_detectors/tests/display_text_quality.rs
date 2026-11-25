@@ -120,7 +120,7 @@ fn suite_registry_declarations_do_not_demote_an_independent_configuration_value(
 fn recorded_header_values_in_valid_regions_survive_unrelated_parse_errors_without_secrets() {
     let root = std::env::temp_dir().join(format!("pqc-header-value-{}", std::process::id()));
     std::fs::create_dir_all(&root).unwrap();
-    std::fs::write(root.join("record.cs"),"class C { string[] values={\" from relay\\r\\n\\tby mx with ESMTP (cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384); date PRIVATE085_RECEIVED_CANARY\"}; }\nclass Broken { void }\n").unwrap();
+    std::fs::write(root.join("record.cs"),"class C { string[] values={\" from relay\\r\\n\\tby mx with ESMTP (cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384); date token=PRIVATE085_RECEIVED_CANARY;\"}; }\nclass Broken { void }\n").unwrap();
     let rules = RuleSet::load_from_dir(
         &PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../rules/default"),
     )

@@ -4,6 +4,7 @@ mod javascript_validation;
 mod module_syntax;
 mod positions;
 mod source_api;
+mod source_privacy;
 mod syntax_compat;
 mod test_scope;
 use std::collections::{BTreeMap, HashSet};
@@ -56,18 +57,8 @@ impl Detector for TreeSitterDetector {
             .map(|outcome| {
                 outcome
                     .with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
-                    .with_sensitive_source_context(
-                        file.text
-                            .as_deref()
-                            .and_then(|text| resolve_language(&file.path, text))
-                            .is_some_and(|(_, name)| {
-                                matches!(name, "php" | "csharp" | "c" | "cpp")
-                                    && rules.all().iter().any(|r| {
-                                        scope_matches(&r.scope, name)
-                                            && crate::source_facts::builtin(r)
-                                    })
-                            }),
-                    )
+                    .with_sensitive_ranges(source_privacy::ranges(file, budget.max_ast_nodes))
+                    .with_typed_source_references_only(source_privacy::typed_only(file, rules))
             })
     }
     fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
@@ -86,18 +77,8 @@ impl TreeSitterDetector {
             .map(|outcome| {
                 outcome
                     .with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
-                    .with_sensitive_source_context(
-                        file.text
-                            .as_deref()
-                            .and_then(|text| resolve_language(&file.path, text))
-                            .is_some_and(|(_, name)| {
-                                matches!(name, "php" | "csharp" | "c" | "cpp")
-                                    && rules.all().iter().any(|r| {
-                                        scope_matches(&r.scope, name)
-                                            && crate::source_facts::builtin(r)
-                                    })
-                            }),
-                    )
+                    .with_sensitive_ranges(source_privacy::ranges(file, budget.max_ast_nodes))
+                    .with_typed_source_references_only(source_privacy::typed_only(file, rules))
             })
     }
     fn detect_source(
@@ -130,6 +111,15 @@ impl TreeSitterDetector {
             return Ok(DetectorOutcome::new(Vec::new(), DetectorStatus::Partial)
                 .with_explanation("Source text could not be decoded; syntax and cryptographic references remain uninspected."));
         }
+        // Legacy reports also need transient typed associations for safe public
+        // excerpts. This does not request inventory serialization or expand the
+        // shared parser budgets.
+        let observe = observe
+            || file
+                .text
+                .as_deref()
+                .and_then(|text| resolve_language(&file.path, text))
+                .is_some_and(|(_, name)| is_new_language(name));
         if file.path.extension().is_some_and(|e| e == "h") {
             return header::inspect(self, file, rules, observe, budget, repository);
         }
@@ -590,8 +580,13 @@ impl TreeSitterDetector {
                         )
                         .with_algorithm_references(&found.algorithm_references);
                         observations.push(if is_new_language(language_name) {
-                            let draft =
+                            let mut draft =
                                 draft.with_source_api_references(&found.algorithm_references);
+                            if let Some(name) =
+                                public_call_name(&original_tree, text, found.start, found.end)
+                            {
+                                draft = draft.with_source_api_display_name(name);
+                            }
                             let draft = if let Some(reference) = found.source_library {
                                 draft.with_source_library_reference(reference)
                             } else {
@@ -1046,6 +1041,42 @@ pub(crate) fn source_tree(
                     .is_some_and(|p| p.ends_with(".blade.php"))),
         template_limited: template.as_ref().is_some_and(|v| v.limited),
     })
+}
+
+// Read only the exact accepted call's callee/type, never its arguments. Core
+// independently restricts display to exact finite public API tokens.
+fn public_call_name<'a>(
+    tree: &tree_sitter::Tree,
+    text: &'a str,
+    start: usize,
+    end: usize,
+) -> Option<&'a str> {
+    let node = tree.root_node().descendant_for_byte_range(start, end)?;
+    if node.start_byte() != start
+        || node.end_byte() != end
+        || !matches!(
+            node.kind(),
+            "call_expression"
+                | "invocation_expression"
+                | "object_creation_expression"
+                | "new_expression"
+                | "function_call_expression"
+                | "member_call_expression"
+                | "nullsafe_member_call_expression"
+                | "scoped_call_expression"
+        )
+    {
+        return None;
+    }
+    let callee = node
+        .child_by_field_name("function")
+        .or_else(|| node.child_by_field_name("name"))
+        .or_else(|| node.child_by_field_name("type"))?;
+    if callee.end_byte() - callee.start_byte() > 256 {
+        return None;
+    }
+    let raw = text.get(callee.byte_range())?;
+    raw.rsplit(['.', ':', '\\', '>']).next()
 }
 
 #[cfg(test)]

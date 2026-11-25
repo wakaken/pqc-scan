@@ -1,0 +1,51 @@
+# Independent reviews
+
+Retained implementation identity /root/oss_implementation_review and test identity /root/oss_test_review only; no delegation. Main owns all investigation, edits and measurements. No new reviewer identities.
+
+## Implementation source01
+
+Manifestd96153f6872cb6a5fae6d054f4cef229b7b997ac095d39b8c0e2fdc7c9112dd0,15owned/336runtime, implementation-01.patch. Reviewer identified3P1s and did not accept: missing secret roles (Sodium/C++), C# initializer and wrapped/cast reference gaps, and node-cap tail-only protection allowing earlier key initializers to leak. Main added meaningful scan regressions (review-p1-red.log) before correcting all3paths, then green controls including public verification keys/messages/filepaths. Same reviewer will assess the combined follow-up. CBOM API-excerpt flag/native typed-only split accepted in principle; legacy lexical value recovery must be measured and not claimed as new typed algorithm facts or complete old/new CBOM equality.
+
+Workspace01 stopped with display_text_quality::recorded_header_values_in_valid_regions_survive_unrelated_parse_errors_without_secrets failing: the old fixture called arbitrary Received-header prose a private canary and depended on blanket hiding. The fixture now places that same synthetic canary in explicit token=credential syntax and retains the original TLS/info/partial assertions; this tests actual credential protection while ordinary header text remains displayable. CHECKS-01 contains a failed workspace result, not a final pass. Subsequent required checks were not executed in that run. Historical086evidence remains unchanged.
+
+## Source02 follow-up and source03 correction
+
+Source02c690e7208eeb4d14c2d34e6f81a2031b980394ebf03d8f0b4975b880a351ca51 addressed the original3P1 paths; reviewer found further boundaries in the same policy: namedseed/keypair, wrong RSA/wolfCrypt input slots, URI exemption applied to actualsecret/password input, and an initializer wrapped beyond16levels escaping fallback. Main reproduced the cases (review-p1-boundary-red.log), corrected API-specific named roles/Cslots and limited URI exception to OpenSSL file-key input slots, then added nonempty finding and native-canary checks to the actual regression helper. A private-key-loader-only fixture had no findings; main added an independent signing finding so source-context assertions consume the loader line rather than passing vacuously. Core/typed semantics were not weakened.
+
+Further main regressions distinguish public member/algorithm references from actual key initializer material, nested conversion literals and composed variable expressions. The relevant RED logs and targeted18 GREEN are retained. Bounded256node walks redact nested private-valued expressions; literal-only conversion calls retain unrelated public labels, while variable/composed/over-limit expressions keep conservative initializer protection. Source03 freezes these combined fixes. Source02 full checks were interrupted for these review corrections (CHECKS-02-INTERRUPTION.json); no partial run is claimed as final acceptance.
+
+## Source03 PHP alias correction
+
+Reviewer accepted the prior boundary fixes but retained a P1: privacy used raw PHP call/class spellings while the detector resolves imported aliases. Main reproduced SigningKey/function aliases (php-alias-red.log), then reused the existing bounded Context/Names namespace/import resolver for privacy canonical callees, including grouped/case-aware class and function names. Verified public-key aliases retain public inputs. Unresolved fromBytes/import aliases and name-resolution exhaustion retain limited conservative protection. Overlong callee spellings no longer bypass privacy enumeration. A300character alias exceeds the detector's own name envelope and initially had no findings; the regression adds an independent signing positive to exercise the preceding initializer/window, retaining the nonempty and native-canary assertions. Source03 full checks were interrupted for this material correction; CHECKS-03-INTERRUPTION.json preserves the reason. Fresh complete checks wait until implementation acceptance to avoid treating interrupted or superseded evidence as final.
+
+## Implementation acceptance source05
+
+Retained reviewer /root/oss_implementation_review accepted source05 manifest991d9d4b70c3d22fd8d4e510df40e978cd2b1127297b8fdfb0fc74b8b22fd95b,19owned/336runtime, implementation-05.patch. PHPalias P1 resolved by reuse of existing canonical names; no new actionable findings. Reviewer verified source hashes, all19selective scans including private/public alias controls, nonemptyfixtures and native-canary protection. Previous implementation boundary P1s resolved. All required final-source full checks,4realrescans, consuming-export privacy, browser acceptance and retained test review remain before completion. No extra reviewers/delegation or new commit/push.
+
+## Source06 array declarator correction
+
+After source05 acceptance, main's actual debug-CLI consumer probe found a C array initializer whose name was not linked to a private key argument (ARRAY-INITIALIZER-DIAGNOSIS.json). The synthetic leak was reproduced in array-initializer-red.log, then fixed by descending parser-owned array/pointer/parenthesized declarator chains before identifying a local variable name. This does not alter detection, roles or source inventories. C/C++/header controls retain public neighbours and native/default parity. Targeted20 covers all6suites, including20selective controls; initial Clippy11 evidence retained. Source05 full run was interrupted for this main-discovered material privacy correction, recorded in CHECKS-05-INTERRUPTION.json. Its implementation acceptance is historical, not final-source acceptance. Same reviewer must confirm source06; fresh complete checks follow acceptance.
+
+## Source06 acceptance and source07 named credential arrays
+
+Retained implementation reviewer accepted source06 e4692e79265d66bf2af047e55f386802fa7ced11db295cabf100ee970814cbe3, resolving array declarator association. Main then reproduced named credential arrays (named-array-red.log), PHP quoted-key => credentials (php-credential-array-red.log), a computed-credential precision regression (computed-credential-red.log), and prefixed camel-case naming inconsistency (credential-name-prefix-red.log). Source07 applies the same finite credential-name policy to literal initializer values, preserves computed public expressions, and supports quoted PHP array keys without interpreting ordinary arrow functions as assignments. Targeted24 all six suites and core privacy03 pass; initial Clippy15 passes. Final broader checks remain unexecuted.
+
+## Source07 review follow-up
+
+The retained reviewer identified two P1s: replacing legacy metadata suffix protection with a narrower identifier matcher, and named credentials hidden behind more than16wrappers escaping the literal-initializer guard. Main reproduced both (metadata-prefix-red.log, named-wrapper-red.log). Metadata now retains the legacy arbitrary-prefix suffix policy in addition to the new finite name matcher. A bounded named-initializer walker unwraps up to256levels, masks literal data or the unresolved right-hand side at the cap, and does not descend public computed calls. An initial nested-values attempt overmasked the public computed control (targeted25); it was corrected before source08 freeze. Both concerns require the same reviewer’s scoped confirmation; no final pass is claimed for source07.
+
+## Implementation acceptance source08
+
+Retained implementation reviewer /root/oss_implementation_review accepts source08 manifest782ca271f864316e937b6a2eea8dc4f01596d391e8fd66c55d8b2ea0fb7663e3,19owned/336runtime. Both source07 P1s are resolved; no new actionable findings. Reviewer confirmed legacy metadata protection, bounded deep named initializer handling, public computed expressions, meaningful RED and final targeted/core GREEN, and source bindings. Required full tests, four real report measurements, all-format consumer privacy, browser acceptance and retained test-stage review remain pending.
+
+## Main performance correction after source08 acceptance
+
+The final workspace run exposed a large-header performance regression: existing language_routing::large_unicode_header_keeps_locations_without_per_hit_prefix_scans ran above100seconds, versus prior task086 full suite0.30seconds. Main traced the added traversal to unconditional Node.parent lookup for every comment in a50000comment translation unit. Source09 restricts that lookup to init_declarator, the only constructor form using it. The existing unchanged test now passes in0.35seconds (large-header-green.log), while all constructor/privacy controls are rerun. Source08 full run was interrupted with exit130; CHECKS-08-INTERRUPTION.json preserves the reason. No superseded full-run pass is claimed. Same implementation reviewer must confirm this minimal scope restriction.
+
+## Implementation acceptance source09
+
+Retained reviewer /root/oss_implementation_review accepts source09 manifestedf1f4bede643843c7d3006bb8e402b5f1862420cae6a465b3a80d26fe6f01f8,19owned/336runtime. The only source08 delta limits constructor parent lookup to init_declarator; existing protected paths and scoped tests remain valid. Large-header0.35seconds, targeted27 and source hashes confirmed. No actionable findings. Required full checks/consumer/browser/test-stage gates remain.
+
+## Final test-stage acceptance source09
+
+Retained test reviewer /root/oss_test_review accepts final source09 manifestedf1f4bede643843c7d3006bb8e402b5f1862420cae6a465b3a80d26fe6f01f8 with no actionable findings and recommends completion against all four original criteria. Reviewer verified19owned/336runtime hashes, all9command/log bindings,983default/1042all-feature/134Node results, meaningful regression assertions/RED-GREEN paths, native/default parity, all four real report identities/coverage, consuming all-format synthetic input/output hashes, explicit CBOM public-value recoveries and absence of raw call promotions, actual Japanese/English source windows/keyboard/layout/offline browser artifacts and main final integrity. No extra full-suite/browser runs, edits or delegation. Both required independent stages accept the same final source; no unresolved required work remains.

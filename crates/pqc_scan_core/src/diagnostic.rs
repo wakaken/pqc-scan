@@ -26,6 +26,7 @@ pub struct DetectorOutcome {
     display_ranges: Vec<std::ops::Range<usize>>,
     sensitive_ranges: Vec<std::ops::Range<usize>>,
     sensitive_source_context: bool,
+    typed_source_references_only: bool,
 }
 
 impl DetectorOutcome {
@@ -46,6 +47,7 @@ impl DetectorOutcome {
             display_ranges: Vec::new(),
             sensitive_ranges: Vec::new(),
             sensitive_source_context: false,
+            typed_source_references_only: false,
         }
     }
 
@@ -88,6 +90,15 @@ impl DetectorOutcome {
     }
     pub fn sensitive_source_context(&self) -> bool {
         self.sensitive_source_context
+    }
+    /// Restrict algorithm inventory to the bounded source handler's typed facts,
+    /// independently of source presentation privacy. Ephemeral, not serialized.
+    pub fn with_typed_source_references_only(mut self, typed_only: bool) -> Self {
+        self.typed_source_references_only = typed_only;
+        self
+    }
+    pub fn typed_source_references_only(&self) -> bool {
+        self.typed_source_references_only
     }
     /// Fixed reason code and bounded numeric work counters only; never source text.
     pub fn with_limit(mut self, reason: &'static str, limit: usize, processed: usize) -> Self {

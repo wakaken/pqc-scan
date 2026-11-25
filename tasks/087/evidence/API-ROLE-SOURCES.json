@@ -1,0 +1,25 @@
+{
+  "scope": "Primary API references used to distinguish public material from private input. Privacy-only role definitions do not add detector rules or cryptographic facts.",
+  "sources": [
+    {
+      "url": "https://www.php.net/manual/en/function.sodium-crypto-sign-publickey-from-secretkey.php",
+      "role": "Secret key input0 despite publickey in function name"
+    },
+    {
+      "url": "https://www.php.net/manual/en/ref.sodium.php",
+      "role": "Finite supported Sodium family cross-check"
+    },
+    {
+      "url": "https://github.com/open-quantum-safe/liboqs/blob/main/src/sig/sig.h",
+      "role": "OQS_SIG_sign secret input5 in generic C API"
+    },
+    {
+      "url": "https://github.com/open-quantum-safe/liboqs-cpp/blob/main/include/oqs_cpp.hpp",
+      "role": "Current C++ Signature stores optional constructor secret key; preserve public signing message"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/paragonie/pqcrypto_compat/main/src/Compat.php",
+      "role": "Compat ML-DSA sign and ML-KEM decaps use secret input0; verified source declarations"
+    }
+  ]
+}

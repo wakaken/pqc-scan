@@ -215,7 +215,7 @@ fn cpp_direct_initializer_retains_nested_request_with_unambiguous_nullptr_argume
         assert_eq!(algorithm_names(&native, observations[0]), vec!["RSA"]);
         assert_eq!(observations[0]["assurance"], "syntactic");
         assert_eq!(observations[0]["usage"], "referenced");
-        assert!(!legacy.to_string().contains("EVP_PKEY_CTX_new_id("));
+        assert!(legacy.to_string().contains("EVP_PKEY_CTX_new_id("));
     }
 }
 
@@ -695,7 +695,7 @@ fn c_family_group_lists_retain_standard_draft_and_alias_spelling_and_reject_opaq
         assert!(native["observations"][0]["evidence"]["marker_kind"].is_null());
         assert_eq!(
             legacy["findings"][0]["evidence"]["match"],
-            "[masked-sensitive-content]"
+            format!("SSL_set1_groups_list(ssl,\"{group}\")")
         );
     }
     for count in [0usize, 15, 16, 17] {
@@ -840,7 +840,9 @@ fn c_family_all_detectors_keep_canaries_and_algorithm_looking_payloads_private_a
                         .as_array()
                         .unwrap()
                         .iter()
-                        .all(|f| f["evidence"]["snippet_preview"] == "[masked-sensitive-content]"));
+                        .any(|f| f["source_snippet"]
+                            .to_string()
+                            .contains("EVP_PKEY_CTX_new_from_name")));
                 }
             }
         }
@@ -946,7 +948,8 @@ fn c_family_shared_builtin_budgets_have_zero_below_at_and_above_boundaries() {
             if limit >= boundary {
                 assert_eq!(outcome.detections().len(), 2, "{cap}");
             }
-            assert!(outcome.sensitive_source_context());
+            assert!(outcome.typed_source_references_only());
+            assert!(!outcome.sensitive_source_context());
         }
     }
     let c: tree_sitter::Language = tree_sitter_c::LANGUAGE.into();
@@ -1217,7 +1220,7 @@ fn c_family_early_limits_and_malformed_inputs_still_protect_other_detector_conte
                 .legacy()
                 .findings
                 .iter()
-                .all(|f| f.evidence.snippet_preview == "[masked-sensitive-content]"));
+                .all(|f| !f.evidence.snippet_preview.contains("PRIVATE080_EARLY_KEY")));
         }
     }
 }

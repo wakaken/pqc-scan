@@ -1,0 +1,38 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.39s
+     Running tests/source_api_display.rs (target/debug/deps/source_api_display-a3f8be988e036029)
+
+running 5 tests
+test recognized_calls_show_a_public_api_excerpt_without_their_arguments ... FAILED
+test public_excerpts_do_not_reintroduce_private_or_algorithm_looking_arguments ... FAILED
+test remaining_recognized_factories_operations_and_php_case_variants_are_readable ... FAILED
+test java_and_go_have_readable_normal_source_and_still_protect_real_private_blocks ... ok
+test all_existing_seven_language_fixtures_retain_normal_readable_source ... ok
+
+failures:
+
+---- recognized_calls_show_a_public_api_excerpt_without_their_arguments stdout ----
+
+thread 'recognized_calls_show_a_public_api_excerpt_without_their_arguments' (25454745) panicked at crates/pqc_scan_detectors/tests/source_api_display.rs:63:5:
+Display-only API excerpts must not become CBOM algorithm identities
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- public_excerpts_do_not_reintroduce_private_or_algorithm_looking_arguments stdout ----
+
+thread 'public_excerpts_do_not_reintroduce_private_or_algorithm_looking_arguments' (25454744) panicked at crates/pqc_scan_detectors/tests/source_api_display.rs:63:5:
+Display-only API excerpts must not become CBOM algorithm identities
+
+---- remaining_recognized_factories_operations_and_php_case_variants_are_readable stdout ----
+
+thread 'remaining_recognized_factories_operations_and_php_case_variants_are_readable' (25454746) panicked at crates/pqc_scan_detectors/tests/source_api_display.rs:63:5:
+Display-only API excerpts must not become CBOM algorithm identities
+
+
+failures:
+    public_excerpts_do_not_reintroduce_private_or_algorithm_looking_arguments
+    recognized_calls_show_a_public_api_excerpt_without_their_arguments
+    remaining_recognized_factories_operations_and_php_case_variants_are_readable
+
+test result: FAILED. 2 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.26s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test source_api_display`

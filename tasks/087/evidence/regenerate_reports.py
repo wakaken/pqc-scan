@@ -1,0 +1,27 @@
+from pathlib import Path
+import json,hashlib,gzip,subprocess,shutil,os,datetime,sys
+R=Path('/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan');E=R/'tasks/087/evidence';T=R/'tasks/084/evidence';B=R/'tasks/085/evidence';C=Path('/Users/waka/.cache/pqc-scan-oss-validation-087');sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();read=lambda p:json.loads(p.read_text());M=E/'IMPLEMENTATION-SOURCE-09.json';manifest=read(M)
+sys.path.insert(0,str(R/'tests/quality'))
+from external import validate_tree,selection_bindings
+from evaluate import digest
+def guard():
+ for n,v in manifest['runtimeSourceBindings'].items():assert sha(R/n)==v,n
+checks=read(E/'CHECKS-09.json');assert len(checks['checks'])==9 and all(c['exitCode']==0 for c in checks['checks']);assert checks['sourceManifestSha256']==sha(M);guard();C.mkdir(exist_ok=True);binary=C/'pqc-scan-source09';assert not binary.exists();shutil.copy2(R/'target/release/pqc-scan',binary);binarysha=sha(binary);projects=read(B/'FINAL-COHORT-SOURCE06.json')['projects'];upstreams=read(T/'UPSTREAMS.json');rows=[]
+for slug,repo in [('php','robrichards/xmlseclibs'),('csharp','ITfoxtec/ITfoxtec.Identity.Saml2'),('c','curl/curl'),('cpp','bitcoin/bitcoin')]:
+ guard();u=next(x for x in upstreams if x['repository']==repo);inventory=R/u['inventory'];assert sha(inventory)==u['inventorySha256'];entries=read(inventory);root=Path(u['root']);validate_tree(root,entries);validated=len(entries)
+ cohort=next(p for p in projects if p['repository']==repo);receiptpath=Path(cohort['profiles']['default'][0]);assert sha(receiptpath)==cohort['receiptHashes'][str(receiptpath.relative_to(R))];before=read(receiptpath);selection=selection_bindings(root,cwd=R);assert digest(selection)==before['selectionBindingsDigest'];artifact=before['artifacts']['report.json'];z=Path(artifact['compressedPath']);assert sha(z)==artifact['compressedSha256'];raw=gzip.decompress(z.read_bytes());assert hashlib.sha256(raw).hexdigest()==artifact['sha256'];old=json.loads(raw);dest=C/'runs'/slug;dest.mkdir(parents=True,exist_ok=False);cmd=before['command'].copy();assert cmd[2]==str(root);ruledir=Path(cmd[cmd.index('--rules-dir')+1]);expectedrules={p.name:sha(p)for p in(R/'rules/default').glob('*.yml')};assert {p.name:sha(p)for p in ruledir.rglob('*.yml')}==expectedrules;cmd[0]=str(binary);cmd[cmd.index('--out-dir')+1]=str(dest);assert sha(binary)==binarysha
+ with (dest/'stdout.log').open('w')as out,(dest/'stderr.log').open('w')as err:p=subprocess.run(cmd,cwd=R,stdout=out,stderr=err,timeout=600)
+ assert p.returncode==0,(repo,p.returncode);guard();new=read(dest/'report.json');assert sha(inventory)==u['inventorySha256'];validate_tree(root,entries);assert selection_bindings(root,cwd=R)==selection;diag=read(dest/'diagnostics.json');assert diag['coverage']==before['coverage'];assert diag['scope']==before['scope'];signature=lambda d:sorted((f['finding_id'],f['rule_id'],json.dumps(f['location'],sort_keys=True),f['severity'],f['risk'])for f in d['findings']);assert signature(old)==signature(new),repo
+ def readable(d):
+  return sum(any(line.get('highlighted') and line.get('text','').strip() and not line['text'].lstrip().startswith('[masked-') for line in (f.get('source_snippet') or {}).get('lines',[])) for f in d['findings'])
+ oldcount=readable(old);newcount=readable(new);assert newcount>oldcount,(repo,oldcount,newcount)
+ assert all('arguments omitted' not in (f.get('source_snippet') or {}).get('lines', [{}])[0].get('text','') for f in new['findings'])
+ if slug=='cpp':
+  focal=next(f for f in new['findings']if f['location']['file']=='src/key.cpp' and f['location']['line']==219)
+  actual=next(line for line in focal['source_snippet']['lines'] if line['highlighted'])
+  expected=(root/'src/key.cpp').read_text().splitlines()[218]
+  assert actual['text']==expected and 'secp256k1_ecdsa_sign(' in actual['text']
+  assert len(focal['source_snippet']['lines'])==5
+
+ row=dict(repository=repo,slug=slug,command=cmd,exitCode=p.returncode,sourceManifestSha256=sha(M),binarySha256=binarysha,beforeReceiptSha256=sha(receiptpath),inventorySha256=sha(inventory),inputFilesVerified=validated,selectionBindings=selection,selectionBindingsDigest=digest(selection),inputAndSelectionVerifiedBeforeAfter=True,validatorSourceSha256=sha(R/'tests/quality/external.py'),coverageEquality=True,coverage=diag['coverage'],scopeEquality=True,findingCountBefore=len(old['findings']),findingCountAfter=len(new['findings']),findingIdRuleLocationSeverityRiskEquality=True,readableSourceLocationsBefore=oldcount,readableSourceLocationsAfter=newcount,stillMasked=sum(f['evidence']['match'].startswith('[masked-')for f in new['findings']),outputs={p.name:sha(p)for p in dest.iterdir()if p.is_file()},outDir=str(dest),scope='Four displayed original pinned scopes only. New report generation, not a new all30 benchmark or accuracy estimate. Unresolved/raw source protection retained.');rows.append(row);(E/'OSS-RESCAN-09.json').write_text(json.dumps(dict(generatedAtUtc=datetime.datetime.now(datetime.timezone.utc).isoformat(),operationSha256=sha(Path(__file__)),sourceManifestSha256=sha(M),binarySha256=binarysha,projects=rows),indent=2)+'\n');print(repo,'findings',len(new['findings']),'readable source locations',oldcount,'->',newcount,flush=True)
+print('All4generated;identitiespreserved',flush=True)

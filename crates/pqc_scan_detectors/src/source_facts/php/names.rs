@@ -266,6 +266,16 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
             format!("{ns}\\{}", raw.trim_start_matches('\\'))
         }
     }
+    pub(super) fn function_import_alias(&self, node: Node<'_>) -> bool {
+        let raw = self.ctx.source(node);
+        if raw.len() > 512 {
+            return true;
+        }
+        let raw = raw.to_ascii_lowercase();
+        let first = raw.split('\\').next().unwrap_or("");
+        self.imports
+            .contains_key(&(self.segment(node.start_byte()), FUNCTION, first.into()))
+    }
     pub fn resolve(&self, node: Node<'_>, kind: u8) -> Option<String> {
         if kind == CLASS && self.dynamic_classes {
             return None;

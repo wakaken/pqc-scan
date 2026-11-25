@@ -1,0 +1,167 @@
+{
+  "sourceManifestSha256": "8b3a39a5c91233d10b45f32bf383118eb741129298a0b142c0e7b579ecb19f07",
+  "environment": {
+    "CARGO_INCREMENTAL": "0"
+  },
+  "checks": [
+    {
+      "name": "source-api",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "pqc_scan_detectors",
+        "--test",
+        "source_api_display",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 7.463878209004179,
+      "log": "tasks/086/evidence/source-api-04.log",
+      "logSha256": "eb07e0daa0b1d3a1082b2655a5c77e76bcaa92d2a8f2ccef2ae7628ae4f7070d"
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.6488454160280526,
+      "log": "tasks/086/evidence/fmt-04.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 4.785512458067387,
+      "log": "tasks/086/evidence/clippy-04.log",
+      "logSha256": "04351027e79e818b7452e804a370f04f3ffa013e7f4dd39800a7c9999387f215"
+    },
+    {
+      "name": "allfeatures",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features",
+        "--locked",
+        "--target-dir",
+        "target/v05-feature"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 191.83895124995615,
+      "log": "tasks/086/evidence/allfeatures-04.log",
+      "logSha256": "97bc88b60c48d3f79127c7b33f3f54dbecf390a3fa1dd38670be1b516708c0a5"
+    },
+    {
+      "name": "clippy-features",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-features",
+        "--all-targets",
+        "--locked",
+        "--target-dir",
+        "target/v05-feature",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 5.521603542030789,
+      "log": "tasks/086/evidence/clippy-features-04.log",
+      "logSha256": "b945da084e8ea6329e2ec45af7e9c6a05f418a96929a9ae31d76002e15c4aae9"
+    },
+    {
+      "name": "build",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.2553825000068173,
+      "log": "tasks/086/evidence/build-04.log",
+      "logSha256": "941ad21f9de7134cfaf5e7fb55b97feb62df7278d8f70ddbb04a9fef7f7deeb0"
+    },
+    {
+      "name": "release",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--release",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 12.66671458305791,
+      "log": "tasks/086/evidence/release-04.log",
+      "logSha256": "9cc50f94625ff5b0a60b8516df6ea9e536025122157a6de2edc79a3ddeedc46b"
+    },
+    {
+      "name": "node",
+      "command": [
+        "node",
+        "--test",
+        "crates/pqc_scan_cli/tests/report-preferences.test.cjs",
+        "crates/pqc_scan_cli/tests/serve-context.test.cjs",
+        "crates/pqc_scan_cli/tests/serve-deadline.test.cjs",
+        "crates/pqc_scan_cli/tests/serve-feedback.test.cjs",
+        "crates/pqc_scan_cli/tests/serve-scope-race.test.cjs",
+        "crates/pqc_scan_report/tests/migration-navigation.test.cjs",
+        "tests/report-ui/compact.test.cjs",
+        "tests/report-ui/presentation.test.cjs",
+        "tests/report-ui/serve.test.cjs"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 2.1110941669903696,
+      "log": "tasks/086/evidence/node-04.log",
+      "logSha256": "b882690c6dca69dd3c213af8a9bc928a853a7f6ba15da8c37b5313da132be46d"
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.05256145796738565,
+      "log": "tasks/086/evidence/diff-04.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "reusedChecks": [
+    {
+      "name": "workspace",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 184.8347444999963,
+      "log": "tasks/086/evidence/workspace-03.log",
+      "logSha256": "25000a630a69197fa8c117de5084c29a38cfb91c2746d4014c445c754876fb3f",
+      "sourceManifestSha256": "d99b2e0316410f74fb53cb5a5c6d9f5b8f86d0af8f249b9562b563d234e2d3fb",
+      "applicability": "Only helper placement and Option identity expression changed; all other333runtime/input bindings identical. Fresh source04 default display tests, both Clippy profiles, full allfeatures and builds run; no numeric or semantic/source contract change."
+    }
+  ]
+}

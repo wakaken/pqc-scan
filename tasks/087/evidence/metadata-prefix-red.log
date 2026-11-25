@@ -1,0 +1,22 @@
+   Compiling pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.14s
+     Running unittests src/lib.rs (target/debug/deps/pqc_scan_core-6ef5ce1f4e3e709a)
+
+running 1 test
+test privacy::tests::caller_metadata_retains_legacy_arbitrary_prefix_secret_protection ... FAILED
+
+failures:
+
+---- privacy::tests::caller_metadata_retains_legacy_arbitrary_prefix_secret_protection stdout ----
+
+thread 'privacy::tests::caller_metadata_retains_legacy_arbitrary_prefix_secret_protection' (25916656) panicked at crates/pqc_scan_core/src/privacy.rs:725:9:
+assertion failed: !serde_json::to_string(&result).unwrap().contains("SYNTH087_METADATA")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    privacy::tests::caller_metadata_retains_legacy_arbitrary_prefix_secret_protection
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 103 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p pqc_scan_core --lib`

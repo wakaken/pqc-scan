@@ -1,0 +1,23 @@
+   Compiling pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+error[E0308]: mismatched types
+    --> crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy.rs:39:63
+     |
+  39 | ...                   .or_else(|| value.named_child(value.named_child_count().saturating_sub(1)))
+     |                                         ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `u32`, found `usize`
+     |                                         |
+     |                                         arguments to this method are incorrect
+     |
+note: method defined here
+    --> /Users/waka/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tree-sitter-0.26.6/binding_rust/lib.rs:1732:12
+     |
+1732 |     pub fn named_child(&self, i: u32) -> Option<Self> {
+     |            ^^^^^^^^^^^
+help: you can convert a `usize` to a `u32` and panic if the converted value doesn't fit
+     |
+  39 |                                 .or_else(|| value.named_child(value.named_child_count().saturating_sub(1).try_into().unwrap()))
+     |                                                                                                          ++++++++++++++++++++
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `pqc_scan_detectors` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

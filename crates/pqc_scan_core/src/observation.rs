@@ -577,6 +577,7 @@ pub struct ObservationDraft {
     pub(crate) dependency: Option<DependencyFacts>,
     pub(crate) typed_dependency: bool,
     pub(crate) source_api_typed: bool,
+    pub(crate) source_api_display: Option<String>,
     pub(crate) source_library: Option<SourceLibraryReference>,
     pub(crate) source_configuration: Option<SourceConfigurationReference>,
     pub(crate) evidence: SafeEvidence,
@@ -659,6 +660,7 @@ impl ObservationDraft {
             dependency: None,
             typed_dependency: false,
             source_api_typed: false,
+            source_api_display: None,
             source_library: None,
             source_configuration: None,
             evidence: SafeEvidence {

@@ -8,6 +8,7 @@ mod csharp;
 mod javascript;
 mod jwt;
 mod php;
+pub(crate) use php::privacy_callees;
 mod python;
 mod ruby;
 mod rust;

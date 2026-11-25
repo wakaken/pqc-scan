@@ -1,0 +1,36 @@
+    Checking pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+    Checking pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Checking pqc_scan_report v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_report)
+    Checking pqc_scan_probe_ssh v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_probe_ssh)
+    Checking pqc_scan_probe_tls v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_probe_tls)
+error: a `Vec` of `Range` that is only one element
+  --> crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy.rs:30:16
+   |
+30 |         return vec![0..text.len()];
+   |                ^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#single_range_in_vec_init
+   = note: `-D clippy::single-range-in-vec-init` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::single_range_in_vec_init)]`
+help: if you wanted a `Vec` that contains the entire range, try
+   |
+30 -         return vec![0..text.len()];
+30 +         return (0..text.len()).collect::<std::vec::Vec<usize>>();
+   |
+
+error: a `Vec` of `Range` that is only one element
+  --> crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy.rs:33:16
+   |
+33 |         return vec![0..text.len()];
+   |                ^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#single_range_in_vec_init
+help: if you wanted a `Vec` that contains the entire range, try
+   |
+33 -         return vec![0..text.len()];
+33 +         return (0..text.len()).collect::<std::vec::Vec<usize>>();
+   |
+
+error: could not compile `pqc_scan_detectors` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `pqc_scan_detectors` (lib test) due to 2 previous errors

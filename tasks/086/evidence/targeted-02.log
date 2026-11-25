@@ -1,0 +1,23 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+error[E0369]: binary operation `==` cannot be applied to type `Vec<(&std::string::String, &std::string::String, &Option<SourceSnippet>)>`
+  --> crates/pqc_scan_detectors/tests/source_api_display.rs:51:5
+   |
+51 | /     assert_eq!(
+52 | |         native_matches, legacy_matches,
+53 | |         "default and inventory scans must show the same excerpts"
+54 | |     );
+   | |     ^
+   | |_____|
+   | |_____Vec<(&std::string::String, &std::string::String, &Option<SourceSnippet>)>
+   |       Vec<(&std::string::String, &std::string::String, &Option<SourceSnippet>)>
+   |
+note: `SourceSnippet` does not implement `PartialEq`
+  --> /Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core/src/model.rs:88:1
+   |
+88 | pub struct SourceSnippet {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^ `SourceSnippet` is defined in another crate
+   = note: this error originates in the macro `assert_eq` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0369`.
+error: could not compile `pqc_scan_detectors` (test "source_api_display") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

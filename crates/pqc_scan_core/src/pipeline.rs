@@ -295,11 +295,14 @@ where
             f.evidence.snippet_preview = "[masked-sensitive-content]".into();
         }
     }
-    // Associate finite public source labels before raw legacy equality material
-    // is discarded. Never whitelist source text or arbitrary detector metadata.
+    // Associate fixed library/configuration labels and core-redacted source
+    // excerpts before raw equality material is discarded. The source-display
+    // flag keeps those excerpts out of CBOM algorithm restoration.
     let mut public_source_labels = BTreeMap::new();
     for draft in &observations {
         if let Some(label) = draft.public_source_label() {
+            let source_display = draft.source_api_display.as_ref() == Some(&label);
+            let label = (label, source_display);
             for binding in &draft.bindings {
                 if let Some(key) = binding.key(&config.root) {
                     public_source_labels
@@ -333,16 +336,22 @@ where
         .iter()
         .zip(&safe_finding_labels)
         .filter_map(|(f, label)| {
-            label.as_ref().map(|label| {
-                (
+            label
+                .as_ref()
+                // API excerpts are presentation only. CBOM has no column and
+                // can represent several calls on one source line; assigning a
+                // particular call name would invent an algorithm identity.
+                .filter(|(_, source_display)| !source_display)
+                .map(|label| {
                     (
-                        format!("{}:{}", f.location.file, f.location.line),
-                        f.category.clone(),
-                        f.evidence.r#match.clone(),
-                    ),
-                    label.clone(),
-                )
-            })
+                        (
+                            format!("{}:{}", f.location.file, f.location.line),
+                            f.category.clone(),
+                            f.evidence.r#match.clone(),
+                        ),
+                        label.0.clone(),
+                    )
+                })
         })
         .collect();
     let safe_cbom_labels: Vec<_> = cbom
@@ -427,8 +436,21 @@ where
         .iter_mut()
         .zip(safe_finding_labels)
     {
-        if let Some(label) = label {
+        if let Some((label, _)) = label {
             finding.evidence.r#match = label;
+        }
+        // Producer previews may already be shortened. Use the sanitized source
+        // window rather than trying to reconstruct lost credential syntax.
+        if let Some(snippet) = &finding.source_snippet {
+            finding.evidence.snippet_preview = snippet
+                .lines
+                .iter()
+                .map(|l| l.text.as_str())
+                .collect::<Vec<_>>()
+                .join(" ")
+                .chars()
+                .take(240)
+                .collect();
         }
     }
     for (row, label) in document.legacy_mut().cbom.iter_mut().zip(safe_cbom_labels) {
@@ -552,6 +574,7 @@ fn inspect_file(
     let mut observations = Vec::new();
     let mut detections = Vec::new();
     let mut diagnostics = Vec::new();
+    let mut typed_source_references_only = false;
     let mut test_ranges = Vec::new();
     let mut display_ranges = Vec::new();
     let (mut complete, mut failed, mut unsupported, mut partial, mut unknown) =
@@ -567,6 +590,7 @@ fn inspect_file(
                 Some(DiagnosticCode::DetectorFailed)
             }
             Ok(outcome) => {
+                typed_source_references_only |= outcome.typed_source_references_only();
                 if outcome.sensitive_source_context() {
                     source_privacy.protect_source_context();
                 }
@@ -599,26 +623,7 @@ fn inspect_file(
                         Some(DiagnosticCode::DetectorNotReported)
                     }
                 };
-                observations.extend(outcome.observations().iter().cloned().map(|mut draft| {
-                    if matches!(
-                        draft.method.as_str(),
-                        "lexical_match"
-                            | "ast_pattern"
-                            | "configuration_match"
-                            | "private_key_marker"
-                    ) {
-                        if let Some(map) = &source_offsets {
-                            let raw = |offset: usize| {
-                                map.binary_search_by_key(&offset, |p| p.0)
-                                    .ok()
-                                    .map(|i| map[i].1)
-                            };
-                            draft.target.byte_start = draft.target.byte_start.and_then(raw);
-                            draft.target.byte_end = draft.target.byte_end.and_then(raw);
-                        }
-                    }
-                    draft.bind_to_inspected_file(&file.path, relative)
-                }));
+                observations.extend(outcome.observations().iter().cloned());
                 detections.extend(outcome.into_detections());
                 code
             }
@@ -631,6 +636,51 @@ fn inspect_file(
                 ScanDiagnostic::new(code, target, Some(detector.name().into()))
                     .with_explanation(explanation.as_deref()),
             );
+        }
+    }
+    // Build presentation from the inspected snapshot after all producers have
+    // supplied secret spans, before native byte-coordinate conversion.
+    for draft in &mut observations {
+        if draft.source_api_display.is_some() {
+            draft.source_api_display = file.text.as_deref().and_then(|text| {
+                let (start, end) = draft.source_span()?;
+                source_privacy.source_excerpt(text, start, end)
+            });
+        }
+        if !draft.source_api_typed
+            && source_privacy.sensitive(
+                draft.target.line.unwrap_or(0),
+                draft.target.column.unwrap_or(0),
+                true,
+            )
+        {
+            draft.algorithms.clear();
+        }
+        if matches!(
+            draft.method.as_str(),
+            "lexical_match" | "ast_pattern" | "configuration_match" | "private_key_marker"
+        ) {
+            if let Some(map) = &source_offsets {
+                let raw = |offset: usize| {
+                    map.binary_search_by_key(&offset, |p| p.0)
+                        .ok()
+                        .map(|i| map[i].1)
+                };
+                draft.target.byte_start = draft.target.byte_start.and_then(raw);
+                draft.target.byte_end = draft.target.byte_end.and_then(raw);
+            }
+        }
+    }
+    observations = observations
+        .into_iter()
+        .map(|draft| draft.bind_to_inspected_file(&file.path, relative))
+        .collect();
+    if !detections.is_empty()
+        && !crate::classifier::is_dependency_manifest(&file.path)
+        && !crate::classifier::is_sbom_file(&file.path)
+    {
+        if let Some(text) = &file.text {
+            source_privacy.capture_source(text);
         }
     }
     if file.text.is_none()
@@ -646,7 +696,7 @@ fn inspect_file(
             Some("text_decoder".into()),
         ));
     }
-    if source_privacy.restricts_source_matches() {
+    if typed_source_references_only || source_privacy.restricts_source_matches() {
         // Opaque lexical tokens in a key-bearing source file may themselves be
         // key payload. Preserve occurrences/links, but never promote payload
         // vocabulary to an algorithm. Explicit finite source API facts survive.
@@ -1019,7 +1069,11 @@ fn attach_source_snippets(
 
         let rel_file = finding.location.file.clone();
         let source = text_cache.entry(rel_file.clone()).or_insert_with(|| {
-            if privacy
+            if let Some(lines) = privacy.get(&rel_file).and_then(|p| p.source_lines.as_ref()) {
+                CachedSnippetSource::TextLines(
+                    lines.iter().map(|l| sanitize_source_line(l)).collect(),
+                )
+            } else if privacy
                 .get(&rel_file)
                 .is_some_and(|p| p.masks_source_context())
             {

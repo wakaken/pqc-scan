@@ -36,8 +36,9 @@ const NAMES: &[&str] = &[
 fn assignment() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
     RE.get_or_init(|| {
-        let names=NAMES.iter().map(|n|regex::escape(n).replace('_',"[_-]")).collect::<Vec<_>>().join("|");
-        let pattern=format!(r#"(?i)(?P<prefix>["']?\b(?:[a-z0-9]+[_-])*(?:{names})\b["']?\s*[:=]\s*)(?P<value>"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|(?:Bearer|Basic)\s+[a-z0-9._~+/=-]+|[a-z0-9_+/=-]+)(?P<end>$|[\s,;&<>\]\}}\)])"#);
+        let names=NAMES.iter().map(|n|regex::escape(n).replace('_',"[_-]?")).collect::<Vec<_>>().join("|");
+        let field=format!(r#"\b(?:[a-z0-9]+[_-])*(?:{names})\b"#);
+        let pattern=format!(r#"(?i)(?P<prefix>(?:["']{field}["']\s*=>|["']?{field}["']?\s*[:=])\s*)(?P<value>"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|(?:Bearer|Basic)\s+[a-z0-9._~+/=-]+|[a-z0-9_+/=-]+)(?P<end>$|[\s,;&<>\]\}}\)])"#);
         Regex::new(&pattern).expect("fixed credential redaction regex")
     })
 }
@@ -46,7 +47,7 @@ fn query_value() -> &'static Regex {
     RE.get_or_init(|| {
         let names = NAMES
             .iter()
-            .map(|n| regex::escape(n).replace('_', "[_-]"))
+            .map(|n| regex::escape(n).replace('_', "[_-]?"))
             .collect::<Vec<_>>()
             .join("|");
         Regex::new(&format!(
@@ -62,12 +63,28 @@ fn userinfo() -> &'static Regex {
             .expect("fixed URL redaction regex")
     })
 }
-fn secret_name(name: &str) -> bool {
-    let n = name.to_ascii_lowercase().replace('-', "_");
-    NAMES
-        .iter()
-        .any(|key| n == *key || n.ends_with(&format!("_{key}")))
+/// Whether a field name denotes a recognized credential/key value. This is
+/// the same finite name policy used by export masking, including camel case.
+pub fn is_sensitive_name(name: &str) -> bool {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| {
+        let names = NAMES
+            .iter()
+            .map(|n| regex::escape(n).replace('_', "[_-]?"))
+            .collect::<Vec<_>>()
+            .join("|");
+        Regex::new(&format!(r"(?i)^(?:[a-z0-9]+[_-])*(?:{names})$"))
+            .expect("fixed sensitive name regex")
+    })
+    .is_match(name)
 }
+fn secret_name(name: &str) -> bool {
+    // Preserve the legacy arbitrary-prefix metadata suffix policy, including
+    // dotted and Unicode prefixes; source identifiers use the finite matcher.
+    let n = name.to_ascii_lowercase().replace('-', "_");
+    is_sensitive_name(name) || NAMES.iter().any(|key| n.ends_with(&format!("_{key}")))
+}
+
 fn literal(value: &str) -> bool {
     // Preserve code expressions/keywords: these are not observed credential values.
     !matches!(
@@ -249,12 +266,20 @@ pub(crate) struct SourcePrivacy {
     syntax_sensitive_context: bool,
     restricted_source_matches: bool,
     private_lines: Vec<(usize, usize)>,
+    exact_private_lines: Vec<(usize, usize)>,
     // Only positions survive collection. Never retain payloads or secret digests.
     credentials: BTreeMap<usize, Vec<(usize, usize, usize, usize)>>,
+    line_offsets: Vec<usize>,
+    pub(crate) source_lines: Option<Vec<String>>,
 }
 impl SourcePrivacy {
     pub(crate) fn from_text(text: &str) -> Self {
-        let mut out = Self::default();
+        let mut out = Self {
+            line_offsets: std::iter::once(0)
+                .chain(text.match_indices('\n').map(|(i, _)| i + 1))
+                .collect(),
+            ..Self::default()
+        };
         let mut active: Option<(usize, &str)> = None;
         let mut last = 0;
         for (index, line) in text.lines().enumerate() {
@@ -332,7 +357,137 @@ impl SourcePrivacy {
         if let Some((start, _)) = active {
             out.private_lines.push((start, last));
         }
+        // Exact PEM bounds let public code on the same line remain visible.
+        let mut private_spans = Vec::new();
+        let mut active: Option<(usize, String)> = None;
+        static MARKERS: OnceLock<Regex> = OnceLock::new();
+        let markers = MARKERS.get_or_init(|| {
+            Regex::new(&format!(
+                r"(?i)-{{2,}}(?:BEGIN|END) (?:{})-{{2,}}",
+                LABELS.join("|")
+            ))
+            .expect("fixed private marker regex")
+        });
+        for marker in markers.find_iter(text) {
+            let upper = marker.as_str().to_ascii_uppercase();
+            if upper.contains("BEGIN ") {
+                if active.is_none() {
+                    let label = LABELS
+                        .iter()
+                        .find(|label| upper.contains(&format!("BEGIN {label}")))
+                        .unwrap();
+                    active = Some((marker.start(), (*label).into()));
+                }
+            } else if let Some((start, label)) = &active {
+                if upper.contains(&format!("END {label}")) {
+                    private_spans.push(*start..marker.end());
+                    active = None;
+                }
+            } else {
+                private_spans.push(
+                    private_spans
+                        .last()
+                        .map_or(0, |r: &std::ops::Range<usize>| r.end)
+                        ..marker.end(),
+                );
+            }
+        }
+        if let Some((start, _)) = active {
+            private_spans.push(start..text.len());
+        }
+        out.exact_private_lines = private_spans
+            .iter()
+            .map(|r| {
+                (
+                    out.line_offsets.partition_point(|&o| o <= r.start),
+                    out.line_offsets.partition_point(|&o| o < r.end),
+                )
+            })
+            .collect();
+        out.add_sensitive_ranges(text, &private_spans);
+        // Collect whole-input quoted values too: a value may span source lines.
+        let multiline: Vec<_> = assignment()
+            .captures_iter(text)
+            .filter(|c| literal(&c["value"]))
+            .filter_map(|c| c.name("value").map(|v| v.range()))
+            .collect();
+        out.add_sensitive_ranges(text, &multiline);
         out
+    }
+    /// Redact against the original inspected snapshot before any clipping. The
+    /// cache contains sanitized text only; callers never reload changed files.
+    pub(crate) fn capture_source(&mut self, text: &str) {
+        if self.restricted_source_matches {
+            return;
+        }
+        self.source_lines = Some(
+            text.lines()
+                .enumerate()
+                .map(|(i, line)| self.redact_slice(i + 1, line, 0, line.len()))
+                .collect(),
+        );
+    }
+    fn redact_slice(&self, number: usize, line: &str, from: usize, to: usize) -> String {
+        if !self
+            .exact_private_lines
+            .iter()
+            .any(|&(a, b)| a <= number && number <= b)
+            && self
+                .private_lines
+                .iter()
+                .any(|&(a, b)| a <= number && number <= b)
+        {
+            return PRIVATE.into();
+        }
+        let mut out = String::new();
+        let mut cursor = from;
+        if let Some(ranges) = self.credentials.get(&number) {
+            for &(_, _, a, b) in ranges {
+                let a = (a - 1).max(from);
+                let b = (b - 1).min(to);
+                if a >= b || b <= cursor {
+                    continue;
+                }
+                out.push_str(&line[cursor..a.max(cursor)]);
+                out.push_str(VALUE);
+                cursor = b;
+            }
+        }
+        out.push_str(&line[cursor..to]);
+        redact_text(&out)
+    }
+    pub(crate) fn source_excerpt(&self, text: &str, start: usize, end: usize) -> Option<String> {
+        if self.restricted_source_matches {
+            return Some(SENSITIVE.into());
+        }
+        if start >= end
+            || end > text.len()
+            || !text.is_char_boundary(start)
+            || !text.is_char_boundary(end)
+        {
+            return None;
+        }
+        let first = self
+            .line_offsets
+            .partition_point(|&o| o <= start)
+            .saturating_sub(1);
+        let last = self
+            .line_offsets
+            .partition_point(|&o| o < end)
+            .saturating_sub(1);
+        let mut lines = Vec::new();
+        for i in first..=last {
+            let offset = self.line_offsets[i];
+            let limit = self.line_offsets.get(i + 1).copied().unwrap_or(text.len());
+            let line = &text[offset..limit];
+            lines.push(self.redact_slice(
+                i + 1,
+                line,
+                start.max(offset) - offset,
+                end.min(limit) - offset,
+            ));
+        }
+        Some(lines.join("").chars().take(240).collect())
     }
     pub(crate) fn add_sensitive_ranges(&mut self, text: &str, ranges: &[std::ops::Range<usize>]) {
         if ranges.is_empty() {
@@ -447,13 +602,40 @@ impl SourcePrivacy {
             })
     }
     pub(crate) fn is_empty(&self) -> bool {
-        !self.masks_source_context() && self.credentials.is_empty()
+        !self.masks_source_context() && self.credentials.is_empty() && self.source_lines.is_none()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn source_window_retains_public_unicode_text_beside_credentials_before_clipping() {
+        let source = "公開 password=\"SYNTH087_VALUE\"; int visible=7;\nRSA_new();";
+        let mut privacy = SourcePrivacy::from_text(source);
+        privacy.capture_source(source);
+        assert_eq!(
+            privacy.source_lines.as_ref().unwrap()[0],
+            "公開 password=[masked-sensitive-value]; int visible=7;"
+        );
+        assert_eq!(
+            privacy.source_excerpt(source, 0, source.len()).unwrap(),
+            "公開 password=[masked-sensitive-value]; int visible=7;\nRSA_new();"
+        );
+        assert!(privacy.source_excerpt(source, 1, source.len()).is_none());
+    }
+
+    #[test]
+    fn private_context_does_not_hide_public_prefix_and_suffix_or_orphan_followup() {
+        let text = "public -----BEGIN EC PRIVATE KEY-----\nSYNTH087_BLOCK\n-----END EC PRIVATE KEY----- suffix\nRSA_new();";
+        let mut privacy = SourcePrivacy::from_text(text);
+        privacy.capture_source(text);
+        let lines = privacy.source_lines.unwrap();
+        assert_eq!(lines[0], "public [masked-sensitive-value]");
+        assert_eq!(lines[2], "[masked-sensitive-value] suffix");
+        assert_eq!(lines[3], "RSA_new();");
+        assert!(!lines.join("\n").contains("SYNTH087_BLOCK"));
+    }
     #[test]
     fn syntax_sensitive_ranges_merge_unicode_and_mask_only_bounded_context() {
         let text = "é(a,\nβ) tail";
@@ -472,6 +654,7 @@ mod tests {
     #[test]
     fn known_literals_keys_urls_and_encoded_value_strings_are_redacted() {
         for text in [
+            "['password' => 'LEAK029A', 'mode' => 'public']",
             "password='LEAK029A'",
             r#"api_key="LEAK029A\"TAIL""#,
             "Authorization: Bearer LEAK029A",
@@ -481,6 +664,10 @@ mod tests {
         ] {
             assert!(!redact_text(text).contains("LEAK029"));
         }
+        assert!(is_sensitive_name("privateKey"));
+        assert!(is_sensitive_name("prefix_privateKey"));
+        assert!(is_sensitive_name("prefix_private_key"));
+        assert!(!is_sensitive_name("private_key_algorithm"));
         let mut fragment = "PRIVATE KEY legacy fragment".to_string();
         evidence_field(&mut fragment);
         assert_eq!(fragment, PRIVATE);
@@ -492,6 +679,8 @@ mod tests {
     #[test]
     fn benign_technical_facts_expressions_and_public_urls_stay_exact() {
         for text in [
+            "password => publicValue;",
+            "const factory = password => derive(password);",
             "RS256",
             "1.2.840.113549.1.1.11",
             "key_bits=2048",
@@ -524,6 +713,21 @@ mod tests {
         let unterminated =
             SourcePrivacy::from_text("-----BEGIN EC PRIVATE KEY-----\nopaque\nother\n");
         assert!(unterminated.sensitive(3, 1, false));
+    }
+    #[test]
+    fn caller_metadata_retains_legacy_arbitrary_prefix_secret_protection() {
+        let mut result: ScanResult = serde_json::from_value(serde_json::json!({
+            "generated_at":"2026-11-10T00:00:00Z",
+            "findings":[{"finding_id":"metadata", "rule_id":"CONTROL", "category":"Control", "risk":"quantum-uncertain", "severity":"low", "confidence":0.5, "description":"Control", "migration_hint":"Review", "location":{"file":"a.txt","line":1,"column":1}, "evidence":{"type":"regex_match", "match":"RSA_new()", "snippet_preview":"public", "metadata":{"tls.auth_password":"SYNTH087_METADATA", "顧客_password":"SYNTH087_METADATA", "prefix_privateKey":"SYNTH087_METADATA", "private_key_algorithm":"RSA"}}}],
+            "cbom":[], "dependency_sbom":[], "summary":{"total_findings":1,"by_severity":{},"by_risk":{},"scanned_files":1,"skipped_files":0}
+        })).unwrap();
+        sanitize_scan_result(&mut result);
+        let metadata = &result.findings[0].evidence.metadata;
+        assert_eq!(metadata["private_key_algorithm"], "RSA");
+        assert_eq!(result.findings[0].evidence.r#match, "RSA_new()");
+        assert!(!serde_json::to_string(&result)
+            .unwrap()
+            .contains("SYNTH087_METADATA"));
     }
     #[test]
     fn cbom_collision_cannot_unmask_a_sensitive_occurrence_or_collapse_rows() {

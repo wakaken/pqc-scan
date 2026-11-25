@@ -88,6 +88,53 @@ fn class_info(name: &str) -> Option<ClassInfo> {
     };
     Some(ClassInfo::Key(Key { algorithm, role }))
 }
+/// Reuse the detector's canonical namespace/import resolution for presentation
+/// privacy. Only names/positions survive; no argument text or new crypto facts.
+pub(crate) fn privacy_callees(
+    root: Node<'_>,
+    text: &str,
+    max_nodes: usize,
+) -> (std::collections::BTreeMap<usize, String>, bool) {
+    let ctx = Context::new(
+        root,
+        text,
+        "php",
+        crate::DetectorBudget {
+            max_ast_nodes: max_nodes,
+            ..Default::default()
+        },
+    );
+    let names = Names::new(&ctx);
+    let mut out = std::collections::BTreeMap::new();
+    for node in &ctx.nodes {
+        match node.kind() {
+            "function_call_expression" => {
+                if let Some(function) = node.child_by_field_name("function") {
+                    if let Some(name) = names.resolve(function, FUNCTION) {
+                        out.insert(node.id(), name);
+                    } else if names.function_import_alias(function) {
+                        out.insert(node.id(), "?unresolved-function-import".into());
+                    }
+                }
+            }
+            "scoped_call_expression" => {
+                if let (Some(class), Some(method)) = (
+                    node.child_by_field_name("scope"),
+                    node.child_by_field_name("name"),
+                ) {
+                    if let (Some(class), Some(method)) =
+                        (names.resolve(class, CLASS), names.token(method, FUNCTION))
+                    {
+                        out.insert(node.id(), format!("{class}::{method}"));
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    (out, ctx.truncated.get())
+}
+
 fn compat_method(method: &str) -> Option<(&'static str, &str)> {
     let (algorithm, operation) = method.split_once('_')?;
     let algorithm = match algorithm {

@@ -1,0 +1,28 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+error[E0597]: `children` does not live long enough
+  --> crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy.rs:65:41
+   |
+64 |                     let mut children = node.walk();
+   |                         ------------ binding `children` declared here
+65 |                     node.named_children(&mut children)
+   |                     --------------------^^^^^^^^^^^^^-
+   |                     |                   |
+   |                     |                   borrowed value does not live long enough
+   |                     a temporary with access to the borrow is created here ...
+66 |                         .find(|child| name.is_none_or(|n| n.id() != child.id()))
+67 |                 });
+   |                 -
+   |                 |
+   |                 `children` dropped here while still borrowed
+   |                 ... and the borrow might be used here, when that temporary is dropped and runs the destructor for type `impl ExactSizeIterator + Iterator<Item = tree_sitter::Node<'_>> + '_`
+   |
+   = note: the temporary is part of an expression at the end of a block;
+           consider forcing this temporary to be dropped sooner, before the block's local variables are dropped
+help: for example, you could save the expression's value in a new local variable `x` and then make `x` be the expression at the end of the block
+   |
+65 ~                     let x = node.named_children(&mut children)
+66 ~                         .find(|child| name.is_none_or(|n| n.id() != child.id())); x
+   |
+
+For more information about this error, try `rustc --explain E0597`.
+error: could not compile `pqc_scan_detectors` (lib) due to 1 previous error

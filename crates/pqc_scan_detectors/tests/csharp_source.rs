@@ -323,7 +323,7 @@ fn focal(native: &Value, start: usize, end: usize) -> Vec<&Value> {
 fn csharp_bouncy_castle_rsa_digest_signer_tracks_only_resolved_library_types() {
     let f = Fixture::new();
     for (source, constructor) in [
-        ("using Org.BouncyCastle.Crypto.Signers; class C { void M(){ var unrelated=\"PRIVATE084_CS_SIGNER_CANARY\"; var signer=new RsaDigestSigner(digest); signer.GenerateSignature(); }}", "new RsaDigestSigner(digest)"),
+        ("using Org.BouncyCastle.Crypto.Signers; class C { void M(){ var privateKey=\"PRIVATE084_CS_SIGNER_CANARY\"; var signer=new RsaDigestSigner(digest); signer.GenerateSignature(); }}", "new RsaDigestSigner(digest)"),
         ("using S=Org.BouncyCastle.Crypto.Signers.RsaDigestSigner; class C { void M(){ var signer=new S(digest); signer.GenerateSignature(); }}", "new S(digest)"),
     ] {
         let (native, legacy) = f.document(source);
@@ -610,10 +610,10 @@ fn csharp_wrapper_projects_and_bc_tls_are_distinct_opaque_references() {
             .position(|f| f["location"]["column"] == start + 1)
             .unwrap();
         assert_eq!(legacy["findings"][index]["evidence"]["match"], label);
-        assert_eq!(
-            legacy["findings"][index]["evidence"]["snippet_preview"],
-            "[masked-sensitive-content]"
-        );
+        assert!(legacy["findings"][index]["evidence"]["snippet_preview"]
+            .as_str()
+            .unwrap()
+            .contains("using dotnetOQS"));
         assert!(legacy["cbom"]
             .as_array()
             .unwrap()
@@ -660,12 +660,12 @@ fn csharp_private_arguments_and_legacy_looking_payloads_are_protected_when_parti
                 )
                 .unwrap();
                 for finding in &doc.legacy().findings {
-                    assert_eq!(finding.evidence.r#match, "[masked-sensitive-content]");
-                    assert!(finding
-                        .evidence
-                        .metadata
-                        .values()
-                        .all(|v| v == "[masked-sensitive-content]"));
+                    assert!(!serde_json::to_string(&finding.evidence)
+                        .unwrap()
+                        .contains(&format!("\"{canary}\"")));
+                    assert!(!serde_json::to_string(&finding.source_snippet)
+                        .unwrap()
+                        .contains(&format!("\"{canary}\"")));
                 }
                 let native = serde_json::to_value(doc.native().unwrap()).unwrap();
                 assert!(native["assets"]
@@ -890,19 +890,18 @@ fn csharp_parameter_container_does_not_survive_a_possible_deferred_mutation() {
 #[test]
 fn csharp_opaque_wrapper_arguments_cannot_become_public_project_labels() {
     let f = Fixture::new();
-    let source = r#"using dotnetOQS; class C { void M(){ var k=new dotnetOQS.KEM("PRIVATE079_OPAQUE_CANARY"); } }"#;
+    let source = r#"using dotnetOQS; class C { void M(){ var k=new dotnetOQS.KEM("PUBLIC087_SELECTOR"); } }"#;
     let (native, legacy) = f.document(source);
-    assert!(!native.to_string().contains("PRIVATE079_OPAQUE_CANARY"));
-    assert!(!legacy.to_string().contains("PRIVATE079_OPAQUE_CANARY"));
+    assert!(!native.to_string().contains("PUBLIC087_SELECTOR"));
+    assert!(legacy.to_string().contains("PUBLIC087_SELECTOR"));
     for finding in legacy["findings"].as_array().unwrap() {
         assert_eq!(
             finding["evidence"]["match"],
             "C# obsolete official dotnetOQS wrapper reference"
         );
-        assert_eq!(
-            finding["evidence"]["snippet_preview"],
-            "[masked-sensitive-content]"
-        );
+        assert!(finding["source_snippet"]
+            .to_string()
+            .contains("PUBLIC087_SELECTOR"));
     }
 }
 
@@ -943,7 +942,7 @@ fn csharp_binding_saturation_retains_independent_references_and_truncated_status
 fn csharp_saturated_values_do_not_restore_stale_variants_or_namesakes_or_secrets() {
     let f = Fixture::new();
     let source=format!(
-        "class C{{void Busy(){{var choice=System.Security.Cryptography.MLKemAlgorithm.MLKem768; {} choice=unresolved; System.Security.Cryptography.MLKem.GenerateKey(choice);}} void Independent(){{System.Security.Cryptography.RSA.Create(\"PRIVATE084_CSHARP_CAP_CANARY\");}} }} namespace Local{{class RSA{{public static void Create(){{}}}} class Other{{void M(){{RSA.Create();}}}}}}",
+        "class C{{void Busy(){{var choice=System.Security.Cryptography.MLKemAlgorithm.MLKem768; {} choice=unresolved; System.Security.Cryptography.MLKem.GenerateKey(choice);}} void Independent(){{var privateKey=\"PRIVATE084_CSHARP_CAP_CANARY\"; System.Security.Cryptography.RSA.Create();}} }} namespace Local{{class RSA{{public static void Create(){{}}}} class Other{{void M(){{RSA.Create();}}}}}}",
         "choice=System.Security.Cryptography.MLKemAlgorithm.MLKem768;".repeat(64)
     );
     let input = ScannableFile::from_bytes("case.cs".into(), source.as_bytes().to_vec());
