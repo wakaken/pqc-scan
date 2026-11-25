@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "reviewer": "/root/oss_implementation_review",
+  "timestampUtc": "2026-11-25T05:28:47Z",
+  "scope": "documented-public-input-subset",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "1353f6b0a117178068624db1b766762fb290a9ed22e601782525e4a9de0bbff9",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "c564da7c165dc766b318fa86f6562a3bd25b59af842833badaa784ca0cc942cd",
+    "docs/user/COVERAGE.ja.md": "66e5efee15b85d220461a05a680d237b65cc2936dfa82c9fdb66dee190ec2c46",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+    "docs/architecture/STATIC-ANALYSIS.md": "23c3eab6664372289c1eeeb6b40722248612b5cdba17b45a423c774a8227bcf5"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "exposure": "Previously reviewed task084–087 OSS/privacy implementation and measurement evidence. Read the original frozen corpus, truth, protocol and provenance for this review. Did not read the current main applicability review, new assessment, aggregate or repair-main-applicability-details; did not consult candidate predictions or execute specimens.",
+  "inputVerification": {
+    "filesRehashed": 203,
+    "questionsReviewed": 246,
+    "allInputHashesMatched": true,
+    "specimensExecuted": false,
+    "originalProtocolSha256": "300313c7a8e6867a4f7283a06c2ec0546ae38f6d987c4300575d98d39bf65dd9",
+    "originalProvenanceSha256": "1253727e7c892a41844ec374230b447f4191b21cb7bc74ecd06447663e3b4874",
+    "encryptedCopiesSha256": "36349ac3da751a23c682371fe9b56fe44a13dffcc9f94dc692bb5586871cf5a1",
+    "encryptedCopiesAuthenticatedSafeContentOid": "1.2.840.113549.1.7.6",
+    "unencryptedControlsSha256": "e574b0dab9c251efc07e5e9b874eaab851685d9cd2deca481c46da3ea4cbd0e4",
+    "unencryptedControlsAuthenticatedSafeContentOid": "1.2.840.113549.1.7.1"
+  },
+  "remainingUnitsReviewed": true,
+  "remainingUnitCount": 240,
+  "remainingOriginalLabelCounts": {
+    "positive": 98,
+    "negative": 91,
+    "unsupported": 47,
+    "ambiguous": 4
+  },
+  "remainingByArtifact": {
+    "source": 95,
+    "configuration": 31,
+    "dependency_manifest": 54,
+    "sbom": 19,
+    "key_marker": 9,
+    "certificate": 32
+  },
+  "remainingScopeReason": "Reviewed all original file contents or static container structures and nominated question scopes. Current source has 139 unique built-in rules and retains every nominated rule ID. PHP/C#/C/C++ additions do not justify exclusions because this corpus contains none of those source routes or their new dependency formats. Selective source privacy and presentation changes are current behavior, not evidence that the old runtime is unchanged; they do not remove the original Java/Go/JS/TS/TSX/Python/Rust/Ruby, configuration, dependency/SBOM or marker questions from evaluation. Preserve original ambiguous, malformed and unsupported labels without creating additional applicability exclusions. Readable unencrypted PKCS12/PFX certificate attributes and all outer-container-presence questions remain in scope. Provenance establishes original certificate truth but cannot substitute for decoding an encrypted copy. No disposition was selected from missing detections or predictions.",
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The nominated ECDSA signature absence concerns the certificate inside public-only.p12. Static DER inspection identifies encryptedData in its AuthenticatedSafe; current content() explicitly leaves that content opaque and the public contract excludes decryption. A provenance-known RSA certificate does not make this encrypted-copy negative inspectable."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "public-only.pfx is byte-identical to the encrypted P12 copy. Its inner certificate-signature absence cannot be established by the supported non-decrypting parser; neither the extension nor conversion provenance supplies readable certificate attributes."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "The RSA3072 SPKI property is inside encryptedData in public-only.p12. The current parser extracts attributes only from readable X.509 certificate bags and does not decrypt this content. Preserve the original positive truth separately."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The RSA certificate-signature property is inside the same encrypted P12 content. The DATA-only extraction path cannot inspect that signature, despite the independently bound source-certificate provenance."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The byte-identical public-only.pfx keeps its RSA3072 SPKI behind encryptedData. Current source and paired coverage contracts provide no decryption support, so this inner-property question is outside the documented readable subset."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The RSA signature attribute of public-only.pfx is encrypted and is not extracted by the current bounded parser. Outer-container detection remains eligible; excluding this inner-property question does not relabel its original truth or claim a detector improvement."
+    }
+  ]
+}

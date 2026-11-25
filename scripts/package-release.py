@@ -6,6 +6,7 @@ import hashlib
 import io
 import json
 import os
+import posixpath
 from pathlib import Path, PurePosixPath
 import re
 import subprocess
@@ -254,6 +255,26 @@ def validate_command_surface(variant, top_help, probe_help, *, allow_legacy=Fals
         raise ValueError('package protocol commands differ from declared variant')
 
 
+def validate_documentation_links(entries):
+    """Require ordinary inline local links in bundled public guides to resolve.
+
+    Fragments are reader navigation, not archive members. External URLs are not
+    fetched. Historical release/maintainer notes and third-party notices are not
+    public guide roots, so this does not pull arbitrary repository files in.
+    """
+    for name, (data, _) in entries.items():
+        if name not in {'README.md', 'README.ja.md', 'SECURITY.md', 'SECURITY.ja.md'} and not (
+                name.startswith('docs/user/') and name.endswith('.md')):
+            continue
+        for href in re.findall(r'!?\[[^\]]*\]\(([^()\s]+)(?:\s+"[^"]*")?\)', data.decode('utf-8')):
+            link = urlsplit(href)
+            if link.scheme or link.netloc or not link.path:
+                continue
+            target = posixpath.normpath(posixpath.join(posixpath.dirname(name), unquote(link.path)))
+            if target not in entries:
+                raise ValueError('missing bundled documentation link: '+name+' -> '+href)
+
+
 def prepare(args):
     root = args.source_root.resolve()
     binary = args.binary.resolve(strict=True)
@@ -279,7 +300,7 @@ def prepare(args):
     if binary_data[:8] != bytes.fromhex('cffaedfe0c000001'):
         raise ValueError('expected thin Mach-O aarch64 binary for declared target')
     entries = {'bin/pqc-scan': (binary_data, 0o755)}
-    explicit = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md', 'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md', 'schemas/migration-context-v1.schema.json', 'docs/images/v0.4/CAPTURES.json', 'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json', 'third_party/notices/README.md']
+    explicit = ['LICENSE', 'SECURITY.md', 'SECURITY.ja.md', 'README.md', 'README.ja.md', 'docs/user/COVERAGE.md', 'docs/user/COVERAGE.ja.md', 'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md', 'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md', 'schemas/migration-context-v1.schema.json', 'docs/images/v0.4/CAPTURES.json', 'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json', 'third_party/notices/README.md']
     paths = ([root/p for p in explicit] + sorted((root/'rules/default').glob('*.yml'))
              + sorted((root/'docs/releases').glob('*.md'))
              + sorted((root/'docs/images/v0.4').glob('*.jpg')))
@@ -291,6 +312,7 @@ def prepare(args):
         data = local_bytes(root, name, 512*1024) if name == 'third_party/notices/manifest.json' else path.read_bytes()
         entries[name] = (data, 0o644)
         source_hashes[name] = digest(data)
+    validate_documentation_links(entries)
     inventory = []
     for ident in sorted(selected):
         package = packages[ident]

@@ -1,0 +1,54 @@
+{
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "1353f6b0a117178068624db1b766762fb290a9ed22e601782525e4a9de0bbff9",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "c564da7c165dc766b318fa86f6562a3bd25b59af842833badaa784ca0cc942cd",
+    "docs/user/COVERAGE.ja.md": "66e5efee15b85d220461a05a680d237b65cc2936dfa82c9fdb66dee190ec2c46",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+    "docs/architecture/STATIC-ANALYSIS.md": "23c3eab6664372289c1eeeb6b40722248612b5cdba17b45a423c774a8227bcf5"
+  },
+  "sourceBased": true,
+  "postObservation": true,
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The original P12 contains encryptedData (OID1.2.840.113549.1.7.6). Its nominal source-certificate signature truth is retained, but the unchanged non-decrypting content branch cannot access this inner signature attribute. Outer container presence remains eligible."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The original PFX has the same encrypted bytes as the P12. Public-certificate-only conversion provenance and empty password do not make its inner signature attribute readable without decryption."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "Original public-certificate provenance retains RSA3072 nominal truth. Extracting the inner SPKI modulus from encryptedData is outside the unchanged PKCS12 parser and current contract."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The original manifest retains the source RSA signature truth. Reading that signature from the encrypted P12 requires unsupported decryption; preserve truth but exclude only this property extraction."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The byte-identical encrypted PFX retains known source RSA3072 provenance. Its inner SPKI-size question remains outside the non-decrypting subset; container recognition remains eligible."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The PFX certificate resides in encryptedData, not readable Data/SafeContents certificate bags. Preserve source RSA-signature truth while excluding only extraction of the inner signature property."
+    }
+  ],
+  "timestampUtc": "2026-11-25T05:30:50.860294+00:00",
+  "version": 1,
+  "scope": "documented-public-input-subset",
+  "corpusDirectory": "tests/quality/expanded-v2",
+  "reason": "Current source-based applicability revalidation for the 139-rule language branch, selective source excerpts and synchronized technical contract. All 203 input hashes and 246 original questions are preserved. Six encrypted-inner-property applicability exclusions leave 240 remaining nominal questions: 189 scored positive/negative questions, 47 unsupported labels and 4 ambiguous labels. Original truth labels and denominators are unchanged. New rules/runtime are disclosed, not declared unchanged. Both separately authored actual reviews agree; no new accuracy, truth relabel, specimen execution or publication approval.",
+  "reviewSources": {
+    "review-main.json": "73562f45a82273c4d2dd1ab2fc3b79c98756af96fac2c58ed7eb56323169f2bc",
+    "review-independent.json": "bdecc434d04852ef18eccab3db1d5423d6c80a774a91cbd6566a85af7410c454"
+  }
+}

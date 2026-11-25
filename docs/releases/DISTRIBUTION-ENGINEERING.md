@@ -30,6 +30,12 @@ release. Dirty state, source inputs, features and tool versions appear in
 for the selected target/features, their declared licenses and collected notices. Exact-version upstream fallbacks
 are checked against Cargo.lock checksum, archive VCS revision and bundled file
 hashes, with no network fetching during packaging.
+Public documentation includes both root READMEs, both security guides, and the
+paired coverage/scanning/report/saved-evidence guides. Preparation rejects missing
+ordinary inline local document/image targets in these public Markdown guides;
+external URLs are not fetched and fragments are not validated as archive members.
+This prevents an internally valid archive from shipping broken local navigation.
+
 It is audit evidence, not legal certification or a proof of exact binary linkage.
 Missing notices fail preparation. Static notice fallbacks include complete
 upstream permission texts and original attributions. Four objc2-family

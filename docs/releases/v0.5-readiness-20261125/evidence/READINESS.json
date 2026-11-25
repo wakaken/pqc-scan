@@ -1,0 +1,104 @@
+{
+  "sourceHead": "b182a2f045ff8256441b0d6797e73542e6108427",
+  "branch": "codex/pqc-language-research",
+  "assessmentDateJst": "2026-11-25",
+  "verdict": "HOLD public v0.5 release; bounded implementation is a release candidate, but CI evidence binding, distribution docs and version/release preparation remain.",
+  "runtimeSourceManifest": "tasks/087/evidence/IMPLEMENTATION-SOURCE-09.json",
+  "runtimeSourceManifestSha256": "edf1f4bede643843c7d3006bb8e402b5f1862420cae6a465b3a80d26fe6f01f8",
+  "runtimeBindingsVerified": 336,
+  "runtimeBindingDifferences": [],
+  "reusedChecks": "tasks/087/evidence/CHECKS-09.json",
+  "reusedReviews": "tasks/087/evidence/REVIEW-DECISIONS-09.json",
+  "newChecks": {
+    "distributionUnitTests": {
+      "tests": 25,
+      "result": "PASS"
+    },
+    "ciNode": {
+      "command": "node --test shell/*.test.cjs tests/report-ui/*.test.cjs",
+      "passed": 81,
+      "failed": 0,
+      "result": "PASS"
+    },
+    "ciPython": {
+      "command": "python3 -m unittest discover -s tests/quality -p 'test_*.py'",
+      "tests": 181,
+      "errors": 1,
+      "skipped": 3,
+      "result": "FAILED"
+    },
+    "focusedCiApplicability": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_ci_applicability.py"
+      ],
+      "exitCode": 1
+    },
+    "localArchiveAndOfflineCleanInstall": {
+      "result": "PASS",
+      "archiveVersion": "0.4.0",
+      "rules": 139,
+      "ruleFiles": 13,
+      "newGrammarLicenseRecords": 4,
+      "missingLicenseNotices": 0,
+      "reviewRequiredNotices": 0
+    },
+    "qualityEvidenceAggregation": {
+      "exitCode": 0,
+      "releaseDecision": "Unknown",
+      "output": "target/v05-final-readiness-20261125/quality-integrated"
+    }
+  },
+  "staleCiApplicability": {
+    "input": "tests/quality/applicability-v040-readme-20261123/assessment.json",
+    "mismatchedContractBindings": [
+      "docs/user/COVERAGE.md",
+      "docs/user/COVERAGE.ja.md"
+    ],
+    "error": "Applicability source/review binding changed",
+    "disposition": "Create a current, source-bound applicability assessment and required independent review evidence. Preserve old records; do not replace hashes alone or disable the guard."
+  },
+  "packageMissingLinkedDocuments": [
+    "README.md",
+    "README.ja.md",
+    "docs/user/COVERAGE.md",
+    "docs/user/COVERAGE.ja.md"
+  ],
+  "packageArchive": "/tmp/pqc-v05-final-readiness-20261125/static/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz",
+  "packageArchiveSha256": "8ae5f33ed47365a002206d54de6d94487266e4856616d6abc2d80efc4496e404",
+  "githubObservation": {
+    "queriedCommitShas": [
+      "b182a2f045ff8256441b0d6797e73542e6108427",
+      "512f2c081d7ea8900e1860a14554e4c9bed90d2d",
+      "31a463803446e42d7d4e989087feb3f11337b4f3"
+    ],
+    "workflowRuns": [],
+    "combinedStatusesAtHead": [],
+    "branchHeadMatchesRemote": true,
+    "v05Tags": [],
+    "latestPublishedReleaseTag": "v0.4.0",
+    "note": "Read-only gh run list/ls-remote/release list and connector combined-status checks. Feature-branch push is not a configured quality workflow trigger. No remote workflow was dispatched."
+  },
+  "limitations": [
+    "Bounded syntactic support; no compiler/runtime/provider/peer verification or language-wide precision/recall estimate.",
+    "Task085 all30 OSS measurements are historical at source04/06; task087 rescanned four displayed scopes at current runtime source09. No new all30 measurement is claimed.",
+    "Task085 full-root migration assessment27/30; OpenSSL/Botan contradictory certificate fixtures and Bitwarden16384-asset limit retain explicit input refusals."
+  ],
+  "evidenceHashes": {
+    "ci-python.log": "dfcf28dc0f63fb6a120c96dd2d160a1b53de00c82fbd12e84e8e8dee0237916e",
+    "INSTALL-RESULTS.json": "4156ec8bfc87a04a640c6f1d48ef5b8c3df695b75478cbd871bf5ca9f4ef5cea",
+    "quality-aggregate.log": "92d4d59588a79516e3c7c4cba8b250c6fe9a0a1c3d309fbc46be2692b21d8a0e",
+    "ci-applicability.log": "617c492397ae6e95d9316968d90fd9362546aa4cc4ffc6e76aa4d6ecc65e7b45",
+    "distribution-tests.log": "7e5d6a7a641fe84265b3f7b639a6e06790f90d77e32d18afe1c9f333c277cda3",
+    "install.log": "b51b1aa8594f780c009ece600b0c67ff5a45b2284ebfd267dd0cd37f6e34ea11",
+    "ci-node.log": "e766e6d4479ed2bd340a2af053459489c3379d6d0767e62ebc7e00b45ecc629f",
+    "package.log": "45bbc4056790bcf9d40b1bf60692bcd07049af6b83788e8083c6f5bc8834df69"
+  },
+  "scope": "Read-only readiness assessment plus retained report. No product fixes, threshold changes, new task creation, version bump, tag, release, CI dispatch, commit or push."
+}
