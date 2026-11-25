@@ -38,12 +38,12 @@ For recurring repository structures and extension styles, see `docs/PATTERNS.md`
 ## Documentation
 
 - keep agent-facing document references aligned with the actual repository layout
-- when renaming or relocating docs, update `AGENTS.md` and related knowledge docs in the same change
+- when renaming or relocating docs, update the effective agent guidance (`AGENTS.override.md` during the trial) and related knowledge docs in the same change
 - keep this document focused on prescriptive guidance; move reusable repository structures to `docs/PATTERNS.md`
 
 ## User-Facing Reports
 
 Follow the [report content and browser rules](agent/REPORTS.md), as required by
-[AGENTS.md](../AGENTS.md). Review the rendered first screen for useful findings,
+[AGENTS.override.md](../AGENTS.override.md). Review the rendered first screen for useful findings,
 locations and next checks; keep
 technical accounting and repeated disclaimers out of the opening.

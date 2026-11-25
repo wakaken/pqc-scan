@@ -1,3 +1,10 @@
+> **Inactive during the Open Pstack trial.** [AGENTS.override.md](../AGENTS.override.md)
+> selects pstack as the development harness. This file preserves the restart pilot execution protocol
+> for historical interpretation and rollback; its execution instructions are not
+> active, including when an old task or skill links here. Original task acceptance
+> criteria and evidence remain binding; retirement of a process does not complete
+> or cancel any task.
+
 # Restart pilot
 
 This protocol applies only to the restart baseline and task 014. Run roles

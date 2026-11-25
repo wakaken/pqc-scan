@@ -3,7 +3,7 @@
 Task definitions are stored in `<ID>/task.yaml`, where `<ID>` is the three-digit
 task number. The YAML `id` must remain a string matching its directory name.
 
-Current lifecycle:
+Existing record status vocabulary (not a required pstack execution sequence):
 
 pending → planned → in-progress → review → done
 
@@ -50,25 +50,26 @@ self-scan expectations require individual review and exact source/result binding
 - owner
 - description
 
-Use `implementation_steps` for ordered work within the same task and PR; steps
-have no separate lifecycle status. Add acceptance criteria and evidence required
+Existing `implementation_steps` describe ordered work within a task; steps
+have no separate stored lifecycle status. Add acceptance criteria and evidence required
 by the selected task without changing historical definitions merely to add fields.
 
-## Lifecycle and Working Rules
+## Trial workflow and record compatibility
 
-Follow [AGENTS.md](../AGENTS.md) for authorization and required reading,
-[verification and completion](../docs/agent/VERIFICATION.md) for full completion
-gates, [review policy](../docs/agent/REVIEWS.md) for independent reviews, and
-[task lifecycle](../docs/TASK-LIFECYCLE.md) for the detailed procedures:
+[AGENTS.override.md](../AGENTS.override.md) selects Open Pstack as the development
+harness. The custom lifecycle and fixed review process are inactive; the status
+vocabulary and file layout above remain compatible with existing records.
+Pstack plans and work units do not automatically need a new numbered YAML task
+or the old pending-to-done execution sequence.
 
-- [Status definitions and responsibility labels](../docs/TASK-LIFECYCLE.md#status-definitions)
-- [Corrections and replanning, including the scoped restart exception](../docs/TASK-LIFECYCLE.md#corrections-and-replanning)
-- [Blocked work and resumption](../docs/TASK-LIFECYCLE.md#blocked-work)
-- [Cancellation and historical evidence](../docs/TASK-LIFECYCLE.md#cancellation-and-historical-evidence)
-- [Task and PR boundaries](../docs/TASK-LIFECYCLE.md#task-boundaries)
+When explicitly working on an existing task, retain its original acceptance
+criteria, dependencies and evidence. A `done` record still requires final-source
+validation; blocked and cancelled remain distinct from completion. Do not rewrite
+past status transitions, owner labels, reviews or measurements. Starting this
+trial does not select queue items, reopen cancelled tasks or change task status.
+The retired [lifecycle guide](../docs/TASK-LIFECYCLE.md) is available only to
+interpret old records or roll back; links to it do not reactivate its process.
 
-The lifecycle document owns these definitions; this guide owns task layout and
-field conventions. Preserve existing owner labels and historical evidence when
-updating current guidance. For work without a task record, use the
-[review-record procedure](../docs/agent/REVIEWS.md#review-records) rather than
-creating a task solely for review metadata.
+Record evidence in the owning task when one exists. Otherwise use the current
+chat or PR and pstack's appropriate artifacts; do not create a task solely to
+satisfy the retired review-metadata procedure.

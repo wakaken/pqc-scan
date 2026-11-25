@@ -130,20 +130,20 @@ Current example:
 ## Documentation Synchronization Pattern
 
 Pattern:
-- when renaming docs or changing workflow terms, update all agent-facing references in the same patch
-- keep core working rules and activity-based reading triggers in `AGENTS.md`, detailed verification/review/report rules in `docs/agent/`, and the shared review request template in `docs/agent/REVIEWER.md`
-- treat `AGENTS.md` as the owner of core constraints and the linked guides as owners of detailed procedures; update affected summaries, details and references in the same change, preserving constraints in both
-- keep the lifecycle summary in `AGENTS.md` aligned with detailed definitions in `docs/TASK-LIFECYCLE.md`; link to those definitions from `tasks/README.md` rather than duplicating them
-- preserve completed task records and past review evidence, including historical prompt paths
+- during the Open Pstack trial, keep project constraints in `AGENTS.override.md` and product validation/report requirements in `docs/agent/VERIFICATION.md` and `docs/agent/REPORTS.md`
+- use installed pstack skills for generic workflow; do not recreate them in repository prompts
+- update active links together when documentation moves; use the effective override rather than importing the retained root `AGENTS.md`
+- keep `tasks/README.md` as the existing record-layout reference; retired lifecycle/review documents are historical references, not execution requirements
+- preserve completed task records, past review evidence and their historical paths
 
 Why it works here:
-- agents depend on these files as operational inputs
-- inconsistent wording causes workflow mistakes and duplicate repair work
+- agents need one active source for project constraints
+- old records must remain understandable without reactivating their workflow
 
-Current example:
-- `AGENTS.md`
-- `docs/TASK-LIFECYCLE.md`
-- `docs/agent/REVIEWER.md`
+Current examples:
+- `AGENTS.override.md`
+- `docs/agent/VERIFICATION.md`
+- `docs/agent/REPORTS.md`
 
 ---
 
