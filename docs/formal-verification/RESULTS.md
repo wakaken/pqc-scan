@@ -167,8 +167,9 @@ conclusions remain applicable. No PR merge or develop update is part of this PoC
 
 ## 2026-11-25: Creusot extension
 
-Status: implementation and local verification pass. Hosted CI and the independent
-test review are pending; this extension is not yet marked complete.
+Status: the selected Creusot PoC is implemented and verified locally and in hosted
+CI. Both independent review stages accepted the change. This is a proof of the
+selected aggregation kernel, not the whole application.
 
 Baseline: `6f94ba692995cb33640dd13af62e4da0606dfead`, including develop
 `b41ae987798d2908850c612634d2d2f220c73dc3`. Branch remains
@@ -205,6 +206,10 @@ actual policy violations independently of solver incompleteness.
 Evidence: `target/formal-creusot-final/results.json` records the first complete
 all-lane success with source unchanged. `target/formal-creusot-final-inputs/` reruns
 the final source manifest after cache exclusion and precise CI path filters.
+That final rerun also passed with source unchanged: positive Creusot command
+2.600s, three negative proof commands 16.708s / 14.932s / 26.342s. All three
+runtime counterexamples failed as expected. Its `results.json` SHA-256 is
+`a0f9f2a8c99a957613ab7d8c98ecc78d8f4489dd2d235b0359cc77657e32696b`.
 Ordinary check receipts and logs are under `target/formal-creusot-checks/` and
 `target/formal-creusot-feature-checks/`. All Rust/Cargo/toolchain inputs in those
 receipts still match final source; only CI filters and generated-cache exclusion
@@ -222,6 +227,46 @@ Implementation review `/root/creusot_implementation_review` accepted the combine
 change, then the scoped cache/filter follow-up, with no unresolved findings.
 Reviewed diff SHA-256: `a29cf2e28b5e62c025af918090bdc73e1d759c3928e2ee7148bbf924a62a977d`.
 Prose-only measurement updates do not change executable proof inputs.
+
+Independent test reviewer `/root/creusot_test_review` accepted executable source
+`f0bed1539b5dc2cdb15ba162f584aa452a1aef01`, with no unresolved findings. The reviewer
+independently checked current/local/CI manifests, command-log hashes, full-record
+compatibility, ordinary test counts and mutation evidence without repeating the
+whole suites. Test binaries' target paths confirm default/all-features isolation.
+`target/formal-creusot-checks/provenance.json` additionally records the retained
+test/CLI artifacts' hashes and timestamps retrospectively, not as hashes captured
+at original execution time. No protocol implementation was changed.
+
+### Creusot extension hosted CI
+
+[Formal verification run 45543461832](https://github.com/wakaken/pqc-scan/actions/runs/45543461832)
+passed on **2026-11-25**, source
+`f0bed1539b5dc2cdb15ba162f584aa452a1aef01`, Ubuntu 24.04 x86_64. All three downloaded
+lane manifests exactly match the 244 final local input hashes above; every lane
+reports source unchanged.
+
+| Lane | Actual result | Full job time | results.json SHA-256 |
+|---|---|---|---|
+| Creusot | Both top-level VCs proved; positive witnesses pass; all three faulty mutants rejected and concrete witnesses fail | 11m 42s | `85b51dbea50a7fe0ef06c6f5c66c9a975c381b9687cdac49e73a7003297b8087` |
+| Kani | All 13 selected harnesses pass | 3m 33s | `68d46afa2eaf546a32fc4e2487e3116d5ce14c2b4690cdfc8bb872345ee41306` |
+| Lean | Seven theorems and axiom audit pass; all 10,662 rows equal | 1m 10s | `a79c00609b5b6b2225041839377f546cb455b6edf079b17ccd32210242139909` |
+
+Creusot's fresh installation took **9m 00s**. Its positive command took **28.874s**,
+including cold Cargo compilation (25.02s). The final named SMT goals were Valid
+(main 0.014455s, length 0.002885s). One calibration attempt with `goal="<none>"`
+timed out; it is retained in the solver history and is not a missing proof goal.
+Negative proof commands took 23.555s / 16.098s / 65.275s, all exit 1, with their
+named runtime witnesses each exit 101. No process timeout or compile failure was
+counted as a valid negative control.
+
+Downloaded evidence is under `target/formal-creusot-ci/{creusot,kani,lean}/`.
+Complete Creusot setup/verification logs are retained beside those directories;
+job/artifact metadata is under `target/formal-creusot-review/`. Hosted artifact IDs
+are 14991455814 (Creusot), 14989774721 (Kani), 14989838968 (Lean), with the workflow's
+14-day retention. Installation cost is isolated from ordinary test jobs. Proofs
+are always regenerated and run without reading cached solver success. This final
+report update changes prose only; executable input hashes and review conclusions
+remain applicable.
 
 No new Creusot claim covers the report wrapper, applicability/reasons, diagnostic
 counter production, assessment/catalog parsing, inventory references, identity,
