@@ -1,16 +1,6 @@
-//! Execute production decisions; Lean independently generates the same input domain.
+//! Small-domain and long-input regression checks for production decisions.
 use crate::diagnostic::{CoverageSummary, InspectionStatus};
 use crate::policy::{summarize, AssessmentContext, Decision};
-use std::fmt::Write;
-
-fn decision_code(d: Decision) -> char {
-    match d {
-        Decision::Pass => 'P',
-        Decision::Fail => 'F',
-        Decision::Indeterminate => 'I',
-        Decision::NotApplicable => 'N',
-    }
-}
 
 #[test]
 fn long_decision_lists_preserve_uncertainty_and_order() {
@@ -66,9 +56,7 @@ fn coverage(counts: &[u64; 8]) -> CoverageSummary {
 }
 
 #[test]
-fn write_lean_vectors() {
-    let mut output = String::new();
-    let mut records = String::new();
+fn small_domain_policy_and_coverage_regressions() {
     let values = [
         Decision::Pass,
         Decision::Fail,
@@ -81,11 +69,6 @@ fn write_lean_vectors() {
             let ds: Vec<_> = (0..len)
                 .map(|i| values[(encoded / 4_usize.pow(i)) % 4])
                 .collect();
-            let code: String = if ds.is_empty() {
-                "-".into()
-            } else {
-                ds.iter().copied().map(decision_code).collect()
-            };
             for (app, applicability) in ["applicable", "unknown", "not_applicable"]
                 .iter()
                 .enumerate()
@@ -96,23 +79,13 @@ fn write_lean_vectors() {
                 .unwrap();
                 for complete in [false, true] {
                     for exhaustive in [false, true] {
-                        let record = summarize(&ds, complete, exhaustive, &context);
-                        writeln!(records, "{}", serde_json::to_string(&record).unwrap()).unwrap();
-                        let d = record.decision;
+                        let d = summarize(&ds, complete, exhaustive, &context).decision;
                         if !complete || !exhaustive || ds.contains(&Decision::Indeterminate) {
                             assert_ne!(d, Decision::Pass);
                         }
                         if app == 0 && ds.contains(&Decision::Fail) {
                             assert_eq!(d, Decision::Fail);
                         }
-                        writeln!(
-                            output,
-                            "policy\t{app}\t{}\t{}\t{code}\t{}",
-                            u8::from(complete),
-                            u8::from(exhaustive),
-                            decision_code(d)
-                        )
-                        .unwrap();
                         policy_rows += 1;
                     }
                 }
@@ -124,27 +97,25 @@ fn write_lean_vectors() {
         summarize(&[Decision::Pass], true, true, &AssessmentContext::default()).decision,
         Decision::Pass
     );
+    let mut coverage_cases = 0;
     for encoded in 0..3_u32.pow(8) {
         let counts = std::array::from_fn(|i| u64::from((encoded / 3_u32.pow(i as u32)) % 3));
-        append_coverage(&mut output, &counts);
+        assert_coverage(&counts);
+        coverage_cases += 1;
     }
-    // Large representable values bridge Nat semantics and the Rust u64 boundary.
+    // Exercise large coherent counters while keeping every sum representable.
     for i in 0..8 {
         let mut counts = [0; 8];
         counts[i] = u64::MAX / 8;
-        append_coverage(&mut output, &counts);
+        assert_coverage(&counts);
+        coverage_cases += 1;
     }
-    append_coverage(&mut output, &[u64::MAX / 8; 8]);
-    assert_eq!(output.lines().count(), 10662);
-    if let Some(directory) = std::env::var_os("PQC_FORMAL_VECTORS_DIR") {
-        let directory = std::path::PathBuf::from(directory);
-        std::fs::create_dir_all(&directory).unwrap();
-        std::fs::write(directory.join("rust.tsv"), output).unwrap();
-        std::fs::write(directory.join("rust-policy-records.jsonl"), records).unwrap();
-    }
+    assert_coverage(&[u64::MAX / 8; 8]);
+    coverage_cases += 1;
+    assert_eq!(coverage_cases, 6570);
 }
 
-fn append_coverage(output: &mut String, counts: &[u64; 8]) {
+fn assert_coverage(counts: &[u64; 8]) {
     let mut c = coverage(counts);
     let before = serde_json::to_value(&c).unwrap();
     c.finish();
@@ -167,10 +138,4 @@ fn append_coverage(output: &mut String, counts: &[u64; 8]) {
     {
         assert_ne!(c.status(), InspectionStatus::CompleteWithinScope);
     }
-    let fields = counts
-        .iter()
-        .map(u64::to_string)
-        .collect::<Vec<_>>()
-        .join(",");
-    writeln!(output, "coverage\t{fields}\t{}", c.status().as_str()).unwrap();
 }

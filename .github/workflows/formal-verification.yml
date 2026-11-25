@@ -7,8 +7,6 @@ on:
       - 'Cargo.toml'
       - 'Cargo.lock'
       - 'rust-toolchain.toml'
-      - 'docs/formal-verification/**/*.lean'
-      - 'docs/formal-verification/lean-toolchain'
       - 'docs/formal-verification/Cargo.toml'
       - 'docs/formal-verification/Cargo.lock'
       - 'docs/formal-verification/rust-toolchain.toml'
@@ -22,8 +20,6 @@ on:
       - 'Cargo.toml'
       - 'Cargo.lock'
       - 'rust-toolchain.toml'
-      - 'docs/formal-verification/**/*.lean'
-      - 'docs/formal-verification/lean-toolchain'
       - 'docs/formal-verification/Cargo.toml'
       - 'docs/formal-verification/Cargo.lock'
       - 'docs/formal-verification/rust-toolchain.toml'
@@ -48,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        verifier: [kani, lean, creusot]
+        verifier: [kani, creusot]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -63,16 +59,6 @@ jobs:
         run: |
           cargo install --locked kani-verifier --version 0.68.0
           cargo kani setup
-      - name: Install pinned Lean
-        if: matrix.verifier == 'lean'
-        run: |
-          curl --fail --location --silent --show-error https://github.com/leanprover/elan/releases/download/v4.4.0/elan-x86_64-unknown-linux-gnu.tar.gz -o "$RUNNER_TEMP/elan.tar.gz"
-          echo "0e8250aa2be86c7af929ade68db617af9edc8b9ccf6eaf5ece228250d0d032e2  $RUNNER_TEMP/elan.tar.gz" | sha256sum --check
-          mkdir "$RUNNER_TEMP/elan-installer"
-          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP/elan-installer"
-          "$RUNNER_TEMP/elan-installer/elan-init" -y --no-modify-path --default-toolchain none
-          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.36.0
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Install pinned Creusot, Why3 and solvers
         if: matrix.verifier == 'creusot'
         env:

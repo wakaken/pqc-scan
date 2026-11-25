@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run pinned proofs and model comparisons; never turn missing tools into success."""
+"""Run pinned Rust proofs; never turn missing tools into success."""
 import argparse
 import datetime
 import hashlib
@@ -13,7 +13,7 @@ import subprocess
 import time
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-LEAN_DIR = ROOT / "docs/formal-verification"
+PROOF_DIR = ROOT / "docs/formal-verification"
 KANI_VERSION = "0.68.0"
 CREUSOT_VERSION = "0.15.0"
 POLICY_SOURCE = ROOT / "crates/pqc_scan_core/src/policy/aggregation.rs"
@@ -23,10 +23,6 @@ MUTATIONS = {
     "skip_last": ("while i < decisions.len() {",
                   "while i < decisions.len() && i != decisions.len() - 1 {"),
 }
-THEOREMS = (
-    "policy_correct", "pass_iff", "incomplete_never_pass", "indeterminate_never_pass",
-    "fail_dominates", "complete_iff", "failure_never_complete",
-)
 HARNESSES = (
     "policy::proofs::policy_aggregation_contract",
     "diagnostic::proofs::coverage_classification_contract",
@@ -63,32 +59,11 @@ def execute(command, cwd, log, timeout, env=None):
     return result
 
 
-def compare_vectors(a, b):
-    if not a.is_file() or not b.is_file():
-        return {"equal": False, "reason": "missing vectors"}
-    left, right = a.read_bytes(), b.read_bytes()
-    return {"equal": bool(left) and left == right, "rows": len(left.splitlines()),
-            "rust_sha256": hashlib.sha256(left).hexdigest(),
-            "lean_sha256": hashlib.sha256(right).hexdigest()}
-
-
-def check_lean_axioms(output):
-    allowed = {"propext", "Quot.sound", "Classical.choice"}
-    for name in THEOREMS:
-        line = next((line for line in output.splitlines() if line.startswith(f"'PQC.{name}' ")), "")
-        if "does not depend on any axioms" in line:
-            continue
-        match = re.fullmatch(r"'PQC\." + name + r"' depends on axioms: \[(.*)\]", line)
-        if not match or not set(filter(None, match[1].split(", "))) <= allowed:
-            return False
-    return True
-
-
 def prepare_creusot_project(directory, source):
     """Compile the real production file, with isolated proof-only dependencies."""
     directory.mkdir()
     directory = directory.resolve()
-    manifest = (LEAN_DIR / "Cargo.toml").read_text()
+    manifest = (PROOF_DIR / "Cargo.toml").read_text()
     original = '"../../crates/pqc_scan_core/src/policy/aggregation.rs"'
     if manifest.count(original) != 1:
         raise ValueError("proof manifest no longer selects the production kernel")
@@ -113,7 +88,7 @@ fn skip_last() {
 }
 """)
     for name in ("Cargo.lock", "rust-toolchain.toml", "why3find.json"):
-        shutil.copyfile(LEAN_DIR / name, directory / name)
+        shutil.copyfile(PROOF_DIR / name, directory / name)
 
 
 def creusot_goals(output):
@@ -158,15 +133,14 @@ def source_manifest():
                             ".github/workflows/formal-verification.yml"}
                 or name.startswith("tests/formal-verification/") and path.suffix == ".py"
                 or name.startswith("docs/formal-verification/")
-                and (path.suffix in {".lean", ".toml", ".lock", ".json"}
-                     or path.name == "lean-toolchain")):
+                and path.suffix in {".toml", ".lock", ".json"}):
             selected[name] = hashlib.sha256(path.read_bytes()).hexdigest()
     return selected
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=("all", "kani", "lean", "creusot"), default="all")
+    parser.add_argument("--mode", choices=("all", "kani", "creusot"), default="all")
     parser.add_argument("--out-dir", type=pathlib.Path)
     parser.add_argument("--timeout", type=float, default=900, help="seconds per command")
     parser.add_argument("--assessment", action="store_true",
@@ -182,12 +156,12 @@ def main():
     out.mkdir(parents=True, exist_ok=False)
     initial = source_manifest()
     report = {
-        "schema_version": 1, "started_utc": stamp, "mode": args.mode,
+        "schema_version": 2, "started_utc": stamp, "mode": args.mode,
         "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "source_files": initial, "steps": {},
         "selected_harnesses": list(HARNESSES + (ASSESSMENT_HARNESSES if args.assessment else ())),
         "experimental_assessment": {"status": "not_run", "reason": "unknown identifiers; opt in with --assessment"},
-        "kani": {"status": "not_run"}, "lean": {"status": "not_run"},
+        "kani": {"status": "not_run"},
         "creusot": {"status": "not_run"},
     }
 
@@ -250,7 +224,7 @@ def main():
             if not ready:
                 report["steps"]["creusot-version"].update(status="failed", reason="dependency version mismatch")
         if ready:
-            env = dict(os.environ, CARGO_TARGET_DIR=str(LEAN_DIR / "target/creusot"))
+            env = dict(os.environ, CARGO_TARGET_DIR=str(PROOF_DIR / "target/creusot"))
 
             def prove(name, directory):
                 command = ["cargo", "creusot", "--no-cache", "--why3find-arg=--goals",
@@ -300,39 +274,8 @@ def main():
             report["creusot"]["reason"] = "pinned Creusot/dependencies unavailable; see version step"
         save()
 
-    if args.mode in {"all", "lean"}:
-        lean = shutil.which("lean") or str(pathlib.Path.home() / ".elan/bin/lean")
-        lean_version = (LEAN_DIR / "lean-toolchain").read_text().strip().split(":v")[-1]
-        ready = version("lean-version", [lean, "--version"], rf"version {re.escape(lean_version)},", LEAN_DIR)
-        ready = version("rust-version", ["rustc", "--version"], r"rustc 1\.93\.1\b") and ready
-        if ready:
-            code = "\n".join(re.sub(r"--[^\n]*", "", p.read_text()) for p in LEAN_DIR.glob("*.lean"))
-            if re.search(r"\b(sorry|admit|axiom|unsafe|native_decide)\b", code):
-                report["lean"] = {"status": "failed", "reason": "forbidden proof escape"}
-            else:
-                ok = step("lean-proof", [lean, "-DwarningAsError=true", "-o", str(out / "Model.olean"), "Model.lean"], LEAN_DIR)
-                if ok and not check_lean_axioms((out / "lean-proof.log").read_text()):
-                    report["steps"]["lean-proof"]["status"] = "failed"
-                    report["steps"]["lean-proof"]["reason"] = "axiom audit failed"
-                    ok = False
-                if ok:
-                    env = dict(os.environ, PQC_FORMAL_VECTORS_DIR=str(out))
-                    ok = step("rust-vectors", ["cargo", "test", "-p", "pqc_scan_core", "--lib",
-                                              "formal::write_lean_vectors", "--locked", "--", "--exact"], env=env)
-                    lean_env = dict(os.environ, LEAN_PATH=str(out))
-                    model_ok = step("lean-vectors", [lean, "-DwarningAsError=true", "--run", "Vectors.lean"], LEAN_DIR, lean_env)
-                    if model_ok:
-                        shutil.copyfile(out / "lean-vectors.log", out / "lean.tsv")
-                    comparison = compare_vectors(out / "rust.tsv", out / "lean.tsv")
-                    report["comparison"] = comparison
-                    ok = ok and model_ok and comparison["equal"] and comparison.get("rows") == 10662
-                report["lean"]["status"] = "passed" if ok else "failed"
-        else:
-            report["lean"]["reason"] = "pinned Lean/Rust unavailable; see version steps"
-        save()
-
     report["source_unchanged"] = initial == source_manifest()
-    requested = [report[key]["status"] for key in ("kani", "lean", "creusot") if args.mode in {"all", key}]
+    requested = [report[key]["status"] for key in ("kani", "creusot") if args.mode in {"all", key}]
     report["status"] = "passed" if all(s == "passed" for s in requested) and report["source_unchanged"] else "failed"
     save()
     print(f"results: {out / 'results.json'}", flush=True)

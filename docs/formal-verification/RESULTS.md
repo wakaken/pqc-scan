@@ -1,5 +1,10 @@
 # PoC results
 
+Current configuration: **Kani and Creusot**. Lean retirement is authorized by the
+maintainer's 2026-11-25 request. The measurements and review records below describe
+the revisions at which they ran; Lean results are historical and do not establish
+current-revision verification. See [the current procedure](README.md).
+
 The original Kani/Lean measurements below are historical. The dated Creusot
 extension at the end records the additional scope and its separate status.
 
@@ -20,7 +25,7 @@ is distinct from the product toolchain. Lean **4.36.0** reports compiler commit
 
 * The unmodified latest-develop baseline: `cargo test --workspace --locked`,
   exit 0, **620 passed**.
-* Lean: all seven named theorems in [Model.lean](Model.lean) compile with warnings
+* Lean: all seven named theorems in [Model.lean](https://github.com/wakaken/pqc-scan/blob/70be6054f6d52cc2172835de5f98ee245308c3db/docs/formal-verification/Model.lean) compile with warnings
   treated as errors. The dependency audit reports only Lean standard logical
   axioms, with no `sorryAx` or project-added axiom.
 * Rust/Lean: **10,662 identical rows**, including 4,092 policy cases (all decision
@@ -275,3 +280,35 @@ upstream library contracts/prelude axioms, Why3 and Z3 remain trusted. The other
 tools' earlier limitations, especially the unproved symbolic unknown-name Kani
 experiment, remain in effect. Next expansion is diagnostic terminal-count
 conservation, then inventory reference integrity and finding-set preservation.
+
+## 2026-11-25: Lean retirement
+
+Status: implementation review accepted; full local checks, hosted CI and the
+independent test review are pending. This section supersedes the active tool
+configuration in earlier measurements without rewriting their historical scope.
+
+The maintainer requested retirement of Lean in favor of Rust-based verification.
+Removed the Lean model, executable model, toolchain pin, Elan CI installation,
+runner lane, axiom audit and cross-language vector comparison. Runner metadata
+uses schema version 2 with only Kani and Creusot lanes; product CLI/API/report
+formats and production decision code are unchanged. The retired command-line
+mode is rejected before any verification runs.
+
+The Rust assertions over 4,092 policy inputs and 6,570 coverage inputs remain as
+ordinary regression tests, including large representable counters. Their vector
+and full-record export plumbing was removed. The 8,193-element regression is
+unchanged. Kani's 13 selected harnesses, Creusot's quantified production contract
+and termination proof, three mutation controls and failure classifications remain.
+No current Lean proof or Rust/Lean agreement is claimed; the independent model
+proof and unbounded natural-number coverage proof are no longer executed.
+
+The removed source is preserved in Git at
+`70be6054f6d52cc2172835de5f98ee245308c3db`; original measurements, reviews and logs
+remain historical. Machine-wide Lean/Elan installations and other projects were
+not modified.
+
+Implementation reviewer `/root/lean_retirement_implementation_review` accepted
+diff SHA-256 `4bbfd37b3bdcf0a413cd253c5fa65aeb8bc8b1d171bf5439dcfac85887fbd949`
+after correcting a stale reference to comparison records. Initial runner tests
+(12), targeted Rust regressions (2), actionlint, fmt and diff checks passed.
+Final evidence will be recorded under `target/formal-lean-retirement/`.

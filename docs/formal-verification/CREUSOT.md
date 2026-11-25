@@ -11,7 +11,7 @@ The kernel now gathers three flags in one pass instead of three membership scans
 | Candidate | Value and applicability | Selection |
 |---|---|---|
 | Policy aggregation | Security-critical; arbitrary-length membership and loop invariants; no allocation or external calls beyond core slice/integer operations | Prove directly now |
-| Diagnostic coverage | Critical scalar classification already checked by Kani and Lean; counter production is spread across pipeline operations | Next: conservation of terminal file counts |
+| Diagnostic coverage | Critical scalar classification checked by Kani; counter production is spread across pipeline operations | Next: conservation of terminal file counts |
 | Algorithm assessment | Critical unknown handling, but string normalization, catalog maps and parameter parsing need additional library contracts | Keep existing tests/Kani; scope separately |
 | Inventory and finding deduplication | Unbounded preservation/idempotence properties would benefit; hash maps, cross references and serialization increase proof boundary | Later, with explicit asset-equivalence specification |
 | Identity and reports | Path normalization, hashing and JSON/HTML dependencies require many external specifications | Defer until input/aggregation contracts are established |
@@ -71,10 +71,10 @@ is added. The trust boundary includes Rust/Creusot's translation, creusot-std's
 contracts for slice length/indexing and integer operations, the logical sequence
 and integer prelude, Why3's transformations, the Z3 binary and host toolchains.
 Upstream prelude axioms (including integer extensionality warnings) remain trusted;
-this is SMT-based verification, not a Lean kernel-checked proof certificate.
+SMT-based verification depends on the correctness of this trusted toolchain.
 The proof crate excludes unrelated dependencies rather than assigning unchecked
 specifications to the full application. Serde derives are disabled during proof;
-their output compatibility is checked by ordinary tests and comparison records.
+their output compatibility is checked by ordinary regression tests.
 
 Creusot supports the slice, enum, match, integer and loop features used here.
 Functions from external crates need available contracts/metadata; arbitrary
@@ -148,7 +148,7 @@ The lane succeeds only if the positive proof/witnesses and all rejection checks
 succeed. Finite witnesses test sensitivity; they do not establish mutation coverage
 against every possible future defect or prove the specification itself correct.
 
-The existing workflow adds a separate Creusot lane to Kani/Lean. Source, contracts,
+The existing workflow runs separate Kani and Creusot lanes. Source, contracts,
 proof manifest/lockfile/toolchain/config, runner and workflow changes trigger it.
 Artifacts survive failure; cancellation or failed installation is not a proof.
 Changing the production kernel changes the compiled proof input automatically.
@@ -158,9 +158,9 @@ Changing the specification still requires independent review against requirement
 
 See [the dated results](RESULTS.md) for source-bound measurements and review status.
 Kani retains bounded direct checks of policy, coverage and fixed catalog entries;
-Lean retains its independent unbounded mathematical model and finite Rust/model
-comparison. Creusot adds an unbounded direct implementation proof of this one
-kernel. All existing tests, fuzzing and corpus evaluations retain their roles.
+Creusot provides an unbounded direct implementation proof of this one kernel.
+The Lean lane was retired at the maintainer's request; its earlier measurements
+remain historical. Small-domain Rust regression tests remain. All existing tests, fuzzing and corpus evaluations retain their roles.
 
 No Creusot proof is claimed for profile applicability, reason construction,
 coverage-counter production, inventory completeness, detector accuracy, algorithm
