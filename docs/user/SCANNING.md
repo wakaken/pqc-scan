@@ -1,15 +1,18 @@
 # Scanning repositories
 
-[日本語](SCANNING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/README.md)
+[日本語](SCANNING.ja.md) · [README](../../README.md)
 
-This guide covers v0.4.0 static scanning. See the [release notes](../releases/v0.4.0.md) for changes between versions.
+This guide covers static scanning in the current source checkout, including the
+PHP, C#, C and C++ additions under v0.5 development. The v0.4.0 release scope is
+narrower; see its [release notes](../releases/v0.4.0.md).
 
-Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/docs/user/COVERAGE.md) for format-specific limits.
+Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
 
 ## Contents
 
 - [Illustrated browser scan and migration workflow](#web-migration-walkthrough)
 - [Command and options](#command)
+- [Scan PHP, C#, C and C++](#added-languages)
 - [GitHub Actions](#github-actions)
 - [Running from source](#from-source)
 - [Inspection diagnostics](#diagnostics)
@@ -32,6 +35,37 @@ Defaults are `--format all`, `--lang en`, `--out-dir ./pqc-report`, `--rules-dir
 Add `--cyclonedx-17` to write separate CycloneDX 1.7 inventories. The [report guide](REPORTS.md#cyclonedx)
 explains these documents and the completeness limits of [inventory comparison](REPORTS.md#diff).
 
+
+<a id="added-languages"></a>
+
+### Scan PHP, C#, C and C++
+
+Use the same scan command above as for Java or Go. Language selection follows the
+file name and supported syntax; there is no language-specific switch. `--lang`
+selects the report display language, not the source language. No PHP/.NET
+runtime, compiler, dependency installation or target build is required.
+
+1. Use the current source build and its matching bundled rules. When scanning another repository, set `--rules-dir` to the absolute path of that checkout's `rules` directory, as described below.
+2. Set `<path>` to the project root so source files and supported dependency declarations are both included. Existing ignore, test-exclusion and file-size settings still apply.
+3. Add `--diagnostics` to inspect incomplete work. Open `report.html`, check inspection scope, then expand a finding to read its location, source context and follow-up guidance.
+
+| Language | Selected source files | Main limits to check |
+|---|---|---|
+| PHP | `.php`, `.phtml`, `.inc` with a PHP opening tag | Static PHP in mixed HTML; Blade is not rendered and remains incomplete |
+| C# | `.cs` | Razor and project-wide type/overload resolution are excluded |
+| C | `.c`, `.h`, `.c.inc` | Preprocessing, includes and compilation are not executed |
+| C++ | `.C`, `.cc`, `.cpp`, `.cxx`, `.hpp`, `.hh`, `.hxx`, `.h`, `.cc.inc`, `.cpp.inc`, `.cxx.inc` | No template instantiation or compiler semantic analysis; local pointer tracking is limited |
+
+Shared `.h` files use bounded C and C++ views; syntax or binding disagreements can
+remain incomplete. Read the [detailed coverage](COVERAGE.md#source-limits) before
+interpreting an absence of findings. Composer, NuGet/MSBuild, vcpkg, Conan and
+literal CMake references are inspected within their [documented subsets](COVERAGE.md#native-dependencies);
+these declarations do not confirm installed libraries or runtime support.
+
+The current bundle has 139 rules, up from 125 in v0.4.0. `rules list` lists the loaded rules; a scan's
+`report.rules.html` explains only rules that produced findings in that scan.
+Ordinary source arguments and neighbouring lines remain readable, with recognized
+secret values masked; see [source excerpts](REPORTS.md#source-excerpts).
 
 ### File size limit
 

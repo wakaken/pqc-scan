@@ -385,6 +385,8 @@ The rule guide lists rules that produced findings in this scan; the complete bui
 Migration evidence details show the observed use state and explain what lexical, syntactic or dependency references establish. Confirm actual purpose/use before acting. Coincident detection records show their count and evidence overlap. Distinct algorithms or concerns are not automatically merged, and record counts are not asserted to be independent cryptographic uses. Test-folder and dependency-file categories are path hints only and do not automatically exclude a target or change its assessment.
 
 
+<a id="source-excerpts"></a>
+
 ## Protected source excerpts
 
 Source excerpts show the detected line and up to two lines before and after it. Ordinary arguments, variable references, algorithm names and neighbouring code remain visible, including PHP, C#, C/C++, Java and Go. Recognized secrets are replaced with mask labels inside the code: credential values, private-key blocks and literal key data in supported cryptographic key-input positions. Masking happens before long lines are shortened; existing line-length limits still apply.

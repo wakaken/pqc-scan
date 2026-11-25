@@ -2,7 +2,9 @@
 
 [日本語](COVERAGE.ja.md) · [README](../../README.md)
 
-This guide explains supported v0.4.0 inputs and how to interpret their results.
+This guide describes the current source checkout, including PHP, C#, C/C++ and
+related dependency support under v0.5 development. The v0.4.0 release scope is
+narrower; use a matching scanner and rule bundle.
 See the [input overview](../../README.md#targets) and [scanning guide](SCANNING.md).
 
 ## Contents
@@ -26,6 +28,12 @@ The following files provide relevant library and version information:
 - Go: `go.mod`
 - JavaScript/TypeScript: `package.json`, `package-lock.json`, `pnpm-lock.yaml`
 - Python: `requirements.txt`, `Pipfile.lock`, `poetry.lock`
+- PHP: `composer.json`, `composer.lock`
+- C#/.NET: `.csproj`, `Directory.Packages.props`, `Directory.Build.props`, `packages.config`, `packages.lock.json`, `global.json`
+- C/C++: `vcpkg.json`, `vcpkg-configuration.json`, `conanfile.txt`, `conan.lock`, `CMakeLists.txt`, `*.cmake`
+
+See [PHP, .NET and native dependency inputs](#native-dependencies) for the supported
+subsets and distinctions between declarations, locks and build references.
 
 Declared versions are distinguished from versions recorded in lockfiles.
 Dynamically determined values are not treated as confirmed values. Finding a
@@ -97,11 +105,13 @@ extensions, implementation equivalence, installation or active protection.
 
 PHP namespaces, imports and function aliases use a bounded, source-ordered local
 subset. Shadowing, reassignment, unknown writes and dynamic/reflected/FFI calls do
-not inherit an older key identity. Argument payloads are omitted from these new
-built-in previews. When PHP built-ins are selected, source context is masked even
-if analysis stops early. Match text and metadata are protected too; opaque
-payload tokens do not become algorithm assets. Explicit API identities remain. Unrelated/custom rules
-retain their generic behavior. Arbitrary cross-file resolution is excluded.
+not inherit an older key identity. Findings show ordinary arguments and source
+context, with recognized credential values, private-key blocks and supported
+literal key inputs masked before clipping. Uninspected regions can retain broader
+protection when analysis stops early. Opaque payload tokens do not become algorithm
+assets; explicit API identities remain. Custom rules retain generic matching and
+shared secret redaction. Arbitrary cross-file resolution is excluded. See
+[source excerpts](REPORTS.md#source-excerpts).
 
 When a variable reaches its tracking limit, later values of that variable remain
 unknown. Independent API references are retained, and inspection still reports
@@ -126,11 +136,12 @@ Generic HPKE is not necessarily post-quantum. Prehash/OID selectors outside the
 finite table remain unresolved. BC TLS, obsolete official dotnetOQS and independent
 OpenForge namespaces remain distinct opaque references. Platform/provider/version
 availability is not inferred from source or target-framework declarations. Selected
-C# built-ins apply the same argument/context/match/metadata protection as PHP;
-explicit finite API identities remain in inventory. Opaque library occurrences
-retain their own fixed public project label in findings/CBOM and a finite library
-marker in native inventory. Arguments, source previews and arbitrary metadata
-remain masked; these labels do not establish installed libraries or active use.
+C# built-ins use the same selective secret masking as PHP; ordinary arguments
+and source context remain readable. Explicit finite API identities remain in
+inventory. Opaque library occurrences retain their own fixed public project label
+in findings/CBOM and a finite library marker in native inventory. Secret-valued
+metadata remains protected. These labels do not establish installed libraries or
+active use, and displayed code does not become a typed algorithm fact.
 
 C/C++ covers the specified OpenSSL RSA/DSA/DH/EC low-level calls, explicit EVP
 selectors and locally bound contexts/generated EVP keys, and OQS C requests and
@@ -153,7 +164,8 @@ algorithm assets, loading or negotiation claims. Standalone MLKEM names, standar
 hybrids, draft groups and aliases remain distinct. Other group grammar operators,
 unknown/escaped/dynamic values and custom provider names remain unresolved.
 New source rules intentionally overlap existing lexical OpenSSL rules; the older
-IDs and occurrences remain, while source arguments/context/metadata are protected.
+IDs and occurrences remain. Ordinary source context is visible; recognized secret
+values and secret-valued metadata are masked.
 All native observations remain syntactic/referenced. No preprocessing, build,
 linking, package manager or cryptographic execution takes place.
 
@@ -185,6 +197,8 @@ settings accept 1–64 MiB. See [file-size limits](SCANNING.md#file-size-limit) 
 Tests are included by default. Use `--exclude-tests` or **Exclude test code** to
 omit them, and `.pqcignore` for custom paths. Symbolic-link targets are not read.
 Excluded and unsupported inputs mean that zero findings do not prove safety.
+
+<a id="native-dependencies"></a>
 
 ## PHP, .NET and native dependency inputs
 

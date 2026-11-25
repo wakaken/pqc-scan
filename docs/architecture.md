@@ -168,8 +168,8 @@ strategy, not full semantic analysis or exhaustive private-key format support.
   - PHP (bounded built-in OpenSSL/Sodium/ParagonIE requests and qualified references)
   - C# (bounded .NET/BC types, selectors and local operations)
 - The v0.5 foundation additionally routes PHP/PHTML/tagged INC (`php`), C# CS
-  (`csharp`), C (`c`) and C++ (`cpp`) for custom AST rules. Per-language built-in
-  C/C++ API packs remain separate deliverables. Uppercase `.C` is selected before
+  (`csharp`), C (`c`) and C++ (`cpp`) for custom AST rules. Built-in C/C++ coverage
+  uses the finite source-fact handlers described below. Uppercase `.C` is selected before
   extension case folding; `.h` uses two candidate views sharing all five work
   caps, consolidating equal original spans and opaque typed references once.
   Candidate syntax/binding disagreement remains Partial. CPP-only node kinds
@@ -179,16 +179,22 @@ strategy, not full semantic analysis or exhaustive private-key format support.
   `recognized` vocabulary and `with_algorithm_references` path remain unchanged.
   New routes report code-point columns and retain original file-byte remapping
   for encoded inputs. No source project, preprocessor or dependency manager runs.
-- Selected PHP/C# built-ins protect source context, match text and metadata independently
-  of parsing/binding completion. A private ephemeral typed-source bit preserves
+- PHP/C#/C/C++ source presentation uses recognized secret spans from the inspected
+  snapshot before clipping. Ordinary arguments and up to two surrounding lines
+  remain visible; unresolved/uninspected regions retain conservative protection.
+  Presentation privacy is separate from typed-source suppression. A private
+  ephemeral typed-source bit preserves
   finite explicit API identities while opaque token-derived algorithm guesses are
-  omitted on these PHP/C# paths. Finite opaque project references retain a fixed
+  omitted on these PHP/C#/C/C++ paths. Finite opaque project references retain a fixed
   public label in legacy findings/CBOM and a `library_ref_*` code in the existing
   open-string `evidence.marker_kind`. The unchanged anchor formula includes that
   marker, distinguishing projects without versions or runtime claims. Only exact
   typed draft-to-finding bindings permit fixed label restoration; arbitrary match
-  text, metadata, argument payloads and source context remain protected. No new
-  serialized field/schema or held-input meaning changes.
+  text cannot restore a typed identity. Core validates display-only call identities,
+  then uses span-bound, redacted source excerpts without promoting call text into
+  CBOM algorithms. Secret-valued metadata retains its existing protection. See
+  [evidence privacy](architecture/EVIDENCE-PRIVACY.md). No serialized field/schema
+  or held-input meaning changes.
 
 PHP and C# local binding saturation retain the fixed limit of 64 records per variable and
 invalidates later values of that variable. It does not abort independent API

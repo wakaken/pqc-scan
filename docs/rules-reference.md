@@ -298,8 +298,11 @@ capability claim; the signature wrapper retains the frozen generic API ID.
 
 Default-definition identity, PHP scope, names, source order and local writes are
 checked before typed capture. Modified/custom definitions retain generic matching.
-Arguments are omitted from new built-in previews and protected across source
-context. Legacy confidence weights are uncalibrated conventions. See
+Ordinary arguments and surrounding source remain visible in findings. Recognized
+secret values are redacted before clipping; uninspected regions retain conservative
+protection. Display excerpts do not feed typed algorithm facts. See
+[source excerpt privacy](user/REPORTS.md#source-excerpts).
+Legacy confidence weights are uncalibrated conventions. See
 [user scope](user/COVERAGE.md#source-limits) and the current source-bound quality
 companion; historical audits remain unchanged.
 
