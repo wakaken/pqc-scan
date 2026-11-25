@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use serde_json::Value as JsonValue;
 
 use crate::model::{CodeExample, DependencySbomEntry, Finding, RecommendedAction};
+mod languages;
 
 #[derive(Debug, Clone, Default)]
 pub struct RuntimeProfile {
@@ -125,7 +126,11 @@ impl RuntimeProfile {
                     .dependency_signals
                     .insert(dep.purl.to_ascii_lowercase());
             }
-            if name.contains("bouncycastle") || name.contains("bcprov") || name.contains("bcpkix") {
+            if dep.ecosystem != "nuget"
+                && (name.contains("bouncycastle")
+                    || name.contains("bcprov")
+                    || name.contains("bcpkix"))
+            {
                 profile
                     .dependency_signals
                     .insert("java-bouncycastle".to_string());
@@ -166,6 +171,7 @@ fn recommend_for_finding(finding: &Finding, profile: &RuntimeProfile) -> Vec<Rec
     let mut actions = Vec::new();
     let language = detect_language(finding);
     let category = finding.category.to_ascii_lowercase();
+    languages::append(&mut actions, finding, language);
 
     if category == "middleware"
         || finding
@@ -916,6 +922,10 @@ fn detect_language(finding: &Finding) -> Option<&'static str> {
         "go" => Some("go"),
         "rs" => Some("rust"),
         "rb" => Some("ruby"),
+        "php" | "phtml" => Some("php"),
+        "cs" => Some("csharp"),
+        "c" | "h" => Some("c"),
+        "cpp" | "cc" | "cxx" | "hpp" | "hh" | "hxx" => Some("cpp"),
         _ => None,
     }
 }
@@ -929,6 +939,10 @@ fn canonical_language_name(raw: &str) -> Option<&'static str> {
         "go" | "golang" => Some("go"),
         "rust" | "rs" => Some("rust"),
         "ruby" | "rb" => Some("ruby"),
+        "php" => Some("php"),
+        "csharp" | "cs" => Some("csharp"),
+        "c" => Some("c"),
+        "cpp" | "c++" => Some("cpp"),
         _ => None,
     }
 }

@@ -1,0 +1,166 @@
+{
+  "generated_at": "2026-11-24T04:22:20.758792Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-03464e04d8aab704a18bb3b185ce66fba587652709c6e5a5fbf0e0079851ed02",
+      "rule_id": "JWT_RS256",
+      "category": "JWT",
+      "risk": "quantum-vulnerable",
+      "severity": "critical",
+      "confidence": 0.6,
+      "description": "RS256 algorithm name referenced; active signing and effective policy are not established.",
+      "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+      "location": {
+        "file": "short.php",
+        "line": 1,
+        "column": 51
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RS256",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "jwt.remove-rsa-algorithms",
+          "title": "Review whether the JOSE reference is used for signing, verification, tests or documentation",
+          "priority": "near-term",
+          "rationale": "JWT signatures using classical public-key algorithms become long-term high risk under quantum adversaries.",
+          "steps": [
+            "Restrict accepted alg values and explicitly deny weak/legacy defaults.",
+            "Introduce short-lived tokens during the migration phase.",
+            "Prepare verifier rollout before signer rollout to avoid compatibility outages.",
+            "Confirm JOSE algorithm identifiers, key encoding, JWT library support and all verifiers before changing token signatures; primitive support alone is insufficient."
+          ],
+          "references": [
+            "https://www.rfc-editor.org/rfc/rfc7519"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-9af32d2de86afb1367847a44bb139c3692938a12fecd3b5b8105a0bc3236b017",
+      "rule_id": "API_JOSE_RSA_ALG",
+      "category": "CryptoAPI",
+      "risk": "quantum-vulnerable",
+      "severity": "high",
+      "confidence": 0.63,
+      "description": "RSA-family JOSE algorithm detected.",
+      "migration_hint": "Update JOSE algorithms to PQC-ready alternatives.",
+      "location": {
+        "file": "short.php",
+        "line": 1,
+        "column": 51
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RS256",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "short.php",
+      "algorithm": "RS256",
+      "usage_type": "JWT",
+      "location": "short.php:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures."
+    },
+    {
+      "component": "short.php",
+      "algorithm": "RS256",
+      "usage_type": "CryptoAPI",
+      "location": "short.php:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Update JOSE algorithms to PQC-ready alternatives."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 2,
+    "by_severity": {
+      "critical": 1,
+      "high": 1
+    },
+    "by_risk": {
+      "quantum-vulnerable": 2
+    },
+    "scanned_files": 1,
+    "skipped_files": 0
+  }
+}

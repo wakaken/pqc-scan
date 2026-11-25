@@ -1,0 +1,125 @@
+- text: Language / 言語
+- combobox "Language / 言語":
+  - option "English" [selected]
+  - option "日本語"
+- text: Theme / 表示
+- combobox "Theme / 表示":
+  - option "Light / ライト" [selected]
+  - option "Dark / ダーク"
+- main:
+  - link "Skip to findings":
+    - /url: "#findings"
+  - paragraph: pqc-scan / Static analysis
+  - heading "PQC Migration Scan Report" [level=1]
+  - paragraph:
+    - text: Generated
+    - time: Nov 24, 2026, 3:18:01 PM GMT+9 (Asia/Tokyo)
+  - generic: Findings to review
+  - generic: 2 items
+  - generic: Informational findings
+  - generic: 6 items
+  - generic: Files with findings
+  - generic: "1"
+  - figure "Severity distribution · all findings":
+    - generic: Severity distribution · all findings
+    - list:
+      - text: medium
+      - strong: "2"
+      - text: info
+      - strong: "6"
+  - heading "Inspection scope and completion" [level=2]
+  - paragraph: Supported inspection completed within the selected scope
+  - paragraph: Review the findings below. Completion does not mean the project is safe.
+  - text: Files selected
+  - strong: "1"
+  - text: Files analyzed
+  - strong: "1"
+  - text: Files needing follow-up
+  - strong: "0"
+  - generic "Scope and exclusions"
+  - complementary:
+    - group "Search conditions":
+      - generic "Search conditions ›":
+        - text: Search conditions ›
+      - text: View
+      - combobox "View":
+        - option "Risk candidates"
+        - option "Inventory"
+        - option "All" [selected]
+      - text: Search
+      - searchbox "Search"
+      - text: Severity
+      - combobox "Severity":
+        - option "All severities" [selected]
+        - option "critical"
+        - option "high"
+        - option "medium"
+        - option "low"
+        - option "info"
+      - text: Risk
+      - combobox "Risk":
+        - option "All risks" [selected]
+        - option "quantum-vulnerable"
+        - option "quantum-uncertain"
+        - option "quantum-safe"
+        - option "non-quantum-risk"
+      - text: Rule
+      - combobox "Rule":
+        - option "All rules" [selected]
+        - option "CSHARP_CRYPTO_API — C# cryptographic API or qualified library reference; effective key use r..."
+        - option "CSHARP_CRYPTO_REFERENCE — C# TLS library or OQS wrapper reference; identity and runtime capability..."
+        - option "CSHARP_PQC_API — C# PQC or composite/HPKE reference; source alone does not establish plat..."
+      - link "Rule explanations":
+        - /url: report.rules.html?lang=en
+      - text: File
+      - combobox "File":
+        - option "All files" [selected]
+        - option "api.cs"
+      - checkbox "Show test code results" [checked]
+      - text: Show test code results
+      - button "Clear all filters"
+    - group "Files":
+      - generic "Files ›":
+        - text: Files ›
+      - link "Show all results":
+        - /url: "#findings"
+      - list:
+        - button "api.cs, 8 total findings":
+          - generic: api.cs
+          - generic: "8"
+  - region "Findings":
+    - heading "Findings" [level=2]
+    - status: 3 / 3 finding groups; 8 / 8 findings match the current view.
+    - generic "› C# cryptographic API or qualified library reference; effective key use requires verification. medium 2 hits Files 1 · matches 2 / 2":
+      - text: ›
+      - strong: C# cryptographic API or qualified library reference; effective key use requires verification.
+      - generic: medium
+      - generic: 2 hits
+      - generic: Files 1 · matches 2 / 2
+    - generic "› C# TLS library or OQS wrapper reference; identity and runtime capability require separate checks. info 3 hits Files 1 · matches 3 / 3" [active]:
+      - text: ›
+      - strong: C# TLS library or OQS wrapper reference; identity and runtime capability require separate checks.
+      - generic: info
+      - generic: 3 hits
+      - generic: Files 1 · matches 3 / 3
+    - paragraph: Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately.
+    - paragraph:
+      - link "About this rule":
+        - /url: report.rules.html?lang=en#rule-1
+    - heading "Locations and next steps" [level=4]
+    - generic "api.cs:1:7 C# obsolete official dotnetOQS wrapper reference":
+      - code: api.cs:1:7
+      - generic: C# obsolete official dotnetOQS wrapper reference
+    - generic "api.cs:1:24 C# OpenForge community OQS wrapper reference":
+      - code: api.cs:1:24
+      - generic: C# OpenForge community OQS wrapper reference
+    - generic "api.cs:1:65 C# Bouncy Castle TLS library reference":
+      - code: api.cs:1:65
+      - generic: C# Bouncy Castle TLS library reference
+    - generic "Shared checks and planning (1)"
+    - generic "› C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection. info 3 hits Files 1 · matches 3 / 3":
+      - text: ›
+      - strong: C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection.
+      - generic: info
+      - generic: 3 hits
+      - generic: Files 1 · matches 3 / 3

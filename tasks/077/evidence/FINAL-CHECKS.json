@@ -1,0 +1,176 @@
+{
+  "source_manifest_sha256": "6dc0c5ddd65591721bd13c1fe20b69e2617a6dd19738d12b322075a07de7af79",
+  "source_files_rechecked": true,
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace"
+      ],
+      "exit": 0,
+      "log": "workspace-final.log",
+      "tool_session": 2172
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "exit": 0,
+      "log": "all-features-final.log",
+      "tool_session": 54300,
+      "environment": {
+        "CARGO_TARGET_DIR": "target/v05-feature"
+      }
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace"
+      ],
+      "exit": 0,
+      "log": "build-final.log",
+      "evidence": "Finished dev profile and actual same binary passes CLI/package installation; compound build/clippy tool exit recorded separately"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "log": "clippy-adopted.log",
+      "tool_session": 35423
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "tool_session": 56430
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/distribution",
+        "-v"
+      ],
+      "exit": 0,
+      "tests": 25,
+      "log": "distribution-checks.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/077/evidence/check_cli_package.py"
+      ],
+      "exit": 0,
+      "artifact": "CLI-PACKAGE-CHECKS.json",
+      "note": "Equivalent observed command used /tmp script whose adopted bytes are archived here; native case-insensitive fixture collision fixed with distinct upper.C basename, no product correction."
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/077/evidence/verify_compatibility.py"
+      ],
+      "exit": 0,
+      "artifact": "COMPATIBILITY.json",
+      "log": "compatibility-final-run.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "pqc_scan_core",
+        "--test",
+        "source_api_capture"
+      ],
+      "exit": 0,
+      "log": "capture-positive-parameters.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "fmt-final.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "log": "clippy-positive-parameters.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "pqc_scan_detectors",
+        "--test",
+        "language_routing"
+      ],
+      "exit": 0,
+      "tests": 11,
+      "log": "routing-review1-boundaries.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "log": "clippy-review1-boundaries.log"
+    }
+  ],
+  "limits": [
+    "Native host macOS arm64 only; no new Windows/Linux execution claim",
+    "Package is local preparation using a dev/default-feature binary, not a release/publication",
+    "No new API-pack quality or whole-v0.5 acceptance inferred",
+    "076 baseline-product hashes intentionally describe old source; current dirty source is bound separately"
+  ],
+  "initial_source_manifest": "IMPLEMENTATION-SOURCE-v1.json sha256 7c80ed8f10a849f2a912465139531f5e21a2bb3bba0a50783a7714e2578588b4",
+  "reuse_after_test_only_change": "Positive RSA key_bits and matching ECDSA curve/key_bits assertions strengthen the existing pure constructor test. All 18 other bound files, including all shipped product, docs and package inputs, are unchanged. Targeted capture/fmt/clippy rerun; default/all-feature workspace and CLI/package evidence reuse is justified by no changed production or feature-specific logic.",
+  "review1_test_only_reuse": "Added exact before/at/after boundaries for four shared caps on int CONTROL; pinned C/C++ parse independently confirms five tree nodes, one semantic identifier/seven bytes. Totals nodes10, ASTcandidates2, matchcandidates2, bytes14; below is Truncated/zero retained, at/above Complete/one original (4,11) span and (1,5) location. Production, feature-specific logic, inputs/binaries/CLI/package observations unchanged; targeted11 and Clippy0."
+}

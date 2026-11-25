@@ -10,7 +10,7 @@ import unittest
 import report
 
 ROOT = Path(__file__).resolve().parents[2]
-CURRENT = 'tests/quality/applicability-docs-readability-20261124/assessment.json'
+CURRENT = 'tests/quality/applicability-v05-integration-20261125/assessment.json'
 PREVIOUS_README = 'tests/quality/applicability-v040-readme-20261123/assessment.json'
 PREVIOUS_ILLUSTRATED = 'tests/quality/applicability-v040-guide-20261123/assessment.json'
 PREVIOUS_V040 = 'tests/quality/applicability-v040-release-20261123/assessment.json'
@@ -53,9 +53,16 @@ class CIApplicabilityTests(unittest.TestCase):
         self.assertEqual({u['id']: u['status'] for u in current['dispositions']},
                          {u['id']: u['status'] for u in old['dispositions']})
 
-    def test_previous_readme_binding_remains_rejected_after_readability_edit(self):
+    def test_previous_readme_review_is_not_relabelled_current_after_language_expansion(self):
         with self.assertRaisesRegex(ValueError, 'binding changed'):
             scoped(ROOT, PREVIOUS_README)
+
+    def test_previous_branch_reviews_remain_rejected_after_integration(self):
+        for previous in ['tests/quality/applicability-docs-readability-20261124/assessment.json',
+                         'tests/quality/applicability-v05-language-20261125/assessment.json']:
+            with self.subTest(previous=previous):
+                with self.assertRaisesRegex(ValueError, 'binding changed'):
+                    scoped(ROOT, previous)
 
     def test_historical_binding_remains_rejected_against_current_document(self):
         with self.assertRaisesRegex(ValueError, 'binding changed'):

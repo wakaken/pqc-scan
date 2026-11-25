@@ -1,0 +1,94 @@
+{
+  "sourceManifestSha256": "942a9d8cb6e87911f224c7103cd098d469fdc2400eb289f8e20a9a34ba750a65",
+  "checks": [
+    {
+      "command": [
+        "node",
+        "--test",
+        "crates/pqc_scan_report/tests/migration-navigation.test.cjs"
+      ],
+      "exitCode": 0,
+      "log": "tasks/085/evidence/migration-navigation-06.log",
+      "logSha256": "dcd10d151a1f813548397f9ae42348c52415c9980c4337abb4d90737eb7dc5e8"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "crates/pqc_scan_report/src/migration.js"
+      ],
+      "exitCode": 0,
+      "log": "tasks/085/evidence/migration-syntax-06.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "log": "tasks/085/evidence/final-diff-06.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "/tmp/pqc-085-compat-06.py"
+      ],
+      "exitCode": 0,
+      "log": "tasks/085/evidence/frozen-compatibility-06.log",
+      "logSha256": "0d44af4699192a978d08adb1ceaa4f0e065af91697007420101dd49ce7c61c69"
+    },
+    {
+      "command": [
+        "/Users/waka/.cache/pqc-scan-oss-validation-085/source06-release-pqc-scan",
+        "rules",
+        "list",
+        "--rules-dir",
+        "/Users/waka/.cache/pqc-scan-oss-validation-085/rules"
+      ],
+      "exitCode": 0,
+      "log": "tasks/085/evidence/rules-list-06.log",
+      "logSha256": "996e5f836bd396935d09acafd2f7c0f288c9da60cd3f1f6d94a1a2eb9b5c1b8f"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--binary",
+        "/Users/waka/.cache/pqc-scan-oss-validation-085/source06-release-pqc-scan",
+        "--variant",
+        "static",
+        "--out-dir",
+        "/Users/waka/.cache/pqc-scan-oss-validation-085/package-source06"
+      ],
+      "exitCode": 0,
+      "log": "tasks/085/evidence/package-prepare-06.log",
+      "logSha256": "3fb369098c46810f4b22e65e84348dd8a3b22d908b248380e436913f0305d479"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--verify",
+        "/Users/waka/.cache/pqc-scan-oss-validation-085/package-source06/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz"
+      ],
+      "exitCode": 0,
+      "log": "tasks/085/evidence/package-verify-06.log",
+      "logSha256": "1ce21212f95db17d1f12efac4dfa2b3575f3651cfdd62195b419ba24f4f36d38"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/distribution/check-install.py",
+        "/Users/waka/.cache/pqc-scan-oss-validation-085/package-source06/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz",
+        "--out-dir",
+        "/Users/waka/.cache/pqc-scan-oss-validation-085/package-install-source06"
+      ],
+      "exitCode": 0,
+      "log": "tasks/085/evidence/package-install-06.log",
+      "logSha256": "b51b1aa8594f780c009ece600b0c67ff5a45b2284ebfd267dd0cd37f6e34ea11"
+    }
+  ]
+}

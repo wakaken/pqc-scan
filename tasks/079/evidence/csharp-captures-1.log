@@ -1,0 +1,32 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.53s
+     Running tests/csharp_source.rs (target/debug/deps/csharp_source-240f82a778562327)
+
+running 11 tests
+test csharp_wrapper_projects_and_bc_tls_are_distinct_opaque_references ... ok
+test csharp_explicit_local_types_keep_only_nominal_family_for_unknown_initializers ... ok
+test csharp_deferred_captures_and_implicit_parameter_names_do_not_reuse_outer_values ... FAILED
+test csharp_global_aliases_do_not_cross_files_and_conditionals_stay_partial ... ok
+test csharp_bc_initialization_resolves_only_the_expected_parameter_container ... ok
+test csharp_parameters_named_arguments_and_conflicts_do_not_guess_exact_sets ... ok
+test csharp_aliases_local_global_usings_namespaces_and_static_imports_are_local ... ok
+test csharp_local_writes_method_boundaries_and_unknown_mutations_stop_old_keys ... ok
+test csharp_private_arguments_and_legacy_looking_payloads_are_protected_when_partial ... ok
+test csharp_alias_and_binding_limits_report_truncation_at_actual_boundaries ... ok
+test every_frozen_csharp_case_matches_its_original_focal_expectation ... ok
+
+failures:
+
+---- csharp_deferred_captures_and_implicit_parameter_names_do_not_reuse_outer_values stdout ----
+
+thread 'csharp_deferred_captures_and_implicit_parameter_names_do_not_reuse_outer_values' (23130376) panicked at crates/pqc_scan_detectors/tests/csharp_source.rs:457:114:
+using System.Security.Cryptography; class C{void M(){Action<object> later=MLKem=>MLKem.GenerateKey(algorithm);}}: {"assessment_status":"not_evaluated","assessments":[],"assets":[{"attributes":{"identifier":"ML-KEM","namespace":"named","parameters":{},"purpose":"reference"},"id":"asset-v1-99056b1d6e756cae9fae60a723d04dec9d652772b7911d36df3143b281a2900e","identity_basis":"identifier_only_parameters_not_fully_interpreted","kind":"algorithm","relations":[],"uncertainty":["algorithm_parameters_not_fully_interpreted"]},{"attributes":{"ambiguous":false,"anchor":"anchor-v1-08f56b3142cfd0a31415762c3a10ffecd31a0edc4093b8d98180f2603519741f","local_ordinal":0,"method":"ast_pattern","path":"case.cs"},"id":"asset-v1-1eaf6b68d45a9ebc4f13215ed4fdf7e4d723c6b5a191a2b9b3b5fc85250bcc63","identity_basis":"scoped_weak_source_anchor","kind":"usage","relations":[{"relationship":"references","target":"asset-v1-99056b1d6e756cae9fae60a723d04dec9d652772b7911d36df3143b281a2900e"}],"uncertainty":["static_reference_not_active_use"]}],"catalog_version":"native-exact-identifiers-1","coverage":{"analysis_failed_files":0,"analyzed_files":0,"enumeration_failed_entries":0,"excluded_enumerated_files":0,"not_applicable_files":0,"not_enumerated_population":true,"partial_files":1,"read_failed_files":0,"read_ok_files":1,"selected_files":1,"status":"partial","unknown_files":0,"unsupported_files":0},"diagnostics":[{"code":"detector_partial","detector":"tree_sitter_detector","disposition":"partial","file":"case.cs","message":"Source syntax could not be fully interpreted. Parsed regions were inspected; unresolved syntax remains unknown. Check generated syntax, language version and the source file separately.","stage":"detection"}],"export_loss_notes":["raw_matches_snippets_and_arbitrary_metadata_omitted","unknown_raw_identifiers_not_guessed","legacy_snapshot_not_derived_from_inventory","legacy_ids_are_not_native_identity","legacy_dependency_version_provenance_unavailable","legacy_applicability_coverage_is_not_native_inventory_completeness","weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity","cryptographic_trust_and_policy_not_evaluated"],"identity_scheme":"pqc-scan-length-prefixed-sha256-v1","legacy_associations":[{"legacy_id":"finding-v1-3c42b0a6d4880c39dcff16ec67829a321824930c0245838598c70dd71a5cd289","legacy_index":0,"observation_ids":["observation-v1-f48ea4f01462d4539b12b0f0a80150aa18b0525ac795019eb446d9015602b2a0"]}],"legacy_loss_records":[],"native_completeness":"not_exhaustive","observations":[{"asset_ids":["asset-v1-99056b1d6e756cae9fae60a723d04dec9d652772b7911d36df3143b281a2900e","asset-v1-1eaf6b68d45a9ebc4f13215ed4fdf7e4d723c6b5a191a2b9b3b5fc85250bcc63"],"assurance":"syntactic","evidence":{"capture_status":"legacy_reported","marker_kind":null},"id":"observation-v1-f48ea4f01462d4539b12b0f0a80150aa18b0525ac795019eb446d9015602b2a0","identity_confidence":"weak_structural_anchor","method":"ast_pattern","occurrence_key":"occurrence-v1-da3eaff15a5675ed28ece2739422d784bb1ad59d23506b4bf4321caeb29a9a53","producer":"tree_sitter_detector","rule_id":"CSHARP_PQC_API","target":{"byte_end":109,"byte_start":81,"column":82,"column_kind":"unicode_code_points","line":1,"object_index":null,"path":"case.cs"},"uncertainty":[],"usage":"referenced"}],"profile":"static-native-v1","repository_scope":"v05/csharp","rules_digest":"rules-v1-75ecd3210a61c40afb70e940e45a8b8896be5410014608222886f1c11a96e47d","run":{"attempt_id":"static-1","generated_at":"2026-11-24T05:04:29.769414+00:00","id":"scan-v1-e6d67ef4fe5fdb86e464ef63740eb12328a6375e3c1fdb599418d0404485e189"},"scanner_version":"0.4.0","schema_version":1,"scope":{"default_excludes":[".git","node_modules","target","dist","docs","known non-scannable media, archives and binary data"],"git_exclude":true,"git_global":true,"git_ignore":true,"markdown_excluded":true,"max_file_size_bytes":2097152},"unassociated_observation_ids":[]}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    csharp_deferred_captures_and_implicit_parameter_names_do_not_reuse_outer_values
+
+test result: FAILED. 10 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.50s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test csharp_source`

@@ -431,3 +431,34 @@ Identical findings produced with the same binary, rules, input and settings can
 be compared by ID. Version upgrades or changes to inputs and settings can change
 IDs and counts. Compare binary/rule versions, selected scope and settings together.
 See the [v0.4.0 compatibility notes](../releases/v0.4.0.md).
+
+### File tree and panel visibility
+
+The **Search conditions** and **Files** headings independently collapse or expand each section without clearing conditions. The tree lists only files with findings, grouped by directory. Names stay on one line; deep or long paths scroll horizontally inside the tree. Hover a folder or file to see its full path. The badge counts all finding occurrences (including informational ones), regardless of active filters; it is not a vulnerability count. Select a file to apply the exact file filter, combined with other conditions. **Show all results** clears every condition and restores test results. Folder expansion, selected file, panel visibility and pagination carry across language changes. These navigation panels are hidden in print and when JavaScript is unavailable.
+
+For `CERT_EXPIRY_2026_OR_BEFORE`, the human report identifies expiry before January 1, 2027 UTC and explains that the cutoff alone does not establish expiry at scan time. Check the parsed expiry and `CERT_EXPIRED` findings. The rule ID, detector predicate and machine descriptions are unchanged.
+
+Folder rows use blue folder icons, file rows use outlined document icons, and the selected file has a leading blue marker. Icons are inline SVG and decorative; file names and counts remain accessible without them.
+
+Migration HTML can carry a bounded non-secret report label. It separates detector record counts from distinct recorded locations, names observation methods, explains known binding limitations, and shows applied active deadline/lead-time pairs in Japan time and human durations. Mixed pairs retain their own record counts; exact machine assessment data is unchanged. See local migration input for scoped organization/contract deadline authoring.
+
+An input with zero assessment targets has a dedicated empty-state explanation: it does not establish absence of cryptography, safety or no required action. It is separate from having assessment targets whose urgency remains undetermined.
+
+Reports generated with test exclusion or `.pqcignore` list those conditions in the existing inspection scope. Mixed Rust files are still analyzed; omitting syntax-proven test-only findings does not necessarily reduce file counts, and source context may show adjacent tests. See [scan exclusion settings](SCANNING.md#exclude-test-code).
+
+Known unfinished-inspection causes are grouped separately, with diagnostic record counts, distinct file counts, example paths and next checks. The existing diagnostics JSON message retains the detail. Algorithm references in recognised human error text appear under reference information rather than migration candidates; expand the location to inspect the source.
+
+## Interpreting source-only records
+
+The rule guide lists rules that produced findings in this scan; the complete built-in catalog is maintained in the rule reference. Source implementation definitions and conditional/composite components have separate informational rules. Comments, symbol declarations and literal Received-header records are informational references, while real configuration candidates and executable crypto tests remain visible. Raw rule identities and risk classifications remain available; an informational source reference is not a confirmed deployed vulnerability.
+
+Migration evidence details show the observed use state and explain what lexical, syntactic or dependency references establish. Confirm actual purpose/use before acting. Coincident detection records show their count and evidence overlap. Distinct algorithms or concerns are not automatically merged, and record counts are not asserted to be independent cryptographic uses. Test-folder and dependency-file categories are path hints only and do not automatically exclude a target or change its assessment.
+
+
+<a id="source-excerpts"></a>
+
+## Protected source excerpts
+
+Source excerpts show the detected line and up to two lines before and after it. Ordinary arguments, variable references, algorithm names and neighbouring code remain visible, including PHP, C#, C/C++, Java and Go. Recognized secrets are replaced with mask labels inside the code: credential values, private-key blocks and literal key data in supported cryptographic key-input positions. Masking happens before long lines are shortened; existing line-length limits still apply.
+
+A mask does not by itself establish that a valid private key was found. Unfinished or ambiguous source inspection can require conservative protection of the uninspected region; dependency manifests and binary key containers retain their separate protections. This is bounded syntax-based masking, not a universal secret detector. Original finding locations and IDs are retained. Saved reports keep their old contents; rescan to obtain source context instead of the previous API-only, arguments-omitted excerpt.

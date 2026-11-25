@@ -1,0 +1,24 @@
+   Compiling pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.37s
+     Running tests/selective_source_privacy.rs (target/debug/deps/selective_source_privacy-c37e02babf4f18a2)
+
+running 1 test
+test verification_public_keys_and_key_file_paths_are_not_secret_values ... FAILED
+
+failures:
+
+---- verification_public_keys_and_key_file_paths_are_not_secret_values stdout ----
+
+thread 'verification_public_keys_and_key_file_paths_are_not_secret_values' (25548780) panicked at crates/pqc_scan_detectors/tests/selective_source_privacy.rs:132:5:
+<?php openssl_verify('public message',$sig,[masked-sensitive-value],OPENSSL_ALGO_SHA256); openssl_sign('public message',$sig,[masked-sensitive-value]);
+<?php openssl_verify('public message',$sig,[masked-sensitive-value],OPENSSL_ALGO_SHA256); openssl_sign('public message',$sig,[masked-sensitive-value]);
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    verification_public_keys_and_key_file_paths_are_not_secret_values
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.22s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test selective_source_privacy`

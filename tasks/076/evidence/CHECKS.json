@@ -1,0 +1,115 @@
+{
+  "source": "HEAD 7e8cd91 plus frozen 076 artifacts; shipped source unchanged",
+  "checks": [
+    {
+      "label": "freeze",
+      "command": [
+        "python3",
+        "tasks/076/evidence/validate_freeze.py"
+      ],
+      "exit": 0,
+      "log": "tasks/076/evidence/check-freeze.log"
+    },
+    {
+      "label": "grammar-corpus",
+      "command": [
+        "cargo",
+        "+1.93.1",
+        "run",
+        "--locked",
+        "--manifest-path",
+        "tasks/076/evidence/grammar/Cargo.toml",
+        "--",
+        "--corpus"
+      ],
+      "exit": 0,
+      "log": "tasks/076/evidence/check-grammar-corpus.log"
+    },
+    {
+      "label": "grammar-assertions",
+      "command": [
+        "cargo",
+        "+1.93.1",
+        "run",
+        "--locked",
+        "--manifest-path",
+        "tasks/076/evidence/grammar/Cargo.toml"
+      ],
+      "exit": 0,
+      "log": "tasks/076/evidence/check-grammar-assertions.log"
+    },
+    {
+      "label": "grammar-fmt",
+      "command": [
+        "cargo",
+        "+1.93.1",
+        "fmt",
+        "--manifest-path",
+        "tasks/076/evidence/grammar/Cargo.toml",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "tasks/076/evidence/check-grammar-fmt.log"
+    },
+    {
+      "label": "grammar-clippy",
+      "command": [
+        "cargo",
+        "+1.93.1",
+        "clippy",
+        "--locked",
+        "--manifest-path",
+        "tasks/076/evidence/grammar/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "log": "tasks/076/evidence/check-grammar-clippy.log"
+    },
+    {
+      "label": "queue",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/quality",
+        "-p",
+        "test_task_queue.py",
+        "-v"
+      ],
+      "exit": 0,
+      "log": "tasks/076/evidence/check-queue.log"
+    },
+    {
+      "label": "product-unchanged",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "HEAD",
+        "--",
+        "Cargo.toml",
+        "Cargo.lock",
+        "crates",
+        "rules/default"
+      ],
+      "exit": 0,
+      "log": "tasks/076/evidence/check-product-unchanged.log"
+    },
+    {
+      "label": "tracked-whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "tasks/076/evidence/check-tracked-whitespace.log"
+    }
+  ]
+}

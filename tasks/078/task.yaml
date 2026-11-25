@@ -1,0 +1,146 @@
+id: '078'
+title: Add bounded PHP cryptographic source and API detection
+type: improvement
+priority: high
+status: done
+owner: Main agent
+milestone: v0.5
+phase: '3'
+plan_reference: docs/roadmap/v0.5/ROADMAP.md
+requirements_reference: docs/roadmap/v0.5/REQUIREMENTS.md
+task_map_reference: docs/roadmap/v0.5/TASKS.md
+design_reference: docs/product/PQC-LANGUAGE-IMPLEMENTATION-PLAN-20261119.md
+description: Deliver every initial PHP source row, including language rules, safe observations, meaningful tests
+  and paired scope documentation.
+quality_requirements:
+- L03
+- L04
+- L05
+- L06
+- L07
+- L08
+- L09
+- L13
+- L14
+- L16
+- L17
+- L25
+- L27
+depends_on:
+- '077'
+target_components:
+- crates/pqc_scan_detectors/src/source_facts/
+- crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+- crates/pqc_scan_detectors/tests/
+- rules/default/
+- docs/quality/rules/
+- docs/rules-reference.md
+- README.md
+- README.ja.md
+- docs/user/
+problem:
+- The required new-language outcomes are not delivered by current seven-language source routing, limited normalization
+  or dependency formats. Existing v0.4 correctness/privacy/contracts must remain intact.
+acceptance:
+- Implement the PHP scope of L03-L07 for every required OpenSSL/Sodium/ParagonIE/phpseclib family in ROADMAP.md;
+  integrate names, literal parameters and bounded receiver facts rather than only API-name regexes.
+- Handle qualified use/use-function aliases, namespaces, fallback, local namesakes, shadowing and reassignment within
+  the frozen subset. Dynamic functions, reflection, FFI and arbitrary cross-file bindings remain unresolved.
+- Generic openssl_sign/verify or imported keys do not assert RSA; KEM, signatures, encryption and DH/ECDH derivation
+  stay distinct. No AES or password-hash public-key migration finding is invented.
+- Keep Sodium pure ML-KEM-768 and X-Wing separate; capture ParagonIE exact primitive/parameter names and required
+  reference-only rows without assuming native/polyfill capability parity or runtime availability.
+- Add unique scoped rules, per-rule rationale/limits/source-bound quality rows, positive/negative detector cases
+  and paired PHP user documentation; preserve custom-rule and secret-handling contracts. Full L03-L07 closure belongs
+  to 082 after all language slices.
+deliverables:
+- tasks/078/TASK-078-RESULTS.md
+- tasks/078/evidence/
+- The scoped behavior or feasibility deliverable, meaningful verification, affected documentation and applicable
+  review evidence; no completion follows from registration.
+implementation_steps:
+- Write frozen PHP positive/negative/namesake/scope/receiver/parameter fixtures before implementation.
+- Add minimal PHP grammar-aware scope/binding and required API rules through existing dispatch.
+- Verify safe canonical inventory facts or explicit unknowns, exact spans/counts, dynamic/rebound controls and partial
+  status.
+- Ship current rule-quality updates and paired documentation with targeted and applicable regression evidence.
+testing_requirements:
+- Apply docs/agent/VERIFICATION.md for all affected categories, including targeted behavior, workspace tests, formatting/diff
+  inspection, Clippy, applicable builds/features and package/dependency provenance checks; record actual commands/exits
+  and final-source applicability.
+- For executable changes, obtain implementation review after initial checks and combined-diff inspection, then test
+  review after required tests. Reuse the same two stage reviewers within one authorized request; splitting tasks
+  or PRs grants no additional identities.
+- New source/rule/manifest coverage needs meaningful positive, negative, malformed/unknown, resource/position/identity
+  and private-data controls. Browser acceptance uses docs/agent/REPORTS.md where presentation/interaction is affected.
+- Exercise each required PHP source family, aliases, function/class namesakes, unknown key type, local writes, mixed
+  HTML/PHP, help strings/comments and source-order limits.
+- Verify classical/PQC/draft/hybrid distinctions, API/reference strength, private-key/credential canaries and unchanged
+  existing-rule behavior.
+out_of_scope:
+- Executing PHP/templates/FFI/Composer, universal phpseclib/wrapper support, dependency parser implementation owned
+  by 081, and broader surveyed APIs outside the matrix.
+risks:
+- An API/library name, dependency or syntactic reference may be promoted beyond its assurance, or historical evidence
+  may be mistaken for coverage of new final-source behavior.
+approval_boundary:
+- Definition and registration only under the 2026-11-24 steering; this task is not selected for execution. Dependencies
+  must complete and later explicit task selection is required.
+- Storage-format changes, high-risk architecture, unclear cryptographic logic and potentially incompatible rules
+  require the applicable AGENTS human decision; routine choices within agreed scope do not create a new approval
+  gate.
+- No extra agents, release/push/publication, outreach, fees or unagreed scope/criteria changes. Review budget remains
+  per authorized request.
+planning_record:
+  date: '2026-11-24'
+  source_head: 7e8cd91426fa21609a91c0511de44252eaa890d4
+  scope: Requirements/roadmap/task-definition work only; no new task execution, implementation acceptance or measurement
+    selected.
+  primary_requirements: []
+  supporting_requirements:
+  - L03
+  - L04
+  - L05
+  - L06
+  - L07
+  - L08
+  - L09
+  - L13
+  - L14
+  - L16
+  - L17
+  - L25
+  - L27
+  scoped_acceptance: Language-specific contributions to L03-L07; 082 closes those full clauses only after all required
+    language evidence.
+  completion_evidence: Every original task criterion, applicable final-source validation and required reviews; preserve
+    failures, unknowns, prior evidence and source bindings.
+execution_authorization:
+  date: '2026-11-24'
+  request: Maintainer selected tasks 076 onward in roadmap dependency order. Continue implementation, applicable
+    checks, required reviews and final acceptance within original scope.
+  review_budget: Two identities for this combined request, implementation stage and test stage; reuse across tasks
+    and fixes.
+execution_record:
+  source_head: 7e8cd91426fa21609a91c0511de44252eaa890d4 plus source-bound076/077 work
+  plan: tasks/078/TASK-078-PLAN.md
+  prerequisite: 077 done; source manifest6dc0c5ddd65591721bd13c1fe20b69e2617a6dd19738d12b322075a07de7af79
+  lifecycle:
+  - 'pending -> planned: current maintainer request and completed077 select next original PHP slice; reuse076 frozen
+    expectations.'
+  - 'planned -> in-progress: write detector/inventory PHP tests before new rules/handlers.'
+  - 'in-progress -> review: scoped implementation and initial checks prepared'
+  - 'review -> in-progress -> review: resolve retained implementation findings; preserve failed logs and source
+    versions'
+  - 'review -> done: every original078 criterion reconciled; final-source execution and both stages accepted'
+  reviewers:
+    implementation: /root/implementation_review
+    test: /root/test_review
+  initial_checks: evidence/IMPLEMENTATION-SOURCE.json; all targeted checks pass; broad checks/reviews pending
+  final_acceptance:
+    source_manifest_sha256: c42ef837e89af5988c33353fb1dc40a882a08d975f380aafd18f0012a053bf1e
+    implementation_review: accepted; same identity
+    test_review: accepted; same identity
+    checks: evidence/FINAL-CHECKS.json; all required checks exit0; strict incomplete expected3
+    results: tasks/078/TASK-078-RESULTS.md
+    remaining: 079-083 milestone work; no original078 criterion deferred

@@ -1,0 +1,597 @@
+{
+  "author": "Main only; output-exposed engineering adjudication, not independent labels or a representative practitioner sample",
+  "generatedAtUtc": "2026-11-24T16:15:33.066134+00:00",
+  "selection": "First differing-risk coincidence examples inspected in BoringSSL, BC and MimeKit, a package declaration, and two immutable source API/compound questions. Not a random sample or global FP/risk-accuracy denominator.",
+  "scope": "Six source/specification judgments. Initial47 and separate supplemental6 matching metrics are unchanged; remaining overlaps remain unadjudicated. One inert-fixture actionable-use counterexample is not relabeled as a nominated API false positive.",
+  "cases": [
+    {
+      "id": "manual-001",
+      "repository": "google/boringssl",
+      "path": "bench/rsakeygen.cc",
+      "line": 35,
+      "column": 10,
+      "sourceFact": "One RSA_generate_key_ex invocation in a benchmark loop; generating RSA keys is the requested static operation, not evidence the benchmark ran.",
+      "expectedClass": "static_api_request",
+      "publicToken": "RSA_generate_key_ex",
+      "duplicateJudgment": "Three rule/evidence representations of the same source invocation; not three independent cryptographic uses. Retaining legacy rule facets is intentional, but raw counts must not be summed as use counts.",
+      "riskJudgment": "The algorithm-family RSA susceptibility labels are consistent with the requested primitive; the generic source rule quantum-uncertain label expresses contextual uncertainty. No actual deployment or migration verdict follows.",
+      "issue": "Semantic overlap, not a wrong primitive identity.",
+      "primary": "https://github.com/google/boringssl/blob/5ec099107553142e9cb34dfe52f3c5bb42c9b7fb/include/openssl/rsa.h",
+      "sourceSha256": "e5eb4bcaec4a7be3e7a5e9b2bbd53960802bde5bb86b42b2b02fdfa7ee088fb9",
+      "commit": "5ec099107553142e9cb34dfe52f3c5bb42c9b7fb",
+      "sourceUrl": "https://github.com/google/boringssl/blob/5ec099107553142e9cb34dfe52f3c5bb42c9b7fb/bench/rsakeygen.cc#L35",
+      "phases": {
+        "baseline-native-v1": {
+          "receiptSha256": "a4cb4242331306fbd0a596801f50c3c1bf319e289cc5c5187330ac191eeba8ab",
+          "findings": [
+            {
+              "ruleId": "OPENSSL_RSA_API",
+              "risk": "quantum-vulnerable",
+              "severity": "high",
+              "description": "OpenSSL RSA API call detected.",
+              "migrationHint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            },
+            {
+              "ruleId": "C_FAMILY_CRYPTO_API",
+              "risk": "quantum-uncertain",
+              "severity": "medium",
+              "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.",
+              "migrationHint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+              "evidenceType": "tree_sitter_match",
+              "referenceKind": null
+            },
+            {
+              "ruleId": "API_OPENSSL_RSA_NEW",
+              "risk": "quantum-vulnerable",
+              "severity": "medium",
+              "description": "OpenSSL low-level RSA API usage detected.",
+              "migrationHint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "C_FAMILY_CRYPTO_API",
+              "method": "ast_pattern",
+              "assurance": "syntactic",
+              "usage": "referenced",
+              "algorithms": [
+                "RSA"
+              ]
+            },
+            {
+              "ruleId": "API_OPENSSL_RSA_NEW",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            },
+            {
+              "ruleId": "OPENSSL_RSA_API",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        },
+        "final-native-v1": {
+          "receiptSha256": "24fd83687cbac6391899ca743f104b00e1e132d13d057d9a0bd85413e96f0739",
+          "findings": [
+            {
+              "ruleId": "OPENSSL_RSA_API",
+              "risk": "quantum-vulnerable",
+              "severity": "high",
+              "description": "OpenSSL RSA API call detected.",
+              "migrationHint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            },
+            {
+              "ruleId": "C_FAMILY_CRYPTO_API",
+              "risk": "quantum-uncertain",
+              "severity": "medium",
+              "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.",
+              "migrationHint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+              "evidenceType": "tree_sitter_match",
+              "referenceKind": null
+            },
+            {
+              "ruleId": "API_OPENSSL_RSA_NEW",
+              "risk": "quantum-vulnerable",
+              "severity": "medium",
+              "description": "OpenSSL low-level RSA API usage detected.",
+              "migrationHint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "C_FAMILY_CRYPTO_API",
+              "method": "ast_pattern",
+              "assurance": "syntactic",
+              "usage": "referenced",
+              "algorithms": [
+                "RSA"
+              ]
+            },
+            {
+              "ruleId": "API_OPENSSL_RSA_NEW",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            },
+            {
+              "ruleId": "OPENSSL_RSA_API",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        }
+      }
+    },
+    {
+      "id": "manual-002",
+      "repository": "bcgit/bc-csharp",
+      "path": "crypto/src/tls/CipherSuite.cs",
+      "line": 263,
+      "column": 29,
+      "sourceFact": "XML documentation for the registry constant TLS_ECDHE_RSA_WITH_NULL_SHA; the following line declares constant0xC010. Neither line selects/enables/negotiates a suite.",
+      "expectedClass": "documentation_and_available_symbol",
+      "publicToken": "TLS_ECDHE_RSA_WITH_NULL_SHA",
+      "duplicateJudgment": "Two rules describe one suite-name reference, with broader RSA-based and ECDHE/RSA facets; no independent occurrence count is justified.",
+      "riskJudgment": "RFC4492 assigns ephemeral ECDH key exchange and RSA authentication to ECDHE_RSA. TLS_RSA_CIPHER_SUITE correctly says RSA-based and its hint explicitly distinguishes authentication from static RSA transport. However Critical/usage wording at a documentation reference cannot establish project exposure; active selection and policy are absent.",
+      "issue": "Context/severity overstatement for an actionable-use interpretation; no evidence of an incorrect ECDHE/RSA role assignment.",
+      "primary": "https://www.rfc-editor.org/rfc/rfc4492#section-2",
+      "sourceSha256": "4434d74cca04bb026171c92827b4a1e529c05ca54da9544ce43b42a5b1738573",
+      "commit": "4814a10bc95da8757d8390c59b0b62d4cc00cb0d",
+      "sourceUrl": "https://github.com/bcgit/bc-csharp/blob/4814a10bc95da8757d8390c59b0b62d4cc00cb0d/crypto/src/tls/CipherSuite.cs#L263",
+      "phases": {
+        "baseline-native-v1": {
+          "receiptSha256": "bc61c63ab91f55a268669dd0a317e7f0960c427ca5d4147a1970e560aa5f8bb3",
+          "findings": [
+            {
+              "ruleId": "TLS_RSA_CIPHER_SUITE",
+              "risk": "quantum-vulnerable",
+              "severity": "critical",
+              "description": "RSA-based TLS cipher suite detected.",
+              "migrationHint": "Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            },
+            {
+              "ruleId": "TLS_ECDHE_RSA",
+              "risk": "quantum-uncertain",
+              "severity": "medium",
+              "description": "TLS_ECDHE_RSA usage detected.",
+              "migrationHint": "Plan hybrid PQC key agreement adoption.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "TLS_ECDHE_RSA",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            },
+            {
+              "ruleId": "TLS_RSA_CIPHER_SUITE",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        },
+        "final-native-v1": {
+          "receiptSha256": "4b6b259ab7125f84e148b96601ef47be75b526005d01d65dad2e68dbf05b2d6d",
+          "findings": [
+            {
+              "ruleId": "TLS_RSA_CIPHER_SUITE",
+              "risk": "quantum-vulnerable",
+              "severity": "critical",
+              "description": "RSA-based TLS cipher suite detected.",
+              "migrationHint": "Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            },
+            {
+              "ruleId": "TLS_ECDHE_RSA",
+              "risk": "quantum-uncertain",
+              "severity": "medium",
+              "description": "TLS_ECDHE_RSA usage detected.",
+              "migrationHint": "Plan hybrid PQC key agreement adoption.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "TLS_ECDHE_RSA",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            },
+            {
+              "ruleId": "TLS_RSA_CIPHER_SUITE",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        }
+      }
+    },
+    {
+      "id": "manual-003",
+      "repository": "jstedfast/MimeKit",
+      "path": "UnitTests/HeaderTests.cs",
+      "line": 264,
+      "column": 184,
+      "sourceFact": "A string-array Received-header test fixture contains TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384. It is parser input, not a TLS configuration call, cryptographic API invocation or negotiation performed by this project.",
+      "expectedClass": "inert_test_data",
+      "publicToken": "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+      "duplicateJudgment": "Two lexical rule rows refer to the same suite token in one fixture value.",
+      "riskJudgment": "The suite-name recognition is a true textual reference, but describing this as project TLS usage with Critical severity overstates the source fact. It is a false positive for actionable project cryptographic use; native lexical/referenced/not_evaluated fields do not provide runtime corroboration.",
+      "issue": "Validated source-context counterexample, retained rather than folded into initial47 API metrics. A safe future fix needs general reference-context classification, without suppressing genuine TLS configuration strings or all tests.",
+      "primary": "https://www.rfc-editor.org/rfc/rfc4492#section-2",
+      "sourceSha256": "58f13a2f0582de397dfe63d36c0007255f29763dd529cd908004270f91f348f7",
+      "commit": "66a7e069010bbee0f93f0b40867c9250568bd910",
+      "sourceUrl": "https://github.com/jstedfast/MimeKit/blob/66a7e069010bbee0f93f0b40867c9250568bd910/UnitTests/HeaderTests.cs#L264",
+      "phases": {
+        "baseline-native-v1": {
+          "receiptSha256": "eed86edd6bc8fe7dd783e87fa2c5f3729cb38fade05b44cd8d059943a714365c",
+          "findings": [
+            {
+              "ruleId": "TLS_RSA_CIPHER_SUITE",
+              "risk": "quantum-vulnerable",
+              "severity": "critical",
+              "description": "RSA-based TLS cipher suite detected.",
+              "migrationHint": "Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            },
+            {
+              "ruleId": "TLS_ECDHE_RSA",
+              "risk": "quantum-uncertain",
+              "severity": "medium",
+              "description": "TLS_ECDHE_RSA usage detected.",
+              "migrationHint": "Plan hybrid PQC key agreement adoption.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "TLS_ECDHE_RSA",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            },
+            {
+              "ruleId": "TLS_RSA_CIPHER_SUITE",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        },
+        "final-native-v1": {
+          "receiptSha256": "11ef94d256df0cf5eefe6c4ef5b4b92e03fa245ad6895b7d6d92c0b4653a7921",
+          "findings": [
+            {
+              "ruleId": "TLS_RSA_CIPHER_SUITE",
+              "risk": "quantum-vulnerable",
+              "severity": "critical",
+              "description": "RSA-based TLS cipher suite detected.",
+              "migrationHint": "Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            },
+            {
+              "ruleId": "TLS_ECDHE_RSA",
+              "risk": "quantum-uncertain",
+              "severity": "medium",
+              "description": "TLS_ECDHE_RSA usage detected.",
+              "migrationHint": "Plan hybrid PQC key agreement adoption.",
+              "evidenceType": "regex_match",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "TLS_ECDHE_RSA",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            },
+            {
+              "ruleId": "TLS_RSA_CIPHER_SUITE",
+              "method": "lexical_match",
+              "assurance": "lexical",
+              "usage": "referenced",
+              "algorithms": []
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        }
+      }
+    },
+    {
+      "id": "manual-004",
+      "repository": "jstedfast/MimeKit",
+      "path": "MimeKit.Cryptography/MimeKit.Cryptography.csproj",
+      "line": 76,
+      "column": 1,
+      "sourceFact": "One PackageReference declares BouncyCastle.Cryptography version2.7.0.",
+      "expectedClass": "dependency_declaration",
+      "publicToken": "BouncyCastle.Cryptography",
+      "duplicateJudgment": "DEP_BOUNCYCASTLE and DEP_NUGET_CRYPTO are two classifier facets of one package assertion. They are not two installed libraries or two algorithm uses.",
+      "riskJudgment": "Both rows are quantum-uncertain references; this is consistent with declaration-only evidence. Neither proves an installed graph, a selected algorithm, active PQC or runtime platform support.",
+      "issue": "No incorrect safe/active promotion in the examined declaration; reference overlap remains visible.",
+      "primary": "https://github.com/bcgit/bc-csharp",
+      "sourceSha256": "8d347fbe2871e63119ae13eaba6160d060397a2889dc4010a0cc487ffc07cb52",
+      "commit": "66a7e069010bbee0f93f0b40867c9250568bd910",
+      "sourceUrl": "https://github.com/jstedfast/MimeKit/blob/66a7e069010bbee0f93f0b40867c9250568bd910/MimeKit.Cryptography/MimeKit.Cryptography.csproj#L76",
+      "phases": {
+        "baseline-native-v1": {
+          "receiptSha256": "eed86edd6bc8fe7dd783e87fa2c5f3729cb38fade05b44cd8d059943a714365c",
+          "findings": [
+            {
+              "ruleId": "DEP_BOUNCYCASTLE",
+              "risk": "quantum-uncertain",
+              "severity": "medium",
+              "description": "BouncyCastle dependency detected.",
+              "migrationHint": "Verify BouncyCastle PQC support status.",
+              "evidenceType": "dependency",
+              "referenceKind": null
+            },
+            {
+              "ruleId": "DEP_NUGET_CRYPTO",
+              "risk": "quantum-uncertain",
+              "severity": "info",
+              "description": "NuGet cryptographic package assertion; wrapper ownership and runtime support require verification.",
+              "migrationHint": "Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider.",
+              "evidenceType": "dependency",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "DEP_BOUNCYCASTLE",
+              "method": "dependency_report",
+              "assurance": "parsed",
+              "usage": "referenced",
+              "algorithms": []
+            },
+            {
+              "ruleId": "DEP_NUGET_CRYPTO",
+              "method": "dependency_report",
+              "assurance": "parsed",
+              "usage": "referenced",
+              "algorithms": []
+            },
+            {
+              "ruleId": "__DEPENDENCY_INVENTORY__",
+              "method": "dependency_report",
+              "assurance": "parsed",
+              "usage": "referenced",
+              "algorithms": []
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        },
+        "final-native-v1": {
+          "receiptSha256": "11ef94d256df0cf5eefe6c4ef5b4b92e03fa245ad6895b7d6d92c0b4653a7921",
+          "findings": [
+            {
+              "ruleId": "DEP_BOUNCYCASTLE",
+              "risk": "quantum-uncertain",
+              "severity": "medium",
+              "description": "BouncyCastle dependency detected.",
+              "migrationHint": "Verify BouncyCastle PQC support status.",
+              "evidenceType": "dependency",
+              "referenceKind": null
+            },
+            {
+              "ruleId": "DEP_NUGET_CRYPTO",
+              "risk": "quantum-uncertain",
+              "severity": "info",
+              "description": "NuGet cryptographic package assertion; wrapper ownership and runtime support require verification.",
+              "migrationHint": "Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider.",
+              "evidenceType": "dependency",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "DEP_BOUNCYCASTLE",
+              "method": "dependency_report",
+              "assurance": "parsed",
+              "usage": "referenced",
+              "algorithms": []
+            },
+            {
+              "ruleId": "DEP_NUGET_CRYPTO",
+              "method": "dependency_report",
+              "assurance": "parsed",
+              "usage": "referenced",
+              "algorithms": []
+            },
+            {
+              "ruleId": "__DEPENDENCY_INVENTORY__",
+              "method": "dependency_report",
+              "assurance": "parsed",
+              "usage": "referenced",
+              "algorithms": []
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        }
+      }
+    },
+    {
+      "id": "manual-005",
+      "repository": "openssl/openssl",
+      "path": "test/ml_kem_evp_extra_test.c",
+      "line": 417,
+      "column": 26,
+      "sourceFact": "ML-KEM-768; key_context_request source question at EVP_PKEY_CTX_new_from_name",
+      "expectedClass": "static_api_request",
+      "publicToken": "EVP_PKEY_CTX_new_from_name",
+      "duplicateJudgment": "Nominated API interval has no excess prediction in the authoritative scorer. Other source occurrences are not inferred to be duplicates.",
+      "riskJudgment": "For the exact ML-KEM parameter request, FIPS203 supplies the algorithm identity, not proof of a working provider or active use.",
+      "issue": "No unsupported whole-system safe/ready claim in this audited syntactic/reference-only case.",
+      "primary": "https://csrc.nist.gov/pubs/fips/203/final",
+      "sourceSha256": "889351863ebac6b689caefd55348acf6cea5501c27bf99f698e260632c01c5f8",
+      "commit": "18d0baa70de7c59d0df5b899122335c93ccbe0e8",
+      "sourceUrl": "https://github.com/openssl/openssl/blob/18d0baa70de7c59d0df5b899122335c93ccbe0e8/test/ml_kem_evp_extra_test.c#L417",
+      "phases": {
+        "baseline-native-v1": {
+          "receiptSha256": "6a65560b19db5b2f383aae39e95c96299fb044ef4e076a5b566fc56caddd350d",
+          "findings": [
+            {
+              "ruleId": "C_FAMILY_PQC_API",
+              "risk": "quantum-uncertain",
+              "severity": "info",
+              "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+              "migrationHint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+              "evidenceType": "tree_sitter_match",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "C_FAMILY_PQC_API",
+              "method": "ast_pattern",
+              "assurance": "syntactic",
+              "usage": "referenced",
+              "algorithms": [
+                "ML-KEM-768"
+              ]
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        },
+        "final-native-v1": {
+          "receiptSha256": "e14ac25ea39267ad653057a2c4b7ad8fb739f28b9640a5ef362ed49238e4eafa",
+          "findings": [
+            {
+              "ruleId": "C_FAMILY_PQC_API",
+              "risk": "quantum-uncertain",
+              "severity": "info",
+              "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+              "migrationHint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+              "evidenceType": "tree_sitter_match",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "C_FAMILY_PQC_API",
+              "method": "ast_pattern",
+              "assurance": "syntactic",
+              "usage": "referenced",
+              "algorithms": [
+                "ML-KEM-768"
+              ]
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        }
+      }
+    },
+    {
+      "id": "manual-006",
+      "repository": "bcgit/bc-csharp",
+      "path": "crypto/src/crypto/generators/CompositeMLDsaKeyPairGenerator.cs",
+      "line": 49,
+      "column": 41,
+      "sourceFact": "ML-DSA component; composite parent; key_generation source question at new MLDsaKeyPairGenerator",
+      "expectedClass": "static_api_request",
+      "publicToken": "new MLDsaKeyPairGenerator",
+      "duplicateJudgment": "Nominated API interval has no excess prediction in the authoritative scorer. Other source occurrences are not inferred to be duplicates.",
+      "riskJudgment": "ML-DSA is a component reference in a composite generator. A component identity does not certify the entire construction or deployed hybrid safety; unknown construction scope must remain.",
+      "issue": "No unsupported whole-system safe/ready claim in this audited syntactic/reference-only case.",
+      "primary": "https://csrc.nist.gov/pubs/fips/204/final",
+      "sourceSha256": "5e635213d7565377a3a1ed22ad4ee8332da9bcd0cae549a6642f87b88780e6aa",
+      "commit": "4814a10bc95da8757d8390c59b0b62d4cc00cb0d",
+      "sourceUrl": "https://github.com/bcgit/bc-csharp/blob/4814a10bc95da8757d8390c59b0b62d4cc00cb0d/crypto/src/crypto/generators/CompositeMLDsaKeyPairGenerator.cs#L49",
+      "phases": {
+        "baseline-native-v1": {
+          "receiptSha256": "bc61c63ab91f55a268669dd0a317e7f0960c427ca5d4147a1970e560aa5f8bb3",
+          "findings": [
+            {
+              "ruleId": "CSHARP_PQC_API",
+              "risk": "quantum-uncertain",
+              "severity": "info",
+              "description": "C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection.",
+              "migrationHint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.",
+              "evidenceType": "tree_sitter_match",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "CSHARP_PQC_API",
+              "method": "ast_pattern",
+              "assurance": "syntactic",
+              "usage": "referenced",
+              "algorithms": [
+                "ML-DSA"
+              ]
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        },
+        "final-native-v1": {
+          "receiptSha256": "4b6b259ab7125f84e148b96601ef47be75b526005d01d65dad2e68dbf05b2d6d",
+          "findings": [
+            {
+              "ruleId": "CSHARP_PQC_API",
+              "risk": "quantum-uncertain",
+              "severity": "info",
+              "description": "C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection.",
+              "migrationHint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.",
+              "evidenceType": "tree_sitter_match",
+              "referenceKind": null
+            }
+          ],
+          "observations": [
+            {
+              "ruleId": "CSHARP_PQC_API",
+              "method": "ast_pattern",
+              "assurance": "syntactic",
+              "usage": "referenced",
+              "algorithms": [
+                "ML-DSA"
+              ]
+            }
+          ],
+          "assessmentStatus": "not_evaluated"
+        }
+      }
+    }
+  ],
+  "residual": "Legacy context/severity ambiguity remains. Generic safe refinement needs comment/declaration/inert-data/configuration controls and review of compatibility; blanket removal of strings/tests would hide legitimate configuration. No legacy rule/schema was silently altered."
+}

@@ -1,0 +1,487 @@
+{
+  "schema_version": 1,
+  "identity_scheme": "pqc-scan-length-prefixed-sha256-v1",
+  "scanner_version": "0.4.0",
+  "catalog_version": "native-exact-identifiers-1",
+  "profile": "static-native-v1",
+  "rules_digest": "rules-v1-0f3d13623aa559fc0a1b047de65c4b03cc731d51ce7b3847e2700b1796214214",
+  "run": {
+    "id": "scan-v1-53f5616ed68037c9758a95ad5394a07d71754ef3f1d8eb78ab64d9d0aaa07e0a",
+    "attempt_id": "static-1",
+    "generated_at": "2026-11-24T07:07:17.464709+00:00"
+  },
+  "repository_scope": null,
+  "scope": {
+    "default_excludes": [
+      ".git",
+      "node_modules",
+      "target",
+      "dist",
+      "docs",
+      "known non-scannable media, archives and binary data"
+    ],
+    "git_exclude": true,
+    "git_global": true,
+    "git_ignore": true,
+    "markdown_excluded": true,
+    "max_file_size_bytes": 2097152
+  },
+  "coverage": {
+    "analysis_failed_files": 0,
+    "analyzed_files": 1,
+    "enumeration_failed_entries": 0,
+    "excluded_enumerated_files": 0,
+    "not_applicable_files": 0,
+    "not_enumerated_population": true,
+    "partial_files": 2,
+    "read_failed_files": 0,
+    "read_ok_files": 3,
+    "selected_files": 3,
+    "status": "partial",
+    "unknown_files": 0,
+    "unsupported_files": 0
+  },
+  "diagnostics": [
+    {
+      "code": "detector_partial",
+      "detector": "tree_sitter_detector",
+      "disposition": "partial",
+      "file": "template-rsa.cpp",
+      "message": "Source syntax could not be fully interpreted. Parsed regions were inspected; unresolved syntax remains unknown. Check generated syntax, language version and the source file separately.",
+      "stage": "detection"
+    },
+    {
+      "code": "detector_partial",
+      "detector": "tree_sitter_detector",
+      "disposition": "partial",
+      "file": "template.cpp",
+      "message": "Source syntax could not be fully interpreted. Parsed regions were inspected; unresolved syntax remains unknown. Check generated syntax, language version and the source file separately.",
+      "stage": "detection"
+    }
+  ],
+  "native_completeness": "not_exhaustive",
+  "assets": [
+    {
+      "id": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+      "kind": "algorithm",
+      "identity_basis": "normalized_identifier_and_reported_parameters",
+      "attributes": {
+        "identifier": "ML-KEM-768",
+        "namespace": "named",
+        "parameters": {},
+        "purpose": "reference"
+      },
+      "relations": [],
+      "uncertainty": []
+    },
+    {
+      "id": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+      "kind": "algorithm",
+      "identity_basis": "identifier_only_parameters_not_fully_interpreted",
+      "attributes": {
+        "identifier": "RSA",
+        "namespace": "named",
+        "parameters": {},
+        "purpose": "reference"
+      },
+      "relations": [],
+      "uncertainty": [
+        "algorithm_parameters_not_fully_interpreted"
+      ]
+    },
+    {
+      "id": "asset-v1-3d3cf85148c4ed3eabec17262f470d544eae45a37e0727dc1b13bfe17eb3d46f",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-e97d5d80c57565937eb30a0413adfd497f417729f36321f56043ab953b2eb002",
+        "local_ordinal": 0,
+        "method": "ast_pattern",
+        "path": "template.cpp"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-271b8ca24e5db131290498029df28a94b66a4d9919371b6ee0680ee95c81c402",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-f685a4117d0d0c21c856377b9d92b45e3c3a71d60eb9411c0175f94ae974d6ea",
+        "local_ordinal": 0,
+        "method": "ast_pattern",
+        "path": "template-rsa.cpp"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-62e1d6bebe3ebd4a6dc41d8e7a89904962d4ee56306cc2cf52b9761da18a2d95",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-f685a4117d0d0c21c856377b9d92b45e3c3a71d60eb9411c0175f94ae974d6ea",
+        "local_ordinal": 0,
+        "method": "ast_pattern",
+        "path": "using.cpp"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-df5f5deb621b5e65b13374530a9f15f64b06c28ec4c5e45f231728deb6a301b6",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-57922344807da6e5533949c6e55da33f2b801e0cb8e7883f48a97c5a0fd1d815",
+        "local_ordinal": 0,
+        "method": "lexical_match",
+        "path": "template-rsa.cpp"
+      },
+      "relations": [],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-346d074667a3238afaf2c2297bf4ff83d3e813b8f8e500181902c31de6ac97ad",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-57922344807da6e5533949c6e55da33f2b801e0cb8e7883f48a97c5a0fd1d815",
+        "local_ordinal": 0,
+        "method": "lexical_match",
+        "path": "using.cpp"
+      },
+      "relations": [],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-b7c4649838a6d2d5400a69d9f9069eb450b83a6e3798d439c61c45b3453a79ec",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-57922344807da6e5533949c6e55da33f2b801e0cb8e7883f48a97c5a0fd1d815",
+        "local_ordinal": 1,
+        "method": "lexical_match",
+        "path": "template-rsa.cpp"
+      },
+      "relations": [],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-6b7dbc26f6f021f88d96f674df042b194b126e2abd9a0a14afda24ced142e770",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-57922344807da6e5533949c6e55da33f2b801e0cb8e7883f48a97c5a0fd1d815",
+        "local_ordinal": 1,
+        "method": "lexical_match",
+        "path": "using.cpp"
+      },
+      "relations": [],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-v1-a1d6f1450d6cef74029888501c61d501663ca85bce88609de614d683ef82916e",
+      "occurrence_key": null,
+      "identity_confidence": "run_local_only",
+      "asset_ids": [
+        "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+        "asset-v1-271b8ca24e5db131290498029df28a94b66a4d9919371b6ee0680ee95c81c402"
+      ],
+      "target": {
+        "path": "template-rsa.cpp",
+        "line": 1,
+        "column": 34,
+        "column_kind": "unicode_code_points",
+        "byte_start": 33,
+        "byte_end": 42,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "C_FAMILY_CRYPTO_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-05f4cfe5e61f5b1350d3863d0763598c884611821c0e852085e5efbdc7be406d",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-df5f5deb621b5e65b13374530a9f15f64b06c28ec4c5e45f231728deb6a301b6"
+      ],
+      "target": {
+        "path": "template-rsa.cpp",
+        "line": 1,
+        "column": 16,
+        "column_kind": "unicode_code_points",
+        "byte_start": 15,
+        "byte_end": 22,
+        "object_index": null
+      },
+      "method": "lexical_match",
+      "producer": "regex_detector",
+      "assurance": "lexical",
+      "usage": "referenced",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-7235de44eb898b3e371ee06b5ac228f8e4863d2846dca3b58b56a8ed5d6bed25",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-b7c4649838a6d2d5400a69d9f9069eb450b83a6e3798d439c61c45b3453a79ec"
+      ],
+      "target": {
+        "path": "template-rsa.cpp",
+        "line": 1,
+        "column": 34,
+        "column_kind": "unicode_code_points",
+        "byte_start": 33,
+        "byte_end": 40,
+        "object_index": null
+      },
+      "method": "lexical_match",
+      "producer": "regex_detector",
+      "assurance": "lexical",
+      "usage": "referenced",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-e83e2da662a6820174fb6a5cacf38faf44dae052cb3651c0eca611fee70d4d86",
+      "occurrence_key": null,
+      "identity_confidence": "run_local_only",
+      "asset_ids": [
+        "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+        "asset-v1-3d3cf85148c4ed3eabec17262f470d544eae45a37e0727dc1b13bfe17eb3d46f"
+      ],
+      "target": {
+        "path": "template.cpp",
+        "line": 1,
+        "column": 39,
+        "column_kind": "unicode_code_points",
+        "byte_start": 38,
+        "byte_end": 63,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "C_FAMILY_PQC_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-57a43e0055ee0625fcf0993fa459215695553705728581853c20ca74c2485177",
+      "occurrence_key": null,
+      "identity_confidence": "run_local_only",
+      "asset_ids": [
+        "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+        "asset-v1-62e1d6bebe3ebd4a6dc41d8e7a89904962d4ee56306cc2cf52b9761da18a2d95"
+      ],
+      "target": {
+        "path": "using.cpp",
+        "line": 1,
+        "column": 33,
+        "column_kind": "unicode_code_points",
+        "byte_start": 32,
+        "byte_end": 41,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "C_FAMILY_CRYPTO_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": []
+    },
+    {
+      "id": "observation-v1-3dc9f89bfba753c7294470bea21198e8bffb6a79e7ab3e73a10cf5fcc9c4675f",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-346d074667a3238afaf2c2297bf4ff83d3e813b8f8e500181902c31de6ac97ad"
+      ],
+      "target": {
+        "path": "using.cpp",
+        "line": 1,
+        "column": 15,
+        "column_kind": "unicode_code_points",
+        "byte_start": 14,
+        "byte_end": 21,
+        "object_index": null
+      },
+      "method": "lexical_match",
+      "producer": "regex_detector",
+      "assurance": "lexical",
+      "usage": "referenced",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-0e3c1a615ae0414e7ff2aaab0b2e14e826f6c969ddf0a6fe688444d6da897650",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-6b7dbc26f6f021f88d96f674df042b194b126e2abd9a0a14afda24ced142e770"
+      ],
+      "target": {
+        "path": "using.cpp",
+        "line": 1,
+        "column": 33,
+        "column_kind": "unicode_code_points",
+        "byte_start": 32,
+        "byte_end": 39,
+        "object_index": null
+      },
+      "method": "lexical_match",
+      "producer": "regex_detector",
+      "assurance": "lexical",
+      "usage": "referenced",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    }
+  ],
+  "legacy_associations": [
+    {
+      "legacy_index": 0,
+      "legacy_id": "finding-v1-b688a312e8bb281b4d5fadc210374f3ac298f6fe28e569db2437ecd150ab610f",
+      "observation_ids": [
+        "observation-v1-a1d6f1450d6cef74029888501c61d501663ca85bce88609de614d683ef82916e"
+      ]
+    },
+    {
+      "legacy_index": 1,
+      "legacy_id": "finding-v1-d57563e4065af009c5075e9217e5a5801dc451cc653db15dd536966ee39281a1",
+      "observation_ids": [
+        "observation-v1-05f4cfe5e61f5b1350d3863d0763598c884611821c0e852085e5efbdc7be406d"
+      ]
+    },
+    {
+      "legacy_index": 2,
+      "legacy_id": "finding-v1-1a0bea108d6327f6f4a8c341793184771d0155f3de60f4804d5be36a3450c625",
+      "observation_ids": [
+        "observation-v1-7235de44eb898b3e371ee06b5ac228f8e4863d2846dca3b58b56a8ed5d6bed25"
+      ]
+    },
+    {
+      "legacy_index": 3,
+      "legacy_id": "finding-v1-596d7a96dfae2110c89a1fce6d9f8ca6c6b6b7336f8c229da73a6d1bc440ebd3",
+      "observation_ids": [
+        "observation-v1-57a43e0055ee0625fcf0993fa459215695553705728581853c20ca74c2485177"
+      ]
+    },
+    {
+      "legacy_index": 4,
+      "legacy_id": "finding-v1-d213c2ca7010342f5081d5c049950db31450f8abec132d91ef22c73ae7ce00c4",
+      "observation_ids": [
+        "observation-v1-3dc9f89bfba753c7294470bea21198e8bffb6a79e7ab3e73a10cf5fcc9c4675f"
+      ]
+    },
+    {
+      "legacy_index": 5,
+      "legacy_id": "finding-v1-a24e4b09b33c14e9f96e32c956a5626ce7b4972119cedcff096249230f8661cc",
+      "observation_ids": [
+        "observation-v1-0e3c1a615ae0414e7ff2aaab0b2e14e826f6c969ddf0a6fe688444d6da897650"
+      ]
+    },
+    {
+      "legacy_index": 6,
+      "legacy_id": "finding-v1-55d11b4652a9640aaa8d5392f617f38c2af1da36cc58073a3d126e253295951a",
+      "observation_ids": [
+        "observation-v1-e83e2da662a6820174fb6a5cacf38faf44dae052cb3651c0eca611fee70d4d86"
+      ]
+    }
+  ],
+  "unassociated_observation_ids": [],
+  "legacy_loss_records": [],
+  "assessment_status": "not_evaluated",
+  "assessments": [],
+  "export_loss_notes": [
+    "raw_matches_snippets_and_arbitrary_metadata_omitted",
+    "unknown_raw_identifiers_not_guessed",
+    "legacy_snapshot_not_derived_from_inventory",
+    "legacy_ids_are_not_native_identity",
+    "legacy_dependency_version_provenance_unavailable",
+    "legacy_applicability_coverage_is_not_native_inventory_completeness",
+    "weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity",
+    "cryptographic_trust_and_policy_not_evaluated"
+  ]
+}

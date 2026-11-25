@@ -1,0 +1,7 @@
+# Safe source API excerpts
+
+Baseline: committed31a463803446e42d7d4e989087feb3f11337b4f3. The user reports blanket masked evidence and asks to fix it and check Java/Go.
+
+Retain the conservative raw-source/argument guards. Add a transient, finite API-display identity only to existing bounded typed source observations. Validate exact public names in core, bind them through the existing exact finding association before sanitization, and restore a normalized single-line excerpt with an explicit arguments-omitted comment after sanitization. This exposes no raw source argument, arbitrary receiver, credential or surrounding line; it changes no serialized schema or identity calculation. Library/configuration facts retain their existing meanings.
+
+Tests cover ordinary new-language calls, opaque arguments including algorithm-looking payloads, arbitrary display-label rejection, current seven-language controls and actual secret markers. Preserve privacy/limit tests; update any assertion that conflates fully masked public API names with secret protection only after checking its no-leak intent. Run targeted RED/GREEN, required Rust/default/all-feature/fmt/Clippy/build and report Node controls, implementation review then test review. Regenerate existing four OSS scopes and inspect the displayed Japanese excerpt in the browser, preserving old artifacts and byte/identity comparisons. No new population-accuracy claim or unselected work.

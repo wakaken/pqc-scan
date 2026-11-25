@@ -1,0 +1,1 @@
+class Sample { void Run() { var k = new Org.BouncyCastle.Crypto.Generators.MLKemKeyPairGenerator(); k.Init(new Org.BouncyCastle.Crypto.Parameters.MLKemKeyGenerationParameters(random,Org.BouncyCastle.Crypto.Parameters.MLKemParameters.ml_kem_768)); k.GenerateKeyPair(); } }

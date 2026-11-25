@@ -1,0 +1,38 @@
+   Compiling pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.73s
+     Running tests/selective_source_privacy.rs (target/debug/deps/selective_source_privacy-c37e02babf4f18a2)
+
+running 10 tests
+test secret_alias_limit_keeps_unresolved_key_values_private ... ok
+test reordered_named_key_arguments_and_multiline_credentials_are_selective ... ok
+test locally_initialized_key_bytes_are_protected_without_hiding_public_key_references ... ok
+test secret_roles_and_wrapped_local_values_remain_private ... FAILED
+test verification_public_keys_and_key_file_paths_are_not_secret_values ... ok
+test node_cap_protects_preceding_literals_used_by_unvisited_calls ... FAILED
+test inline_private_block_preserves_code_after_it_and_long_secret_clipping_is_safe ... ok
+test private_blocks_do_not_hide_unrelated_java_go_or_cpp_code ... ok
+test key_literals_and_credentials_are_masked_but_public_neighbours_survive ... ok
+test ordinary_arguments_and_neighbouring_code_are_readable ... ok
+
+failures:
+
+---- secret_roles_and_wrapped_local_values_remain_private stdout ----
+
+thread 'secret_roles_and_wrapped_local_values_remain_private' (25607044) panicked at crates/pqc_scan_detectors/tests/selective_source_privacy.rs:195:42:
+sodium_crypto_sign_publickey_from_secretkey
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- node_cap_protects_preceding_literals_used_by_unvisited_calls stdout ----
+
+thread 'node_cap_protects_preceding_literals_used_by_unvisited_calls' (25607039) panicked at crates/pqc_scan_detectors/tests/selective_source_privacy.rs:213:9:
+nodecap32
+
+
+failures:
+    node_cap_protects_preceding_literals_used_by_unvisited_calls
+    secret_roles_and_wrapped_local_values_remain_private
+
+test result: FAILED. 8 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.45s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test selective_source_privacy`

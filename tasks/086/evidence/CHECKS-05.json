@@ -1,0 +1,147 @@
+{
+  "sourceManifestSha256": "ce308b4ab0086ad8ccad2f9748d11efc82868caeaf7af4f3d3230c98d575b568",
+  "environment": {
+    "CARGO_INCREMENTAL": "0"
+  },
+  "checks": [
+    {
+      "name": "workspace",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 203.80559300002642,
+      "log": "tasks/086/evidence/workspace-05.log",
+      "logSha256": "3c63ae9b9766039f6b878fac08cead9f22e32cdab5d8d51473852da0eb4dfa78"
+    },
+    {
+      "name": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.7069703750312328,
+      "log": "tasks/086/evidence/fmt-05.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 7.40948324999772,
+      "log": "tasks/086/evidence/clippy-05.log",
+      "logSha256": "242d4a69ec45d20f77c48b38cb6a07779649de6159670a4265aa12c2b3f44aa7"
+    },
+    {
+      "name": "allfeatures",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features",
+        "--locked",
+        "--target-dir",
+        "target/v05-feature"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 187.31715183297638,
+      "log": "tasks/086/evidence/allfeatures-05.log",
+      "logSha256": "02cbb7b5b5dfaaef29df147f76ad924c583369b76243382fdfd93271f6d2c5c9"
+    },
+    {
+      "name": "clippy-features",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-features",
+        "--all-targets",
+        "--locked",
+        "--target-dir",
+        "target/v05-feature",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 5.418900249991566,
+      "log": "tasks/086/evidence/clippy-features-05.log",
+      "logSha256": "7b7c931b6a8da5fc1de2cd559b3bc08ae182825660145c8b08d63264e5f79ea1"
+    },
+    {
+      "name": "build",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.7125882500549778,
+      "log": "tasks/086/evidence/build-05.log",
+      "logSha256": "8ff208724cf0c04081c037b021a39dac4e914bed652a41bbea2f278fdd6433e0"
+    },
+    {
+      "name": "release",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--release",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 11.622947791940533,
+      "log": "tasks/086/evidence/release-05.log",
+      "logSha256": "7eba6a80cc7d9067e2b62a591ae7c1bd210a12c17719760ecc7d9aab0114c1d6"
+    },
+    {
+      "name": "node",
+      "command": [
+        "node",
+        "--test",
+        "crates/pqc_scan_cli/tests/report-preferences.test.cjs",
+        "crates/pqc_scan_cli/tests/serve-context.test.cjs",
+        "crates/pqc_scan_cli/tests/serve-deadline.test.cjs",
+        "crates/pqc_scan_cli/tests/serve-feedback.test.cjs",
+        "crates/pqc_scan_cli/tests/serve-scope-race.test.cjs",
+        "crates/pqc_scan_report/tests/migration-navigation.test.cjs",
+        "tests/report-ui/compact.test.cjs",
+        "tests/report-ui/presentation.test.cjs",
+        "tests/report-ui/serve.test.cjs"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 1.5166089170379564,
+      "log": "tasks/086/evidence/node-05.log",
+      "logSha256": "860bac87aecb08c1e5bf39dd579ca45bb6fbed6317c3125a65f765c92369f32b"
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.038726833066903055,
+      "log": "tasks/086/evidence/diff-05.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

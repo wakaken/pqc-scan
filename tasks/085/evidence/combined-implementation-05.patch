@@ -1,0 +1,2349 @@
+--- a/README.ja.md
++++ b/README.ja.md
+@@ -51,6 +51,8 @@
+ PHPではOpenSSL・Sodium・ParagonIEの限定的なAPI呼び出しと修飾されたライブラリ参照を検出します。
+ C#では.NETとBouncy Castleの対応する参照を検出します。
+ C/C++では、限定したOpenSSL・OQSの呼び出し、修飾されたC++の局所変数の操作、設定とincludeの参照を検出します。
++このほか、wolfCryptのRSA、libsecp256k1のECDSA、Botanの署名、XML署名、証明書チェーン検証の限定的な参照を調べます。\
++実装定義と条件付きの複合方式は別のルールで記録し、実行や構成全体の安全性とは区別します。
+ 対応する範囲は、[対応入力](docs/user/COVERAGE.ja.md#source-limits)を参照してください。
+ 
+ なお、スキャン時にPQC方式の名前が見つかっても、アプリケーションで正しく使われているとは限りません。
+--- a/README.md
++++ b/README.md
+@@ -51,6 +51,7 @@
+ PHP built-ins now cover bounded OpenSSL, Sodium and ParagonIE requests and qualified library references.
+ C# built-ins cover supported .NET and Bouncy Castle references.
+ C/C++ built-ins cover finite OpenSSL and OQS requests, qualified C++ receivers and configuration/include references.
++Additional bounded requests include wolfCrypt RSA, libsecp256k1 ECDSA, Botan signers, XML signatures and certificate-chain verification. Separate implementation and conditional-construction rules identify source definitions and components without establishing execution or whole-construction safety.
+ Their bounded scope is described in
+ [supported inputs](docs/user/COVERAGE.md#source-limits).
+ 
+--- a/crates/pqc_scan_core/src/observation/source_api.rs
++++ b/crates/pqc_scan_core/src/observation/source_api.rs
+@@ -73,6 +73,7 @@
+                 | "CompositeMLKem"
+                 | "CompositeMLDsa"
+                 | "HPKE"
++                | "sntrup761x25519-sha512"
+         ) || exact_slh(name);
+         let mut value = if extra {
+             Self {
+--- a/crates/pqc_scan_core/src/pipeline.rs
++++ b/crates/pqc_scan_core/src/pipeline.rs
+@@ -386,6 +386,20 @@
+         );
+         document = document.with_native(native);
+     }
++    let display_reference_ids: HashSet<_> = document
++        .legacy()
++        .findings
++        .iter()
++        .filter(|f| {
++            f.evidence
++                .metadata
++                .get("reference_kind")
++                .is_some_and(|s| s == "display_text")
++                && f.description
++                    == "An algorithm name appears in non-executable text or a symbol declaration."
++        })
++        .map(|f| f.finding_id.clone())
++        .collect();
+     crate::privacy::sanitize_with_context(document.legacy_mut(), &sensitive_ids);
+     for finding in &mut document.legacy_mut().findings {
+         if privacy_by_file
+@@ -397,6 +411,14 @@
+             for value in finding.evidence.metadata.values_mut() {
+                 *value = "[masked-sensitive-content]".into();
+             }
++        }
++        // Restore only the fixed classification produced before sanitization,
++        // never a scanned token, preview or arbitrary detector metadata value.
++        if display_reference_ids.contains(&finding.finding_id) {
++            finding
++                .evidence
++                .metadata
++                .insert("reference_kind".into(), "display_text".into());
+         }
+     }
+     for (finding, label) in document
+@@ -686,39 +708,6 @@
+         ) {
+             continue;
+         }
+-        // A display annotation applies to algorithm-name references only, never
+-        // arbitrary custom matches, private-key material or other security facts.
+-        let token = d
+-            .evidence
+-            .r#match
+-            .trim_matches(['\'', '"'])
+-            .to_ascii_uppercase();
+-        if !matches!(
+-            token.as_str(),
+-            "RSA"
+-                | "RS256"
+-                | "RS384"
+-                | "RS512"
+-                | "ES256"
+-                | "ES384"
+-                | "ES512"
+-                | "EDDSA"
+-                | "AES"
+-                | "AES-128-GCM"
+-                | "AES-192-GCM"
+-                | "AES-256-GCM"
+-                | "AES-128-CBC"
+-                | "AES-192-CBC"
+-                | "AES-256-CBC"
+-                | "TLS1.0"
+-                | "TLS1.1"
+-                | "TLSV1"
+-                | "TLSV1.0"
+-                | "TLSV1.1"
+-        ) {
+-            continue;
+-        }
+-
+         let Some(line) = d
+             .location
+             .line
+@@ -740,9 +729,68 @@
+             .into_iter()
+             .flatten()
+             .filter_map(|start| {
+-                let end = start.checked_add(d.evidence.r#match.len())?;
+-                (start < end && text.get(start..end) == Some(d.evidence.r#match.as_str()))
+-                    .then_some(start..end)
++                let matched = d.evidence.r#match.as_str();
++                let end = start.checked_add(matched.len())?;
++                let raw = if text.get(start..end) == Some(matched) {
++                    matched
++                } else {
++                    // Long regex previews are masked. Recover only a bounded
++                    // public TLS suite token, requiring the exact same preview;
++                    // never reconstruct arbitrary source or private-key data.
++                    let rest = text.get(start..)?;
++                    let size = rest
++                        .bytes()
++                        .take(129)
++                        .take_while(|b| b.is_ascii_uppercase() || b.is_ascii_digit() || *b == b'_')
++                        .count();
++                    if size > 128 {
++                        return None;
++                    }
++                    let token = rest.get(..size)?;
++                    if !token.starts_with("TLS_")
++                        || !token.contains("_WITH_")
++                        || crate::model::mask_preview(token) != matched
++                    {
++                        return None;
++                    }
++                    token
++                };
++                let token = raw.trim_matches(['\'', '"']).to_ascii_uppercase();
++                let suite = token.starts_with("TLS_")
++                    && token.contains("_WITH_")
++                    && token.len() <= 128
++                    && token
++                        .bytes()
++                        .all(|b| b.is_ascii_uppercase() || b.is_ascii_digit() || b == b'_');
++                if !suite
++                    && !matches!(
++                        token.as_str(),
++                        "RSA"
++                            | "RS256"
++                            | "RS384"
++                            | "RS512"
++                            | "ES256"
++                            | "ES384"
++                            | "ES512"
++                            | "EDDSA"
++                            | "AES"
++                            | "AES-128-GCM"
++                            | "AES-192-GCM"
++                            | "AES-256-GCM"
++                            | "AES-128-CBC"
++                            | "AES-192-CBC"
++                            | "AES-256-CBC"
++                            | "TLS1.0"
++                            | "TLS1.1"
++                            | "TLSV1"
++                            | "TLSV1.0"
++                            | "TLSV1.1"
++                            | "TLS_ECDHE_RSA"
++                    )
++                {
++                    return None;
++                }
++                Some(start..start.checked_add(raw.len())?)
+             })
+             .peekable();
+         if exact.peek().is_some()
+@@ -807,7 +855,7 @@
+             risk: rule.risk,
+             severity,
+             confidence: rule.confidence,
+-            description: if display_reference { "An algorithm name appears in diagnostic or display text.".into() } else { description },
++            description: if display_reference { "An algorithm name appears in non-executable text or a symbol declaration.".into() } else { description },
+             migration_hint: if display_reference { "This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.".into() } else { rule.migration_hint.clone() },
+             location: crate::model::Location {
+                 file: relative_file,
+--- a/crates/pqc_scan_detectors/src/source_facts/bindings.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/bindings.rs
+@@ -22,9 +22,11 @@
+     CFamilyClassical,
+     CFamilyPqc,
+     CFamilyTls,
++    ImplementationReference,
++    ConstructionReference,
+ }
+ impl Handler {
+-    pub const ALL: [Self; 18] = [
++    pub const ALL: [Self; 20] = [
+         Self::JavaPqc,
+         Self::NodePqc,
+         Self::PythonPqc,
+@@ -43,6 +45,8 @@
+         Self::CFamilyClassical,
+         Self::CFamilyPqc,
+         Self::CFamilyTls,
++        Self::ImplementationReference,
++        Self::ConstructionReference,
+     ];
+     pub fn id(self) -> &'static str {
+         match self {
+@@ -64,10 +68,14 @@
+             Self::CFamilyClassical => "C_FAMILY_CRYPTO_API",
+             Self::CFamilyPqc => "C_FAMILY_PQC_API",
+             Self::CFamilyTls => "C_FAMILY_TLS_REFERENCE",
++            Self::ImplementationReference => "SOURCE_IMPLEMENTATION_REFERENCE",
++            Self::ConstructionReference => "SOURCE_CONSTRUCTION_REFERENCE",
+         }
+     }
+     pub fn handles(self, language: &str) -> bool {
+         match self {
++            Self::ImplementationReference => matches!(language, "c" | "cpp"),
++            Self::ConstructionReference => matches!(language, "c" | "cpp" | "csharp"),
+             Self::JavaPqc => language == "java",
+             Self::PythonPqc => language == "python",
+             Self::RustPqc => language == "rust",
+@@ -90,13 +98,14 @@
+ 
+ // Build inputs, not a runtime read of mutable repository paths. A YAML edit
+ // recompiles this crate; no copied pattern/scope/kind literals need updating.
+-const SOURCES: [&str; 6] = [
++const SOURCES: [&str; 7] = [
+     include_str!("../../../../rules/default/pqc.yml"),
+     include_str!("../../../../rules/default/tree_sitter.yml"),
+     include_str!("../../../../rules/default/crypto_api.yml"),
+     include_str!("../../../../rules/default/php.yml"),
+     include_str!("../../../../rules/default/csharp.yml"),
+     include_str!("../../../../rules/default/c_family.yml"),
++    include_str!("../../../../rules/default/source_references.yml"),
+ ];
+ static DEFAULTS: LazyLock<BTreeMap<String, Rule>> = LazyLock::new(|| {
+     let mut rules = BTreeMap::new();
+--- a/crates/pqc_scan_detectors/src/source_facts/c_family.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/c_family.rs
+@@ -97,6 +97,10 @@
+         "EC_KEY_new" | "EC_KEY_new_by_curve_name" | "EC_KEY_generate_key" => "EC",
+         "ECDSA_sign" | "ECDSA_verify" => "EC",
+         "ECDH_compute_key" => "ECDH",
++        "wc_RsaSSL_Sign" | "wc_RsaSSL_Verify" | "wc_RsaPublicEncrypt" | "wc_RsaPrivateDecrypt" => {
++            "RSA"
++        }
++        "secp256k1_ecdsa_sign" | "secp256k1_ecdsa_verify" => "ECDSA",
+         _ => return None,
+     })
+ }
+@@ -171,6 +175,10 @@
+         || configuration(name)
+         || matches!(
+             name,
++            "X509_verify_cert" | "Botan::PK_Signer" | "Botan::PK_Verifier"
++        )
++        || matches!(
++            name,
+             "OQS_KEM_new"
+                 | "OQS_SIG_new"
+                 | "OQS_KEM_keypair"
+@@ -192,6 +200,22 @@
+     Some(raw.split_whitespace().collect())
+ }
+ fn args(node: Node<'_>) -> Vec<Node<'_>> {
++    if node.kind() == "parameter_declaration" {
++        return node
++            .child_by_field_name("declarator")
++            .and_then(|d| d.child_by_field_name("parameters"))
++            .map(children)
++            .unwrap_or_default()
++            .into_iter()
++            .map(|n| {
++                if n.child_by_field_name("declarator").is_none() {
++                    n.child_by_field_name("type").unwrap_or(n)
++                } else {
++                    n
++                }
++            })
++            .collect();
++    }
+     let arg = if matches!(node.kind(), "argument_list" | "initializer_list") {
+         Some(node)
+     } else {
+@@ -202,6 +226,41 @@
+         .into_iter()
+         .filter(|n| !n.kind().contains("comment"))
+         .collect()
++}
++// The C++ grammar can view an initializer's nested factory as a parameter.
++// A reserved nullptr token cannot be a parameter type, so this bounded case
++// is an expression. Possible declarations (including NULL/type names) stay out.
++fn recovered_cpp_call<'a>(ctx: &Context<'a, '_>, declaration: Node<'a>) -> Option<Node<'a>> {
++    if ctx.language != "cpp"
++        || declaration.kind() != "declaration"
++        || ctx.function_scope(ctx.scope(declaration)) == 0
++    {
++        return None;
++    }
++    let outer = declaration.child_by_field_name("declarator")?;
++    if outer.kind() != "function_declarator" {
++        return None;
++    }
++    let parameters = children(outer.child_by_field_name("parameters")?);
++    if parameters.len() != 1 {
++        return None;
++    }
++    let call = parameters[0];
++    if call.kind() != "parameter_declaration" {
++        return None;
++    }
++    let function = call.child_by_field_name("type")?;
++    if !context_constructor(ctx.bounded_source(function)) {
++        return None;
++    }
++    let declarator = call.child_by_field_name("declarator")?;
++    if declarator.kind() != "abstract_function_declarator" {
++        return None;
++    }
++    args(call)
++        .iter()
++        .any(|n| ctx.bounded_source(*n) == "nullptr")
++        .then_some(call)
+ }
+ fn conditional(mut node: Node<'_>) -> bool {
+     for _ in 0..64 {
+@@ -255,6 +314,60 @@
+     for node in &ctx.nodes {
+         if !values.charge() {
+             break;
++        }
++        if node.kind() == "function_definition" {
++            if let Some(name) = node
++                .child_by_field_name("declarator")
++                .and_then(|d| d.child_by_field_name("declarator"))
++                .and_then(|d| {
++                    if d.kind() == "qualified_identifier" {
++                        let scope = d.child_by_field_name("scope")?;
++                        let name = d.child_by_field_name("name")?;
++                        (ctx.bounded_source(scope) == "bssl"
++                            && ctx.bounded_source(name).starts_with("BCM_"))
++                        .then_some(name)
++                    } else {
++                        Some(d)
++                    }
++                })
++                .filter(|n| n.kind() == "identifier")
++            {
++                let algorithm = match ctx.bounded_source(name) {
++                    "ECDSA_sign" => Some("ECDSA"),
++                    "BCM_mlkem512_generate_key" => Some("ML-KEM-512"),
++                    "BCM_mlkem768_generate_key" => Some("ML-KEM-768"),
++                    "BCM_mlkem1024_generate_key" => Some("ML-KEM-1024"),
++                    "BCM_mldsa44_generate_key" => Some("ML-DSA-44"),
++                    "BCM_mldsa65_generate_key" => Some("ML-DSA-65"),
++                    "BCM_mldsa87_generate_key" => Some("ML-DSA-87"),
++                    _ => None,
++                };
++                if let Some(algorithm) = algorithm {
++                    emit(
++                        facts,
++                        rules,
++                        name,
++                        "SOURCE_IMPLEMENTATION_REFERENCE",
++                        Some(algorithm),
++                        "implementation_definition_not_api_call",
++                    );
++                }
++            }
++        }
++        if node.kind() == "preproc_ifdef" {
++            if let Some(name) = node
++                .child_by_field_name("name")
++                .filter(|n| ctx.bounded_source(*n) == "USE_SNTRUP761X25519")
++            {
++                emit(
++                    facts,
++                    rules,
++                    name,
++                    "SOURCE_CONSTRUCTION_REFERENCE",
++                    Some("sntrup761x25519-sha512"),
++                    "conditional_hybrid_reference_not_enabled_or_negotiated",
++                );
++            }
+         }
+         if node.kind().starts_with("preproc_")
+             && !matches!(node.kind(), "preproc_include" | "preproc_arg")
+@@ -303,6 +416,24 @@
+             continue;
+         }
+         if node.kind() == "declaration" {
++            if let Some(call) = recovered_cpp_call(ctx, *node) {
++                let function = call.child_by_field_name("type").unwrap();
++                let name = ctx.bounded_source(function);
++                if values.api_available(name, function) {
++                    let key = values.constructor(call, 0);
++                    let algorithm = key.as_ref().map(|k| k.algorithm.as_str());
++                    emit(
++                        facts,
++                        rules,
++                        call,
++                        rule_id(algorithm),
++                        algorithm,
++                        "cpp_unambiguous_nested_initializer_reference",
++                    );
++                    facts.sensitive_ranges.push(call.byte_range());
++                    facts.partial = true;
++                }
++            }
+             if let Some(ty) = node.child_by_field_name("type") {
+                 let name = ctx.bounded_source(ty).replace(' ', "");
+                 if matches!(name.as_str(), "oqs::KeyEncapsulation" | "oqs::Signature")
+@@ -426,6 +557,20 @@
+         if conditional(*node) {
+             facts.partial = true
+         }
++        if matches!(
++            name,
++            "X509_verify_cert" | "Botan::PK_Signer" | "Botan::PK_Verifier"
++        ) {
++            emit(
++                facts,
++                rules,
++                *node,
++                API,
++                None,
++                "canonical_request_key_or_chain_algorithm_unresolved",
++            );
++            continue;
++        }
+         if let Some(algorithm) = low_level(name) {
+             emit(
+                 facts,
+--- a/crates/pqc_scan_detectors/src/source_facts/c_family/values.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/c_family/values.rs
+@@ -44,6 +44,7 @@
+     symbols: HashMap<usize, HashMap<String, usize>>,
+     macros: HashSet<String>,
+     oqs_shadow: bool,
++    botan_shadow: bool,
+     barriers: HashMap<usize, BTreeSet<usize>>,
+     scalar_barriers: HashMap<usize, BTreeSet<usize>>,
+     work: Cell<usize>,
+@@ -59,6 +60,7 @@
+             symbols: HashMap::new(),
+             macros: HashSet::new(),
+             oqs_shadow: false,
++            botan_shadow: false,
+             barriers: HashMap::new(),
+             scalar_barriers: HashMap::new(),
+             work: Cell::new(0),
+@@ -67,6 +69,18 @@
+         for node in &ctx.nodes {
+             if !out.charge() {
+                 break;
++            }
++            if matches!(
++                node.kind(),
++                "namespace_definition"
++                    | "namespace_alias_definition"
++                    | "class_specifier"
++                    | "struct_specifier"
++            ) && node
++                .child_by_field_name("name")
++                .is_some_and(|n| ctx.bounded_source(n) == "Botan")
++            {
++                out.botan_shadow = true;
+             }
+             if matches!(
+                 node.kind(),
+@@ -542,6 +556,7 @@
+             && !self.macros.contains(name)
+             && !self.globals.contains(name)
+             && (!name.starts_with("oqs::") || !self.oqs_shadowed())
++            && (!name.starts_with("Botan::") || !self.botan_shadow)
+             && !shadowed
+     }
+     pub fn oqs_shadowed(&self) -> bool {
+@@ -626,7 +641,23 @@
+                 .filter(|s| !s.contains(['\\', '"']))
+                 .and_then(|value| selected_literal(value, kind));
+         }
+-        if n.kind() == "identifier" {
++        if n.kind() == "identifier"
++            || (n.kind() == "type_identifier" && {
++                let mut ancestor = n.parent();
++                let mut recovered = false;
++                for _ in 0..8 {
++                    let Some(parent) = ancestor else {
++                        break;
++                    };
++                    if parent.kind() == "declaration" {
++                        recovered = super::recovered_cpp_call(self.ctx, parent).is_some();
++                        break;
++                    }
++                    ancestor = parent.parent();
++                }
++                recovered
++            })
++        {
+             if let Some(binding) = self.scalar_binding(n, at) {
+                 return match binding.value {
+                     Value::Node(value) => self.selector(
+--- a/crates/pqc_scan_detectors/src/source_facts/context.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/context.rs
+@@ -24,7 +24,7 @@
+     pub truncated: Cell<bool>,
+     pub limit_reason: Cell<Option<(&'static str, usize, usize)>>,
+     pub budget: crate::DetectorBudget,
+-    language: &'s str,
++    pub(super) language: &'s str,
+     scopes: Vec<Scope<'a>>,
+     node_scopes: HashMap<usize, usize>,
+     node_positions: HashMap<usize, usize>,
+--- a/crates/pqc_scan_detectors/src/source_facts/csharp.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/csharp.rs
+@@ -24,6 +24,10 @@
+     OfficialWrapper,
+     CommunityWrapper,
+     BcTls,
++    CertificateChain,
++    XmlSignature,
++    RsaFormatter,
++    RsaDeformatter,
+ }
+ #[derive(Clone, Debug)]
+ struct Key {
+@@ -33,6 +37,7 @@
+ impl Kind {
+     fn family(self) -> Option<&'static str> {
+         match self {
++            Self::RsaFormatter | Self::RsaDeformatter => Some("RSA"),
+             Self::Classical(a)
+             | Self::Pqc(a)
+             | Self::Construction(a)
+@@ -40,7 +45,11 @@
+             | Self::Engine(a)
+             | Self::Signer(a) => Some(a),
+             Self::Encap | Self::Decap => Some("ML-KEM"),
+-            Self::OfficialWrapper | Self::CommunityWrapper | Self::BcTls => None,
++            Self::OfficialWrapper
++            | Self::CommunityWrapper
++            | Self::BcTls
++            | Self::CertificateChain
++            | Self::XmlSignature => None,
+         }
+     }
+     fn id(self) -> &'static str {
+@@ -62,7 +71,11 @@
+     fn key(self) -> Option<Key> {
+         Some(Key {
+             kind: self,
+-            algorithm: self.family()?.into(),
++            algorithm: if matches!(self, Self::CertificateChain | Self::XmlSignature) {
++                String::new()
++            } else {
++                self.family()?.into()
++            },
+         })
+     }
+ }
+@@ -79,6 +92,10 @@
+     }
+     if let Some(name) = name.strip_prefix(STD) {
+         return Some(match name {
++            "RSAPKCS1SignatureFormatter" => Kind::RsaFormatter,
++            "RSAPKCS1SignatureDeformatter" => Kind::RsaDeformatter,
++            "X509Certificates.X509Chain" => Kind::CertificateChain,
++            "Xml.SignedXml" => Kind::XmlSignature,
+             "RSA" | "RSACryptoServiceProvider" | "RSACng" | "RSAOpenSsl" => Kind::Classical("RSA"),
+             "DSA" | "DSACryptoServiceProvider" | "DSACng" | "DSAOpenSsl" => Kind::Classical("DSA"),
+             "ECDsa" | "ECDsaCng" | "ECDsaOpenSsl" => Kind::Classical("EC"),
+@@ -236,6 +253,10 @@
+         Kind::Pqc(_) => matches!(method, "SignData" | "VerifyData"),
+         Kind::Generator(_) => method == "GenerateKeyPair",
+         Kind::Signer(_) => matches!(method, "GenerateSignature" | "VerifySignature"),
++        Kind::RsaFormatter => method == "CreateSignature",
++        Kind::RsaDeformatter => method == "VerifySignature",
++        Kind::CertificateChain => method == "Build",
++        Kind::XmlSignature => matches!(method, "ComputeSignature" | "CheckSignature"),
+         Kind::Encap => method == "Encapsulate",
+         Kind::Decap => method == "Decapsulate",
+         Kind::Engine("RSA") => method == "ProcessBlock",
+@@ -341,6 +362,21 @@
+                 let Some(function) = n.child_by_field_name("function") else {
+                     continue;
+                 };
++                if names.path(function).as_deref() == Some("GenerateTraditionalKeyPair")
++                    && names.namespace(*n, true)
++                        == "Org.BouncyCastle.Crypto.Generators.CompositeMLDsaKeyPairGenerator."
++                    && rules
++                        .get("SOURCE_CONSTRUCTION_REFERENCE")
++                        .is_some_and(builtin)
++                {
++                    facts.source_api(
++                        "SOURCE_CONSTRUCTION_REFERENCE",
++                        *n,
++                        "composite_traditional_component_reference_not_whole_construction_safety",
++                        &["CompositeMLDsa"],
++                        "C# composite implementation component reference",
++                    );
++                }
+                 if let Some(key) = values.factory(*n, 0) {
+                     emit(
+                         facts,
+--- a/crates/pqc_scan_detectors/src/source_facts/csharp/names.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/csharp/names.rs
+@@ -1,6 +1,9 @@
+ //! Case-sensitive, file-local C# names. No project-wide lookup or using expansion.
+ use super::super::context::{children, Context};
+-use std::{cell::Cell, collections::HashSet};
++use std::{
++    cell::Cell,
++    collections::{HashMap, HashSet},
++};
+ use tree_sitter::Node;
+ struct Import {
+     scope: usize,
+@@ -15,6 +18,7 @@
+     types: HashSet<String>,
+     shadows: HashSet<(usize, String)>,
+     vars: HashSet<(usize, String)>,
++    declared_types: HashMap<(usize, String), Option<Node<'a>>>,
+     file_namespace: Option<(usize, String)>,
+     remaining: Cell<usize>,
+     pub partial: Cell<bool>,
+@@ -28,6 +32,7 @@
+             types: HashSet::new(),
+             shadows: HashSet::new(),
+             vars: HashSet::new(),
++            declared_types: HashMap::new(),
+             file_namespace: None,
+             remaining: Cell::new(ctx.budget.max_ast_candidates),
+             partial: Cell::new(false),
+@@ -42,6 +47,29 @@
+             }
+             if in_error(*n, ctx) {
+                 continue;
++            }
++            if matches!(
++                n.kind(),
++                "property_declaration" | "event_declaration" | "variable_declarator" | "parameter"
++            ) {
++                if let Some(name) = n.child_by_field_name("name").and_then(|v| out.path(v)) {
++                    let mut ty = n.child_by_field_name("type").or_else(|| {
++                        (n.kind() == "variable_declarator")
++                            .then(|| n.parent())
++                            .flatten()
++                            .and_then(|p| p.child_by_field_name("type"))
++                    });
++                    if ty.is_some_and(|t| t.kind() == "implicit_type") {
++                        ty = children(*n)
++                            .into_iter()
++                            .find(|v| v.kind() == "object_creation_expression")
++                            .and_then(|v| v.child_by_field_name("type"));
++                    }
++                    out.declared_types
++                        .entry((ctx.scope(*n), name))
++                        .and_modify(|v| *v = None)
++                        .or_insert(ty);
++                }
+             }
+             if matches!(
+                 n.kind(),
+@@ -234,7 +262,7 @@
+         self.ctx.limit("csharp_scope_depth", 64, 64);
+         false
+     }
+-    fn namespace(&self, node: Node<'_>, classes: bool) -> String {
++    pub(super) fn namespace(&self, node: Node<'_>, classes: bool) -> String {
+         let mut parts = vec![];
+         let mut p = node.parent();
+         for _ in 0..64 {
+@@ -294,10 +322,21 @@
+                 let Some(s) = current else {
+                     break;
+                 };
+-                if self.shadows.contains(&(s, first.to_owned()))
+-                    || (!ignore_vars && self.vars.contains(&(s, first.to_owned())))
+-                {
++                if self.shadows.contains(&(s, first.to_owned())) {
+                     return vec![];
++                }
++                if !ignore_vars && self.vars.contains(&(s, first.to_owned())) {
++                    let prefix = if raw == first {
++                        Some(node)
++                    } else {
++                        node.child_by_field_name("expression")
++                            .filter(|n| self.path(*n).as_deref() == Some(first))
++                    };
++                    if !prefix.is_some_and(|n| self.identical_declared_type(n, s, first)) {
++                        return vec![];
++                    }
++                    current = None;
++                    break;
+                 }
+                 current = self.ctx.scope_parent(s);
+             }
+@@ -376,6 +415,52 @@
+                 .filter(|(_, c)| *c == '.')
+                 .any(|(i, _)| self.types.contains(&name[..i]))
+     }
++    // C# §12.8.7.2 permits E.I for a value E whose declared type is the
++    // identical canonical type denoted by E. Family equivalence is insufficient.
++    fn identical_declared_type(&self, node: Node<'_>, scope: usize, name: &str) -> bool {
++        let Some(Some(ty)) = self.declared_types.get(&(scope, name.to_owned())) else {
++            return false;
++        };
++        let canonical = |n| {
++            self.resolve(n, true)
++                .into_iter()
++                .filter(|p| super::class_info(p).is_some())
++                .collect::<Vec<_>>()
++        };
++        let expression_types = canonical(node);
++        let declared = canonical(*ty);
++        expression_types.len() == 1 && declared == expression_types
++    }
++    // An opaque chain/XML object's declared class survives mutations to its
++    // settings, but no key algorithm, policy success or parameter is inferred.
++    pub fn opaque_receiver(&self, node: Node<'_>) -> Option<super::Kind> {
++        if node.kind() != "identifier" {
++            return None;
++        }
++        let raw = self.path(node)?;
++        let mut scope = Some(self.ctx.scope(node));
++        for _ in 0..64 {
++            if !self.charge() {
++                return None;
++            }
++            let s = scope?;
++            if self.vars.contains(&(s, raw.clone())) {
++                let ty = self.declared_types.get(&(s, raw))?.as_ref()?;
++                let kinds: Vec<_> = self
++                    .resolve(*ty, true)
++                    .iter()
++                    .filter_map(|n| super::class_info(n))
++                    .filter(|k| {
++                        matches!(k, super::Kind::CertificateChain | super::Kind::XmlSignature)
++                    })
++                    .collect();
++                return (kinds.len() == 1).then(|| kinds[0]);
++            }
++            scope = self.ctx.scope_parent(s);
++        }
++        self.ctx.limit("csharp_scope_depth", 64, 64);
++        None
++    }
+     pub fn static_candidates(&self, node: Node<'_>) -> Vec<String> {
+         let mut out = self.resolve(node, false);
+         if out.is_empty() {
+--- a/crates/pqc_scan_detectors/src/source_facts/csharp/values.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/csharp/values.rs
+@@ -387,6 +387,7 @@
+     }
+     pub fn key(&self, node: Node<'a>) -> Option<Key> {
+         self.value(node, 0)
++            .or_else(|| self.names.opaque_receiver(node).and_then(Kind::key))
+     }
+     fn value(&self, node: Node<'a>, depth: usize) -> Option<Key> {
+         if !self.step(depth) {
+--- a/crates/pqc_scan_detectors/src/source_facts/php.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/php.rs
+@@ -21,6 +21,7 @@
+     Sign,
+     Verify,
+     Reference,
++    XmlSignature,
+ }
+ #[derive(Clone, Copy)]
+ struct Key {
+@@ -33,9 +34,11 @@
+     Key(Key),
+     Compat,
+     Reference(Option<&'static str>),
++    XmlSignature,
+ }
+ fn class_info(name: &str) -> Option<ClassInfo> {
+     match name {
++        "robrichards\\xmlseclibs\\xmlsecuritydsig" => return Some(ClassInfo::XmlSignature),
+         "phpseclib3\\crypt\\rsa" => return Some(ClassInfo::Reference(Some("RSA"))),
+         "phpseclib3\\crypt\\ec" => return Some(ClassInfo::Reference(Some("EC"))),
+         "phpseclib3\\crypt\\dh" => return Some(ClassInfo::Reference(Some("DH"))),
+@@ -350,6 +353,18 @@
+                 };
+                 if class == "ffi" {
+                     names.partial.set(true);
++                    continue;
++                }
++                if class == "firebase\\jwt\\jwt" && matches!(method.as_str(), "decode" | "encode") {
++                    emit(
++                        facts,
++                        rules,
++                        API,
++                        *n,
++                        None,
++                        "canonical_jose_request_algorithm_unresolved",
++                        "PHP JOSE library request",
++                    );
+                     continue;
+                 }
+                 match class_info(&class) {
+@@ -471,6 +486,35 @@
+                     names.partial.set(true);
+                     continue;
+                 };
++                if matches!(method.as_str(), "sign" | "validatereference" | "verify")
++                    && values
++                        .key(object)
++                        .is_some_and(|k| k.role == Role::XmlSignature)
++                {
++                    emit(
++                        facts,
++                        rules,
++                        API,
++                        *n,
++                        None,
++                        "canonical_xml_signature_request_algorithm_unresolved",
++                        "PHP XML signature library request",
++                    );
++                    continue;
++                }
++                if method == "sign" && values.guarded_signer_reference(object, n.start_byte()) {
++                    emit(
++                        facts,
++                        rules,
++                        API,
++                        *n,
++                        None,
++                        "local_key_type_check_receiver_relation_unresolved",
++                        "PHP type-checked key signature reference",
++                    );
++                    names.partial.set(true);
++                    continue;
++                }
+                 if !matches!(
+                     method.as_str(),
+                     "sign" | "verify" | "encapsulate" | "decapsulate"
+--- a/crates/pqc_scan_detectors/src/source_facts/php/values.rs
++++ b/crates/pqc_scan_detectors/src/source_facts/php/values.rs
+@@ -161,7 +161,11 @@
+                             "sign" | "verify" | "encapsulate" | "decapsulate"
+                         )
+                     });
+-                if !safe {
++                let opaque_xml = n
++                    .child_by_field_name("object")
++                    .and_then(|object| result.key(object))
++                    .is_some_and(|k| k.role == Role::XmlSignature);
++                if !safe && !opaque_xml {
+                     if let Some(object) = n.child_by_field_name("object") {
+                         result.invalidate_target(object, n.end_byte(), 0);
+                     }
+@@ -385,6 +389,10 @@
+                     .into_iter()
+                     .find(|n| matches!(n.kind(), "name" | "qualified_name" | "relative_name"))?;
+                 match class_info(&self.names.resolve(class, CLASS)?)? {
++                    ClassInfo::XmlSignature => Some(Value::Key(Key {
++                        algorithm: "",
++                        role: Role::XmlSignature,
++                    })),
+                     ClassInfo::Reference(Some("SLH-DSA")) => Some(Value::Key(Key {
+                         algorithm: "SLH-DSA",
+                         role: Role::Reference,
+@@ -414,6 +422,79 @@
+             Value::Key(k) => Some(k),
+             _ => None,
+         }
++    }
++    /// A nearby canonical key-type assertion is a source reference, not proof
++    /// that every control-flow path supplies that type at the later operation.
++    pub fn guarded_signer_reference(&self, object: Node<'a>, at: usize) -> bool {
++        if object.kind() != "variable_name" {
++            return false;
++        }
++        let scope = self.names.ctx.function_scope(self.names.ctx.scope(object));
++        let raw = self.names.ctx.source(object);
++        let mut checked = None;
++        for node in &self.names.ctx.nodes {
++            if !self.names.charge() {
++                return false;
++            }
++            if node.end_byte() > at
++                || self.names.ctx.function_scope(self.names.ctx.scope(*node)) != scope
++            {
++                continue;
++            }
++            if node.kind() == "binary_expression"
++                && node
++                    .child_by_field_name("operator")
++                    .is_some_and(|n| self.names.ctx.source(n) == "instanceof")
++                && node
++                    .child_by_field_name("left")
++                    .is_some_and(|n| self.names.ctx.source(n) == raw)
++                && node
++                    .child_by_field_name("right")
++                    .and_then(|n| self.names.resolve(n, CLASS))
++                    .is_some_and(|s| {
++                        matches!(
++                            s.as_str(),
++                            "phpseclib3\\crypt\\rsa\\privatekey"
++                                | "phpseclib3\\crypt\\ec\\privatekey"
++                        )
++                    })
++            {
++                checked = Some(node.end_byte());
++            }
++        }
++        let Some(checked) = checked else {
++            return false;
++        };
++        for node in &self.names.ctx.nodes {
++            if !self.names.charge() {
++                return false;
++            }
++            if node.start_byte() < checked
++                || node.end_byte() > at
++                || self.names.ctx.function_scope(self.names.ctx.scope(*node)) != scope
++            {
++                continue;
++            }
++            if matches!(
++                node.kind(),
++                "assignment_expression"
++                    | "reference_assignment_expression"
++                    | "augmented_assignment_expression"
++            ) && node
++                .child_by_field_name("left")
++                .is_some_and(|n| self.names.ctx.source(n) == raw)
++            {
++                return false;
++            }
++            if matches!(
++                node.kind(),
++                "function_call_expression" | "member_call_expression" | "scoped_call_expression"
++            ) && args(*node).iter().any(|n| self.names.ctx.source(*n) == raw)
++            {
++                return false;
++            }
++        }
++        true
+     }
+     fn openssl_type(&self, node: Node<'a>, depth: usize) -> Option<&'static str> {
+         let array = self.expression(node, depth)?;
+--- a/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
++++ b/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+@@ -887,6 +887,21 @@
+     match ext.as_str() {
+         "php" | "phtml" => Some((tree_sitter_php::LANGUAGE_PHP.into(), "php")),
+         "inc" if has_php_tag(text) => Some((tree_sitter_php::LANGUAGE_PHP.into(), "php")),
++        "inc"
++            if path.file_stem().and_then(|n| n.to_str()).is_some_and(|n| {
++                n.ends_with(".cc") || n.ends_with(".cpp") || n.ends_with(".cxx")
++            }) =>
++        {
++            Some((tree_sitter_cpp::LANGUAGE.into(), "cpp"))
++        }
++        "inc"
++            if path
++                .file_stem()
++                .and_then(|n| n.to_str())
++                .is_some_and(|n| n.ends_with(".c")) =>
++        {
++            Some((tree_sitter_c::LANGUAGE.into(), "c"))
++        }
+         "cs" => Some((tree_sitter_c_sharp::LANGUAGE.into(), "csharp")),
+         "c" | "h" => Some((tree_sitter_c::LANGUAGE.into(), "c")),
+         "cc" | "cpp" | "cxx" | "hpp" | "hh" | "hxx" => {
+--- a/crates/pqc_scan_detectors/src/tree_sitter_detector/display_references.rs
++++ b/crates/pqc_scan_detectors/src/tree_sitter_detector/display_references.rs
+@@ -57,9 +57,7 @@
+     let Some(tree) = parser.parse(source, None) else {
+         return vec![];
+     };
+-    if tree.root_node().has_error() {
+-        return vec![];
+-    }
++    let partial_tree = tree.root_node().has_error();
+     let mut stack = vec![tree.root_node()];
+     let mut count = 0;
+     let mut out = vec![];
+@@ -70,6 +68,34 @@
+         count += 1;
+         if count > max_nodes.min(200_000) {
+             return vec![];
++        }
++        if node.kind() == "ERROR" || node.is_missing() {
++            continue;
++        }
++        if node.kind().contains("comment") {
++            out.push(node.byte_range());
++            continue;
++        }
++        if matches!(
++            node.kind(),
++            "variable_declarator" | "init_declarator" | "enumerator"
++        ) {
++            if let Some(name) = node
++                .child_by_field_name("name")
++                .or_else(|| node.child_by_field_name("declarator"))
++                .filter(|n| matches!(n.kind(), "identifier" | "field_identifier"))
++            {
++                let token = &source[name.byte_range()];
++                if token.starts_with("TLS_")
++                    && token.contains("_WITH_")
++                    && token.len() <= 128
++                    && token
++                        .bytes()
++                        .all(|b| b.is_ascii_uppercase() || b.is_ascii_digit() || b == b'_')
++                {
++                    out.push(name.byte_range());
++                }
++            }
+         }
+         // Java imports/throws name exception types, not callable local values.
+         // The Java case below still requires a literal directly in `throw new`.
+@@ -171,7 +197,25 @@
+                 .is_some_and(|b| matches!(b, b'\'' | b'"' | b'`'))
+                 && !value.contains("#{")
+                 && !value.contains("${");
+-            if value.len() <= 512 && phrase && plain {
++            // An RFC-style Received header records transport history. The
++            // literal itself does not select a cipher, even inside test code.
++            if plain && value.len() <= 4096 {
++                let body = value.trim_start_matches(['\'', '"', '`']).trim_start();
++                let unfolded = body
++                    .replace("\\r", " ")
++                    .replace("\\n", " ")
++                    .replace("\\t", " ");
++                let normalized = unfolded.split_whitespace().collect::<Vec<_>>().join(" ");
++                if body.starts_with("Received:")
++                    || (normalized.starts_with("from ")
++                        && normalized.contains(" by ")
++                        && normalized.contains(" with ")
++                        && normalized.contains(';'))
++                {
++                    out.push(node.byte_range());
++                }
++            }
++            if !partial_tree && value.len() <= 512 && phrase && plain {
+                 strings.push(node);
+             }
+             if plain {
+--- a/crates/pqc_scan_detectors/tests/c_family_source.rs
++++ b/crates/pqc_scan_detectors/tests/c_family_source.rs
+@@ -77,6 +77,160 @@
+         })
+         .map(|a| a["attributes"]["identifier"].as_str().unwrap().into())
+         .collect()
++}
++
++#[test]
++fn cpp_qualified_implementation_definitions_keep_the_original_name_position() {
++    let f = Fixture::new();
++    let source="bcm_status bssl::BCM_mldsa65_generate_key(unsigned char out[100], Key *key){return status;}";
++    let native = f.native(source, "cc.inc");
++    let obs: Vec<_> = native["observations"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .filter(|o| o["rule_id"] == "SOURCE_IMPLEMENTATION_REFERENCE")
++        .collect();
++    assert_eq!(obs.len(), 1);
++    assert_eq!(
++        obs[0]["target"]["byte_start"],
++        source.find("BCM_mldsa65_generate_key").unwrap()
++    );
++    assert_eq!(algorithm_names(&native, obs[0]), vec!["ML-DSA-65"]);
++}
++
++#[test]
++fn additional_canonical_c_and_cpp_apis_keep_unknown_key_and_certificate_algorithms_unknown() {
++    let f = Fixture::new();
++    for (extension, expression, expected) in [
++        (
++            "c",
++            "wc_RsaSSL_Sign(data,size,out,cap,key,rng)",
++            vec!["RSA"],
++        ),
++        (
++            "cpp",
++            "secp256k1_ecdsa_sign(ctx,sig,msg,key,nonce,data)",
++            vec!["ECDSA"],
++        ),
++        ("c", "X509_verify_cert(store)", vec![]),
++        (
++            "cpp",
++            "Botan::PK_Signer(key,rng,padding,format,provider)",
++            vec![],
++        ),
++        (
++            "cpp",
++            "Botan::PK_Verifier(key,padding,format,provider)",
++            vec![],
++        ),
++    ] {
++        let source = format!("void f(){{ {expression}; }}");
++        let native = f.native(&source, extension);
++        let start = source.find(expression).unwrap();
++        let obs = focal(&native, start, start + expression.len());
++        assert_eq!(
++            obs.len(),
++            1,
++            "missing canonical source request: {expression}"
++        );
++        assert_eq!(algorithm_names(&native, obs[0]), expected);
++        assert_eq!(obs[0]["usage"], "referenced");
++    }
++    for source in [
++        "#define wc_RsaSSL_Sign(a,b,c,d,e,f) local(a)\nvoid f(){wc_RsaSSL_Sign(a,b,c,d,e,f);}",
++        "void f(){int secp256k1_ecdsa_sign; secp256k1_ecdsa_sign(a,b,c,d,e,f);}",
++        "namespace Botan {class PK_Signer {}; } void f(){Botan::PK_Signer(key,rng,pad,format,provider);}",
++    ] {
++        assert!(f.native(source, "cpp")["observations"].as_array().unwrap().is_empty());
++    }
++}
++
++#[test]
++fn implementation_and_conditional_construction_references_are_separate_from_api_calls() {
++    let f = Fixture::new();
++    for (extension, source, rule, algorithm) in [
++        (
++            "cpp",
++            "int ECDSA_sign(int a){return 0;}",
++            "SOURCE_IMPLEMENTATION_REFERENCE",
++            "ECDSA",
++        ),
++        (
++            "cc.inc",
++            "int BCM_mlkem768_generate_key(int a){return 0;}",
++            "SOURCE_IMPLEMENTATION_REFERENCE",
++            "ML-KEM-768",
++        ),
++        (
++            "cc.inc",
++            "int BCM_mldsa65_generate_key(int a){return 0;}",
++            "SOURCE_IMPLEMENTATION_REFERENCE",
++            "ML-DSA-65",
++        ),
++        (
++            "c",
++            "#ifdef USE_SNTRUP761X25519\nint f(){return 0;}\n#endif\n",
++            "SOURCE_CONSTRUCTION_REFERENCE",
++            "sntrup761x25519-sha512",
++        ),
++    ] {
++        let native = f.native(source, extension);
++        let obs: Vec<_> = native["observations"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .filter(|o| o["rule_id"] == rule)
++            .collect();
++        assert_eq!(obs.len(), 1, "missing explicitly separate evidence: {rule}");
++        assert_eq!(algorithm_names(&native, obs[0]), vec![algorithm]);
++        assert_eq!(obs[0]["usage"], "referenced");
++        assert!(!native["observations"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .any(|o| o["rule_id"] == "C_FAMILY_CRYPTO_API"));
++    }
++    for source in [
++        "void f(){const char *s=\"USE_SNTRUP761X25519\";}",
++        "int NotECDSA_sign(int a){return 0;}",
++        "int ECDSA_sign(int a);",
++    ] {
++        assert!(f.native(source, "cpp")["observations"]
++            .as_array()
++            .unwrap()
++            .is_empty());
++    }
++}
++
++#[test]
++fn cpp_direct_initializer_retains_nested_request_with_unambiguous_nullptr_argument() {
++    let f = Fixture::new();
++    for wrapper in ["Holder<EVP_PKEY_CTX>", "other::Owner<EVP_PKEY_CTX>"] {
++        let expression = "EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr)";
++        let source = format!("void f(){{ {wrapper} value({expression}); }}");
++        let (native, legacy) = f.document(&source, "cpp");
++        let start = source.find(expression).unwrap();
++        let observations = focal(&native, start, start + expression.len());
++        assert_eq!(observations.len(), 1, "nested request lost as a declarator");
++        assert_eq!(algorithm_names(&native, observations[0]), vec!["RSA"]);
++        assert_eq!(observations[0]["assurance"], "syntactic");
++        assert_eq!(observations[0]["usage"], "referenced");
++        assert!(!legacy.to_string().contains("EVP_PKEY_CTX_new_id("));
++    }
++}
++
++#[test]
++fn cpp_direct_initializer_does_not_promote_possible_declarations_or_shadowed_apis() {
++    let f = Fixture::new();
++    for source in [
++        "void f(){ Holder<EVP_PKEY_CTX> value(EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, OtherType)); }",
++        "Holder<EVP_PKEY_CTX> value(EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr));",
++        "#define EVP_PKEY_CTX_new_id(a,b) fake(a)\nvoid f(){ Holder<EVP_PKEY_CTX> value(EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr)); }",
++        "void f(){ int EVP_PKEY_CTX_new_id; Holder<EVP_PKEY_CTX> value(EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr)); }",
++    ] {
++        let native = f.native(source, "cpp");
++        assert!(native["observations"].as_array().unwrap().is_empty(), "declaration or namesake: {source}");
++    }
+ }
+ 
+ #[test]
+--- a/crates/pqc_scan_detectors/tests/csharp_source.rs
++++ b/crates/pqc_scan_detectors/tests/csharp_source.rs
+@@ -74,6 +74,166 @@
+         })
+         .map(|a| a["attributes"]["identifier"].as_str().unwrap().into())
+         .collect()
++}
++
++#[test]
++fn csharp_xml_signature_certificate_chain_and_legacy_rsa_formatter_are_bounded_requests() {
++    let f = Fixture::new();
++    for (source, expression, expected) in [
++        ("using System.Security.Cryptography; class C {void F(){var f=new RSAPKCS1SignatureFormatter(key);}}", "new RSAPKCS1SignatureFormatter(key)", vec!["RSA"]),
++        ("using System.Security.Cryptography.Xml; class C {void F(){var x=new SignedXml(doc); x.AddReference(r); x.ComputeSignature();}}", "x.ComputeSignature()", vec![]),
++        ("using System.Security.Cryptography.X509Certificates; class C {void F(){using var chain=new X509Chain(); chain.ChainPolicy.RevocationMode = mode; if(chain.Build(cert)){} }}", "chain.Build(cert)", vec![]),
++    ] {
++        let native=f.native(source);let start=source.find(expression).unwrap();
++        let obs:Vec<_>=native["observations"].as_array().unwrap().iter().filter(|o|o["target"]["byte_start"]==start).collect();
++        assert_eq!(obs.len(),1,"missing correctly owned request: {expression}");
++        assert_eq!(algorithm_names(&native,obs[0]),expected);
++        assert_eq!(obs[0]["usage"],"referenced");
++    }
++    for source in [
++        "class X509Chain {} class C {void F(){var chain=new X509Chain();chain.Build(cert);}}",
++        "class C {void F(dynamic chain){chain.Build(cert);}}",
++    ] {
++        assert!(f.native(source)["observations"]
++            .as_array()
++            .unwrap()
++            .is_empty());
++    }
++}
++
++#[test]
++fn csharp_standard_rsa_formatters_do_not_borrow_bouncy_castle_signer_operations() {
++    let f = Fixture::new();
++    for (ty, method, expected) in [
++        (
++            "System.Security.Cryptography.RSAPKCS1SignatureFormatter",
++            "CreateSignature",
++            true,
++        ),
++        (
++            "System.Security.Cryptography.RSAPKCS1SignatureDeformatter",
++            "VerifySignature",
++            true,
++        ),
++        (
++            "Org.BouncyCastle.Crypto.Signers.RsaDigestSigner",
++            "GenerateSignature",
++            true,
++        ),
++        (
++            "Org.BouncyCastle.Crypto.Signers.RsaDigestSigner",
++            "CreateSignature",
++            false,
++        ),
++        (
++            "System.Security.Cryptography.RSAPKCS1SignatureFormatter",
++            "GenerateSignature",
++            false,
++        ),
++        (
++            "System.Security.Cryptography.RSAPKCS1SignatureFormatter",
++            "VerifySignature",
++            false,
++        ),
++        (
++            "System.Security.Cryptography.RSAPKCS1SignatureDeformatter",
++            "CreateSignature",
++            false,
++        ),
++    ] {
++        let expression = format!("signer.{method}(data)");
++        let source = format!("class C {{void F(){{var signer=new {ty}(key); {expression};}}}}");
++        let native = f.native(&source);
++        let start = source.find(&expression).unwrap();
++        let obs: Vec<_> = native["observations"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .filter(|o| o["target"]["byte_start"] == start)
++            .collect();
++        assert_eq!(!obs.is_empty(), expected, "{ty}.{method}");
++        if expected {
++            assert_eq!(algorithm_names(&native, obs[0]), vec!["RSA"]);
++        }
++    }
++}
++
++#[test]
++fn csharp_composite_implementation_component_does_not_become_whole_construction_safety() {
++    let f = Fixture::new();
++    let source="namespace Org.BouncyCastle.Crypto.Generators {class CompositeMLDsaKeyPairGenerator {void GenerateKeyPair(){GenerateTraditionalKeyPair(random);} void GenerateTraditionalKeyPair(object random){} }}";
++    let native = f.native(source);
++    let obs: Vec<_> = native["observations"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .filter(|o| o["rule_id"] == "SOURCE_CONSTRUCTION_REFERENCE")
++        .collect();
++    assert_eq!(obs.len(), 1);
++    assert_eq!(algorithm_names(&native, obs[0]), vec!["CompositeMLDsa"]);
++    assert_eq!(obs[0]["usage"], "referenced");
++    assert_eq!(native["assessment_status"], "not_evaluated");
++    assert!(f.native("namespace Other {class CompositeMLDsaKeyPairGenerator {void F(){GenerateTraditionalKeyPair(random);}}}")["observations"].as_array().unwrap().is_empty());
++}
++
++#[test]
++fn csharp_identical_value_and_type_names_allow_static_factory_only_for_same_declared_type() {
++    let f = Fixture::new();
++    for (imports, declaration) in [
++        (
++            "using System.Security.Cryptography;",
++            "RSA RSA { get; set; }",
++        ),
++        (
++            "using RSA = System.Security.Cryptography.RSA;",
++            "RSA RSA { get; set; }",
++        ),
++        (
++            "using System.Security.Cryptography;",
++            "System.Security.Cryptography.RSA RSA;",
++        ),
++    ] {
++        let source =
++            format!("{imports} class C {{ {declaration} void M(){{ var key = RSA.Create(); }} }}");
++        let native = f.native(&source);
++        let start = source.find("RSA.Create()").unwrap();
++        let obs: Vec<_> = native["observations"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .filter(|o| o["target"]["byte_start"] == start)
++            .collect();
++        assert_eq!(
++            obs.len(),
++            1,
++            "same declared type must permit static factory"
++        );
++        assert_eq!(algorithm_names(&native, obs[0]), vec!["RSA"]);
++        assert_eq!(obs[0]["usage"], "referenced");
++    }
++}
++
++#[test]
++fn csharp_different_or_unknown_value_types_do_not_bypass_nearest_shadow() {
++    let f = Fixture::new();
++    for declaration in ["object RSA {get;set;}", "Other RSA;", "class RSA {}"] {
++        let source = format!("using System.Security.Cryptography; class C {{ {declaration} void M(){{ RSA.Create(); }} }}");
++        let native = f.native(&source);
++        let start = source.find("RSA.Create()").unwrap();
++        assert!(!native["observations"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .any(|o| o["target"]["byte_start"] == start));
++    }
++    let source = "using System.Security.Cryptography; class C { RSA RSA {get;set;} void M(object RSA){ RSA.Create(); } }";
++    let native = f.native(source);
++    let start = source.find("RSA.Create()").unwrap();
++    assert!(!native["observations"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .any(|o| o["target"]["byte_start"] == start));
+ }
+ #[test]
+ fn every_frozen_csharp_case_matches_its_original_focal_expectation() {
+--- a/crates/pqc_scan_detectors/tests/display_text_quality.rs
++++ b/crates/pqc_scan_detectors/tests/display_text_quality.rs
+@@ -3,6 +3,153 @@
+ use pqc_scan_detectors::default_detectors;
+ use pqc_scan_rules::RuleSet;
+ use std::path::PathBuf;
++#[test]
++fn recorded_protocol_text_and_comments_do_not_turn_into_actionable_tls_usage() {
++    let root = std::env::temp_dir().join(format!("pqc-recorded-protocol-{}", std::process::id()));
++    std::fs::create_dir_all(root.join("tests")).unwrap();
++    let suite = "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384";
++    for (name, source) in [
++        (
++            "record.cs",
++            format!("class C {{string[] headers={{\"Received: from relay with {suite}\"}};}}"),
++        ),
++        (
++            "comment.cs",
++            format!("/// Registry entry {suite}\nclass C {{}}"),
++        ),
++        (
++            "config.cs",
++            format!("class C {{void F(){{ ConfigureTls(\"{suite}\");}}}}"),
++        ),
++        (
++            "tests/crypto.cs",
++            "using System.Security.Cryptography; class C{void F(){RSA.Create();}}".into(),
++        ),
++    ] {
++        std::fs::write(root.join(name), source).unwrap();
++    }
++    let rules = RuleSet::load_from_dir(
++        &PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../rules/default"),
++    )
++    .unwrap();
++    let doc = scan_repository_detailed(
++        &ScanConfig {
++            root: root.clone(),
++            threads: 1,
++            ..Default::default()
++        },
++        &rules,
++        &default_detectors(),
++    )
++    .unwrap();
++    for name in ["record.cs", "comment.cs", "config.cs"] {
++        let findings: Vec<_> = doc
++            .legacy()
++            .findings
++            .iter()
++            .filter(|f| f.location.file == name && f.rule_id.starts_with("TLS_"))
++            .collect();
++        assert!(!findings.is_empty(), "retain the lexical reference: {name}");
++        for finding in findings {
++            assert_eq!(
++                finding.severity.as_str() == "info",
++                name != "config.cs",
++                "{name}"
++            );
++            assert_eq!(
++                finding
++                    .evidence
++                    .metadata
++                    .get("reference_kind")
++                    .map(String::as_str),
++                if name == "config.cs" {
++                    None
++                } else {
++                    Some("display_text")
++                }
++            );
++            if name != "config.cs" {
++                assert!(finding.recommended_actions.is_empty());
++            }
++        }
++    }
++    assert!(doc
++        .legacy()
++        .findings
++        .iter()
++        .any(|f| f.location.file == "tests/crypto.cs"
++            && f.rule_id == "CSHARP_CRYPTO_API"
++            && f.severity.as_str() != "info"));
++    std::fs::remove_dir_all(root).unwrap();
++}
++
++#[test]
++fn suite_registry_declarations_do_not_demote_an_independent_configuration_value() {
++    let root = std::env::temp_dir().join(format!("pqc-suite-registry-{}", std::process::id()));
++    std::fs::create_dir_all(&root).unwrap();
++    std::fs::write(root.join("registry.cs"),"class C {\npublic const int TLS_ECDHE_RSA_WITH_NULL_SHA = 123;\nvoid F(){ConfigureTls(\"TLS_ECDHE_RSA_WITH_NULL_SHA\");}\n}").unwrap();
++    let rules = RuleSet::load_from_dir(
++        &PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../rules/default"),
++    )
++    .unwrap();
++    let doc = scan_repository_detailed(
++        &ScanConfig {
++            root: root.clone(),
++            threads: 1,
++            ..Default::default()
++        },
++        &rules,
++        &default_detectors(),
++    )
++    .unwrap();
++    for line in [2, 3] {
++        let rows: Vec<_> = doc
++            .legacy()
++            .findings
++            .iter()
++            .filter(|f| f.location.line == line && f.rule_id.starts_with("TLS_"))
++            .collect();
++        assert!(!rows.is_empty());
++        for row in rows {
++            assert_eq!(row.severity.as_str() == "info", line == 2, "line{line}");
++        }
++    }
++    std::fs::remove_dir_all(root).unwrap();
++}
++#[test]
++fn recorded_header_values_in_valid_regions_survive_unrelated_parse_errors_without_secrets() {
++    let root = std::env::temp_dir().join(format!("pqc-header-value-{}", std::process::id()));
++    std::fs::create_dir_all(&root).unwrap();
++    std::fs::write(root.join("record.cs"),"class C { string[] values={\" from relay\\r\\n\\tby mx with ESMTP (cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384); date PRIVATE085_RECEIVED_CANARY\"}; }\nclass Broken { void }\n").unwrap();
++    let rules = RuleSet::load_from_dir(
++        &PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../rules/default"),
++    )
++    .unwrap();
++    let doc = scan_repository_detailed(
++        &ScanConfig {
++            root: root.clone(),
++            threads: 1,
++            ..Default::default()
++        },
++        &rules,
++        &default_detectors(),
++    )
++    .unwrap();
++    let rows: Vec<_> = doc
++        .legacy()
++        .findings
++        .iter()
++        .filter(|f| f.rule_id.starts_with("TLS_"))
++        .collect();
++    assert!(!rows.is_empty());
++    assert!(rows.iter().all(|f| f.severity.as_str() == "info"));
++    assert!(!serde_json::to_string(doc.legacy())
++        .unwrap()
++        .contains("PRIVATE085_RECEIVED_CANARY"));
++    assert_eq!(doc.coverage().partial_files(), 1);
++    std::fs::remove_dir_all(root).unwrap();
++}
++
+ #[test]
+ fn labelled_seven_language_corpus_preserves_references_and_configuration_candidates() {
+     let corpus: serde_json::Value =
+--- a/crates/pqc_scan_detectors/tests/php_source.rs
++++ b/crates/pqc_scan_detectors/tests/php_source.rs
+@@ -14,6 +14,57 @@
+ struct Fixture {
+     root: PathBuf,
+     rules: RuleSet,
++}
++
++#[test]
++fn php_xml_reference_and_signature_verification_use_real_case_insensitive_methods() {
++    let f = Fixture::new();
++    for method in ["validateReference", "VALIDATEREFERENCE", "verify"] {
++        let expression = format!("$xml->{method}($key)");
++        let source=format!("<?php use RobRichards\\XMLSecLibs\\XMLSecurityDSig as DS; function f(){{$xml=new DS(); {expression};}}");
++        let native = f.native(&source);
++        let start = source.find(&expression).unwrap();
++        assert_eq!(
++            native["observations"]
++                .as_array()
++                .unwrap()
++                .iter()
++                .filter(|o| o["rule_id"] == "PHP_CRYPTO_API" && o["target"]["byte_start"] == start)
++                .count(),
++            1,
++            "{method}"
++        );
++    }
++    for source in ["<?php class XMLSecurityDSig {} function f(){$xml=new XMLSecurityDSig();$xml->validateReference($key);}","<?php function f($xml){$xml->validateReference($key);}","<?php use RobRichards\\XMLSecLibs\\XMLSecurityDSig; function f(){$xml=new XMLSecurityDSig();$xml->validateSignature($key);}"] {
++        let native=f.native(source);let start=source.rfind("$xml->").unwrap();
++        assert!(!native["observations"].as_array().unwrap().iter().any(|o|o["target"]["byte_start"]==start));
++    }
++}
++
++#[test]
++fn php_canonical_jwt_xml_and_type_checked_signers_keep_unknown_primitive_explicit() {
++    let f = Fixture::new();
++    for (source, expression) in [
++        ("<?php use Firebase\\JWT\\JWT; JWT::decode($token,$keys);", "JWT::decode($token,$keys)"),
++        ("<?php use RobRichards\\XMLSecLibs\\XMLSecurityDSig; function f(){ $x=new XMLSecurityDSig(); $x->addReference($r); $x->sign($key); }", "$x->sign($key)"),
++        ("<?php use phpseclib3\\Crypt\\RSA\\PrivateKey; function f($key){ if (!$key instanceof PrivateKey) {throw new Exception();} $key->sign($data); }", "$key->sign($data)"),
++    ] {
++        let native=f.native(source);let start=source.find(expression).unwrap();
++        let obs:Vec<_>=native["observations"].as_array().unwrap().iter().filter(|o|o["target"]["byte_start"]==start).collect();
++        assert_eq!(obs.len(),1,"missing scoped library operation: {expression}");
++        assert!(algorithm_names(&native,obs[0]).is_empty());
++        assert_eq!(obs[0]["usage"],"referenced");
++    }
++    for source in [
++        "<?php class JWT{static function decode($t,$k){}} JWT::decode($token,$keys);",
++        "<?php function f($x){$x->sign($key);}",
++        "<?php use phpseclib3\\Crypt\\RSA\\PrivateKey; function f($key,$other){if(!$other instanceof PrivateKey){throw new Exception();} $key->sign($data);}",
++        "<?php use phpseclib3\\Crypt\\RSA\\PrivateKey; function f($key){if(!$key instanceof PrivateKey){throw new Exception();} $key=opaque(); $key->sign($data);}",
++    ] {
++        let native=f.native(source);
++        let start=source.rfind("JWT::decode").or_else(||source.rfind("$key->sign")).or_else(||source.rfind("$x->sign")).unwrap();
++        assert!(!native["observations"].as_array().unwrap().iter().any(|o|o["target"]["byte_start"]==start));
++    }
+ }
+ impl Fixture {
+     fn new() -> Self {
+--- a/crates/pqc_scan_report/src/compact.rs
++++ b/crates/pqc_scan_report/src/compact.rs
+@@ -62,8 +62,8 @@
+     {
+         display.description = label(
+             lang,
+-            "An algorithm name appears in diagnostic or display text.",
+-            "エラー文・表示文に暗号方式名が含まれています。",
++            "An algorithm name appears in commentary, a declaration or recorded text.",
++            "注釈・宣言・記録に暗号方式名が含まれています。",
+         )
+         .into();
+         display.migration_hint = label(lang, "This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.", "この文言だけでは暗号処理での利用は確認できません。実装と実際の設定を別途確認してください。").into();
+@@ -367,6 +367,10 @@
+                 )?;
+             }
+             writeln!(out, "</details>")?;
++            let overlaps = view.coincident_records(f);
++            if overlaps > 1 {
++                writeln!(out,"<p class=\"coincident-records\">{}: {overlaps} · {}</p>",label(lang,"Detection records at this location","この位置の検出記録"),label(lang,"Review the distinct rules and evidence. These records are not necessarily independent cryptographic uses.","異なるルールと根拠を確認してください。記録の件数は、独立した暗号利用の数とは限りません。"))?;
++            }
+             if let Some(snippet) = &f.source_snippet {
+                 writeln!(
+                     out,
+@@ -800,6 +804,10 @@
+             }
+         }
+         for (offset, f) in group.occurrences.iter().enumerate() {
++            let overlaps = view.coincident_records(f);
++            if overlaps > 1 {
++                writeln!(out,"\n{}: {overlaps} · {}\n",label(lang,"Detection records at this location","この位置の検出記録"),label(lang,"Review the distinct rules and evidence. These records are not necessarily independent cryptographic uses.","異なるルールと根拠を確認してください。記録の件数は、独立した暗号利用の数とは限りません。"))?;
++            }
+             writeln!(
+                 out,
+                 "\n### {} — {}\n",
+--- a/crates/pqc_scan_report/src/deduplicated.rs
++++ b/crates/pqc_scan_report/src/deduplicated.rs
+@@ -6,6 +6,18 @@
+ pub(crate) struct View<'a> {
+     pub(crate) result: ScanResult,
+     pub(crate) originals: BTreeMap<String, Vec<&'a Finding>>,
++    location_counts: BTreeMap<(String, usize, usize), usize>,
++}
++impl View<'_> {
++    pub(crate) fn coincident_records(&self, f: &Finding) -> usize {
++        if f.location.line == 0 || f.location.column == 0 {
++            return 0;
++        }
++        self.location_counts
++            .get(&(f.location.file.clone(), f.location.line, f.location.column))
++            .copied()
++            .unwrap_or(0)
++    }
+ }
+ 
+ fn builtin_copy(id: &str) -> Option<(String, String, String)> {
+@@ -23,7 +35,7 @@
+ 
+ fn issue(f: &Finding) -> String {
+     if f.evidence.metadata.get("reference_kind").is_some_and(|s| s == "display_text")
+-        && f.description == "An algorithm name appears in diagnostic or display text."
++        && f.description == "An algorithm name appears in non-executable text or a symbol declaration."
+         && f.migration_hint == "This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately."
+     { return "display-algorithm-reference".into(); }
+     // Only explicitly equivalent built-in rule families cross description/category
+@@ -50,7 +62,13 @@
+ 
+ pub(crate) fn project(result: &ScanResult) -> View<'_> {
+     let mut buckets = BTreeMap::new();
++    let mut location_counts = BTreeMap::new();
+     for f in &result.findings {
++        if f.location.line > 0 && f.location.column > 0 {
++            *location_counts
++                .entry((f.location.file.clone(), f.location.line, f.location.column))
++                .or_insert(0) += 1;
++        }
+         let evidence = &f.evidence.r#match;
+         // Missing positions and redacted/empty evidence cannot establish equivalence.
+         let isolated = if f.location.line == 0
+@@ -78,6 +96,7 @@
+     let mut view = View {
+         result: result.clone(),
+         originals: BTreeMap::new(),
++        location_counts,
+     };
+     view.result.findings.clear();
+     for mut originals in buckets.into_values() {
+@@ -150,7 +169,8 @@
+         let mut raw = fixture();
+         for f in &mut raw.findings {
+             f.severity = pqc_scan_rules::Severity::Info;
+-            f.description = "An algorithm name appears in diagnostic or display text.".into();
++            f.description =
++                "An algorithm name appears in non-executable text or a symbol declaration.".into();
+             f.migration_hint = "This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.".into();
+             f.evidence
+                 .metadata
+--- a/crates/pqc_scan_report/src/japanese.rs
++++ b/crates/pqc_scan_report/src/japanese.rs
+@@ -7,6 +7,8 @@
+ 
+ fn rule_text(id: &str) -> Option<RuleCopy> {
+     Some(match id {
++        "SOURCE_IMPLEMENTATION_REFERENCE" => ("暗号実装の入口となる関数定義が見つかりました。", "実装の提供元、呼び出し元、ビルドへの組込みを確認してください。関数の定義だけでは、仕様への適合や実行、移行完了を判断できません。"),
++        "SOURCE_CONSTRUCTION_REFERENCE" => ("条件付きのハイブリッド方式、または複合方式の実装要素の参照が見つかりました。", "両方の構成要素、正確な構成、ビルド条件、結合処理を別々に確認してください。構成要素や条件の記述だけでは、通信での合意や構成全体の安全性を判断できません。"),
+         "DEP_PHP_CRYPTO" => ("PHPの暗号ライブラリや拡張機能への依存宣言が見つかりました。", "Composerの宣言、実際にロードする拡張機能、ネイティブライブラリを別々に確認してください。platformのエミュレート設定は、配備先の環境を示しません。"),
+         "DEP_NUGET_CRYPTO" => ("NuGetの暗号パッケージに関する記録が見つかりました。", "正確なパッケージ、対象フレームワーク、実行環境、OSとネイティブバックエンドを確認してください。ロックの記録は、導入済み環境やTLSの有効化を示しません。"),
+         "DEP_NATIVE_CRYPTO" => ("C/C++の暗号ライブラリへの依存やビルド設定の参照が見つかりました。", "ネイティブライブラリ、ビルド設定、プロバイダーを確認してください。vcpkg・Conan・CMakeの宣言だけでは、導入済み・方式の選択済み・TLSの合意済みとは判断できません。"),
+--- a/crates/pqc_scan_report/src/migration.js
++++ b/crates/pqc_scan_report/src/migration.js
+@@ -909,6 +909,15 @@
+       }
+       return [...variants.values()];
+     }
++    function referenceMeaning(records) {
++      const referenced = records.filter(record => record.observation.usage === "referenced");
++      if (!referenced.length) return "";
++      const lexical = referenced.some(record => record.observation.method === "lexical_match");
++      const message = lexical
++        ? t("This is a name found in text, which may be a comment or recorded data. Confirm the actual purpose and use before applying a migration action.", "文字列内の方式名の参照です。注釈や記録データの場合もあるため、移行対応の前に実際の用途と利用状況を確認してください。")
++        : t("This is a source or dependency reference. Check calls, implementation definitions, conditional constructions and installation separately, then confirm the actual purpose and use.", "ソースや依存関係の参照です。呼び出し・実装定義・条件付きの構成・導入状況を区別し、実際の用途と利用状況を確認してください。");
++      return `<p class="reference-meaning">${h(message)}</p>`;
++    }
+     function recordHtml(members, separateLocation) {
+       const i = members[0];
+       const d = decision(i),
+@@ -923,7 +932,7 @@
+       const scanLinks = !standaloneExport && hasScanReport ? scanIds
+         .map((id, index) => `<a href="${h(artifactBase)}report.html?lang=${ja() ? "ja" : "en"}#scan-match-${id}" target="_blank" rel="noopener">${t("Open scan finding", "スキャンの検出箇所を開く")}${scanIds.length > 1 ? " " + n(index + 1) : ""}</a>`)
+         .join(" · ") : "";
+-      let html = `<section id="target-${i + 1}"><h3>${h(algorithm(tg.technical.identifier))}</h3>${separateLocation ? "" : `<p class="path">${h(recordLocation(tg))}</p>`}${scanLinks ? `<p>${scanLinks}</p>` : ""}<p>${h(state("urgency", d.urgency))} · ${h(state("information", d.information))} · ${h(state("readiness", d.readiness))}</p>${section(t("Decision reasons", "判定理由"), list(d.reason_codes), 4)}${unbindable.has(tg.id) ? bindingNotice() : ""}<table><tbody>${row(t("Observation method", "検出方法"), methods)}${rules ? row(t("Scan rule ID", "スキャンのルールID"), rules) : ""}${row(t("Role", "役割"), word(tg.source_ref.role))}${tg.source_ref.dependency_provenance ? row(t("Dependency declaration", "依存関係の宣言"), tg.source_ref.dependency_provenance === "manifest_dev_declared" ? t("Declared development dependency", "開発用依存関係として宣言") : word(tg.source_ref.dependency_provenance)) : ""}${row(t("Observed purpose", "検出結果の用途"), word(tg.technical.purpose))}${row(t("Assessment system ID", "評価上のシステムID"), d.system_id || t("Unbound", "未対応付け"))}${row(t("Quantum assessment", "量子計算に対する評価"), word(tg.technical.quantum))}${row(t("Evidence assurance", "確認できている範囲"), assurances)}${row(t("Collection", "収集状況"), word(tg.observation.collection_outcome))}${row(t("Parameter encoding", "パラメーターの符号化"), word(tg.technical.encoding_assurance))}${(tg.technical.classical_concerns || []).map((c) => row(t("Classical concern", "従来暗号の懸念"), word(c))).join("")}${(tg.technical.components || []).map((c) => row(t("Hybrid component", "ハイブリッド構成要素"), `${word(c.role)} / ${algorithm(c.assessment.identifier)} / ${word(c.assessment.quantum)}`)).join("")}${tg.technical.combiner_assessment ? row(t("Combiner assessment", "結合処理の確認範囲"), word(tg.technical.combiner_assessment)) : ""}</tbody></table>${section(t("Evidence limitations", "根拠の制約"), list(tg.limitations.filter(code => !d.reason_codes.some(reason => word(reason) === word(code)))), 4)}${section(t("Next checks", "次に確認すること"), list(d.action.validation_steps), 4)}${section(t("Claims used", "判断に使った申告"), applied.map(entry => claimHtml(value(entry.ref), entry.index, `target-${i + 1}-`)).join(""), 4)}`;
++      let html = `<section id="target-${i + 1}"><h3>${h(algorithm(tg.technical.identifier))}</h3>${separateLocation ? "" : `<p class="path">${h(recordLocation(tg))}</p>`}${scanLinks ? `<p>${scanLinks}</p>` : ""}<p>${h(state("urgency", d.urgency))} · ${h(state("information", d.information))} · ${h(state("readiness", d.readiness))}</p>${referenceMeaning(records)}${records.length > 1 ? `<p>${t("Matching records at this location", "この箇所に対応する検出記録")}: ${n(records.length)} · ${t("These records alone do not establish the number of independent cryptographic uses.", "この記録数だけでは、独立した暗号利用の件数は判断できません。")}</p>` : ""}${section(t("Decision reasons", "判定理由"), list(d.reason_codes), 4)}${unbindable.has(tg.id) ? bindingNotice() : ""}<table><tbody>${row(t("Observation method", "検出方法"), methods)}${rules ? row(t("Scan rule ID", "スキャンのルールID"), rules) : ""}${row(t("Role", "役割"), word(tg.source_ref.role))}${tg.source_ref.dependency_provenance ? row(t("Dependency declaration", "依存関係の宣言"), tg.source_ref.dependency_provenance === "manifest_dev_declared" ? t("Declared development dependency", "開発用依存関係として宣言") : word(tg.source_ref.dependency_provenance)) : ""}${row(t("Observed purpose", "検出結果の用途"), word(tg.technical.purpose))}${row(t("Assessment system ID", "評価上のシステムID"), d.system_id || t("Unbound", "未対応付け"))}${row(t("Quantum assessment", "量子計算に対する評価"), word(tg.technical.quantum))}${row(t("Evidence assurance", "確認できている範囲"), assurances)}${row(t("Observed use state", "検出時の利用状態"), word(tg.observation.usage))}${row(t("Collection", "収集状況"), word(tg.observation.collection_outcome))}${row(t("Parameter encoding", "パラメーターの符号化"), word(tg.technical.encoding_assurance))}${(tg.technical.classical_concerns || []).map((c) => row(t("Classical concern", "従来暗号の懸念"), word(c))).join("")}${(tg.technical.components || []).map((c) => row(t("Hybrid component", "ハイブリッド構成要素"), `${word(c.role)} / ${algorithm(c.assessment.identifier)} / ${word(c.assessment.quantum)}`)).join("")}${tg.technical.combiner_assessment ? row(t("Combiner assessment", "結合処理の確認範囲"), word(tg.technical.combiner_assessment)) : ""}</tbody></table>${section(t("Evidence limitations", "根拠の制約"), list(tg.limitations.filter(code => !d.reason_codes.some(reason => word(reason) === word(code)))), 4)}${section(t("Next checks", "次に確認すること"), list(d.action.validation_steps), 4)}${section(t("Claims used", "判断に使った申告"), applied.map(entry => claimHtml(value(entry.ref), entry.index, `target-${i + 1}-`)).join(""), 4)}`;
+       if (d.action.candidate_ids.length)
+         html +=
+           `<h4>${t("Candidates: integration unverified", "検討候補（組込みは未検証）")}</h4>` +
+--- a/crates/pqc_scan_report/src/migration_copy.rs
++++ b/crates/pqc_scan_report/src/migration_copy.rs
+@@ -4,6 +4,21 @@
+     ActionKind, ClaimFreshness, Information, Readiness, ResolvedClaim, Target, Urgency,
+ };
+ pub(crate) struct Labels(pub(crate) ReportLanguage);
++pub(crate) fn observation_explanation(
++    t: &Target,
++    language: ReportLanguage,
++) -> Option<&'static str> {
++    if t.observation.usage != "referenced" {
++        return None;
++    }
++    let c = Labels(language);
++    match t.observation.method.as_str() {
++        "lexical_match" => Some(c.pick("This is a name found in text, which may be a comment or recorded data. Confirm the actual purpose and use before applying a migration action.","文字列内の方式名の参照です。注釈や記録データの場合もあるため、移行対応の前に実際の用途と利用状況を確認してください。")),
++        "ast_pattern" => Some(c.pick("This is a syntactic source reference. Check the originating code for a call, an implementation definition or a conditional construction, then confirm the actual purpose and use.","構文上の参照です。検出元でAPI呼び出し・実装定義・条件付きの構成を区別し、実際の用途と利用状況を確認してください。")),
++        "dependency_report" => Some(c.pick("This is a dependency record. Confirm installation, selected algorithms and actual purpose and use separately.","依存関係の記録です。導入状況、選択した暗号方式、実際の用途と利用状況を別途確認してください。")),
++        _ => None,
++    }
++}
+ impl Labels {
+     pub(crate) fn pick<'a>(&self, en: &'a str, ja: &'a str) -> &'a str {
+         if self.0 == ReportLanguage::Ja {
+@@ -192,6 +207,14 @@
+                 "検証未完了、または収集情報が不完全",
+             ),
+             "syntactic" => ("Syntactic reference", "構文上の参照"),
++            "referenced" => (
++                "Reference only; runtime use unverified",
++                "参照のみ。実行時の利用は未確認",
++            ),
++            "configured" => (
++                "Configuration recorded; active use unverified",
++                "設定の記録。実際の利用は未確認",
++            ),
+             "lexical" => ("Text match", "文字列の一致"),
+             "parsed" => ("Parsed attributes", "解析した属性"),
+             "collector_reported_verified_session" => (
+--- a/crates/pqc_scan_report/src/migration_markdown.rs
++++ b/crates/pqc_scan_report/src/migration_markdown.rs
+@@ -219,6 +219,9 @@
+             i + 1,
+             c.pick("Evidence for this response", "この対応とした根拠")
+         )?;
++        if let Some(explanation) = crate::migration_copy::observation_explanation(t, language) {
++            writeln!(out, "{explanation}\n")?;
++        }
+         writeln!(
+             out,
+             "| {} | {} |\n|---|---|",
+@@ -237,6 +240,10 @@
+             (
+                 c.pick("Evidence assurance", "確認できている範囲"),
+                 c.token(&t.observation.assurance).into(),
++            ),
++            (
++                c.pick("Observed use state", "検出時の利用状態"),
++                c.token(&t.observation.usage).into(),
+             ),
+             (
+                 c.pick("Collection", "収集状況"),
+--- a/crates/pqc_scan_report/src/migration_view.rs
++++ b/crates/pqc_scan_report/src/migration_view.rs
+@@ -10,7 +10,8 @@
+ 
+ /// A path hint, never proof of production/test applicability.
+ pub fn migration_location(path: Option<&str>) -> &'static str {
+-    let parts: Vec<_> = path.unwrap_or("").split(['/', '\\']).collect();
++    let lower = path.unwrap_or("").to_ascii_lowercase();
++    let parts: Vec<_> = lower.split(['/', '\\']).collect();
+     let name = parts.last().copied().unwrap_or("");
+     if parts.iter().any(|p| {
+         [
+@@ -20,8 +21,12 @@
+             "test-framework",
+             "__tests__",
+             "spec",
++            "unittests",
++            "unit-tests",
++            "fixtures",
+         ]
+         .contains(p)
++            || p.ends_with(".tests")
+     }) {
+         "tests"
+     } else if [
+@@ -30,21 +35,34 @@
+         "package-lock.json",
+         "pnpm-lock.yaml",
+         "yarn.lock",
+-        "Cargo.toml",
+-        "Cargo.lock",
++        "cargo.toml",
++        "cargo.lock",
+         "go.mod",
+         "go.sum",
+-        "Gemfile",
+-        "Gemfile.lock",
++        "gemfile",
++        "gemfile.lock",
+         "requirements.txt",
+         "pyproject.toml",
++        "composer.json",
++        "composer.lock",
++        "packages.lock.json",
++        "packages.config",
++        "project.assets.json",
++        "cmakelists.txt",
++        "vcpkg.json",
++        "conanfile.py",
++        "conanfile.txt",
+     ]
+     .contains(&name)
++        || [".csproj", ".fsproj", ".vbproj", ".props", ".targets"]
++            .iter()
++            .any(|ext| name.ends_with(ext))
+     {
+         "dependency"
+     } else if [
+         ".java", ".rs", ".go", ".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".h", ".cpp", ".kt",
+-        ".rb", ".cs", ".php",
++        ".rb", ".cs", ".php", ".phtml", ".cc", ".cxx", ".hpp", ".hh", ".hxx", ".cc.inc",
++        ".cpp.inc", ".c.inc",
+     ]
+     .iter()
+     .any(|ext| name.ends_with(ext))
+--- a/crates/pqc_scan_report/tests/compact.rs
++++ b/crates/pqc_scan_report/tests/compact.rs
+@@ -73,6 +73,39 @@
+ }
+ 
+ #[test]
++fn overlapping_non_equivalent_records_are_explained_without_merging_machine_evidence() {
++    let root = std::env::temp_dir().join(format!("pqc-overlap-{}", std::process::id()));
++    let mut raw = result(2);
++    raw.findings[1].location = raw.findings[0].location.clone();
++    raw.findings[0].location.line = 1;
++    raw.findings[1].location.line = 1;
++    raw.findings[1].rule_id = "OTHER_REFERENCE".into();
++    raw.findings[1].description = "Distinct source evidence".into();
++    raw.findings[1].risk = Risk::QuantumUncertain;
++    for (name, language, phrase) in [
++        ("ja", ReportLanguage::Ja, "この位置の検出記録"),
++        (
++            "en",
++            ReportLanguage::En,
++            "Detection records at this location",
++        ),
++    ] {
++        write_reports_with_language(&raw, &root.join(name), ReportFormat::All, language).unwrap();
++        let html = fs::read_to_string(root.join(name).join("report.html")).unwrap();
++        let md = fs::read_to_string(root.join(name).join("report.md")).unwrap();
++        assert!(html.contains(phrase));
++        assert!(md.contains(phrase));
++        assert!(html.contains("Distinct source evidence"));
++        let machine: serde_json::Value =
++            serde_json::from_slice(&fs::read(root.join(name).join("report.json")).unwrap())
++                .unwrap();
++        assert_eq!(machine["findings"].as_array().unwrap().len(), 2);
++        assert_eq!(machine["findings"][1]["risk"], "quantum-uncertain");
++    }
++    fs::remove_dir_all(root).unwrap();
++}
++
++#[test]
+ fn compact_reports_keep_all_locations_and_only_share_identical_actions() {
+     let root = std::env::temp_dir().join(format!(
+         "pqc-compact-{}-{}",
+--- a/crates/pqc_scan_report/tests/migration-navigation.test.cjs
++++ b/crates/pqc_scan_report/tests/migration-navigation.test.cjs
+@@ -861,3 +861,57 @@
+  const regular=fixture(1,false,false,s=>{s.targets[0].source_ref.dependency_provenance='build_requirement_unresolved';});
+  assert.doesNotMatch(regular.root.innerHTML,/Declared development dependencies: 1/);
+ });
++
++test('referenced observation details explain text and source evidence in both languages without changing the archive', () => {
++  for (const method of ['lexical_match', 'ast_pattern', 'dependency_report']) {
++    for (const lang of ['en', 'ja']) {
++      const f=fixture(1,false,false,s=>{s.targets[0].observation.usage='referenced';s.targets[0].observation.method=method;});
++      const original=JSON.stringify(f.payload.archive);
++      f.instance.setLanguage(lang);f.jump('#target-1');
++      const detail=f.body().innerHTML;
++      assert.match(detail, /class="reference-meaning"/);
++      assert.ok(detail.includes(lang==='ja'?'検出時の利用状態':'Observed use state'));
++      assert.match(detail, /referenced<\/td>/);
++      const expected=method==='lexical_match'
++        ? (lang==='ja'?'文字列内の方式名の参照です。':'This is a name found in text,')
++        : (lang==='ja'?'ソースや依存関係の参照です。':'This is a source or dependency reference.');
++      assert.ok(detail.includes(expected),`${method}/${lang}`);
++      assert.doesNotMatch(detail,/Matching records at this location|この箇所に対応する検出記録/);
++      assert.equal(JSON.stringify(f.payload.archive),original);
++    }
++  }
++});
++
++test('configured observations retain their use state without the reference-only explanation or a multiple-record note', () => {
++  for (const lang of ['en','ja']) {
++    const f=fixture(1,false,false,s=>{s.targets[0].observation.usage='configured';});
++    const original=JSON.stringify(f.payload.archive);
++    f.instance.setLanguage(lang);f.jump('#target-1');
++    assert.ok(f.body().innerHTML.includes(lang==='ja'?'検出時の利用状態':'Observed use state'));
++    assert.match(f.body().innerHTML,/configured<\/td>/);
++    assert.doesNotMatch(f.body().innerHTML,/class="reference-meaning"|Matching records at this location|この箇所に対応する検出記録/);
++    assert.equal(JSON.stringify(f.payload.archive),original);
++  }
++});
++
++test('equivalent reference records explain the count while preserving both observations in export', async () => {
++  for (const lang of ['en','ja']) {
++    const f=fixture(2,false,false,s=>{
++      s.targets.forEach((t,i)=>{t.source_ref.observation_id='o'+i;t.source_ref.path='src/signature.cs';t.source_ref.line=18;t.technical.identifier='RSA';t.observation.usage='referenced';});
++      s.targets[1].observation.method='lexical_match';s.targets[1].observation.assurance='lexical';
++      s.decisions[1].system_id=s.decisions[0].system_id;s.decisions[1].urgency=s.decisions[0].urgency;
++      return [{members:[0,1]}];
++    });
++    const original=JSON.stringify(f.payload.archive);
++    f.instance.setLanguage(lang);f.click({work:'0'});f.click({target:'0'});
++    const detail=f.body().innerHTML;
++    assert.ok(detail.includes(lang==='ja'?'この箇所に対応する検出記録: 2':'Matching records at this location: 2'));
++    assert.ok(detail.includes(lang==='ja'?'この記録数だけでは、独立した暗号利用の件数は判断できません。':'These records alone do not establish the number of independent cryptographic uses.'));
++    assert.ok(detail.includes(lang==='ja'?'構文解析 · 文字列一致':'Syntax pattern · Text match'));
++    assert.equal((detail.match(/<section id="target-/g)||[]).length,1);
++    f.click({},['data-download']);const exported=JSON.parse(await f.saved().text());
++    assert.equal(exported.targets.length,2);assert.equal(exported.decisions.length,2);
++    assert.deepEqual(exported.targets.map(t=>t.observation.usage),['referenced','referenced']);
++    assert.equal(JSON.stringify(f.payload.archive),original);
++  }
++});
+--- a/crates/pqc_scan_report/tests/migration_markdown.rs
++++ b/crates/pqc_scan_report/tests/migration_markdown.rs
+@@ -24,6 +24,37 @@
+ }
+ fn text(r: &MigrationAssessment, l: ReportLanguage) -> String {
+     String::from_utf8(migration_markdown_bytes(r, l).unwrap()).unwrap()
++}
++#[test]
++fn source_references_explain_use_state_without_changing_assessment_or_claiming_execution() {
++    let r = report(fixture::inventory("RSA"), None);
++    let before = serde_json::to_value(&r).unwrap();
++    let ja = text(&r, ReportLanguage::Ja);
++    let en = text(&r, ReportLanguage::En);
++    assert!(ja.contains("検出時の利用状態"));
++    assert!(ja.contains("実際の用途と利用状況"));
++    assert!(en.contains("Observed use state"));
++    assert!(en.contains("actual purpose and use"));
++    assert_eq!(serde_json::to_value(&r).unwrap(), before);
++}
++
++#[test]
++fn language_dependency_and_test_locations_are_useful_hints_without_policy_inference() {
++    use pqc_scan_report::migration_location;
++    for (path, expected) in [
++        ("UnitTests/HeaderTests.cs", "tests"),
++        ("Project.Tests/Signing.cs", "tests"),
++        ("src/lib.cc", "source"),
++        ("src/lib.C", "source"),
++        ("src/impl.cc.inc", "source"),
++        ("views/page.phtml", "source"),
++        ("composer.json", "dependency"),
++        ("src/Crypto.csproj", "dependency"),
++        ("Directory.Packages.props", "dependency"),
++        ("contest/main.php", "source"),
++    ] {
++        assert_eq!(migration_location(Some(path)), expected, "{path}");
++    }
+ }
+ #[test]
+ fn paired_reports_preserve_decisions_with_human_tables_and_no_json_dump() {
+--- a/crates/pqc_scan_rules/tests/quality_metadata.rs
++++ b/crates/pqc_scan_rules/tests/quality_metadata.rs
+@@ -19,7 +19,7 @@
+         );
+     }
+     let rules = RuleSet::load_from_dir(&root.join("rules/default")).unwrap();
+-    assert_eq!(rules.len(), 137);
++    assert_eq!(rules.len(), 139);
+     let rows = metadata["rules"].as_array().unwrap();
+     assert_eq!(rows.len(), rules.len());
+     let mut seen = BTreeSet::new();
+--- a/docs/architecture.md
++++ b/docs/architecture.md
+@@ -608,3 +608,9 @@
+ exact OQS mechanism/constant spellings. C++ template frames and an owner-scoped
+ symbol index handle type/non-type/default/template-template parameters and
+ using-declaration shadows without instantiation/import resolution.
++
++## Bounded OSS follow-up references (task085)
++
++The existing source-fact registry also binds two additive implementation/construction rules to the installed YAML fingerprints. Definitions, conditional guards and canonical composite components remain syntactic references with no execution or conformance claim. Explicit C/C++ fragment suffixes are parsed without preprocessing. The narrow C++ declarator repair requires nullptr to rule out a parameter declaration; C# identical-name handling requires identical canonical declared types. Opaque XML/chain declared classes can survive settings mutations without retaining an algorithm or claiming policy success.
++
++Display-only classification covers comments and literal Received headers, including bounded TLS tokens whose preview is masked. Original source coordinates and the exact masking function must corroborate reconstruction. Only human projections explain the reference kind, use state and coincident records; public JSON/native schema and policy inputs are unchanged.
+--- a/docs/quality/rules/RULE-QUALITY-METADATA.json
++++ b/docs/quality/rules/RULE-QUALITY-METADATA.json
+@@ -53,6 +53,10 @@
+     {
+       "path": "rules/default/language_dependencies.yml",
+       "sha256": "99cdff24352df3f9c69545b773fcaa877b1b77faa003fc301b99455d629c3d9f"
++    },
++    {
++      "path": "rules/default/source_references.yml",
++      "sha256": "0da824be0bea3f02ede9d8c461615d675ae5ccb8d7e45cb24c195e696ea7da9c"
+     }
+   ],
+   "references": {
+@@ -223,6 +227,30 @@
+       "edition": "076 frozen 2026-11-24 SHA256 c207aaa30adb88d397357f2a21f6b37ef1ccd328d72bf2030b8262b2783ae319",
+       "url": "tasks/076/evidence/FORMAT-SOURCES.json",
+       "scope_limit": "Supported literal declarations and source-local lock claims only; no installed software, graph, active crypto or runtime support."
++    },
++    "OSS-SOURCE-085": {
++      "title": "Pinned implementation and construction source contracts",
++      "edition": "Task084 fixed upstream revisions; task085 bounded source interpretation",
++      "url": "tasks/085/TASK-085-PLAN.md",
++      "scope_limit": "Named definitions and conditional/component references only; no implementation conformance, execution, negotiated protection or whole-construction security."
++    },
++    "OSS-IMPLEMENTATION-085": {
++      "title": "Pinned BoringSSL implementation entries",
++      "edition": "5ec099107553142e9cb34dfe52f3c5bb42c9b7fb",
++      "url": "https://github.com/google/boringssl/tree/5ec099107553142e9cb34dfe52f3c5bb42c9b7fb/crypto",
++      "scope_limit": "Canonical function definitions identify declared implementation entries, not conformance or execution."
++    },
++    "OSS-HYBRID-085": {
++      "title": "OpenSSH conditional sntrup761/X25519 source",
++      "edition": "d1b85c67231443b6db150c56ec5aec0e88459edb",
++      "url": "https://github.com/openssh/openssh-portable/blob/d1b85c67231443b6db150c56ec5aec0e88459edb/kexsntrup761x25519.c",
++      "scope_limit": "Conditional construction reference only; compiled support and actual negotiation unverified."
++    },
++    "OSS-COMPOSITE-085": {
++      "title": "Bouncy Castle composite ML-DSA generator",
++      "edition": "4814a10bc95da8757d8390c59b0b62d4cc00cb0d",
++      "url": "https://github.com/bcgit/bc-csharp/blob/4814a10bc95da8757d8390c59b0b62d4cc00cb0d/crypto/src/crypto/generators/CompositeMLDsaKeyPairGenerator.cs",
++      "scope_limit": "Traditional component request in its canonical composite owner; no whole-construction security inference."
+     }
+   },
+   "rules": [
+@@ -6917,6 +6945,102 @@
+           "expected_pattern_match": false
+         }
+       ]
++    },
++    {
++      "id": "SOURCE_IMPLEMENTATION_REFERENCE",
++      "rule_snapshot": {
++        "id": "SOURCE_IMPLEMENTATION_REFERENCE",
++        "kind": "tree_sitter",
++        "category": "CryptoAPI",
++        "severity": "info",
++        "risk": "quantum-uncertain",
++        "confidence": 0.7,
++        "scope": "c,cpp",
++        "pattern": "\\b(?:ECDSA_sign|BCM_mlkem(?:512|768|1024)_generate_key|BCM_mldsa(?:44|65|87)_generate_key)\\b",
++        "description": "A recognized cryptographic implementation entry is defined in source; this is not an API call or evidence of execution.",
++        "migration_hint": "Review implementation ownership, callers and build inclusion. A named implementation entry does not prove conformance, enabled protection or migration completion."
++      },
++      "purpose": "implementation_definition_reference",
++      "algorithm_families": [
++        "ECDSA",
++        "ML-KEM",
++        "ML-DSA"
++      ],
++      "quantum": "unknown_from_source_reference",
++      "classical": "not_assessed",
++      "reference_ids": [
++        "OSS-IMPLEMENTATION-085",
++        "FIPS203",
++        "FIPS204"
++      ],
++      "reference_application": "Static source identity only; no execution/conformance/resistance inference.",
++      "method_limits": [
++        "The compiled pattern is only a target-level control; the bounded AST handler distinguishes actual definitions or conditional/component structures from strings, prototypes and calls.",
++        "No target source is executed or compiled; original137 rule definitions remain unchanged."
++      ],
++      "known_gaps": [
++        "Finite canonical entry/type names; arbitrary implementations and whole-program construction equivalence are not inferred."
++      ],
++      "review_status": "source_classification_review_not_accuracy_certification",
++      "fixtures": [
++        {
++          "target": "ECDSA_sign",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "NotECDSA_sign",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        }
++      ]
++    },
++    {
++      "id": "SOURCE_CONSTRUCTION_REFERENCE",
++      "rule_snapshot": {
++        "id": "SOURCE_CONSTRUCTION_REFERENCE",
++        "kind": "tree_sitter",
++        "category": "PQC",
++        "severity": "info",
++        "risk": "quantum-uncertain",
++        "confidence": 0.7,
++        "scope": "c,cpp,csharp",
++        "pattern": "\\b(?:USE_SNTRUP761X25519|GenerateTraditionalKeyPair)\\b",
++        "description": "A conditional hybrid or composite implementation component is referenced; combined protection and execution remain unverified.",
++        "migration_hint": "Review both components, the exact construction, build conditions and combiner separately. A component or conditional guard does not prove negotiation or whole-construction security."
++      },
++      "purpose": "conditional_or_composite_construction_reference",
++      "algorithm_families": [
++        "sntrup761/X25519",
++        "CompositeMLDsa"
++      ],
++      "quantum": "unknown_from_source_reference",
++      "classical": "not_assessed",
++      "reference_ids": [
++        "OSS-HYBRID-085",
++        "OSS-COMPOSITE-085"
++      ],
++      "reference_application": "Static source identity only; no execution/conformance/resistance inference.",
++      "method_limits": [
++        "The compiled pattern is only a target-level control; the bounded AST handler distinguishes actual definitions or conditional/component structures from strings, prototypes and calls.",
++        "No target source is executed or compiled; original137 rule definitions remain unchanged."
++      ],
++      "known_gaps": [
++        "Finite canonical entry/type names; arbitrary implementations and whole-program construction equivalence are not inferred."
++      ],
++      "review_status": "source_classification_review_not_accuracy_certification",
++      "fixtures": [
++        {
++          "target": "USE_SNTRUP761X25519",
++          "desired_positive": true,
++          "expected_pattern_match": true
++        },
++        {
++          "target": "USE_SNTRUP761X25519_EXTRA",
++          "desired_positive": false,
++          "expected_pattern_match": false
++        }
++      ]
+     }
+   ],
+   "integrated_develop": "26fa19e7bd2434836d6c4dbed0185f34e15b9e45",
+--- a/docs/quality/rules/RULE-QUALITY.md
++++ b/docs/quality/rules/RULE-QUALITY.md
+@@ -1,6 +1,6 @@
+ # Built-in rule quality companion (task028)
+ 
+-[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **137 current
++[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **139 current
+ built-in rules**, not the historical counts in task descriptions. Existing YAML is
+ the executable source of truth. This original MIT development-only companion is
+ not loaded by the CLI, does not add report fields, and does not certify accuracy.
+@@ -41,7 +41,7 @@
+ separate from expected current matches. They are not end-to-end source truth,
+ symbol resolution, a key parser test, provider validation or performance evidence.
+ The existing detector/CLI/certificate/schema suites and frozen task023 corpus still
+-provide their own bounded integration evidence. Do not count these controls as137
++provide their own bounded integration evidence. Do not count these controls as139
+ new independently labeled accuracy units or as approved quality budgets.
+ 
+ The original task028 recorded eight negative controls with false positives. Four
+@@ -145,3 +145,7 @@
+ ## Task081 dependency input supplement
+ 
+ Three additive exact-name/ecosystem predicates cover Composer/platform, NuGet and native build declarations. The inherited134 rows remain byte-for-byte unchanged. Fifteen new compiled-target controls are distinct from parser/provenance/privacy/CLI tests. Dependency presence never selects an algorithm or proves deployment.
++
++## Implementation/construction reference additions (task085)
++
++Two informational, quantum-uncertain AST rows add separate implementation-definition and conditional/component-reference evidence. The137 earlier YAML rows and their target controls are unchanged. New source-handler regressions distinguish definitions from calls/prototypes, canonical ownership from namesakes, conditional guards from string data, and composite components from whole-construction safety. No runtime, conformance or population-accuracy conclusion follows. The metadata records both positive/negative pattern targets and the stronger AST-layer interpretation.
+--- a/docs/rules-reference.md
++++ b/docs/rules-reference.md
+@@ -2,9 +2,9 @@
+ 
+ This document lists all built-in detection rules shipped in `rules/default/` and explains severity levels used in reports.
+ 
+-- Total rules: **137**
+-- Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`, `php.yml`, `csharp.yml`, `c_family.yml`, `language_dependencies.yml`
+-- Kind breakdown: `certificate`: 18, `dependency`: 19, `key`: 3, `regex`: 60, `tree_sitter`: 37
++- Total rules: **139**
++- Rule files: `cert.yml`, `crypto_api.yml`, `jwt.yml`, `middleware.yml`, `ssh.yml`, `tls.yml`, `tree_sitter.yml`, `pqc.yml`, `php.yml`, `csharp.yml`, `c_family.yml`, `language_dependencies.yml`, `source_references.yml`
++- Kind breakdown: `certificate`: 18, `dependency`: 19, `key`: 3, `regex`: 60, `tree_sitter`: 39
+ 
+ ## Validation and quality review
+ 
+@@ -24,7 +24,7 @@
+ | `high` (41) | Strong crypto risk in production paths. | Prioritize in active migration backlog. |
+ | `medium` (59) | Meaningful migration signal requiring design/planning. | Schedule remediation with clear owner and target release. |
+ | `low` (6) | Contextual or lower-confidence finding. | Triage and backlog when confirmed. |
+-| `info` (24) | Inventory-only informational signal. | Track for visibility and architecture review. |
++| `info` (26) | Inventory-only informational signal. | Track for visibility and architecture review. |
+ 
+ Note: final severity can be adjusted by context in the risk engine (for example TLS/PKI/JWT/authentication paths).
+ 
+@@ -347,3 +347,14 @@
+ ## Bounded new-language dependency references (task081)
+ 
+ `DEP_PHP_CRYPTO`, `DEP_NUGET_CRYPTO` and `DEP_NATIVE_CRYPTO` are additive info/quantum-uncertain inventory predicates over exact safe names and ecosystems. They do not infer selected algorithms, active PQC, installed packages or TLS support. Legacy broad dependency rules can additionally match these new inputs; their historical risk labels are not algorithm selection evidence. See [dependency provenance](architecture/DEPENDENCY-PROVENANCE.md) for supported formats and incomplete cases.
++
++## Static implementation and construction references (task085)
++
++The137 earlier rule definitions remain byte-identical. Two additive informational, quantum-uncertain rules distinguish facts that must not be reported as API calls or active protection. The report rule guide is generated from rules that produced findings; this catalog lists all139 built-ins.
++
++| Rule ID | Kind | Scope | Meaning |
++|---|---|---|---|
++| SOURCE_IMPLEMENTATION_REFERENCE | tree_sitter | c,cpp | Exact ECDSA or finite BCM ML-KEM/ML-DSA entry definitions, excluding prototypes and ordinary calls. Explicit .c.inc/.cc.inc/.cpp.inc fragments are parsed without preprocessing. |
++| SOURCE_CONSTRUCTION_REFERENCE | tree_sitter | c,cpp,csharp | Exact conditional sntrup761/X25519 guard or canonical Bouncy Castle composite-generator component; not enabled/negotiated use or whole-construction safety. |
++
++Existing C/C++ API handlers additionally recognize finite wolfCrypt RSA, libsecp256k1 ECDSA, Botan signer/verifier and OpenSSL chain-verification requests. C# adds canonical RSA formatters, XML signatures and certificate-chain requests. PHP adds canonical Firebase JWT and XMLSecLibs requests plus explicitly unresolved key-type-check relationships. No selector absent from source is guessed. Built-in fingerprints retain their original YAML predicates; finite handler semantics and their target-level pattern controls have distinct coverage.
+--- a/docs/user/COVERAGE.ja.md
++++ b/docs/user/COVERAGE.ja.md
+@@ -60,7 +60,7 @@
+ TLS・暗号スイート・鍵交換グループなどの設定を調べます。
+ ファイル上の設定であり、稼働中の接続で有効な方式を確認した結果ではありません。
+ 
+-組み込みルールは137件です。同梱の `rules/default` を指定して使ってください。
++組み込みルールは139件です。同梱の `rules/default` を指定して使ってください。
+ 
+ <a id="source-limits"></a>
+ <a id="source-facts"></a>
+@@ -189,3 +189,19 @@
+ 他の新しいソースルールは `quantum-uncertain` を使います。この分類はソース上の参照を示すもので、
+ 実環境での配備や保護全体を確認した意味ではありません。未対応の構成は移行評価でも不明のままで、
+ 対応状況が不足している対象を準備完了とは判定しません。
++
++## 追加のソース参照
++
++wolfCryptのRSA、libsecp256k1のECDSA、BotanのPK_Signer／PK_Verifier、OpenSSLのX509_verify_cert、.NETのRSA署名フォーマッター・SignedXml・X509Chainの限定的な参照を調べます。\
++PHPのFirebase JWTとXMLSecLibsでは、鍵や方式の指定が分からなければ暗号方式を確定しません。\
++同じ関数内のphpseclib秘密鍵型の検査と署名処理の関係を、不明な点を残した参照として記録する場合もあります。\
++その型検査がすべての実行経路で成立するとは判断しません。
++
++C++の入れ子になった直接初期化は、予約語nullptrが引数にあり、引数宣言ではないと区別できる場合に限って参照を復元します。\
++宣言の可能性が残る構文は未解決です。\
++C#の値と型が同名の場合は、暗号の種類が同じだけでなく、宣言された型が同じ正規の型に解決できる場合に限って扱います。
++
++SOURCE_IMPLEMENTATION_REFERENCEは、限定した実装入口の関数定義を記録します。\
++.c.inc・.cc.inc・.cpp.incのように言語を明記した断片も対象です。\
++SOURCE_CONSTRUCTION_REFERENCEは、既知の条件付きハイブリッド方式や正規の複合鍵生成クラスの構成要素を記録します。\
++これらは呼び出し、ビルドで有効な分岐、仕様への適合、構成全体の耐性を確定するものではありません。
+--- a/docs/user/COVERAGE.md
++++ b/docs/user/COVERAGE.md
+@@ -62,7 +62,7 @@
+ Istio, HAProxy and Traefik. Checks cover TLS, cipher suites and key-exchange groups.
+ These are file settings, not confirmed algorithms in a live connection.
+ 
+-There are 137 built-in rules. Use the matching bundled `rules/default` directory.
++There are 139 built-in rules. Use the matching bundled `rules/default` directory.
+ 
+ <a id="source-limits"></a>
+ <a id="source-facts"></a>
+@@ -207,3 +207,11 @@
+ remain unknown in migration assessment, and missing support cannot become ready.
+ 
+ New info/quantum-uncertain dependency rules add findings for these supported crypto packages. Existing broad package rules may also match new inputs; a historical risk label does not identify the selected algorithm. This can change finding counts and fail thresholds on newly covered files. Missing versions, active providers, peer support and runtime capabilities remain unknown. Guidance distinguishes PHP extensions/native libraries, .NET target/package/OS/backend and C/C++ build/provider prerequisites; exact OQS wrapper identities remain separate. API availability does not establish PQC TLS or require blanket replacement of symmetric AES.
++
++## Additional source references
++
++Finite wolfCrypt RSA and libsecp256k1 ECDSA calls, Botan PK_Signer/PK_Verifier, OpenSSL X509_verify_cert, .NET RSA signature formatters, SignedXml and X509Chain requests are recognized. PHP Firebase JWT and XMLSecLibs requests retain unknown algorithms where keys or selectors are unavailable. A same-function phpseclib private-key type check can retain an unresolved signature relationship, without asserting that the check dominates every path.
++
++C++ nested direct initializers are recovered only when a reserved nullptr argument rules out a parameter declaration. Possible declarations remain unresolved. C# identical simple/type names require the identical canonical declared type, rather than merely the same algorithm family.
++
++SOURCE_IMPLEMENTATION_REFERENCE records finite named entry definitions, including explicit .c.inc/.cc.inc/.cpp.inc fragments. SOURCE_CONSTRUCTION_REFERENCE records exact conditional hybrid guards or canonical composite-generator components. These records do not establish actual calls, compiled branches, conformance or combined resistance.
+--- a/docs/user/REPORTS.ja.md
++++ b/docs/user/REPORTS.ja.md
+@@ -350,3 +350,17 @@
+ テスト除外や `.pqcignore` を適用したレポートでは、既存の検査範囲欄にその条件を表示します。Rustの混在ファイルは解析したまま、テスト専用と構文から確認できた範囲の所見だけを省くため、ファイル数は減らない場合があります。周辺ソースには隣接するテストが表示される場合があります。[スキャン時の除外設定](SCANNING.ja.md#テストコードを除外する)も確認してください。
+ 
+ 解析未完了の理由は、分かる範囲で原因別に表示します。診断記録数・ファイル数・ファイル例と次の確認方法を区別し、詳細は既存の診断JSONのmessageにも残します。対応するエラー文に含まれる方式名は、移行の対応候補ではなく参考情報に表示します。検出箇所を開いて原文を確認できます。
++
++## ソース上の参照の読み分け
++
++ルールの説明には、そのスキャンで所見を出したルールを掲載します。\
++組み込みルール全体はルールリファレンスで確認してください。\
++実装定義と条件付き・複合方式の構成要素には、専用の情報ルールがあります。\
++注釈・方式名の宣言・Receivedヘッダーの文字列記録は情報として扱い、実際の設定候補や暗号を呼び出すテストは残します。\
++元のルールIDとリスク分類も保持しますが、参照だけで配備済みの脆弱性とは判断しません。
++
++移行レポートの根拠の詳細では、「検出時の利用状態」と、文字列・構文・依存宣言の参照から分かる範囲を確認できます。\
++実際の用途と利用状況を確認してから対応を決めてください。\
++同じ位置に複数の検出記録がある場合は、その件数と根拠の重なりを表示します。\
++異なる方式や指摘は自動でまとめず、独立した暗号利用の件数とも断定しません。\
++テスト用フォルダや依存宣言の分類はパスに基づく手掛かりであり、それだけで対象外にしたり評価を変更したりしません。
+--- a/docs/user/REPORTS.md
++++ b/docs/user/REPORTS.md
+@@ -377,3 +377,9 @@
+ Reports generated with test exclusion or `.pqcignore` list those conditions in the existing inspection scope. Mixed Rust files are still analyzed; omitting syntax-proven test-only findings does not necessarily reduce file counts, and source context may show adjacent tests. See [scan exclusion settings](SCANNING.md#exclude-test-code).
+ 
+ Known unfinished-inspection causes are grouped separately, with diagnostic record counts, distinct file counts, example paths and next checks. The existing diagnostics JSON message retains the detail. Algorithm references in recognised human error text appear under reference information rather than migration candidates; expand the location to inspect the source.
++
++## Interpreting source-only records
++
++The rule guide lists rules that produced findings in this scan; the complete built-in catalog is maintained in the rule reference. Source implementation definitions and conditional/composite components have separate informational rules. Comments, symbol declarations and literal Received-header records are informational references, while real configuration candidates and executable crypto tests remain visible. Raw rule identities and risk classifications remain available; an informational source reference is not a confirmed deployed vulnerability.
++
++Migration evidence details show the observed use state and explain what lexical, syntactic or dependency references establish. Confirm actual purpose/use before acting. Coincident detection records show their count and evidence overlap. Distinct algorithms or concerns are not automatically merged, and record counts are not asserted to be independent cryptographic uses. Test-folder and dependency-file categories are path hints only and do not automatically exclude a target or change its assessment.
+--- a/rules/default/source_references.yml
++++ b/rules/default/source_references.yml
+@@ -0,0 +1,21 @@
++- id: SOURCE_IMPLEMENTATION_REFERENCE
++  kind: tree_sitter
++  category: CryptoAPI
++  severity: info
++  risk: quantum-uncertain
++  confidence: 0.70
++  scope: c,cpp
++  pattern: '\b(?:ECDSA_sign|BCM_mlkem(?:512|768|1024)_generate_key|BCM_mldsa(?:44|65|87)_generate_key)\b'
++  description: A recognized cryptographic implementation entry is defined in source; this is not an API call or evidence of execution.
++  migration_hint: Review implementation ownership, callers and build inclusion. A named implementation entry does not prove conformance, enabled protection or migration completion.
++
++- id: SOURCE_CONSTRUCTION_REFERENCE
++  kind: tree_sitter
++  category: PQC
++  severity: info
++  risk: quantum-uncertain
++  confidence: 0.70
++  scope: c,cpp,csharp
++  pattern: '\b(?:USE_SNTRUP761X25519|GenerateTraditionalKeyPair)\b'
++  description: A conditional hybrid or composite implementation component is referenced; combined protection and execution remain unverified.
++  migration_hint: Review both components, the exact construction, build conditions and combiner separately. A component or conditional guard does not prove negotiation or whole-construction security.

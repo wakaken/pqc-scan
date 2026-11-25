@@ -1,0 +1,149 @@
+{
+  "source_manifest_sha256": "c73abf4448fe8172a544cd5ce4dabe3328d2d4c05b27ae0c46d2d5002ce12abb",
+  "source_files_rechecked": true,
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "workspace-project-identity.log",
+      "tool_session": 6693
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "clippy-project-identity.log",
+      "tool_session": 57933
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "fmt-project-identity.log",
+      "tool_session": 6693
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "pqc_scan_detectors",
+        "--test",
+        "csharp_source",
+        "--test",
+        "php_source"
+      ],
+      "exit": 0,
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "log": "project-identity-regression.log",
+      "tool_session": 15354
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "exit": 0,
+      "log": "workspace-features-project-identity.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_TARGET_DIR": "target/v05-feature"
+      }
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace"
+      ],
+      "exit": 0,
+      "log": "build-project-identity.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/079/evidence/check_cli_package.py"
+      ],
+      "exit": 0,
+      "log": "cli-package-project-identity.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/079/evidence/verify_compatibility.py"
+      ],
+      "exit": 0,
+      "log": "compat-project-identity.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/distribution",
+        "-p",
+        "test_*.py"
+      ],
+      "exit": 0,
+      "log": "distribution-project-identity.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "assertions": "43 manifest source hashes rechecked against final unchanged files"
+    }
+  ],
+  "evidence_helpers": {
+    "tasks/079/evidence/check_cli_package.py": "dafe4ee230b6b660c022239d342d18bb560f910ccaa26d335762e49b0fd7bb61",
+    "tasks/079/evidence/verify_compatibility.py": "f8d2966dee45c7898b9214eef418246039f4b2d708b3ba58a723519ca87146ea"
+  },
+  "observations": "CLI-PACKAGE-CHECKS.json, COMPATIBILITY.json, BROWSER-GENERATION.json, BROWSER-OBSERVATIONS.json and OBSERVATION-FILES.json",
+  "pending": [],
+  "implementation_review": "/root/implementation_review accepted c73abf4448fe8172a544cd5ce4dabe3328d2d4c05b27ae0c46d2d5002ce12abb; no outstanding findings",
+  "historical_failures": "Prior review1 and project-identity red logs and v2 source/observations preserved. No failed or unexecuted final-source required run.",
+  "test_review": "/root/test_review accepted c73abf444; all43source/92observations matched; P2 resolved"
+}

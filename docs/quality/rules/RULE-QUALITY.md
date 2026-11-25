@@ -1,6 +1,6 @@
 # Built-in rule quality companion (task028)
 
-[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **125 current
+[Machine-readable review](RULE-QUALITY-METADATA.json) covers all **139 current
 built-in rules**, not the historical counts in task descriptions. Existing YAML is
 the executable source of truth. This original MIT development-only companion is
 not loaded by the CLI, does not add report fields, and does not certify accuracy.
@@ -37,11 +37,11 @@ configuration grammar. No standard text or real private keys are copied.
 
 ## Fixtures and known gaps
 
-The 272 current examples exercise **compiled regex targets only**, with desired labels
+The 305 current examples exercise **compiled regex targets only**, with desired labels
 separate from expected current matches. They are not end-to-end source truth,
 symbol resolution, a key parser test, provider validation or performance evidence.
 The existing detector/CLI/certificate/schema suites and frozen task023 corpus still
-provide their own bounded integration evidence. Do not count these controls as125
+provide their own bounded integration evidence. Do not count these controls as139
 new independently labeled accuracy units or as approved quality budgets.
 
 The original task028 recorded eight negative controls with false positives. Four
@@ -72,7 +72,7 @@ not changes to rule decisions or a comprehensive proof of every unsupported case
 
 ## Maintenance
 
-Development test `quality_metadata` loads authoritative built-ins, checks all8
+Development test `quality_metadata` loads authoritative built-ins, checks all12
 source hashes, exact rule population and snapshots, reference resolution/editions,
 required review fields and positive/negative pattern outcomes. A matcher/source
 change makes this binding fail until the companion is re-reviewed; never regenerate
@@ -120,3 +120,32 @@ source descriptions and cryptographic-family facts do not calibrate those values
 The existing 0.45 promotion policy remains compatibility behavior. Current
 268 compiled-target controls include four retained false-positive controls,
 not an estimate of end-to-end false-positive/false-negative rates.
+
+Task078 adds three PHP rows and six pattern controls, while preserving the previous
+125 rows. Its 180 frozen source cases and supplementary scope/privacy tests are
+separate from these pattern controls; neither cohort estimates deployment accuracy.
+
+Task079 adds three C# rows and six pattern controls without changing the previous
+128 rows. Its218 frozen focal cases and supplemental source-flow/privacy tests are
+separate evidence. The mixed PQC/HPKE/composite source rule uses quantum-uncertain
+because a construction name does not identify a post-quantum component.
+
+## C/C++ source additions (task080)
+
+Three scoped definitions append to the inherited131 rows unchanged. They cover
+finite low-level/EVP/OpenSSL and OQS requests, qualified C++ receivers and opaque
+include references. Provider/property/TLS-group settings use existing finite
+public evidence markers without algorithm assets or negotiation assertions.
+Legacy OpenSSL lexical IDs/occurrences overlap intentionally and are retained;
+argument/context privacy can mask their evidence. The frozen484 source cases and
+supplemental hostile/privacy/scope controls are separate detector conformance,
+not independent accuracy or calibration. Source-bound task080 review/checks must
+complete before its implementation is accepted.
+
+## Task081 dependency input supplement
+
+Three additive exact-name/ecosystem predicates cover Composer/platform, NuGet and native build declarations. The inherited134 rows remain byte-for-byte unchanged. Fifteen new compiled-target controls are distinct from parser/provenance/privacy/CLI tests. Dependency presence never selects an algorithm or proves deployment.
+
+## Implementation/construction reference additions (task085)
+
+Two informational, quantum-uncertain AST rows add separate implementation-definition and conditional/component-reference evidence. The137 earlier YAML rows and their target controls are unchanged. New source-handler regressions distinguish definitions from calls/prototypes, canonical ownership from namesakes, conditional guards from string data, and composite components from whole-construction safety. No runtime, conformance or population-accuracy conclusion follows. The metadata records both positive/negative pattern targets and the stronger AST-layer interpretation.

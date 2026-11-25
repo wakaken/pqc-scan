@@ -1,0 +1,19 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+error[E0369]: binary operation `==` cannot be applied to type `pqc_scan_core::Location`
+   --> crates/pqc_scan_detectors/tests/c_family_source.rs:624:9
+    |
+624 |         assert_eq!(actual.location, old.location);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         |
+    |         pqc_scan_core::Location
+    |         pqc_scan_core::Location
+    |
+note: `pqc_scan_core::Location` does not implement `PartialEq`
+   --> /Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core/src/model.rs:27:1
+    |
+ 27 | pub struct Location {
+    | ^^^^^^^^^^^^^^^^^^^ `pqc_scan_core::Location` is defined in another crate
+    = note: this error originates in the macro `assert_eq` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0369`.
+error: could not compile `pqc_scan_detectors` (test "c_family_source") due to 1 previous error

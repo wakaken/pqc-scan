@@ -1,0 +1,41 @@
+{
+  "stage": "implementation",
+  "reviewer": "/root/implementation_review",
+  "prior_source_population": 856,
+  "adopted_source_population": 882,
+  "prior_freeze": "FREEZE-2.json",
+  "before_subject_implementation": true,
+  "findings": [
+    "P2 missing known DH/ECDH derive and known/unknown/reassigned EVP sign/verify controls in C/C++",
+    "P2 OQS input string case inconsistent with pinned sig.h"
+  ],
+  "added_cases": [
+    "php-known-derive-dh",
+    "php-known-derive-dh-negative-comment",
+    "php-known-derive-dh-reassigned",
+    "php-known-derive-ec",
+    "php-known-derive-ec-negative-comment",
+    "php-known-derive-ec-reassigned",
+    "c-known-evp_digestsigninit",
+    "c-known-evp_digestsigninit-negative-comment",
+    "c-known-evp_digestsigninit-reassigned",
+    "c-known-evp_digestsigninit-unknown",
+    "c-known-evp_digestsigninit-unknown-comment",
+    "c-known-evp_digestverifyinit",
+    "c-known-evp_digestverifyinit-negative-comment",
+    "c-known-evp_digestverifyinit-reassigned",
+    "c-known-evp_digestverifyinit-unknown",
+    "c-known-evp_digestverifyinit-unknown-comment",
+    "cpp-known-evp_digestsigninit",
+    "cpp-known-evp_digestsigninit-negative-comment",
+    "cpp-known-evp_digestsigninit-reassigned",
+    "cpp-known-evp_digestsigninit-unknown",
+    "cpp-known-evp_digestsigninit-unknown-comment",
+    "cpp-known-evp_digestverifyinit",
+    "cpp-known-evp_digestverifyinit-negative-comment",
+    "cpp-known-evp_digestverifyinit-reassigned",
+    "cpp-known-evp_digestverifyinit-unknown",
+    "cpp-known-evp_digestverifyinit-unknown-comment"
+  ],
+  "truth_basis": "Pinned PHP OpenSSL stub and OpenSSL 3.5 EVP headers; input OQS mechanism strings distinguish uppercase S/F from canonical lowercase s/f. These are specified before subject implementation, not changed to fit observed detector output."
+}

@@ -1,0 +1,115 @@
+- text: Language / 言語
+- combobox "Language / 言語":
+  - option "English"
+  - option "日本語" [selected]
+- text: Theme / 表示
+- combobox "Theme / 表示":
+  - option "Light / ライト" [selected]
+  - option "Dark / ダーク"
+- main:
+  - heading "移行に向けた確認事項" [level=1]
+  - paragraph: input
+  - time: "評価日時: 2026/11/24 18:23:57 （日本時間）"
+  - heading "結論" [level=2]
+  - list:
+    - listitem: "▲ 早急に対応: 1"
+    - listitem: "？ 緊急度を判断できない: 3"
+  - generic "反映した申告"
+  - heading "移行の判断" [level=2]
+  - heading "早急に対応 · 1 件" [level=3]: ▲ 早急に対応 · 1 件
+  - heading "署名・認証" [level=4]
+  - heading "最初に着手現在の設定と影響範囲を特定する" [level=5]
+  - term: やること
+  - definition: 署名設定をたどり、生成された署名を検証する処理を確認する。
+  - term: 次に進める条件
+  - definition: 実際の設定と影響範囲を特定し、試験する候補方式と設定値が決まれば互換性試験へ進む。
+  - strong: 記録された場所
+  - list:
+    - code: rsa.php:2
+  - heading "影響範囲の特定後候補方式で対象システムが動作するか" [level=5]
+  - term: やること
+  - definition: 候補方式で署名し、利用先で新旧両方の署名を検証する。 未対応の条件（実行環境、暗号パラメーター、接続先、プロトコル、プロバイダー）も試験で確かめる。
+  - term: 次に進める条件
+  - definition: 必要な実行環境・利用先で試験に合格し、移行中に必要な既存の接続やデータも使えること。 未対応の条件を解消し、その根拠を確認できたら段階切り替えへ進む。
+  - heading "互換性試験の合格後切り替え対象を広げられるか" [level=5]
+  - term: やること
+  - definition: 限定した範囲で切り替えてエラーを監視し、旧設定へ戻す手順を試す。
+  - term: 次に進める条件
+  - definition: エラーが合意した基準内に収まり、復旧手順を確認できたら、対象を段階的に広げる。
+  - button "検出箇所を見る"
+  - button "▸ 判定の詳細"
+  - generic "ほかの確認項目 · 3 件"
+  - heading "緊急度を判断できない · 3 件" [level=3]: ？ 緊急度を判断できない · 3 件
+  - article:
+    - heading "調査 · ML-KEM-768 · 鍵確立" [level=4]
+    - term: やること
+    - definition: 移行候補の設定に対応しているか、該当する実行環境・プロバイダー・接続先で確認する。
+    - term: 次に進める条件
+    - definition: 必要な設定と配備先について、対応状況を示す根拠が揃ったら再評価する。
+    - strong: 記録された場所
+    - list:
+      - code: kem.php:2
+    - button "検出箇所を見る"
+    - button "▸ 判定の詳細"
+  - article:
+    - heading "調査 · ML-DSA-65 / SLH-DSA-SHA2-128s · 署名・認証" [level=4]
+    - term: やること
+    - definition: 移行候補の設定に対応しているか、該当する実行環境・プロバイダー・接続先で確認する。
+    - term: 次に進める条件
+    - definition: 必要な設定と配備先について、対応状況を示す根拠が揃ったら再評価する。
+    - strong: 記録された場所
+    - list:
+      - code: signature.c:1
+      - code: signature.cpp:1
+      - code: signature.cs:1
+    - button "検出箇所を見る"
+    - button "▸ 判定の詳細"
+  - article:
+    - heading "依存関係の参照と関連する根拠" [level=4]
+    - term: やること
+    - definition: 以下の箇所から適用される設定を探し、実行時に選ばれる方式と設定値を確認する。
+    - term: 次に進める条件
+    - definition: コード・設定・観測記録から実際の方式と利用箇所を確認できたら、再評価する。
+    - strong: 確認箇所
+    - list:
+      - code: unknown.c:1
+    - button "検出箇所を見る"
+    - button "▸ 判定の詳細"
+  - button "評価データを保存"
+  - dialog "検出箇所":
+    - heading "検出箇所" [level=2]
+    - button "閉じる" [active]: ×
+    - searchbox "記録を検索"
+    - table:
+      - rowgroup:
+        - row "暗号方式 場所 検出方法 スキャンのルールID":
+          - columnheader "暗号方式"
+          - columnheader "場所"
+          - columnheader "検出方法"
+          - columnheader "スキャンのルールID"
+          - columnheader
+      - rowgroup:
+        - row "SLH-DSA-SHA2-128s signature.c:1 構文解析 C_FAMILY_PQC_API 詳細":
+          - cell "SLH-DSA-SHA2-128s"
+          - cell "signature.c:1"
+          - cell "構文解析"
+          - cell "C_FAMILY_PQC_API"
+          - cell "詳細":
+            - button "詳細"
+        - row "ML-DSA-65 signature.cpp:1 構文解析 C_FAMILY_PQC_API 詳細":
+          - cell "ML-DSA-65"
+          - cell "signature.cpp:1"
+          - cell "構文解析"
+          - cell "C_FAMILY_PQC_API"
+          - cell "詳細":
+            - button "詳細"
+        - row "ML-DSA-65 signature.cs:1 構文解析 CSHARP_PQC_API 詳細":
+          - cell "ML-DSA-65"
+          - cell "signature.cs:1"
+          - cell "構文解析"
+          - cell "CSHARP_PQC_API"
+          - cell "詳細":
+            - button "詳細"
+    - generic: 1-3 / 3
+    - button "前へ" [disabled]
+    - button "次へ" [disabled]

@@ -230,7 +230,7 @@ test('multiple checkbox selections survive navigation; remove/clear and deselect
  assert.equal(p.get('selected-folders').children.length,0);
  assert.equal(row(p,0).attributes['aria-pressed'],'false');
 });
-test('two scans are strictly sequential and remain individually reviewable without navigating early',async()=>{
+test('two scans are strictly sequential and finish with a result card for each folder without navigating early',async()=>{
  const p=await page('',[],folders);row(p,0).click();row(p,1).click();
  await p.get('scan').click();
  assert.deepEqual(posts(p),['api/scan?path=alpha&max_file_size_mib=2']);
@@ -252,11 +252,12 @@ test('two scans are strictly sequential and remain individually reviewable witho
  assert.equal(p.get('batch-results').hidden,false);
  const cards=p.get('batch-results').children;
  assert.deepEqual(cards.map(card=>card.children[0].textContent),['alpha','beta']);
- const reportLink=card=>card.children.find(n=>n.className==='job-actions').children[0];
+ const reportLink=card=>card.children.find(n=>n.className==='job-actions').children.find(n=>n.target==='_blank');
  for(const [index,card] of cards.entries()) {
   const link=reportLink(card);
   assert.equal(link.href,`http://127.0.0.1:8787/session/reports/${index+1}/report.html?theme=dark&lang=ja`);
   assert.equal(link.target,'_blank');
+  assert.equal(link.rel,'noopener');
   assert.match(link.attributes['aria-label'],new RegExp(index===0?'alpha':'beta'));
  }
  assert.deepEqual(p.get('jobs').children.map(card=>card.children[0].textContent),['beta','alpha']);
@@ -265,6 +266,7 @@ test('two scans are strictly sequential and remain individually reviewable witho
  const url=new URL(p.location.href);
  assert.equal(url.searchParams.get('results'),'1,2');
  assert.equal(url.searchParams.has('result'),false);
+ assert.equal(posts(p).length,2,'reviewing the batch does not rescan either folder');
 });
 test('modal cannot cancel; page changes, selection and duplicate submission are blocked until all work ends',async()=>{
  const p=await page('',[],folders);row(p,0).click();row(p,1).click();await p.get('scan').click();

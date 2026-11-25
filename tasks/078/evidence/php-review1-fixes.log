@@ -1,0 +1,17 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+error[E0599]: no method named `detect_observed_with_budget` found for struct `TreeSitterDetector` in the current scope
+   --> crates/pqc_scan_detectors/tests/php_source.rs:478:10
+    |
+477 |       let outcome = TreeSitterDetector
+    |  ___________________-
+478 | |         .detect_observed_with_budget(
+    | |_________-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `detect_observed` with a similar name, but with different arguments
+   --> /Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core/src/lib.rs:72:5
+    |
+ 72 |     fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `pqc_scan_detectors` (test "php_source") due to 1 previous error

@@ -1,0 +1,1 @@
+void f(){OQS_SIG *s=OQS_SIG_new("SLH_DSA_PURE_SHA2_128s"); OQS_SIG_sign(s,sig,&n,msg,len,key);}

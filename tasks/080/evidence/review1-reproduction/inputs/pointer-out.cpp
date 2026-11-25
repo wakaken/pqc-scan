@@ -1,0 +1,1 @@
+void f(){EVP_PKEY_CTX *ctx=EVP_PKEY_CTX_new_from_name(NULL,"RSA",NULL); EVP_PKEY *key=NULL; EVP_PKEY_keygen(ctx,&key); EVP_PKEY_CTX *other=EVP_PKEY_CTX_new_from_name(NULL,"ML-DSA-65",NULL); EVP_PKEY **dest=&key; EVP_PKEY_keygen(other,dest); EVP_DigestSignInit(md,NULL,NULL,NULL,key);}

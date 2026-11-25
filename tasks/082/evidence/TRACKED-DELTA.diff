@@ -1,0 +1,214 @@
+diff --git a/crates/pqc_scan_cli/tests/serve.rs b/crates/pqc_scan_cli/tests/serve.rs
+index 5688382..382ba45 100644
+--- a/crates/pqc_scan_cli/tests/serve.rs
++++ b/crates/pqc_scan_cli/tests/serve.rs
+@@ -1186,3 +1186,6 @@ fn size_settings_flow_from_serve_default_or_request_into_real_report_scope() {
+         assert_eq!(d["coverage"]["selected_files"], count);
+     }
+ }
++
++#[path = "support/language_serve.rs"]
++mod language_serve;
+diff --git a/crates/pqc_scan_core/src/migration/native.rs b/crates/pqc_scan_core/src/migration/native.rs
+index 31c05c6..e8e368a 100644
+--- a/crates/pqc_scan_core/src/migration/native.rs
++++ b/crates/pqc_scan_core/src/migration/native.rs
+@@ -258,6 +258,30 @@ pub(super) fn project(value: Value, hash: String) -> Result<SavedEvidence> {
+                         "source_unresolved",
+                         "legacy_unclassified",
+                         "unavailable_or_unsafe_version_omitted",
++                        // Finite v0.5 source contexts; informational provenance
++                        // only, never installed/runtime support or assurance.
++                        "platform_required",
++                        "platform_dev_required",
++                        "platform_emulated",
++                        "platform_emulation_disabled",
++                        "sdk_declared",
++                        "target_framework_declared",
++                        "lock_framework_reported",
++                        "registry_baseline_declared",
++                        "feature_declared",
++                        "override_declared",
++                        "conditional_declaration_unresolved",
++                        "build_lock_record_unverified",
++                        "build_source_unresolved",
++                        "build_requirement_unresolved",
++                        "lexical_build_reference",
++                        "legacy_package_declared",
++                        "central_literal_inherited_not_effective",
++                        "dev_path_dependency_unresolved",
++                        "dev_git_dependency_unresolved",
++                        "dev_archive_dependency_unresolved",
++                        "dev_lock_record_unverified",
++                        "dev_source_unresolved",
+                     ],
+                 ));
+             }
+diff --git a/crates/pqc_scan_report/src/migration.js b/crates/pqc_scan_report/src/migration.js
+index 7b279b7..0f687da 100644
+--- a/crates/pqc_scan_report/src/migration.js
++++ b/crates/pqc_scan_report/src/migration.js
+@@ -178,7 +178,7 @@
+           if (!relatedSourceRules.has(key)) relatedSourceRules.set(key, new Set());
+           relatedSourceRules.get(key).add(rule);
+         }
+-        if (provenance !== null && value(provenance) === "manifest_dev_declared") developmentDeclarations++;
++        if (provenance !== null && ["manifest_dev_declared", "platform_dev_required", "dev_path_dependency_unresolved", "dev_git_dependency_unresolved", "dev_archive_dependency_unresolved", "dev_lock_record_unverified", "dev_source_unresolved"].includes(value(provenance))) developmentDeclarations++;
+         for (const key of ["path", "detail_path"]) {
+           const id = child(source, key);
+           if (id !== null && value(id)) {
+diff --git a/crates/pqc_scan_report/src/migration_copy.rs b/crates/pqc_scan_report/src/migration_copy.rs
+index 619a40b..6294829 100644
+--- a/crates/pqc_scan_report/src/migration_copy.rs
++++ b/crates/pqc_scan_report/src/migration_copy.rs
+@@ -65,6 +65,28 @@ impl Labels {
+     }
+     pub(crate) fn code<'a>(&self, s: &'a str) -> &'a str {
+         let (en, ja) = match s {
++            "platform_required" => ("Declared platform requirement", "プラットフォームの要求宣言"),
++            "platform_dev_required" => ("Declared development platform requirement", "開発用プラットフォームの要求宣言"),
++            "platform_emulated" => ("Emulated platform configuration; runtime unverified", "仮想的なプラットフォーム設定。実行環境は未確認"),
++            "platform_emulation_disabled" => ("Platform emulation explicitly disabled", "プラットフォームの仮想設定を明示的に無効化"),
++            "sdk_declared" => ("Declared SDK; runtime unverified", "SDKの宣言。実行環境は未確認"),
++            "target_framework_declared" => ("Declared target framework", "ターゲットフレームワークの宣言"),
++            "lock_framework_reported" => ("Framework reported in lock file", "ロックファイルに記録されたフレームワーク"),
++            "registry_baseline_declared" => ("Declared registry baseline; installation unverified", "レジストリーの基準点の宣言。導入状況は未確認"),
++            "feature_declared" => ("Declared dependency feature", "依存機能の宣言"),
++            "override_declared" => ("Declared version override; installation unverified", "バージョン上書きの宣言。導入状況は未確認"),
++            "conditional_declaration_unresolved" => ("Conditional declaration; effective value unresolved", "条件付き宣言。有効な値は未解決"),
++            "build_lock_record_unverified" => ("Unverified build dependency lock record", "未検証のビルド用依存関係のロック記録"),
++            "build_source_unresolved" => ("Build dependency source unresolved", "ビルド用依存関係の取得元が未解決"),
++            "build_requirement_unresolved" => ("Build requirement; effective value unresolved", "ビルド用要求。有効な値は未解決"),
++            "lexical_build_reference" => ("Build script reference; script not evaluated", "ビルドスクリプト内の参照。スクリプトは未評価"),
++            "legacy_package_declared" => ("Declared legacy package reference", "従来形式のパッケージ参照の宣言"),
++            "central_literal_inherited_not_effective" => ("Inherited central literal; effective build unverified", "中央定義のリテラル値を継承。ビルドでの有効性は未確認"),
++            "dev_path_dependency_unresolved" => ("Development path dependency unresolved", "開発用のパス依存関係が未解決"),
++            "dev_git_dependency_unresolved" => ("Development Git dependency unresolved", "開発用のGit依存関係が未解決"),
++            "dev_archive_dependency_unresolved" => ("Development archive dependency unresolved", "開発用のアーカイブ依存関係が未解決"),
++            "dev_lock_record_unverified" => ("Unverified development dependency lock record", "未検証の開発用依存関係のロック記録"),
++            "dev_source_unresolved" => ("Development dependency source unresolved", "開発用依存関係の取得元が未解決"),
+             "outside_declared_scope" => ("The active declaration excludes this target; known technical concerns remain.", "有効な申告では対象外です。既知の技術上の懸念は残ります。"),
+             "known_classical_concern" => ("The saved facts show a relevant classical cryptographic concern.", "保存された事実に、用途に関係する従来暗号の懸念があります。"),
+             "deadline_reached_or_lead_time_boundary" => ("The scoped deadline is within the declared migration lead time.", "適用範囲を定めた期限が、申告された移行所要期間の内側に入っています。"),
+@@ -283,3 +305,41 @@ pub(crate) fn enum_token(v: &impl serde::Serialize) -> String {
+         .and_then(|v| v.as_str().map(str::to_owned))
+         .unwrap_or_else(|| "unknown".into())
+ }
++
++#[cfg(test)]
++mod language_provenance_tests {
++    use super::*;
++    #[test]
++    fn new_provenance_has_bilingual_copy_without_runtime_assertions() {
++        for code in [
++            "platform_required",
++            "platform_dev_required",
++            "platform_emulated",
++            "platform_emulation_disabled",
++            "sdk_declared",
++            "target_framework_declared",
++            "lock_framework_reported",
++            "registry_baseline_declared",
++            "feature_declared",
++            "override_declared",
++            "conditional_declaration_unresolved",
++            "build_lock_record_unverified",
++            "build_source_unresolved",
++            "build_requirement_unresolved",
++            "lexical_build_reference",
++            "legacy_package_declared",
++            "central_literal_inherited_not_effective",
++            "dev_path_dependency_unresolved",
++            "dev_git_dependency_unresolved",
++            "dev_archive_dependency_unresolved",
++            "dev_lock_record_unverified",
++            "dev_source_unresolved",
++        ] {
++            let en = Labels(ReportLanguage::En).code(code);
++            let ja = Labels(ReportLanguage::Ja).code(code);
++            assert_ne!(en, code);
++            assert_ne!(ja, code);
++            assert_ne!(en, ja);
++        }
++    }
++}
+diff --git a/crates/pqc_scan_report/src/migration_markdown.rs b/crates/pqc_scan_report/src/migration_markdown.rs
+index 169bee6..854f790 100644
+--- a/crates/pqc_scan_report/src/migration_markdown.rs
++++ b/crates/pqc_scan_report/src/migration_markdown.rs
+@@ -125,6 +125,14 @@ pub fn migration_markdown_bytes(
+             code(&location(t)),
+             c.token(&t.source_ref.role)
+         )?;
++        if let Some(provenance) = &t.source_ref.dependency_provenance {
++            writeln!(
++                out,
++                "{}: {}\n",
++                c.pick("Dependency declaration", "依存関係の宣言"),
++                code(c.code(provenance))
++            )?;
++        }
+         writeln!(
+             out,
+             "### {}\n\n{}\n\n{}\n",
+diff --git a/docs/user/SAVED-EVIDENCE.ja.md b/docs/user/SAVED-EVIDENCE.ja.md
+index b822c33..fbfd082 100644
+--- a/docs/user/SAVED-EVIDENCE.ja.md
++++ b/docs/user/SAVED-EVIDENCE.ja.md
+@@ -150,3 +150,24 @@ pqc-scan context-template saved.inventory.v1.json --input-format inventory-v1 \
+ 
+ 入力との対応付けは、その保存済みファイルに限って有効です。別のスキャンへそのまま引き継げません。
+ 入力ファイルを再生成・整形した場合は、対応する設定を作り直してください。
++
++### PHP・C#・C/C++のソース検出結果
++
++これらの言語でも、同じ `scan --inventory-json`、`context-template`、`assess` の手順を使います。
++識別できたML-KEM・ML-DSA・SLH-DSAの正確なパラメーターセットは、既存の技術カタログで
++評価します。ソース上の呼出しは構文から得た参照です。実行の成功、プロバイダーの導入、
++実行環境の対応、TLSで交渉されたグループは確認しません。X-Wing・複合方式・HPKEの参照は
++元の箇所を保持しますが、カタログで扱っていない構成の技術判定は不明のままです。
++
++Composerの仮想的なプラットフォーム設定（明示的な `false` を含む）、SDK・ターゲット
++フレームワーク設定、ネイティブのビルド宣言は、それぞれの出所を保持します。依存関係の
++宣言やロック記録だけで、暗号方式や実行環境の対応を確定しません。MSBuildの条件付きの値と、
++評価していないCMakeの参照は未解決です。[対応範囲と制約](COVERAGE.ja.md)も参照してください。
++
++保存された対象を明示的に選んでから、システムの用途を申告してください。有効期限内の、
++用途に関係する対応状況が `false` なら準備状況は阻害ありになります。未回答・不明・失効・
++矛盾のある申告から準備完了とは判定しません。同じ方式を使う別の対象があっても、回答は
++選んだシステムと対象に限って適用します。CLIとローカル画面で入力のバイト列、設定、評価日時が
++同じなら評価JSONの判定も一致し、表示言語では変わりません。入力を差し替えたり整形したり
++すると、以前の対応付けは無効になります。対象を確認して設定を明示的に作り直してください。
++保存済みの結果の評価では、ソースの再スキャンやサービスへの接続確認を行いません。
+diff --git a/docs/user/SAVED-EVIDENCE.md b/docs/user/SAVED-EVIDENCE.md
+index 3504bd0..fc3131d 100644
+--- a/docs/user/SAVED-EVIDENCE.md
++++ b/docs/user/SAVED-EVIDENCE.md
+@@ -207,3 +207,27 @@ purpose while their algorithm remains unknown. Entering a purpose does not ident
+ 
+ Bindings apply only to the exact saved file and cannot be carried over to another
+ scan. Regenerating or reformatting the input requires matching configuration to be created again.
++
++### PHP, C# and C/C++ source evidence
++
++Use the same `scan --inventory-json`, `context-template` and `assess` workflow for
++these languages. Exact recognized ML-KEM, ML-DSA and SLH-DSA parameter sets reach
++the existing technical catalog. Source calls remain syntactic references: they
++do not establish execution, installed providers, platform support or negotiated
++TLS groups. X-Wing, composite and HPKE references retain their source trace but
++stay technically unknown where the catalog has no supported construction.
++
++Composer platform emulation (including explicit `false`), SDK/target-framework
++settings and native build declarations retain their distinct declaration origins.
++A declared or locked dependency does not select a primitive or confirm runtime
++support. Conditional MSBuild values and unevaluated CMake references remain
++unresolved. See [coverage and limits](COVERAGE.md).
++
++Select exact saved targets before declaring system use. A fresh, relevant `false`
++support answer blocks readiness; missing, unknown, expired or conflicting answers
++do not establish readiness. Answers belong to the selected system and target,
++even when another target uses the same algorithm. Assessing identical saved bytes,
++context and evaluation time in the CLI and local UI produces identical machine
++decisions; changing the display language does not alter them. Replacing or merely
++reformatting saved input invalidates the old binding. Inspect targets and create
++new context explicitly; assessment does not rescan source or probe a service.

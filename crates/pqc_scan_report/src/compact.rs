@@ -62,8 +62,8 @@ fn text(finding: &Finding, lang: ReportLanguage) -> Finding {
     {
         display.description = label(
             lang,
-            "An algorithm name appears in diagnostic or display text.",
-            "エラー文・表示文に暗号方式名が含まれています。",
+            "An algorithm name appears in commentary, a declaration or recorded text.",
+            "注釈・宣言・記録に暗号方式名が含まれています。",
         )
         .into();
         display.migration_hint = label(lang, "This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.", "この文言だけでは暗号処理での利用は確認できません。実装と実際の設定を別途確認してください。").into();
@@ -367,6 +367,10 @@ fn html_view(
                 )?;
             }
             writeln!(out, "</details>")?;
+            let overlaps = view.coincident_records(f);
+            if overlaps > 1 {
+                writeln!(out,"<p class=\"coincident-records\">{}: {overlaps} · {}</p>",label(lang,"Detection records at this location","この位置の検出記録"),label(lang,"Review the distinct rules and evidence. These records are not necessarily independent cryptographic uses.","異なるルールと根拠を確認してください。記録の件数は、独立した暗号利用の数とは限りません。"))?;
+            }
             if let Some(snippet) = &f.source_snippet {
                 writeln!(
                     out,
@@ -800,6 +804,10 @@ pub(crate) fn markdown_report_with_context(
             }
         }
         for (offset, f) in group.occurrences.iter().enumerate() {
+            let overlaps = view.coincident_records(f);
+            if overlaps > 1 {
+                writeln!(out,"\n{}: {overlaps} · {}\n",label(lang,"Detection records at this location","この位置の検出記録"),label(lang,"Review the distinct rules and evidence. These records are not necessarily independent cryptographic uses.","異なるルールと根拠を確認してください。記録の件数は、独立した暗号利用の数とは限りません。"))?;
+            }
             writeln!(
                 out,
                 "\n### {} — {}\n",

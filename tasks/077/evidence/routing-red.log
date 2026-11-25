@@ -1,0 +1,51 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.04s
+     Running tests/language_routing.rs (target/debug/deps/language_routing-b7530e93e8fc6f26)
+
+running 4 tests
+test malformed_and_ambiguous_headers_remain_incomplete ... FAILED
+test all_new_routes_use_real_ast_candidates_and_custom_scope ... FAILED
+test php_tags_templates_strings_and_original_unicode_positions ... FAILED
+test header_parses_share_limits_and_do_not_duplicate_occurrences ... FAILED
+
+failures:
+
+---- malformed_and_ambiguous_headers_remain_incomplete stdout ----
+
+thread 'malformed_and_ambiguous_headers_remain_incomplete' (22577808) panicked at crates/pqc_scan_detectors/tests/language_routing.rs:60:105:
+assertion `left == right` failed: a.php
+  left: NotApplicable
+ right: Partial
+
+---- all_new_routes_use_real_ast_candidates_and_custom_scope stdout ----
+
+thread 'all_new_routes_use_real_ast_candidates_and_custom_scope' (22577806) panicked at crates/pqc_scan_detectors/tests/language_routing.rs:36:9:
+assertion `left == right` failed: a.php: DetectorOutcome { detections: [], status: NotApplicable, observations: [], explanation: None, limit_detail: None, test_ranges: [], display_ranges: [] }
+  left: NotApplicable
+ right: Complete
+
+---- php_tags_templates_strings_and_original_unicode_positions stdout ----
+
+thread 'php_tags_templates_strings_and_original_unicode_positions' (22577809) panicked at crates/pqc_scan_detectors/tests/language_routing.rs:51:5:
+assertion `left == right` failed: DetectorOutcome { detections: [], status: NotApplicable, observations: [], explanation: None, limit_detail: None, test_ranges: [], display_ranges: [] }
+  left: 0
+ right: 2
+
+---- header_parses_share_limits_and_do_not_duplicate_occurrences stdout ----
+
+thread 'header_parses_share_limits_and_do_not_duplicate_occurrences' (22577807) panicked at crates/pqc_scan_detectors/tests/language_routing.rs:71:22:
+assertion `left == right` failed
+  left: NotApplicable
+ right: Truncated
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    all_new_routes_use_real_ast_candidates_and_custom_scope
+    header_parses_share_limits_and_do_not_duplicate_occurrences
+    malformed_and_ambiguous_headers_remain_incomplete
+    php_tags_templates_strings_and_original_unicode_positions
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test language_routing`

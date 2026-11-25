@@ -1,0 +1,54 @@
+{
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "32b7ce0401916eb647b34af158aa761d3e7a2cf11e2c301f5fea8f610efaccff",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "d39bfce8fc0d7a3f0b4c8431f8c34b7a8ddfa93424172e147e1b55fadff5131a",
+    "docs/user/COVERAGE.ja.md": "b115e3f6b573ecfcca13e4f47d66b709cad5caf9de1ca67e55688615ff5ced0b",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+    "docs/architecture/STATIC-ANALYSIS.md": "23c3eab6664372289c1eeeb6b40722248612b5cdba17b45a423c774a8227bcf5"
+  },
+  "version": 1,
+  "scope": "documented-public-input-subset",
+  "corpusDirectory": "tests/quality/expanded-v2",
+  "sourceBased": true,
+  "postObservation": true,
+  "timestampUtc": "2026-11-25T05:53:40.781162+00:00",
+  "reason": "Source-based applicability confirmation after merging v0.5 language source 5ae84d5 with develop b41ae98. Both actual separately authored records revalidate 203 original inputs and all 246 nominated questions. The original six encrypted-inner-property exclusions remain unchanged, leaving 240 nominal questions: 189 scored positive/negative, 47 unsupported, four ambiguous. Preserve original truth, corpus, provenance, thresholds and all historical assessments. Documentation and runtime changes are disclosed; this is not a blind evaluation, independent Ground Truth, measured detector improvement or release authorization.",
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The source P12 embeds encryptedData. Its inner signature question needs decryption outside the unchanged parser; keep the nominal truth and outer-container question."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The PFX copy contains the same encrypted content, so nominal inner signature provenance does not make that property readable without decryption."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "The nominated encrypted P12 inner RSA modulus requires decryption; public certificate provenance does not establish parser access."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The nominated encrypted P12 inner signature remains inaccessible to the bounded non-decrypting parser; preserve original truth."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The encrypted PFX inner SPKI-size question requires unsupported decryption; container presence and readable unencrypted controls stay eligible."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The PFX inner signature is inside encryptedData rather than a readable certificate bag. Exclude this extraction only, not outer signals."
+    }
+  ],
+  "reviewSources": {
+    "review-main.json": "0b599775619064558fd21ee2af4cccc7b71286fc28d9cfaeb1d78c4f5afe4777",
+    "review-independent.json": "f8e376ce4121beaef13940e74ffea13fc3b167cd03fe006f9e638b7a770ffe1f"
+  }
+}

@@ -1,0 +1,28 @@
+    Checking pqc_scan_rules v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_rules)
+    Checking pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+    Checking pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Checking pqc_scan_report v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_report)
+    Checking pqc_scan_probe_ssh v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_probe_ssh)
+    Checking pqc_scan_probe_tls v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_probe_tls)
+error: called `filter(..).next_back()` on an `DoubleEndedIterator`. This is more succinctly expressed by calling `.rfind(..)` instead
+   --> crates/pqc_scan_detectors/src/source_facts/csharp/names.rs:125:34
+    |
+125 |                       let target = children(*n)
+    |  __________________________________^
+126 | |                         .into_iter()
+127 | |                         .filter(|c| alias_node.is_none_or(|a| a.id() != c.id()))
+128 | |                         .next_back();
+    | |____________________________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#filter_next
+    = note: `-D clippy::filter-next` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::filter_next)]`
+help: try
+    |
+125 ~                     let target = children(*n)
+126 ~                         .into_iter().rfind(|c| alias_node.is_none_or(|a| a.id() != c.id()));
+    |
+
+error: could not compile `pqc_scan_detectors` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `pqc_scan_detectors` (lib test) due to 1 previous error

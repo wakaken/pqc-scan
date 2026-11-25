@@ -4,6 +4,21 @@ use pqc_scan_core::migration::{
     ActionKind, ClaimFreshness, Information, Readiness, ResolvedClaim, Target, Urgency,
 };
 pub(crate) struct Labels(pub(crate) ReportLanguage);
+pub(crate) fn observation_explanation(
+    t: &Target,
+    language: ReportLanguage,
+) -> Option<&'static str> {
+    if t.observation.usage != "referenced" {
+        return None;
+    }
+    let c = Labels(language);
+    match t.observation.method.as_str() {
+        "lexical_match" => Some(c.pick("This is a name found in text, which may be a comment or recorded data. Confirm the actual purpose and use before applying a migration action.","文字列内の方式名の参照です。注釈や記録データの場合もあるため、移行対応の前に実際の用途と利用状況を確認してください。")),
+        "ast_pattern" => Some(c.pick("This is a syntactic source reference. Check the originating code for a call, an implementation definition or a conditional construction, then confirm the actual purpose and use.","構文上の参照です。検出元でAPI呼び出し・実装定義・条件付きの構成を区別し、実際の用途と利用状況を確認してください。")),
+        "dependency_report" => Some(c.pick("This is a dependency record. Confirm installation, selected algorithms and actual purpose and use separately.","依存関係の記録です。導入状況、選択した暗号方式、実際の用途と利用状況を別途確認してください。")),
+        _ => None,
+    }
+}
 impl Labels {
     pub(crate) fn pick<'a>(&self, en: &'a str, ja: &'a str) -> &'a str {
         if self.0 == ReportLanguage::Ja {
@@ -65,6 +80,28 @@ impl Labels {
     }
     pub(crate) fn code<'a>(&self, s: &'a str) -> &'a str {
         let (en, ja) = match s {
+            "platform_required" => ("Declared platform requirement", "プラットフォームの要求宣言"),
+            "platform_dev_required" => ("Declared development platform requirement", "開発用プラットフォームの要求宣言"),
+            "platform_emulated" => ("Emulated platform configuration; runtime unverified", "仮想的なプラットフォーム設定。実行環境は未確認"),
+            "platform_emulation_disabled" => ("Platform emulation explicitly disabled", "プラットフォームの仮想設定を明示的に無効化"),
+            "sdk_declared" => ("Declared SDK; runtime unverified", "SDKの宣言。実行環境は未確認"),
+            "target_framework_declared" => ("Declared target framework", "ターゲットフレームワークの宣言"),
+            "lock_framework_reported" => ("Framework reported in lock file", "ロックファイルに記録されたフレームワーク"),
+            "registry_baseline_declared" => ("Declared registry baseline; installation unverified", "レジストリーの基準点の宣言。導入状況は未確認"),
+            "feature_declared" => ("Declared dependency feature", "依存機能の宣言"),
+            "override_declared" => ("Declared version override; installation unverified", "バージョン上書きの宣言。導入状況は未確認"),
+            "conditional_declaration_unresolved" => ("Conditional declaration; effective value unresolved", "条件付き宣言。有効な値は未解決"),
+            "build_lock_record_unverified" => ("Unverified build dependency lock record", "未検証のビルド用依存関係のロック記録"),
+            "build_source_unresolved" => ("Build dependency source unresolved", "ビルド用依存関係の取得元が未解決"),
+            "build_requirement_unresolved" => ("Build requirement; effective value unresolved", "ビルド用要求。有効な値は未解決"),
+            "lexical_build_reference" => ("Build script reference; script not evaluated", "ビルドスクリプト内の参照。スクリプトは未評価"),
+            "legacy_package_declared" => ("Declared legacy package reference", "従来形式のパッケージ参照の宣言"),
+            "central_literal_inherited_not_effective" => ("Inherited central literal; effective build unverified", "中央定義のリテラル値を継承。ビルドでの有効性は未確認"),
+            "dev_path_dependency_unresolved" => ("Development path dependency unresolved", "開発用のパス依存関係が未解決"),
+            "dev_git_dependency_unresolved" => ("Development Git dependency unresolved", "開発用のGit依存関係が未解決"),
+            "dev_archive_dependency_unresolved" => ("Development archive dependency unresolved", "開発用のアーカイブ依存関係が未解決"),
+            "dev_lock_record_unverified" => ("Unverified development dependency lock record", "未検証の開発用依存関係のロック記録"),
+            "dev_source_unresolved" => ("Development dependency source unresolved", "開発用依存関係の取得元が未解決"),
             "outside_declared_scope" => ("The active declaration excludes this target; known technical concerns remain.", "有効な申告では対象外です。既知の技術上の懸念は残ります。"),
             "known_classical_concern" => ("The saved facts show a relevant classical cryptographic concern.", "保存された事実に、用途に関係する従来暗号の懸念があります。"),
             "deadline_reached_or_lead_time_boundary" => ("The scoped deadline is within the declared migration lead time.", "適用範囲を定めた期限が、申告された移行所要期間の内側に入っています。"),
@@ -170,6 +207,14 @@ impl Labels {
                 "検証未完了、または収集情報が不完全",
             ),
             "syntactic" => ("Syntactic reference", "構文上の参照"),
+            "referenced" => (
+                "Reference only; runtime use unverified",
+                "参照のみ。実行時の利用は未確認",
+            ),
+            "configured" => (
+                "Configuration recorded; active use unverified",
+                "設定の記録。実際の利用は未確認",
+            ),
             "lexical" => ("Text match", "文字列の一致"),
             "parsed" => ("Parsed attributes", "解析した属性"),
             "collector_reported_verified_session" => (
@@ -282,4 +327,42 @@ pub(crate) fn enum_token(v: &impl serde::Serialize) -> String {
         .ok()
         .and_then(|v| v.as_str().map(str::to_owned))
         .unwrap_or_else(|| "unknown".into())
+}
+
+#[cfg(test)]
+mod language_provenance_tests {
+    use super::*;
+    #[test]
+    fn new_provenance_has_bilingual_copy_without_runtime_assertions() {
+        for code in [
+            "platform_required",
+            "platform_dev_required",
+            "platform_emulated",
+            "platform_emulation_disabled",
+            "sdk_declared",
+            "target_framework_declared",
+            "lock_framework_reported",
+            "registry_baseline_declared",
+            "feature_declared",
+            "override_declared",
+            "conditional_declaration_unresolved",
+            "build_lock_record_unverified",
+            "build_source_unresolved",
+            "build_requirement_unresolved",
+            "lexical_build_reference",
+            "legacy_package_declared",
+            "central_literal_inherited_not_effective",
+            "dev_path_dependency_unresolved",
+            "dev_git_dependency_unresolved",
+            "dev_archive_dependency_unresolved",
+            "dev_lock_record_unverified",
+            "dev_source_unresolved",
+        ] {
+            let en = Labels(ReportLanguage::En).code(code);
+            let ja = Labels(ReportLanguage::Ja).code(code);
+            assert_ne!(en, code);
+            assert_ne!(ja, code);
+            assert_ne!(en, ja);
+        }
+    }
 }

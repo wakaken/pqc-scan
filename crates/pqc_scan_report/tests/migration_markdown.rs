@@ -26,6 +26,37 @@ fn text(r: &MigrationAssessment, l: ReportLanguage) -> String {
     String::from_utf8(migration_markdown_bytes(r, l).unwrap()).unwrap()
 }
 #[test]
+fn source_references_explain_use_state_without_changing_assessment_or_claiming_execution() {
+    let r = report(fixture::inventory("RSA"), None);
+    let before = serde_json::to_value(&r).unwrap();
+    let ja = text(&r, ReportLanguage::Ja);
+    let en = text(&r, ReportLanguage::En);
+    assert!(ja.contains("検出時の利用状態"));
+    assert!(ja.contains("実際の用途と利用状況"));
+    assert!(en.contains("Observed use state"));
+    assert!(en.contains("actual purpose and use"));
+    assert_eq!(serde_json::to_value(&r).unwrap(), before);
+}
+
+#[test]
+fn language_dependency_and_test_locations_are_useful_hints_without_policy_inference() {
+    use pqc_scan_report::migration_location;
+    for (path, expected) in [
+        ("UnitTests/HeaderTests.cs", "tests"),
+        ("Project.Tests/Signing.cs", "tests"),
+        ("src/lib.cc", "source"),
+        ("src/lib.C", "source"),
+        ("src/impl.cc.inc", "source"),
+        ("views/page.phtml", "source"),
+        ("composer.json", "dependency"),
+        ("src/Crypto.csproj", "dependency"),
+        ("Directory.Packages.props", "dependency"),
+        ("contest/main.php", "source"),
+    ] {
+        assert_eq!(migration_location(Some(path)), expected, "{path}");
+    }
+}
+#[test]
 fn paired_reports_preserve_decisions_with_human_tables_and_no_json_dump() {
     let mut blocked = ctx::critical_signing();
     blocked["support"] = ctx::support();

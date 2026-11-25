@@ -1,0 +1,1 @@
+<?php use function class_alias as ca; ca($external,'PQCrypto\MLKem768'); \PQCrypto\MLKem768::generateKeypair();

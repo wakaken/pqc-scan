@@ -1,0 +1,88 @@
+{
+  "sourceManifestSha256": "2b010fae8a80b5c08f4ab499c5b3c762bbaba34959d079e87ad6d926f8710723",
+  "fixtureBindingSha256": "f7d13588b2fdf445bce5510862b2e50433d0496b1c0baded176828a2a57001c1",
+  "browser": "ChatGPT in-app browser (iab, browser3)",
+  "viewports": [
+    {
+      "width": 702,
+      "height": 1397,
+      "observed": "migration narrow layout"
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "observed": "scan desktop layout"
+    }
+  ],
+  "loopback": "http://127.0.0.1:57384/scan/report.html?lang=ja",
+  "migration": "http://127.0.0.1:57384/migration/migration.assessment.html?lang=ja",
+  "server": {
+    "host": "127.0.0.1",
+    "directory": "/Users/waka/.cache/pqc-scan-oss-validation-085/browser",
+    "state": "Dedicated server restarted at same port after loaded-offline test; preserved report tabs"
+  },
+  "checks": [
+    {
+      "check": "ja/en scan and migration copy",
+      "result": "passed",
+      "observed": "Reference-only use-state and meaning visible; no runtime-use assertion. Source implementation ECDSA detail keeps unknown encoding/business context and Partial."
+    },
+    {
+      "check": "all14 language/dependency/reference rule options and guide",
+      "result": "passed",
+      "observed": "Actual CLI guide and UI options contain original12 plus2newIDs, localized in Japanese and English. Rule guide states it lists rules found in this report."
+    },
+    {
+      "check": "scan coincident records",
+      "result": "passed",
+      "observed": "RSA same location shows3 raw records across distinct rules and explicitly explains count is not independent uses; masked source preserved."
+    },
+    {
+      "check": "inert header",
+      "result": "passed",
+      "observed": "Recorded.cs two TLS records both informational; reference explanation rather than migration action; both retained."
+    },
+    {
+      "check": "keyboard",
+      "result": "passed",
+      "observed": "Native scan detail click collapse then Return reopen; migration Details Enter opens, Escape closes and returns focus to originating detection-locations button."
+    },
+    {
+      "check": "loaded-offline",
+      "result": "passed",
+      "observed": "Stopped dedicated HTTP server (session70853 exit130), without reloading already loaded documents. Scan inventory/search/detail/language switch and migration detail Enter/Escape remained functional. Restarted same loopback port afterwards. This does not assert unavailable-page navigation or general network-offline mode."
+    },
+    {
+      "check": "layout",
+      "result": "passed",
+      "observed": "Observed no horizontal overflow: document/client width702/702 and1280/1280. Dialog table, state labels, record note and source masking readable in screenshots."
+    },
+    {
+      "check": "rule-guide navigation",
+      "result": "passed",
+      "observed": "Scan rule explanation opens guide; guide return link opens corresponding-language scan report. A stale-tab/label selector mismatch was corrected by fresh state/direct bound guide navigation."
+    }
+  ],
+  "captures": {
+    "browser-migration-overlap-ja.jpg": "9d5230145388702ba963ab0a8a6f6da47df8a23f54305502ccda2212168bd58d",
+    "browser-migration-en-offline.jpg": "2a9cf377aa29c66dbc0ff7b10a2ecccc59e71fcf067e25723996ac9e5f3b278d",
+    "browser-migration-ja.jpg": "449ee555439b951c1735bce43a1186b76061c1b8db0a614189ed161f83c5d51a",
+    "browser-migration-en.jpg": "a43fb459255f07f8eb8a093537f4e77709714763b853b7c829ea2aeceeffcf66",
+    "browser-scan-en-offline.jpg": "f63f45bc5a19d7c7471dce111568a442d698f627411eda26de7528ca9b399991",
+    "browser-scan-overlap-ja.jpg": "4db34af3560402765986a293dc7e847b76d6af6025ec978b175cf16dcb47c6c5",
+    "browser-scan-ja-offline.jpg": "fb95d4ed1cea6c92afb414cf6eee02a9fb64e68f54f8eefc7274cb4700250b75"
+  },
+  "observations": {
+    "browser-migration-en.ax.txt": "073e68d9e1a18033b268782c0fa1204ef3c52fbe4c7f4be33a7c234eae8414d3",
+    "browser-scan-overlap-ja.ax.txt": "e1c529c4c20aab47ccbc5505cc5be2f613317b9ace00d2829ab5542eb39ada72",
+    "browser-migration-ja.ax.txt": "4636e1307825f02a5af6aa416761f9addf8bee4a871ae45cdbe571001538a028",
+    "browser-rules-en.ax.txt": "97d5ae568b863f0d2b857650ea8cca4a66a4ba789a5f546f4a7327c7a376698a",
+    "browser-rules-ja.ax.txt": "5fa78dec186e974f55953a8714a5e402b993b8a00c05ad0ba309e90aa4cc74b5",
+    "browser-scan-ja-offline.ax.txt": "2df37b04c736337310756867e436c1a9f78a12e54a5b03ad852e13e2d358a93d"
+  },
+  "limits": [
+    "Synthetic static fixture only, not upstream runtime or product deployment.",
+    "Actual scan+assess debug/default source04 fixture is separately bound; final all30 release measurements use final release binary.",
+    "Migration overlapping identical fact grouping is covered by renderer regressions; the actual RSA example keeps its differing method/fact records separate."
+  ]
+}

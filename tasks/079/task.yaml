@@ -1,0 +1,150 @@
+id: '079'
+title: Add bounded C# cryptographic type, alias and API detection
+type: improvement
+priority: high
+status: done
+owner: Main agent
+milestone: v0.5
+phase: '4'
+plan_reference: docs/roadmap/v0.5/ROADMAP.md
+requirements_reference: docs/roadmap/v0.5/REQUIREMENTS.md
+task_map_reference: docs/roadmap/v0.5/TASKS.md
+design_reference: docs/product/PQC-LANGUAGE-IMPLEMENTATION-PLAN-20261119.md
+description: Deliver the required .NET and Bouncy Castle source subsets with explicit type/namespace/receiver
+  limits.
+quality_requirements:
+- L03
+- L04
+- L05
+- L06
+- L07
+- L08
+- L09
+- L13
+- L14
+- L16
+- L17
+- L25
+- L27
+depends_on:
+- '077'
+target_components:
+- crates/pqc_scan_detectors/src/source_facts/
+- crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+- crates/pqc_scan_detectors/tests/
+- rules/default/
+- docs/quality/rules/
+- docs/rules-reference.md
+- README.md
+- README.ja.md
+- docs/user/
+problem:
+- The required new-language outcomes are not delivered by current seven-language source routing, limited normalization
+  or dependency formats. Existing v0.4 correctness/privacy/contracts must remain intact.
+acceptance:
+- Implement the C# scope of L03-L07 for standard classical/PQC API families, concrete providers and Bouncy Castle
+  rows in ROADMAP.md, with exact parameter and bounded receiver operations.
+- Resolve file-local using/global-using/qualified aliases and ordinary/file-scoped namespaces with local type/variable
+  shadowing and reassignment. Cross-file globals, reflection, generators, assemblies and Razor remain outside
+  the source subset.
+- Discover standard PQC classes without assuming AsymmetricAlgorithm inheritance; do not classify unrelated
+  RSA/MLDsa namesakes or imports as successful crypto operations.
+- CompositeMLKem/CompositeMLDsa/HPKE remain explicit construction-unresolved references where the finite catalog
+  cannot judge them. Standard .NET, BC TLS, obsolete official OQS and independent community identities remain
+  distinct.
+- Ship scoped rules, current source-bound classification/quality controls, C# positive/negative tests and paired
+  documentation; OS/provider/version prerequisites are not inferred from target framework or dependency presence.
+  Full cross-language clauses close in 082.
+deliverables:
+- tasks/079/TASK-079-RESULTS.md
+- tasks/079/evidence/
+- The scoped behavior or feasibility deliverable, meaningful verification, affected documentation and applicable
+  review evidence; no completion follows from registration.
+implementation_steps:
+- Write failing literal type/alias/receiver/parameter cases and negative namesake/dynamic/conditional controls.
+- Implement minimal C# grammar-specific name and receiver facts plus required rules.
+- Verify safe identity/parameter capture, uncertainty, positions, duplicate handling and modified custom-rule
+  fallback.
+- Update current rule metadata/reference and paired scope documentation with applicable checks and source bindings.
+testing_requirements:
+- Apply docs/agent/VERIFICATION.md for all affected categories, including targeted behavior, workspace tests,
+  formatting/diff inspection, Clippy, applicable builds/features and package/dependency provenance checks; record
+  actual commands/exits and final-source applicability.
+- For executable changes, obtain implementation review after initial checks and combined-diff inspection, then
+  test review after required tests. Reuse the same two stage reviewers within one authorized request; splitting
+  tasks or PRs grants no additional identities.
+- New source/rule/manifest coverage needs meaningful positive, negative, malformed/unknown, resource/position/identity
+  and private-data controls. Browser acceptance uses docs/agent/REPORTS.md where presentation/interaction is
+  affected.
+- Cover required .NET/BC APIs, qualified aliases, rebound/local namesakes, file-scoped namespaces, conditional
+  references, missing parameter sets and unresolved composite/HPKE KEM selection.
+- Verify import/reference versus operation strength, unchanged native-platform uncertainty and no readiness
+  promotion or private-data leakage.
+out_of_scope:
+- Running dotnet/MSBuild/NuGet or generators, whole-project semantic analysis, Razor support, universal JOSE/TLS/PQC
+  backend claims and 081 dependency parser implementation.
+risks:
+- An API/library name, dependency or syntactic reference may be promoted beyond its assurance, or historical
+  evidence may be mistaken for coverage of new final-source behavior.
+approval_boundary:
+- Definition and registration only under the 2026-11-24 steering; this task is not selected for execution. Dependencies
+  must complete and later explicit task selection is required.
+- Storage-format changes, high-risk architecture, unclear cryptographic logic and potentially incompatible rules
+  require the applicable AGENTS human decision; routine choices within agreed scope do not create a new approval
+  gate.
+- No extra agents, release/push/publication, outreach, fees or unagreed scope/criteria changes. Review budget
+  remains per authorized request.
+planning_record:
+  date: '2026-11-24'
+  source_head: 7e8cd91426fa21609a91c0511de44252eaa890d4
+  scope: Requirements/roadmap/task-definition work only; no new task execution, implementation acceptance or
+    measurement selected.
+  primary_requirements: []
+  supporting_requirements:
+  - L03
+  - L04
+  - L05
+  - L06
+  - L07
+  - L08
+  - L09
+  - L13
+  - L14
+  - L16
+  - L17
+  - L25
+  - L27
+  scoped_acceptance: Language-specific contributions to L03-L07; 082 closes those full clauses only after all
+    required language evidence.
+  completion_evidence: Every original task criterion, applicable final-source validation and required reviews;
+    preserve failures, unknowns, prior evidence and source bindings.
+execution_authorization:
+  date: '2026-11-24'
+  request: Maintainer selected tasks 076 onward in roadmap dependency order. Continue implementation, applicable
+    checks, required reviews and final acceptance within original scope.
+  review_budget: Two identities for this combined request, implementation stage and test stage; reuse across
+    tasks and fixes.
+execution_record:
+  source_head: 7e8cd91426fa21609a91c0511de44252eaa890d4 plus accepted076-078 work
+  prerequisite: 077 foundation and sequential078 complete; manifestc42ef837
+  plan: tasks/079/TASK-079-PLAN.md
+  reviewers:
+    implementation: /root/implementation_review
+    test: /root/test_review
+  lifecycle:
+  - 'pending -> planned: current user selected sequential076 onward;078 accepted. Reuse frozen218 C# cases and
+    original079 criteria.'
+  - 'planned -> in-progress: frozen C# detector/native tests precede rule and handler implementation'
+  - 'in-progress -> review: initial implementation and source-bound evidence submitted'
+  - 'review -> in-progress -> review: main corrected retained implementation findings and final-output project-identity
+    P2; previous versions preserved'
+  - 'review -> done: original079 criteria delivered; final unchanged source verified and both retained reviewers
+    accepted'
+  initial_checks: evidence/IMPLEMENTATION-SOURCE.json; all targeted checks pass; broad checks/reviews pending
+  final_acceptance:
+    source_manifest_sha256: c73abf4448fe8172a544cd5ce4dabe3328d2d4c05b27ae0c46d2d5002ce12abb
+    implementation_review: accepted; same identity
+    test_review: accepted; same identity; P2 resolved
+    checks: evidence/FINAL-CHECKS.json; all required checks exit0; strict incomplete expected3
+    results: tasks/079/TASK-079-RESULTS.md
+    remaining: 080-083 milestone work; no original079 criterion deferred

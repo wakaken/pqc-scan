@@ -1,0 +1,1 @@
+/* documentation: &lt;?php sodium_crypto_kem_keypair(); */

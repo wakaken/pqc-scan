@@ -1,0 +1,99 @@
+   Compiling pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+error[E0432]: unresolved imports `super::super::parse`, `super::super::parse`
+ --> crates/pqc_scan_detectors/src/dependency_detector/languages/mod.rs:5:19
+  |
+5 | use super::super::parse::{self, decode, Build, DetectorStatus, Failure, Format, Origin, Parsed};
+  |                   ^^^^^   ^^^^ no `parse` in the root
+  |                   |
+  |                   unresolved import
+  |                   help: a similar path exists: `syn::parse`
+  |
+  = help: consider importing one of these modules instead:
+          crate::dependency_detector::parse
+          syn::parse
+
+error[E0106]: missing lifetime specifier
+  --> crates/pqc_scan_detectors/src/dependency_detector/languages/nuget.rs:46:57
+   |
+46 | fn version(n: roxmltree::Node<'_, '_>) -> Result<Option<&str>, ()> {
+   |               -----------------------                   ^ expected named lifetime parameter
+   |
+   = help: this function's return type contains a borrowed value, but the signature does not say which one of `n`'s 2 lifetimes it is borrowed from
+help: consider introducing a named lifetime parameter
+   |
+46 - fn version(n: roxmltree::Node<'_, '_>) -> Result<Option<&str>, ()> {
+46 + fn version<'a>(n: roxmltree::Node<'a, 'a>) -> Result<Option<&'a str>, ()> {
+   |
+
+error[E0282]: type annotations needed
+  --> crates/pqc_scan_detectors/src/dependency_detector/languages/nuget.rs:22:40
+   |
+22 |     for n in doc.descendants().filter(|n| n.is_element()) {
+   |                                        ^  - type must be known at this point
+   |
+help: consider giving this closure parameter an explicit type
+   |
+22 |     for n in doc.descendants().filter(|n: /* Type */| n.is_element()) {
+   |                                         ++++++++++++
+
+error[E0282]: type annotations needed
+  --> crates/pqc_scan_detectors/src/dependency_detector/languages/nuget.rs:23:12
+   |
+23 |         if n.ancestors().take(66).count() > 65 {
+   |            ^ cannot infer type
+
+error[E0282]: type annotations needed
+  --> crates/pqc_scan_detectors/src/dependency_detector/languages/nuget.rs:68:19
+   |
+68 |             .any(|n| n.has_tag_name("Import") || n.has_tag_name("Choose"))
+   |                   ^  - type must be known at this point
+   |
+help: consider giving this closure parameter an explicit type
+   |
+68 |             .any(|n: /* Type */| n.has_tag_name("Import") || n.has_tag_name("Choose"))
+   |                    ++++++++++++
+
+error[E0282]: type annotations needed
+  --> crates/pqc_scan_detectors/src/dependency_detector/languages/nuget.rs:75:18
+   |
+75 |         .filter(|n| n.has_tag_name("ItemGroup"))
+   |                  ^  - type must be known at this point
+   |
+help: consider giving this closure parameter an explicit type
+   |
+75 |         .filter(|n: /* Type */| n.has_tag_name("ItemGroup"))
+   |                   ++++++++++++
+
+error[E0282]: type annotations needed
+  --> crates/pqc_scan_detectors/src/dependency_detector/languages/nuget.rs:76:20
+   |
+76 |         .flat_map(|n| n.children().filter(|n| n.has_tag_name("PackageVersion")))
+   |                    ^  - type must be known at this point
+   |
+help: consider giving this closure parameter an explicit type
+   |
+76 |         .flat_map(|n: /* Type */| n.children().filter(|n| n.has_tag_name("PackageVersion")))
+   |                     ++++++++++++
+
+error[E0282]: type annotations needed
+  --> crates/pqc_scan_detectors/src/dependency_detector/languages/nuget.rs:76:44
+   |
+76 |         .flat_map(|n| n.children().filter(|n| n.has_tag_name("PackageVersion")))
+   |                                            ^  - type must be known at this point
+   |
+help: consider giving this closure parameter an explicit type
+   |
+76 |         .flat_map(|n| n.children().filter(|n: /* Type */| n.has_tag_name("PackageVersion")))
+   |                                             ++++++++++++
+
+error[E0282]: type annotations needed
+  --> crates/pqc_scan_detectors/src/dependency_detector/languages/nuget.rs:78:18
+   |
+78 |         let id = n
+   |                  ^ cannot infer type
+
+Some errors have detailed explanations: E0106, E0282, E0432.
+For more information about an error, try `rustc --explain E0106`.
+error: could not compile `pqc_scan_detectors` (lib) due to 9 previous errors
+warning: build failed, waiting for other jobs to finish...

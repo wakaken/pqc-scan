@@ -1,0 +1,99 @@
+- text: Language / 言語
+- combobox "Language / 言語":
+  - option "English" [selected]
+  - option "日本語"
+- text: Theme / 表示
+- combobox "Theme / 表示":
+  - option "Light / ライト" [selected]
+  - option "Dark / ダーク"
+- main:
+  - link "Skip to findings":
+    - /url: "#findings"
+  - paragraph: pqc-scan / Static analysis
+  - heading "PQC Migration Scan Report" [level=1]
+  - paragraph:
+    - text: Generated
+    - time: Nov 24, 2026, 2:45:59 PM GMT+9 (Asia/Tokyo)
+  - generic: Findings to review
+  - generic: 2 items
+  - generic: Informational findings
+  - generic: 6 items
+  - generic: Files with findings
+  - generic: "1"
+  - figure "Severity distribution · all findings":
+    - generic: Severity distribution · all findings
+    - list:
+      - text: medium
+      - strong: "2"
+      - text: info
+      - strong: "6"
+  - heading "Inspection scope and completion" [level=2]
+  - paragraph: Supported inspection completed within the selected scope
+  - paragraph: Review the findings below. Completion does not mean the project is safe.
+  - text: Files selected
+  - strong: "1"
+  - text: Files analyzed
+  - strong: "1"
+  - text: Files needing follow-up
+  - strong: "0"
+  - generic "Scope and exclusions"
+  - complementary:
+    - group "Search conditions":
+      - generic "Search conditions ›":
+        - text: Search conditions ›
+      - text: View
+      - combobox "View":
+        - option "Risk candidates" [selected]
+        - option "Inventory"
+        - option "All"
+      - text: Search
+      - searchbox "Search"
+      - text: Severity
+      - combobox "Severity":
+        - option "All severities" [selected]
+        - option "critical"
+        - option "high"
+        - option "medium"
+        - option "low"
+        - option "info"
+      - text: Risk
+      - combobox "Risk":
+        - option "All risks" [selected]
+        - option "quantum-vulnerable"
+        - option "quantum-uncertain"
+        - option "quantum-safe"
+        - option "non-quantum-risk"
+      - text: Rule
+      - combobox "Rule":
+        - option "All rules" [selected]
+        - option "CSHARP_CRYPTO_API — C# cryptographic API or qualified library reference; effective key use r..."
+        - option "CSHARP_CRYPTO_REFERENCE — C# TLS library or OQS wrapper reference; identity and runtime capability..."
+        - option "CSHARP_PQC_API — C# PQC or composite/HPKE reference; source alone does not establish plat..."
+      - link "Rule explanations":
+        - /url: report.rules.html?lang=en
+      - text: File
+      - combobox "File":
+        - option "All files" [selected]
+        - option "api.cs"
+      - checkbox "Show test code results" [checked]
+      - text: Show test code results
+      - button "Clear all filters"
+    - group "Files":
+      - generic "Files ›":
+        - text: Files ›
+      - link "Show all results":
+        - /url: "#findings"
+      - list:
+        - button "api.cs, 8 total findings":
+          - generic: api.cs
+          - generic: "8"
+  - region "Findings":
+    - heading "Findings" [level=2]
+    - status: 1 / 3 finding groups; 2 / 8 findings match the current view.
+    - generic "› C# cryptographic API or qualified library reference; effective key use requires verification. medium 2 hits Files 1 · matches 2 / 2":
+      - text: ›
+      - strong: C# cryptographic API or qualified library reference; effective key use requires verification.
+      - generic: medium
+      - generic: 2 hits
+      - generic: Files 1 · matches 2 / 2
+    - text: › ›

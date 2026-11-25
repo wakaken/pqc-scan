@@ -1,0 +1,1 @@
+<?php [$sk,$pk]=\PQCrypto\MLKem768::generateKeypair(); try {} catch (Exception $pk) {} $pk->encapsulate();

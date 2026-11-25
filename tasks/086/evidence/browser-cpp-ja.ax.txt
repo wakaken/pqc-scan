@@ -1,0 +1,44 @@
+Browser tab: 5, Title: "耐量子暗号への移行調査レポート", URL: "http://127.0.0.1:57385/cpp/report.html?lang=ja&theme=light".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 121, 135-138
++					217 text ›
++				218 container finding-0
++					219 button (expanded) src/key.cpp:219:15 secp256k1_ecdsa_sign(/* arguments omitted */), Secondary Actions: Collapse
++						220 AXListMarker ▾ 
++						221 text src/key.cpp:219:15
++						222 text secp256k1_ecdsa_sign(/* arguments omitted */)
++					223 text C/C++の暗号APIまたは設定の参照が見つかりました。
++					224 text 判断の目安: 要確認（実装や設定の確認が必要）
++					225 text 確認すること: 方式、鍵の役割、リンクするプロバイダーとビルド設定を確認してください。プロバイダーやTLSグループの指定だけでは、実行時の有効性や通信での合意を判断できません。
++					226 container
++						227 text 検出した記述:  secp256k1_ecdsa_sign(/* arguments omitted */)
++					228 button (collapsed) 一致したルール (1), Secondary Actions: Expand
++						229 text 一致したルール (1)
++					230 text 219 secp256k1_ecdsa_sign(/* arguments omitted */)
++					231 heading この箇所の対応, Value: 4
++						232 text この箇所の対応
++					233 container
++						234 heading C/C++のライブラリ・プロバイダー・ビルド設定を確認する 計画して対応, Value: 4
++							235 text C/C++のライブラリ・プロバイダー・ビルド設定を確認する  計画して対応
++						236 text 参照や依存宣言から配備先の対応状況は分かりません。不明なバージョンは未確認のまま扱ってください。
++						237 content list
++							238 container
++								239 AXListMarker 1. 
++								240 text 配備先のネイティブライブラリ・ビルド設定・プロバイダー・通信相手は未確認です。vcpkg・Conanの宣言やbaseline、CMakeの参照は、導入済みライブラリや復元したビルド依存関係ではありません。
++							241 container
++								242 AXListMarker 2. 
++								243 text OpenSSL 3.5は既定プロバイダーにML-KEM・ML-DSA・SLH-DSAを備えます。すべてのPQC利用にoqsproviderが必要なわけではありません。正確なビルド・有効な方式・プロバイダーとプロパティを確認してください。
++							244 container
++								245 AXListMarker 3. 
++								246 text liboqs・liboqs-cpp・oqsproviderは、それぞれの互換バージョン・有効／無効な方式・ビルドフラグ・保守状況を確認してください。OQSの統合はプロトタイプであり、ラッパーやincludeだけでは本番への適性を判断できません。
++							247 container
++								248 AXListMarker 4. 
++								249 text TLSグループやプロバイダーのロードは設定の要求です。通信相手、合意したグループ、認証署名とプロトコルを別々に確認してください。適切なAESを一律に公開鍵KEMへ置き換える案にはなりません。
++						250 button (collapsed) 参考資料・変更例, Secondary Actions: Expand
++							251 text 参考資料・変更例
++					252 text 共通の確認・計画（この行で確認済みの事実ではありません）：
++					253 content list
++						254 container
++							255 AXListMarker • 
++							256 link Description: 暗号方式を切り替えられる共通処理を設ける, Value: 127.0.0.1:57385/cpp/report.html?lang=ja&theme=light#shared-0-0
+The focused UI element is 219 button (expanded) src/key.cpp:219:15 secp256k1_ecdsa_sign(/* arguments omitted */), Secondary Actions: Collapse

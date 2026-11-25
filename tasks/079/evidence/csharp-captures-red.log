@@ -1,0 +1,32 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.77s
+     Running tests/csharp_source.rs (target/debug/deps/csharp_source-240f82a778562327)
+
+running 11 tests
+test csharp_deferred_captures_and_implicit_parameter_names_do_not_reuse_outer_values ... FAILED
+test csharp_wrapper_projects_and_bc_tls_are_distinct_opaque_references ... ok
+test csharp_explicit_local_types_keep_only_nominal_family_for_unknown_initializers ... ok
+test csharp_global_aliases_do_not_cross_files_and_conditionals_stay_partial ... ok
+test csharp_parameters_named_arguments_and_conflicts_do_not_guess_exact_sets ... ok
+test csharp_bc_initialization_resolves_only_the_expected_parameter_container ... ok
+test csharp_aliases_local_global_usings_namespaces_and_static_imports_are_local ... ok
+test csharp_local_writes_method_boundaries_and_unknown_mutations_stop_old_keys ... ok
+test csharp_private_arguments_and_legacy_looking_payloads_are_protected_when_partial ... ok
+test csharp_alias_and_binding_limits_report_truncation_at_actual_boundaries ... ok
+test every_frozen_csharp_case_matches_its_original_focal_expectation ... ok
+
+failures:
+
+---- csharp_deferred_captures_and_implicit_parameter_names_do_not_reuse_outer_values stdout ----
+
+thread 'csharp_deferred_captures_and_implicit_parameter_names_do_not_reuse_outer_values' (23128539) panicked at crates/pqc_scan_detectors/tests/csharp_source.rs:449:101:
+assertion failed: focal(&native, start, start + call.len()).is_empty()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    csharp_deferred_captures_and_implicit_parameter_names_do_not_reuse_outer_values
+
+test result: FAILED. 10 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.51s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test csharp_source`

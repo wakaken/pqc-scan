@@ -1,0 +1,28 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.01s
+     Running tests/c_family_source.rs (target/debug/deps/c_family_source-31e1842aa2f3e465)
+
+running 2 tests
+
+thread 'c_family_raw_imports_do_not_guess_wrong_selector_dialects_or_expose_key_arguments' (24374052) panicked at crates/pqc_scan_detectors/tests/c_family_source.rs:120:9:
+assertion `left == right` failed: unresolved source request still needs an observation
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'c_family_raw_key_imports_retain_documented_selectors_and_local_key_roles' (24374053) panicked at crates/pqc_scan_detectors/tests/c_family_source.rs:97:17:
+assertion `left == right` failed: documented raw key request was omitted: EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519,NULL,bytes,size)
+  left: 0
+ right: 1
+test c_family_raw_imports_do_not_guess_wrong_selector_dialects_or_expose_key_arguments ... FAILED
+test c_family_raw_key_imports_retain_documented_selectors_and_local_key_roles ... FAILED
+
+failures:
+
+failures:
+    c_family_raw_imports_do_not_guess_wrong_selector_dialects_or_expose_key_arguments
+    c_family_raw_key_imports_retain_documented_selectors_and_local_key_roles
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.20s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test c_family_source`

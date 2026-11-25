@@ -1,0 +1,221 @@
+diff --git a/.github/workflows/pqc-scan.yml b/.github/workflows/pqc-scan.yml
+index 03e830a..a3d2778 100644
+--- a/.github/workflows/pqc-scan.yml
++++ b/.github/workflows/pqc-scan.yml
+@@ -168,7 +168,7 @@ jobs:
+         run: >-
+           python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2
+           --baseline target/quality-expanded-v2
+-          --applicability tests/quality/applicability-v040-readme-20261123/assessment.json
++          --applicability tests/quality/applicability-v05-language-20261125/assessment.json
+           --out-dir target/quality-expanded-v2-assessment
+       - name: Measure missing lock-format controls
+         run: >-
+diff --git a/docs/architecture/STATIC-ANALYSIS.md b/docs/architecture/STATIC-ANALYSIS.md
+index 8603bb8..e13f0b2 100644
+--- a/docs/architecture/STATIC-ANALYSIS.md
++++ b/docs/architecture/STATIC-ANALYSIS.md
+@@ -94,8 +94,9 @@ chain or runtime-use guarantee follows. PSS digest parameters and unlisted
+ signature OIDs are not fully assessed; absence of a hash finding does not prove a
+ safe digest. See [classification specification](../../tasks/021/TASK-021-IMPLEMENTATION.md)
+ and [focused baseline](../../tasks/021/CERTIFICATE-BASELINE-021.md).
+-Files containing EC/DSA/encrypted private-key PEM markers also receive file-wide source
+-snippet masking; this does not add new private-key detection rules or decrypt keys.
++Recognized private-key blocks are redacted in source excerpts before clipping.
++Uninspected or unresolved regions retain conservative protection; this does not
++add private-key parsing or decryption support. See [evidence privacy](EVIDENCE-PRIVACY.md).
+ 
+ ### PKCS#12 support and limits
+ 
+@@ -128,7 +129,7 @@ for adjacent references. Custom patterns/scopes keep their generic ranges. See
+ ### Built-in Rule Set
+ 
+ - Default rules live under `rules/default/`
+-- Current built-in rules: 125
++- Current built-in rules: 139
+ - Full reference (all rule IDs + severity definitions): [docs/rules-reference.md](../rules-reference.md)
+ 
+ Rule packs reject blank IDs, non-finite confidence or values outside `0..1`, duplicate IDs, invalid patterns and traversal failures. Invalid packs return operational error 1 instead of a partial pack. Valid custom scopes retain their per-detector semantics; unknown scope labels are not rejected. Check [scope compatibility](../architecture/RULE-VALIDATION.md) when upgrading a custom pack.
+@@ -209,11 +210,11 @@ Selected V8 grammar compatibility covers native-call expression positions, slopp
+ 
+ ## Privacy and excluded files
+ 
+-Recognized private-key blocks and credential literals are masked in exported evidence. The policy covers RSA, generic PKCS#8, OpenSSH, EC, DSA and encrypted private-key markers; single-line named password/token/key literals; Bearer/Basic tokens; and HTTP(S) userinfo and named credential query values. Marker masking does not add private-key parsing or decryption support.
++Recognized private-key blocks and credential literals are masked in exported evidence. The policy covers RSA, generic PKCS#8, OpenSSH, EC, DSA and encrypted private-key markers; recognized named password/token/key literals, including quoted multiline values; Bearer/Basic tokens; and HTTP(S) userinfo and named credential query values. Marker masking does not add private-key parsing or decryption support.
+ 
+-Previews are conservatively masked when recognized private/credential context is present. Metadata values, action text/code, CBOM and dependency text also pass through bounded redaction. Typed inventory and diagnostics omit raw payloads and arbitrary error text.
++Ordinary arguments and up to two surrounding lines remain visible; recognized secret spans are masked before clipping. Uninspected/ambiguous regions retain conservative protection. Metadata values, action text/code, CBOM and dependency text also pass through bounded redaction. Typed inventory and diagnostics omit raw payloads and arbitrary error text.
+ 
+-This is not a universal secret scanner. Unknown/obfuscated syntax, arbitrary credential names, multiline credential position tracking and secret-bearing structural fields are outside the contract. Keep paths, IDs, repository scopes and custom metadata keys free of secrets. Public certificate fingerprints/subjects and other retained facts can still require distribution review. Some benign preview text is omitted conservatively. See the [supported syntax, field policy and limits](../architecture/EVIDENCE-PRIVACY.md) and [synthetic-canary verification](../../tasks/029/TASK-029-EVIDENCE-PRIVACY.md).
++This is not a universal secret scanner. Unknown/obfuscated syntax, arbitrary credential names and secret-bearing structural fields are outside the contract. Keep paths, IDs, repository scopes and custom metadata keys free of secrets. Public certificate fingerprints/subjects and other retained facts can still require distribution review. Some benign preview text is omitted conservatively. See the [supported syntax, field policy and limits](../architecture/EVIDENCE-PRIVACY.md) and [synthetic-canary verification](../../tasks/029/TASK-029-EVIDENCE-PRIVACY.md).
+ 
+ Repository walking respects Git ignore settings. Default exclusions include `.git`, `node_modules`, `target`, `dist`, `docs` and Markdown files; files larger than 2 MiB are skipped by default. CLI scan/serve and the folder picker accept `--max-file-size-mib` / a size field from 1 to 64 MiB. This changes selection and bounded primary reads only; secondary reference readers and detector-specific budgets retain their own limits. Test directories are not generally excluded. These scope limits mean a successful scan does not establish absence of cryptography in ignored or unsupported files.
+ 
+diff --git a/docs/releases/DISTRIBUTION-ENGINEERING.md b/docs/releases/DISTRIBUTION-ENGINEERING.md
+index 3b73776..85b0d4a 100644
+--- a/docs/releases/DISTRIBUTION-ENGINEERING.md
++++ b/docs/releases/DISTRIBUTION-ENGINEERING.md
+@@ -30,6 +30,12 @@ release. Dirty state, source inputs, features and tool versions appear in
+ for the selected target/features, their declared licenses and collected notices. Exact-version upstream fallbacks
+ are checked against Cargo.lock checksum, archive VCS revision and bundled file
+ hashes, with no network fetching during packaging.
++Public documentation includes both root READMEs, both security guides, and the
++paired coverage/scanning/report/saved-evidence guides. Preparation rejects missing
++ordinary inline local document/image targets in these public Markdown guides;
++external URLs are not fetched and fragments are not validated as archive members.
++This prevents an internally valid archive from shipping broken local navigation.
++
+ It is audit evidence, not legal certification or a proof of exact binary linkage.
+ Missing notices fail preparation. Static notice fallbacks include complete
+ upstream permission texts and original attributions. Four objc2-family
+diff --git a/scripts/package-release.py b/scripts/package-release.py
+index a8997bd..be5dfda 100644
+--- a/scripts/package-release.py
++++ b/scripts/package-release.py
+@@ -6,6 +6,7 @@ import hashlib
+ import io
+ import json
+ import os
++import posixpath
+ from pathlib import Path, PurePosixPath
+ import re
+ import subprocess
+@@ -254,6 +255,26 @@ def validate_command_surface(variant, top_help, probe_help, *, allow_legacy=Fals
+         raise ValueError('package protocol commands differ from declared variant')
+ 
+ 
++def validate_documentation_links(entries):
++    """Require ordinary inline local links in bundled public guides to resolve.
++
++    Fragments are reader navigation, not archive members. External URLs are not
++    fetched. Historical release/maintainer notes and third-party notices are not
++    public guide roots, so this does not pull arbitrary repository files in.
++    """
++    for name, (data, _) in entries.items():
++        if name not in {'README.md', 'README.ja.md', 'SECURITY.md', 'SECURITY.ja.md'} and not (
++                name.startswith('docs/user/') and name.endswith('.md')):
++            continue
++        for href in re.findall(r'!?\[[^\]]*\]\(([^()\s]+)(?:\s+"[^"]*")?\)', data.decode('utf-8')):
++            link = urlsplit(href)
++            if link.scheme or link.netloc or not link.path:
++                continue
++            target = posixpath.normpath(posixpath.join(posixpath.dirname(name), unquote(link.path)))
++            if target not in entries:
++                raise ValueError('missing bundled documentation link: '+name+' -> '+href)
++
++
+ def prepare(args):
+     root = args.source_root.resolve()
+     binary = args.binary.resolve(strict=True)
+@@ -279,7 +300,7 @@ def prepare(args):
+     if binary_data[:8] != bytes.fromhex('cffaedfe0c000001'):
+         raise ValueError('expected thin Mach-O aarch64 binary for declared target')
+     entries = {'bin/pqc-scan': (binary_data, 0o755)}
+-    explicit = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md', 'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md', 'schemas/migration-context-v1.schema.json', 'docs/images/v0.4/CAPTURES.json', 'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json', 'third_party/notices/README.md']
++    explicit = ['LICENSE', 'SECURITY.md', 'SECURITY.ja.md', 'README.md', 'README.ja.md', 'docs/user/COVERAGE.md', 'docs/user/COVERAGE.ja.md', 'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md', 'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md', 'schemas/migration-context-v1.schema.json', 'docs/images/v0.4/CAPTURES.json', 'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json', 'third_party/notices/README.md']
+     paths = ([root/p for p in explicit] + sorted((root/'rules/default').glob('*.yml'))
+              + sorted((root/'docs/releases').glob('*.md'))
+              + sorted((root/'docs/images/v0.4').glob('*.jpg')))
+@@ -291,6 +312,7 @@ def prepare(args):
+         data = local_bytes(root, name, 512*1024) if name == 'third_party/notices/manifest.json' else path.read_bytes()
+         entries[name] = (data, 0o644)
+         source_hashes[name] = digest(data)
++    validate_documentation_links(entries)
+     inventory = []
+     for ident in sorted(selected):
+         package = packages[ident]
+diff --git a/tests/distribution/test_package.py b/tests/distribution/test_package.py
+index 6bd644a..7304837 100644
+--- a/tests/distribution/test_package.py
++++ b/tests/distribution/test_package.py
+@@ -73,7 +73,7 @@ class PackageTests(unittest.TestCase):
+     def test_network_binds_features_metadata_and_dependency_notices(self):
+         with tempfile.TemporaryDirectory() as tmp:
+             root = pathlib.Path(tmp)
+-            required = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md',
++            required = ['LICENSE', 'SECURITY.md', 'SECURITY.ja.md', 'README.md', 'README.ja.md', 'docs/user/COVERAGE.md', 'docs/user/COVERAGE.ja.md', 'docs/user/DISTRIBUTION.md',
+                         'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md',
+                         'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md', 'docs/releases/v0.2.0.md', 'docs/releases/v0.2.0.ja.md', 'Cargo.lock', 'rust-toolchain.toml',
+                         'third_party/notices/manifest.json', 'third_party/notices/README.md', 'schemas/migration-context-v1.schema.json', 'docs/images/v0.4/web-01-folders-en.jpg', 'docs/images/v0.4/CAPTURES.json']
+@@ -130,6 +130,56 @@ class PackageTests(unittest.TestCase):
+             self.assertIn('negotiation', [p['name'] for p in notices['packages']])
+             self.assertTrue(all(p['notices'] for p in notices['packages']))
+ 
++    def test_prepared_public_guides_include_linked_documents_and_reject_broken_links(self):
++        required = [
++            'LICENSE', 'SECURITY.md', 'SECURITY.ja.md', 'README.md', 'README.ja.md',
++            'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md',
++            'docs/user/PROBING.md', 'docs/user/PROBING.ja.md',
++            'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md',
++            'docs/user/COVERAGE.md', 'docs/user/COVERAGE.ja.md',
++            'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md',
++            'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md',
++            'schemas/migration-context-v1.schema.json', 'docs/images/v0.4/CAPTURES.json',
++            'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json',
++            'third_party/notices/README.md',
++        ]
++        with tempfile.TemporaryDirectory() as tmp:
++            root = pathlib.Path(tmp)
++            for name in required:
++                path = root/name
++                path.parent.mkdir(parents=True, exist_ok=True)
++                path.write_text('fixture')
++            (root/'README.md').write_text('[Scan](docs/user/SCANNING.md)')
++            (root/'README.ja.md').write_text('[Security](SECURITY.ja.md)')
++            guide = root/'docs/user/SCANNING.md'
++            guide.write_text('[Coverage](COVERAGE.md#source-limits) [Home](../../README.md) '
++                             '[Online](https://example.invalid/remote) [Here](#local)')
++            (root/'rules/default').mkdir(parents=True)
++            binary = root/'binary'
++            binary.write_bytes(bytes.fromhex('cffaedfe0c000001') + b'fixture')
++            metadata = {'packages': [{'id': 'cli', 'name': 'pqc_scan_cli', 'version': '0.1.0',
++                         'source': None, 'license': 'MIT', 'manifest_path': str(root/'Cargo.toml')}],
++                        'resolve': {'nodes': [{'id': 'cli', 'deps': []}]}}
++            def run(directory, *args):
++                return json.dumps(metadata) if args[:2] == ('cargo', 'metadata') else 'fixture'
++            def prepare(folder):
++                self.mod.prepare(argparse.Namespace(source_root=root, binary=binary,
++                    target='aarch64-apple-darwin', variant='static', out_dir=root/folder))
++            with patch.object(self.mod, 'run', side_effect=run), patch.object(self.mod.subprocess, 'check_output', return_value=b''):
++                prepare('valid')
++                archive, = (root/'valid').glob('*.tar.gz')
++                with tarfile.open(archive) as tar:
++                    prefix = archive.name.removesuffix('.tar.gz')
++                    for name in ['README.md', 'README.ja.md', 'SECURITY.ja.md',
++                                 'docs/user/COVERAGE.md', 'docs/user/COVERAGE.ja.md']:
++                        self.assertIn(prefix+'/'+name, tar.getnames(), name)
++                        self.assertEqual(tar.extractfile(prefix+'/'+name).read(), (root/name).read_bytes())
++                for index, link in enumerate(['missing.md', '../../../outside.md',
++                                               'missing%20guide.md', 'missing.png']):
++                    guide.write_text('![Required document]('+link+')')
++                    with self.subTest(link=link), self.assertRaisesRegex(ValueError, 'documentation link'):
++                        prepare('broken'+str(index))
++
+     def test_repeatable_and_tamper_detection(self):
+         entries = {'bin/pqc-scan': (b'binary', 0o755), 'rules/test.yml': (b'id: test', 0o644)}
+         with tempfile.TemporaryDirectory() as tmp:
+diff --git a/tests/quality/test_ci_applicability.py b/tests/quality/test_ci_applicability.py
+index bb92254..be2eb1e 100644
+--- a/tests/quality/test_ci_applicability.py
++++ b/tests/quality/test_ci_applicability.py
+@@ -10,7 +10,8 @@ import unittest
+ import report
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+-CURRENT = 'tests/quality/applicability-v040-readme-20261123/assessment.json'
++CURRENT = 'tests/quality/applicability-v05-language-20261125/assessment.json'
++PREVIOUS_README = 'tests/quality/applicability-v040-readme-20261123/assessment.json'
+ PREVIOUS_ILLUSTRATED = 'tests/quality/applicability-v040-guide-20261123/assessment.json'
+ PREVIOUS_V040 = 'tests/quality/applicability-v040-release-20261123/assessment.json'
+ PREVIOUS_V030 = 'tests/quality/applicability-v030-publication-20261117/assessment.json'
+@@ -52,6 +53,10 @@ class CIApplicabilityTests(unittest.TestCase):
+         self.assertEqual({u['id']: u['status'] for u in current['dispositions']},
+                          {u['id']: u['status'] for u in old['dispositions']})
+ 
++    def test_previous_readme_review_is_not_relabelled_current_after_language_expansion(self):
++        with self.assertRaisesRegex(ValueError, 'binding changed'):
++            scoped(ROOT, PREVIOUS_README)
++
+     def test_historical_binding_remains_rejected_against_current_document(self):
+         with self.assertRaisesRegex(ValueError, 'binding changed'):
+             scoped(ROOT, HISTORICAL)

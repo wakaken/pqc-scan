@@ -1,0 +1,1966 @@
+diff --git a/crates/pqc_scan_core/src/diagnostic.rs b/crates/pqc_scan_core/src/diagnostic.rs
+index e7d1fa1..10abb44 100644
+--- a/crates/pqc_scan_core/src/diagnostic.rs
++++ b/crates/pqc_scan_core/src/diagnostic.rs
+@@ -26,6 +26,7 @@ pub struct DetectorOutcome {
+     display_ranges: Vec<std::ops::Range<usize>>,
+     sensitive_ranges: Vec<std::ops::Range<usize>>,
+     sensitive_source_context: bool,
++    typed_source_references_only: bool,
+ }
+ 
+ impl DetectorOutcome {
+@@ -46,6 +47,7 @@ impl DetectorOutcome {
+             display_ranges: Vec::new(),
+             sensitive_ranges: Vec::new(),
+             sensitive_source_context: false,
++            typed_source_references_only: false,
+         }
+     }
+ 
+@@ -89,6 +91,15 @@ impl DetectorOutcome {
+     pub fn sensitive_source_context(&self) -> bool {
+         self.sensitive_source_context
+     }
++    /// Restrict algorithm inventory to the bounded source handler's typed facts,
++    /// independently of source presentation privacy. Ephemeral, not serialized.
++    pub fn with_typed_source_references_only(mut self, typed_only: bool) -> Self {
++        self.typed_source_references_only = typed_only;
++        self
++    }
++    pub fn typed_source_references_only(&self) -> bool {
++        self.typed_source_references_only
++    }
+     /// Fixed reason code and bounded numeric work counters only; never source text.
+     pub fn with_limit(mut self, reason: &'static str, limit: usize, processed: usize) -> Self {
+         self.limit_detail = Some(format!("Inspection limit: {reason}; limit={limit}; processed={processed}. Retained findings remain available; omitted findings are unknown. Inspect the remaining source separately."));
+diff --git a/crates/pqc_scan_core/src/observation.rs b/crates/pqc_scan_core/src/observation.rs
+index 4c8a781..4fb5ed9 100644
+--- a/crates/pqc_scan_core/src/observation.rs
++++ b/crates/pqc_scan_core/src/observation.rs
+@@ -577,6 +577,7 @@ pub struct ObservationDraft {
+     pub(crate) dependency: Option<DependencyFacts>,
+     pub(crate) typed_dependency: bool,
+     pub(crate) source_api_typed: bool,
++    pub(crate) source_api_display: Option<String>,
+     pub(crate) source_library: Option<SourceLibraryReference>,
+     pub(crate) source_configuration: Option<SourceConfigurationReference>,
+     pub(crate) evidence: SafeEvidence,
+@@ -659,6 +660,7 @@ impl ObservationDraft {
+             dependency: None,
+             typed_dependency: false,
+             source_api_typed: false,
++            source_api_display: None,
+             source_library: None,
+             source_configuration: None,
+             evidence: SafeEvidence {
+diff --git a/crates/pqc_scan_core/src/observation/source_api.rs b/crates/pqc_scan_core/src/observation/source_api.rs
+index f0855be..9a2c9c0 100644
+--- a/crates/pqc_scan_core/src/observation/source_api.rs
++++ b/crates/pqc_scan_core/src/observation/source_api.rs
+@@ -195,10 +195,26 @@ impl ObservationDraft {
+         }
+         self
+     }
++    /// A finite public API token only; never accepts source arguments, receivers
++    /// or arbitrary metadata. This transient admission token is not serialized or
++    /// included in observation/finding identities. Core may replace it only with
++    /// an inspected, span-bound and redacted source excerpt after all detectors.
++    pub fn with_source_api_display_name(mut self, name: &str) -> Self {
++        if self.source_api_typed
++            && self.method == "ast_pattern"
++            && self.assurance == "syntactic"
++            && self.usage == "referenced"
++        {
++            self.source_api_display =
++                public_api_name(name).map(|name| format!("{name}(/* arguments omitted */)"));
++        }
++        self
++    }
+     pub(crate) fn public_source_label(&self) -> Option<String> {
+         self.source_library
+             .map(|r| r.label().to_owned())
+             .or_else(|| self.source_configuration.as_ref().map(|r| r.label()))
++            .or_else(|| self.source_api_display.clone())
+     }
+     /// The source producer computed these columns with line_col_for_offset.
+     /// Legacy producers retain their existing mixed-column annotation.
+@@ -229,3 +245,302 @@ impl ObservationDraft {
+             && self.source_configuration == other.source_configuration
+     }
+ }
++
++// Finite public tokens, canonicalized only after language-aware acceptance.
++// No prefix/pattern allowlist. In particular, a scanned
++// receiver, alias, credential or string literal can never extend this set.
++fn public_api_name(name: &str) -> Option<&'static str> {
++    const NAMES: &[&str] = &[
++        "RSA_new",
++        "RSA_generate_key_ex",
++        "RSA_public_encrypt",
++        "RSA_private_decrypt",
++        "RSA_private_encrypt",
++        "RSA_public_decrypt",
++        "RSA_sign",
++        "RSA_verify",
++        "DSA_new",
++        "DSA_generate_key",
++        "DSA_generate_parameters_ex",
++        "DSA_sign",
++        "DSA_verify",
++        "DH_new",
++        "DH_generate_key",
++        "DH_generate_parameters_ex",
++        "DH_compute_key",
++        "EC_KEY_new",
++        "EC_KEY_new_by_curve_name",
++        "EC_KEY_generate_key",
++        "ECDSA_sign",
++        "ECDSA_verify",
++        "ECDH_compute_key",
++        "secp256k1_ecdsa_sign",
++        "secp256k1_ecdsa_verify",
++        "wc_RsaSSL_Sign",
++        "wc_RsaSSL_Verify",
++        "wc_RsaPublicEncrypt",
++        "wc_RsaPrivateDecrypt",
++        "EVP_PKEY_CTX_new_id",
++        "EVP_PKEY_CTX_new_from_name",
++        "EVP_PKEY_CTX_new",
++        "EVP_PKEY_CTX_new_from_pkey",
++        "EVP_PKEY_CTX_dup",
++        "EVP_PKEY_new_raw_private_key",
++        "EVP_PKEY_new_raw_private_key_ex",
++        "EVP_PKEY_new_raw_public_key",
++        "EVP_PKEY_new_raw_public_key_ex",
++        "EVP_PKEY_keygen_init",
++        "EVP_PKEY_keygen",
++        "EVP_PKEY_generate",
++        "EVP_PKEY_paramgen_init",
++        "EVP_PKEY_paramgen",
++        "EVP_PKEY_encapsulate_init",
++        "EVP_PKEY_encapsulate",
++        "EVP_PKEY_decapsulate_init",
++        "EVP_PKEY_decapsulate",
++        "EVP_PKEY_sign_init",
++        "EVP_PKEY_sign",
++        "EVP_PKEY_verify_init",
++        "EVP_PKEY_verify",
++        "EVP_PKEY_encrypt_init",
++        "EVP_PKEY_encrypt",
++        "EVP_PKEY_decrypt_init",
++        "EVP_PKEY_decrypt",
++        "EVP_PKEY_derive_init",
++        "EVP_PKEY_derive",
++        "EVP_DigestSignInit",
++        "EVP_DigestVerifyInit",
++        "EVP_DigestSignInit_ex",
++        "EVP_DigestVerifyInit_ex",
++        "OSSL_PROVIDER_load",
++        "OSSL_PROVIDER_load_ex",
++        "EVP_set_default_properties",
++        "SSL_CTX_set1_groups_list",
++        "SSL_set1_groups_list",
++        "X509_verify_cert",
++        "OQS_KEM_new",
++        "OQS_KEM_keypair",
++        "OQS_KEM_encaps",
++        "OQS_KEM_decaps",
++        "OQS_SIG_new",
++        "OQS_SIG_keypair",
++        "OQS_SIG_sign",
++        "OQS_SIG_verify",
++        "KeyEncapsulation",
++        "Signature",
++        "PK_Signer",
++        "PK_Verifier",
++        "encap_secret",
++        "decap_secret",
++        "generate_keypair",
++        "generate_keypair_seed",
++        "export_secret_key",
++        "sign",
++        "verify",
++        "Create",
++        "CreateFromPem",
++        "CreateFromEncryptedPem",
++        "GenerateKey",
++        "GenerateKeyPair",
++        "Import",
++        "ImportPrivateSeed",
++        "ImportPrivateKey",
++        "ImportPublicKey",
++        "ImportSubjectPublicKeyInfo",
++        "SignData",
++        "VerifyData",
++        "SignHash",
++        "VerifyHash",
++        "Encrypt",
++        "Decrypt",
++        "DeriveKeyMaterial",
++        "DeriveRawSecretAgreement",
++        "DeriveKeyFromHash",
++        "GenerateSignature",
++        "VerifySignature",
++        "CreateSignature",
++        "Encapsulate",
++        "Decapsulate",
++        "Build",
++        "ComputeSignature",
++        "CheckSignature",
++        "RSAPKCS1SignatureFormatter",
++        "RSAPKCS1SignatureDeformatter",
++        "RSAPKCS1KeyExchangeFormatter",
++        "RSAPKCS1KeyExchangeDeformatter",
++        "RsaKeyPairGenerator",
++        "ECKeyPairGenerator",
++        "DHKeyPairGenerator",
++        "DsaKeyPairGenerator",
++        "MLKemKeyPairGenerator",
++        "MLDsaKeyPairGenerator",
++        "SlhDsaKeyPairGenerator",
++        "RsaEngine",
++        "RsaDigestSigner",
++        "openssl_pkey_new",
++        "openssl_pkey_get_private",
++        "openssl_pkey_get_public",
++        "openssl_pkey_derive",
++        "openssl_sign",
++        "openssl_verify",
++        "openssl_public_encrypt",
++        "openssl_private_decrypt",
++        "openssl_private_encrypt",
++        "openssl_public_decrypt",
++        "sodium_crypto_sign_keypair",
++        "sodium_crypto_sign_seed_keypair",
++        "sodium_crypto_sign_detached",
++        "sodium_crypto_sign_verify_detached",
++        "sodium_crypto_box_keypair",
++        "sodium_crypto_box_seed_keypair",
++        "sodium_crypto_scalarmult",
++        "sodium_crypto_kx_keypair",
++        "sodium_crypto_kem_keypair",
++        "sodium_crypto_kem_encapsulate",
++        "sodium_crypto_kem_decapsulate",
++        "signData",
++        "verifySignature",
++        "encode",
++        "decode",
++        "generateKeys",
++        "generateKeyPair",
++        "encapsulate",
++        "decapsulate",
++        "keygen",
++        "verifyDetached",
++        "createKey",
++        "CalculateAgreement",
++        "CompositeMLDsa",
++        "CompositeMLKem",
++        "DSA",
++        "DSACng",
++        "DSACryptoServiceProvider",
++        "DSAOpenSsl",
++        "DeriveKeyFromHmac",
++        "DsaSigner",
++        "EC",
++        "ECDH",
++        "ECDHBasicAgreement",
++        "ECDiffieHellman",
++        "ECDiffieHellmanCng",
++        "ECDiffieHellmanOpenSsl",
++        "ECDsa",
++        "ECDsaCng",
++        "ECDsaOpenSsl",
++        "ECDsaSigner",
++        "HPKE",
++        "Hpke",
++        "ImportDecapsulationKey",
++        "ImportEncapsulationKey",
++        "ImportEncryptedPkcs8PrivateKey",
++        "ImportFromEncryptedPem",
++        "ImportFromPem",
++        "ImportMLDsaPrivateKey",
++        "ImportMLDsaPublicKey",
++        "ImportPkcs8PrivateKey",
++        "ImportSlhDsaPrivateKey",
++        "ImportSlhDsaPublicKey",
++        "LibOqs",
++        "MLDsa",
++        "MLDsaSigner",
++        "MLKem",
++        "MLKemDecapsulator",
++        "MLKemEncapsulator",
++        "ProcessBlock",
++        "RSA",
++        "RSACng",
++        "RSACryptoServiceProvider",
++        "RSAOpenSsl",
++        "SignedXml",
++        "SlhDsa",
++        "SlhDsaSigner",
++        "Tls",
++        "X509Chain",
++        "dotnetOQS",
++        "fromBytes",
++        "mldsa44_keygen",
++        "mldsa44_sign",
++        "mldsa44_verify",
++        "mldsa65_keygen",
++        "mldsa65_sign",
++        "mldsa65_verify",
++        "mldsa87_keygen",
++        "mldsa87_sign",
++        "mldsa87_verify",
++        "mlkem1024_decaps",
++        "mlkem1024_encaps",
++        "mlkem1024_keygen",
++        "mlkem512_decaps",
++        "mlkem512_encaps",
++        "mlkem512_keygen",
++        "mlkem768_decaps",
++        "mlkem768_encaps",
++        "mlkem768_keygen",
++        "signMessage",
++        "sodium_crypto_box",
++        "sodium_crypto_box_keypair_from_secretkey_and_publickey",
++        "sodium_crypto_box_open",
++        "sodium_crypto_box_publickey",
++        "sodium_crypto_box_publickey_from_secretkey",
++        "sodium_crypto_box_seal",
++        "sodium_crypto_box_seal_open",
++        "sodium_crypto_box_secretkey",
++        "sodium_crypto_kem_dec",
++        "sodium_crypto_kem_enc",
++        "sodium_crypto_kem_mlkem768_dec",
++        "sodium_crypto_kem_mlkem768_enc",
++        "sodium_crypto_kem_mlkem768_keypair",
++        "sodium_crypto_kem_mlkem768_publickey",
++        "sodium_crypto_kem_mlkem768_secretkey",
++        "sodium_crypto_kem_mlkem768_seed_keypair",
++        "sodium_crypto_kem_publickey",
++        "sodium_crypto_kem_secretkey",
++        "sodium_crypto_kem_seed_keypair",
++        "sodium_crypto_kx_client_session_keys",
++        "sodium_crypto_kx_publickey",
++        "sodium_crypto_kx_secretkey",
++        "sodium_crypto_kx_seed_keypair",
++        "sodium_crypto_kx_server_session_keys",
++        "sodium_crypto_scalarmult_base",
++        "sodium_crypto_sign",
++        "sodium_crypto_sign_keypair_from_secretkey_and_publickey",
++        "sodium_crypto_sign_open",
++        "sodium_crypto_sign_publickey",
++        "sodium_crypto_sign_publickey_from_secretkey",
++        "sodium_crypto_sign_secretkey",
++        "validateReference",
++        "verifyMessage",
++        "xwing_decaps",
++        "xwing_encaps",
++        "xwing_keygen",
++    ];
++    NAMES
++        .iter()
++        .copied()
++        .find(|n| *n == name)
++        .or_else(|| NAMES.iter().copied().find(|n| n.eq_ignore_ascii_case(name)))
++}
++
++#[cfg(test)]
++mod display_names_tests {
++    use super::public_api_name;
++    #[test]
++    fn only_exact_public_api_tokens_can_be_displayed() {
++        assert_eq!(
++            public_api_name("secp256k1_ecdsa_sign"),
++            Some("secp256k1_ecdsa_sign")
++        );
++        assert_eq!(public_api_name("OPENSSL_SIGN"), Some("openssl_sign"));
++        for name in [
++            "secp256k1_ecdsa_sign_PRIVATE086",
++            "RSA_new(secret)",
++            "PRIVATE086",
++            "x.sign",
++            "signData\nPRIVATE086",
++            "",
++            "RS256",
++        ] {
++            assert!(public_api_name(name).is_none());
++        }
++    }
++}
+diff --git a/crates/pqc_scan_core/src/pipeline.rs b/crates/pqc_scan_core/src/pipeline.rs
+index 423b09b..d8002cd 100644
+--- a/crates/pqc_scan_core/src/pipeline.rs
++++ b/crates/pqc_scan_core/src/pipeline.rs
+@@ -295,11 +295,14 @@ where
+             f.evidence.snippet_preview = "[masked-sensitive-content]".into();
+         }
+     }
+-    // Associate finite public source labels before raw legacy equality material
+-    // is discarded. Never whitelist source text or arbitrary detector metadata.
++    // Associate fixed library/configuration labels and core-redacted source
++    // excerpts before raw equality material is discarded. The source-display
++    // flag keeps those excerpts out of CBOM algorithm restoration.
+     let mut public_source_labels = BTreeMap::new();
+     for draft in &observations {
+         if let Some(label) = draft.public_source_label() {
++            let source_display = draft.source_api_display.as_ref() == Some(&label);
++            let label = (label, source_display);
+             for binding in &draft.bindings {
+                 if let Some(key) = binding.key(&config.root) {
+                     public_source_labels
+@@ -333,16 +336,22 @@ where
+         .iter()
+         .zip(&safe_finding_labels)
+         .filter_map(|(f, label)| {
+-            label.as_ref().map(|label| {
+-                (
++            label
++                .as_ref()
++                // API excerpts are presentation only. CBOM has no column and
++                // can represent several calls on one source line; assigning a
++                // particular call name would invent an algorithm identity.
++                .filter(|(_, source_display)| !source_display)
++                .map(|label| {
+                     (
+-                        format!("{}:{}", f.location.file, f.location.line),
+-                        f.category.clone(),
+-                        f.evidence.r#match.clone(),
+-                    ),
+-                    label.clone(),
+-                )
+-            })
++                        (
++                            format!("{}:{}", f.location.file, f.location.line),
++                            f.category.clone(),
++                            f.evidence.r#match.clone(),
++                        ),
++                        label.0.clone(),
++                    )
++                })
+         })
+         .collect();
+     let safe_cbom_labels: Vec<_> = cbom
+@@ -427,9 +436,22 @@ where
+         .iter_mut()
+         .zip(safe_finding_labels)
+     {
+-        if let Some(label) = label {
++        if let Some((label, _)) = label {
+             finding.evidence.r#match = label;
+         }
++        // Producer previews may already be shortened. Use the sanitized source
++        // window rather than trying to reconstruct lost credential syntax.
++        if let Some(snippet) = &finding.source_snippet {
++            finding.evidence.snippet_preview = snippet
++                .lines
++                .iter()
++                .map(|l| l.text.as_str())
++                .collect::<Vec<_>>()
++                .join(" ")
++                .chars()
++                .take(240)
++                .collect();
++        }
+     }
+     for (row, label) in document.legacy_mut().cbom.iter_mut().zip(safe_cbom_labels) {
+         if let Some(label) = label {
+@@ -552,6 +574,7 @@ fn inspect_file(
+     let mut observations = Vec::new();
+     let mut detections = Vec::new();
+     let mut diagnostics = Vec::new();
++    let mut typed_source_references_only = false;
+     let mut test_ranges = Vec::new();
+     let mut display_ranges = Vec::new();
+     let (mut complete, mut failed, mut unsupported, mut partial, mut unknown) =
+@@ -567,6 +590,7 @@ fn inspect_file(
+                 Some(DiagnosticCode::DetectorFailed)
+             }
+             Ok(outcome) => {
++                typed_source_references_only |= outcome.typed_source_references_only();
+                 if outcome.sensitive_source_context() {
+                     source_privacy.protect_source_context();
+                 }
+@@ -599,26 +623,7 @@ fn inspect_file(
+                         Some(DiagnosticCode::DetectorNotReported)
+                     }
+                 };
+-                observations.extend(outcome.observations().iter().cloned().map(|mut draft| {
+-                    if matches!(
+-                        draft.method.as_str(),
+-                        "lexical_match"
+-                            | "ast_pattern"
+-                            | "configuration_match"
+-                            | "private_key_marker"
+-                    ) {
+-                        if let Some(map) = &source_offsets {
+-                            let raw = |offset: usize| {
+-                                map.binary_search_by_key(&offset, |p| p.0)
+-                                    .ok()
+-                                    .map(|i| map[i].1)
+-                            };
+-                            draft.target.byte_start = draft.target.byte_start.and_then(raw);
+-                            draft.target.byte_end = draft.target.byte_end.and_then(raw);
+-                        }
+-                    }
+-                    draft.bind_to_inspected_file(&file.path, relative)
+-                }));
++                observations.extend(outcome.observations().iter().cloned());
+                 detections.extend(outcome.into_detections());
+                 code
+             }
+@@ -633,6 +638,51 @@ fn inspect_file(
+             );
+         }
+     }
++    // Build presentation from the inspected snapshot after all producers have
++    // supplied secret spans, before native byte-coordinate conversion.
++    for draft in &mut observations {
++        if draft.source_api_display.is_some() {
++            draft.source_api_display = file.text.as_deref().and_then(|text| {
++                let (start, end) = draft.source_span()?;
++                source_privacy.source_excerpt(text, start, end)
++            });
++        }
++        if !draft.source_api_typed
++            && source_privacy.sensitive(
++                draft.target.line.unwrap_or(0),
++                draft.target.column.unwrap_or(0),
++                true,
++            )
++        {
++            draft.algorithms.clear();
++        }
++        if matches!(
++            draft.method.as_str(),
++            "lexical_match" | "ast_pattern" | "configuration_match" | "private_key_marker"
++        ) {
++            if let Some(map) = &source_offsets {
++                let raw = |offset: usize| {
++                    map.binary_search_by_key(&offset, |p| p.0)
++                        .ok()
++                        .map(|i| map[i].1)
++                };
++                draft.target.byte_start = draft.target.byte_start.and_then(raw);
++                draft.target.byte_end = draft.target.byte_end.and_then(raw);
++            }
++        }
++    }
++    observations = observations
++        .into_iter()
++        .map(|draft| draft.bind_to_inspected_file(&file.path, relative))
++        .collect();
++    if !detections.is_empty()
++        && !crate::classifier::is_dependency_manifest(&file.path)
++        && !crate::classifier::is_sbom_file(&file.path)
++    {
++        if let Some(text) = &file.text {
++            source_privacy.capture_source(text);
++        }
++    }
+     if file.text.is_none()
+         && crate::text_encoding::has_wide_bom(&file.bytes)
+         && !file
+@@ -646,7 +696,7 @@ fn inspect_file(
+             Some("text_decoder".into()),
+         ));
+     }
+-    if source_privacy.restricts_source_matches() {
++    if typed_source_references_only || source_privacy.restricts_source_matches() {
+         // Opaque lexical tokens in a key-bearing source file may themselves be
+         // key payload. Preserve occurrences/links, but never promote payload
+         // vocabulary to an algorithm. Explicit finite source API facts survive.
+@@ -1019,7 +1069,11 @@ fn attach_source_snippets(
+ 
+         let rel_file = finding.location.file.clone();
+         let source = text_cache.entry(rel_file.clone()).or_insert_with(|| {
+-            if privacy
++            if let Some(lines) = privacy.get(&rel_file).and_then(|p| p.source_lines.as_ref()) {
++                CachedSnippetSource::TextLines(
++                    lines.iter().map(|l| sanitize_source_line(l)).collect(),
++                )
++            } else if privacy
+                 .get(&rel_file)
+                 .is_some_and(|p| p.masks_source_context())
+             {
+diff --git a/crates/pqc_scan_core/src/privacy.rs b/crates/pqc_scan_core/src/privacy.rs
+index 1e7fd64..fc3befc 100644
+--- a/crates/pqc_scan_core/src/privacy.rs
++++ b/crates/pqc_scan_core/src/privacy.rs
+@@ -36,7 +36,7 @@ const NAMES: &[&str] = &[
+ fn assignment() -> &'static Regex {
+     static RE: OnceLock<Regex> = OnceLock::new();
+     RE.get_or_init(|| {
+-        let names=NAMES.iter().map(|n|regex::escape(n).replace('_',"[_-]")).collect::<Vec<_>>().join("|");
++        let names=NAMES.iter().map(|n|regex::escape(n).replace('_',"[_-]?")).collect::<Vec<_>>().join("|");
+         let pattern=format!(r#"(?i)(?P<prefix>["']?\b(?:[a-z0-9]+[_-])*(?:{names})\b["']?\s*[:=]\s*)(?P<value>"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|(?:Bearer|Basic)\s+[a-z0-9._~+/=-]+|[a-z0-9_+/=-]+)(?P<end>$|[\s,;&<>\]\}}\)])"#);
+         Regex::new(&pattern).expect("fixed credential redaction regex")
+     })
+@@ -46,7 +46,7 @@ fn query_value() -> &'static Regex {
+     RE.get_or_init(|| {
+         let names = NAMES
+             .iter()
+-            .map(|n| regex::escape(n).replace('_', "[_-]"))
++            .map(|n| regex::escape(n).replace('_', "[_-]?"))
+             .collect::<Vec<_>>()
+             .join("|");
+         Regex::new(&format!(
+@@ -249,12 +249,20 @@ pub(crate) struct SourcePrivacy {
+     syntax_sensitive_context: bool,
+     restricted_source_matches: bool,
+     private_lines: Vec<(usize, usize)>,
++    exact_private_lines: Vec<(usize, usize)>,
+     // Only positions survive collection. Never retain payloads or secret digests.
+     credentials: BTreeMap<usize, Vec<(usize, usize, usize, usize)>>,
++    line_offsets: Vec<usize>,
++    pub(crate) source_lines: Option<Vec<String>>,
+ }
+ impl SourcePrivacy {
+     pub(crate) fn from_text(text: &str) -> Self {
+-        let mut out = Self::default();
++        let mut out = Self {
++            line_offsets: std::iter::once(0)
++                .chain(text.match_indices('\n').map(|(i, _)| i + 1))
++                .collect(),
++            ..Self::default()
++        };
+         let mut active: Option<(usize, &str)> = None;
+         let mut last = 0;
+         for (index, line) in text.lines().enumerate() {
+@@ -332,8 +340,138 @@ impl SourcePrivacy {
+         if let Some((start, _)) = active {
+             out.private_lines.push((start, last));
+         }
++        // Exact PEM bounds let public code on the same line remain visible.
++        let mut private_spans = Vec::new();
++        let mut active: Option<(usize, String)> = None;
++        static MARKERS: OnceLock<Regex> = OnceLock::new();
++        let markers = MARKERS.get_or_init(|| {
++            Regex::new(&format!(
++                r"(?i)-{{2,}}(?:BEGIN|END) (?:{})-{{2,}}",
++                LABELS.join("|")
++            ))
++            .expect("fixed private marker regex")
++        });
++        for marker in markers.find_iter(text) {
++            let upper = marker.as_str().to_ascii_uppercase();
++            if upper.contains("BEGIN ") {
++                if active.is_none() {
++                    let label = LABELS
++                        .iter()
++                        .find(|label| upper.contains(&format!("BEGIN {label}")))
++                        .unwrap();
++                    active = Some((marker.start(), (*label).into()));
++                }
++            } else if let Some((start, label)) = &active {
++                if upper.contains(&format!("END {label}")) {
++                    private_spans.push(*start..marker.end());
++                    active = None;
++                }
++            } else {
++                private_spans.push(
++                    private_spans
++                        .last()
++                        .map_or(0, |r: &std::ops::Range<usize>| r.end)
++                        ..marker.end(),
++                );
++            }
++        }
++        if let Some((start, _)) = active {
++            private_spans.push(start..text.len());
++        }
++        out.exact_private_lines = private_spans
++            .iter()
++            .map(|r| {
++                (
++                    out.line_offsets.partition_point(|&o| o <= r.start),
++                    out.line_offsets.partition_point(|&o| o < r.end),
++                )
++            })
++            .collect();
++        out.add_sensitive_ranges(text, &private_spans);
++        // Collect whole-input quoted values too: a value may span source lines.
++        let multiline: Vec<_> = assignment()
++            .captures_iter(text)
++            .filter(|c| literal(&c["value"]))
++            .filter_map(|c| c.name("value").map(|v| v.range()))
++            .collect();
++        out.add_sensitive_ranges(text, &multiline);
+         out
+     }
++    /// Redact against the original inspected snapshot before any clipping. The
++    /// cache contains sanitized text only; callers never reload changed files.
++    pub(crate) fn capture_source(&mut self, text: &str) {
++        if self.restricted_source_matches {
++            return;
++        }
++        self.source_lines = Some(
++            text.lines()
++                .enumerate()
++                .map(|(i, line)| self.redact_slice(i + 1, line, 0, line.len()))
++                .collect(),
++        );
++    }
++    fn redact_slice(&self, number: usize, line: &str, from: usize, to: usize) -> String {
++        if !self
++            .exact_private_lines
++            .iter()
++            .any(|&(a, b)| a <= number && number <= b)
++            && self
++                .private_lines
++                .iter()
++                .any(|&(a, b)| a <= number && number <= b)
++        {
++            return PRIVATE.into();
++        }
++        let mut out = String::new();
++        let mut cursor = from;
++        if let Some(ranges) = self.credentials.get(&number) {
++            for &(_, _, a, b) in ranges {
++                let a = (a - 1).max(from);
++                let b = (b - 1).min(to);
++                if a >= b || b <= cursor {
++                    continue;
++                }
++                out.push_str(&line[cursor..a.max(cursor)]);
++                out.push_str(VALUE);
++                cursor = b;
++            }
++        }
++        out.push_str(&line[cursor..to]);
++        redact_text(&out)
++    }
++    pub(crate) fn source_excerpt(&self, text: &str, start: usize, end: usize) -> Option<String> {
++        if self.restricted_source_matches {
++            return Some(SENSITIVE.into());
++        }
++        if start >= end
++            || end > text.len()
++            || !text.is_char_boundary(start)
++            || !text.is_char_boundary(end)
++        {
++            return None;
++        }
++        let first = self
++            .line_offsets
++            .partition_point(|&o| o <= start)
++            .saturating_sub(1);
++        let last = self
++            .line_offsets
++            .partition_point(|&o| o < end)
++            .saturating_sub(1);
++        let mut lines = Vec::new();
++        for i in first..=last {
++            let offset = self.line_offsets[i];
++            let limit = self.line_offsets.get(i + 1).copied().unwrap_or(text.len());
++            let line = &text[offset..limit];
++            lines.push(self.redact_slice(
++                i + 1,
++                line,
++                start.max(offset) - offset,
++                end.min(limit) - offset,
++            ));
++        }
++        Some(lines.join("").chars().take(240).collect())
++    }
+     pub(crate) fn add_sensitive_ranges(&mut self, text: &str, ranges: &[std::ops::Range<usize>]) {
+         if ranges.is_empty() {
+             return;
+@@ -447,7 +585,7 @@ impl SourcePrivacy {
+             })
+     }
+     pub(crate) fn is_empty(&self) -> bool {
+-        !self.masks_source_context() && self.credentials.is_empty()
++        !self.masks_source_context() && self.credentials.is_empty() && self.source_lines.is_none()
+     }
+ }
+ 
+@@ -455,6 +593,33 @@ impl SourcePrivacy {
+ mod tests {
+     use super::*;
+     #[test]
++    fn source_window_retains_public_unicode_text_beside_credentials_before_clipping() {
++        let source = "公開 password=\"SYNTH087_VALUE\"; int visible=7;\nRSA_new();";
++        let mut privacy = SourcePrivacy::from_text(source);
++        privacy.capture_source(source);
++        assert_eq!(
++            privacy.source_lines.as_ref().unwrap()[0],
++            "公開 password=[masked-sensitive-value]; int visible=7;"
++        );
++        assert_eq!(
++            privacy.source_excerpt(source, 0, source.len()).unwrap(),
++            "公開 password=[masked-sensitive-value]; int visible=7;\nRSA_new();"
++        );
++        assert!(privacy.source_excerpt(source, 1, source.len()).is_none());
++    }
++
++    #[test]
++    fn private_context_does_not_hide_public_prefix_and_suffix_or_orphan_followup() {
++        let text = "public -----BEGIN EC PRIVATE KEY-----\nSYNTH087_BLOCK\n-----END EC PRIVATE KEY----- suffix\nRSA_new();";
++        let mut privacy = SourcePrivacy::from_text(text);
++        privacy.capture_source(text);
++        let lines = privacy.source_lines.unwrap();
++        assert_eq!(lines[0], "public [masked-sensitive-value]");
++        assert_eq!(lines[2], "[masked-sensitive-value] suffix");
++        assert_eq!(lines[3], "RSA_new();");
++        assert!(!lines.join("\n").contains("SYNTH087_BLOCK"));
++    }
++    #[test]
+     fn syntax_sensitive_ranges_merge_unicode_and_mask_only_bounded_context() {
+         let text = "é(a,\nβ) tail";
+         let mut p = SourcePrivacy::from_text(text);
+diff --git a/crates/pqc_scan_detectors/src/tree_sitter_detector.rs b/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+index 8696a42..d50b215 100644
+--- a/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
++++ b/crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+@@ -4,6 +4,7 @@ mod javascript_validation;
+ mod module_syntax;
+ mod positions;
+ mod source_api;
++mod source_privacy;
+ mod syntax_compat;
+ mod test_scope;
+ use std::collections::{BTreeMap, HashSet};
+@@ -56,18 +57,8 @@ impl Detector for TreeSitterDetector {
+             .map(|outcome| {
+                 outcome
+                     .with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
+-                    .with_sensitive_source_context(
+-                        file.text
+-                            .as_deref()
+-                            .and_then(|text| resolve_language(&file.path, text))
+-                            .is_some_and(|(_, name)| {
+-                                matches!(name, "php" | "csharp" | "c" | "cpp")
+-                                    && rules.all().iter().any(|r| {
+-                                        scope_matches(&r.scope, name)
+-                                            && crate::source_facts::builtin(r)
+-                                    })
+-                            }),
+-                    )
++                    .with_sensitive_ranges(source_privacy::ranges(file, budget.max_ast_nodes))
++                    .with_typed_source_references_only(source_privacy::typed_only(file, rules))
+             })
+     }
+     fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
+@@ -86,18 +77,8 @@ impl TreeSitterDetector {
+             .map(|outcome| {
+                 outcome
+                     .with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
+-                    .with_sensitive_source_context(
+-                        file.text
+-                            .as_deref()
+-                            .and_then(|text| resolve_language(&file.path, text))
+-                            .is_some_and(|(_, name)| {
+-                                matches!(name, "php" | "csharp" | "c" | "cpp")
+-                                    && rules.all().iter().any(|r| {
+-                                        scope_matches(&r.scope, name)
+-                                            && crate::source_facts::builtin(r)
+-                                    })
+-                            }),
+-                    )
++                    .with_sensitive_ranges(source_privacy::ranges(file, budget.max_ast_nodes))
++                    .with_typed_source_references_only(source_privacy::typed_only(file, rules))
+             })
+     }
+     fn detect_source(
+@@ -130,6 +111,15 @@ impl TreeSitterDetector {
+             return Ok(DetectorOutcome::new(Vec::new(), DetectorStatus::Partial)
+                 .with_explanation("Source text could not be decoded; syntax and cryptographic references remain uninspected."));
+         }
++        // Legacy reports also need transient typed associations for safe public
++        // excerpts. This does not request inventory serialization or expand the
++        // shared parser budgets.
++        let observe = observe
++            || file
++                .text
++                .as_deref()
++                .and_then(|text| resolve_language(&file.path, text))
++                .is_some_and(|(_, name)| is_new_language(name));
+         if file.path.extension().is_some_and(|e| e == "h") {
+             return header::inspect(self, file, rules, observe, budget, repository);
+         }
+@@ -590,8 +580,13 @@ impl TreeSitterDetector {
+                         )
+                         .with_algorithm_references(&found.algorithm_references);
+                         observations.push(if is_new_language(language_name) {
+-                            let draft =
++                            let mut draft =
+                                 draft.with_source_api_references(&found.algorithm_references);
++                            if let Some(name) =
++                                public_call_name(&original_tree, text, found.start, found.end)
++                            {
++                                draft = draft.with_source_api_display_name(name);
++                            }
+                             let draft = if let Some(reference) = found.source_library {
+                                 draft.with_source_library_reference(reference)
+                             } else {
+@@ -1048,6 +1043,42 @@ pub(crate) fn source_tree(
+     })
+ }
+ 
++// Read only the exact accepted call's callee/type, never its arguments. Core
++// independently restricts display to exact finite public API tokens.
++fn public_call_name<'a>(
++    tree: &tree_sitter::Tree,
++    text: &'a str,
++    start: usize,
++    end: usize,
++) -> Option<&'a str> {
++    let node = tree.root_node().descendant_for_byte_range(start, end)?;
++    if node.start_byte() != start
++        || node.end_byte() != end
++        || !matches!(
++            node.kind(),
++            "call_expression"
++                | "invocation_expression"
++                | "object_creation_expression"
++                | "new_expression"
++                | "function_call_expression"
++                | "member_call_expression"
++                | "nullsafe_member_call_expression"
++                | "scoped_call_expression"
++        )
++    {
++        return None;
++    }
++    let callee = node
++        .child_by_field_name("function")
++        .or_else(|| node.child_by_field_name("name"))
++        .or_else(|| node.child_by_field_name("type"))?;
++    if callee.end_byte() - callee.start_byte() > 256 {
++        return None;
++    }
++    let raw = text.get(callee.byte_range())?;
++    raw.rsplit(['.', ':', '\\', '>']).next()
++}
++
+ #[cfg(test)]
+ mod tests {
+     use super::is_embedded_identifier_submatch;
+diff --git a/crates/pqc_scan_detectors/tests/c_family_source.rs b/crates/pqc_scan_detectors/tests/c_family_source.rs
+index 1d59b69..76773c8 100644
+--- a/crates/pqc_scan_detectors/tests/c_family_source.rs
++++ b/crates/pqc_scan_detectors/tests/c_family_source.rs
+@@ -215,7 +215,7 @@ fn cpp_direct_initializer_retains_nested_request_with_unambiguous_nullptr_argume
+         assert_eq!(algorithm_names(&native, observations[0]), vec!["RSA"]);
+         assert_eq!(observations[0]["assurance"], "syntactic");
+         assert_eq!(observations[0]["usage"], "referenced");
+-        assert!(!legacy.to_string().contains("EVP_PKEY_CTX_new_id("));
++        assert!(legacy.to_string().contains("EVP_PKEY_CTX_new_id("));
+     }
+ }
+ 
+@@ -695,7 +695,7 @@ fn c_family_group_lists_retain_standard_draft_and_alias_spelling_and_reject_opaq
+         assert!(native["observations"][0]["evidence"]["marker_kind"].is_null());
+         assert_eq!(
+             legacy["findings"][0]["evidence"]["match"],
+-            "[masked-sensitive-content]"
++            format!("SSL_set1_groups_list(ssl,\"{group}\")")
+         );
+     }
+     for count in [0usize, 15, 16, 17] {
+@@ -840,7 +840,9 @@ fn c_family_all_detectors_keep_canaries_and_algorithm_looking_payloads_private_a
+                         .as_array()
+                         .unwrap()
+                         .iter()
+-                        .all(|f| f["evidence"]["snippet_preview"] == "[masked-sensitive-content]"));
++                        .any(|f| f["source_snippet"]
++                            .to_string()
++                            .contains("EVP_PKEY_CTX_new_from_name")));
+                 }
+             }
+         }
+@@ -946,7 +948,8 @@ fn c_family_shared_builtin_budgets_have_zero_below_at_and_above_boundaries() {
+             if limit >= boundary {
+                 assert_eq!(outcome.detections().len(), 2, "{cap}");
+             }
+-            assert!(outcome.sensitive_source_context());
++            assert!(outcome.typed_source_references_only());
++            assert!(!outcome.sensitive_source_context());
+         }
+     }
+     let c: tree_sitter::Language = tree_sitter_c::LANGUAGE.into();
+@@ -1217,7 +1220,7 @@ fn c_family_early_limits_and_malformed_inputs_still_protect_other_detector_conte
+                 .legacy()
+                 .findings
+                 .iter()
+-                .all(|f| f.evidence.snippet_preview == "[masked-sensitive-content]"));
++                .all(|f| !f.evidence.snippet_preview.contains("PRIVATE080_EARLY_KEY")));
+         }
+     }
+ }
+diff --git a/crates/pqc_scan_detectors/tests/csharp_source.rs b/crates/pqc_scan_detectors/tests/csharp_source.rs
+index fa4c6b6..e8dd11b 100644
+--- a/crates/pqc_scan_detectors/tests/csharp_source.rs
++++ b/crates/pqc_scan_detectors/tests/csharp_source.rs
+@@ -323,7 +323,7 @@ fn focal(native: &Value, start: usize, end: usize) -> Vec<&Value> {
+ fn csharp_bouncy_castle_rsa_digest_signer_tracks_only_resolved_library_types() {
+     let f = Fixture::new();
+     for (source, constructor) in [
+-        ("using Org.BouncyCastle.Crypto.Signers; class C { void M(){ var unrelated=\"PRIVATE084_CS_SIGNER_CANARY\"; var signer=new RsaDigestSigner(digest); signer.GenerateSignature(); }}", "new RsaDigestSigner(digest)"),
++        ("using Org.BouncyCastle.Crypto.Signers; class C { void M(){ var privateKey=\"PRIVATE084_CS_SIGNER_CANARY\"; var signer=new RsaDigestSigner(digest); signer.GenerateSignature(); }}", "new RsaDigestSigner(digest)"),
+         ("using S=Org.BouncyCastle.Crypto.Signers.RsaDigestSigner; class C { void M(){ var signer=new S(digest); signer.GenerateSignature(); }}", "new S(digest)"),
+     ] {
+         let (native, legacy) = f.document(source);
+@@ -610,10 +610,10 @@ fn csharp_wrapper_projects_and_bc_tls_are_distinct_opaque_references() {
+             .position(|f| f["location"]["column"] == start + 1)
+             .unwrap();
+         assert_eq!(legacy["findings"][index]["evidence"]["match"], label);
+-        assert_eq!(
+-            legacy["findings"][index]["evidence"]["snippet_preview"],
+-            "[masked-sensitive-content]"
+-        );
++        assert!(legacy["findings"][index]["evidence"]["snippet_preview"]
++            .as_str()
++            .unwrap()
++            .contains("using dotnetOQS"));
+         assert!(legacy["cbom"]
+             .as_array()
+             .unwrap()
+@@ -660,12 +660,12 @@ fn csharp_private_arguments_and_legacy_looking_payloads_are_protected_when_parti
+                 )
+                 .unwrap();
+                 for finding in &doc.legacy().findings {
+-                    assert_eq!(finding.evidence.r#match, "[masked-sensitive-content]");
+-                    assert!(finding
+-                        .evidence
+-                        .metadata
+-                        .values()
+-                        .all(|v| v == "[masked-sensitive-content]"));
++                    assert!(!serde_json::to_string(&finding.evidence)
++                        .unwrap()
++                        .contains(&format!("\"{canary}\"")));
++                    assert!(!serde_json::to_string(&finding.source_snippet)
++                        .unwrap()
++                        .contains(&format!("\"{canary}\"")));
+                 }
+                 let native = serde_json::to_value(doc.native().unwrap()).unwrap();
+                 assert!(native["assets"]
+@@ -890,19 +890,18 @@ fn csharp_parameter_container_does_not_survive_a_possible_deferred_mutation() {
+ #[test]
+ fn csharp_opaque_wrapper_arguments_cannot_become_public_project_labels() {
+     let f = Fixture::new();
+-    let source = r#"using dotnetOQS; class C { void M(){ var k=new dotnetOQS.KEM("PRIVATE079_OPAQUE_CANARY"); } }"#;
++    let source = r#"using dotnetOQS; class C { void M(){ var k=new dotnetOQS.KEM("PUBLIC087_SELECTOR"); } }"#;
+     let (native, legacy) = f.document(source);
+-    assert!(!native.to_string().contains("PRIVATE079_OPAQUE_CANARY"));
+-    assert!(!legacy.to_string().contains("PRIVATE079_OPAQUE_CANARY"));
++    assert!(!native.to_string().contains("PUBLIC087_SELECTOR"));
++    assert!(legacy.to_string().contains("PUBLIC087_SELECTOR"));
+     for finding in legacy["findings"].as_array().unwrap() {
+         assert_eq!(
+             finding["evidence"]["match"],
+             "C# obsolete official dotnetOQS wrapper reference"
+         );
+-        assert_eq!(
+-            finding["evidence"]["snippet_preview"],
+-            "[masked-sensitive-content]"
+-        );
++        assert!(finding["source_snippet"]
++            .to_string()
++            .contains("PUBLIC087_SELECTOR"));
+     }
+ }
+ 
+@@ -943,7 +942,7 @@ fn csharp_binding_saturation_retains_independent_references_and_truncated_status
+ fn csharp_saturated_values_do_not_restore_stale_variants_or_namesakes_or_secrets() {
+     let f = Fixture::new();
+     let source=format!(
+-        "class C{{void Busy(){{var choice=System.Security.Cryptography.MLKemAlgorithm.MLKem768; {} choice=unresolved; System.Security.Cryptography.MLKem.GenerateKey(choice);}} void Independent(){{System.Security.Cryptography.RSA.Create(\"PRIVATE084_CSHARP_CAP_CANARY\");}} }} namespace Local{{class RSA{{public static void Create(){{}}}} class Other{{void M(){{RSA.Create();}}}}}}",
++        "class C{{void Busy(){{var choice=System.Security.Cryptography.MLKemAlgorithm.MLKem768; {} choice=unresolved; System.Security.Cryptography.MLKem.GenerateKey(choice);}} void Independent(){{var privateKey=\"PRIVATE084_CSHARP_CAP_CANARY\"; System.Security.Cryptography.RSA.Create();}} }} namespace Local{{class RSA{{public static void Create(){{}}}} class Other{{void M(){{RSA.Create();}}}}}}",
+         "choice=System.Security.Cryptography.MLKemAlgorithm.MLKem768;".repeat(64)
+     );
+     let input = ScannableFile::from_bytes("case.cs".into(), source.as_bytes().to_vec());
+diff --git a/crates/pqc_scan_detectors/tests/php_source.rs b/crates/pqc_scan_detectors/tests/php_source.rs
+index c010012..7434440 100644
+--- a/crates/pqc_scan_detectors/tests/php_source.rs
++++ b/crates/pqc_scan_detectors/tests/php_source.rs
+@@ -236,9 +236,9 @@ fn php_namespaces_aliases_tuple_roles_and_source_order_are_bounded() {
+ #[test]
+ fn php_unknown_keys_named_arguments_local_shadowing_and_privacy() {
+     let f = Fixture::new();
+-    let source="<?php $options=['private_key_type'=>OPENSSL_KEYTYPE_RSA]; $key=openssl_pkey_new(options:$options); openssl_sign(private_key:$key,data:'LEAKME',signature:$sig);";
++    let source="<?php $options=['private_key_type'=>OPENSSL_KEYTYPE_RSA]; $key=openssl_pkey_new(options:$options); openssl_sign(private_key:$key,data:'PUBLIC087_MESSAGE',signature:$sig);";
+     let native = f.native(source);
+-    let expression = "openssl_sign(private_key:$key,data:'LEAKME',signature:$sig)";
++    let expression = "openssl_sign(private_key:$key,data:'PUBLIC087_MESSAGE',signature:$sig)";
+     let start = source.find(expression).unwrap();
+     let o = focal(&native, start, start + expression.len());
+     assert_eq!(o.len(), 1);
+@@ -248,18 +248,22 @@ fn php_unknown_keys_named_arguments_local_shadowing_and_privacy() {
+         .detect_detailed(&input, &f.rules)
+         .unwrap();
+     for d in outcome.detections() {
+-        assert!(!d.evidence.r#match.contains("LEAKME"));
+-        assert!(!d.evidence.snippet_preview.contains("LEAKME"));
++        assert!(!d.evidence.r#match.contains("PUBLIC087_MESSAGE"));
++        assert!(!d.evidence.snippet_preview.contains("PUBLIC087_MESSAGE"));
+         assert!(!serde_json::to_string(&d.evidence.metadata)
+             .unwrap()
+-            .contains("LEAKME"));
++            .contains("PUBLIC087_MESSAGE"));
+     }
+     let (_, legacy) = f.document(source);
+     assert!(
+-        !serde_json::to_string(&legacy).unwrap().contains("LEAKME"),
++        serde_json::to_string(&legacy)
++            .unwrap()
++            .contains("PUBLIC087_MESSAGE"),
+         "{legacy}"
+     );
+-    assert!(!serde_json::to_string(&native).unwrap().contains("LEAKME"));
++    assert!(!serde_json::to_string(&native)
++        .unwrap()
++        .contains("PUBLIC087_MESSAGE"));
+     for source in [
+         "<?php openssl_sign('RSA',$sig,$imported);",
+         "<?php $key=openssl_pkey_get_private($pem); openssl_sign($m,$sig,$key);",
+@@ -412,11 +416,13 @@ fn php_sensitive_arguments_protect_all_detector_context_and_wide_source() {
+                 assert!(!serde_json::to_string(&legacy).unwrap().contains(canary));
+                 assert!(!serde_json::to_string(&native).unwrap().contains(canary));
+             }
+-            for finding in legacy["findings"].as_array().unwrap() {
+-                for line in finding["source_snippet"]["lines"].as_array().unwrap() {
+-                    assert_eq!(line["text"], "[masked-sensitive-file-content]");
+-                }
+-            }
++            assert!(legacy["findings"]
++                .as_array()
++                .unwrap()
++                .iter()
++                .any(|finding| finding["source_snippet"]
++                    .to_string()
++                    .contains("sign('public')")));
+         }
+     }
+ }
+@@ -509,7 +515,7 @@ fn php_reference_only_imports_and_class_constants_are_not_runtime_operations() {
+ fn php_local_binding_limit_retains_unaffected_api_requests_and_masking() {
+     let f = Fixture::new();
+     let source = format!(
+-        "<?php function noisy(){{ {} }} function signing(){{ $key=openssl_pkey_new(['private_key_type'=>OPENSSL_KEYTYPE_RSA]); openssl_sign('PRIVATE084_PHP_BINDING_CANARY',$sig,$key); }}",
++        "<?php function noisy(){{ {} }} function signing(){{ $key=openssl_pkey_new(['private_key_type'=>OPENSSL_KEYTYPE_RSA]); $password='PRIVATE084_PHP_BINDING_CANARY'; openssl_sign('public message',$sig,$key); }}",
+         "$noise=1;".repeat(65)
+     );
+     let input = ScannableFile::from_bytes("case.php".into(), source.as_bytes().to_vec());
+@@ -518,7 +524,7 @@ fn php_local_binding_limit_retains_unaffected_api_requests_and_masking() {
+         .unwrap();
+     assert_eq!(outcome.status(), DetectorStatus::Truncated);
+     let (native, legacy) = f.document(&source);
+-    let expression = "openssl_sign('PRIVATE084_PHP_BINDING_CANARY',$sig,$key)";
++    let expression = "openssl_sign('public message',$sig,$key)";
+     let start = source.find(expression).unwrap();
+     let observations = focal(&native, start, start + expression.len());
+     assert_eq!(
+@@ -609,7 +615,8 @@ fn php_truncation_still_masks_source_context_for_other_detectors() {
+     .detect_observed(&input, &f.rules)
+     .unwrap();
+     assert_eq!(outcome.status(), DetectorStatus::Truncated);
+-    assert!(outcome.sensitive_source_context());
++    assert!(outcome.typed_source_references_only());
++    assert!(!outcome.sensitive_source_context());
+ }
+ 
+ #[test]
+@@ -655,12 +662,12 @@ fn php_secret_that_looks_like_a_legacy_algorithm_is_not_exported_or_promoted() {
+             )
+             .unwrap();
+             for finding in &doc.legacy().findings {
+-                assert_eq!(finding.evidence.r#match, "[masked-sensitive-content]");
+-                assert!(finding
+-                    .evidence
+-                    .metadata
+-                    .values()
+-                    .all(|v| v == "[masked-sensitive-content]"));
++                assert!(!serde_json::to_string(&finding.evidence)
++                    .unwrap()
++                    .contains(&format!("'{canary}'")));
++                assert!(!serde_json::to_string(&finding.source_snippet)
++                    .unwrap()
++                    .contains(&format!("'{canary}'")));
+             }
+             let native = serde_json::to_value(doc.native().unwrap()).unwrap();
+             // RS256 is also part of preserved public rule IDs (JWT_RS256).
+@@ -685,9 +692,9 @@ fn php_secret_that_looks_like_a_legacy_algorithm_is_not_exported_or_promoted() {
+ }
+ 
+ #[test]
+-fn php_wrapper_projects_remain_distinct_in_final_outputs_without_arguments() {
++fn php_wrapper_projects_keep_public_arguments_out_of_typed_project_labels() {
+     let f = Fixture::new();
+-    let source = r#"<?php $a=new \OQS_KeyEncapsulation('PRIVATE079_OPAQUE_CANARY'); $b=new \OQS\OQSKem('PRIVATE079_OPAQUE_CANARY');"#;
++    let source = r#"<?php $a=new \OQS_KeyEncapsulation('PUBLIC087_SELECTOR'); $b=new \OQS\OQSKem('PUBLIC087_SELECTOR');"#;
+     let (native, legacy) = f.document(source);
+     let expected = [
+         (
+@@ -734,8 +741,8 @@ fn php_wrapper_projects_remain_distinct_in_final_outputs_without_arguments() {
+             .any(|r| r["algorithm"] == label));
+     }
+     assert_eq!(markers.len(), 2);
+-    assert!(!native.to_string().contains("PRIVATE079_OPAQUE_CANARY"));
+-    assert!(!legacy.to_string().contains("PRIVATE079_OPAQUE_CANARY"));
++    assert!(!native.to_string().contains("PUBLIC087_SELECTOR"));
++    assert!(legacy.to_string().contains("PUBLIC087_SELECTOR"));
+ }
+ #[test]
+ fn php_non_crypto_receiver_probes_do_not_change_inspection_status() {
+diff --git a/docs/architecture/EVIDENCE-PRIVACY.md b/docs/architecture/EVIDENCE-PRIVACY.md
+index fa30b61..9b610d4 100644
+--- a/docs/architecture/EVIDENCE-PRIVACY.md
++++ b/docs/architecture/EVIDENCE-PRIVACY.md
+@@ -6,7 +6,7 @@ This contract covers bounded, recognized syntax in local static scans and report
+ 
+ 1. Core records only private-block line ranges and named credential value positions from the original immutable source snapshot before detector callbacks. Payloads and secret digests are not retained in this context index.
+ 2. Detection, framed finding ID computation, summary/CBOM construction and native observation association run before evidence redaction. Finding IDs use the original rule, relative path, position and evidence match; public schemas remain unchanged.
+-3. Core sanitizes exportable free text after native associations are built. Sensitive matches and surrounding previews are replaced. Any file with recognized private/credential context has its detector preview replaced because a detector may already have shortened it and destroyed redaction syntax. Full source snippets are redacted before clipping; private-marker files retain the existing whole-file snippet mask.
++3. Core sanitizes exportable free text after native associations are built. Sensitive matches and surrounding previews are replaced. Any file with recognized private/credential context has its detector preview replaced because a detector may already have shortened it and destroyed redaction syntax. Source windows and supported call excerpts come from the inspected snapshot, with private/credential spans redacted before clipping. Public neighbours remain visible instead of masking private-marker files wholesale; explicit detector fallback and protected dependency/binary containers remain conservative. Display restoration runs after identity/native/CBOM construction and never supplies algorithm identities.
+ 4. CBOM keeps original row counts/order. Sensitive replacements use location/category/original match, and a sensitive occurrence wins a column-less collision. Rows are not rebuilt or deduplicated.
+ 5. Evidence match/preview/snippet fields retain the legacy writer's broader protection for fragments containing `PRIVATE KEY`, even when BEGIN/END was lost. Report writers sanitize a cloned legacy result again, including caller-constructed results; the caller is unchanged. Such results have no original source snapshot and therefore receive syntax-based and explicit private-key evidence masking only.
+ 
+@@ -29,6 +29,6 @@ Source positions account for Unicode character columns; legacy AST adapters may
+ 
+ ## Limits
+ 
+-Opaque/obfuscated content, arbitrary secret names, encoded field names, unsupported assignment syntax and secret-bearing structural fields are outside this bounded contract. Free-form caller results cannot recover private block context lost before construction. Public certificate fingerprints/subjects/endpoints are existing typed facts, not automatically secret; consumers must assess their own distribution policy. URLs may remain public and identifiable after credentials are removed. Conservative masking can remove benign preview text in a file containing recognized credentials. Canary success proves the exercised paths, not universal absence of secrets.
++Opaque/obfuscated content, arbitrary secret names, encoded field names, unsupported assignment syntax and secret-bearing structural fields are outside this bounded contract. Free-form caller results cannot recover private block context lost before construction. Public certificate fingerprints/subjects/endpoints are existing typed facts, not automatically secret; consumers must assess their own distribution policy. URLs may remain public and identifiable after credentials are removed. Conservative fallback can remove benign text in an uninspected source region. Supported PHP/C#/C/C++ key-input roles protect literal key expressions and explicit same-function initializers (bounded alias following); public messages, variable references and selectors are presentation evidence, not new typed crypto facts. Native algorithm suppression is independent from presentation privacy, preserving the existing source-handler-only inventory policy. Named literals include camel-case spellings and multiline quoted values. Canary success proves the exercised paths, not universal absence of secrets.
+ 
+ See [task evidence](../../tasks/029/TASK-029-EVIDENCE-PRIVACY.md) for validation and independent review.
+diff --git a/docs/user/REPORTS.ja.md b/docs/user/REPORTS.ja.md
+index d8192ab..2946f19 100644
+--- a/docs/user/REPORTS.ja.md
++++ b/docs/user/REPORTS.ja.md
+@@ -364,3 +364,17 @@ SARIFを選んでも、他の出力形式の所見IDや位置情報は変わり
+ 同じ位置に複数の検出記録がある場合は、その件数と根拠の重なりを表示します。\
+ 異なる方式や指摘は自動でまとめず、独立した暗号利用の件数とも断定しません。\
+ テスト用フォルダや依存宣言の分類はパスに基づく手掛かりであり、それだけで対象外にしたり評価を変更したりしません。
++
++
++## 保護されたコード抜粋
++
++検出行と、その前後それぞれ最大２行のコードを表示します。\
++PHP・C#・C/C++・Java・Goなどの通常の引数、変数参照、方式名、周辺コードはそのまま表示し、認証情報の値、秘密鍵ブロック、対応する暗号APIの鍵入力に埋め込まれた鍵データなどをマスクします。\
++長い行を短くする前に秘密部分を伏せるため、表示の途中で切れても保護が残ります。
++
++マスクがあるだけで、有効な秘密鍵が見つかったとは限りません。\
++構文を十分に検査できない範囲は、安全のため広めに保護する場合があります。\
++依存宣言やバイナリの鍵コンテナには、それぞれの保護処理を適用します。\
++対応する構文に基づく処理であり、あらゆる秘密情報を判別するものではありません。\
++元の検出位置とIDは維持します。\
++保存済みのレポートは変わらないため、従来のAPI名だけの抜粋からコード表示に更新するには、再スキャンしてください。
+diff --git a/docs/user/REPORTS.md b/docs/user/REPORTS.md
+index d854c2a..a9251da 100644
+--- a/docs/user/REPORTS.md
++++ b/docs/user/REPORTS.md
+@@ -383,3 +383,10 @@ Known unfinished-inspection causes are grouped separately, with diagnostic recor
+ The rule guide lists rules that produced findings in this scan; the complete built-in catalog is maintained in the rule reference. Source implementation definitions and conditional/composite components have separate informational rules. Comments, symbol declarations and literal Received-header records are informational references, while real configuration candidates and executable crypto tests remain visible. Raw rule identities and risk classifications remain available; an informational source reference is not a confirmed deployed vulnerability.
+ 
+ Migration evidence details show the observed use state and explain what lexical, syntactic or dependency references establish. Confirm actual purpose/use before acting. Coincident detection records show their count and evidence overlap. Distinct algorithms or concerns are not automatically merged, and record counts are not asserted to be independent cryptographic uses. Test-folder and dependency-file categories are path hints only and do not automatically exclude a target or change its assessment.
++
++
++## Protected source excerpts
++
++Source excerpts show the detected line and up to two lines before and after it. Ordinary arguments, variable references, algorithm names and neighbouring code remain visible, including PHP, C#, C/C++, Java and Go. Recognized secrets are replaced with mask labels inside the code: credential values, private-key blocks and literal key data in supported cryptographic key-input positions. Masking happens before long lines are shortened; existing line-length limits still apply.
++
++A mask does not by itself establish that a valid private key was found. Unfinished or ambiguous source inspection can require conservative protection of the uninspected region; dependency manifests and binary key containers retain their separate protections. This is bounded syntax-based masking, not a universal secret detector. Original finding locations and IDs are retained. Saved reports keep their old contents; rescan to obtain source context instead of the previous API-only, arguments-omitted excerpt.
+diff --git a/crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy.rs b/crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy.rs
+new file mode 100644
+index 0000000..78cddd0
+--- /dev/null
++++ b/crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy.rs
+@@ -0,0 +1,256 @@
++//! Presentation-only secret spans. Never feeds source resolution or assets.
++use pqc_scan_core::ScannableFile;
++use std::{collections::BTreeSet, ops::Range};
++use tree_sitter::{Node, Parser};
++
++pub(super) fn typed_only(file: &ScannableFile, rules: &pqc_scan_rules::RuleSet) -> bool {
++    file.text
++        .as_deref()
++        .and_then(|t| super::resolve_language(&file.path, t))
++        .is_some_and(|(_, name)| {
++            matches!(name, "php" | "csharp" | "c" | "cpp")
++                && rules.all().iter().any(|r| {
++                    super::scope_matches(&r.scope, name) && crate::source_facts::builtin(r)
++                })
++        })
++}
++
++pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>> {
++    let Some(text) = file.text.as_deref() else {
++        return vec![];
++    };
++    let Some((language, name)) = super::resolve_language(&file.path, text) else {
++        return vec![];
++    };
++    if !matches!(name, "php" | "csharp" | "c" | "cpp") {
++        return vec![];
++    }
++    let mut parser = Parser::new();
++    if parser.set_language(&language).is_err() {
++        return std::iter::once(0..text.len()).collect();
++    }
++    let Some(tree) = parser.parse(text, None) else {
++        return std::iter::once(0..text.len()).collect();
++    };
++    let mut out = Vec::new();
++    let mut secret_names = BTreeSet::new();
++    let mut assignments = Vec::new();
++    let mut cursor = tree.walk();
++    let mut visited = 0;
++    'walk: loop {
++        let node = cursor.node();
++        if visited >= max_nodes {
++            out.push(node.start_byte()..text.len());
++            break;
++        }
++        visited += 1;
++        if matches!(
++            node.kind(),
++            "init_declarator" | "variable_declarator" | "assignment_expression"
++        ) {
++            let name = node
++                .child_by_field_name("name")
++                .or_else(|| node.child_by_field_name("declarator"))
++                .or_else(|| node.child_by_field_name("left"));
++            let value = node
++                .child_by_field_name("value")
++                .or_else(|| node.child_by_field_name("right"));
++            if let (Some(name), Some(value)) = (name.and_then(|n| reference_name(n, text)), value) {
++                assignments.push((scope(node), name.to_owned(), value));
++            }
++        }
++        if let Some(arguments) = node.child_by_field_name("arguments") {
++            let callee = node
++                .child_by_field_name("function")
++                .or_else(|| node.child_by_field_name("name"))
++                .or_else(|| node.child_by_field_name("type"));
++            if let Some(callee) = callee.filter(|n| n.end_byte() - n.start_byte() <= 256) {
++                let raw = &text[callee.byte_range()];
++                let leaf = raw
++                    .rsplit([':', '.', '\\', '>'])
++                    .next()
++                    .unwrap_or(raw)
++                    .to_ascii_lowercase();
++                let mut args = arguments.walk();
++                for (index, argument) in arguments
++                    .named_children(&mut args)
++                    .filter(|n| n.kind() != "comment")
++                    .enumerate()
++                {
++                    let named = argument
++                        .child_by_field_name("name")
++                        .and_then(|n| text.get(n.byte_range()))
++                        .map(|s| {
++                            s.trim_start_matches('$')
++                                .replace('_', "")
++                                .to_ascii_lowercase()
++                        });
++                    let secret = if let Some(named) = named {
++                        if matches!(leaf.as_str(), "openssl_sign" | "openssl_verify") {
++                            leaf == "openssl_sign" && named == "privatekey"
++                        } else {
++                            matches!(
++                                named.as_str(),
++                                "key" | "privatekey" | "secretkey" | "password" | "privateseed"
++                            ) || (leaf.starts_with("import")
++                                && !leaf.contains("public")
++                                && !leaf.contains("encapsulation"))
++                        }
++                    } else {
++                        secret_argument(&leaf, index, &text[node.start_byte()..callee.end_byte()])
++                    };
++                    if secret {
++                        // Keep variable references and key-loading calls readable.
++                        // Literal data/byte-array/concatenation expressions in key
++                        // positions are protected as one span before truncation.
++                        let mut value = argument;
++                        if matches!(value.kind(), "argument" | "named_argument") {
++                            value = value
++                                .child_by_field_name("value")
++                                .or_else(|| {
++                                    u32::try_from(value.named_child_count().saturating_sub(1))
++                                        .ok()
++                                        .and_then(|i| value.named_child(i))
++                                })
++                                .unwrap_or(value);
++                        }
++                        if literal_data(value) {
++                            let raw = text[value.byte_range()].trim_start_matches(['\'', '"']);
++                            if !raw.starts_with("file://") {
++                                out.push(value.byte_range());
++                            }
++                        } else if let Some(name) = reference_name(value, text) {
++                            secret_names.insert((scope(node), name.to_owned()));
++                        }
++                    }
++                }
++            }
++        }
++        if cursor.goto_first_child() {
++            continue;
++        }
++        loop {
++            if cursor.goto_next_sibling() {
++                break;
++            }
++            if !cursor.goto_parent() {
++                break 'walk;
++            }
++        }
++    }
++    // Follow only explicit same-function variable initializers, with a finite
++    // alias depth. This does not resolve crypto facts or execute key loaders.
++    let mut exhausted = true;
++    for _ in 0..8 {
++        let mut added = Vec::new();
++        for (local_scope, name, value) in &assignments {
++            if secret_names.contains(&(*local_scope, name.clone()))
++                || (*local_scope == 0 && secret_names.iter().any(|(_, n)| n == name))
++            {
++                if literal_data(*value) {
++                    out.push(value.byte_range());
++                } else if let Some(alias) = reference_name(*value, text) {
++                    added.push((*local_scope, alias.to_owned()));
++                }
++            }
++        }
++        let before = secret_names.len();
++        secret_names.extend(added);
++        if before == secret_names.len() {
++            exhausted = false;
++            break;
++        }
++    }
++    if exhausted {
++        // The key's definition is unresolved beyond the finite alias envelope.
++        // Protect literal initializers in the affected function, not unrelated
++        // functions or their normal statements/variable references.
++        let scopes: BTreeSet<_> = secret_names.iter().map(|(scope, _)| *scope).collect();
++        for (local_scope, _, value) in &assignments {
++            if (scopes.contains(local_scope) || *local_scope == 0) && literal_data(*value) {
++                out.push(value.byte_range());
++            }
++        }
++    }
++    out
++}
++
++fn scope(mut node: Node<'_>) -> usize {
++    for _ in 0..128 {
++        if matches!(
++            node.kind(),
++            "function_definition"
++                | "function_declaration"
++                | "method_declaration"
++                | "anonymous_function"
++                | "lambda_expression"
++        ) {
++            return node.start_byte() + 1;
++        }
++        let Some(parent) = node.parent() else {
++            return 0;
++        };
++        node = parent;
++    }
++    0
++}
++fn reference_name<'a>(node: Node<'_>, text: &'a str) -> Option<&'a str> {
++    if node.end_byte() - node.start_byte() > 256 {
++        return None;
++    }
++    let raw = text
++        .get(node.byte_range())?
++        .trim()
++        .trim_start_matches(['$', '*', '&', ' ']);
++    (!raw.is_empty() && raw.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'_')).then_some(raw)
++}
++
++fn literal_data(node: Node<'_>) -> bool {
++    let kind = node.kind();
++    kind.contains("string")
++        || kind.contains("array")
++        || matches!(
++            kind,
++            "concatenation_expression"
++                | "binary_expression"
++                | "cast_expression"
++                | "initializer_list"
++                | "collection_expression"
++                | "heredoc"
++                | "nowdoc"
++        )
++}
++
++fn secret_argument(name: &str, index: usize, qualified: &str) -> bool {
++    match name {
++        "openssl_sign" => index == 2,
++        "openssl_private_encrypt" | "openssl_private_decrypt" => index == 2,
++        "openssl_pkey_get_private" | "openssl_get_privatekey" => index <= 1,
++        "openssl_encrypt" | "openssl_decrypt" => index == 2,
++        "sodium_crypto_sign" | "sodium_crypto_sign_detached" => index == 1,
++        "sodium_crypto_box" | "sodium_crypto_secretbox" => index == 2,
++        "sodium_crypto_sign_seed_keypair" | "sodium_crypto_box_seed_keypair" => index == 0,
++        "evp_pkey_new_raw_private_key" => index == 2,
++        "evp_pkey_new_raw_private_key_ex" => index == 3,
++        "oqs_kem_decaps" => index == 1 || index == 3,
++        "oqs_sig_sign" => index == 5,
++        "secp256k1_ecdsa_sign" => index == 3,
++        "createencryptor" | "createdecryptor" => index == 0,
++        "frombytes" => {
++            qualified.to_ascii_lowercase().contains("signingkey")
++                || qualified.to_ascii_lowercase().contains("privatekey")
++                || qualified.to_ascii_lowercase().contains("secretkey")
++        }
++        n if n.starts_with("import")
++            && (n.contains("private")
++                || n.contains("seed")
++                || n.contains("decapsulation")
++                || n.contains("encrypted")
++                || n == "importfrompem") =>
++        {
++            true
++        }
++        n if n.starts_with("sodium_crypto_kem") && n.ends_with("_dec") => index == 1,
++        _ => false,
++    }
++}
+diff --git a/crates/pqc_scan_detectors/tests/selective_source_privacy.rs b/crates/pqc_scan_detectors/tests/selective_source_privacy.rs
+new file mode 100644
+index 0000000..77d5ad1
+--- /dev/null
++++ b/crates/pqc_scan_detectors/tests/selective_source_privacy.rs
+@@ -0,0 +1,184 @@
++use pqc_scan_core::{scan_repository_native, NativeOptions, ScanConfig};
++use pqc_scan_rules::RuleSet;
++use std::{
++    path::Path,
++    sync::atomic::{AtomicU64, Ordering},
++};
++
++fn scan(source: &str, ext: &str, wide: bool) -> pqc_scan_core::ScanDocument {
++    static NEXT: AtomicU64 = AtomicU64::new(0);
++    let root = std::env::temp_dir().join(format!(
++        "pqc087-{}-{}",
++        std::process::id(),
++        NEXT.fetch_add(1, Ordering::Relaxed)
++    ));
++    std::fs::create_dir_all(&root).unwrap();
++    let bytes = if wide {
++        let mut b = vec![0xff, 0xfe];
++        b.extend(source.encode_utf16().flat_map(u16::to_le_bytes));
++        b
++    } else {
++        source.as_bytes().to_vec()
++    };
++    std::fs::write(root.join(format!("case.{ext}")), bytes).unwrap();
++    let rules =
++        RuleSet::load_from_dir(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules")).unwrap();
++    let config = ScanConfig {
++        root: root.clone(),
++        threads: 1,
++        ..Default::default()
++    };
++    let doc = scan_repository_native(
++        &config,
++        &rules,
++        &pqc_scan_detectors::default_detectors(),
++        &NativeOptions::new(Some("synthetic/selective087")).unwrap(),
++    )
++    .unwrap();
++    let legacy =
++        pqc_scan_core::scan_repository(&config, &rules, &pqc_scan_detectors::default_detectors())
++            .unwrap();
++    assert_eq!(
++        serde_json::to_value(&legacy.findings).unwrap(),
++        serde_json::to_value(&doc.legacy().findings).unwrap()
++    );
++    assert_eq!(
++        serde_json::to_value(&legacy.cbom).unwrap(),
++        serde_json::to_value(&doc.legacy().cbom).unwrap()
++    );
++    std::fs::remove_dir_all(root).unwrap();
++    doc
++}
++
++#[test]
++fn ordinary_arguments_and_neighbouring_code_are_readable() {
++    for (ext,source,call) in [
++        ("cpp","void f(){\n int before = 7;\n secp256k1_ecdsa_sign(ctx,sig,hash,key.data(),nonce,data);\n int after = 9;\n}","secp256k1_ecdsa_sign(ctx,sig,hash,key.data(),nonce,data)"),
++        ("c","void f(){\n int before = 7;\n EVP_PKEY_CTX_new_from_name(NULL,\"RSA\",NULL);\n int after = 9;\n}","EVP_PKEY_CTX_new_from_name(NULL,\"RSA\",NULL)"),
++        ("cs","using System.Security.Cryptography; class C {void M(){\n int before = 7;\n RSA.Create(2048);\n int after = 9;\n}}","RSA.Create(2048)"),
++        ("php","<?php\n$before = 7;\nopenssl_sign('public message',$sig,$key,OPENSSL_ALGO_SHA256);\n$after = 9;","openssl_sign('public message',$sig,$key,OPENSSL_ALGO_SHA256)"),
++    ] {
++        for wide in [false,true] {
++            let d=scan(source,ext,wide);
++            let f=d.legacy().findings.iter().find(|f|f.rule_id.ends_with("CRYPTO_API")).unwrap();
++            let snippet=f.source_snippet.as_ref().unwrap();
++            let text=snippet.lines.iter().map(|l|l.text.as_str()).collect::<Vec<_>>().join("\n");
++            assert!(text.contains(call),"{ext}: ordinary call missing: {text}");
++            assert!(text.contains("before") && text.contains("after"),"{ext}: context missing");
++            assert!(!text.contains("arguments omitted"));
++            assert!(snippet.lines.iter().any(|l|l.highlighted && l.line==f.location.line));
++        }
++    }
++}
++
++#[test]
++fn key_literals_and_credentials_are_masked_but_public_neighbours_survive() {
++    for (ext,source,public) in [
++        ("c","void f(){\n const char *password=\"SYNTH087_PASSWORD\"; int visible=17;\n EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519,NULL,\"SYNTH087_KEY\",32);\n int after=9;\n}","EVP_PKEY_ED25519"),
++        ("cs","using System.Security.Cryptography; class C{void M(){\n var privateKey = \"SYNTH087_KEY\"; int visible=17;\n MLKem.ImportPrivateSeed(MLKemAlgorithm.MLKem768,\"SYNTH087_SEED\");\n int after=9;\n}}","MLKemAlgorithm.MLKem768"),
++        ("php","<?php\n$password=\"SYNTH087_PASSWORD\"; $visible=17;\nopenssl_sign('public message',$sig,'SYNTH087_KEY',OPENSSL_ALGO_SHA256);\n$after=9;","'public message'"),
++    ] {
++        for wide in [false,true] {
++            let d=scan(source,ext,wide); let exported=serde_json::to_string(d.legacy()).unwrap();
++            assert!(!exported.contains("SYNTH087_"),"{ext}: secret leaked");
++            let text=d.legacy().findings.iter().filter_map(|f|f.source_snippet.as_ref()).flat_map(|s|&s.lines).map(|l|l.text.as_str()).collect::<Vec<_>>().join("\n");
++            assert!(text.contains(public) && text.contains("visible=17") && text.contains("after=9"),"{ext}: benign context hidden: {text}");
++            assert!(text.contains("[masked-"));
++            assert!(!serde_json::to_string(d.native().unwrap()).unwrap().contains("SYNTH087_"));
++        }
++    }
++}
++
++#[test]
++fn private_blocks_do_not_hide_unrelated_java_go_or_cpp_code() {
++    for (ext,source,public) in [
++        ("java","class C {void f(){java.security.KeyPairGenerator.getInstance(\"RSA\");}}\n// -----BEGIN PRIVATE KEY-----\n// SYNTH087_BLOCK\n// -----END PRIVATE KEY-----","getInstance(\"RSA\")"),
++        ("go","package main\nimport \"crypto/rsa\"\nfunc f(){rsa.GenerateKey(nil,2048)}\n// -----BEGIN PRIVATE KEY-----\n// SYNTH087_BLOCK\n// -----END PRIVATE KEY-----","rsa.GenerateKey(nil,2048)"),
++        ("cpp","void f(){RSA_new();}\n// -----BEGIN PRIVATE KEY-----\n// SYNTH087_BLOCK\n// -----END PRIVATE KEY-----","RSA_new()"),
++    ] {
++        let d=scan(source,ext,false); let text=serde_json::to_string(d.legacy()).unwrap();
++        assert!(!text.contains("SYNTH087_BLOCK"));
++        assert!(d.legacy().findings.iter().filter_map(|f|f.source_snippet.as_ref()).flat_map(|s|&s.lines).any(|l|l.text.contains(public)),"{ext}: public code hidden");
++    }
++}
++
++#[test]
++fn reordered_named_key_arguments_and_multiline_credentials_are_selective() {
++    let source = "<?php\n$password=\"SYNTH087_FIRST\nSYNTH087_SECOND\"; $visible=17;\nopenssl_sign(private_key:'SYNTH087_KEY',signature:$sig,data:'public message');\n$after=9;";
++    let d = scan(source, "php", false);
++    let exported = serde_json::to_string(d.legacy()).unwrap();
++    assert!(!exported.contains("SYNTH087_"));
++    assert!(exported.contains("public message") && exported.contains("visible=17"));
++}
++
++#[test]
++fn locally_initialized_key_bytes_are_protected_without_hiding_public_key_references() {
++    let source="void f(){const char *key=\"SYNTH087_LOCAL_KEY\"; EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519,NULL,key,32); int visible=17;} void other(){const char *key=\"public label\";RSA_new();}";
++    let d = scan(source, "c", false);
++    let exported = serde_json::to_string(d.legacy()).unwrap();
++    assert!(!exported.contains("SYNTH087_LOCAL_KEY"));
++    assert!(
++        exported.contains("public label")
++            && exported.contains("NULL,key,32")
++            && exported.contains("visible=17")
++    );
++}
++
++#[test]
++fn verification_public_keys_and_key_file_paths_are_not_secret_values() {
++    let source="<?php openssl_verify('public message',$sig,'PUBLIC087_VERIFICATION_KEY',OPENSSL_ALGO_SHA256); openssl_sign('public message',$sig,'file://keys/signing.pem');";
++    let d = scan(source, "php", false);
++    let text = d
++        .legacy()
++        .findings
++        .iter()
++        .filter_map(|f| f.source_snippet.as_ref())
++        .flat_map(|s| &s.lines)
++        .map(|l| l.text.as_str())
++        .collect::<Vec<_>>()
++        .join("\n");
++    assert!(
++        text.contains("PUBLIC087_VERIFICATION_KEY") && text.contains("file://keys/signing.pem"),
++        "{text}"
++    );
++}
++
++#[test]
++fn secret_alias_limit_keeps_unresolved_key_values_private() {
++    let mut source = "void f(){const char *a0=\"SYNTH087_ALIAS_KEY\";".to_string();
++    for i in 1..=10 {
++        source.push_str(&format!("const char *a{i}=a{};", i - 1));
++    }
++    source.push_str("EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519,NULL,a10,32);int visible=17;}");
++    let d = scan(&source, "c", false);
++    let text = serde_json::to_string(d.legacy()).unwrap();
++    assert!(!text.contains("SYNTH087_ALIAS_KEY"));
++}
++
++#[test]
++fn inline_private_block_preserves_code_after_it_and_long_secret_clipping_is_safe() {
++    let source="void f(){const char *privateKey=\"-----BEGIN PRIVATE KEY-----SYNTH087_BLOCK-----END PRIVATE KEY-----\"; RSA_new(); int visible=17;}";
++    let d = scan(source, "cpp", false);
++    let exported = serde_json::to_string(d.legacy()).unwrap();
++    assert!(!exported.contains("SYNTH087_BLOCK"));
++    let snippet = d
++        .legacy()
++        .findings
++        .iter()
++        .filter_map(|f| f.source_snippet.as_ref())
++        .flat_map(|s| &s.lines)
++        .map(|l| l.text.as_str())
++        .collect::<Vec<_>>()
++        .join("\n");
++    assert!(
++        snippet.contains("RSA_new()") && snippet.contains("visible=17"),
++        "{snippet}"
++    );
++    let long = format!(
++        "void f(){{const char *password=\"{}SYNTH087_TAIL\"; RSA_new();}}",
++        "SYNTH087_MIDDLE".repeat(50)
++    );
++    let d = scan(&long, "c", false);
++    let exported = serde_json::to_string(d.legacy()).unwrap();
++    assert!(!exported.contains("SYNTH087_"));
++}
+diff --git a/crates/pqc_scan_detectors/tests/source_api_display.rs b/crates/pqc_scan_detectors/tests/source_api_display.rs
+new file mode 100644
+index 0000000..78fe986
+--- /dev/null
++++ b/crates/pqc_scan_detectors/tests/source_api_display.rs
+@@ -0,0 +1,244 @@
++use pqc_scan_core::{scan_repository_native, NativeOptions, ScanConfig};
++use pqc_scan_rules::RuleSet;
++use std::{
++    path::Path,
++    sync::atomic::{AtomicU64, Ordering},
++};
++
++fn scan(source: &str, extension: &str) -> pqc_scan_core::ScanDocument {
++    static NEXT: AtomicU64 = AtomicU64::new(0);
++    let root = std::env::temp_dir().join(format!(
++        "pqc086-{}-{}",
++        std::process::id(),
++        NEXT.fetch_add(1, Ordering::Relaxed)
++    ));
++    std::fs::create_dir_all(&root).unwrap();
++    std::fs::write(root.join(format!("case.{extension}")), source).unwrap();
++    let rules =
++        RuleSet::load_from_dir(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules")).unwrap();
++    let doc = scan_repository_native(
++        &ScanConfig {
++            root: root.clone(),
++            threads: 1,
++            ..Default::default()
++        },
++        &rules,
++        &pqc_scan_detectors::default_detectors(),
++        &NativeOptions::new(Some("synthetic/display086")).unwrap(),
++    )
++    .unwrap();
++    let legacy = pqc_scan_core::scan_repository(
++        &ScanConfig {
++            root: root.clone(),
++            threads: 1,
++            ..Default::default()
++        },
++        &rules,
++        &pqc_scan_detectors::default_detectors(),
++    )
++    .unwrap();
++    let native_matches: Vec<_> = doc
++        .legacy()
++        .findings
++        .iter()
++        .map(|f| {
++            (
++                &f.finding_id,
++                &f.evidence.r#match,
++                serde_json::to_value(&f.source_snippet).unwrap(),
++            )
++        })
++        .collect();
++    let legacy_matches: Vec<_> = legacy
++        .findings
++        .iter()
++        .map(|f| {
++            (
++                &f.finding_id,
++                &f.evidence.r#match,
++                serde_json::to_value(&f.source_snippet).unwrap(),
++            )
++        })
++        .collect();
++    assert_eq!(
++        serde_json::to_value(&doc.legacy().cbom).unwrap(),
++        serde_json::to_value(&legacy.cbom).unwrap()
++    );
++    assert!(!serde_json::to_string(doc.native().unwrap())
++        .unwrap()
++        .contains("arguments omitted"));
++    assert!(
++        doc.legacy()
++            .cbom
++            .iter()
++            .all(|row| !row.algorithm.contains("arguments omitted")),
++        "Display-only API excerpts must not become CBOM algorithm identities"
++    );
++    assert_eq!(
++        native_matches, legacy_matches,
++        "default and inventory scans must show the same excerpts"
++    );
++    std::fs::remove_dir_all(root).unwrap();
++    doc
++}
++
++#[test]
++fn recognized_calls_show_original_arguments_in_sanitized_source_context() {
++    for (ext, source, api) in [
++        (
++            "c",
++            "void f(){secp256k1_ecdsa_sign(ctx,sig,hash,key,nonce,data);}",
++            "secp256k1_ecdsa_sign",
++        ),
++        (
++            "cpp",
++            "void f(){EVP_PKEY_CTX_new_from_name(nullptr,\"RSA\",nullptr);}",
++            "EVP_PKEY_CTX_new_from_name",
++        ),
++        (
++            "cs",
++            "using System.Security.Cryptography; class C { void M(){ RSA.Create(); } }",
++            "Create",
++        ),
++        (
++            "php",
++            "<?php openssl_sign($data,$sig,$key);",
++            "openssl_sign",
++        ),
++    ] {
++        let doc = scan(source, ext);
++        let found = doc
++            .legacy()
++            .findings
++            .iter()
++            .find(|f| {
++                f.evidence
++                    .r#match
++                    .to_ascii_lowercase()
++                    .contains(&api.to_ascii_lowercase())
++            })
++            .unwrap_or_else(|| panic!("{ext}: no readable API source excerpt"));
++        assert!(!found.evidence.snippet_preview.contains("arguments omitted"));
++        let snippet = found.source_snippet.as_ref().unwrap();
++        assert!(snippet
++            .lines
++            .iter()
++            .any(|l| l.highlighted && l.line == found.location.line && l.text.contains(api)));
++        assert!(doc.native().unwrap().validate().is_ok());
++    }
++}
++
++#[test]
++fn public_excerpts_do_not_reintroduce_private_or_algorithm_looking_arguments() {
++    for ext in ["c", "cpp", "h"] {
++        let doc = scan(
++            "void f(){OQS_KEM_decaps(k,\"PRIVATE086_OPAQUE_RS256\",data,more);}",
++            ext,
++        );
++        assert!(!serde_json::to_string(doc.legacy())
++            .unwrap()
++            .contains("PRIVATE086"));
++        assert!(!serde_json::to_string(doc.native().unwrap())
++            .unwrap()
++            .contains("PRIVATE086"));
++    }
++    for (ext, source) in [
++        ("cs", "class C { void M(){System.Security.Cryptography.MLKem.ImportPrivateSeed(System.Security.Cryptography.MLKemAlgorithm.MLKem768,\"PRIVATE086_OPAQUE\");} }"),
++        ("php", "<?php openssl_sign($data,$sig,'PRIVATE086_OPAQUE');"),
++    ] {
++        let doc = scan(source, ext);
++        assert!(!serde_json::to_string(doc.legacy()).unwrap().contains("PRIVATE086"));
++        assert!(!serde_json::to_string(doc.native().unwrap()).unwrap().contains("PRIVATE086"));
++    }
++}
++
++#[test]
++fn java_and_go_have_readable_normal_source_and_still_protect_real_private_blocks() {
++    for (ext, source, token) in [
++        ("java", "import java.security.KeyPairGenerator; class C {void f() throws Exception {KeyPairGenerator.getInstance(\"RSA\");}}", "KeyPairGenerator"),
++        ("go", "package main\nimport \"crypto/rsa\"\nfunc f(){rsa.GenerateKey(nil,2048)}", "rsa"),
++    ] {
++        let doc = scan(source, ext);
++        assert!(doc.legacy().findings.iter().filter_map(|f| f.source_snippet.as_ref()).flat_map(|s| &s.lines).any(|l| l.text.contains(token)), "{ext}: normal source hidden");
++        let private = format!("{source}\n// -----BEGIN PRIVATE KEY-----\nPRIVATE086_BLOCK\n// -----END PRIVATE KEY-----\n");
++        let credential = format!("{source}\n// password = \"PRIVATE086_CREDENTIAL\"\n");
++        let protected = scan(&credential, ext);
++        assert!(!serde_json::to_string(protected.legacy()).unwrap().contains("PRIVATE086_CREDENTIAL"));
++        assert!(!serde_json::to_string(protected.native().unwrap()).unwrap().contains("PRIVATE086_CREDENTIAL"));
++        let doc = scan(&private, ext);
++        assert!(!serde_json::to_string(doc.legacy()).unwrap().contains("PRIVATE086_BLOCK"));
++        assert!(!serde_json::to_string(doc.native().unwrap()).unwrap().contains("PRIVATE086_BLOCK"));
++    }
++}
++
++#[test]
++fn all_existing_seven_language_fixtures_retain_normal_readable_source() {
++    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tasks/076/evidence/old-seven");
++    let mut total = 0;
++    for entry in std::fs::read_dir(root).unwrap() {
++        let path = entry.unwrap().path();
++        if path.file_name().unwrap() == "negative.js" {
++            continue;
++        }
++        let source = std::fs::read_to_string(&path).unwrap();
++        let doc = scan(&source, path.extension().unwrap().to_str().unwrap());
++        assert!(!doc.legacy().findings.is_empty(), "{}", path.display());
++        assert!(
++            doc.legacy()
++                .findings
++                .iter()
++                .filter_map(|f| f.source_snippet.as_ref())
++                .flat_map(|s| &s.lines)
++                .any(|l| !l.text.is_empty() && !l.text.starts_with("[masked-")),
++            "{}",
++            path.display()
++        );
++        total += 1;
++    }
++    assert_eq!(total, 7);
++}
++
++#[test]
++fn remaining_recognized_factories_operations_and_php_case_variants_are_readable() {
++    let mut cases: Vec<(String, &str, &str)> = vec![
++        (r"<?php $key=\PQCrypto\MLDSA44\SigningKey::fromBytes('PRIVATE086_KEY'); $key?->sign('PUBLIC087_MESSAGE');".into(), "php", "sign"),
++        ("<?php OPENSSL_SIGN($data,$sig,$key);".into(), "php", "openssl_sign"),
++        ("<?php sodium_crypto_sign('PUBLIC087_SIGN',$key);".into(), "php", "sodium_crypto_sign"),
++        ("<?php sodium_crypto_box('PUBLIC087_BOX',$nonce,$key);".into(), "php", "sodium_crypto_box"),
++        ("<?php sodium_crypto_kem_enc($key);".into(), "php", "sodium_crypto_kem_enc"),
++        ("<?php sodium_crypto_kem_dec('PUBLIC087_CIPHERTEXT',$key);".into(), "php", "sodium_crypto_kem_dec"),
++        ("<?php sodium_crypto_kem_mlkem768_enc($key);".into(), "php", "sodium_crypto_kem_mlkem768_enc"),
++        ("using System.Security.Cryptography; class C{void M(){var k=ECDiffieHellman.Create();k.DeriveKeyFromHmac(peer,HashAlgorithmName.SHA256,key);}}".into(), "cs", "DeriveKeyFromHmac"),
++        ("using System.Security.Cryptography; class C{void M(){var k=new RSACryptoServiceProvider();}}".into(), "cs", "RSACryptoServiceProvider"),
++        ("using Org.BouncyCastle.Crypto.Signers; class C{void M(){var k=new DsaSigner();}}".into(), "cs", "DsaSigner"),
++    ];
++    for method in [
++        "ImportFromPem",
++        "ImportFromEncryptedPem",
++        "ImportSubjectPublicKeyInfo",
++        "ImportPkcs8PrivateKey",
++        "ImportEncryptedPkcs8PrivateKey",
++        "ImportPrivateSeed",
++        "ImportDecapsulationKey",
++        "ImportEncapsulationKey",
++    ] {
++        cases.push((format!("using System.Security.Cryptography; class C{{void M(){{MLKem.{method}(MLKemAlgorithm.MLKem768,\"{}\");}}}}", if method.contains("Public") || method == "ImportEncapsulationKey" {"PUBLIC087_IMPORT"} else {"PRIVATE086_IMPORT"}), "cs", method));
++    }
++    for (source, ext, name) in cases {
++        let doc = scan(&source, ext);
++        assert!(
++            doc.legacy().findings.iter().any(|f| f
++                .evidence
++                .r#match
++                .to_ascii_lowercase()
++                .contains(&name.to_ascii_lowercase())),
++            "{name}: missing source excerpt"
++        );
++        assert!(!serde_json::to_string(doc.legacy())
++            .unwrap()
++            .contains("PRIVATE086"));
++        assert!(!serde_json::to_string(doc.native().unwrap())
++            .unwrap()
++            .contains("PRIVATE086"));
++    }
++}

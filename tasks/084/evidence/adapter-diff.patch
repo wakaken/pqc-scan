@@ -1,0 +1,170 @@
+--- /dev/null
++++ b/tests/quality/external.py
+@@ -0,0 +1,76 @@
++"""Bounded exploratory OSS scoring; existing corpus/license contracts stay intact.
++
++Only annotated intervals are scored. Other locations are unattributed, so this
++adapter cannot establish full-file or repository precision. No independent-label
++claim is made here. Source acquisition, licenses and annotation completeness must
++be recorded separately by the study owner.
++"""
++import pathlib
++
++from evaluate import bytes_digest, safe_relative, score, validate_labels
++
++
++def source_language(name):
++    """Inventory-based grouping; headers and untagged INC remain unresolved."""
++    suffix = pathlib.PurePosixPath(name).suffix
++    if suffix == '.C':
++        return 'C++'
++    languages = {'.java': 'Java', '.go': 'Go', '.js': 'JavaScript', '.ts': 'TypeScript',
++                 '.tsx': 'TSX', '.py': 'Python', '.rs': 'Rust', '.rb': 'Ruby',
++                 '.swift': 'Unsupported Swift', '.php': 'PHP', '.phtml': 'PHP',
++                 '.inc': 'Unresolved INC', '.cs': 'C#', '.c': 'C', '.cc': 'C++',
++                 '.cpp': 'C++', '.cxx': 'C++', '.hpp': 'C++', '.hxx': 'C++',
++                 '.hh': 'C++', '.h': 'Ambiguous C/C++ header'}
++    return languages.get(suffix.lower(), 'Not Applicable')
++
++
++def bound_source(root, name, expected_sha256):
++    # The operator-selected root may use a system alias such as /tmp on macOS.
++    # Only descendants must remain exact, non-symlinked source paths.
++    root = pathlib.Path(root).resolve(strict=True)
++    path = root / safe_relative(name)
++    if path.resolve() != path or not path.is_file() or bytes_digest(path) != expected_sha256:
++        raise ValueError('External source changed, unavailable or symlinked')
++    return path
++
++
++def score_annotated(data, labels, findings):
++    """Use unchanged one-to-one scorer inside frozen annotated intervals only."""
++    validate_labels(data, labels)
++    files = {f['path'] for f in data['files']}
++    nominated = {r for rules in data['families'].values() for r in rules}
++    if len(files) != len(data['files']) or len(nominated) != sum(map(len, data['families'].values())):
++        raise ValueError('Duplicate files or rule families')
++    intervals = {}
++    ids = set()
++    for unit in data['units']:
++        safe_relative(unit['path'])
++        if unit['id'] in ids or unit['path'] not in files or unit['ruleId'] not in nominated:
++            raise ValueError('Invalid unit identity')
++        ids.add(unit['id'])
++        if any(type(unit[k]) is not int for k in ('line', 'startColumn', 'endColumn')) or not (
++                unit['line'] > 0 and 0 < unit['startColumn'] < unit['endColumn']):
++            raise ValueError('Invalid truth interval')
++        key = (unit['path'], unit['ruleId'], unit['line'])
++        for previous in intervals.setdefault(key, []):
++            if max(previous['startColumn'], unit['startColumn']) < min(previous['endColumn'], unit['endColumn']):
++                raise ValueError('Overlapping truth intervals')
++        intervals[key].append(unit)
++    selected, unattributed, other_rules = [], [], []
++    for finding in findings:
++        loc = finding['location']
++        if finding['rule_id'] not in nominated:
++            other_rules.append(finding)
++            continue
++        candidates = intervals.get((loc['file'], finding['rule_id'], loc['line']), [])
++        if loc['line'] == 0:
++            name = finding.get('evidence', {}).get('metadata', {}).get('dep_name')
++            candidates = [u for u in data['units'] if u['path'] == loc['file'] and
++                          u['ruleId'] == finding['rule_id'] and name is not None and u.get('dependencyName') == name]
++        if any(loc['line'] == 0 or u['startColumn'] <= loc['column'] < u['endColumn'] for u in candidates):
++            selected.append(finding)
++        else:
++            unattributed.append(finding)
++    return dict(accuracy=score(data, labels, selected), unattributed=unattributed,
++                other_rules=other_rules,
++                scope='Annotated intervals only; not full-file or repository accuracy')
+--- /dev/null
++++ b/tests/quality/test_external.py
+@@ -0,0 +1,88 @@
++"""External OSS measurement boundaries; hand-derived counts, no upstream execution."""
++import copy
++import hashlib
++import importlib.util
++import pathlib
++import tempfile
++import unittest
++
++class ExternalStudyTests(unittest.TestCase):
++    def test_language_does_not_pool_uppercase_c_or_ambiguous_headers(self):
++        classify = getattr(self.external(), 'source_language', None)
++        self.assertTrue(callable(classify), 'new languages require source-based grouping')
++        for name, expected in [('a.c', 'C'), ('a.C', 'C++'), ('a.cpp', 'C++'),
++                               ('a.h', 'Ambiguous C/C++ header'), ('a.hpp', 'C++'),
++                               ('a.cs', 'C#'), ('a.php', 'PHP'), ('a.phtml', 'PHP'),
++                               ('a.PHP', 'PHP'), ('a.H', 'Ambiguous C/C++ header'),
++                               ('a.inc', 'Unresolved INC'), ('a.tsx', 'TSX'),
++                               ('a.swift', 'Unsupported Swift'), ('LICENSE', 'Not Applicable')]:
++            with self.subTest(name=name):
++                self.assertEqual(classify(name), expected)
++
++    def external(self):
++        spec = importlib.util.find_spec('external')
++        self.assertIsNotNone(spec, 'external source validation/score adapter is missing')
++        import external
++        return external
++
++    def test_partial_annotation_preserves_unattributed_and_duplicate_predictions(self):
++        external = self.external()
++        data = dict(files=[dict(path='a.php', split='tuning')], families=dict(api=['R']),
++                    units=[dict(id='p', path='a.php', ruleId='R', line=2, startColumn=1, endColumn=5),
++                           dict(id='n', path='a.php', ruleId='R', line=3, startColumn=1, endColumn=5),
++                           dict(id='miss', path='a.php', ruleId='R', line=4, startColumn=1, endColumn=5)])
++        labels = dict(p='positive', n='negative', miss='positive')
++        def prediction(line, column=1, rule='R'):
++            return dict(rule_id=rule, location=dict(file='a.php', line=line, column=column))
++        predictions = [prediction(2), prediction(2), prediction(3), prediction(4, 5),
++                       prediction(99), prediction(2, rule='OTHER')]
++        scored = external.score_annotated(data, labels, predictions)
++        group = scored['accuracy']['groups']['tuning/api']
++        self.assertEqual({k: group[k] for k in ('tp', 'fp', 'fn', 'tn')},
++                         dict(tp=1, fp=2, fn=1, tn=0))
++        self.assertEqual(len(scored['unattributed']), 2)
++        self.assertEqual(len(scored['other_rules']), 1)
++        self.assertEqual(len(predictions), 6)
++        # Reject overlapping truth, including overlaps with the same label.
++        invalid = copy.deepcopy(data)
++        invalid['units'].append(dict(id='overlap', path='a.php', ruleId='R', line=2, startColumn=2, endColumn=4))
++        with self.assertRaises(ValueError):
++            external.score_annotated(invalid, dict(labels, overlap='positive'), predictions)
++
++    def test_dependency_unknown_position_matches_only_exact_name(self):
++        external = self.external()
++        data = dict(files=[dict(path='composer.json', split='tuning')],
++                    families=dict(dependency=['D']), units=[dict(id='d', path='composer.json',
++                    ruleId='D', line=4, startColumn=2, endColumn=20, dependencyName='ext-openssl')])
++        finding = dict(rule_id='D', location=dict(file='composer.json', line=0, column=0),
++                       evidence=dict(metadata=dict(dep_name='ext-openssl')))
++        good = external.score_annotated(data, {'d': 'positive'}, [finding])
++        self.assertEqual(good['accuracy']['groups']['tuning/dependency']['tp'], 1)
++        finding['evidence']['metadata']['dep_name'] = 'ext-sodium'
++        unknown = external.score_annotated(data, {'d': 'positive'}, [finding])
++        self.assertEqual(unknown['accuracy']['groups']['tuning/dependency']['fn'], 1)
++        self.assertEqual(len(unknown['unattributed']), 1)
++
++    def test_bound_source_rejects_changes_traversal_and_symlink(self):
++        external = self.external()
++        with tempfile.TemporaryDirectory() as tmp:
++            root = pathlib.Path(tmp)
++            source = root/'a.php'
++            source.write_bytes(b'<?php echo 1;\n')
++            expected = hashlib.sha256(b'<?php echo 1;\n').hexdigest()
++            self.assertEqual(external.bound_source(root, 'a.php', expected), source.resolve())
++            source.write_bytes(b'changed')
++            with self.assertRaises(ValueError):
++                external.bound_source(root, 'a.php', expected)
++            with self.assertRaises(ValueError):
++                external.bound_source(root, '../a.php', expected)
++            (root/'link').symlink_to(source)
++            with self.assertRaises(ValueError):
++                external.bound_source(root, 'link', hashlib.sha256(b'changed').hexdigest())
++            (root/'dirlink').symlink_to(root, target_is_directory=True)
++            with self.assertRaises(ValueError):
++                external.bound_source(root, 'dirlink/a.php', hashlib.sha256(b'changed').hexdigest())
++
++
++if __name__ == '__main__':
++    unittest.main()

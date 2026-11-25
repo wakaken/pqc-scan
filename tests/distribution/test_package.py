@@ -73,7 +73,7 @@ class PackageTests(unittest.TestCase):
     def test_network_binds_features_metadata_and_dependency_notices(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
-            required = ['LICENSE', 'SECURITY.md', 'docs/user/DISTRIBUTION.md',
+            required = ['LICENSE', 'SECURITY.md', 'SECURITY.ja.md', 'README.md', 'README.ja.md', 'docs/user/COVERAGE.md', 'docs/user/COVERAGE.ja.md', 'docs/user/DISTRIBUTION.md',
                         'docs/user/DISTRIBUTION.ja.md', 'docs/user/PROBING.md',
                         'docs/user/PROBING.ja.md', 'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md', 'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md', 'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md', 'docs/releases/v0.2.0.md', 'docs/releases/v0.2.0.ja.md', 'Cargo.lock', 'rust-toolchain.toml',
                         'third_party/notices/manifest.json', 'third_party/notices/README.md', 'schemas/migration-context-v1.schema.json', 'docs/images/v0.4/web-01-folders-en.jpg', 'docs/images/v0.4/CAPTURES.json']
@@ -129,6 +129,56 @@ class PackageTests(unittest.TestCase):
             self.assertEqual(provenance['features'], ['probe-tls', 'probe-ssh', 'probe-ssh-kex'])
             self.assertIn('negotiation', [p['name'] for p in notices['packages']])
             self.assertTrue(all(p['notices'] for p in notices['packages']))
+
+    def test_prepared_public_guides_include_linked_documents_and_reject_broken_links(self):
+        required = [
+            'LICENSE', 'SECURITY.md', 'SECURITY.ja.md', 'README.md', 'README.ja.md',
+            'docs/user/DISTRIBUTION.md', 'docs/user/DISTRIBUTION.ja.md',
+            'docs/user/PROBING.md', 'docs/user/PROBING.ja.md',
+            'docs/user/SCANNING.md', 'docs/user/SCANNING.ja.md',
+            'docs/user/COVERAGE.md', 'docs/user/COVERAGE.ja.md',
+            'docs/user/REPORTS.md', 'docs/user/REPORTS.ja.md',
+            'docs/user/SAVED-EVIDENCE.md', 'docs/user/SAVED-EVIDENCE.ja.md',
+            'schemas/migration-context-v1.schema.json', 'docs/images/v0.4/CAPTURES.json',
+            'Cargo.lock', 'rust-toolchain.toml', 'third_party/notices/manifest.json',
+            'third_party/notices/README.md',
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            for name in required:
+                path = root/name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('fixture')
+            (root/'README.md').write_text('[Scan](docs/user/SCANNING.md)')
+            (root/'README.ja.md').write_text('[Security](SECURITY.ja.md)')
+            guide = root/'docs/user/SCANNING.md'
+            guide.write_text('[Coverage](COVERAGE.md#source-limits) [Home](../../README.md) '
+                             '[Online](https://example.invalid/remote) [Here](#local)')
+            (root/'rules/default').mkdir(parents=True)
+            binary = root/'binary'
+            binary.write_bytes(bytes.fromhex('cffaedfe0c000001') + b'fixture')
+            metadata = {'packages': [{'id': 'cli', 'name': 'pqc_scan_cli', 'version': '0.1.0',
+                         'source': None, 'license': 'MIT', 'manifest_path': str(root/'Cargo.toml')}],
+                        'resolve': {'nodes': [{'id': 'cli', 'deps': []}]}}
+            def run(directory, *args):
+                return json.dumps(metadata) if args[:2] == ('cargo', 'metadata') else 'fixture'
+            def prepare(folder):
+                self.mod.prepare(argparse.Namespace(source_root=root, binary=binary,
+                    target='aarch64-apple-darwin', variant='static', out_dir=root/folder))
+            with patch.object(self.mod, 'run', side_effect=run), patch.object(self.mod.subprocess, 'check_output', return_value=b''):
+                prepare('valid')
+                archive, = (root/'valid').glob('*.tar.gz')
+                with tarfile.open(archive) as tar:
+                    prefix = archive.name.removesuffix('.tar.gz')
+                    for name in ['README.md', 'README.ja.md', 'SECURITY.ja.md',
+                                 'docs/user/COVERAGE.md', 'docs/user/COVERAGE.ja.md']:
+                        self.assertIn(prefix+'/'+name, tar.getnames(), name)
+                        self.assertEqual(tar.extractfile(prefix+'/'+name).read(), (root/name).read_bytes())
+                for index, link in enumerate(['missing.md', '../../../outside.md',
+                                               'missing%20guide.md', 'missing.png']):
+                    guide.write_text('![Required document]('+link+')')
+                    with self.subTest(link=link), self.assertRaisesRegex(ValueError, 'documentation link'):
+                        prepare('broken'+str(index))
 
     def test_repeatable_and_tamper_detection(self):
         entries = {'bin/pqc-scan': (b'binary', 0o755), 'rules/test.yml': (b'id: test', 0o644)}

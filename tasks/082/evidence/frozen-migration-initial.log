@@ -1,0 +1,24 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+error[E0308]: mismatched types
+  --> crates/pqc_scan_detectors/tests/language_migration.rs:88:11
+   |
+88 |         + Duration::from_secs(2 * 86400))
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&str`, found `Duration`
+
+error[E0599]: no method named `to_rfc3339` found for struct `std::string::String` in the current scope
+  --> crates/pqc_scan_detectors/tests/language_migration.rs:89:6
+   |
+83 | /     (migration::parse_as_of(&format!(
+84 | |         "{}T00:00:00Z",
+85 | |         &saved.input().collection_time[..10]
+86 | |     ))
+87 | |     .unwrap()
+88 | |         + Duration::from_secs(2 * 86400))
+89 | |     .to_rfc3339()
+   | |     -^^^^^^^^^^ method not found in `std::string::String`
+   | |_____|
+   |
+
+Some errors have detailed explanations: E0308, E0599.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `pqc_scan_detectors` (test "language_migration") due to 2 previous errors

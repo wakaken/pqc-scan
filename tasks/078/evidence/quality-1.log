@@ -1,0 +1,38 @@
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.44
+   Compiling memchr v2.8.0
+   Compiling libc v0.2.191
+   Compiling aho-corasick v1.1.4
+   Compiling serde_json v1.0.149
+   Compiling regex-automata v0.4.14
+   Compiling syn v2.0.117
+   Compiling cpufeatures v0.2.17
+   Compiling sha2 v0.10.9
+   Compiling regex v1.12.3
+   Compiling serde_derive v1.0.228
+   Compiling serde v1.0.228
+   Compiling yaml_serde v0.10.7
+   Compiling pqc_scan_rules v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_rules)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.46s
+     Running tests/quality_metadata.rs (target/debug/deps/quality_metadata-7f05f105e2107907)
+
+running 1 test
+test every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls ... FAILED
+
+failures:
+
+---- every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls stdout ----
+
+thread 'every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls' (22878006) panicked at crates/pqc_scan_rules/tests/quality_metadata.rs:39:9:
+assertion `left == right` failed: PHP_CRYPTO_API snapshot
+  left: Object {"category": String("CryptoAPI"), "description": String("Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved."), "id": String("PHP_CRYPTO_API"), "kind": String("tree_sitter"), "migration_hint": String("Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."), "oid": Null, "pattern": String("(?i)\\b(?:openssl_(?:pkey_new|pkey_derive|public_encrypt|private_decrypt|private_encrypt|public_decrypt|sign|verify)|sodium_crypto_(?:sign|scalarmult|box|kx)(?:_[A-Za-z0-9_]+)?|OQS_SIGNATURE|Oqs\\\\OqsSig|phpseclib3\\\\Crypt\\\\(?:RSA|EC|DH)::[A-Za-z_][A-Za-z0-9_]*)\\s*\\("), "risk": String("quantum-uncertain"), "scope": String("php"), "severity": String("medium")}
+ right: Object {"category": String("CryptoAPI"), "description": String("Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved."), "id": String("PHP_CRYPTO_API"), "kind": String("tree_sitter"), "migration_hint": String("Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."), "pattern": String("(?i)\\b(?:openssl_(?:pkey_new|pkey_derive|public_encrypt|private_decrypt|private_encrypt|public_decrypt|sign|verify)|sodium_crypto_(?:sign|scalarmult|box|kx)(?:_[A-Za-z0-9_]+)?|OQS_SIGNATURE|Oqs\\\\OqsSig|phpseclib3\\\\Crypt\\\\(?:RSA|EC|DH)::[A-Za-z_][A-Za-z0-9_]*)\\s*\\("), "risk": String("quantum-uncertain"), "scope": String("php"), "severity": String("medium")}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    every_builtin_has_bound_review_axes_sources_and_honest_pattern_controls
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+error: test failed, to rerun pass `-p pqc_scan_rules --test quality_metadata`

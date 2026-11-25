@@ -1,0 +1,63 @@
+{
+  "generated_at": "2026-11-24T04:17:38.572437Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-08a5c5c840ebf6dde1bcaf6c38c00d24df3cf1ed00c2b668b8b683ed7f6cbc7d",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "alias.php",
+        "line": 1,
+        "column": 74
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "explicit_pqc_keypair_request"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "alias.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "alias.php:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 1,
+    "by_severity": {
+      "info": 1
+    },
+    "by_risk": {
+      "quantum-safe": 1
+    },
+    "scanned_files": 1,
+    "skipped_files": 0
+  }
+}

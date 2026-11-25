@@ -24,7 +24,7 @@ pub(super) struct Context<'a, 's> {
     pub truncated: Cell<bool>,
     pub limit_reason: Cell<Option<(&'static str, usize, usize)>>,
     pub budget: crate::DetectorBudget,
-    language: &'s str,
+    pub(super) language: &'s str,
     scopes: Vec<Scope<'a>>,
     node_scopes: HashMap<usize, usize>,
     node_positions: HashMap<usize, usize>,
@@ -88,37 +88,70 @@ impl<'a, 's> Context<'a, 's> {
                 continue;
             }
             let kind = node.kind();
-            let function = matches!(
-                kind,
-                "function_declaration"
-                    | "function_expression"
-                    | "generator_function_declaration"
-                    | "generator_function"
-                    | "arrow_function"
-                    | "function_item"
-                    | "closure_expression"
-                    | "function_definition"
-                    | "lambda"
-                    | "method_definition"
-                    | "method_signature"
-                    | "function_signature"
-                    | "function_type"
-                    | "constructor_type"
-                    | "call_signature"
-                    | "construct_signature"
-            );
-            let block = matches!(
-                kind,
-                "statement_block"
-                    | "for_in_statement"
-                    | "for_statement"
-                    | "catch_clause"
-                    | "class_definition"
-                    | "class_body"
-                    | "declaration_list"
-                    | "impl_item"
-                    | "trait_item"
-            ) && !(language == "python" && kind == "for_statement")
+            let function = (language == "cpp" && kind == "lambda_expression")
+                || (language == "csharp"
+                    && matches!(
+                        kind,
+                        "method_declaration"
+                            | "constructor_declaration"
+                            | "local_function_statement"
+                            | "lambda_expression"
+                            | "anonymous_method_expression"
+                    ))
+                || (language == "php"
+                    && matches!(kind, "method_declaration" | "anonymous_function"))
+                || matches!(
+                    kind,
+                    "function_declaration"
+                        | "function_expression"
+                        | "generator_function_declaration"
+                        | "generator_function"
+                        | "arrow_function"
+                        | "function_item"
+                        | "closure_expression"
+                        | "function_definition"
+                        | "lambda"
+                        | "method_definition"
+                        | "method_signature"
+                        | "function_signature"
+                        | "function_type"
+                        | "constructor_type"
+                        | "call_signature"
+                        | "construct_signature"
+                );
+            let block = (matches!(language, "c" | "cpp")
+                && matches!(
+                    kind,
+                    "compound_statement"
+                        | "namespace_definition"
+                        | "field_declaration_list"
+                        | "template_declaration"
+                ))
+                || (language == "csharp"
+                    && matches!(
+                        kind,
+                        "foreach_statement"
+                            | "switch_section"
+                            | "using_statement"
+                            | "class_declaration"
+                            | "struct_declaration"
+                            | "interface_declaration"
+                            | "record_declaration"
+                            | "enum_declaration"
+                            | "delegate_declaration"
+                    ))
+                || matches!(
+                    kind,
+                    "statement_block"
+                        | "for_in_statement"
+                        | "for_statement"
+                        | "catch_clause"
+                        | "class_definition"
+                        | "class_body"
+                        | "declaration_list"
+                        | "impl_item"
+                        | "trait_item"
+                ) && !(language == "python" && kind == "for_statement")
                 || (kind == "block" && language != "python");
             let scope = if function || block {
                 let id = result.scopes.len();
@@ -210,6 +243,9 @@ impl<'a, 's> Context<'a, 's> {
     }
     pub fn source(&self, node: Node<'_>) -> &'s str {
         &self.text[node.start_byte()..node.end_byte()]
+    }
+    pub fn scope_parent(&self, scope: usize) -> Option<usize> {
+        self.scopes.get(scope).and_then(|s| s.parent)
     }
     pub fn scope(&self, node: Node<'_>) -> usize {
         self.node_scopes.get(&node.id()).copied().unwrap_or(0)

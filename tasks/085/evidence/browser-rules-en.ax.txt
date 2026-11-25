@@ -1,0 +1,466 @@
+Browser tab: 2, Title: "Rule explanations", URL: "http://127.0.0.1:57384/scan/report.rules.html?lang=en&theme=light".
+1 AXWebArea Rule explanations, URL: 127.0.0.1:57384/scan/report.rules.html?lang=en&theme=light
+	2 container
+		3 text Language / 言語
+		4 pop up button (collapsed, settable) Description: Language / 言語, Value: English, Secondary Actions: Expand
+			5 menu
+				6 (selected) English
+				7 日本語
+	8 container
+		9 text Theme / 表示
+		10 pop up button (collapsed, settable) Description: Theme / 表示, Value: Light / ライト, Secondary Actions: Expand
+			11 menu
+				12 (selected) Light / ライト
+				13 Dark / ダーク
+	14 container
+		15 text pqc-scan / Reference
+		16 heading Rule explanations, Value: 1
+			17 text Rule explanations
+		18 link Description: Back to report, Value: 127.0.0.1:57384/scan/report.html?lang=en
+		19 text Rules found in this report. Findings identify references to investigate, not confirmed vulnerabilities or runtime use.
+		20 heading How to read the labels, Value: 2
+			21 text How to read the labels
+		22 text Severity prioritizes investigation; it is not a count of confirmed vulnerabilities. Risk describes the matched cryptographic signal. Informational PQC references do not establish migration completion.
+		23 text Review the file role (product, test, fixture or documentation), source context and actual deployment before applying the suggested action.
+		24 container rule-0
+			25 heading OpenSSL RSA API call detected., Value: 2
+				26 text OpenSSL RSA API call detected.
+			27 text OPENSSL_RSA_API
+			28 text Replace with EVP_PKEY-based implementation suitable for PQC migration.
+			29 definition list
+				30 container Category
+					31 text Category
+				32 text TLS
+				33 container Observed severities
+					34 text Observed severities
+				35 text high
+				36 container Observed risks
+					37 text Observed risks
+				38 text quantum-vulnerable
+				39 container Occurrences
+					40 text Occurrences
+				41 text 1
+			42 heading Example follow-up; confirm the advice at each location, Value: 3
+				43 text Example follow-up; confirm the advice at each location
+			44 text Verify C/C++ library, provider and build capabilities
+			45 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-0
+		46 container rule-1
+			47 heading EVP_PKEY configured for RSA detected., Value: 2
+				48 text EVP_PKEY configured for RSA detected.
+			49 text API_EVP_PKEY_RSA
+			50 text Use EVP_PKEY abstraction to prepare key-type replacement for PQC.
+			51 definition list
+				52 container Category
+					53 text Category
+				54 text CryptoAPI
+				55 container Observed severities
+					56 text Observed severities
+				57 text medium
+				58 container Observed risks
+					59 text Observed risks
+				60 text quantum-vulnerable
+				61 container Occurrences
+					62 text Occurrences
+				63 text 1
+			64 heading Example follow-up; confirm the advice at each location, Value: 3
+				65 text Example follow-up; confirm the advice at each location
+			66 text Verify C/C++ library, provider and build capabilities
+			67 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-1
+		68 container rule-2
+			69 heading OpenSSL low-level RSA API usage detected., Value: 2
+				70 text OpenSSL low-level RSA API usage detected.
+			71 text API_OPENSSL_RSA_NEW
+			72 text Prefer high-level OpenSSL EVP APIs to ease PQC migration.
+			73 definition list
+				74 container Category
+					75 text Category
+				76 text CryptoAPI
+				77 container Observed severities
+					78 text Observed severities
+				79 text medium
+				80 container Observed risks
+					81 text Observed risks
+				82 text quantum-vulnerable
+				83 container Occurrences
+					84 text Occurrences
+				85 text 1
+			86 heading Example follow-up; confirm the advice at each location, Value: 3
+				87 text Example follow-up; confirm the advice at each location
+			88 text Verify C/C++ library, provider and build capabilities
+			89 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-2
+		90 container rule-3
+			91 heading C# cryptographic API or qualified library reference; effective key use requires verification., Value: 2
+				92 text C# cryptographic API or qualified library reference; effective key use requires verification.
+			93 text CSHARP_CRYPTO_API
+			94 text Review the resolved primitive and purpose, platform and provider. A .NET or Bouncy Castle source reference does not establish effective runtime use.
+			95 definition list
+				96 container Category
+					97 text Category
+				98 text CryptoAPI
+				99 container Observed severities
+					100 text Observed severities
+				101 text medium
+				102 container Observed risks
+					103 text Observed risks
+				104 text quantum-uncertain
+				105 container Occurrences
+					106 text Occurrences
+				107 text 1
+			108 heading Example follow-up; confirm the advice at each location, Value: 3
+				109 text Example follow-up; confirm the advice at each location
+			110 text Verify .NET target, package and operating-system support
+			111 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-3
+		112 container rule-4
+			113 heading Value: 2, C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.
+				114 text C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.
+			115 text C_FAMILY_CRYPTO_API
+			116 text Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.
+			117 definition list
+				118 container Category
+					119 text Category
+				120 text CryptoAPI
+				121 container Observed severities
+					122 text Observed severities
+				123 text medium
+				124 container Observed risks
+					125 text Observed risks
+				126 text quantum-uncertain
+				127 container Occurrences
+					128 text Occurrences
+				129 text 2
+			130 heading Example follow-up; confirm the advice at each location, Value: 3
+				131 text Example follow-up; confirm the advice at each location
+			132 text Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.
+			133 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-4
+		134 container rule-5
+			135 heading BouncyCastle dependency detected., Value: 2
+				136 text BouncyCastle dependency detected.
+			137 text DEP_BOUNCYCASTLE
+			138 text Verify BouncyCastle PQC support status.
+			139 definition list
+				140 container Category
+					141 text Category
+				142 text TLS
+				143 container Observed severities
+					144 text Observed severities
+				145 text medium
+				146 container Observed risks
+					147 text Observed risks
+				148 text quantum-uncertain
+				149 container Occurrences
+					150 text Occurrences
+				151 text 1
+			152 heading Example follow-up; confirm the advice at each location, Value: 3
+				153 text Example follow-up; confirm the advice at each location
+			154 text Verify .NET target, package and operating-system support
+			155 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-5
+		156 container rule-6
+			157 heading PHP cryptographic API or library reference; key type may be unresolved., Value: 2
+				158 text PHP cryptographic API or library reference; key type may be unresolved.
+			159 text PHP_CRYPTO_API
+			160 text Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.
+			161 definition list
+				162 container Category
+					163 text Category
+				164 text CryptoAPI
+				165 container Observed severities
+					166 text Observed severities
+				167 text medium
+				168 container Observed risks
+					169 text Observed risks
+				170 text quantum-uncertain
+				171 container Occurrences
+					172 text Occurrences
+				173 text 1
+			174 heading Example follow-up; confirm the advice at each location, Value: 3
+				175 text Example follow-up; confirm the advice at each location
+			176 text Verify PHP extensions and their native cryptographic backends
+			177 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-6
+		178 container rule-7
+			179 heading C# TLS library or OQS wrapper reference; identity and runtime capability require separate checks., Value: 2
+				180 text C# TLS library or OQS wrapper reference; identity and runtime capability require separate checks.
+			181 text CSHARP_CRYPTO_REFERENCE
+			182 text Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately.
+			183 definition list
+				184 container Category
+					185 text Category
+				186 text CryptoAPI
+				187 container Observed severities
+					188 text Observed severities
+				189 text info
+				190 container Observed risks
+					191 text Observed risks
+				192 text quantum-uncertain
+				193 container Occurrences
+					194 text Occurrences
+				195 text 1
+			196 heading Example follow-up; confirm the advice at each location, Value: 3
+				197 text Example follow-up; confirm the advice at each location
+			198 text Verify .NET target, package and operating-system support
+			199 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-7
+		200 container rule-8
+			201 heading Value: 2, C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection.
+				202 text C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection.
+			203 text CSHARP_PQC_API
+			204 text Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.
+			205 definition list
+				206 container Category
+					207 text Category
+				208 text PQC
+				209 container Observed severities
+					210 text Observed severities
+				211 text info
+				212 container Observed risks
+					213 text Observed risks
+				214 text quantum-uncertain
+				215 container Occurrences
+					216 text Occurrences
+				217 text 1
+			218 heading Example follow-up; confirm the advice at each location, Value: 3
+				219 text Example follow-up; confirm the advice at each location
+			220 text Verify .NET target, package and operating-system support
+			221 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-8
+		222 container rule-9
+			223 heading Value: 2, C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.
+				224 text C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.
+			225 text C_FAMILY_PQC_API
+			226 text Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.
+			227 definition list
+				228 container Category
+					229 text Category
+				230 text PQC
+				231 container Observed severities
+					232 text Observed severities
+				233 text info
+				234 container Observed risks
+					235 text Observed risks
+				236 text quantum-uncertain
+				237 container Occurrences
+					238 text Occurrences
+				239 text 1
+			240 heading Example follow-up; confirm the advice at each location, Value: 3
+				241 text Example follow-up; confirm the advice at each location
+			242 text Verify C/C++ library, provider and build capabilities
+			243 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-9
+		244 container rule-10
+			245 heading C/C++ cryptographic include or TLS library reference; linking and negotiation remain unverified., Value: 2
+				246 text C/C++ cryptographic include or TLS library reference; linking and negotiation remain unverified.
+			247 text C_FAMILY_TLS_REFERENCE
+			248 text Check included libraries, exact TLS groups and provider configuration separately from deployment and negotiated connections. Includes alone do not prove linking or enabled algorithms.
+			249 definition list
+				250 container Category
+					251 text Category
+				252 text CryptoAPI
+				253 container Observed severities
+					254 text Observed severities
+				255 text info
+				256 container Observed risks
+					257 text Observed risks
+				258 text quantum-uncertain
+				259 container Occurrences
+					260 text Occurrences
+				261 text 1
+			262 heading Example follow-up; confirm the advice at each location, Value: 3
+				263 text Example follow-up; confirm the advice at each location
+			264 text Verify C/C++ library, provider and build capabilities
+			265 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-10
+		266 container rule-11
+			267 heading C/C++ cryptographic dependency or literal build reference; effective configuration is unknown., Value: 2
+				268 text C/C++ cryptographic dependency or literal build reference; effective configuration is unknown.
+			269 text DEP_NATIVE_CRYPTO
+			270 text Verify the native library, build flags and provider versions. vcpkg, Conan and CMake source declarations do not prove installation, selected algorithms or negotiated TLS.
+			271 definition list
+				272 container Category
+					273 text Category
+				274 text CryptoAPI
+				275 container Observed severities
+					276 text Observed severities
+				277 text info
+				278 container Observed risks
+					279 text Observed risks
+				280 text quantum-uncertain
+				281 container Occurrences
+					282 text Occurrences
+				283 text 1
+			284 heading Example follow-up; confirm the advice at each location, Value: 3
+				285 text Example follow-up; confirm the advice at each location
+			286 text Verify C/C++ library, provider and build capabilities
+			287 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-11
+		288 container rule-12
+			289 heading NuGet cryptographic package assertion; wrapper ownership and runtime support require verification., Value: 2
+				290 text NuGet cryptographic package assertion; wrapper ownership and runtime support require verification.
+			291 text DEP_NUGET_CRYPTO
+			292 text Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider.
+			293 definition list
+				294 container Category
+					295 text Category
+				296 text CryptoAPI
+				297 container Observed severities
+					298 text Observed severities
+				299 text info
+				300 container Observed risks
+					301 text Observed risks
+				302 text quantum-uncertain
+				303 container Occurrences
+					304 text Occurrences
+				305 text 1
+			306 heading Example follow-up; confirm the advice at each location, Value: 3
+				307 text Example follow-up; confirm the advice at each location
+			308 text Verify .NET target, package and operating-system support
+			309 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-12
+		310 container rule-13
+			311 heading PHP cryptographic dependency or platform declaration; installed capability is unknown., Value: 2
+				312 text PHP cryptographic dependency or platform declaration; installed capability is unknown.
+			313 text DEP_PHP_CRYPTO
+			314 text Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence.
+			315 definition list
+				316 container Category
+					317 text Category
+				318 text CryptoAPI
+				319 container Observed severities
+					320 text Observed severities
+				321 text info
+				322 container Observed risks
+					323 text Observed risks
+				324 text quantum-uncertain
+				325 container Occurrences
+					326 text Occurrences
+				327 text 1
+			328 heading Example follow-up; confirm the advice at each location, Value: 3
+				329 text Example follow-up; confirm the advice at each location
+			330 text Verify PHP extensions and their native cryptographic backends
+			331 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-13
+		332 container rule-14
+			333 heading PHP OQS KEM wrapper reference; installation and selected algorithm are unresolved., Value: 2
+				334 text PHP OQS KEM wrapper reference; installation and selected algorithm are unresolved.
+			335 text PHP_CRYPTO_REFERENCE
+			336 text Identify the specific third-party OQS wrapper and native library. A qualified reference does not establish installation, algorithm selection or enabled functionality.
+			337 definition list
+				338 container Category
+					339 text Category
+				340 text CryptoAPI
+				341 container Observed severities
+					342 text Observed severities
+				343 text info
+				344 container Observed risks
+					345 text Observed risks
+				346 text quantum-uncertain
+				347 container Occurrences
+					348 text Occurrences
+				349 text 2
+			350 heading Example follow-up; confirm the advice at each location, Value: 3
+				351 text Example follow-up; confirm the advice at each location
+			352 text Identify the specific third-party OQS wrapper and native library. A qualified reference does not establish installation, algorithm selection or enabled functionality.
+			353 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-14
+		354 container rule-15
+			355 heading PHP PQC algorithm or X-Wing reference; runtime support requires verification., Value: 2
+				356 text PHP PQC algorithm or X-Wing reference; runtime support requires verification.
+			357 text PHP_PQC_API
+			358 text Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.
+			359 definition list
+				360 container Category
+					361 text Category
+				362 text PQC
+				363 container Observed severities
+					364 text Observed severities
+				365 text info
+				366 container Observed risks
+					367 text Observed risks
+				368 text quantum-safe
+				369 container Occurrences
+					370 text Occurrences
+				371 text 1
+			372 heading Example follow-up; confirm the advice at each location, Value: 3
+				373 text Example follow-up; confirm the advice at each location
+			374 text Verify PHP extensions and their native cryptographic backends
+			375 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-15
+		376 container rule-16
+			377 heading Value: 2, A conditional hybrid or composite implementation component is referenced; combined protection and execution remain unverified.
+				378 text A conditional hybrid or composite implementation component is referenced; combined protection and execution remain unverified.
+			379 text SOURCE_CONSTRUCTION_REFERENCE
+			380 text Review both components, the exact construction, build conditions and combiner separately. A component or conditional guard does not prove negotiation or whole-construction security.
+			381 definition list
+				382 container Category
+					383 text Category
+				384 text PQC
+				385 container Observed severities
+					386 text Observed severities
+				387 text info
+				388 container Observed risks
+					389 text Observed risks
+				390 text quantum-uncertain
+				391 container Occurrences
+					392 text Occurrences
+				393 text 1
+			394 heading Example follow-up; confirm the advice at each location, Value: 3
+				395 text Example follow-up; confirm the advice at each location
+			396 text Verify C/C++ library, provider and build capabilities
+			397 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-16
+		398 container rule-17
+			399 heading Value: 2, A recognized cryptographic implementation entry is defined in source; this is not an API call or evidence of execution.
+				400 text A recognized cryptographic implementation entry is defined in source; this is not an API call or evidence of execution.
+			401 text SOURCE_IMPLEMENTATION_REFERENCE
+			402 text Review implementation ownership, callers and build inclusion. A named implementation entry does not prove conformance, enabled protection or migration completion.
+			403 definition list
+				404 container Category
+					405 text Category
+				406 text CryptoAPI
+				407 container Observed severities
+					408 text Observed severities
+				409 text info
+				410 container Observed risks
+					411 text Observed risks
+				412 text quantum-uncertain
+				413 container Occurrences
+					414 text Occurrences
+				415 text 1
+			416 heading Example follow-up; confirm the advice at each location, Value: 3
+				417 text Example follow-up; confirm the advice at each location
+			418 text Verify C/C++ library, provider and build capabilities
+			419 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-17
+		420 container rule-18
+			421 heading An algorithm name appears in commentary, a declaration or recorded text., Value: 2
+				422 text An algorithm name appears in commentary, a declaration or recorded text.
+			423 text TLS_ECDHE_RSA
+			424 text This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.
+			425 definition list
+				426 container Category
+					427 text Category
+				428 text TLS
+				429 container Observed severities
+					430 text Observed severities
+				431 text info
+				432 container Observed risks
+					433 text Observed risks
+				434 text quantum-uncertain
+				435 container Occurrences
+					436 text Occurrences
+				437 text 1
+			438 heading Example follow-up; confirm the advice at each location, Value: 3
+				439 text Example follow-up; confirm the advice at each location
+			440 text This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.
+			441 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-18
+		442 container rule-19
+			443 heading An algorithm name appears in commentary, a declaration or recorded text., Value: 2
+				444 text An algorithm name appears in commentary, a declaration or recorded text.
+			445 text TLS_RSA_CIPHER_SUITE
+			446 text This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.
+			447 definition list
+				448 container Category
+					449 text Category
+				450 text TLS
+				451 container Observed severities
+					452 text Observed severities
+				453 text info
+				454 container Observed risks
+					455 text Observed risks
+				456 text quantum-vulnerable
+				457 container Occurrences
+					458 text Occurrences
+				459 text 1
+			460 heading Example follow-up; confirm the advice at each location, Value: 3
+				461 text Example follow-up; confirm the advice at each location
+			462 text This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.
+			463 link Description: View locations and evidence, Value: 127.0.0.1:57384/scan/report.html?lang=en#rule-19
+
+The focused UI element is 1 AXWebArea Rule explanations, URL: 127.0.0.1:57384/scan/report.rules.html?lang=en&theme=light

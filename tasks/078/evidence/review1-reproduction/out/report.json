@@ -1,0 +1,481 @@
+{
+  "generated_at": "2026-11-24T04:15:58.303173Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-e5b85e4c268c13913f808ab3b71a461471206fcb112297768bed460211299f36",
+      "rule_id": "PHP_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved.",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+      "location": {
+        "file": "arraywrite.php",
+        "line": 1,
+        "column": 105
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "explicit_key_type_request"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-a2ca850b0fb8df415a61ce868d5784ca1920f1fa79c5e8a25d333bf8b25ef6c1",
+      "rule_id": "PHP_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved.",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+      "location": {
+        "file": "arraywrite.php",
+        "line": 1,
+        "column": 130
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "locally_typed_signature_request"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-57e1b2c3af672e5ffa8b2b3c3248f4fb3d64b98a7fee46621d79975543f6c603",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "category": "CryptoAPI",
+      "risk": "quantum-vulnerable",
+      "severity": "medium",
+      "confidence": 0.55,
+      "description": "OpenSSL low-level RSA API usage detected.",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+      "location": {
+        "file": "privacy.php",
+        "line": 1,
+        "column": 76
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "RSA_new",
+        "snippet_preview": "QCrypto\\***=1;$a=",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "<?php $k=\\PQCrypto\\MLDSA44\\SigningKey::fromBytes('CANARY078_SECRET_A'); // RSA_new",
+            "highlighted": true
+          },
+          {
+            "line": 2,
+            "text": "$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;$a=1;...",
+            "highlighted": false
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-9c37141b73e9092e522e0e154fa802c06e979548b28703aa0ebba8e54c25c6e7",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "catch.php",
+        "line": 1,
+        "column": 17
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "explicit_pqc_keypair_request"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-dc9694d448ba727d73da6d3bc968867f52775356c1891333b0e749303c721b1d",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "catch.php",
+        "line": 1,
+        "column": 88
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "bounded_key_receiver_request"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-a3be358b146863271d88682dfa6cb4a76335d6842ea54e134a69c6f64e2f1d08",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "foreach.php",
+        "line": 1,
+        "column": 17
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "explicit_pqc_keypair_request"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-2400c0338414d9e7b3a4d2f16765a0d31dbaf2f1305574ef7d3d7aafa7ceffa8",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "foreach.php",
+        "line": 1,
+        "column": 83
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "bounded_key_receiver_request"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-228c68cb8d6cf69961924e783433c303983ae959527218888de14373267990c2",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "methodwrite.php",
+        "line": 1,
+        "column": 17
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "explicit_pqc_keypair_request"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-95f54fd8e77c9bd114af5ab751023e1160546061f974301e638b03f670925428",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "methodwrite.php",
+        "line": 1,
+        "column": 73
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "bounded_key_receiver_request"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "arraywrite.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "arraywrite.php:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+    },
+    {
+      "component": "arraywrite.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "arraywrite.php:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+    },
+    {
+      "component": "privacy.php",
+      "algorithm": "RSA_new",
+      "usage_type": "CryptoAPI",
+      "location": "privacy.php:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration."
+    },
+    {
+      "component": "catch.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "catch.php:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    },
+    {
+      "component": "catch.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "catch.php:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    },
+    {
+      "component": "foreach.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "foreach.php:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    },
+    {
+      "component": "foreach.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "foreach.php:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    },
+    {
+      "component": "methodwrite.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "methodwrite.php:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    },
+    {
+      "component": "methodwrite.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "methodwrite.php:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 9,
+    "by_severity": {
+      "info": 6,
+      "medium": 3
+    },
+    "by_risk": {
+      "quantum-safe": 6,
+      "quantum-uncertain": 2,
+      "quantum-vulnerable": 1
+    },
+    "scanned_files": 5,
+    "skipped_files": 0
+  }
+}

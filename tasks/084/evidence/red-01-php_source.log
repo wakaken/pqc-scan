@@ -1,0 +1,28 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.50s
+     Running tests/php_source.rs (target/debug/deps/php_source-2a5e7744acd9f0c5)
+
+running 2 tests
+
+thread 'php_local_binding_limit_retains_unaffected_api_requests_and_masking' (24373814) panicked at crates/pqc_scan_detectors/tests/php_source.rs:469:5:
+assertion `left == right` failed: an unrelated local binding cap erased an explicit API request
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test php_local_binding_limit_retains_unaffected_api_requests_and_masking ... FAILED
+
+thread 'php_local_binding_limit_keeps_overflowed_values_unknown_and_shadows_closed' (24373813) panicked at crates/pqc_scan_detectors/tests/php_source.rs:490:9:
+assertion `left == right` failed: explicit API reference must survive without a guessed key type
+  left: 0
+ right: 1
+test php_local_binding_limit_keeps_overflowed_values_unknown_and_shadows_closed ... FAILED
+
+failures:
+
+failures:
+    php_local_binding_limit_keeps_overflowed_values_unknown_and_shadows_closed
+    php_local_binding_limit_retains_unaffected_api_requests_and_masking
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.23s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test php_source`

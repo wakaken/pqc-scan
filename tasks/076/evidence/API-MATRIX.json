@@ -1,0 +1,460 @@
+{
+  "source_baseline": "7e8cd91426fa21609a91c0511de44252eaa890d4",
+  "source_index": "SOURCES.json",
+  "rows": [
+    {
+      "id": "php-openssl",
+      "language": "php",
+      "sources": [
+        "php",
+        "openssl"
+      ],
+      "operations": [
+        "openssl_pkey_new",
+        "openssl_public_encrypt",
+        "openssl_private_decrypt",
+        "openssl_private_encrypt",
+        "openssl_public_decrypt",
+        "openssl_sign",
+        "openssl_verify",
+        "openssl_pkey_derive"
+      ],
+      "parameters": [
+        "OPENSSL_KEYTYPE_RSA",
+        "OPENSSL_KEYTYPE_EC",
+        "OPENSSL_KEYTYPE_DH"
+      ],
+      "limitation": "Generic imported keys and sign/verify alone have no inferred RSA identity; EC derive means ECDH only with an established local EC key."
+    },
+    {
+      "id": "php-sodium",
+      "language": "php",
+      "sources": [
+        "php"
+      ],
+      "operations": [
+        "sign_keypair",
+        "sign_detached",
+        "sign_verify_detached",
+        "scalarmult",
+        "box_keypair",
+        "box",
+        "box_open",
+        "kx_keypair",
+        "kx_client_session_keys",
+        "kx_server_session_keys",
+        "kem_keypair",
+        "kem_enc",
+        "kem_dec",
+        "kem_mlkem768_keypair",
+        "kem_mlkem768_enc",
+        "kem_mlkem768_dec"
+      ],
+      "parameters": [
+        "Ed25519",
+        "X25519",
+        "X-Wing",
+        "ML-KEM-768"
+      ],
+      "limitation": "Only syntactic references and bounded local facts; no runtime/backend success."
+    },
+    {
+      "id": "php-paragonie",
+      "language": "php",
+      "sources": [
+        "ext-pqcrypto",
+        "pqcrypto-compat"
+      ],
+      "operations": [
+        "generateKeypair",
+        "encapsulate",
+        "decapsulate",
+        "sign",
+        "verify",
+        "Compat::*_keygen",
+        "Compat::*_encaps",
+        "Compat::*_decaps",
+        "Compat::*_sign",
+        "Compat::*_verify"
+      ],
+      "parameters": [
+        "ML-KEM-512",
+        "ML-KEM-768",
+        "ML-KEM-1024",
+        "ML-DSA-44",
+        "ML-DSA-65",
+        "ML-DSA-87",
+        "X-Wing"
+      ],
+      "limitation": "PQCrypto and ParagonIE\\PQCrypto are distinct namespaces; bounded tuple roles, keys and reassignment; ext SLHDSA is a qualified reference only."
+    },
+    {
+      "id": "php-reference",
+      "language": "php",
+      "sources": [
+        "phpseclib",
+        "ext-pqcrypto"
+      ],
+      "operations": [
+        "phpseclib3\\Crypt\\RSA",
+        "phpseclib3\\Crypt\\EC",
+        "phpseclib3\\Crypt\\DH",
+        "PQCrypto\\SLHDSA"
+      ],
+      "parameters": [
+        "RSA",
+        "EC",
+        "DH",
+        "SLH-DSA"
+      ],
+      "limitation": "Qualified references do not prove operations; ext SLH parameters remain unasserted for reference-only coverage."
+    },
+    {
+      "id": "csharp-standard",
+      "language": "csharp",
+      "sources": [
+        "dotnet"
+      ],
+      "operations": [
+        "RSA.Create",
+        "DSA.Create",
+        "ECDsa.Create",
+        "ECDiffieHellman.Create",
+        "RSACryptoServiceProvider",
+        "RSACng",
+        "RSAOpenSsl",
+        "DSACryptoServiceProvider",
+        "DSACng",
+        "DSAOpenSsl",
+        "ECDsaCng",
+        "ECDsaOpenSsl",
+        "ECDiffieHellmanCng",
+        "ECDiffieHellmanOpenSsl",
+        "SignData",
+        "VerifyData",
+        "Encrypt",
+        "Decrypt",
+        "DeriveKeyMaterial"
+      ],
+      "parameters": [
+        "RSA",
+        "DSA",
+        "EC",
+        "ECDH"
+      ],
+      "limitation": "Only syntactic references and bounded local facts; no runtime/backend success."
+    },
+    {
+      "id": "csharp-dotnet-pqc",
+      "language": "csharp",
+      "sources": [
+        "dotnet"
+      ],
+      "operations": [
+        "MLKem.GenerateKey",
+        "MLDsa.GenerateKey",
+        "SlhDsa.GenerateKey",
+        "Import*",
+        "Encapsulate",
+        "Decapsulate",
+        "SignData",
+        "VerifyData"
+      ],
+      "parameters": [
+        "ML-KEM-512",
+        "ML-KEM-768",
+        "ML-KEM-1024",
+        "ML-DSA-44",
+        "ML-DSA-65",
+        "ML-DSA-87",
+        "SLH-DSA-SHA2-128s",
+        "SLH-DSA-SHA2-128f",
+        "SLH-DSA-SHA2-192s",
+        "SLH-DSA-SHA2-192f",
+        "SLH-DSA-SHA2-256s",
+        "SLH-DSA-SHA2-256f",
+        "SLH-DSA-SHAKE-128s",
+        "SLH-DSA-SHAKE-128f",
+        "SLH-DSA-SHAKE-192s",
+        "SLH-DSA-SHAKE-192f",
+        "SLH-DSA-SHAKE-256s",
+        "SLH-DSA-SHAKE-256f"
+      ],
+      "limitation": "PQC classes derive from IDisposable rather than AsymmetricAlgorithm; imports without explicit parameter selectors retain generic family identity only."
+    },
+    {
+      "id": "csharp-bc",
+      "language": "csharp",
+      "sources": [
+        "bc-csharp"
+      ],
+      "operations": [
+        "RsaKeyPairGenerator",
+        "DsaKeyPairGenerator",
+        "ECKeyPairGenerator",
+        "MLKemKeyPairGenerator",
+        "MLDsaKeyPairGenerator",
+        "SlhDsaKeyPairGenerator",
+        "MLKemEncapsulator",
+        "MLKemDecapsulator",
+        "MLDsaSigner",
+        "SlhDsaSigner",
+        "RsaEngine.ProcessBlock",
+        "DsaSigner.GenerateSignature/VerifySignature",
+        "ECDsaSigner.GenerateSignature/VerifySignature",
+        "ECDHBasicAgreement.CalculateAgreement",
+        "GenerateKeyPair"
+      ],
+      "parameters": [
+        "ml_kem_512",
+        "ml_kem_768",
+        "ml_kem_1024",
+        "ml_dsa_44",
+        "ml_dsa_65",
+        "ml_dsa_87",
+        "slh_dsa_sha2_128s",
+        "slh_dsa_sha2_128f",
+        "slh_dsa_sha2_192s",
+        "slh_dsa_sha2_192f",
+        "slh_dsa_sha2_256s",
+        "slh_dsa_sha2_256f",
+        "slh_dsa_shake_128s",
+        "slh_dsa_shake_128f",
+        "slh_dsa_shake_192s",
+        "slh_dsa_shake_192f",
+        "slh_dsa_shake_256s",
+        "slh_dsa_shake_256f"
+      ],
+      "limitation": "Only syntactic references and bounded local facts; no runtime/backend success."
+    },
+    {
+      "id": "csharp-construction",
+      "language": "csharp",
+      "sources": [
+        "dotnet"
+      ],
+      "operations": [
+        "CompositeMLKem",
+        "CompositeMLDsa",
+        "Hpke"
+      ],
+      "parameters": [
+        "CompositeMLKem",
+        "CompositeMLDsa",
+        "HPKE; suite unresolved"
+      ],
+      "limitation": "Exact construction reference only; no universal TLS/JOSE/HPKE or PQC readiness claim."
+    },
+    {
+      "id": "c-openssl",
+      "language": "c",
+      "sources": [
+        "openssl"
+      ],
+      "operations": [
+        "RSA_new",
+        "RSA_generate_key_ex",
+        "RSA_public_encrypt",
+        "RSA_private_decrypt",
+        "RSA_sign",
+        "RSA_verify",
+        "DSA_new",
+        "DSA_generate_key",
+        "DSA_sign",
+        "DSA_verify",
+        "DH_new",
+        "DH_generate_key",
+        "DH_compute_key",
+        "EC_KEY_new_by_curve_name",
+        "EC_KEY_generate_key",
+        "ECDSA_sign",
+        "ECDSA_verify",
+        "ECDH_compute_key",
+        "EVP_PKEY_CTX_new_id",
+        "EVP_PKEY_CTX_new_from_name",
+        "EVP_PKEY_keygen_init",
+        "EVP_PKEY_keygen",
+        "EVP_PKEY_encapsulate",
+        "EVP_PKEY_decapsulate",
+        "EVP_DigestSignInit",
+        "EVP_DigestVerifyInit"
+      ],
+      "parameters": [
+        "RSA",
+        "DSA",
+        "DH",
+        "EC",
+        "ML-KEM-512",
+        "ML-KEM-768",
+        "ML-KEM-1024",
+        "ML-DSA-44",
+        "ML-DSA-65",
+        "ML-DSA-87",
+        "SLH-DSA-SHA2-128s",
+        "SLH-DSA-SHA2-128f",
+        "SLH-DSA-SHA2-192s",
+        "SLH-DSA-SHA2-192f",
+        "SLH-DSA-SHA2-256s",
+        "SLH-DSA-SHA2-256f",
+        "SLH-DSA-SHAKE-128s",
+        "SLH-DSA-SHAKE-128f",
+        "SLH-DSA-SHAKE-192s",
+        "SLH-DSA-SHAKE-192f",
+        "SLH-DSA-SHAKE-256s",
+        "SLH-DSA-SHAKE-256f"
+      ],
+      "limitation": "No preprocessor/include evaluation, function-pointer resolution or linked provider assertion; untyped generic EVP operations stay unknown."
+    },
+    {
+      "id": "c-provider-tls",
+      "language": "c",
+      "sources": [
+        "openssl"
+      ],
+      "operations": [
+        "OSSL_PROVIDER_load",
+        "EVP_set_default_properties",
+        "SSL_CTX_set1_groups_list",
+        "SSL_set1_groups_list"
+      ],
+      "parameters": [
+        "oqsprovider",
+        "provider=oqsprovider",
+        "X25519MLKEM768",
+        "MLKEM768",
+        "X25519",
+        "P-256"
+      ],
+      "limitation": "Configuration references only; no loaded provider or negotiated connection assertion."
+    },
+    {
+      "id": "c-oqs",
+      "language": "c",
+      "sources": [
+        "liboqs"
+      ],
+      "operations": [
+        "OQS_KEM_new",
+        "OQS_SIG_new",
+        "OQS_KEM_keypair",
+        "OQS_KEM_encaps",
+        "OQS_KEM_decaps",
+        "OQS_SIG_keypair",
+        "OQS_SIG_sign",
+        "OQS_SIG_verify"
+      ],
+      "parameters": [
+        "ML-KEM-512",
+        "ML-KEM-768",
+        "ML-KEM-1024",
+        "ML-DSA-44",
+        "ML-DSA-65",
+        "ML-DSA-87",
+        "SLH_DSA_PURE_SHA2_128S",
+        "SLH_DSA_PURE_SHA2_128F",
+        "SLH_DSA_PURE_SHA2_192S",
+        "SLH_DSA_PURE_SHA2_192F",
+        "SLH_DSA_PURE_SHA2_256S",
+        "SLH_DSA_PURE_SHA2_256F",
+        "SLH_DSA_PURE_SHAKE_128S",
+        "SLH_DSA_PURE_SHAKE_128F",
+        "SLH_DSA_PURE_SHAKE_192S",
+        "SLH_DSA_PURE_SHAKE_192F",
+        "SLH_DSA_PURE_SHAKE_256S",
+        "SLH_DSA_PURE_SHAKE_256F"
+      ],
+      "limitation": "Requested name not enabled mechanism; old Kyber/Dilithium are draft families rather than standardized aliases.",
+      "parameter_mapping": [
+        {
+          "input": "SLH_DSA_PURE_SHA2_128S",
+          "canonical": "SLH-DSA-SHA2-128s"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHA2_128F",
+          "canonical": "SLH-DSA-SHA2-128f"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHA2_192S",
+          "canonical": "SLH-DSA-SHA2-192s"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHA2_192F",
+          "canonical": "SLH-DSA-SHA2-192f"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHA2_256S",
+          "canonical": "SLH-DSA-SHA2-256s"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHA2_256F",
+          "canonical": "SLH-DSA-SHA2-256f"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHAKE_128S",
+          "canonical": "SLH-DSA-SHAKE-128s"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHAKE_128F",
+          "canonical": "SLH-DSA-SHAKE-128f"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHAKE_192S",
+          "canonical": "SLH-DSA-SHAKE-192s"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHAKE_192F",
+          "canonical": "SLH-DSA-SHAKE-192f"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHAKE_256S",
+          "canonical": "SLH-DSA-SHAKE-256s"
+        },
+        {
+          "input": "SLH_DSA_PURE_SHAKE_256F",
+          "canonical": "SLH-DSA-SHAKE-256f"
+        }
+      ]
+    },
+    {
+      "id": "cpp-oqs",
+      "language": "cpp",
+      "sources": [
+        "liboqs-cpp"
+      ],
+      "operations": [
+        "oqs::KeyEncapsulation",
+        "oqs::Signature",
+        "generate_keypair",
+        "encap_secret",
+        "decap_secret",
+        "sign",
+        "verify"
+      ],
+      "parameters": [
+        "ML-KEM-768",
+        "ML-DSA-65"
+      ],
+      "limitation": "Only syntactic references and bounded local facts; no runtime/backend success."
+    },
+    {
+      "id": "third-party-wrapper-references",
+      "language": "php,csharp",
+      "sources": [
+        "oqs-php-ext",
+        "oqs-php-ffi",
+        "oqs-dotnet-old",
+        "oqs-dotnet"
+      ],
+      "operations": [
+        "\\OQS_KEYENCAPSULATION",
+        "\\OQS_SIGNATURE",
+        "Oqs\\OqsKem",
+        "Oqs\\OqsSig",
+        "dotnetOQS",
+        "OpenForge.Cryptography.LibOqs"
+      ],
+      "parameters": [],
+      "limitation": "Qualified/reference and explicit package identity only; no primitive/runtime inference, project name does not invent a registry package. Exact source pin controls spelling."
+    }
+  ]
+}

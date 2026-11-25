@@ -1,0 +1,11 @@
+{
+  "command": "CARGO_INCREMENTAL=0 cargo run --manifest-path <external baseline source>/Cargo.toml --locked -p pqc_scan_detectors --example oss_ast_probe --target-dir <original-root>/target",
+  "exitCode": 0,
+  "sourceSha256": "f2ecbab6d16c028847c166b3e97135ae6c222b9fb18576c9848e1c40ac06cf07",
+  "logSha256": "4f6669a6663da2e5c6547a87d6b9dd70c4144e1d4863213709e9787ac1e1a16d",
+  "cxxFinding": "Pinned C++ grammar parses nested direct initializer as function_declarator/parameter_declaration, with no call_expression. Assignment control is a call_expression. Current semantic matcher intentionally does not reinterpret type/declarator syntax as an API call.",
+  "csharpFinding": "Pinned C# grammar preserves property type/name and invocation normally. Names::new registers same-name property as a variable; resolve(false) suppresses any variable shadow. Specification permits both meanings only when the declared value type and type-name meaning are identical.",
+  "csharpPrimarySource": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12872-identical-simple-names-and-type-names",
+  "checkedAtUtc": "2026-11-24T14:19:21.850225+00:00",
+  "residualPolicy": "Do not reinterpret all C++ function declarators as calls or ignore all C# value shadows. Safe future corrections need bounded declarator reconciliation or canonical declared-type equivalence, including namesake/alias/scope/conditional controls. No limits raised or runtime assumptions made."
+}

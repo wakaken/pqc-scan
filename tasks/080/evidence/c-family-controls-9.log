@@ -1,0 +1,38 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.87s
+     Running tests/c_family_source.rs (target/debug/deps/c_family_source-31e1842aa2f3e465)
+
+running 15 tests
+test c_family_configuration_and_include_references_keep_exact_public_identity_without_activation ... ok
+test c_family_shared_builtin_budgets_have_zero_below_at_and_above_boundaries ... FAILED
+test c_family_overlap_preserves_original_lexical_rule_occurrences_and_ids ... ok
+test c_family_private_arguments_are_not_exported_even_through_partial_shared_headers ... ok
+test c_family_help_strings_qualified_names_macros_and_templates_do_not_fabricate_bindings ... ok
+test c_family_indirect_writes_and_unproven_named_methods_invalidate_local_selectors ... ok
+test c_family_literal_selectors_and_generated_key_roles_preserve_exact_drafts_and_agreement ... ok
+test c_family_local_enums_and_cpp_namespace_namesakes_do_not_select_real_apis ... ok
+test c_family_group_lists_retain_standard_draft_and_alias_spelling_and_reject_opaque_data ... ok
+test c_family_local_key_flow_does_not_survive_writes_shadows_or_opaque_calls ... ok
+test c_family_alias_and_write_limits_cannot_resurrect_old_bindings ... ok
+test c_family_wrong_constructor_suites_and_non_evp_keys_do_not_cross_roles ... ok
+test c_family_source_positions_identity_and_utf16_bytes_are_original ... ok
+test c_family_all_detectors_keep_canaries_and_algorithm_looking_payloads_private_after_limits ... ok
+test every_frozen_c_family_case_matches_its_original_focal_expectation ... ok
+
+failures:
+
+---- c_family_shared_builtin_budgets_have_zero_below_at_and_above_boundaries stdout ----
+
+thread 'c_family_shared_builtin_budgets_have_zero_below_at_and_above_boundaries' (23583826) panicked at crates/pqc_scan_detectors/tests/c_family_source.rs:695:13:
+assertion `left == right` failed: candidates/4: DetectorOutcome { detections: [Detection { rule_id: "C_FAMILY_PQC_API", location: Location { file: "case.h", line: 1, column: 10 }, evidence: Evidence { type: "tree_sitter_match", match: "C/C++ cryptographic source reference: ML-KEM-768", snippet_preview: "C/C++ cryptographic source reference: ML-KEM-768", metadata: {"detector": "tree_sitter_detector", "language": "c,cpp", "node_kind": "bounded_source_fact", "scope": "c,cpp", "source_resolution": "explicit_algorithm_or_unresolved_selector"} } }, Detection { rule_id: "C_FAMILY_PQC_API", location: Location { file: "case.h", line: 1, column: 37 }, evidence: Evidence { type: "tree_sitter_match", match: "C/C++ cryptographic source reference: ML-KEM-768", snippet_preview: "C/C++ cryptographic source reference: ML-KEM-768", metadata: {"detector": "tree_sitter_detector", "language": "c,cpp", "node_kind": "bounded_source_fact", "scope": "c,cpp", "source_resolution": "explicit_algorithm_or_unresolved_selector"} } }], status: Truncated, observations: [ObservationDraft { method: "ast_pattern", assurance: "syntactic", .. }, ObservationDraft { method: "ast_pattern", assurance: "syntactic", .. }], explanation: Some("Ambiguous C/C++ header: shared inspection budget exhausted; omitted or conflicting facts remain unknown."), limit_detail: None, test_ranges: [], display_ranges: [], sensitive_ranges: [20..34, 47..61, 20..34, 47..61], sensitive_source_context: true }
+  left: Truncated
+ right: Complete
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c_family_shared_builtin_budgets_have_zero_below_at_and_above_boundaries
+
+test result: FAILED. 14 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.25s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test c_family_source`

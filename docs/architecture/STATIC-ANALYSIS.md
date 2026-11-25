@@ -94,8 +94,9 @@ chain or runtime-use guarantee follows. PSS digest parameters and unlisted
 signature OIDs are not fully assessed; absence of a hash finding does not prove a
 safe digest. See [classification specification](../../tasks/021/TASK-021-IMPLEMENTATION.md)
 and [focused baseline](../../tasks/021/CERTIFICATE-BASELINE-021.md).
-Files containing EC/DSA/encrypted private-key PEM markers also receive file-wide source
-snippet masking; this does not add new private-key detection rules or decrypt keys.
+Recognized private-key blocks are redacted in source excerpts before clipping.
+Uninspected or unresolved regions retain conservative protection; this does not
+add private-key parsing or decryption support. See [evidence privacy](EVIDENCE-PRIVACY.md).
 
 ### PKCS#12 support and limits
 
@@ -128,7 +129,7 @@ for adjacent references. Custom patterns/scopes keep their generic ranges. See
 ### Built-in Rule Set
 
 - Default rules live under `rules/default/`
-- Current built-in rules: 125
+- Current built-in rules: 139
 - Full reference (all rule IDs + severity definitions): [docs/rules-reference.md](../rules-reference.md)
 
 Rule packs reject blank IDs, non-finite confidence or values outside `0..1`, duplicate IDs, invalid patterns and traversal failures. Invalid packs return operational error 1 instead of a partial pack. Valid custom scopes retain their per-detector semantics; unknown scope labels are not rejected. Check [scope compatibility](../architecture/RULE-VALIDATION.md) when upgrading a custom pack.
@@ -209,11 +210,11 @@ Selected V8 grammar compatibility covers native-call expression positions, slopp
 
 ## Privacy and excluded files
 
-Recognized private-key blocks and credential literals are masked in exported evidence. The policy covers RSA, generic PKCS#8, OpenSSH, EC, DSA and encrypted private-key markers; single-line named password/token/key literals; Bearer/Basic tokens; and HTTP(S) userinfo and named credential query values. Marker masking does not add private-key parsing or decryption support.
+Recognized private-key blocks and credential literals are masked in exported evidence. The policy covers RSA, generic PKCS#8, OpenSSH, EC, DSA and encrypted private-key markers; recognized named password/token/key literals, including quoted multiline values; Bearer/Basic tokens; and HTTP(S) userinfo and named credential query values. Marker masking does not add private-key parsing or decryption support.
 
-Previews are conservatively masked when recognized private/credential context is present. Metadata values, action text/code, CBOM and dependency text also pass through bounded redaction. Typed inventory and diagnostics omit raw payloads and arbitrary error text.
+Ordinary arguments and up to two surrounding lines remain visible; recognized secret spans are masked before clipping. Uninspected/ambiguous regions retain conservative protection. Metadata values, action text/code, CBOM and dependency text also pass through bounded redaction. Typed inventory and diagnostics omit raw payloads and arbitrary error text.
 
-This is not a universal secret scanner. Unknown/obfuscated syntax, arbitrary credential names, multiline credential position tracking and secret-bearing structural fields are outside the contract. Keep paths, IDs, repository scopes and custom metadata keys free of secrets. Public certificate fingerprints/subjects and other retained facts can still require distribution review. Some benign preview text is omitted conservatively. See the [supported syntax, field policy and limits](../architecture/EVIDENCE-PRIVACY.md) and [synthetic-canary verification](../../tasks/029/TASK-029-EVIDENCE-PRIVACY.md).
+This is not a universal secret scanner. Unknown/obfuscated syntax, arbitrary credential names and secret-bearing structural fields are outside the contract. Keep paths, IDs, repository scopes and custom metadata keys free of secrets. Public certificate fingerprints/subjects and other retained facts can still require distribution review. Some benign preview text is omitted conservatively. See the [supported syntax, field policy and limits](../architecture/EVIDENCE-PRIVACY.md) and [synthetic-canary verification](../../tasks/029/TASK-029-EVIDENCE-PRIVACY.md).
 
 Repository walking respects Git ignore settings. Default exclusions include `.git`, `node_modules`, `target`, `dist`, `docs` and Markdown files; files larger than 2 MiB are skipped by default. CLI scan/serve and the folder picker accept `--max-file-size-mib` / a size field from 1 to 64 MiB. This changes selection and bounded primary reads only; secondary reference readers and detector-specific budgets retain their own limits. Test directories are not generally excluded. These scope limits mean a successful scan does not establish absence of cryptography in ignored or unsupported files.
 

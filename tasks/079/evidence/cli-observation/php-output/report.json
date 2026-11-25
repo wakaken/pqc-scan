@@ -1,0 +1,168 @@
+{
+  "generated_at": "2026-11-24T06:18:00.279578Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-c565bd3505403e74419bde897bde809015101345152627bb446135f84511f125",
+      "rule_id": "PHP_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "PHP cryptographic API or library reference; key type may be unresolved.",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+      "location": {
+        "file": "api.php",
+        "line": 1,
+        "column": 134
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-07d1ba2cb03ef37239bb303f7e066e4e627d6ccaf87797487f164ad1ac989bf6",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "PHP PQC algorithm or X-Wing reference; runtime support requires verification.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "api.php",
+        "line": 1,
+        "column": 12
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-4f45081c313512fe0d7994ecddacb5ef9a0169b50f1692ce5b0510da51d3213c",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "PHP PQC algorithm or X-Wing reference; runtime support requires verification.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "api.php",
+        "line": 1,
+        "column": 111
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "api.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "api.php:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+    },
+    {
+      "component": "api.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "api.php:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    },
+    {
+      "component": "api.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "api.php:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 3,
+    "by_severity": {
+      "info": 2,
+      "medium": 1
+    },
+    "by_risk": {
+      "quantum-safe": 2,
+      "quantum-uncertain": 1
+    },
+    "scanned_files": 1,
+    "skipped_files": 0
+  }
+}

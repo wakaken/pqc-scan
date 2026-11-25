@@ -1,0 +1,1 @@
+<?php [$sk,$pk]=\PQCrypto\MLKem768::generateKeypair(); [0=>$pk]=$unknown; $pk->encapsulate();

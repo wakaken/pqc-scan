@@ -1,7 +1,10 @@
 mod display_references;
+mod header;
 mod javascript_validation;
 mod module_syntax;
+mod positions;
 mod source_api;
+mod source_privacy;
 mod syntax_compat;
 mod test_scope;
 use std::collections::{BTreeMap, HashSet};
@@ -52,7 +55,10 @@ impl Detector for TreeSitterDetector {
         let budget = crate::DetectorBudget::default();
         self.detect_source(file, rules, observe, budget, repository)
             .map(|outcome| {
-                outcome.with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
+                outcome
+                    .with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
+                    .with_sensitive_ranges(source_privacy::ranges(file, budget.max_ast_nodes))
+                    .with_typed_source_references_only(source_privacy::typed_only(file, rules))
             })
     }
     fn detect_observed(&self, file: &ScannableFile, rules: &RuleSet) -> Result<DetectorOutcome> {
@@ -69,7 +75,10 @@ impl TreeSitterDetector {
     ) -> Result<DetectorOutcome> {
         self.detect_source(file, rules, observe, budget, None)
             .map(|outcome| {
-                outcome.with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
+                outcome
+                    .with_display_ranges(display_references::ranges(file, budget.max_ast_nodes))
+                    .with_sensitive_ranges(source_privacy::ranges(file, budget.max_ast_nodes))
+                    .with_typed_source_references_only(source_privacy::typed_only(file, rules))
             })
     }
     fn detect_source(
@@ -79,6 +88,51 @@ impl TreeSitterDetector {
         observe: bool,
         budget: crate::DetectorBudget,
         repository: Option<&pqc_scan_core::RepositoryContext>,
+    ) -> Result<DetectorOutcome> {
+        if file.text.is_none()
+            && !crate::source_kind::is_dockerfile(&file.path, "")
+            && file.ext().is_some_and(|e| {
+                matches!(
+                    e.to_ascii_lowercase().as_str(),
+                    "php"
+                        | "phtml"
+                        | "cs"
+                        | "c"
+                        | "cc"
+                        | "cpp"
+                        | "cxx"
+                        | "h"
+                        | "hpp"
+                        | "hh"
+                        | "hxx"
+                )
+            })
+        {
+            return Ok(DetectorOutcome::new(Vec::new(), DetectorStatus::Partial)
+                .with_explanation("Source text could not be decoded; syntax and cryptographic references remain uninspected."));
+        }
+        // Legacy reports also need transient typed associations for safe public
+        // excerpts. This does not request inventory serialization or expand the
+        // shared parser budgets.
+        let observe = observe
+            || file
+                .text
+                .as_deref()
+                .and_then(|text| resolve_language(&file.path, text))
+                .is_some_and(|(_, name)| is_new_language(name));
+        if file.path.extension().is_some_and(|e| e == "h") {
+            return header::inspect(self, file, rules, observe, budget, repository);
+        }
+        self.detect_candidate(file, rules, observe, budget, repository, None)
+    }
+    fn detect_candidate(
+        &self,
+        file: &ScannableFile,
+        rules: &RuleSet,
+        observe: bool,
+        budget: crate::DetectorBudget,
+        repository: Option<&pqc_scan_core::RepositoryContext>,
+        selected: Option<(Language, &'static str)>,
     ) -> Result<DetectorOutcome> {
         let text = match file.text.as_ref() {
             Some(v) => v,
@@ -90,15 +144,16 @@ impl TreeSitterDetector {
             }
         };
 
-        let (language, language_name) = match resolve_language(&file.path, text) {
-            Some(v) => v,
-            None => {
-                return Ok(DetectorOutcome::new(
-                    Vec::new(),
-                    DetectorStatus::NotApplicable,
-                ))
-            }
-        };
+        let (language, language_name) =
+            match selected.or_else(|| resolve_language(&file.path, text)) {
+                Some(v) => v,
+                None => {
+                    return Ok(DetectorOutcome::new(
+                        Vec::new(),
+                        DetectorStatus::NotApplicable,
+                    ))
+                }
+            };
 
         if !rules
             .by_kind(RuleKind::TreeSitter)
@@ -121,14 +176,30 @@ impl TreeSitterDetector {
             && rules
                 .get("TS_RSA_KEY_SIZE_LITERAL")
                 .is_some_and(|r| r.kind == RuleKind::TreeSitter && scope_matches(&r.scope, "java"));
-        let (mut candidates, mut status, mut constructors) =
-            collect_candidate_nodes(text, &tree, budget, rsa_constructors);
+        let positions = is_new_language(language_name)
+            .then(|| positions::Positions::new(text, budget.max_ast_nodes));
+        let (mut candidates, mut status, mut constructors) = collect_candidate_nodes(
+            text,
+            &tree,
+            budget,
+            rsa_constructors,
+            language_name,
+            file.path.extension().is_some_and(|e| e == "h") && language_name == "cpp",
+            positions.as_ref(),
+        );
         if compatibility_limited {
             status = DetectorStatus::Truncated;
         }
         if tree.root_node().id() != original_tree.root_node().id() {
-            let (original, original_status, extra_constructors) =
-                collect_candidate_nodes(text, &original_tree, budget, rsa_constructors);
+            let (original, original_status, extra_constructors) = collect_candidate_nodes(
+                text,
+                &original_tree,
+                budget,
+                rsa_constructors,
+                language_name,
+                file.path.extension().is_some_and(|e| e == "h") && language_name == "cpp",
+                positions.as_ref(),
+            );
             for candidate in extra_constructors {
                 if !constructors.iter().any(|old| {
                     old.byte_start == candidate.byte_start && old.text.len() == candidate.text.len()
@@ -157,6 +228,9 @@ impl TreeSitterDetector {
                 }
             }
         }
+        if positions.as_ref().is_some_and(|p| !p.complete) {
+            status = DetectorStatus::Truncated;
+        }
         let (resolved_calls, binding_limited) = source_api::aliases(
             text,
             &tree,
@@ -172,7 +246,10 @@ impl TreeSitterDetector {
                 status = DetectorStatus::Truncated;
                 break;
             }
-            let (line, column) = pqc_scan_core::model::line_col_for_offset(text, call.start);
+            let Some((line, column)) = source_position(text, call.start, positions.as_ref()) else {
+                status = DetectorStatus::Truncated;
+                continue;
+            };
             candidates.push(CandidateNode {
                 kind: "resolved_call",
                 text: &text[call.start..call.end],
@@ -209,6 +286,11 @@ impl TreeSitterDetector {
         );
         if facts.truncated {
             status = DetectorStatus::Truncated;
+        } else if is_new_language(language_name)
+            && facts.partial
+            && status == DetectorStatus::Complete
+        {
+            status = DetectorStatus::Partial;
         }
 
         let mut observations = Vec::new();
@@ -266,6 +348,7 @@ impl TreeSitterDetector {
                     // Java constructors are included for the existing RSA parameter
                     // rule only; other rules retain their original candidate scope.
                     if candidate.kind == "object_creation_expression"
+                        && language_name == "java"
                         && rule.id != "TS_RSA_KEY_SIZE_LITERAL"
                     {
                         continue;
@@ -305,7 +388,9 @@ impl TreeSitterDetector {
                             continue;
                         }
 
-                        let (relative_line, relative_col) =
+                        let (relative_line, relative_col) = if is_new_language(language_name) {
+                            (1, 1)
+                        } else {
                             pqc_scan_core::model::line_col_for_offset(
                                 candidate.text,
                                 if candidate.canonical.is_some() {
@@ -313,7 +398,8 @@ impl TreeSitterDetector {
                                 } else {
                                     hit.start()
                                 },
-                            );
+                            )
+                        };
                         let line = candidate.line + relative_line.saturating_sub(1);
                         let column = if relative_line == 1 {
                             candidate.column + relative_col.saturating_sub(1)
@@ -337,6 +423,14 @@ impl TreeSitterDetector {
                             candidate.byte_start + candidate.text.len()
                         } else {
                             source_start + token.len()
+                        };
+                        let Some((line, column)) = (if positions.is_some() {
+                            source_position(text, source_start, positions.as_ref())
+                        } else {
+                            Some((line, column))
+                        }) else {
+                            status = DetectorStatus::Truncated;
+                            continue;
                         };
                         let dedup_key = (source_start, source_end);
                         if dedup.contains(&dedup_key) {
@@ -396,17 +490,20 @@ impl TreeSitterDetector {
                             },
                         });
                         if observe {
-                            observations.push(
-                                pqc_scan_core::ObservationDraft::source(
-                                    out.last().expect("accepted detection"),
-                                    pqc_scan_core::ObservationMethod::AstPattern,
-                                    hit.as_str(),
-                                    Some((source_start, source_end)),
-                                )
-                                .with_algorithm_references(
-                                    facts.references_at(rule, source_start, source_end),
-                                ),
+                            let draft = pqc_scan_core::ObservationDraft::source(
+                                out.last().expect("accepted detection"),
+                                pqc_scan_core::ObservationMethod::AstPattern,
+                                hit.as_str(),
+                                Some((source_start, source_end)),
+                            )
+                            .with_algorithm_references(
+                                facts.references_at(rule, source_start, source_end),
                             );
+                            observations.push(if is_new_language(language_name) {
+                                draft.with_code_point_columns()
+                            } else {
+                                draft
+                            });
                         }
                         rule_hits += 1;
                     }
@@ -416,10 +513,13 @@ impl TreeSitterDetector {
                     .iter()
                     .filter(|_| !constructor_pass)
                 {
-                    if dedup
-                        .iter()
-                        .any(|&(start, end)| found.start <= start && end <= found.end)
-                    {
+                    if dedup.iter().any(|&(start, end)| {
+                        if is_new_language(language_name) {
+                            (found.start, found.end) == (start, end)
+                        } else {
+                            found.start <= start && end <= found.end
+                        }
+                    }) {
                         continue;
                     }
                     if rule_hits >= budget.max_hits_per_rule
@@ -428,8 +528,12 @@ impl TreeSitterDetector {
                         status = DetectorStatus::Truncated;
                         break;
                     }
-                    let (line, column) =
-                        pqc_scan_core::model::line_col_for_offset(text, found.start);
+                    let Some((line, column)) =
+                        source_position(text, found.start, positions.as_ref())
+                    else {
+                        status = DetectorStatus::Truncated;
+                        continue;
+                    };
                     let raw = &text[found.start..found.end];
                     if found.budget_bytes() > remaining_match_bytes {
                         status = DetectorStatus::Truncated;
@@ -446,13 +550,18 @@ impl TreeSitterDetector {
                         },
                         evidence: Evidence {
                             r#type: "tree_sitter_match".into(),
-                            r#match: mask_preview(raw),
-                            snippet_preview: pqc_scan_core::model::snippet_around(
-                                text,
-                                found.start,
-                                found.end,
-                                64,
-                            ),
+                            r#match: found
+                                .safe_preview
+                                .clone()
+                                .unwrap_or_else(|| mask_preview(raw)),
+                            snippet_preview: found.safe_preview.clone().unwrap_or_else(|| {
+                                pqc_scan_core::model::snippet_around(
+                                    text,
+                                    found.start,
+                                    found.end,
+                                    64,
+                                )
+                            }),
                             metadata: BTreeMap::from([
                                 ("detector".into(), self.name().into()),
                                 ("language".into(), language_name.into()),
@@ -463,15 +572,35 @@ impl TreeSitterDetector {
                         },
                     };
                     if observe {
-                        observations.push(
-                            pqc_scan_core::ObservationDraft::source(
-                                &detection,
-                                pqc_scan_core::ObservationMethod::AstPattern,
-                                raw,
-                                Some((found.start, found.end)),
-                            )
-                            .with_algorithm_references(&found.algorithm_references),
-                        );
+                        let draft = pqc_scan_core::ObservationDraft::source(
+                            &detection,
+                            pqc_scan_core::ObservationMethod::AstPattern,
+                            raw,
+                            Some((found.start, found.end)),
+                        )
+                        .with_algorithm_references(&found.algorithm_references);
+                        observations.push(if is_new_language(language_name) {
+                            let mut draft =
+                                draft.with_source_api_references(&found.algorithm_references);
+                            if let Some(name) =
+                                public_call_name(&original_tree, text, found.start, found.end)
+                            {
+                                draft = draft.with_source_api_display_name(name);
+                            }
+                            let draft = if let Some(reference) = found.source_library {
+                                draft.with_source_library_reference(reference)
+                            } else {
+                                draft
+                            };
+                            let draft = if let Some(reference) = &found.source_configuration {
+                                draft.with_source_configuration_reference(reference.clone())
+                            } else {
+                                draft
+                            };
+                            draft.with_code_point_columns()
+                        } else {
+                            draft
+                        });
                     }
                     dedup.insert((found.start, found.end));
                     out.push(detection);
@@ -496,9 +625,16 @@ impl TreeSitterDetector {
         };
         let outcome = DetectorOutcome::new(out, status)
             .with_observations(observations)
-            .with_test_ranges(test_ranges);
+            .with_test_ranges(test_ranges)
+            .with_sensitive_ranges(facts.sensitive_ranges.clone());
         Ok(if template_pending {
             outcome.with_explanation("Unrendered template: static source inspected; generated values and branches remain unknown.")
+        } else if positions.as_ref().is_some_and(|p| !p.complete) {
+            outcome.with_limit(
+                "source_position_entries",
+                budget.max_ast_nodes,
+                positions.as_ref().map_or(0, |p| p.entries()),
+            )
         } else if let Some((reason, limit, processed)) = facts.limit_reason {
             outcome.with_limit(reason, limit, processed)
         } else if status == DetectorStatus::Truncated {
@@ -516,6 +652,9 @@ fn collect_candidate_nodes<'a>(
     tree: &tree_sitter::Tree,
     budget: crate::DetectorBudget,
     rsa_constructors: bool,
+    language: &str,
+    ambiguous_cpp: bool,
+    positions: Option<&positions::Positions>,
 ) -> (
     Vec<CandidateNode<'a>>,
     DetectorStatus,
@@ -580,13 +719,19 @@ fn collect_candidate_nodes<'a>(
         }
 
         let kind = node.kind();
+        if ambiguous_cpp && !header::c_kind_known(kind) && status == DetectorStatus::Complete {
+            // C's permissive macro/declaration recovery can accept C++ scope
+            // syntax as a different, error-free structure. Parser success alone
+            // must not resolve the header's configured language.
+            status = DetectorStatus::Partial;
+        }
         let constructor = rsa_constructors
             && kind == "object_creation_expression"
             && node
                 .child_by_field_name("type")
                 .and_then(|n| n.utf8_text(text.as_bytes()).ok())
                 .is_some_and(|name| name.rsplit('.').next() == Some("RSAKeyGenParameterSpec"));
-        if !is_semantic_node_kind(kind) && !constructor {
+        if !is_semantic_node_kind(kind) && !new_semantic_node(language, kind) && !constructor {
             continue;
         }
 
@@ -616,11 +761,19 @@ fn collect_candidate_nodes<'a>(
             break;
         }
         let point = node.start_position();
+        let Some((line, column)) = (if positions.is_some() {
+            source_position(text, node.start_byte(), positions)
+        } else {
+            Some((point.row + 1, point.column + 1))
+        }) else {
+            status = DetectorStatus::Truncated;
+            continue;
+        };
         target.push(CandidateNode {
             kind,
             text: raw_text,
-            line: point.row + 1,
-            column: point.column + 1,
+            line,
+            column,
             byte_start: node.start_byte(),
             canonical: None,
         });
@@ -653,6 +806,44 @@ fn is_semantic_node_kind(kind: &str) -> bool {
         || kind == "scope_resolution"
 }
 
+fn is_new_language(language: &str) -> bool {
+    matches!(language, "php" | "csharp" | "c" | "cpp")
+}
+fn source_position(
+    text: &str,
+    offset: usize,
+    positions: Option<&positions::Positions>,
+) -> Option<(usize, usize)> {
+    positions.map_or_else(
+        || Some(pqc_scan_core::model::line_col_for_offset(text, offset)),
+        |p| p.at(offset),
+    )
+}
+fn new_semantic_node(language: &str, kind: &str) -> bool {
+    match language {
+        "php" => matches!(
+            kind,
+            "name"
+                | "qualified_name"
+                | "variable_name"
+                | "function_call_expression"
+                | "member_call_expression"
+                | "scoped_call_expression"
+                | "object_creation_expression"
+        ),
+        "csharp" => matches!(
+            kind,
+            "invocation_expression"
+                | "member_access_expression"
+                | "qualified_name"
+                | "generic_name"
+                | "object_creation_expression"
+        ),
+        "c" | "cpp" => matches!(kind, "field_expression" | "new_expression"),
+        _ => false,
+    }
+}
+
 fn scope_matches(scope: &str, language: &str) -> bool {
     let scope_lower = scope.to_ascii_lowercase();
     if scope_lower == "*" || scope_lower == "any" {
@@ -679,6 +870,9 @@ pub(crate) fn resolve_language(path: &Path, text: &str) -> Option<(Language, &'s
     if crate::source_kind::is_dockerfile(path, text) {
         return None;
     }
+    if path.extension().is_some_and(|e| e == "C") {
+        return Some((tree_sitter_cpp::LANGUAGE.into(), "cpp"));
+    }
     let ext = path
         .extension()
         .and_then(|v| v.to_str())
@@ -686,6 +880,28 @@ pub(crate) fn resolve_language(path: &Path, text: &str) -> Option<(Language, &'s
         .to_ascii_lowercase();
 
     match ext.as_str() {
+        "php" | "phtml" => Some((tree_sitter_php::LANGUAGE_PHP.into(), "php")),
+        "inc" if has_php_tag(text) => Some((tree_sitter_php::LANGUAGE_PHP.into(), "php")),
+        "inc"
+            if path.file_stem().and_then(|n| n.to_str()).is_some_and(|n| {
+                n.ends_with(".cc") || n.ends_with(".cpp") || n.ends_with(".cxx")
+            }) =>
+        {
+            Some((tree_sitter_cpp::LANGUAGE.into(), "cpp"))
+        }
+        "inc"
+            if path
+                .file_stem()
+                .and_then(|n| n.to_str())
+                .is_some_and(|n| n.ends_with(".c")) =>
+        {
+            Some((tree_sitter_c::LANGUAGE.into(), "c"))
+        }
+        "cs" => Some((tree_sitter_c_sharp::LANGUAGE.into(), "csharp")),
+        "c" | "h" => Some((tree_sitter_c::LANGUAGE.into(), "c")),
+        "cc" | "cpp" | "cxx" | "hpp" | "hh" | "hxx" => {
+            Some((tree_sitter_cpp::LANGUAGE.into(), "cpp"))
+        }
         "java" => Some((tree_sitter_java::LANGUAGE.into(), "java")),
         "go" => Some((tree_sitter_go::LANGUAGE.into(), "go")),
         "js" | "mjs" | "cjs" | "jsx" => {
@@ -701,6 +917,17 @@ pub(crate) fn resolve_language(path: &Path, text: &str) -> Option<(Language, &'s
         "rb" => Some((tree_sitter_ruby::LANGUAGE.into(), "ruby")),
         _ => None,
     }
+}
+
+fn has_php_tag(text: &str) -> bool {
+    text.match_indices("<?").any(|(i, _)| {
+        let rest = &text[i + 2..];
+        rest.starts_with('=')
+            || (rest.get(..3).is_some_and(|s| s.eq_ignore_ascii_case("php"))
+                && rest
+                    .get(3..)
+                    .is_some_and(|s| s.is_empty() || s.starts_with(char::is_whitespace)))
+    })
 }
 
 fn is_match_boundary(c: char) -> bool {
@@ -806,9 +1033,50 @@ pub(crate) fn source_tree(
         tree,
         original_tree,
         compatibility_limited,
-        template_pending: template.as_ref().is_some_and(|v| v.found),
+        template_pending: template.as_ref().is_some_and(|v| v.found)
+            || (language_name == "php"
+                && path
+                    .file_name()
+                    .and_then(|p| p.to_str())
+                    .is_some_and(|p| p.ends_with(".blade.php"))),
         template_limited: template.as_ref().is_some_and(|v| v.limited),
     })
+}
+
+// Read only the exact accepted call's callee/type, never its arguments. Core
+// independently restricts display to exact finite public API tokens.
+fn public_call_name<'a>(
+    tree: &tree_sitter::Tree,
+    text: &'a str,
+    start: usize,
+    end: usize,
+) -> Option<&'a str> {
+    let node = tree.root_node().descendant_for_byte_range(start, end)?;
+    if node.start_byte() != start
+        || node.end_byte() != end
+        || !matches!(
+            node.kind(),
+            "call_expression"
+                | "invocation_expression"
+                | "object_creation_expression"
+                | "new_expression"
+                | "function_call_expression"
+                | "member_call_expression"
+                | "nullsafe_member_call_expression"
+                | "scoped_call_expression"
+        )
+    {
+        return None;
+    }
+    let callee = node
+        .child_by_field_name("function")
+        .or_else(|| node.child_by_field_name("name"))
+        .or_else(|| node.child_by_field_name("type"))?;
+    if callee.end_byte() - callee.start_byte() > 256 {
+        return None;
+    }
+    let raw = text.get(callee.byte_range())?;
+    raw.rsplit(['.', ':', '\\', '>']).next()
 }
 
 #[cfg(test)]

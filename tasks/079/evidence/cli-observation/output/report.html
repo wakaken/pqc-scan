@@ -1,0 +1,1129 @@
+<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>pqc-scan report</title><script>/* Apply before styles/large report content to avoid a light-theme flash. */
+(() => {
+  let value = new URLSearchParams(location.search).get('theme') || document.documentElement.dataset.exportTheme;
+  if (!['light', 'dark'].includes(value)) {
+    try { value = localStorage.getItem('pqc-scan-theme'); } catch { /* Optional preference. */ }
+  }
+  if (['light', 'dark'].includes(value)) document.documentElement.dataset.theme = value;
+})();
+</script><style>
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #1a2233;
+  --muted: #5e6b85;
+  --border: #dfe5f2;
+  --hl: #fff2c7;
+  --line: #f8fafc;
+  --critical: #9d0208;
+  --high: #d00000;
+  --medium: #ef8a17;
+  --low: #1f7a8c;
+  --info: #3d5a80;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", "Noto Sans", sans-serif;
+  background: linear-gradient(180deg, #eef3fb 0%, var(--bg) 100%);
+  color: var(--text);
+}
+.container {
+  width: min(1200px, 96vw);
+  margin: 0 auto;
+  padding: 20px 12px 40px;
+}
+.top h1 { margin: 0; font-size: 28px; }
+.meta { color: var(--muted); margin-top: 8px; }
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 18px 0 22px;
+}
+.metric {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.metric-label { color: var(--muted); font-size: 13px; }
+.metric-value { font-size: 24px; font-weight: 700; }
+.finding {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.finding h3 {
+  margin: 0;
+  font-size: 18px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.desc {
+  margin: 10px 0 10px;
+  color: #26324a;
+}
+.kv {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+.kv li {
+  margin: 4px 0;
+}
+.sev {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 3px 9px;
+  border: 1px solid transparent;
+}
+.sev.critical { background: #ffe5e8; color: var(--critical); border-color: #f3b8bf; }
+.sev.high { background: #ffe9e9; color: var(--high); border-color: #f7c0c0; }
+.sev.medium { background: #fff4df; color: var(--medium); border-color: #f7d7a2; }
+.sev.low { background: #e5f5f8; color: var(--low); border-color: #b8dde4; }
+.sev.info { background: #e7eef7; color: var(--info); border-color: #c7d6ea; }
+.count {
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid #d6dfef;
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: #f7f9fe;
+}
+.snippet-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.evidence-list {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: #fbfcff;
+}
+.occurrence-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: #fbfcff;
+}
+.occurrence-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+.snippet-title {
+  background: #f3f6fc;
+  border-bottom: 1px solid var(--border);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.code-lines {
+  background: #fbfcff;
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.2;
+}
+pre {
+  margin: 0;
+  overflow-x: auto;
+  background: #fbfcff;
+}
+code {
+  display: inline;
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+pre code {
+  display: block;
+  font-size: 13px;
+  line-height: 1.28;
+}
+.occ-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.occ-table th, .occ-table td {
+  border-top: 1px solid #e4ebf7;
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+.occ-table th {
+  background: #f8faff;
+  color: #3b4964;
+  font-weight: 600;
+}
+.occ-table th:nth-child(1),
+.occ-table td:nth-child(1) {
+  width: 54%;
+}
+.occ-table td:nth-child(2) {
+  width: 72px;
+  text-align: right;
+}
+.occ-table th:nth-child(3),
+.occ-table td:nth-child(3) {
+  width: 20%;
+}
+.occ-table th:nth-child(4),
+.occ-table td:nth-child(4) {
+  width: 20%;
+}
+.file-toggle {
+  border: 0;
+  background: transparent;
+  color: #1b5fbf;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.file-toggle code {
+  color: inherit;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.occ-table td code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.line {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  column-gap: 8px;
+  background: var(--line);
+  min-height: 1.5em;
+}
+.line.hl {
+  background: var(--hl);
+}
+.ln {
+  user-select: none;
+  text-align: right;
+  color: #73819c;
+  border-right: 1px solid #dfe5f2;
+  padding: 0 8px 0 0;
+  line-height: 1.5;
+}
+.tx {
+  white-space: pre;
+  line-height: 1.5;
+}
+.occ-snippet-row.hidden {
+  display: none;
+}
+.occ-snippet-inline {
+  background: #f9fbff;
+  border: 1px solid #e2e9f7;
+  border-radius: 8px;
+  padding: 8px;
+}
+.occ-snippet-inline .snippet-wrap {
+  margin-top: 8px;
+}
+.actions {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.actions h4 { margin: 0 0 8px; }
+.action {
+  border: 1px dashed #d7deed;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: #fafcff;
+}
+.action-title {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  font-size: 11px;
+  border: 1px solid #bfcbe3;
+  background: #edf2fb;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.refs {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+.code-example {
+  margin-top: 6px;
+}
+.code-label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+@media (max-width: 640px) {
+  .line { grid-template-columns: 46px 1fr; }
+  code { font-size: 12px; }
+  .occ-table th:nth-child(1),
+  .occ-table td:nth-child(1) {
+    width: 48%;
+  }
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f6f8fa;
+  --card: #fff;
+  --text: #1f2328;
+  --muted: #59636e;
+  --border: #d1d9e0;
+  --line: #d1d9e0;
+  --critical: #b42318;
+  --high: #9a3412;
+  --medium: #7a5500;
+  --low: #175cd3;
+  --info: #59636e;
+}
+[hidden] { display: none !important; }
+body { background: var(--bg); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", sans-serif; }
+.container { width: min(1440px, 100%); padding: 28px 32px 56px; }
+a { color: #0969da; overflow-wrap: anywhere; }
+a:hover { text-decoration: underline; }
+.skip-link { position: absolute; top: 8px; left: 8px; transform: translateY(-180%); background: #fff; padding: 10px 16px; z-index: 10; }
+.skip-link:focus { transform: none; }
+.top { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+.eyebrow { color: var(--muted); font-size: 12px; font-weight: 600; margin: 0 0 7px; letter-spacing: .02em; }
+.eyebrow span { color: #8c959f; margin: 0 6px; }
+.top h1 { font-size: 25px; font-weight: 650; line-height: 1.3; letter-spacing: -.025em; }
+.report-description { margin: 8px 0 0; color: var(--muted); }
+.meta { margin: 0; font-size: 12px; text-align: right; flex-shrink: 0; }
+.summary { display: flex; margin: 0; gap: 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; }
+.metric { flex: 1; min-width: 0; border: 0; border-right: 1px solid #e5e9ed; border-radius: 0; padding: 14px 20px; background: none; }
+.metric:last-child { border-right: 0; }
+.metric-label { color: var(--muted); font-size: 12px; }
+.metric-value { font-size: 26px; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.severity-distribution { display: grid; grid-template-columns: auto minmax(90px, 1fr) auto; align-items: center; gap: 16px; margin: 15px 0 20px; }
+.severity-distribution figcaption { color: var(--muted); font-size: 12px; }
+.severity-bar { display: flex; height: 8px; background: #d8dee4; border-radius: 4px; overflow: hidden; }
+.severity-segment { height: 100%; }
+.severity-segment.critical, .severity-dot.critical { background: #cf222e; }
+.severity-segment.high, .severity-dot.high { background: #bc4c00; }
+.severity-segment.medium, .severity-dot.medium { background: #bf8700; }
+.severity-segment.low, .severity-dot.low { background: #218bff; }
+.severity-segment.info, .severity-dot.info { background: #8c959f; }
+.severity-legend { display: flex; flex-wrap: wrap; gap: 14px; list-style: none; margin: 0; padding: 0; font-size: 12px; }
+.severity-legend li { display: inline-flex; align-items: center; gap: 5px; }
+.severity-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+.severity-legend strong { font-variant-numeric: tabular-nums; }
+.inspection-overview { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 24px; margin: 0 0 24px; padding: 14px 18px; border: 1px solid var(--border); border-left: 3px solid #218bff; border-radius: 8px; background: #fff; overflow-wrap: anywhere; }
+.inspection-overview h2 { margin: 0; font-size: 12px; color: var(--muted); font-weight: 500; }
+.inspection-status { grid-column: 1; margin: 2px 0; font-size: 14px; font-weight: 650; }
+.inspection-overview > p:not(.inspection-status) { grid-column: 1; margin: 0; color: var(--muted); font-size: 12px; }
+.inspection-overview[data-inspection-status="partial"], .inspection-overview[data-inspection-status="unknown"] { border-left-color: #bf8700; }
+.inspection-overview[data-inspection-status="failed"] { border-left-color: #cf222e; }
+.inspection-metrics { grid-column: 2; grid-row: 1 / 4; display: flex; align-items: center; gap: 22px; }
+.inspection-metrics > div { min-width: 65px; padding: 0; background: none; border: 0; text-align: right; color: var(--muted); font-size: 12px; }
+.inspection-metrics strong { display: block; font-size: 21px; color: var(--text); font-variant-numeric: tabular-nums; }
+.inspection-scope-details, .inspection-reasons { grid-column: 1 / -1; min-width: 0; font-size: 12px; }
+.inspection-scope-details { margin-top: 6px; }
+.inspection-scope-details > summary { padding: 3px 0; color: #0969da; }
+.inspection-scope { padding-left: 20px; }
+.inspection-reasons { margin-top: 3px; border: 0; }
+.inspection-reasons h3 { display: none; }
+.inspection-reasons > p { display: inline; margin: 0 12px 0 0; }
+.inspection-overview[data-inspection-status="complete_within_scope"] .inspection-reasons > p { display: none; }
+.inspection-diagnostics { margin-top: 4px; }
+.inspection-diagnostics > summary { padding: 3px 0; }
+.inspection-reason { border-top: 1px solid #e5e9ed; padding: 2px 8px; }
+.report-workspace { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 24px; align-items: start; }
+.report-workspace:has([data-report-controls][hidden]) { grid-template-columns: minmax(0, 1fr); }
+[data-report-controls] { display: flex; flex-direction: column; gap: 16px; padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: #fff; position: sticky; top: 16px; }
+[data-report-controls] h2 { font-size: 14px; margin: 0; }
+[data-report-controls] label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 600; min-width: 0; }
+input, select, button { font: inherit; color: var(--text); min-height: 34px; padding: 6px 9px; max-width: 100%; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+input, select { width: 100%; min-width: 0; }
+input[type="search"] { background: #f6f8fa; }
+button { cursor: pointer; font-size: 12px; font-weight: 600; background: #f6f8fa; }
+button:hover { background: #eef1f4; border-color: #8c959f; }
+button:disabled { cursor: default; opacity: .55; }
+summary { cursor: pointer; overflow-wrap: anywhere; }
+summary:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0969da; outline-offset: 3px; }
+.results { min-width: 0; }
+.results-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 32px; margin-bottom: 10px; }
+.results-heading h2 { font-size: 16px; margin: 0; }
+[data-report-status] { color: var(--muted); font-size: 12px; margin: 0; }
+.rule-card { border: 1px solid var(--border); border-radius: 6px; margin: 0 0 8px; background: #fff; }
+.rule-card > summary { display: flex; align-items: center; gap: 10px; padding: 12px 14px; list-style: none; }
+.rule-card > summary::-webkit-details-marker { display: none; }
+.rule-card > summary::before { content: "›"; color: var(--muted); font-size: 20px; line-height: 1; width: 10px; flex-shrink: 0; }
+.rule-card[open] > summary::before { transform: rotate(90deg); }
+.rule-card > summary:hover { background: #f6f8fa; }
+.rule-title { min-width: 0; flex: 1; }
+.rule-title strong { display: block; font-size: 14px; font-weight: 600; }
+.rule-title code { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+.rule-meta { display: block; color: var(--muted); font-size: 11px; max-width: 180px; text-align: right; }
+.sev { display: inline-block; flex-shrink: 0; white-space: nowrap; font-size: 11px; padding: 1px 7px; font-weight: 600; }
+.sev.critical { color: #b42318; background: #fff0ee; border-color: #f5b5ac; }
+.sev.high { color: #9a3412; background: #fff4ed; border-color: #f5c4a5; }
+.sev.medium { color: #7a5500; background: #fff8c5; border-color: #eac54f; }
+.sev.low { color: #175cd3; background: #eff8ff; border-color: #b2ddff; }
+.sev.info { color: #59636e; background: #f6f8fa; border-color: #d1d9e0; }
+.count { white-space: nowrap; font-size: 11px; }
+.rule-body { padding: 0 16px 14px 34px; }
+.rule-body > p { color: var(--muted); margin: 0 0 12px; }
+.rule-body h4 { font-size: 12px; margin: 12px 0 6px; }
+nav { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0; font-size: 12px; }
+.occurrence { border-top: 1px solid #e5e9ed; padding-bottom: 4px; }
+.occurrence > summary { padding: 10px 0; }
+.occurrence > summary code { font-weight: 600; color: #0969da; }
+.occurrence > :not(summary) { margin-left: 15px; margin-right: 0; }
+.occurrence p { font-size: 13px; }
+.occ-match { display: block; color: var(--muted); font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; margin: 3px 0 0 15px; }
+.next-step { display: none; }
+.action { border-left: 2px solid var(--border); padding: 2px 12px; margin: 14px 0; }
+.shared { margin-top: 14px; background: #f6f8fa; border-radius: 6px; padding: 8px 12px; }
+.shared > summary { padding: 2px 0; font-size: 12px; font-weight: 600; }
+.snippet-wrap { margin-top: 12px; min-width: 0; }
+.code-lines { line-height: 1.6; background: #f6f8fa; }
+.line { min-width: 0; }
+.tx { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+pre { overflow: auto; padding: 12px; background: #f6f8fa; }
+code { overflow-wrap: anywhere; }
+.empty-state { border: 1px dashed var(--border); border-radius: 6px; padding: 40px 20px; text-align: center; color: var(--muted); background: #fff; }
+.print-note { display: none; }
+.inspection-context table { width: 100%; table-layout: fixed; }
+.inspection-context th, .inspection-context td { overflow-wrap: anywhere; text-align: left; vertical-align: top; }
+@media (max-width: 1000px) {
+  .severity-distribution { grid-template-columns: auto 1fr; }
+  .severity-legend { grid-column: 1 / -1; }
+  .inspection-overview { grid-template-columns: 1fr; }
+  .inspection-metrics { grid-column: 1; grid-row: auto; margin: 6px 0; justify-content: flex-start; }
+  .inspection-metrics > div { text-align: left; }
+  .rule-meta { display: none; }
+}
+@media (max-width: 760px) {
+  .container { padding: 18px 16px 36px; }
+  .top { flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .top h1 { font-size: 21px; }
+  .meta { text-align: left; }
+  .meta br { display: none; }
+  .meta time { margin-left: 8px; }
+  .summary { flex-wrap: wrap; }
+  .metric { flex-basis: 33%; padding: 12px; }
+  .metric-value { font-size: 23px; }
+  .report-workspace { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  [data-report-controls] { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  [data-report-controls] h2 { grid-column: 1 / -1; }
+  .rule-card > summary { flex-wrap: wrap; gap: 8px; padding: 11px 12px; }
+  .rule-title { flex-basis: calc(100% - 28px); }
+  .rule-card > summary > .sev { margin-left: 20px; }
+  .rule-body { padding: 0 12px 12px; }
+  .inspection-overview { padding: 12px 14px; }
+  .severity-distribution { gap: 8px 12px; }
+  .severity-legend { gap: 12px; }
+}
+@media print {
+  @page { margin: 14mm; }
+  body { background: #fff; color: #000; font-size: 10pt; }
+  .container { width: 100%; padding: 0; }
+  .top { margin-bottom: 12px; }
+  .skip-link, [data-report-controls], [data-group-pager], [data-occ-pager], [data-report-status], [data-empty], noscript { display: none !important; }
+  .report-workspace { display: block; }
+  .rule-card[hidden], .occurrence[hidden] { display: block !important; }
+  .print-note { display: block; font-size: 9pt; }
+  details::details-content { content-visibility: visible; display: block; }
+  details > :not(summary) { display: block !important; }
+  .rule-card { break-inside: auto; margin-bottom: 12px; }
+  summary, h4 { break-after: avoid; }
+  .occurrence, .action, .snippet-wrap { break-inside: avoid; }
+  .rule-meta { display: none !important; }
+  .next-step { display: block; }
+  pre, .snippet-wrap { overflow: visible; }
+  pre code, .tx { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .inspection-metrics { display: flex; }
+  a { color: #000; }
+}
+.report-settings { width: min(1440px, 100%); margin: 0 auto; padding: 14px 32px 0; display: flex; justify-content: flex-end; gap: 16px; }
+.report-settings label { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.report-settings select { width: auto; }
+.rule-guide-link { font-size: 12px; }
+[data-report-controls] > .rule-guide-link { margin-top: -10px; }
+.rule-guide-intro, .rule-explanation { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+.rule-explanation h2 { font-size: 17px; margin: 0 0 6px; }
+.rule-explanation h3 { font-size: 14px; }
+.rule-explanation dl { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 8px 16px; }
+.rule-explanation dt { color: var(--muted); }
+.rule-explanation dd { margin: 0; overflow-wrap: anywhere; }
+@media screen {
+  html[data-theme="dark"] { color-scheme: dark; --bg: #0d1117; --card: #161b22; --text: #e6edf3; --muted: #a3aeba; --border: #3d444d; --line: #30363d; --hl: #493b12; }
+  [data-theme="dark"] .summary, [data-theme="dark"] .inspection-overview, [data-theme="dark"] [data-report-controls], [data-theme="dark"] .rule-card, [data-theme="dark"] .empty-state { background: var(--card); border-color: var(--border); }
+  [data-theme="dark"] .metric { border-color: var(--border); }
+  [data-theme="dark"] .action { background: var(--card); color: var(--text); border-color: var(--border); }
+  [data-theme="dark"] .action .badge { background: #21262d; color: var(--text); border-color: #484f58; }
+  [data-theme="dark"] a, [data-theme="dark"] .occurrence > summary code, [data-theme="dark"] .inspection-scope-details > summary { color: #79c0ff; }
+  [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] button { background: #21262d; border-color: var(--border); color: var(--text); }
+  [data-theme="dark"] button:hover, [data-theme="dark"] .rule-card > summary:hover, [data-theme="dark"] .shared { background: #262e38; }
+  [data-theme="dark"] .count, [data-theme="dark"] .sev.info { color: #c9d1d9; background: #21262d; border-color: #484f58; }
+  [data-theme="dark"] .sev.critical { color: #ffb4ae; background: #45201f; border-color: #a74540; }
+  [data-theme="dark"] .sev.high { color: #ffc49c; background: #432917; border-color: #975a16; }
+  [data-theme="dark"] .sev.medium { color: #f8de79; background: #3d3213; border-color: #8b741f; }
+  [data-theme="dark"] .sev.low { color: #a5d6ff; background: #142e49; border-color: #326fa4; }
+  [data-theme="dark"] .snippet-wrap, [data-theme="dark"] .occurrence, [data-theme="dark"] .inspection-reason { border-color: #3d444d; }
+  [data-theme="dark"] .code-lines, [data-theme="dark"] pre, [data-theme="dark"] .line { background: #0d1117; color: #e6edf3; }
+  [data-theme="dark"] .line.hl { background: #443819; }
+  [data-theme="dark"] .ln { color: #a3aeba; background: #161b22; border-color: #3d444d; }
+  [data-theme="dark"] .skip-link { background: var(--card); }
+  [data-theme="dark"] .severity-bar { background: #3d444d; }
+  [data-theme="dark"] :focus-visible { outline-color: #79c0ff; }
+}
+@media (max-width: 760px) {
+  .report-settings { padding: 12px 16px 0; gap: 12px; flex-wrap: wrap; }
+  .report-settings label { flex-wrap: wrap; gap: 3px; }
+  .rule-explanation dl { grid-template-columns: 1fr; gap: 4px; }
+  .rule-explanation dd { margin-bottom: 8px; }
+}
+@media print { .report-settings { display: none !important; } }
+
+/* Independently visible filters and finding-bearing paths. */
+.panel-toggles { display:flex; justify-content:flex-end; gap:8px; margin:0 0 12px; }
+.panel-toggles button[aria-pressed="true"] { color:#0969da; border-color:#0969da; }
+[data-report-sidebar] { display:grid; gap:16px; min-width:0; }
+.report-workspace:has([data-report-sidebar][hidden]) { grid-template-columns:minmax(0,1fr); }
+.report-workspace:has([data-report-sidebar]:not([hidden])) { grid-template-columns:260px minmax(0,1fr); }
+[data-report-controls] { position:static; }
+.file-tree { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; min-width:0; max-height:65vh; overflow:auto; }
+.file-tree h2 { font-size:14px; margin:0 0 4px; }
+.file-tree > p { color:var(--muted); font-size:12px; margin:4px 0 10px; }
+.file-tree ul { list-style:none; margin:2px 0; padding-left:16px; }
+.file-tree > ul { padding-left:0; margin-top:10px; min-width:max-content; }
+.file-tree li { margin:0; }
+.file-tree summary, .file-tree button[data-tree-file] { display:flex; align-items:center; gap:7px; width:100%; min-width:0; min-height:32px; padding:5px 6px; border:0; border-radius:6px; background:transparent; text-align:left; font-size:13px; font-weight:400; line-height:20px; }
+.file-tree summary { list-style:none; }
+.file-tree summary::-webkit-details-marker { display:none; }
+.file-tree summary:hover, .file-tree button[data-tree-file]:hover { background:#f0f2f5; }
+.tree-chevron, .tree-chevron-space { width:12px; height:16px; flex:0 0 12px; }
+.tree-chevron { fill:none; stroke:var(--muted); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.file-tree details[open] > summary > .tree-chevron { transform:rotate(90deg); }
+.tree-icon { flex:0 0 16px; }
+.tree-folder { fill:#54aeff; }
+.tree-file { fill:none; stroke:var(--muted); stroke-width:1.25; stroke-linecap:round; stroke-linejoin:round; }
+.tree-name { min-width:0; white-space:nowrap; overflow-wrap:normal; flex-shrink:0; }
+.tree-count { flex-shrink:0; margin-left:auto; padding:0 5px; border-radius:10px; background:#eaeef2; color:var(--muted); font-size:11px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.file-tree button[aria-pressed="true"] { position:relative; background:#eaeef2; color:var(--text); }
+.file-tree button[aria-pressed="true"]::before { content:""; position:absolute; top:5px; bottom:5px; left:-7px; width:3px; border-radius:2px; background:#0969da; }
+@media screen {
+  [data-theme="dark"] .panel-toggles button[aria-pressed="true"] { color:#79c0ff; border-color:#79c0ff; }
+  [data-theme="dark"] .file-tree summary:hover, [data-theme="dark"] .file-tree button[data-tree-file]:hover { background:#21262d; }
+  [data-theme="dark"] .tree-folder { fill:#79c0ff; }
+  [data-theme="dark"] .tree-count { background:#30363d; }
+  [data-theme="dark"] .file-tree button[aria-pressed="true"] { background:#30363d; color:var(--text); }
+  [data-theme="dark"] .file-tree button[aria-pressed="true"]::before { background:#58a6ff; }
+}
+@media (max-width:800px) { .report-workspace:has([data-report-sidebar]:not([hidden])) { grid-template-columns:minmax(0,1fr); } .file-tree { max-height:360px; } }
+@media print { .panel-toggles, [data-report-sidebar] { display:none !important; } .report-workspace:has([data-report-sidebar]:not([hidden])) { display:block; } }
+
+/* Consistent local workflow controls and USWDS-aligned spacing. */
+.report-settings { font-size:14px; }
+.report-settings input,.report-settings select,.report-settings button,[data-report-controls] input,[data-report-controls] select,[data-report-controls] button { min-height:44px; border-radius:4px; font-size:14px; }
+.rule-card,[data-report-controls],.inspection-overview { border-radius:4px; }
+[data-report-controls] label { font-size:14px; }
+nav a { min-height:44px; display:inline-flex; align-items:center; }
+
+/* Sidebar disclosures retain their headings when collapsed. */
+.metric-unit { font-size:13px; font-weight:400; color:var(--muted); }
+[data-report-sidebar] { align-content:start; }
+[data-report-controls] { padding:0; display:block; }
+[data-report-controls] > summary, .file-tree > summary { display:flex; align-items:center; gap:8px; padding:12px 14px; font-size:14px; font-weight:600; cursor:pointer; list-style:none; }
+[data-report-controls] > summary::-webkit-details-marker, .file-tree > summary::-webkit-details-marker { display:none; }
+[data-report-controls] > summary::after, .file-tree > summary::after { content:'›'; margin-left:auto; transform:rotate(90deg); }
+[data-report-controls]:not([open]) > summary::after, .file-tree:not([open]) > summary::after { transform:none; }
+.panel-icon { display:inline-flex; width:18px; height:18px; flex:0 0 18px; }
+.panel-body { display:grid; gap:10px; padding:0 14px 14px; }
+[data-report-controls] label { margin:0; font-size:12px; }
+[data-report-controls] input, [data-report-controls] select { min-height:34px; padding:5px 8px; font-size:13px; }
+[data-report-controls] button[data-reset] { min-height:32px; padding:5px 10px; font-size:12px; }
+[data-report-controls] .test-results-option { display:flex; flex-direction:row; align-items:center; gap:7px; font-weight:400; }
+[data-report-controls] .test-results-option input { width:16px; min-height:16px; height:16px; padding:0; margin:0; }
+.panel-body > .rule-guide-link { margin:0; }
+.file-tree { padding:0; overflow:visible; max-height:none; }
+.tree-body { max-height:60vh; overflow:auto; padding:0 10px 12px; }
+.tree-body > ul { padding-left:0; margin-top:10px; min-width:max-content; }
+.tree-body > a { display:inline-block; font-size:12px; padding:4px; }
+.rule-dialog { color:var(--text); background:var(--card); border:1px solid var(--border); border-radius:10px; width:min(800px,calc(100vw - 32px)); max-height:85vh; padding:0; }
+.rule-dialog::backdrop { background:#0008; }
+.rule-dialog > header { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 20px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--card); z-index:1; }
+.rule-dialog > header h2 { font-size:18px; margin:0; }
+[data-rule-dialog-body] { padding:0 20px 20px; }
+.rule-dialog .rule-explanation { border:0; padding:16px 0; margin:0; }
+@media(max-width:600px) { [data-rule-dialog-body] { padding:0 12px 12px; } .panel-body { gap:12px; } }
+@media print { .rule-dialog { display:none !important; } }
+</style></head><body><div class="report-settings" data-settings hidden><label>Language / 言語<select data-language aria-label="Language / 言語"><option value="en">English</option><option value="ja">日本語</option></select></label><label>Theme / 表示<select data-theme-select aria-label="Theme / 表示"><option value="light">Light / ライト</option><option value="dark">Dark / ダーク</option></select></label></div><main class="container" data-report-view lang="en" data-compact-report><a class="skip-link" href="#findings">Skip to findings</a>
+<header class="top"><div><p class="eyebrow">pqc-scan <span> / </span> Static analysis</p><h1>PQC Migration Scan Report</h1></div><p class="meta">Generated<br><time data-local-time datetime="2026-11-24T06:17:52.747170+00:00" title="2026-11-24T06:17:52.747170+00:00">2026-11-24 15:17:52 +09:00 (UTC+09:00)</time></p></header>
+<section class="summary">
+<div class="metric"><div class="metric-label">Findings to review</div><div class="metric-value">0 <small class="metric-unit">items</small></div></div>
+<div class="metric"><div class="metric-label">Informational findings</div><div class="metric-value">8 <small class="metric-unit">items</small></div></div>
+<div class="metric"><div class="metric-label">Files with findings</div><div class="metric-value">7</div></div>
+</section>
+<figure class="severity-distribution"><figcaption>Severity distribution · all findings</figcaption><div class="severity-bar" aria-hidden="true">
+<span class="severity-segment info" style="width:100.0000%"></span>
+</div><ul class="severity-legend">
+<li><span class="severity-dot info" aria-hidden="true"></span>info <strong>8</strong></li>
+</ul></figure>
+<section class="inspection-overview inspection-context" data-inspection-status="partial"><h2>Inspection scope and completion</h2><p class="inspection-status">Some files or inspection steps could not be checked fully</p><p>Check the reasons below before relying on an absence of findings.</p><div class="inspection-metrics">
+<div><span>Files selected</span><strong>7</strong></div>
+<div><span>Files analyzed</span><strong>6</strong></div>
+<div><span>Files needing follow-up</span><strong>1</strong></div>
+</div><details class="inspection-scope-details" id="inspection-scope"><summary>Scope and exclusions</summary><p>This is a local inspection of supported files, not a live connection test. File counts are not a cryptographic coverage percentage.</p><ul class="inspection-scope">
+<li>Exclusions: <code>.git, node_modules, target, dist, docs, known non-scannable media, archives and binary data</code></li>
+<li>File size limit: 2097152 bytes (2 MiB)</li>
+<li>Git exclusion settings, including .gitignore, are applied.</li>
+<li>Markdown files are excluded.</li>
+<li>Recorded excluded files: 0; files omitted by ignore rules cannot be counted completely.</li>
+</ul></details><div class="inspection-reasons"><h3>Unfinished checks and reasons</h3>
+<p>Partially inspected files: 1</p>
+<details class="inspection-diagnostics" id="inspection-diagnostics"><summary>Reasons and example files</summary>
+<div class="inspection-reason"><p><strong>Only part of inspection completed</strong> — 1 records</p><ul>
+<li>Unrendered template: static source inspected; generated values and branches remain unknown.</li><li>Diagnostic records: 1 / Files: 1</li>
+<li><code>b.blade.php</code></li>
+</ul></div>
+<p>Only up to three example paths per reason are shown. Full diagnostic records remain in the optional diagnostics JSON.</p></details>
+</div></section>
+
+<div class="report-workspace"><aside data-report-sidebar hidden>
+<details id="report-filters" data-report-controls hidden open aria-label="Search conditions"><summary><svg class="panel-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5h18M6 12h12M9 19h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Search conditions</summary><div class="panel-body"><label>View<select data-mode><option value="candidate">Risk candidates</option><option value="inventory">Inventory</option><option value="all">All</option></select></label><label>Search<input data-search type="search" placeholder="Rule, title or file"></label><label>Severity<select data-severity><option value="">All severities</option>
+<option value="critical">critical</option>
+<option value="high">high</option>
+<option value="medium">medium</option>
+<option value="low">low</option>
+<option value="info">info</option>
+</select></label><label>Risk<select data-risk><option value="">All risks</option>
+<option value="quantum-vulnerable">quantum-vulnerable</option>
+<option value="quantum-uncertain">quantum-uncertain</option>
+<option value="quantum-safe">quantum-safe</option>
+<option value="non-quantum-risk">non-quantum-risk</option>
+</select></label><label>Rule<select data-rule-filter><option value="">All rules</option>
+<option value="FOUNDATION_CONTROL">FOUNDATION_CONTROL — Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</option>
+</select></label><a class="rule-guide-link" data-rule-help="all" href="report.rules.html?lang=en">Rule explanations</a><label>File<select data-file-filter><option value="">All files</option>
+<option value="a.c">a.c</option>
+<option value="a.cs">a.cs</option>
+<option value="a.h">a.h</option>
+<option value="a.phtml">a.phtml</option>
+<option value="b.blade.php">b.blade.php</option>
+<option value="encoded.php">encoded.php</option>
+<option value="upper.C">upper.C</option>
+</select></label><label class="test-results-option"><input type="checkbox" data-show-tests checked>Show test code results</label><button type="button" data-reset>Clear all filters</button></div></details><details id="report-file-tree" class="file-tree" data-file-tree hidden open aria-label="Files"><summary><span class="panel-icon"><svg class="tree-icon tree-folder" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 3.25C1 2.56 1.56 2 2.25 2h3.3c.4 0 .78.19 1.02.51L7.7 4h6.05c.69 0 1.25.56 1.25 1.25v7.5c0 .69-.56 1.25-1.25 1.25H2.25C1.56 14 1 13.44 1 12.75Z"/></svg></span>Files</summary><div class="tree-body"><a href="#findings" data-tree-clear>Show all results</a><ul><li><button type="button" data-tree-file="a.c" title="a.c" aria-label="a.c, 1 total findings" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">a.c</span><span class="tree-count">1</span></button></li><li><button type="button" data-tree-file="a.cs" title="a.cs" aria-label="a.cs, 1 total findings" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">a.cs</span><span class="tree-count">1</span></button></li><li><button type="button" data-tree-file="a.h" title="a.h" aria-label="a.h, 1 total findings" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">a.h</span><span class="tree-count">1</span></button></li><li><button type="button" data-tree-file="a.phtml" title="a.phtml" aria-label="a.phtml, 2 total findings" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">a.phtml</span><span class="tree-count">2</span></button></li><li><button type="button" data-tree-file="b.blade.php" title="b.blade.php" aria-label="b.blade.php, 1 total findings" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">b.blade.php</span><span class="tree-count">1</span></button></li><li><button type="button" data-tree-file="encoded.php" title="encoded.php" aria-label="encoded.php, 1 total findings" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">encoded.php</span><span class="tree-count">1</span></button></li><li><button type="button" data-tree-file="upper.C" title="upper.C" aria-label="upper.C, 1 total findings" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">upper.C</span><span class="tree-count">1</span></button></li></ul></div></details></aside><section class="results" id="findings" tabindex="-1" aria-label="Findings"><div class="results-heading"><h2>Findings</h2><p data-report-status role="status" aria-live="polite" aria-atomic="true"></p></div>
+<noscript><p>JavaScript is unavailable. All findings are shown below; native details still work. Interactive filters and pagination are unavailable.</p></noscript><p class="empty-state" data-empty hidden>No findings match these filters. Clear the filters to see the full report.</p><p class="print-note">Print view includes all findings, regardless of screen filters or pagination.</p><nav data-group-pager hidden aria-label="Rule pages"><button type="button" data-prev>Previous</button><span data-page></span><button type="button" data-next>Next</button></nav>
+<details class="rule-card" id="rule-0" data-rule data-rule-id="FOUNDATION_CONTROL" data-page-size="20"><summary><span class="rule-title"><strong>Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</strong></span><span class="sev info">info</span><span class="count">8 hits</span><span class="rule-meta">Files 7 · matches <span data-match-count>8 / 8</span></span></summary><div class="rule-body"><p>Review</p>
+<p><a class="rule-guide-link" data-rule-help="0" href="report.rules.html?lang=en#rule-0">About this rule</a></p>
+<h4>Locations and next steps</h4><nav data-occ-pager hidden><button type="button" data-occ-prev>Previous locations</button><span data-occ-status aria-live="polite"></span><button type="button" data-occ-next>Next locations</button></nav><div data-occurrence-list>
+<details class="occurrence" id="finding-0" data-finding-id="finding-v1-6a16065303fdc3587ec2aff64f6df33c53efabcd9ae2ca91f9ddf16d5ff3d99f" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage a.c" data-file="a.c" data-test="false"><summary><code>a.c:1:5</code><span class="occ-match">CONTROL</span><span class="next-step">Next: Review</span></summary><p class="finding-description">Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>Risk: quantum-uncertain</p><p>Check: Review</p><p>Evidence: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-0"><summary>Matched rules (1)</summary>
+<section id="scan-match-finding-v1-6a16065303fdc3587ec2aff64f6df33c53efabcd9ae2ca91f9ddf16d5ff3d99f" tabindex="-1"><h4>Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · info</p><p>Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">int CONTROL;</span></span>
+</div></div>
+<h4>Recommended Actions</h4>
+<p>Review</p>
+</details>
+<details class="occurrence" id="finding-1" data-finding-id="finding-v1-5fe4b5e7bfc226262bd83dfaa440b4133e33afad50b8cf66d40657401a4a7568" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage a.cs" data-file="a.cs" data-test="false"><summary><code>a.cs:1:30</code><span class="occ-match">CONTROL</span><span class="next-step">Next: Review</span></summary><p class="finding-description">Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>Risk: quantum-uncertain</p><p>Check: Review</p><p>Evidence: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-1"><summary>Matched rules (1)</summary>
+<section id="scan-match-finding-v1-5fe4b5e7bfc226262bd83dfaa440b4133e33afad50b8cf66d40657401a4a7568" tabindex="-1"><h4>Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · info</p><p>Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">namespace App; class C { int CONTROL; }</span></span>
+</div></div>
+<h4>Recommended Actions</h4>
+<p>Review</p>
+</details>
+<details class="occurrence" id="finding-2" data-finding-id="finding-v1-d8f634af742639f33cb031f88ffd48bc31b09a077040fd6a5e5ffbd73a03d83d" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage a.h" data-file="a.h" data-test="false"><summary><code>a.h:1:5</code><span class="occ-match">CONTROL</span><span class="next-step">Next: Review</span></summary><p class="finding-description">Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>Risk: quantum-uncertain</p><p>Check: Review</p><p>Evidence: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-2"><summary>Matched rules (1)</summary>
+<section id="scan-match-finding-v1-d8f634af742639f33cb031f88ffd48bc31b09a077040fd6a5e5ffbd73a03d83d" tabindex="-1"><h4>Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · info</p><p>Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">int CONTROL;</span></span>
+</div></div>
+<h4>Recommended Actions</h4>
+<p>Review</p>
+</details>
+<details class="occurrence" id="finding-3" data-finding-id="finding-v1-1ce3b13f147aa05846ec20d6b7886780eb46b43f1d58d73763dac36c23544a5c" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage a.phtml" data-file="a.phtml" data-test="false"><summary><code>a.phtml:1:11</code><span class="occ-match">CONTROL</span><span class="next-step">Next: Review</span></summary><p class="finding-description">Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>Risk: quantum-uncertain</p><p>Check: Review</p><p>Evidence: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-3"><summary>Matched rules (1)</summary>
+<section id="scan-match-finding-v1-1ce3b13f147aa05846ec20d6b7886780eb46b43f1d58d73763dac36c23544a5c" tabindex="-1"><h4>Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · info</p><p>Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">日本語&lt;?php $CONTROL=1; $CONTROL=2; ?&gt;</span></span>
+</div></div>
+<h4>Recommended Actions</h4>
+<p>Review</p>
+</details>
+<details class="occurrence" id="finding-4" data-finding-id="finding-v1-2273b6bf0cdd4f06b17e2f74212a8bf1b8e8375d5ac38c3fd81f1716cf769aef" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage a.phtml" data-file="a.phtml" data-test="false"><summary><code>a.phtml:1:23</code><span class="occ-match">CONTROL</span><span class="next-step">Next: Review</span></summary><p class="finding-description">Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>Risk: quantum-uncertain</p><p>Check: Review</p><p>Evidence: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-4"><summary>Matched rules (1)</summary>
+<section id="scan-match-finding-v1-2273b6bf0cdd4f06b17e2f74212a8bf1b8e8375d5ac38c3fd81f1716cf769aef" tabindex="-1"><h4>Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · info</p><p>Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">日本語&lt;?php $CONTROL=1; $CONTROL=2; ?&gt;</span></span>
+</div></div>
+<h4>Recommended Actions</h4>
+<p>Review</p>
+</details>
+<details class="occurrence" id="finding-5" data-finding-id="finding-v1-b8c813a55e86f0c9e57e60b194e19420519852884494de55a7b4b7b7c37a686a" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage b.blade.php" data-file="b.blade.php" data-test="false"><summary><code>b.blade.php:1:17</code><span class="occ-match">CONTROL</span><span class="next-step">Next: Review</span></summary><p class="finding-description">Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>Risk: quantum-uncertain</p><p>Check: Review</p><p>Evidence: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-5"><summary>Matched rules (1)</summary>
+<section id="scan-match-finding-v1-b8c813a55e86f0c9e57e60b194e19420519852884494de55a7b4b7b7c37a686a" tabindex="-1"><h4>Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · info</p><p>Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">@if($ok) &lt;?php $CONTROL=1; ?&gt; @endif</span></span>
+</div></div>
+<h4>Recommended Actions</h4>
+<p>Review</p>
+</details>
+<details class="occurrence" id="finding-6" data-finding-id="finding-v1-3bec3ed13f150ad2cbcc5ffeedc6b7418b3f5e35da68a3e42b24f40577db1686" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage encoded.php" data-file="encoded.php" data-test="false"><summary><code>encoded.php:1:18</code><span class="occ-match">CONTROL</span><span class="next-step">Next: Review</span></summary><p class="finding-description">Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>Risk: quantum-uncertain</p><p>Check: Review</p><p>Evidence: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-6"><summary>Matched rules (1)</summary>
+<section id="scan-match-finding-v1-3bec3ed13f150ad2cbcc5ffeedc6b7418b3f5e35da68a3e42b24f40577db1686" tabindex="-1"><h4>Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · info</p><p>Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">&lt;?php /* 日本語 */ $CONTROL=1;</span></span>
+</div></div>
+<h4>Recommended Actions</h4>
+<p>Review</p>
+</details>
+<details class="occurrence" id="finding-7" data-finding-id="finding-v1-ad053d58264db8d6d923b8cf361f6ddfaede265f1319f397bc0ed8a37ded16d6" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage upper.C" data-file="upper.C" data-test="false"><summary><code>upper.C:1:21</code><span class="occ-match">CONTROL</span><span class="next-step">Next: Review</span></summary><p class="finding-description">Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>Risk: quantum-uncertain</p><p>Check: Review</p><p>Evidence: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-7"><summary>Matched rules (1)</summary>
+<section id="scan-match-finding-v1-ad053d58264db8d6d923b8cf361f6ddfaede265f1319f397bc0ed8a37ded16d6" tabindex="-1"><h4>Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · info</p><p>Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">namespace App { int CONTROL; }</span></span>
+</div></div>
+<h4>Recommended Actions</h4>
+<p>Review</p>
+</details>
+</div>
+</div></details>
+</section></div><dialog class="rule-dialog" data-rule-dialog aria-label="Rule explanations"><header><h2>Rule explanations</h2><button type="button" data-close-rule-dialog>Close</button></header><div data-rule-dialog-body></div></dialog><template data-rule-explanations><main class="container rule-guide" data-report-view lang="en"><header class="top"><div><p class="eyebrow">pqc-scan / Reference</p><h1>Rule explanations</h1></div><a href="?lang=en">Back to report</a></header><p>Rules found in this report. Findings identify references to investigate, not confirmed vulnerabilities or runtime use.</p>
+<section class="rule-guide-intro"><h2>How to read the labels</h2><p>Severity prioritizes investigation; it is not a count of confirmed vulnerabilities. Risk describes the matched cryptographic signal. Informational PQC references do not establish migration completion.</p><p>Review the file role (product, test, fixture or documentation), source context and actual deployment before applying the suggested action.</p></section>
+<section class="rule-explanation" id="rule-0" tabindex="-1"><h2>Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h2><code>FOUNDATION_CONTROL</code><p>Review</p><dl><dt>Category</dt><dd>test</dd><dt>Observed severities</dt><dd>info</dd><dt>Observed risks</dt><dd>quantum-uncertain</dd><dt>Occurrences</dt><dd>8</dd></dl><h3>Example follow-up; confirm the advice at each location</h3><p>Review</p><a href="?lang=en#rule-0">View locations and evidence</a></section>
+</main>
+</template></main>
+<template data-report-translation lang="ja"><main class="container" data-report-view lang="ja" data-compact-report><a class="skip-link" href="#findings">検出結果へ移動</a>
+<header class="top"><div><p class="eyebrow">pqc-scan <span> / </span> 静的解析</p><h1>耐量子暗号への移行調査レポート</h1></div><p class="meta">作成日時<br><time data-local-time datetime="2026-11-24T06:17:52.747170+00:00" title="2026-11-24T06:17:52.747170+00:00">2026-11-24 15:17:52 +09:00 (UTC+09:00)</time></p></header>
+<section class="summary">
+<div class="metric"><div class="metric-label">確認が必要な指摘</div><div class="metric-value">0 <small class="metric-unit">件</small></div></div>
+<div class="metric"><div class="metric-label">参考情報</div><div class="metric-value">8 <small class="metric-unit">件</small></div></div>
+<div class="metric"><div class="metric-label">検出のあったファイル数</div><div class="metric-value">7</div></div>
+</section>
+<figure class="severity-distribution"><figcaption>重大度の分布 · 全検出</figcaption><div class="severity-bar" aria-hidden="true">
+<span class="severity-segment info" style="width:100.0000%"></span>
+</div><ul class="severity-legend">
+<li><span class="severity-dot info" aria-hidden="true"></span>参考情報 <strong>8</strong></li>
+</ul></figure>
+<section class="inspection-overview inspection-context" data-inspection-status="partial"><h2>検査範囲と完了状況</h2><p class="inspection-status">一部のファイル・検査を確認できていません</p><p>下の理由を確認してください。未確認の範囲に問題がないとは判断できません。</p><div class="inspection-metrics">
+<div><span>検査対象ファイル数</span><strong>7</strong></div>
+<div><span>解析完了ファイル数</span><strong>6</strong></div>
+<div><span>追加確認が必要なファイル数</span><strong>1</strong></div>
+</div><details class="inspection-scope-details" id="inspection-scope"><summary>検査範囲と除外条件</summary><p>対応する形式のローカルファイルを調べた結果です。実通信や実際の利用は確認していません。ファイル件数は、暗号利用の網羅率ではありません。</p><ul class="inspection-scope">
+<li>除外条件: <code>.git, node_modules, target, dist, docs, 画像・アーカイブ・検査できないバイナリ</code></li>
+<li>1ファイルの上限: 2097152 bytes (2 MiB)</li>
+<li>.gitignoreなどGitの除外設定を適用しています。</li>
+<li>Markdownファイルは対象外です。</li>
+<li>今回記録できた対象外ファイル: 0件。ignore設定などで列挙されなかったファイルは数え切れていません。</li>
+</ul></details><div class="inspection-reasons"><h3>未完了・対象外の内訳</h3>
+<p>一部だけ検査したファイル: 1</p>
+<details class="inspection-diagnostics" id="inspection-diagnostics"><summary>理由とファイルの例</summary>
+<div class="inspection-reason"><p><strong>検査の一部だけが完了しました</strong> — 1件</p><ul>
+<li>未展開のテンプレートです。元の記述は検査していますが、生成後の値や分岐は未確認です。ビルド後の生成ファイルもスキャンしてください。</li><li>診断記録数: 1 / ファイル数: 1</li>
+<li><code>b.blade.php</code></li>
+</ul></div>
+<p>理由ごとに最大3件のファイル例を示します。全件の記録は診断JSONで確認できます。</p></details>
+</div></section>
+
+<div class="report-workspace"><aside data-report-sidebar hidden>
+<details id="report-filters" data-report-controls hidden open aria-label="検索条件"><summary><svg class="panel-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5h18M6 12h12M9 19h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>検索条件</summary><div class="panel-body"><label>表示対象<select data-mode><option value="candidate">対応候補</option><option value="inventory">参考情報</option><option value="all">すべて</option></select></label><label>検索<input data-search type="search" placeholder="ルール・説明・ファイル名"></label><label>重大度<select data-severity><option value="">すべて</option>
+<option value="critical">緊急</option>
+<option value="high">高</option>
+<option value="medium">中</option>
+<option value="low">低</option>
+<option value="info">参考情報</option>
+</select></label><label>リスク<select data-risk><option value="">すべて</option>
+<option value="quantum-vulnerable">量子計算によるリスクあり</option>
+<option value="quantum-uncertain">要確認（実装や設定の確認が必要）</option>
+<option value="quantum-safe">PQC方式の参照あり（対応完了の保証ではありません）</option>
+<option value="non-quantum-risk">量子計算とは別のセキュリティ上の注意点</option>
+</select></label><label>ルール<select data-rule-filter><option value="">すべてのルール</option>
+<option value="FOUNDATION_CONTROL">FOUNDATION_CONTROL — 日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant c...</option>
+</select></label><a class="rule-guide-link" data-rule-help="all" href="report.rules.html?lang=ja">ルールの説明</a><label>ファイル<select data-file-filter><option value="">すべてのファイル</option>
+<option value="a.c">a.c</option>
+<option value="a.cs">a.cs</option>
+<option value="a.h">a.h</option>
+<option value="a.phtml">a.phtml</option>
+<option value="b.blade.php">b.blade.php</option>
+<option value="encoded.php">encoded.php</option>
+<option value="upper.C">upper.C</option>
+</select></label><label class="test-results-option"><input type="checkbox" data-show-tests checked>テストコードの結果を表示</label><button type="button" data-reset>条件をすべて解除</button></div></details><details id="report-file-tree" class="file-tree" data-file-tree hidden open aria-label="ファイル"><summary><span class="panel-icon"><svg class="tree-icon tree-folder" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 3.25C1 2.56 1.56 2 2.25 2h3.3c.4 0 .78.19 1.02.51L7.7 4h6.05c.69 0 1.25.56 1.25 1.25v7.5c0 .69-.56 1.25-1.25 1.25H2.25C1.56 14 1 13.44 1 12.75Z"/></svg></span>ファイル</summary><div class="tree-body"><a href="#findings" data-tree-clear>すべての結果を表示</a><ul><li><button type="button" data-tree-file="a.c" title="a.c" aria-label="a.c、全検出1件" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">a.c</span><span class="tree-count">1</span></button></li><li><button type="button" data-tree-file="a.cs" title="a.cs" aria-label="a.cs、全検出1件" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">a.cs</span><span class="tree-count">1</span></button></li><li><button type="button" data-tree-file="a.h" title="a.h" aria-label="a.h、全検出1件" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">a.h</span><span class="tree-count">1</span></button></li><li><button type="button" data-tree-file="a.phtml" title="a.phtml" aria-label="a.phtml、全検出2件" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">a.phtml</span><span class="tree-count">2</span></button></li><li><button type="button" data-tree-file="b.blade.php" title="b.blade.php" aria-label="b.blade.php、全検出1件" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">b.blade.php</span><span class="tree-count">1</span></button></li><li><button type="button" data-tree-file="encoded.php" title="encoded.php" aria-label="encoded.php、全検出1件" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">encoded.php</span><span class="tree-count">1</span></button></li><li><button type="button" data-tree-file="upper.C" title="upper.C" aria-label="upper.C、全検出1件" aria-pressed="false"><span class="tree-chevron-space" aria-hidden="true"></span><svg class="tree-icon tree-file" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 1.5h5.75l3.25 3.25V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5Z"/><path d="M9 1.5V5h3.5"/></svg><span class="tree-name">upper.C</span><span class="tree-count">1</span></button></li></ul></div></details></aside><section class="results" id="findings" tabindex="-1" aria-label="検出結果"><div class="results-heading"><h2>検出結果</h2><p data-report-status role="status" aria-live="polite" aria-atomic="true"></p></div>
+<noscript><p>JavaScriptを使わない場合は、全件を表示します。折りたたみは開けますが、検索・絞り込み・ページ切替は使えません。</p></noscript><p class="empty-state" data-empty hidden>条件に一致する検出はありません。条件を解除すると全体の結果を確認できます。</p><p class="print-note">印刷には、画面の絞り込みやページに関係なく、すべての検出結果を含みます。</p><nav data-group-pager hidden aria-label="ルール一覧のページ"><button type="button" data-prev>前へ</button><span data-page></span><button type="button" data-next>次へ</button></nav>
+<details class="rule-card" id="rule-0" data-rule data-rule-id="FOUNDATION_CONTROL" data-page-size="20"><summary><span class="rule-title"><strong>日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</strong></span><span class="sev info">参考情報</span><span class="count">8 件</span><span class="rule-meta">ファイル 7 · 表示対象 <span data-match-count>8 / 8</span></span></summary><div class="rule-body"><p>ルール作成者の確認事項（原文）：Review</p>
+<p><a class="rule-guide-link" data-rule-help="0" href="report.rules.html?lang=ja#rule-0">このルールの説明</a></p>
+<h4>検出箇所と対応</h4><nav data-occ-pager hidden><button type="button" data-occ-prev>前の箇所</button><span data-occ-status aria-live="polite"></span><button type="button" data-occ-next>次の箇所</button></nav><div data-occurrence-list>
+<details class="occurrence" id="finding-0" data-finding-id="finding-v1-6a16065303fdc3587ec2aff64f6df33c53efabcd9ae2ca91f9ddf16d5ff3d99f" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL 日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage a.c" data-file="a.c" data-test="false"><summary><code>a.c:1:5</code><span class="occ-match">CONTROL</span><span class="next-step">対応: ルール作成者の確認事項（原文）：Review</span></summary><p class="finding-description">日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>判断の目安: 要確認（実装や設定の確認が必要）</p><p>確認すること: ルール作成者の確認事項（原文）：Review</p><p>検出した記述: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-0"><summary>一致したルール (1)</summary>
+<section id="scan-match-finding-v1-6a16065303fdc3587ec2aff64f6df33c53efabcd9ae2ca91f9ddf16d5ff3d99f" tabindex="-1"><h4>日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · 参考情報</p><p>ルール作成者の確認事項（原文）：Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">int CONTROL;</span></span>
+</div></div>
+<h4>この箇所の対応</h4>
+<p>ルール作成者の確認事項（原文）：Review</p>
+</details>
+<details class="occurrence" id="finding-1" data-finding-id="finding-v1-5fe4b5e7bfc226262bd83dfaa440b4133e33afad50b8cf66d40657401a4a7568" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL 日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage a.cs" data-file="a.cs" data-test="false"><summary><code>a.cs:1:30</code><span class="occ-match">CONTROL</span><span class="next-step">対応: ルール作成者の確認事項（原文）：Review</span></summary><p class="finding-description">日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>判断の目安: 要確認（実装や設定の確認が必要）</p><p>確認すること: ルール作成者の確認事項（原文）：Review</p><p>検出した記述: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-1"><summary>一致したルール (1)</summary>
+<section id="scan-match-finding-v1-5fe4b5e7bfc226262bd83dfaa440b4133e33afad50b8cf66d40657401a4a7568" tabindex="-1"><h4>日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · 参考情報</p><p>ルール作成者の確認事項（原文）：Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">namespace App; class C { int CONTROL; }</span></span>
+</div></div>
+<h4>この箇所の対応</h4>
+<p>ルール作成者の確認事項（原文）：Review</p>
+</details>
+<details class="occurrence" id="finding-2" data-finding-id="finding-v1-d8f634af742639f33cb031f88ffd48bc31b09a077040fd6a5e5ffbd73a03d83d" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL 日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage a.h" data-file="a.h" data-test="false"><summary><code>a.h:1:5</code><span class="occ-match">CONTROL</span><span class="next-step">対応: ルール作成者の確認事項（原文）：Review</span></summary><p class="finding-description">日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>判断の目安: 要確認（実装や設定の確認が必要）</p><p>確認すること: ルール作成者の確認事項（原文）：Review</p><p>検出した記述: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-2"><summary>一致したルール (1)</summary>
+<section id="scan-match-finding-v1-d8f634af742639f33cb031f88ffd48bc31b09a077040fd6a5e5ffbd73a03d83d" tabindex="-1"><h4>日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · 参考情報</p><p>ルール作成者の確認事項（原文）：Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">int CONTROL;</span></span>
+</div></div>
+<h4>この箇所の対応</h4>
+<p>ルール作成者の確認事項（原文）：Review</p>
+</details>
+<details class="occurrence" id="finding-3" data-finding-id="finding-v1-1ce3b13f147aa05846ec20d6b7886780eb46b43f1d58d73763dac36c23544a5c" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL 日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage a.phtml" data-file="a.phtml" data-test="false"><summary><code>a.phtml:1:11</code><span class="occ-match">CONTROL</span><span class="next-step">対応: ルール作成者の確認事項（原文）：Review</span></summary><p class="finding-description">日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>判断の目安: 要確認（実装や設定の確認が必要）</p><p>確認すること: ルール作成者の確認事項（原文）：Review</p><p>検出した記述: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-3"><summary>一致したルール (1)</summary>
+<section id="scan-match-finding-v1-1ce3b13f147aa05846ec20d6b7886780eb46b43f1d58d73763dac36c23544a5c" tabindex="-1"><h4>日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · 参考情報</p><p>ルール作成者の確認事項（原文）：Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">日本語&lt;?php $CONTROL=1; $CONTROL=2; ?&gt;</span></span>
+</div></div>
+<h4>この箇所の対応</h4>
+<p>ルール作成者の確認事項（原文）：Review</p>
+</details>
+<details class="occurrence" id="finding-4" data-finding-id="finding-v1-2273b6bf0cdd4f06b17e2f74212a8bf1b8e8375d5ac38c3fd81f1716cf769aef" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL 日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage a.phtml" data-file="a.phtml" data-test="false"><summary><code>a.phtml:1:23</code><span class="occ-match">CONTROL</span><span class="next-step">対応: ルール作成者の確認事項（原文）：Review</span></summary><p class="finding-description">日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>判断の目安: 要確認（実装や設定の確認が必要）</p><p>確認すること: ルール作成者の確認事項（原文）：Review</p><p>検出した記述: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-4"><summary>一致したルール (1)</summary>
+<section id="scan-match-finding-v1-2273b6bf0cdd4f06b17e2f74212a8bf1b8e8375d5ac38c3fd81f1716cf769aef" tabindex="-1"><h4>日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · 参考情報</p><p>ルール作成者の確認事項（原文）：Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">日本語&lt;?php $CONTROL=1; $CONTROL=2; ?&gt;</span></span>
+</div></div>
+<h4>この箇所の対応</h4>
+<p>ルール作成者の確認事項（原文）：Review</p>
+</details>
+<details class="occurrence" id="finding-5" data-finding-id="finding-v1-b8c813a55e86f0c9e57e60b194e19420519852884494de55a7b4b7b7c37a686a" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL 日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage b.blade.php" data-file="b.blade.php" data-test="false"><summary><code>b.blade.php:1:17</code><span class="occ-match">CONTROL</span><span class="next-step">対応: ルール作成者の確認事項（原文）：Review</span></summary><p class="finding-description">日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>判断の目安: 要確認（実装や設定の確認が必要）</p><p>確認すること: ルール作成者の確認事項（原文）：Review</p><p>検出した記述: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-5"><summary>一致したルール (1)</summary>
+<section id="scan-match-finding-v1-b8c813a55e86f0c9e57e60b194e19420519852884494de55a7b4b7b7c37a686a" tabindex="-1"><h4>日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · 参考情報</p><p>ルール作成者の確認事項（原文）：Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">@if($ok) &lt;?php $CONTROL=1; ?&gt; @endif</span></span>
+</div></div>
+<h4>この箇所の対応</h4>
+<p>ルール作成者の確認事項（原文）：Review</p>
+</details>
+<details class="occurrence" id="finding-6" data-finding-id="finding-v1-3bec3ed13f150ad2cbcc5ffeedc6b7418b3f5e35da68a3e42b24f40577db1686" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL 日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage encoded.php" data-file="encoded.php" data-test="false"><summary><code>encoded.php:1:18</code><span class="occ-match">CONTROL</span><span class="next-step">対応: ルール作成者の確認事項（原文）：Review</span></summary><p class="finding-description">日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>判断の目安: 要確認（実装や設定の確認が必要）</p><p>確認すること: ルール作成者の確認事項（原文）：Review</p><p>検出した記述: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-6"><summary>一致したルール (1)</summary>
+<section id="scan-match-finding-v1-3bec3ed13f150ad2cbcc5ffeedc6b7418b3f5e35da68a3e42b24f40577db1686" tabindex="-1"><h4>日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · 参考情報</p><p>ルール作成者の確認事項（原文）：Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">&lt;?php /* 日本語 */ $CONTROL=1;</span></span>
+</div></div>
+<h4>この箇所の対応</h4>
+<p>ルール作成者の確認事項（原文）：Review</p>
+</details>
+<details class="occurrence" id="finding-7" data-finding-id="finding-v1-ad053d58264db8d6d923b8cf361f6ddfaede265f1319f397bc0ed8a37ded16d6" data-rules="[&quot;FOUNDATION_CONTROL&quot;]" data-inventory="true" data-severity="info" data-risk="quantum-uncertain" data-search="FOUNDATION_CONTROL 日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage upper.C" data-file="upper.C" data-test="false"><summary><code>upper.C:1:21</code><span class="occ-match">CONTROL</span><span class="next-step">対応: ルール作成者の確認事項（原文）：Review</span></summary><p class="finding-description">日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</p><p>判断の目安: 要確認（実装や設定の確認が必要）</p><p>確認すること: ルール作成者の確認事項（原文）：Review</p><p>検出した記述: <code>CONTROL</code></p>
+<details class="matched-rules" id="matched-rules-7"><summary>一致したルール (1)</summary>
+<section id="scan-match-finding-v1-ad053d58264db8d6d923b8cf361f6ddfaede265f1319f397bc0ed8a37ded16d6" tabindex="-1"><h4>日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h4><p><code>FOUNDATION_CONTROL</code> · 参考情報</p><p>ルール作成者の確認事項（原文）：Review</p></section>
+</details>
+<div class="snippet-wrap"><div class="code-lines">
+<span class="line hl"><span class="ln">1</span><span class="tx">namespace App { int CONTROL; }</span></span>
+</div></div>
+<h4>この箇所の対応</h4>
+<p>ルール作成者の確認事項（原文）：Review</p>
+</details>
+</div>
+</div></details>
+</section></div><dialog class="rule-dialog" data-rule-dialog aria-label="ルールの説明"><header><h2>ルールの説明</h2><button type="button" data-close-rule-dialog>閉じる</button></header><div data-rule-dialog-body></div></dialog><template data-rule-explanations><main class="container rule-guide" data-report-view lang="ja"><header class="top"><div><p class="eyebrow">pqc-scan / 解説</p><h1>ルールの説明</h1></div><a href="?lang=ja">レポートに戻る</a></header><p>このレポートで検出されたルールを説明します。所見は調査の手掛かりであり、脆弱性や稼働時の利用を確定するものではありません。</p>
+<section class="rule-guide-intro"><h2>表示の読み方</h2><p>重大度は調査の優先順位です。確認済みの脆弱性の数ではありません。リスクは一致した暗号の手掛かりを分類します。PQC方式の参照も移行完了を保証しません。</p><p>推奨対応を適用する前に、製品・テスト・fixture・文書のどこにある記述か、周辺コードと実際の稼働環境を確認してください。</p></section>
+<section class="rule-explanation" id="rule-0" tabindex="-1"><h2>日本語の説明が未登録のルールです。原文：Rule FOUNDATION_CONTROL matched a quantum-relevant crypto usage</h2><code>FOUNDATION_CONTROL</code><p>ルール作成者の確認事項（原文）：Review</p><dl><dt>分類</dt><dd>test</dd><dt>今回の重大度</dt><dd>参考情報</dd><dt>今回のリスク</dt><dd>要確認（実装や設定の確認が必要）</dd><dt>検出箇所</dt><dd>8</dd></dl><h3>確認事項の例（各検出箇所の案内も確認してください）</h3><p>ルール作成者の確認事項（原文）：Review</p><a href="?lang=ja#rule-0">検出箇所と根拠を見る</a></section>
+</main>
+</template></main>
+</template><script>(() => {
+  const initialized = new WeakSet();
+  function initialize(root) {
+  if (!root || !root.hasAttribute('data-compact-report') || initialized.has(root)) return;
+  initialized.add(root);
+  const ja = root.lang === 'ja';
+  const choose = (en, jp) => ja ? jp : en;
+  const controls = root.querySelector('[data-report-controls]');
+  const mode = controls.querySelector('[data-mode]');
+  const search = controls.querySelector('[data-search]');
+  const severity = controls.querySelector('[data-severity]');
+  const risk = controls.querySelector('[data-risk]');
+  const ruleFilter = controls.querySelector('[data-rule-filter]');
+  const fileFilter = controls.querySelector('[data-file-filter]');
+  const showTests = controls.querySelector('[data-show-tests]');
+  const rules = Array.from(root.querySelectorAll('[data-rule]'));
+  const rows = new Map(rules.map(rule => [rule, Array.from(rule.querySelectorAll('[data-finding-id]'))]));
+  const tree = root.querySelector('[data-file-tree]');
+  const sidebar = root.querySelector('[data-report-sidebar]');
+  function panels(filtersOpen, treeOpen) {
+    controls.hidden = false;
+    controls.open = filtersOpen;
+    if (tree) { tree.hidden = false; tree.open = treeOpen; }
+    if (sidebar) sidebar.hidden = false;
+  }
+  panels(true, true);
+  const dialog = root.querySelector('[data-rule-dialog]');
+  const explanations = root.querySelector('[data-rule-explanations]');
+  let ruleOpener = null;
+  if (dialog) {
+    dialog.querySelector('[data-close-rule-dialog]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('close', () => { ruleOpener?.focus(); ruleOpener = null; });
+  }
+  function openRule(link) {
+    if (!dialog || !explanations || typeof dialog.showModal !== 'function') return false;
+    const key = link.dataset.ruleHelp;
+    const sources = key === 'all'
+      ? explanations.content.querySelectorAll('.rule-guide-intro, .rule-explanation')
+      : explanations.content.querySelectorAll(`#rule-${key}`);
+    if (!sources.length) return false;
+    const body = dialog.querySelector('[data-rule-dialog-body]');
+    body.replaceChildren();
+    for (const source of sources) {
+      const copy = source.cloneNode(true);
+      // The explanation is already escaped by the Rust renderer. Avoid duplicate IDs.
+      copy.removeAttribute('id');
+      copy.querySelectorAll('[id]').forEach(element => element.removeAttribute('id'));
+      copy.querySelectorAll('a[href]').forEach(anchor => {
+        const hash = anchor.getAttribute('href').split('#')[1];
+        if (hash) anchor.setAttribute('href', '#' + hash);
+      });
+      body.append(copy);
+    }
+    ruleOpener = link;
+    dialog.showModal();
+    dialog.querySelector('[data-close-rule-dialog]').focus();
+    return true;
+  }
+  const pages = new Map();
+  let page = 0;
+  let visibleRules = [];
+  const matches = row => {
+    const inventory = row.dataset.inventory === 'true';
+    return (mode.value === 'all' || (mode.value === 'inventory' ? inventory : !inventory))
+      && (!showTests || showTests.checked || row.dataset.test !== 'true')
+      && (!severity.value || row.dataset.severity === severity.value)
+      && (!risk.value || row.dataset.risk === risk.value)
+      && (!ruleFilter.value || JSON.parse(row.dataset.rules || '[]').includes(ruleFilter.value))
+      && (!fileFilter.value || row.dataset.file === fileFilter.value)
+      && row.dataset.search.toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase());
+  };
+  function refresh() {
+    for (const button of root.querySelectorAll('[data-tree-file]')) {
+      button.setAttribute('aria-pressed', String(button.dataset.treeFile === fileFilter.value));
+    }
+    let count = 0;
+    visibleRules = [];
+    for (const rule of rules) {
+      const all = rows.get(rule);
+      const matched = all.filter(matches);
+      count += matched.length;
+      if (matched.length) visibleRules.push(rule);
+      const last = Math.max(0, Math.ceil(matched.length / 20) - 1);
+      const p = Math.min(pages.get(rule) || 0, last);
+      pages.set(rule, p);
+      const onPage = new Set(matched.slice(p * 20, (p + 1) * 20));
+      all.forEach(row => { row.hidden = !onPage.has(row); });
+      rule.querySelector('[data-match-count]').textContent = `${matched.length} / ${all.length}`;
+      rule.querySelector('[data-occ-pager]').hidden = matched.length <= 20;
+      rule.querySelector('[data-occ-prev]').disabled = p === 0;
+      rule.querySelector('[data-occ-next]').disabled = p === last;
+      rule.querySelector('[data-occ-status]').textContent = `${matched.length ? p * 20 + 1 : 0}-${Math.min((p + 1) * 20, matched.length)} / ${matched.length}`;
+    }
+    const last = Math.max(0, Math.ceil(visibleRules.length / 20) - 1);
+    page = Math.min(page, last);
+    rules.forEach(rule => { const i = visibleRules.indexOf(rule); rule.hidden = i < page * 20 || i >= (page + 1) * 20; });
+    root.querySelector('[data-report-status]').textContent = choose(
+      `${visibleRules.length} / ${rules.length} finding groups; ${count} / ${Array.from(rows.values()).reduce((n,r) => n+r.length,0)} findings match the current view.`,
+      `表示対象：${visibleRules.length} / ${rules.length}グループ、${count} / ${Array.from(rows.values()).reduce((n,r) => n+r.length,0)}件`);
+    root.querySelector('[data-empty]').hidden = count !== 0 || rules.length === 0;
+    root.querySelector('[data-group-pager]').hidden = visibleRules.length <= 20;
+    root.querySelector('[data-prev]').disabled = page === 0;
+    root.querySelector('[data-next]').disabled = page === last;
+    root.querySelector('[data-page]').textContent = `${visibleRules.length ? page * 20 + 1 : 0}-${Math.min((page + 1) * 20, visibleRules.length)} / ${visibleRules.length}`;
+  }
+  function reset() { if (showTests) showTests.checked = true; mode.value = 'all'; search.value = ''; severity.value = ''; risk.value = ''; ruleFilter.value = ''; fileFilter.value = ''; page = 0; pages.clear(); }
+  controls.hidden = false;
+  controls.addEventListener('input', () => {
+    if (severity.value === 'info' || risk.value === 'quantum-safe') mode.value = 'all';
+    page = 0; pages.clear(); refresh();
+  });
+  root.addEventListener('click', event => {
+    const link = event.target.closest('a');
+    if (link && root.contains(link) && link.matches('a')) {
+      if (event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (link.matches('[data-rule-help]') && openRule(link)) { event.preventDefault(); return; }
+      if (link.matches('[data-tree-clear]')) { event.preventDefault(); reset(); refresh(); return; }
+      if (dialog?.contains(link)) {
+        event.preventDefault();
+        const hash = link.getAttribute('href');
+        ruleOpener = null; dialog.close();
+        // A same-hash navigation emits no hashchange event.
+        if (location.hash === hash) revealHash();
+        else location.hash = hash;
+      }
+      return;
+    }
+    const button = event.target.closest('button');
+    if (!button || !root.contains(button)) return;
+    if (button.matches('[data-tree-file], [data-tree-clear]')) {
+      fileFilter.value = button.dataset.treeFile || ''; page = 0; pages.clear();
+    } else if (button.matches('[data-reset]')) reset();
+    else if (button.matches('[data-prev]')) page--;
+    else if (button.matches('[data-next]')) page++;
+    else if (button.matches('[data-occ-prev], [data-occ-next]')) {
+      const rule = button.closest('[data-rule]');
+      pages.set(rule, (pages.get(rule) || 0) + (button.matches('[data-occ-next]') ? 1 : -1));
+    } else return;
+    refresh();
+  });
+  function revealHash() {
+    let id;
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
+    const target = document.getElementById(id);
+    if (!target || !root.contains(target)) return;
+    const rule = target.closest('[data-rule]');
+    if (!rule) return;
+    reset();
+    page = Math.floor(rules.indexOf(rule) / 20);
+    const occurrence = target.closest('[data-finding-id]');
+    if (occurrence) pages.set(rule, Math.floor(rows.get(rule).indexOf(occurrence) / 20));
+    refresh();
+    for (let element = target; element && element !== root; element = element.parentElement) {
+      if (element.tagName === 'DETAILS') element.open = true;
+    }
+    (target.querySelector('summary') || target).focus();
+    target.scrollIntoView({block: 'nearest'});
+  }
+  // Print the full report, then restore the reader's open/closed state.
+  let beforePrint = null;
+  window.addEventListener('beforeprint', () => {
+    if (beforePrint) return;
+    beforePrint = Array.from(root.querySelectorAll('details'), detail => [detail, detail.open]);
+    beforePrint.forEach(([detail]) => { detail.open = true; });
+  });
+  window.addEventListener('afterprint', () => {
+    if (!beforePrint) return;
+    beforePrint.forEach(([detail, open]) => { detail.open = open; });
+    beforePrint = null;
+  });
+  const fields = {'data-mode': mode, 'data-search': search, 'data-severity': severity,
+    'data-risk': risk, 'data-rule-filter': ruleFilter, 'data-file-filter': fileFilter};
+  root.addEventListener('pqc-report-capture', event => {
+    Object.assign(event.detail, {panels: [controls.open, tree?.open], showTests: showTests?.checked, page, pages: rules.map(rule => [rule.id, pages.get(rule) || 0]),
+      fields: Object.fromEntries(Object.entries(fields).map(([key, input]) => [key, input.value]))});
+  });
+  root.addEventListener('pqc-report-restore', event => {
+    const state = event.detail;
+    if (!state.fields) return;
+    Object.entries(fields).forEach(([key, input]) => { input.value = state.fields[key]; });
+    if (state.panels) panels(...state.panels);
+    if (showTests && typeof state.showTests === 'boolean') showTests.checked = state.showTests;
+    page = state.page;
+    pages.clear();
+    for (const [id, p] of state.pages) {
+      const rule = rules.find(rule => rule.id === id);
+      if (rule) pages.set(rule, p);
+    }
+    refresh();
+  });
+  window.addEventListener('hashchange', revealHash);
+  refresh();
+  if (location.hash) revealHash();
+  }
+  document.addEventListener('pqc-report-view', event => initialize(event.detail));
+  initialize(document.querySelector('[data-compact-report]'));
+})();
+
+(() => {
+  const settings = document.querySelector('[data-settings]');
+  const alternate = document.querySelector('[data-report-translation]');
+  let active = document.querySelector('[data-report-view]');
+  if (!settings || !alternate || !active) return;
+  const language = settings.querySelector('[data-language]');
+  const theme = settings.querySelector('[data-theme-select]');
+  function localTime() {
+    const locale = active.lang === 'ja' ? 'ja-JP' : 'en-US';
+    for (const time of active.querySelectorAll('[data-local-time]')) {
+      try {
+        const formatter = new Intl.DateTimeFormat(locale, {dateStyle: 'medium', timeStyle: 'long'});
+        time.textContent = `${formatter.format(new Date(time.dateTime))} (${formatter.resolvedOptions().timeZone})`;
+      } catch { /* Keep the generation host's explicit offset if Intl is unavailable. */ }
+    }
+  }
+  function switchLanguage(value) {
+    if (!['en', 'ja'].includes(value)) return;
+    if (active.lang !== value && alternate.lang === value) {
+      const state = {};
+      active.dispatchEvent(new CustomEvent('pqc-report-capture', {detail: state}));
+      const opened = new Set(Array.from(active.querySelectorAll('details[id]')).filter(d => d.open).map(d => d.id));
+      const incoming = alternate.content.firstElementChild;
+      const outgoing = active;
+      active.replaceWith(incoming);
+      alternate.content.append(outgoing);
+      alternate.lang = outgoing.lang;
+      active = incoming;
+      document.dispatchEvent(new CustomEvent('pqc-report-view', {detail: active}));
+      active.dispatchEvent(new CustomEvent('pqc-report-restore', {detail: state}));
+      active.querySelectorAll('details[id]').forEach(d => { d.open = opened.has(d.id); });
+    }
+    language.value = active.lang;
+    document.documentElement.lang = active.lang;
+    const scope = active.querySelector('.report-scope')?.textContent;
+    document.title = (scope ? scope + ' | ' : '') + active.querySelector('h1').textContent;
+    localTime();
+    rememberURL();
+  }
+  function rememberURL() {
+    try {
+      const url = new URL(location.href);
+      url.searchParams.set('theme', document.documentElement.dataset.theme);
+      url.searchParams.set('lang', document.documentElement.lang);
+      history.replaceState(null, '', url);
+    } catch { /* Standalone exports also work without history updates. */ }
+  }
+  function applyTheme(value) {
+    if (!['light', 'dark'].includes(value)) value = 'light';
+    theme.value = value;
+    document.documentElement.dataset.theme = value;
+  }
+  language.addEventListener('change', () => switchLanguage(language.value));
+  theme.addEventListener('change', () => {
+    applyTheme(theme.value);
+    rememberURL();
+    try { localStorage.setItem('pqc-scan-theme', theme.value); } catch { /* Optional preference. */ }
+  });
+  applyTheme(document.documentElement.dataset.theme);
+  let requested;
+  try { requested = new URLSearchParams(location.search).get('lang'); } catch { /* CLI default. */ }
+  switchLanguage(requested || active.lang);
+  settings.hidden = false;
+})();
+</script></body></html>

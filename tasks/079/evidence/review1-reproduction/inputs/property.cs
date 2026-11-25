@@ -1,0 +1,1 @@
+using System.Security.Cryptography; class C { dynamic MLKem {get;set;} void M(){var k=MLKem.GenerateKey(MLKemAlgorithm.MLKem768);} }

@@ -1,16 +1,18 @@
 # リポジトリのスキャン方法
 
-[English](SCANNING.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.ja.md)
+[English](SCANNING.md) · [README](../../README.ja.md)
 
-このガイドはv0.4.0の静的スキャンを対象とします。\
-バージョン間の変更点は[リリースノート](../releases/v0.4.0.ja.md)を参照してください。
+このガイドは、現在のソースに含まれる静的スキャンを対象とし、v0.5開発中のPHP・C#・C・C++対応も説明します。\
+v0.4.0向けの配布アーカイブとは対応範囲が異なります。\
+v0.4.0の内容は[リリースノート](../releases/v0.4.0.ja.md)を参照してください。
 
-静的スキャンの出力オプション、CIの終了判定、検査できなかった箇所の確認方法を説明します。\
-棚卸しや評価の見方は[結果の読み方](REPORTS.ja.md)、形式ごとの制約は[対応する入力と検査範囲](https://github.com/wakaken/pqc-scan/blob/develop/docs/user/COVERAGE.ja.md)を参照してください。
+静的スキャンの出力オプション、CIの終了判定、検査できなかった箇所の確認方法を説明します。
+棚卸しや評価の見方は[結果の読み方](REPORTS.ja.md)、形式ごとの制約は[対応する入力と検査範囲](COVERAGE.ja.md)を参照してください。
 
 ## 目次
 
 - [コマンドと指定方法](#command)
+- [PHP・C#・C・C++をスキャンする](#added-languages)
 - [GitHub Actions](#github-actions)
 - [ソースから実行する](#from-source)
 - [診断情報と検査の完全性](#diagnostics)
@@ -40,6 +42,39 @@ pqc-scan diff <before-inventory> <after-inventory> --repository-scope ID --out-d
 
 別ファイルのCycloneDX 1.7棚卸しには `--cyclonedx-17` を付けます。\
 用途と制約は[形式の説明](REPORTS.ja.md#cyclonedx)と[棚卸しの比較](REPORTS.ja.md#diff)を参照してください。
+
+
+<a id="added-languages"></a>
+
+### PHP・C#・C・C++をスキャンする
+
+JavaやGoと同じスキャン操作を使います。\
+ファイル名と対応する構文から言語を選ぶため、言語専用の指定は不要です。\
+`--lang` はレポートの表示言語の指定であり、ソースの言語を選ぶものではありません。\
+PHPや.NETの実行環境、コンパイラー、依存パッケージのインストール、対象のビルドも必要ありません。
+
+1. 現在のソースから作成したスキャナーと、同じチェックアウトの同梱ルールを使います。<br>別のリポジトリを調べる場合は、後述の手順に沿って `--rules-dir` にそのチェックアウトの `rules` ディレクトリの絶対パスを指定します。
+2. `<path>` にプロジェクトのルートを指定し、ソースと対応する依存宣言を一緒に調べます。<br>ignore、テスト除外、ファイルサイズの設定は引き続き適用されます。
+3. `--diagnostics` を付けて検査できなかった範囲を確認します。<br>`report.html` を開き、検査範囲を確かめてから、検出結果を展開して位置・コード・確認事項を読みます。
+
+| 言語 | 対象ソース | 主な制約 |
+|---|---|---|
+| PHP | `.php`、`.phtml`、PHP開始タグを持つ`.inc` | HTML内の静的なPHPを検査します。Bladeは描画せず、未完了として扱います。 |
+| C# | `.cs` | Razor、プロジェクト全体の型・オーバーロード解決は対象外です。 |
+| C | `.c`、`.h`、`.c.inc` | プリプロセッサー、include、コンパイルは実行しません。 |
+| C++ | `.C`、`.cc`、`.cpp`、`.cxx`、`.hpp`、`.hh`、`.hxx`、`.h`、`.cc.inc`、`.cpp.inc`、`.cxx.inc` | テンプレートの具体化やコンパイラーの意味解析は行いません。ポインターの追跡は限定的です。 |
+
+共有の`.h`は、上限を設けてCとC++の両方で検査します。\
+構文や変数の対応が食い違う箇所は、未完了として残る場合があります。\
+検出がない場合も、[詳しい対応範囲](COVERAGE.ja.md#source-limits)を確認してください。
+
+Composer、NuGet／MSBuild、vcpkg、Conan、静的なCMake参照も、[対応する範囲](COVERAGE.ja.md#native-dependencies)で読み取ります。\
+宣言が見つかっても、ライブラリの導入済み状態や実行環境の対応を確認した意味ではありません。
+
+同梱ルールはv0.4.0の125件から14件増え、現在は139件です。\
+`rules list` は読み込んだルールを一覧にし、スキャンの `report.rules.html` は、そのスキャンで検出結果が出たルールを説明します。\
+通常の引数と周辺コードは表示し、認識した秘密の値をマスクします。\
+詳しくは[コード抜粋の表示と保護](REPORTS.ja.md#source-excerpts)を参照してください。
 
 ### ファイルサイズの上限
 

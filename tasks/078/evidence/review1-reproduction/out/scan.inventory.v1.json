@@ -1,0 +1,617 @@
+{
+  "schema_version": 1,
+  "identity_scheme": "pqc-scan-length-prefixed-sha256-v1",
+  "scanner_version": "0.4.0",
+  "catalog_version": "native-exact-identifiers-1",
+  "profile": "static-native-v1",
+  "rules_digest": "rules-v1-df05331aa04f7bf2bd554b7f20a08a6684b14eaf8b4e446fac9b880eee524239",
+  "run": {
+    "id": "scan-v1-b54c7d64d8d2c7b3e275592577a9cda3d785488332332695971a1946d5cf2a8d",
+    "attempt_id": "static-1",
+    "generated_at": "2026-11-24T04:15:58.303173+00:00"
+  },
+  "repository_scope": null,
+  "scope": {
+    "default_excludes": [
+      ".git",
+      "node_modules",
+      "target",
+      "dist",
+      "docs",
+      "known non-scannable media, archives and binary data"
+    ],
+    "git_exclude": true,
+    "git_global": true,
+    "git_ignore": true,
+    "markdown_excluded": true,
+    "max_file_size_bytes": 2097152
+  },
+  "coverage": {
+    "analysis_failed_files": 0,
+    "analyzed_files": 4,
+    "enumeration_failed_entries": 0,
+    "excluded_enumerated_files": 0,
+    "not_applicable_files": 0,
+    "not_enumerated_population": true,
+    "partial_files": 1,
+    "read_failed_files": 0,
+    "read_ok_files": 5,
+    "selected_files": 5,
+    "status": "partial",
+    "unknown_files": 0,
+    "unsupported_files": 0
+  },
+  "diagnostics": [
+    {
+      "code": "detector_truncated",
+      "detector": "tree_sitter_detector",
+      "disposition": "truncated",
+      "file": "privacy.php",
+      "message": "Inspection limit: php_same_name_bindings; limit=64; processed=64. Retained findings remain available; omitted findings are unknown. Inspect the remaining source separately.",
+      "stage": "detection"
+    }
+  ],
+  "native_completeness": "not_exhaustive",
+  "assets": [
+    {
+      "id": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+      "kind": "algorithm",
+      "identity_basis": "normalized_identifier_and_reported_parameters",
+      "attributes": {
+        "identifier": "ML-KEM-768",
+        "namespace": "named",
+        "parameters": {},
+        "purpose": "reference"
+      },
+      "relations": [],
+      "uncertainty": []
+    },
+    {
+      "id": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+      "kind": "algorithm",
+      "identity_basis": "identifier_only_parameters_not_fully_interpreted",
+      "attributes": {
+        "identifier": "RSA",
+        "namespace": "named",
+        "parameters": {},
+        "purpose": "reference"
+      },
+      "relations": [],
+      "uncertainty": [
+        "algorithm_parameters_not_fully_interpreted"
+      ]
+    },
+    {
+      "id": "asset-v1-573cce8ed9b6b24069c9e56638529be1c7bbafad0349897f51ad18a1c31c7671",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": false,
+        "anchor": "anchor-v1-57922344807da6e5533949c6e55da33f2b801e0cb8e7883f48a97c5a0fd1d815",
+        "local_ordinal": 0,
+        "method": "lexical_match",
+        "path": "privacy.php"
+      },
+      "relations": [],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-7bd31cf64561fea84c2f83339cfa77de33a56a73af675f8ed8d7d7a9af63a735",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-0507c8eb016873c6f212d5c909c23d107074a5f4a5dd5d7e02c408e879122c8d",
+        "local_ordinal": 0,
+        "method": "ast_pattern",
+        "path": "arraywrite.php"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-fb45859e3456b77d460cd99cff84a35a5d3754c62f2a25f85849286f63d8db7b",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-0507c8eb016873c6f212d5c909c23d107074a5f4a5dd5d7e02c408e879122c8d",
+        "local_ordinal": 1,
+        "method": "ast_pattern",
+        "path": "arraywrite.php"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-643ffb2a2057cc7c33139ab8ff4882516d068152e195713b150aa39b06313535",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-0f117f00bf83ec630fcabe485ee68cb57c957a6141015a7d0dba114c616284c6",
+        "local_ordinal": 0,
+        "method": "ast_pattern",
+        "path": "catch.php"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-4d6f67a6f957c9c552a7c3186c5adc41d472529413f4eaeca499e88500ccf6b0",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-0f117f00bf83ec630fcabe485ee68cb57c957a6141015a7d0dba114c616284c6",
+        "local_ordinal": 0,
+        "method": "ast_pattern",
+        "path": "foreach.php"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-64efc2cd7faa10b6cb5fef0090b35bd4cd412a697342d83572c86d63701fec5f",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-0f117f00bf83ec630fcabe485ee68cb57c957a6141015a7d0dba114c616284c6",
+        "local_ordinal": 0,
+        "method": "ast_pattern",
+        "path": "methodwrite.php"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-15ac4f1c99da2c555d12b5b4fd623e9d40242413cd0cdb3363aaf35c62e39752",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-0f117f00bf83ec630fcabe485ee68cb57c957a6141015a7d0dba114c616284c6",
+        "local_ordinal": 1,
+        "method": "ast_pattern",
+        "path": "catch.php"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-e169521323ca47b5bdabb34d0b1f8cce3d6dc4befe1c47215720329370ed949b",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-0f117f00bf83ec630fcabe485ee68cb57c957a6141015a7d0dba114c616284c6",
+        "local_ordinal": 1,
+        "method": "ast_pattern",
+        "path": "foreach.php"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    },
+    {
+      "id": "asset-v1-60a814560d457ca03b2d7d70447c91e79b3a9f967a60fcc6e82e9ad2576fb17b",
+      "kind": "usage",
+      "identity_basis": "run_local_only",
+      "attributes": {
+        "ambiguous": true,
+        "anchor": "anchor-v1-0f117f00bf83ec630fcabe485ee68cb57c957a6141015a7d0dba114c616284c6",
+        "local_ordinal": 1,
+        "method": "ast_pattern",
+        "path": "methodwrite.php"
+      },
+      "relations": [
+        {
+          "relationship": "references",
+          "target": "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"
+        }
+      ],
+      "uncertainty": [
+        "static_reference_not_active_use"
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation-v1-24a5fba673632333079fb0fb045c6d5f0dfcf7291f8490d7ca9b7cc551c641ff",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+        "asset-v1-7bd31cf64561fea84c2f83339cfa77de33a56a73af675f8ed8d7d7a9af63a735"
+      ],
+      "target": {
+        "path": "arraywrite.php",
+        "line": 1,
+        "column": 105,
+        "column_kind": "unicode_code_points",
+        "byte_start": 104,
+        "byte_end": 127,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "PHP_CRYPTO_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-8feb0ac72a23d18deb096e125b20fe30e62acafccd6f32dc41cd3f85387a8f91",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-7bbf1f29e19625b0e55aab993b0f879f9b6e4412b02839f7727cae2aadf29cd3",
+        "asset-v1-fb45859e3456b77d460cd99cff84a35a5d3754c62f2a25f85849286f63d8db7b"
+      ],
+      "target": {
+        "path": "arraywrite.php",
+        "line": 1,
+        "column": 130,
+        "column_kind": "unicode_code_points",
+        "byte_start": 129,
+        "byte_end": 153,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "PHP_CRYPTO_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-af66769f7c5a7ff38b10d1537830c5b915a5476efb56952a364d3e5f1485db19",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+        "asset-v1-643ffb2a2057cc7c33139ab8ff4882516d068152e195713b150aa39b06313535"
+      ],
+      "target": {
+        "path": "catch.php",
+        "line": 1,
+        "column": 17,
+        "column_kind": "unicode_code_points",
+        "byte_start": 16,
+        "byte_end": 53,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "PHP_PQC_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-9e55ec3607055a66bbe74bc92ad777a4966925c1d211f4fdb5a8ebdeee3ed682",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+        "asset-v1-15ac4f1c99da2c555d12b5b4fd623e9d40242413cd0cdb3363aaf35c62e39752"
+      ],
+      "target": {
+        "path": "catch.php",
+        "line": 1,
+        "column": 88,
+        "column_kind": "unicode_code_points",
+        "byte_start": 87,
+        "byte_end": 105,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "PHP_PQC_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-fa0d7bea1c553661eb01a6566b434f1d3c69f849a5abad9100d6ee76a78ea825",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+        "asset-v1-4d6f67a6f957c9c552a7c3186c5adc41d472529413f4eaeca499e88500ccf6b0"
+      ],
+      "target": {
+        "path": "foreach.php",
+        "line": 1,
+        "column": 17,
+        "column_kind": "unicode_code_points",
+        "byte_start": 16,
+        "byte_end": 53,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "PHP_PQC_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-47a702a4c045d9da8f18cbd465d22d8deaec2b5c8ddcefbf91f518c610bf2241",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+        "asset-v1-e169521323ca47b5bdabb34d0b1f8cce3d6dc4befe1c47215720329370ed949b"
+      ],
+      "target": {
+        "path": "foreach.php",
+        "line": 1,
+        "column": 83,
+        "column_kind": "unicode_code_points",
+        "byte_start": 82,
+        "byte_end": 100,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "PHP_PQC_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-b688d8b53b9caed20618b5ae38828ab0604e352dbe3c9f9faa13dd696cedcf8b",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+        "asset-v1-64efc2cd7faa10b6cb5fef0090b35bd4cd412a697342d83572c86d63701fec5f"
+      ],
+      "target": {
+        "path": "methodwrite.php",
+        "line": 1,
+        "column": 17,
+        "column_kind": "unicode_code_points",
+        "byte_start": 16,
+        "byte_end": 53,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "PHP_PQC_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-60a9efdbce812c86eea2a67422379f1708647ed1a54e9e8ae548bae50f07b96c",
+      "occurrence_key": null,
+      "identity_confidence": "ambiguous_duplicate_anchor",
+      "asset_ids": [
+        "asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d",
+        "asset-v1-60a814560d457ca03b2d7d70447c91e79b3a9f967a60fcc6e82e9ad2576fb17b"
+      ],
+      "target": {
+        "path": "methodwrite.php",
+        "line": 1,
+        "column": 73,
+        "column_kind": "unicode_code_points",
+        "byte_start": 72,
+        "byte_end": 90,
+        "object_index": null
+      },
+      "method": "ast_pattern",
+      "producer": "tree_sitter_detector",
+      "assurance": "syntactic",
+      "usage": "referenced",
+      "rule_id": "PHP_PQC_API",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": [
+        "duplicate_anchor_ordinals_can_shift"
+      ]
+    },
+    {
+      "id": "observation-v1-4de2008c1d6b452bf932c4a4271cd059a4e05be8c48ee5237a7d83c455c944ab",
+      "occurrence_key": null,
+      "identity_confidence": "run_local_only",
+      "asset_ids": [
+        "asset-v1-573cce8ed9b6b24069c9e56638529be1c7bbafad0349897f51ad18a1c31c7671"
+      ],
+      "target": {
+        "path": "privacy.php",
+        "line": 1,
+        "column": 76,
+        "column_kind": "unicode_code_points",
+        "byte_start": 75,
+        "byte_end": 82,
+        "object_index": null
+      },
+      "method": "lexical_match",
+      "producer": "regex_detector",
+      "assurance": "lexical",
+      "usage": "referenced",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "evidence": {
+        "marker_kind": null,
+        "capture_status": "legacy_reported"
+      },
+      "uncertainty": []
+    }
+  ],
+  "legacy_associations": [
+    {
+      "legacy_index": 0,
+      "legacy_id": "finding-v1-e5b85e4c268c13913f808ab3b71a461471206fcb112297768bed460211299f36",
+      "observation_ids": [
+        "observation-v1-24a5fba673632333079fb0fb045c6d5f0dfcf7291f8490d7ca9b7cc551c641ff"
+      ]
+    },
+    {
+      "legacy_index": 1,
+      "legacy_id": "finding-v1-a2ca850b0fb8df415a61ce868d5784ca1920f1fa79c5e8a25d333bf8b25ef6c1",
+      "observation_ids": [
+        "observation-v1-8feb0ac72a23d18deb096e125b20fe30e62acafccd6f32dc41cd3f85387a8f91"
+      ]
+    },
+    {
+      "legacy_index": 2,
+      "legacy_id": "finding-v1-57e1b2c3af672e5ffa8b2b3c3248f4fb3d64b98a7fee46621d79975543f6c603",
+      "observation_ids": [
+        "observation-v1-4de2008c1d6b452bf932c4a4271cd059a4e05be8c48ee5237a7d83c455c944ab"
+      ]
+    },
+    {
+      "legacy_index": 3,
+      "legacy_id": "finding-v1-9c37141b73e9092e522e0e154fa802c06e979548b28703aa0ebba8e54c25c6e7",
+      "observation_ids": [
+        "observation-v1-af66769f7c5a7ff38b10d1537830c5b915a5476efb56952a364d3e5f1485db19"
+      ]
+    },
+    {
+      "legacy_index": 4,
+      "legacy_id": "finding-v1-dc9694d448ba727d73da6d3bc968867f52775356c1891333b0e749303c721b1d",
+      "observation_ids": [
+        "observation-v1-9e55ec3607055a66bbe74bc92ad777a4966925c1d211f4fdb5a8ebdeee3ed682"
+      ]
+    },
+    {
+      "legacy_index": 5,
+      "legacy_id": "finding-v1-a3be358b146863271d88682dfa6cb4a76335d6842ea54e134a69c6f64e2f1d08",
+      "observation_ids": [
+        "observation-v1-fa0d7bea1c553661eb01a6566b434f1d3c69f849a5abad9100d6ee76a78ea825"
+      ]
+    },
+    {
+      "legacy_index": 6,
+      "legacy_id": "finding-v1-2400c0338414d9e7b3a4d2f16765a0d31dbaf2f1305574ef7d3d7aafa7ceffa8",
+      "observation_ids": [
+        "observation-v1-47a702a4c045d9da8f18cbd465d22d8deaec2b5c8ddcefbf91f518c610bf2241"
+      ]
+    },
+    {
+      "legacy_index": 7,
+      "legacy_id": "finding-v1-228c68cb8d6cf69961924e783433c303983ae959527218888de14373267990c2",
+      "observation_ids": [
+        "observation-v1-b688d8b53b9caed20618b5ae38828ab0604e352dbe3c9f9faa13dd696cedcf8b"
+      ]
+    },
+    {
+      "legacy_index": 8,
+      "legacy_id": "finding-v1-95f54fd8e77c9bd114af5ab751023e1160546061f974301e638b03f670925428",
+      "observation_ids": [
+        "observation-v1-60a9efdbce812c86eea2a67422379f1708647ed1a54e9e8ae548bae50f07b96c"
+      ]
+    }
+  ],
+  "unassociated_observation_ids": [],
+  "legacy_loss_records": [],
+  "assessment_status": "not_evaluated",
+  "assessments": [],
+  "export_loss_notes": [
+    "raw_matches_snippets_and_arbitrary_metadata_omitted",
+    "unknown_raw_identifiers_not_guessed",
+    "legacy_snapshot_not_derived_from_inventory",
+    "legacy_ids_are_not_native_identity",
+    "legacy_dependency_version_provenance_unavailable",
+    "legacy_applicability_coverage_is_not_native_inventory_completeness",
+    "weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity",
+    "cryptographic_trust_and_policy_not_evaluated"
+  ]
+}

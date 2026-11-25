@@ -1,0 +1,42 @@
+    Checking pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+    Checking pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Checking pqc_scan_report v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_report)
+    Checking pqc_scan_probe_ssh v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_probe_ssh)
+    Checking pqc_scan_probe_tls v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_probe_tls)
+error: enclosing `Some` and `?` operator are unneeded
+    --> crates/pqc_scan_detectors/src/tree_sitter_detector.rs:1130:5
+     |
+1130 |     Some(raw.rsplit(['.', ':', '\\', '>']).next()?)
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#needless_question_mark
+     = note: `-D clippy::needless-question-mark` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::needless_question_mark)]`
+help: remove the enclosing `Some` and `?` operator
+     |
+1130 -     Some(raw.rsplit(['.', ':', '\\', '>']).next()?)
+1130 +     raw.rsplit(['.', ':', '\\', '>']).next()
+     |
+
+error: could not compile `pqc_scan_detectors` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: items after a test module
+    --> crates/pqc_scan_detectors/src/tree_sitter_detector.rs:1066:1
+     |
+1066 |   mod tests {
+     |   ^^^^^^^^^
+...
+1099 | / fn public_call_name<'a>(
+1100 | |     tree: &tree_sitter::Tree,
+1101 | |     text: &'a str,
+1102 | |     start: usize,
+1103 | |     end: usize,
+1104 | | ) -> Option<&'a str> {
+     | |____________________^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#items_after_test_module
+     = note: `-D clippy::items-after-test-module` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::items_after_test_module)]`
+     = help: move the items to before the test module was defined
+
+error: could not compile `pqc_scan_detectors` (lib test) due to 2 previous errors

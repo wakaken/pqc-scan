@@ -1,0 +1,584 @@
+{
+  "generated_at": "2026-11-24T02:12:07.907109Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-19f343b74d1b0af50c98b3431468b1923ceca2f9439edbaf248cd9afe308b076",
+      "rule_id": "PQC_JAVA_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Standard PQC algorithm requested through Java APIs; runtime success is not established.",
+      "migration_hint": "JDK 24+ provides ML-KEM and ML-DSA; verify provider and protocol support independently.",
+      "location": {
+        "file": "Example.java",
+        "line": 3,
+        "column": 9
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "Signatur***L-DSA\"",
+        "snippet_preview": "class Ex***   } }",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "java",
+          "node_kind": "bounded_source_fact",
+          "scope": "java",
+          "source_resolution": "explicit_api_request"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "class Example {",
+            "highlighted": false
+          },
+          {
+            "line": 2,
+            "text": "    void inspect() throws Exception {",
+            "highlighted": false
+          },
+          {
+            "line": 3,
+            "text": "        Signature.getInstance(\"ML-DSA\");",
+            "highlighted": true
+          },
+          {
+            "line": 4,
+            "text": "    }",
+            "highlighted": false
+          },
+          {
+            "line": 5,
+            "text": "}",
+            "highlighted": false
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-037487dae8b7eb70b87f1fd022b31f312ca4e4c03dc97ca937ff226aa7da3b43",
+      "rule_id": "PQC_GO_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Standard Go PQC package imported; import alone does not prove negotiated protection.",
+      "migration_hint": "crypto/mlkem requires Go 1.24+; crypto/mldsa requires Go 1.27+. Verify actual call sites.",
+      "location": {
+        "file": "example.go",
+        "line": 3,
+        "column": 8
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "\"crypto/mlkem\"",
+        "snippet_preview": "\"crypto/mlkem\"",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "go",
+          "node_kind": "interpreted_string_literal",
+          "scope": "go"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "package example",
+            "highlighted": false
+          },
+          {
+            "line": 2,
+            "text": "",
+            "highlighted": false
+          },
+          {
+            "line": 3,
+            "text": "import \"crypto/mlkem\"",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-581b9268a49abfdc1bef57e8d797a23f334e69395db2c7f63c4787196fac7abb",
+      "rule_id": "PQC_NODE_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Node-style PQC key generation call; bindings and actual execution require confirmation.",
+      "migration_hint": "Node crypto requires 24.6+ for ML-DSA, 24.7+ for ML-KEM, and 24.8+ for SLH-DSA. Check runtime support.",
+      "location": {
+        "file": "example.js",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "generate***m-768'",
+        "snippet_preview": "generate***768');",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "javascript",
+          "node_kind": "bounded_source_fact",
+          "scope": "javascript,typescript",
+          "source_resolution": "bounded_import_scope_and_literal_set"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "generateKeyPairSync('ml-kem-768');",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-966d887021fc204f958738bdd031e84f0b48b4b09a8aea588c6ec19cc0310d90",
+      "rule_id": "PQC_STANDARD_REFERENCE",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established.",
+      "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security.",
+      "location": {
+        "file": "example.js",
+        "line": 1,
+        "column": 22
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "ml-kem-768",
+        "snippet_preview": "generate***-768')",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "javascript",
+          "node_kind": "call_expression",
+          "reference_kind": "call_reference",
+          "scope": "java,go,javascript,typescript,python,rust,ruby"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "generateKeyPairSync('ml-kem-768');",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-1f19b8484e431227d3e4189c298d854ecebe2ff05b85118e90f40b265b8bbee1",
+      "rule_id": "PQC_PYTHON_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Python PQC key generation reference; backend support is not established.",
+      "migration_hint": "cryptography 47 added ML-KEM and ML-DSA; 48 adds OpenSSL 3.5+ support. Confirm backend capability.",
+      "location": {
+        "file": "example.py",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "mlkem.ML***erate(",
+        "snippet_preview": "mlkem.ML***rate()",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "python",
+          "node_kind": "bounded_source_fact",
+          "scope": "python",
+          "source_resolution": "explicit_python_generation_reference"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "mlkem.MLKEM768PrivateKey.generate()",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-0ec03c2d433fbd3a6283d6d226e479eaf19d31adfa135db29eee17257f484965",
+      "rule_id": "PQC_RUBY_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.65,
+      "description": "Ruby PQC algorithm literal referenced; key generation or signing success is not established.",
+      "migration_hint": "Verify openssl gem and linked OpenSSL/provider capabilities, not Ruby version alone.",
+      "location": {
+        "file": "example.rb",
+        "line": 1,
+        "column": 28
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "'ML-DSA-65'",
+        "snippet_preview": "OpenSSL:***A-65')",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "ruby",
+          "node_kind": "call",
+          "scope": "ruby"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "OpenSSL::PKey.generate_key('ML-DSA-65')",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-dfc770ef4e1abc232f913f7b7bf8f45434175c9b2f1bfda303f526e262e0fbd2",
+      "rule_id": "PQC_STANDARD_REFERENCE",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established.",
+      "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security.",
+      "location": {
+        "file": "example.rb",
+        "line": 1,
+        "column": 29
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "ML-DSA-65",
+        "snippet_preview": "OpenSSL:***A-65')",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "ruby",
+          "node_kind": "call",
+          "reference_kind": "call_reference",
+          "scope": "java,go,javascript,typescript,python,rust,ruby"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "OpenSSL::PKey.generate_key('ML-DSA-65')",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-522a4bd71cc5ddd266cb88ee89f320a00125b6fea97a391b3b357bc70a28b203",
+      "rule_id": "PQC_RUST_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.75,
+      "description": "Rust PQC crate symbol referenced; execution and protocol use require confirmation.",
+      "migration_hint": "Confirm crate version, features and provider; a RustCrypto reference alone does not enable PQC TLS.",
+      "location": {
+        "file": "example.rs",
+        "line": 1,
+        "column": 5
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "ml_kem::MlKem768",
+        "snippet_preview": "use ml_k***em768;",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "rust",
+          "node_kind": "bounded_source_fact",
+          "scope": "rust",
+          "source_resolution": "explicit_rust_pqc_import"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "use ml_kem::MlKem768;",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-a4d81dfdc07162bccfa6efa9f993dd2df854969885c8a0a98a7181b6ec295059",
+      "rule_id": "PQC_STANDARD_REFERENCE",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established.",
+      "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security.",
+      "location": {
+        "file": "example.rs",
+        "line": 1,
+        "column": 13
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "MlKem768",
+        "snippet_preview": "ml_kem::MlKem768",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "rust",
+          "node_kind": "scoped_identifier",
+          "reference_kind": "symbol_reference",
+          "scope": "java,go,javascript,typescript,python,rust,ruby"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "use ml_kem::MlKem768;",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-404d5dd92516810f7d05e70e0beab910b1fcd2497fcd368b7b89e755d9017603",
+      "rule_id": "PQC_STANDARD_REFERENCE",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established.",
+      "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security.",
+      "location": {
+        "file": "example.ts",
+        "line": 1,
+        "column": 28
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "ML-DSA-65",
+        "snippet_preview": "subtle.g***ign'])",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "typescript",
+          "node_kind": "call_expression",
+          "reference_kind": "call_reference",
+          "scope": "java,go,javascript,typescript,python,rust,ruby"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "subtle.generateKey({name: 'ML-DSA-65'}, false, ['sign']);",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-e43280fdd3f650b8a76a343bd5904559d3c01b85fe2a99b609f15c4f336b99e6",
+      "rule_id": "PQC_WEBCRYPTO_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.75,
+      "description": "WebCrypto-style PQC algorithm request; this is not proof of browser support.",
+      "migration_hint": "Node WebCrypto supports ML-KEM and ML-DSA from 24.7; browser support must be checked separately.",
+      "location": {
+        "file": "example.ts",
+        "line": 1,
+        "column": 8
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "generate***SA-65'",
+        "snippet_preview": "subtle.g***ign'])",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "typescript",
+          "node_kind": "call_expression",
+          "scope": "javascript,typescript"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "subtle.generateKey({name: 'ML-DSA-65'}, false, ['sign']);",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-4ac99399fb1522ffc34aaf06d25548c278b0d4e8469cca681031727a0689c31c",
+      "rule_id": "PQC_STANDARD_REFERENCE",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established.",
+      "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security.",
+      "location": {
+        "file": "negative.js",
+        "line": 3,
+        "column": 16
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "X25519MLKEM768",
+        "snippet_preview": "'X25519MLKEM768'",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "javascript",
+          "node_kind": "string",
+          "reference_kind": "name_literal",
+          "scope": "java,go,javascript,typescript,python,rust,ruby"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "// generateKeyPairSync('ml-kem-768');",
+            "highlighted": false
+          },
+          {
+            "line": 2,
+            "text": "const ML_KEM_helper = 1;",
+            "highlighted": false
+          },
+          {
+            "line": 3,
+            "text": "const group = 'X25519MLKEM768';",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "Example.java",
+      "algorithm": "Signatur***L-DSA\"",
+      "usage_type": "PQC",
+      "location": "Example.java:3",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "JDK 24+ provides ML-KEM and ML-DSA; verify provider and protocol support independently."
+    },
+    {
+      "component": "example.go",
+      "algorithm": "\"crypto/mlkem\"",
+      "usage_type": "PQC",
+      "location": "example.go:3",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "crypto/mlkem requires Go 1.24+; crypto/mldsa requires Go 1.27+. Verify actual call sites."
+    },
+    {
+      "component": "example.js",
+      "algorithm": "generate***m-768'",
+      "usage_type": "PQC",
+      "location": "example.js:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Node crypto requires 24.6+ for ML-DSA, 24.7+ for ML-KEM, and 24.8+ for SLH-DSA. Check runtime support."
+    },
+    {
+      "component": "example.js",
+      "algorithm": "ml-kem-768",
+      "usage_type": "PQC",
+      "location": "example.js:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+    },
+    {
+      "component": "example.py",
+      "algorithm": "mlkem.ML***erate(",
+      "usage_type": "PQC",
+      "location": "example.py:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "cryptography 47 added ML-KEM and ML-DSA; 48 adds OpenSSL 3.5+ support. Confirm backend capability."
+    },
+    {
+      "component": "example.rb",
+      "algorithm": "'ML-DSA-65'",
+      "usage_type": "PQC",
+      "location": "example.rb:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify openssl gem and linked OpenSSL/provider capabilities, not Ruby version alone."
+    },
+    {
+      "component": "example.rb",
+      "algorithm": "ML-DSA-65",
+      "usage_type": "PQC",
+      "location": "example.rb:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+    },
+    {
+      "component": "example.rs",
+      "algorithm": "ml_kem::MlKem768",
+      "usage_type": "PQC",
+      "location": "example.rs:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Confirm crate version, features and provider; a RustCrypto reference alone does not enable PQC TLS."
+    },
+    {
+      "component": "example.rs",
+      "algorithm": "MlKem768",
+      "usage_type": "PQC",
+      "location": "example.rs:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+    },
+    {
+      "component": "example.ts",
+      "algorithm": "ML-DSA-65",
+      "usage_type": "PQC",
+      "location": "example.ts:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+    },
+    {
+      "component": "example.ts",
+      "algorithm": "generate***SA-65'",
+      "usage_type": "PQC",
+      "location": "example.ts:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Node WebCrypto supports ML-KEM and ML-DSA from 24.7; browser support must be checked separately."
+    },
+    {
+      "component": "negative.js",
+      "algorithm": "X25519MLKEM768",
+      "usage_type": "PQC",
+      "location": "negative.js:3",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 12,
+    "by_severity": {
+      "info": 12
+    },
+    "by_risk": {
+      "quantum-safe": 12
+    },
+    "scanned_files": 8,
+    "skipped_files": 0
+  }
+}

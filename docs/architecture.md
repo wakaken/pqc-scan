@@ -165,6 +165,42 @@ strategy, not full semantic analysis or exhaustive private-key format support.
   - Python
   - Rust
   - Ruby
+  - PHP (bounded built-in OpenSSL/Sodium/ParagonIE requests and qualified references)
+  - C# (bounded .NET/BC types, selectors and local operations)
+- The v0.5 foundation additionally routes PHP/PHTML/tagged INC (`php`), C# CS
+  (`csharp`), C (`c`) and C++ (`cpp`) for custom AST rules. Built-in C/C++ coverage
+  uses the finite source-fact handlers described below. Uppercase `.C` is selected before
+  extension case folding; `.h` uses two candidate views sharing all five work
+  caps, consolidating equal original spans and opaque typed references once.
+  Candidate syntax/binding disagreement remains Partial. CPP-only node kinds
+  also retain ambiguity when C's permissive grammar accepts a different shape.
+- New source facts use the finite `AlgorithmSpec::source_api` vocabulary and
+  `with_source_api_references` to replace argument-token guesses. The older
+  `recognized` vocabulary and `with_algorithm_references` path remain unchanged.
+  New routes report code-point columns and retain original file-byte remapping
+  for encoded inputs. No source project, preprocessor or dependency manager runs.
+- PHP/C#/C/C++ source presentation uses recognized secret spans from the inspected
+  snapshot before clipping. Ordinary arguments and up to two surrounding lines
+  remain visible; unresolved/uninspected regions retain conservative protection.
+  Presentation privacy is separate from typed-source suppression. A private
+  ephemeral typed-source bit preserves
+  finite explicit API identities while opaque token-derived algorithm guesses are
+  omitted on these PHP/C#/C/C++ paths. Finite opaque project references retain a fixed
+  public label in legacy findings/CBOM and a `library_ref_*` code in the existing
+  open-string `evidence.marker_kind`. The unchanged anchor formula includes that
+  marker, distinguishing projects without versions or runtime claims. Only exact
+  typed draft-to-finding bindings permit fixed label restoration; arbitrary match
+  text cannot restore a typed identity. Core validates display-only call identities,
+  then uses span-bound, redacted source excerpts without promoting call text into
+  CBOM algorithms. Secret-valued metadata retains its existing protection. See
+  [evidence privacy](architecture/EVIDENCE-PRIVACY.md). No serialized field/schema
+  or held-input meaning changes.
+
+PHP and C# local binding saturation retain the fixed limit of 64 records per variable and
+invalidates later values of that variable. It does not abort independent API
+inspection after the name index has completed. The local cap is reported as
+Truncated after retaining those references; structural/name/candidate limits
+still fail closed before unproven identities can be emitted.
 
 ### AST occurrence identity (task 024)
 
@@ -544,3 +580,41 @@ and [folder navigation](product/LOCAL-SCAN-UI.md#current-per-folder-result-navig
 
 - [Static analysis implementation and limits](architecture/STATIC-ANALYSIS.md)
 - [Repository CI](quality/REPOSITORY-CI.md)
+### Bounded C-family source facts (task080)
+
+The default-only three-rule registry routes C/C++ into the same Facts pipeline.
+Lexical compound/function scopes are C-family gated; other language scope rules
+are unchanged. Ordered bindings use a64-record per-name cap, depth8 aliases and
+bounded ancestor/declarator traversal. Unknown calls/indirect writes use ordered
+mutation barriers; an incomplete name index cannot expose a hidden built-in.
+Explicit EVP contexts, keys from generation or raw imports, OQS C objects and C++ local
+objects retain distinct roles. No graph/include/preprocessor/compiler evaluation
+occurs. Qualified C++ local lists/multiple declarations use precise ranges and
+normal shared budgets; pointer flow from new remains unresolved.
+
+Finite source-library and source-configuration constructors retain only allowlisted
+public labels and existing open-string evidence markers. Provider/properties and
+TLS group lists do not create algorithm assets or active-use assertions. The
+unchanged anchor formula distinguishes exact markers; the existing readers retain
+unknown configuration semantics. Private ephemeral fields and exact legacy binding
+keys allow only these labels to survive final redaction. C-family source context
+protection applies even when parsing/indexing stops; header consolidation carries
+both candidates' sensitive annotations under the original shared work allocation.
+Legacy lexical OpenSSL IDs/occurrences remain; masking their raw evidence does
+not delete them. No serialized fields, schema, asset kinds, identity formula or
+technical evaluator policy changes.
+
+Task080 review corrections keep EVP output updates source-ordered. Direct
+generated-key/context outputs have separate roles; opaque output pointers
+invalidate prior local facts. Known output buffers invalidate mutable scalar
+selectors while immutable object-family selections remain source references.
+Selector dialects distinguish EVP numeric IDs, OpenSSL algorithm strings and
+exact OQS mechanism/constant spellings. C++ template frames and an owner-scoped
+symbol index handle type/non-type/default/template-template parameters and
+using-declaration shadows without instantiation/import resolution.
+
+## Bounded OSS follow-up references (task085)
+
+The existing source-fact registry also binds two additive implementation/construction rules to the installed YAML fingerprints. Definitions, conditional guards and canonical composite components remain syntactic references with no execution or conformance claim. Explicit C/C++ fragment suffixes are parsed without preprocessing. The narrow C++ declarator repair requires nullptr to rule out a parameter declaration; C# identical-name handling requires identical canonical declared types. Opaque XML/chain declared classes can survive settings mutations without retaining an algorithm or claiming policy success.
+
+Display-only classification covers comments and literal Received headers, including bounded TLS tokens whose preview is masked. Original source coordinates and the exact masking function must corroborate reconstruction. Only human projections explain the reference kind, use state and coincident records; public JSON/native schema and policy inputs are unchanged.

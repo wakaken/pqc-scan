@@ -304,3 +304,27 @@ metadata and unknown names, but source paths, public fingerprints and identifier
 can remain sensitive operational metadata. Even probe-enabled builds never
 execute input, fetch references, rescan source or contact endpoints. See the
 [probe guide](PROBING.md) for TLS/SSH collection and distributions.
+
+### PHP, C# and C/C++ source evidence
+
+Use the same `scan --inventory-json`, `context-template` and `assess` workflow for
+these languages. Exact recognized ML-KEM, ML-DSA and SLH-DSA parameter sets reach
+the existing technical catalog. Source calls remain syntactic references: they
+do not establish execution, installed providers, platform support or negotiated
+TLS groups. X-Wing, composite and HPKE references retain their source trace but
+stay technically unknown where the catalog has no supported construction.
+
+Composer platform emulation (including explicit `false`), SDK/target-framework
+settings and native build declarations retain their distinct declaration origins.
+A declared or locked dependency does not select a primitive or confirm runtime
+support. Conditional MSBuild values and unevaluated CMake references remain
+unresolved. See [coverage and limits](COVERAGE.md).
+
+Select exact saved targets before declaring system use. A fresh, relevant `false`
+support answer blocks readiness; missing, unknown, expired or conflicting answers
+do not establish readiness. Answers belong to the selected system and target,
+even when another target uses the same algorithm. Assessing identical saved bytes,
+context and evaluation time in the CLI and local UI produces identical machine
+decisions; changing the display language does not alter them. Replacing or merely
+reformatting saved input invalidates the old binding. Inspect targets and create
+new context explicitly; assessment does not rescan source or probe a service.

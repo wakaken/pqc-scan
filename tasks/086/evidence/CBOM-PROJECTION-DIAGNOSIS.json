@@ -1,0 +1,72 @@
+{
+  "binarySha256": "e835f0c0b30c3f168f3debfd2ab49c5ae57534bb7ba5fdd4918c673abbd718c1",
+  "scope": "Diagnostic pre-fix debug binary from source03 default workspace. Not a final-source acceptance run.",
+  "command": [
+    "/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/target/debug/pqc-scan",
+    "scan",
+    "/tmp/pqc086-cbom-o5m9xc3_/input",
+    "--format",
+    "json",
+    "--rules-dir",
+    "/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/rules",
+    "--out-dir",
+    "/tmp/pqc086-cbom-o5m9xc3_/out"
+  ],
+  "exitCode": 0,
+  "findings": [
+    {
+      "rule": "OPENSSL_RSA_API",
+      "match": "[masked-sensitive-content]"
+    },
+    {
+      "rule": "C_FAMILY_CRYPTO_API",
+      "match": "RSA_new(/* arguments omitted */)"
+    },
+    {
+      "rule": "C_FAMILY_CRYPTO_API",
+      "match": "RSA_generate_key_ex(/* arguments omitted */)"
+    },
+    {
+      "rule": "API_OPENSSL_RSA_NEW",
+      "match": "[masked-sensitive-content]"
+    },
+    {
+      "rule": "API_OPENSSL_RSA_NEW",
+      "match": "[masked-sensitive-content]"
+    }
+  ],
+  "cbom": [
+    {
+      "component": "case.c",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "TLS",
+      "location": "case.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration."
+    },
+    {
+      "component": "case.c",
+      "algorithm": "RSA_generate_key_ex(/* arguments omitted */)",
+      "usage_type": "CryptoAPI",
+      "location": "case.c:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation."
+    },
+    {
+      "component": "case.c",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "case.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration."
+    },
+    {
+      "component": "case.c",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "case.c:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration."
+    }
+  ]
+}

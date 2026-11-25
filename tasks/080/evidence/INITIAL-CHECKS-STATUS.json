@@ -1,0 +1,50 @@
+{
+  "source": "21a4e6bdcdd7141d34c5960fc934fbd8118777bdf3ecd5db1f975f735f6affa8",
+  "note": "Both broad workspace runs passed before review1 product fixes; retained as historical only. Initial CLI helper failed at assessment due00:00 predating new capture, then fractional as-of also rejected. Corrected canonical next wholeUTCsecond marker-reader smoke passed. Initial shell ended0 because subsequent independent compatibility passed; not an all-check success.",
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exit": 0,
+      "tool_session": 2891,
+      "log": "workspace-initial.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_TARGET_DIR": "target/v05-feature"
+      },
+      "exit": 0,
+      "tool_session": 40878,
+      "log": "workspace-features-initial.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/080/evidence/check_cli_package.py"
+      ],
+      "exit": 1,
+      "log": "cli-package-initial.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/080/evidence/verify_compatibility.py"
+      ],
+      "exit": 0,
+      "log": "compat-initial.log"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+using System.Security.Cryptography; interface IFactory { static abstract object GenerateKey(MLKemAlgorithm a); } class C<MLKem> where MLKem:IFactory { void M(){var k=MLKem.GenerateKey(MLKemAlgorithm.MLKem768);} }

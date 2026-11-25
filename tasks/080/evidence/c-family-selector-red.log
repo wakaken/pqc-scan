@@ -1,0 +1,24 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.88s
+     Running tests/c_family_source.rs (target/debug/deps/c_family_source-31e1842aa2f3e465)
+
+running 1 test
+test c_family_selector_vocabulary_does_not_coerce_jose_generic_or_tls_names_into_key_types ... FAILED
+
+failures:
+
+---- c_family_selector_vocabulary_does_not_coerce_jose_generic_or_tls_names_into_key_types stdout ----
+
+thread 'c_family_selector_vocabulary_does_not_coerce_jose_generic_or_tls_names_into_key_types' (23617967) panicked at crates/pqc_scan_detectors/tests/c_family_source.rs:831:9:
+assertion `left == right` failed: ML-KEM: DetectorOutcome { detections: [Detection { rule_id: "C_FAMILY_PQC_API", location: Location { file: "case.c", line: 1, column: 10 }, evidence: Evidence { type: "tree_sitter_match", match: "C/C++ cryptographic source reference: ML-KEM", snippet_preview: "C/C++ cryptographic source reference: ML-KEM", metadata: {"detector": "tree_sitter_detector", "language": "c", "node_kind": "bounded_source_fact", "scope": "c,cpp", "source_resolution": "explicit_algorithm_or_unresolved_selector"} } }], status: Complete, observations: [ObservationDraft { method: "ast_pattern", assurance: "syntactic", .. }], explanation: None, limit_detail: None, test_ranges: [], display_ranges: [], sensitive_ranges: [35..55], sensitive_source_context: true }
+  left: Complete
+ right: Partial
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c_family_selector_vocabulary_does_not_coerce_jose_generic_or_tls_names_into_key_types
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.19s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test c_family_source`

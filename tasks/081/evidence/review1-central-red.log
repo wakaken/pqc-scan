@@ -1,0 +1,24 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.92s
+     Running tests/language_dependencies.rs (target/debug/deps/language_dependencies-bf2fcd7220ddc5e7)
+
+running 1 test
+test malformed_explicit_versions_and_truncated_central_sources_never_supply_inheritance ... FAILED
+
+failures:
+
+---- malformed_explicit_versions_and_truncated_central_sources_never_supply_inheritance stdout ----
+
+thread 'malformed_explicit_versions_and_truncated_central_sources_never_supply_inheritance' (23892654) panicked at crates/pqc_scan_detectors/tests/language_dependencies.rs:275:9:
+assertion `left == right` failed: <Project><ItemGroup><PackageReference Include="BouncyCastle.Cryptography" Version="2.6.0" VersionOverride="2.7.0"/></ItemGroup></Project>
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    malformed_explicit_versions_and_truncated_central_sources_never_supply_inheritance
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.20s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test language_dependencies`

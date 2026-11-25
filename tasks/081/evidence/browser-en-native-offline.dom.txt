@@ -1,0 +1,222 @@
+- text: Language / 言語
+- combobox "Language / 言語":
+  - option "English" [selected]
+  - option "日本語"
+- text: Theme / 表示
+- combobox "Theme / 表示":
+  - option "Light / ライト" [selected]
+  - option "Dark / ダーク"
+- main:
+  - link "Skip to findings":
+    - /url: "#findings"
+  - paragraph: pqc-scan / Static analysis
+  - heading "PQC Migration Scan Report" [level=1]
+  - paragraph:
+    - text: Generated
+    - time: Nov 24, 2026, 5:32:20 PM GMT+9 (Asia/Tokyo)
+  - generic: Findings to review
+  - generic: 14 items
+  - generic: Informational findings
+  - generic: 28 items
+  - generic: Files with findings
+  - generic: "17"
+  - figure "Severity distribution · all findings":
+    - generic: Severity distribution · all findings
+    - list:
+      - text: medium
+      - strong: "14"
+      - text: info
+      - strong: "28"
+  - heading "Inspection scope and completion" [level=2]
+  - paragraph: Some files or inspection steps could not be checked fully
+  - paragraph: Check the reasons below before relying on an absence of findings.
+  - text: Files selected
+  - strong: "25"
+  - text: Files analyzed
+  - strong: "20"
+  - text: Files needing follow-up
+  - strong: "5"
+  - generic "Scope and exclusions"
+  - paragraph: "Partially inspected files: 5"
+  - generic "Reasons and example files"
+  - complementary:
+    - group "Search conditions":
+      - generic "Search conditions ›":
+        - text: Search conditions ›
+      - text: View
+      - combobox "View":
+        - option "Risk candidates"
+        - option "Inventory"
+        - option "All" [selected]
+      - text: Search
+      - searchbox "Search"
+      - text: Severity
+      - combobox "Severity":
+        - option "All severities" [selected]
+        - option "critical"
+        - option "high"
+        - option "medium"
+        - option "low"
+        - option "info"
+      - text: Risk
+      - combobox "Risk":
+        - option "All risks" [selected]
+        - option "quantum-vulnerable"
+        - option "quantum-uncertain"
+        - option "quantum-safe"
+        - option "non-quantum-risk"
+      - text: Rule
+      - combobox "Rule":
+        - option "All rules"
+        - option "DEP_BOUNCYCASTLE — BouncyCastle dependency detected."
+        - option "DEP_OPENSSL — OpenSSL dependency detected."
+        - option "DEP_NATIVE_CRYPTO — C/C++ cryptographic dependency or literal build reference; effective con..." [selected]
+        - option "DEP_NUGET_CRYPTO — NuGet cryptographic package assertion; wrapper ownership and runtime sup..."
+        - option "DEP_PHP_CRYPTO — PHP cryptographic dependency or platform declaration; installed capabili..."
+      - link "Rule explanations":
+        - /url: report.rules.html?lang=en
+      - text: File
+      - combobox "File":
+        - option "All files" [selected]
+        - option "cmake-literals/CMakeLists.txt"
+        - option "composer-lock-git/composer.lock"
+        - option "composer-lock-path/composer.lock"
+        - option "composer-lock-zip/composer.lock"
+        - option "composer-manifest/composer.json"
+        - option "composer-wrappers/composer.json"
+        - option "conan-lock/conan.lock"
+        - option "conan-text/conanfile.txt"
+        - option "nuget-build/Directory.Build.props"
+        - option "nuget-central/Directory.Packages.props"
+        - option "nuget-conditional/sample.csproj"
+        - option "nuget-legacy/packages.config"
+        - option "nuget-lock-1/packages.lock.json"
+        - option "nuget-lock-2/packages.lock.json"
+        - option "nuget-project/sample.csproj"
+        - option "vcpkg-config/vcpkg-configuration.json"
+        - option "vcpkg-manifest/vcpkg.json"
+      - checkbox "Show test code results" [checked]
+      - text: Show test code results
+      - button "Clear all filters"
+    - group "Files":
+      - generic "Files ›":
+        - text: Files ›
+      - link "Show all results":
+        - /url: "#findings"
+      - list:
+        - generic "cmake-literals 6":
+          - generic: cmake-literals
+          - generic: "6"
+        - generic "composer-lock-git 1":
+          - generic: composer-lock-git
+          - generic: "1"
+        - generic "composer-lock-path 1":
+          - generic: composer-lock-path
+          - generic: "1"
+        - generic "composer-lock-zip 1":
+          - generic: composer-lock-zip
+          - generic: "1"
+        - generic "composer-manifest 4":
+          - generic: composer-manifest
+          - generic: "4"
+        - generic "composer-wrappers 3":
+          - generic: composer-wrappers
+          - generic: "3"
+        - generic "conan-lock 2":
+          - generic: conan-lock
+          - generic: "2"
+        - generic "conan-text 3":
+          - generic: conan-text
+          - generic: "3"
+        - generic "nuget-build 1":
+          - generic: nuget-build
+          - generic: "1"
+        - generic "nuget-central 2":
+          - generic: nuget-central
+          - generic: "2"
+        - generic "nuget-conditional 2":
+          - generic: nuget-conditional
+          - generic: "2"
+        - generic "nuget-legacy 2":
+          - generic: nuget-legacy
+          - generic: "2"
+        - generic "nuget-lock-1 2":
+          - generic: nuget-lock-1
+          - generic: "2"
+        - generic "nuget-lock-2 2":
+          - generic: nuget-lock-2
+          - generic: "2"
+        - generic "nuget-project 2":
+          - generic: nuget-project
+          - generic: "2"
+        - generic "vcpkg-config 2":
+          - generic: vcpkg-config
+          - generic: "2"
+        - generic "vcpkg-manifest 6":
+          - generic: vcpkg-manifest
+          - generic: "6"
+  - region "Findings":
+    - heading "Findings" [level=2]
+    - status: 1 / 5 finding groups; 11 / 42 findings match the current view.
+    - text: › ›
+    - generic "› C/C++ cryptographic dependency or literal build reference; effective configuration is unknown. info 11 hits Files 5 · matches 11 / 11":
+      - text: ›
+      - strong: C/C++ cryptographic dependency or literal build reference; effective configuration is unknown.
+      - generic: info
+      - generic: 11 hits
+      - generic: Files 5 · matches 11 / 11
+    - paragraph: Verify the native library, build flags and provider versions. vcpkg, Conan and CMake source declarations do not prove installation, selected algorithms or negotiated TLS.
+    - paragraph:
+      - link "About this rule":
+        - /url: report.rules.html?lang=en#rule-2
+    - heading "Locations and next steps" [level=4]
+    - generic "cmake-literals/CMakeLists.txt:1:1 openssl@3.5":
+      - code: cmake-literals/CMakeLists.txt:1:1
+      - generic: openssl@3.5
+    - generic "cmake-literals/CMakeLists.txt:2:1 openssl@unknown":
+      - code: cmake-literals/CMakeLists.txt:2:1
+      - generic: openssl@unknown
+    - generic "cmake-literals/CMakeLists.txt:2:1 liboqs@unknown":
+      - code: cmake-literals/CMakeLists.txt:2:1
+      - generic: liboqs@unknown
+    - generic "cmake-literals/CMakeLists.txt:3:1 liboqs@unknown":
+      - code: cmake-literals/CMakeLists.txt:3:1
+      - generic: liboqs@unknown
+    - generic "conan-lock/conan.lock:4:1 openssl@***7890.1":
+      - code: conan-lock/conan.lock:4:1
+      - generic: openssl@***7890.1
+    - generic "conan-text/conanfile.txt:2:1 openssl@3.5.0":
+      - code: conan-text/conanfile.txt:2:1
+      - generic: openssl@3.5.0
+    - generic "conan-text/conanfile.txt:3:1 liboqs@0.16.0":
+      - code: conan-text/conanfile.txt:3:1
+      - generic: liboqs@0.16.0
+    - generic "vcpkg-config/vcpkg-configuration.json:12:1 openssl@unknown":
+      - code: vcpkg-config/vcpkg-configuration.json:12:1
+      - generic: openssl@unknown
+    - generic "vcpkg-manifest/vcpkg.json (line unavailable) openssl@unknown":
+      - code: vcpkg-manifest/vcpkg.json (line unavailable)
+      - generic: openssl@unknown
+    - generic "vcpkg-manifest/vcpkg.json (line unavailable) openssl@3.5.0":
+      - code: vcpkg-manifest/vcpkg.json (line unavailable)
+      - generic: openssl@3.5.0
+    - generic "vcpkg-manifest/vcpkg.json:5:1 liboqs@>=0.16.0":
+      - code: vcpkg-manifest/vcpkg.json:5:1
+      - generic: liboqs@>=0.16.0
+    - generic "Shared checks and planning (2)" [active]
+    - heading "Verify C/C++ library, provider and build capabilities planned" [level=4]
+    - paragraph: Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.
+    - list:
+      - listitem: The deployed native library, build options, provider configuration and peer capabilities are unknown. vcpkg/Conan declarations, baselines and CMake references are not installed libraries or a reconstructed build graph.
+      - listitem: OpenSSL 3.5 supplies ML-KEM, ML-DSA and SLH-DSA in its default provider; oqsprovider is not required for every OpenSSL PQC use. Check the exact OpenSSL build, enabled algorithms and provider/property selection.
+      - listitem: For liboqs, liboqs-cpp and oqsprovider, verify separate compatible versions, disabled/enabled algorithms, native build flags and maintenance status. OQS integrations are prototypes; a wrapper/include reference does not establish deployment suitability.
+      - listitem: TLS groups and provider loads are requested configuration only. Verify peers, negotiated groups, authentication signatures and protocol compatibility independently. Preserve appropriate symmetric encryption rather than replacing AES wholesale with a public-key KEM.
+    - generic "References and examples"
+    - heading "Track PQC readiness of dependent libraries planned" [level=4]
+    - paragraph: Dependency-level crypto libraries strongly influence migration options and operational timelines.
+    - list:
+      - listitem: Record current versions in dependency-sbom.json and define upgrade targets.
+      - listitem: Subscribe to release notes for PQC feature availability and API changes.
+      - listitem: Run integration tests for PQC or hybrid modes before promoting to production.
+    - generic "References and examples"
+    - text: › ›

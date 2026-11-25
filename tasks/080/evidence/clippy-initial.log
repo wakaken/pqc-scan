@@ -1,0 +1,23 @@
+    Checking pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+    Checking pqc_scan_rules v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_rules)
+error: useless conversion to the same type: `std::string::String`
+   --> crates/pqc_scan_core/src/pipeline.rs:409:40
+    |
+409 |             finding.evidence.r#match = label.into();
+    |                                        ^^^^^^^^^^^^ help: consider removing `.into()`: `label`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#useless_conversion
+    = note: `-D clippy::useless-conversion` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::useless_conversion)]`
+
+error: useless conversion to the same type: `std::string::String`
+   --> crates/pqc_scan_core/src/pipeline.rs:414:29
+    |
+414 |             row.algorithm = label.into();
+    |                             ^^^^^^^^^^^^ help: consider removing `.into()`: `label`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#useless_conversion
+
+error: could not compile `pqc_scan_core` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `pqc_scan_core` (lib test) due to 2 previous errors

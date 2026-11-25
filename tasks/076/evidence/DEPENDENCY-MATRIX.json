@@ -1,0 +1,524 @@
+{
+  "edition_contract": "Composer schema pinned source; NuGet lock 1/2 (3 explicitly unsupported despite current upstream support); Conan lock exactly 0.5; vcpkg literal schema; CMake lexical only. No scanned dependency manager or script execution.",
+  "cases": [
+    {
+      "id": "composer-manifest",
+      "path": "tasks/076/evidence/dependency-corpus/composer-manifest/composer.json",
+      "sha256": "af5c7dc9772aa78107adabeeebd5d5ac6c38b60098a2d52cc07ec48bd6333f1f",
+      "format": "composer.json",
+      "sources": [
+        "composer",
+        "php",
+        "pqcrypto-compat",
+        "phpseclib"
+      ],
+      "expected_facts": [
+        "separate literal declared constraints",
+        "platform emulation is not installed PHP/extension"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "composer-lock-zip",
+      "path": "tasks/076/evidence/dependency-corpus/composer-lock-zip/composer.lock",
+      "sha256": "466f6dafeee489181af04bfa71b8f4802df3f197137340bac32c7a78503f026d",
+      "format": "composer.lock",
+      "sources": [
+        "composer"
+      ],
+      "expected_facts": [
+        "paragonie/pqcrypto_compat concrete version reported unresolved without registry-source proof",
+        "arbitrary zip distribution alone never establishes registry origin",
+        "never retain dist/source URL"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "composer-lock-path",
+      "path": "tasks/076/evidence/dependency-corpus/composer-lock-path/composer.lock",
+      "sha256": "3bc9c72a102eed3f31e729f89522647762344069c3f0b9a09ff9a70d2eece2f0",
+      "format": "composer.lock",
+      "sources": [
+        "composer"
+      ],
+      "expected_facts": [
+        "paragonie/pqcrypto_compat version 1.0.0 reported unresolved",
+        "never retain dist/source URL"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "composer-lock-git",
+      "path": "tasks/076/evidence/dependency-corpus/composer-lock-git/composer.lock",
+      "sha256": "1611461eecb02cc4e3f79ab5b3221908bfc2b9a1f3a6e3465a2843bd39d5437c",
+      "format": "composer.lock",
+      "sources": [
+        "composer"
+      ],
+      "expected_facts": [
+        "paragonie/pqcrypto_compat version 1.0.0 reported unresolved",
+        "never retain dist/source URL"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "composer-negative",
+      "path": "tasks/076/evidence/dependency-corpus/composer-negative/composer.json",
+      "sha256": "22e1c2d986f9f43f8cce8bf6bcbf8f57f1dd608d5d8a66051ea54ae70d453301",
+      "format": "composer.json",
+      "sources": [
+        "composer"
+      ],
+      "expected_facts": [],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "composer-wrappers",
+      "path": "tasks/076/evidence/dependency-corpus/composer-wrappers/composer.json",
+      "sha256": "684a561307a93d7972ce146f4c506269452e43c9a5e3029e28d53ff796adc901",
+      "format": "composer.json",
+      "sources": [
+        "composer",
+        "oqs-php-ext",
+        "oqs-php-ffi",
+        "ext-pqcrypto"
+      ],
+      "expected_facts": [
+        "distinct FFI wrapper, oqsphp extension and PQCrypto extension references",
+        "no fabricated Composer identity for Muzosh repository"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "nuget-project",
+      "path": "tasks/076/evidence/dependency-corpus/nuget-project/sample.csproj",
+      "sha256": "2000acd9ead93719edc813a2e85db6fe28c551d31724242645ab0836046399be",
+      "format": "sample.csproj",
+      "sources": [
+        "nuget",
+        "dotnet",
+        "bc-csharp"
+      ],
+      "expected_facts": [
+        "declaration BouncyCastle.Cryptography >=2.7.0, not installed",
+        "TFM literal references"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "nuget-conditional",
+      "path": "tasks/076/evidence/dependency-corpus/nuget-conditional/sample.csproj",
+      "sha256": "340bbb048ce98991733e9e387e4c3d322b1cc4f37d67bc737110a7ad954a652b",
+      "format": "sample.csproj",
+      "sources": [
+        "nuget"
+      ],
+      "expected_facts": [
+        "conditional package assertion; no resolved version",
+        "no imports/network evaluation"
+      ],
+      "expected_status": "partial",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "nuget-central",
+      "path": "tasks/076/evidence/dependency-corpus/nuget-central/Directory.Packages.props",
+      "sha256": "07659b19cf45640ceb6f0c4d8424a2f64c06930de670f99eeffbc711a8bd0a07",
+      "format": "Directory.Packages.props",
+      "sources": [
+        "nuget"
+      ],
+      "expected_facts": [
+        "literal central declaration only; usable by nearest selected in-root project context"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "nuget-build",
+      "path": "tasks/076/evidence/dependency-corpus/nuget-build/Directory.Build.props",
+      "sha256": "537c5be5ad11ace80001ad9a3d46beec9993876a2d8b0a12b79b8cb53f92d6d0",
+      "format": "Directory.Build.props",
+      "sources": [
+        "nuget",
+        "oqs-dotnet",
+        "oqs-dotnet-old"
+      ],
+      "expected_facts": [
+        "TFM and literal reference",
+        "OpenForge identity distinct from deprecated official dotnetOQS"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "nuget-legacy",
+      "path": "tasks/076/evidence/dependency-corpus/nuget-legacy/packages.config",
+      "sha256": "7b7d7e97bf19e9f78bc1c11bef2963cdcd71acdf75eaa86b05c5eaffbd3acef7",
+      "format": "packages.config",
+      "sources": [
+        "nuget"
+      ],
+      "expected_facts": [
+        "reported package and target framework; no source registry assurance"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "nuget-sdk",
+      "path": "tasks/076/evidence/dependency-corpus/nuget-sdk/global.json",
+      "sha256": "cb03931434c87ddfd2e74d473b0c23215557cfbd4fd5ccb294e69a6f54f7592e",
+      "format": "global.json",
+      "sources": [
+        "dotnet"
+      ],
+      "expected_facts": [
+        "declared SDK, not installed runtime"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "nuget-lock-1",
+      "path": "tasks/076/evidence/dependency-corpus/nuget-lock-1/packages.lock.json",
+      "sha256": "5cb891f88cc79869f8d54ef0dc7a9437f774d96115024a159450981dbd1990c2",
+      "format": "packages.lock.json",
+      "sources": [
+        "nuget"
+      ],
+      "expected_facts": [
+        "source-local requested/resolved facts",
+        "case-insensitive ID, no source merging",
+        "framework bucket net11.0"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "nuget-lock-2",
+      "path": "tasks/076/evidence/dependency-corpus/nuget-lock-2/packages.lock.json",
+      "sha256": "4d751d314ca4f8d796c8529c4a2409f5b1cbc07b9d475e2dacca773e513c2c04",
+      "format": "packages.lock.json",
+      "sources": [
+        "nuget"
+      ],
+      "expected_facts": [
+        "source-local requested/resolved facts",
+        "case-insensitive ID, no source merging",
+        "framework bucket net11.0"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "nuget-lock-future",
+      "path": "tasks/076/evidence/dependency-corpus/nuget-lock-future/packages.lock.json",
+      "sha256": "9a3a82e61bb38fa57820bdc92111eaa5c47fd2d25b5132e0278203d125234118",
+      "format": "packages.lock.json",
+      "sources": [
+        "nuget"
+      ],
+      "expected_facts": [
+        "unsupported edition, not silently empty/complete"
+      ],
+      "expected_status": "unsupported",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "nuget-negative",
+      "path": "tasks/076/evidence/dependency-corpus/nuget-negative/sample.csproj",
+      "sha256": "0718c2c51ce55739e5f1d256029edea05c32b0e731e832bde49b9062a6195e07",
+      "format": "sample.csproj",
+      "sources": [
+        "nuget"
+      ],
+      "expected_facts": [],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "vcpkg-manifest",
+      "path": "tasks/076/evidence/dependency-corpus/vcpkg-manifest/vcpkg.json",
+      "sha256": "c98133a5f733f1ba4289304e9ff15dc12ae7305202719a13058a1894bc5b38fd",
+      "format": "vcpkg.json",
+      "sources": [
+        "vcpkg",
+        "liboqs",
+        "openssl"
+      ],
+      "expected_facts": [
+        "literal declarations/features/baseline/override; none proves installed/resolved"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "vcpkg-config",
+      "path": "tasks/076/evidence/dependency-corpus/vcpkg-config/vcpkg-configuration.json",
+      "sha256": "94f319f94a825763f3d926b6b3172cb775ce6d703c2616b54a021d62fa4d5d1c",
+      "format": "vcpkg-configuration.json",
+      "sources": [
+        "vcpkg"
+      ],
+      "expected_facts": [
+        "registry configuration references only; no fetched registry; omit URL"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "vcpkg-negative",
+      "path": "tasks/076/evidence/dependency-corpus/vcpkg-negative/vcpkg.json",
+      "sha256": "69939f1e392f082972cd371bce34cfb3b5418421dae04c320d4c5c5eeb6fb605",
+      "format": "vcpkg.json",
+      "sources": [
+        "vcpkg"
+      ],
+      "expected_facts": [],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "conan-text",
+      "path": "tasks/076/evidence/dependency-corpus/conan-text/conanfile.txt",
+      "sha256": "aaa219e643c1947f216ecdc838c4aecd111c2a2e4b6bd4ce9e11eef74c361bb6",
+      "format": "conanfile.txt",
+      "sources": [
+        "conan"
+      ],
+      "expected_facts": [
+        "literal declarations with version and group; not installed"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "conan-lock",
+      "path": "tasks/076/evidence/dependency-corpus/conan-lock/conan.lock",
+      "sha256": "4ef0ec1027805b5d0778976f71de382a346677112d2bf338a2beb3eb1e6bf457",
+      "format": "conan.lock",
+      "sources": [
+        "conan"
+      ],
+      "expected_facts": [
+        "bounded concrete reported lock versions and revisions; no binary/platform/registry deployment proof"
+      ],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "conan-lock-future",
+      "path": "tasks/076/evidence/dependency-corpus/conan-lock-future/conan.lock",
+      "sha256": "3cbd1cd13fb8609908b5644c93ab6d1e0b1184dd4ccfa2bc08094b2ce4ce04f6",
+      "format": "conan.lock",
+      "sources": [
+        "conan"
+      ],
+      "expected_facts": [
+        "unsupported edition"
+      ],
+      "expected_status": "unsupported",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "conan-negative",
+      "path": "tasks/076/evidence/dependency-corpus/conan-negative/conanfile.txt",
+      "sha256": "58dd7ba26a456adf320e532965b1aa6f4dd25c523975d50a7a51b1b34d64b270",
+      "format": "conanfile.txt",
+      "sources": [
+        "conan"
+      ],
+      "expected_facts": [],
+      "expected_status": "complete",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "cmake-literals",
+      "path": "tasks/076/evidence/dependency-corpus/cmake-literals/CMakeLists.txt",
+      "sha256": "b5321d55cb91f06ac7ce42a2a0c8dc6decc127c1b548d233ced8dccbef9e7d7e",
+      "format": "CMakeLists.txt",
+      "sources": [
+        "cmake",
+        "openssl",
+        "liboqs"
+      ],
+      "expected_facts": [
+        "lexical optional context references only; do not evaluate/fetch"
+      ],
+      "expected_status": "partial",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    },
+    {
+      "id": "cmake-dynamic",
+      "path": "tasks/076/evidence/dependency-corpus/cmake-dynamic/dependencies.cmake",
+      "sha256": "00114e54c1675950200062043d83f708b701c2330b0d09002ea0b1c547450539",
+      "format": "dependencies.cmake",
+      "sources": [
+        "cmake"
+      ],
+      "expected_facts": [
+        "dynamic unresolved; comment ignored"
+      ],
+      "expected_status": "partial",
+      "never_assert": [
+        "installed",
+        "activated",
+        "graph",
+        "ready",
+        "credential_url"
+      ]
+    }
+  ]
+}

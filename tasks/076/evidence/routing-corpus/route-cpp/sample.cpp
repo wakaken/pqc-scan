@@ -1,0 +1,1 @@
+void f(void) { OQS_KEM_new("ML-KEM-768"); }

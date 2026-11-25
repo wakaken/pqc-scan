@@ -5,13 +5,25 @@ pub fn is_dependency_manifest(path: &Path) -> bool {
         Some(v) => v,
         None => return false,
     };
-    if name.ends_with(".gemspec") {
+    if name.ends_with(".gemspec") || name.ends_with(".csproj") || name.ends_with(".cmake") {
         return true;
     }
 
     matches!(
         name,
         "Cargo.toml"
+            | "composer.json"
+            | "composer.lock"
+            | "Directory.Packages.props"
+            | "Directory.Build.props"
+            | "packages.config"
+            | "packages.lock.json"
+            | "global.json"
+            | "vcpkg.json"
+            | "vcpkg-configuration.json"
+            | "conanfile.txt"
+            | "conan.lock"
+            | "CMakeLists.txt"
             | "Cargo.lock"
             | "Gemfile"
             | "Gemfile.lock"
