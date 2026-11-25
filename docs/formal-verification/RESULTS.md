@@ -283,8 +283,8 @@ conservation, then inventory reference integrity and finding-set preservation.
 
 ## 2026-11-25: Lean retirement
 
-Status: implementation review accepted; full local checks, hosted CI and the
-independent test review are pending. This section supersedes the active tool
+Status: local checks and hosted CI passed; both independent review stages
+accepted the change. This section supersedes the active tool
 configuration in earlier measurements without rewriting their historical scope.
 
 The maintainer requested retirement of Lean in favor of Rust-based verification.
@@ -311,4 +311,44 @@ Implementation reviewer `/root/lean_retirement_implementation_review` accepted
 diff SHA-256 `4bbfd37b3bdcf0a413cd253c5fa65aeb8bc8b1d171bf5439dcfac85887fbd949`
 after correcting a stale reference to comparison records. Initial runner tests
 (12), targeted Rust regressions (2), actionlint, fmt and diff checks passed.
-Final evidence will be recorded under `target/formal-lean-retirement/`.
+Final evidence is recorded under `target/formal-lean-retirement/`, executable
+source `7fc28a1abbccc9bc7b075c00b63a0aa38bf8a490`. The 241-input manifest SHA-256
+(sorted compact JSON) is
+`ae48bf21b41156df6387797c13d32d4b2037ac6d12bba3d87343aee3f43c92ce`.
+
+| Final check | Actual result |
+|---|---|
+| Default workspace tests | Exit 0; 825 passed, three existing ignored entries |
+| All-features workspace tests | Exit 0; 887 passed, five existing ignored entries |
+| Default/all-features build and clippy; fmt | All exit 0; clippy warnings denied |
+| Runner tests, actionlint and diff check | All exit 0; 12 Python tests |
+| Local `--mode all` | Exit 0; source unchanged; all 13 Kani harnesses, Creusot proof and all three mutation controls pass |
+| Retired `--mode lean` | Exit 2 before creating results or running verifiers |
+
+Ordinary check receipts are under `default/` and `all-features/`, with isolated
+Cargo target paths, 104 compiled executable hashes per configuration and CLI
+hashes captured before test execution. Their source manifests exactly match
+final proof inputs. The local `proof/results.json` SHA-256 is
+`3c5302c60817c09bae5b51edda675a9524f90e8be3226afa0f882de89a0f1b92`.
+
+[Hosted run 45549911853](https://github.com/wakaken/pqc-scan/actions/runs/45549911853)
+passed for that source on Ubuntu 24.04 x86_64. Exactly two jobs ran; no Lean or
+Elan installation/execution step remains. Both downloaded lane reports use
+schema 2, omit `lean`/`comparison`, report source unchanged and exactly match all
+241 local input hashes.
+
+| CI lane | Result | Full job time | results.json SHA-256 |
+|---|---|---|---|
+| Kani | All 13 selected harnesses pass | 4m 16s | `a411eda58a9441e6ef20148edbb6227bed9b91138a43b8848c7879bd53ce0c6d` |
+| Creusot | Proof and positive witnesses pass; all three mutant VCs are unproved and their runtime witnesses fail | 11m 50s | `f5cc7e44107765aa04cf5ecbb1d491a87b719b1cabb3cbf81dc98fca066126c4` |
+
+CI reports/logs are under `ci/`, job metadata is `ci-final.json`, and artifact
+metadata is `ci-artifacts.jsonl`. Hosted artifact IDs are 14993376083 (Kani) and
+14993666233 (Creusot), with 14-day retention. The experimental unknown-identifier
+Kani harness remains `not_run`, outside the successful default proof scope.
+
+Test reviewer `/root/lean_retirement_test_review` accepted the final executable
+source with no findings, independently checking manifests, log hashes, preserved
+assertions, failure classifications and mutation evidence without rerunning the
+full suites. This final update changes results prose only; executable inputs,
+all verification results and review conclusions remain applicable.
