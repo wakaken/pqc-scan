@@ -70,6 +70,9 @@ def trial(command,name,data,work):
 
 def run_target(label,command,seeds,out,work,*,seconds,seed,max_cases=40000):
     if not math.isfinite(seconds) or seconds<=0 or type(max_cases) is not int or max_cases<=0 or not seeds or any(len(bytes.fromhex(s['hex']))>MAX_INPUT for s in seeds):raise ValueError('finite positive campaign limits and bounded nonempty seeds required')
+    return _run_target_validated(label,command,seeds,out,work,seconds=seconds,seed=seed,max_cases=max_cases)
+
+def _run_target_validated(label,command,seeds,out,work,*,seconds,seed,max_cases):
     out=Path(out);out.mkdir(parents=True,exist_ok=False);work=Path(work)
     (out/'seeds.json').write_text(json.dumps(seeds,separators=(',',':'))+'\n')
     start=time.monotonic();counts=Counter();paths=Counter();failures=[];index=0

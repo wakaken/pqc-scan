@@ -1,5 +1,6 @@
 //! Bounded, source-ordered PHP local values and generation-tuple roles.
 use super::super::context::children;
+use super::super::PartialCause;
 use super::names::{Names, CLASS, CONSTANT, FUNCTION};
 use super::{class_info, ClassInfo, Key, Role};
 use std::collections::HashMap;
@@ -64,7 +65,7 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
                         && right.kind() == "variable_name"
                     {
                         result.add(right, None, None, n.end_byte());
-                        names.partial.set(true);
+                        names.mark_partial(PartialCause::OtherSourceUncertainty);
                     }
                 }
                 "simple_parameter" | "variadic_parameter" | "property_promotion_parameter" => {
@@ -97,7 +98,7 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
                         result.invalidate_target(name, n.end_byte(), 0);
                     }
                     if n.kind() == "global_declaration" {
-                        names.partial.set(true);
+                        names.mark_partial(PartialCause::OtherSourceUncertainty);
                     }
                 }
                 _ => {}
@@ -268,7 +269,8 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
         if b.guard
             .is_some_and(|(start, end)| node.start_byte() < start || node.end_byte() > end)
         {
-            self.names.partial.set(true);
+            self.names
+                .mark_partial(PartialCause::OtherSourceUncertainty);
             return None;
         }
         Some(b)
@@ -420,7 +422,8 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
                 .get(&key)
                 .is_some_and(|v| v.iter().filter(|b| b.end <= node.start_byte()).count() > 1)
             {
-                self.names.partial.set(true);
+                self.names
+                    .mark_partial(PartialCause::OtherSourceUncertainty);
             }
         }
         match value? {
@@ -433,9 +436,9 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
         // methods. Only actual crypto lookups may report unresolved bindings.
         // Resolution remains fail-closed; work budgets and context limits are
         // still charged and are never restored by this diagnostic suppression.
-        let partial = self.names.partial.get();
+        let partial = self.names.partial_causes();
         let value = self.value(node, 0);
-        self.names.partial.set(partial);
+        self.names.restore_partial_causes(partial);
         matches!(value, Some(Value::Key(key)) if key.role == Role::XmlSignature)
     }
     /// A nearby canonical key-type assertion is a source reference, not proof

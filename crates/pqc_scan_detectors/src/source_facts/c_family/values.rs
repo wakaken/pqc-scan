@@ -263,10 +263,9 @@ impl<'a, 's, 'c> Values<'a, 's, 'c> {
                 let Some(function) = node.child_by_field_name("function") else {
                     continue;
                 };
-                let Some(name) = function_name(ctx, function) else {
-                    continue;
-                };
-                let name = name.strip_prefix("::").unwrap_or(&name);
+                let name = function_name(ctx, function);
+                let name = name.as_deref().unwrap_or("");
+                let name = name.strip_prefix("::").unwrap_or(name);
                 let arguments = args(*node);
                 let output_indices: &[usize] = match name {
                     "OQS_KEM_keypair" | "OQS_KEM_encaps" | "OQS_SIG_keypair" | "OQS_SIG_sign" => {
@@ -343,23 +342,15 @@ impl<'a, 's, 'c> Values<'a, 's, 'c> {
                         out.invalidate_all(*node);
                     }
                 } else {
-                    let safe_c = known(name) && out.api_available(name, function);
+                    let safe_c =
+                        name != "wc_MakeRsaKey" && known(name) && out.api_available(name, function);
                     let safe_cpp = out
                         .receiver(function)
                         .and_then(|(receiver, method)| {
                             out.key(receiver, node.start_byte(), 0)
                                 .map(|key| (key.role, method))
                         })
-                        .is_some_and(|(role, method)| match role {
-                            Role::CppKem => matches!(
-                                method,
-                                "generate_keypair" | "encap_secret" | "decap_secret"
-                            ),
-                            Role::CppSig => {
-                                matches!(method, "generate_keypair" | "sign" | "verify")
-                            }
-                            _ => false,
-                        });
+                        .is_some_and(|(role, method)| super::cpp_operation_allowed(role, method));
                     if !safe_c && !safe_cpp {
                         out.invalidate_all(*node);
                     }
@@ -388,16 +379,18 @@ impl<'a, 's, 'c> Values<'a, 's, 'c> {
         true
     }
     fn identifier(&self, node: Node<'_>) -> Option<String> {
+        if !matches!(
+            node.kind(),
+            "identifier" | "type_identifier" | "namespace_identifier"
+        ) {
+            return None;
+        }
         let value = self.ctx.bounded_source(node);
         if value.len() > 256 {
             self.ctx.limit("c_family_identifier_bytes", 256, 256);
             return None;
         }
-        (matches!(
-            node.kind(),
-            "identifier" | "type_identifier" | "namespace_identifier"
-        ) && !value.is_empty())
-        .then(|| value.into())
+        (!value.is_empty()).then(|| value.into())
     }
     fn declarator(&self, mut node: Node<'a>) -> Option<Node<'a>> {
         for _ in 0..8 {
@@ -559,14 +552,14 @@ impl<'a, 's, 'c> Values<'a, 's, 'c> {
             && (!name.starts_with("Botan::") || !self.botan_shadow)
             && !shadowed
     }
+    pub fn implementation_available(&self, name: &str) -> bool {
+        !self.names_incomplete.get() && !self.macros.contains(name)
+    }
     pub fn oqs_shadowed(&self) -> bool {
         self.names_incomplete.get()
             || self.oqs_shadow
             || self.macros.contains("oqs")
             || self.globals.contains("oqs")
-    }
-    pub fn was_bound(&self, node: Node<'_>) -> bool {
-        self.binding_scope(node, node.start_byte()).is_some()
     }
     pub fn receiver(&self, node: Node<'a>) -> Option<(Node<'a>, &'s str)> {
         if node.kind() != "field_expression" {

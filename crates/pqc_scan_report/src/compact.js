@@ -28,8 +28,18 @@
   const explanations = root.querySelector('[data-rule-explanations]');
   let ruleOpener = null;
   if (dialog) {
-    dialog.querySelector('[data-close-rule-dialog]').addEventListener('click', () => dialog.close());
+    const close = dialog.querySelector('[data-close-rule-dialog]');
+    close.addEventListener('click', () => dialog.close());
     dialog.addEventListener('close', () => { ruleOpener?.focus(); ruleOpener = null; });
+    dialog.addEventListener('keydown', event => {
+      if (!dialog.open || event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+      const links = dialog.querySelector('[data-rule-dialog-body]').querySelectorAll('a[href]');
+      const last = links[links.length - 1] || close;
+      if ((event.shiftKey && document.activeElement === close) || (!event.shiftKey && document.activeElement === last)) {
+        event.preventDefault();
+        (event.shiftKey ? last : close).focus();
+      }
+    });
   }
   function openRule(link) {
     if (!dialog || !explanations || typeof dialog.showModal !== 'function') return false;

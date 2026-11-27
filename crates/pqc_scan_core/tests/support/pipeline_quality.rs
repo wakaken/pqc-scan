@@ -1,6 +1,62 @@
 use super::*;
 
 #[test]
+fn cbom_keeps_distinct_locations_when_paths_and_matches_contain_colons() {
+    let first = Finding {
+        finding_id: "first".into(),
+        rule_id: "RULE".into(),
+        category: "RSA".into(),
+        risk: pqc_scan_rules::Risk::QuantumUncertain,
+        severity: pqc_scan_rules::Severity::Info,
+        confidence: 0.5,
+        description: "Synthetic reference".into(),
+        migration_hint: "Check source".into(),
+        location: crate::Location {
+            file: "source.rs".into(),
+            line: 2,
+            column: 1,
+        },
+        evidence: crate::Evidence {
+            r#type: "regex_match".into(),
+            r#match: "part.rs:3:RSA".into(),
+            snippet_preview: String::new(),
+            metadata: BTreeMap::new(),
+        },
+        recommended_actions: Vec::new(),
+        source_snippet: None,
+    };
+    let mut second = first.clone();
+    second.finding_id = "second".into();
+    second.location.file = "source.rs:2:part.rs".into();
+    second.location.line = 3;
+    second.evidence.r#match = "RSA".into();
+    let mut repeated = first.clone();
+    repeated.finding_id = "same-reference-other-column".into();
+    repeated.location.column = 8;
+    let mut other_rule = first.clone();
+    other_rule.finding_id = "other-rule".into();
+    other_rule.rule_id = "OTHER".into();
+    let mut other_match = second.clone();
+    other_match.finding_id = "other-match".into();
+    other_match.evidence.r#match = "ECDSA".into();
+
+    let rows = build_cbom(&[first, second, repeated, other_rule, other_match]);
+    let projection: Vec<_> = rows
+        .iter()
+        .map(|row| (row.location.as_str(), row.algorithm.as_str()))
+        .collect();
+    assert_eq!(
+        projection,
+        vec![
+            ("source.rs:2", "part.rs:3:RSA"),
+            ("source.rs:2:part.rs:3", "RSA"),
+            ("source.rs:2", "part.rs:3:RSA"),
+            ("source.rs:2:part.rs:3", "ECDSA"),
+        ]
+    );
+}
+
+#[test]
 fn snippet_boundaries_and_each_private_marker_protect_displayed_source() {
     assert!(build_source_snippet(&[], 1, 2, 2).is_none());
     assert!(build_source_snippet(&["public".into()], 0, 2, 2).is_none());

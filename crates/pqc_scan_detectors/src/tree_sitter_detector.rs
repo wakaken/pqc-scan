@@ -259,6 +259,7 @@ impl TreeSitterDetector {
                 canonical: Some(call.canonical),
             });
         }
+        let mut partial_causes = crate::source_facts::PartialCauses::default();
         if language_name == "javascript" {
             let (invalid, limited) = javascript_validation::strict_yield_binding(
                 text,
@@ -269,11 +270,9 @@ impl TreeSitterDetector {
             if limited {
                 status = DetectorStatus::Truncated;
             } else if invalid && status != DetectorStatus::Truncated {
+                partial_causes.insert(crate::source_facts::PartialCause::OtherSourceUncertainty);
                 status = DetectorStatus::Partial;
             }
-        }
-        if tree.root_node().has_error() && status != DetectorStatus::Truncated {
-            status = DetectorStatus::Partial;
         }
         let facts = crate::source_facts::inspect_in_repository(
             tree.root_node(),
@@ -284,10 +283,12 @@ impl TreeSitterDetector {
             Some(&file.path),
             repository,
         );
+        partial_causes.extend(facts.partial_causes());
         if facts.truncated {
             status = DetectorStatus::Truncated;
-        } else if is_new_language(language_name)
-            && facts.partial
+        } else if (is_new_language(language_name)
+            || partial_causes.contains(crate::source_facts::PartialCause::ParserRecovery))
+            && facts.is_partial()
             && status == DetectorStatus::Complete
         {
             status = DetectorStatus::Partial;
@@ -627,9 +628,7 @@ impl TreeSitterDetector {
             .with_observations(observations)
             .with_test_ranges(test_ranges)
             .with_sensitive_ranges(facts.sensitive_ranges.clone());
-        Ok(if template_pending {
-            outcome.with_explanation("Unrendered template: static source inspected; generated values and branches remain unknown.")
-        } else if positions.as_ref().is_some_and(|p| !p.complete) {
+        Ok(if positions.as_ref().is_some_and(|p| !p.complete) {
             outcome.with_limit(
                 "source_position_entries",
                 budget.max_ast_nodes,
@@ -639,8 +638,10 @@ impl TreeSitterDetector {
             outcome.with_limit(reason, limit, processed)
         } else if status == DetectorStatus::Truncated {
             outcome.with_explanation("AST inspection limit: node, candidate, alias or retained-match work was bounded. Retained findings remain available; omitted findings are unknown. Inspect the remaining source separately.")
+        } else if template_pending {
+            outcome.with_explanation("Unrendered template: static source inspected; generated values and branches remain unknown.")
         } else if status == DetectorStatus::Partial {
-            outcome.with_explanation("Source syntax could not be fully interpreted. Parsed regions were inspected; unresolved syntax remains unknown. Check generated syntax, language version and the source file separately.")
+            outcome.with_explanation(partial_causes.explanation())
         } else {
             outcome
         })

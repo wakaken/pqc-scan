@@ -34,7 +34,11 @@ fn inspect(language: &str, pattern: &str, text: &str) -> Facts {
         crate::DetectorBudget::default(),
     );
     let mut facts = Facts {
-        partial: tree.root_node().has_error(),
+        partial_causes: if tree.root_node().has_error() {
+            super::PartialCauses::from(super::PartialCause::ParserRecovery)
+        } else {
+            super::PartialCauses::default()
+        },
         ..Facts::default()
     };
     if language == "python" {

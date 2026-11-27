@@ -1,5 +1,6 @@
 //! Local lexical values, immutable parameter symbols and conservative write barriers.
 use super::super::context::children;
+use super::super::PartialCause;
 use super::names::Names;
 use super::{class_info, compatible, factory_method, parameter, unique_kind, Key, Kind};
 use std::collections::HashMap;
@@ -171,7 +172,7 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
                                     .and_then(|n| out.selector_in(n, 0))
                                     .filter(|s| compatible(key.kind.family().unwrap_or(""), s));
                                 key.algorithm = selected.unwrap_or_else(|| {
-                                    names.partial.set(true);
+                                    names.mark_partial(PartialCause::UnresolvedCryptoBinding);
                                     key.kind.family().unwrap_or("").into()
                                 });
                             }
@@ -356,7 +357,6 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
                     .guard
                     .is_some_and(|(a, b)| node.start_byte() < a || node.end_byte() > b)
                 {
-                    self.names.partial.set(true);
                     return None;
                 }
                 let function = self.names.ctx.function_scope(self.names.ctx.scope(node));
@@ -364,7 +364,6 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
                     let last = v.partition_point(|at| *at <= node.start_byte());
                     last > 0 && binding.end < v[last - 1]
                 }) {
-                    self.names.partial.set(true);
                     return None;
                 }
                 return Some(binding);
@@ -403,7 +402,8 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
                     let value = self.value(rhs, depth + usize::from(rhs.kind() == "identifier"));
                     if let (Some(hint), Some(value)) = (b.hint, value.as_ref()) {
                         if hint.family() != value.kind.family() {
-                            self.names.partial.set(true);
+                            self.names
+                                .mark_partial(PartialCause::UnresolvedCryptoBinding);
                             return None;
                         }
                     }
@@ -425,7 +425,8 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
                     {
                         key.algorithm = selected;
                     } else {
-                        self.names.partial.set(true);
+                        self.names
+                            .mark_partial(PartialCause::UnresolvedCryptoBinding);
                     }
                 }
                 Some(key)
@@ -458,7 +459,8 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
                 if let Some(selected) = selected {
                     key.algorithm = selected;
                 } else if method == "GenerateKey" {
-                    self.names.partial.set(true);
+                    self.names
+                        .mark_partial(PartialCause::UnresolvedCryptoBinding);
                 }
             }
             found.push(key);
@@ -467,7 +469,8 @@ impl<'a, 's, 'n, 'c> Values<'a, 's, 'n, 'c> {
             found.pop()
         } else {
             if found.len() > 1 {
-                self.names.partial.set(true);
+                self.names
+                    .mark_partial(PartialCause::UnresolvedCryptoBinding);
             }
             None
         }

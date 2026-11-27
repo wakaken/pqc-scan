@@ -318,10 +318,13 @@ fn c_family_raw_imports_do_not_guess_wrong_selector_dialects_or_expose_key_argum
     );
 }
 #[test]
-fn every_frozen_c_family_case_matches_its_original_focal_expectation() {
+fn c_family_frozen_focal_references_follow_the_current_partial_contract() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let corpus: Value = serde_json::from_slice(
-        &std::fs::read(root.join("tasks/076/evidence/CORPUS-CASES.json")).unwrap(),
+        &std::fs::read(
+            root.join("crates/pqc_scan_detectors/tests/fixtures/c_family_partial_contract_v2.json"),
+        )
+        .unwrap(),
     )
     .unwrap();
     let f = Fixture::new();
@@ -567,7 +570,9 @@ fn c_family_alias_and_write_limits_cannot_resurrect_old_bindings() {
             .unwrap();
         assert_eq!(
             outcome.status(),
-            if writes <= 64 {
+            if writes == 0 {
+                DetectorStatus::Partial
+            } else if writes <= 64 {
                 DetectorStatus::Complete
             } else {
                 DetectorStatus::Truncated
@@ -1378,4 +1383,405 @@ fn cpp_review1_qualified_namespace_roots_and_non_type_parameters_are_owner_scope
  ]{
   let native=f.native(source,"cpp");let expression=if source.contains("Signature"){"s.sign(data)"}else{"RSA_new()"};let first=source.find(expression).unwrap();let last=source.rfind(expression).unwrap();assert!(focal(&native,first,first+expression.len()).iter().all(|o|algorithm_names(&native,o).is_empty()),"{source}: {native}");let o=focal(&native,last,last+expression.len());assert_eq!(o.len(),1);assert_eq!(algorithm_names(&native,o[0]),if source.contains("Signature"){vec!["ML-DSA-65"]}else{vec!["RSA"]});
  }
+}
+
+fn partial_repair_outcome(
+    f: &Fixture,
+    source: &str,
+    extension: &str,
+) -> pqc_scan_core::DetectorOutcome {
+    TreeSitterDetector
+        .detect_observed(
+            &ScannableFile::from_bytes(
+                format!("case.{extension}").into(),
+                source.as_bytes().to_vec(),
+            ),
+            &f.rules,
+        )
+        .unwrap()
+}
+
+#[test]
+fn partial_repair_non_names_do_not_consume_identifier_limits() {
+    let f = Fixture::new();
+    for padding in [0, 300, 600] {
+        let source = format!(
+            "void f(){{RSA_new(); auto unrelated=Thing(\"{}\"); unrelated.size(); RSA_new();}}",
+            "a".repeat(padding)
+        );
+        let outcome = partial_repair_outcome(&f, &source, "cpp");
+        assert_eq!(
+            outcome.status(),
+            DetectorStatus::Complete,
+            "{padding}: {outcome:?}"
+        );
+        let native = f.native(&source, "cpp");
+        assert_eq!(
+            native["observations"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|o| o["rule_id"] == "C_FAMILY_CRYPTO_API")
+                .count(),
+            2
+        );
+    }
+    for padding in [0, 600] {
+        let source = format!(
+            "void f(){{RSA_new(); Thing(/*{}*/).size(); RSA_new();}}",
+            "a".repeat(padding)
+        );
+        let outcome = partial_repair_outcome(&f, &source, "cpp");
+        assert_eq!(
+            outcome.status(),
+            DetectorStatus::Complete,
+            "{padding}: {outcome:?}"
+        );
+        assert_eq!(
+            f.native(&source, "cpp")["observations"]
+                .as_array()
+                .unwrap()
+                .len(),
+            2
+        );
+    }
+    for bytes in [255, 256, 257] {
+        let source = format!("void f(){{int {}=0; RSA_new();}}", "a".repeat(bytes));
+        let outcome = partial_repair_outcome(&f, &source, "cpp");
+        assert_eq!(
+            outcome.status(),
+            if bytes > 256 {
+                DetectorStatus::Truncated
+            } else {
+                DetectorStatus::Complete
+            },
+            "{bytes}: {outcome:?}"
+        );
+    }
+    for bytes in [511, 512, 513] {
+        let source = format!("void f(){{{}(); RSA_new();}}", "a".repeat(bytes));
+        let outcome = partial_repair_outcome(&f, &source, "cpp");
+        assert_eq!(
+            outcome.status(),
+            if bytes > 512 {
+                DetectorStatus::Truncated
+            } else {
+                DetectorStatus::Complete
+            },
+            "{bytes}: {outcome:?}"
+        );
+    }
+}
+
+#[test]
+fn partial_repair_unknown_crypto_receivers_remain_partial_and_opaque_calls_invalidate() {
+    let f = Fixture::new();
+    for method in [
+        "sign",
+        "verify",
+        "encap_secret",
+        "decap_secret",
+        "generate_keypair",
+    ] {
+        let source = format!("void f(){{opaque.{method}();}}");
+        assert_eq!(
+            partial_repair_outcome(&f, &source, "cpp").status(),
+            DetectorStatus::Partial,
+            "{source}"
+        );
+    }
+    for expression in [
+        "EVP_PKEY_encrypt(opaque,data)",
+        "EVP_PKEY_sign(holder.key,data)",
+        "OQS_KEM_encaps(opaque,data)",
+    ] {
+        let source = format!("void f(){{{expression};}}");
+        let outcome = partial_repair_outcome(&f, &source, "cpp");
+        assert_eq!(
+            outcome.status(),
+            DetectorStatus::Partial,
+            "{expression}: {outcome:?}"
+        );
+        let native = f.native(&source, "cpp");
+        let start = source.find(expression).unwrap();
+        let obs = focal(&native, start, start + expression.len());
+        assert_eq!(obs.len(), 1);
+        assert!(algorithm_names(&native, obs[0]).is_empty());
+    }
+    for opaque in [
+        "object.callback(&k)",
+        "([](auto p){})(&k)",
+        "(*callback)(&k)",
+        "object.size()",
+    ] {
+        let source =
+            format!("void f(){{oqs::Signature k(\"ML-DSA-65\"); {opaque}; k.sign(message);}}");
+        assert_eq!(
+            partial_repair_outcome(&f, &source, "cpp").status(),
+            DetectorStatus::Partial,
+            "{source}"
+        );
+        let native = f.native(&source, "cpp");
+        let start = source.find("k.sign").unwrap();
+        assert!(
+            !native["observations"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|o| o["target"]["byte_start"] == start),
+            "{opaque}: {native}"
+        );
+    }
+}
+
+#[test]
+fn partial_repair_wolf_rsa_generation_is_a_private_source_reference() {
+    let f = Fixture::new();
+    for callee in ["wc_MakeRsaKey", "::wc_MakeRsaKey"] {
+        let source = format!(
+            "void f(){{{callee}(key,requested_bits,exponent,\"PRIVATE_PARTIAL_RSA_KEY\");}}"
+        );
+        let outcome = partial_repair_outcome(&f, &source, "cpp");
+        assert!(
+            !outcome.sensitive_ranges().is_empty(),
+            "missing sensitive argument range for {callee}"
+        );
+        let (native, legacy) = f.document(&source, "cpp");
+        let obs: Vec<_> = native["observations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|o| o["rule_id"] == "C_FAMILY_CRYPTO_API")
+            .collect();
+        assert_eq!(obs.len(), 1, "{native}");
+        assert_eq!(algorithm_names(&native, obs[0]), vec!["RSA"]);
+        assert!(!native.to_string().contains("PRIVATE_PARTIAL_RSA_KEY"));
+        assert!(!legacy.to_string().contains("PRIVATE_PARTIAL_RSA_KEY"));
+        assert!(
+            legacy["findings"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|o| o["evidence"]["match"]
+                    .as_str()
+                    .is_some_and(|s| s.starts_with(callee))),
+            "{legacy}"
+        );
+    }
+    for bits in ["2048", "requested_bits"] {
+        let source=format!("void f(){{EVP_PKEY_CTX *k=EVP_PKEY_CTX_new_from_name(NULL,\"ML-KEM-768\",NULL); wc_MakeRsaKey(&k,{bits},e,rng); EVP_PKEY_encapsulate(k,data);}}");
+        let native = f.native(&source, "cpp");
+        let expression = "EVP_PKEY_encapsulate(k,data)";
+        let start = source.find(expression).unwrap();
+        let obs = focal(&native, start, start + expression.len());
+        assert_eq!(obs.len(), 1);
+        assert!(
+            algorithm_names(&native, obs[0]).is_empty(),
+            "reference-only keygen must retain opaque writes"
+        );
+        assert_eq!(
+            partial_repair_outcome(&f, &source, "cpp").status(),
+            DetectorStatus::Partial
+        );
+        let rsa = native["assets"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["attributes"]["identifier"] == "RSA")
+            .unwrap();
+        assert!(rsa["attributes"]["parameters"]
+            .as_object()
+            .is_none_or(|p| p.is_empty()));
+    }
+    let source = "int wc_MakeRsaKey(Key *key,int bits,long exponent,Rng *rng){return 0;}";
+    let native = f.native(source, "c");
+    let obs: Vec<_> = native["observations"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|o| o["rule_id"] == "SOURCE_IMPLEMENTATION_REFERENCE")
+        .collect();
+    assert_eq!(obs.len(), 1, "{native}");
+    assert_eq!(algorithm_names(&native, obs[0]), vec!["RSA"]);
+    assert_eq!(
+        obs[0]["target"]["byte_start"],
+        source.find("wc_MakeRsaKey").unwrap()
+    );
+    for source in [
+        "int wc_MakeRsaKey(Key*,int,long,Rng*);",
+        "#define wc_MakeRsaKey replacement\nint wc_MakeRsaKey(Key *key,int bits,long e,Rng *rng){return 0;}",
+        "namespace other { int wc_MakeRsaKey(Key *key,int bits,long e,Rng *rng){return 0;} }",
+        "int (*wc_MakeRsaKey)(Key*,int,long,Rng*); void f(){wc_MakeRsaKey(key,bits,e,rng);}",
+        "void f(){object.wc_MakeRsaKey(key,bits,e,rng);}",
+        "void f(){(*wc_MakeRsaKey)(key,bits,e,rng);}",
+        "void f(){other::wc_MakeRsaKey(key,bits,e,rng);}",
+        "void f(){int wc_MakeRsaKey=0;wc_MakeRsaKey(key,bits,e,rng);}",
+        "#define wc_MakeRsaKey replacement\nvoid f(){wc_MakeRsaKey(key,bits,e,rng);}",
+        "void f(){wc_MakeRsaKeyExtra(key,bits,e,rng);}",
+        "// wc_MakeRsaKey(key,bits,e,rng)\nconst char *text=\"wc_MakeRsaKey\";",
+    ] {
+        let native = f.native(source, "cpp");
+        assert!(
+            !native["observations"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|o| matches!(
+                    o["rule_id"].as_str(),
+                    Some("C_FAMILY_CRYPTO_API" | "SOURCE_IMPLEMENTATION_REFERENCE")
+                )),
+            "{source}: {native}"
+        );
+    }
+}
+
+#[test]
+fn partial_repair_namespace_fragment_reclassifies_only_the_proven_terminal_macro() {
+    let f = Fixture::new();
+    let source="/* 日本語 */\nBSSL_NAMESPACE_BEGIN\nDEFINE_METHOD_FUNCTION(RSA_METHOD, RSA_default_method) { RSA_new(); }\nBSSL_NAMESPACE_END\n";
+    let outcome = partial_repair_outcome(&f, source, "cc.inc");
+    assert_eq!(outcome.status(), DetectorStatus::Partial, "{outcome:?}");
+    assert!(
+        outcome
+            .explanation()
+            .unwrap()
+            .contains("Opaque macro syntax:"),
+        "{outcome:?}"
+    );
+    assert!(
+        !outcome.explanation().unwrap().contains("Parser recovery"),
+        "{outcome:?}"
+    );
+    let native = f.native(source, "cc.inc");
+    let obs = native["observations"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|o| o["rule_id"] == "C_FAMILY_CRYPTO_API")
+        .unwrap();
+    assert_eq!(obs["target"]["byte_start"], source.find("RSA_new").unwrap());
+    assert_eq!(obs["target"]["line"], 3);
+    assert_eq!(obs["target"]["column"], 58);
+    for extension in ["cpp", "c"] {
+        let outcome = partial_repair_outcome(&f, source, extension);
+        assert!(
+            outcome
+                .explanation()
+                .is_some_and(|s| s.contains("Parser recovery")),
+            "{extension}: {outcome:?}"
+        );
+    }
+    let header = partial_repair_outcome(&f, source, "h");
+    assert_eq!(header.status(), DetectorStatus::Partial);
+    assert!(!header
+        .explanation()
+        .is_some_and(|s| s.contains("Opaque macro syntax:")));
+    let negatives = vec![
+        source.replace("BSSL_NAMESPACE_BEGIN", ""),
+        source.replace("BSSL_NAMESPACE_END", "BSSL_NAMESPACE_END()"),
+        format!("{source}// tail\n"),
+        format!("#define BSSL_NAMESPACE_END changed\n{source}"),
+        format!("#undef BSSL_NAMESPACE_END\n{source}"),
+        format!("#define BSSL_NAMESPACE_BEGIN changed\n{source}"),
+        format!("#undef BSSL_NAMESPACE_BEGIN\n{source}"),
+        format!("#if FEATURE\n{source}#endif\n"),
+        source.replace("RSA_new();", "use(BSSL_NAMESPACE_END);"),
+        source.replace("RSA_new();", "use(BSSL_NAMESPACE_BEGIN);"),
+        source.replace("RSA_new();", "use(\"BSSL_NAMESPACE_END\");"),
+        source.replace("RSA_new();", "/* BSSL_NAMESPACE_END */ RSA_new();"),
+        source.replace("BSSL_NAMESPACE_END", "BSSL_NAMESPACE_END_EXTRA"),
+        source.replace("BSSL_NAMESPACE_BEGIN", "BSSL_NAMESPACE_BEGIN_EXTRA"),
+        source.replace("RSA_new();", "RSA_new()"),
+        source.replace("RSA_new();", "int invalid=; RSA_new();"),
+        source.replace(
+            "BSSL_NAMESPACE_BEGIN",
+            "const char *s=\"BSSL_NAMESPACE_BEGIN\";",
+        ),
+        source.replace("BSSL_NAMESPACE_BEGIN", "// BSSL_NAMESPACE_BEGIN"),
+    ];
+    for source in negatives {
+        let outcome = partial_repair_outcome(&f, &source, "cc.inc");
+        assert!(
+            outcome
+                .explanation()
+                .is_some_and(|s| s.contains("Parser recovery")),
+            "{source}: {outcome:?}"
+        );
+    }
+    let mut parser = tree_sitter::Parser::new();
+    parser
+        .set_language(&tree_sitter_cpp::LANGUAGE.into())
+        .unwrap();
+    let tree = parser.parse(source, None).unwrap();
+    let mut cursor = tree.walk();
+    let mut total_nodes = 0;
+    loop {
+        total_nodes += 1;
+        if cursor.goto_first_child() {
+            continue;
+        }
+        loop {
+            if cursor.goto_next_sibling() {
+                break;
+            }
+            if !cursor.goto_parent() {
+                break;
+            }
+        }
+        if cursor.node().parent().is_none() {
+            break;
+        }
+    }
+    for (budget, reason) in [
+        (
+            pqc_scan_detectors::DetectorBudget {
+                max_ast_nodes: total_nodes - 1,
+                ..Default::default()
+            },
+            "c_family_macro_proof_nodes",
+        ),
+        (
+            pqc_scan_detectors::DetectorBudget {
+                max_ast_match_bytes: source.len() - 1,
+                ..Default::default()
+            },
+            "c_family_macro_proof_bytes",
+        ),
+    ] {
+        let outcome = TreeSitterDetector::with_budget(budget)
+            .detect_observed(
+                &ScannableFile::from_bytes("case.cc.inc".into(), source.as_bytes().to_vec()),
+                &f.rules,
+            )
+            .unwrap();
+        assert_eq!(outcome.status(), DetectorStatus::Truncated, "{outcome:?}");
+        assert!(
+            outcome
+                .diagnostic_message()
+                .is_some_and(|s| s.contains(reason)),
+            "{reason}: {outcome:?}"
+        );
+    }
+    for limit in [0, 1, 16] {
+        let outcome = TreeSitterDetector::with_budget(pqc_scan_detectors::DetectorBudget {
+            max_ast_nodes: limit,
+            ..Default::default()
+        })
+        .detect_observed(
+            &ScannableFile::from_bytes("case.cc.inc".into(), source.as_bytes().to_vec()),
+            &f.rules,
+        )
+        .unwrap();
+        assert_eq!(
+            outcome.status(),
+            DetectorStatus::Truncated,
+            "{limit}: {outcome:?}"
+        );
+        assert!(
+            !outcome
+                .explanation()
+                .is_some_and(|s| s.contains("Opaque macro syntax:")),
+            "{limit}: {outcome:?}"
+        );
+    }
 }

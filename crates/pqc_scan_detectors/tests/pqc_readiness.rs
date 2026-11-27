@@ -228,3 +228,62 @@ fn existing_same_line_baseline_fixture_retains_each_api_call() {
     columns.sort();
     assert_eq!(columns, vec![1, 36]);
 }
+
+#[test]
+fn inventories_finite_underscore_parameter_names_without_matching_neighbors() {
+    let rules = rules();
+    let mut names = vec![
+        "ml_kem512".to_string(),
+        "ml_kem768".to_string(),
+        "ml_kem1024".to_string(),
+        "ml_dsa44".to_string(),
+        "ml_dsa65".to_string(),
+        "ml_dsa87".to_string(),
+    ];
+    for hash in ["sha2", "shake"] {
+        for bits in [128, 192, 256] {
+            for profile in ["s", "f"] {
+                names.push(format!("slh_dsa_{hash}_{bits}{profile}"));
+            }
+        }
+    }
+    let source = names
+        .iter()
+        .map(|name| format!("export const {name} = factory();\n"))
+        .collect::<String>();
+    let file = ScannableFile::from_bytes(PathBuf::from("parameters.ts"), source.into_bytes());
+    let hits = TreeSitterDetector.detect(&file, &rules).unwrap();
+    let references = hits
+        .iter()
+        .filter(|hit| hit.rule_id == "PQC_STANDARD_REFERENCE")
+        .collect::<Vec<_>>();
+    assert_eq!(references.len(), 18);
+    let mut lines = references
+        .iter()
+        .map(|hit| hit.location.line)
+        .collect::<Vec<_>>();
+    lines.sort_unstable();
+    assert_eq!(lines, (1..=18).collect::<Vec<_>>());
+    for hit in references {
+        assert_eq!(
+            hit.evidence
+                .metadata
+                .get("reference_kind")
+                .map(String::as_str),
+            Some("symbol_reference")
+        );
+    }
+    for text in [
+        "// ml_kem768 slh_dsa_sha2_128f\n",
+        "const not_ml_kem768 = 1; const ml_kem768_helper = 1;",
+        "const names = ['ml_kem999', 'ml_dsa99', 'slh_dsa_sha2_128fast', 'slh_dsa_sha3_128f'];",
+    ] {
+        let file =
+            ScannableFile::from_bytes(PathBuf::from("negative.ts"), text.as_bytes().to_vec());
+        assert!(TreeSitterDetector
+            .detect(&file, &rules)
+            .unwrap()
+            .iter()
+            .all(|hit| hit.rule_id != "PQC_STANDARD_REFERENCE"));
+    }
+}

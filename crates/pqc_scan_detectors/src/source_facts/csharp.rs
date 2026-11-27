@@ -1,7 +1,7 @@
 //! Bounded C# API identities and operations; all captured facts remain references.
 mod names;
 mod values;
-use super::{builtin, context::Context, Facts};
+use super::{builtin, context::Context, Facts, PartialCause};
 use names::{in_error, Names};
 use pqc_scan_rules::RuleSet;
 use tree_sitter::Node;
@@ -283,6 +283,20 @@ fn crypto_operation_name(method: &str) -> bool {
             | "CalculateAgreement"
     )
 }
+fn method_name<'s>(mut node: Node<'_>, names: &Names<'_, 's, '_>) -> Option<&'s str> {
+    loop {
+        if !names.charge() {
+            return None;
+        }
+        node = match node.kind() {
+            "identifier" => return Some(names.ctx.source(node)),
+            "generic_name" => node.named_child(0)?,
+            "member_binding_expression" => node.child_by_field_name("name")?,
+            "conditional_access_expression" => node.named_child(1)?,
+            _ => return None,
+        };
+    }
+}
 fn emit(
     facts: &mut Facts,
     rules: &RuleSet,
@@ -396,7 +410,9 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                         continue;
                     };
                     let Some(method) = names.path(method) else {
-                        names.partial.set(true);
+                        if method_name(method, &names).is_some_and(crypto_operation_name) {
+                            names.mark_partial(PartialCause::UnresolvedCryptoBinding);
+                        }
                         continue;
                     };
                     if let Some(key) = values.key(object) {
@@ -410,16 +426,13 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                                 "bounded_local_receiver_reference",
                             );
                         } else if crypto_operation_name(&method) {
-                            names.partial.set(true);
+                            names.mark_partial(PartialCause::UnresolvedCryptoBinding);
                         }
                     } else if crypto_operation_name(&method) {
-                        names.partial.set(true);
+                        names.mark_partial(PartialCause::UnresolvedCryptoBinding);
                     }
-                } else if !matches!(
-                    function.kind(),
-                    "identifier" | "qualified_name" | "alias_qualified_name"
-                ) {
-                    names.partial.set(true);
+                } else if method_name(function, &names).is_some_and(crypto_operation_name) {
+                    names.mark_partial(PartialCause::UnresolvedCryptoBinding);
                 }
             }
             "member_access_expression" => {
@@ -444,7 +457,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                         "qualified_parameter_reference",
                     );
                 } else if families.len() == 1 {
-                    names.partial.set(true);
+                    names.mark_partial(PartialCause::UnresolvedCryptoBinding);
                     emit(
                         facts,
                         rules,
@@ -475,9 +488,12 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
     if values.binding_limited {
         ctx.limit("csharp_same_name_bindings", 64, 64);
     }
-    facts.partial |= names.partial.get();
+    facts.extend_partial_causes(names.partial_causes());
 }
 fn unique_kind(names: &Names<'_, '_, '_>, node: Node<'_>, ignore_vars: bool) -> Option<Kind> {
+    if node.kind() == "predefined_type" {
+        return None;
+    }
     let mut found: Vec<_> = names
         .resolve(node, ignore_vars)
         .iter()

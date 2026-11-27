@@ -1,5 +1,22 @@
 # v0.5 technical acceptance
 
+Current disposition: the source prepares an unpublished 0.5.0 candidate with 139
+rules. The original bounded L01-L30 acceptance remains accepted for its frozen
+source. Later language/masking and five finite inspection repairs have their own
+source-bound evidence. The old Node browser-feedback issue was resolved in later
+checks. The earlier debug-profile Node.js corpus timeout is retained as historical
+evidence. The operator-approved final release-profile evaluation now completes all
+27 primary and 8 comparison scans within the unchanged 600-second limit.
+See the [current preparation disposition](RELEASE-PREPARATION.md) for exact scope,
+evidence reuse, pending final-source checks, packaging, hosted gates and L29 status.
+No release approval or publication is claimed.
+
+## Historical task083 acceptance
+
+The following text is retained as the original task083 disposition. Its rule
+count, version, measurements, review identities and Node control describe that
+historical source. Later results do not rewrite those observations.
+
 Current status: tasks 076–083 are done for their original bounded technical scope. Both retained reviewers accepted the final source, with no unresolved mandatory criteria. This page is a current disposition, not a rewrite of historical registration/baseline evidence. [Final acceptance record](../../../tasks/083/evidence/ACCEPTANCE.json), task YAML and final review records own completion. Pre-review evidence indexes retain their original pending annotations; the final record supersedes them. No release/version bump/publication is authorized or performed; the workspace package remains0.4.0.
 
 ## Delivered bounded support

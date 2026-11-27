@@ -59,10 +59,10 @@
   severity: medium
   risk: quantum-vulnerable
   confidence: 0.52
-  migration_hint: Replace with EVP_PKEY-based implementation suitable for PQC migration.
+  migration_hint: Confirm whether this name occurs in an active RSA operation. If so, assess an EVP_PKEY-based implementation and provider support for the required migration.
   pattern: "RSA_(generate_key|public_encrypt|private_decrypt)"
   scope: code
-  description: OpenSSL RSA API call detected.
+  description: Text matching an OpenSSL RSA API name was found. This match does not establish an API call.
 
 - id: GO_TLS_RSA_IMPORT
   kind: regex

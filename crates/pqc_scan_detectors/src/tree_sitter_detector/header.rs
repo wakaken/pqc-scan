@@ -64,6 +64,7 @@ fn consolidate(
     let mut detections = Vec::new();
     let mut observations = Vec::new();
     let mut disagreement = false;
+    let mut identity_disagreement = false;
     let mut used = std::collections::HashSet::new();
     // Index exact occurrences once; hostile headers must not cause a quadratic
     // all-pairs comparison of the two bounded candidate populations.
@@ -77,20 +78,20 @@ fn consolidate(
         }
     }
     for (i, d) in c.detections().iter().enumerate() {
-        let same = c
+        let counterpart = c
             .observations()
             .get(i)
             .and_then(|o| o.source_span())
             .and_then(|span| index.get(&(d.rule_id.as_str(), span)))
             .copied()
-            .flatten()
-            .filter(|j| {
-                !used.contains(j)
-                    && c.observations()
-                        .get(i)
-                        .zip(cpp.observations().get(*j))
-                        .is_some_and(|(a, b)| a.equivalent_source_reference(b))
-            });
+            .flatten();
+        let same = counterpart.filter(|j| {
+            !used.contains(j)
+                && c.observations()
+                    .get(i)
+                    .zip(cpp.observations().get(*j))
+                    .is_some_and(|(a, b)| a.equivalent_source_reference(b))
+        });
         if let Some(j) = same {
             used.insert(j);
             let mut hit = d.clone();
@@ -103,6 +104,7 @@ fn consolidate(
             }
         } else {
             disagreement = true;
+            identity_disagreement |= counterpart.is_some();
             // A rule explicitly scoped to only one language still uses its
             // selected grammar; no cross-candidate primitive binding is merged.
             let only_c = rules
@@ -139,6 +141,9 @@ fn consolidate(
             }
         }
     }
+    identity_disagreement |= disagreement
+        && c.status() == DetectorStatus::Complete
+        && cpp.status() == DetectorStatus::Complete;
     let status = if [c.status(), cpp.status()].contains(&DetectorStatus::Truncated) {
         DetectorStatus::Truncated
     } else if disagreement
@@ -163,7 +168,8 @@ fn consolidate(
         );
     match status {
         DetectorStatus::Truncated=>outcome.with_explanation("Ambiguous C/C++ header: shared inspection budget exhausted; omitted or conflicting facts remain unknown."),
-        DetectorStatus::Partial=>outcome.with_explanation("Ambiguous C/C++ header: candidate syntax or source bindings differ; only agreeing facts and explicitly scoped references were retained. Configured build language is unknown."),
+        DetectorStatus::Partial if identity_disagreement=>outcome.with_explanation("Ambiguous C/C++ header: candidate source identities disagree; only agreeing facts and explicitly scoped references were retained. Configured build language is unknown."),
+        DetectorStatus::Partial=>outcome.with_explanation("Ambiguous C/C++ header: one or both candidate inspections are incomplete; retained source identities do not disagree. Configured build language is unknown."),
         _=>outcome,
     }
 }
@@ -205,10 +211,60 @@ mod tests {
         assert_eq!(combined.status(), DetectorStatus::Partial);
         assert!(combined.detections().is_empty());
         assert!(combined.observations().is_empty());
+        assert!(combined
+            .explanation()
+            .unwrap()
+            .contains("candidate source identities disagree"));
         let combined = consolidate(&a, &candidate("ML-KEM-768"), &rules, true);
         assert_eq!(combined.status(), DetectorStatus::Complete);
         assert_eq!(combined.detections().len(), 1);
         assert_eq!(combined.observations().len(), 1);
+        let incomplete = DetectorOutcome::new(vec![], DetectorStatus::Partial);
+        for (left, right) in [(&a, &incomplete), (&incomplete, &a)] {
+            let combined = consolidate(left, right, &rules, true);
+            assert_eq!(combined.status(), DetectorStatus::Partial);
+            assert!(combined.detections().is_empty());
+            assert!(combined
+                .explanation()
+                .unwrap()
+                .contains("candidate inspections are incomplete"));
+            assert!(!combined
+                .explanation()
+                .unwrap()
+                .contains("identities disagree"));
+        }
         std::fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn incomplete_candidates_do_not_claim_identity_disagreement() {
+        let rules = RuleSet::load_from_dir(
+            &std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules/default"),
+        )
+        .unwrap();
+        let complete = DetectorOutcome::complete(vec![]);
+        let partial = DetectorOutcome::new(vec![], DetectorStatus::Partial);
+        for (a, b) in [
+            (&partial, &complete),
+            (&complete, &partial),
+            (&partial, &partial),
+        ] {
+            let result = consolidate(a, b, &rules, true);
+            assert_eq!(result.status(), DetectorStatus::Partial);
+            assert!(result
+                .explanation()
+                .unwrap()
+                .contains("candidate inspections are incomplete"));
+            assert!(!result
+                .explanation()
+                .unwrap()
+                .contains("identities disagree"));
+        }
+        let limited = DetectorOutcome::new(vec![], DetectorStatus::Truncated);
+        let result = consolidate(&limited, &partial, &rules, true);
+        assert_eq!(result.status(), DetectorStatus::Truncated);
+        assert!(result
+            .explanation()
+            .unwrap()
+            .contains("shared inspection budget exhausted"));
     }
 }

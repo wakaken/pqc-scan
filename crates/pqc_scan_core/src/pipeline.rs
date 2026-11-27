@@ -955,9 +955,11 @@ fn build_cbom(findings: &[Finding]) -> Vec<CbomEntry> {
 
     for finding in findings {
         let location = format!("{}:{}", finding.location.file, finding.location.line);
-        let key = format!(
-            "{}:{}:{}",
-            finding.rule_id, location, finding.evidence.r#match
+        let key = (
+            finding.rule_id.as_str(),
+            finding.location.file.as_str(),
+            finding.location.line,
+            finding.evidence.r#match.as_str(),
         );
         if !seen.insert(key) {
             continue;

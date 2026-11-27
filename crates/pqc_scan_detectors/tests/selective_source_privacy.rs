@@ -480,3 +480,602 @@ fn deeply_wrapped_named_credentials_keep_public_computed_expressions_visible() {
         );
     }
 }
+
+#[test]
+fn ruby_private_scalar_alias_is_masked_at_its_origin() {
+    let source = "def sample\n  material = \"SYNTH087_RUBY_SCALAR\"\n  ec = OpenSSL::PKey::EC.new(\"prime256v1\")\n  ec.private_key = OpenSSL::BN.new(material, 16)\nend\n";
+    let document = scan(source, "rb", false);
+    let serialized = serde_json::to_string(document.legacy()).unwrap();
+    assert!(
+        !serialized.contains("SYNTH087_RUBY_SCALAR"),
+        "Ruby scalar initializer leaked"
+    );
+    assert!(serialized.contains("prime256v1"));
+}
+
+fn ruby_ranges(source: &str, node_limit: usize) -> Vec<std::ops::Range<usize>> {
+    use pqc_scan_core::{Detector, ScannableFile};
+    let file = ScannableFile::from_bytes("public.rb".into(), source.as_bytes().to_vec());
+    let rules =
+        RuleSet::load_from_dir(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules")).unwrap();
+    let detector = pqc_scan_detectors::tree_sitter_detector::TreeSitterDetector::with_budget(
+        pqc_scan_detectors::DetectorBudget {
+            max_ast_nodes: node_limit,
+            ..Default::default()
+        },
+    );
+    let detailed = detector.detect_detailed(&file, &rules).unwrap();
+    let observed = detector.detect_observed(&file, &rules).unwrap();
+    assert_eq!(detailed.sensitive_ranges(), observed.sensitive_ranges());
+    detailed.sensitive_ranges().to_vec()
+}
+
+fn ruby_protects(source: &str, hidden: &[&str], visible: &[&str]) {
+    let ranges = ruby_ranges(source, 100_000);
+    for value in hidden {
+        let start = source.find(value).unwrap();
+        assert!(
+            ranges
+                .iter()
+                .any(|r| r.start <= start && r.end >= start + value.len()),
+            "unprotected fake value {value}"
+        );
+    }
+    for value in visible {
+        let start = source.find(value).unwrap();
+        assert!(
+            !ranges
+                .iter()
+                .any(|r| r.start < start + value.len() && start < r.end),
+            "public value was hidden: {value}"
+        );
+    }
+    assert!(ranges.iter().all(|r| source.is_char_boundary(r.start)
+        && source.is_char_boundary(r.end)
+        && r.end <= source.len()));
+}
+
+#[test]
+fn ruby_scalar_direct_bn_and_receiver_aliases_keep_public_inputs() {
+    ruby_protects(
+        r#"def f
+  material = "FAKE_SCALAR_ORIGIN"
+  copy = material
+  scalar = OpenSSL::BN.new(copy, 16)
+  ec = OpenSSL::PKey::EC.generate("PUBLIC_CURVE")
+  alias_ec = ec
+  alias_ec.private_key=(scalar)
+  public_number = OpenSSL::BN.new("PUBLIC_BN", 16)
+  ec.public_key = OpenSSL::BN.new("PUBLIC_POINT", 16)
+end
+"#,
+        &["FAKE_SCALAR_ORIGIN"],
+        &["PUBLIC_CURVE", "PUBLIC_BN", "PUBLIC_POINT", "16"],
+    );
+    ruby_protects(
+        r#"ec = ::OpenSSL::PKey::EC.new("PUBLIC_CURVE")
+ec.private_key = ::OpenSSL::BN.new("FAKE_DIRECT", 16)
+"#,
+        &["FAKE_DIRECT"],
+        &["PUBLIC_CURVE", "16"],
+    );
+}
+
+#[test]
+fn ruby_scalar_scope_boundaries_do_not_share_local_names_or_receivers() {
+    ruby_protects(
+        r#"material = "PUBLIC_TOP"
+module First
+  material = "PUBLIC_MODULE"
+  class Example
+    material = "PUBLIC_CLASS"
+    def f
+      material = "FAKE_METHOD"
+      ec = OpenSSL::PKey::EC.new("PUBLIC_CURVE")
+      ec.private_key = material
+      [1].each { material = "PUBLIC_BLOCK"; ec.private_key = material }
+      while false; material = "PUBLIC_LOOP"; ec.private_key = material; end
+      l = -> { material = "PUBLIC_LAMBDA"; ec.private_key = material }
+      object.instance_eval { material = "PUBLIC_INSTANCE_EVAL"; ec.private_key = material }
+    end
+    def self.f
+      material = "PUBLIC_SINGLETON"
+      ec.private_key = material
+    end
+    def other
+      material = "PUBLIC_OTHER"
+      ec.private_key = material
+    end
+  end
+end
+module Second
+  material = "PUBLIC_SECOND"
+end
+"#,
+        &[
+            "FAKE_METHOD",
+            "PUBLIC_BLOCK",
+            "PUBLIC_LOOP",
+            "PUBLIC_LAMBDA",
+            "PUBLIC_INSTANCE_EVAL",
+        ],
+        &[
+            "PUBLIC_TOP",
+            "PUBLIC_MODULE",
+            "PUBLIC_CLASS",
+            "PUBLIC_SINGLETON",
+            "PUBLIC_OTHER",
+            "PUBLIC_SECOND",
+            "PUBLIC_CURVE",
+        ],
+    );
+}
+
+#[test]
+fn ruby_scalar_namesakes_public_bn_and_shadowed_namespaces_do_not_seed_ranges() {
+    for source in [
+        r#"ec = Something::EC.new("PUBLIC_CURVE"); material = "PUBLIC_NAMESAKE"; ec.private_key = OpenSSL::BN.new(material,16)"#,
+        r#"OpenSSL = Something; ec = OpenSSL::PKey::EC.new("PUBLIC_CURVE"); ec.private_key = "PUBLIC_NAMESAKE""#,
+        r#"module M; OpenSSL = Something; ec = OpenSSL::PKey::EC.new("PUBLIC_CURVE"); ec.private_key = "PUBLIC_NAMESAKE"; end"#,
+        r#"OpenSSL::PKey::EC = Something; ec = OpenSSL::PKey::EC.new("PUBLIC_CURVE"); ec.private_key = "PUBLIC_NAMESAKE""#,
+        r#"ec = OpenSSL::PKey::EC.new("PUBLIC_CURVE"); number = OpenSSL::BN.new("PUBLIC_NAMESAKE",16); ec.public_key = number"#,
+        r#"ec = a; a = ec; ec.private_key = "PUBLIC_NAMESAKE"; curve = "PUBLIC_CURVE""#,
+    ] {
+        ruby_protects(source, &[], &["PUBLIC_NAMESAKE", "PUBLIC_CURVE"]);
+    }
+}
+
+#[test]
+fn ruby_scalar_ambiguous_writes_cycles_and_limits_protect_affected_scope() {
+    for body in [
+        "a = b; b = a; other = \"FAKE_FALLBACK\"; ec.private_key = a".to_owned(),
+        "a = \"FAKE_FALLBACK\"; a = \"FAKE_SECOND\"; ec.private_key = a".to_owned(),
+        "a = \"FAKE_FALLBACK\"; b = opaque(a); ec.private_key = b".to_owned(),
+        "a = \"FAKE_FALLBACK\"; b = \"computed#{a}\"; ec.private_key = b".to_owned(),
+        format!(
+            "a0 = \"FAKE_FALLBACK\"; {} ec.private_key = a12",
+            (1..=12)
+                .map(|n| format!("a{n} = a{};", n - 1))
+                .collect::<String>()
+        ),
+        "a = \"FAKE_FALLBACK\"; other = ec; other = unknown; other.private_key = a".to_owned(),
+        "a = \"FAKE_FALLBACK\"; a += unknown; ec.private_key = a".to_owned(),
+    ] {
+        let source = format!("def f\nec = OpenSSL::PKey::EC.new(\"curve\")\n{body}\nend\ndef other; a = \"PUBLIC_OTHER\"; end");
+        ruby_protects(&source, &["FAKE_FALLBACK"], &["PUBLIC_OTHER"]);
+    }
+}
+
+#[test]
+fn ruby_scalar_unicode_multiline_and_node_exhaustion_use_original_ranges() {
+    let source = "def f\n material = \"合成FAKE_FIRST\nFAKE_SECOND\"\n ec = OpenSSL::PKey::EC.new(\"curve\")\n ec.private_key = material\nend\n";
+    ruby_protects(source, &["合成FAKE_FIRST\nFAKE_SECOND"], &["curve"]);
+    for limit in [0, 4, 12, 24] {
+        let ranges = ruby_ranges(source, limit);
+        for marker in ["FAKE_FIRST", "FAKE_SECOND"] {
+            let start = source.find(marker).unwrap();
+            assert!(
+                ranges
+                    .iter()
+                    .any(|r| r.start <= start && r.end >= start + marker.len()),
+                "node cap exposed prior scalar initializer"
+            );
+        }
+        assert!(ranges
+            .iter()
+            .all(|r| source.is_char_boundary(r.start) && source.is_char_boundary(r.end)));
+    }
+}
+
+#[test]
+fn ruby_scalar_privacy_runs_without_ruby_rules_through_all_outer_entrypoints() {
+    use pqc_scan_core::{Detector, ScannableFile};
+    let root = std::env::temp_dir().join(format!("pqc-ruby-no-rules-{}", std::process::id()));
+    std::fs::create_dir_all(&root).unwrap();
+    std::fs::write(root.join("control.yml"), "[]").unwrap();
+    let rules = RuleSet::load_from_dir(&root).unwrap();
+    let source = "a = \"FAKE_NO_RULES\"; ec = OpenSSL::PKey::EC.new(\"curve\"); ec.private_key = a";
+    let file = ScannableFile::from_bytes("public.rb".into(), source.as_bytes().to_vec());
+    let detector = pqc_scan_detectors::tree_sitter_detector::TreeSitterDetector;
+    for outcome in [
+        detector.detect_detailed(&file, &rules),
+        detector.detect_observed(&file, &rules),
+        detector.detect_in_repository(&file, &rules, None, false),
+        detector.detect_in_repository(&file, &rules, None, true),
+    ] {
+        let outcome = outcome.unwrap();
+        assert!(outcome.detections().is_empty());
+        let start = source.find("FAKE_NO_RULES").unwrap();
+        assert!(outcome
+            .sensitive_ranges()
+            .iter()
+            .any(|r| r.contains(&start)));
+    }
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn ruby_scalar_eight_round_aliases_stay_selective_and_recovery_is_conservative() {
+    let chain = (1..=7)
+        .map(|n| format!("a{n} = a{};", n - 1))
+        .collect::<String>();
+    let source = format!("a0 = \"FAKE_EIGHT\"; {chain} ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\"); ec.private_key = a7");
+    ruby_protects(&source, &["FAKE_EIGHT"], &["PUBLIC_CURVE"]);
+    ruby_protects(
+        "a = \"FAKE_RECOVERED\"; ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\"); ec.private_key = (a",
+        &["FAKE_RECOVERED"],
+        &[],
+    );
+}
+
+#[test]
+fn ruby_scalar_bn_comments_keep_argument_position_and_public_radix() {
+    for value in ["\"FAKE_COMMENT_DIRECT\"", "material"] {
+        let source = format!("material = \"FAKE_COMMENT_ALIAS\"; ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\"); ec.private_key = OpenSSL::BN.new(\n# public comment\n{value}, 16); public_number = OpenSSL::BN.new(\"PUBLIC_BN\", 16)");
+        let hidden = if value == "material" {
+            "FAKE_COMMENT_ALIAS"
+        } else {
+            "FAKE_COMMENT_DIRECT"
+        };
+        ruby_protects(&source, &[hidden], &["PUBLIC_CURVE", "PUBLIC_BN", "16"]);
+    }
+}
+
+#[test]
+fn ruby_scalar_loops_and_blocks_capture_both_receiver_and_material() {
+    for body in [
+        "while flag; ec.private_key = material; end",
+        "until flag; ec.private_key = material; end",
+        "for item in items; ec.private_key = material; end",
+        "ec.private_key = material while flag",
+        "items.each { ec.private_key = material }",
+        "items.each do; ec.private_key = material; end",
+        "l = -> { ec.private_key = material }",
+        "items.each { local_ec = OpenSSL::PKey::EC.new(\"PUBLIC_LOCAL_CURVE\"); local_ec.private_key = material }",
+        "items.each { local_material = \"FAKE_LOCAL\"; ec.private_key = local_material }",
+        "items.each { items.each { ec.private_key = material } }",
+    ] {
+        let source = format!("def f; material = \"FAKE_CAPTURE\"; ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\"); {body}; end; def other; material = \"PUBLIC_OTHER\"; end");
+        let hidden = if body.contains("FAKE_LOCAL") { "FAKE_LOCAL" } else { "FAKE_CAPTURE" };
+        ruby_protects(&source, &[hidden], &["PUBLIC_CURVE", "PUBLIC_OTHER"]);
+    }
+}
+
+#[test]
+fn ruby_scalar_explicit_block_shadows_and_new_block_locals_stay_isolated() {
+    for body in [
+        "items.each { |ec| ec.private_key = \"PUBLIC_SHADOW\" }",
+        "items.each { |; ec| ec = Something::EC.new; ec.private_key = \"PUBLIC_SHADOW\" }",
+        "l = ->(ec) { ec.private_key = \"PUBLIC_SHADOW\" }",
+        "items.each { |(ec, other)| ec.private_key = \"PUBLIC_SHADOW\" }",
+    ] {
+        let source = format!("ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\"); {body}");
+        ruby_protects(&source, &[], &["PUBLIC_SHADOW", "PUBLIC_CURVE"]);
+    }
+    for body in [
+        "items.each { |material| material = \"FAKE_SHADOW\"; ec.private_key = material }",
+        "items.each { |; material| material = \"FAKE_SHADOW\"; ec.private_key = material }",
+        "l = ->(material) { material = \"FAKE_SHADOW\"; ec.private_key = material }",
+        "items.each { material = \"FAKE_SHADOW\"; ec.private_key = material }",
+    ] {
+        let source = format!(
+            "ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\"); {body}; material = \"PUBLIC_LATER\""
+        );
+        ruby_protects(&source, &["FAKE_SHADOW"], &["PUBLIC_LATER", "PUBLIC_CURVE"]);
+    }
+}
+
+#[test]
+fn ruby_scalar_receiver_wrapper_exhaustion_preserves_uncertainty() {
+    for depth in [16, 17, 40] {
+        for expression in [false, true] {
+            let wrapped =
+                |value: &str| format!("{}{value}{}", "(".repeat(depth), ")".repeat(depth));
+            let source = if expression {
+                format!("material = \"FAKE_WRAPPED\"; ec = OpenSSL::PKey::EC.new(\"curve\"); {}.private_key = material; def other; control = \"PUBLIC_OTHER\"; end", wrapped("ec"))
+            } else {
+                format!("material = \"FAKE_WRAPPED\"; ec = {}; ec.private_key = material; def other; control = \"PUBLIC_OTHER\"; end", wrapped("OpenSSL::PKey::EC.new(\"curve\")"))
+            };
+            ruby_protects(&source, &["FAKE_WRAPPED"], &["PUBLIC_OTHER"]);
+        }
+    }
+    ruby_protects("ec = (((Something::EC.new))); ec.private_key = \"PUBLIC_NAMESAKE\"; other.private_key = \"PUBLIC_OTHER\"", &[], &["PUBLIC_NAMESAKE", "PUBLIC_OTHER"]);
+}
+
+#[test]
+fn ruby_scalar_many_distinct_aliases_keep_public_controls() {
+    let mut source = String::from("ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\");");
+    for n in 0..192 {
+        source.push_str(&format!(
+            "a{n} = \"FAKE_MANY_{n}_END\"; ec.private_key = a{n};"
+        ));
+    }
+    source.push_str(
+        "public_bn = OpenSSL::BN.new(\"PUBLIC_BN\", 16); ec.public_key = \"PUBLIC_POINT\"",
+    );
+    let hidden: Vec<_> = (0..192).map(|n| format!("FAKE_MANY_{n}_END")).collect();
+    let hidden: Vec<_> = hidden.iter().map(String::as_str).collect();
+    ruby_protects(
+        &source,
+        &hidden,
+        &["PUBLIC_CURVE", "PUBLIC_BN", "PUBLIC_POINT", "16"],
+    );
+}
+
+#[test]
+fn ruby_scalar_uncertain_capture_protects_outer_candidates_within_binding_barriers() {
+    for body in [
+        "items.each { ec.private_key = opaque(material) }".to_owned(),
+        "items.each { items.each { ec.private_key = missing } }".to_owned(),
+        format!(
+            "{} items.each {{ a10.private_key = material }}",
+            (1..=10)
+                .map(|n| format!(
+                    "a{n} = {};",
+                    if n == 1 {
+                        "ec".to_owned()
+                    } else {
+                        format!("a{}", n - 1)
+                    }
+                ))
+                .collect::<String>()
+        ),
+    ] {
+        let source = format!("def f; material = \"FAKE_UNCERTAIN_CAPTURE\"; ec = OpenSSL::PKey::EC.new(\"curve\"); {body}; end; def other; material = \"PUBLIC_OTHER\"; end");
+        ruby_protects(&source, &["FAKE_UNCERTAIN_CAPTURE"], &["PUBLIC_OTHER"]);
+    }
+}
+
+#[test]
+fn ruby_scalar_alias_exhaustion_in_block_protects_captured_outer_material() {
+    let chain = (1..=12)
+        .map(|n| {
+            format!(
+                "a{n} = {};",
+                if n == 1 {
+                    "material".to_owned()
+                } else {
+                    format!("a{}", n - 1)
+                }
+            )
+        })
+        .collect::<String>();
+    let source = format!("def f; material = \"FAKE_DEEP_CAPTURE\"; ec = OpenSSL::PKey::EC.new(\"curve\"); items.each {{ {chain} ec.private_key = a12 }}; end; def other; control = \"PUBLIC_OTHER\"; end");
+    ruby_protects(&source, &["FAKE_DEEP_CAPTURE"], &["PUBLIC_OTHER"]);
+}
+
+#[test]
+fn ruby_scalar_captured_bindings_do_not_depend_on_ancestor_depth() {
+    for depth in [127, 128, 129, 130, 256] {
+        let source = format!(
+            "def private_method\nmaterial = \"FAKE_DEEP_BINDING\"; ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\")\n{}ec.private_key = OpenSSL::BN.new(material, 16)\n{}end\ndef public_method\nmaterial = \"PUBLIC_OTHER_METHOD\"; ec = Something::EC.new; ec.private_key = material\nend\n",
+            "items.each {\n".repeat(depth),
+            "}\n".repeat(depth),
+        );
+        ruby_protects(
+            &source,
+            &["FAKE_DEEP_BINDING"],
+            &["PUBLIC_CURVE", "PUBLIC_OTHER_METHOD"],
+        );
+    }
+}
+
+#[test]
+fn ruby_scalar_syntax_depth_does_not_change_namespace_trust_or_scope() {
+    for depth in [127, 128, 129, 130, 140] {
+        let source = format!(
+            "material = \"FAKE_DEEP_SYNTAX\"\n{}ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\"); ec.private_key = OpenSSL::BN.new(material, 16){}\ndef other; material = \"PUBLIC_OTHER_METHOD\"; end\n",
+            "if true; ".repeat(depth),
+            "; end".repeat(depth),
+        );
+        ruby_protects(
+            &source,
+            &["FAKE_DEEP_SYNTAX"],
+            &["PUBLIC_CURVE", "PUBLIC_OTHER_METHOD"],
+        );
+    }
+}
+
+#[test]
+fn ruby_scalar_deep_captures_keep_parameter_and_block_local_shadows() {
+    for parameter in ["|ec|", "|; ec|", "|(ec, other)|", "|ec = fallback|"] {
+        let source = format!(
+            "material = \"PUBLIC_SHADOW_MATERIAL\"; ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\")\n{}items.each {{ {parameter} ec.private_key = material }}\n{}",
+            "items.each {\n".repeat(130),
+            "}\n".repeat(130),
+        );
+        ruby_protects(&source, &[], &["PUBLIC_SHADOW_MATERIAL", "PUBLIC_CURVE"]);
+    }
+    for parameter in ["|material|", "|; material|"] {
+        let source = format!(
+            "material = \"PUBLIC_OUTER_SHADOW\"; ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\")\n{}items.each {{ {parameter} material = \"FAKE_SHADOW_INPUT\"; ec.private_key = material }}\n{}",
+            "items.each {\n".repeat(130),
+            "}\n".repeat(130),
+        );
+        ruby_protects(
+            &source,
+            &["FAKE_SHADOW_INPUT"],
+            &["PUBLIC_OUTER_SHADOW", "PUBLIC_CURVE"],
+        );
+    }
+}
+
+#[test]
+fn ruby_scalar_deep_namesakes_and_namespace_shadows_remain_public() {
+    for prefix in ["", "OpenSSL = Something\n", "module OpenSSL; end\n"] {
+        let constructor = if prefix.is_empty() {
+            "Something::EC.new"
+        } else {
+            "OpenSSL::PKey::EC.new"
+        };
+        let source = format!(
+            "{prefix}material = \"PUBLIC_NAMESAKE_MATERIAL\"\n{}ec = {constructor}(\"PUBLIC_CURVE\"); ec.private_key = material{}",
+            "if true; ".repeat(140),
+            "; end".repeat(140),
+        );
+        ruby_protects(&source, &[], &["PUBLIC_NAMESAKE_MATERIAL", "PUBLIC_CURVE"]);
+    }
+    let source = format!(
+        "module Outer\nOpenSSL = Something\n{}material = \"PUBLIC_NAMESPACE_SHADOW\"; ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\"); ec.private_key = material\n{}end\n",
+        "module Inner\n".repeat(130),
+        "end\n".repeat(130),
+    );
+    ruby_protects(&source, &[], &["PUBLIC_NAMESPACE_SHADOW", "PUBLIC_CURVE"]);
+    let source = format!(
+        "{}material = \"FAKE_NAMESPACE_INPUT\"; ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\"); ec.private_key = material\n{}",
+        "module Inner\n".repeat(130),
+        "end\n".repeat(130),
+    );
+    ruby_protects(&source, &["FAKE_NAMESPACE_INPUT"], &["PUBLIC_CURVE"]);
+}
+
+#[test]
+fn ruby_scalar_deep_binding_events_preserve_declaration_order_and_siblings() {
+    let source = format!(
+        "def container\n{}items.each {{ material = \"FAKE_LOCAL_BEFORE_CAPTURE\"; ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\"); items.each {{ ec.private_key = material }} }}\nitems.each {{ material = \"PUBLIC_SIBLING\"; ec = Something::EC.new; ec.private_key = material }}\n{}material = \"PUBLIC_LATER_OUTER\"\nend\n",
+        "items.each {\n".repeat(130),
+        "}\n".repeat(130),
+    );
+    ruby_protects(
+        &source,
+        &["FAKE_LOCAL_BEFORE_CAPTURE"],
+        &["PUBLIC_CURVE", "PUBLIC_SIBLING", "PUBLIC_LATER_OUTER"],
+    );
+}
+
+#[test]
+fn ruby_scalar_deep_metadata_truncation_keeps_unobserved_origins_private() {
+    let source = format!(
+        "material = \"FAKE_TRUNCATED_METADATA\"; ec = OpenSSL::PKey::EC.new(\"curve\")\n{}ec.private_key = OpenSSL::BN.new(material,16)\n{}",
+        "items.each {\n".repeat(130),
+        "}\n".repeat(130),
+    );
+    let start = source.find("FAKE_TRUNCATED_METADATA").unwrap();
+    for limit in [0, 1, 2, 3, 5, 10, 20, 32, 64, 128, 512, 1024, 100_000] {
+        let ranges = ruby_ranges(&source, limit);
+        assert!(
+            ranges.iter().any(|range| range.start <= start
+                && range.end >= start + "FAKE_TRUNCATED_METADATA".len()),
+            "unprotected metadata limit {limit}"
+        );
+    }
+}
+
+#[test]
+fn ruby_scalar_deep_captures_run_through_both_entrypoints_without_rules() {
+    use pqc_scan_core::{Detector, ScannableFile};
+    let source = format!(
+        "material = \"FAKE_DEEP_NO_RULES\"; ec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\")\n{}ec.private_key = material\n{}",
+        "items.each {\n".repeat(130), "}\n".repeat(130),
+    );
+    let file = ScannableFile::from_bytes("public.rb".into(), source.as_bytes().to_vec());
+    let detector = pqc_scan_detectors::tree_sitter_detector::TreeSitterDetector;
+    let rules = RuleSet::default();
+    let direct = detector.detect_detailed(&file, &rules).unwrap();
+    let observed = detector.detect_observed(&file, &rules).unwrap();
+    assert_eq!(direct.sensitive_ranges(), observed.sensitive_ranges());
+    let start = source.find("FAKE_DEEP_NO_RULES").unwrap();
+    assert!(direct
+        .sensitive_ranges()
+        .iter()
+        .any(|range| range.start <= start && range.end >= start + "FAKE_DEEP_NO_RULES".len()));
+}
+
+#[test]
+fn ruby_scalar_identifier_byte_boundaries_keep_exact_bindings_across_rules() {
+    use pqc_scan_core::{Detector, ScannableFile};
+    let root = std::env::temp_dir().join(format!("pqc-ruby-long-name-{}", std::process::id()));
+    std::fs::create_dir_all(&root).unwrap();
+    std::fs::write(root.join("control.yml"), r#"[{"id":"LONG_NAME_PUBLIC_CONTROL","kind":"regex","category":"CryptoAPI","severity":"medium","risk":"quantum-vulnerable","confidence":0.65,"migration_hint":"Review","pattern":"OpenSSL::PKey::EC\\.new","scope":"code"}]"#).unwrap();
+    let custom = RuleSet::load_from_dir(&root).unwrap();
+    let defaults =
+        RuleSet::load_from_dir(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../rules/default"))
+            .unwrap();
+    let empty = RuleSet::default();
+    let detector = pqc_scan_detectors::tree_sitter_detector::TreeSitterDetector;
+    for bytes in [511, 512, 513, 4096] {
+        for unicode in [false, true] {
+            let name = if unicode {
+                format!(
+                    "r{}{}",
+                    "名".repeat((bytes - 1) / 3),
+                    "x".repeat((bytes - 1) % 3)
+                )
+            } else {
+                "r".repeat(bytes)
+            };
+            assert_eq!(name.len(), bytes);
+            for source in [
+                format!("material = \"FAKE_LONG_RECEIVER\"\n{name} = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\")\n{name}.private_key = material\nother.private_key = \"PUBLIC_OTHER\"\n"),
+                format!("{name} =\n \"FAKE_LONG_MATERIAL\"\nec = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\")\nec.private_key = OpenSSL::BN.new({name},16)\nother.private_key = \"PUBLIC_OTHER\"\n"),
+            ] {
+                let file = ScannableFile::from_bytes("public.rb".into(), source.as_bytes().to_vec());
+                for rules in [&defaults, &custom, &empty] {
+                    let direct = detector.detect_detailed(&file, rules).unwrap();
+                    let observed = detector.detect_observed(&file, rules).unwrap();
+                    assert_eq!(direct.sensitive_ranges(), observed.sensitive_ranges());
+                    let marker = if source.contains("FAKE_LONG_RECEIVER") { "FAKE_LONG_RECEIVER" } else { "FAKE_LONG_MATERIAL" };
+                    let start = source.find(marker).unwrap();
+                    assert!(direct.sensitive_ranges().iter().any(|range| range.start <= start && range.end >= start + marker.len()), "unprotected identifier bytes {bytes}, unicode {unicode}");
+                    for public in ["PUBLIC_CURVE", "PUBLIC_OTHER"] {
+                        let start = source.find(public).unwrap();
+                        assert!(!direct.sensitive_ranges().iter().any(|range| range.start < start + public.len() && range.end > start));
+                    }
+                }
+            }
+        }
+    }
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn ruby_scalar_long_aliases_and_deep_captures_keep_parameter_shadows() {
+    let receiver = "r".repeat(1025);
+    let material = "m".repeat(1027);
+    let alias = "a".repeat(1029);
+    let source = format!(
+        "{material} = \"FAKE_LONG_CAPTURE\"\n{receiver} = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\")\n{alias} = {receiver}\n{}{alias}.private_key = {material}\n{}\n",
+        "items.each {\n".repeat(130),
+        "}\n".repeat(130),
+    );
+    ruby_protects(&source, &["FAKE_LONG_CAPTURE"], &["PUBLIC_CURVE"]);
+    for parameter in [receiver.clone(), format!("; {receiver}")] {
+        let source = format!("{material} = \"PUBLIC_LONG_SHADOW\"\n{receiver} = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\")\n{}items.each {{ |{parameter}| {receiver}.private_key = {material} }}\n{}", "items.each {\n".repeat(130), "}\n".repeat(130));
+        ruby_protects(&source, &[], &["PUBLIC_LONG_SHADOW", "PUBLIC_CURVE"]);
+    }
+    let source = format!("def private_input\n{material} = \"FAKE_LONG_METHOD\"\n{receiver} = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\")\n{receiver}.private_key = {material}\nend\ndef unrelated\n{material} = \"PUBLIC_LONG_METHOD\"\n{receiver} = Something::EC.new\n{receiver}.private_key = {material}\nend\n");
+    ruby_protects(
+        &source,
+        &["FAKE_LONG_METHOD"],
+        &["PUBLIC_LONG_METHOD", "PUBLIC_CURVE"],
+    );
+}
+
+#[test]
+fn ruby_scalar_long_material_survives_node_and_alias_exhaustion() {
+    let material = "m".repeat(2049);
+    let receiver = "r".repeat(2051);
+    let mut source = format!("{material} =\n \"FAKE_LONG_LIMIT\"\n{receiver} = OpenSSL::PKey::EC.new(\"PUBLIC_CURVE\")\n");
+    for i in 0..12 {
+        let value = if i == 0 {
+            material.clone()
+        } else {
+            format!("a{}_{}", "x".repeat(513), i - 1)
+        };
+        source.push_str(&format!("a{}_{} = {value}\n", "x".repeat(513), i));
+    }
+    source.push_str(&format!(
+        "{receiver}.private_key = a{}_11\n",
+        "x".repeat(513)
+    ));
+    let start = source.find("FAKE_LONG_LIMIT").unwrap();
+    for limit in [0, 1, 2, 3, 5, 10, 20, 32, 64, 128, 512, 1024, 100_000] {
+        let ranges = ruby_ranges(&source, limit);
+        assert!(
+            ranges
+                .iter()
+                .any(|range| range.start <= start && range.end >= start + "FAKE_LONG_LIMIT".len()),
+            "unprotected long initializer at node limit {limit}"
+        );
+    }
+}

@@ -1,0 +1,456 @@
+{
+  "reviewer": "source-label-a",
+  "corpusSha256": "5f21273ec09f05903fc9a5cbaf078211c5d0aedf1a1cbef63b18ed4ad6498b9c",
+  "protocolSha256": "81defa80c5f36cd557974714dc3f1763a8664cef43a8c3b7e31d82bd4825dfcf",
+  "model": "gpt-6.1-sol",
+  "sourceOnly": true,
+  "otherLabelsSeen": false,
+  "scannerResultsSeen": false,
+  "frozenAt": "2026-11-25T07:11:47.985193+00:00",
+  "labels": [
+    {
+      "id": "U01",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-512"
+      ],
+      "reason": "The interval declares the nominal ML-KEM-512 parameter type in its corresponding module. The following parameter implementation and KEM implementation establish its source role. This counts as a source reference without asserting runtime use.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L111",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "line": 111,
+        "startColumn": 1,
+        "endColumn": 25,
+        "sourceSpanSha256": "69ca7dc863d39f58b44e37db0e1b14066f0061e75f9f45c22fac8b9c9883c233",
+        "surroundingContextRead": [
+          98,
+          220
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "location": "Abstract",
+          "basis": "The NIST publication abstract defines the three named ML-KEM parameter sets."
+        }
+      ]
+    },
+    {
+      "id": "U02",
+      "label": "negative",
+      "role": "documentation_comment",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-512"
+      ],
+      "reason": "The entire interval is a documentation comment describing a parameter type. It is excluded by the executable-source reference protocol.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L108",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "line": 108,
+        "startColumn": 1,
+        "endColumn": 98,
+        "sourceSpanSha256": "498fdd1f8c58bfebebeaf4c798c80a13642f76ecb0be436aefc010a6af108856",
+        "surroundingContextRead": [
+          98,
+          220
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "location": "Abstract",
+          "basis": "The NIST publication abstract defines the three named ML-KEM parameter sets."
+        }
+      ]
+    },
+    {
+      "id": "U03",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "The interval declares the nominal ML-KEM-768 parameter type in its corresponding module. The adjacent parameter implementation and KEM implementation establish its source role.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L159",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "line": 159,
+        "startColumn": 1,
+        "endColumn": 25,
+        "sourceSpanSha256": "e0b38f1009dbb28917e06e9e831cb4782fa38176a8790438d9fb775f7c65ec5c",
+        "surroundingContextRead": [
+          98,
+          220
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "location": "Abstract",
+          "basis": "The NIST publication abstract defines the three named ML-KEM parameter sets."
+        }
+      ]
+    },
+    {
+      "id": "U04",
+      "label": "negative",
+      "role": "documentation_code_example",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "This interval is inside a module documentation comment containing an import example. The example does not become an executable-source import in this annotation scope.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L25",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "line": 25,
+        "startColumn": 1,
+        "endColumn": 18,
+        "sourceSpanSha256": "fe9cfd88ee93c8887e1aaf0e39a82539de353ae056e01ffa3a2f5c2852afd91c",
+        "surroundingContextRead": [
+          98,
+          220
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "location": "Abstract",
+          "basis": "The NIST publication abstract defines the three named ML-KEM parameter sets."
+        }
+      ]
+    },
+    {
+      "id": "U05",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-1024"
+      ],
+      "reason": "The interval declares the nominal ML-KEM-1024 parameter type in its corresponding module. The adjacent parameter implementation and KEM implementation establish its source role.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L206",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "line": 206,
+        "startColumn": 1,
+        "endColumn": 26,
+        "sourceSpanSha256": "775d0e1774f3f041e4bba021d2c08e5efd6b8827db2e9c048db9aadb9dc30861",
+        "surroundingContextRead": [
+          98,
+          220
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "location": "Abstract",
+          "basis": "The NIST publication abstract defines the three named ML-KEM parameter sets."
+        }
+      ]
+    },
+    {
+      "id": "U06",
+      "label": "negative",
+      "role": "documentation_comment",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-1024"
+      ],
+      "reason": "The entire interval is a documentation comment describing a parameter type. It is excluded by the executable-source reference protocol.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L203",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "line": 203,
+        "startColumn": 1,
+        "endColumn": 99,
+        "sourceSpanSha256": "9490abc36c5ea94d404913c0890080d5faf9b54a8e79e2a1ea928bee7630a970",
+        "surroundingContextRead": [
+          98,
+          220
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "location": "Abstract",
+          "basis": "The NIST publication abstract defines the three named ML-KEM parameter sets."
+        }
+      ]
+    },
+    {
+      "id": "U07",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-44"
+      ],
+      "reason": "The interval declares the nominal ML-DSA-44 parameter type. Its following ParameterSet implementation uses matrix dimensions 4 and 4, supporting the name mapping to FIPS 204.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L207",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "line": 207,
+        "startColumn": 1,
+        "endColumn": 20,
+        "sourceSpanSha256": "4a33271f848dbcb35587819482bde345e422e1307d1f11c9376e78bf6a1b0673",
+        "surroundingContextRead": [
+          204,
+          257
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "location": "Section 4, Table 1, printed page 15 (PDF page 25); Section 3.3, printed page 11",
+          "basis": "FIPS 204 identifies the parameter names and their matrix dimensions."
+        }
+      ]
+    },
+    {
+      "id": "U08",
+      "label": "negative",
+      "role": "module_documentation_comment",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-44",
+        "ML-DSA-65"
+      ],
+      "reason": "The interval documents a generic parameter trait and names two concrete parameter types, but the whole line is a module documentation comment. The concrete names do not make the line an executable-source reference.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L16",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "line": 16,
+        "startColumn": 1,
+        "endColumn": 99,
+        "sourceSpanSha256": "9f14bf58d6f8b9df83383345369bab52deb3a4e72a220122cec3e8169c219a35",
+        "surroundingContextRead": [
+          204,
+          257
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "location": "Section 4, Table 1, printed page 15 (PDF page 25); Section 3.3, printed page 11",
+          "basis": "FIPS 204 identifies the parameter names and their matrix dimensions."
+        }
+      ]
+    },
+    {
+      "id": "U09",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-65"
+      ],
+      "reason": "The interval declares the nominal ML-DSA-65 parameter type. Its following ParameterSet implementation uses matrix dimensions 6 and 5, supporting the name mapping to FIPS 204.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L227",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "line": 227,
+        "startColumn": 1,
+        "endColumn": 20,
+        "sourceSpanSha256": "c07b44230f4ee185476969942f345b8fa20c605270a02057f9a4cfa6233d29b9",
+        "surroundingContextRead": [
+          204,
+          257
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "location": "Section 4, Table 1, printed page 15 (PDF page 25); Section 3.3, printed page 11",
+          "basis": "FIPS 204 identifies the parameter names and their matrix dimensions."
+        }
+      ]
+    },
+    {
+      "id": "U10",
+      "label": "negative",
+      "role": "module_documentation_comment",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-44",
+        "ML-DSA-65"
+      ],
+      "reason": "This is the same source interval as U08. The whole line is a module documentation comment, so its concrete parameter names are excluded from executable-source references.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L16",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "line": 16,
+        "startColumn": 1,
+        "endColumn": 99,
+        "sourceSpanSha256": "9f14bf58d6f8b9df83383345369bab52deb3a4e72a220122cec3e8169c219a35",
+        "surroundingContextRead": [
+          204,
+          257
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "location": "Section 4, Table 1, printed page 15 (PDF page 25); Section 3.3, printed page 11",
+          "basis": "FIPS 204 identifies the parameter names and their matrix dimensions."
+        }
+      ]
+    },
+    {
+      "id": "U11",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-87"
+      ],
+      "reason": "The interval declares the nominal ML-DSA-87 parameter type. Its following ParameterSet implementation uses matrix dimensions 8 and 7, supporting the name mapping to FIPS 204.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L245",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "line": 245,
+        "startColumn": 1,
+        "endColumn": 20,
+        "sourceSpanSha256": "d7452bdc01238b619e03b40e1883d9a2178140443900b8a9039a8df60ab55834",
+        "surroundingContextRead": [
+          204,
+          257
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "location": "Section 4, Table 1, printed page 15 (PDF page 25); Section 3.3, printed page 11",
+          "basis": "FIPS 204 identifies the parameter names and their matrix dimensions."
+        }
+      ]
+    },
+    {
+      "id": "U12",
+      "label": "negative",
+      "role": "module_documentation_comment",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-87",
+        "ML-DSA-65"
+      ],
+      "reason": "The interval mentions concrete parameter types within module documentation prose. The entire line is a documentation comment and is excluded by the executable-source reference protocol.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "url": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L17",
+        "localSource": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "line": 17,
+        "startColumn": 1,
+        "endColumn": 94,
+        "sourceSpanSha256": "3b8ab31efb8086476e1811ef862488db3788a50eedebb34ea6557301348959df",
+        "surroundingContextRead": [
+          204,
+          257
+        ],
+        "uncertainty": "No unresolved uncertainty for the scoped source-reference classification. No conformance or runtime-use assertion."
+      },
+      "primaryEvidence": [
+        {
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "location": "Section 4, Table 1, printed page 15 (PDF page 25); Section 3.3, printed page 11",
+          "basis": "FIPS 204 identifies the parameter names and their matrix dimensions."
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "The labels cover only the twelve frozen single-line units in two pinned files. They do not estimate repository, language, API, cryptographic correctness, runtime use, or broad scanner accuracy.",
+    "U08 and U10 are duplicate intervals. The twelve unit identifiers represent eleven distinct source spans. Counts must not imply twelve independent observations.",
+    "Positive and negative units were deliberately selected. Their proportions are not a prevalence estimate.",
+    "Independence is based on reading pinned source and NIST primary definitions without scanner results, tuning observations, rules, or another annotation file. The model identity and agreement with another same-model agent do not independently certify accuracy.",
+    "The FIPS 203 PDF fetch timed out twice. Its authoritative NIST publication page abstract was successfully read and explicitly defines all three parameter-set names; no additional cryptographic correctness claim is made.",
+    "No upstream code was executed or imported. No scanner, tests, builds, benchmarks, or unrelated network requests were run.",
+    "Only source symbols and surrounding local declarations establish the Rust identifier mappings. The review does not validate the complete algorithm implementations."
+  ]
+}

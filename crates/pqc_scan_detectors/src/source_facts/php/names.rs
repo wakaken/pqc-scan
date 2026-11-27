@@ -1,5 +1,6 @@
 //! PHP namespace segments and case-aware import identities; never loads a file.
 use super::super::context::{children, Context};
+use super::super::{PartialCause, PartialCauses};
 use std::{
     cell::Cell,
     collections::{HashMap, HashSet},
@@ -21,9 +22,20 @@ pub(super) struct Names<'a, 's, 'c> {
     declared: HashSet<(u8, String)>,
     remaining: Cell<usize>,
     dynamic_classes: bool,
-    pub partial: Cell<bool>,
+    partial_causes: Cell<PartialCauses>,
 }
 impl<'a, 's, 'c> Names<'a, 's, 'c> {
+    pub fn mark_partial(&self, cause: PartialCause) {
+        let mut causes = self.partial_causes.get();
+        causes.insert(cause);
+        self.partial_causes.set(causes);
+    }
+    pub fn restore_partial_causes(&self, causes: PartialCauses) {
+        self.partial_causes.set(causes);
+    }
+    pub fn partial_causes(&self) -> PartialCauses {
+        self.partial_causes.get()
+    }
     pub fn new(ctx: &'c Context<'a, 's>) -> Self {
         let mut result = Self {
             ctx,
@@ -50,10 +62,10 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
                         "class_alias" | "eval"
                     )
                 }),
-            partial: Cell::new(false),
+            partial_causes: Cell::new(PartialCauses::default()),
         };
         if result.dynamic_classes {
-            result.partial.set(true);
+            result.mark_partial(PartialCause::OtherSourceUncertainty);
         }
         let nodes: Vec<_> = ctx
             .nodes
@@ -150,7 +162,7 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
                         && matches!(n.kind(), "name" | "qualified_name")
                 });
                 let Some(target) = target else {
-                    result.partial.set(true);
+                    result.mark_partial(PartialCause::OtherSourceUncertainty);
                     continue;
                 };
                 let Some(raw) = result.token(target, kind) else {
@@ -189,7 +201,7 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
                     std::collections::hash_map::Entry::Occupied(mut e) => {
                         let at = e.get().1.min(declaration.end_byte());
                         e.insert((None, at));
-                        result.partial.set(true);
+                        result.mark_partial(PartialCause::OtherSourceUncertainty);
                     }
                 }
             }
@@ -205,7 +217,7 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
                     .is_some_and(|f| matches!(f.as_str(), "class_alias" | "eval"))
                 {
                     result.dynamic_classes = true;
-                    result.partial.set(true);
+                    result.mark_partial(PartialCause::OtherSourceUncertainty);
                     result.import_references.clear();
                     break;
                 }
@@ -296,11 +308,11 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
             let alias_kind = if rest.is_empty() { kind } else { CLASS };
             if let Some((target, at)) = self.imports.get(&(segment, alias_kind, first.to_owned())) {
                 if node.start_byte() < *at {
-                    self.partial.set(true);
+                    self.mark_partial(PartialCause::OtherSourceUncertainty);
                     return None;
                 }
                 let Some(target) = target else {
-                    self.partial.set(true);
+                    self.mark_partial(PartialCause::OtherSourceUncertainty);
                     return None;
                 };
                 if rest.is_empty() {

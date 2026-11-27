@@ -11,6 +11,10 @@ import time
 def execute(command,output,*,timeout=2,cpu_seconds=2):
     if not math.isfinite(timeout) or timeout<=0 or type(cpu_seconds) is not int or cpu_seconds<=0:
         raise ValueError('finite positive wall and CPU limits required')
+    return _execute_validated(command,output,timeout=timeout,cpu_seconds=cpu_seconds)
+
+
+def _execute_validated(command,output,*,timeout,cpu_seconds):
     output=Path(output);output.mkdir(parents=True,exist_ok=False)
     def limits():
         resource.setrlimit(resource.RLIMIT_CORE,(0,0))

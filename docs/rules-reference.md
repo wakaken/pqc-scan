@@ -16,6 +16,20 @@ away. These annotations do not replace existing Risk/severity tags or certify
 accuracy. See [loader and custom-scope compatibility](architecture/RULE-VALIDATION.md)
 for blank ID/confidence/traversal errors and unchanged scope behavior.
 
+## Lexical references and filename candidates
+
+`JWT_KID_HEADER` matches a `kid` member name. The match does not distinguish a
+JWK member from a JOSE header or establish active key selection.
+`OPENSSL_RSA_API` and `API_EVP_PKEY_RSA` match text containing API names or
+identifiers, including name prefixes in macros, documentation and type checks.
+Their existing categories group rules and do not prove TLS use, a call or a
+configured key. Confirm the source role and active use before planning changes.
+
+`CERT_PEM_CONTAINER` and `CERT_P12_CONTAINER` retain filename-extension signals.
+These findings alone do not establish cryptographic contents or certificate
+presence. Parsed certificate algorithms, when available, remain separate facts.
+Partial or unsupported inspection remains incomplete, including encrypted PKCS#12.
+
 ## Severity Levels
 
 | Severity | Meaning | Typical handling |
@@ -95,7 +109,7 @@ identifiers are not exhaustively assessed. See the
 |---|---|---|---|---|---:|---|---|---|---|---|
 | `API_BC_RSA_ENGINE` | `regex` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.58 | `code` | `crypto_api.yml` | BouncyCastle RSA engine usage detected. | Migrate to BouncyCastle PQC APIs. | `\bRSAEngine\b\|\bRSABlindedEngine\b` |
 | `API_CIPHER_RSA` | `regex` | CryptoAPI | `high` | `quantum-vulnerable` | 0.64 | `code` | `crypto_api.yml` | RSA cipher API usage detected. | Migrate to hybrid KEM+AEAD cryptographic design. | `Cipher\.getInstance\(\s*"RSA` |
-| `API_EVP_PKEY_RSA` | `regex` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.54 | `code` | `crypto_api.yml` | EVP_PKEY configured for RSA detected. | Use EVP_PKEY abstraction to prepare key-type replacement for PQC. | `EVP_PKEY_(RSA\|set1_RSA)` |
+| `API_EVP_PKEY_RSA` | `regex` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.54 | `code` | `crypto_api.yml` | Text matching an RSA-related EVP_PKEY identifier was found. This match does not establish a configured key. | Confirm whether this identifier belongs to active key configuration or use. If so, assess key-type replacement and provider support for PQC migration. | `EVP_PKEY_(RSA\|set1_RSA)` |
 | `API_GO_CRYPTO_RSA` | `regex` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.52 | `code` | `crypto_api.yml` | Go crypto/rsa usage detected. | Introduce hybrid PQC key sharing in Go services. | `\bcrypto/rsa\b` |
 | `API_JOSE_RSA_ALG` | `regex` | CryptoAPI | `high` | `quantum-vulnerable` | 0.63 | `code` | `crypto_api.yml` | RSA-family JOSE algorithm detected. | Update JOSE algorithms to PQC-ready alternatives. | `\b(RS256\|RS384\|RS512\|PS256\|PS384\|PS512)\b` |
 | `API_NODE_CRYPTO_SIGN_RSA` | `regex` | CryptoAPI | `medium` | `quantum-vulnerable` | 0.50 | `code` | `crypto_api.yml` | Node.js RSA signing API usage detected. | Plan PQC replacement for node:crypto RSA operations. | `create(Sign\|Verify)\(\s*['"]RSA` |
@@ -108,8 +122,8 @@ identifiers are not exhaustively assessed. See the
 | `CERT_EXPIRY_2026_OR_BEFORE` | `certificate` | PKI | `medium` | `non-quantum-risk` | 0.25 | `legacy_not_after_2026` | `cert.yml` | Parsed certificate expiry is at or before 2026 (legacy fixed cutoff, not current validity). | Use current-time validity findings for renewal decisions; retain this legacy cutoff only for compatibility. | `^before_2027$` |
 | `CERT_MD5_SIGNATURE` | `certificate` | PKI | `critical` | `non-quantum-risk` | 0.90 | `signature_oid` | `cert.yml` | MD5 certificate signature detected. | Reissue the certificate immediately. | `^1\.2\.840\.113549\.1\.1\.4$` |
 | `CERT_OID_RSA_PSS` | `certificate` | PKI | `high` | `quantum-vulnerable` | 0.62 | `signature_oid` | `cert.yml` | RSASSA-PSS OID detected. | Verify issuer, verifier and key-format support before evaluating standardized PQC certificate signatures. | `^1\.2\.840\.113549\.1\.1\.10$` |
-| `CERT_P12_CONTAINER` | `certificate` | PKI | `medium` | `quantum-uncertain` | 0.35 | `certificate` | `cert.yml` | PKCS#12/PFX container file detected. | Audit algorithms used inside PKCS#12/PFX containers. | `(?i)\.(p12\|pfx)$` |
-| `CERT_PEM_CONTAINER` | `certificate` | PKI | `low` | `quantum-uncertain` | 0.30 | `certificate` | `cert.yml` | PEM/DER cryptographic container detected; certificate presence is not established. | Identify the cryptographic object type; inspect certificate algorithms only when a certificate is present. | `(?i)\.(pem\|crt\|cer\|der)$` |
+| `CERT_P12_CONTAINER` | `certificate` | PKI | `medium` | `quantum-uncertain` | 0.35 | `certificate` | `cert.yml` | Filename extension suggests PKCS#12/PFX. This finding does not establish container contents or certificate presence. | Check whether the file contains PKCS#12/PFX data. If certificates are present, inspect their algorithms and retain unsupported or encrypted contents as unverified. | `(?i)\.(p12\|pfx)$` |
+| `CERT_PEM_CONTAINER` | `certificate` | PKI | `low` | `quantum-uncertain` | 0.30 | `certificate` | `cert.yml` | Filename extension suggests a PEM/DER object. This finding does not establish cryptographic content or certificate presence. | Check the file contents and object type. Inspect certificate algorithms only when a certificate is present. | `(?i)\.(pem\|crt\|cer\|der)$` |
 | `CERT_RSA_1024` | `certificate` | PKI | `critical` | `non-quantum-risk` | 0.88 | `rsa_modulus_bits` | `cert.yml` | Certificate subject public key is 1024-bit RSA. | Confirm actual use and issuer/verifier support; replace weak deployed keys while planning purpose-appropriate PQC migration. | `^1024$` |
 | `CERT_RSA_2048` | `certificate` | PKI | `high` | `quantum-vulnerable` | 0.78 | `rsa_modulus_bits` | `cert.yml` | Certificate subject public key is 2048-bit RSA. | Plan supported PQC certificate signatures with issuer and peer compatibility checks; larger classical keys alone do not remove quantum exposure. | `^2048$` |
 | `CERT_RSA_3072` | `certificate` | PKI | `medium` | `quantum-vulnerable` | 0.65 | `rsa_modulus_bits` | `cert.yml` | Certificate subject public key is 3072-bit RSA. | Evaluate standardized PQC signatures in supported issuance and verification environments. | `^3072$` |
@@ -145,7 +159,7 @@ identifiers are not exhaustively assessed. See the
 | `JAVA_KEYFACTORY_RSA` | `regex` | TLS | `medium` | `quantum-vulnerable` | 0.50 | `code` | `tls.yml` | Java KeyFactory configured for RSA. | Phase out RSA-dependent key management. | `KeyFactory\.getInstance\(\s*"RSA"` |
 | `JWK_RSA_KEY` | `regex` | JWT | `high` | `quantum-vulnerable` | 0.62 | `code` | `jwt.yml` | RSA key type in JWK detected. | Migrate JWKs to ML-DSA or hybrid key types. | `"kty"\s*:\s*"RSA"` |
 | `JWT_ES256` | `regex` | JWT | `medium` | `quantum-uncertain` | 0.50 | `code` | `jwt.yml` | ES256 (ECDSA-based JWT signing) is in use. | Plan migration from ECDSA to PQC signatures. | `\bES256\b` |
-| `JWT_KID_HEADER` | `regex` | JWT | `low` | `quantum-uncertain` | 0.35 | `code` | `jwt.yml` | JWT kid header usage detected, indicating key-management touch points. | Add PQC keys into the key-rotation strategy. | `"kid"\s*:` |
+| `JWT_KID_HEADER` | `regex` | JWT | `low` | `quantum-uncertain` | 0.35 | `code` | `jwt.yml` | A kid member reference was found. This match does not distinguish a key object from a JWT header. | Confirm the member's object and active use. If it selects signing or verification keys, assess JOSE formats and peer/library support before planning PQC key rotation. | `"kid"\s*:` |
 | `JWT_LIB_JOSE` | `dependency` | JWT | `medium` | `quantum-uncertain` | 0.45 | `dependency` | `jwt.yml` | jose dependency detected. | Verify PQC support in the JOSE implementation. | `(?i)\bjose\b` |
 | `JWT_LIB_JSONWEBTOKEN` | `dependency` | JWT | `medium` | `quantum-uncertain` | 0.48 | `dependency` | `jwt.yml` | jsonwebtoken dependency detected. | Review the library roadmap for PQC-ready algorithms. | `(?i)\bjsonwebtoken\b` |
 | `JWT_PS256` | `regex` | JWT | `high` | `quantum-vulnerable` | 0.55 | `code` | `jwt.yml` | PS256 (RSA-PSS) is used for JWT signing. | Migrate to ML-DSA signatures. | `\bPS256\b` |
@@ -164,7 +178,7 @@ identifiers are not exhaustively assessed. See the
 | `NGINX_SSL_PROTOCOLS_LEGACY` | `regex` | Middleware | `high` | `non-quantum-risk` | 0.85 | `config` | `middleware.yml` | Legacy TLSv1.x is enabled in nginx configuration. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `(?m)^\s*ssl_protocols\s+[^;]*(TLSv1(?:\.0\|\.1)?(?:$\|[^0-9.]))` |
 | `NODE_TLS_MIN_VERSION` | `regex` | TLS | `medium` | `non-quantum-risk` | 0.65 | `code` | `tls.yml` | Node.js TLS minimum version may be too weak. | Prefer TLS 1.3; restrict to TLS 1.3 when all peers support it. Retain securely configured TLS 1.2 only for a documented interoperability need. Disable TLS 1.0 and 1.1. | `minVersion\s*:\s*['"]TLSv1(?:[._][01])?['"]` |
 | `OIDC_ID_TOKEN_SIGALG` | `regex` | JWT | `medium` | `quantum-uncertain` | 0.40 | `code` | `jwt.yml` | OIDC ID token signature algorithm configuration detected. | Select PQC-ready algorithms in OIDC provider settings. | `id_token_signed_response_alg` |
-| `OPENSSL_RSA_API` | `regex` | TLS | `medium` | `quantum-vulnerable` | 0.52 | `code` | `tls.yml` | OpenSSL RSA API call detected. | Replace with EVP_PKEY-based implementation suitable for PQC migration. | `RSA_(generate_key\|public_encrypt\|private_decrypt)` |
+| `OPENSSL_RSA_API` | `regex` | TLS | `medium` | `quantum-vulnerable` | 0.52 | `code` | `tls.yml` | Text matching an OpenSSL RSA API name was found. This match does not establish an API call. | Confirm whether this name occurs in an active RSA operation. If so, assess an EVP_PKEY-based implementation and provider support for the required migration. | `RSA_(generate_key\|public_encrypt\|private_decrypt)` |
 | `PRIVATE_KEY_OPENSSH_HEADER` | `key` | KeyMaterial | `critical` | `non-quantum-risk` | 0.95 | `keymaterial` | `ssh.yml` | OpenSSH private key header detected. | Treat OpenSSH private-key exposure as an urgent incident. | `-----BEGIN OPENSSH PRIVATE KEY-----` |
 | `PRIVATE_KEY_PKCS8_HEADER` | `key` | KeyMaterial | `critical` | `non-quantum-risk` | 0.95 | `keymaterial` | `ssh.yml` | PKCS#8 private key header detected. | Investigate private-key exposure and rotate credentials. | `-----BEGIN PRIVATE KEY-----` |
 | `PRIVATE_KEY_RSA_HEADER` | `key` | KeyMaterial | `critical` | `non-quantum-risk` | 0.95 | `keymaterial` | `ssh.yml` | RSA private key header detected. | Rotate exposed private keys immediately and strengthen key handling. | `-----BEGIN RSA PRIVATE KEY-----` |
@@ -244,7 +258,7 @@ Known non-certificate PEM/DER objects are inapplicable to certificate parsing; n
 
 The user-approved audit remediation retains IDs, schemas and the severity engine. RSA size matching now needs explicit RSA context, avoiding ML-KEM/Falcon parameter names and HSS counters. TLS reference guidance separates static RSA exchange from ECDHE/DHE RSA authentication. Generic protocol names and private-key markers do not establish enabled settings or a live credential incident. General EdDSA names do not establish JWT usage; Java RSA references can already belong to a PQC composition.
 
-`PQC_STANDARD_REFERENCE` (tree_sitter, info, quantum-safe, seven language scopes) inventories recognized standard parameter names and X25519MLKEM768. It is nominal source inventory, not execution, enabled state, implementation conformance or certification. Specific API rules remain separate findings.
+`PQC_STANDARD_REFERENCE` (tree_sitter, info, quantum-safe, seven language scopes) inventories recognized standard parameter names and X25519MLKEM768. Exact underscore identifiers `ml_kem512/768/1024`, `ml_dsa44/65/87`, and the twelve `slh_dsa_sha2/shake_128/192/256s/f` spellings are included as nominal symbol references. Identifier prefixes, suffixes, unknown parameters and comments do not extend that finite vocabulary. It is nominal source inventory, not execution, enabled state, implementation conformance or certification. Specific API rules remain separate findings.
 
 The task062 source-bound companion is preserved as [historical audit metadata](../tasks/062/evidence/AUDIT-RULE-QUALITY-METADATA.json). The maintained [rule companion](quality/rules/RULE-QUALITY-METADATA.json) now also records the approved F054-01 correction; historical snapshots and past measurements remain unchanged. These are hand-authored pattern controls, not a calibrated accuracy claim. Actual detector/CLI regression controls are in `crates/pqc_scan_cli/tests/audit_remediation.rs`.
 

@@ -1,0 +1,93 @@
+name: Release quality with performance held
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+        with:
+          toolchain: 1.93.1
+          components: rustfmt, clippy
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+      - name: Run tests
+        run: cargo test --workspace --locked
+
+      - name: Run clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Check all features in an isolated target
+        run: |
+          cargo test --workspace --all-features --locked --target-dir "$RUNNER_TEMP/pqc-all-features"
+          cargo clippy --workspace --all-targets --all-features --locked --target-dir "$RUNNER_TEMP/pqc-all-features" -- -D warnings
+      - name: Test distribution safety
+        run: python3 -m unittest discover -s tests/distribution -v
+      - name: Test report navigation and self-scan preparation
+        run: node --test shell/*.test.cjs tests/report-ui/*.test.cjs
+
+      - name: Install source-only audit dependencies
+        run: python3 -m pip install -r benchmark/audit-requirements.txt
+
+      - name: Test performance hold selector controls
+        run: python3 -I -B tests/ci/test_quality_performance_hold.py
+
+      - name: Test quality consumers with explicit performance hold
+        run: |
+          python3 -I - <<'PYTHON'
+          import os
+          import sys
+          environment = {
+              key: value for key, value in os.environ.items()
+              if not key.startswith('PQC_') and key not in ('PYTHONHOME', 'PYTHONPATH')
+          }
+          environment['PYTHONDONTWRITEBYTECODE'] = '1'
+          os.execve(sys.executable, [
+              sys.executable, '-B', 'scripts/quality-with-performance-held.py',
+              '--repo', '.', '--out-dir', 'target/quality-performance-held',
+          ], environment)
+          PYTHON
+
+      - name: Test temporal witness with product libraries
+        run: python3 benchmark/temporal_reassessment/ci.py
+
+      - name: Aggregate all-axis evidence offline
+        if: always()
+        timeout-minutes: 2
+        run: |
+          python3 tests/quality/report.py --evidence-catalog docs/quality/EVIDENCE-CATALOG.json --out-dir target/quality-integrated
+          cp docs/quality/CI-MEASUREMENT-PLAN.md target/quality-integrated/ci-measurement-plan.md
+
+      - name: Preserve integrated evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pqc-release-quality-performance-held
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            target/quality-integrated/
+            target/quality-performance-held/
+

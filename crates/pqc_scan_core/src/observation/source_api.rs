@@ -276,6 +276,7 @@ fn public_api_name(name: &str) -> Option<&'static str> {
         "ECDH_compute_key",
         "secp256k1_ecdsa_sign",
         "secp256k1_ecdsa_verify",
+        "wc_MakeRsaKey",
         "wc_RsaSSL_Sign",
         "wc_RsaSSL_Verify",
         "wc_RsaPublicEncrypt",

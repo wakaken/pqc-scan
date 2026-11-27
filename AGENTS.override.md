@@ -13,6 +13,22 @@ for history and rollback, not as active workflow instructions. References to
 them in older tasks, guides or skills do not reactivate them. Do not automatically
 compose another general workflow (including GSD or Superpowers) with pstack.
 
+## Review model selection
+
+Use these explicit project assignments for all future reviews:
+
+| Review scope | Assigned model |
+| --- | --- |
+| Decision-trail and work-record audits, including `pstack:show-me-your-work` | `codex:gpt-6.1-terra@high` |
+| Implementation correctness, test adequacy, architecture, design, security and other important technical reviews | `codex:gpt-6.1-sol@high` |
+
+These assignments take precedence over skill defaults and any conflicting
+requirement to choose a different model family. Preserve reviewer independence:
+a change's author cannot approve their own work; use a separate review agent.
+If an assigned model is unavailable, report that review as unavailable rather
+than substituting another model. State each review's scope and assigned model
+explicitly. Preserve historical reviews and their recorded reviewer identities.
+
 ## Product and source of truth
 
 `pqc-scan` is a Rust CLI static analyzer of post-quantum cryptography migration

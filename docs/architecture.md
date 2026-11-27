@@ -50,7 +50,7 @@
 
 Rule loading rejects blank IDs, invalid source confidence and every traversal
 error before returning a RuleSet; valid custom scope semantics are unchanged.
-See [loading contract](architecture/RULE-VALIDATION.md). The [source-bound122-rule
+See [loading contract](architecture/RULE-VALIDATION.md). The [source-bound rule quality
 companion](quality/rules/RULE-QUALITY.md) is development-only and has no runtime/report
 schema dependency. Existing matcher/Risk/severity remain authoritative.
 
@@ -412,6 +412,12 @@ remain language-independent. No runtime translation service is used.
 
 - `cbom.json`: cryptographic bill of materials from findings
 - `dependency-sbom.json`: normalized dependency inventory from manifests/SBOMs
+
+Legacy CBOM grouping uses the structured tuple of rule ID, source path, line and
+original evidence match. Columns remain outside that grouping, and the first
+occurrence supplies the row and its order. Delimiters in paths or evidence cannot
+merge distinct tuples. This grouping does not change finding IDs or native
+associations; export redaction still runs after the original identity is built.
 
 ## Performance Characteristics
 

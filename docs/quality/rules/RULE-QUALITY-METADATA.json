@@ -8,15 +8,15 @@
   "source_files": [
     {
       "path": "rules/default/cert.yml",
-      "sha256": "4b508af4b18cdfb8bb0b811bc021c24b0837d667b19a3d136e6f6dc9e808a75b"
+      "sha256": "65562f8eaa263940b60ce3d0b83e95a4b6c064ea095e2deb138e8a8466c3f260"
     },
     {
       "path": "rules/default/crypto_api.yml",
-      "sha256": "ac1a6ee684390ea37ca6d783468016f8e896512737eeca6640e8ba735a583006"
+      "sha256": "37e692cde0402ac28b16ef5d3a37436ff2b3651f4e483cded9e6f62b46375673"
     },
     {
       "path": "rules/default/jwt.yml",
-      "sha256": "580a9f4f263b9e441757619c7f655a38b8496edeb570807cbb6bff5070b87a51"
+      "sha256": "d81ef2c09dffb7f829cf7ed856b38cfa8ab0bbb9faeec2cd9c0bdc03ea89548d"
     },
     {
       "path": "rules/default/middleware.yml",
@@ -24,7 +24,7 @@
     },
     {
       "path": "rules/default/pqc.yml",
-      "sha256": "acde689dc784a1866c738014fe47cb071948f7e452c3bdf32722b83082f824d2"
+      "sha256": "45b41005a7e4a63960d31d89b669ee2d8fd1c6ea41bd49e3bb3abb9672903ebe"
     },
     {
       "path": "rules/default/ssh.yml",
@@ -32,7 +32,7 @@
     },
     {
       "path": "rules/default/tls.yml",
-      "sha256": "bab99ff127a7cc147f83bdae3a4246d8e629389c9de0a6d280f3a3ec25e7af43"
+      "sha256": "6e3c59cc2e12bfc6f5ad06580f6a4a9fef8b5dba513af80daf4764e9fe9347b0"
     },
     {
       "path": "rules/default/tree_sitter.yml",
@@ -358,10 +358,10 @@
         "severity": "medium",
         "risk": "quantum-vulnerable",
         "confidence": 0.54,
-        "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+        "migration_hint": "Confirm whether this identifier belongs to active key configuration or use. If so, assess key-type replacement and provider support for PQC migration.",
         "pattern": "EVP_PKEY_(RSA|set1_RSA)",
         "scope": "code",
-        "description": "EVP_PKEY configured for RSA detected."
+        "description": "Text matching an RSA-related EVP_PKEY identifier was found. This match does not establish a configured key."
       },
       "purpose": "signature_or_key_establishment_reference",
       "algorithm_families": [
@@ -1152,10 +1152,10 @@
         "severity": "medium",
         "risk": "quantum-uncertain",
         "confidence": 0.35,
-        "migration_hint": "Audit algorithms used inside PKCS#12/PFX containers.",
+        "migration_hint": "Check whether the file contains PKCS#12/PFX data. If certificates are present, inspect their algorithms and retain unsupported or encrypted contents as unverified.",
         "pattern": "(?i)\\.(p12|pfx)$",
         "scope": "certificate",
-        "description": "PKCS#12/PFX container file detected."
+        "description": "Filename extension suggests PKCS#12/PFX. This finding does not establish container contents or certificate presence."
       },
       "purpose": "container_inventory",
       "algorithm_families": [
@@ -1199,10 +1199,10 @@
         "severity": "low",
         "risk": "quantum-uncertain",
         "confidence": 0.3,
-        "migration_hint": "Identify the cryptographic object type; inspect certificate algorithms only when a certificate is present.",
+        "migration_hint": "Check the file contents and object type. Inspect certificate algorithms only when a certificate is present.",
         "pattern": "(?i)\\.(pem|crt|cer|der)$",
         "scope": "certificate",
-        "description": "PEM/DER cryptographic container detected; certificate presence is not established."
+        "description": "Filename extension suggests a PEM/DER object. This finding does not establish cryptographic content or certificate presence."
       },
       "purpose": "container_inventory",
       "algorithm_families": [
@@ -2981,10 +2981,10 @@
         "severity": "low",
         "risk": "quantum-uncertain",
         "confidence": 0.35,
-        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+        "migration_hint": "Confirm the member's object and active use. If it selects signing or verification keys, assess JOSE formats and peer/library support before planning PQC key rotation.",
         "pattern": "\"kid\"\\s*:",
         "scope": "code",
-        "description": "JWT kid header usage detected, indicating key-management touch points."
+        "description": "A kid member reference was found. This match does not distinguish a key object from a JWT header."
       },
       "purpose": "jwt_metadata_or_api_reference",
       "algorithm_families": [
@@ -3897,10 +3897,10 @@
         "severity": "medium",
         "risk": "quantum-vulnerable",
         "confidence": 0.52,
-        "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+        "migration_hint": "Confirm whether this name occurs in an active RSA operation. If so, assess an EVP_PKEY-based implementation and provider support for the required migration.",
         "pattern": "RSA_(generate_key|public_encrypt|private_decrypt)",
         "scope": "code",
-        "description": "OpenSSL RSA API call detected."
+        "description": "Text matching an OpenSSL RSA API name was found. This match does not establish an API call."
       },
       "purpose": "signature_or_key_establishment_reference",
       "algorithm_families": [
@@ -6164,7 +6164,7 @@
         "risk": "quantum-safe",
         "confidence": 0.6,
         "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security.",
-        "pattern": "(?i)\\b(?:ML-KEM-(?:512|768|1024)|ML-DSA-(?:44|65|87)|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf]|MLKEM(?:512|768|1024)|MLDSA(?:44|65|87)|X25519MLKEM768)\\b",
+        "pattern": "(?i)\\b(?:ML-KEM-(?:512|768|1024)|ML-DSA-(?:44|65|87)|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf]|MLKEM(?:512|768|1024)|MLDSA(?:44|65|87)|ml_kem(?:512|768|1024)|ml_dsa(?:44|65|87)|slh_dsa_(?:sha2|shake)_(?:128|192|256)[sf]|X25519MLKEM768)\\b",
         "scope": "java,go,javascript,typescript,python,rust,ruby",
         "description": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established."
       },
@@ -6186,7 +6186,8 @@
       "method_limits": [
         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "The eighteen underscore spellings are nominal parameter-set references, not name binding or a final-standard implementation conformance claim."
       ],
       "known_gaps": [
         "Names and registration symbols do not establish execution, final implementation conformance or product security."
@@ -6215,6 +6216,126 @@
         },
         {
           "target": "NOTMLKEM768",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "ml_kem512",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ml_kem768",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ml_kem1024",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ml_dsa44",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ml_dsa65",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ml_dsa87",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_128s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_128f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_192s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_192f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_256s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_256f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_128s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_128f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_192s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_192f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_256s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_256f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "not_ml_kem768",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "ml_kem768_helper",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "ml_kem999",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "ml_dsa99",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "slh_dsa_sha2_128fast",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "slh_dsa_sha3_128f",
           "desired_positive": false,
           "expected_pattern_match": false
         }

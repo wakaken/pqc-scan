@@ -4,7 +4,7 @@ mod values;
 use super::{
     builtin,
     context::{children, Context},
-    Facts,
+    Facts, PartialCause,
 };
 use names::{Names, CLASS, FUNCTION};
 use pqc_scan_rules::RuleSet;
@@ -265,7 +265,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                     continue;
                 };
                 if !matches!(function.kind(), "name" | "qualified_name" | "relative_name") {
-                    names.partial.set(true);
+                    names.mark_partial(PartialCause::OtherSourceUncertainty);
                     continue;
                 }
                 let Some(name) = names.resolve(function, FUNCTION) else {
@@ -287,7 +287,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                         _ => None,
                     });
                     if key.is_none() {
-                        names.partial.set(true);
+                        names.mark_partial(PartialCause::OtherSourceUncertainty);
                     }
                     emit(
                         facts,
@@ -377,7 +377,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                         | "forward_static_call"
                         | "forward_static_call_array"
                 ) {
-                    names.partial.set(true);
+                    names.mark_partial(PartialCause::OtherSourceUncertainty);
                 }
             }
             "scoped_call_expression" => {
@@ -390,7 +390,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                 if !matches!(scope.kind(), "name" | "qualified_name" | "relative_name")
                     || method.kind() != "name"
                 {
-                    names.partial.set(true);
+                    names.mark_partial(PartialCause::OtherSourceUncertainty);
                     continue;
                 }
                 let (Some(class), Some(method)) =
@@ -399,7 +399,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                     continue;
                 };
                 if class == "ffi" {
-                    names.partial.set(true);
+                    names.mark_partial(PartialCause::OtherSourceUncertainty);
                     continue;
                 }
                 if class == "firebase\\jwt\\jwt" && matches!(method.as_str(), "decode" | "encode") {
@@ -477,7 +477,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                     .find(|n| matches!(n.kind(), "name" | "qualified_name" | "relative_name"));
                 let Some(class) = class else {
                     if children(*n).iter().any(|n| n.kind() == "variable_name") {
-                        names.partial.set(true);
+                        names.mark_partial(PartialCause::OtherSourceUncertainty);
                     }
                     continue;
                 };
@@ -485,7 +485,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                     continue;
                 };
                 if class.starts_with("reflection") {
-                    names.partial.set(true);
+                    names.mark_partial(PartialCause::OtherSourceUncertainty);
                 }
                 if let Some(ClassInfo::Reference(algorithm)) = class_info(&class) {
                     if let Some(arguments) = n.child_by_field_name("arguments") {
@@ -530,7 +530,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                     continue;
                 };
                 let Some(method) = names.token(method, FUNCTION) else {
-                    names.partial.set(true);
+                    names.mark_partial(PartialCause::OtherSourceUncertainty);
                     continue;
                 };
                 if matches!(method.as_str(), "sign" | "validatereference" | "verify")
@@ -559,7 +559,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                         "local_key_type_check_receiver_relation_unresolved",
                         "PHP type-checked key signature reference",
                     );
-                    names.partial.set(true);
+                    names.mark_partial(PartialCause::OtherSourceUncertainty);
                     continue;
                 }
                 if !matches!(
@@ -586,7 +586,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                         "PHP ParagonIE key operation",
                     );
                 } else {
-                    names.partial.set(true);
+                    names.mark_partial(PartialCause::OtherSourceUncertainty);
                 }
             }
             _ => {}
@@ -595,7 +595,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
     if values.binding_limited {
         ctx.limit("php_same_name_bindings", 64, 64);
     }
-    facts.partial |= names.partial.get();
+    facts.extend_partial_causes(names.partial_causes());
 }
 fn in_error(mut node: Node<'_>, ctx: &Context<'_, '_>) -> bool {
     for _ in 0..64 {

@@ -259,6 +259,18 @@ fn damaged_or_unsupported_pem_block_preserves_neighboring_valid_certificates() {
 fn malformed_and_unsupported_containers_keep_signals_but_do_not_complete() {
     for (name, bytes, expected, id) in [
         (
+            "empty.pem",
+            b"".as_slice(),
+            DetectorStatus::Partial,
+            "CERT_PEM_CONTAINER",
+        ),
+        (
+            "newline.pem",
+            b"\n".as_slice(),
+            DetectorStatus::Partial,
+            "CERT_PEM_CONTAINER",
+        ),
+        (
             "bad.pem",
             b"not a certificate".as_slice(),
             DetectorStatus::Partial,
@@ -282,6 +294,18 @@ fn malformed_and_unsupported_containers_keep_signals_but_do_not_complete() {
             .unwrap();
         assert_eq!(result.status(), expected);
         assert!(result.detections().iter().any(|h| h.rule_id == id));
+        let hit = result
+            .detections()
+            .iter()
+            .find(|h| h.rule_id == id)
+            .unwrap();
+        assert!(hit.evidence.snippet_preview.contains("filename"));
+        assert!(!hit.evidence.snippet_preview.contains("container detected"));
+        assert_eq!(hit.location.line, 1);
+        assert_eq!(hit.location.column, 1);
+        for field in ["signature_oid", "public_key_oid", "certificate_sha256"] {
+            assert!(!hit.evidence.metadata.contains_key(field));
+        }
         assert_eq!(
             CertificateDetector
                 .detect(&file(name, bytes), &rules())

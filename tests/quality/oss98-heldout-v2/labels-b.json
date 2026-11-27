@@ -1,0 +1,706 @@
+{
+  "reviewer": "source-label-b",
+  "corpusSha256": "5c64bd362c3a2305693058d5054565ccc02f47940709bf2053ab87f562500838",
+  "protocolSha256": "20d8f17719b38b2f8fce58fb75440ba4ee903d08fcda393dd26fe22f0df4808d",
+  "model": "gpt-6.1-sol",
+  "sourceOnly": true,
+  "otherLabelsSeen": false,
+  "scannerResultsSeen": false,
+  "frozenAt": "2026-11-25T07:15:37.665448+00:00",
+  "labels": [
+    {
+      "id": "U01",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-512"
+      ],
+      "reason": "The selected symbol MlKem512 is the name of a public Rust unit-struct declaration for ML-KEM-512. Its surrounding ParameterSet implementation and module context identify the concrete standardized parameter set. The declaration meets the nominal executable-source reference definition without asserting runtime use or conformance.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/KEMs",
+        "commit": "b26db85a9b44e532a0167333ce34743b6886e22c",
+        "path": "ml-kem/src/lib.rs",
+        "line": 111,
+        "startColumn": 16,
+        "endColumn": 24,
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "sourceSpanSha256": "43226fc6178b932f7dd958b1b03bba10d6e41d06bdd2bae4a4dab82bd8628fe7",
+        "sourceUrl": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L111",
+        "contextLines": [
+          100,
+          119
+        ],
+        "nominalSymbols": "MlKem512",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "0e8f02ab6844bdd5a000ef45a8efebf367f2136d7d169f9ad50d60173b6e5940",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 203 final publication page",
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "locator": "Abstract, paragraph listing the three ML-KEM parameter sets",
+          "observation": "The NIST publication page explicitly lists ML-KEM-512, ML-KEM-768, and ML-KEM-1024 as the standardized parameter sets.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U01",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U02",
+      "label": "negative",
+      "role": "doc_comment",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-512"
+      ],
+      "reason": "The selected symbol MlKem512 denotes ML-KEM-512 but occurs inside a Rust documentation comment. The surrounding line establishes the documentary role, so this exact symbol interval is negative under the protocol. The judgment is not inferred from any scanner output.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/KEMs",
+        "commit": "b26db85a9b44e532a0167333ce34743b6886e22c",
+        "path": "ml-kem/src/lib.rs",
+        "line": 108,
+        "startColumn": 10,
+        "endColumn": 18,
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "sourceSpanSha256": "43226fc6178b932f7dd958b1b03bba10d6e41d06bdd2bae4a4dab82bd8628fe7",
+        "sourceUrl": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L108",
+        "contextLines": [
+          100,
+          111
+        ],
+        "nominalSymbols": "MlKem512",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "b8ca283f3e0e848d1de64b9c46453ed8f9241f1f48dc222be94ead5a9f289c94",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 203 final publication page",
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "locator": "Abstract, paragraph listing the three ML-KEM parameter sets",
+          "observation": "The NIST publication page explicitly lists ML-KEM-512, ML-KEM-768, and ML-KEM-1024 as the standardized parameter sets.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U02",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U03",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "The selected symbol MlKem768 is the name of a public Rust unit-struct declaration for ML-KEM-768. Its surrounding ParameterSet implementation and module context identify the concrete standardized parameter set. The declaration meets the nominal executable-source reference definition without asserting runtime use or conformance.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/KEMs",
+        "commit": "b26db85a9b44e532a0167333ce34743b6886e22c",
+        "path": "ml-kem/src/lib.rs",
+        "line": 159,
+        "startColumn": 16,
+        "endColumn": 24,
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "sourceSpanSha256": "793fbe7ff2e8a507e42239c9c98959abaf3cca5c386dfc27714a2bd38cec7a8b",
+        "sourceUrl": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L159",
+        "contextLines": [
+          147,
+          167
+        ],
+        "nominalSymbols": "MlKem768",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "607e570fb6ba0b416cb131feb96c7110861e2a29ee54387b026b98adeac8402f",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 203 final publication page",
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "locator": "Abstract, paragraph listing the three ML-KEM parameter sets",
+          "observation": "The NIST publication page explicitly lists ML-KEM-512, ML-KEM-768, and ML-KEM-1024 as the standardized parameter sets.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U03",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U04",
+      "label": "negative",
+      "role": "doc_comment_code_example",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-768"
+      ],
+      "reason": "The selected symbol MlKem768 denotes ML-KEM-768 but occurs inside a Rust documentation comment. The surrounding line establishes the documentary role, so this exact symbol interval is negative under the protocol. The judgment is not inferred from any scanner output.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/KEMs",
+        "commit": "b26db85a9b44e532a0167333ce34743b6886e22c",
+        "path": "ml-kem/src/lib.rs",
+        "line": 25,
+        "startColumn": 9,
+        "endColumn": 17,
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "sourceSpanSha256": "793fbe7ff2e8a507e42239c9c98959abaf3cca5c386dfc27714a2bd38cec7a8b",
+        "sourceUrl": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L25",
+        "contextLines": [
+          20,
+          27
+        ],
+        "nominalSymbols": "MlKem768",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "a5868d7be17f6659ee0a4203371a38b43de9206af2084d57a872264a60eab021",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 203 final publication page",
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "locator": "Abstract, paragraph listing the three ML-KEM parameter sets",
+          "observation": "The NIST publication page explicitly lists ML-KEM-512, ML-KEM-768, and ML-KEM-1024 as the standardized parameter sets.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U04",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U05",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-1024"
+      ],
+      "reason": "The selected symbol MlKem1024 is the name of a public Rust unit-struct declaration for ML-KEM-1024. Its surrounding ParameterSet implementation and module context identify the concrete standardized parameter set. The declaration meets the nominal executable-source reference definition without asserting runtime use or conformance.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/KEMs",
+        "commit": "b26db85a9b44e532a0167333ce34743b6886e22c",
+        "path": "ml-kem/src/lib.rs",
+        "line": 206,
+        "startColumn": 16,
+        "endColumn": 25,
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "sourceSpanSha256": "468a6526cb69b19697fadf636c2b7234d6a17f077ec0ec2eb44e238838c1e8a4",
+        "sourceUrl": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L206",
+        "contextLines": [
+          195,
+          214
+        ],
+        "nominalSymbols": "MlKem1024",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "8345cd346353d1438dd2eed2f29e8f0e786bcc0644db5942f7d509f62ef79bd2",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 203 final publication page",
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "locator": "Abstract, paragraph listing the three ML-KEM parameter sets",
+          "observation": "The NIST publication page explicitly lists ML-KEM-512, ML-KEM-768, and ML-KEM-1024 as the standardized parameter sets.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U05",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U06",
+      "label": "negative",
+      "role": "doc_comment",
+      "algorithms": [
+        "ML-KEM"
+      ],
+      "parameters": [
+        "ML-KEM-1024"
+      ],
+      "reason": "The selected symbol MlKem1024 denotes ML-KEM-1024 but occurs inside a Rust documentation comment. The surrounding line establishes the documentary role, so this exact symbol interval is negative under the protocol. The judgment is not inferred from any scanner output.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__KEMs/20261125T063008-1795588208948822000/root/ml-kem/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/KEMs",
+        "commit": "b26db85a9b44e532a0167333ce34743b6886e22c",
+        "path": "ml-kem/src/lib.rs",
+        "line": 203,
+        "startColumn": 10,
+        "endColumn": 19,
+        "sourceSha256": "65c638bc6ca63e05dae60244b6f0b5c02a80736b76ecc645b19316b8dafbec61",
+        "sourceSpanSha256": "468a6526cb69b19697fadf636c2b7234d6a17f077ec0ec2eb44e238838c1e8a4",
+        "sourceUrl": "https://github.com/RustCrypto/KEMs/blob/b26db85a9b44e532a0167333ce34743b6886e22c/ml-kem/src/lib.rs#L203",
+        "contextLines": [
+          195,
+          206
+        ],
+        "nominalSymbols": "MlKem1024",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "885ff63804c2db464af1052942733182b9b736bc7c5b61d9636a2c19ab3b8f28",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 203 final publication page",
+          "url": "https://csrc.nist.gov/pubs/fips/203/final",
+          "locator": "Abstract, paragraph listing the three ML-KEM parameter sets",
+          "observation": "The NIST publication page explicitly lists ML-KEM-512, ML-KEM-768, and ML-KEM-1024 as the standardized parameter sets.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U06",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U07",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-44"
+      ],
+      "reason": "The selected symbol MlDsa44 is the name of a public Rust unit-struct declaration for ML-DSA-44. Its surrounding ParameterSet implementation and module context identify the concrete standardized parameter set. The declaration meets the nominal executable-source reference definition without asserting runtime use or conformance.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/signatures",
+        "commit": "8d3230a534530dea0d7657cfc591418490a141ff",
+        "path": "ml-dsa/src/lib.rs",
+        "line": 207,
+        "startColumn": 12,
+        "endColumn": 19,
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "sourceSpanSha256": "ec01e4e9b5fa1cd310e33982018ed5b73499f7631d2514a1d9c990fad9e0b07e",
+        "sourceUrl": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L207",
+        "contextLines": [
+          204,
+          220
+        ],
+        "nominalSymbols": "MlDsa44",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "a10c31f23b7087abf6ec3a54733ffa1bf6d7429a8c4e2d899862bd2395f606a9",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 204, final, August 13, 2024",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "locator": "Section 3.3, printed page 11; Section 4 and Table 1, printed page 15",
+          "observation": "FIPS 204 defines ML-DSA-44, ML-DSA-65, and ML-DSA-87; the suffix denotes the matrix dimensions, with K,L values 4,4; 6,5; and 8,7.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U07",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U08",
+      "label": "negative",
+      "role": "doc_comment",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-44"
+      ],
+      "reason": "The selected symbol MlDsa44 denotes ML-DSA-44 but occurs inside a Rust documentation comment. The surrounding line establishes the documentary role, so this exact symbol interval is negative under the protocol. The judgment is not inferred from any scanner output.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/signatures",
+        "commit": "8d3230a534530dea0d7657cfc591418490a141ff",
+        "path": "ml-dsa/src/lib.rs",
+        "line": 16,
+        "startColumn": 76,
+        "endColumn": 83,
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "sourceSpanSha256": "ec01e4e9b5fa1cd310e33982018ed5b73499f7631d2514a1d9c990fad9e0b07e",
+        "sourceUrl": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L16",
+        "contextLines": [
+          13,
+          18
+        ],
+        "nominalSymbols": "MlDsa44",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "72fb0c11250f3acb40d262621af6bbb6c50e9b4c6c1b40f03aada5b9391c788a",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 204, final, August 13, 2024",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "locator": "Section 3.3, printed page 11; Section 4 and Table 1, printed page 15",
+          "observation": "FIPS 204 defines ML-DSA-44, ML-DSA-65, and ML-DSA-87; the suffix denotes the matrix dimensions, with K,L values 4,4; 6,5; and 8,7.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U08",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U09",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-65"
+      ],
+      "reason": "The selected symbol MlDsa65 is the name of a public Rust unit-struct declaration for ML-DSA-65. Its surrounding ParameterSet implementation and module context identify the concrete standardized parameter set. The declaration meets the nominal executable-source reference definition without asserting runtime use or conformance.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/signatures",
+        "commit": "8d3230a534530dea0d7657cfc591418490a141ff",
+        "path": "ml-dsa/src/lib.rs",
+        "line": 227,
+        "startColumn": 12,
+        "endColumn": 19,
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "sourceSpanSha256": "5f640f4619adfd5510e259a212eb121a356a4d6fb411a425d27121da73ef508e",
+        "sourceUrl": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L227",
+        "contextLines": [
+          222,
+          240
+        ],
+        "nominalSymbols": "MlDsa65",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "4806f16fc5962d801d05c5dcb4d1b0787d9d85f9044fd01e64accbdb3ddd63d9",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 204, final, August 13, 2024",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "locator": "Section 3.3, printed page 11; Section 4 and Table 1, printed page 15",
+          "observation": "FIPS 204 defines ML-DSA-44, ML-DSA-65, and ML-DSA-87; the suffix denotes the matrix dimensions, with K,L values 4,4; 6,5; and 8,7.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U09",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U10",
+      "label": "negative",
+      "role": "doc_comment",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-65"
+      ],
+      "reason": "The selected symbol MlDsa65 denotes ML-DSA-65 but occurs inside a Rust documentation comment. The surrounding line establishes the documentary role, so this exact symbol interval is negative under the protocol. The judgment is not inferred from any scanner output.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/signatures",
+        "commit": "8d3230a534530dea0d7657cfc591418490a141ff",
+        "path": "ml-dsa/src/lib.rs",
+        "line": 16,
+        "startColumn": 89,
+        "endColumn": 96,
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "sourceSpanSha256": "5f640f4619adfd5510e259a212eb121a356a4d6fb411a425d27121da73ef508e",
+        "sourceUrl": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L16",
+        "contextLines": [
+          13,
+          18
+        ],
+        "nominalSymbols": "MlDsa65",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "72fb0c11250f3acb40d262621af6bbb6c50e9b4c6c1b40f03aada5b9391c788a",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 204, final, August 13, 2024",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "locator": "Section 3.3, printed page 11; Section 4 and Table 1, printed page 15",
+          "observation": "FIPS 204 defines ML-DSA-44, ML-DSA-65, and ML-DSA-87; the suffix denotes the matrix dimensions, with K,L values 4,4; 6,5; and 8,7.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U10",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U11",
+      "label": "positive",
+      "role": "parameter_type_declaration",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-87"
+      ],
+      "reason": "The selected symbol MlDsa87 is the name of a public Rust unit-struct declaration for ML-DSA-87. Its surrounding ParameterSet implementation and module context identify the concrete standardized parameter set. The declaration meets the nominal executable-source reference definition without asserting runtime use or conformance.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/signatures",
+        "commit": "8d3230a534530dea0d7657cfc591418490a141ff",
+        "path": "ml-dsa/src/lib.rs",
+        "line": 245,
+        "startColumn": 12,
+        "endColumn": 19,
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "sourceSpanSha256": "e78d47bb136e8808ee7ad5dd4c83b489e9791c25d22018fe5c380d26a16f00c4",
+        "sourceUrl": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L245",
+        "contextLines": [
+          242,
+          258
+        ],
+        "nominalSymbols": "MlDsa87",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "dd452d649686bbbb79370d8caa3d06106120efcfd1651ce041da8233a47e3490",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 204, final, August 13, 2024",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "locator": "Section 3.3, printed page 11; Section 4 and Table 1, printed page 15",
+          "observation": "FIPS 204 defines ML-DSA-44, ML-DSA-65, and ML-DSA-87; the suffix denotes the matrix dimensions, with K,L values 4,4; 6,5; and 8,7.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U11",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    },
+    {
+      "id": "U12",
+      "label": "negative",
+      "role": "doc_comment",
+      "algorithms": [
+        "ML-DSA"
+      ],
+      "parameters": [
+        "ML-DSA-87"
+      ],
+      "reason": "The selected symbol MlDsa87 denotes ML-DSA-87 but occurs inside a Rust documentation comment. The surrounding line establishes the documentary role, so this exact symbol interval is negative under the protocol. The judgment is not inferred from any scanner output.",
+      "sourceOnly": true,
+      "otherLabelsSeen": false,
+      "scannerResultsSeen": false,
+      "sourceEvidence": {
+        "sourcePath": "/Users/waka/.cache/pqc-scan-oss98-20261125/acquisition-new/sources/RustCrypto__signatures/20261125T063012-1795588212100516000/root/ml-dsa/src/lib.rs",
+        "repository": "https://github.com/RustCrypto/signatures",
+        "commit": "8d3230a534530dea0d7657cfc591418490a141ff",
+        "path": "ml-dsa/src/lib.rs",
+        "line": 17,
+        "startColumn": 10,
+        "endColumn": 17,
+        "sourceSha256": "4f602007ee0029254bbaa271ae7bd53a8c7a145d571b4fac7500e3393bb1c8c1",
+        "sourceSpanSha256": "e78d47bb136e8808ee7ad5dd4c83b489e9791c25d22018fe5c380d26a16f00c4",
+        "sourceUrl": "https://github.com/RustCrypto/signatures/blob/8d3230a534530dea0d7657cfc591418490a141ff/ml-dsa/src/lib.rs#L17",
+        "contextLines": [
+          13,
+          18
+        ],
+        "nominalSymbols": "MlDsa87",
+        "hashesVerified": true,
+        "contextRecheckedForV2": true,
+        "contextSha256": "72fb0c11250f3acb40d262621af6bbb6c50e9b4c6c1b40f03aada5b9391c788a",
+        "contextHashEncoding": "UTF-8, complete context lines joined with LF, no final LF"
+      },
+      "primaryEvidence": [
+        {
+          "title": "NIST FIPS 204, final, August 13, 2024",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.204.pdf",
+          "locator": "Section 3.3, printed page 11; Section 4 and Table 1, printed page 15",
+          "observation": "FIPS 204 defines ML-DSA-44, ML-DSA-65, and ML-DSA-87; the suffix denotes the matrix dimensions, with K,L values 4,4; 6,5; and 8,7.",
+          "retrievedOn": "2026-11-25"
+        }
+      ],
+      "uncertainty": "No unresolved source-role or nominal parameter identity uncertainty for this interval. This does not establish runtime use or conformance.",
+      "reuseAssessment": {
+        "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+        "priorUnitId": "U12",
+        "directSourceRechecked": true,
+        "labelApplicableAfterNarrowing": true,
+        "roleUnchanged": true,
+        "parameterScopeNarrowedToSelectedSymbol": true,
+        "targetPredictionsSeen": false,
+        "otherAnnotatorLabelsSeen": false
+      }
+    }
+  ],
+  "limitations": [
+    "Only twelve non-overlapping exact symbol intervals in two pinned files were annotated. Surrounding full lines and declarations establish source roles. No repository-wide, language-wide, API-wide, security, or cryptographic correctness estimate follows.",
+    "V1 U08 and U10 selected the same full line. V2 selects distinct MlDsa44 and MlDsa65 occurrences on that line. All twelve exact intervals are now unique and pairwise non-overlapping; shared context still does not establish statistical independence.",
+    "The corpus scope string retains the phrase complete single-line intervals. The v2 protocol and explicit start/end columns unambiguously define exact symbol intervals, which are the annotated scope.",
+    "The deliberate positive and negative sampling is not a prevalence sample. Documentation names remain negative for this specific AST-source reference scope.",
+    "No scanner output, rule regex, previous tuning observation, other annotator label, code-review artifact, benchmark result, or target prediction was read before or during the v2 assessment.",
+    "No upstream source was executed, imported, built, or dependency-resolved. No upstream instructions or AGENTS files were read.",
+    "Primary definitions were read in the original blind assessment and reused after direct source rechecking. NIST FIPS 203 PDF retrieval had timed out twice, so its official NIST final-publication page supplied explicit parameter-set names. FIPS 204 PDF Sections 3.3 and 4 supplied parameter-set definitions.",
+    "This is a separately performed source-evidence assessment. Same-model agent identity or agreement cannot independently certify accuracy. No scanner accuracy metrics are computed.",
+    "All twelve v2 labels were frozen together without viewing target predictions or other annotator labels. Any unresolved independence or truth-admission requirement must remain unevaluated under the protocol."
+  ],
+  "priorLabelPath": "/tmp/pqc-oss98-source-label-b-s6d5cp6q/labels.json",
+  "priorLabelSha256": "a989732beaf8c0a6ecd6921cff7db17fd926522312f069dac806fe3d9c96aa55",
+  "correctionReason": "Full-line U08/U10 overlapped; v2 binds each exact distinct symbol occurrence before target predictions. Source bytes, unit IDs, roles and intended facts are unchanged.",
+  "annotationRevision": 2,
+  "targetPredictionsSeen": false,
+  "validationEvidence": {
+    "path": "/tmp/pqc-oss98-source-label-b-s6d5cp6q/evidence-v2.json",
+    "sha256": "c27007fe57cc37221ef06c5eed1fccda66cbb95eff5e860859de676177ddc3ce"
+  },
+  "nonOverlapVerified": true,
+  "uniqueIntervals": 12
+}

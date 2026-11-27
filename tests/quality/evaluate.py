@@ -17,7 +17,11 @@ def digest(value):
 
 
 def bytes_digest(path):
-    return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+    result = hashlib.sha256()
+    with pathlib.Path(path).open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            result.update(chunk)
+    return result.hexdigest()
 
 
 def safe_relative(name):

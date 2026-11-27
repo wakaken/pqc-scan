@@ -2,9 +2,8 @@
 
 [English](DISTRIBUTION.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.ja.md)
 
-このガイドは、macOS Apple Silicon（`aarch64-apple-darwin`）向けの
-**v0.4.0**の導入方法を説明します。\
-変更点は[v0.4.0のリリースノート](../releases/v0.4.0.ja.md)を参照してください。
+macOS Apple Silicon（`aarch64-apple-darwin`）向けの導入方法を説明します。\
+バージョンごとの変更点は[v0.5.0のリリースノート](../releases/v0.5.0.ja.md)を参照してください。
 
 <a id="release-status"></a>
 
@@ -18,8 +17,8 @@ Actions成果物は公開済みReleaseとは別です。
 
 | 構成 | ファイル名 | 使える機能 |
 |---|---|---|
-| `static` | `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz` | ローカルスキャン、ローカルWeb画面、移行確認 |
-| `network` | `pqc-scan-0.4.0-aarch64-apple-darwin-network.tar.gz` | 静的版の全機能に加え、明示したTLS・SSH接続先の診断 |
+| `static` | `pqc-scan-0.5.0-aarch64-apple-darwin-static.tar.gz` | ローカルスキャン、ローカルWeb画面、移行確認 |
+| `network` | `pqc-scan-0.5.0-aarch64-apple-darwin-network.tar.gz` | 静的版の全機能に加え、明示したTLS・SSH接続先の診断 |
 
 圧縮ファイルと、対応する `.sha256` ファイルを、同じリリースページの **Assets** からそれぞれダウンロードしてください。\
 `.sha256` はダウンロードした圧縮ファイルが壊れていないか照合するためのファイルで、圧縮ファイルの中ではなく別ファイルとして配布しています。\
@@ -27,8 +26,8 @@ Actions成果物は公開済みReleaseとは別です。
 
 例：`static`版では、次の2ファイルを取得します。
 
-- `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz`
-- `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz.sha256`
+- `pqc-scan-0.5.0-aarch64-apple-darwin-static.tar.gz`
+- `pqc-scan-0.5.0-aarch64-apple-darwin-static.tar.gz.sha256`
 
 接続先の診断には管理者の許可が必要です。\
 [TLS・SSH診断ガイド](PROBING.ja.md)に沿って実行します。\

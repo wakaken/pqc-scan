@@ -761,6 +761,13 @@ fn csharp_import_name_and_variable_caps_bound_real_sources() {
                 DetectorStatus::Truncated
             }
         );
+        let native = f.native(&source);
+        let expression = "System.Security.Cryptography.RSA.Create()";
+        let start = source.find(expression).unwrap();
+        assert_eq!(
+            focal(&native, start, start + expression.len()).len(),
+            usize::from(bytes <= 512)
+        );
     }
     for bytes in [255, 256, 257] {
         let name = "a".repeat(bytes);
@@ -967,4 +974,239 @@ fn csharp_saturated_values_do_not_restore_stale_variants_or_namesakes_or_secrets
     assert!(focal(&native, start, start + 12).is_empty());
     assert!(!native.to_string().contains("PRIVATE084_CSHARP_CAP_CANARY"));
     assert!(!legacy.to_string().contains("PRIVATE084_CSHARP_CAP_CANARY"));
+}
+
+#[test]
+fn csharp_predefined_types_never_inherit_tls_namespace_or_import_qualification() {
+    let f = Fixture::new();
+    for prefix in [
+        "namespace Org.BouncyCastle.Tls;",
+        "using Org.BouncyCastle.Tls; namespace Application;",
+    ] {
+        for typ in [
+            "bool", "byte", "sbyte", "char", "decimal", "double", "float", "int", "uint", "nint",
+            "nuint", "long", "ulong", "short", "ushort", "object", "string", "int?", "int[]",
+        ] {
+            let source =
+                format!("{prefix} class C {{ {typ} field; void F({typ} arg) {{ {typ} local; }} }}");
+            let (native, legacy) = f.document(&source);
+            let type_findings: Vec<_> = legacy["findings"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|v| {
+                    v["evidence"]["metadata"]["source_resolution"] == "qualified_type_reference"
+                })
+                .collect();
+            assert!(
+                type_findings.is_empty(),
+                "built-in type acquired nominal crypto meaning: {typ}"
+            );
+            for finding in legacy["findings"].as_array().unwrap() {
+                assert_eq!(finding["location"]["line"], 1);
+                assert!(prefix.starts_with("using"));
+                assert_eq!(finding["location"]["column"], 7);
+            }
+            assert!(native["observations"].as_array().unwrap().len() <= 1);
+        }
+    }
+    let (native, legacy) =
+        f.document("namespace Org.BouncyCastle.Tls; class C { void F() { var local = 1; } }");
+    assert!(native["observations"].as_array().unwrap().is_empty());
+    assert!(legacy["findings"].as_array().unwrap().is_empty());
+}
+
+#[test]
+fn csharp_tls_alias_qualified_and_escaped_identifier_type_controls_remain_references() {
+    let f = Fixture::new();
+    let source = "using TLS = Org.BouncyCastle.Tls.TlsClientProtocol; namespace Org.BouncyCastle.Tls; class C { TLS alias; TlsClientProtocol actual; global::Org.BouncyCastle.Tls.TlsClientProtocol full; @int escaped; }";
+    let (native, legacy) = f.document(source);
+    for token in [
+        "TLS alias",
+        "TlsClientProtocol actual",
+        "global::Org.BouncyCastle.Tls.TlsClientProtocol full",
+        "@int escaped",
+    ] {
+        let start = source.find(token).unwrap();
+        let observations: Vec<_> = native["observations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|v| v["target"]["byte_start"] == start)
+            .collect();
+        assert_eq!(
+            observations.len(),
+            1,
+            "missing nominal type reference: {token}"
+        );
+        let findings: Vec<_> = legacy["findings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|v| v["location"]["column"] == start + 1)
+            .collect();
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0]["rule_id"], "CSHARP_CRYPTO_REFERENCE");
+        assert_eq!(
+            findings[0]["evidence"]["metadata"]["source_resolution"],
+            "qualified_type_reference"
+        );
+    }
+}
+
+fn csharp_status(source: &str, fixture: &Fixture) -> DetectorStatus {
+    let input = ScannableFile::from_bytes("case.cs".into(), source.as_bytes().to_vec());
+    TreeSitterDetector
+        .detect_observed(&input, &fixture.rules)
+        .unwrap()
+        .status()
+}
+
+#[test]
+fn csharp_partial_fluent_comment_padding_preserves_independent_rsa_references() {
+    let f = Fixture::new();
+    let expression = "System.Security.Cryptography.RSA.Create()";
+    let mut controls = vec![];
+    for padding in [1, 32] {
+        let chain = format!(
+            "new Builder(){}",
+            format!(".Step(/*{}*/)", "x".repeat(padding)).repeat(20)
+        );
+        assert_eq!(chain.len(), if padding == 1 { 253 } else { 873 });
+        let source = format!("class Builder {{ public Builder Step() {{ return this; }} }}\nclass Example {{ void Check() {{\n{expression};\n{chain};\n{expression};\n}} }}\n");
+        controls.push(source.replace(&format!("/*{}*/", "x".repeat(padding)), ""));
+        let native = f.native(&source);
+        for (start, _) in source.match_indices(expression) {
+            let observations = focal(&native, start, start + expression.len());
+            assert_eq!(
+                observations.len(),
+                1,
+                "padding {padding} lost an independent RSA reference"
+            );
+            assert_eq!(algorithm_names(&native, observations[0]), vec!["RSA"]);
+            assert_eq!(observations[0]["usage"], "referenced");
+        }
+        assert_eq!(csharp_status(&source, &f), DetectorStatus::Complete);
+    }
+    assert_eq!(controls[0], controls[1]);
+}
+
+#[test]
+fn csharp_partial_ordinary_receiver_and_generic_calls_do_not_create_crypto_uncertainty() {
+    let f = Fixture::new();
+    for body in [
+        "var ordinary=new Builder(); Opaque(); ordinary.ToString();",
+        "var ordinary=new Builder(); if(flag){ordinary=new Builder();} ordinary.ToString();",
+        "var ordinary=new Builder(); ordinary.Route<int>();",
+        "Route<int>();",
+        "builder?.Route<int>();",
+        "builder?.Invoke();",
+        "(GetCallback())();",
+    ] {
+        let source = format!("class C{{void M(dynamic builder,bool flag){{{body}}}}}");
+        assert_eq!(
+            csharp_status(&source, &f),
+            DetectorStatus::Complete,
+            "{body}"
+        );
+        assert!(f.native(&source)["observations"]
+            .as_array()
+            .unwrap()
+            .is_empty());
+    }
+}
+
+#[test]
+fn csharp_partial_unresolved_supported_consumers_retain_uncertainty_without_guessed_keys() {
+    let f = Fixture::new();
+    for setup in [
+        "",
+        "var k=System.Security.Cryptography.RSA.Create(); k=other;",
+        "var k=System.Security.Cryptography.RSA.Create(); Opaque(ref k);",
+        "var k=System.Security.Cryptography.RSA.Create(); Opaque(out k);",
+        "var k=System.Security.Cryptography.RSA.Create(); k.UnknownMutation();",
+        "var k=System.Security.Cryptography.RSA.Create(); k.UnknownMutation<int>();",
+        "var k=System.Security.Cryptography.RSA.Create(); (GetCallback())();",
+        "var k=System.Security.Cryptography.RSA.Create(); Opaque(k);",
+        "var k=System.Security.Cryptography.RSA.Create(); if(flag){k=other;}",
+        "var k=System.Security.Cryptography.RSA.Create(); {dynamic k=other; k.Encrypt(data);}",
+    ] {
+        let call = "k.Encrypt(data)";
+        let source = format!("class C{{dynamic k;void M(bool flag){{{setup}{call};}}}}");
+        assert_eq!(
+            csharp_status(&source, &f),
+            DetectorStatus::Partial,
+            "{setup}"
+        );
+        let native = f.native(&source);
+        let start = source.rfind(call).unwrap();
+        assert!(
+            focal(&native, start, start + call.len()).is_empty(),
+            "{setup}"
+        );
+    }
+    for source in [
+        "class C{System.Security.Cryptography.RSA k=System.Security.Cryptography.RSA.Create();void M(){k.Encrypt(data);}}",
+        "class C{void M(){System.Security.Cryptography.MLKem.GenerateKey(unknownAlgorithm);}}",
+    ] {
+        assert_eq!(csharp_status(source, &f), DetectorStatus::Partial);
+        let native = f.native(source);
+        let call = "k.Encrypt(data)";
+        if let Some(start) = source.find(call) {
+            assert!(focal(&native, start, start + call.len()).is_empty());
+        } else {
+            let call = "System.Security.Cryptography.MLKem.GenerateKey(unknownAlgorithm)";
+            let start = source.find(call).unwrap();
+            let observations = focal(&native, start, start + call.len());
+            assert_eq!(observations.len(), 1);
+            assert_eq!(algorithm_names(&native, observations[0]), vec!["ML-KEM"]);
+        }
+    }
+    for (declaration, call) in [
+        ("dynamic k", "k.Encrypt<int>(data)"),
+        ("dynamic k", "k?.Encrypt<int>(data)"),
+        ("System.Security.Cryptography.RSA k", "k.Encrypt<int>(data)"),
+    ] {
+        let source = format!("class C{{void M({declaration}){{{call};}}}}");
+        assert_eq!(
+            csharp_status(&source, &f),
+            DetectorStatus::Partial,
+            "{call}"
+        );
+        let native = f.native(&source);
+        let start = source.find(call).unwrap();
+        assert!(focal(&native, start, start + call.len()).is_empty());
+    }
+}
+
+#[test]
+fn csharp_partial_conditional_relevance_stays_bounded_and_fail_closed() {
+    let f = Fixture::new();
+    for method in ["Encrypt<int>", "Route<int>"] {
+        let receiver = format!("k{}", "?.Next".repeat(80));
+        let source = format!("class C{{void M(dynamic k){{{receiver}?.{method}(data);}}}}");
+        assert_eq!(csharp_status(&source, &f), DetectorStatus::Truncated);
+        assert!(f.native(&source)["observations"]
+            .as_array()
+            .unwrap()
+            .is_empty());
+    }
+    for source in [
+        "class C{void M(dynamic k){k?.Encrypt<int>(data);}}",
+        "class C{void M(dynamic k){k?.Encrypt<int>(",
+    ] {
+        let input = ScannableFile::from_bytes("case.cs".into(), source.as_bytes().to_vec());
+        let limited = TreeSitterDetector::with_budget(pqc_scan_detectors::DetectorBudget {
+            max_ast_candidates: 1,
+            ..Default::default()
+        })
+        .detect_observed(&input, &f.rules)
+        .unwrap();
+        assert_eq!(limited.status(), DetectorStatus::Truncated);
+        assert_eq!(csharp_status(source, &f), DetectorStatus::Partial);
+        assert!(f.native(source)["observations"]
+            .as_array()
+            .unwrap()
+            .is_empty());
+    }
 }

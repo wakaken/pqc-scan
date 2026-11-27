@@ -2,8 +2,9 @@
 
 [English](PROBING.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.ja.md)
 
-macOS Apple Silicon向けのv0.4 `network`版で、次の3種類の診断を使えます。\
-（`static`版には `probe` を含みません。詳細は[配布物の選び方](DISTRIBUTION.ja.md#release-status)を参照してください）\
+`network`版で使える3種類の診断を説明します。\
+`static`版には`probe`コマンドはありません。\
+[配布物の選び方](DISTRIBUTION.ja.md#release-status)を参照してください。
 
 | 調べたいこと | コマンド | 確認できる範囲 |
 |---|---|---|

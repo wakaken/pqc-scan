@@ -88,20 +88,20 @@
   severity: medium
   risk: quantum-uncertain
   confidence: 0.35
-  migration_hint: Audit algorithms used inside PKCS#12/PFX containers.
+  migration_hint: Check whether the file contains PKCS#12/PFX data. If certificates are present, inspect their algorithms and retain unsupported or encrypted contents as unverified.
   pattern: (?i)\.(p12|pfx)$
   scope: certificate
-  description: PKCS#12/PFX container file detected.
+  description: Filename extension suggests PKCS#12/PFX. This finding does not establish container contents or certificate presence.
 - id: CERT_PEM_CONTAINER
   kind: certificate
   category: PKI
   severity: low
   risk: quantum-uncertain
   confidence: 0.3
-  migration_hint: Identify the cryptographic object type; inspect certificate algorithms only when a certificate is present.
+  migration_hint: Check the file contents and object type. Inspect certificate algorithms only when a certificate is present.
   pattern: (?i)\.(pem|crt|cer|der)$
   scope: certificate
-  description: PEM/DER cryptographic container detected; certificate presence is not established.
+  description: Filename extension suggests a PEM/DER object. This finding does not establish cryptographic content or certificate presence.
 - id: CERT_EXPIRY_2026_OR_BEFORE
   kind: certificate
   category: PKI

@@ -1,5 +1,6 @@
 //! Case-sensitive, file-local C# names. No project-wide lookup or using expansion.
 use super::super::context::{children, Context};
+use super::super::{PartialCause, PartialCauses};
 use std::{
     cell::Cell,
     collections::{HashMap, HashSet},
@@ -21,10 +22,18 @@ pub(super) struct Names<'a, 's, 'c> {
     declared_types: HashMap<(usize, String), Option<Node<'a>>>,
     file_namespace: Option<(usize, String)>,
     remaining: Cell<usize>,
-    pub partial: Cell<bool>,
+    partial_causes: Cell<PartialCauses>,
     pub references: Vec<(Node<'a>, String)>,
 }
 impl<'a, 's, 'c> Names<'a, 's, 'c> {
+    pub fn mark_partial(&self, cause: PartialCause) {
+        let mut causes = self.partial_causes.get();
+        causes.insert(cause);
+        self.partial_causes.set(causes);
+    }
+    pub fn partial_causes(&self) -> PartialCauses {
+        self.partial_causes.get()
+    }
     pub fn new(ctx: &'c Context<'a, 's>) -> Self {
         let mut out = Self {
             ctx,
@@ -35,7 +44,7 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
             declared_types: HashMap::new(),
             file_namespace: None,
             remaining: Cell::new(ctx.budget.max_ast_candidates),
-            partial: Cell::new(false),
+            partial_causes: Cell::new(PartialCauses::default()),
             references: vec![],
         };
         for n in &ctx.nodes {
@@ -43,7 +52,7 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
                 return out;
             }
             if n.kind().starts_with("preproc_if") || n.kind() == "preproc_else" {
-                out.partial.set(true);
+                out.mark_partial(PartialCause::ConditionalSource);
             }
             if in_error(*n, ctx) {
                 continue;
@@ -201,16 +210,23 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
         }
     }
     pub fn path(&self, node: Node<'_>) -> Option<String> {
-        if !matches!(
-            node.kind(),
-            "identifier"
-                | "implicit_parameter"
-                | "qualified_name"
-                | "alias_qualified_name"
-                | "member_access_expression"
-                | "predefined_type"
-        ) {
-            return None;
+        let mut pending = vec![node];
+        while let Some(part) = pending.pop() {
+            if !self.charge() {
+                return None;
+            }
+            let qualifier = match part.kind() {
+                "identifier" | "implicit_parameter" | "predefined_type" => continue,
+                "qualified_name" => "qualifier",
+                "alias_qualified_name" => "alias",
+                "member_access_expression" => "expression",
+                _ => return None,
+            };
+            if part.named_child_count() != 2 {
+                return None;
+            }
+            pending.push(part.child_by_field_name(qualifier)?);
+            pending.push(part.child_by_field_name("name")?);
         }
         let raw = self.ctx.source(node);
         if raw.len() > 512 {
@@ -218,7 +234,7 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
             return None;
         }
         if raw.contains('\\') {
-            self.partial.set(true);
+            self.mark_partial(PartialCause::OtherSourceUncertainty);
             return None;
         }
         let raw: String = raw.chars().filter(|c| !c.is_whitespace()).collect();
@@ -363,7 +379,7 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
                 if !aliases.is_empty() {
                     alias_found = true;
                     if aliases.len() != 1 || node.start_byte() < aliases[0].at {
-                        self.partial.set(true);
+                        self.mark_partial(PartialCause::OtherSourceUncertainty);
                         return vec![];
                     }
                     if alias_qualified
@@ -373,7 +389,7 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
                                 .is_some()
                             || self.types.contains(&aliases[0].target))
                     {
-                        self.partial.set(true);
+                        self.mark_partial(PartialCause::OtherSourceUncertainty);
                         return vec![];
                     }
                     let suffix = &raw[first.len()..];
@@ -387,7 +403,7 @@ impl<'a, 's, 'c> Names<'a, 's, 'c> {
                 return vec![];
             }
             if alias_qualified && !alias_found {
-                self.partial.set(true);
+                self.mark_partial(PartialCause::OtherSourceUncertainty);
                 return vec![];
             }
             if !alias_found {

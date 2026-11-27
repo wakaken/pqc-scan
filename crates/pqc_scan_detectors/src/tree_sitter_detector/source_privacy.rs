@@ -3,6 +3,16 @@ use pqc_scan_core::ScannableFile;
 use std::{collections::BTreeSet, ops::Range};
 use tree_sitter::{Node, Parser};
 
+mod ruby;
+
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
+enum Scope {
+    Legacy(usize),
+    Ruby(usize),
+}
+
+type Assignment<'tree> = (Scope, String, Node<'tree>);
+
 pub(super) fn typed_only(file: &ScannableFile, rules: &pqc_scan_rules::RuleSet) -> bool {
     file.text
         .as_deref()
@@ -22,7 +32,7 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
     let Some((language, name)) = super::resolve_language(&file.path, text) else {
         return vec![];
     };
-    if !matches!(name, "php" | "csharp" | "c" | "cpp") {
+    if !matches!(name, "php" | "csharp" | "c" | "cpp" | "ruby") {
         return vec![];
     }
     let mut parser = Parser::new();
@@ -40,6 +50,7 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
     let mut out = Vec::new();
     let mut secret_names = BTreeSet::new();
     let mut assignments = Vec::new();
+    let mut ruby = ruby::Index::default();
     let mut uncertain_scopes = BTreeSet::new();
     let mut cursor = tree.walk();
     let mut visited = 0;
@@ -52,10 +63,15 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
             break;
         }
         visited += 1;
-        if matches!(
-            node.kind(),
-            "init_declarator" | "variable_declarator" | "assignment_expression"
-        ) {
+        if name == "ruby" {
+            ruby.observe(node, text, &mut assignments);
+        }
+        if name != "ruby"
+            && matches!(
+                node.kind(),
+                "init_declarator" | "variable_declarator" | "assignment_expression"
+            )
+        {
             let name = node
                 .child_by_field_name("name")
                 .or_else(|| node.child_by_field_name("declarator"))
@@ -77,7 +93,7 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
                 if pqc_scan_core::privacy::is_sensitive_name(name) {
                     protect_named_initializer(value, &mut out);
                 }
-                assignments.push((scope(node), name.to_owned(), value));
+                assignments.push((Scope::Legacy(scope(node)), name.to_owned(), value));
             }
         }
         // Parent lookup on each root-level comment is quadratic in a large
@@ -104,7 +120,7 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
                 .and_then(|_| node.child_by_field_name("value"))
                 .filter(|n| matches!(n.kind(), "argument_list" | "initializer_list"))
         });
-        if let Some(arguments) = arguments {
+        if let Some(arguments) = arguments.filter(|_| name != "ruby") {
             let callee = node
                 .child_by_field_name("function")
                 .or_else(|| node.child_by_field_name("name"))
@@ -176,14 +192,14 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
                                 out.push(value.byte_range());
                             }
                             if value.kind() == "binary_expression" {
-                                uncertain_scopes.insert(scope(node));
+                                uncertain_scopes.insert(Scope::Legacy(scope(node)));
                             }
                         } else if let Some(name) = reference_name(value, text) {
-                            secret_names.insert((scope(node), name.to_owned()));
+                            secret_names.insert((Scope::Legacy(scope(node)), name.to_owned()));
                         } else {
                             protect_nested_values(value, &mut out);
                             if !literal_only_call(value) {
-                                uncertain_scopes.insert(scope(node));
+                                uncertain_scopes.insert(Scope::Legacy(scope(node)));
                             }
                         }
                     }
@@ -202,6 +218,28 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
             }
         }
     }
+    if name == "ruby" {
+        ruby.prepare(&mut assignments);
+        for (scope, value, uncertain) in ruby.inputs(text, &assignments, max_nodes) {
+            let value = ruby.value(value, text);
+            if ruby::literal(value) {
+                out.push(value.byte_range());
+            } else if let Some(alias) = ruby::local(value, text) {
+                if let Some(binding) = ruby.binding(value, alias) {
+                    secret_names.insert((binding, alias.to_owned()));
+                } else {
+                    uncertain_scopes.insert(scope);
+                }
+            } else {
+                ruby::protect_values(value, &mut out);
+                uncertain_scopes.insert(scope);
+            }
+            if uncertain {
+                uncertain_scopes.insert(scope);
+            }
+        }
+    }
+    let mut processed_ruby = BTreeSet::new();
     // Follow only explicit same-function variable initializers, with a finite
     // alias depth. This does not resolve crypto facts or execute key loaders.
     let mut exhausted = true;
@@ -209,8 +247,31 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
         let mut added = Vec::new();
         for (local_scope, name, value) in &assignments {
             if secret_names.contains(&(*local_scope, name.clone()))
-                || (*local_scope == 0 && secret_names.iter().any(|(_, n)| n == name))
+                || (*local_scope == Scope::Legacy(0) && secret_names.iter().any(|(_, n)| n == name))
             {
+                if matches!(local_scope, Scope::Ruby(_)) {
+                    if !processed_ruby.insert(value.id()) {
+                        continue;
+                    }
+                    let value = ruby.value(*value, text);
+                    if ruby::literal(value) {
+                        out.push(value.byte_range());
+                    } else if let Some(alias) = ruby::local(value, text) {
+                        if let Some(binding) = ruby.binding(value, alias) {
+                            let key = (binding, alias.to_owned());
+                            if secret_names.contains(&key) {
+                                uncertain_scopes.insert(*local_scope);
+                            }
+                            added.push(key);
+                        } else {
+                            uncertain_scopes.insert(*local_scope);
+                        }
+                    } else {
+                        ruby::protect_values(value, &mut out);
+                        uncertain_scopes.insert(*local_scope);
+                    }
+                    continue;
+                }
                 let value = unwrap_value(*value);
                 if literal_data(value) {
                     out.push(value.byte_range());
@@ -236,6 +297,15 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
             break;
         }
     }
+    let assignment_keys: BTreeSet<_> = assignments
+        .iter()
+        .map(|(owner, name, _)| (*owner, name.clone()))
+        .collect();
+    for (scope, name) in &secret_names {
+        if matches!(scope, Scope::Ruby(_)) && !assignment_keys.contains(&(*scope, name.clone())) {
+            uncertain_scopes.insert(*scope);
+        }
+    }
     if exhausted || node_limited || !uncertain_scopes.is_empty() {
         // The key's definition is unresolved beyond the finite alias envelope.
         // Protect literal initializers in the affected function, not unrelated
@@ -249,8 +319,18 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
         } else {
             uncertain_scopes
         };
+        let mut scopes = scopes;
+        if name == "ruby" {
+            ruby.extend_captures(&mut scopes);
+        }
         for (local_scope, _, value) in &assignments {
-            if (node_limited || scopes.contains(local_scope) || *local_scope == 0)
+            if matches!(local_scope, Scope::Ruby(_)) {
+                if node_limited || scopes.contains(local_scope) {
+                    ruby::protect_values(*value, &mut out);
+                }
+                continue;
+            }
+            if (node_limited || scopes.contains(local_scope) || *local_scope == Scope::Legacy(0))
                 && (literal_data(unwrap_value(*value))
                     || matches!(
                         unwrap_value(*value).kind(),
@@ -573,6 +653,7 @@ fn secret_argument(name: &str, index: usize, qualified: &str) -> bool {
         "oqs_sig_sign" => index == 5,
         "secp256k1_ecdsa_sign" => index == 3,
         "rsa_sign" | "dsa_sign" | "ecdsa_sign" => index == 5,
+        "wc_makersakey" => true,
         "wc_rsassl_sign" | "wc_rsaprivatedecrypt" => index == 4,
         "rsa_private_encrypt" | "rsa_private_decrypt" => index == 3,
         "dh_compute_key" => index == 2,

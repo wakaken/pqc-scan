@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "name": "oss98-descriptive-baseline-v1",
+  "document": "docs/quality/oss-corpus/PROTOCOL-98.md",
+  "documentSha256": "34bb35177a3f60bb696bb0ed6d2c468ed59826541f6e8a4b8b5b5b01345f4824",
+  "repeats": 1,
+  "threads": 1,
+  "timeoutSeconds": 600,
+  "minFreeGiB": 4,
+  "requiredArtifacts": [
+    "report.json",
+    "report.html",
+    "report.rules.html",
+    "report.md",
+    "report.sarif",
+    "cbom.json",
+    "dependency-sbom.json",
+    "diagnostics.json",
+    "scan.inventory.v1.json",
+    "cbom.cdx-1.7.json",
+    "dependency-sbom.cdx-1.7.json"
+  ],
+  "limits": {
+    "cpu": "observed via wait4; not kernel-confined",
+    "rss": "child high-water, not aggregate; not kernel-confined",
+    "maxFileSizeMiB": 2,
+    "maxArtifactBytes": 134217728,
+    "minFreeGiB": 4,
+    "wallSeconds": 600
+  },
+  "truthPolicy": "descriptive only unless a separate qualified independently frozen annotated interval scope is bound",
+  "accuracy": null,
+  "performancePolicy": "single first-pass characterization; five alternating samples per side required for speed comparison",
+  "holdoutPolicy": "freeze source facts and exposure ledger before first scanner output; no accuracy claim without qualified truth"
+}

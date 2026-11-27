@@ -3,6 +3,7 @@
 import argparse
 import datetime
 import json
+import math
 import os
 import pathlib
 import platform
@@ -19,6 +20,7 @@ from evaluate import (bytes_digest, canonical, check_coverage, digest, load_trut
 from taxonomy import select_corpus
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
+PERFORMANCE_DISABLED = "Disabled by collectPerformance=false"
 
 
 def write_json(path, value):
@@ -35,46 +37,58 @@ def resource_scope(system=None, available=None):
                 pollingSeconds=0.005)
 
 
-def measure(command, directory, timeout):
+def measure(command, directory, timeout, *, collect_performance=True):
+    if not math.isfinite(timeout) or timeout <= 0:
+        raise ValueError("Measurement timeout must be finite and positive")
     directory.mkdir(parents=True, exist_ok=True)
-    start = time.monotonic()
+    if any(directory.iterdir()):
+        raise ValueError("Refusing to overwrite prior measurement evidence")
+    start = time.monotonic() if collect_performance else None
     timed_out, usage = False, None
-    with (directory / "stdout.log").open("wb") as stdout, (directory / "stderr.log").open("wb") as stderr:
+    with (directory / "stdout.log").open("xb") as stdout, (directory / "stderr.log").open("xb") as stderr:
         proc = subprocess.Popen(command, cwd=REPO, stdout=stdout, stderr=stderr,
                                 start_new_session=os.name == "posix")
-        if hasattr(os, "wait4"):
-            while True:
-                pid, status, observed = os.wait4(proc.pid, os.WNOHANG)
-                if pid:
-                    usage = observed
-                    proc.returncode = os.waitstatus_to_exitcode(status)
-                    break
-                if time.monotonic() - start >= timeout:
+        try:
+            if collect_performance and hasattr(os, "wait4"):
+                while True:
+                    pid, status, observed = os.wait4(proc.pid, os.WNOHANG)
+                    if pid:
+                        usage = observed
+                        proc.returncode = os.waitstatus_to_exitcode(status)
+                        break
+                    if time.monotonic() - start >= timeout:
+                        timed_out = True
+                        break
+                    time.sleep(0.005)
+            else:
+                try:
+                    proc.wait(timeout=timeout)
+                except subprocess.TimeoutExpired:
                     timed_out = True
+        finally:
+            try:
+                if os.name == "posix":
                     try:
                         os.killpg(proc.pid, signal.SIGKILL)
                     except ProcessLookupError:
                         pass
+                elif proc.returncode is None:
+                    proc.kill()
+            finally:
+                if proc.returncode is None and collect_performance and hasattr(os, "wait4"):
                     _, status, usage = os.wait4(proc.pid, 0)
                     proc.returncode = os.waitstatus_to_exitcode(status)
-                    break
-                time.sleep(0.005)
-        else:
-            try:
-                proc.wait(timeout=timeout)
-            except subprocess.TimeoutExpired:
-                timed_out = True
-                proc.kill()
-                proc.wait()
+                elif proc.returncode is None:
+                    proc.wait()
     rss = None
     if usage is not None and sys.platform in {"darwin", "linux"}:
         rss = usage.ru_maxrss * (1 if sys.platform == "darwin" else 1024)
     return dict(command=[str(x) for x in command], exitCode=proc.returncode, timedOut=timed_out,
-                wallSeconds=time.monotonic() - start,
+                wallSeconds=time.monotonic() - start if collect_performance else None,
                 cpuSeconds=usage.ru_utime + usage.ru_stime if usage else None,
-                peakRssBytes=rss, resourceMethod="wait4 per child" if usage else "unavailable",
-                rssNativeUnit=resource_scope(available=usage is not None)["rssNativeUnit"],
-                resourceScope=resource_scope(available=usage is not None))
+                peakRssBytes=rss, resourceMethod=("wait4 per child" if usage else "unavailable") if collect_performance else PERFORMANCE_DISABLED,
+                rssNativeUnit=resource_scope(available=usage is not None)["rssNativeUnit"] if collect_performance else None,
+                resourceScope=resource_scope(available=usage is not None) if collect_performance else None)
 
 
 def materialize(data, repo, root, copies):
@@ -131,7 +145,7 @@ def command_text(command):
     return dict(command=command, exitCode=result.returncode, stdout=result.stdout.strip())
 
 
-def environment(binary):
+def environment(binary, *, collect_performance=True):
     files = [REPO / "Cargo.toml", REPO / "Cargo.lock", REPO / "rust-toolchain.toml"]
     for root, patterns in [(REPO / "crates", ["*.rs", "*.js", "*.css", "Cargo.toml"]), (REPO / "rules", ["*.yml"])]:
         for pattern in patterns:
@@ -140,10 +154,10 @@ def environment(binary):
     harness = {str(f.relative_to(REPO)): bytes_digest(f) for f in sorted((REPO / "tests/quality").rglob('*'))
                if f.is_file() and '__pycache__' not in f.parts}
     hardware = {}
-    if sys.platform == "darwin":
+    if collect_performance and sys.platform == "darwin":
         for key in ["machdep.cpu.brand_string", "hw.memsize", "hw.ncpu"]:
             hardware[key] = command_text(["sysctl", "-n", key])
-    elif sys.platform == "linux":
+    elif collect_performance and sys.platform == "linux":
         for name in ["meminfo", "cpuinfo"]:
             text = pathlib.Path('/proc', name).read_text()
             hardware[name] = [line for line in text.splitlines() if line.startswith(('MemTotal:', 'model name', 'Hardware'))][:1]
@@ -153,15 +167,15 @@ def environment(binary):
                 worktree=command_text(["git", "status", "--short"]),
                 rust=command_text(["rustc", "-Vv"]), cargo=command_text(["cargo", "-V"]),
                 python=sys.version, platform=platform.platform(), machine=platform.machine(),
-                cpuCount=os.cpu_count(), hardware=hardware,
+                cpuCount=os.cpu_count() if collect_performance else None, hardware=hardware,
                 binary=str(binary), binarySha256=bytes_digest(binary),
                 buildProfile="caller supplied; use --release for published performance baseline",
                 features="workspace defaults, no extra features requested",
                 runtimeSourceBindings=runtime, runtimeSourceDigest=digest(runtime),
                 harnessBindings=harness, harnessDigest=digest(harness),
                 clockUtc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                cachePolicy="first measured run after materialization, then warm; OS cold cache unmeasured",
-                wallTimer="monotonic, 5 ms child-completion polling; launch/report writing included")
+                cachePolicy="first measured run after materialization, then warm; OS cold cache unmeasured" if collect_performance else PERFORMANCE_DISABLED,
+                wallTimer="monotonic, 5 ms child-completion polling; launch/report writing included" if collect_performance else PERFORMANCE_DISABLED)
 
 
 def run(args):

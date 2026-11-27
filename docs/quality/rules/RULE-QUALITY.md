@@ -149,3 +149,24 @@ Three additive exact-name/ecosystem predicates cover Composer/platform, NuGet an
 ## Implementation/construction reference additions (task085)
 
 Two informational, quantum-uncertain AST rows add separate implementation-definition and conditional/component-reference evidence. The137 earlier YAML rows and their target controls are unchanged. New source-handler regressions distinguish definitions from calls/prototypes, canonical ownership from namesakes, conditional guards from string data, and composite components from whole-construction safety. No runtime, conformance or population-accuracy conclusion follows. The metadata records both positive/negative pattern targets and the stronger AST-layer interpretation.
+
+## Underscore parameter-set references in OSS98
+
+The existing PQC_STANDARD_REFERENCE rule additionally recognizes18 exact underscore parameter-set names. Source-first observations are bound in benchmark/evidence/holdout-source-facts.json, with NIST primary definitions in benchmark/evidence/primary-references.json. These are nominal implementation exports, not evidence of a completed operation or FIPS conformance. The SLH-DSA implementation header still links an earlier draft, so source naming must not establish conformance to the final standard.
+
+The detector regression tests all18 parameter names, exact source lines, symbol-reference metadata, comments, neighboring identifiers, unsupported parameters and hash/profile spellings. Existing rule ID, risk, severity, confidence, language scopes and prior spellings are preserved. Additional detections are a finite inventory coverage improvement, not a population Recall measurement.
+
+## Static claim wording repair in OSS98
+
+The current companion refreshes the descriptions, conditional advice and source
+file hashes for `JWT_KID_HEADER`, `OPENSSL_RSA_API`, `API_EVP_PKEY_RSA`,
+`CERT_PEM_CONTAINER` and `CERT_P12_CONTAINER`. The first three establish lexical
+references, including member names, macro name prefixes, documentation and type
+checks. The last two retain extension-based candidates without establishing
+container contents or certificate presence. Parsed certificate facts and
+incomplete inspection states remain separate.
+
+Patterns, scopes, classifications, confidence and all 139 IDs remain unchanged.
+The original review dates and historical records remain intact. CLI regressions
+use synthetic role controls and both report languages. They are presentation and
+compatibility checks, not additional independently labeled accuracy units.

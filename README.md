@@ -76,17 +76,9 @@ File selection defaults to 2 MiB per file. See [file-size limits](docs/user/SCAN
 - Lists cryptographic scan results and software dependencies separately.
 - Lets you enter the purpose and usage of cryptography to organize the checks needed for migration to PQC.
 
-PHP built-ins now cover bounded OpenSSL, Sodium and ParagonIE requests and qualified library references.
-C# built-ins cover supported .NET and Bouncy Castle references.
-C/C++ built-ins cover finite OpenSSL and OQS requests, qualified C++ receivers and configuration/include references.
-Additional bounded requests include wolfCrypt RSA, libsecp256k1 ECDSA, Botan signers, XML signatures and certificate-chain verification. Separate implementation and conditional-construction rules identify source definitions and components without establishing execution or whole-construction safety.
-Their bounded scope is described in
-[supported inputs](docs/user/COVERAGE.md#source-limits).
+v0.5.0 includes 139 built-in rules. See the [v0.5.0 release notes](docs/releases/v0.5.0.md)
+for changes. Use the scanner and rules from the same version.
 
-These language additions are part of the current v0.5 development source. If you
-use a v0.4.0 release build, update from source to obtain this coverage. Use the
-scanner and bundled rules from the same checkout. No language-specific option or target-language runtime is needed;
-see [scanning PHP, C#, C and C++](docs/user/SCANNING.md#added-languages).
 Reports retain ordinary arguments and surrounding code while masking recognized
 secret values. See [source excerpts](docs/user/REPORTS.md#source-excerpts).
 

@@ -3,7 +3,7 @@ mod values;
 use super::{
     builtin,
     context::{children, Context},
-    Facts,
+    Facts, PartialCause,
 };
 use pqc_scan_rules::RuleSet;
 use tree_sitter::Node;
@@ -97,9 +97,11 @@ fn low_level(name: &str) -> Option<&'static str> {
         "EC_KEY_new" | "EC_KEY_new_by_curve_name" | "EC_KEY_generate_key" => "EC",
         "ECDSA_sign" | "ECDSA_verify" => "EC",
         "ECDH_compute_key" => "ECDH",
-        "wc_RsaSSL_Sign" | "wc_RsaSSL_Verify" | "wc_RsaPublicEncrypt" | "wc_RsaPrivateDecrypt" => {
-            "RSA"
-        }
+        "wc_MakeRsaKey"
+        | "wc_RsaSSL_Sign"
+        | "wc_RsaSSL_Verify"
+        | "wc_RsaPublicEncrypt"
+        | "wc_RsaPrivateDecrypt" => "RSA",
         "secp256k1_ecdsa_sign" | "secp256k1_ecdsa_verify" => "ECDSA",
         _ => return None,
     })
@@ -191,7 +193,37 @@ fn known(name: &str) -> bool {
                 | "oqs::Signature"
         )
 }
+fn cpp_operation_allowed(role: Role, method: &str) -> bool {
+    match role {
+        Role::CppKem => matches!(method, "generate_keypair" | "encap_secret" | "decap_secret"),
+        Role::CppSig => matches!(method, "generate_keypair" | "sign" | "verify"),
+        _ => false,
+    }
+}
+fn cpp_crypto_operation(method: &str) -> bool {
+    cpp_operation_allowed(Role::CppKem, method) || cpp_operation_allowed(Role::CppSig, method)
+}
 fn function_name(ctx: &Context<'_, '_>, node: Node<'_>) -> Option<String> {
+    let mut stack = vec![node];
+    let mut examined = 0;
+    while let Some(part) = stack.pop() {
+        examined += 1;
+        if examined > 512 {
+            ctx.limit("c_family_api_name_parts", 512, 512);
+            return None;
+        }
+        match part.kind() {
+            "identifier" | "type_identifier" | "namespace_identifier" => {}
+            "qualified_identifier" => {
+                let name = part.child_by_field_name("name")?;
+                stack.push(name);
+                if let Some(scope) = part.child_by_field_name("scope") {
+                    stack.push(scope);
+                }
+            }
+            _ => return None,
+        }
+    }
     let raw = ctx.source(node);
     if raw.len() > 512 {
         ctx.limit("c_family_api_identifier_bytes", 512, 512);
@@ -309,8 +341,134 @@ fn emit(
         );
     }
 }
-pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet) {
+fn standalone_token(text: &str, node: Node<'_>) -> bool {
+    let before = &text[..node.start_byte()];
+    let line_start = before.rfind('\n').map_or(0, |i| i + 1);
+    let after = &text[node.end_byte()..];
+    let line_end = after.find('\n').unwrap_or(after.len());
+    text[line_start..node.start_byte()].trim().is_empty() && after[..line_end].trim().is_empty()
+}
+fn trailing_namespace_macro(ctx: &Context<'_, '_>, file: Option<&std::path::Path>) -> bool {
+    if ctx.language != "cpp"
+        || !file
+            .and_then(|p| p.file_name())
+            .and_then(|n| n.to_str())
+            .is_some_and(|name| name.ends_with(".cc.inc"))
+        || !ctx.text.trim_end().ends_with("BSSL_NAMESPACE_END")
+    {
+        return false;
+    }
+    let Some(root) = ctx
+        .nodes
+        .iter()
+        .copied()
+        .find(|n| n.kind() == "translation_unit" && n.parent().is_none())
+    else {
+        return false;
+    };
+    let Ok(count) = u32::try_from(root.named_child_count()) else {
+        return false;
+    };
+    let Some(end) = count.checked_sub(1).and_then(|i| root.named_child(i)) else {
+        return false;
+    };
+    let Some(wrapper) = count.checked_sub(2).and_then(|i| root.named_child(i)) else {
+        return false;
+    };
+    if end.kind() != "expression_statement"
+        || end.child_count() != 2
+        || wrapper.kind() != "function_definition"
+    {
+        return false;
+    }
+    let (Some(token), Some(semicolon), Some(begin), Some(declarator)) = (
+        end.child(0),
+        end.child(1),
+        wrapper.child_by_field_name("type"),
+        wrapper.child_by_field_name("declarator"),
+    ) else {
+        return false;
+    };
+    if token.kind() != "identifier"
+        || ctx.source(token) != "BSSL_NAMESPACE_END"
+        || semicolon.kind() != ";"
+        || !semicolon.is_missing()
+        || semicolon.start_byte() != token.end_byte()
+        || begin.kind() != "type_identifier"
+        || ctx.source(begin) != "BSSL_NAMESPACE_BEGIN"
+        || begin.start_byte() != wrapper.start_byte()
+        || declarator.kind() != "function_declarator"
+        || !declarator
+            .child_by_field_name("declarator")
+            .is_some_and(|n| n.kind() == "identifier" && ctx.source(n) == "DEFINE_METHOD_FUNCTION")
+        || !standalone_token(ctx.text, begin)
+        || !standalone_token(ctx.text, token)
+        || !ctx.text[token.end_byte()..].trim().is_empty()
+    {
+        return false;
+    }
+    let byte_limit = ctx.budget.max_ast_match_bytes;
+    if ctx.text.len() > byte_limit {
+        ctx.limit("c_family_macro_proof_bytes", byte_limit, byte_limit);
+        return false;
+    }
+    if ctx
+        .text
+        .match_indices("BSSL_NAMESPACE_BEGIN")
+        .take(2)
+        .count()
+        != 1
+        || ctx.text.match_indices("BSSL_NAMESPACE_END").take(2).count() != 1
+    {
+        return false;
+    }
+    let mut cursor = root.walk();
+    let mut visited = 0;
+    let mut missing = 0;
+    loop {
+        if visited == ctx.budget.max_ast_nodes {
+            ctx.limit(
+                "c_family_macro_proof_nodes",
+                ctx.budget.max_ast_nodes,
+                visited,
+            );
+            return false;
+        }
+        visited += 1;
+        let node = cursor.node();
+        if node.is_error() {
+            return false;
+        }
+        if node.is_missing() {
+            if node.id() != semicolon.id() {
+                return false;
+            }
+            missing += 1;
+        }
+        if cursor.goto_first_child() {
+            continue;
+        }
+        loop {
+            if cursor.goto_next_sibling() {
+                break;
+            }
+            if !cursor.goto_parent() {
+                return missing == 1;
+            }
+        }
+    }
+}
+pub(super) fn inspect(
+    ctx: &Context<'_, '_>,
+    facts: &mut Facts,
+    rules: &RuleSet,
+    file: Option<&std::path::Path>,
+) {
     let values = Values::new(ctx);
+    if trailing_namespace_macro(ctx, file) {
+        facts.partial_causes.remove(PartialCause::ParserRecovery);
+        facts.mark_partial(PartialCause::OpaqueMacro);
+    }
     for node in &ctx.nodes {
         if !values.charge() {
             break;
@@ -333,6 +491,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                 .filter(|n| n.kind() == "identifier")
             {
                 let algorithm = match ctx.bounded_source(name) {
+                    "wc_MakeRsaKey" => Some("RSA"),
                     "ECDSA_sign" => Some("ECDSA"),
                     "BCM_mlkem512_generate_key" => Some("ML-KEM-512"),
                     "BCM_mlkem768_generate_key" => Some("ML-KEM-768"),
@@ -342,7 +501,13 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                     "BCM_mldsa87_generate_key" => Some("ML-DSA-87"),
                     _ => None,
                 };
-                if let Some(algorithm) = algorithm {
+                if let Some(algorithm) = algorithm.filter(|_| {
+                    ctx.source(name) != "wc_MakeRsaKey"
+                        || (node
+                            .parent()
+                            .is_some_and(|p| p.kind() == "translation_unit")
+                            && values.implementation_available("wc_MakeRsaKey"))
+                }) {
                     emit(
                         facts,
                         rules,
@@ -372,7 +537,14 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
         if node.kind().starts_with("preproc_")
             && !matches!(node.kind(), "preproc_include" | "preproc_arg")
         {
-            facts.partial = true;
+            facts.mark_partial(match node.kind() {
+                "preproc_if" | "preproc_ifdef" | "preproc_elif" | "preproc_elifdef"
+                | "preproc_else" | "preproc_defined" => PartialCause::ConditionalSource,
+                "preproc_def" | "preproc_function_def" | "preproc_undef" | "preproc_params" => {
+                    PartialCause::OpaqueMacro
+                }
+                _ => PartialCause::OtherSourceUncertainty,
+            });
         }
         if node.kind() == "preproc_include" {
             if let Some(path) = node.child_by_field_name("path") {
@@ -431,7 +603,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                         "cpp_unambiguous_nested_initializer_reference",
                     );
                     facts.sensitive_ranges.push(call.byte_range());
-                    facts.partial = true;
+                    facts.mark_partial(PartialCause::OtherSourceUncertainty);
                 }
             }
             if let Some(ty) = node.child_by_field_name("type") {
@@ -440,7 +612,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                     && !values.oqs_shadowed()
                 {
                     if !values.api_available(&name, ty) {
-                        facts.partial = true;
+                        facts.mark_partial(PartialCause::UnresolvedCryptoBinding);
                         continue;
                     }
                     let mut cursor = node.walk();
@@ -459,8 +631,11 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                             };
                             let algorithm =
                                 values.cpp_constructor(arguments, role).map(|k| k.algorithm);
-                            if algorithm.is_none() || conditional(*node) {
-                                facts.partial = true;
+                            if algorithm.is_none() {
+                                facts.mark_partial(PartialCause::UnresolvedCryptoBinding);
+                            }
+                            if conditional(*node) {
+                                facts.mark_partial(PartialCause::ConditionalSource);
                             }
                             let id = rule_id(algorithm.as_deref());
                             if rules.get(id).is_some_and(builtin) {
@@ -493,12 +668,15 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                 )
             }) {
                 if values.oqs_shadowed() {
-                    facts.partial = true;
+                    facts.mark_partial(PartialCause::UnresolvedCryptoBinding);
                     continue;
                 }
                 let key = values.constructor(*node, 0);
-                if key.is_none() || conditional(*node) {
-                    facts.partial = true;
+                if key.is_none() {
+                    facts.mark_partial(PartialCause::UnresolvedCryptoBinding);
+                }
+                if conditional(*node) {
+                    facts.mark_partial(PartialCause::ConditionalSource);
                 }
                 let algorithm = key.as_ref().map(|k| k.algorithm.as_str());
                 emit(
@@ -519,43 +697,40 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
             continue;
         };
         let arguments = args(*node);
+        if let Some((receiver, method)) = values.receiver(function) {
+            if cpp_crypto_operation(method) {
+                if let Some(key) = values.key(receiver, node.start_byte(), 0) {
+                    if cpp_operation_allowed(key.role, method) {
+                        emit(
+                            facts,
+                            rules,
+                            *node,
+                            rule_id(Some(&key.algorithm)),
+                            Some(&key.algorithm),
+                            "bounded_cpp_receiver",
+                        );
+                    } else {
+                        facts.mark_partial(PartialCause::UnresolvedCryptoBinding);
+                    }
+                } else {
+                    facts.mark_partial(PartialCause::UnresolvedCryptoBinding);
+                }
+            }
+            continue;
+        }
         let Some(name) = function_name(ctx, function) else {
             continue;
         };
         let name = name.strip_prefix("::").unwrap_or(&name);
-        if let Some((receiver, method)) = values.receiver(function) {
-            if let Some(key) = values.key(receiver, node.start_byte(), 0) {
-                let allowed = match key.role {
-                    Role::CppKem => {
-                        matches!(method, "generate_keypair" | "encap_secret" | "decap_secret")
-                    }
-                    Role::CppSig => matches!(method, "generate_keypair" | "sign" | "verify"),
-                    _ => false,
-                };
-                if allowed {
-                    emit(
-                        facts,
-                        rules,
-                        *node,
-                        rule_id(Some(&key.algorithm)),
-                        Some(&key.algorithm),
-                        "bounded_cpp_receiver",
-                    );
-                }
-            } else if values.was_bound(receiver) {
-                facts.partial = true;
-            }
-            continue;
-        }
         if !known(name) {
             continue;
         }
         if !values.api_available(name, function) {
-            facts.partial = true;
+            facts.mark_partial(PartialCause::UnresolvedCryptoBinding);
             continue;
         }
         if conditional(*node) {
-            facts.partial = true
+            facts.mark_partial(PartialCause::ConditionalSource)
         }
         if matches!(
             name,
@@ -606,7 +781,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                     }
                 });
             if reference.is_none() {
-                facts.partial = true;
+                facts.mark_partial(PartialCause::OtherSourceUncertainty);
             }
             if let Some(hit) = facts.hits.get_mut(API).and_then(|h| h.get_mut(before)) {
                 if let Some(reference) = &reference {
@@ -625,7 +800,7 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
         {
             let key = values.constructor(*node, 0);
             if key.is_none() {
-                facts.partial = true
+                facts.mark_partial(PartialCause::UnresolvedCryptoBinding)
             }
             let algorithm = key.as_ref().map(|k| k.algorithm.as_str());
             emit(
@@ -665,8 +840,8 @@ pub(super) fn inspect(ctx: &Context<'_, '_>, facts: &mut Facts, rules: &RuleSet)
                 key.algorithm = "ECDH".into();
             }
         }
-        if key.is_none() && key_node.is_some_and(|n| values.was_bound(n)) {
-            facts.partial = true;
+        if key.is_none() {
+            facts.mark_partial(PartialCause::UnresolvedCryptoBinding);
         }
         let algorithm = key.as_ref().map(|k| k.algorithm.as_str());
         let id = if name.starts_with("OQS_") && algorithm.is_none() {

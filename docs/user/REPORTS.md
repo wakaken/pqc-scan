@@ -2,7 +2,7 @@
 
 [日本語](REPORTS.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
 
-This guide covers v0.4.0 static scanning. See the [release notes](../releases/v0.4.0.md) for changes between versions.
+This guide explains how to review scan results and choose a report.
 
 After a scan, use the human report to investigate findings, then choose machine-readable files for tracking or automation. A finding records evidence and suggested checks; it is not an instruction to replace an algorithm without investigating its use.
 
@@ -93,10 +93,8 @@ remain analyzed while syntax-proven test-only findings are omitted, so file coun
 may not decrease and source context can include adjacent tests. See
 [scan exclusion settings](SCANNING.md#exclude-test-code).
 
-Unfinished-inspection details distinguish diagnostic records, file counts, examples
-and next checks; diagnostic JSON retains the detail in `message`. Algorithm names
-inside recognized error text appear under inventory. Open the location to read
-the original text.
+If inspection is incomplete, review diagnostics for the cause, affected files and next checks.
+Available findings are retained, but areas with no findings may not have been inspected.
 
 ### Print, offline reading and Markdown
 
@@ -157,22 +155,18 @@ For example:
 | A Kyber/Dilithium draft name | Which implementation and specification version it refers to; old and final names are not interchangeable evidence |
 | A TLS setting that disables PQC/hybrid groups | The effective configuration and peer support; this is a configuration signal, not an observed negotiated connection |
 
-The rule set includes ML-KEM/ML-DSA references across the seven listed languages, selected Java, Node and Ruby SLH-DSA API references, selected libraries, Java/Ruby classical-only TLS group settings and Go `GODEBUG=tlsmlkem=0`.
-Certificate signature OIDs and subject-public-key OIDs for ML-DSA/SLH-DSA are checked separately; a filename does not establish the certificate's algorithm. Parsed OIDs do not verify a signature, trust chain or valid PQC key.
+Informational findings can also appear in CBOM and SARIF. Read `quantum-safe`
+as an algorithm classification, not "migration complete." Dependency findings
+remain `quantum-uncertain`.
 
-These references can appear as informational findings in CBOM and SARIF too. Read `quantum-safe` as a classification of the primitive, not “migration complete.” Dependency findings remain `quantum-uncertain`.
-Node crypto/WebCrypto, browser and TypeScript runtime support must be checked individually; their version requirements differ. JWT signature changes also need compatible JOSE formats, libraries and verifiers.
-See [static examples and references](https://github.com/wakaken/pqc-scan/blob/develop/examples/pqc-readiness/README.md) for specific patterns.
+Before applying migration guidance, check runtime and library support, key and
+certificate settings, and peer compatibility. A signature change also requires
+compatible keys and a way to distribute public keys. Validate operation and
+interoperability in a test environment before production deployment.
 
-Before applying migration guidance:
-
-- If the Java version is unknown, check the deployed runtime; do not infer that it is old. Standard ML-KEM/ML-DSA APIs start at JDK 24.
-- Generate a new key pair for the selected signature algorithm and parameter set, then provision its public key and JOSE/PKI encoding to verifiers. An RSA key cannot be reused for ML-DSA.
-- The BC example is scoped to BC Java 1.85 and the `BC` provider, not `BCPQC`. Verify the resolved library release, deployed JDK and algorithm support before using it.
-- For certificate migration, choose the exact construction and encoding and confirm provider, CA, client and trust-store support before a nonproduction pilot. FIPS 204/205 specify signature primitives, not a universal hybrid certificate format.
-- Envoy `cipher_suites` applies to TLS 1.0–1.2, not TLS 1.3. Retiring static RSA key exchange differs from removing RSA authentication in ECDHE_RSA suites; check certificate and peer compatibility separately.
-
-For `CERT_EXPIRY_2026_OR_BEFORE`, the human report identifies expiry before January 1, 2027 UTC and explains that the cutoff alone does not establish expiry at scan time. Check the parsed expiry and `CERT_EXPIRED` findings.
+`CERT_EXPIRY_2026_OR_BEFORE` identifies certificates expiring before January 1,
+2027 UTC. To check expiry at scan time, review the actual expiry date and
+`CERT_EXPIRED` findings.
 
 <a id="choose-report"></a>
 
@@ -202,12 +196,14 @@ exports and the HTML rule guide (eleven files in total):
 pqc-scan scan /path/to/your-product --format all --inventory-json --diagnostics --cyclonedx-17 --lang en --out-dir /path/to/reports/product-scan --rules-dir /path/to/pqc-scan/rules
 ```
 
-A policy assessment is an additional, separate opt-in. Product version 0.4.0 is separate from Inventory v1, SARIF 2.1.0 and CycloneDX 1.7; it does not rename these formats. Separate
+A policy assessment is an additional, separate opt-in. Product version 0.5.0 is separate from Inventory v1, SARIF 2.1.0 and CycloneDX 1.7; it does not rename these formats. Separate
 probe reports are described in the [probe guide](PROBING.md).
 
 ### Why counts differ
 
-HTML and Markdown count equivalent findings once when file, line, column, algorithm evidence and issue agree. Details retain every matched rule, description, severity and check; actions are combined and the highest severity is displayed. Missing positions and empty or masked evidence are not merged. Summaries, charts and file-tree counts use this projection. Files inspected is a file count, not a count of cryptographic detections. JSON, SARIF, inventories and stable finding IDs retain original rule-level records, so their counts can differ from HTML and Markdown.
+HTML and Markdown may group repeated findings for the same location, algorithm
+and issue. JSON, SARIF and inventories retain individual records, so counts may
+differ. File counts and finding counts are not vulnerability counts.
 
 ### What CBOM and SBOM mean here
 
@@ -220,25 +216,20 @@ Use `scan.inventory.v1.json` when you need richer observations and provenance al
 <a id="inventory"></a>
 ## Capture richer inventory
 
-`--inventory-json` adds `scan.inventory.v1.json` with method-specific observations,
-normalized algorithm/public-key/certificate/dependency assets, and links to legacy
-findings. This is pqc-scan's own JSON format. It is opt-in even with `--format all`;
-selecting it does not change the legacy report schemas or finding identity algorithm. Use `--repository-scope team/project`
-with inventory capture to enable weak cross-scan source correlation. Omit secret
-or absolute identifiers. The report does not assert active use, trust or a PQC
-assessment. See the [contract and limitations](https://github.com/wakaken/pqc-scan/blob/develop/docs/architecture/INVENTORY-REPORT-V1.md).
+`--inventory-json` adds `scan.inventory.v1.json`, recording cryptographic assets
+and finding locations in pqc-scan's own JSON format. `--format all` alone does
+not save it. To compare inventories later, use the same
+`--repository-scope team/project` for both scans. Do not include secrets or
+absolute paths in this name. Inventory does not establish actual use or
+completed PQC migration.
 
 ```bash
 pqc-scan scan . --inventory-json --repository-scope team/project --rules-dir ./rules
 ```
 
-Dependency assets preserve declared constraints (for example `^1.2.3`), optional
-lock-record resolved versions and source provenance separately. A declaration or
-SBOM claim alone never creates a versioned purl. Path/git/workspace locators stay
-unresolved; no dependency graph or package download is inferred. The legacy
-`dependency-sbom.json` is a flat array; its purls and inspection diagnostics reflect
-the supported declaration/resolution evidence. Source origins remain
-separate in inventory even when the legacy projection collapses them.
+The inventory keeps dependency declarations and resolved-version records distinct.
+A declaration alone does not establish the installed version or actual use.
+The scanner does not install packages or resolve dependencies.
 
 <a id="cyclonedx"></a>
 ## Export CycloneDX 1.7
@@ -250,9 +241,8 @@ pqc-scan scan . --cyclonedx-17 --rules-dir /path/to/pqc-scan/rules --out-dir /pa
 ```
 
 `cbom.cdx-1.7.json` carries observed algorithm/public-key/certificate assets;
-`dependency-sbom.cdx-1.7.json` carries software dependency assertions. Native
-observations are captured internally; writing `scan.inventory.v1.json` still
-requires `--inventory-json`. Neither `--format all` nor input SBOM detection enables
+`dependency-sbom.cdx-1.7.json` carries software dependency assertions. To also save
+`scan.inventory.v1.json`, add `--inventory-json`. Neither `--format all` nor input SBOM detection enables
 this export automatically. The two legacy arrays retain their names and shape.
 
 Read the `pqc-scan` properties and conversion-loss notes as well as the standard
@@ -269,14 +259,13 @@ Capture both scans with `--inventory-json --repository-scope team/project`, then
 pqc-scan diff /path/to/before/scan.inventory.v1.json /path/to/after/scan.inventory.v1.json --repository-scope team/project --out-dir /path/to/new-diff
 ```
 
-Both inputs must use the requested scope and compatible schema/identity versions.
-The command writes `scan.diff.v1.json` and `scan.diff.v1.md`. Exact correspondence
-uses inventory asset/occurrence keys, not legacy finding IDs or checkout roots.
-Rule/profile/coverage changes are disclosed. Duplicate anchors and missing target
-inspection evidence stay unresolved; absence alone never proves remediation.
-Current inventory v1 cannot prove target-level exhaustive absence, so disappeared
-records remain unresolved. Unique changed-path pairs may be suggested as heuristic
-moves; they are never merged automatically or treated as verified renames.
+Both inputs must use the same repository scope and compatible output formats.
+The command writes `scan.diff.v1.json` and `scan.diff.v1.md`. Check changes to
+rules, assessment policy and inspection scope as well.
+
+A finding that disappears is not proof of remediation. Ambiguous matches and
+differences without evidence of inspection remain unresolved. If a possible file
+move is suggested, check the original records and the change.
 
 <a id="assessment"></a>
 
@@ -341,26 +330,13 @@ Each target retains its own decision and candidate references. Expand its detail
 
 ### Read the migration decisions
 
-Start with the evaluation time and schedule, then review **Urgent** items. Each
-card gives **What to do** and **When to proceed**. The number of cards depends
-on the saved evidence and declarations; it is not a fixed three.
+Check the evaluation time and schedule, then review **Urgent** items. Read each
+card's **What to do** and **When to proceed**. Depending on purpose and usage,
+cards show migration steps, further investigation or continued review.
 
-A three-step migration plan (identify current use, test compatibility, roll out
-in stages) appears when active, non-conflicting declarations identify a system,
-a supported use (JWT, signature, PKI, key establishment, encryption or hashing),
-and active/planned usage, and the assessed action is plan, unblock or migrate.
-Adding more detail alone does not create a plan. Investigation cards show the
-next fact to establish; monitoring and declared exclusions show reassessment
-conditions instead. Test-only usage alone does not override known classical
-concerns such as RSA-SHA1 or short RSA keys. An applicable explicit scope
-exclusion takes precedence; it retains the original detection and conditions
-for reassessment if live processing uses it.
-
-When at least one card has a use-specific workflow (including monitoring or an
-exclusion), **Other checks** initially folds remaining cards without a workflow,
-except urgent investigations, which stay visible. Without such a workflow, all
-cards appear by urgency without this fold. Undetermined urgency needs more
-information; it is not low risk. Work items are paged 20 at a time.
+Open **Other checks**, when present, to review the remaining items. Undetermined
+urgency needs more information and does not mean low risk. A test-only declaration
+alone does not resolve known concerns. Work items are paged 20 at a time.
 
 The example below uses saved Kubernetes evidence with explicit JWT purpose, usage and planning declarations. Start-by and migration deadline are separate; each phase states its condition for proceeding. These dates and counts belong to this example, not every project.
 
@@ -384,36 +360,24 @@ is a count of deployed uses or confirmed vulnerabilities.
 
 ### Inspect locations and save the result
 
-**View detection locations** opens **Detection locations**. Search there by
-algorithm or filename and browse 20 locations at a time. Long paths wrap; each
-row has a **Details** button. Equivalent detections at the same file and line
-share the row and detail view, retaining their matched rules and methods.
-Migration decisions themselves have no search box or urgency filter.
+Open **View detection locations** and search by algorithm or filename. Locations
+are paged 20 at a time. Use each row's **Details** to read the evidence. When the
+original scan report remains in the same local job, details also link to the
+original finding.
 
-When the same local job has the original scan report, the location details can
-open the corresponding finding. A standalone assessment HTML does not carry
-that original report or create this link. The bottom action, **Save assessment
-data**, exports the complete assessment JSON. There is no separate end-of-page
-checklist, owner list or request-copy control. CLI `assess` still writes HTML,
-Markdown and JSON; simplifying HTML controls does not remove those files or the
-original detection data.
+Use **Save assessment data** at the bottom to save the complete assessment JSON.
+CLI `assess` writes HTML, Markdown and JSON. See the
+[saved-results guide](SAVED-EVIDENCE.md) to reassess saved inputs.
 
-The page reuses the scan HTML's styles and local language/theme controls.
-`--lang ja` selects the HTML initial language and Markdown language; English is
-the default. Without JavaScript, the initial language and native disclosures
-remain available. No external translation, scripts or fonts are fetched. JSON,
-IDs, facts and decisions are language-independent. Assessment uses saved inputs
-without rescanning or connecting to endpoints.
+Switch language and light/dark display on the page. `--lang ja` selects Japanese
+for the HTML initial language and Markdown. Assessment uses saved inputs without
+rescanning or contacting endpoints.
 
-Operator/external-review claims remain unverified. Ready means active declared
-support, not verified deployment. Candidates need exact parameter and compatibility
-validation before adoption. Outside scope is a scoped declaration; monitor applies
-to the recorded technical role. Unknown is not low priority; no aggregate safety
-or independently measured practitioner-usefulness verdict is presented.
-
-Migration HTML can carry a bounded non-secret report label. It separates detector record counts from distinct recorded locations, names observation methods, explains known binding limitations, and shows applied active deadline/lead-time pairs in Japan time and human durations. Mixed pairs retain their own record counts; exact UTC timestamps and seconds remain available in JSON. See local migration input for scoped organization/contract deadline authoring.
-
-Zero assessment targets do not establish absence of cryptography, safety or no required action. This differs from having targets whose urgency is undetermined, or finding no matching records in a detection-location search.
+Distinguish declared purpose and usage from facts checked by the scanner.
+"Ready" is also based on declarations and requires deployment and compatibility
+validation. For exclusions and continued review, check each card's reassessment
+conditions. Zero assessment targets do not establish absence of cryptography,
+safety or that no action is needed.
 
 <a id="sarif-locations"></a>
 
@@ -430,35 +394,30 @@ available. Selecting SARIF does not change finding IDs or locations in other out
 Identical findings produced with the same binary, rules, input and settings can
 be compared by ID. Version upgrades or changes to inputs and settings can change
 IDs and counts. Compare binary/rule versions, selected scope and settings together.
-See the [v0.4.0 compatibility notes](../releases/v0.4.0.md).
-
-### File tree and panel visibility
-
-The **Search conditions** and **Files** headings independently collapse or expand each section without clearing conditions. The tree lists only files with findings, grouped by directory. Names stay on one line; deep or long paths scroll horizontally inside the tree. Hover a folder or file to see its full path. The badge counts all finding occurrences (including informational ones), regardless of active filters; it is not a vulnerability count. Select a file to apply the exact file filter, combined with other conditions. **Show all results** clears every condition and restores test results. Folder expansion, selected file, panel visibility and pagination carry across language changes. These navigation panels are hidden in print and when JavaScript is unavailable.
-
-For `CERT_EXPIRY_2026_OR_BEFORE`, the human report identifies expiry before January 1, 2027 UTC and explains that the cutoff alone does not establish expiry at scan time. Check the parsed expiry and `CERT_EXPIRED` findings. The rule ID, detector predicate and machine descriptions are unchanged.
-
-Folder rows use blue folder icons, file rows use outlined document icons, and the selected file has a leading blue marker. Icons are inline SVG and decorative; file names and counts remain accessible without them.
-
-Migration HTML can carry a bounded non-secret report label. It separates detector record counts from distinct recorded locations, names observation methods, explains known binding limitations, and shows applied active deadline/lead-time pairs in Japan time and human durations. Mixed pairs retain their own record counts; exact machine assessment data is unchanged. See local migration input for scoped organization/contract deadline authoring.
-
-An input with zero assessment targets has a dedicated empty-state explanation: it does not establish absence of cryptography, safety or no required action. It is separate from having assessment targets whose urgency remains undetermined.
-
-Reports generated with test exclusion or `.pqcignore` list those conditions in the existing inspection scope. Mixed Rust files are still analyzed; omitting syntax-proven test-only findings does not necessarily reduce file counts, and source context may show adjacent tests. See [scan exclusion settings](SCANNING.md#exclude-test-code).
-
-Known unfinished-inspection causes are grouped separately, with diagnostic record counts, distinct file counts, example paths and next checks. The existing diagnostics JSON message retains the detail. Algorithm references in recognised human error text appear under reference information rather than migration candidates; expand the location to inspect the source.
+See the [v0.5.0 compatibility notes](../releases/v0.5.0.md#compatibility).
 
 ## Interpreting source-only records
 
-The rule guide lists rules that produced findings in this scan; the complete built-in catalog is maintained in the rule reference. Source implementation definitions and conditional/composite components have separate informational rules. Comments, symbol declarations and literal Received-header records are informational references, while real configuration candidates and executable crypto tests remain visible. Raw rule identities and risk classifications remain available; an informational source reference is not a confirmed deployed vulnerability.
+Algorithm and implementation references help locate possible cryptographic use.
+Read the code or configuration at the finding location and confirm its purpose
+and use in the deployed system before acting. Informational findings are also
+available, but a reference alone does not establish a vulnerability or completed PQC migration.
 
-Migration evidence details show the observed use state and explain what lexical, syntactic or dependency references establish. Confirm actual purpose/use before acting. Coincident detection records show their count and evidence overlap. Distinct algorithms or concerns are not automatically merged, and record counts are not asserted to be independent cryptographic uses. Test-folder and dependency-file categories are path hints only and do not automatically exclude a target or change its assessment.
-
+Several findings at one location do not necessarily represent independent uses
+of cryptography. A test path or dependency-file classification alone does not
+establish that no action is needed.
 
 <a id="source-excerpts"></a>
 
 ## Protected source excerpts
 
-Source excerpts show the detected line and up to two lines before and after it. Ordinary arguments, variable references, algorithm names and neighbouring code remain visible, including PHP, C#, C/C++, Java and Go. Recognized secrets are replaced with mask labels inside the code: credential values, private-key blocks and literal key data in supported cryptographic key-input positions. Masking happens before long lines are shortened; existing line-length limits still apply.
+Source excerpts show the detected line and up to two lines before and after it.
+Ordinary code remains visible while recognized credentials and private or shared
+key values are masked. Regions that cannot be inspected sufficiently may be
+withheld more broadly. A mask alone does not establish that a valid private key was found.
 
-A mask does not by itself establish that a valid private key was found. Unfinished or ambiguous source inspection can require conservative protection of the uninspected region; dependency manifests and binary key containers retain their separate protections. This is bounded syntax-based masking, not a universal secret detector. Original finding locations and IDs are retained. Saved reports keep their old contents; rescan to obtain source context instead of the previous API-only, arguments-omitted excerpt.
+This feature does not find and hide every secret. Review the report before
+sharing it. File paths and public-key information may also contain information
+that is sensitive within your organization.
+
+Saved reports keep their contents. Rescan to obtain current source excerpts.
