@@ -93,3 +93,23 @@ The following external release gates remain outside this local preparation:
 Future 63 repositories, all ten residual themes, population accuracy and human
 usefulness studies are not new gates for this bounded preparation. No commit,
 push, PR, merge, tag, publication or external contact is part of this record.
+
+## Authorized publication follow-up on 2026-11-28
+
+The maintainer subsequently authorized the listed remaining quality checks,
+distribution refresh, hosted CI, provenance, develop integration and publication.
+Performance/resource observation remains held. This authorization supersedes
+the earlier no-remote-action scope for those release operations only.
+
+The final user documentation and bilingual v0.5.0 release notes have been
+simplified. Earlier packages retain their old document bytes; refreshed packages
+must bind the final committed source. Product source bindings remain unchanged
+across all 343 recorded inputs, so the completed 35-project evaluation remains
+applicable. The guarded-quality follow-up separates original input validation
+from forbidden execution effects and selects the two original negative tests.
+See [the current held-performance quality reference](QUALITY-WITH-PERFORMANCE-HELD.md).
+
+Hosted outcomes, archive hashes, provenance verification and publication are
+recorded only after actual execution; this paragraph is not their completion
+receipt. Existing source-bound evidence and historical failed attempts remain
+preserved.
