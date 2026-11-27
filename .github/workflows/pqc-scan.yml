@@ -84,7 +84,9 @@ jobs:
           PYTHON
 
       - name: Test temporal witness with product libraries
-        run: python3 benchmark/temporal_reassessment/ci.py
+        run: |
+          cargo fetch --locked
+          python3 benchmark/temporal_reassessment/ci.py
 
       - name: Aggregate all-axis evidence offline
         if: always()
