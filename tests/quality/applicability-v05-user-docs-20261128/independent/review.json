@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "scope": "documented-public-input-subset",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "da3256dabe4f04a9a7f8d28d45a08164925ab9d8be2316125ebe46d02f4f1d0c",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "6d127736456cc6d9ca4721da21e722dc46cd8b0ba066237d3dca07eb64de8f31",
+    "docs/user/COVERAGE.ja.md": "eeefde00cb04a6ef005a58c09ab5c64c8017013dade71caab432ea9574be3478",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+    "docs/architecture/STATIC-ANALYSIS.md": "23c3eab6664372289c1eeeb6b40722248612b5cdba17b45a423c774a8227bcf5"
+  },
+  "reviewer": "/root/docs_applicability_independent_20261128 | fresh source applicability author",
+  "assignedModel": "codex:gpt-6.1-sol@high",
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": false,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "remainingScopeReason": "All other original questions were inspected against their actual bounded source/context/public structure and retained with the original nominal annotations. Existing unsupported and ambiguous cases remain unchanged. Readable public certificate attributes and outer container signals are separate from encrypted-inner attributes; shorter documentation does not expand scope. Missing detections were not used as a scope premise.",
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "PFX v3 wraps Data/AuthenticatedSafe whose sole content has encryptedData OID 1.2.840.113549.1.7.6 and PBES2 algorithm OID 1.2.840.113549.1.5.13. Its 1104 ciphertext bytes remain opaque. No readable public certificate is exposed without decryption, even with the original empty-password conversion record. The outer container signal remains distinct. The nominated property asks whether the inner certificate has an ECDSA signature. Provenance binds the known original public object, but these encrypted input bytes cannot expose that attribute under the unchanged non-decrypting contract. Only this inner-attribute question is excluded; its original nominal label is preserved."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "PFX v3 wraps Data/AuthenticatedSafe whose sole content has encryptedData OID 1.2.840.113549.1.7.6 and PBES2 algorithm OID 1.2.840.113549.1.5.13. Its 1104 ciphertext bytes remain opaque. No readable public certificate is exposed without decryption, even with the original empty-password conversion record. The outer container signal remains distinct. The nominated property asks whether the inner certificate has a 3072-bit RSA subject key. Provenance binds the known original public object, but these encrypted input bytes cannot expose that attribute under the unchanged non-decrypting contract. Only this inner-attribute question is excluded; its original nominal label is preserved."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "PFX v3 wraps Data/AuthenticatedSafe whose sole content has encryptedData OID 1.2.840.113549.1.7.6 and PBES2 algorithm OID 1.2.840.113549.1.5.13. Its 1104 ciphertext bytes remain opaque. No readable public certificate is exposed without decryption, even with the original empty-password conversion record. The outer container signal remains distinct. The nominated property asks whether the inner certificate has an RSA signature. Provenance binds the known original public object, but these encrypted input bytes cannot expose that attribute under the unchanged non-decrypting contract. Only this inner-attribute question is excluded; its original nominal label is preserved."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "PFX v3 wraps Data/AuthenticatedSafe whose sole content has encryptedData OID 1.2.840.113549.1.7.6 and PBES2 algorithm OID 1.2.840.113549.1.5.13. Its 1104 ciphertext bytes remain opaque. No readable public certificate is exposed without decryption, even with the original empty-password conversion record. The outer container signal remains distinct. The nominated property asks whether the inner certificate has an ECDSA signature. Provenance binds the known original public object, but these encrypted input bytes cannot expose that attribute under the unchanged non-decrypting contract. Only this inner-attribute question is excluded; its original nominal label is preserved."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "PFX v3 wraps Data/AuthenticatedSafe whose sole content has encryptedData OID 1.2.840.113549.1.7.6 and PBES2 algorithm OID 1.2.840.113549.1.5.13. Its 1104 ciphertext bytes remain opaque. No readable public certificate is exposed without decryption, even with the original empty-password conversion record. The outer container signal remains distinct. The nominated property asks whether the inner certificate has a 3072-bit RSA subject key. Provenance binds the known original public object, but these encrypted input bytes cannot expose that attribute under the unchanged non-decrypting contract. Only this inner-attribute question is excluded; its original nominal label is preserved."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "PFX v3 wraps Data/AuthenticatedSafe whose sole content has encryptedData OID 1.2.840.113549.1.7.6 and PBES2 algorithm OID 1.2.840.113549.1.5.13. Its 1104 ciphertext bytes remain opaque. No readable public certificate is exposed without decryption, even with the original empty-password conversion record. The outer container signal remains distinct. The nominated property asks whether the inner certificate has an RSA signature. Provenance binds the known original public object, but these encrypted input bytes cannot expose that attribute under the unchanged non-decrypting contract. Only this inner-attribute question is excluded; its original nominal label is preserved."
+    }
+  ],
+  "unresolved": [],
+  "timestampUtc": "2026-11-27T22:43:10.462987Z",
+  "frozen": true,
+  "fileCount": 203,
+  "questionCount": 246,
+  "auditSources": {
+    "source_structure.py": "26e606ba39ec453602f5c9f88be09dffc955f56e222b13568c9afcb0c8721431",
+    "write_audits.py": "9cd1472bcbd24dd881bad531783a9414d40257fb44efbd65ad8c931ba8e5c5f5",
+    "freeze_review.py": "a17627111d14870e98816b004b68e12d0b49d1c6cbf69d692ceb77e4359c71f7",
+    "public-structure.json": "4de5ed124dbe52133cc1057cb9dc6e30df9347f4c7f8891dc3302752c68cc167",
+    "file-audit.json": "a86cf35a13acc67ce1a041b8dabd909f0ec7e9d88955ac845d6f3f328e5427d6",
+    "unit-audit.json": "06f02889c880a309e6df2622e5d7b45f89794905147625bed701ef3084351526",
+    "decisions.json": "6d66ab41426f98bc42a799becbdca0ee1342e37ec21e4f80733052bd7ad00199",
+    "binding-checks.json": "bd5557f0cee84a6f82c20db4eac728a0829b958c7611d5b2ab18e00e4d20f3b4",
+    "AUDIT.md": "9f3c553330db4f15651a163c421932dbc0007ffc5cb8b40f6be5ddca2747a76d"
+  },
+  "originalBindingChecks": {
+    "corpus.json": {
+      "expected": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+      "actual": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+      "matches": true
+    },
+    "truth.json": {
+      "expected": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+      "actual": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+      "matches": true
+    },
+    "PROTOCOL.md": {
+      "expected": "300313c7a8e6867a4f7283a06c2ec0546ae38f6d987c4300575d98d39bf65dd9",
+      "actual": "300313c7a8e6867a4f7283a06c2ec0546ae38f6d987c4300575d98d39bf65dd9",
+      "matches": true
+    },
+    "provenance.json": {
+      "expected": "1253727e7c892a41844ec374230b447f4191b21cb7bc74ecd06447663e3b4874",
+      "actual": "1253727e7c892a41844ec374230b447f4191b21cb7bc74ecd06447663e3b4874",
+      "matches": true
+    },
+    "labels-a-width.json": {
+      "expected": "aebd30a92b53197852f19439b7c3c188c60b7c7391d512cb464c030b857c7b35",
+      "actual": "aebd30a92b53197852f19439b7c3c188c60b7c7391d512cb464c030b857c7b35",
+      "matches": true
+    },
+    "labels-b-width.json": {
+      "expected": "536e8a240597be54033f89d8b9ec1bdf6d93389286bbd425850079a11b3c38f8",
+      "actual": "536e8a240597be54033f89d8b9ec1bdf6d93389286bbd425850079a11b3c38f8",
+      "matches": true
+    }
+  },
+  "originalBindings": {
+    "corpus.json": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+    "truth.json": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+    "PROTOCOL.md": "300313c7a8e6867a4f7283a06c2ec0546ae38f6d987c4300575d98d39bf65dd9",
+    "provenance.json": "1253727e7c892a41844ec374230b447f4191b21cb7bc74ecd06447663e3b4874",
+    "labels-a-width.json": "aebd30a92b53197852f19439b7c3c188c60b7c7391d512cb464c030b857c7b35",
+    "labels-b-width.json": "536e8a240597be54033f89d8b9ec1bdf6d93389286bbd425850079a11b3c38f8"
+  },
+  "sourceBindingsSha256": "d2a7009c53cd8c3cb8e93ed06fc0615b17866e95ceca6f02fb877c9a4abc0cf8",
+  "exposureDisclosure": {
+    "originalNominalTruthAndLabelSourcesSeen": true,
+    "originalProtocolAndProvenanceSeen": true,
+    "historicallyNominatedCandidatesSeen": true,
+    "currentContractsSeen": [
+      "docs/user/COVERAGE.md",
+      "docs/user/COVERAGE.ja.md",
+      "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs",
+      "docs/architecture/STATIC-ANALYSIS.md"
+    ],
+    "historicalMeasurementsSeen": false,
+    "measurementExplanation": "Prior observation of the corpus is known from the protocol. This fresh author opened no numerical historical measurement or result artifact; source counts and nominal labels were exposed. No blind-corpus claim is made.",
+    "otherApplicabilityReviewSeen": false,
+    "otherAuthorCurrentOutputsSeen": false,
+    "predictionsOrAggregateClassificationsSeen": false
+  },
+  "assessmentLimits": [
+    "Same-family separate AI authors are not independent gold.",
+    "No blind gold, human validation, population study, runtime accuracy or release approval.",
+    "No product, corpus, truth, split, scorer, labels, historical evidence, Git or remote changes.",
+    "Performance/resource hold remains; no CPU/RSS/load/swap/performance observation."
+  ],
+  "sourceState": {
+    "revision": "712f2364076d000818044939ddaaff5ee02f1b4f",
+    "branch": "codex/oss-crypto-corpus",
+    "dirty": true,
+    "porcelainStatus": [
+      " M .github/workflows/pqc-scan.yml",
+      " M benchmark/decisions.tsv",
+      " M scripts/quality-performance-held-policy.json",
+      " M tests/quality/test_ci_applicability.py",
+      "?? tests/quality/applicability-v05-user-docs-20261128/"
+    ]
+  },
+  "productBindingCount": 343
+}

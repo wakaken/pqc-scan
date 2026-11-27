@@ -1,0 +1,68 @@
+import datetime, json, subprocess
+from source_structure import R,O,bounded,sha,load,write
+P=R/'tests/quality/applicability-v05-user-docs-20261128'; B=R/'tests/quality/expanded-v2'
+bindings=load(P/'SOURCE-BINDINGS.json')
+checks={}
+for name,expected in bindings['originalBindings'].items():
+    actual=sha(bounded(B/name)); checks[name]={'expected':expected,'actual':actual,'matches':actual==expected}
+assert all(x['matches'] for x in checks.values())
+contracts={}
+for name,expected in bindings['contractBindings'].items():
+    actual=sha(bounded(R/name)); contracts[name]={'expected':expected,'actual':actual,'matches':actual==expected}
+assert all(x['matches'] for x in contracts.values())
+assert sha(bounded(P/'PROTOCOL.md'))==bindings['protocolSha256']
+product=bindings['integratedProductSource']; descriptor=sha(bounded(__import__('pathlib').Path(product['path'])))
+assert descriptor==product['sha256']
+product_checks={}
+for name,expected in product['bindings'].items():
+    actual=sha(bounded(R/name)); product_checks[name]={'expected':expected,'actual':actual,'matches':actual==expected}
+assert all(x['matches'] for x in product_checks.values())
+corpus=load(B/'corpus.json'); truth=load(B/'truth.json'); files=load(O/'file-audit.json')['records']; units=load(O/'unit-audit.json')['records']; decisions=load(O/'decisions.json')
+assert len(files)==203 and len(units)==246
+assert {x['path'] for x in files}=={x['path'] for x in corpus['files']}
+assert {x['id']:x['question'] for x in units}=={x['id']:x for x in corpus['units']}
+assert {x['id']:x['nominalAnnotation'] for x in units}=={x['id']:x for x in truth['labels']}
+assert len({d['id'] for d in decisions})==len(decisions)
+assert {d['id'] for d in decisions}=={u['id'] for u in units if u['applicability']=='unsupported'}
+assert all(d['status']=='unsupported' and d['reason'].strip() for d in decisions)
+file_bindings=[]
+for f in corpus['files']:
+    actual=sha(bounded(R/f['source'])); assert actual==f['sha256']
+    a=next(a for a in files if a['path']==f['path']); assert a['sha256']==actual and a['fullInputReviewed']
+    file_bindings.append({'path':f['path'],'sha256':actual,'matches':True})
+fixture=load(R/'crates/pqc_scan_detectors/tests/fixtures/certificates/manifest.json')
+fixture_hashes={x['certificate_sha256'] for x in fixture.values()}
+for row in load(O/'public-structure.json'):
+    obs=row['observation']; public=obs.get('publicCertificates',[]) if obs['kind']=='pfx-v3' else [obs] if obs['kind']=='x509-public-certificate' else []
+    assert all(x['certificateDerSha256'] in fixture_hashes for x in public)
+revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip()
+branch=subprocess.check_output(['git','branch','--show-current'],cwd=R,text=True).strip()
+status=subprocess.check_output(['git','status','--porcelain=v1','--untracked-files=normal'],cwd=R,text=True)
+checks_record={'version':1,'originalBindingChecks':checks,'contractBindingChecks':contracts,'protocolBindingMatches':True,'sourceBindingsSha256':sha(bounded(P/'SOURCE-BINDINGS.json')),'inputFileCount':len(file_bindings),'inputBindings':file_bindings,'integratedProductDescriptorMatches':True,'integratedProductBindingCount':len(product_checks),'integratedProductBindingChecks':product_checks,'allOriginalQuestionsAndNominalAnnotationsPreserved':True,'publicCertificateManifestBindingsMatch':True,'sourceState':{'revision':revision,'branch':branch,'dirty':bool(status.strip()),'porcelainStatus':status.splitlines()},'method':'Read-only bounded source and SHA-256 checks. No specimen execution, scanning, scoring or performance observation.'}
+write('binding-checks.json',checks_record)
+notes='''# Independent applicability audit
+
+This author reassessed the existing documented input subset after the English and Japanese coverage prose cleanup. The audit reads the 203 original bounded inputs and 246 original questions against the four exact current contract bindings. Product behavior is unchanged.
+
+The reviewer is /root/docs_applicability_independent_20261128, assigned codex:gpt-6.1-sol@high. This is a fresh separate AI author from the coordinator and other current author. The audit does not establish gold independence, human validation, blinded labeling, population accuracy, runtime cryptographic use, or release approval.
+
+The author read the original corpus, nominal truth, original annotation-source metadata/initial labels, provenance, original protocol, current protocol, source bindings, four current contracts, original public certificate manifest and report.py applicability validation code. The six historical encrypted-inner nominations were visible in the assignment and protocol before inspection. They were candidates, not a required exclusion count. No old applicability review, other current author output, parent PR/audit review, predictions or aggregate classifications was opened. No numerical historical measurement/result artifact was opened. The post-observation status of the corpus and its prior output exposure were known. The boolean historicalMeasurementsSeen is false for this fresh author's actual access; it does not claim the corpus itself is blind.
+
+The text inputs were read with surrounding file context. Public binary structure was read with source_structure.py using bounded definite-length framing. Encrypted entries were kept opaque. Only public certificate attributes, OIDs, sizes, source hashes and fixed summaries were exported. No input was executed, imported, built, installed or decrypted. The only Python imports were standard-library utilities and this author's evidence helper, never scanned inputs or repository evaluator/scorer code.
+
+The original public-only.p12 and .pfx each contain a PFX v3 Data wrapper, one encryptedData entry and no public certificate readable without decryption. The original empty-password conversion/provenance does not make the encrypted contents part of the non-decrypting contract. Questions x154, v2-audit4, v2-audit5, x156, v2-audit6 and v2-audit7 therefore exclude inner signature/SPKI attributes only. Legacy outer-container questions remain. The two public-unencrypted controls expose an X.509 certificate bag whose RSA3072 public object matches the original certificate hash; all eight of their positive/negative attribute and container questions remain.
+
+The remaining source, configuration, dependency, SBOM, marker and certificate questions were retained with their original nominal labels, intervals and reasons preserved separately from this author's applicability explanation. Unsupported/malformed/dynamic/ambiguous cases remain distinct. Comments, strings, namesakes, parameter shadowing, typed alternatives, finite loops and static dead code were reviewed from source. No missing detection was used to excuse scope. The shorter user text does not expand the accepted input subset. No additional applicability uncertainty remains after these source checks, while original unsupported/ambiguous annotations remain unchanged.
+
+Throughput checkpoint was finite. All 203 input byte hashes and all 246 exact questions were checked, with one file-audit record and one question-audit record for each. file-audit.json has 203 records; unit-audit.json has 246. These are applicability records, not a new evaluation framework or scorer. The product bindings, original truth/protocol/label/provenance bindings and four current contracts match SOURCE-BINDINGS.json.
+
+Commands completed with exit code 0. The source-reading batches used Python standard-library bounded reads and sanitized stdout. source_structure.py produced public-structure.json. write_audits.py produced file-audit.json, unit-audit.json and decisions.json. freeze_review.py checked exact question/nominal-record preservation, all input hashes, current contract hashes, original bindings, public-manifest matches and all integrated product bindings, then wrote binding-checks.json and this frozen review. An audit-drafting condition was corrected before freeze to distinguish the TLS 1.3 alternatives from TLS 1.0 source tokens; final source summaries were reread and checked. No prior run was overwritten.
+
+The performance/resource hold remains. No CPU, RSS, load, swap or performance observation was made. No new scanner findings, accuracy measurement or performance claim was produced. The parent must compare the independently frozen reviews and perform separate admission/quality, hosted-CI and exact-source package/provenance stages. This author does not approve those stages.
+'''
+(O/'AUDIT.md').write_text(notes)
+audit_names=['source_structure.py','write_audits.py','freeze_review.py','public-structure.json','file-audit.json','unit-audit.json','decisions.json','binding-checks.json','AUDIT.md']
+review={k:bindings[k] for k in ['version','scope','corpusSha256','truthSha256','protocolSha256','contractBindings']}
+review.update(reviewer='/root/docs_applicability_independent_20261128 | fresh source applicability author',assignedModel='codex:gpt-6.1-sol@high',sourceBased=True,postObservation=True,historicalMeasurementsSeen=False,otherApplicabilityReviewSeen=False,remainingUnitsReviewed=True,remainingScopeReason='All other original questions were inspected against their actual bounded source/context/public structure and retained with the original nominal annotations. Existing unsupported and ambiguous cases remain unchanged. Readable public certificate attributes and outer container signals are separate from encrypted-inner attributes; shorter documentation does not expand scope. Missing detections were not used as a scope premise.',dispositions=decisions,unresolved=[],timestampUtc=datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00','Z'),frozen=True,fileCount=len(files),questionCount=len(units),auditSources={name:sha(bounded(O/name)) for name in audit_names},originalBindingChecks=checks,originalBindings=bindings['originalBindings'],sourceBindingsSha256=sha(bounded(P/'SOURCE-BINDINGS.json')),exposureDisclosure={'originalNominalTruthAndLabelSourcesSeen':True,'originalProtocolAndProvenanceSeen':True,'historicallyNominatedCandidatesSeen':True,'currentContractsSeen':list(bindings['contractBindings']),'historicalMeasurementsSeen':False,'measurementExplanation':'Prior observation of the corpus is known from the protocol. This fresh author opened no numerical historical measurement or result artifact; source counts and nominal labels were exposed. No blind-corpus claim is made.','otherApplicabilityReviewSeen':False,'otherAuthorCurrentOutputsSeen':False,'predictionsOrAggregateClassificationsSeen':False},assessmentLimits=['Same-family separate AI authors are not independent gold.','No blind gold, human validation, population study, runtime accuracy or release approval.','No product, corpus, truth, split, scorer, labels, historical evidence, Git or remote changes.','Performance/resource hold remains; no CPU/RSS/load/swap/performance observation.'],sourceState=checks_record['sourceState'],productBindingCount=len(product_checks))
+write('review.json',review)
+print(json.dumps({'reviewSha256':sha(bounded(O/'review.json')),'fileAuditSha256':review['auditSources']['file-audit.json'],'unitAuditSha256':review['auditSources']['unit-audit.json'],'files':len(files),'questions':len(units),'productBindings':len(product_checks),'originalBindings':len(checks),'currentContracts':len(contracts),'dispositions':[d['id'] for d in decisions],'unresolved':review['unresolved'],'timestampUtc':review['timestampUtc']},indent=2))

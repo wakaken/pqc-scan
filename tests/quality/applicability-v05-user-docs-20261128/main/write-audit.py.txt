@@ -1,0 +1,230 @@
+import datetime
+import json
+from collections import Counter
+from audit_source import R, O, D, I, read, sha
+
+c = json.loads(read(D / 'corpus.json'))
+t = json.loads(read(D / 'truth.json'))
+truth = {v['id']: v for v in t['labels']}
+binding = json.loads(read(I / 'SOURCE-BINDINGS.json'))
+structures = json.loads(read(O / 'public-structure.json'))
+files = {v['path']: v for v in c['files']}
+label_sources = {n: {v['id']: v for v in json.loads(read(D / n))['labels']}
+                 for n in ['labels-a-width.json', 'labels-b-width.json']}
+
+observations = {
+'x001': 'Signature.getInstance has a complete ML-DSA-44 string argument.',
+'x002': 'KEM.getInstance has a complete ML-KEM-1024 string argument.',
+'x003': 'Signature.getInstance selects SLH-DSA-SHAKE-256s.',
+'x004': 'Signature.getInstance selects SHA256withRSA, a classical RSA reference rather than the nominated standard PQC API property.',
+'x005': 'The closing call syntax is missing, but Signature.getInstance and the complete ML-DSA-65 literal remain visible.',
+'x006': 'The Go import explicitly names crypto/mlkem.',
+'x007': 'The only Go import is fmt, which does not establish the nominated PQC import property.',
+'x008': 'The Go import stops after an opening quote and identifies no package.',
+'x009': 'The explicit asymmetric mlkem import binds MLKEM768PrivateKey.generate on the next line.',
+'v2-audit0': 'The from-import names cryptography.hazmat.primitives.asymmetric and imports mlkem separately from its later generation call.',
+'x010': 'The only expression prints an ML-KEM-768 string; it is not a Python PQC API invocation.',
+'x011': 'The call is truncated after generate(, but mlkem.MLKEM768PrivateKey.generate remains an explicit nominal reference.',
+'x012': 'The Rust use declaration explicitly names ml_kem::MlKem768.',
+'x013': 'ml_kem is defined as an unrelated local function; there is no PQC crate import or API reference.',
+'x014': 'The Rust import stops after ml_kem::, but its explicit crate namespace remains visible.',
+'x015': 'OpenSSL::PKey.generate_key has the literal ML-DSA-87 argument.',
+'x016': 'Ruby puts contains the complete SLH-DSA-SHA2-128s literal; the original Ruby property is an algorithm-literal reference, not successful API invocation.',
+'x017': 'OpenSSL::PKey.generate_key stops at an opening quote and supplies no decidable algorithm.',
+'x018': 'crypto.subtle.generateKey receives a name object with ML-KEM-768 and an encapsulateBits usage.',
+'x019': 'The WebCrypto name object specifies AES-GCM, a symmetric alternative to the nominated PQC property.',
+'x020': 'The WebCrypto name field has no value after name:, so the algorithm is undecidable.',
+'x021': 'generateKeyPairSync receives the complete ml-kem-512 string, with no conflicting local binding visible.',
+'x022': 'The apparent ml-kem-768 call is wholly inside a line comment.',
+'x023': 'The apparent call appears inside a quoted help string, not an executed call expression.',
+'x024': 'A local function named generateKeyPairSync returns its argument; the later call targets that namesake.',
+'x025': 'The node:crypto import explicitly renames generateKeyPairSync to make; make receives ml-dsa-65.',
+'x026': 'The render parameter shadows the imported generateKeyPairSync at the nominated call.',
+'x027': 'The argument request.algorithm is externally unconstrained, so its algorithm remains ambiguous.',
+'x028': 'The if(false) branch contains an explicit ml-kem-768 factory reference; deadness does not erase the static reference.',
+'x029': 'The first same-line factory call explicitly selects rsa, not a standardized PQC key type.',
+'x030': 'The second same-line factory call explicitly selects ml-kem-768 and is separate from the rsa call.',
+'v2-audit1': 'The first same-line factory call explicitly selects rsa and establishes the separate nominal RSA reference.',
+'x031': 'The first of two same-line calls selects ml-kem-512 at its own interval.',
+'x032': 'The second of two same-line calls selects ml-kem-1024 at its own interval.',
+'x033': 'The Node factory receives a WebCrypto-shaped object rather than the required string key-type argument.',
+'x034': 'The key-type string is future-quantum-safe-v9, not an identified standardized PQC name.',
+'x035': 'The key-type string is ed25519, which does not satisfy the nominated standardized PQC property.',
+'x036': 'The factory names kyber768 explicitly; this is a pre-standard name reference, not a final ML-KEM API claim.',
+'x037': 'X25519MLKEM768 occurs only as the assigned string group, without a Node PQC API call.',
+'x038': 'The file is Swift, outside the supported source languages for the nominated Node API rule; its familiar spelling cannot establish supported syntax.',
+'x039': 'The sign call explicitly selects the JOSE algorithm RS256.',
+'v2-a0': 'The sign call explicitly selects RS256 and therefore separately establishes the nominal RSA JOSE reference.',
+'x040': 'The sign call selects HS256, which identifies HMAC rather than the nominated RSA JWT property.',
+'x041': 'The sign options stop after algorithm: and provide no decidable signature algorithm.',
+'x042': 'The namedGroups data explicitly lists only secp256r1 and secp384r1; this is a static configuration reference.',
+'x043': 'The namedGroups data includes X25519MLKEM768 together with secp256r1, so it is not a classical-only list.',
+'x044': 'The namedGroups assignment is prefixed by a hash comment, so it is a disabled configuration reference.',
+'x045': 'The namedGroups value stops at an opening quote and gives no group list.',
+'x046': 'HostKeyAlgorithms explicitly selects ssh-dss.',
+'x047': 'HostKeyAlgorithms selects ssh-ed25519 rather than ssh-dss.',
+'x048': 'KexAlgorithms explicitly selects diffie-hellman-group14-sha1.',
+'x049': 'KexAlgorithms selects mlkem768x25519-sha256 rather than group14-sha1.',
+'x050': 'KexAlgorithms has no operand; no exchange selection can be established.',
+'v2-Encrypt.java': 'Cipher.getInstance explicitly selects RSA/ECB/OAEPWithSHA-256AndMGF1Padding.',
+'v2-Symmetric.java': 'Cipher.getInstance selects AES/GCM/NoPadding, which is not the nominated RSA encryption property.',
+'v2-BrokenCipher.java': 'Cipher.getInstance ends at an opening quote without a decidable transformation.',
+'v2-independent-import': 'The Rust use declaration explicitly imports ml_kem::*; it remains a nominal crate reference even if an implementation misses wildcard imports.',
+'v2-audit8': 'MlKem768::generate establishes local ML-KEM provenance for the dk and ek bindings.',
+'v2-audit9': 'The ek receiver comes directly from MlKem768::generate and its encapsulate invocation is a separate nominal KEM reference.',
+'v2-audit10': 'The dk receiver comes directly from MlKem768::generate and its decapsulate invocation is a separate nominal KEM reference.',
+'x140': 'createDiffieHellman receives 2048 and establishes a classical DH reference rather than standard PQC.',
+'x141': 'createDiffieHellmanGroup receives modp16 and establishes classical DH rather than standard PQC.',
+'x142': 'createECDH receives secp521r1 and establishes classical ECDH rather than standard PQC.',
+'x143': 'createECDH receives secp256k1 and establishes classical ECDH rather than standard PQC.',
+'x144': 'generateKeyPairSync selects ec with sect239k1; subsequent signing does not turn that key into a PQC key.',
+'x145': 'generateKeyPairSync explicitly selects rsa with modulusLength 2048.',
+'v2-audit2': 'The selected factory key type is rsa with a 2048-bit option, not a standardized PQC type.',
+'x146': 'createSign receives SHA256, and the same local sign object later signs the privateKey bound by generateKeyPairSync(rsa). The RSA provenance comes from that binding, not from SHA256 alone.',
+'v2-audit3': 'sign.sign receives privateKey from the local RSA key-pair binding, establishing a separate RSA signing reference.',
+'v2-rsa-11': 'createSign is paired locally with a sign.sign call using the explicitly generated RSA privateKey.',
+'v2-rsa-14': 'The sign.sign invocation uses the privateKey returned by the local RSA factory.',
+'v2-rsa-16': 'createVerify is paired locally with a verify.verify call using publicKey from the explicit RSA factory.',
+'v2-rsa-19': 'verify.verify receives publicKey from the locally explicit RSA factory; this is a separate nominal verification reference.'
+}
+
+excluded = {'x154', 'x156', 'v2-audit4', 'v2-audit5', 'v2-audit6', 'v2-audit7'}
+
+
+def reason(u):
+    identity = u['id']
+    f = files[u['path']]
+    src = read(R / f['source'])
+    label = truth[identity]
+    if identity in observations:
+        return observations[identity]
+    if u['ruleId'] == 'DEP_PQC_CAPABLE_LIBRARY':
+        text = src.decode('utf8')
+        if text.startswith(('{ =', '{broken')) or text.rstrip().endswith('['):
+            return 'The source is an incomplete or invalid dependency/SBOM document and does not establish a library record. Its original unsupported label remains distinct from a safe negative.'
+        if 'cryptographic-asset' in text:
+            return 'The CycloneDX 1.7 component is a cryptographic-asset named ML-KEM-768, not a library/package dependency record in the bounded ingestion contract. The original unsupported dependency question is retained.'
+        names = [('org.bouncycastle', 'BouncyCastle'), ('github.com/cloudflare/circl', 'CIRCL'), ('cryptography', 'cryptography'), ('openssl', 'openssl'), ('jose', 'jose'), ('ordinary-package', 'ordinary-package'), ('<groupId>ordinary</groupId>', 'ordinary-package')]
+        name = next(display for token, display in names if token in text)
+        if name == 'jose':
+            return 'The source explicitly records jose 6.0.0, but this is JOSE dependency presence and does not establish the nominated standard-PQC-capable-library premise. The original ambiguity is retained; documentation shortening does not resolve it.'
+        versions = ', '.join(label['parameters'])
+        if name == 'ordinary-package':
+            return f'The document records ordinary-package with version/constraint {versions}. This unrelated package does not establish the nominated capable-library property; installation and safety are not inferred.'
+        return f'The document explicitly records {name} with version/constraint {versions}. This remains a supported static dependency-presence question without enabled-algorithm or installed-state inference.'
+    if u['ruleId'].startswith('PRIVATE_KEY_'):
+        text = src.decode('ascii')
+        if text.startswith('-----BEGIN '):
+            return 'A complete recognized private-key BEGIN header is present with a deliberately invalid synthetic body. The retained property concerns the header only and does not validate or decode a key.'
+        if text.startswith('---BEGIN '):
+            return 'The incomplete BEGIN-like line lacks the complete recognized private-key delimiter. This is a retained negative for the marker property, not absence-of-secret proof.'
+        return 'The source contains only public-document text and no complete recognized private-key header. The negative remains limited to that exact marker property.'
+    if f['artifact'] == 'certificate':
+        s = structures[f['path']]
+        if u['ruleId'] == 'CERT_P12_CONTAINER':
+            if s.get('parsedAttributes') is False:
+                return 'The .p12/.pfx suffix retains the frozen legacy container signal even though the bytes have no readable PFX structure. This does not establish valid container or inner certificate attributes.'
+            return 'The source has a definite-length PFX v3 Data wrapper. The retained container-presence signal is separate from inner attributes, decryption, MAC integrity and trust.'
+        if identity in excluded:
+            return ('The definite-length PFX v3 outer Data contains AuthenticatedSafe content OID 1.2.840.113549.1.7.6, encryptedData, with no readable public certBag. '
+                    'The nominated inner signature/SPKI attribute requires decryption, which the current EN/JA coverage, STATIC-ANALYSIS PKCS#12 subset and non-decrypting pkcs12.rs contract exclude. '
+                    'Historical conversion provenance identifies a source certificate but does not make its encrypted inner attributes readable from this input.')
+        if s.get('parsedAttributes') is False:
+            return 'The bytes have no readable certificate/PFX structure and yield no public signature attribute. The original unsupported attribute question remains retained, without a safety inference.'
+        if 'readablePublicCertificates' in s:
+            assert len(s['readablePublicCertificates']) == 1
+            s = s['readablePublicCertificates'][0]
+            prefix = 'The PFX contains Data and one X.509 certBag, OID 1.2.840.113549.1.12.10.1.3, with readable public certificate attributes. '
+        else:
+            prefix = 'The public certificate is readable as PEM/DER. '
+        if u['ruleId'] == 'CERT_RSA_3072':
+            return prefix + (f"Its SPKI OID is {s['publicKeyOid']} and the RSA modulus bit length is {s['rsaModulusBits']}, so the exact size question remains in the public subset." if 'rsaModulusBits' in s else f"Its SPKI OID is {s['publicKeyOid']}, not RSA; the original size-property negative remains supported.")
+        return prefix + f"Its signature OID is {s['signatureOid']}. Signature and SPKI are separate facts, and the original exact-signature question remains supported without trust verification."
+    if identity in {'x131','x132','x133','x134','x135','x136','x137','x138','x139'}:
+        return ('The imported crypto generateKeyPair call takes asymmetricKeyType from the finite local list of ' + ', '.join(label['parameters']) + '. '
+                'Capability guards and assertion branches do not erase the nominal reference; loop members are not multiplied into new independent questions.')
+    if u['ruleId'] == 'PQC_WEBCRYPTO_API':
+        if label['label'] == 'unsupported':
+            return 'TSX is a supported grammar, but the generateKey name field stops before a value. The original unsupported algorithm question remains visible rather than a safe negative.'
+        value = 'ML-KEM-768' if 'ML-KEM-768' in src.decode() else 'AES-GCM'
+        return f'The TSX source supplies the explicit WebCrypto name object {value}. Its original nominal algorithm question remains supported; the boolean declaration does not change that reference.'
+    if u['ruleId'] in {'PQC_NODE_API', 'PQC_JAVA_API'} and src.lstrip().startswith(b'//'):
+        return 'The entire apparent factory/getInstance call is inside a line comment, including the visible algorithm literal. Its original comment-control negative remains in the source contract.'
+    if u['ruleId'] == 'SSH_DSS_SIGALG' and src.lstrip().startswith(b'#'):
+        return 'The HostKeyAlgorithms ssh-dss directive is hash-commented. It remains a disabled-setting negative, not an effective DSA selection.'
+    if f['artifact'] == 'configuration':
+        text = src.decode().strip()
+        if text.endswith('"'):
+            return 'The configuration fragment stops at an opening quote and has no decidable operand. Its original unsupported question remains distinct from a safe negative.'
+        operand = ', '.join(label['parameters'])
+        if u['ruleId'] in {'NGINX_SSL_CIPHERS_RSA','K8S_INGRESS_RSA_CIPHERS'}:
+            return f'The cipher directive explicitly supplies {operand}. The question concerns a named RSA operand; an AESGCM alternative does not prove the expanded effective suite is quantum safe.'
+        return f'The protocol directive explicitly supplies {operand}. The legacy-version selection question remains a static file-setting question; no deployed configuration or negotiated connection is inferred.'
+    raise RuntimeError('Missing source-authored reason for ' + identity)
+
+
+def write_json(name, value):
+    (O / name).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
+
+
+unit_rows = []
+for u in c['units']:
+    original = truth[u['id']]
+    f = files[u['path']]
+    row = dict(u, source=f['source'], sourceSha256=f['sha256'],
+               nominalLabel=original['label'], nominalAnnotations={k: original[k] for k in ['algorithms','usage','artifact','caseKind','parameters']},
+               originalLabelSourceLabels={n: values[u['id']]['label'] for n, values in label_sources.items()},
+               applicability='unsupported' if u['id'] in excluded else 'retained',
+               sourceReason=reason(u), reviewed=True)
+    unit_rows.append(row)
+assert len(unit_rows) == 246 and len({u['id'] for u in unit_rows}) == 246
+assert {u['id'] for u in unit_rows if u['applicability'] == 'unsupported'} == excluded
+file_rows = []
+for f in c['files']:
+    units = [u for u in unit_rows if u['path'] == f['path']]
+    assert units
+    row = dict(path=f['path'], source=f['source'], sha256=f['sha256'], bytes=len(read(R / f['source'])),
+               inputFormat=f['inputFormat'], artifact=f['artifact'], reviewed=True,
+               questionIds=[u['id'] for u in units],
+               sourceReasons=list(dict.fromkeys(u['sourceReason'] for u in units)))
+    if f['path'] in structures:
+        row['publicStructure'] = structures[f['path']]
+    file_rows.append(row)
+assert len(file_rows) == 203
+for name, rows in [('unit-audit.jsonl',unit_rows), ('file-audit.jsonl',file_rows)]:
+    (O / name).write_text(''.join(json.dumps(v,ensure_ascii=False) + '\n' for v in rows))
+
+sources = {}
+for name in ['file-audit.jsonl','unit-audit.jsonl','source-verification.json','public-structure.json','audit_source.py','write-audit.py']:
+    sources[name] = sha(read(O / name))
+review = dict(version=1, scope=binding['scope'], corpusSha256=binding['corpusSha256'], truthSha256=binding['truthSha256'],
+              protocolSha256=binding['protocolSha256'], contractBindings=binding['contractBindings'],
+              sourceBindingsSha256=sha(read(I / 'SOURCE-BINDINGS.json')),
+              reviewer='Codex applicability author /root/docs_applicability_main_20261128 / fresh source review 2026-11-28',
+              assignedModel='codex:gpt-6.1-sol@high', sourceBased=True, postObservation=True,
+              historicalMeasurementsSeen=True, otherApplicabilityReviewSeen=False,
+              remainingUnitsReviewed=True,
+              remainingScopeReason='All 203 bounded original inputs and all 246 nominal questions were read against the four current contracts. The retained questions preserve the original nominal labels, including negative, ambiguous, unsupported, malformed, comment, string, namesake, shadowing, dead-code, finite-loop, dependency and configuration cases. Only the six inner-attribute questions on structurally confirmed encryptedData inputs require decryption outside the contract. Source references, outer container signals and readable unencrypted certBag attributes remain retained. Missing detections were not used to narrow scope.',
+              dispositions=[dict(id=u['id'], status='unsupported', reason=u['sourceReason']) for u in unit_rows if u['id'] in excluded],
+              unresolved=[], timestampUtc=datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00','Z'), frozen=True,
+              fileCount=203, questionCount=246, auditSources=sources,
+              originalBindings=binding['originalBindings'], originalFileHashVerification='source-verification.json',
+              sourceState=binding['sourceState'],
+              exposureDisclosure=[
+                  'The assigned brief disclosed historical output exposure and the six nominated encrypted-inner candidate IDs before this review. Their inclusion was independently checked against the current original source structure.',
+                  'Read corpus questions, all truth nominal labels, both original labels-a-width/labels-b-width per-unit labels, original labeling protocols, provenance, the public certificate manifest, current four contracts and supported_scope validation code. These known labels and records preclude blind-labeling claims.',
+                  'The inherited original protocol includes historical adjudication and count/result descriptions; therefore historicalMeasurementsSeen is true. No historical applicability review, another current applicability review, aggregate applicability classification or parent audit/PR review was opened.',
+                  'This same-family AI author is separate from the other applicability author, but that does not establish independent gold, independent population accuracy, a blind holdout or product runtime accuracy.',
+                  'The source review did not run product scanners or score findings, execute/import/build/install scanned specimens, decrypt encrypted contents, contact remote endpoints, or observe CPU/RSS/load/swap/performance.'
+              ],
+              processDisclosure=[
+                  dict(type='public-fixture-payload-rendering-incident',
+                       files=['tuning/width/public-unencrypted.p12','tuning/width/public-unencrypted.pfx'],
+                       actualEvent='During the final batched source read, a missing binary-display guard decoded these two public fixture inputs as UTF-8 with replacement and emitted the resulting certificate-bearing bytes into the internal tool output. This violated the instruction to avoid certificate payload output. The trace was preserved and the parent was informed immediately. No claim of fully compliant payload handling is made.',
+                       subsequentStructureEvidence='Both exact input hashes were verified. Definite-length PFX v3 parsing shows outer Data, one AuthenticatedSafe Data, one X.509 certBag OID 1.2.840.113549.1.12.10.1.3 and no other SafeBag. The only readable bag is a public certificate with RSA public-key OID and 3072-bit modulus and RSA signature OID. This conclusion comes from structure, not filenames. No private-key bag or decrypted private data was observed in these two inputs.',
+                       handling='Subsequent reads emitted only OIDs, counts, hashes and public attribute summaries. Source applicability decisions are separate from this process defect; final process acceptance belongs to the parent and its independent audits.')
+              ],
+              interpretation='Post-observation source-based applicability only. Product343 is unchanged; documentation simplification does not broaden its bounded static, public-input, non-decrypting subset. No release approval or accuracy measurement is issued.',
+              throughputCheckpoint='Read all 203 bounded files and all 246 nominal questions in source batches; produce one file audit per original input and one unit audit per original question without a new evaluation framework.')
+write_json('review.json',review)
+print(json.dumps(dict(fileAuditRows=len(file_rows),unitAuditRows=len(unit_rows),newUnsupportedIds=[v['id'] for v in review['dispositions']], unresolved=review['unresolved'], auditSources=sources,reviewSha256=sha(read(O/'review.json'))),indent=2))
