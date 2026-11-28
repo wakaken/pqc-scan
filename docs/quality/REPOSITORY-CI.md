@@ -1,6 +1,5 @@
 # Repository CI
 
-
 The `pqc-scan` workflow runs automatically for pull requests and pushes to
 `develop`. Working-branch and tag pushes do not start it; updating an open PR
 still triggers PR validation.
@@ -8,12 +7,12 @@ still triggers PR validation.
 | Event | Jobs |
 |---|---|
 | Pull request | `quality` |
-| Push to `develop` | `baseline`, `scan` |
-| Manual execution | `quality`, `baseline`, `scan` |
+| Push to `develop` | `scan` |
+| Manual execution | `quality`, `scan` |
 
-On `develop`, `baseline` and `scan` run independently of `quality`; PR validation
-provides the pre-merge quality check. Manual execution remains available for
-running all three enabled jobs together.
+On `develop`, `scan` runs independently of `quality`; PR validation provides the
+pre-merge quality check. Manual execution runs both enabled jobs. The `baseline`
+job is disabled for all triggers while performance measurement remains held.
 
 The CI self-scan reads a separate product input: `crates/*/src/**`, Cargo manifests
 and the root lockfile, build scripts when present, and `rules/default/*.yml`.
@@ -35,8 +34,7 @@ Policy updates require source and result review, rather than blanket registratio
 of current findings. The dated directories under `self-scan/` contain data used
 by regression tests, including source snapshots and before/after SARIF.
 
-The existing `quality` and `baseline` jobs also aggregate all six quality axes
-offline from recorded evidence. Missing facts and stale measurements remain
+The `quality` job aggregates all six quality axes offline from recorded evidence. Missing facts and stale measurements remain
 visible; aggregation does not run the high-cost studies or grant release acceptance.
 Integrated reports are uploaded even after a failed step, with 30-day retention.
 See the [measurement and retention plan](../../docs/quality/CI-MEASUREMENT-PLAN.md).
@@ -52,7 +50,7 @@ when validation is needed for an otherwise skipped change.
 The `protocols` job is disabled for every trigger, including manual runs. Its
 `if: ${{ false }}` condition remains in place. The generic isolated suite's
 read-only-target write failure has been corrected and its tests, Clippy, previews
-and SSH KEX completed in the [candidate validation](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md). This is separate evidence from the dedicated protocol049 path and does not resume the hosted job. Re-enabling it requires a maintainer decision and validation of its current inputs, environment and resource limits; the three enabled jobs do not establish a protocol pass.
+and SSH KEX completed in the [candidate validation](https://github.com/wakaken/pqc-scan/blob/d20a1f1872d8527d90dc3832a0d8b1b2284405b7/docs/releases/static-candidate-20261117/AUDIT-FIXES.md). This is separate evidence from the dedicated protocol049 path and does not resume the hosted job. Re-enabling it requires a maintainer decision and validation of its current inputs, environment and resource limits; the enabled jobs do not establish a protocol pass.
 
 GitHub limits the number of changed files considered
 by path filtering; for large changes, manually run CI if it was omitted.
