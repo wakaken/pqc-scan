@@ -19,8 +19,7 @@ This preparation does not implement those languages again or change the rules.
 
 [Task087 results](../../../tasks/087/TASK-087-RESULTS.md) record later bounded
 source inspection, selective secret masking and actual bilingual browser checks.
-The [selected-five-repair report](../../quality/oss-corpus/REPORT-35-PARTIAL-FIXES.md)
-and its [source-bound index](../../../benchmark/evidence/selected35-partial-fixes-index.json)
+The [five-repair source-bound index](../../../benchmark/evidence/selected35-partial-fixes-index.json)
 record finite C#/C/C++ name-limit corrections, truthful Partial causes, ordinary
 receiver-call handling, wolfSSL RSA references and the proven BoringSSL macro
 artifact correction. Those fixes preserve genuine resource limits and static
@@ -34,10 +33,8 @@ remain accepted for the original frozen source, API/input matrix and denominator
 Original task083 measurements, review identities and budgets remain unchanged.
 The old Node browser-feedback control recorded there is a historical failure.
 [Task087 checks](../../../tasks/087/evidence/CHECKS-09.json) record the later
-passing Node suite, and the [two P1 readiness repairs](../../releases/v0.5-readiness-20261125/REPAIRS.md)
-record passing current CI Node checks plus corrected applicability and bundled
-navigation for their own source. The old browser-feedback issue is resolved in
-that later scope. It is distinct from the current Node.js corpus timeout.
+passing Node suite for their recorded source. This is distinct from the Node.js
+corpus execution results.
 
 The five-repair closure records default workspace tests with 1,064 passed and
 three ignored, and all-features tests with 1,126 passed and five ignored. It also
@@ -68,18 +65,18 @@ succeed within the unchanged 600-second limit. All 35 output audits pass.
 Primary inspection remains Complete 4 and Partial 23. Comparison inspection
 remains Complete 1 and Partial 7. The evidence populations stay separate.
 
-[The final release-profile report](../../quality/oss-corpus/REPORT-35-V05-RELEASE-FINAL.md)
+[The final evaluation index](../../../benchmark/evidence/selected35-v05-release-final-index.json)
 records the actual scoring, regressions, browser checks, packages and reviews.
-Its source-bound index preserves invocation and source identities. This current
+It preserves invocation and source identities. This current
 result supersedes the timeout as the evaluation completion status, while the old
 profile's failure remains preserved. No performance or speedup is inferred.
 
 Version metadata is integrated as 0.5.0. Final-source default and all-feature
 validation, temporal witness checks and the substantive 203-input, 246-question
-applicability reviews are recorded in the final report. The original truth,
+applicability reviews are recorded in the final evaluation index. The original truth,
 six encrypted-inner exclusions and stale/tamper rejection are retained.
 
-Local package and browser results are separately recorded in that report.
+Local package and browser results are linked from that index.
 Independent technical review uses `codex:gpt-6.1-sol@high`. Work-record audit uses
 `codex:gpt-6.1-terra@high`. Author observations alone are not independent approval.
 

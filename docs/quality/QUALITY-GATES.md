@@ -1,55 +1,25 @@
-# OSS quality gates
+# Product quality checks
 
-## Current Applicability
+[AGENTS.override.md](../../AGENTS.override.md) defines the active development and
+review workflow. Apply the [verification requirements](../agent/VERIFICATION.md)
+and the original acceptance criteria for the affected product scope. These checks
+supplement those requirements; they do not replace them or introduce another
+review process.
 
-[AGENTS.md](../../AGENTS.md) and its linked agent guides define current workflow,
-review stages and completion procedures. This document supplies additional
-product-quality checks for the affected change classes; it does not replace or
-waive those procedures or original task acceptance criteria. Read the relevant
-sections when the selected task or affected product design invokes these gates.
+## Evidence and comparisons
 
-The release target and proposal status below describe the original v0.2 design,
-not the current development version. Dated review and measurement records retain
-their original scope. In the change-class table, `Documentation/task-only (this
-change)` describes that original design change, including its independent design
-review; it is not a blanket review requirement for later prose-only changes.
-Later documentation work follows [verification by change type](../agent/VERIFICATION.md#verification-by-change-type)
-and the [review-stage policy](../agent/REVIEWS.md#required-review-stages), plus any
-explicit task requirements. The Rust-behavior build requirement and specialized
-product gates below remain applicable to their stated scope. Stop and resolve
-any remaining conflict before dependent work; do not choose a weaker requirement.
+Bind validation to the actual source revision and dirty changes, inputs, rules,
+features, tools, configuration, commands, and exit results. Keep generated outputs
+outside scanned fixture roots. Source review, local execution, independent review,
+browser observations, and hosted CI establish different facts. Missing or failed
+validation remains explicit, and a historical CI success does not validate changed
+source. Test counts and rule counts are not quality scores.
 
-## Original Design Context
-
-Current release target: v0.2.0, retargeted by the maintainer on2026-11-12. Earlier1.0 references in historical evidence retain their original meaning. Functional scope and accepted criteria are unchanged.
-
-Design date: 2026-11-09. Status: proposed acceptance policy; passing tests or benchmark results are not asserted by this document. Current capabilities/gaps are in [CURRENT-GAP-ANALYSIS.md](../records/v0.2-roadmap/CURRENT-GAP-ANALYSIS.md).
-
-## Evidence and lifecycle
-
-Every implementation task must record exact HEAD/worktree, selected scope, commands and exit statuses, fixture/corpus digest, result artifact paths, independent review, known limitations and unexecuted checks. Keep generated artifacts under ignored `target/`, outside scanned fixture roots. A historical successful CI run does not validate a changed checkout.
-
-Planner selects `pending -> planned`; Executor moves `in-progress -> review`; Reviewer assesses correctness/security/compatibility; Evaluator alone marks `done` after required evidence; Reflection updates durable knowledge without duplication. This design adds pending work only. Preserve the existing 014/016 statuses and the pilot's scope. When an implementation encounters an AGENTS.md stop condition, stop before changing rule semantics, storage contracts or high-risk architecture, and obtain the required human decision.
-
-The default delivery unit is one task, one PR, including implementation, tests and documentation. Internal implementation steps are not separate PRs or task states. Necessary prerequisite feasibility studies retain their own task and decision gate. This changes delivery planning, not acceptance criteria or role ownership.
-
-Source review, local execution, independent review, browser acceptance and remote CI are different evidence classes. Do not report one as another. Failed/unavailable validation stays explicit. A rule count, test declaration count or successful test count is not a quality score.
-
-## Baseline study before numeric targets (task 023)
-
-1. Define truth units by family: source usage instance, configuration assignment, certificate object/attribute, dependency declaration/resolution, session fact or advertised capability. Static truth labels describe reference/configuration, not runtime reachability.
-2. Build a redistributable corpus with reviewed positive, negative, ambiguous, malformed and unsupported cases across seven current languages, manifests/SBOMs, certificates/keys and configuration families. Include same-named APIs, aliasing, comments, dead code, old draft names, misleading filenames and duplicate occurrences. Use synthetic non-secret content and public certificate fixtures.
-3. Have two reviewers label independently; adjudicate disagreements and record rationale/uncertain labels. Split tuning and held-out sets by project/pattern lineage to avoid template leakage. Record corpus/version/license and scanner/rule/catalog versions.
-4. Run existing CLI/core on fixed local inputs with explicit threads, excludes and limits. Collect per-family confusion counts and coverage diagnostics, then repeat to measure semantic determinism. Before diagnostics exist, call completeness unmeasurable rather than filling zeroes.
-5. Benchmark fixed small/medium/large and pathological fixtures with input digests, hardware/OS/toolchain/provider/features, cold/warm conditions, repeated runs and peak RSS/wall/CPU/bytes/target counts. Report distributions and noise, not one unlabeled duration. Do not scan an external product without explicit authorization.
-6. Set precision/recall and performance budgets only after this baseline and maintainer review. Preserve holdout data to evaluate subsequent changes. Record environment limits and unsupported populations alongside results.
-
-The measured development baseline and maintainer-approved local regression signals
-are recorded in [TASK-023-ACCEPTANCE.md](../../tasks/023/TASK-023-ACCEPTANCE.md). On the same eligible
-truth, TP must not decrease and FP/FN must not increase. On the same environment,
-wall time or peak RSS above 2x the preceding warm maximum requires investigation.
-These are local comparison signals, not universal targets or automatic numeric CI
-failure thresholds. Probe limits are safety limits, not quality benchmarks.
+The [approved baseline criteria](../../tasks/023/TASK-023-ACCEPTANCE.md) require TP
+not to decrease and FP/FN not to increase on the same eligible truth. On the same
+environment, wall time or peak RSS above twice the preceding warm maximum requires
+investigation. These are local comparison signals, not universal targets or
+numeric CI failure thresholds. They do not authorize new performance measurements.
 
 ## Required measurements
 
@@ -72,7 +42,7 @@ failure thresholds. Probe limits are safety limits, not quality benchmarks.
 
 | Change | Required checks before done |
 |---|---|
-| Documentation/task-only (this change) | Whitespace/diff, links and required sections, task YAML fields/IDs/dependency DAG, code/rule/old-task immutability, source citation spot checks, independent design review; no Rust product execution required |
+| Documentation only | References, links, commands, behavior consistency, and English/Japanese agreement where applicable; follow the documentation category in the verification guide |
 | Pipeline/diagnostics | Error injection, failure/empty distinction, counter reconciliation, unknown applicability, limits and partial result retention; existing scan/output regression |
 | Crypto rules/certificates | Written standard-based specification and human review; positive/negative/type/filename/time/bundle fixtures; expected-result diff; unchanged unrelated findings |
 | New domain/native output | Identity ambiguity tests, root/line/move cases, all model distinctions, schema/golden/tolerant-reader tests, legacy shadow comparison and explicit export-loss ledger |
@@ -80,11 +50,11 @@ failure thresholds. Probe limits are safety limits, not quality benchmarks.
 | TLS/SSH | Pinned dependency/features/MSRV/target record; isolated local peers; packet-type/no-auth assertion; timeout/traffic/connection/cancellation and address-binding tests; source/release status review |
 | Release/platform | Supported OS/arch build/install matrix, bundled/discoverable rules, license/security/update docs, release artifact verification and declared support policy |
 
-For Rust behavior changes run the pinned toolchain: `cargo build --workspace`, `cargo fmt --all --check` (apply `cargo fmt --all` only in implementation work), `cargo test --workspace`, `cargo clippy --workspace --all-targets -- -D warnings`; run `node --test shell/compact-report.test.cjs` when presentation/scripts are relevant. Run new probe feature combinations explicitly because default workspace checks may omit optional dependencies. For security experiments use the isolation requirements of the review workflow; unavailable isolation is not a passing test.
+For Rust behavior changes run the pinned toolchain: `cargo build --workspace`, `cargo fmt --all --check` (apply `cargo fmt --all` only in implementation work), `cargo test --workspace`, `cargo clippy --workspace --all-targets -- -D warnings`; run `node --test shell/compact-report.test.cjs` when presentation/scripts are relevant. Run new probe feature combinations explicitly because default workspace checks may omit optional dependencies. For security experiments use the applicable isolation requirements; unavailable isolation is not a passing test.
 
 ## Contract and golden strategy
 
-- Keep existing report/CLI tests and all seven-language readiness fixtures. Do not rebuild test infrastructure merely to rename it.
+- Keep existing report/CLI tests and language-readiness fixtures. Do not rebuild test infrastructure merely to rename it.
 - Check golden semantic JSON/SARIF/inventory with stable ordering and a documented volatile-field allowlist. Preserve fields, enums, CLI defaults, old Finding IDs and default filenames except a reviewed intentional fix. A schema additive field is not automatically safe for strict consumers.
 - Version and separately opt in to richer native and CycloneDX output; never replace arrays with objects in place. Test consumers of old entrypoints and third-party Detector default adaptation.
 - Validate official CycloneDX 1.7 and SARIF 2.1.0 schemas offline with pinned local dependencies/digests; prohibit network schema fetching in tests. Schema success alone does not prove accurate key size, trust, version provenance, unique references or PQC readiness.
@@ -104,40 +74,15 @@ Use local versioned test servers and CAs inside a network-isolated environment. 
 
 TLS matrix: TLS 1.2/1.3, supported hybrid/classical KX, HRR, unknown/unavailable group, certificate/name/trust/expiry errors, mTLS-required failure without credentials, alerts, timeout and oversized input. SSH matrix: classical/hybrid offers, unknown names/extension markers, KEXINIT-wait behavior, fragmentation, malformed framing and limits; verify zero userauth/service/channel requests. Completed SSH KEX uses explicit public-key pinning and a separate no-auth packet-type assertion.
 
-## v0.2 release gate
+## Release evidence
 
-All supported paths have measured baselines and agreed regression budgets; critical correctness/safety issues in the supported scope are resolved or explicitly excluded with accurate diagnostics; no silent inspection loss; schemas and compatibility policy published; deterministic and privacy contracts tested; platform/install/rule-pack evidence recorded; security reporting and release process documented. External publication/release verification is a future explicit action, not performed by this design task.
-
-Do not claim complete coverage of all cryptography or universal migration compliance at v0.2. Unsupported languages/protocol profiles and residual uncertainty remain visible. See [ROADMAP.md](../roadmap/v0.2/ROADMAP.md).
-
-## Review record for this design
-
-On 2026-11-09, an independent read-only builder/Reviewer examined the new design and task dependencies. Four material issues were corrected: explicit file-counter partitions/equalities; separation of hybrid construction from quantum assessment; ownership of internal dependency-parser parse-to-empty errors in task 027; and packaging/install evidence in 038 preceding final 1.0 evaluation in 037. A second review confirmed these corrections and reported no remaining material contradiction, planning blocker or unnecessary architectural expansion in the reviewed scope.
-
-Documentation validation parsed all 22 new YAML records, checked pending status/unique IDs, existing target paths, acyclic/resolving dependencies, document links/fences and untouched tracked files. This is design validation, not implementation verification. Rust build/test/clippy/fmt, protocol interoperability, measured precision/recall/performance and current-HEAD remote CI were not executed. No implementation task was advanced or closed; no push, PR or merge was performed.
-
-## Task 023 implementation evidence
-
-The development-only [measurement protocol](../../tests/quality/PROTOCOL.md),
-source-bound corpus and two independent label records now support baseline
-measurements through the existing CLI. [Measured results and limitations](../../tasks/023/TASK-023-BASELINE.md)
-record finite-corpus counts, actual diagnostics and repeated resource samples.
-The baseline implementation and the maintainer-approved local criteria satisfy
-task 023's development-only decision gate; task 023 is done. CI validates evaluator
-sanity, corpus bindings, read/terminal-state arithmetic and semantic repeatability.
-It publishes metrics without enforcing numeric score or latency/RSS thresholds.
-Task 037, final-source hosted CI and release acceptance remain separate gates.
-
-## Task023 criterion approval and local acceptance — 2026-11-11
-
-The maintainer explicitly approved frozen-truth TP/FP/FN nonregression and the
-same-environment2x prior warm maximum time/RSS investigation signals. The earlier
-2026-11-09 design checkpoint is historical; current criteria are stated above. Existing independent technical
-approval, fresh corpus/harness integrity checks and20 evaluator sanity tests allow
-023 to close for its development-only baseline scope; see
-[TASK-023-ACCEPTANCE.md](../../tasks/023/TASK-023-ACCEPTANCE.md). No numeric CI enforcement is
-claimed. This does not close037, imply current-HEAD hosted CI, replace the ongoing
-Cursor audit, change truth/labels or promise multi-platform/global accuracy.
+All supported paths need applicable baselines and agreed regression budgets.
+Resolve critical correctness and safety issues in the supported scope, or preserve
+accurate exclusions and diagnostics. Check inspection loss, schemas, compatibility,
+determinism, privacy, platform/install behavior, rule packs, artifact verification,
+and the documented security and release process against the release's original
+criteria. Unsupported inputs and residual uncertainty remain visible. Validation
+does not itself authorize publication.
 
 ## Protocol execution boundary
 
@@ -165,18 +110,11 @@ with `PQC_RUN_CONTAINER_TESTS=1` and `PQC_PROTOCOL_IMAGE_FILE` set to the prepar
 image record. The legacy native macOS smoke runner is explicitly weaker and is
 not the CI confinement gate. No hosted-CI success is inferred from local runs.
 
-## PQS-QAM evidence reporting (TASK-041)
+## Quality reporting
 
-The independent [quality model](QUALITY-MODEL.md) and [metric definitions](QUALITY-METRICS.md)
-classify evidence as Verified, Passed, Failed, Partial, Unsupported, Unknown,
-Not Tested or Not Applicable. [Current measurements](../../tasks/041/QUALITY-BASELINE.md) and
-[assessment](../../tasks/041/QUALITY-ASSESSMENT.md) are new snapshots; old baselines remain intact.
-The existing baseline CI job also runs `tests/quality/report.py` over its raw
-measurements and saves JSON/Markdown. Inconsistent truth/source/raw evidence is
-an evaluation-infrastructure failure, not a measured product-accuracy regression.
-Numeric accuracy comparisons are descriptive; no new numeric CI failure policy
-is introduced. Performance beyond the existing same-environment 2x signal still
-requires investigation, not an automatic claim of regression or acceptance.
-Unsupported and unknown populations never become safe or zero-loss results.
-Release acceptance uses the supported scope and individual evidence, not an
-average score. [Follow-up work](../roadmap/v0.3/ROADMAP.md) records unexecuted dimensions.
+The [quality model](QUALITY-MODEL.md) defines the six evidence axes and their
+states. [Metric definitions](QUALITY-METRICS.md) explain scoring and denominators.
+The [CI measurement contract](CI-MEASUREMENT-PLAN.md) describes source-bound
+aggregation and retention. Aggregation does not execute high-cost studies or turn
+unsupported and unknown populations into safe results. Release acceptance depends
+on the supported scope and individual evidence, not an average score.

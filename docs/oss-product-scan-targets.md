@@ -2,12 +2,9 @@
 
 This list focuses on OSS products/applications (not crypto libraries), so findings are closer to real migration work.
 
-The separate [pinned cryptography corpus study](quality/oss-corpus/REPORT.md)
-adds 18 cryptographic libraries and PKI/SSH/JOSE projects across six language
-groups, and remeasures Keycloak, Airflow, Kubernetes, Node.js, n8n, Discourse,
-Rails and Vector. It records immutable commits, resources, diagnostic limits and
-64 source-checked observations. It preserves this historical list, the benchmark
-scripts and previous reports; reference counts are not accuracy measurements.
+The separate [cryptography corpus results](quality/oss-corpus/README.md)
+cover 27 primary cryptographic projects and eight comparison projects.
+Finding counts are not accuracy measurements.
 
 ## Verified targets (scanned with this repository's pqc-scan)
 
