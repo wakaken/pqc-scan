@@ -1,66 +1,70 @@
-# PQS-QAM v1: pqc-scan品質評価モデル
+# Quality evaluation model
 
-対象ロードマップ: **pqc-scan v0.3**（品質評価・検証基盤の包括的強化。[位置付け](../roadmap/v0.3/ROADMAP.md#v03-scope)）。
+PQS-QAM organizes evidence about detection, inspection coverage, cryptographic
+interpretation, safety, performance, and product operation. It is a project model,
+not NIST approval, ISO certification, or proof of cryptographic safety.
 
-制定日: 2026-11-11。pqc-scanの診断能力、検査範囲、判断と証拠の品質を評価します。
-ISO等を参考にした独自モデルです。NISTの認定、ISO認証、暗号学的安全性の証明は意味しません。
+Use the [metric definitions](QUALITY-METRICS.md) for scoring and denominators,
+[reference register](QUALITY-REFERENCES.md) for source scope, and
+[quality checks](QUALITY-GATES.md) for change-specific validation.
 
-公式資料は[資料台帳](QUALITY-REFERENCES.md)、計算方法は[指標定義](QUALITY-METRICS.md)、実測値は[ベースライン](../../tasks/041/QUALITY-BASELINE.md)、その解釈は[評価書](../../tasks/041/QUALITY-ASSESSMENT.md)にまとめます。
-全要求の担当と完了条件は[要求対応表](../roadmap/v0.3/REQUIREMENTS.md)、作業順序は[ロードマップ](../roadmap/v0.3/ROADMAP.md)を参照してください。
-TASK-023の正解・測定方式と、承認済みの[品質ゲート](QUALITY-GATES.md)を土台にします。
+## Evidence states
 
-## 検証状態の表し方
+Attach the evaluated source, inputs, conditions, and evidence to each result.
+Command success, source applicability, and independent verification are separate.
 
-状態には、対象の版、入力、条件、証拠への参照を付けます。過去の成功記録、今回の実行結果、ソースと記録の照合結果は別に扱います。
+| State | Meaning |
+| --- | --- |
+| Verified | Agreement with independent supporting evidence has been checked. This is separate from acceptance. |
+| Passed | An executed check meets its stated condition within the recorded scope. |
+| Failed | An executed check does not meet its condition, even if the cause is unknown. |
+| Partial | Only part of the required scope has been checked or completed. |
+| Unsupported | The feature, input format, or environment lies outside supported scope. This does not establish safety. |
+| Unknown | Evidence, population, authority, or other facts are insufficient for a conclusion. |
+| Not Tested | The defined check or measurement has not been executed. |
+| Not Applicable | The condition does not apply to this target, with a recorded reason. |
 
-| 状態 | 意味 |
-|---|---|
-| Verified | 独立した根拠との一致を確認した事実。測定原本と集計の一致など。受入条件への合否とは別 |
-| Passed | 指定した検証を実行し、その条件を満たした。対象外には一般化しない |
-| Failed | 実行した検証が条件を満たさなかった。原因が未確定でも結果を残す |
-| Partial | 一部の範囲だけ確認済み、または完了できなかった範囲がある |
-| Unsupported | 機能・入力形式・環境が対応範囲外。安全という意味ではない |
-| Unknown | 証拠不足、母数不明、権限不足などで結論を出せない |
-| Not Tested | 定義した試験・測定をまだ実行していない |
-| Not Applicable | その対象には検証条件が適用されない。理由を記す |
+A successful command can be Passed while the overall evaluation remains Partial.
+Do not average the axes into a release decision or infer completeness from test counts.
 
-例えば、コマンドの終了コード0はPassed、正解と測定の整合はVerifiedと記録しても、Q1全体には未評価範囲が残るためPartialと判定できます。
-6軸の点数平均で合否を決めず、各検証の結果と受入範囲を照合します。
+## Quality axes
 
-## 6つの品質軸
+| Axis | Evidence | Interpretation limits |
+| --- | --- | --- |
+| Q1 Detection accuracy | Source-backed labels, one-to-one matching, TP/FP/FN, denominators, and split/family strata | Static references do not establish runtime use. Unlabeled and exposed inputs do not supply independent deployment accuracy. |
+| Q2 Inspection coverage | File enumeration, reads, applicable detectors, terminal states, diagnostics, and reconciled counts | Enumeration, applicability, and completion are distinct. An unknown ignored population is not zero. |
+| Q3 Cryptographic interpretation | Rule rationale, standards, certificate facts, and assessment-policy cases | Detection accuracy differs from interpretation. Confidence is not a calibrated probability; references and offers do not prove execution or negotiation. |
+| Q4 Robustness and safety | Fault injection, resource boundaries, synthetic secret canaries, escaping, filesystem and protocol safety controls | Distinguish crashes, timeouts, limits, read failures, and secret survivors. Finite success does not prove safety for every input. |
+| Q5 Performance and reproducibility | Repeated runs with fixed input, binary, rules, source, environment, features, and cold/warm conditions | Report wall/CPU/RSS and noise with their measurement scope. Input copies are not independent accuracy samples, and changed environments do not establish a regression. |
+| Q6 Product operation | CI, platform/feature builds, install/distribution tests, notices, compatibility, security and maintenance procedures, provenance, and publication evidence | Repository operation scores are separate from detection accuracy. Identical archives from one supplied binary differ from independent reproducible builds. |
 
-| 軸 | 測定方法とデータ | 確認する条件・証拠 | 限界 |
-|---|---|---|---|
-| Q1 検出精度 | 独立した正解ラベルと既存の一対一照合。データ区分・用途・言語・方式・規則・検出器・入力種別ごとに集計 | 正解・入力・由来のhash、全予測の扱い、分母、FP/FNを示す。同一データの回帰には023の承認済み条件を使う | 現在の023-v2だけでは実利用、一般の製品精度、全方式の正確性を推定できない。方式別の独立正解は不足 |
-| Q2 検査網羅性 | ファイル列挙、読み取り、検出器の適用・処理結果と診断を集計 | ファイル件数の等式、部分結果の保持、対象範囲、列挙できない母数を確認。018/019/027の試験を再利用 | 列挙率、検出器の適用率、処理完了率は別。ignore等で未知の件数を0にしない |
-| Q3 PQC判断の妥当性 | 119ルールの根拠台帳、公開証明書の独立した事実、評価方針の試験表、規格との照合 | KEM/署名/鍵交換、量子/古典的問題、宣言/実利用、提示方式/交渉結果を区別 | 分類の説明と検出精度は別。Confidenceは校正済み確率ではなく、判断全体の外部妥当性も未測定 |
-| Q4 堅牢性と安全性 | 故障注入、処理上限、秘匿用の合成文字列、XSS/URI、symlink/FIFO、probeの安全試験 | crash、panic、hang、timeout、制限超過、読み取り失敗、秘密残存を分けて記録。失敗時も保持できる結果と診断を確認 | 有限の試験成功では、全入力への安全性を証明できない。到達率・変異試験・fuzzの不足を他の成功で補わない |
-| Q5 性能と再現性 | 既存run.pyで反復し、wall time、CPU time、peak RSSを測る | 入力・バイナリ・規則・ソース・環境のhashを保存。意味・診断・採点・順序を別々に比較。同条件での2倍超過は調査 | 現在は初回とwarm3回の小さい合成入力。起動と報告生成を含む。cold cacheは未測定で、入力コピーは独立した精度データではない |
-| Q6 OSS製品としての成熟度 | CI・設定の読み取り、配布/導入/notice試験、セキュリティ・保守手順、OpenSSFの観点を確認 | 対象commitのCI、環境/feature別結果、互換性、再ビルド、配布物の完全性、署名・生成来歴・公開状況を個別に示す | OpenSSFと検出精度を合算しない。権限不足はUnknown。同じバイナリからのarchive再現と、別環境での再ビルドは別 |
+## Source binding and aggregation
 
-この表は評価対象の定義です。実装済み範囲や測定済み範囲を広げたという意味ではありません。現在の測定は[評価書](../../tasks/041/QUALITY-ASSESSMENT.md)の範囲に限ります。初期の通常入力の最大は183872 bytesで、4種類の入力を初回とwarm3回ずつ測定しています。
+Record revision, branch, dirty changes, time, toolchain, features, build conditions,
+environment, and input/truth/rule/binary/source hashes. Bind logs and terminal
+results to that context. A HEAD SHA alone does not identify dirty source, and
+binaries from different feature builds must remain distinguishable.
 
-## 証拠と自動報告
+`tests/quality/run.py` collects measurements, `evaluate.py` applies the scoring
+contract, and `report.py` checks and aggregates recorded evidence. Q1/Q2/Q5
+baseline measurements do not supply missing Q3/Q4/Q6 evidence. The all-axis catalog
+and [CI measurement contract](CI-MEASUREMENT-PLAN.md) define integrated reporting.
+Unattributed predictions counted as FP by a scorer can include correct unlabeled
+facts; retain that distinction from confirmed product false positives.
 
-測定にはHEAD、ブランチ、未コミット変更、UTC時刻、工具・features・build条件、OS/CPU/RAM、入力・正解・規則・バイナリ・ソースのhashを結び付けます。
-コマンド、終了状態、timeout、ログと測定原本も保存します。未コミット変更がある場合はHEADだけで対象を特定しません。
-異なるfeatureのバイナリが混ざらないよう、buildログとバイナリSHAを確認します。
+## Labels and change control
 
-現在は `run.py` が測定し、`evaluate.py` が正解と照合し、`report.py` が測定原本との整合を検査して指標をまとめます。
-自動集約はQ1/Q2/Q5の一部です。Q3/Q4/Q6には別の検証証拠が必要なので、自動版ではNot Testedと表示します。
-追加版042-v1では方式・用途別の注釈を使いますが、注釈の完全性はPartialです。[実測と限界](../../tasks/042/TASK-042-RESULTS.md)を参照してください。
-帰属不能の所見は既存protocolでFPと数えます。正しい未注釈の事実も含み得るため、製品の誤検出と断定せず、負例への誤報・重複・帰属不能を別々に示します。
-手動の評価書は追加の証拠を参照してPartial等を判定します。全軸の自動集約は今後の053で扱います。
+Define truth from input facts before inspecting results. Preserve provenance,
+author, adjudication, ambiguity, license, fixed input identity, and exposure history.
+Do not overwrite existing labels or reuse a tuned holdout as an independent test.
+Keep regression on exposed data separate from evaluation on new independent data.
 
-## 正解データの独立性と変更管理
+Positive and Negative follow the declared static reference or configuration unit,
+including unused code. Keep Ambiguous and Unsupported outside eligible denominators
+while retaining their counts, provenance, and predictions. Unsupported truth labels
+describe scoring eligibility, not the product's complete format support.
 
-正解は検出結果を見る前に入力の事実から決めます。追加時は作成元・担当者・裁定・曖昧な理由・ライセンス・固定時点を記録し、既存ラベルを上書きしません。
-既存57単位は公開された開発用データです。調整に使った独立評価用データ（holdout）は、その改善の独立評価には再使用しません。
-同一データの回帰と新しい独立データの評価は分け、同系統のひな型を大量に変形して独立標本数を増やしません。
-
-Positive/Negativeは名目的なAPI参照・設定等の定義に従います。未使用コードでも静的参照があればPositiveです。
-Ambiguous/Unsupportedは得点の分母から外しますが、個数・由来・予測数を残します。
-正解ラベルのUnsupportedは、その問いを採点できないという意味であり、製品全体の形式対応とは別です。
-
-規則の意味、Severity、公開Schema、新規の数値ハードゲートを変える場合は、影響分析と承認が必要です。
-要求ごとの完了は、必要な実装と検証・証拠をそろえて判定します。未確認と表示できるだけでは実現済みにしません。
+Changes to rule semantics, severity, public schemas, or numeric hard gates require
+the applicable impact review and approval. Complete only the original criteria
+supported by implementation and required validation; displaying Unknown does not
+implement a missing capability.

@@ -25,7 +25,15 @@ The summary separates results requiring review from exact reviewed references.
 The `pqc-self-scan-evidence` artifact contains the input inventory/hashes, scoped
 expectations, all results for that scope, upload results, diagnostics and summary.
 New or changed results still appear for review. These counts describe detected
-references, not confirmed vulnerabilities. See [the product scan scope](../../docs/quality/self-scan/CI-SELF-SCAN.md#product-scope-20261116).
+references, not confirmed vulnerabilities.
+
+The [self-scan expectations](self-scan/SELF-SCAN-EXPECTATIONS.json) identify exact
+reviewed references using source hashes, full-result hashes, locations, and counts.
+Only matching results are omitted from the upload copy; unfiltered results remain
+in the artifact. Changed or unmatched observations remain available for review.
+Policy updates require source and result review, rather than blanket registration
+of current findings. The dated directories under `self-scan/` contain data used
+by regression tests, including source snapshots and before/after SARIF.
 
 The existing `quality` and `baseline` jobs also aggregate all six quality axes
 offline from recorded evidence. Missing facts and stale measurements remain

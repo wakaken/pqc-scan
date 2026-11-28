@@ -1,8 +1,8 @@
-# Built-in rule quality companion (task028)
+# Built-in rule quality
 
 [Machine-readable review](RULE-QUALITY-METADATA.json) covers all **139 current
 built-in rules**, not the historical counts in task descriptions. Existing YAML is
-the executable source of truth. This original MIT development-only companion is
+the executable source of truth. This development-only companion is
 not loaded by the CLI, does not add report fields, and does not certify accuracy.
 
 Each row binds the complete rule snapshot and its source-file SHA-256, then records
@@ -35,25 +35,18 @@ configuration grammar. No standard text or real private keys are copied.
   before2027 are different. The latter is local policy, not an external deadline.
   Certificate signature and subject public-key OIDs are separate target scopes.
 
-## Fixtures and known gaps
+## Pattern controls and known gaps
 
-The 305 current examples exercise **compiled regex targets only**, with desired labels
-separate from expected current matches. They are not end-to-end source truth,
-symbol resolution, a key parser test, provider validation or performance evidence.
-The existing detector/CLI/certificate/schema suites and frozen task023 corpus still
-provide their own bounded integration evidence. Do not count these controls as139
-new independently labeled accuracy units or as approved quality budgets.
+The companion's synthetic examples exercise compiled regex targets. Desired labels
+and expected current matches are separate. These are not end-to-end source truth,
+symbol-resolution tests, key parsing, provider validation, or performance evidence.
+Detector, CLI, certificate, and schema tests provide their own bounded evidence.
+Do not count pattern controls as independent accuracy units or quality budgets.
 
-The original task028 recorded eight negative controls with false positives. Four
-remain in the current companion; the others have passing negative expectations
-after later repairs. The historical targets and their current dispositions are:
+The following negative controls retain known limitations:
 
-| Rule | Negative intent | Historical issue and current disposition |
-|---|---|---|
-| TLS_VERSION_1_0 | `TLSv1_3` | Fixed: current predicate rejects this modern version; later span/adjacency repair is also retained |
-| NODE_TLS_MIN_VERSION | `minVersion: "TLSv1.3"` | Fixed: current predicate rejects this modern version |
-| TS_TLS_LEGACY_VERSION_LITERAL | `TLSv1_3` | Fixed: current predicate rejects this modern version |
-| TS_RUBY_RSA_USAGE | JWT HMAC example | Fixed: generic encode/decode branch removed; computed/aliased references remain bounded |
+| Rule | Negative intent | Limit |
+| --- | --- | --- |
 | HTTPD_SSLPROTOCOL_LEGACY | Explicitly disabled TLS1.0/1.1 | Does not parse enable/disable modifiers |
 | HTTPD_SSLCIPHERSUITE_RSA | ECDSA cipher plus excluded RSA/weak operands | Does not interpret cipher exclusions |
 | NGINX_SSL_CIPHERS_RSA | ECDSA cipher plus excluded RSA/weak operands | Does not interpret cipher exclusions |
@@ -72,8 +65,8 @@ not changes to rule decisions or a comprehensive proof of every unsupported case
 
 ## Maintenance
 
-Development test `quality_metadata` loads authoritative built-ins, checks all12
-source hashes, exact rule population and snapshots, reference resolution/editions,
+Development test `quality_metadata` loads authoritative built-ins, checks source-file
+hashes, exact rule population and snapshots, reference resolution/editions,
 required review fields and positive/negative pattern outcomes. A matcher/source
 change makes this binding fail until the companion is re-reviewed; never regenerate
 expected outcomes blindly. Metadata is under docs to avoid self-scan recursion.
@@ -83,90 +76,19 @@ metadata lookup, network access or dependency.
 Pinned primary references in the companion include RFC7518 (2015), RFC8996 (2021),
 RFC9325 (2022), RFC8332 (2018), RFC9142 (2022), RFC5280 (2008), SP800-131A Rev2
 (2019), FIPS203/204/205 final (2024), and reviewed NIST PQC/CSOR registers. These
-are classification context, not a current-law compliance engine. Local task021
-cutoff and task028 method policy are explicitly marked repository references.
+are classification context, not a current-law compliance engine. The local certificate
+cutoff and review method policy are explicitly marked repository references.
 
-The 2026-11-12 source repair refresh includes three additional classical API/EdDSA rules, narrowed Ruby/Go/TLS predicates and source-bound controls. Pattern fixtures remain distinct from language-aware detector tests (`semantic_repairs.rs`); current changes do not retroactively alter historical task028 evidence.
+## Interpreting rule evidence
 
-## Maintainer-approved F054-01 correction — 2026-11-17
+KEM, signature, key exchange, implementation definitions, and construction/component
+references have different meanings. A dependency or container candidate does not
+select an algorithm or establish its contents. Lexical member names, macro prefixes,
+documentation, and type checks remain references, not proof of executed operations.
+Parsed certificate facts and incomplete inspection states remain separate.
 
-The current DEP_RUST_RSA_CRATE predicate now matches exactly the Cargo package
-components rsa and jsonwebtoken, with the existing case-insensitive policy.
-Its other fields and the dependency parser are unchanged. Three additional
-compiled-target controls cover universal-hash, rsa-helper and a versioned
-jsonwebtoken purl; the current metadata has123rules and268controls. These are
-synthetic controls, not independent accuracy units. Historical task062 metadata
-and the earlier measurements remain unchanged; the maintained metadata source
-hash/snapshot update records this explicitly approved correction. Detector and
-CLI regressions additionally test real manifests,locks,SBOMs and provenance.
-
-## Current-source audit supplement (task 065)
-
-The [task 065 audit](../../../tasks/065/RULE-AUDIT.json) composes exactly one
-supplemental row per maintained companion row, bound to the selected source.
-See [results and correction impacts](../../../tasks/065/TASK-065-RESULTS.md) and
-[population evidence](../../../tasks/065/evidence/POPULATION.json). The supplement
-adds explicit parameter limits, per-rule base Severity/Confidence rationale gaps,
-promotion gates and current FP/FN dispositions without changing executable rules.
-It also supplies the SLH-DSA family and existing FIPS205 reference missing from
-the Java/Ruby companion annotations. The maintained companion's snapshots and
-historical evidence remain unchanged. The supplement also resolves the two local
-reference paths left behind by documentation relocation, preserving their original
-values as audit findings.
-
-All 123 exact numeric confidence choices and independent justifications for exact
-base Severity levels remain explicitly unknown in the bounded reviewed evidence;
-source descriptions and cryptographic-family facts do not calibrate those values.
-The existing 0.45 promotion policy remains compatibility behavior. Current
-268 compiled-target controls include four retained false-positive controls,
-not an estimate of end-to-end false-positive/false-negative rates.
-
-Task078 adds three PHP rows and six pattern controls, while preserving the previous
-125 rows. Its 180 frozen source cases and supplementary scope/privacy tests are
-separate from these pattern controls; neither cohort estimates deployment accuracy.
-
-Task079 adds three C# rows and six pattern controls without changing the previous
-128 rows. Its218 frozen focal cases and supplemental source-flow/privacy tests are
-separate evidence. The mixed PQC/HPKE/composite source rule uses quantum-uncertain
-because a construction name does not identify a post-quantum component.
-
-## C/C++ source additions (task080)
-
-Three scoped definitions append to the inherited131 rows unchanged. They cover
-finite low-level/EVP/OpenSSL and OQS requests, qualified C++ receivers and opaque
-include references. Provider/property/TLS-group settings use existing finite
-public evidence markers without algorithm assets or negotiation assertions.
-Legacy OpenSSL lexical IDs/occurrences overlap intentionally and are retained;
-argument/context privacy can mask their evidence. The frozen484 source cases and
-supplemental hostile/privacy/scope controls are separate detector conformance,
-not independent accuracy or calibration. Source-bound task080 review/checks must
-complete before its implementation is accepted.
-
-## Task081 dependency input supplement
-
-Three additive exact-name/ecosystem predicates cover Composer/platform, NuGet and native build declarations. The inherited134 rows remain byte-for-byte unchanged. Fifteen new compiled-target controls are distinct from parser/provenance/privacy/CLI tests. Dependency presence never selects an algorithm or proves deployment.
-
-## Implementation/construction reference additions (task085)
-
-Two informational, quantum-uncertain AST rows add separate implementation-definition and conditional/component-reference evidence. The137 earlier YAML rows and their target controls are unchanged. New source-handler regressions distinguish definitions from calls/prototypes, canonical ownership from namesakes, conditional guards from string data, and composite components from whole-construction safety. No runtime, conformance or population-accuracy conclusion follows. The metadata records both positive/negative pattern targets and the stronger AST-layer interpretation.
-
-## Underscore parameter-set references in OSS98
-
-The existing PQC_STANDARD_REFERENCE rule additionally recognizes18 exact underscore parameter-set names. Source-first observations are bound in benchmark/evidence/holdout-source-facts.json, with NIST primary definitions in benchmark/evidence/primary-references.json. These are nominal implementation exports, not evidence of a completed operation or FIPS conformance. The SLH-DSA implementation header still links an earlier draft, so source naming must not establish conformance to the final standard.
-
-The detector regression tests all18 parameter names, exact source lines, symbol-reference metadata, comments, neighboring identifiers, unsupported parameters and hash/profile spellings. Existing rule ID, risk, severity, confidence, language scopes and prior spellings are preserved. Additional detections are a finite inventory coverage improvement, not a population Recall measurement.
-
-## Static claim wording repair in OSS98
-
-The current companion refreshes the descriptions, conditional advice and source
-file hashes for `JWT_KID_HEADER`, `OPENSSL_RSA_API`, `API_EVP_PKEY_RSA`,
-`CERT_PEM_CONTAINER` and `CERT_P12_CONTAINER`. The first three establish lexical
-references, including member names, macro name prefixes, documentation and type
-checks. The last two retain extension-based candidates without establishing
-container contents or certificate presence. Parsed certificate facts and
-incomplete inspection states remain separate.
-
-Patterns, scopes, classifications, confidence and all 139 IDs remain unchanged.
-The original review dates and historical records remain intact. CLI regressions
-use synthetic role controls and both report languages. They are presentation and
-compatibility checks, not additional independently labeled accuracy units.
+Exact confidence values and base severity levels are not independently calibrated
+by cryptographic-family rationale. Preserve known gaps and current outcomes rather
+than changing expectations to obtain a pass. Apply the
+[rule validation requirements](../../rules-reference.md#validation-and-quality-review)
+when rules or their source bindings change.

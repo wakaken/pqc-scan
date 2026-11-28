@@ -15,9 +15,8 @@ The [registry](registry.json) catalogs 98 repositories. The v0.5 evaluation uses
 
 Keep main and comparison results separate. The main projects were deliberately selected for cryptographic coverage, not randomly sampled.
 
-See the [35-project list](../docs/releases/v0.5.0.md#validation-scope),
-[evaluation conditions](../docs/quality/oss-corpus/PROTOCOL-35.md), and
-[final results](../docs/quality/oss-corpus/REPORT-35-V05-RELEASE-FINAL.md).
+See the [35-project list](../docs/releases/v0.5.0.md#validation-scope)
+and [results and evaluation conditions](../docs/quality/oss-corpus/README.md).
 
 ## Understand the results
 

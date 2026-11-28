@@ -8,9 +8,8 @@ The registered population contains90 primary projects and eight disjoint
 comparison projects. Reconciliation retained18 historical primary acquisitions,
 30 v0.5 primary acquisitions and42 new primary acquisitions at fixed commits.
 
-The current result is [REPORT-98.ja.md](../../quality/oss-corpus/REPORT-98.ja.md).
 The [registry](../../../benchmark/registry.json),
-[protocol](../../quality/oss-corpus/PROTOCOL-98.md), and
+[protocol](../../../benchmark/protocol.json), and
 [result index](../../../benchmark/evidence/results-index.json) retain the source and evidence bindings.
 
 The overall task is unfinished. Two comparison input files remain unavailable,
