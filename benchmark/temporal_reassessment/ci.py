@@ -105,7 +105,7 @@ def main():
         externs.extend(['--extern', name + '=' + artifact])
         searches.add(str(Path(artifact).parent))
     with tempfile.TemporaryDirectory(prefix='pqc-temporal-ci-') as temporary:
-        binary = Path(temporary) / 'temporal-witness-tests'
+        binary = Path(temporary).resolve() / 'temporal-witness-tests'
         compiler = Path(invoke(['rustc', '--print', 'sysroot']).decode().strip()) / 'bin/rustc'
         command = [str(compiler), '--edition=2021', '--test', '--crate-name',
                    'pqc_temporal_witness_tests', str(Path(__file__).with_name('temporal_witness.rs')),
@@ -115,7 +115,7 @@ def main():
         environment = {**os.environ, 'PQC_TEMPORAL_PRODUCT_SOURCE': str(ROOT)}
         subprocess.run(command, cwd=ROOT, env=environment, check=True)
         digest = hashlib.sha256(binary.read_bytes()).hexdigest()
-        subprocess.run([str(binary)], cwd=ROOT, env=environment, check=True)
+        subprocess.run([str(binary), '--test-threads=1'], cwd=ROOT, env=environment, check=True)
         print(json.dumps({'kind': 'temporal-witness-ci-tests', 'binarySha256': digest,
                           'scope': 'Synthetic first-party regression tests only',
                           'corpusRuns': 0, 'performanceMeasurements': False}))
