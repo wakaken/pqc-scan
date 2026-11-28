@@ -27,7 +27,7 @@ def runtime_features(metadata, dependencies):
                for row in packages.values()) != 1:
             raise ValueError('E_CI_FEATURE_PACKAGE_AMBIGUOUS')
         names[key] = name
-    command = ['cargo', 'tree', '--locked', '--offline', '--edges', 'normal',
+    command = ['cargo', 'tree', '--locked', '--offline', '--edges', 'normal,no-proc-macro',
                '--prefix', 'none', '--format', '{p}|{f}']
     for name in ('pqc_scan_core', 'pqc_scan_rules', 'pqc_scan_detectors'):
         command.extend(['-p', dependencies[name]])
@@ -41,7 +41,7 @@ def runtime_features(metadata, dependencies):
             name = names[key]
             value = frozenset(filter(None, values.removesuffix(' (*)').split(',')))
             if name in features and features[name] != value:
-                raise ValueError('E_CI_RUNTIME_FEATURE_AMBIGUOUS')
+                raise ValueError('E_CI_RUNTIME_FEATURE_AMBIGUOUS:' + name)
             features[name] = value
     if set(features) != set(dependencies):
         raise ValueError('E_CI_RUNTIME_FEATURE_MISSING')

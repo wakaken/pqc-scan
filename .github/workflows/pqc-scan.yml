@@ -67,6 +67,11 @@ jobs:
       - name: Test performance hold selector controls
         run: python3 -I -B tests/ci/test_quality_performance_hold.py
 
+      - name: Test temporal witness with product libraries
+        run: |
+          cargo fetch --locked
+          python3 benchmark/temporal_reassessment/ci.py
+
       - name: Test quality consumers with performance held
         run: |
           python3 -I - <<'PYTHON'
@@ -82,11 +87,6 @@ jobs:
               '--repo', '.', '--out-dir', 'target/quality-performance-held',
           ], environment)
           PYTHON
-
-      - name: Test temporal witness with product libraries
-        run: |
-          cargo fetch --locked
-          python3 benchmark/temporal_reassessment/ci.py
 
       - name: Aggregate all-axis evidence offline
         if: always()
