@@ -10,9 +10,8 @@ comparison projects. Reconciliation retained18 historical primary acquisitions,
 
 The current result is [REPORT-98.ja.md](../../quality/oss-corpus/REPORT-98.ja.md).
 The [registry](../../../benchmark/registry.json),
-[protocol](../../quality/oss-corpus/PROTOCOL-98.md),
-[result index](../../../benchmark/evidence/results-index.json) and
-[workflow](../../../benchmark/WORKFLOW.md) retain the source and evidence bindings.
+[protocol](../../quality/oss-corpus/PROTOCOL-98.md), and
+[result index](../../../benchmark/evidence/results-index.json) retain the source and evidence bindings.
 
 The overall task is unfinished. Two comparison input files remain unavailable,
 accuracy is qualified only for twelve token intervals, and strict isolation from

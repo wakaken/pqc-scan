@@ -22,7 +22,7 @@
 
 対象台帳は [registry.json](../../../benchmark/registry.json)、実行入口は [entry.py](../../../benchmark/entry.py)、条件は [PROTOCOL-98.md](PROTOCOL-98.md) と [protocol.json](../../../benchmark/protocol.json) です。既存18件とv0.5由来30件を固定SHAで照合し、新規取得42件を加えました。主対象90件と比較用8件を別集計し、同一OSSの再試行を追加件数に含めていません。9グループ各10件です。JS/TSとC/C++を分けた11言語は、後掲の実ファイル拡張子別集計と区別します。
 
-開始ソースは `cf3bfe2071228921f5a33d2a44e0f3b94de4d1de` です。作業は `codex/oss-crypto-corpus` に保存しています。v0.5対応の統合マージ `3cb487d` と元ソース `5ae84d5` を含み、言語対応を再実装していません。139ルールを維持し、パッケージの表示版は0.4.0です。統合済みであることはv0.5公開準備完了の判定ではありません。[ROADMAP-LINKS.md](../../../benchmark/ROADMAP-LINKS.md) にタスク076–087との関係を残しました。
+開始ソースは `cf3bfe2071228921f5a33d2a44e0f3b94de4d1de` です。作業は `codex/oss-crypto-corpus` に保存しています。v0.5対応の統合マージ `3cb487d` と元ソース `5ae84d5` を含み、言語対応を再実装していません。139ルールを維持し、パッケージの表示版は0.4.0です。統合済みであることはv0.5公開準備完了の判定ではありません。
 
 ソース・大量出力は `/Users/waka/.cache/pqc-scan-oss98-20261125` に保存しています。URL、コミット、対象範囲、入力マニフェスト、実ファイルのハッシュは台帳から参照できます。ライセンスの事実確認98件は [license-evidence.json](../../../benchmark/license-evidence.json) に結び付けました。n8nのSustainable Use/Enterprise、GitLabの複数範囲、SustainsysとBitwardenの限定部分などを保持しています。全ツリーの統一ライセンス、OSS適格性、法的適合性を一括認定していません。
 
