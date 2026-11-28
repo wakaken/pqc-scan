@@ -27,6 +27,7 @@ class RuntimeArtifactTests(unittest.TestCase):
             features = ci.runtime_features(self.metadata(), self.dependencies())
         command = invoke.call_args.args[0]
         self.assertEqual(command[command.index('--edges') + 1], 'normal,no-proc-macro')
+        self.assertEqual(command[command.index('--color') + 1], 'never')
         self.assertIn('--locked', command)
         self.assertIn('--offline', command)
         rows = [self.row(['default', 'std', 'preserve_order'], 'host.rlib'),

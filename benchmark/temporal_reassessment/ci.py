@@ -27,7 +27,8 @@ def runtime_features(metadata, dependencies):
                for row in packages.values()) != 1:
             raise ValueError('E_CI_FEATURE_PACKAGE_AMBIGUOUS')
         names[key] = name
-    command = ['cargo', 'tree', '--locked', '--offline', '--edges', 'normal,no-proc-macro',
+    command = ['cargo', 'tree', '--color', 'never', '--locked', '--offline',
+               '--edges', 'normal,no-proc-macro',
                '--prefix', 'none', '--format', '{p}|{f}']
     for name in ('pqc_scan_core', 'pqc_scan_rules', 'pqc_scan_detectors'):
         command.extend(['-p', dependencies[name]])
