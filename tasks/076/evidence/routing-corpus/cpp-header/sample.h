@@ -1,0 +1,1 @@
+namespace App { void f() { oqs::Signature k("ML-DSA-65"); } }

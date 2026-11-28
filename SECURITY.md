@@ -1,15 +1,16 @@
 # Security policy
 
-[English](SECURITY.md) | [日本語](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/SECURITY.ja.md)
+[English](SECURITY.md) | [日本語](SECURITY.ja.md)
 
-For v0.4, the formal binary scope is macOS Apple Silicon static scanning and the
-network variant's TLS, SSH advertisement and pinned hybrid SSH KEX diagnostics.
-Publication remains pending updated-source artifact verification, maintainer
-acceptance and the chrono maintenance-warning decision. The latest verified
-snapshots in 0.2.x and 0.3.x receive best-effort maintenance; the v0.4 maintenance
-disposition will accompany the publication decision. No response SLA or old-version
-backport guarantee is declared. Unsupported inputs and incomplete observations
-must not be interpreted as a clean security assessment.
+This checkout prepares the unpublished v0.5.0 candidate. Its intended binary
+scope remains macOS Apple Silicon static scanning and the network variant's TLS,
+SSH advertisement and pinned hybrid SSH KEX diagnostics. See the
+[candidate release notes](docs/releases/v0.5.0.md). Local preparation does not
+establish successful final-source hosted checks, publication or release approval.
+The recorded best-effort maintenance for verified 0.2.x/0.3.x snapshots and v0.4
+remains unchanged. No response SLA or old-version backport guarantee is declared.
+Unsupported inputs and incomplete observations must not be interpreted as a clean
+security assessment.
 
 ## Reporting a vulnerability
 
@@ -74,7 +75,7 @@ establish a history of successful scheduled runs or delivered notifications.
 ## Distribution and updates
 
 Local packaging alone does not establish publication or authenticity. The
-[release-preparation workflow](https://github.com/wakaken/pqc-scan/blob/codex/v04-roadmap-20261118/.github/workflows/release.yml) produces build-provenance
+[release-preparation workflow](https://github.com/wakaken/pqc-scan/blob/develop/.github/workflows/release.yml) produces build-provenance
 attestations for both static and network candidates. Verify the repository,
 workflow and exact source commit alongside each archive digest before publication.
 SHA-256 manifests detect changes relative to supplied hashes; they do not prove
@@ -90,13 +91,13 @@ authorize execution, network access, disclosure or remediation.
 
 ### System and Scope
 
-This checkout contains product version 0.4.0. Assess the selected source revision and enabled
+This checkout contains candidate product version 0.5.0. Assess the selected source revision and enabled
 features rather than assuming that a published release represents this checkout.
 
 pqc-scan is a local Rust CLI and library for advisory inspection of cryptographic
 usage and PQC migration risks. Static scanning is the primary product surface.
 Explicit, feature-enabled TLS, SSH-offer and SSH hybrid-KEX probes are separate
-network operations within the documented macOS Apple Silicon v0.4 scope.
+network operations within the documented macOS Apple Silicon scope.
 
 Assess relevant boundaries across `crates/`, `rules/`, report generation,
 `scripts/`, packaging and `.github/workflows/`. Include developer tools, tests

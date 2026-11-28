@@ -138,9 +138,12 @@ fn preflight(text: &str, format: Format) -> Result<(), Failure> {
     Ok(())
 }
 pub(super) fn decode(text: &str, format: Format) -> Result<Value, Failure> {
+    decode_limited(text, format, 500_000)
+}
+pub(super) fn decode_limited(text: &str, format: Format, values: usize) -> Result<Value, Failure> {
     preflight(text, format)?;
     let mut budget = Budget {
-        remaining: 500_000,
+        remaining: values.min(500_000),
         limited: false,
     };
     let seed = Seed {
@@ -203,4 +206,34 @@ pub(super) fn yaml_documents(text: &str) -> Result<Vec<Value>, Failure> {
         return Err(Failure::Malformed);
     }
     Ok(values)
+}
+
+#[cfg(test)]
+mod value_limit_tests {
+    use super::*;
+    #[test]
+    fn construction_budget_stops_at_zero_below_at_and_above_without_changing_old_default() {
+        for (input, required) in [("null", 1), ("[]", 1), ("[0]", 2), (r#"{"a":0}"#, 2)] {
+            assert!(matches!(
+                decode_limited(input, Format::Json, 0),
+                Err(Failure::Limit)
+            ));
+            assert!(matches!(
+                decode_limited(input, Format::Json, required - 1),
+                Err(Failure::Limit)
+            ));
+            assert!(decode_limited(input, Format::Json, required).is_ok());
+            assert!(decode_limited(input, Format::Json, required + 1).is_ok());
+        }
+        let many = format!("[{}]", vec!["0"; 50000].join(","));
+        assert!(decode(&many, Format::Json).is_ok());
+        assert!(matches!(
+            decode_limited(&many, Format::Json, 50000),
+            Err(Failure::Limit)
+        ));
+        assert!(matches!(
+            decode_limited(r#"{"a":0,"a":1}"#, Format::Json, 50000),
+            Err(Failure::Malformed)
+        ));
+    }
 }

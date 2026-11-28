@@ -1,0 +1,45 @@
+{
+  "name": "paragonie/pqcrypto_compat",
+  "description": "Pure PHP implementation of pqcrypto; uses the PHP extension if it exists",
+  "keywords": [
+    "PHP",
+    "cryptography",
+    "post-quantum",
+    "post-quantum cryptography",
+    "module lattice",
+    "ML-KEM",
+    "ML-DSA",
+    "SLH-DSA",
+    "stateless hash-based digital signatures"
+  ],
+  "license": "ISC",
+  "authors": [
+    {
+      "name": "Paragon Initiative Enterprises",
+      "email": "security@paragonie.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "ParagonIE\\PQCrypto\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "ParagonIE\\PQCrypto\\Tests\\": "tests"
+  },
+  "require": {
+    "php": "^8.1",
+    "php-64bit": "*",
+    "paragonie/sodium_compat": "^2"
+  },
+  "require-dev": {
+    "c2sp/wycheproof": "dev-main",
+    "giorgiosironi/eris": "^1",
+    "phpunit/phpunit": "^10|^11|^12|^13",
+    "trailofbits/wycheproof": "^0|^1"
+  },
+  "suggest": {
+    "ext-pqcrypto": "Better performance, higher assurance",
+    "ext-sodium": "Faster X-Wing KEM (only if ext-pqcrypto is not installed)"
+  }
+}

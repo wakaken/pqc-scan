@@ -1,0 +1,3452 @@
+{
+  "version": 1,
+  "fileCount": 203,
+  "records": [
+    {
+      "index": 0,
+      "path": "tuning/java/ML.java",
+      "source": "tests/quality/expanded/inputs/tuning/java/ML.java",
+      "sha256": "03f67cb6030883f5881decd597c87e93d8cd9af64352187a6fdd76a4e7a0bbf0",
+      "bytes": 36,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "Signature.getInstance has a complete ML-DSA-44 string argument.",
+      "questionIds": [
+        "x001"
+      ]
+    },
+    {
+      "index": 1,
+      "path": "tuning/java/Kem.java",
+      "source": "tests/quality/expanded/inputs/tuning/java/Kem.java",
+      "sha256": "6229eb7fbc332f37a114676c3d641a2e26ce00ffc45dae2936abff5ee1f9e5da",
+      "bytes": 32,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "KEM.getInstance has a complete ML-KEM-1024 string argument, a KEM request rather than a signature request.",
+      "questionIds": [
+        "x002"
+      ]
+    },
+    {
+      "index": 2,
+      "path": "tuning/java/Slh.java",
+      "source": "tests/quality/expanded/inputs/tuning/java/Slh.java",
+      "sha256": "878a1535f094b3d34cbf7c24bdc6f788dbb18f30c3574b417b50f3bd3f4b00da",
+      "bytes": 45,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "Signature.getInstance has a complete SLH-DSA-SHAKE-256s string argument.",
+      "questionIds": [
+        "x003"
+      ]
+    },
+    {
+      "index": 3,
+      "path": "tuning/java/Neg.java",
+      "source": "tests/quality/expanded/inputs/tuning/java/Neg.java",
+      "sha256": "e8f8332a8b0baa6fba0f8f126c1d725b5a0c24d7e59755c5009bba2a5e80e686",
+      "bytes": 40,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Java signature factory selects SHA256withRSA, a classical alternative rather than a standard PQC algorithm.",
+      "questionIds": [
+        "x004"
+      ]
+    },
+    {
+      "index": 4,
+      "path": "tuning/java/Broken.java",
+      "source": "tests/quality/expanded/inputs/tuning/java/Broken.java",
+      "sha256": "fa706773e256d0489f9882fbba530772b1bd340334b9812387c58b3f14d2547f",
+      "bytes": 34,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The closing syntax is missing, but Signature.getInstance and the complete ML-DSA-65 literal remain visible. Incompleteness does not erase this nominal reference.",
+      "questionIds": [
+        "x005"
+      ]
+    },
+    {
+      "index": 5,
+      "path": "tuning/go/main.go",
+      "source": "tests/quality/expanded/inputs/tuning/go/main.go",
+      "sha256": "1d8459a39e2439c9db9df58ff8f010470fb53589a2c3f1386eac94ef367ffdfe",
+      "bytes": 35,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Go import explicitly names crypto/mlkem. This is an import reference, not proof of an operation.",
+      "questionIds": [
+        "x006"
+      ]
+    },
+    {
+      "index": 6,
+      "path": "tuning/go/negative.go",
+      "source": "tests/quality/expanded/inputs/tuning/go/negative.go",
+      "sha256": "6b01d2a622d492c33529686bf8f95f921f39c0f13a2c65dfb7bf7cbec4e9791d",
+      "bytes": 26,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete Go import names fmt, with no nominated PQC package reference.",
+      "questionIds": [
+        "x007"
+      ]
+    },
+    {
+      "index": 7,
+      "path": "tuning/go/broken.go",
+      "source": "tests/quality/expanded/inputs/tuning/go/broken.go",
+      "sha256": "41db73d50d8416ce8ac7f1a205ef377a71704df999048c8be2fcc1ad4a5e2285",
+      "bytes": 22,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Go import ends at an opening quote. No module name can be established from these bytes.",
+      "questionIds": [
+        "x008"
+      ]
+    },
+    {
+      "index": 8,
+      "path": "tuning/python/pqc.py",
+      "source": "tests/quality/expanded/inputs/tuning/python/pqc.py",
+      "sha256": "c8fc664d890e3b92cc13c8dba3511ae14e5a4b1be2f86fe36fbd465b098894ea",
+      "bytes": 100,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "An explicit cryptography asymmetric mlkem import precedes mlkem.MLKEM768PrivateKey.generate. Both the import and the generation call have local textual provenance.",
+      "questionIds": [
+        "x009",
+        "v2-audit0"
+      ]
+    },
+    {
+      "index": 9,
+      "path": "tuning/python/negative.py",
+      "source": "tests/quality/expanded/inputs/tuning/python/negative.py",
+      "sha256": "94452a4ea91bc064c2155f120e49971a0b483c224f732d08ac17f556dddf49fb",
+      "bytes": 20,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The ML-KEM-768 name is an argument to print, with no Python cryptographic API call.",
+      "questionIds": [
+        "x010"
+      ]
+    },
+    {
+      "index": 10,
+      "path": "tuning/python/broken.py",
+      "source": "tests/quality/expanded/inputs/tuning/python/broken.py",
+      "sha256": "f4980165315bb83a61d78efe222fdcec23c41adfca385e1e29ad506b6eedd160",
+      "bytes": 41,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The incomplete Python expression still spells mlkem.MLKEM768PrivateKey.generate. This is the original nominal-reference question, without a runtime capability claim.",
+      "questionIds": [
+        "x011"
+      ]
+    },
+    {
+      "index": 11,
+      "path": "tuning/rust/pqc.rs",
+      "source": "tests/quality/expanded/inputs/tuning/rust/pqc.rs",
+      "sha256": "3734f7dcc12bd02e1bd6c417ec9ffbccd7d137d19b9adf2129a24234fcb8d511",
+      "bytes": 22,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Rust use statement explicitly names ml_kem::MlKem768.",
+      "questionIds": [
+        "x012"
+      ]
+    },
+    {
+      "index": 12,
+      "path": "tuning/rust/negative.rs",
+      "source": "tests/quality/expanded/inputs/tuning/rust/negative.rs",
+      "sha256": "8ebe24efc82f428910e3b64267f9799454b4dc1af90abb64a898ba77c83bf6b9",
+      "bytes": 15,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The only ml_kem identifier is a locally declared function. It is a namesake rather than an imported PQC reference.",
+      "questionIds": [
+        "x013"
+      ]
+    },
+    {
+      "index": 13,
+      "path": "tuning/rust/broken.rs",
+      "source": "tests/quality/expanded/inputs/tuning/rust/broken.rs",
+      "sha256": "3f4ff41f37ee764f6580819c84f85a9ec218b6c114d0067605768419b793828f",
+      "bytes": 13,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Rust use statement is incomplete after ml_kem::, but explicitly names that crate path.",
+      "questionIds": [
+        "x014"
+      ]
+    },
+    {
+      "index": 14,
+      "path": "tuning/ruby/pqc.rb",
+      "source": "tests/quality/expanded/inputs/tuning/ruby/pqc.rb",
+      "sha256": "9d404d716b7f18609459ab5ef029734f8550edcfd1476d017c2c7d97439e2919",
+      "bytes": 40,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "OpenSSL::PKey.generate_key receives the ML-DSA-87 literal. The Ruby protocol asks for the standard algorithm literal and does not assert generation success.",
+      "questionIds": [
+        "x015"
+      ]
+    },
+    {
+      "index": 15,
+      "path": "tuning/ruby/negative.rb",
+      "source": "tests/quality/expanded/inputs/tuning/ruby/negative.rb",
+      "sha256": "3e395117fde1e5b4ed961a1e59ae586579fc7f50a19c4a1475dc5712daf467e7",
+      "bytes": 25,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "puts receives the SLH-DSA-SHA2-128s literal. The original Ruby property explicitly includes a literal algorithm reference and does not require an API invocation.",
+      "questionIds": [
+        "x016"
+      ]
+    },
+    {
+      "index": 16,
+      "path": "tuning/ruby/broken.rb",
+      "source": "tests/quality/expanded/inputs/tuning/ruby/broken.rb",
+      "sha256": "f4f5e6ad40acc93810cf9601d7d2152c82be47c74888f3c0772d456af96d1e66",
+      "bytes": 29,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Ruby generator call is cut off at an opening quote, so no algorithm argument is identifiable.",
+      "questionIds": [
+        "x017"
+      ]
+    },
+    {
+      "index": 17,
+      "path": "tuning/typescript/web.ts",
+      "source": "tests/quality/expanded/inputs/tuning/typescript/web.ts",
+      "sha256": "e6834a09ff6195f049b874889876a3720cb7febbbd4b3dabb17f1bfa2fd7f564",
+      "bytes": 76,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The WebCrypto generateKey name object explicitly selects ML-KEM-768.",
+      "questionIds": [
+        "x018"
+      ]
+    },
+    {
+      "index": 18,
+      "path": "tuning/typescript/negative.ts",
+      "source": "tests/quality/expanded/inputs/tuning/typescript/negative.ts",
+      "sha256": "477d9afbdd5dd5b5a86a8f4ff11ebc5b3ec5d23a10371de5ad671589000b63b1",
+      "bytes": 65,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The WebCrypto generateKey name object explicitly selects AES-GCM, a symmetric alternative.",
+      "questionIds": [
+        "x019"
+      ]
+    },
+    {
+      "index": 19,
+      "path": "tuning/typescript/broken.ts",
+      "source": "tests/quality/expanded/inputs/tuning/typescript/broken.ts",
+      "sha256": "82e7b272a7da7d2dbeb3c3c5055b5ec5726332e91d68d471bc5e9399521f2cc5",
+      "bytes": 33,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The WebCrypto name field is cut off before its value; the algorithm cannot be established.",
+      "questionIds": [
+        "x020"
+      ]
+    },
+    {
+      "index": 20,
+      "path": "tuning/js/direct.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/direct.js",
+      "sha256": "d15fdd3c0cc10908363e274a76865a3fc31ef8bfb7a85512492ea8f433fa8282",
+      "bytes": 35,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Node-style factory has an explicit ml-kem-512 string argument. It is a nominal source reference without imported-runtime or success assurance.",
+      "questionIds": [
+        "x021"
+      ]
+    },
+    {
+      "index": 21,
+      "path": "tuning/js/comment.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/comment.js",
+      "sha256": "8b91fffd163dd8b913e96893e04d94e8f8108f4ef94c2fbbf50056cb9e61eafe",
+      "bytes": 38,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The entire apparent Node PQC invocation is in a // comment, not an invocation in source code.",
+      "questionIds": [
+        "x022"
+      ]
+    },
+    {
+      "index": 22,
+      "path": "tuning/js/string.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/string.js",
+      "sha256": "1113326eb9e741da5db2fc45fa5adb77c97e8cdf0dba3e5ebc63ba974aa806f2",
+      "bytes": 50,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The apparent Node invocation is inside the help string assigned to a variable.",
+      "questionIds": [
+        "x023"
+      ]
+    },
+    {
+      "index": 23,
+      "path": "tuning/js/namesake.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/namesake.js",
+      "sha256": "d8c88b75d5721bea78cdd0de85fb02320590f2adfd729122da49b94f77af9b40",
+      "bytes": 81,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The callee is declared locally as an identity function before its call. Its crypto-like name does not establish Node crypto provenance.",
+      "questionIds": [
+        "x024"
+      ]
+    },
+    {
+      "index": 24,
+      "path": "tuning/js/alias.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/alias.js",
+      "sha256": "a4daad0b1b87770fba80582bd22bf43cfae0d3ab787281baca203981df730f68",
+      "bytes": 76,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The import explicitly aliases generateKeyPairSync from node:crypto to make, which is called with ml-dsa-65.",
+      "questionIds": [
+        "x025"
+      ]
+    },
+    {
+      "index": 25,
+      "path": "tuning/js/shadow.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/shadow.js",
+      "sha256": "af99601a844995a4619f97964e8577d2ac7c03ba62c24c632b41757097b3ffce",
+      "bytes": 132,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The imported factory name is shadowed by the render function parameter at the apparent call.",
+      "questionIds": [
+        "x026"
+      ]
+    },
+    {
+      "index": 26,
+      "path": "tuning/js/dynamic.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/dynamic.js",
+      "sha256": "087ac2b4ec8ee983adc09d1efed9d541144946e6f2d3de5627fd58ed4532db2e",
+      "bytes": 40,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "request.algorithm is unconstrained by local literal assignments. It cannot establish a particular PQC algorithm.",
+      "questionIds": [
+        "x027"
+      ]
+    },
+    {
+      "index": 27,
+      "path": "tuning/js/dead.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/dead.js",
+      "sha256": "7b47f1716406f34e48a411022813b8dbaa319c809f5e28cb374cf033a4a8a369",
+      "bytes": 46,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The literal ml-kem-768 call is under if(false). The original property is a static nominal reference, so dead code does not erase it.",
+      "questionIds": [
+        "x028"
+      ]
+    },
+    {
+      "index": 28,
+      "path": "tuning/js/mixed.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/mixed.js",
+      "sha256": "3e8af98e367f6ac3fd4ded78bc0decea2538526563a1685674c4dca2eff8dfe5",
+      "bytes": 63,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "Two distinct invocations occur on the same line, first rsa and then ml-kem-768. Their individual source spans must remain separate.",
+      "questionIds": [
+        "x029",
+        "x030",
+        "v2-audit1"
+      ]
+    },
+    {
+      "index": 29,
+      "path": "tuning/js/same-line.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/same-line.js",
+      "sha256": "9042bdc33946f29a4c0b4a3defac8c73c519f06b59921dc035ae8e06141687a6",
+      "bytes": 71,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "Two distinct invocations on one line select ml-kem-512 and ml-kem-1024. They are two nominated spans, not one merged observation.",
+      "questionIds": [
+        "x031",
+        "x032"
+      ]
+    },
+    {
+      "index": 30,
+      "path": "tuning/js/typed.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/typed.js",
+      "sha256": "aea8bd70dc8741ae725e0664a80a877e88fd589777eb3d8d1ffe0b5ad38b9f77",
+      "bytes": 43,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Node factory receives an object with a name property, not the string type argument required by this nominal Node key-type property.",
+      "questionIds": [
+        "x033"
+      ]
+    },
+    {
+      "index": 31,
+      "path": "tuning/js/unknown.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/unknown.js",
+      "sha256": "e6f227bbf34be7088a2d374b42bbc637bbaeda31d297e8618057ab8fe5d0b5a0",
+      "bytes": 47,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The factory string is future-quantum-safe-v9. It is not an identified standard PQC algorithm.",
+      "questionIds": [
+        "x034"
+      ]
+    },
+    {
+      "index": 32,
+      "path": "tuning/js/eddsa.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/eddsa.js",
+      "sha256": "d9eae332aab58b8576e5e31f76ce95ec9ed7e535d19f55d6107ccfb755210110",
+      "bytes": 32,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The factory string is ed25519. This is an explicit classical/EdDSA alternative for the standard PQC question.",
+      "questionIds": [
+        "x035"
+      ]
+    },
+    {
+      "index": 33,
+      "path": "tuning/js/draft.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/draft.js",
+      "sha256": "168fe54558ecb8988cb1a10c9c7b29f77abda3cafe85ae2dab9c0dd32482372d",
+      "bytes": 33,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The key-type string is kyber768, a named pre-standard algorithm rather than the final ML-KEM API name.",
+      "questionIds": [
+        "x036"
+      ]
+    },
+    {
+      "index": 34,
+      "path": "tuning/js/hybrid.js",
+      "source": "tests/quality/expanded/inputs/tuning/js/hybrid.js",
+      "sha256": "a9b824ae74e1f22e639692f56abbd4f89b6f59d17f1ec70cb72d555628540b5d",
+      "bytes": 32,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "X25519MLKEM768 is assigned to a group string, with no nominated Node key-generation invocation.",
+      "questionIds": [
+        "x037"
+      ]
+    },
+    {
+      "index": 35,
+      "path": "tuning/unsupported/example.swift",
+      "source": "tests/quality/expanded/inputs/tuning/unsupported/example.swift",
+      "sha256": "17b8f8db4279083153d98500a73973b15e4648acfb141d76d9a224bb8ffc796c",
+      "bytes": 42,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The source is Swift, outside the listed supported source grammars for this Node property despite a familiar function name.",
+      "questionIds": [
+        "x038"
+      ]
+    },
+    {
+      "index": 36,
+      "path": "tuning/jwt/sign.js",
+      "source": "tests/quality/expanded/inputs/tuning/jwt/sign.js",
+      "sha256": "8a57a5c0b9b34066855a5e93878757dbdbbbb65edbe5de4b80159c5ccd064b23",
+      "bytes": 42,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The sign options explicitly select the JOSE algorithm RS256. JWT and RSA-reference questions concern that nominal choice, without requiring execution.",
+      "questionIds": [
+        "x039",
+        "v2-a0"
+      ]
+    },
+    {
+      "index": 37,
+      "path": "tuning/jwt/negative.js",
+      "source": "tests/quality/expanded/inputs/tuning/jwt/negative.js",
+      "sha256": "741a2f3da27eb3aed111887ba649ebf08b1fbf28bf9ae91953414adee03d1ac1",
+      "bytes": 42,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The sign options select HS256, which does not establish RS256 or RSA.",
+      "questionIds": [
+        "x040"
+      ]
+    },
+    {
+      "index": 38,
+      "path": "tuning/jwt/broken.js",
+      "source": "tests/quality/expanded/inputs/tuning/jwt/broken.js",
+      "sha256": "50d6b093d33121e242d0abde67e6836eb4d823fa70e29b7938b440197fa3be92",
+      "bytes": 31,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The JWT algorithm option is truncated before its value.",
+      "questionIds": [
+        "x041"
+      ]
+    },
+    {
+      "index": 39,
+      "path": "tuning/tls/positive.conf",
+      "source": "tests/quality/expanded/inputs/tuning/tls/positive.conf",
+      "sha256": "649cc731266d26f68ce2856453c6b566c46d01d2db24ca2d8d7eeaf02ccab464",
+      "bytes": 66,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The source data explicitly supplies jdk.tls.namedGroups with secp256r1,secp384r1 only. The .conf fragment does not prove loading or effective deployment.",
+      "questionIds": [
+        "x042"
+      ]
+    },
+    {
+      "index": 40,
+      "path": "tuning/tls/negative.conf",
+      "source": "tests/quality/expanded/inputs/tuning/tls/negative.conf",
+      "sha256": "921654ac0c77acbe6c05ca1cd3e9f455e269a1b45263331371bf1618728bb951",
+      "bytes": 71,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The explicit group list includes X25519MLKEM768 as well as secp256r1, so it is not classical-only.",
+      "questionIds": [
+        "x043"
+      ]
+    },
+    {
+      "index": 41,
+      "path": "tuning/tls/disabled.conf",
+      "source": "tests/quality/expanded/inputs/tuning/tls/disabled.conf",
+      "sha256": "084a8174b89f1d2f4bffaed5c648034b04f86c62748690574219daf4c7cc880c",
+      "bytes": 58,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The apparent namedGroups assignment is on a hash-commented line, so it is disabled configuration source.",
+      "questionIds": [
+        "x044"
+      ]
+    },
+    {
+      "index": 42,
+      "path": "tuning/tls/broken.conf",
+      "source": "tests/quality/expanded/inputs/tuning/tls/broken.conf",
+      "sha256": "40bfa4cf35a18eb599e23a60a04c3d5fd26bf2e00fc9dc638bf13dfc36d4dd67",
+      "bytes": 44,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The namedGroups argument is cut off at its opening quote. No complete group list is represented.",
+      "questionIds": [
+        "x045"
+      ]
+    },
+    {
+      "index": 43,
+      "path": "tuning/ssh/dsa.conf",
+      "source": "tests/quality/expanded/inputs/tuning/ssh/dsa.conf",
+      "sha256": "8c8aed13d0c47251edd3cc42863b6df88a270237a14208db531159a3175a461c",
+      "bytes": 26,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "HostKeyAlgorithms explicitly names ssh-dss in a configuration fragment.",
+      "questionIds": [
+        "x046"
+      ]
+    },
+    {
+      "index": 44,
+      "path": "tuning/ssh/negative.conf",
+      "source": "tests/quality/expanded/inputs/tuning/ssh/negative.conf",
+      "sha256": "4cf2b3e9c4e1c76fe8c89232dd0a2cb13c695c2d3468340570c376761650921f",
+      "bytes": 30,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "HostKeyAlgorithms names ssh-ed25519, a different configured algorithm from ssh-dss.",
+      "questionIds": [
+        "x047"
+      ]
+    },
+    {
+      "index": 45,
+      "path": "tuning/ssh/dh.conf",
+      "source": "tests/quality/expanded/inputs/tuning/ssh/dh.conf",
+      "sha256": "faf72ebeaf7c9f55f08e644cd32da9eddcaa762a4cfc4cc34c665448993ab9a7",
+      "bytes": 42,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "KexAlgorithms explicitly names diffie-hellman-group14-sha1.",
+      "questionIds": [
+        "x048"
+      ]
+    },
+    {
+      "index": 46,
+      "path": "tuning/ssh/hybrid.conf",
+      "source": "tests/quality/expanded/inputs/tuning/ssh/hybrid.conf",
+      "sha256": "e97277fb9a61ff68b31dc619cb302c91ab830360de39a26b34ee96750ee70428",
+      "bytes": 36,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "KexAlgorithms names mlkem768x25519-sha256, a hybrid alternative to the nominated group14 SHA1 KEX.",
+      "questionIds": [
+        "x049"
+      ]
+    },
+    {
+      "index": 47,
+      "path": "tuning/ssh/broken.conf",
+      "source": "tests/quality/expanded/inputs/tuning/ssh/broken.conf",
+      "sha256": "56243d777deedbcde3d3d6fcfd86452125f6b72e3bab8fdef9a82232586bc78b",
+      "bytes": 14,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "KexAlgorithms has no operand. No configured exchange can be established.",
+      "questionIds": [
+        "x050"
+      ]
+    },
+    {
+      "index": 48,
+      "path": "tuning/manifests/Cargo.toml/declared/Cargo.toml",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Cargo.toml/declared/Cargo.toml",
+      "sha256": "087549379a2236bee32e9957029727b4d9ccb0687dd1bc169cbc7ad854d5c306",
+      "bytes": 35,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Cargo.toml fragment explicitly records openssl and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x051"
+      ]
+    },
+    {
+      "index": 49,
+      "path": "tuning/manifests/Cargo.toml/unrelated/Cargo.toml",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Cargo.toml/unrelated/Cargo.toml",
+      "sha256": "93632f70e888da6a9d94cba6dca54f01fbd13ad74421b1664a4f53dc82f300be",
+      "bytes": 44,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete Cargo.toml fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x052"
+      ]
+    },
+    {
+      "index": 50,
+      "path": "tuning/manifests/Cargo.toml/malformed/Cargo.toml",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Cargo.toml/malformed/Cargo.toml",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Cargo.toml input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x053"
+      ]
+    },
+    {
+      "index": 51,
+      "path": "tuning/manifests/Cargo.lock/declared/Cargo.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Cargo.lock/declared/Cargo.lock",
+      "sha256": "988b3b4b47e93fe6627852096640f461d2c859f4752ee2255a19b881f37ae23c",
+      "bytes": 61,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Cargo.lock fragment explicitly records openssl and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x054"
+      ]
+    },
+    {
+      "index": 52,
+      "path": "tuning/manifests/Cargo.lock/unrelated/Cargo.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Cargo.lock/unrelated/Cargo.lock",
+      "sha256": "c604935ebf2f1ab72ca8b4a93d35dfbdb9c3ae3aff163ffa9080b4f9e5caf11a",
+      "bytes": 70,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete Cargo.lock fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x055"
+      ]
+    },
+    {
+      "index": 53,
+      "path": "tuning/manifests/Cargo.lock/malformed/Cargo.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Cargo.lock/malformed/Cargo.lock",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Cargo.lock input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x056"
+      ]
+    },
+    {
+      "index": 54,
+      "path": "tuning/manifests/package.json/declared/package.json",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/package.json/declared/package.json",
+      "sha256": "9ee7c1bc9a8a02b831d0bc6aa89dc42c9bfefad970b8e01911adec314e1ff2ab",
+      "bytes": 34,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The package.json structure explicitly records jose at 6.0.0. That establishes only a JOSE dependency; the frozen protocol does not establish this version as standard-PQC-capable. The original ambiguity remains.",
+      "questionIds": [
+        "x057"
+      ]
+    },
+    {
+      "index": 55,
+      "path": "tuning/manifests/package.json/unrelated/package.json",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/package.json/unrelated/package.json",
+      "sha256": "b843171ea6028f41c03edbd9a5996fdd7b6437bcaa64a6c9075475d48a1802ac",
+      "bytes": 46,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete package.json fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x058"
+      ]
+    },
+    {
+      "index": 56,
+      "path": "tuning/manifests/package.json/malformed/package.json",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/package.json/malformed/package.json",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The package.json input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x059"
+      ]
+    },
+    {
+      "index": 57,
+      "path": "tuning/manifests/package-lock.json/declared/package-lock.json",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/package-lock.json/declared/package-lock.json",
+      "sha256": "ee12fef91834bc59d270eea7d190087ce9354262d89af4b07b927efd037ad9b8",
+      "bytes": 75,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The package-lock.json structure explicitly records jose at 6.0.0. That establishes only a JOSE dependency; the frozen protocol does not establish this version as standard-PQC-capable. The original ambiguity remains.",
+      "questionIds": [
+        "x060"
+      ]
+    },
+    {
+      "index": 58,
+      "path": "tuning/manifests/package-lock.json/unrelated/package-lock.json",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/package-lock.json/unrelated/package-lock.json",
+      "sha256": "394289300480b8e236529518153b5fdbf3121c67d5a35680a8043ae878ba58de",
+      "bytes": 87,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete package-lock.json fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x061"
+      ]
+    },
+    {
+      "index": 59,
+      "path": "tuning/manifests/package-lock.json/malformed/package-lock.json",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/package-lock.json/malformed/package-lock.json",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The package-lock.json input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x062"
+      ]
+    },
+    {
+      "index": 60,
+      "path": "tuning/manifests/pnpm-lock.yaml/declared/pnpm-lock.yaml",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/pnpm-lock.yaml/declared/pnpm-lock.yaml",
+      "sha256": "7470ccb4ef9a4bec483d3d760eb5a62b2dd37132596aa53cf370f2fb382caa4a",
+      "bytes": 50,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The pnpm-lock.yaml structure explicitly records jose at 6.0.0. That establishes only a JOSE dependency; the frozen protocol does not establish this version as standard-PQC-capable. The original ambiguity remains.",
+      "questionIds": [
+        "x063"
+      ]
+    },
+    {
+      "index": 61,
+      "path": "tuning/manifests/pnpm-lock.yaml/unrelated/pnpm-lock.yaml",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/pnpm-lock.yaml/unrelated/pnpm-lock.yaml",
+      "sha256": "689d76948bbbeeb12a1ecdbb98ea8623554f27ba0f9498ceb708dfc9ecbbcc7c",
+      "bytes": 62,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete pnpm-lock.yaml fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x064"
+      ]
+    },
+    {
+      "index": 62,
+      "path": "tuning/manifests/pnpm-lock.yaml/malformed/pnpm-lock.yaml",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/pnpm-lock.yaml/malformed/pnpm-lock.yaml",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The pnpm-lock.yaml input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x065"
+      ]
+    },
+    {
+      "index": 63,
+      "path": "tuning/manifests/go.mod/declared/go.mod",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/go.mod/declared/go.mod",
+      "sha256": "f58c53ed55e563dc38846c0363fc98466e1e922dd100ae4e344142572c682f31",
+      "bytes": 79,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The go.mod fragment explicitly records github.com/cloudflare/circl and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x066"
+      ]
+    },
+    {
+      "index": 64,
+      "path": "tuning/manifests/go.mod/unrelated/go.mod",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/go.mod/unrelated/go.mod",
+      "sha256": "cd621295beea6fc8fa6e57589984d49763475013f7c79cd5a9c63f4346d14c3e",
+      "bytes": 68,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete go.mod fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x067"
+      ]
+    },
+    {
+      "index": 65,
+      "path": "tuning/manifests/go.mod/malformed/go.mod",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/go.mod/malformed/go.mod",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The go.mod input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x068"
+      ]
+    },
+    {
+      "index": 66,
+      "path": "tuning/manifests/pom.xml/declared/pom.xml",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/pom.xml/declared/pom.xml",
+      "sha256": "4e7e97f523c0c1a5c6a92d4fb22db6651d0dfbb3fb184db73398abe228b764a9",
+      "bytes": 171,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The pom.xml fragment explicitly records org.bouncycastle:bcprov-jdk18on and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x069"
+      ]
+    },
+    {
+      "index": 67,
+      "path": "tuning/manifests/pom.xml/unrelated/pom.xml",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/pom.xml/unrelated/pom.xml",
+      "sha256": "09127506d46c8de9c2da353d0b24dbbfd4995b8f5784020d86cfe425ce0e3bfe",
+      "bytes": 156,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete pom.xml fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x070"
+      ]
+    },
+    {
+      "index": 68,
+      "path": "tuning/manifests/pom.xml/malformed/pom.xml",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/pom.xml/malformed/pom.xml",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The pom.xml input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x071"
+      ]
+    },
+    {
+      "index": 69,
+      "path": "tuning/manifests/build.gradle/declared/build.gradle",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/build.gradle/declared/build.gradle",
+      "sha256": "7e77425f619d82d64a6bcebc7d5a79df8c40bc1b7a9ef0e97daa513deef4dab1",
+      "bytes": 71,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The build.gradle fragment explicitly records org.bouncycastle:bcprov-jdk18on and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x072"
+      ]
+    },
+    {
+      "index": 70,
+      "path": "tuning/manifests/build.gradle/unrelated/build.gradle",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/build.gradle/unrelated/build.gradle",
+      "sha256": "95a913da157c08ac4ef7eadb143dd2deba0a7192d288aa3147d1af20f1db3ef5",
+      "bytes": 56,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete build.gradle fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x073"
+      ]
+    },
+    {
+      "index": 71,
+      "path": "tuning/manifests/build.gradle/malformed/build.gradle",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/build.gradle/malformed/build.gradle",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The build.gradle input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x074"
+      ]
+    },
+    {
+      "index": 72,
+      "path": "tuning/manifests/build.gradle.kts/declared/build.gradle.kts",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/build.gradle.kts/declared/build.gradle.kts",
+      "sha256": "81fce435b94dae182836c9ad289d2198096d83566e6628cfa60e5689f45e91ff",
+      "bytes": 72,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The build.gradle.kts fragment explicitly records org.bouncycastle:bcprov-jdk18on and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x075"
+      ]
+    },
+    {
+      "index": 73,
+      "path": "tuning/manifests/build.gradle.kts/unrelated/build.gradle.kts",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/build.gradle.kts/unrelated/build.gradle.kts",
+      "sha256": "0ca74feabdfb4ee047a1201878efc4183ff8efa9e3c482aa5361326923608979",
+      "bytes": 57,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete build.gradle.kts fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x076"
+      ]
+    },
+    {
+      "index": 74,
+      "path": "tuning/manifests/build.gradle.kts/malformed/build.gradle.kts",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/build.gradle.kts/malformed/build.gradle.kts",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The build.gradle.kts input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x077"
+      ]
+    },
+    {
+      "index": 75,
+      "path": "tuning/manifests/gradle.lockfile/declared/gradle.lockfile",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/gradle.lockfile/declared/gradle.lockfile",
+      "sha256": "c19f9de0fb97100b28335a8df1dbea4263ab67dd80a8878815e950bcbc263d9c",
+      "bytes": 54,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The gradle.lockfile fragment explicitly records org.bouncycastle:bcprov-jdk18on and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x078"
+      ]
+    },
+    {
+      "index": 76,
+      "path": "tuning/manifests/gradle.lockfile/unrelated/gradle.lockfile",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/gradle.lockfile/unrelated/gradle.lockfile",
+      "sha256": "c3957652fc6bb4d87ee1aa0835544fd3d60d60e57c59ebfb24d561527502116e",
+      "bytes": 39,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete gradle.lockfile fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x079"
+      ]
+    },
+    {
+      "index": 77,
+      "path": "tuning/manifests/gradle.lockfile/malformed/gradle.lockfile",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/gradle.lockfile/malformed/gradle.lockfile",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The gradle.lockfile input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x080"
+      ]
+    },
+    {
+      "index": 78,
+      "path": "tuning/manifests/requirements.txt/declared/requirements.txt",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/requirements.txt/declared/requirements.txt",
+      "sha256": "c954d83fdeeeb9c0982a56c4aea3fc0fd3ab0f225e2c3e707c8fa4eff82ffa54",
+      "bytes": 21,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The requirements.txt fragment explicitly records cryptography and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x081"
+      ]
+    },
+    {
+      "index": 79,
+      "path": "tuning/manifests/requirements.txt/unrelated/requirements.txt",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/requirements.txt/unrelated/requirements.txt",
+      "sha256": "2c5e40fb72a1015fcc78fc6380b6deb0e50248859612aacf2fabc4cd3b1f9bd2",
+      "bytes": 25,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete requirements.txt fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x082"
+      ]
+    },
+    {
+      "index": 80,
+      "path": "tuning/manifests/requirements.txt/malformed/requirements.txt",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/requirements.txt/malformed/requirements.txt",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The requirements.txt input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x083"
+      ]
+    },
+    {
+      "index": 81,
+      "path": "tuning/manifests/Pipfile.lock/declared/Pipfile.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Pipfile.lock/declared/Pipfile.lock",
+      "sha256": "cf4ea4198d065d3da64bda31e0c38070a89c6ed603631c2bffca2de1ea196bab",
+      "bytes": 52,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Pipfile.lock fragment explicitly records cryptography and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x084"
+      ]
+    },
+    {
+      "index": 82,
+      "path": "tuning/manifests/Pipfile.lock/unrelated/Pipfile.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Pipfile.lock/unrelated/Pipfile.lock",
+      "sha256": "2491a9ede38ab74c338ad5a87355cf02a642ed6a5495108e01d0125e9d905cbe",
+      "bytes": 56,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete Pipfile.lock fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x085"
+      ]
+    },
+    {
+      "index": 83,
+      "path": "tuning/manifests/Pipfile.lock/malformed/Pipfile.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Pipfile.lock/malformed/Pipfile.lock",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Pipfile.lock input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x086"
+      ]
+    },
+    {
+      "index": 84,
+      "path": "tuning/manifests/poetry.lock/declared/poetry.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/poetry.lock/declared/poetry.lock",
+      "sha256": "ad98bfc50b13032b5b735b5051083270ff2ee52e817bffbb516688fcfc197d1c",
+      "bytes": 53,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The poetry.lock fragment explicitly records cryptography and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x087"
+      ]
+    },
+    {
+      "index": 85,
+      "path": "tuning/manifests/poetry.lock/unrelated/poetry.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/poetry.lock/unrelated/poetry.lock",
+      "sha256": "1e0cba4409207d0335034a7afcb31b1b02ca35ab4f16bbc579811b88dc104597",
+      "bytes": 57,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete poetry.lock fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x088"
+      ]
+    },
+    {
+      "index": 86,
+      "path": "tuning/manifests/poetry.lock/malformed/poetry.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/poetry.lock/malformed/poetry.lock",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The poetry.lock input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x089"
+      ]
+    },
+    {
+      "index": 87,
+      "path": "tuning/manifests/Gemfile/declared/Gemfile",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Gemfile/declared/Gemfile",
+      "sha256": "b8dbda484e8cf3e5a2174c9c8e36df180a3ac46e8e3ba83f0a370576dedc0dc1",
+      "bytes": 23,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Gemfile fragment explicitly records openssl and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x090"
+      ]
+    },
+    {
+      "index": 88,
+      "path": "tuning/manifests/Gemfile/unrelated/Gemfile",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Gemfile/unrelated/Gemfile",
+      "sha256": "ca1569872712f0d07a2f6f906e078d09f49c5cbe9c556d05d70e05b5a5b0add8",
+      "bytes": 32,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete Gemfile fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x091"
+      ]
+    },
+    {
+      "index": 89,
+      "path": "tuning/manifests/Gemfile/malformed/Gemfile",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Gemfile/malformed/Gemfile",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Gemfile input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x092"
+      ]
+    },
+    {
+      "index": 90,
+      "path": "tuning/manifests/gems.rb/declared/gems.rb",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/gems.rb/declared/gems.rb",
+      "sha256": "b8dbda484e8cf3e5a2174c9c8e36df180a3ac46e8e3ba83f0a370576dedc0dc1",
+      "bytes": 23,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The gems.rb fragment explicitly records openssl and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x093"
+      ]
+    },
+    {
+      "index": 91,
+      "path": "tuning/manifests/gems.rb/unrelated/gems.rb",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/gems.rb/unrelated/gems.rb",
+      "sha256": "ca1569872712f0d07a2f6f906e078d09f49c5cbe9c556d05d70e05b5a5b0add8",
+      "bytes": 32,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete gems.rb fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x094"
+      ]
+    },
+    {
+      "index": 92,
+      "path": "tuning/manifests/gems.rb/malformed/gems.rb",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/gems.rb/malformed/gems.rb",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The gems.rb input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x095"
+      ]
+    },
+    {
+      "index": 93,
+      "path": "tuning/manifests/Gemfile.lock/declared/Gemfile.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Gemfile.lock/declared/Gemfile.lock",
+      "sha256": "3db591bd569fb6609447ee0a088c7dc917b5da5476ad5a30145114fad9e46bdf",
+      "bytes": 33,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Gemfile.lock fragment explicitly records openssl and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x096"
+      ]
+    },
+    {
+      "index": 94,
+      "path": "tuning/manifests/Gemfile.lock/unrelated/Gemfile.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Gemfile.lock/unrelated/Gemfile.lock",
+      "sha256": "86a7ee457f2ac2d341fb5d8469ecc639dcb570b23c5d2275723caf84ecc536e5",
+      "bytes": 42,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete Gemfile.lock fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x097"
+      ]
+    },
+    {
+      "index": 95,
+      "path": "tuning/manifests/Gemfile.lock/malformed/Gemfile.lock",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/Gemfile.lock/malformed/Gemfile.lock",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The Gemfile.lock input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x098"
+      ]
+    },
+    {
+      "index": 96,
+      "path": "tuning/manifests/gems.locked/declared/gems.locked",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/gems.locked/declared/gems.locked",
+      "sha256": "3db591bd569fb6609447ee0a088c7dc917b5da5476ad5a30145114fad9e46bdf",
+      "bytes": 33,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The gems.locked fragment explicitly records openssl and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x099"
+      ]
+    },
+    {
+      "index": 97,
+      "path": "tuning/manifests/gems.locked/unrelated/gems.locked",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/gems.locked/unrelated/gems.locked",
+      "sha256": "86a7ee457f2ac2d341fb5d8469ecc639dcb570b23c5d2275723caf84ecc536e5",
+      "bytes": 42,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete gems.locked fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x100"
+      ]
+    },
+    {
+      "index": 98,
+      "path": "tuning/manifests/gems.locked/malformed/gems.locked",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/gems.locked/malformed/gems.locked",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The gems.locked input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x101"
+      ]
+    },
+    {
+      "index": 99,
+      "path": "tuning/manifests/fixture.gemspec/declared/fixture.gemspec",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/fixture.gemspec/declared/fixture.gemspec",
+      "sha256": "a292ffb34b72c8eea6c32f77b13cc6e67ff59846057fbd0fb129db5cc6f23c92",
+      "bytes": 72,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The fixture.gemspec fragment explicitly records openssl and its literal version/constraint in the declaration or package record. The fact is bounded library presence; declarations and lock records keep their own provenance and do not prove enabled algorithms.",
+      "questionIds": [
+        "x102"
+      ]
+    },
+    {
+      "index": 100,
+      "path": "tuning/manifests/fixture.gemspec/unrelated/fixture.gemspec",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/fixture.gemspec/unrelated/fixture.gemspec",
+      "sha256": "3e08653b96137bea5c686a9f52f0b039e8913ecf6aa0ba53f308a93953138e6d",
+      "bytes": 81,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete fixture.gemspec fragment records only an ordinary-package coordinate/version in the nominated declaration. It does not name the corpus-recognized crypto library; installation or safety is not inferred.",
+      "questionIds": [
+        "x103"
+      ]
+    },
+    {
+      "index": 101,
+      "path": "tuning/manifests/fixture.gemspec/malformed/fixture.gemspec",
+      "source": "tests/quality/expanded/inputs/tuning/manifests/fixture.gemspec/malformed/fixture.gemspec",
+      "sha256": "c4ca7d335ec47f388a0f98aa26c9b67dd83d9b6fe72b396183657290a7c145f3",
+      "bytes": 6,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "dependency_manifest",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The fixture.gemspec input is an incomplete malformed fragment consisting of an unmatched object/assignment/quote. No dependency declaration can be established; this is not absence evidence.",
+      "questionIds": [
+        "x104"
+      ]
+    },
+    {
+      "index": 102,
+      "path": "tuning/sbom/CycloneDX-1.5/declared/bom.json",
+      "source": "tests/quality/expanded/inputs/tuning/sbom/CycloneDX-1.5/declared/bom.json",
+      "sha256": "409a88156b48c270b60076fe50f49b1f6e19d6c4e0fbb43dfc21e137a439d808",
+      "bytes": 176,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The CycloneDX 1.5 JSON has a complete component/package record for openssl with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "x105"
+      ]
+    },
+    {
+      "index": 103,
+      "path": "tuning/sbom/CycloneDX-1.5/unrelated/bom.json",
+      "source": "tests/quality/expanded/inputs/tuning/sbom/CycloneDX-1.5/unrelated/bom.json",
+      "sha256": "cf395fe2de8968dc7ef4db2a06d312fd50aaa09efd0996f5ea31a4ecaef1855c",
+      "bytes": 194,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The CycloneDX 1.5 JSON has a complete component/package record for ordinary-package with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "x106"
+      ]
+    },
+    {
+      "index": 104,
+      "path": "tuning/sbom/CycloneDX-1.5/malformed/bom.json",
+      "source": "tests/quality/expanded/inputs/tuning/sbom/CycloneDX-1.5/malformed/bom.json",
+      "sha256": "be302461cda285db3ed2d45fb767b23e08ca8808b35a638009937df22b332d73",
+      "bytes": 7,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The SBOM JSON is cut off or malformed before a complete component/package value. The supported filename/version does not establish dependency absence.",
+      "questionIds": [
+        "x107"
+      ]
+    },
+    {
+      "index": 105,
+      "path": "tuning/sbom/CycloneDX-1.5/cbom-crypto-only/bom.json",
+      "source": "tests/quality/expanded/inputs/tuning/sbom/CycloneDX-1.5/cbom-crypto-only/bom.json",
+      "sha256": "df5faa016cfc3892acbe7cbc1b052c4110746763c469a06a6291a5c4d7fcd2bb",
+      "bytes": 182,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The CycloneDX 1.7 component is a cryptographic-asset with algorithm cryptoProperties, rather than a library/package dependency. This original unsupported dependency-ingestion case is retained; its ML-KEM name does not establish library presence.",
+      "questionIds": [
+        "x108"
+      ]
+    },
+    {
+      "index": 106,
+      "path": "tuning/sbom/SPDX-2.3/declared/bom.json",
+      "source": "tests/quality/expanded/inputs/tuning/sbom/SPDX-2.3/declared/bom.json",
+      "sha256": "772535f8b5964e5ac58a8bce650b2f41a9e24c881087690278f385bd0b05a092",
+      "bytes": 87,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The SPDX-2.3 SPDX-2.3 JSON has a complete component/package record for openssl with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "x109"
+      ]
+    },
+    {
+      "index": 107,
+      "path": "tuning/sbom/SPDX-2.3/unrelated/bom.json",
+      "source": "tests/quality/expanded/inputs/tuning/sbom/SPDX-2.3/unrelated/bom.json",
+      "sha256": "d85cd751331fc82c6201630cd038fa034f542f7e1bb36e430ce907830e1dadbe",
+      "bytes": 96,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The SPDX-2.3 SPDX-2.3 JSON has a complete component/package record for ordinary-package with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "x110"
+      ]
+    },
+    {
+      "index": 108,
+      "path": "tuning/sbom/SPDX-2.3/malformed/bom.json",
+      "source": "tests/quality/expanded/inputs/tuning/sbom/SPDX-2.3/malformed/bom.json",
+      "sha256": "be302461cda285db3ed2d45fb767b23e08ca8808b35a638009937df22b332d73",
+      "bytes": 7,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The SBOM JSON is cut off or malformed before a complete component/package value. The supported filename/version does not establish dependency absence.",
+      "questionIds": [
+        "x111"
+      ]
+    },
+    {
+      "index": 109,
+      "path": "tuning/markers/PRIVATE_KEY_RSA_HEADER/marker.txt",
+      "source": "tests/quality/expanded/inputs/tuning/markers/PRIVATE_KEY_RSA_HEADER/marker.txt",
+      "sha256": "545e3c62a38699ed4ac04b7320c936425a43beae5f208a00135aa6feb5e3c06b",
+      "bytes": 52,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "key_marker",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The first line is the complete BEGIN marker nominated by PRIVATE_KEY_RSA_HEADER. The subsequent deliberately invalid synthetic body is omitted and not interpreted as a private key. The supported property is marker presence alone.",
+      "questionIds": [
+        "x113"
+      ]
+    },
+    {
+      "index": 110,
+      "path": "tuning/markers/PRIVATE_KEY_RSA_HEADER/negative.txt",
+      "source": "tests/quality/expanded/inputs/tuning/markers/PRIVATE_KEY_RSA_HEADER/negative.txt",
+      "sha256": "e5ca8f40a4ac084a9be3a5540ebb3cb1e9d2794893fe9dd77093808952a56f78",
+      "bytes": 16,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "key_marker",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The input is ordinary public-document text and has no complete PRIVATE_KEY_RSA_HEADER BEGIN marker. This negative marker property does not establish absence of secrets elsewhere.",
+      "questionIds": [
+        "x114"
+      ]
+    },
+    {
+      "index": 111,
+      "path": "tuning/markers/PRIVATE_KEY_RSA_HEADER/broken.txt",
+      "source": "tests/quality/expanded/inputs/tuning/markers/PRIVATE_KEY_RSA_HEADER/broken.txt",
+      "sha256": "65743077adb2e7a22931e15e93de1048a10d222a1af62ea9c07f44b45f76b757",
+      "bytes": 25,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "key_marker",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The BEGIN-like text lacks the complete five-hyphen marker shape nominated by PRIVATE_KEY_RSA_HEADER. It cannot satisfy the complete-marker property and does not establish a valid or absent key.",
+      "questionIds": [
+        "x115"
+      ]
+    },
+    {
+      "index": 112,
+      "path": "tuning/markers/PRIVATE_KEY_PKCS8_HEADER/marker.txt",
+      "source": "tests/quality/expanded/inputs/tuning/markers/PRIVATE_KEY_PKCS8_HEADER/marker.txt",
+      "sha256": "e9e2d1407552e9a342abd967edcf23ccd4b29dbc8d81d3540828e6b72ca3fce2",
+      "bytes": 48,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "key_marker",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The first line is the complete BEGIN marker nominated by PRIVATE_KEY_PKCS8_HEADER. The subsequent deliberately invalid synthetic body is omitted and not interpreted as a private key. The supported property is marker presence alone.",
+      "questionIds": [
+        "x116"
+      ]
+    },
+    {
+      "index": 113,
+      "path": "tuning/markers/PRIVATE_KEY_PKCS8_HEADER/negative.txt",
+      "source": "tests/quality/expanded/inputs/tuning/markers/PRIVATE_KEY_PKCS8_HEADER/negative.txt",
+      "sha256": "e5ca8f40a4ac084a9be3a5540ebb3cb1e9d2794893fe9dd77093808952a56f78",
+      "bytes": 16,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "key_marker",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The input is ordinary public-document text and has no complete PRIVATE_KEY_PKCS8_HEADER BEGIN marker. This negative marker property does not establish absence of secrets elsewhere.",
+      "questionIds": [
+        "x117"
+      ]
+    },
+    {
+      "index": 114,
+      "path": "tuning/markers/PRIVATE_KEY_PKCS8_HEADER/broken.txt",
+      "source": "tests/quality/expanded/inputs/tuning/markers/PRIVATE_KEY_PKCS8_HEADER/broken.txt",
+      "sha256": "7312b138927b64e03d56db5c6184e8a9db4f4fd54d7758f3f3debefbdf0b234a",
+      "bytes": 21,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "key_marker",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The BEGIN-like text lacks the complete five-hyphen marker shape nominated by PRIVATE_KEY_PKCS8_HEADER. It cannot satisfy the complete-marker property and does not establish a valid or absent key.",
+      "questionIds": [
+        "x118"
+      ]
+    },
+    {
+      "index": 115,
+      "path": "tuning/markers/PRIVATE_KEY_OPENSSH_HEADER/marker.txt",
+      "source": "tests/quality/expanded/inputs/tuning/markers/PRIVATE_KEY_OPENSSH_HEADER/marker.txt",
+      "sha256": "7308b7b5d7f1c280cfde8c6bb1d473a19f71cf90f4aa4ac3a6b8561d93c8dcc2",
+      "bytes": 56,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "key_marker",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The first line is the complete BEGIN marker nominated by PRIVATE_KEY_OPENSSH_HEADER. The subsequent deliberately invalid synthetic body is omitted and not interpreted as a private key. The supported property is marker presence alone.",
+      "questionIds": [
+        "x119"
+      ]
+    },
+    {
+      "index": 116,
+      "path": "tuning/markers/PRIVATE_KEY_OPENSSH_HEADER/negative.txt",
+      "source": "tests/quality/expanded/inputs/tuning/markers/PRIVATE_KEY_OPENSSH_HEADER/negative.txt",
+      "sha256": "e5ca8f40a4ac084a9be3a5540ebb3cb1e9d2794893fe9dd77093808952a56f78",
+      "bytes": 16,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "key_marker",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The input is ordinary public-document text and has no complete PRIVATE_KEY_OPENSSH_HEADER BEGIN marker. This negative marker property does not establish absence of secrets elsewhere.",
+      "questionIds": [
+        "x120"
+      ]
+    },
+    {
+      "index": 117,
+      "path": "tuning/markers/PRIVATE_KEY_OPENSSH_HEADER/broken.txt",
+      "source": "tests/quality/expanded/inputs/tuning/markers/PRIVATE_KEY_OPENSSH_HEADER/broken.txt",
+      "sha256": "63a722a4bcce9d556171fcc48cf787f6b9f4d00d74bad7c81af14ba517c2fc25",
+      "bytes": 29,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "key_marker",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The BEGIN-like text lacks the complete five-hyphen marker shape nominated by PRIVATE_KEY_OPENSSH_HEADER. It cannot satisfy the complete-marker property and does not establish a valid or absent key.",
+      "questionIds": [
+        "x121"
+      ]
+    },
+    {
+      "index": 118,
+      "path": "tuning/certs/rsa3072.der",
+      "source": "tests/quality/expanded/inputs/tuning/certs/rsa3072.der",
+      "sha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46",
+      "bytes": 1040,
+      "split": "tuning",
+      "lineage": "task020-public-certificates",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual public certificate structure has signature OID 1.2.840.113549.1.1.11 and SPKI OID 1.2.840.113549.1.1.1, with RSA modulus bit length 3072. The public object hash matches the original fixture manifest; no filename-based algorithm inference or trust verification is made.",
+      "questionIds": [
+        "x122",
+        "v2-a3"
+      ],
+      "publicStructure": {
+        "kind": "x509-public-certificate",
+        "signatureOid": "1.2.840.113549.1.1.11",
+        "spkiAlgorithmOid": "1.2.840.113549.1.1.1",
+        "certificateDerSha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46",
+        "certificateBytes": 1040,
+        "rsaModulusBits": 3072
+      }
+    },
+    {
+      "index": 119,
+      "path": "tuning/certs/ed25519.der",
+      "source": "tests/quality/expanded/inputs/tuning/certs/ed25519.der",
+      "sha256": "0d7c2608816ee0deabf95a50a794448fff77928927bf3649583c7c4dd80f3c9e",
+      "bytes": 323,
+      "split": "tuning",
+      "lineage": "task020-public-certificates",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual public certificate structure has signature OID 1.3.101.112 and SPKI OID 1.3.101.112. The public object hash matches the original fixture manifest; no filename-based algorithm inference or trust verification is made.",
+      "questionIds": [
+        "x123",
+        "x157"
+      ],
+      "publicStructure": {
+        "kind": "x509-public-certificate",
+        "signatureOid": "1.3.101.112",
+        "spkiAlgorithmOid": "1.3.101.112",
+        "certificateDerSha256": "0d7c2608816ee0deabf95a50a794448fff77928927bf3649583c7c4dd80f3c9e",
+        "certificateBytes": 323
+      }
+    },
+    {
+      "index": 120,
+      "path": "tuning/certs/p256.der",
+      "source": "tests/quality/expanded/inputs/tuning/certs/p256.der",
+      "sha256": "cc5b37ec71cff86a39f7eaf27a71fc33161b7b64242f09df03b716f262f249db",
+      "bytes": 388,
+      "split": "tuning",
+      "lineage": "task020-public-certificates",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual public certificate structure has signature OID 1.2.840.10045.4.3.2 and SPKI OID 1.2.840.10045.2.1. The public object hash matches the original fixture manifest; no filename-based algorithm inference or trust verification is made.",
+      "questionIds": [
+        "x124"
+      ],
+      "publicStructure": {
+        "kind": "x509-public-certificate",
+        "signatureOid": "1.2.840.10045.4.3.2",
+        "spkiAlgorithmOid": "1.2.840.10045.2.1",
+        "certificateDerSha256": "cc5b37ec71cff86a39f7eaf27a71fc33161b7b64242f09df03b716f262f249db",
+        "certificateBytes": 388,
+        "curveOid": "1.2.840.10045.3.1.7"
+      }
+    },
+    {
+      "index": 121,
+      "path": "tuning/certs/broken.der",
+      "source": "tests/quality/expanded/inputs/tuning/certs/broken.der",
+      "sha256": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a",
+      "bytes": 18,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual bounded bytes have no complete public X.509/PFX structure. Certificate signature attributes stay unavailable. A .p12/.pfx filename separately retains the legacy container signal, without validity assurance.",
+      "questionIds": [
+        "x125"
+      ],
+      "publicStructure": {
+        "kind": "malformed-or-unavailable-public-structure",
+        "payloadNotExported": true
+      }
+    },
+    {
+      "index": 122,
+      "path": "tuning/certs/broken.pem",
+      "source": "tests/quality/expanded/inputs/tuning/certs/broken.pem",
+      "sha256": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a",
+      "bytes": 18,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual bounded bytes have no complete public X.509/PFX structure. Certificate signature attributes stay unavailable. A .p12/.pfx filename separately retains the legacy container signal, without validity assurance.",
+      "questionIds": [
+        "x126"
+      ],
+      "publicStructure": {
+        "kind": "malformed-or-unavailable-public-structure",
+        "payloadNotExported": true
+      }
+    },
+    {
+      "index": 123,
+      "path": "tuning/certs/broken.p12",
+      "source": "tests/quality/expanded/inputs/tuning/certs/broken.p12",
+      "sha256": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a",
+      "bytes": 18,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual bounded bytes have no complete public X.509/PFX structure. Certificate signature attributes stay unavailable. A .p12/.pfx filename separately retains the legacy container signal, without validity assurance.",
+      "questionIds": [
+        "x127",
+        "v2-a1"
+      ],
+      "publicStructure": {
+        "kind": "malformed-or-unavailable-public-structure",
+        "payloadNotExported": true
+      }
+    },
+    {
+      "index": 124,
+      "path": "tuning/certs/broken.pfx",
+      "source": "tests/quality/expanded/inputs/tuning/certs/broken.pfx",
+      "sha256": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a",
+      "bytes": 18,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual bounded bytes have no complete public X.509/PFX structure. Certificate signature attributes stay unavailable. A .p12/.pfx filename separately retains the legacy container signal, without validity assurance.",
+      "questionIds": [
+        "x128",
+        "v2-a2"
+      ],
+      "publicStructure": {
+        "kind": "malformed-or-unavailable-public-structure",
+        "payloadNotExported": true
+      }
+    },
+    {
+      "index": 125,
+      "path": "tuning/certs/broken.crt",
+      "source": "tests/quality/expanded/inputs/tuning/certs/broken.crt",
+      "sha256": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a",
+      "bytes": 18,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual bounded bytes have no complete public X.509/PFX structure. Certificate signature attributes stay unavailable. A .p12/.pfx filename separately retains the legacy container signal, without validity assurance.",
+      "questionIds": [
+        "x129"
+      ],
+      "publicStructure": {
+        "kind": "malformed-or-unavailable-public-structure",
+        "payloadNotExported": true
+      }
+    },
+    {
+      "index": 126,
+      "path": "tuning/certs/broken.cer",
+      "source": "tests/quality/expanded/inputs/tuning/certs/broken.cer",
+      "sha256": "e0ad0e502bd9a948a16dac38a0b3d51a6c82a8cfbad1e9b6da1224a5564e0b5a",
+      "bytes": 18,
+      "split": "tuning",
+      "lineage": "qam042-authored-tuning",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual bounded bytes have no complete public X.509/PFX structure. Certificate signature attributes stay unavailable. A .p12/.pfx filename separately retains the legacy container signal, without validity assurance.",
+      "questionIds": [
+        "x130"
+      ],
+      "publicStructure": {
+        "kind": "malformed-or-unavailable-public-structure",
+        "payloadNotExported": true
+      }
+    },
+    {
+      "index": 127,
+      "path": "holdout/ml-kem.js",
+      "source": "tests/quality/expanded/inputs/holdout/ml-kem.js",
+      "sha256": "c9d943c82da73429541a4cbd30e99f7611feafc9683b3ecc3b46a0745dae012d",
+      "bytes": 1904,
+      "split": "tuning",
+      "lineage": "nodejs-upstream-2025",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete Node test imports generateKeyPair. Its failure and success branches bind finite local arrays of three ML-KEM names. Three call sites remain static references, including the expected-error branch; encoding loops are not independent populations.",
+      "questionIds": [
+        "x131",
+        "x132",
+        "x133"
+      ]
+    },
+    {
+      "index": 128,
+      "path": "holdout/ml-dsa.js",
+      "source": "tests/quality/expanded/inputs/holdout/ml-dsa.js",
+      "sha256": "ec7fdd5696ed4ebe30249f8bda33bdab33f1d769ecd19e8d5442d16d2b2b6973",
+      "bytes": 2602,
+      "split": "tuning",
+      "lineage": "nodejs-upstream-2025",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete Node test imports generateKeyPair. Local arrays/tuples bind ML-DSA-44,65,87 for failure and success branches. Three factory call sites retain nominal provenance even inside capability guards and encoding tests.",
+      "questionIds": [
+        "x134",
+        "x135",
+        "x136"
+      ]
+    },
+    {
+      "index": 129,
+      "path": "holdout/slh-dsa.js",
+      "source": "tests/quality/expanded/inputs/holdout/slh-dsa.js",
+      "sha256": "136e44a3ade4286713bcd8fb4377d346d9b3d207ba58e36fbbda4c70bd91bcd7",
+      "bytes": 2368,
+      "split": "tuning",
+      "lineage": "nodejs-upstream-2025",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete Node test imports generateKeyPair and binds twelve finite SLH-DSA variants in the capability branches. The three call sites remain nominal static references, not twelve independent samples or successful-execution evidence.",
+      "questionIds": [
+        "x137",
+        "x138",
+        "x139"
+      ]
+    },
+    {
+      "index": 130,
+      "path": "holdout/dh.js",
+      "source": "tests/quality/expanded/inputs/holdout/dh.js",
+      "sha256": "f3d62ddbe61a5a81f56430e816df939a1016a809e55b04128d0d250f80c3e9c5",
+      "bytes": 562,
+      "split": "tuning",
+      "lineage": "nodejs-upstream-2025",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The imported createDiffieHellman factory uses a 2048-bit classical DH example and exchanges values through local variables. It is not a standard PQC key-type selection.",
+      "questionIds": [
+        "x140"
+      ]
+    },
+    {
+      "index": 131,
+      "path": "holdout/dh-group.js",
+      "source": "tests/quality/expanded/inputs/holdout/dh-group.js",
+      "sha256": "b58b955e35a3e2f233a1799ce412ca29fcff310cc31628769605c71754d16107",
+      "bytes": 113,
+      "split": "tuning",
+      "lineage": "nodejs-upstream-2025",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The imported createDiffieHellmanGroup factory selects the classical modp16 group, not a standard PQC algorithm.",
+      "questionIds": [
+        "x141"
+      ]
+    },
+    {
+      "index": 132,
+      "path": "holdout/ecdh.js",
+      "source": "tests/quality/expanded/inputs/holdout/ecdh.js",
+      "sha256": "07b7f055f2ea1182ae48e4e659b7f0751ddad276ab9895670f99daa03457669b",
+      "bytes": 515,
+      "split": "tuning",
+      "lineage": "nodejs-upstream-2025",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The imported createECDH calls select secp521r1. The source expresses classical ECDH, not PQC.",
+      "questionIds": [
+        "x142"
+      ]
+    },
+    {
+      "index": 133,
+      "path": "holdout/ecdh-convert.js",
+      "source": "tests/quality/expanded/inputs/holdout/ecdh-convert.js",
+      "sha256": "f9a1975cc164859e47685b21e28e9766505217796e97bcb2a5b80a0da962bb85",
+      "bytes": 578,
+      "split": "tuning",
+      "lineage": "nodejs-upstream-2025",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The imported createECDH and ECDH.convertKey source selects secp256k1 and encodings. This is classical EC source, without any key payload export by this review.",
+      "questionIds": [
+        "x143"
+      ]
+    },
+    {
+      "index": 134,
+      "path": "holdout/ec-sign.js",
+      "source": "tests/quality/expanded/inputs/holdout/ec-sign.js",
+      "sha256": "4ead9b9d943fcb91ab44bc1ea2d33b33898fd850dc16fc63010ab1f14f6581da",
+      "bytes": 479,
+      "split": "tuning",
+      "lineage": "nodejs-upstream-2025",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The locally generated pair selects ec with sect239k1, then SHA256 signing and verification use that pair. A digest name alone would not establish RSA or PQC.",
+      "questionIds": [
+        "x144"
+      ]
+    },
+    {
+      "index": 135,
+      "path": "holdout/rsa-sign.js",
+      "source": "tests/quality/expanded/inputs/holdout/rsa-sign.js",
+      "sha256": "1324395a9ab016d2fb86deb09889b007b54d8c7e453980b8c6ae63e96367287e",
+      "bytes": 464,
+      "split": "tuning",
+      "lineage": "nodejs-upstream-2025",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The pair factory explicitly selects rsa with modulusLength 2048. Its privateKey and publicKey feed local signing and verification. SHA256 names alone are insufficient; the local RSA pair supplies the provenance.",
+      "questionIds": [
+        "x145",
+        "x146",
+        "v2-audit2",
+        "v2-audit3",
+        "v2-rsa-11",
+        "v2-rsa-14",
+        "v2-rsa-16",
+        "v2-rsa-19"
+      ]
+    },
+    {
+      "index": 136,
+      "path": "tuning/certs/public-rsa3072.pem",
+      "source": "tests/quality/expanded/inputs/tuning/certs/public-rsa3072.pem",
+      "sha256": "166c938aa8812b13f31d0e55e5ff9acdefe8bd2a11fd8fc9f353f45eb6c174e2",
+      "bytes": 1464,
+      "split": "tuning",
+      "lineage": "task020-public-certificates",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual public certificate structure has signature OID 1.2.840.113549.1.1.11 and SPKI OID 1.2.840.113549.1.1.1, with RSA modulus bit length 3072. The public object hash matches the original fixture manifest; no filename-based algorithm inference or trust verification is made.",
+      "questionIds": [
+        "x147",
+        "x148",
+        "v2-a6"
+      ],
+      "publicStructure": {
+        "kind": "x509-public-certificate",
+        "signatureOid": "1.2.840.113549.1.1.11",
+        "spkiAlgorithmOid": "1.2.840.113549.1.1.1",
+        "certificateDerSha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46",
+        "certificateBytes": 1040,
+        "rsaModulusBits": 3072
+      }
+    },
+    {
+      "index": 137,
+      "path": "tuning/certs/public-rsa3072.crt",
+      "source": "tests/quality/expanded/inputs/tuning/certs/public-rsa3072.crt",
+      "sha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46",
+      "bytes": 1040,
+      "split": "tuning",
+      "lineage": "task020-public-certificates",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual public certificate structure has signature OID 1.2.840.113549.1.1.11 and SPKI OID 1.2.840.113549.1.1.1, with RSA modulus bit length 3072. The public object hash matches the original fixture manifest; no filename-based algorithm inference or trust verification is made.",
+      "questionIds": [
+        "x149",
+        "x150",
+        "v2-a5"
+      ],
+      "publicStructure": {
+        "kind": "x509-public-certificate",
+        "signatureOid": "1.2.840.113549.1.1.11",
+        "spkiAlgorithmOid": "1.2.840.113549.1.1.1",
+        "certificateDerSha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46",
+        "certificateBytes": 1040,
+        "rsaModulusBits": 3072
+      }
+    },
+    {
+      "index": 138,
+      "path": "tuning/certs/public-rsa3072.cer",
+      "source": "tests/quality/expanded/inputs/tuning/certs/public-rsa3072.cer",
+      "sha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46",
+      "bytes": 1040,
+      "split": "tuning",
+      "lineage": "task020-public-certificates",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "The actual public certificate structure has signature OID 1.2.840.113549.1.1.11 and SPKI OID 1.2.840.113549.1.1.1, with RSA modulus bit length 3072. The public object hash matches the original fixture manifest; no filename-based algorithm inference or trust verification is made.",
+      "questionIds": [
+        "x151",
+        "x152",
+        "v2-a4"
+      ],
+      "publicStructure": {
+        "kind": "x509-public-certificate",
+        "signatureOid": "1.2.840.113549.1.1.11",
+        "spkiAlgorithmOid": "1.2.840.113549.1.1.1",
+        "certificateDerSha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46",
+        "certificateBytes": 1040,
+        "rsaModulusBits": 3072
+      }
+    },
+    {
+      "index": 139,
+      "path": "tuning/certs/public-only.p12",
+      "source": "tests/quality/expanded/inputs/tuning/certs/public-only.p12",
+      "sha256": "36349ac3da751a23c682371fe9b56fe44a13dffcc9f94dc692bb5586871cf5a1",
+      "bytes": 1355,
+      "split": "tuning",
+      "lineage": "task020-public-certificates",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "PFX v3 wraps Data/AuthenticatedSafe whose sole content has encryptedData OID 1.2.840.113549.1.7.6 and PBES2 algorithm OID 1.2.840.113549.1.5.13. Its 1104 ciphertext bytes remain opaque. No readable public certificate is exposed without decryption, even with the original empty-password conversion record. The outer container signal remains distinct.",
+      "questionIds": [
+        "x153",
+        "x154",
+        "v2-audit4",
+        "v2-audit5"
+      ],
+      "publicStructure": {
+        "kind": "pfx-v3",
+        "outerContentOid": "1.2.840.113549.1.7.1",
+        "authenticatedSafeEntries": [
+          {
+            "contentOid": "1.2.840.113549.1.7.6",
+            "encrypted": true,
+            "encryptedPayloadOpaque": true,
+            "encryptionAlgorithmOid": "1.2.840.113549.1.5.13",
+            "ciphertextBytes": 1104
+          }
+        ],
+        "publicCertificates": [],
+        "macPresent": true,
+        "macVerified": false,
+        "decryptionPerformed": false
+      }
+    },
+    {
+      "index": 140,
+      "path": "tuning/certs/public-only.pfx",
+      "source": "tests/quality/expanded/inputs/tuning/certs/public-only.pfx",
+      "sha256": "36349ac3da751a23c682371fe9b56fe44a13dffcc9f94dc692bb5586871cf5a1",
+      "bytes": 1355,
+      "split": "tuning",
+      "lineage": "task020-public-certificates",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "PFX v3 wraps Data/AuthenticatedSafe whose sole content has encryptedData OID 1.2.840.113549.1.7.6 and PBES2 algorithm OID 1.2.840.113549.1.5.13. Its 1104 ciphertext bytes remain opaque. No readable public certificate is exposed without decryption, even with the original empty-password conversion record. The outer container signal remains distinct.",
+      "questionIds": [
+        "x155",
+        "x156",
+        "v2-audit6",
+        "v2-audit7"
+      ],
+      "publicStructure": {
+        "kind": "pfx-v3",
+        "outerContentOid": "1.2.840.113549.1.7.1",
+        "authenticatedSafeEntries": [
+          {
+            "contentOid": "1.2.840.113549.1.7.6",
+            "encrypted": true,
+            "encryptedPayloadOpaque": true,
+            "encryptionAlgorithmOid": "1.2.840.113549.1.5.13",
+            "ciphertextBytes": 1104
+          }
+        ],
+        "publicCertificates": [],
+        "macPresent": true,
+        "macVerified": false,
+        "decryptionPerformed": false
+      }
+    },
+    {
+      "index": 141,
+      "path": "tuning/encryption/Encrypt.java",
+      "source": "tests/quality/expanded-v2/inputs/tuning/encryption/Encrypt.java",
+      "sha256": "0ff1c1633606dbb8f75c3dbfa02fba104c99e303e2d713bb053cbe255daf6911",
+      "bytes": 61,
+      "split": "tuning",
+      "lineage": "qam042-v2-authored",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "Cipher.getInstance explicitly selects RSA/ECB/OAEPWithSHA-256AndMGF1Padding, a nominal RSA encryption configuration.",
+      "questionIds": [
+        "v2-Encrypt.java"
+      ]
+    },
+    {
+      "index": 142,
+      "path": "tuning/encryption/Symmetric.java",
+      "source": "tests/quality/expanded-v2/inputs/tuning/encryption/Symmetric.java",
+      "sha256": "3a684bd888251e4b7f4a44e552b8612ee1fbf13c01b0f66c03f69bd7c0e28160",
+      "bytes": 41,
+      "split": "tuning",
+      "lineage": "qam042-v2-authored",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "Cipher.getInstance selects AES/GCM/NoPadding, a symmetric alternative to RSA encryption.",
+      "questionIds": [
+        "v2-Symmetric.java"
+      ]
+    },
+    {
+      "index": 143,
+      "path": "tuning/encryption/BrokenCipher.java",
+      "source": "tests/quality/expanded-v2/inputs/tuning/encryption/BrokenCipher.java",
+      "sha256": "6d84909c07a8f4c341779e5878231a2ce4bf222e9ee27deda0487f1746832a7b",
+      "bytes": 21,
+      "split": "tuning",
+      "lineage": "qam042-v2-authored",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "Cipher.getInstance is truncated at an opening quote, with no algorithm selection.",
+      "questionIds": [
+        "v2-BrokenCipher.java"
+      ]
+    },
+    {
+      "index": 144,
+      "path": "holdout/rustcrypto-usage.rs",
+      "source": "tests/quality/expanded-v2/inputs/holdout/rustcrypto-usage.rs",
+      "sha256": "7f92e6352cadf8c3919372d95f8927efaa59a5361a3ac159b62ce3840b7ea33b",
+      "bytes": 531,
+      "split": "holdout",
+      "lineage": "rustcrypto-kems-2024",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The excerpt imports ml_kem::* and the Encapsulate/Decapsulate traits. MlKem768::generate binds dk/ek, whose encapsulate/decapsulate methods preserve local ML-KEM roles. Import, generation and the two methods remain distinct static questions.",
+      "questionIds": [
+        "v2-independent-import",
+        "v2-audit8",
+        "v2-audit9",
+        "v2-audit10"
+      ]
+    },
+    {
+      "index": 145,
+      "path": "tuning/width/cdx-1.4/library/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/cdx-1.4/library/bom.json",
+      "sha256": "6efeeae6b1b81fd07c2245b091df73f4c40d8e9a121561645ca711936b3051e2",
+      "bytes": 156,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The CycloneDX 1.4 JSON has a complete component/package record for openssl with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "w182"
+      ]
+    },
+    {
+      "index": 146,
+      "path": "tuning/width/cdx-1.4/control/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/cdx-1.4/control/bom.json",
+      "sha256": "51e58e5b01752d9510a188b0ee323d63d23ebcf22368b2ab8c95e2f9d20038c5",
+      "bytes": 128,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The CycloneDX 1.4 JSON has a complete component/package record for ordinary-package with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "w183"
+      ]
+    },
+    {
+      "index": 147,
+      "path": "tuning/width/cdx-1.4/broken/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/cdx-1.4/broken/bom.json",
+      "sha256": "b78a89d9166ff2e1123013d7535b44c3f7b87aad5eac4a0a898520a8bac3e71f",
+      "bytes": 60,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The SBOM JSON is cut off or malformed before a complete component/package value. The supported filename/version does not establish dependency absence.",
+      "questionIds": [
+        "w184"
+      ]
+    },
+    {
+      "index": 148,
+      "path": "tuning/width/cdx-1.6/library/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/cdx-1.6/library/bom.json",
+      "sha256": "35b58d2b95399e557ec178c13fd66b7578be5f76d70680d06dbf4d5cde36ca75",
+      "bytes": 156,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The CycloneDX 1.6 JSON has a complete component/package record for openssl with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "w185"
+      ]
+    },
+    {
+      "index": 149,
+      "path": "tuning/width/cdx-1.6/control/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/cdx-1.6/control/bom.json",
+      "sha256": "c47aea85f8e3cb390b79524f7ca4da6cbad8cceef3074acd5861d110cb8b41cf",
+      "bytes": 128,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The CycloneDX 1.6 JSON has a complete component/package record for ordinary-package with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "w186"
+      ]
+    },
+    {
+      "index": 150,
+      "path": "tuning/width/cdx-1.6/broken/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/cdx-1.6/broken/bom.json",
+      "sha256": "bbff35c8de9007765323b652b8eb1138e38d7f80d101c337d4b00d653e377752",
+      "bytes": 60,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The SBOM JSON is cut off or malformed before a complete component/package value. The supported filename/version does not establish dependency absence.",
+      "questionIds": [
+        "w187"
+      ]
+    },
+    {
+      "index": 151,
+      "path": "tuning/width/cdx-1.7/library/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/cdx-1.7/library/bom.json",
+      "sha256": "cd01b4115b9dc133fa8e77fbb51d02c332364e82b607e6c44cc4fe113c4a4f77",
+      "bytes": 156,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The CycloneDX 1.7 JSON has a complete component/package record for openssl with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "w188"
+      ]
+    },
+    {
+      "index": 152,
+      "path": "tuning/width/cdx-1.7/control/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/cdx-1.7/control/bom.json",
+      "sha256": "5ff14e156691f10f649d030bf1c47ce499e8c0da7943f7ffc3045743798fab07",
+      "bytes": 128,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The CycloneDX 1.7 JSON has a complete component/package record for ordinary-package with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "w189"
+      ]
+    },
+    {
+      "index": 153,
+      "path": "tuning/width/cdx-1.7/broken/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/cdx-1.7/broken/bom.json",
+      "sha256": "229228e4ee60f08568da35632458485bccb36ca3a12c8aac930d213a211f9e88",
+      "bytes": 60,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The SBOM JSON is cut off or malformed before a complete component/package value. The supported filename/version does not establish dependency absence.",
+      "questionIds": [
+        "w190"
+      ]
+    },
+    {
+      "index": 154,
+      "path": "tuning/width/spdx-2.2/library/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/spdx-2.2/library/bom.json",
+      "sha256": "239721a7084f88ee51ce507420991569ed558dfa690759bd7e169be1e9e3cd90",
+      "bytes": 181,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The SPDX-2.2 SPDX-2.2 JSON has a complete component/package record for openssl with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "w191"
+      ]
+    },
+    {
+      "index": 155,
+      "path": "tuning/width/spdx-2.2/control/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/spdx-2.2/control/bom.json",
+      "sha256": "92822ead0ba7a771422f889aa802b2b68bcfc47abdf8f1beeef4a516b8b37373",
+      "bytes": 199,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The SPDX-2.2 SPDX-2.2 JSON has a complete component/package record for ordinary-package with a version. This is within the documented component/package subset, without full-schema, installation or enabled-feature assurance.",
+      "questionIds": [
+        "w192"
+      ]
+    },
+    {
+      "index": 156,
+      "path": "tuning/width/spdx-2.2/broken/bom.json",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/spdx-2.2/broken/bom.json",
+      "sha256": "6b8e4bf7ec4b284c6555fd65e691f245a1b4d47f70c42a7666063ca255a5c2c6",
+      "bytes": 39,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "sbom",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The SBOM JSON is cut off or malformed before a complete component/package value. The supported filename/version does not establish dependency absence.",
+      "questionIds": [
+        "w193"
+      ]
+    },
+    {
+      "index": 157,
+      "path": "tuning/width/tsx/standard.tsx",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/tsx/standard.tsx",
+      "sha256": "4f5cdda57099b67f9034a6b24569788760b09f526055b319daf926e64f09bd61",
+      "bytes": 90,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The TSX file contains an explicit typed declaration and a WebCrypto name object selecting ML-KEM-768. TSX is a listed supported grammar.",
+      "questionIds": [
+        "w194"
+      ]
+    },
+    {
+      "index": 158,
+      "path": "tuning/width/tsx/symmetric.tsx",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/tsx/symmetric.tsx",
+      "sha256": "b2a57809a66669114f4b3de1c446e7b287c05ecf1e8a0f136b3bb9db6feb21df",
+      "bytes": 87,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The TSX file contains a typed declaration and WebCrypto selection AES-GCM, not the nominated standard PQC algorithm.",
+      "questionIds": [
+        "w195"
+      ]
+    },
+    {
+      "index": 159,
+      "path": "tuning/width/tsx/broken.tsx",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/tsx/broken.tsx",
+      "sha256": "b9078ffc3c0bba9b9fe15fc2fb2a4348050b4b34ab314358d38415844784acbb",
+      "bytes": 64,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The TSX WebCrypto call is truncated before the name value. Supported grammar does not make this unknown value a safe negative.",
+      "questionIds": [
+        "w196"
+      ]
+    },
+    {
+      "index": 160,
+      "path": "tuning/width/nginx/selection.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/nginx/selection.conf",
+      "sha256": "3d456b8f137b70f381d29b4fd2021cfebb11322bedd480558aab82015e4efe09",
+      "bytes": 17,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The nginx cipher directive explicitly names RSA. The question asks that static operand rather than a live connection or expanded effective suite.",
+      "questionIds": [
+        "w197"
+      ]
+    },
+    {
+      "index": 161,
+      "path": "tuning/width/nginx/alternative.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/nginx/alternative.conf",
+      "sha256": "2d8b7db3fade33fe26b9a6c2402bda1d2c28d04beb77cb0cb8a903bd34340112",
+      "bytes": 20,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The nginx cipher directive names AESGCM without an explicit RSA operand. It is a negative only for the exact nominated RSA-cipher property; no expanded effective-suite or quantum-safety claim follows.",
+      "questionIds": [
+        "w198"
+      ]
+    },
+    {
+      "index": 162,
+      "path": "tuning/width/nginx/incomplete.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/nginx/incomplete.conf",
+      "sha256": "3630ac4d38e8d7920ef56cf96ada46209661c665bd5f84e20111ee129cca7631",
+      "bytes": 14,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The nginx directive is truncated at an opening quote, leaving no interpretable cipher/protocol operand. It stays an original unsupported value, not a safe alternative.",
+      "questionIds": [
+        "w199"
+      ]
+    },
+    {
+      "index": 163,
+      "path": "tuning/width/apache/selection.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/apache/selection.conf",
+      "sha256": "1f604eb207891216cd832b18a4425bbcfea488c0085eb62b6b54f13abb8aa46e",
+      "bytes": 20,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The apache directive explicitly names a TLS 1.0 selection. It is a file-level legacy-protocol reference, not a negotiated connection.",
+      "questionIds": [
+        "w200"
+      ]
+    },
+    {
+      "index": 164,
+      "path": "tuning/width/apache/alternative.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/apache/alternative.conf",
+      "sha256": "47a0a7c33dd12e373e227a0d8cee2c488a9082d5d6265e5cffa32c025684aa90",
+      "bytes": 20,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The apache directive explicitly names TLS 1.3 as the alternative. It is negative for the exact legacy TLS 1.0 property, without broader safety assurance.",
+      "questionIds": [
+        "w201"
+      ]
+    },
+    {
+      "index": 165,
+      "path": "tuning/width/apache/incomplete.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/apache/incomplete.conf",
+      "sha256": "017bca12d422b5a9560540a1baf6eed72672bea2ff9cb384f706057cb8e8d8f6",
+      "bytes": 14,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The apache directive is truncated at an opening quote, leaving no interpretable cipher/protocol operand. It stays an original unsupported value, not a safe alternative.",
+      "questionIds": [
+        "w202"
+      ]
+    },
+    {
+      "index": 166,
+      "path": "tuning/width/envoy/selection.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/envoy/selection.conf",
+      "sha256": "2e6a996aafafea4612a51f485530148c4c4188adda8b303b5511d2f3dae14c88",
+      "bytes": 38,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The envoy directive explicitly names a TLS 1.0 selection. It is a file-level legacy-protocol reference, not a negotiated connection.",
+      "questionIds": [
+        "w203"
+      ]
+    },
+    {
+      "index": 167,
+      "path": "tuning/width/envoy/alternative.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/envoy/alternative.conf",
+      "sha256": "b2637a22ba377af29d6d11ff8dd1c5ca2107f239b60be3b0143d52c7c754f099",
+      "bytes": 38,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The envoy directive explicitly names TLS 1.3 as the alternative. It is negative for the exact legacy TLS 1.0 property, without broader safety assurance.",
+      "questionIds": [
+        "w204"
+      ]
+    },
+    {
+      "index": 168,
+      "path": "tuning/width/envoy/incomplete.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/envoy/incomplete.conf",
+      "sha256": "f9145c8a378032d6898eb4221f0b84ac3fb80c9b9efd1fda5a4d77e4fb1cafc5",
+      "bytes": 32,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The envoy directive is truncated at an opening quote, leaving no interpretable cipher/protocol operand. It stays an original unsupported value, not a safe alternative.",
+      "questionIds": [
+        "w205"
+      ]
+    },
+    {
+      "index": 169,
+      "path": "tuning/width/istio/selection.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/istio/selection.conf",
+      "sha256": "6be094139f76fc3f700b56157eb9ccef99358347ba46d651fd531d35e3f79e48",
+      "bytes": 28,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The istio directive explicitly names a TLS 1.0 selection. It is a file-level legacy-protocol reference, not a negotiated connection.",
+      "questionIds": [
+        "w206"
+      ]
+    },
+    {
+      "index": 170,
+      "path": "tuning/width/istio/alternative.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/istio/alternative.conf",
+      "sha256": "c0d21a61022cd063005b97e578dcd46153fce67ad4afe9be3ff698ddaec4cbac",
+      "bytes": 28,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The istio directive explicitly names TLS 1.3 as the alternative. It is negative for the exact legacy TLS 1.0 property, without broader safety assurance.",
+      "questionIds": [
+        "w207"
+      ]
+    },
+    {
+      "index": 171,
+      "path": "tuning/width/istio/incomplete.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/istio/incomplete.conf",
+      "sha256": "8a4f497fbe5f2afc133727c0eb17e8e347536dc71b398dd0c9f2f88ed088fbab",
+      "bytes": 22,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The istio directive is truncated at an opening quote, leaving no interpretable cipher/protocol operand. It stays an original unsupported value, not a safe alternative.",
+      "questionIds": [
+        "w208"
+      ]
+    },
+    {
+      "index": 172,
+      "path": "tuning/width/haproxy/selection.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/haproxy/selection.conf",
+      "sha256": "636f6ca33e5c6a05096f85b97735a40dbc3b5d57b0f9067444c5bc580e39a397",
+      "bytes": 27,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The haproxy directive explicitly names a TLS 1.0 selection. It is a file-level legacy-protocol reference, not a negotiated connection.",
+      "questionIds": [
+        "w209"
+      ]
+    },
+    {
+      "index": 173,
+      "path": "tuning/width/haproxy/alternative.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/haproxy/alternative.conf",
+      "sha256": "3baca0be47ee5d52a58a09ba9988a964d5618ce6a96c1dc0d401421b59243c2b",
+      "bytes": 27,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The haproxy directive explicitly names TLS 1.3 as the alternative. It is negative for the exact legacy TLS 1.0 property, without broader safety assurance.",
+      "questionIds": [
+        "w210"
+      ]
+    },
+    {
+      "index": 174,
+      "path": "tuning/width/haproxy/incomplete.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/haproxy/incomplete.conf",
+      "sha256": "81d2c1ad37f3d65defe285078c47efdcf461f2da8a9c456bf1fc6f0b1edb3667",
+      "bytes": 16,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The haproxy directive is truncated at an opening quote, leaving no interpretable cipher/protocol operand. It stays an original unsupported value, not a safe alternative.",
+      "questionIds": [
+        "w211"
+      ]
+    },
+    {
+      "index": 175,
+      "path": "tuning/width/traefik/selection.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/traefik/selection.conf",
+      "sha256": "8e6f5de3cfd9b1be38eb3ea425668c49f2afc6fc42acaea0514bf27edf2e54d8",
+      "bytes": 25,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The traefik directive explicitly names a TLS 1.0 selection. It is a file-level legacy-protocol reference, not a negotiated connection.",
+      "questionIds": [
+        "w212"
+      ]
+    },
+    {
+      "index": 176,
+      "path": "tuning/width/traefik/alternative.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/traefik/alternative.conf",
+      "sha256": "4f709853ba012b48763aadaa0456d0960cb6c5f0035f9c581a9ba20132b39553",
+      "bytes": 25,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The traefik directive explicitly names TLS 1.3 as the alternative. It is negative for the exact legacy TLS 1.0 property, without broader safety assurance.",
+      "questionIds": [
+        "w213"
+      ]
+    },
+    {
+      "index": 177,
+      "path": "tuning/width/traefik/incomplete.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/traefik/incomplete.conf",
+      "sha256": "2c4199ae7d57e52c6242be1fb8cd5490a6487422b36d724af55f54cae665e917",
+      "bytes": 14,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The traefik directive is truncated at an opening quote, leaving no interpretable cipher/protocol operand. It stays an original unsupported value, not a safe alternative.",
+      "questionIds": [
+        "w214"
+      ]
+    },
+    {
+      "index": 178,
+      "path": "tuning/width/kubernetes/selection.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/kubernetes/selection.conf",
+      "sha256": "dc62a3312c132b90a853ea29299e432dae4a262a8e9e84404d55086d6c37d0eb",
+      "bytes": 45,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The kubernetes cipher directive explicitly names RSA. The question asks that static operand rather than a live connection or expanded effective suite.",
+      "questionIds": [
+        "w215"
+      ]
+    },
+    {
+      "index": 179,
+      "path": "tuning/width/kubernetes/alternative.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/kubernetes/alternative.conf",
+      "sha256": "e26e1e487cc68fd680df3bfee80140b3e4238f29d2680685c0877f1534cbe7d0",
+      "bytes": 48,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The kubernetes cipher directive names AESGCM without an explicit RSA operand. It is a negative only for the exact nominated RSA-cipher property; no expanded effective-suite or quantum-safety claim follows.",
+      "questionIds": [
+        "w216"
+      ]
+    },
+    {
+      "index": 180,
+      "path": "tuning/width/kubernetes/incomplete.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/kubernetes/incomplete.conf",
+      "sha256": "09e1b67569ab4636e4243e73c65d8a6ed11e22f445a30f2f8dfb40da902f0b99",
+      "bytes": 43,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The kubernetes directive is truncated at an opening quote, leaving no interpretable cipher/protocol operand. It stays an original unsupported value, not a safe alternative.",
+      "questionIds": [
+        "w217"
+      ]
+    },
+    {
+      "index": 181,
+      "path": "tuning/width/parameter/ml-kem-512.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/ml-kem-512.js",
+      "sha256": "b99507c97b21378c953af32c3485a49cca69aac74494856c268e249755fa9055",
+      "bytes": 38,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete ml-kem-512 key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w218"
+      ]
+    },
+    {
+      "index": 182,
+      "path": "tuning/width/parameter/ml-kem-768.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/ml-kem-768.js",
+      "sha256": "8b91fffd163dd8b913e96893e04d94e8f8108f4ef94c2fbbf50056cb9e61eafe",
+      "bytes": 38,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete ml-kem-768 key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w219"
+      ]
+    },
+    {
+      "index": 183,
+      "path": "tuning/width/parameter/ml-kem-1024.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/ml-kem-1024.js",
+      "sha256": "e01a4d19f3df9b3fab21a9cabd986ce2b7db119204e2806c506f70c9b2b0ea72",
+      "bytes": 39,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete ml-kem-1024 key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w220"
+      ]
+    },
+    {
+      "index": 184,
+      "path": "tuning/width/parameter/ml-dsa-44.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/ml-dsa-44.js",
+      "sha256": "86ce688c0cda8356a7ba9aafe9693a445d4aee5b0ea08575b8e25c6479eb7372",
+      "bytes": 37,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete ml-dsa-44 key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w221"
+      ]
+    },
+    {
+      "index": 185,
+      "path": "tuning/width/parameter/ml-dsa-65.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/ml-dsa-65.js",
+      "sha256": "29df2e802e2c5c46fca52eae218cb15e48f44fcb67847544afa60c98fa4499c5",
+      "bytes": 37,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete ml-dsa-65 key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w222"
+      ]
+    },
+    {
+      "index": 186,
+      "path": "tuning/width/parameter/ml-dsa-87.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/ml-dsa-87.js",
+      "sha256": "ab6635f64086305308fc8344941e6a6f4051196859f46786a2a0a216b73c168a",
+      "bytes": 37,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete ml-dsa-87 key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w223"
+      ]
+    },
+    {
+      "index": 187,
+      "path": "tuning/width/parameter/slh-dsa-sha2-128s.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-sha2-128s.js",
+      "sha256": "ab34b2bec30443a30f6ebfb4050fa66de026010b84900194985168dbabdb5ce8",
+      "bytes": 45,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-sha2-128s key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w224"
+      ]
+    },
+    {
+      "index": 188,
+      "path": "tuning/width/parameter/slh-dsa-sha2-128f.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-sha2-128f.js",
+      "sha256": "0c8bb817c307567622d3ec918df078464edac33cffa2ff1772b3f5a347d58030",
+      "bytes": 45,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-sha2-128f key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w225"
+      ]
+    },
+    {
+      "index": 189,
+      "path": "tuning/width/parameter/slh-dsa-sha2-192s.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-sha2-192s.js",
+      "sha256": "3ea783e3bfc2fe3aaf508cf704ad3e0bad4a90f80c5cdedaa7b2329d7cbf0115",
+      "bytes": 45,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-sha2-192s key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w226"
+      ]
+    },
+    {
+      "index": 190,
+      "path": "tuning/width/parameter/slh-dsa-sha2-192f.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-sha2-192f.js",
+      "sha256": "3a4a0a55754fdb3665290dbdc19ee20d6b98b323912df35556ba8d5b65e521e1",
+      "bytes": 45,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-sha2-192f key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w227"
+      ]
+    },
+    {
+      "index": 191,
+      "path": "tuning/width/parameter/slh-dsa-sha2-256s.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-sha2-256s.js",
+      "sha256": "bb29294a4e7b485a4325c365e178840e040710526158c031b526afa06a0811e0",
+      "bytes": 45,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-sha2-256s key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w228"
+      ]
+    },
+    {
+      "index": 192,
+      "path": "tuning/width/parameter/slh-dsa-sha2-256f.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-sha2-256f.js",
+      "sha256": "c8e6b25fb441dc975de3dc843b7029b937387fc27dedf3d6133abe1604345078",
+      "bytes": 45,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-sha2-256f key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w229"
+      ]
+    },
+    {
+      "index": 193,
+      "path": "tuning/width/parameter/slh-dsa-shake-128s.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-shake-128s.js",
+      "sha256": "b21bfc2bab648112e2d5e3e0e590de08594a6511170512a64746398e82720a1c",
+      "bytes": 46,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-shake-128s key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w230"
+      ]
+    },
+    {
+      "index": 194,
+      "path": "tuning/width/parameter/slh-dsa-shake-128f.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-shake-128f.js",
+      "sha256": "9e15e4ba60630810933c5788bde4447255a8ad4067edcbcf61e0d97391328c0b",
+      "bytes": 46,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-shake-128f key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w231"
+      ]
+    },
+    {
+      "index": 195,
+      "path": "tuning/width/parameter/slh-dsa-shake-192s.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-shake-192s.js",
+      "sha256": "cabbdeccec0b3fd0ab49b21c0f77d864880d91893b491923e1a4751d2a4f2580",
+      "bytes": 46,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-shake-192s key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w232"
+      ]
+    },
+    {
+      "index": 196,
+      "path": "tuning/width/parameter/slh-dsa-shake-192f.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-shake-192f.js",
+      "sha256": "48fdbb63b773900fef22d3817e19eb1b63b2898cacb635de0738ea70705a0e05",
+      "bytes": 46,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-shake-192f key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w233"
+      ]
+    },
+    {
+      "index": 197,
+      "path": "tuning/width/parameter/slh-dsa-shake-256s.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-shake-256s.js",
+      "sha256": "f9e66da11195aeedf705de2b48c53333cf5c3ac1df84e9ae42c405a32d8decef",
+      "bytes": 46,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-shake-256s key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w234"
+      ]
+    },
+    {
+      "index": 198,
+      "path": "tuning/width/parameter/slh-dsa-shake-256f.js",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/slh-dsa-shake-256f.js",
+      "sha256": "865fa1e26d6b6cedb92ec73b7a4b2a065037fbe8b81014aa7674cac12cd7f142",
+      "bytes": 46,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The complete slh-dsa-shake-256f key-generation-looking text is inside a // comment. The algorithm parameter remains visible as annotation, but the Node API question is a negative static-source control.",
+      "questionIds": [
+        "w235"
+      ]
+    },
+    {
+      "index": 199,
+      "path": "tuning/width/parameter/dsa.conf",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/dsa.conf",
+      "sha256": "5a91b9898d98cf58870c5ae42a15be6026be774c34466e096bdb0a2208c5c9c4",
+      "bytes": 28,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "configuration",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The ssh-dss HostKeyAlgorithms text is hash-commented and is a disabled configuration reference.",
+      "questionIds": [
+        "w236"
+      ]
+    },
+    {
+      "index": 200,
+      "path": "tuning/width/parameter/java-slh.java",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/parameter/java-slh.java",
+      "sha256": "2d58cf81b17fe9ad207663e8326dff9480db3f8436d724a98b2dbf3e4c1fac7f",
+      "bytes": 48,
+      "split": "tuning",
+      "lineage": "qam042-v2-width",
+      "artifact": "source",
+      "fullInputReviewed": true,
+      "method": "bounded source/context inspection",
+      "reason": "The entire SLH-DSA-SHAKE-256s Java Signature invocation is in a // comment.",
+      "questionIds": [
+        "w237"
+      ]
+    },
+    {
+      "index": 201,
+      "path": "tuning/width/public-unencrypted.p12",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/public-unencrypted.p12",
+      "sha256": "e574b0dab9c251efc07e5e9b874eaab851685d9cd2deca481c46da3ea4cbd0e4",
+      "bytes": 1146,
+      "split": "tuning",
+      "lineage": "task020-public-certificates",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "PFX v3 wraps a Data/AuthenticatedSafe Data entry with an X.509 certBag. The readable certificate has RSA SPKI, 3072-bit modulus and sha256WithRSAEncryption signature, and matches the original public fixture DER hash. No decryption, MAC validation or trust verification is performed.",
+      "questionIds": [
+        "public-p12-CERT_P12_CONTAINER",
+        "public-p12-CERT_RSA_3072",
+        "public-p12-CERT_RSA_SIGNATURE",
+        "public-p12-CERT_ECDSA_SIGNATURE"
+      ],
+      "publicStructure": {
+        "kind": "pfx-v3",
+        "outerContentOid": "1.2.840.113549.1.7.1",
+        "authenticatedSafeEntries": [
+          {
+            "contentOid": "1.2.840.113549.1.7.1",
+            "bagTypes": [
+              "1.2.840.113549.1.12.10.1.3"
+            ]
+          }
+        ],
+        "publicCertificates": [
+          {
+            "kind": "x509-public-certificate",
+            "signatureOid": "1.2.840.113549.1.1.11",
+            "spkiAlgorithmOid": "1.2.840.113549.1.1.1",
+            "certificateDerSha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46",
+            "certificateBytes": 1040,
+            "rsaModulusBits": 3072
+          }
+        ],
+        "macPresent": false,
+        "macVerified": false,
+        "decryptionPerformed": false
+      }
+    },
+    {
+      "index": 202,
+      "path": "tuning/width/public-unencrypted.pfx",
+      "source": "tests/quality/expanded-v2/inputs/tuning/width/public-unencrypted.pfx",
+      "sha256": "e574b0dab9c251efc07e5e9b874eaab851685d9cd2deca481c46da3ea4cbd0e4",
+      "bytes": 1146,
+      "split": "tuning",
+      "lineage": "task020-public-certificates",
+      "artifact": "certificate",
+      "fullInputReviewed": true,
+      "method": "bounded public structure only, no decryption",
+      "reason": "PFX v3 wraps a Data/AuthenticatedSafe Data entry with an X.509 certBag. The readable certificate has RSA SPKI, 3072-bit modulus and sha256WithRSAEncryption signature, and matches the original public fixture DER hash. No decryption, MAC validation or trust verification is performed.",
+      "questionIds": [
+        "public-pfx-CERT_P12_CONTAINER",
+        "public-pfx-CERT_RSA_3072",
+        "public-pfx-CERT_RSA_SIGNATURE",
+        "public-pfx-CERT_ECDSA_SIGNATURE"
+      ],
+      "publicStructure": {
+        "kind": "pfx-v3",
+        "outerContentOid": "1.2.840.113549.1.7.1",
+        "authenticatedSafeEntries": [
+          {
+            "contentOid": "1.2.840.113549.1.7.1",
+            "bagTypes": [
+              "1.2.840.113549.1.12.10.1.3"
+            ]
+          }
+        ],
+        "publicCertificates": [
+          {
+            "kind": "x509-public-certificate",
+            "signatureOid": "1.2.840.113549.1.1.11",
+            "spkiAlgorithmOid": "1.2.840.113549.1.1.1",
+            "certificateDerSha256": "5e075b55ba2590d0862078ccac32a0b67020b46b709f250056abd23f3c815b46",
+            "certificateBytes": 1040,
+            "rsaModulusBits": 3072
+          }
+        ],
+        "macPresent": false,
+        "macVerified": false,
+        "decryptionPerformed": false
+      }
+    }
+  ]
+}

@@ -57,9 +57,7 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
     let Some(tree) = parser.parse(source, None) else {
         return vec![];
     };
-    if tree.root_node().has_error() {
-        return vec![];
-    }
+    let partial_tree = tree.root_node().has_error();
     let mut stack = vec![tree.root_node()];
     let mut count = 0;
     let mut out = vec![];
@@ -70,6 +68,34 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
         count += 1;
         if count > max_nodes.min(200_000) {
             return vec![];
+        }
+        if node.kind() == "ERROR" || node.is_missing() {
+            continue;
+        }
+        if node.kind().contains("comment") {
+            out.push(node.byte_range());
+            continue;
+        }
+        if matches!(
+            node.kind(),
+            "variable_declarator" | "init_declarator" | "enumerator"
+        ) {
+            if let Some(name) = node
+                .child_by_field_name("name")
+                .or_else(|| node.child_by_field_name("declarator"))
+                .filter(|n| matches!(n.kind(), "identifier" | "field_identifier"))
+            {
+                let token = &source[name.byte_range()];
+                if token.starts_with("TLS_")
+                    && token.contains("_WITH_")
+                    && token.len() <= 128
+                    && token
+                        .bytes()
+                        .all(|b| b.is_ascii_uppercase() || b.is_ascii_digit() || b == b'_')
+                {
+                    out.push(name.byte_range());
+                }
+            }
         }
         // Java imports/throws name exception types, not callable local values.
         // The Java case below still requires a literal directly in `throw new`.
@@ -171,7 +197,25 @@ pub(super) fn ranges(file: &ScannableFile, max_nodes: usize) -> Vec<Range<usize>
                 .is_some_and(|b| matches!(b, b'\'' | b'"' | b'`'))
                 && !value.contains("#{")
                 && !value.contains("${");
-            if value.len() <= 512 && phrase && plain {
+            // An RFC-style Received header records transport history. The
+            // literal itself does not select a cipher, even inside test code.
+            if plain && value.len() <= 4096 {
+                let body = value.trim_start_matches(['\'', '"', '`']).trim_start();
+                let unfolded = body
+                    .replace("\\r", " ")
+                    .replace("\\n", " ")
+                    .replace("\\t", " ");
+                let normalized = unfolded.split_whitespace().collect::<Vec<_>>().join(" ");
+                if body.starts_with("Received:")
+                    || (normalized.starts_with("from ")
+                        && normalized.contains(" by ")
+                        && normalized.contains(" with ")
+                        && normalized.contains(';'))
+                {
+                    out.push(node.byte_range());
+                }
+            }
+            if !partial_tree && value.len() <= 512 && phrase && plain {
                 strings.push(node);
             }
             if plain {

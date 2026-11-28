@@ -33,9 +33,15 @@ jobs:
   quality:
     if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable (explicit toolchain below)
@@ -55,8 +61,32 @@ jobs:
       - name: Test report navigation and self-scan preparation
         run: node --test shell/*.test.cjs tests/report-ui/*.test.cjs
 
-      - name: Test baseline evaluator
-        run: python3 -m unittest discover -s tests/quality -p 'test_*.py'
+      - name: Install source-only audit dependencies
+        run: python3 -m pip install -r benchmark/audit-requirements.txt
+
+      - name: Test performance hold selector controls
+        run: python3 -I -B tests/ci/test_quality_performance_hold.py
+
+      - name: Test temporal witness with product libraries
+        run: |
+          cargo fetch --locked
+          python3 benchmark/temporal_reassessment/ci.py
+
+      - name: Test quality consumers with performance held
+        run: |
+          python3 -I - <<'PYTHON'
+          import os
+          import sys
+          environment = {
+              key: value for key, value in os.environ.items()
+              if not key.startswith('PQC_') and key not in ('PYTHONHOME', 'PYTHONPATH')
+          }
+          environment['PYTHONDONTWRITEBYTECODE'] = '1'
+          os.execve(sys.executable, [
+              sys.executable, '-B', 'scripts/quality-with-performance-held.py',
+              '--repo', '.', '--out-dir', 'target/quality-performance-held',
+          ], environment)
+          PYTHON
 
       - name: Aggregate all-axis evidence offline
         if: always()
@@ -72,7 +102,9 @@ jobs:
           name: pqc-quality-integrated-pr
           if-no-files-found: error
           retention-days: 30
-          path: target/quality-integrated/
+          path: |
+            target/quality-integrated/
+            target/quality-performance-held/
 
   protocols:
     # Temporarily paused during development, including manual workflow runs.
@@ -119,7 +151,8 @@ jobs:
             target/protocol-image/prepare.log
 
   baseline:
-    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch' }}
+    # Performance/resource observation remains held by the operator.
+    if: ${{ false && ((github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -168,7 +201,7 @@ jobs:
         run: >-
           python3 tests/quality/report.py --corpus-dir tests/quality/expanded-v2
           --baseline target/quality-expanded-v2
-          --applicability tests/quality/applicability-docs-readability-20261124/assessment.json
+          --applicability tests/quality/applicability-v05-user-docs-20261128/assessment.json
           --out-dir target/quality-expanded-v2-assessment
       - name: Measure missing lock-format controls
         run: >-

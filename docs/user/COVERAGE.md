@@ -2,8 +2,9 @@
 
 [日本語](COVERAGE.ja.md) · [README](../../README.md)
 
-This guide explains supported v0.4.0 inputs and what to consider when reading scan reports.
-See the [input overview](../../README.md#targets) and [scanning guide](SCANNING.md).
+This guide describes supported inputs and inspection limits. Use a matching
+scanner and rule bundle. See the [input overview](../../README.md#targets) and
+[scanning guide](SCANNING.md).
 
 ## Contents
 
@@ -62,7 +63,7 @@ Supported configurations include Kubernetes/Ingress, nginx, Apache httpd, Envoy,
 Istio, HAProxy and Traefik. Checks cover TLS, cipher suites and key-exchange groups.
 These are file settings, not confirmed algorithms in a live connection.
 
-There are 125 built-in rules. Use the matching bundled `rules/default` directory.
+There are 139 built-in rules. Use the matching bundled `rules/default` directory.
 
 <a id="source-limits"></a>
 <a id="source-facts"></a>
@@ -70,14 +71,10 @@ There are 125 built-in rules. Use the matching bundled `rules/default` directory
 ## Source-code inspection limits
 
 Checks cover cryptographic API and algorithm references in Java, Go, JavaScript,
-TypeScript/TSX, Python, Rust and Ruby. Code is not executed. Supported usage
+TypeScript/TSX, Python, Rust, Ruby, PHP, C# and C/C++. Code is not executed. Supported usage
 patterns are limited, so not every cryptographic operation can be found.
 Finding the name of a cryptographic algorithm in code does not confirm that the
 operation is actually used or that PQC migration is complete.
-
-Syntax errors, unsupported constructs and processing limits can leave inspection
-incomplete while retaining available findings. Review the stated reasons and next
-checks in [inspection status](SCANNING.md#diagnostics).
 
 <a id="privacy"></a>
 

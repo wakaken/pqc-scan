@@ -1,0 +1,21 @@
+- id: SOURCE_IMPLEMENTATION_REFERENCE
+  kind: tree_sitter
+  category: CryptoAPI
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.70
+  scope: c,cpp
+  pattern: '\b(?:ECDSA_sign|BCM_mlkem(?:512|768|1024)_generate_key|BCM_mldsa(?:44|65|87)_generate_key)\b'
+  description: A recognized cryptographic implementation entry is defined in source; this is not an API call or evidence of execution.
+  migration_hint: Review implementation ownership, callers and build inclusion. A named implementation entry does not prove conformance, enabled protection or migration completion.
+
+- id: SOURCE_CONSTRUCTION_REFERENCE
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.70
+  scope: c,cpp,csharp
+  pattern: '\b(?:USE_SNTRUP761X25519|GenerateTraditionalKeyPair)\b'
+  description: A conditional hybrid or composite implementation component is referenced; combined protection and execution remain unverified.
+  migration_hint: Review both components, the exact construction, build conditions and combiner separately. A component or conditional guard does not prove negotiation or whole-construction security.

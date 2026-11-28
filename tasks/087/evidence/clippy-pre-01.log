@@ -1,0 +1,23 @@
+    Checking pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+error: field assignment outside of initializer for an instance created with Default::default()
+   --> crates/pqc_scan_core/src/privacy.rs:261:9
+    |
+261 | /         out.line_offsets = std::iter::once(0)
+262 | |             .chain(text.match_indices('\n').map(|(i, _)| i + 1))
+263 | |             .collect();
+    | |_______________________^
+    |
+note: consider initializing the variable with `privacy::SourcePrivacy { line_offsets: std::iter::once(0)
+                  .chain(text.match_indices('\n').map(|(i, _)| i + 1))
+                  .collect(), ..Default::default() }` and removing relevant reassignments
+   --> crates/pqc_scan_core/src/privacy.rs:260:9
+    |
+260 |         let mut out = Self::default();
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#field_reassign_with_default
+    = note: `-D clippy::field-reassign-with-default` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::field_reassign_with_default)]`
+
+error: could not compile `pqc_scan_core` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `pqc_scan_core` (lib test) due to 1 previous error

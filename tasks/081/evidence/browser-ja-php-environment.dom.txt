@@ -1,0 +1,285 @@
+- text: Language / 言語
+- combobox "Language / 言語":
+  - option "English"
+  - option "日本語" [selected]
+- text: Theme / 表示
+- combobox "Theme / 表示":
+  - option "Light / ライト" [selected]
+  - option "Dark / ダーク"
+- main:
+  - link "検出結果へ移動":
+    - /url: "#findings"
+  - paragraph: pqc-scan / 静的解析
+  - heading "耐量子暗号への移行調査レポート" [level=1]
+  - paragraph:
+    - text: 作成日時
+    - time: 2026/11/24 17:32:19 JST (Asia/Tokyo)
+  - generic: 確認が必要な指摘
+  - generic: 14 件
+  - generic: 参考情報
+  - generic: 28 件
+  - generic: 検出のあったファイル数
+  - generic: "17"
+  - figure "重大度の分布 · 全検出":
+    - generic: 重大度の分布 · 全検出
+    - list:
+      - text: 中
+      - strong: "14"
+      - text: 参考情報
+      - strong: "28"
+  - heading "検査範囲と完了状況" [level=2]
+  - paragraph: 一部のファイル・検査を確認できていません
+  - paragraph: 下の理由を確認してください。未確認の範囲に問題がないとは判断できません。
+  - text: 検査対象ファイル数
+  - strong: "25"
+  - text: 解析完了ファイル数
+  - strong: "20"
+  - text: 追加確認が必要なファイル数
+  - strong: "5"
+  - generic "検査範囲と除外条件"
+  - paragraph: "一部だけ検査したファイル: 5"
+  - generic "理由とファイルの例"
+  - complementary:
+    - group "検索条件":
+      - generic "検索条件 ›":
+        - text: 検索条件 ›
+      - text: 表示対象
+      - combobox "表示対象":
+        - option "対応候補"
+        - option "参考情報"
+        - option "すべて" [selected]
+      - text: 検索
+      - searchbox "検索"
+      - text: 重大度
+      - combobox "重大度":
+        - option "すべて" [selected]
+        - option "緊急"
+        - option "高"
+        - option "中"
+        - option "低"
+        - option "参考情報"
+      - text: リスク
+      - combobox "リスク":
+        - option "すべて" [selected]
+        - option "量子計算によるリスクあり"
+        - option "要確認（実装や設定の確認が必要）"
+        - option "PQC方式の参照あり（対応完了の保証ではありません）"
+        - option "量子計算とは別のセキュリティ上の注意点"
+      - text: ルール
+      - combobox "ルール":
+        - option "すべてのルール" [selected]
+        - option "DEP_BOUNCYCASTLE — 暗号処理に関係するライブラリへの依存が見つかりました。"
+        - option "DEP_OPENSSL — 暗号処理に関係するライブラリへの依存が見つかりました。"
+        - option "DEP_NATIVE_CRYPTO — C/C++の暗号ライブラリへの依存やビルド設定の参照が見つかりました。"
+        - option "DEP_NUGET_CRYPTO — NuGetの暗号パッケージに関する記録が見つかりました。"
+        - option "DEP_PHP_CRYPTO — PHPの暗号ライブラリや拡張機能への依存宣言が見つかりました。"
+      - link "ルールの説明":
+        - /url: report.rules.html?lang=ja
+      - text: ファイル
+      - combobox "ファイル":
+        - option "すべてのファイル" [selected]
+        - option "cmake-literals/CMakeLists.txt"
+        - option "composer-lock-git/composer.lock"
+        - option "composer-lock-path/composer.lock"
+        - option "composer-lock-zip/composer.lock"
+        - option "composer-manifest/composer.json"
+        - option "composer-wrappers/composer.json"
+        - option "conan-lock/conan.lock"
+        - option "conan-text/conanfile.txt"
+        - option "nuget-build/Directory.Build.props"
+        - option "nuget-central/Directory.Packages.props"
+        - option "nuget-conditional/sample.csproj"
+        - option "nuget-legacy/packages.config"
+        - option "nuget-lock-1/packages.lock.json"
+        - option "nuget-lock-2/packages.lock.json"
+        - option "nuget-project/sample.csproj"
+        - option "vcpkg-config/vcpkg-configuration.json"
+        - option "vcpkg-manifest/vcpkg.json"
+      - checkbox "テストコードの結果を表示" [checked]
+      - text: テストコードの結果を表示
+      - button "条件をすべて解除"
+    - group "ファイル":
+      - generic "ファイル ›":
+        - text: ファイル ›
+      - link "すべての結果を表示":
+        - /url: "#findings"
+      - list:
+        - generic "cmake-literals 6":
+          - generic: cmake-literals
+          - generic: "6"
+        - generic "composer-lock-git 1":
+          - generic: composer-lock-git
+          - generic: "1"
+        - generic "composer-lock-path 1":
+          - generic: composer-lock-path
+          - generic: "1"
+        - generic "composer-lock-zip 1":
+          - generic: composer-lock-zip
+          - generic: "1"
+        - generic "composer-manifest 4":
+          - generic: composer-manifest
+          - generic: "4"
+        - generic "composer-wrappers 3":
+          - generic: composer-wrappers
+          - generic: "3"
+        - generic "conan-lock 2":
+          - generic: conan-lock
+          - generic: "2"
+        - generic "conan-text 3":
+          - generic: conan-text
+          - generic: "3"
+        - generic "nuget-build 1":
+          - generic: nuget-build
+          - generic: "1"
+        - generic "nuget-central 2":
+          - generic: nuget-central
+          - generic: "2"
+        - generic "nuget-conditional 2":
+          - generic: nuget-conditional
+          - generic: "2"
+        - generic "nuget-legacy 2":
+          - generic: nuget-legacy
+          - generic: "2"
+        - generic "nuget-lock-1 2":
+          - generic: nuget-lock-1
+          - generic: "2"
+        - generic "nuget-lock-2 2":
+          - generic: nuget-lock-2
+          - generic: "2"
+        - generic "nuget-project 2":
+          - generic: nuget-project
+          - generic: "2"
+        - generic "vcpkg-config 2":
+          - generic: vcpkg-config
+          - generic: "2"
+        - generic "vcpkg-manifest 6":
+          - generic: vcpkg-manifest
+          - generic: "6"
+  - region "検出結果":
+    - heading "検出結果" [level=2]
+    - status: 表示対象：5 / 5グループ、42 / 42件
+    - generic "› 暗号処理に関係するライブラリへの依存が見つかりました。 中 6 件 ファイル 6 · 表示対象 6 / 6":
+      - text: ›
+      - strong: 暗号処理に関係するライブラリへの依存が見つかりました。
+      - generic: 中
+      - generic: 6 件
+      - generic: ファイル 6 · 表示対象 6 / 6
+    - generic "› 暗号処理に関係するライブラリへの依存が見つかりました。 中 8 件 ファイル 5 · 表示対象 8 / 8":
+      - text: ›
+      - strong: 暗号処理に関係するライブラリへの依存が見つかりました。
+      - generic: 中
+      - generic: 8 件
+      - generic: ファイル 5 · 表示対象 8 / 8
+    - generic "› C/C++の暗号ライブラリへの依存やビルド設定の参照が見つかりました。 参考情報 11 件 ファイル 5 · 表示対象 11 / 11":
+      - text: ›
+      - strong: C/C++の暗号ライブラリへの依存やビルド設定の参照が見つかりました。
+      - generic: 参考情報
+      - generic: 11 件
+      - generic: ファイル 5 · 表示対象 11 / 11
+    - generic "› NuGetの暗号パッケージに関する記録が見つかりました。 参考情報 7 件 ファイル 7 · 表示対象 7 / 7":
+      - text: ›
+      - strong: NuGetの暗号パッケージに関する記録が見つかりました。
+      - generic: 参考情報
+      - generic: 7 件
+      - generic: ファイル 7 · 表示対象 7 / 7
+    - generic "› PHPの暗号ライブラリや拡張機能への依存宣言が見つかりました。 参考情報 10 件 ファイル 5 · 表示対象 10 / 10":
+      - text: ›
+      - strong: PHPの暗号ライブラリや拡張機能への依存宣言が見つかりました。
+      - generic: 参考情報
+      - generic: 10 件
+      - generic: ファイル 5 · 表示対象 10 / 10
+    - paragraph: Composerの宣言、実際にロードする拡張機能、ネイティブライブラリを別々に確認してください。platformのエミュレート設定は、配備先の環境を示しません。
+    - paragraph:
+      - link "このルールの説明":
+        - /url: report.rules.html?lang=ja#rule-4
+    - heading "検出箇所と対応" [level=4]
+    - generic "composer-lock-git/composer.lock:4:1 paragoni***v1.0.0":
+      - code: composer-lock-git/composer.lock:4:1
+      - generic: paragoni***v1.0.0
+    - generic "composer-lock-path/composer.lock:4:1 paragoni***v1.0.0":
+      - code: composer-lock-path/composer.lock:4:1
+      - generic: paragoni***v1.0.0
+    - generic "composer-lock-zip/composer.lock:4:1 paragoni***v1.0.0":
+      - code: composer-lock-zip/composer.lock:4:1
+      - generic: paragoni***v1.0.0
+    - generic "composer-manifest/composer.json (行番号不明) ext-sodium@8.6.0":
+      - code: composer-manifest/composer.json (行番号不明)
+      - generic: ext-sodium@8.6.0
+    - generic "composer-manifest/composer.json (行番号不明) ext-sodium@*":
+      - code: composer-manifest/composer.json (行番号不明)
+      - generic: ext-sodium@*
+    - generic "composer-manifest/composer.json:5:1 paragoni***at@1.0":
+      - code: composer-manifest/composer.json:5:1
+      - generic: paragoni***at@1.0
+    - generic "composer-manifest/composer.json:8:1 phpsecli***ib@3.0":
+      - code: composer-manifest/composer.json:8:1
+      - generic: phpsecli***ib@3.0
+    - generic "composer-wrappers/composer.json:3:1 mir-evge***hp@1.0":
+      - code: composer-wrappers/composer.json:3:1
+      - generic: mir-evge***hp@1.0
+    - paragraph: PHPの暗号ライブラリや拡張機能への依存宣言が見つかりました。
+    - paragraph: "判断の目安: 要確認（実装や設定の確認が必要）"
+    - paragraph: "確認すること: Composerの宣言、実際にロードする拡張機能、ネイティブライブラリを別々に確認してください。platformのエミュレート設定は、配備先の環境を示しません。"
+    - paragraph:
+      - text: "検出した記述:"
+      - code: mir-evge***hp@1.0
+    - generic "一致したルール (1)"
+    - generic: "3"
+    - generic: "[masked-sensitive-file-content]"
+    - heading "この箇所の対応" [level=4]
+    - heading "FFI版PHP OQSラッパーの出所と保守を確認する 計画して対応" [level=4]
+    - paragraph: 似た名前のラッパーでも、開発元・配布方法・保守・監査の状況は異なります。
+    - list:
+      - listitem: mir-evgenii/liboqs-phpは独立したComposer／FFIラッパーです。FFI設定と別途導入するliboqsを確認してください。
+      - listitem: 実際のパッケージ・ネイティブライブラリ・実行環境を別々に確認してください。存在だけでは選択した方式は分かりません。
+    - generic "参考資料・変更例"
+    - paragraph: 共通の確認・計画（この行で確認済みの事実ではありません）：
+    - list:
+      - link "PHPの拡張機能とネイティブライブラリを確認する":
+        - /url: "#shared-4-0"
+      - link "依存ライブラリのPQC対応を確認する":
+        - /url: "#shared-4-1"
+    - generic "composer-wrappers/composer.json:4:1 ext-oqsphp@*":
+      - code: composer-wrappers/composer.json:4:1
+      - generic: ext-oqsphp@*
+    - paragraph: PHPの暗号ライブラリや拡張機能への依存宣言が見つかりました。
+    - paragraph: "判断の目安: 要確認（実装や設定の確認が必要）"
+    - paragraph: "確認すること: Composerの宣言、実際にロードする拡張機能、ネイティブライブラリを別々に確認してください。platformのエミュレート設定は、配備先の環境を示しません。"
+    - paragraph:
+      - text: "検出した記述:"
+      - code: ext-oqsphp@*
+    - generic "一致したルール (1)"
+    - generic: "4"
+    - generic: "[masked-sensitive-file-content]"
+    - heading "この箇所の対応" [level=4]
+    - heading "ネイティブ版PHP OQSラッパーの出所と保守を確認する 計画して対応" [level=4]
+    - paragraph: 似た名前のラッパーでも、開発元・配布方法・保守・監査の状況は異なります。
+    - list:
+      - listitem: Muzosh/liboqs-phpはoqsphp拡張機能とOQS_*クラスを提供します。mir-evgeniiのComposer／FFIラッパーとは別です。
+      - listitem: 実際のパッケージ・ネイティブライブラリ・実行環境を別々に確認してください。存在だけでは選択した方式は分かりません。
+    - generic "参考資料・変更例"
+    - paragraph: 共通の確認・計画（この行で確認済みの事実ではありません）：
+    - list:
+      - link "PHPの拡張機能とネイティブライブラリを確認する":
+        - /url: "#shared-4-0"
+      - link "依存ライブラリのPQC対応を確認する":
+        - /url: "#shared-4-1"
+    - generic "composer-wrappers/composer.json:5:1 ext-pqcrypto@*":
+      - code: composer-wrappers/composer.json:5:1
+      - generic: ext-pqcrypto@*
+    - generic "共通の確認・計画 (2)"
+    - heading "PHPの拡張機能とネイティブライブラリを確認する 計画して対応" [level=4]
+    - paragraph: 参照や依存宣言から配備先の対応状況は分かりません。不明なバージョンは未確認のまま扱ってください。
+    - list:
+      - listitem: 配備先のPHP・拡張機能・ネイティブライブラリのバージョンは未確認です。Composerのconfig.platformは依存解決用のエミュレート設定です。
+      - listitem: PHP 8.6のSodium KEM APIはlibsodium 1.0.22以降が必要です。X-Wing、単独のML-KEM-768、TLSのハイブリッドグループを区別し、ロード済み拡張機能と操作を確認してください。
+      - listitem: ext-pqcryptoとparagonie/pqcrypto_compatは別々に調べ、対応方式・バージョン・保守と監査の状況を確認してください。Composerパッケージはネイティブ拡張機能とは別です。
+      - listitem: PHP OpenSSLはリンク先・プロバイダーと公開APIを確認してください。OpenSSLのPQC機能だけではPHPのKEMやTLS対応を判断できません。フレームワークのAES暗号化を一律にKEMへ置き換える案にはなりません。
+    - generic "参考資料・変更例" [active]
+    - heading "依存ライブラリのPQC対応を確認する 計画して対応" [level=4]
+    - paragraph: PQCへの移行方法は、利用しているライブラリのバージョンや設定にも左右されます。
+    - list:
+      - listitem: dependency-sbom.jsonで現在のバージョンを確認し、更新候補を決めてください。
+      - listitem: リリース情報でPQC機能とAPIの変更を確認してください。
+      - listitem: 本番導入の前にPQC・ハイブリッド方式の結合テストを行ってください。
+    - generic "参考資料・変更例"

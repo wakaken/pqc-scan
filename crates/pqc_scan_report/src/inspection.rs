@@ -63,6 +63,27 @@ fn detail(message: &str, lang: ReportLanguage) -> String {
     if lang == ReportLanguage::En {
         return message.into();
     }
+    if message.starts_with("Source inspection incomplete. ") {
+        return message
+            .replace("Source inspection incomplete. ", "ソースの検査が未完了です。")
+            .replace("Parser recovery or missing syntax tokens: parsed regions were inspected; unresolved syntax remains unknown. ", "構文回復または構文要素の欠落があります。解析できた範囲は検査しましたが、解釈できない構文は未確認です。")
+            .replace("Conditional source: active branches and build definitions remain unknown. ", "条件付きソースがあります。有効な分岐とビルド時の定義は未確認です。")
+            .replace("Unresolved supported crypto binding: the receiver or selected algorithm remains unknown. ", "対応する暗号操作の参照先を解決できません。操作対象または選択された方式は未確認です。")
+            .replace("Opaque macro syntax: source references were retained; macro expansion and build semantics remain unknown. ", "マクロの構文を展開せずに扱っています。ソース上の参照は保持しましたが、展開結果とビルド時の意味は未確認です。")
+            .replace("Other source uncertainty: some supported source facts could not be resolved. ", "その他の未確定なソース情報があります。対応範囲の参照を一部解決できませんでした。")
+            .replace("Review the affected source and build configuration separately.", "該当ソースとビルド設定を別途確認してください。");
+    }
+    if message.starts_with("Ambiguous C/C++ header: candidate source identities disagree;") {
+        return "CとC++のヘッダー候補でソース上の参照先が食い違います。一致した参照と、言語を明示したルールの参照だけを保持しています。ビルドで使う言語は未確認です。".into();
+    }
+    if message
+        .starts_with("Ambiguous C/C++ header: one or both candidate inspections are incomplete;")
+    {
+        return "CとC++のヘッダー候補の一方または両方で検査が未完了です。保持したソース上の参照先に食い違いはありません。ビルドで使う言語は未確認です。".into();
+    }
+    if message.starts_with("Ambiguous C/C++ header: shared inspection budget exhausted;") {
+        return "CとC++のヘッダー候補で共通の検査上限に達しました。省略した参照や食い違う参照は未確認です。".into();
+    }
     if let Some(rest) = message.strip_prefix("Inspection limit: ") {
         let counters = rest.split('.').next().unwrap_or(rest);
         let translated = counters
@@ -660,4 +681,23 @@ pub(crate) fn markdown(context: &HumanContext<'_>, lang: ReportLanguage) -> Resu
         }
     }
     Ok(out)
+}
+
+#[cfg(test)]
+mod partial_diagnostic_tests {
+    use super::*;
+    #[test]
+    fn unknown_and_legacy_diagnostics_keep_their_fallback() {
+        let unknown = "An unrecognized diagnostic remains unchanged.";
+        assert_eq!(detail(unknown, ReportLanguage::Ja), unknown);
+        let unknown_cause = "Source inspection incomplete. Future reason remains unknown.";
+        assert!(
+            detail(unknown_cause, ReportLanguage::Ja).contains("Future reason remains unknown.")
+        );
+        assert!(detail(
+            "Source syntax could not be fully interpreted.",
+            ReportLanguage::Ja
+        )
+        .contains("ソースの構文またはルール"));
+    }
 }

@@ -1,0 +1,111 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "columnKind": "unicodeCodePoints",
+      "tool": {
+        "driver": {
+          "name": "pqc-scan",
+          "rules": [
+            {
+              "id": "C_FAMILY_CRYPTO_API",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "C_FAMILY_PQC_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "C_FAMILY_CRYPTO_API",
+          "level": "warning",
+          "message": {
+            "text": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification. | migration_hint=Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation. | next_actions=Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "case.h"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+            "recommended_actions": [
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "C_FAMILY_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection. | migration_hint=Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "case.h"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+          }
+        },
+        {
+          "ruleId": "C_FAMILY_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection. | migration_hint=Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "case.h"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+          }
+        }
+      ]
+    }
+  ]
+}

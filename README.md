@@ -57,11 +57,11 @@ Point the scanner at a local repository. It inspects the following artifacts wit
 
 | Artifact | Languages or file examples | What the scanner looks for |
 |---|---|---|
-| Source code | Java, Go, JavaScript, TypeScript/TSX, Python, Rust, Ruby | Cryptographic APIs, algorithm names and related usage patterns |
+| Source code | Java, Go, JavaScript, TypeScript/TSX, Python, Rust, Ruby, PHP, C#, C, C++ | Cryptographic APIs, algorithm names and related usage patterns |
 | Middleware configuration files | Kubernetes/Ingress, nginx, Apache httpd, Envoy, Istio, HAProxy, Traefik | TLS/cipher/group settings and other cryptographic configuration signals |
 | Certificate files | `.pem`, `.crt`, `.cer`, `.der` | Signature and subject-key algorithms, supported key sizes/curves, validity periods and public fingerprints |
 | Private-key headers | RSA, generic PKCS#8 and OpenSSH private-key headers | The presence of supported headers; no decryption or private-key validation |
-| Dependency manifests and locks | `Cargo.toml`, `Cargo.lock`, `package.json`, npm/pnpm locks, Python/Ruby/Java/Go dependency files | Relevant libraries, declared version constraints and supported resolution records |
+| Dependency manifests and locks | `Cargo.toml`, `Cargo.lock`, `package.json`, npm/pnpm locks, Python/Ruby/Java/Go files, Composer, NuGet/MSBuild, vcpkg, Conan and literal CMake references | Relevant libraries, declared version constraints and supported resolution records |
 | SBOM files | CycloneDX JSON and SPDX JSON | SBOMs used for the scanned project, describing its dependency components and packages |
 
 File selection defaults to 2 MiB per file. See [file-size limits](docs/user/SCANNING.md#file-size-limit).
@@ -75,6 +75,12 @@ File selection defaults to 2 MiB per file. See [file-size limits](docs/user/SCAN
 - Writes HTML/Markdown for investigation and JSON/SARIF for integration with other tools.
 - Lists cryptographic scan results and software dependencies separately.
 - Lets you enter the purpose and usage of cryptography to organize the checks needed for migration to PQC.
+
+v0.5.0 includes 139 built-in rules. See the [v0.5.0 release notes](docs/releases/v0.5.0.md)
+for changes. Use the scanner and rules from the same version.
+
+Reports retain ordinary arguments and surrounding code while masking recognized
+secret values. See [source excerpts](docs/user/REPORTS.md#source-excerpts).
 
 A reference to a PQC algorithm is useful evidence, but it does not establish that the application uses it successfully. The [report guide](docs/user/REPORTS.md#pqc-findings) explains these findings with examples.
 

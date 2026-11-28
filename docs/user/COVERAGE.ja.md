@@ -2,7 +2,8 @@
 
 [English](COVERAGE.md) · [README](../../README.ja.md)
 
-v0.4.0で検査できる入力と、スキャン結果のレポートを読むときの注意点を説明します。\
+検査できる入力と、検査範囲の制約を説明します。\
+スキャナーと同じ版のルールを使ってください。\
 [入力の概要](../../README.ja.md#targets)と[スキャン手順](SCANNING.ja.md)も参照してください。
 
 ## 目次
@@ -64,20 +65,17 @@ Kubernetes／Ingress、nginx、Apache httpd、Envoy、Istio、HAProxy、Traefik�
 TLS・暗号スイート・鍵交換グループなどの設定を調べます。\
 ファイル上の設定であり、稼働中の接続で有効な方式を確認した結果ではありません。
 
-組み込みルールは125件です。\
-同梱の `rules/default` を指定して使ってください。
+組み込みルールは139件です。同梱の `rules/default` を指定して使ってください。
 
 <a id="source-limits"></a>
 <a id="source-facts"></a>
 
 ## ソースコードの検査範囲
 
-Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Rubyの暗号APIや方式名の参照を調べます。コードは実行しません。\
+Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Ruby、PHP、C#、C/C++の暗号APIや方式名の参照を調べます。\
+コードは実行しません。\
 対応する利用パターンに範囲があるため、すべての暗号処理を発見するものではありません。\
-暗号アルゴリズムなどの名前がコード中に見つかっても、その処理が実際に使われていることや、PQCへの移行が完了していることまでは確認できません。
-
-構文エラー、未対応の記述、処理上限などで検査が終わらなかった場合も、取得できた検出結果は残ります。\
-[検査状況と未完了の確認](SCANNING.ja.md#diagnostics)を参照し、表示された理由と次の確認方法に沿って調べてください。
+方式名が見つかっても、実行時の利用やPQC対応の完了を意味しません。
 
 <a id="privacy"></a>
 

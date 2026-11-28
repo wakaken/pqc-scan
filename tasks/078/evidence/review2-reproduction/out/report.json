@@ -1,0 +1,447 @@
+{
+  "generated_at": "2026-11-24T04:21:50.773086Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-ff8015e8a9f9dce103c6c7170b131818c3cb269b88b1c7b95b3dc5be8112b6f5",
+      "rule_id": "TLS_RSA_CIPHER_SUITE",
+      "category": "TLS",
+      "risk": "quantum-vulnerable",
+      "severity": "critical",
+      "confidence": 0.68,
+      "description": "RSA-based TLS cipher suite detected.",
+      "migration_hint": "Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication.",
+      "location": {
+        "file": "privacy.php",
+        "line": 1,
+        "column": 51
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "TLS_RSA_***ARY078",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "tls.review-reference",
+          "title": "Review the TLS reference before changing effective settings",
+          "priority": "planned",
+          "rationale": "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.",
+          "steps": [
+            "Distinguish constants, comments, tests and active settings.",
+            "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration."
+          ],
+          "references": [
+            "https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-ac7913353c09a0cc1c97e7d75680f64ac1bafb5f4014df73694ed22907eb3e67",
+      "rule_id": "TLS_RSA_KEY_EXCHANGE",
+      "category": "TLS",
+      "risk": "quantum-vulnerable",
+      "severity": "critical",
+      "confidence": 0.7,
+      "description": "TLS RSA key-exchange suite detected.",
+      "migration_hint": "Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats.",
+      "location": {
+        "file": "privacy.php",
+        "line": 1,
+        "column": 51
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "TLS_RSA_***ARY078",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "regex_detector",
+          "scope": "code"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "tls.review-reference",
+          "title": "Review the TLS reference before changing effective settings",
+          "priority": "planned",
+          "rationale": "A source name or token does not prove enabled configuration or a negotiated connection. ECDHE_RSA/DHE_RSA use RSA authentication, not static RSA key exchange.",
+          "steps": [
+            "Distinguish constants, comments, tests and active settings.",
+            "Inspect key agreement, authentication and protocol version separately; confirm existing hybrid support and peer compatibility before migration."
+          ],
+          "references": [
+            "https://www.rfc-editor.org/rfc/rfc8422.html#section-2.2"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-4014546f96394c9c47bd8c0ebfc72a754041cc0034abee760a4a4c6f3373af66",
+      "rule_id": "PHP_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved.",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+      "location": {
+        "file": "computed.php",
+        "line": 1,
+        "column": 90
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "explicit_key_type_request"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-b4df3a52421dbfeff86d43f74e1a0a31462c13cd394a5aed6a926d54d0b9b452",
+      "rule_id": "PHP_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved.",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+      "location": {
+        "file": "computed.php",
+        "line": 1,
+        "column": 115
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "locally_typed_signature_request"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-6469225ee159912025c41520895217bdd126413353b8f896760967756b5e8a1f",
+      "rule_id": "PHP_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved.",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+      "location": {
+        "file": "spread.php",
+        "line": 1,
+        "column": 73
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "explicit_key_type_request"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-10c92e6c1ada7fd603a180946583b041baa9e420fca083a520bdfadb0066f962",
+      "rule_id": "PHP_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved.",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+      "location": {
+        "file": "spread.php",
+        "line": 1,
+        "column": 98
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "locally_typed_signature_request"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-7f96f6b3eae35723bbb0e6fdc336debf43776efca72aeeeb6d2265d66da7afb9",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "keyedwrite.php",
+        "line": 1,
+        "column": 17
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "tree_sitter_detector",
+          "language": "php",
+          "node_kind": "bounded_source_fact",
+          "scope": "php",
+          "source_resolution": "explicit_pqc_keypair_request"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "privacy.php",
+      "algorithm": "TLS_RSA_***ARY078",
+      "usage_type": "TLS",
+      "location": "privacy.php:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication."
+    },
+    {
+      "component": "privacy.php",
+      "algorithm": "TLS_RSA_***ARY078",
+      "usage_type": "TLS",
+      "location": "privacy.php:1",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats."
+    },
+    {
+      "component": "computed.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "computed.php:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+    },
+    {
+      "component": "computed.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "computed.php:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+    },
+    {
+      "component": "spread.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "spread.php:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+    },
+    {
+      "component": "spread.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "spread.php:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+    },
+    {
+      "component": "keyedwrite.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "keyedwrite.php:1",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 7,
+    "by_severity": {
+      "critical": 2,
+      "info": 1,
+      "medium": 4
+    },
+    "by_risk": {
+      "quantum-safe": 1,
+      "quantum-uncertain": 4,
+      "quantum-vulnerable": 2
+    },
+    "scanned_files": 4,
+    "skipped_files": 0
+  }
+}

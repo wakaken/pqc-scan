@@ -1,13 +1,14 @@
 //! Dependency assertions and a compatible flat projection; no package resolution.
 mod bounded;
 mod decode;
+mod languages;
 mod maven_context;
 mod parse;
 mod ruby;
 mod yaml_preflight;
 use anyhow::Result;
 use pqc_scan_core::model::mask_preview;
-use pqc_scan_core::observation::{DependencyOrigin, DependencyVersionFacts};
+use pqc_scan_core::observation::{DependencyContext, DependencyOrigin, DependencyVersionFacts};
 use pqc_scan_core::{
     Detection, Detector, DetectorOutcome, Evidence, Location, ObservationDraft, ScannableFile,
 };
@@ -31,6 +32,7 @@ struct DependencyItem {
     ordinal: usize,
     parsed: bool,
     context: Option<&'static str>,
+    language_context: Option<DependencyContext>,
 }
 impl DependencyDetector {
     fn inspect(
@@ -40,7 +42,9 @@ impl DependencyDetector {
         observe: bool,
         context: Option<&pqc_scan_core::RepositoryContext>,
     ) -> Result<DetectorOutcome> {
-        let parsed = if file.file_name() == Some("pom.xml") && file.text.is_some() {
+        let parsed = if languages::accepts(file) {
+            languages::inspect(file, context)?
+        } else if file.file_name() == Some("pom.xml") && file.text.is_some() {
             let props = maven_context::load(file, context);
             bounded::pom_with_context(file.text.as_deref().unwrap_or(""), &props)?
         } else if matches!(file.file_name(), Some("Gemfile" | "gems.rb"))
@@ -108,7 +112,7 @@ impl DependencyDetector {
             }
             if observe {
                 drafts.extend(hits.iter().map(|d| {
-                    ObservationDraft::dependency_assertion(
+                    let draft = ObservationDraft::dependency_assertion(
                         d,
                         DependencyVersionFacts {
                             declared: item.declared.as_deref(),
@@ -118,7 +122,12 @@ impl DependencyDetector {
                             ordinal: item.ordinal,
                             parsed: item.parsed,
                         },
-                    )
+                    );
+                    if let Some(context) = item.language_context {
+                        draft.with_dependency_context(context)
+                    } else {
+                        draft
+                    }
                 }));
             }
             detections.extend(hits);

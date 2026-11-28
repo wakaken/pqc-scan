@@ -1,22 +1,22 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-11-20",
+  "reviewed_at": "2026-11-24",
   "base_commit": "1bb45f891c3b39f5e784e9b10cff23a1ee94ab0c",
   "fixture_layer": "compiled_pattern_target_only",
   "license": "MIT; original synthetic fixtures and review text, references linked not copied",
-  "scope": "Current integrated v0.3 rule companion. New source binding; inherits unchanged classifications and exact pattern fixtures from the two archived companions. Not an accuracy certification or a reassignment of historical review hashes.",
+  "scope": "Current integrated companion plus task081 bounded PHP/NuGet/native dependency additions. Inherited134 rows unchanged; pattern controls are not detector accuracy measurements.",
   "source_files": [
     {
       "path": "rules/default/cert.yml",
-      "sha256": "4b508af4b18cdfb8bb0b811bc021c24b0837d667b19a3d136e6f6dc9e808a75b"
+      "sha256": "65562f8eaa263940b60ce3d0b83e95a4b6c064ea095e2deb138e8a8466c3f260"
     },
     {
       "path": "rules/default/crypto_api.yml",
-      "sha256": "ac1a6ee684390ea37ca6d783468016f8e896512737eeca6640e8ba735a583006"
+      "sha256": "37e692cde0402ac28b16ef5d3a37436ff2b3651f4e483cded9e6f62b46375673"
     },
     {
       "path": "rules/default/jwt.yml",
-      "sha256": "580a9f4f263b9e441757619c7f655a38b8496edeb570807cbb6bff5070b87a51"
+      "sha256": "d81ef2c09dffb7f829cf7ed856b38cfa8ab0bbb9faeec2cd9c0bdc03ea89548d"
     },
     {
       "path": "rules/default/middleware.yml",
@@ -24,7 +24,7 @@
     },
     {
       "path": "rules/default/pqc.yml",
-      "sha256": "acde689dc784a1866c738014fe47cb071948f7e452c3bdf32722b83082f824d2"
+      "sha256": "45b41005a7e4a63960d31d89b669ee2d8fd1c6ea41bd49e3bb3abb9672903ebe"
     },
     {
       "path": "rules/default/ssh.yml",
@@ -32,11 +32,31 @@
     },
     {
       "path": "rules/default/tls.yml",
-      "sha256": "bab99ff127a7cc147f83bdae3a4246d8e629389c9de0a6d280f3a3ec25e7af43"
+      "sha256": "6e3c59cc2e12bfc6f5ad06580f6a4a9fef8b5dba513af80daf4764e9fe9347b0"
     },
     {
       "path": "rules/default/tree_sitter.yml",
       "sha256": "9e3ee8bd1442bd99562565ab08f28e7c624f6100dcc858054f789d4a861d0edf"
+    },
+    {
+      "path": "rules/default/php.yml",
+      "sha256": "6a09be5f15b674205b6b8e482092f086c489f5f3805de28cbd67993d913c6499"
+    },
+    {
+      "path": "rules/default/csharp.yml",
+      "sha256": "4413e37c0c95840324e49ce79a05c7c23d9f85b72734a13dcd215c37280dfdc7"
+    },
+    {
+      "path": "rules/default/c_family.yml",
+      "sha256": "638f577b292d370e60d7e9814957eed9ea2e8fbb2772ccf50d53967bf3651fc7"
+    },
+    {
+      "path": "rules/default/language_dependencies.yml",
+      "sha256": "99cdff24352df3f9c69545b773fcaa877b1b77faa003fc301b99455d629c3d9f"
+    },
+    {
+      "path": "rules/default/source_references.yml",
+      "sha256": "0da824be0bea3f02ede9d8c461615d675ae5ccb8d7e45cb24c195e696ea7da9c"
     }
   ],
   "references": {
@@ -123,6 +143,114 @@
       "edition": "repository companion v1, 2026-11-10",
       "url": "docs/quality/RULE-QUALITY.md",
       "scope_limit": "Current local heuristic behavior only; not a cryptographic standard or proof of detection accuracy."
+    },
+    "PHP-php": {
+      "title": "php/php-src",
+      "edition": "e0d4d57ac2de236058a7e2c5cabb61609a621d4f",
+      "url": "https://raw.githubusercontent.com/php/php-src/e0d4d57ac2de236058a7e2c5cabb61609a621d4f/ext/openssl/openssl.stub.php",
+      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
+    },
+    "PHP-ext-pqcrypto": {
+      "title": "paragonie/ext-pqcrypto",
+      "edition": "2d64b4a1dfc6fd34561947aed3ba442f54283a8f",
+      "url": "https://raw.githubusercontent.com/paragonie/ext-pqcrypto/2d64b4a1dfc6fd34561947aed3ba442f54283a8f/README.md",
+      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
+    },
+    "PHP-pqcrypto-compat": {
+      "title": "paragonie/pqcrypto_compat",
+      "edition": "d15b17cc6f2e922c780e928d27f4677aba0b8e05",
+      "url": "https://raw.githubusercontent.com/paragonie/pqcrypto_compat/d15b17cc6f2e922c780e928d27f4677aba0b8e05/README.md",
+      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
+    },
+    "PHP-phpseclib": {
+      "title": "phpseclib/phpseclib",
+      "edition": "13e0215be2c8c32ec577edba6139b64d376bcb7c",
+      "url": "https://raw.githubusercontent.com/phpseclib/phpseclib/13e0215be2c8c32ec577edba6139b64d376bcb7c/phpseclib/Crypt/RSA.php",
+      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
+    },
+    "PHP-oqs-php-ext": {
+      "title": "Muzosh/liboqs-php",
+      "edition": "8f929d29d6fbe58cfdb65a48c436510bd93b7da2",
+      "url": "https://raw.githubusercontent.com/Muzosh/liboqs-php/8f929d29d6fbe58cfdb65a48c436510bd93b7da2/README.md",
+      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
+    },
+    "PHP-oqs-php-ffi": {
+      "title": "mir-evgenii/liboqs-php",
+      "edition": "ae09b858eef7c3cf36ffe7ebcbfecf7bc4f91ac3",
+      "url": "https://raw.githubusercontent.com/mir-evgenii/liboqs-php/ae09b858eef7c3cf36ffe7ebcbfecf7bc4f91ac3/README.md",
+      "scope_limit": "Pinned API declarations and qualified source identities only; no PHP/native runtime capability or deployed-use assertion. Full snapshots and hashes: tasks/076/evidence/SOURCES.json."
+    },
+    "CSHARP-dotnet": {
+      "title": "dotnet/runtime",
+      "edition": "deae2e32bf0e018e09d64597b7c59b62b73bb3ce",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/deae2e32bf0e018e09d64597b7c59b62b73bb3ce/src/libraries/Common/src/System/Security/Cryptography/MLKem.cs",
+      "scope_limit": "Pinned API names, exact pure enum parameter sets and project identities only; not platform/runtime installation, active cryptography or .NET/BC parity. See source snapshots/hashes in tasks/076/evidence/SOURCES.json and task079 supplemental sources."
+    },
+    "CSHARP-bc-csharp": {
+      "title": "bcgit/bc-csharp",
+      "edition": "4007498b13582d90ee1eda5d9920c324428b98b3",
+      "url": "https://raw.githubusercontent.com/bcgit/bc-csharp/4007498b13582d90ee1eda5d9920c324428b98b3/README.md",
+      "scope_limit": "Pinned API names, exact pure enum parameter sets and project identities only; not platform/runtime installation, active cryptography or .NET/BC parity. See source snapshots/hashes in tasks/076/evidence/SOURCES.json and task079 supplemental sources."
+    },
+    "CSHARP-oqs-dotnet-old": {
+      "title": "open-quantum-safe/liboqs-dotnet",
+      "edition": "00c4c6b1a114579803c23329b41189da865f2672",
+      "url": "https://raw.githubusercontent.com/open-quantum-safe/liboqs-dotnet/00c4c6b1a114579803c23329b41189da865f2672/README.md",
+      "scope_limit": "Pinned API names, exact pure enum parameter sets and project identities only; not platform/runtime installation, active cryptography or .NET/BC parity. See source snapshots/hashes in tasks/076/evidence/SOURCES.json and task079 supplemental sources."
+    },
+    "CSHARP-oqs-dotnet": {
+      "title": "openforge-sh/liboqs-dotnet",
+      "edition": "b910a32eaa6b47bfab5769c7eaa2acbbb310f732",
+      "url": "https://raw.githubusercontent.com/openforge-sh/liboqs-dotnet/b910a32eaa6b47bfab5769c7eaa2acbbb310f732/README.md",
+      "scope_limit": "Pinned API names, exact pure enum parameter sets and project identities only; not platform/runtime installation, active cryptography or .NET/BC parity. See source snapshots/hashes in tasks/076/evidence/SOURCES.json and task079 supplemental sources."
+    },
+    "C-FAMILY-openssl": {
+      "title": "openssl/openssl",
+      "edition": "636dfadc70ce26f2473870570bfd9ec352806b1d",
+      "url": "https://raw.githubusercontent.com/openssl/openssl/636dfadc70ce26f2473870570bfd9ec352806b1d/include/openssl/evp.h",
+      "scope_limit": "Pinned exact API signatures/selector names and source reference semantics; not enabled algorithms, linked provider, runtime success or negotiated TLS. Snapshots/hashes in tasks076 and080."
+    },
+    "C-FAMILY-liboqs": {
+      "title": "open-quantum-safe/liboqs",
+      "edition": "5a1a854b0dc9f2141bdc771c555ee60c37950183",
+      "url": "https://raw.githubusercontent.com/open-quantum-safe/liboqs/5a1a854b0dc9f2141bdc771c555ee60c37950183/src/kem/kem.h",
+      "scope_limit": "Pinned exact API signatures/selector names and source reference semantics; not enabled algorithms, linked provider, runtime success or negotiated TLS. Snapshots/hashes in tasks076 and080."
+    },
+    "C-FAMILY-liboqs-cpp": {
+      "title": "open-quantum-safe/liboqs-cpp",
+      "edition": "7db51b636fdf8fa0a3bf7ce0bc67db0cb4dfe8f9",
+      "url": "https://raw.githubusercontent.com/open-quantum-safe/liboqs-cpp/7db51b636fdf8fa0a3bf7ce0bc67db0cb4dfe8f9/include/oqs_cpp.hpp",
+      "scope_limit": "Pinned exact API signatures/selector names and source reference semantics; not enabled algorithms, linked provider, runtime success or negotiated TLS. Snapshots/hashes in tasks076 and080."
+    },
+    "V05-FORMATS": {
+      "title": "Pinned task076 dependency format sources",
+      "edition": "076 frozen 2026-11-24 SHA256 c207aaa30adb88d397357f2a21f6b37ef1ccd328d72bf2030b8262b2783ae319",
+      "url": "tasks/076/evidence/FORMAT-SOURCES.json",
+      "scope_limit": "Supported literal declarations and source-local lock claims only; no installed software, graph, active crypto or runtime support."
+    },
+    "OSS-SOURCE-085": {
+      "title": "Pinned implementation and construction source contracts",
+      "edition": "Task084 fixed upstream revisions; task085 bounded source interpretation",
+      "url": "tasks/085/TASK-085-PLAN.md",
+      "scope_limit": "Named definitions and conditional/component references only; no implementation conformance, execution, negotiated protection or whole-construction security."
+    },
+    "OSS-IMPLEMENTATION-085": {
+      "title": "Pinned BoringSSL implementation entries",
+      "edition": "5ec099107553142e9cb34dfe52f3c5bb42c9b7fb",
+      "url": "https://github.com/google/boringssl/tree/5ec099107553142e9cb34dfe52f3c5bb42c9b7fb/crypto",
+      "scope_limit": "Canonical function definitions identify declared implementation entries, not conformance or execution."
+    },
+    "OSS-HYBRID-085": {
+      "title": "OpenSSH conditional sntrup761/X25519 source",
+      "edition": "d1b85c67231443b6db150c56ec5aec0e88459edb",
+      "url": "https://github.com/openssh/openssh-portable/blob/d1b85c67231443b6db150c56ec5aec0e88459edb/kexsntrup761x25519.c",
+      "scope_limit": "Conditional construction reference only; compiled support and actual negotiation unverified."
+    },
+    "OSS-COMPOSITE-085": {
+      "title": "Bouncy Castle composite ML-DSA generator",
+      "edition": "4814a10bc95da8757d8390c59b0b62d4cc00cb0d",
+      "url": "https://github.com/bcgit/bc-csharp/blob/4814a10bc95da8757d8390c59b0b62d4cc00cb0d/crypto/src/crypto/generators/CompositeMLDsaKeyPairGenerator.cs",
+      "scope_limit": "Traditional component request in its canonical composite owner; no whole-construction security inference."
     }
   },
   "rules": [
@@ -230,10 +358,10 @@
         "severity": "medium",
         "risk": "quantum-vulnerable",
         "confidence": 0.54,
-        "migration_hint": "Use EVP_PKEY abstraction to prepare key-type replacement for PQC.",
+        "migration_hint": "Confirm whether this identifier belongs to active key configuration or use. If so, assess key-type replacement and provider support for PQC migration.",
         "pattern": "EVP_PKEY_(RSA|set1_RSA)",
         "scope": "code",
-        "description": "EVP_PKEY configured for RSA detected."
+        "description": "Text matching an RSA-related EVP_PKEY identifier was found. This match does not establish a configured key."
       },
       "purpose": "signature_or_key_establishment_reference",
       "algorithm_families": [
@@ -1024,10 +1152,10 @@
         "severity": "medium",
         "risk": "quantum-uncertain",
         "confidence": 0.35,
-        "migration_hint": "Audit algorithms used inside PKCS#12/PFX containers.",
+        "migration_hint": "Check whether the file contains PKCS#12/PFX data. If certificates are present, inspect their algorithms and retain unsupported or encrypted contents as unverified.",
         "pattern": "(?i)\\.(p12|pfx)$",
         "scope": "certificate",
-        "description": "PKCS#12/PFX container file detected."
+        "description": "Filename extension suggests PKCS#12/PFX. This finding does not establish container contents or certificate presence."
       },
       "purpose": "container_inventory",
       "algorithm_families": [
@@ -1071,10 +1199,10 @@
         "severity": "low",
         "risk": "quantum-uncertain",
         "confidence": 0.3,
-        "migration_hint": "Identify the cryptographic object type; inspect certificate algorithms only when a certificate is present.",
+        "migration_hint": "Check the file contents and object type. Inspect certificate algorithms only when a certificate is present.",
         "pattern": "(?i)\\.(pem|crt|cer|der)$",
         "scope": "certificate",
-        "description": "PEM/DER cryptographic container detected; certificate presence is not established."
+        "description": "Filename extension suggests a PEM/DER object. This finding does not establish cryptographic content or certificate presence."
       },
       "purpose": "container_inventory",
       "algorithm_families": [
@@ -2853,10 +2981,10 @@
         "severity": "low",
         "risk": "quantum-uncertain",
         "confidence": 0.35,
-        "migration_hint": "Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.",
+        "migration_hint": "Confirm the member's object and active use. If it selects signing or verification keys, assess JOSE formats and peer/library support before planning PQC key rotation.",
         "pattern": "\"kid\"\\s*:",
         "scope": "code",
-        "description": "JWT kid header usage detected, indicating key-management touch points."
+        "description": "A kid member reference was found. This match does not distinguish a key object from a JWT header."
       },
       "purpose": "jwt_metadata_or_api_reference",
       "algorithm_families": [
@@ -3769,10 +3897,10 @@
         "severity": "medium",
         "risk": "quantum-vulnerable",
         "confidence": 0.52,
-        "migration_hint": "Replace with EVP_PKEY-based implementation suitable for PQC migration.",
+        "migration_hint": "Confirm whether this name occurs in an active RSA operation. If so, assess an EVP_PKEY-based implementation and provider support for the required migration.",
         "pattern": "RSA_(generate_key|public_encrypt|private_decrypt)",
         "scope": "code",
-        "description": "OpenSSL RSA API call detected."
+        "description": "Text matching an OpenSSL RSA API name was found. This match does not establish an API call."
       },
       "purpose": "signature_or_key_establishment_reference",
       "algorithm_families": [
@@ -6036,7 +6164,7 @@
         "risk": "quantum-safe",
         "confidence": 0.6,
         "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security.",
-        "pattern": "(?i)\\b(?:ML-KEM-(?:512|768|1024)|ML-DSA-(?:44|65|87)|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf]|MLKEM(?:512|768|1024)|MLDSA(?:44|65|87)|X25519MLKEM768)\\b",
+        "pattern": "(?i)\\b(?:ML-KEM-(?:512|768|1024)|ML-DSA-(?:44|65|87)|SLH-DSA-(?:SHA2|SHAKE)-(?:128|192|256)[sf]|MLKEM(?:512|768|1024)|MLDSA(?:44|65|87)|ml_kem(?:512|768|1024)|ml_dsa(?:44|65|87)|slh_dsa_(?:sha2|shake)_(?:128|192|256)[sf]|X25519MLKEM768)\\b",
         "scope": "java,go,javascript,typescript,python,rust,ruby",
         "description": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established."
       },
@@ -6058,7 +6186,8 @@
       "method_limits": [
         "Regex over eligible AST nodes, not semantic binding, call reachability or data flow.",
         "Seven-language heuristic scopes; TypeScript/TSX use dedicated grammars. Syntax errors can still yield partial inspection.",
-        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives."
+        "Aliases, shadowing, computed names and same-named APIs can cause misses/false positives.",
+        "The eighteen underscore spellings are nominal parameter-set references, not name binding or a final-standard implementation conformance claim."
       ],
       "known_gaps": [
         "Names and registration symbols do not establish execution, final implementation conformance or product security."
@@ -6087,6 +6216,126 @@
         },
         {
           "target": "NOTMLKEM768",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "ml_kem512",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ml_kem768",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ml_kem1024",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ml_dsa44",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ml_dsa65",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ml_dsa87",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_128s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_128f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_192s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_192f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_256s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_sha2_256f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_128s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_128f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_192s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_192f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_256s",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "slh_dsa_shake_256f",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "not_ml_kem768",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "ml_kem768_helper",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "ml_kem999",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "ml_dsa99",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "slh_dsa_sha2_128fast",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "slh_dsa_sha3_128f",
           "desired_positive": false,
           "expected_pattern_match": false
         }
@@ -6177,6 +6426,738 @@
         },
         {
           "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "PHP_CRYPTO_API",
+      "rule_snapshot": {
+        "id": "PHP_CRYPTO_API",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "medium",
+        "risk": "quantum-uncertain",
+        "confidence": 0.8,
+        "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+        "pattern": "(?i)\\b(?:openssl_(?:pkey_new|pkey_derive|public_encrypt|private_decrypt|private_encrypt|public_decrypt|sign|verify)|sodium_crypto_(?:sign|scalarmult|box|kx)(?:_[A-Za-z0-9_]+)?|OQS_SIGNATURE|Oqs\\\\OqsSig|phpseclib3\\\\Crypt\\\\(?:RSA|EC|DH)::[A-Za-z_][A-Za-z0-9_]*)\\s*\\(",
+        "scope": "php",
+        "description": "PHP cryptographic API or library reference; key type may be unresolved."
+      },
+      "purpose": "primitive_request_or_unresolved_api_reference",
+      "algorithm_families": [],
+      "quantum": "finite_resolved_primitive_only_or_unknown; X-Wing distinct; wrapper unknown",
+      "classical": "not_a_classical_security_assessment",
+      "reference_ids": [
+        "PHP-php",
+        "PHP-ext-pqcrypto",
+        "PHP-pqcrypto-compat",
+        "PHP-phpseclib",
+        "PHP-oqs-php-ext",
+        "PHP-oqs-php-ffi"
+      ],
+      "reference_application": "Grammar-aware exact qualified identities and bounded local facts; legacy confidence weights 0.80/0.60 are conventions, not calibrated probabilities. Signature wrapper references retain the frozen PHP_CRYPTO_API ID without asserting a classical primitive.",
+      "method_limits": [
+        "No PHP, template, FFI, manager, dynamic code or arbitrary cross-file evaluation.",
+        "Private argument ranges are ephemeral; context is masked. Generic signing/imported keys do not imply RSA.",
+        "Compiled regex controls alone do not validate scope/binding semantics; detector tests and frozen 180-case cohort are separate evidence."
+      ],
+      "known_gaps": [
+        "Dynamic functions/classes, reflection, runtime aliases, unsupported receiver flow and external symbols remain unresolved; no absence-of-risk claim."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "openssl_sign(",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "PHP_PQC_API",
+      "rule_snapshot": {
+        "id": "PHP_PQC_API",
+        "kind": "tree_sitter",
+        "category": "PQC",
+        "severity": "info",
+        "risk": "quantum-safe",
+        "confidence": 0.8,
+        "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+        "pattern": "(?i)\\b(?:sodium_crypto_kem_[A-Za-z0-9_]+\\s*\\(|(?:PQCrypto|ParagonIE\\\\PQCrypto)\\\\(?:MLKem(?:512|768|1024)|MLDSA(?:44|65|87)|XWing|SLHDSA|Compat)(?:\\\\[A-Za-z_][A-Za-z0-9_]*)?\\s*(?:::|\\())",
+        "scope": "php",
+        "description": "PHP PQC algorithm or X-Wing reference; runtime support requires verification."
+      },
+      "purpose": "pqc_or_hybrid_source_reference",
+      "algorithm_families": [],
+      "quantum": "finite_resolved_primitive_only_or_unknown; X-Wing distinct; wrapper unknown",
+      "classical": "not_a_classical_security_assessment",
+      "reference_ids": [
+        "PHP-php",
+        "PHP-ext-pqcrypto",
+        "PHP-pqcrypto-compat",
+        "PHP-phpseclib",
+        "PHP-oqs-php-ext",
+        "PHP-oqs-php-ffi"
+      ],
+      "reference_application": "Grammar-aware exact qualified identities and bounded local facts; legacy confidence weights 0.80/0.60 are conventions, not calibrated probabilities. Signature wrapper references retain the frozen PHP_CRYPTO_API ID without asserting a classical primitive.",
+      "method_limits": [
+        "No PHP, template, FFI, manager, dynamic code or arbitrary cross-file evaluation.",
+        "Private argument ranges are ephemeral; context is masked. Generic signing/imported keys do not imply RSA.",
+        "Compiled regex controls alone do not validate scope/binding semantics; detector tests and frozen 180-case cohort are separate evidence."
+      ],
+      "known_gaps": [
+        "Dynamic functions/classes, reflection, runtime aliases, unsupported receiver flow and external symbols remain unresolved; no absence-of-risk claim."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "PQCrypto\\MLKem768::generateKeypair(",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "PHP_CRYPTO_REFERENCE",
+      "rule_snapshot": {
+        "id": "PHP_CRYPTO_REFERENCE",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.6,
+        "migration_hint": "Identify the specific third-party OQS wrapper and native library. A qualified reference does not establish installation, algorithm selection or enabled functionality.",
+        "pattern": "(?i)\\b(?:OQS_KEYENCAPSULATION|Oqs\\\\OqsKem)\\b",
+        "scope": "php",
+        "description": "PHP OQS KEM wrapper reference; installation and selected algorithm are unresolved."
+      },
+      "purpose": "opaque_wrapper_reference",
+      "algorithm_families": [],
+      "quantum": "finite_resolved_primitive_only_or_unknown; X-Wing distinct; wrapper unknown",
+      "classical": "not_a_classical_security_assessment",
+      "reference_ids": [
+        "PHP-php",
+        "PHP-ext-pqcrypto",
+        "PHP-pqcrypto-compat",
+        "PHP-phpseclib",
+        "PHP-oqs-php-ext",
+        "PHP-oqs-php-ffi"
+      ],
+      "reference_application": "Grammar-aware exact qualified identities and bounded local facts; legacy confidence weights 0.80/0.60 are conventions, not calibrated probabilities. Signature wrapper references retain the frozen PHP_CRYPTO_API ID without asserting a classical primitive.",
+      "method_limits": [
+        "No PHP, template, FFI, manager, dynamic code or arbitrary cross-file evaluation.",
+        "Private argument ranges are ephemeral; context is masked. Generic signing/imported keys do not imply RSA.",
+        "Compiled regex controls alone do not validate scope/binding semantics; detector tests and frozen 180-case cohort are separate evidence."
+      ],
+      "known_gaps": [
+        "Dynamic functions/classes, reflection, runtime aliases, unsupported receiver flow and external symbols remain unresolved; no absence-of-risk claim."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "Oqs\\OqsKem",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "CSHARP_CRYPTO_API",
+      "rule_snapshot": {
+        "id": "CSHARP_CRYPTO_API",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "medium",
+        "risk": "quantum-uncertain",
+        "confidence": 0.8,
+        "migration_hint": "Review the resolved primitive and purpose, platform and provider. A .NET or Bouncy Castle source reference does not establish effective runtime use.",
+        "pattern": "\\b(?:System\\.Security\\.Cryptography\\.(?:RSA|DSA|ECDsa|ECDiffieHellman)[A-Za-z]*|Org\\.BouncyCastle\\.Crypto\\.(?:Generators|Engines|Signers|Agreement)\\.[A-Za-z]+)",
+        "scope": "csharp",
+        "description": "C# cryptographic API or qualified library reference; effective key use requires verification."
+      },
+      "purpose": "nominal_classical_api_reference",
+      "algorithm_families": [],
+      "quantum": "resolved_classical_or_pqc_family_only; generic_HPKE_and_composites_unresolved",
+      "classical": "not_a_runtime_key_or_classical_security_assessment",
+      "reference_ids": [
+        "CSHARP-dotnet",
+        "CSHARP-bc-csharp",
+        "CSHARP-oqs-dotnet-old",
+        "CSHARP-oqs-dotnet"
+      ],
+      "reference_application": "Exact file-local qualified identities and finite pure parameter symbols. .NET PQC types are independent IDisposable classes. Official obsolete OQS differs from OpenForge; BC TLS does not imply a negotiated protocol. Legacy confidence0.80/0.60 weights are uncalibrated conventions. The mixed PQC/construction rule intentionally retains quantum-uncertain because HPKE need not be post-quantum.",
+      "method_limits": [
+        "No Roslyn/dotnet/MSBuild/NuGet execution, external/global-using traversal, reflection or generator evaluation.",
+        "No AsymmetricAlgorithm inheritance assumption, opaque argument-to-primitive guessing, generic HPKE-to-KEM coercion, or pure/prehash parameter conflation.",
+        "Qualified type/using references and calls remain syntactic/referenced, not successful operations. Custom definitions use generic matching.",
+        "Bounded local scopes/source order/writes and immutable selector symbols; unmodeled fields/inheritance/dynamic values stay unresolved. OID overloads are outside the finite selector table.",
+        "Source context/match/metadata protection and opaque algorithm quarantine reuse task078; explicit finite API identities survive."
+      ],
+      "known_gaps": [
+        "Project-wide overload resolution, assemblies, conditional compilation selection, partial/generated types and cross-file aliases remain unresolved.",
+        "Synthetic frozen detector cohort and compiled regex targets are separate layers, not an independently labeled accuracy population."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "System.Security.Cryptography.RSA.Create()",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "CSHARP_PQC_API",
+      "rule_snapshot": {
+        "id": "CSHARP_PQC_API",
+        "kind": "tree_sitter",
+        "category": "PQC",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.8,
+        "migration_hint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.",
+        "pattern": "\\b(?:System\\.Security\\.Cryptography\\.(?:MLKem|MLDsa|SlhDsa|CompositeMLKem|CompositeMLDsa|Hpke)[A-Za-z0-9_]*|Org\\.BouncyCastle\\.Crypto\\.(?:Parameters|Generators|Kems|Signers)\\.(?:MLKem|MLDsa|SlhDsa)[A-Za-z0-9_]*)",
+        "scope": "csharp",
+        "description": "C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection."
+      },
+      "purpose": "pqc_or_construction_reference",
+      "algorithm_families": [],
+      "quantum": "resolved_classical_or_pqc_family_only; generic_HPKE_and_composites_unresolved",
+      "classical": "not_a_runtime_key_or_classical_security_assessment",
+      "reference_ids": [
+        "CSHARP-dotnet",
+        "CSHARP-bc-csharp",
+        "CSHARP-oqs-dotnet-old",
+        "CSHARP-oqs-dotnet"
+      ],
+      "reference_application": "Exact file-local qualified identities and finite pure parameter symbols. .NET PQC types are independent IDisposable classes. Official obsolete OQS differs from OpenForge; BC TLS does not imply a negotiated protocol. Legacy confidence0.80/0.60 weights are uncalibrated conventions. The mixed PQC/construction rule intentionally retains quantum-uncertain because HPKE need not be post-quantum.",
+      "method_limits": [
+        "No Roslyn/dotnet/MSBuild/NuGet execution, external/global-using traversal, reflection or generator evaluation.",
+        "No AsymmetricAlgorithm inheritance assumption, opaque argument-to-primitive guessing, generic HPKE-to-KEM coercion, or pure/prehash parameter conflation.",
+        "Qualified type/using references and calls remain syntactic/referenced, not successful operations. Custom definitions use generic matching.",
+        "Bounded local scopes/source order/writes and immutable selector symbols; unmodeled fields/inheritance/dynamic values stay unresolved. OID overloads are outside the finite selector table.",
+        "Source context/match/metadata protection and opaque algorithm quarantine reuse task078; explicit finite API identities survive."
+      ],
+      "known_gaps": [
+        "Project-wide overload resolution, assemblies, conditional compilation selection, partial/generated types and cross-file aliases remain unresolved.",
+        "Synthetic frozen detector cohort and compiled regex targets are separate layers, not an independently labeled accuracy population."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "System.Security.Cryptography.MLKem.GenerateKey()",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "CSHARP_CRYPTO_REFERENCE",
+      "rule_snapshot": {
+        "id": "CSHARP_CRYPTO_REFERENCE",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.6,
+        "migration_hint": "Distinguish Bouncy Castle TLS, the obsolete official dotnetOQS wrapper and the independent OpenForge project; verify protocol settings, maintenance, native library and selected algorithms separately.",
+        "pattern": "\\b(?:dotnetOQS|OpenForge\\.Cryptography\\.LibOqs|Org\\.BouncyCastle\\.Tls)(?:\\.[A-Za-z_][A-Za-z0-9_]*)*\\b",
+        "scope": "csharp",
+        "description": "C# TLS library or OQS wrapper reference; identity and runtime capability require separate checks."
+      },
+      "purpose": "opaque_wrapper_or_tls_library_reference",
+      "algorithm_families": [],
+      "quantum": "resolved_classical_or_pqc_family_only; generic_HPKE_and_composites_unresolved",
+      "classical": "not_a_runtime_key_or_classical_security_assessment",
+      "reference_ids": [
+        "CSHARP-dotnet",
+        "CSHARP-bc-csharp",
+        "CSHARP-oqs-dotnet-old",
+        "CSHARP-oqs-dotnet"
+      ],
+      "reference_application": "Exact file-local qualified identities and finite pure parameter symbols. .NET PQC types are independent IDisposable classes. Official obsolete OQS differs from OpenForge; BC TLS does not imply a negotiated protocol. Legacy confidence0.80/0.60 weights are uncalibrated conventions. The mixed PQC/construction rule intentionally retains quantum-uncertain because HPKE need not be post-quantum.",
+      "method_limits": [
+        "No Roslyn/dotnet/MSBuild/NuGet execution, external/global-using traversal, reflection or generator evaluation.",
+        "No AsymmetricAlgorithm inheritance assumption, opaque argument-to-primitive guessing, generic HPKE-to-KEM coercion, or pure/prehash parameter conflation.",
+        "Qualified type/using references and calls remain syntactic/referenced, not successful operations. Custom definitions use generic matching.",
+        "Bounded local scopes/source order/writes and immutable selector symbols; unmodeled fields/inheritance/dynamic values stay unresolved. OID overloads are outside the finite selector table.",
+        "Source context/match/metadata protection and opaque algorithm quarantine reuse task078; explicit finite API identities survive."
+      ],
+      "known_gaps": [
+        "Project-wide overload resolution, assemblies, conditional compilation selection, partial/generated types and cross-file aliases remain unresolved.",
+        "Synthetic frozen detector cohort and compiled regex targets are separate layers, not an independently labeled accuracy population."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "dotnetOQS",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "C_FAMILY_CRYPTO_API",
+      "rule_snapshot": {
+        "id": "C_FAMILY_CRYPTO_API",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "medium",
+        "risk": "quantum-uncertain",
+        "confidence": 0.8,
+        "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+        "pattern": "\\b(?:RSA_[A-Za-z_]+|DSA_[A-Za-z_]+|DH_[A-Za-z_]+|EC_KEY_[A-Za-z_]+|ECDSA_[A-Za-z_]+|ECDH_[A-Za-z_]+|EVP_[A-Za-z_]+|OSSL_PROVIDER_load|SSL(?:_CTX)?_set1_groups_list|OQS_(?:KEM|SIG)_new)\\b",
+        "scope": "c,cpp",
+        "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification."
+      },
+      "purpose": "bounded_classical_or_configuration_reference",
+      "algorithm_families": [],
+      "quantum": "finite_resolved_family_only; provider_groups_and_includes_are_not_activation",
+      "classical": "not_a_runtime_key_or_classical_security_assessment",
+      "reference_ids": [
+        "C-FAMILY-openssl",
+        "C-FAMILY-liboqs",
+        "C-FAMILY-liboqs-cpp"
+      ],
+      "reference_application": "Exact low-level/OpenSSL EVP and OQS C/C++ selectors/roles; TLS/provider settings are finite opaque configuration markers without algorithm assets. Confidence0.80/0.60 are uncalibrated legacy conventions.",
+      "method_limits": [
+        "Tree-sitter only; no preprocessors, compiler/build/include evaluation, arbitrary function-pointer/template resolution or external crypto code executes.",
+        "Bounded file-local lexical scopes, ordered writes, explicit generated-key out-parameters and receiver roles; dynamic/invalidated/imported values remain unknown.",
+        "Explicit conditional references remain Partial and do not bind active branches. Ambiguous headers share limits and retain only agreeing facts.",
+        "Arguments/context/untrusted metadata are masked. Finite public include/provider/group labels and markers survive without arbitrary raw values.",
+        "Old lexical OpenSSL IDs/occurrences remain; new source facts overlap deliberately. Custom modified definitions retain generic matching.",
+        "EVP ID/name and exact OQS literal/constant dialects stay distinct. Explicit EVP output updates and opaque output pointers replace/invalidate old facts; known output buffers invalidate scalar selections. Owner-scoped template parameters and using declarations guard names, without import/instantiation semantics."
+      ],
+      "known_gaps": [
+        "Exact supported names only; bare qualified C++ constructors/receivers. Namespace/type aliases, inheritance, field/pointer/template/include graphs and effective overload resolution remain unresolved.",
+        "Provider/group availability and grammar operators are not evaluated. Unknown groups/escaped/dynamic selections are incomplete.",
+        "Main-authored conformance population and compiled-pattern controls are not independent deployment accuracy."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "RSA_new()",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "C_FAMILY_PQC_API",
+      "rule_snapshot": {
+        "id": "C_FAMILY_PQC_API",
+        "kind": "tree_sitter",
+        "category": "PQC",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.8,
+        "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+        "pattern": "\\b(?:OQS_(?:KEM|SIG)_[A-Za-z_]+|oqs::(?:KeyEncapsulation|Signature)|EVP_PKEY_[A-Za-z_]+)\\b",
+        "scope": "c,cpp",
+        "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection."
+      },
+      "purpose": "bounded_pqc_request_reference",
+      "algorithm_families": [],
+      "quantum": "finite_resolved_family_only; provider_groups_and_includes_are_not_activation",
+      "classical": "not_a_runtime_key_or_classical_security_assessment",
+      "reference_ids": [
+        "C-FAMILY-openssl",
+        "C-FAMILY-liboqs",
+        "C-FAMILY-liboqs-cpp"
+      ],
+      "reference_application": "Exact low-level/OpenSSL EVP and OQS C/C++ selectors/roles; TLS/provider settings are finite opaque configuration markers without algorithm assets. Confidence0.80/0.60 are uncalibrated legacy conventions.",
+      "method_limits": [
+        "Tree-sitter only; no preprocessors, compiler/build/include evaluation, arbitrary function-pointer/template resolution or external crypto code executes.",
+        "Bounded file-local lexical scopes, ordered writes, explicit generated-key out-parameters and receiver roles; dynamic/invalidated/imported values remain unknown.",
+        "Explicit conditional references remain Partial and do not bind active branches. Ambiguous headers share limits and retain only agreeing facts.",
+        "Arguments/context/untrusted metadata are masked. Finite public include/provider/group labels and markers survive without arbitrary raw values.",
+        "Old lexical OpenSSL IDs/occurrences remain; new source facts overlap deliberately. Custom modified definitions retain generic matching.",
+        "EVP ID/name and exact OQS literal/constant dialects stay distinct. Explicit EVP output updates and opaque output pointers replace/invalidate old facts; known output buffers invalidate scalar selections. Owner-scoped template parameters and using declarations guard names, without import/instantiation semantics."
+      ],
+      "known_gaps": [
+        "Exact supported names only; bare qualified C++ constructors/receivers. Namespace/type aliases, inheritance, field/pointer/template/include graphs and effective overload resolution remain unresolved.",
+        "Provider/group availability and grammar operators are not evaluated. Unknown groups/escaped/dynamic selections are incomplete.",
+        "Main-authored conformance population and compiled-pattern controls are not independent deployment accuracy."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "oqs::KeyEncapsulation(\"ML-KEM-768\")",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "C_FAMILY_TLS_REFERENCE",
+      "rule_snapshot": {
+        "id": "C_FAMILY_TLS_REFERENCE",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.6,
+        "migration_hint": "Check included libraries, exact TLS groups and provider configuration separately from deployment and negotiated connections. Includes alone do not prove linking or enabled algorithms.",
+        "pattern": "(?:openssl/(?:evp|rsa|dsa|dh|ec|ssl|provider)\\.h|oqs/oqs\\.h|oqs_cpp\\.hpp)",
+        "scope": "c,cpp",
+        "description": "C/C++ cryptographic include or TLS library reference; linking and negotiation remain unverified."
+      },
+      "purpose": "opaque_include_reference",
+      "algorithm_families": [],
+      "quantum": "finite_resolved_family_only; provider_groups_and_includes_are_not_activation",
+      "classical": "not_a_runtime_key_or_classical_security_assessment",
+      "reference_ids": [
+        "C-FAMILY-openssl",
+        "C-FAMILY-liboqs",
+        "C-FAMILY-liboqs-cpp"
+      ],
+      "reference_application": "Exact low-level/OpenSSL EVP and OQS C/C++ selectors/roles; TLS/provider settings are finite opaque configuration markers without algorithm assets. Confidence0.80/0.60 are uncalibrated legacy conventions.",
+      "method_limits": [
+        "Tree-sitter only; no preprocessors, compiler/build/include evaluation, arbitrary function-pointer/template resolution or external crypto code executes.",
+        "Bounded file-local lexical scopes, ordered writes, explicit generated-key out-parameters and receiver roles; dynamic/invalidated/imported values remain unknown.",
+        "Explicit conditional references remain Partial and do not bind active branches. Ambiguous headers share limits and retain only agreeing facts.",
+        "Arguments/context/untrusted metadata are masked. Finite public include/provider/group labels and markers survive without arbitrary raw values.",
+        "Old lexical OpenSSL IDs/occurrences remain; new source facts overlap deliberately. Custom modified definitions retain generic matching.",
+        "EVP ID/name and exact OQS literal/constant dialects stay distinct. Explicit EVP output updates and opaque output pointers replace/invalidate old facts; known output buffers invalidate scalar selections. Owner-scoped template parameters and using declarations guard names, without import/instantiation semantics."
+      ],
+      "known_gaps": [
+        "Exact supported names only; bare qualified C++ constructors/receivers. Namespace/type aliases, inheritance, field/pointer/template/include graphs and effective overload resolution remain unresolved.",
+        "Provider/group availability and grammar operators are not evaluated. Unknown groups/escaped/dynamic selections are incomplete.",
+        "Main-authored conformance population and compiled-pattern controls are not independent deployment accuracy."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "<oqs/oqs.h>",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "unrelated(value)",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "DEP_PHP_CRYPTO",
+      "rule_snapshot": {
+        "id": "DEP_PHP_CRYPTO",
+        "kind": "dependency",
+        "category": "CryptoAPI",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.6,
+        "migration_hint": "Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence.",
+        "pattern": "^(?:(?:paragonie/pqcrypto_compat|phpseclib/phpseclib|mir-evgenii/liboqs-php) \\S(?:.*\\S)? composer |(?:ext-(?:pqcrypto|oqsphp|sodium|openssl)|lib-(?:sodium|openssl)) \\S(?:.*\\S)? php-platform )",
+        "scope": "dependency",
+        "description": "PHP cryptographic dependency or platform declaration; installed capability is unknown."
+      },
+      "purpose": "library_inventory",
+      "algorithm_families": [
+        "unknown_from_package_presence"
+      ],
+      "quantum": "unknown_from_dependency_presence",
+      "classical": "not_assessed",
+      "reference_ids": [
+        "V05-FORMATS",
+        "NIST-PQ-FAQ"
+      ],
+      "reference_application": "Format identifiers and source claims only, not deployment or cryptographic safety.",
+      "method_limits": [
+        "Exact validated name and ecosystem on the safe projected dependency target.",
+        "Conditional/development/platform/SDK/locator facts remain distinct through typed provenance; no execution or graph reconstruction.",
+        "Legacy broad package predicates may additionally match a newly supported ecosystem; their historical risk is not algorithm selection evidence."
+      ],
+      "known_gaps": [
+        "Finite initial package identities only; missing versions/backend/provider/peer support remain unknown."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "paragonie/pqcrypto_compat ^1 composer pkg:composer/paragonie/pqcrypto_compat",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "ext-oqsphp unknown php-platform ",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "mir-evgenii/liboqs-php 1.0 composer ",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "phpseclib/phpseclib-helper 1 composer ",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "ext-sodium 1 cargo pkg:cargo/ext-sodium",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "DEP_NUGET_CRYPTO",
+      "rule_snapshot": {
+        "id": "DEP_NUGET_CRYPTO",
+        "kind": "dependency",
+        "category": "CryptoAPI",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.6,
+        "migration_hint": "Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider.",
+        "pattern": "^(?:bouncycastle\\.cryptography|openforge\\.cryptography\\.liboqs(?:\\.(?:kem|sig))?|liboqs-dotnet) \\S(?:.*\\S)? nuget ",
+        "scope": "dependency",
+        "description": "NuGet cryptographic package assertion; wrapper ownership and runtime support require verification."
+      },
+      "purpose": "library_inventory",
+      "algorithm_families": [
+        "unknown_from_package_presence"
+      ],
+      "quantum": "unknown_from_dependency_presence",
+      "classical": "not_assessed",
+      "reference_ids": [
+        "V05-FORMATS",
+        "NIST-PQ-FAQ"
+      ],
+      "reference_application": "Format identifiers and source claims only, not deployment or cryptographic safety.",
+      "method_limits": [
+        "Exact validated name and ecosystem on the safe projected dependency target.",
+        "Conditional/development/platform/SDK/locator facts remain distinct through typed provenance; no execution or graph reconstruction.",
+        "Legacy broad package predicates may additionally match a newly supported ecosystem; their historical risk is not algorithm selection evidence."
+      ],
+      "known_gaps": [
+        "Finite initial package identities only; missing versions/backend/provider/peer support remain unknown."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "bouncycastle.cryptography [2.7.0, ) nuget pkg:nuget/bouncycastle.cryptography",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "openforge.cryptography.liboqs.kem 1 nuget ",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "liboqs-dotnet 1 nuget ",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "openforge.cryptography.liboqs-helper 1 nuget ",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "bouncycastle.cryptography 1 maven ",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "DEP_NATIVE_CRYPTO",
+      "rule_snapshot": {
+        "id": "DEP_NATIVE_CRYPTO",
+        "kind": "dependency",
+        "category": "CryptoAPI",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.6,
+        "migration_hint": "Verify the native library, build flags and provider versions. vcpkg, Conan and CMake source declarations do not prove installation, selected algorithms or negotiated TLS.",
+        "pattern": "^(?:openssl|liboqs|liboqs-cpp|oqs-provider) \\S(?:.*\\S)? (?:vcpkg|conan|cmake) ",
+        "scope": "dependency",
+        "description": "C/C++ cryptographic dependency or literal build reference; effective configuration is unknown."
+      },
+      "purpose": "library_inventory",
+      "algorithm_families": [
+        "unknown_from_package_presence"
+      ],
+      "quantum": "unknown_from_dependency_presence",
+      "classical": "not_assessed",
+      "reference_ids": [
+        "V05-FORMATS",
+        "NIST-PQ-FAQ"
+      ],
+      "reference_application": "Format identifiers and source claims only, not deployment or cryptographic safety.",
+      "method_limits": [
+        "Exact validated name and ecosystem on the safe projected dependency target.",
+        "Conditional/development/platform/SDK/locator facts remain distinct through typed provenance; no execution or graph reconstruction.",
+        "Legacy broad package predicates may additionally match a newly supported ecosystem; their historical risk is not algorithm selection evidence."
+      ],
+      "known_gaps": [
+        "Finite initial package identities only; missing versions/backend/provider/peer support remain unknown."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "openssl >=3.5.0 vcpkg ",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "liboqs 0.16.0#abcdef%123 conan ",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "openssl 3.5 cmake ",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "liboqs-helper 1 conan ",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        },
+        {
+          "target": "openssl 0.10 cargo pkg:cargo/openssl",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "SOURCE_IMPLEMENTATION_REFERENCE",
+      "rule_snapshot": {
+        "id": "SOURCE_IMPLEMENTATION_REFERENCE",
+        "kind": "tree_sitter",
+        "category": "CryptoAPI",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.7,
+        "scope": "c,cpp",
+        "pattern": "\\b(?:ECDSA_sign|BCM_mlkem(?:512|768|1024)_generate_key|BCM_mldsa(?:44|65|87)_generate_key)\\b",
+        "description": "A recognized cryptographic implementation entry is defined in source; this is not an API call or evidence of execution.",
+        "migration_hint": "Review implementation ownership, callers and build inclusion. A named implementation entry does not prove conformance, enabled protection or migration completion."
+      },
+      "purpose": "implementation_definition_reference",
+      "algorithm_families": [
+        "ECDSA",
+        "ML-KEM",
+        "ML-DSA"
+      ],
+      "quantum": "unknown_from_source_reference",
+      "classical": "not_assessed",
+      "reference_ids": [
+        "OSS-IMPLEMENTATION-085",
+        "FIPS203",
+        "FIPS204"
+      ],
+      "reference_application": "Static source identity only; no execution/conformance/resistance inference.",
+      "method_limits": [
+        "The compiled pattern is only a target-level control; the bounded AST handler distinguishes actual definitions or conditional/component structures from strings, prototypes and calls.",
+        "No target source is executed or compiled; original137 rule definitions remain unchanged."
+      ],
+      "known_gaps": [
+        "Finite canonical entry/type names; arbitrary implementations and whole-program construction equivalence are not inferred."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "ECDSA_sign",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "NotECDSA_sign",
+          "desired_positive": false,
+          "expected_pattern_match": false
+        }
+      ]
+    },
+    {
+      "id": "SOURCE_CONSTRUCTION_REFERENCE",
+      "rule_snapshot": {
+        "id": "SOURCE_CONSTRUCTION_REFERENCE",
+        "kind": "tree_sitter",
+        "category": "PQC",
+        "severity": "info",
+        "risk": "quantum-uncertain",
+        "confidence": 0.7,
+        "scope": "c,cpp,csharp",
+        "pattern": "\\b(?:USE_SNTRUP761X25519|GenerateTraditionalKeyPair)\\b",
+        "description": "A conditional hybrid or composite implementation component is referenced; combined protection and execution remain unverified.",
+        "migration_hint": "Review both components, the exact construction, build conditions and combiner separately. A component or conditional guard does not prove negotiation or whole-construction security."
+      },
+      "purpose": "conditional_or_composite_construction_reference",
+      "algorithm_families": [
+        "sntrup761/X25519",
+        "CompositeMLDsa"
+      ],
+      "quantum": "unknown_from_source_reference",
+      "classical": "not_assessed",
+      "reference_ids": [
+        "OSS-HYBRID-085",
+        "OSS-COMPOSITE-085"
+      ],
+      "reference_application": "Static source identity only; no execution/conformance/resistance inference.",
+      "method_limits": [
+        "The compiled pattern is only a target-level control; the bounded AST handler distinguishes actual definitions or conditional/component structures from strings, prototypes and calls.",
+        "No target source is executed or compiled; original137 rule definitions remain unchanged."
+      ],
+      "known_gaps": [
+        "Finite canonical entry/type names; arbitrary implementations and whole-program construction equivalence are not inferred."
+      ],
+      "review_status": "source_classification_review_not_accuracy_certification",
+      "fixtures": [
+        {
+          "target": "USE_SNTRUP761X25519",
+          "desired_positive": true,
+          "expected_pattern_match": true
+        },
+        {
+          "target": "USE_SNTRUP761X25519_EXTRA",
           "desired_positive": false,
           "expected_pattern_match": false
         }

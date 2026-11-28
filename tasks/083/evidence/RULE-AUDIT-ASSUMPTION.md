@@ -1,0 +1,3 @@
+# Preserved audit-helper correction
+
+The first main-agent audit helper asserted that all12new rule snapshots had risk quantum-uncertain. It failed at that assertion: accepted078 PHP_PQC_API has quantum-safe/info reference labeling. Actual YAML/metadata have never changed in083. The corrected assertion pins that one existing exception and confirms11others uncertain; paired COVERAGE guides explain that this label does not confirm deployment, unknown constructions or readiness. No post-observation rule/truth rewriting or silent reclassification occurred. The original terminal AssertionError is in the session transcript; this note does not pretend to be a saved raw initial log.

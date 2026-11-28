@@ -1,0 +1,24 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.50s
+     Running tests/php_source.rs (target/debug/deps/php_source-2a5e7744acd9f0c5)
+
+running 1 test
+test php_non_crypto_receiver_probes_do_not_change_inspection_status ... FAILED
+
+failures:
+
+---- php_non_crypto_receiver_probes_do_not_change_inspection_status stdout ----
+
+thread 'php_non_crypto_receiver_probes_do_not_change_inspection_status' (25074899) panicked at crates/pqc_scan_detectors/tests/php_source.rs:749:9:
+assertion `left == right` failed: <?php function show($view) { $view=first(); $view=second(); $view->render(); }
+  left: Partial
+ right: Complete
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    php_non_crypto_receiver_probes_do_not_change_inspection_status
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.19s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test php_source`

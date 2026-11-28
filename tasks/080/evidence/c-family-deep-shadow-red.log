@@ -1,0 +1,24 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.04s
+     Running tests/c_family_source.rs (target/debug/deps/c_family_source-31e1842aa2f3e465)
+
+running 1 test
+test c_family_incomplete_name_indices_never_turn_deep_shadowing_into_builtin_apis ... FAILED
+
+failures:
+
+---- c_family_incomplete_name_indices_never_turn_deep_shadowing_into_builtin_apis stdout ----
+
+thread 'c_family_incomplete_name_indices_never_turn_deep_shadowing_into_builtin_apis' (23606769) panicked at crates/pqc_scan_detectors/tests/c_family_source.rs:773:9:
+assertion `left == right` failed: 6: DetectorOutcome { detections: [], status: Partial, observations: [], explanation: Some("Source syntax could not be fully interpreted. Parsed regions were inspected; unresolved syntax remains unknown. Check generated syntax, language version and the source file separately."), limit_detail: None, test_ranges: [], display_ranges: [], sensitive_ranges: [], sensitive_source_context: true }
+  left: Partial
+ right: Complete
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c_family_incomplete_name_indices_never_turn_deep_shadowing_into_builtin_apis
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.17s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test c_family_source`

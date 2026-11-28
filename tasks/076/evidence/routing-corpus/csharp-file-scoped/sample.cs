@@ -1,0 +1,1 @@
+global using K = System.Security.Cryptography.MLKem; namespace App; class C { void M(){ K.GenerateKey(algorithm); } }

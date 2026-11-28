@@ -231,27 +231,15 @@ algorithm stays unknown. Entering a purpose does not identify the algorithm.
 
 ## How records and input are matched (details)
 
-You do not need to enter or edit identifiers during normal use. For manual JSON
-inspection, a target ID distinguishes a detection record and technical role in one
-exact saved file, preventing purpose/usage answers from being applied to the wrong record.
-Observations sharing an algorithm definition are not merged. Changing any byte,
-including JSON whitespace, changes the input digest and target IDs; native
-run/observation/asset IDs stay unchanged. A digest establishes content identity,
-not collector authenticity.
+Purpose and usage answers apply to individual records in the saved detection
+results. You do not need to edit identifiers during normal use. Preserve the
+original saved file without reformatting it. If its contents change, previous
+answers may no longer apply.
 
-Repeated source references can receive declarations when saved positions and
-records are uniquely distinguishable. Missing/colliding locations remain
-unbindable; cross-scan ambiguity flags are preserved.
-
-| Input | Meaning of saved evidence |
-|---|---|
-| Source, certificates and dependencies | Static references remain lexical/syntactic; certificates retain parsed attributes. Dependency declaration/resolution is distinct from provider activation or deployment. Unknown identifiers and parameter encodings are not invented |
-| TLS | Negotiated key establishment, certificate signatures and subject keys are separate targets. Verified session means the saved collector reported a full verified handshake with matching peer binding. Valid partial records retain known negotiation despite incomplete certificate collection/group data; contradictory success/verification/handshake claims reject. Missing CertificateVerify schemes and ASN.1 encodings are not invented |
-| SSH offers | Ordered unauthenticated advertisements. Extension markers are excluded from cryptographic targets; saved candidate classifications are not technical authority |
-| SSH KEX | Requires recorded supported host-key pinning, completed handshake and no attempted user authentication. Host signatures and key establishment stay separate |
-
-Hybrid components retain exact final/draft identities and the stated combiner
-scope. A PQC component does not establish whole-system safety.
+Saved source references do not establish actual use or deployment. Read TLS
+results as recorded connection evidence, and SSH offers as unauthenticated
+advertisements. Review SSH key exchange results together with their host-key
+verification conditions. A PQC component alone does not establish whole-system safety.
 
 <a id="claims"></a>
 
@@ -281,8 +269,7 @@ must be at or after assertion and before expiry. Future, expired and expiry-unkn
 claims remain visible but cannot establish an active favorable claim. An external-review
 label is still a claim, not scanner verification.
 
-New assertion/evaluation times require seconds and an explicit offset and are
-normalized to UTC. Evaluation before collection is rejected.
+New assertion/evaluation times require seconds and an explicit time-zone offset. Evaluation before collection is rejected.
 
 </details>
 
@@ -294,13 +281,12 @@ normalized to UTC. Evaluation before collection is rejected.
 | Each TLS/SSH input format | 1 MiB |
 | Context JSON | 1 MiB for reading and generation; use defined fields and valid times |
 | Each assessment report | 64 MiB; overflow rejects without truncation |
-| Destination | Cannot be the same file as input/context. `context-template` rejects input aliases, hardlinks, linked destinations, bad values/provenance and overflow before replacement. Existing output files are replaced individually |
+| Destination | Use files separate from the input and context. Existing output files are replaced |
 | Exit 0 | Successful assessment, including urgent or incomplete results |
 | Exit 1 | Input/context/time/output error, using fixed errors without echoing rejected values |
 
 Invalid/unsupported formats or versions, invalid references, contradictory facts
-and oversized input are rejected. Typed output omits raw evidence, arbitrary
-metadata and unknown names, but source paths, public fingerprints and identifiers
-can remain sensitive operational metadata. Even probe-enabled builds never
+and oversized input are rejected. Source paths, public fingerprints and identifiers
+can remain sensitive operational metadata. Review the contents before sharing. Even probe-enabled builds never
 execute input, fetch references, rescan source or contact endpoints. See the
 [probe guide](PROBING.md) for TLS/SSH collection and distributions.

@@ -1,0 +1,39 @@
+{
+  "source_manifest_sha256": "8c2c3670531e82bf9d70faf5fcc6e363f7fb1c8c64b3393488209613b521f83f",
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace"
+      ],
+      "exit": 0,
+      "log": "tasks/081/evidence/build-final.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/081/evidence/check_cli_package.py"
+      ],
+      "exit": 0,
+      "log": "tasks/081/evidence/cli-package-final.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/081/evidence/verify_compatibility.py"
+      ],
+      "exit": 0,
+      "log": "tasks/081/evidence/compat-final.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    }
+  ]
+}

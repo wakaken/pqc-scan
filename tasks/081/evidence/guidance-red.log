@@ -1,0 +1,29 @@
+   Compiling pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.40s
+     Running tests/language_guidance.rs (target/debug/deps/language_guidance-8a099e92ad96b681)
+
+running 2 tests
+test wrapper_maintenance_identities_are_exact_and_never_inferred_from_a_similar_package_name ... FAILED
+test language_source_and_dependency_guidance_names_prerequisites_without_claiming_runtime_support ... FAILED
+
+failures:
+
+---- wrapper_maintenance_identities_are_exact_and_never_inferred_from_a_similar_package_name stdout ----
+
+thread 'wrapper_maintenance_identities_are_exact_and_never_inferred_from_a_similar_package_name' (23820894) panicked at crates/pqc_scan_core/tests/language_guidance.rs:98:9:
+mir-evgenii/liboqs-php: [{"action_id":"dependency.track-pqc-readiness","title":"Track PQC readiness of dependent libraries","priority":"planned","rationale":"Dependency-level crypto libraries strongly influence migration options and operational timelines.","steps":["Record current versions in dependency-sbom.json and define upgrade targets.","Subscribe to release notes for PQC feature availability and API changes.","Run integration tests for PQC or hybrid modes before promoting to production."],"references":["https://cyclonedx.org/","https://spdx.dev/"]}]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- language_source_and_dependency_guidance_names_prerequisites_without_claiming_runtime_support stdout ----
+
+thread 'language_source_and_dependency_guidance_names_prerequisites_without_claiming_runtime_support' (23820893) panicked at crates/pqc_scan_core/tests/language_guidance.rs:69:17:
+a.php missing php.verify-pqc-environment: [{"action_id":"cryptoapi.abstraction-layer","title":"Introduce crypto abstraction boundary for algorithm agility","priority":"near-term","rationale":"Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.","steps":["Wrap signing, verification, keygen, and key exchange behind stable interfaces.","Add policy controls to select classical, hybrid, or PQC paths at runtime."],"references":["https://www.nist.gov/itl/post-quantum-cryptography"]}]
+
+
+failures:
+    language_source_and_dependency_guidance_names_prerequisites_without_claiming_runtime_support
+    wrapper_maintenance_identities_are_exact_and_never_inferred_from_a_similar_package_name
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p pqc_scan_core --test language_guidance`

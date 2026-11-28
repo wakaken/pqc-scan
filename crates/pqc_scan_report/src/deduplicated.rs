@@ -6,6 +6,18 @@ use pqc_scan_core::{Finding, ScanResult};
 pub(crate) struct View<'a> {
     pub(crate) result: ScanResult,
     pub(crate) originals: BTreeMap<String, Vec<&'a Finding>>,
+    location_counts: BTreeMap<(String, usize, usize), usize>,
+}
+impl View<'_> {
+    pub(crate) fn coincident_records(&self, f: &Finding) -> usize {
+        if f.location.line == 0 || f.location.column == 0 {
+            return 0;
+        }
+        self.location_counts
+            .get(&(f.location.file.clone(), f.location.line, f.location.column))
+            .copied()
+            .unwrap_or(0)
+    }
 }
 
 fn builtin_copy(id: &str) -> Option<(String, String, String)> {
@@ -23,7 +35,7 @@ fn builtin_copy(id: &str) -> Option<(String, String, String)> {
 
 fn issue(f: &Finding) -> String {
     if f.evidence.metadata.get("reference_kind").is_some_and(|s| s == "display_text")
-        && f.description == "An algorithm name appears in diagnostic or display text."
+        && f.description == "An algorithm name appears in non-executable text or a symbol declaration."
         && f.migration_hint == "This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately."
     { return "display-algorithm-reference".into(); }
     // Only explicitly equivalent built-in rule families cross description/category
@@ -50,7 +62,13 @@ fn issue(f: &Finding) -> String {
 
 pub(crate) fn project(result: &ScanResult) -> View<'_> {
     let mut buckets = BTreeMap::new();
+    let mut location_counts = BTreeMap::new();
     for f in &result.findings {
+        if f.location.line > 0 && f.location.column > 0 {
+            *location_counts
+                .entry((f.location.file.clone(), f.location.line, f.location.column))
+                .or_insert(0) += 1;
+        }
         let evidence = &f.evidence.r#match;
         // Missing positions and redacted/empty evidence cannot establish equivalence.
         let isolated = if f.location.line == 0
@@ -78,6 +96,7 @@ pub(crate) fn project(result: &ScanResult) -> View<'_> {
     let mut view = View {
         result: result.clone(),
         originals: BTreeMap::new(),
+        location_counts,
     };
     view.result.findings.clear();
     for mut originals in buckets.into_values() {
@@ -150,7 +169,8 @@ mod tests {
         let mut raw = fixture();
         for f in &mut raw.findings {
             f.severity = pqc_scan_rules::Severity::Info;
-            f.description = "An algorithm name appears in diagnostic or display text.".into();
+            f.description =
+                "An algorithm name appears in non-executable text or a symbol declaration.".into();
             f.migration_hint = "This text alone does not establish cryptographic use. Inspect the implementation and effective configuration separately.".into();
             f.evidence
                 .metadata

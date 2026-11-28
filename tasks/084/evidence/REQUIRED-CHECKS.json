@@ -1,0 +1,108 @@
+{
+  "sourceManifest": "IMPLEMENTATION-SOURCE-02.json",
+  "sourceManifestSha256": "5ddaf587eeb72862719889611f29cbd858608bdb23f9d6d40b630a517e3c5691",
+  "environment": {
+    "CARGO_INCREMENTAL": "0"
+  },
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.6713627919089049,
+      "log": "tasks/084/evidence/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.07206562499050051,
+      "log": "tasks/084/evidence/diff.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 6.152707792003639,
+      "log": "tasks/084/evidence/clippy.log",
+      "sha256": "fe53af0cb3979230314956c6ab625cae657a2a99206824a7cb499883eef8b8b0"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features",
+        "--locked",
+        "--target-dir",
+        "target/v05-feature"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 177.0681451249402,
+      "log": "tasks/084/evidence/allfeatures-tests.log",
+      "sha256": "5481f40ad44693d71eddffc7a6f48a8338e4f879bfaec8b73bfa4dd302fe7697"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-features",
+        "--all-targets",
+        "--locked",
+        "--target-dir",
+        "target/v05-feature",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 11.102978416951373,
+      "log": "tasks/084/evidence/allfeatures-clippy.log",
+      "sha256": "1c571b09832584610abbdeddbadbc63f8855ca31abbc8fece00c559fb4228355"
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 0.7198130829492584,
+      "log": "tasks/084/evidence/build.log",
+      "sha256": "d45006197a58d3591511e8220a2f4a8bd039e9a092cd6a66dbadf79d6dc77af2"
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--release",
+        "--locked"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 7.352212541969493,
+      "log": "tasks/084/evidence/release-build.log",
+      "sha256": "f9f0d80f45e2c99b469028d50ab86c99da589159aa85129a934e4ba7ecfc53bf"
+    }
+  ]
+}

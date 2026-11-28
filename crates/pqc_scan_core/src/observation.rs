@@ -4,6 +4,12 @@ use crate::identity::safe_token;
 use crate::{Detection, DetectorStatus};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+mod dependency_context;
+mod source_api;
+pub use dependency_context::DependencyContext;
+mod source_configuration;
+pub use source_api::SourceLibraryReference;
+pub use source_configuration::SourceConfigurationReference;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AlgorithmSpec {
@@ -314,6 +320,28 @@ pub fn safe_dependency_version(value: &str) -> bool {
             .bytes()
             .all(|b| b.is_ascii_alphanumeric() || b"v.*^~<>=!_,+- |".contains(&b))
 }
+/// Additional literal syntax is confined to these ecosystems; old validators are unchanged.
+pub fn safe_dependency_constraint(ecosystem: &str, value: &str) -> bool {
+    safe_dependency_version(value)
+        || (ecosystem == "nuget"
+            && !value.is_empty()
+            && value.len() <= 256
+            && value
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b".*+-_ ,[]()".contains(&b)))
+        || (ecosystem == "conan"
+            && !value.is_empty()
+            && value.len() <= 256
+            && value
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b"._+-#%".contains(&b)))
+        || (ecosystem == "vcpkg"
+            && !value.is_empty()
+            && value.len() <= 256
+            && value
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b"._+-#<>=".contains(&b)))
+}
 pub fn exact_dependency_version(value: &str) -> bool {
     value.len() <= 128
         && value.starts_with(|c: char| c.is_ascii_digit())
@@ -333,7 +361,31 @@ pub fn resolved_dependency_version(ecosystem: &str, value: &str) -> bool {
     if !exact_dependency_version(value) {
         return false;
     }
-    if ecosystem == "npm" || ecosystem == "cargo" {
+    if ecosystem == "nuget" {
+        let mut metadata = value.split('+');
+        let main = metadata.next().unwrap_or("");
+        let build = metadata.next();
+        if metadata.next().is_some() {
+            return false;
+        }
+        let (numbers, pre) = main
+            .split_once('-')
+            .map(|(a, b)| (a, Some(b)))
+            .unwrap_or((main, None));
+        let numbers: Vec<_> = numbers.split('.').collect();
+        let identifiers = |s: &str| {
+            !s.is_empty()
+                && s.split('.').all(|p| {
+                    !p.is_empty() && p.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+                })
+        };
+        (1..=4).contains(&numbers.len())
+            && numbers.iter().all(|s| {
+                !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit()) && s.parse::<i32>().is_ok()
+            })
+            && pre.is_none_or(identifiers)
+            && build.is_none_or(identifiers)
+    } else if ecosystem == "npm" || ecosystem == "cargo" {
         let mut build = value.split('+');
         let main = build.next().unwrap_or("");
         let metadata = build.next();
@@ -385,6 +437,17 @@ pub fn valid_dependency_name(name: &str, ecosystem: &str) -> bool {
         }
         "maven" => name.split(':').count() == 2 && name.split(':').all(segment),
         "golang" => !name.starts_with('/') && name.split('/').all(segment),
+        "composer" => {
+            name.split('/').count() == 2
+                && name.split('/').all(|s| {
+                    !s.is_empty()
+                        && s.starts_with(|c: char| c.is_ascii_alphanumeric())
+                        && s.bytes().all(|b| {
+                            b.is_ascii_lowercase() || b.is_ascii_digit() || b"._-".contains(&b)
+                        })
+                })
+        }
+        "vcpkg-feature" => name.split('/').count() == 2 && name.split('/').all(segment),
         _ => segment(name),
     }
 }
@@ -416,7 +479,26 @@ impl DependencyFacts {
         let ecosystem = m
             .get("dep_ecosystem")
             .filter(|v| {
-                ["cargo", "npm", "pypi", "gem", "maven", "golang", "unknown"].contains(&v.as_str())
+                [
+                    "cargo",
+                    "npm",
+                    "pypi",
+                    "gem",
+                    "maven",
+                    "golang",
+                    "unknown",
+                    "composer",
+                    "nuget",
+                    "php-platform",
+                    "dotnet-sdk",
+                    "dotnet-framework",
+                    "vcpkg",
+                    "vcpkg-feature",
+                    "vcpkg-baseline",
+                    "conan",
+                    "cmake",
+                ]
+                .contains(&v.as_str())
             })
             .cloned()
             .unwrap_or("unknown".into());
@@ -441,6 +523,7 @@ impl DependencyFacts {
                         .split('/')
                         .all(|s| safe_token(s) && s != "." && s != "..")
             }
+            "composer" | "vcpkg-feature" => valid_dependency_name(name, &ecosystem),
             _ => safe_token(name) && name != "." && name != "..",
         };
         if !package_valid {
@@ -493,6 +576,10 @@ pub struct ObservationDraft {
     pub(crate) certificate: Option<PublicCertificateFacts>,
     pub(crate) dependency: Option<DependencyFacts>,
     pub(crate) typed_dependency: bool,
+    pub(crate) source_api_typed: bool,
+    pub(crate) source_api_display: Option<String>,
+    pub(crate) source_library: Option<SourceLibraryReference>,
+    pub(crate) source_configuration: Option<SourceConfigurationReference>,
     pub(crate) evidence: SafeEvidence,
     pub(crate) bindings: Vec<LegacyBinding>,
 }
@@ -572,6 +659,10 @@ impl ObservationDraft {
             certificate: None,
             dependency: None,
             typed_dependency: false,
+            source_api_typed: false,
+            source_api_display: None,
+            source_library: None,
+            source_configuration: None,
             evidence: SafeEvidence {
                 marker_kind: matches!(method, ObservationMethod::PrivateKeyMarker)
                     .then_some("private_marker".into()),
@@ -595,6 +686,9 @@ impl ObservationDraft {
             self.certificate = None;
             self.dependency = None;
             self.evidence.capture_status = "target_mismatch".into();
+            if self.source_library.take().is_some() | self.source_configuration.take().is_some() {
+                self.evidence.marker_kind = None;
+            }
         }
         self
     }
@@ -619,7 +713,7 @@ impl ObservationDraft {
         if let Some(dep) = &mut draft.dependency {
             dep.declared_constraint = f
                 .declared
-                .filter(|s| safe_dependency_version(s))
+                .filter(|s| safe_dependency_constraint(&dep.ecosystem, s))
                 .map(str::to_string);
             dep.resolved_version = f
                 .resolved
@@ -627,7 +721,7 @@ impl ObservationDraft {
                 .map(str::to_string);
             dep.reported_version = f
                 .reported
-                .filter(|s| safe_dependency_version(s))
+                .filter(|s| safe_dependency_constraint(&dep.ecosystem, s))
                 .map(str::to_string);
             dep.version_provenance = f.origin.as_str().into();
             draft.evidence.capture_status = match d

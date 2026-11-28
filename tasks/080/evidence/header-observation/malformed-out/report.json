@@ -1,0 +1,63 @@
+{
+  "generated_at": "2026-11-24T07:30:07.587631Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-71542b6326fad9e5a55ea4f4b3a3471ec214768adc9edf95eb30dc34f843a3c6",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "case.h",
+        "line": 1,
+        "column": 10
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "case.h",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "case.h:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 1,
+    "by_severity": {
+      "info": 1
+    },
+    "by_risk": {
+      "quantum-uncertain": 1
+    },
+    "scanned_files": 1,
+    "skipped_files": 0
+  }
+}

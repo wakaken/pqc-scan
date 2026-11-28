@@ -1,0 +1,194 @@
+TAP version 13
+# Subtest: spinner starts immediately, reports actual counts, and stops on scan failure with retry enabled
+ok 1 - spinner starts immediately, reports actual counts, and stops on scan failure with retry enabled
+  ---
+  duration_ms: 15.225833
+  type: 'test'
+  ...
+# Subtest: an exact ready result restores without rescanning; unavailable IDs do not select another job
+ok 2 - an exact ready result restores without rescanning; unavailable IDs do not select another job
+  ---
+  duration_ms: 2.421625
+  type: 'test'
+  ...
+# Subtest: connection failure removes stale progress and recovery clears the connection error
+ok 3 - connection failure removes stale progress and recovery clears the connection error
+  ---
+  duration_ms: 1.087792
+  type: 'test'
+  ...
+# Subtest: restoring imported results does not browse the display label as a source folder
+ok 4 - restoring imported results does not browse the display label as a source folder
+  ---
+  duration_ms: 0.879625
+  type: 'test'
+  ...
+# Subtest: session results show source identity, Japan request time, explicit missing time and newest first
+ok 5 - session results show source identity, Japan request time, explicit missing time and newest first
+  ---
+  duration_ms: 3.136833
+  type: 'test'
+  ...
+# Subtest: single click selects the child without browsing; scan submits the selected child path
+ok 6 - single click selects the child without browsing; scan submits the selected child path
+  ---
+  duration_ms: 0.766875
+  type: 'test'
+  ...
+# Subtest: double-click opens, breadcrumbs select current/root, and history restores selection
+ok 7 - double-click opens, breadcrumbs select current/root, and history restores selection
+  ---
+  duration_ms: 1.736416
+  type: 'test'
+  ...
+# Subtest: keyboard selection, Enter, touch open button and parent shortcut navigate without selection confirmation
+ok 8 - keyboard selection, Enter, touch open button and parent shortcut navigate without selection confirmation
+  ---
+  duration_ms: 1.101167
+  type: 'test'
+  ...
+# Subtest: pending/failed directory navigation cannot scan a different folder and preserves successful history
+ok 9 - pending/failed directory navigation cannot scan a different folder and preserves successful history
+  ---
+  duration_ms: 0.97025
+  type: 'test'
+  ...
+# Subtest: folder names containing spaces, separators and Unicode retain their exact scan path
+ok 10 - folder names containing spaces, separators and Unicode retain their exact scan path
+  ---
+  duration_ms: 1.366125
+  type: 'test'
+  ...
+# Subtest: a stale directory response cannot overwrite a newer successful navigation
+ok 11 - a stale directory response cannot overwrite a newer successful navigation
+  ---
+  duration_ms: 0.877291
+  type: 'test'
+  ...
+# Subtest: multiple checkbox selections survive navigation; remove/clear and deselection stay exact
+ok 12 - multiple checkbox selections survive navigation; remove/clear and deselection stay exact
+  ---
+  duration_ms: 0.799333
+  type: 'test'
+  ...
+# Subtest: two scans are strictly sequential and remain individually reviewable without navigating early
+not ok 13 - two scans are strictly sequential and remain individually reviewable without navigating early
+  ---
+  duration_ms: 1.646375
+  type: 'test'
+  location: '/private/tmp/pqc082-node-baseline-b7m7p7rq/tests/serve-feedback.test.cjs:233:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    '' !== 'beta'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'beta'
+  actual: ''
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (/private/tmp/pqc082-node-baseline-b7m7p7rq/tests/serve-feedback.test.cjs:250:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: modal cannot cancel; page changes, selection and duplicate submission are blocked until all work ends
+ok 14 - modal cannot cancel; page changes, selection and duplicate submission are blocked until all work ends
+  ---
+  duration_ms: 1.291125
+  type: 'test'
+  ...
+# Subtest: failed folder still advances to the next and remains a failed result
+ok 15 - failed folder still advances to the next and remains a failed result
+  ---
+  duration_ms: 0.839833
+  type: 'test'
+  ...
+# Subtest: uncertain start stops remaining folders and polls before unlocking; accepted work is never posted twice
+ok 16 - uncertain start stops remaining folders and polls before unlocking; accepted work is never posted twice
+  ---
+  duration_ms: 0.818125
+  type: 'test'
+  ...
+# Subtest: lost polling keeps queue locked and resumes exactly once after recovery
+ok 17 - lost polling keeps queue locked and resumes exactly once after recovery
+  ---
+  duration_ms: 1.551208
+  type: 'test'
+  ...
+# Subtest: selection beyond session capacity is rejected before any scan starts
+ok 18 - selection beyond session capacity is rejected before any scan starts
+  ---
+  duration_ms: 1.382708
+  type: 'test'
+  ...
+# Subtest: single default-mode scan retains automatic report navigation and unlocks at completion
+ok 19 - single default-mode scan retains automatic report navigation and unlocks at completion
+  ---
+  duration_ms: 0.724333
+  type: 'test'
+  ...
+# Subtest: a jobs response issued before an uncertain start cannot unlock or resubmit accepted work
+ok 20 - a jobs response issued before an uncertain start cannot unlock or resubmit accepted work
+  ---
+  duration_ms: 0.925833
+  type: 'test'
+  ...
+# Subtest: folder rows, checkboxes, breadcrumbs and browsing unlock after successful or all-failed batches
+ok 21 - folder rows, checkboxes, breadcrumbs and browsing unlock after successful or all-failed batches
+  ---
+  duration_ms: 1.687167
+  type: 'test'
+  ...
+# Subtest: a delayed start response holds the modal and cannot create duplicate queue submissions
+ok 22 - a delayed start response holds the modal and cannot create duplicate queue submissions
+  ---
+  duration_ms: 0.664042
+  type: 'test'
+  ...
+# Subtest: selection is bounded to twenty exact unique paths and can be reduced
+ok 23 - selection is bounded to twenty exact unique paths and can be reduced
+  ---
+  duration_ms: 1.8085
+  type: 'test'
+  ...
+# Subtest: cancel stops every pending folder while preserving the running folder and its result
+ok 24 - cancel stops every pending folder while preserving the running folder and its result
+  ---
+  duration_ms: 0.971458
+  type: 'test'
+  ...
+# Subtest: cancel during a pending POST still waits for that accepted job and never starts another
+ok 25 - cancel during a pending POST still waits for that accepted job and never starts another
+  ---
+  duration_ms: 0.970875
+  type: 'test'
+  ...
+# Subtest: test exclusion is explicit, locked and captured for the entire sequential batch
+ok 26 - test exclusion is explicit, locked and captured for the entire sequential batch
+  ---
+  duration_ms: 0.949125
+  type: 'test'
+  ...
+# Subtest: size limit is validated before POST and frozen for the complete batch
+ok 27 - size limit is validated before POST and frozen for the complete batch
+  ---
+  duration_ms: 1.290291
+  type: 'test'
+  ...
+# Subtest: live size validation disables scanning across polling and navigation until corrected
+ok 28 - live size validation disables scanning across polling and navigation until corrected
+  ---
+  duration_ms: 1.04475
+  type: 'test'
+  ...
+1..28
+# tests 28
+# suites 0
+# pass 27
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 87.359083

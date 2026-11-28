@@ -1,0 +1,34 @@
+   Compiling pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.86s
+     Running tests/selective_source_privacy.rs (target/debug/deps/selective_source_privacy-c37e02babf4f18a2)
+
+running 6 tests
+test reordered_named_key_arguments_and_multiline_credentials_are_selective ... FAILED
+test locally_initialized_key_bytes_are_protected_without_hiding_public_key_references ... FAILED
+test inline_private_block_preserves_code_after_it_and_long_secret_clipping_is_safe ... ok
+test private_blocks_do_not_hide_unrelated_java_go_or_cpp_code ... ok
+test key_literals_and_credentials_are_masked_but_public_neighbours_survive ... ok
+test ordinary_arguments_and_neighbouring_code_are_readable ... ok
+
+failures:
+
+---- reordered_named_key_arguments_and_multiline_credentials_are_selective stdout ----
+
+thread 'reordered_named_key_arguments_and_multiline_credentials_are_selective' (25525388) panicked at crates/pqc_scan_detectors/tests/selective_source_privacy.rs:111:5:
+assertion failed: exported.contains("public message") && exported.contains("visible=17")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- locally_initialized_key_bytes_are_protected_without_hiding_public_key_references stdout ----
+
+thread 'locally_initialized_key_bytes_are_protected_without_hiding_public_key_references' (25525385) panicked at crates/pqc_scan_detectors/tests/selective_source_privacy.rs:118:5:
+assertion failed: !exported.contains("SYNTH087_LOCAL_KEY")
+
+
+failures:
+    locally_initialized_key_bytes_are_protected_without_hiding_public_key_references
+    reordered_named_key_arguments_and_multiline_credentials_are_selective
+
+test result: FAILED. 4 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.45s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test selective_source_privacy`

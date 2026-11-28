@@ -7,26 +7,38 @@ const {runInNewContext} = require('node:vm');
 const source = readFileSync(require('node:path').join(__dirname, '../../crates/pqc_scan_report/src/compact.js'), 'utf8');
 
 function report(spec, hash = '', modal = false) {
+  let activeElement = null;
   const node = (dataset = {}) => ({dataset, hidden: false, open: false, value: '', textContent: '', listeners: {},
     addEventListener(type, fn) { this.listeners[type] = fn; },
     setAttribute(name,value) { this[name]=value; },
-    focus() { this.focused = true; }, scrollIntoView() { this.scrolled = true; }});
+    focus() { this.focused = true; activeElement = this; }, scrollIntoView() { this.scrolled = true; }});
   const selectors = ['data-mode','data-search','data-severity','data-risk','data-rule-filter','data-file-filter','data-show-tests','data-reset','data-report-status','data-empty','data-group-pager','data-prev','data-next','data-page','data-file-tree','data-panel-toggles','data-toggle-filters','data-toggle-tree','data-report-sidebar'];
   const ui = Object.fromEntries(selectors.map(s => [s, node()]));
   ui['data-mode'].value = 'candidate';
   ui['data-show-tests'].checked = true;
   const root = node(), controls = node();
   const dialog = modal ? node() : null, body = node(), close = node();
+  body.children = [];
   body.replaceChildren = (...children) => { body.children = children; };
   body.append = child => body.children.push(child);
+  body.querySelectorAll = selector => body.children.flatMap(child => child.querySelectorAll(selector));
   if (dialog) {
     dialog.querySelector = selector => selector === '[data-close-rule-dialog]' ? close : body;
     dialog.showModal = () => { dialog.open = true; };
     dialog.close = () => { dialog.open = false; dialog.listeners.close?.(); };
     dialog.contains = link => link.inDialog === true;
   }
-  const copy = {removeAttribute(){},querySelectorAll:()=>[]};
-  const explanations = modal ? {content:{querySelectorAll:()=>[{cloneNode:()=>copy}]}} : null;
+  const explanation = index => ({cloneNode() {
+    const anchor = node();
+    anchor.href = `report.html#rule-${index}`;
+    anchor.getAttribute = name => anchor[name];
+    const anchors = index === null ? [] : [anchor];
+    return {removeAttribute(){},querySelectorAll:selector=>selector==='a[href]'?anchors:[]};
+  }});
+  const explanations = modal ? {content:{querySelectorAll:selector=>
+    selector === '.rule-guide-intro, .rule-explanation'
+      ? [explanation(null), ...spec.map((_,index)=>explanation(index))]
+      : spec.flatMap((_,index)=>selector===`#rule-${index}`?[explanation(index)]:[])}} : null;
   root.hasAttribute = name => name === 'data-compact-report';
   root.lang = 'en';
   controls.hidden = true;
@@ -60,11 +72,16 @@ function report(spec, hash = '', modal = false) {
   root.querySelectorAll = s => s === '[data-rule]' ? rules : s === '[data-tree-file]' ? treeFiles : details;
   root.contains = n => n === root || details.includes(n);
   const window = node();
-  const document = {addEventListener(){},documentElement:{lang:'en'},querySelector:()=>root,getElementById:id=>details.find(n=>n.id===id)};
+  const document = {addEventListener(){},get activeElement(){return activeElement;},documentElement:{lang:'en'},querySelector:()=>root,getElementById:id=>details.find(n=>n.id===id)};
   runInNewContext(source,{document,window,location:{hash}});
-  return {ui,rules,controls,window,root,treeFiles,dialog,close,
+  return {ui,rules,controls,window,root,treeFiles,dialog,close,body,document,
+    keydown(key, modifiers = {}) {
+      const event = {key,defaultPrevented:false,...modifiers,preventDefault(){this.defaultPrevented=true;}};
+      dialog.listeners.keydown?.(event);
+      return event;
+    },
     link(help, inDialog=false) {
-      const anchor={dataset:{ruleHelp:help},inDialog,focus(){this.focused=true;},getAttribute:()=>help, matches:s=>s==='a'||s==='[data-rule-help]'&&!inDialog};
+      const anchor={...node({ruleHelp:help}),inDialog,getAttribute:()=>help, matches:s=>s==='a'||s==='[data-rule-help]'&&!inDialog};
       root.contains=n=>n===anchor||details.includes(n);
       root.listeners.click({target:{closest:s=>s==='a'?anchor:null},preventDefault(){}});return anchor;
     },
@@ -208,10 +225,81 @@ test('offline rule help preserves filters on close and reveals targets even for 
  r.input('data-rule-filter','RULE_1');assert.equal(r.rules[0].hidden,true);
  const opener=r.link('all');assert.equal(r.dialog.open,true);assert.equal(r.close.focused,true);
  r.close.listeners.click();assert.equal(r.dialog.open,false);assert.equal(opener.focused,true);
+ assert.equal(r.document.activeElement,opener);
  assert.equal(r.ui['data-rule-filter'].value,'RULE_1');assert.equal(r.ui['data-show-tests'].checked,false);
  r.link('all');r.link('#rule-0',true);
  assert.equal(r.dialog.open,false);assert.equal(r.rules[0].hidden,false);assert.equal(r.rules[0].open,true);
  assert.equal(r.ui['data-rule-filter'].value,'');assert.equal(r.ui['data-show-tests'].checked,true);assert.equal(r.rules[0].focused,true);
+ assert.equal(r.document.activeElement,r.rules[0]);
+});
+
+test('individual rule help cycles Tab and Shift+Tab between its endpoints',()=>{
+ const r=report([[{}]],'',true);
+ r.link('0');
+ const [location]=r.body.querySelectorAll('a[href]');
+ location.focus();
+ assert.equal(r.keydown('Tab').defaultPrevented,true);
+ assert.equal(r.document.activeElement,r.close);
+ assert.equal(r.keydown('Tab',{shiftKey:true}).defaultPrevented,true);
+ assert.equal(r.document.activeElement,location);
+ assert.equal(r.dialog.open,true);
+});
+
+test('all-rule help uses current body endpoints and leaves interior Tab to the browser',()=>{
+ const r=report([[{}],[{}]],'',true);
+ r.link('all');
+ const [first,last]=r.body.querySelectorAll('a[href]');
+ assert.equal(r.keydown('Tab').defaultPrevented,false);
+ assert.equal(r.document.activeElement,r.close);
+ first.focus();
+ assert.equal(r.keydown('Tab').defaultPrevented,false);
+ assert.equal(r.keydown('Tab',{shiftKey:true}).defaultPrevented,false);
+ assert.equal(r.document.activeElement,first);
+ last.focus();
+ assert.equal(r.keydown('Tab',{shiftKey:true}).defaultPrevented,false);
+ assert.equal(r.keydown('Tab').defaultPrevented,true);
+ assert.equal(r.document.activeElement,r.close);
+ assert.equal(r.keydown('Tab',{shiftKey:true}).defaultPrevented,true);
+ assert.equal(r.document.activeElement,last);
+ r.close.listeners.click();
+ r.link('1');
+ const [current]=r.body.querySelectorAll('a[href]');
+ assert.notEqual(current,last);
+ assert.equal(r.keydown('Tab',{shiftKey:true}).defaultPrevented,true);
+ assert.equal(r.document.activeElement,current);
+ assert.equal(r.keydown('Tab').defaultPrevented,true);
+ assert.equal(r.document.activeElement,r.close);
+});
+
+test('rule help with no location links cycles Close in both directions',()=>{
+ const r=report([],'',true);
+ r.link('all');
+ assert.equal(r.body.querySelectorAll('a[href]').length,0);
+ for(const modifiers of [{},{shiftKey:true}]) {
+  assert.equal(r.keydown('Tab',modifiers).defaultPrevented,true);
+  assert.equal(r.document.activeElement,r.close);
+  assert.equal(r.dialog.open,true);
+ }
+});
+
+test('rule help leaves other keys, modified Tab and closed-dialog keys unhandled',()=>{
+ const r=report([[{}]],'',true);
+ const opener=r.link('0');
+ for(const key of ['Escape','Enter','ArrowDown']) {
+  assert.equal(r.keydown(key).defaultPrevented,false);
+  assert.equal(r.document.activeElement,r.close);
+ }
+ for(const modifier of ['altKey','ctrlKey','metaKey']) {
+  for(const shiftKey of [false,true]) {
+   assert.equal(r.keydown('Tab',{[modifier]:true,shiftKey}).defaultPrevented,false);
+   assert.equal(r.document.activeElement,r.close);
+  }
+ }
+ r.close.listeners.click();
+ assert.equal(r.document.activeElement,opener);
+ r.close.focus();
+ assert.equal(r.keydown('Tab',{shiftKey:true}).defaultPrevented,false);
+ assert.equal(r.document.activeElement,r.close);
 });
 
 test('a matched-rule hash opens and focuses that individual finding inside a merged occurrence', () => {

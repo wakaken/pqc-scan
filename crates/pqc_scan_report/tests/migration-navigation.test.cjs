@@ -851,3 +851,67 @@ test('a blocker-free report has no checklist or empty checklist notice',()=>{
   f.instance.setLanguage('ja');
   assert.doesNotMatch(f.root.innerHTML,/work-checklist|migration-checklist|確認依頼はありません/);
 });
+
+test('new development provenance counts declarations without inferring deployment',()=>{
+ for(const provenance of ['platform_dev_required','dev_path_dependency_unresolved','dev_git_dependency_unresolved','dev_archive_dependency_unresolved','dev_lock_record_unverified','dev_source_unresolved']){
+  const f=fixture(1,false,false,s=>{s.targets[0].source_ref.dependency_provenance=provenance;s.targets[0].source_ref.path='composer.lock';});
+  assert.match(f.root.innerHTML,/Declared development dependencies: 1 \/ 1 records/,provenance);
+  assert.doesNotMatch(f.root.innerHTML,/production excluded|not deployed/);
+ }
+ const regular=fixture(1,false,false,s=>{s.targets[0].source_ref.dependency_provenance='build_requirement_unresolved';});
+ assert.doesNotMatch(regular.root.innerHTML,/Declared development dependencies: 1/);
+});
+
+test('referenced observation details explain text and source evidence in both languages without changing the archive', () => {
+  for (const method of ['lexical_match', 'ast_pattern', 'dependency_report']) {
+    for (const lang of ['en', 'ja']) {
+      const f=fixture(1,false,false,s=>{s.targets[0].observation.usage='referenced';s.targets[0].observation.method=method;});
+      const original=JSON.stringify(f.payload.archive);
+      f.instance.setLanguage(lang);f.jump('#target-1');
+      const detail=f.body().innerHTML;
+      assert.match(detail, /class="reference-meaning"/);
+      assert.ok(detail.includes(lang==='ja'?'検出時の利用状態':'Observed use state'));
+      assert.match(detail, /referenced<\/td>/);
+      const expected=method==='lexical_match'
+        ? (lang==='ja'?'文字列内の方式名の参照です。':'This is a name found in text,')
+        : (lang==='ja'?'ソースや依存関係の参照です。':'This is a source or dependency reference.');
+      assert.ok(detail.includes(expected),`${method}/${lang}`);
+      assert.doesNotMatch(detail,/Matching records at this location|この箇所に対応する検出記録/);
+      assert.equal(JSON.stringify(f.payload.archive),original);
+    }
+  }
+});
+
+test('configured observations retain their use state without the reference-only explanation or a multiple-record note', () => {
+  for (const lang of ['en','ja']) {
+    const f=fixture(1,false,false,s=>{s.targets[0].observation.usage='configured';});
+    const original=JSON.stringify(f.payload.archive);
+    f.instance.setLanguage(lang);f.jump('#target-1');
+    assert.ok(f.body().innerHTML.includes(lang==='ja'?'検出時の利用状態':'Observed use state'));
+    assert.match(f.body().innerHTML,/configured<\/td>/);
+    assert.doesNotMatch(f.body().innerHTML,/class="reference-meaning"|Matching records at this location|この箇所に対応する検出記録/);
+    assert.equal(JSON.stringify(f.payload.archive),original);
+  }
+});
+
+test('equivalent reference records explain the count while preserving both observations in export', async () => {
+  for (const lang of ['en','ja']) {
+    const f=fixture(2,false,false,s=>{
+      s.targets.forEach((t,i)=>{t.source_ref.observation_id='o'+i;t.source_ref.path='src/signature.cs';t.source_ref.line=18;t.technical.identifier='RSA';t.observation.usage='referenced';});
+      s.targets[1].observation.method='lexical_match';s.targets[1].observation.assurance='lexical';
+      s.decisions[1].system_id=s.decisions[0].system_id;s.decisions[1].urgency=s.decisions[0].urgency;
+      return [{members:[0,1]}];
+    });
+    const original=JSON.stringify(f.payload.archive);
+    f.instance.setLanguage(lang);f.click({work:'0'});f.click({target:'0'});
+    const detail=f.body().innerHTML;
+    assert.ok(detail.includes(lang==='ja'?'この箇所に対応する検出記録: 2':'Matching records at this location: 2'));
+    assert.ok(detail.includes(lang==='ja'?'この記録数だけでは、独立した暗号利用の件数は判断できません。':'These records alone do not establish the number of independent cryptographic uses.'));
+    assert.ok(detail.includes(lang==='ja'?'構文解析 · 文字列一致':'Syntax pattern · Text match'));
+    assert.equal((detail.match(/<section id="target-/g)||[]).length,1);
+    f.click({},['data-download']);const exported=JSON.parse(await f.saved().text());
+    assert.equal(exported.targets.length,2);assert.equal(exported.decisions.length,2);
+    assert.deepEqual(exported.targets.map(t=>t.observation.usage),['referenced','referenced']);
+    assert.equal(JSON.stringify(f.payload.archive),original);
+  }
+});

@@ -1,0 +1,149 @@
+id: '080'
+title: Add bounded C and C++ OpenSSL and OQS source detection
+type: improvement
+priority: high
+status: done
+owner: Main agent
+milestone: v0.5
+phase: '5'
+plan_reference: docs/roadmap/v0.5/ROADMAP.md
+requirements_reference: docs/roadmap/v0.5/REQUIREMENTS.md
+task_map_reference: docs/roadmap/v0.5/TASKS.md
+design_reference: docs/product/PQC-LANGUAGE-IMPLEMENTATION-PLAN-20261119.md
+description: Deliver required OpenSSL/liboqs/liboqs-cpp source coverage while retaining header, macro, provider
+  and build uncertainty.
+quality_requirements:
+- L02
+- L03
+- L04
+- L05
+- L06
+- L07
+- L08
+- L09
+- L13
+- L14
+- L15
+- L16
+- L17
+- L25
+- L27
+depends_on:
+- '077'
+target_components:
+- crates/pqc_scan_detectors/src/source_facts/
+- crates/pqc_scan_detectors/src/tree_sitter_detector.rs
+- crates/pqc_scan_detectors/tests/
+- rules/default/
+- docs/quality/rules/
+- docs/rules-reference.md
+- README.md
+- README.ja.md
+- docs/user/
+problem:
+- The required new-language outcomes are not delivered by current seven-language source routing, limited normalization
+  or dependency formats. Existing v0.4 correctness/privacy/contracts must remain intact.
+acceptance:
+- 'Implement the C/C++ scope of L03-L07: OpenSSL low-level/classical APIs, explicit EVP key/context selection
+  and KEM/signature operations, provider/property/TLS-group references, liboqs C and official C++ receiver operations.'
+- Bind generic EVP/receiver operations only to unambiguous bounded local selection; dynamic contexts, pointers,
+  macros, templates and cross-file includes do not supply invented algorithms or active branches.
+- Use 077 routing and combined header budget; retain conflicting parse/binding uncertainty, repeated same-line
+  operations and explicit incomplete status on hostile/deep/malformed input.
+- Preserve exact standardized/draft/experimental/hybrid names. Provider load, includes, TLS version and cipher
+  suites are not algorithm activation or negotiation. X-Wing and TLS hybrid names are not interchangeable.
+- Preserve existing lexical OpenSSL rule IDs/findings unless an incompatible correction is separately approved;
+  document overlap with new observations, attach current quality metadata, and ship tests and paired documentation.
+deliverables:
+- tasks/080/TASK-080-RESULTS.md
+- tasks/080/evidence/
+- The scoped behavior or feasibility deliverable, meaningful verification, affected documentation and applicable
+  review evidence; no completion follows from registration.
+implementation_steps:
+- Write detector-level positive/negative fixtures for every initial OpenSSL/OQS C/C++ family and legacy overlap.
+- Implement bounded local context/receiver selection and source-specific rules without preprocessing or compilation
+  of scanned inputs.
+- Exercise header/conditional/dynamic/macro/unknown-key and precise span/identity controls.
+- Update current quality/rule references and paired user scope with applicable old/new regression evidence.
+testing_requirements:
+- Apply docs/agent/VERIFICATION.md for all affected categories, including targeted behavior, workspace tests,
+  formatting/diff inspection, Clippy, applicable builds/features and package/dependency provenance checks; record
+  actual commands/exits and final-source applicability.
+- For executable changes, obtain implementation review after initial checks and combined-diff inspection, then
+  test review after required tests. Reuse the same two stage reviewers within one authorized request; splitting
+  tasks or PRs grants no additional identities.
+- New source/rule/manifest coverage needs meaningful positive, negative, malformed/unknown, resource/position/identity
+  and private-data controls. Browser acceptance uses docs/agent/REPORTS.md where presentation/interaction is
+  affected.
+- Cover C and C++ syntax/routes independently, liboqs-cpp qualified use, literal EVP contexts, provider overrides,
+  groups, includes-only cases and unknown operation key types.
+- Check old OpenSSL lexical IDs, AST/regex coexistence, custom packs, duplicate same-line spans, malformed headers
+  and shared resource caps.
+out_of_scope:
+- Executing preprocessors/compilers/build files, arbitrary include/pointer/template resolution, universal runtime
+  support, full secondary-library API analysis and 081 dependency parsing.
+risks:
+- An API/library name, dependency or syntactic reference may be promoted beyond its assurance, or historical
+  evidence may be mistaken for coverage of new final-source behavior.
+approval_boundary:
+- Definition and registration only under the 2026-11-24 steering; this task is not selected for execution. Dependencies
+  must complete and later explicit task selection is required.
+- Storage-format changes, high-risk architecture, unclear cryptographic logic and potentially incompatible rules
+  require the applicable AGENTS human decision; routine choices within agreed scope do not create a new approval
+  gate.
+- No extra agents, release/push/publication, outreach, fees or unagreed scope/criteria changes. Review budget
+  remains per authorized request.
+planning_record:
+  date: '2026-11-24'
+  source_head: 7e8cd91426fa21609a91c0511de44252eaa890d4
+  scope: Requirements/roadmap/task-definition work only; no new task execution, implementation acceptance or
+    measurement selected.
+  primary_requirements: []
+  supporting_requirements:
+  - L02
+  - L03
+  - L04
+  - L05
+  - L06
+  - L07
+  - L08
+  - L09
+  - L13
+  - L14
+  - L15
+  - L16
+  - L17
+  - L25
+  - L27
+  scoped_acceptance: Language-specific contributions to L03-L07; 082 closes those full clauses only after all
+    required language evidence.
+  completion_evidence: Every original task criterion, applicable final-source validation and required reviews;
+    preserve failures, unknowns, prior evidence and source bindings.
+execution_authorization:
+  date: '2026-11-24'
+  request: Maintainer selected tasks 076 onward in roadmap dependency order. Continue implementation, applicable
+    checks, required reviews and final acceptance within original scope.
+  review_budget: Two identities for this combined request, implementation stage and test stage; reuse across
+    tasks and fixes.
+execution_record:
+  source_head: 7e8cd91426fa21609a91c0511de44252eaa890d4 plus accepted076-079 work
+  prerequisite: 077 foundation and sequential079 done; c73abf444 manifest
+  plan: tasks/080/TASK-080-PLAN.md
+  reviewers:
+    implementation: /root/implementation_review
+    test: /root/test_review
+  lifecycle:
+  - 'pending -> planned: current user selected076 onward sequentially;079 accepted; reuse484 frozen C/C++ cases
+    and original criteria'
+  - 'planned -> in-progress: frozen484 tests preceded handlers; added primary-source-bound supplemental controls'
+  - in-progress -> review:48-file snapshot21a4e6bd and passing initial source/quality/build/fmt/Clippy submitted
+  - 'review -> in-progress -> review: main reproduced/fixed three P2 issues with retained implementation reviewer;
+    old source/reproductions/failed logs preserved'
+  - 'review -> done: unchanged final source verified; both retained stages accepted all original080 criteria'
+  final_acceptance:
+    source_manifest_sha256: 5fb2fe9db1ee0eb9c78ca0fcec7c64907ac0c1de22c4a4d7d859368a1f6b352a
+    implementation_review: accepted; threeP2 resolved; same identity
+    test_review: accepted; same identity;48source/twoinputs/151observations match
+    checks: evidence/FINAL-CHECKS.json;11 commands exit0, strict incomplete expected3
+    results: tasks/080/TASK-080-RESULTS.md
+    remaining: 081-083 milestone work; no original080 criterion deferred

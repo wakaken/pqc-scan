@@ -1,0 +1,105 @@
+{
+  "reviewer": "/root/test_review",
+  "prior_freeze": "FREEZE-3.json",
+  "source_population_unchanged": 882,
+  "reason": "Original focal-negative patch matched unsuffixed names, while actual IDs end in -positive. Freeze concrete call spans and old identities so valid setup facts cannot hide wrong inherited receiver facts. No subject implementation exists.",
+  "changes": [
+    {
+      "id": "php-reassignment-positive",
+      "before": {
+        "rule": null,
+        "span": null,
+        "canonical_algorithm": null,
+        "observation_role": "unresolved",
+        "status": "partial",
+        "forbidden_algorithms": [],
+        "scope": "focal-expression; setup calls may independently produce observations"
+      },
+      "after": {
+        "rule": null,
+        "span": null,
+        "canonical_algorithm": null,
+        "observation_role": "unresolved",
+        "status": "partial",
+        "forbidden_algorithms": [
+          "SLH-DSA"
+        ],
+        "scope": "only the rebound receiver call at forbidden_span; valid constructor/setup observations at other spans remain allowed",
+        "forbidden_span": [
+          65,
+          80
+        ],
+        "allowed_outcomes": [
+          "no observation at focal span",
+          "unresolved reference without prohibited old identity"
+        ]
+      }
+    },
+    {
+      "id": "cs-rebound-positive",
+      "before": {
+        "rule": null,
+        "span": null,
+        "canonical_algorithm": null,
+        "observation_role": "unresolved",
+        "status": "partial",
+        "forbidden_algorithms": [],
+        "scope": "focal-expression; setup calls may independently produce observations"
+      },
+      "after": {
+        "rule": null,
+        "span": null,
+        "canonical_algorithm": null,
+        "observation_role": "unresolved",
+        "status": "partial",
+        "forbidden_algorithms": [
+          "ML-KEM",
+          "ML-KEM-512",
+          "ML-KEM-768",
+          "ML-KEM-1024"
+        ],
+        "scope": "only the rebound receiver call at forbidden_span; valid constructor/setup observations at other spans remain allowed",
+        "forbidden_span": [
+          106,
+          125
+        ],
+        "allowed_outcomes": [
+          "no observation at focal span",
+          "unresolved reference without prohibited old identity"
+        ]
+      }
+    },
+    {
+      "id": "cpp-rebound-positive",
+      "before": {
+        "rule": null,
+        "span": null,
+        "canonical_algorithm": null,
+        "observation_role": "unresolved",
+        "status": "partial",
+        "forbidden_algorithms": [],
+        "scope": "focal-expression; setup calls may independently produce observations"
+      },
+      "after": {
+        "rule": null,
+        "span": null,
+        "canonical_algorithm": null,
+        "observation_role": "unresolved",
+        "status": "partial",
+        "forbidden_algorithms": [
+          "ML-KEM-768"
+        ],
+        "scope": "only the rebound receiver call at forbidden_span; valid constructor/setup observations at other spans remain allowed",
+        "forbidden_span": [
+          66,
+          86
+        ],
+        "allowed_outcomes": [
+          "no observation at focal span",
+          "unresolved reference without prohibited old identity"
+        ]
+      }
+    }
+  ],
+  "measurement_reuse": "Only expectation JSON changed; every scanned source/dependency/old-seven/saved input byte, binary, argv and environment is unchanged from baseline-review1. Reuse those observations without relabelling populations."
+}

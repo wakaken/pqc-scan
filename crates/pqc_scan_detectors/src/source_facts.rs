@@ -1,10 +1,16 @@
 //! Local source facts for the explicitly supported built-in reference rules.
 //! Unrelated/custom patterns retain the generic matching path.
 mod bindings;
+mod c_family;
 mod context;
 mod cross_file;
+mod csharp;
 mod javascript;
 mod jwt;
+mod partial_causes;
+mod php;
+pub(crate) use partial_causes::{PartialCause, PartialCauses};
+pub(crate) use php::privacy_callees;
 mod python;
 mod ruby;
 mod rust;
@@ -24,6 +30,10 @@ pub(crate) struct SourceMatch {
     pub end: usize,
     pub reason: &'static str,
     pub algorithm_references: Vec<String>,
+    pub(crate) safe_preview: Option<String>,
+    pub(crate) source_library: Option<pqc_scan_core::observation::SourceLibraryReference>,
+    pub(crate) source_configuration:
+        Option<pqc_scan_core::observation::SourceConfigurationReference>,
     retained_prefix_bytes: usize,
 }
 impl SourceMatch {
@@ -36,11 +46,24 @@ pub(crate) struct Facts {
     hits: HashMap<&'static str, Vec<SourceMatch>>,
     pub truncated: bool,
     pub limit_reason: Option<(&'static str, usize, usize)>,
-    pub partial: bool,
+    partial_causes: PartialCauses,
+    pub sensitive_ranges: Vec<std::ops::Range<usize>>,
     remaining_candidates: Option<usize>,
     remaining_bytes: Option<usize>,
 }
 impl Facts {
+    pub fn mark_partial(&mut self, cause: PartialCause) {
+        self.partial_causes.insert(cause);
+    }
+    pub fn is_partial(&self) -> bool {
+        !self.partial_causes.is_empty()
+    }
+    pub fn partial_causes(&self) -> PartialCauses {
+        self.partial_causes
+    }
+    fn extend_partial_causes(&mut self, causes: PartialCauses) {
+        self.partial_causes.extend(causes);
+    }
     fn push(&mut self, id: &'static str, start: usize, end: usize, reason: &'static str) {
         if let Some(remaining) = &mut self.remaining_bytes {
             let bytes = end.saturating_sub(start);
@@ -64,7 +87,52 @@ impl Facts {
                 end,
                 reason,
                 algorithm_references: vec![],
+                safe_preview: None,
+                source_library: None,
+                source_configuration: None,
                 retained_prefix_bytes: 0,
+            });
+        }
+    }
+    fn source_api(
+        &mut self,
+        id: &'static str,
+        node: Node<'_>,
+        reason: &'static str,
+        names: &[&str],
+        label: &'static str,
+    ) {
+        if let Some(arguments) = node.child_by_field_name("arguments") {
+            self.sensitive_ranges.push(arguments.byte_range());
+        }
+        self.source_api_range(id, node.start_byte()..node.end_byte(), reason, names, label);
+    }
+    fn source_api_range(
+        &mut self,
+        id: &'static str,
+        span: std::ops::Range<usize>,
+        reason: &'static str,
+        names: &[&str],
+        label: &'static str,
+    ) {
+        let before = self.hits.get(id).map_or(0, Vec::len);
+        self.push(id, span.start, span.end, reason);
+        if let Some(hit) = self.hits.get_mut(id).and_then(|hits| hits.get_mut(before)) {
+            hit.algorithm_references = names
+                .iter()
+                .take(16)
+                .filter(|n| {
+                    pqc_scan_core::observation::AlgorithmSpec::source_api(n, &Default::default())
+                        .is_some()
+                })
+                .map(|s| (*s).to_owned())
+                .collect();
+            hit.source_library =
+                pqc_scan_core::observation::SourceLibraryReference::from_label(label);
+            hit.safe_preview = Some(if hit.algorithm_references.is_empty() {
+                label.into()
+            } else {
+                format!("{label}: {}", hit.algorithm_references.join(", "))
             });
         }
     }
@@ -117,7 +185,7 @@ impl Facts {
     pub fn status(&self) -> DetectorStatus {
         if self.truncated {
             DetectorStatus::Truncated
-        } else if self.partial {
+        } else if self.is_partial() {
             DetectorStatus::Partial
         } else {
             DetectorStatus::Complete
@@ -155,11 +223,13 @@ pub(crate) fn inspect_in_repository(
     repository: Option<&pqc_scan_core::RepositoryContext>,
 ) -> Facts {
     let mut facts = Facts {
-        partial: root.has_error(),
         remaining_candidates: Some(budget.max_ast_candidates),
         remaining_bytes: Some(budget.max_ast_match_bytes),
         ..Facts::default()
     };
+    if root.has_error() {
+        facts.mark_partial(PartialCause::ParserRecovery);
+    }
     if !Handler::ALL
         .into_iter()
         .filter(|h| h.handles(language))
@@ -184,6 +254,9 @@ pub(crate) fn inspect_in_repository(
             }
         }
         "python" => python::inspect(&mut context, &mut facts, rules),
+        "php" => php::inspect(&context, &mut facts, rules),
+        "csharp" => csharp::inspect(&context, &mut facts, rules),
+        "c" | "cpp" => c_family::inspect(&context, &mut facts, rules, file),
         "rust" => {
             rust::inspect(
                 &mut context,
@@ -239,6 +312,7 @@ pub(crate) fn inspect_in_repository(
             .get(id)
             .filter(|r| builtin(r))
             .and_then(|r| r.compiled_pattern())
+            .filter(|_| !matches!(language, "php" | "csharp" | "c" | "cpp"))
         {
             for hit in matches.iter_mut() {
                 if let Some(original) = pattern
@@ -250,7 +324,11 @@ pub(crate) fn inspect_in_repository(
             }
         }
         matches.sort_by_key(|m| (m.start, m.end));
-        matches.dedup_by_key(|m| m.start);
+        if matches!(language, "php" | "csharp" | "c" | "cpp") {
+            matches.dedup_by_key(|m| (m.start, m.end));
+        } else {
+            matches.dedup_by_key(|m| m.start);
+        }
     }
     facts
 }
@@ -272,12 +350,14 @@ pub(crate) fn for_regex(
         crate::tree_sitter_detector::source_tree(text, &file.path, language, name, budget)
     else {
         return Some(Facts {
-            partial: true,
+            partial_causes: PartialCauses::from(PartialCause::OtherSourceUncertainty),
             ..Facts::default()
         });
     };
     let mut facts = inspect(parsed.tree.root_node(), text, name, rules, budget);
     facts.truncated |= parsed.compatibility_limited || parsed.template_limited;
-    facts.partial |= parsed.template_pending;
+    if parsed.template_pending {
+        facts.mark_partial(PartialCause::OtherSourceUncertainty);
+    }
     Some(facts)
 }

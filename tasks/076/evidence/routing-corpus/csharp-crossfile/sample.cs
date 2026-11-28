@@ -1,0 +1,1 @@
+namespace App; class C { void M(){ K.GenerateKey(algorithm); } }

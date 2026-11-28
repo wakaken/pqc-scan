@@ -793,3 +793,70 @@ fn concrete_limit_reasons_remain_separate_and_keep_the_diagnostic_shape() {
     }
     assert!(html.contains("&lt;untrusted&gt;&amp;.txt"));
 }
+
+#[test]
+fn source_partial_causes_keep_multiple_reasons_in_both_languages_and_machine_records() {
+    struct PartialMessage(&'static str);
+    impl Detector for PartialMessage {
+        fn name(&self) -> &'static str {
+            "source_partial_fixture"
+        }
+        fn detect(&self, _: &ScannableFile, _: &RuleSet) -> anyhow::Result<Vec<Detection>> {
+            Ok(vec![])
+        }
+        fn detect_detailed(
+            &self,
+            _: &ScannableFile,
+            _: &RuleSet,
+        ) -> anyhow::Result<DetectorOutcome> {
+            Ok(DetectorOutcome::new(vec![], DetectorStatus::Partial).with_explanation(self.0))
+        }
+    }
+    let fixture = Fixture::new();
+    for (case, message, en, ja, absent) in [
+        (
+            "combined",
+            "Source inspection incomplete. Conditional source: active branches and build definitions remain unknown. Unresolved supported crypto binding: the receiver or selected algorithm remains unknown. Review the affected source and build configuration separately.",
+            vec!["Conditional source:", "Unresolved supported crypto binding:"],
+            vec!["条件付きソースがあります", "暗号操作の参照先を解決できません"],
+            "構文回復",
+        ),
+        (
+            "opaque",
+            "Source inspection incomplete. Opaque macro syntax: source references were retained; macro expansion and build semantics remain unknown. Review the affected source and build configuration separately.",
+            vec!["Opaque macro syntax:"],
+            vec!["マクロの構文を展開せずに扱っています"],
+            "構文回復",
+        ),
+        (
+            "header",
+            "Ambiguous C/C++ header: one or both candidate inspections are incomplete; retained source identities do not disagree. Configured build language is unknown.",
+            vec!["candidate inspections are incomplete"],
+            vec!["候補の一方または両方で検査が未完了", "参照先に食い違いはありません"],
+            "参照先が食い違います",
+        ),
+    ] {
+        let doc = scan_repository_native(
+            &ScanConfig { root: fixture.0.join("input"), threads: 1, ..Default::default() },
+            &RuleSet::load_from_dir(&fixture.0.join("rules")).unwrap(),
+            &[std::sync::Arc::new(PartialMessage(message))],
+            &NativeOptions::new(Some("partial/diagnostic-copy")).unwrap(),
+        ).unwrap();
+        assert_eq!(doc.diagnostics()[0].message(), message);
+        let machine_before = serde_json::to_value(doc.diagnostics_report()).unwrap();
+        for (lang, expected, dir) in [(ReportLanguage::En, &en, "en"), (ReportLanguage::Ja, &ja, "ja")] {
+            let out = fixture.0.join(case).join(dir);
+            write_document_reports(&doc, None, true, &out, ReportFormat::All, lang).unwrap();
+            for filename in ["report.html", "report.md"] {
+                let content = fs::read_to_string(out.join(filename)).unwrap();
+                for phrase in expected {
+                    assert!(content.contains(phrase), "{case}/{dir}/{filename} missing {phrase}");
+                }
+                if lang == ReportLanguage::Ja {
+                    assert!(!content.contains(absent), "{case}/{filename} claims {absent}");
+                }
+            }
+        }
+        assert_eq!(serde_json::to_value(doc.diagnostics_report()).unwrap(), machine_before);
+    }
+}

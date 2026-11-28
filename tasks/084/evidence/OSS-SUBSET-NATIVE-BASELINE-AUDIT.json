@@ -1,0 +1,109 @@
+{
+  "phase": "baseline-oss-subsets-native-v1",
+  "generatedAtUtc": "2026-11-24T16:17:06.856520+00:00",
+  "truthBindings": {
+    "TRUTH-INITIAL.json": "3ab1fd718017fc0ec38f483309795edef0225bd681b09b4a9d643811e249cfbf",
+    "TRUTH-SUPPLEMENT-02.json": "2564f721cbdf202148372d91e053980e30823c82b6b775ed542cdeb8dc506dbd",
+    "DOMAIN-TRUTH-INITIAL.json": "3097e84917baa81e8cdb96589937c51297173ecb4d996ffeac6ea6844ad0bfc0"
+  },
+  "scope": "Initial47 immutable. Supplement exposed/tuning and separate denominator. Source facts, algorithm identities and runtime deployment are separate.",
+  "projects": [
+    {
+      "repository": "Sustainsys/Saml2",
+      "commit": "1adec7d9ef5ff66e00f51232e9c232fa81735430",
+      "nativeReceiptSha256": "98e38f78b913fb39637ba9bae3c740859c06701a96249443f5db32dd8cb4d7fc",
+      "coverage": {
+        "selected_files": 168,
+        "read_ok_files": 168,
+        "read_failed_files": 0,
+        "analyzed_files": 110,
+        "partial_files": 58,
+        "analysis_failed_files": 0,
+        "unsupported_files": 0,
+        "not_applicable_files": 0,
+        "unknown_files": 0,
+        "excluded_enumerated_files": 0,
+        "enumeration_failed_entries": 0,
+        "not_enumerated_population": true,
+        "status": "partial"
+      },
+      "nativeCompleteness": "not_exhaustive",
+      "nativeObservations": 11,
+      "nativeVsDefaultLegacySemantic": true,
+      "initial": [],
+      "supplement": [],
+      "domain": [
+        {
+          "unit": "domain-008",
+          "sourceUrl": "https://github.com/Sustainsys/Saml2/blob/1adec7d9ef5ff66e00f51232e9c232fa81735430/src/foss/Sustainsys.Saml2/Xml/SignedXmlHelper.cs#L70",
+          "sourceExpectation": "Key-dependent XML signature",
+          "sourceEvidenceClass": "dotnet_xml_api",
+          "observationsOnSourceLine": [],
+          "scoring": "Unscored source-domain question; same-line evidence alone does not establish equivalent crypto semantics or absence."
+        }
+      ],
+      "nativeVsDefaultCoverage": true
+    },
+    {
+      "repository": "bitwarden/server",
+      "commit": "487bc1602e941c057c3984462288a27021bd45c6",
+      "nativeReceiptSha256": "f160ca6cc9fca4cb4a46ceefc7a5b93da183aa2f15016b60c93a139ac6449cf3",
+      "coverage": {
+        "selected_files": 8019,
+        "read_ok_files": 8019,
+        "read_failed_files": 0,
+        "analyzed_files": 4811,
+        "partial_files": 3208,
+        "analysis_failed_files": 0,
+        "unsupported_files": 0,
+        "not_applicable_files": 0,
+        "unknown_files": 0,
+        "excluded_enumerated_files": 106,
+        "enumeration_failed_entries": 0,
+        "not_enumerated_population": true,
+        "status": "partial"
+      },
+      "nativeCompleteness": "not_exhaustive",
+      "nativeObservations": 11273,
+      "nativeVsDefaultLegacySemantic": true,
+      "initial": [],
+      "supplement": [],
+      "domain": [
+        {
+          "unit": "domain-009",
+          "sourceUrl": "https://github.com/bitwarden/server/blob/487bc1602e941c057c3984462288a27021bd45c6/util/Seeder/Data/Generators/SshKeyDataGenerator.cs#L61",
+          "sourceExpectation": "RSA",
+          "sourceEvidenceClass": "dotnet_api",
+          "observationsOnSourceLine": [
+            {
+              "observationId": "observation-v1-4505f304f78b2b376e558d4d117eb4137b9196ffdd9b86ad1e880be471ccd2eb",
+              "ruleId": "CSHARP_CRYPTO_API",
+              "target": {
+                "path": "util/Seeder/Data/Generators/SshKeyDataGenerator.cs",
+                "line": 61,
+                "column": 29,
+                "column_kind": "unicode_code_points",
+                "byte_start": 2479,
+                "byte_end": 2495,
+                "object_index": null
+              },
+              "method": "ast_pattern",
+              "assurance": "syntactic",
+              "usage": "referenced",
+              "captureStatus": "legacy_reported",
+              "algorithms": [
+                "RSA"
+              ],
+              "assetKinds": {
+                "algorithm": 1,
+                "usage": 1
+              }
+            }
+          ],
+          "scoring": "Unscored source-domain question; same-line evidence alone does not establish equivalent crypto semantics or absence."
+        }
+      ],
+      "nativeVsDefaultCoverage": true
+    }
+  ]
+}

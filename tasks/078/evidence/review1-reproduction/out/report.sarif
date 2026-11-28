@@ -1,0 +1,263 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "columnKind": "unicodeCodePoints",
+      "tool": {
+        "driver": {
+          "name": "pqc-scan",
+          "rules": [
+            {
+              "id": "API_OPENSSL_RSA_NEW",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "OpenSSL low-level RSA API usage detected."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "PHP_CRYPTO_API",
+              "shortDescription": {
+                "text": "CryptoAPI"
+              },
+              "fullDescription": {
+                "text": "Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "PHP_PQC_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "PHP_CRYPTO_API",
+          "level": "warning",
+          "message": {
+            "text": "Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved. | migration_hint=Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use. | next_actions=Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "arraywrite.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+            "recommended_actions": [
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "PHP_CRYPTO_API",
+          "level": "warning",
+          "message": {
+            "text": "Bounded PHP primitive API or opaque signature-wrapper reference; generic keys remain unresolved. | migration_hint=Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use. | next_actions=Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "arraywrite.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+            "recommended_actions": [
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "API_OPENSSL_RSA_NEW",
+          "level": "warning",
+          "message": {
+            "text": "OpenSSL low-level RSA API usage detected. | migration_hint=Prefer high-level OpenSSL EVP APIs to ease PQC migration. | next_actions=Adopt a phased hybrid PQC migration plan (near-term); Introduce crypto abstraction boundary for algorithm agility (near-term)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "privacy.php"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 76
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+            "recommended_actions": [
+              "Adopt a phased hybrid PQC migration plan (near-term)",
+              "Introduce crypto abstraction boundary for algorithm agility (near-term)"
+            ]
+          }
+        },
+        {
+          "ruleId": "PHP_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence. | migration_hint=Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "catch.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          }
+        },
+        {
+          "ruleId": "PHP_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence. | migration_hint=Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "catch.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          }
+        },
+        {
+          "ruleId": "PHP_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence. | migration_hint=Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "foreach.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          }
+        },
+        {
+          "ruleId": "PHP_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence. | migration_hint=Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "foreach.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          }
+        },
+        {
+          "ruleId": "PHP_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence. | migration_hint=Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "methodwrite.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          }
+        },
+        {
+          "ruleId": "PHP_PQC_API",
+          "level": "note",
+          "message": {
+            "text": "Exact PHP PQC family and local receiver reference; parameters, provider and active use require separate evidence. | migration_hint=Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "methodwrite.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+          }
+        }
+      ]
+    }
+  ]
+}

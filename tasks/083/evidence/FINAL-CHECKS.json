@@ -1,0 +1,89 @@
+{
+  "source_manifest_sha256": "c660ef994798d3a3ec26aa43282fa91cad1cff10306c13640c383a67b26f9636",
+  "head": "7e8cd91426fa21609a91c0511de44252eaa890d4",
+  "CARGO_INCREMENTAL": "0",
+  "all_features_target": "target/v05-feature",
+  "checks": [
+    {
+      "command": "cargo test -p pqc_scan_detectors --test language_dependencies",
+      "exit": 0,
+      "log": "tasks/083/evidence/dependencies-final.log",
+      "sha256": "9243fe1b6ca041f122ba3bdaa1f6db16527054e39b43bc16764e0a2bcfdc458c"
+    },
+    {
+      "command": "cargo test -p pqc_scan_detectors --all-features --test language_dependencies",
+      "exit": 0,
+      "log": "tasks/083/evidence/dependencies-allfeatures-final.log",
+      "sha256": "cb6ebd99171f5e2f56462b192737820f82d1cc9569b2298f563a3b4c67477d30"
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets -- -D warnings",
+      "exit": 0,
+      "log": "tasks/083/evidence/clippy-final.log",
+      "sha256": "498b9435545ac98eff33e60849eb0df7397c398ce84a6fd38f115160d42dd8af"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "exit": 0,
+      "log": "tasks/083/evidence/fmt-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0,
+      "log": "tasks/083/evidence/diff-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "cargo build --workspace --locked --offline [isolatedHEAD]",
+      "exit": 0,
+      "log": "tasks/083/evidence/baseline-build.log",
+      "sha256": "d3a22d8bac7f3f7e4a4d854ca1c36749acf634f3fa6404cab69e75ac2274579f"
+    },
+    {
+      "command": "cargo build --workspace --locked --offline [finalsource]",
+      "exit": 0,
+      "log": "tasks/083/evidence/final-build.log",
+      "sha256": "d3d730c8dc6554928e724e0acba95ac6cadae178e7d9f20b90b6abb197de6d7a"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests/distribution -p test_*.py",
+      "exit": 0,
+      "log": "tasks/083/evidence/distribution-final.log",
+      "sha256": "dfc7ecf84d39e815bd723e0396c38e23363139077053f7d008e206b6170dc6ca"
+    },
+    {
+      "command": "python3 tasks/083/evidence/measure_final.py baseline-comparable",
+      "exit": 0,
+      "log": "tasks/083/evidence/measure-baseline-comparable.log",
+      "sha256": "6663269f88eb955170366d842ae7bcabc60c6c8e6e8f46e3e3938464cfa878f8"
+    },
+    {
+      "command": "python3 tasks/083/evidence/measure_final.py final",
+      "exit": 0,
+      "log": "tasks/083/evidence/measure-final.log",
+      "sha256": "6663269f88eb955170366d842ae7bcabc60c6c8e6e8f46e3e3938464cfa878f8"
+    },
+    {
+      "command": "python3 tasks/083/evidence/reconcile_rules.py",
+      "exit": 0,
+      "log": "tasks/083/evidence/rule-audit-final.log",
+      "sha256": "c46b34fa8e05de394d715dd10484b9429851be2ab7ad0f149dbaa5682e02e38d"
+    },
+    {
+      "command": "python3 tasks/083/evidence/summarize_measurements.py",
+      "exit": 0,
+      "log": "tasks/083/evidence/measurement-summary.log",
+      "sha256": "ae7e687e5519354b68fd88780a6f25730471a916250b4824359acd797765d16b"
+    },
+    {
+      "command": "python3 tasks/083/evidence/compare_measurements.py",
+      "exit": 0,
+      "log": "tasks/083/evidence/frozen-compatibility.log",
+      "sha256": "2e085291fdc45c6b9b7c6aec6745ced11fa579e9653d1b1b8b9bf54ade2f4a2e"
+    }
+  ],
+  "reuse": "tasks/083/evidence/SOURCE-APPLICABILITY.json",
+  "unchanged082checks": "tasks/082/evidence/FINAL-CHECKS.json; no rerunwithoutnewsource/failureconcern",
+  "notrun": "No release/push/PR, newprotocolnetworkprobe, externalCIjobs, otherOSmeasurements orhumanstudy required/requested. Allfeatures protocolunit/integration tests and default/allfeaturebuilds ran locally; local checks do not claim remoteCI execution."
+}

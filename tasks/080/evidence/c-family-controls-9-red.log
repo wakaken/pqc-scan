@@ -1,0 +1,44 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.35s
+     Running tests/c_family_source.rs (target/debug/deps/c_family_source-31e1842aa2f3e465)
+
+running 15 tests
+test c_family_shared_builtin_budgets_have_zero_below_at_and_above_boundaries ... FAILED
+test c_family_configuration_and_include_references_keep_exact_public_identity_without_activation ... ok
+test c_family_indirect_writes_and_unproven_named_methods_invalidate_local_selectors ... FAILED
+test c_family_overlap_preserves_original_lexical_rule_occurrences_and_ids ... ok
+test c_family_local_enums_and_cpp_namespace_namesakes_do_not_select_real_apis ... ok
+test c_family_literal_selectors_and_generated_key_roles_preserve_exact_drafts_and_agreement ... ok
+test c_family_help_strings_qualified_names_macros_and_templates_do_not_fabricate_bindings ... ok
+test c_family_private_arguments_are_not_exported_even_through_partial_shared_headers ... ok
+test c_family_group_lists_retain_standard_draft_and_alias_spelling_and_reject_opaque_data ... ok
+test c_family_local_key_flow_does_not_survive_writes_shadows_or_opaque_calls ... ok
+test c_family_alias_and_write_limits_cannot_resurrect_old_bindings ... ok
+test c_family_wrong_constructor_suites_and_non_evp_keys_do_not_cross_roles ... ok
+test c_family_source_positions_identity_and_utf16_bytes_are_original ... ok
+test c_family_all_detectors_keep_canaries_and_algorithm_looking_payloads_private_after_limits ... ok
+test every_frozen_c_family_case_matches_its_original_focal_expectation ... ok
+
+failures:
+
+---- c_family_shared_builtin_budgets_have_zero_below_at_and_above_boundaries stdout ----
+
+thread 'c_family_shared_builtin_budgets_have_zero_below_at_and_above_boundaries' (23580348) panicked at crates/pqc_scan_detectors/tests/c_family_source.rs:695:13:
+assertion `left == right` failed: candidates/4: DetectorOutcome { detections: [Detection { rule_id: "C_FAMILY_PQC_API", location: Location { file: "case.h", line: 1, column: 10 }, evidence: Evidence { type: "tree_sitter_match", match: "C/C++ cryptographic source reference: ML-KEM-768", snippet_preview: "C/C++ cryptographic source reference: ML-KEM-768", metadata: {"detector": "tree_sitter_detector", "language": "c,cpp", "node_kind": "bounded_source_fact", "scope": "c,cpp", "source_resolution": "explicit_algorithm_or_unresolved_selector"} } }, Detection { rule_id: "C_FAMILY_PQC_API", location: Location { file: "case.h", line: 1, column: 37 }, evidence: Evidence { type: "tree_sitter_match", match: "C/C++ cryptographic source reference: ML-KEM-768", snippet_preview: "C/C++ cryptographic source reference: ML-KEM-768", metadata: {"detector": "tree_sitter_detector", "language": "c,cpp", "node_kind": "bounded_source_fact", "scope": "c,cpp", "source_resolution": "explicit_algorithm_or_unresolved_selector"} } }], status: Truncated, observations: [ObservationDraft { method: "ast_pattern", assurance: "syntactic", .. }, ObservationDraft { method: "ast_pattern", assurance: "syntactic", .. }], explanation: Some("Ambiguous C/C++ header: shared inspection budget exhausted; omitted or conflicting facts remain unknown."), limit_detail: None, test_ranges: [], display_ranges: [], sensitive_ranges: [20..34, 47..61, 20..34, 47..61], sensitive_source_context: true }
+  left: Truncated
+ right: Complete
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- c_family_indirect_writes_and_unproven_named_methods_invalidate_local_selectors stdout ----
+
+thread 'c_family_indirect_writes_and_unproven_named_methods_invalidate_local_selectors' (23580342) panicked at crates/pqc_scan_detectors/tests/c_family_source.rs:665:9:
+void f(){char *name="ML-KEM-768";name[0]='x';EVP_PKEY_CTX_new_from_name(NULL,name,NULL);}: {"assessment_status":"not_evaluated","assessments":[],"assets":[{"attributes":{"identifier":"ML-KEM-768","namespace":"named","parameters":{},"purpose":"reference"},"id":"asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d","identity_basis":"normalized_identifier_and_reported_parameters","kind":"algorithm","relations":[],"uncertainty":[]},{"attributes":{"ambiguous":false,"anchor":"anchor-v1-e97d5d80c57565937eb30a0413adfd497f417729f36321f56043ab953b2eb002","local_ordinal":0,"method":"ast_pattern","path":"case.c"},"id":"asset-v1-4831e50eda385aee4fe6ba4fc3f312cc92cc89fea70077e29051a8360e60c9be","identity_basis":"scoped_weak_source_anchor","kind":"usage","relations":[{"relationship":"references","target":"asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d"}],"uncertainty":["static_reference_not_active_use"]}],"catalog_version":"native-exact-identifiers-1","coverage":{"analysis_failed_files":0,"analyzed_files":1,"enumeration_failed_entries":0,"excluded_enumerated_files":0,"not_applicable_files":0,"not_enumerated_population":true,"partial_files":0,"read_failed_files":0,"read_ok_files":1,"selected_files":1,"status":"complete_within_scope","unknown_files":0,"unsupported_files":0},"diagnostics":[],"export_loss_notes":["raw_matches_snippets_and_arbitrary_metadata_omitted","unknown_raw_identifiers_not_guessed","legacy_snapshot_not_derived_from_inventory","legacy_ids_are_not_native_identity","legacy_dependency_version_provenance_unavailable","legacy_applicability_coverage_is_not_native_inventory_completeness","weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity","cryptographic_trust_and_policy_not_evaluated"],"identity_scheme":"pqc-scan-length-prefixed-sha256-v1","legacy_associations":[{"legacy_id":"finding-v1-8b879b5e2c55d895f701d2eb2ab234ce4e600b5cff80a2b418b9b7eddda3b1d0","legacy_index":0,"observation_ids":["observation-v1-f4761a903aa7cd15247431c00e858f2afdca19a24f83e78708f4bf722ac28a3b"]}],"legacy_loss_records":[],"native_completeness":"not_exhaustive","observations":[{"asset_ids":["asset-v1-252b3a43b89d87587ead0efb5d490fe7e693fc3bc95901ba0dc46170e148832d","asset-v1-4831e50eda385aee4fe6ba4fc3f312cc92cc89fea70077e29051a8360e60c9be"],"assurance":"syntactic","evidence":{"capture_status":"legacy_reported","marker_kind":null},"id":"observation-v1-f4761a903aa7cd15247431c00e858f2afdca19a24f83e78708f4bf722ac28a3b","identity_confidence":"weak_structural_anchor","method":"ast_pattern","occurrence_key":"occurrence-v1-5bc63bd0d515c3282548ced95d85121120db168e8d440cb50c03f1c5fc9e532f","producer":"tree_sitter_detector","rule_id":"C_FAMILY_PQC_API","target":{"byte_end":87,"byte_start":45,"column":46,"column_kind":"unicode_code_points","line":1,"object_index":null,"path":"case.c"},"uncertainty":[],"usage":"referenced"}],"profile":"static-native-v1","repository_scope":"v05/c-family","rules_digest":"rules-v1-0f3d13623aa559fc0a1b047de65c4b03cc731d51ce7b3847e2700b1796214214","run":{"attempt_id":"static-1","generated_at":"2026-11-24T06:43:52.497897+00:00","id":"scan-v1-a6eb9c7d7af4a3a70e175871a8a271351e07acac622f6c973928075cb13aff2b"},"scanner_version":"0.4.0","schema_version":1,"scope":{"default_excludes":[".git","node_modules","target","dist","docs","known non-scannable media, archives and binary data"],"git_exclude":true,"git_global":true,"git_ignore":true,"markdown_excluded":true,"max_file_size_bytes":2097152},"unassociated_observation_ids":[]}
+
+
+failures:
+    c_family_indirect_writes_and_unproven_named_methods_invalidate_local_selectors
+    c_family_shared_builtin_budgets_have_zero_below_at_and_above_boundaries
+
+test result: FAILED. 13 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.29s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test c_family_source`

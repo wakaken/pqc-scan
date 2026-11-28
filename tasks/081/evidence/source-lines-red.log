@@ -1,0 +1,25 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.98s
+     Running tests/language_dependencies.rs (target/debug/deps/language_dependencies-bf2fcd7220ddc5e7)
+
+running 1 test
+test original_xml_json_and_utf16_source_lines_are_useful_and_duplicates_stay_unknown ... FAILED
+
+failures:
+
+---- original_xml_json_and_utf16_source_lines_are_useful_and_duplicates_stay_unknown stdout ----
+
+thread 'original_xml_json_and_utf16_source_lines_are_useful_and_duplicates_stay_unknown' (23903200) panicked at crates/pqc_scan_detectors/tests/language_dependencies.rs:536:5:
+assertion failed: out.detections().iter().filter(|d|
+            d.evidence.metadata.get("dep_name").is_some_and(|n|
+                    n ==
+                        "bouncycastle.cryptography")).all(|d| d.location.line == 4)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    original_xml_json_and_utf16_source_lines_are_useful_and_duplicates_stay_unknown
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.19s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test language_dependencies`

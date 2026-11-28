@@ -1,0 +1,135 @@
+- text: Language / 言語
+- combobox "Language / 言語":
+  - option "English"
+  - option "日本語" [selected]
+- text: Theme / 表示
+- combobox "Theme / 表示":
+  - option "Light / ライト" [selected]
+  - option "Dark / ダーク"
+- main:
+  - link "検出結果へ移動":
+    - /url: "#findings"
+  - paragraph: pqc-scan / 静的解析
+  - heading "耐量子暗号への移行調査レポート" [level=1]
+  - paragraph:
+    - text: 作成日時
+    - time: 2026/11/24 14:45:59 JST (Asia/Tokyo)
+  - generic: 確認が必要な指摘
+  - generic: 2 件
+  - generic: 参考情報
+  - generic: 6 件
+  - generic: 検出のあったファイル数
+  - generic: "1"
+  - figure "重大度の分布 · 全検出":
+    - generic: 重大度の分布 · 全検出
+    - list:
+      - text: 中
+      - strong: "2"
+      - text: 参考情報
+      - strong: "6"
+  - heading "検査範囲と完了状況" [level=2]
+  - paragraph: 対象範囲の検査は完了しました
+  - paragraph: 下の所見を確認してください。検査完了は、安全性や移行完了を意味しません。
+  - text: 検査対象ファイル数
+  - strong: "1"
+  - text: 解析完了ファイル数
+  - strong: "1"
+  - text: 追加確認が必要なファイル数
+  - strong: "0"
+  - generic "検査範囲と除外条件"
+  - complementary:
+    - group "検索条件":
+      - generic "検索条件 ›":
+        - text: 検索条件 ›
+      - text: 表示対象
+      - combobox "表示対象":
+        - option "対応候補"
+        - option "参考情報"
+        - option "すべて" [selected]
+      - text: 検索
+      - searchbox "検索"
+      - text: 重大度
+      - combobox "重大度":
+        - option "すべて" [selected]
+        - option "緊急"
+        - option "高"
+        - option "中"
+        - option "低"
+        - option "参考情報"
+      - text: リスク
+      - combobox "リスク":
+        - option "すべて" [selected]
+        - option "量子計算によるリスクあり"
+        - option "要確認（実装や設定の確認が必要）"
+        - option "PQC方式の参照あり（対応完了の保証ではありません）"
+        - option "量子計算とは別のセキュリティ上の注意点"
+      - text: ルール
+      - combobox "ルール":
+        - option "すべてのルール" [selected]
+        - option "CSHARP_CRYPTO_API — C#の暗号APIまたはライブラリの参照が見つかりました。"
+        - option "CSHARP_CRYPTO_REFERENCE — C#のTLSライブラリまたはOQSラッパーの参照が見つかりました。"
+        - option "CSHARP_PQC_API — C#のPQC方式または複合方式・HPKEの参照が見つかりました。"
+      - link "ルールの説明":
+        - /url: report.rules.html?lang=ja
+      - text: ファイル
+      - combobox "ファイル":
+        - option "すべてのファイル" [selected]
+        - option "api.cs"
+      - checkbox "テストコードの結果を表示" [checked]
+      - text: テストコードの結果を表示
+      - button "条件をすべて解除"
+    - group "ファイル":
+      - generic "ファイル ›":
+        - text: ファイル ›
+      - link "すべての結果を表示":
+        - /url: "#findings"
+      - list:
+        - button "api.cs、全検出8件":
+          - generic: api.cs
+          - generic: "8"
+  - region "検出結果":
+    - heading "検出結果" [level=2]
+    - status: 表示対象：3 / 3グループ、8 / 8件
+    - generic "› C#の暗号APIまたはライブラリの参照が見つかりました。 中 2 件 ファイル 1 · 表示対象 2 / 2":
+      - text: ›
+      - strong: C#の暗号APIまたはライブラリの参照が見つかりました。
+      - generic: 中
+      - generic: 2 件
+      - generic: ファイル 1 · 表示対象 2 / 2
+    - generic "› C#のTLSライブラリまたはOQSラッパーの参照が見つかりました。 参考情報 3 件 ファイル 1 · 表示対象 3 / 3":
+      - text: ›
+      - strong: C#のTLSライブラリまたはOQSラッパーの参照が見つかりました。
+      - generic: 参考情報
+      - generic: 3 件
+      - generic: ファイル 1 · 表示対象 3 / 3
+    - generic "› C#のPQC方式または複合方式・HPKEの参照が見つかりました。 参考情報 3 件 ファイル 1 · 表示対象 3 / 3":
+      - text: ›
+      - strong: C#のPQC方式または複合方式・HPKEの参照が見つかりました。
+      - generic: 参考情報
+      - generic: 3 件
+      - generic: ファイル 1 · 表示対象 3 / 3
+    - paragraph: 正確な方式とパラメーター、.NETやBouncy Castleの実装とバージョンを確認してください。複合方式や汎用のHPKEを単独のPQC方式と同一視せず、構成と実行環境を確認してください。
+    - paragraph:
+      - link "このルールの説明":
+        - /url: report.rules.html?lang=ja#rule-2
+    - heading "検出箇所と対応" [level=4]
+    - generic "api.cs:1:110 [masked-sensitive-content]" [active]:
+      - code: api.cs:1:110
+      - generic: "[masked-sensitive-content]"
+    - paragraph: C#のPQC方式または複合方式・HPKEの参照が見つかりました。
+    - paragraph: "判断の目安: 要確認（実装や設定の確認が必要）"
+    - paragraph: "確認すること: 正確な方式とパラメーター、.NETやBouncy Castleの実装とバージョンを確認してください。複合方式や汎用のHPKEを単独のPQC方式と同一視せず、構成と実行環境を確認してください。"
+    - paragraph:
+      - text: "検出した記述:"
+      - code: "[masked-sensitive-content]"
+    - generic "一致したルール (1)"
+    - generic: "1"
+    - generic: "[masked-sensitive-file-content]"
+    - heading "この箇所の対応" [level=4]
+    - paragraph: 正確な方式とパラメーター、.NETやBouncy Castleの実装とバージョンを確認してください。複合方式や汎用のHPKEを単独のPQC方式と同一視せず、構成と実行環境を確認してください。
+    - generic "api.cs:1:314 [masked-sensitive-content]":
+      - code: api.cs:1:314
+      - generic: "[masked-sensitive-content]"
+    - generic "api.cs:1:334 [masked-sensitive-content]":
+      - code: api.cs:1:334
+      - generic: "[masked-sensitive-content]"

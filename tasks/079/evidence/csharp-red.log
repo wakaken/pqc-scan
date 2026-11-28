@@ -1,0 +1,33 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+warning: function `focal` is never used
+   --> crates/pqc_scan_detectors/tests/csharp_source.rs:149:4
+    |
+149 | fn focal(native: &Value, start: usize, end: usize) -> Vec<&Value> {
+    |    ^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `pqc_scan_detectors` (test "csharp_source") generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.27s
+     Running tests/csharp_source.rs (target/debug/deps/csharp_source-240f82a778562327)
+
+running 1 test
+test every_frozen_csharp_case_matches_its_original_focal_expectation ... FAILED
+
+failures:
+
+---- every_frozen_csharp_case_matches_its_original_focal_expectation stdout ----
+
+thread 'every_frozen_csharp_case_matches_its_original_focal_expectation' (23070816) panicked at crates/pqc_scan_detectors/tests/csharp_source.rs:106:9:
+assertion `left == right` failed: cs-standard-rsa-positive: DetectorOutcome { detections: [], status: NotApplicable, observations: [], explanation: None, limit_detail: None, test_ranges: [], display_ranges: [], sensitive_ranges: [], sensitive_source_context: false }
+  left: NotApplicable
+ right: Complete
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    every_frozen_csharp_case_matches_its_original_focal_expectation
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test csharp_source`

@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "scope": "documented-public-input-subset",
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "3ebe7838e812929808b69698a5551ec64d780ed2441cf0ae05f8ef56fc1a2c27",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "a82f9ac6212be8d69fd707a931c098d2b0b2f046d7abcd259e2dee5087904290",
+    "docs/user/COVERAGE.ja.md": "5d1b188de17afad4b83189776f0b24cf5359c944d337634f114f506fd7aaa879",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+    "docs/architecture/STATIC-ANALYSIS.md": "23c3eab6664372289c1eeeb6b40722248612b5cdba17b45a423c774a8227bcf5"
+  },
+  "reviewer": "/root/ci_applicability_final_main | actual main author | codex:gpt-6.1-sol@high",
+  "assignedModel": "codex:gpt-6.1-sol@high",
+  "reviewScope": "Final-source applicability of the original expanded-v2 questions",
+  "timestampUtc": "2026-11-27T06:05:54.603703+00:00",
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "remainingScopeReason": "I read all 203 bounded inputs and all 246 original question scopes and nominal reasons against the final contracts. The encryptedData structures remove only six inner-attribute questions. All other 240 nominal questions remain, including outer container signals, readable public certificate attributes, comments, strings, namesakes, shadowing, malformed values, finite provenance, dependency records and configuration references. The retained original 47 unsupported and four ambiguous units remain visible and unscored. There are 189 eligible positive/negative questions, not 189 files or a universal accuracy denominator.",
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The PFX v3 outer data contains encryptedData with OID 1.2.840.113549.1.7.6 and no readable certificate bag. CERT_ECDSA_SIGNATURE asks an inner attribute. Current pkcs12.rs leaves this content opaque and both final coverage guides exclude decryption. Historical conversion lineage cannot make the encrypted attribute readable, including an original negative ECDSA claim. Exclude only this inner question as unsupported."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The PFX v3 outer data contains encryptedData with OID 1.2.840.113549.1.7.6 and no readable certificate bag. CERT_ECDSA_SIGNATURE asks an inner attribute. Current pkcs12.rs leaves this content opaque and both final coverage guides exclude decryption. Historical conversion lineage cannot make the encrypted attribute readable, including an original negative ECDSA claim. Exclude only this inner question as unsupported."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "The PFX v3 outer data contains encryptedData with OID 1.2.840.113549.1.7.6 and no readable certificate bag. CERT_RSA_3072 asks an inner attribute. Current pkcs12.rs leaves this content opaque and both final coverage guides exclude decryption. Historical conversion lineage cannot make the encrypted attribute readable, including an original negative ECDSA claim. Exclude only this inner question as unsupported."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The PFX v3 outer data contains encryptedData with OID 1.2.840.113549.1.7.6 and no readable certificate bag. CERT_RSA_SIGNATURE asks an inner attribute. Current pkcs12.rs leaves this content opaque and both final coverage guides exclude decryption. Historical conversion lineage cannot make the encrypted attribute readable, including an original negative ECDSA claim. Exclude only this inner question as unsupported."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The PFX v3 outer data contains encryptedData with OID 1.2.840.113549.1.7.6 and no readable certificate bag. CERT_RSA_3072 asks an inner attribute. Current pkcs12.rs leaves this content opaque and both final coverage guides exclude decryption. Historical conversion lineage cannot make the encrypted attribute readable, including an original negative ECDSA claim. Exclude only this inner question as unsupported."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The PFX v3 outer data contains encryptedData with OID 1.2.840.113549.1.7.6 and no readable certificate bag. CERT_RSA_SIGNATURE asks an inner attribute. Current pkcs12.rs leaves this content opaque and both final coverage guides exclude decryption. Historical conversion lineage cannot make the encrypted attribute readable, including an original negative ECDSA claim. Exclude only this inner question as unsupported."
+    }
+  ],
+  "unresolved": [],
+  "frozen": true,
+  "finalSourceReviewed": true,
+  "finalSourceDeltaReviewed": {
+    "status": "Reviewed for applicability",
+    "versionFields": [
+      "Cargo.toml workspace.package.version",
+      "Cargo.lock seven workspace package versions",
+      "crates/pqc_scan_cli/tests/fixtures/native-v1.golden.json scanner_version"
+    ],
+    "conclusion": "The reviewed version-only fields do not alter original question definitions or add decryption. The actual final EN and JA coverage contracts identify unpublished v0.5 and retain the public-input limits. The four actual contract bytes were read and all 343 integrated product bindings matched. This is not a full correctness approval of every product file."
+  },
+  "sourceState": {
+    "revision": "cf3bfe2071228921f5a33d2a44e0f3b94de4d1de",
+    "branch": "codex/oss-crypto-corpus",
+    "dirty": true,
+    "statusAtReview": " M .github/workflows/pqc-scan.yml\n M AGENTS.override.md\n M Cargo.lock\n M Cargo.toml\n M README.ja.md\n M README.md\n M SECURITY.ja.md\n M SECURITY.md\n M crates/pqc_scan_cli/tests/evidence_privacy.rs\n M crates/pqc_scan_cli/tests/fixtures/native-v1.golden.json\n M crates/pqc_scan_core/src/observation/source_api.rs\n M crates/pqc_scan_core/src/pipeline.rs\n M crates/pqc_scan_core/src/privacy.rs\n M crates/pqc_scan_core/tests/support/pipeline_quality.rs\n M crates/pqc_scan_detectors/src/certificate_detector.rs\n M crates/pqc_scan_detectors/src/source_facts.rs\n M crates/pqc_scan_detectors/src/source_facts/c_family.rs\n M crates/pqc_scan_detectors/src/source_facts/c_family/values.rs\n M crates/pqc_scan_detectors/src/source_facts/csharp.rs\n M crates/pqc_scan_detectors/src/source_facts/csharp/names.rs\n M crates/pqc_scan_detectors/src/source_facts/csharp/values.rs\n M crates/pqc_scan_detectors/src/source_facts/php.rs\n M crates/pqc_scan_detectors/src/source_facts/php/names.rs\n M crates/pqc_scan_detectors/src/source_facts/php/values.rs\n M crates/pqc_scan_detectors/src/source_facts/selectors_tests.rs\n M crates/pqc_scan_detectors/src/tree_sitter_detector.rs\n M crates/pqc_scan_detectors/src/tree_sitter_detector/header.rs\n M crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy.rs\n M crates/pqc_scan_detectors/tests/c_family_source.rs\n M crates/pqc_scan_detectors/tests/certificate_attributes.rs\n M crates/pqc_scan_detectors/tests/csharp_source.rs\n M crates/pqc_scan_detectors/tests/pqc_readiness.rs\n M crates/pqc_scan_detectors/tests/selective_source_privacy.rs\n M crates/pqc_scan_report/src/compact.js\n M crates/pqc_scan_report/src/inspection.rs\n M crates/pqc_scan_report/src/japanese.rs\n M crates/pqc_scan_report/tests/evidence_privacy.rs\n M crates/pqc_scan_report/tests/inspection.rs\n M docs/architecture.md\n M docs/architecture/EVIDENCE-PRIVACY.md\n M docs/quality/rules/RULE-QUALITY-METADATA.json\n M docs/quality/rules/RULE-QUALITY.md\n M docs/roadmap/v0.5/ACCEPTANCE.md\n M docs/rules-reference.md\n M docs/user/COVERAGE.ja.md\n M docs/user/COVERAGE.md\n M docs/user/DISTRIBUTION.ja.md\n M docs/user/DISTRIBUTION.md\n M docs/user/REPORTS.ja.md\n M docs/user/REPORTS.md\n M docs/user/SCANNING.ja.md\n M docs/user/SCANNING.md\n M rules/default/cert.yml\n M rules/default/crypto_api.yml\n M rules/default/jwt.yml\n M rules/default/pqc.yml\n M rules/default/tls.yml\n M tests/quality/evaluate.py\n M tests/quality/run.py\n M tests/report-ui/compact.test.cjs\n?? benchmark/\n?? crates/pqc_scan_cli/tests/static_claims.rs\n?? crates/pqc_scan_detectors/src/source_facts/partial_causes.rs\n?? crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy/\n?? crates/pqc_scan_detectors/tests/fixtures/c_family_partial_contract_v2.json\n?? crates/pqc_scan_detectors/tests/partial_diagnostics.rs\n?? docs/quality/oss-corpus/ACCURACY-EXPANSION.ja.md\n?? docs/quality/oss-corpus/IMPROVEMENT-CANDIDATES.ja.md\n?? docs/quality/oss-corpus/PROTOCOL-35.md\n?? docs/quality/oss-corpus/PROTOCOL-98.md\n?? docs/quality/oss-corpus/REPORT-35-PARTIAL-FIXES.ja.md\n?? docs/quality/oss-corpus/REPORT-35-PARTIAL-FIXES.md\n?? docs/quality/oss-corpus/REPORT-35.ja.md\n?? docs/quality/oss-corpus/REPORT-35.md\n?? docs/quality/oss-corpus/REPORT-98.ja.md\n?? docs/records/oss-corpus-20261121/20261125-98-corpus-index.md\n?? docs/releases/v0.5.0.ja.md\n?? docs/releases/v0.5.0.md\n?? docs/roadmap/v0.5/RELEASE-PREPARATION.md\n?? tests/quality/applicability-v05-final-20261127-bc20507d/\n?? tests/quality/oss.py\n?? tests/quality/oss98-heldout-v1/\n?? tests/quality/oss98-heldout-v2/\n?? tests/quality/test_accuracy_assessment.py\n?? tests/quality/test_accuracy_display.py\n?? tests/quality/test_accuracy_display_context.py\n?? tests/quality/test_accuracy_display_logical_regions.py\n?? tests/quality/test_accuracy_display_oth.py\n?? tests/quality/test_accuracy_display_owned_boundaries.py\n?? tests/quality/test_accuracy_native.py\n?? tests/quality/test_accuracy_sampling.py\n?? tests/quality/test_annotation_contracts.py\n?? tests/quality/test_artifact_preflight.py\n?? tests/quality/test_assessment_four_phase.py\n?? tests/quality/test_benchmark.py\n?? tests/quality/test_digest_streaming.py\n?? tests/quality/test_measure_safety.py\n?? tests/quality/test_no_performance.py\n?? tests/quality/test_oss_summary.py\n?? tests/quality/test_output_audit.py\n?? tests/quality/test_source_statistics_qualification.py\n?? tests/quality/test_temporal_ci_artifacts.py\n?? tests/quality/test_temporal_reassessment.py\n",
+    "productSourceRecord": {
+      "path": "/Users/waka/.cache/pqc-scan-oss98-20261125/accuracy-expansion-20261126-68b7cfbb41114d8c910d4de72b468fd9/v05-release-preparation-bc20507df81c418cabc07b02e6dc74a9/INTEGRATED-PRODUCT-SOURCE.json",
+      "sha256": "63f0066ddbb9528fa5687ad4392c576643682f8f1010ae8bebfb25c4fc801060"
+    },
+    "productBindingsCount": 343,
+    "allProductBindingsMatch": true,
+    "contractBindings": {
+      "docs/user/COVERAGE.md": "a82f9ac6212be8d69fd707a931c098d2b0b2f046d7abcd259e2dee5087904290",
+      "docs/user/COVERAGE.ja.md": "5d1b188de17afad4b83189776f0b24cf5359c944d337634f114f506fd7aaa879",
+      "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+      "docs/architecture/STATIC-ANALYSIS.md": "23c3eab6664372289c1eeeb6b40722248612b5cdba17b45a423c774a8227bcf5"
+    }
+  },
+  "counts": {
+    "inputFiles": 203,
+    "originalQuestions": 246,
+    "originalLabels": {
+      "positive": 102,
+      "negative": 93,
+      "unsupported": 47,
+      "ambiguous": 4
+    },
+    "excludedQuestions": 6,
+    "retainedNominal": 240,
+    "retainedPositive": 98,
+    "retainedNegative": 91,
+    "eligible": 189,
+    "retainedUnsupported": 47,
+    "retainedAmbiguous": 4,
+    "projectedUnsupportedIncludingExclusions": 53
+  },
+  "method": "New source-based main review of every original input and nominated question. Python only frames bounded public ASN.1 and checks preserved bindings. It does not author labels, decide truth, run the scanner or measure accuracy.",
+  "informationExposure": {
+    "preparedRecipeSeen": true,
+    "originalTruthAndReasonsSeen": true,
+    "originalLabelFilesLoadedByValidator": true,
+    "historicalSixNominationsSeen": true,
+    "historicalCountsSeen": true,
+    "historicalScannerOutcomeSummarySeen": true,
+    "scannerPredictionFilesSeen": false,
+    "otherCurrentApplicabilityReviewSeen": false,
+    "oldApplicabilityReviewFilesOpened": false,
+    "forbiddenDraftAndUnitNotesOpened": false,
+    "details": "The parent brief disclosed the earlier development-profile timeout and later production-profile completion, including 11 outputs and 5978 findings. No raw scanner outputs or prediction files were opened in this lane. HOW.md and RECIPE.json disclosed historical applicability nominations. This exposed confirmation is not blind gold labeling."
+  },
+  "originalProtocolSha256": "300313c7a8e6867a4f7283a06c2ec0546ae38f6d987c4300575d98d39bf65dd9",
+  "provenanceSha256": "1253727e7c892a41844ec374230b447f4191b21cb7bc74ecd06447663e3b4874",
+  "sourceBindingsSha256": "d1b63030e79bdf8845003515b0fb3b555ad2c4fc8dc9615c011439628d5c869a",
+  "auditSources": {
+    "main-file-audit.json": "f81c6fb027e45cd17805e1f2b14838c92171be579e4f13a21b367c9fe8f8c066",
+    "main-unit-audit.json": "e5e554105962b8a4c68add64723b705a2471d31c7dddabf1d6f0e73bed135328"
+  },
+  "evidenceSources": {
+    "/Users/waka/.cache/pqc-scan-oss98-20261125/accuracy-expansion-20261126-68b7cfbb41114d8c910d4de72b468fd9/v05-release-preparation-bc20507df81c418cabc07b02e6dc74a9/ci-applicability-final-main/read_inputs.py": "982c46efad780fedbf99920e90be3def9206ab719a001399a6e2c2f8466a7ffa",
+    "/Users/waka/.cache/pqc-scan-oss98-20261125/accuracy-expansion-20261126-68b7cfbb41114d8c910d4de72b468fd9/v05-release-preparation-bc20507df81c418cabc07b02e6dc74a9/ci-applicability-final-main/inspect_public_structures.py": "63956e79a79186e8659d8995bf2dd5f2537014f68bc68efd8de268350e16bd4e",
+    "/Users/waka/.cache/pqc-scan-oss98-20261125/accuracy-expansion-20261126-68b7cfbb41114d8c910d4de72b468fd9/v05-release-preparation-bc20507df81c418cabc07b02e6dc74a9/ci-applicability-final-main/public-structures.json": "930e5250af83d66e99d82a88fd239714622c7cb630d9590a079014d73493118a"
+  },
+  "interpretation": "Source-only applicability confirmation, not an independent gold trial, detector improvement, runtime-baseline admission, accuracy measurement or release approval.",
+  "verification": {
+    "preservedTruthLoad": "Passed with absolute corpus directory",
+    "preservedCorpusValidation": "Passed for 203 inputs and 246 units",
+    "provenanceHashMatches": 203,
+    "integratedProductBindingsMatch": 343,
+    "contractBindingsMatch": 4,
+    "initialRelativePathCheck": "The initial relative-directory load_truth call rejected its noncanonical paths as symlink evidence. Rerunning with the absolute canonical directory passed without changing any input or validator.",
+    "runtimeBaselinePassed": false,
+    "scannerRun": false,
+    "buildRun": false,
+    "networkUsed": false,
+    "performanceMeasurementRun": false
+  }
+}

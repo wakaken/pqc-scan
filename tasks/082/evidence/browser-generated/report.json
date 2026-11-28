@@ -1,0 +1,966 @@
+{
+  "generated_at": "2026-11-24T09:23:43.730406Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-69a77eac662bde7eb8ed353114f374cae00125f8b2d5de73d570fe6429f97aa5",
+      "rule_id": "DEP_BOUNCYCASTLE",
+      "category": "TLS",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.45,
+      "description": "BouncyCastle dependency detected.",
+      "migration_hint": "Verify BouncyCastle PQC support status.",
+      "location": {
+        "file": "packages.lock.json",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "bouncyca***@2.6.2",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "nuget",
+          "dep_name": "bouncycastle.cryptography",
+          "dep_purl": "pkg:nuget/bouncycastle.cryptography@2.6.2",
+          "dep_source_type": "manifest",
+          "dep_version": "2.6.2",
+          "detector": "dependency_detector",
+          "manifest": "packages.lock.json"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dotnet.verify-pqc-environment",
+          "title": "Verify .NET target, package and operating-system support",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed runtime, OS, provider and native backend versions are unknown. Target frameworks, global.json SDK selection and NuGet package declarations are separate source claims, not the installed runtime.",
+            ".NET 10 documents MLKem, MLDsa and SlhDsa. Check the selected parameter, OS/backend support and IsSupported or IsAlgorithmSupported in the deployed environment; Linux facilities may require OpenSSL 3.5 or later. Do not generalize platform support across Windows, Linux and macOS.",
+            ".NET 11 CompositeMLKem and Hpke facilities require review of the exact API and experimental diagnostics. HPKE alone does not identify a PQC KEM. Check Bouncy Castle package/version independently of the .NET target.",
+            "ASP.NET/Kestrel TLS depends on the OS/TLS backend and peer negotiation; cryptographic API availability does not enable PQC TLS. Data Protection AES payloads are not a reason to replace symmetric encryption with a KEM."
+          ],
+          "references": [
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/standard/security/cross-platform-cryptography",
+            "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-10.0"
+          ]
+        },
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-6981fb6a1346b8efa285d6fe485884b3820787d2a85365ccc537d97dc5a0e601",
+      "rule_id": "PHP_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "PHP cryptographic API or library reference; key type may be unresolved.",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.",
+      "location": {
+        "file": "rsa.php",
+        "line": 2,
+        "column": 1
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "php.verify-pqc-environment",
+          "title": "Verify PHP extensions and their native cryptographic backends",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed PHP, extension and native library versions are unknown from a source or manifest reference. Composer config.platform is emulated dependency resolution, not the deployed PHP version.",
+            "PHP 8.6 Sodium KEM APIs require libsodium 1.0.22 or later. Keep X-Wing separate from pure ML-KEM-768 and TLS hybrid groups; confirm the actual loaded extension and operation.",
+            "Check ext-pqcrypto and paragonie/pqcrypto_compat independently; a Composer package is not a native extension. Verify each documented algorithm, version and maintenance/audit status.",
+            "For PHP OpenSSL calls, verify the linked OpenSSL/provider and exposed PHP API. OpenSSL PQC primitives alone do not establish PHP KEM or TLS support. Framework encryption using AES does not call for blanket replacement with a public-key KEM."
+          ],
+          "references": [
+            "https://www.php.net/manual/en/migration86.new-functions.php",
+            "https://github.com/paragonie/ext-pqcrypto",
+            "https://github.com/paragonie/pqcrypto_compat",
+            "https://www.php.net/manual/en/ref.openssl.php"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 2,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-9f9317bed0297ee5ae8676373e609e6351117c4e94db9de3ffb643da2f8b54c9",
+      "rule_id": "C_FAMILY_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+      "location": {
+        "file": "unknown.c",
+        "line": 1,
+        "column": 21
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "native.verify-pqc-environment",
+          "title": "Verify C/C++ library, provider and build capabilities",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "The deployed native library, build options, provider configuration and peer capabilities are unknown. vcpkg/Conan declarations, baselines and CMake references are not installed libraries or a reconstructed build graph.",
+            "OpenSSL 3.5 supplies ML-KEM, ML-DSA and SLH-DSA in its default provider; oqsprovider is not required for every OpenSSL PQC use. Check the exact OpenSSL build, enabled algorithms and provider/property selection.",
+            "For liboqs, liboqs-cpp and oqsprovider, verify separate compatible versions, disabled/enabled algorithms, native build flags and maintenance status. OQS integrations are prototypes; a wrapper/include reference does not establish deployment suitability.",
+            "TLS groups and provider loads are requested configuration only. Verify peers, negotiated groups, authentication signatures and protocol compatibility independently. Preserve appropriate symmetric encryption rather than replacing AES wholesale with a public-key KEM."
+          ],
+          "references": [
+            "https://docs.openssl.org/3.5/man7/EVP_KEM-ML-KEM/",
+            "https://openquantumsafe.org/",
+            "https://github.com/open-quantum-safe/oqs-provider",
+            "https://github.com/open-quantum-safe/liboqs-cpp"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-d535bbca8003fb3ebab0f3bfd82daa0e4c6559866663b9d4dbaa69b163088303",
+      "rule_id": "DEP_OPENSSL",
+      "category": "TLS",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.45,
+      "description": "OpenSSL dependency detected.",
+      "migration_hint": "Review the OpenSSL PQC roadmap.",
+      "location": {
+        "file": "vcpkg.json",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "openssl@unknown",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "vcpkg",
+          "dep_name": "openssl",
+          "dep_purl": "",
+          "dep_source_type": "manifest",
+          "dep_version": "unknown",
+          "detector": "dependency_detector",
+          "manifest": "vcpkg.json"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "native.verify-pqc-environment",
+          "title": "Verify C/C++ library, provider and build capabilities",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "The deployed native library, build options, provider configuration and peer capabilities are unknown. vcpkg/Conan declarations, baselines and CMake references are not installed libraries or a reconstructed build graph.",
+            "OpenSSL 3.5 supplies ML-KEM, ML-DSA and SLH-DSA in its default provider; oqsprovider is not required for every OpenSSL PQC use. Check the exact OpenSSL build, enabled algorithms and provider/property selection.",
+            "For liboqs, liboqs-cpp and oqsprovider, verify separate compatible versions, disabled/enabled algorithms, native build flags and maintenance status. OQS integrations are prototypes; a wrapper/include reference does not establish deployment suitability.",
+            "TLS groups and provider loads are requested configuration only. Verify peers, negotiated groups, authentication signatures and protocol compatibility independently. Preserve appropriate symmetric encryption rather than replacing AES wholesale with a public-key KEM."
+          ],
+          "references": [
+            "https://docs.openssl.org/3.5/man7/EVP_KEM-ML-KEM/",
+            "https://openquantumsafe.org/",
+            "https://github.com/open-quantum-safe/oqs-provider",
+            "https://github.com/open-quantum-safe/liboqs-cpp"
+          ]
+        },
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-bac322e5c4a7794ee19fb59fc2a2df26db21157eb20e05ebc973b7ed7d7bcccb",
+      "rule_id": "DEP_PHP_CRYPTO",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "PHP cryptographic dependency or platform declaration; installed capability is unknown.",
+      "migration_hint": "Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence.",
+      "location": {
+        "file": "composer.json",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "phpsecli***ib@3.0",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "composer",
+          "dep_name": "phpseclib/phpseclib",
+          "dep_purl": "pkg:composer/phpseclib/phpseclib",
+          "dep_source_type": "manifest",
+          "dep_version": "3.0",
+          "detector": "dependency_detector",
+          "manifest": "composer.json"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "php.verify-pqc-environment",
+          "title": "Verify PHP extensions and their native cryptographic backends",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed PHP, extension and native library versions are unknown from a source or manifest reference. Composer config.platform is emulated dependency resolution, not the deployed PHP version.",
+            "PHP 8.6 Sodium KEM APIs require libsodium 1.0.22 or later. Keep X-Wing separate from pure ML-KEM-768 and TLS hybrid groups; confirm the actual loaded extension and operation.",
+            "Check ext-pqcrypto and paragonie/pqcrypto_compat independently; a Composer package is not a native extension. Verify each documented algorithm, version and maintenance/audit status.",
+            "For PHP OpenSSL calls, verify the linked OpenSSL/provider and exposed PHP API. OpenSSL PQC primitives alone do not establish PHP KEM or TLS support. Framework encryption using AES does not call for blanket replacement with a public-key KEM."
+          ],
+          "references": [
+            "https://www.php.net/manual/en/migration86.new-functions.php",
+            "https://github.com/paragonie/ext-pqcrypto",
+            "https://github.com/paragonie/pqcrypto_compat",
+            "https://www.php.net/manual/en/ref.openssl.php"
+          ]
+        },
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-4d0da499fb7a4c4498a43c162d875da8a1faf89d6faa3524ab12e4221fe3cbe5",
+      "rule_id": "DEP_PHP_CRYPTO",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "PHP cryptographic dependency or platform declaration; installed capability is unknown.",
+      "migration_hint": "Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence.",
+      "location": {
+        "file": "composer.json",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "ext-sodium@unknown",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "php-platform",
+          "dep_name": "ext-sodium",
+          "dep_purl": "",
+          "dep_source_type": "manifest",
+          "dep_version": "unknown",
+          "detector": "dependency_detector",
+          "manifest": "composer.json"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "php.verify-pqc-environment",
+          "title": "Verify PHP extensions and their native cryptographic backends",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed PHP, extension and native library versions are unknown from a source or manifest reference. Composer config.platform is emulated dependency resolution, not the deployed PHP version.",
+            "PHP 8.6 Sodium KEM APIs require libsodium 1.0.22 or later. Keep X-Wing separate from pure ML-KEM-768 and TLS hybrid groups; confirm the actual loaded extension and operation.",
+            "Check ext-pqcrypto and paragonie/pqcrypto_compat independently; a Composer package is not a native extension. Verify each documented algorithm, version and maintenance/audit status.",
+            "For PHP OpenSSL calls, verify the linked OpenSSL/provider and exposed PHP API. OpenSSL PQC primitives alone do not establish PHP KEM or TLS support. Framework encryption using AES does not call for blanket replacement with a public-key KEM."
+          ],
+          "references": [
+            "https://www.php.net/manual/en/migration86.new-functions.php",
+            "https://github.com/paragonie/ext-pqcrypto",
+            "https://github.com/paragonie/pqcrypto_compat",
+            "https://www.php.net/manual/en/ref.openssl.php"
+          ]
+        },
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-fe40c6405c861921d3ff03a1fc36b160d8788c9859e59c40f43afee6c17acf8e",
+      "rule_id": "PHP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-safe",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "PHP PQC algorithm or X-Wing reference; runtime support requires verification.",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.",
+      "location": {
+        "file": "kem.php",
+        "line": 2,
+        "column": 1
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "php.verify-pqc-environment",
+          "title": "Verify PHP extensions and their native cryptographic backends",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed PHP, extension and native library versions are unknown from a source or manifest reference. Composer config.platform is emulated dependency resolution, not the deployed PHP version.",
+            "PHP 8.6 Sodium KEM APIs require libsodium 1.0.22 or later. Keep X-Wing separate from pure ML-KEM-768 and TLS hybrid groups; confirm the actual loaded extension and operation.",
+            "Check ext-pqcrypto and paragonie/pqcrypto_compat independently; a Composer package is not a native extension. Verify each documented algorithm, version and maintenance/audit status.",
+            "For PHP OpenSSL calls, verify the linked OpenSSL/provider and exposed PHP API. OpenSSL PQC primitives alone do not establish PHP KEM or TLS support. Framework encryption using AES does not call for blanket replacement with a public-key KEM."
+          ],
+          "references": [
+            "https://www.php.net/manual/en/migration86.new-functions.php",
+            "https://github.com/paragonie/ext-pqcrypto",
+            "https://github.com/paragonie/pqcrypto_compat",
+            "https://www.php.net/manual/en/ref.openssl.php"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 2,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-7e22b5e1a3d18f8d3cadb932c827f682d2c92f9a683fb5fb473e8df532fc7a3b",
+      "rule_id": "DEP_NUGET_CRYPTO",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "NuGet cryptographic package assertion; wrapper ownership and runtime support require verification.",
+      "migration_hint": "Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider.",
+      "location": {
+        "file": "packages.lock.json",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "bouncyca***@2.6.2",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "nuget",
+          "dep_name": "bouncycastle.cryptography",
+          "dep_purl": "pkg:nuget/bouncycastle.cryptography@2.6.2",
+          "dep_source_type": "manifest",
+          "dep_version": "2.6.2",
+          "detector": "dependency_detector",
+          "manifest": "packages.lock.json"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dotnet.verify-pqc-environment",
+          "title": "Verify .NET target, package and operating-system support",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed runtime, OS, provider and native backend versions are unknown. Target frameworks, global.json SDK selection and NuGet package declarations are separate source claims, not the installed runtime.",
+            ".NET 10 documents MLKem, MLDsa and SlhDsa. Check the selected parameter, OS/backend support and IsSupported or IsAlgorithmSupported in the deployed environment; Linux facilities may require OpenSSL 3.5 or later. Do not generalize platform support across Windows, Linux and macOS.",
+            ".NET 11 CompositeMLKem and Hpke facilities require review of the exact API and experimental diagnostics. HPKE alone does not identify a PQC KEM. Check Bouncy Castle package/version independently of the .NET target.",
+            "ASP.NET/Kestrel TLS depends on the OS/TLS backend and peer negotiation; cryptographic API availability does not enable PQC TLS. Data Protection AES payloads are not a reason to replace symmetric encryption with a KEM."
+          ],
+          "references": [
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/standard/security/cross-platform-cryptography",
+            "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-10.0"
+          ]
+        },
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-9036d98cd599accb8715fd882023c06ef463e128fbeff82c176a7b5f606d98ef",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "signature.c",
+        "line": 1,
+        "column": 39
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "native.verify-pqc-environment",
+          "title": "Verify C/C++ library, provider and build capabilities",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "The deployed native library, build options, provider configuration and peer capabilities are unknown. vcpkg/Conan declarations, baselines and CMake references are not installed libraries or a reconstructed build graph.",
+            "OpenSSL 3.5 supplies ML-KEM, ML-DSA and SLH-DSA in its default provider; oqsprovider is not required for every OpenSSL PQC use. Check the exact OpenSSL build, enabled algorithms and provider/property selection.",
+            "For liboqs, liboqs-cpp and oqsprovider, verify separate compatible versions, disabled/enabled algorithms, native build flags and maintenance status. OQS integrations are prototypes; a wrapper/include reference does not establish deployment suitability.",
+            "TLS groups and provider loads are requested configuration only. Verify peers, negotiated groups, authentication signatures and protocol compatibility independently. Preserve appropriate symmetric encryption rather than replacing AES wholesale with a public-key KEM."
+          ],
+          "references": [
+            "https://docs.openssl.org/3.5/man7/EVP_KEM-ML-KEM/",
+            "https://openquantumsafe.org/",
+            "https://github.com/open-quantum-safe/oqs-provider",
+            "https://github.com/open-quantum-safe/liboqs-cpp"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-4f403bf72719a2b9456e893935052bc9dae3d0127d70f6215b9bfe86f0be211a",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "signature.cpp",
+        "line": 1,
+        "column": 17
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "native.verify-pqc-environment",
+          "title": "Verify C/C++ library, provider and build capabilities",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "The deployed native library, build options, provider configuration and peer capabilities are unknown. vcpkg/Conan declarations, baselines and CMake references are not installed libraries or a reconstructed build graph.",
+            "OpenSSL 3.5 supplies ML-KEM, ML-DSA and SLH-DSA in its default provider; oqsprovider is not required for every OpenSSL PQC use. Check the exact OpenSSL build, enabled algorithms and provider/property selection.",
+            "For liboqs, liboqs-cpp and oqsprovider, verify separate compatible versions, disabled/enabled algorithms, native build flags and maintenance status. OQS integrations are prototypes; a wrapper/include reference does not establish deployment suitability.",
+            "TLS groups and provider loads are requested configuration only. Verify peers, negotiated groups, authentication signatures and protocol compatibility independently. Preserve appropriate symmetric encryption rather than replacing AES wholesale with a public-key KEM."
+          ],
+          "references": [
+            "https://docs.openssl.org/3.5/man7/EVP_KEM-ML-KEM/",
+            "https://openquantumsafe.org/",
+            "https://github.com/open-quantum-safe/oqs-provider",
+            "https://github.com/open-quantum-safe/liboqs-cpp"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-890f186eb7e4f159960484adc3ce0c76e56c393d99a4993241fe9e7bf9dd2c86",
+      "rule_id": "CSHARP_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C# PQC or composite/HPKE reference; source alone does not establish platform support or active protection.",
+      "migration_hint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component.",
+      "location": {
+        "file": "signature.cs",
+        "line": 1,
+        "column": 37
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "dotnet.verify-pqc-environment",
+          "title": "Verify .NET target, package and operating-system support",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "Deployed runtime, OS, provider and native backend versions are unknown. Target frameworks, global.json SDK selection and NuGet package declarations are separate source claims, not the installed runtime.",
+            ".NET 10 documents MLKem, MLDsa and SlhDsa. Check the selected parameter, OS/backend support and IsSupported or IsAlgorithmSupported in the deployed environment; Linux facilities may require OpenSSL 3.5 or later. Do not generalize platform support across Windows, Linux and macOS.",
+            ".NET 11 CompositeMLKem and Hpke facilities require review of the exact API and experimental diagnostics. HPKE alone does not identify a PQC KEM. Check Bouncy Castle package/version independently of the .NET target.",
+            "ASP.NET/Kestrel TLS depends on the OS/TLS backend and peer negotiation; cryptographic API availability does not enable PQC TLS. Data Protection AES payloads are not a reason to replace symmetric encryption with a KEM."
+          ],
+          "references": [
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-10/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries",
+            "https://learn.microsoft.com/en-us/dotnet/standard/security/cross-platform-cryptography",
+            "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-10.0"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-7b0c9501e0fab5a96b2b5e85ce172993f7ae8a19430c26bed4ee55fd5436d8e2",
+      "rule_id": "DEP_NATIVE_CRYPTO",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "C/C++ cryptographic dependency or literal build reference; effective configuration is unknown.",
+      "migration_hint": "Verify the native library, build flags and provider versions. vcpkg, Conan and CMake source declarations do not prove installation, selected algorithms or negotiated TLS.",
+      "location": {
+        "file": "vcpkg.json",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "dependency",
+        "match": "openssl@unknown",
+        "snippet_preview": "[masked-sensitive-file-content]",
+        "metadata": {
+          "dep_ecosystem": "vcpkg",
+          "dep_name": "openssl",
+          "dep_purl": "",
+          "dep_source_type": "manifest",
+          "dep_version": "unknown",
+          "detector": "dependency_detector",
+          "manifest": "vcpkg.json"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "native.verify-pqc-environment",
+          "title": "Verify C/C++ library, provider and build capabilities",
+          "priority": "planned",
+          "rationale": "Static references and declarations require independent deployment and interoperability checks; missing versions remain unknown.",
+          "steps": [
+            "The deployed native library, build options, provider configuration and peer capabilities are unknown. vcpkg/Conan declarations, baselines and CMake references are not installed libraries or a reconstructed build graph.",
+            "OpenSSL 3.5 supplies ML-KEM, ML-DSA and SLH-DSA in its default provider; oqsprovider is not required for every OpenSSL PQC use. Check the exact OpenSSL build, enabled algorithms and provider/property selection.",
+            "For liboqs, liboqs-cpp and oqsprovider, verify separate compatible versions, disabled/enabled algorithms, native build flags and maintenance status. OQS integrations are prototypes; a wrapper/include reference does not establish deployment suitability.",
+            "TLS groups and provider loads are requested configuration only. Verify peers, negotiated groups, authentication signatures and protocol compatibility independently. Preserve appropriate symmetric encryption rather than replacing AES wholesale with a public-key KEM."
+          ],
+          "references": [
+            "https://docs.openssl.org/3.5/man7/EVP_KEM-ML-KEM/",
+            "https://openquantumsafe.org/",
+            "https://github.com/open-quantum-safe/oqs-provider",
+            "https://github.com/open-quantum-safe/liboqs-cpp"
+          ]
+        },
+        {
+          "action_id": "dependency.track-pqc-readiness",
+          "title": "Track PQC readiness of dependent libraries",
+          "priority": "planned",
+          "rationale": "Dependency-level crypto libraries strongly influence migration options and operational timelines.",
+          "steps": [
+            "Record current versions in dependency-sbom.json and define upgrade targets.",
+            "Subscribe to release notes for PQC feature availability and API changes.",
+            "Run integration tests for PQC or hybrid modes before promoting to production."
+          ],
+          "references": [
+            "https://cyclonedx.org/",
+            "https://spdx.dev/"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "packages.lock.json",
+      "algorithm": "bouncyca***@2.6.2",
+      "usage_type": "TLS",
+      "location": "packages.lock.json:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify BouncyCastle PQC support status."
+    },
+    {
+      "component": "rsa.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "rsa.php:2",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+    },
+    {
+      "component": "unknown.c",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "unknown.c:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation."
+    },
+    {
+      "component": "vcpkg.json",
+      "algorithm": "openssl@unknown",
+      "usage_type": "TLS",
+      "location": "vcpkg.json:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Review the OpenSSL PQC roadmap."
+    },
+    {
+      "component": "composer.json",
+      "algorithm": "phpsecli***ib@3.0",
+      "usage_type": "CryptoAPI",
+      "location": "composer.json:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence."
+    },
+    {
+      "component": "composer.json",
+      "algorithm": "ext-sodium@unknown",
+      "usage_type": "CryptoAPI",
+      "location": "composer.json:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence."
+    },
+    {
+      "component": "kem.php",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "kem.php:2",
+      "quantum_risk": "quantum-safe",
+      "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+    },
+    {
+      "component": "packages.lock.json",
+      "algorithm": "bouncyca***@2.6.2",
+      "usage_type": "CryptoAPI",
+      "location": "packages.lock.json:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider."
+    },
+    {
+      "component": "signature.c",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "signature.c:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+    },
+    {
+      "component": "signature.cpp",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "signature.cpp:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+    },
+    {
+      "component": "signature.cs",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "signature.cs:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact primitive, parameter set, .NET or Bouncy Castle version and provider. Composite and HPKE constructions remain unresolved and are not equivalent to a component."
+    },
+    {
+      "component": "vcpkg.json",
+      "algorithm": "openssl@unknown",
+      "usage_type": "CryptoAPI",
+      "location": "vcpkg.json:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the native library, build flags and provider versions. vcpkg, Conan and CMake source declarations do not prove installation, selected algorithms or negotiated TLS."
+    }
+  ],
+  "dependency_sbom": [
+    {
+      "name": "phpseclib/phpseclib",
+      "version": "3.0",
+      "ecosystem": "composer",
+      "source_file": "composer.json",
+      "source_type": "manifest",
+      "purl": "pkg:composer/phpseclib/phpseclib"
+    },
+    {
+      "name": "target-framework",
+      "version": "net10.0",
+      "ecosystem": "dotnet-framework",
+      "source_file": "packages.lock.json",
+      "source_type": "manifest",
+      "purl": ""
+    },
+    {
+      "name": "bouncycastle.cryptography",
+      "version": "2.6.2",
+      "ecosystem": "nuget",
+      "source_file": "packages.lock.json",
+      "source_type": "manifest",
+      "purl": "pkg:nuget/bouncycastle.cryptography@2.6.2"
+    },
+    {
+      "name": "ext-sodium",
+      "version": "unknown",
+      "ecosystem": "php-platform",
+      "source_file": "composer.json",
+      "source_type": "manifest",
+      "purl": ""
+    },
+    {
+      "name": "php",
+      "version": "8.6",
+      "ecosystem": "php-platform",
+      "source_file": "composer.json",
+      "source_type": "manifest",
+      "purl": ""
+    },
+    {
+      "name": "openssl",
+      "version": "unknown",
+      "ecosystem": "vcpkg",
+      "source_file": "vcpkg.json",
+      "source_type": "manifest",
+      "purl": ""
+    }
+  ],
+  "summary": {
+    "total_findings": 12,
+    "by_severity": {
+      "info": 8,
+      "medium": 4
+    },
+    "by_risk": {
+      "quantum-safe": 1,
+      "quantum-uncertain": 11
+    },
+    "scanned_files": 9,
+    "skipped_files": 0
+  }
+}

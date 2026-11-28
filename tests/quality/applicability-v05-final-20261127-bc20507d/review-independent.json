@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "reviewer": "/root/ci_applicability_final_independent / codex:gpt-6.1-sol@high",
+  "assignedModel": "codex:gpt-6.1-sol@high",
+  "reviewScope": "Independent technical applicability and question-scope assessment from final source; not runtime accuracy or blind truth labeling",
+  "timestampUtc": "2026-11-27T06:12:26.971716+00:00",
+  "frozen": true,
+  "sourceBased": true,
+  "postObservation": true,
+  "finalSourceReviewed": true,
+  "sourceState": {
+    "revision": "cf3bfe2071228921f5a33d2a44e0f3b94de4d1de",
+    "branch": "codex/oss-crypto-corpus",
+    "dirty": true,
+    "statusAtReview": " M .github/workflows/pqc-scan.yml\n M AGENTS.override.md\n M Cargo.lock\n M Cargo.toml\n M README.ja.md\n M README.md\n M SECURITY.ja.md\n M SECURITY.md\n M crates/pqc_scan_cli/tests/evidence_privacy.rs\n M crates/pqc_scan_cli/tests/fixtures/native-v1.golden.json\n M crates/pqc_scan_core/src/observation/source_api.rs\n M crates/pqc_scan_core/src/pipeline.rs\n M crates/pqc_scan_core/src/privacy.rs\n M crates/pqc_scan_core/tests/support/pipeline_quality.rs\n M crates/pqc_scan_detectors/src/certificate_detector.rs\n M crates/pqc_scan_detectors/src/source_facts.rs\n M crates/pqc_scan_detectors/src/source_facts/c_family.rs\n M crates/pqc_scan_detectors/src/source_facts/c_family/values.rs\n M crates/pqc_scan_detectors/src/source_facts/csharp.rs\n M crates/pqc_scan_detectors/src/source_facts/csharp/names.rs\n M crates/pqc_scan_detectors/src/source_facts/csharp/values.rs\n M crates/pqc_scan_detectors/src/source_facts/php.rs\n M crates/pqc_scan_detectors/src/source_facts/php/names.rs\n M crates/pqc_scan_detectors/src/source_facts/php/values.rs\n M crates/pqc_scan_detectors/src/source_facts/selectors_tests.rs\n M crates/pqc_scan_detectors/src/tree_sitter_detector.rs\n M crates/pqc_scan_detectors/src/tree_sitter_detector/header.rs\n M crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy.rs\n M crates/pqc_scan_detectors/tests/c_family_source.rs\n M crates/pqc_scan_detectors/tests/certificate_attributes.rs\n M crates/pqc_scan_detectors/tests/csharp_source.rs\n M crates/pqc_scan_detectors/tests/pqc_readiness.rs\n M crates/pqc_scan_detectors/tests/selective_source_privacy.rs\n M crates/pqc_scan_report/src/compact.js\n M crates/pqc_scan_report/src/inspection.rs\n M crates/pqc_scan_report/src/japanese.rs\n M crates/pqc_scan_report/tests/evidence_privacy.rs\n M crates/pqc_scan_report/tests/inspection.rs\n M docs/architecture.md\n M docs/architecture/EVIDENCE-PRIVACY.md\n M docs/quality/rules/RULE-QUALITY-METADATA.json\n M docs/quality/rules/RULE-QUALITY.md\n M docs/roadmap/v0.5/ACCEPTANCE.md\n M docs/rules-reference.md\n M docs/user/COVERAGE.ja.md\n M docs/user/COVERAGE.md\n M docs/user/DISTRIBUTION.ja.md\n M docs/user/DISTRIBUTION.md\n M docs/user/REPORTS.ja.md\n M docs/user/REPORTS.md\n M docs/user/SCANNING.ja.md\n M docs/user/SCANNING.md\n M rules/default/cert.yml\n M rules/default/crypto_api.yml\n M rules/default/jwt.yml\n M rules/default/pqc.yml\n M rules/default/tls.yml\n M tests/quality/evaluate.py\n M tests/quality/run.py\n M tests/report-ui/compact.test.cjs\n?? benchmark/\n?? crates/pqc_scan_cli/tests/static_claims.rs\n?? crates/pqc_scan_detectors/src/source_facts/partial_causes.rs\n?? crates/pqc_scan_detectors/src/tree_sitter_detector/source_privacy/\n?? crates/pqc_scan_detectors/tests/fixtures/c_family_partial_contract_v2.json\n?? crates/pqc_scan_detectors/tests/partial_diagnostics.rs\n?? docs/quality/oss-corpus/ACCURACY-EXPANSION.ja.md\n?? docs/quality/oss-corpus/IMPROVEMENT-CANDIDATES.ja.md\n?? docs/quality/oss-corpus/PROTOCOL-35.md\n?? docs/quality/oss-corpus/PROTOCOL-98.md\n?? docs/quality/oss-corpus/REPORT-35-PARTIAL-FIXES.ja.md\n?? docs/quality/oss-corpus/REPORT-35-PARTIAL-FIXES.md\n?? docs/quality/oss-corpus/REPORT-35.ja.md\n?? docs/quality/oss-corpus/REPORT-35.md\n?? docs/quality/oss-corpus/REPORT-98.ja.md\n?? docs/records/oss-corpus-20261121/20261125-98-corpus-index.md\n?? docs/releases/v0.5.0.ja.md\n?? docs/releases/v0.5.0.md\n?? docs/roadmap/v0.5/RELEASE-PREPARATION.md\n?? tests/quality/applicability-v05-final-20261127-bc20507d/\n?? tests/quality/oss.py\n?? tests/quality/oss98-heldout-v1/\n?? tests/quality/oss98-heldout-v2/\n?? tests/quality/test_accuracy_assessment.py\n?? tests/quality/test_accuracy_display.py\n?? tests/quality/test_accuracy_display_context.py\n?? tests/quality/test_accuracy_display_logical_regions.py\n?? tests/quality/test_accuracy_display_oth.py\n?? tests/quality/test_accuracy_display_owned_boundaries.py\n?? tests/quality/test_accuracy_native.py\n?? tests/quality/test_accuracy_sampling.py\n?? tests/quality/test_annotation_contracts.py\n?? tests/quality/test_artifact_preflight.py\n?? tests/quality/test_assessment_four_phase.py\n?? tests/quality/test_benchmark.py\n?? tests/quality/test_digest_streaming.py\n?? tests/quality/test_measure_safety.py\n?? tests/quality/test_no_performance.py\n?? tests/quality/test_oss_summary.py\n?? tests/quality/test_output_audit.py\n?? tests/quality/test_source_statistics_qualification.py\n?? tests/quality/test_temporal_ci_artifacts.py\n?? tests/quality/test_temporal_reassessment.py\n",
+    "productSourceRecord": {
+      "path": "/Users/waka/.cache/pqc-scan-oss98-20261125/accuracy-expansion-20261126-68b7cfbb41114d8c910d4de72b468fd9/v05-release-preparation-bc20507df81c418cabc07b02e6dc74a9/INTEGRATED-PRODUCT-SOURCE.json",
+      "sha256": "63f0066ddbb9528fa5687ad4392c576643682f8f1010ae8bebfb25c4fc801060"
+    },
+    "sourceEpoch": "v05-final-bc20507df81c418cabc07b02e6dc74a9",
+    "productBindingsCount": 343,
+    "allProductBindingsMatch": true,
+    "contractBindings": {
+      "docs/user/COVERAGE.md": "a82f9ac6212be8d69fd707a931c098d2b0b2f046d7abcd259e2dee5087904290",
+      "docs/user/COVERAGE.ja.md": "5d1b188de17afad4b83189776f0b24cf5359c944d337634f114f506fd7aaa879",
+      "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+      "docs/architecture/STATIC-ANALYSIS.md": "23c3eab6664372289c1eeeb6b40722248612b5cdba17b45a423c774a8227bcf5"
+    }
+  },
+  "exposures": {
+    "originalCorpusTruthProvenanceSeen": true,
+    "originalFrozenLabelRecordsSeen": true,
+    "originalLabelExposureDetail": "Read both historical label records metadata and coverageAudit prose. Existing load_truth loads their labels for binding/admission. Original truth reasons were read with the source, so this is applicability confirmation rather than blind gold labeling.",
+    "finalApplicabilityProtocolSeen": true,
+    "protocolHistoricalNominationAndCountExposure": true,
+    "historicalMeasurementsSeen": true,
+    "historicalMeasurementExposureDetail": "Parent brief and provided protocol disclosed historical six nominations, expected retained-count examples, a previous Node development timeout, later production/release-profile success and version integration context. No scanner prediction files, native result samples or historical applicability review files were opened. Own counts below are recomputed from own source-based dispositions.",
+    "otherApplicabilityReviewSeen": false,
+    "currentMainReviewAndAuditsSeen": false,
+    "currentIndependentReviewSeen": false,
+    "currentAggregateSeen": false,
+    "mainEvidenceDirectoriesOpened": false,
+    "deniedPathsRespected": [
+      "review-main.json",
+      "main-file-audit.json",
+      "main-unit-audit.json",
+      "ci-applicability-final-main/",
+      "ci-applicability-main/",
+      "assessment.json"
+    ],
+    "additionalLocalSourceRead": [
+      "tests/quality/evaluate.py",
+      "tests/quality/report.py:supported_scope",
+      "tests/quality/taxonomy.py:annotation_audit_status",
+      "tests/quality/PROTOCOL.md",
+      "docs/architecture.md:certificate detector and index",
+      "docs/BEST-PRACTICES.md",
+      "docs/PATTERNS.md:detector extension and facts binding",
+      "docs/MISTAKES.md:shared target outputs"
+    ],
+    "freshApplicabilityReviewFilesRead": [],
+    "actualReviewScope": "All 203 complete bounded inputs, all 246 original nominal questions and reasons, all four final contracts. Product hashes bind 343 integrated files without claiming their full implementation was line-by-line reviewed."
+  },
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "3ebe7838e812929808b69698a5551ec64d780ed2441cf0ae05f8ef56fc1a2c27",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "a82f9ac6212be8d69fd707a931c098d2b0b2f046d7abcd259e2dee5087904290",
+    "docs/user/COVERAGE.ja.md": "5d1b188de17afad4b83189776f0b24cf5359c944d337634f114f506fd7aaa879",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+    "docs/architecture/STATIC-ANALYSIS.md": "23c3eab6664372289c1eeeb6b40722248612b5cdba17b45a423c774a8227bcf5"
+  },
+  "scope": "documented-public-input-subset",
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "remainingScopeReason": "Every input and original question was reviewed. Standard source/API references, Ruby literal semantics, aliases and local finite loops stay nominal even when parsing/detection is incomplete. Comment/string/namesake/shadow controls, wrong Node argument shape, classical alternatives, supported TSX and static config operands retain their original distinctions. Manifest/lock and supported SBOM library/package presence stay in scope without capability/use claims; jose capability and unconstrained dynamic values stay ambiguous. Malformed or unavailable values, Swift and crypto-only CBOM remain nominal unsupported. Broken P12/PFX keeps its legacy container signal. DER/PEM public certificate attributes and readable unencrypted PFX certificate bags remain supported. Only inner attribute questions behind encryptedData are newly unsupported, including negative ECDSA questions. No remaining question needs an additional applicability exclusion; absent detections never establish safety.",
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "Definite-length PFX v3 contains outer Data and inner encryptedData OID 1.2.840.113549.1.7.6. There is no readable certificate bag in the non-decrypting view. MAC presence does not expose or verify an inner signature or SPKI size. The legacy container signal remains readable. The property is the certificate signature OID; a readable RSA signature is a negative ECDSA control. The question needs an encrypted inner attribute, unavailable under the final non-decrypting contract. This also excludes a nominal negative; encrypted contents cannot establish absence of ECDSA."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "Definite-length PFX v3 contains outer Data and inner encryptedData OID 1.2.840.113549.1.7.6. There is no readable certificate bag in the non-decrypting view. MAC presence does not expose or verify an inner signature or SPKI size. The legacy container signal remains readable. The property is the certificate signature OID; a readable RSA signature is a negative ECDSA control. The question needs an encrypted inner attribute, unavailable under the final non-decrypting contract. This also excludes a nominal negative; encrypted contents cannot establish absence of ECDSA."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "Definite-length PFX v3 contains outer Data and inner encryptedData OID 1.2.840.113549.1.7.6. There is no readable certificate bag in the non-decrypting view. MAC presence does not expose or verify an inner signature or SPKI size. The legacy container signal remains readable. The property is RSA modulus size in the public SPKI, never filename, signature type or certificate length. The question needs an encrypted inner attribute, unavailable under the final non-decrypting contract. This also excludes a nominal negative; encrypted contents cannot establish absence of ECDSA."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "Definite-length PFX v3 contains outer Data and inner encryptedData OID 1.2.840.113549.1.7.6. There is no readable certificate bag in the non-decrypting view. MAC presence does not expose or verify an inner signature or SPKI size. The legacy container signal remains readable. The property is the certificate signature OID, distinct from its SPKI type or any trust verdict. The question needs an encrypted inner attribute, unavailable under the final non-decrypting contract. This also excludes a nominal negative; encrypted contents cannot establish absence of ECDSA."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "Definite-length PFX v3 contains outer Data and inner encryptedData OID 1.2.840.113549.1.7.6. There is no readable certificate bag in the non-decrypting view. MAC presence does not expose or verify an inner signature or SPKI size. The legacy container signal remains readable. The property is RSA modulus size in the public SPKI, never filename, signature type or certificate length. The question needs an encrypted inner attribute, unavailable under the final non-decrypting contract. This also excludes a nominal negative; encrypted contents cannot establish absence of ECDSA."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "Definite-length PFX v3 contains outer Data and inner encryptedData OID 1.2.840.113549.1.7.6. There is no readable certificate bag in the non-decrypting view. MAC presence does not expose or verify an inner signature or SPKI size. The legacy container signal remains readable. The property is the certificate signature OID, distinct from its SPKI type or any trust verdict. The question needs an encrypted inner attribute, unavailable under the final non-decrypting contract. This also excludes a nominal negative; encrypted contents cannot establish absence of ECDSA."
+    }
+  ],
+  "unresolved": [],
+  "fileCount": 203,
+  "questionCount": 246,
+  "countsDerivedFromIndependentRows": {
+    "nominalLabels": {
+      "positive": 102,
+      "negative": 93,
+      "unsupported": 47,
+      "ambiguous": 4
+    },
+    "excludedQuestions": 6,
+    "retainedNominalQuestions": 240,
+    "retainedNominalLabels": {
+      "positive": 98,
+      "negative": 91,
+      "unsupported": 47,
+      "ambiguous": 4
+    },
+    "retainedEligibleQuestions": 189
+  },
+  "originalBindings": {
+    "corpus.json": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+    "truth.json": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+    "PROTOCOL.md": "300313c7a8e6867a4f7283a06c2ec0546ae38f6d987c4300575d98d39bf65dd9",
+    "provenance.json": "1253727e7c892a41844ec374230b447f4191b21cb7bc74ecd06447663e3b4874",
+    "labels-a-width.json": "aebd30a92b53197852f19439b7c3c188c60b7c7391d512cb464c030b857c7b35",
+    "labels-b-width.json": "536e8a240597be54033f89d8b9ec1bdf6d93389286bbd425850079a11b3c38f8"
+  },
+  "labelSources": {
+    "labels-a-width.json": "aebd30a92b53197852f19439b7c3c188c60b7c7391d512cb464c030b857c7b35",
+    "labels-b-width.json": "536e8a240597be54033f89d8b9ec1bdf6d93389286bbd425850079a11b3c38f8"
+  },
+  "sourceBindingFileSha256": "d1b63030e79bdf8845003515b0fb3b555ad2c4fc8dc9615c011439628d5c869a",
+  "validation": {
+    "sourceAdmissionOnly": true,
+    "commands": [
+      "Existing evaluate.load_truth(ORIGINAL)",
+      "Existing evaluate.validate_corpus(data, REPO)",
+      "SHA-256 comparison of all 343 final product bindings, 4 contracts and all original bindings",
+      "Independent bounded DER public-structure inspection without decryption"
+    ],
+    "exitCode": 0,
+    "accuracyMeasured": false,
+    "throughputCheckpoint": "n/a, bounded source-only independent applicability investigation"
+  },
+  "verificationLimits": "No build, scanner run, specimen execution, package resolution, decryption, OpenSSL command, network, performance/resource observation or publication was performed. This does not independently approve all executable implementation changes or demonstrate runtime accuracy.",
+  "auditSources": {
+    "independent-file-audit.json": "f0e9a9a18a0c5625c844669e26590ae159120c3361733256b77b67a14d8059a3",
+    "independent-unit-audit.json": "201334a06484d8bbb68b7883c7befaef979a6c1e1e16c7bc01b910da5ef32ae7"
+  }
+}

@@ -1,0 +1,105 @@
+import base64, hashlib, json, os
+from pathlib import Path
+R = Path('/Users/waka/.codex/worktrees/oss-crypto-corpus/pqc-scan')
+O = Path('/Users/waka/.cache/pqc-scan-oss98-20261125/v05-publish-52b0339234f444e8a7922faca10903af/applicability-independent')
+LIMIT=2*1024*1024
+
+def bounded(p):
+    assert not p.is_symlink() and p.resolve()==p
+    fd=os.open(p,os.O_RDONLY|os.O_NOFOLLOW)
+    try:
+        assert os.fstat(fd).st_size<=LIMIT
+        with os.fdopen(fd,'rb',closefd=False) as f: b=f.read(LIMIT+1)
+        assert len(b)<=LIMIT
+        return b
+    finally: os.close(fd)
+
+def sha(b): return hashlib.sha256(b).hexdigest()
+def load(p): return json.loads(bounded(p))
+def write(n,d): (O/n).write_text(json.dumps(d,indent=2,ensure_ascii=False)+'\n')
+def node(b,p=0):
+    assert p+2<=len(b)
+    tag=b[p]; n=b[p+1]; a=p+2
+    if n&128:
+        k=n&127; assert 0<k<=4 and a+k<=len(b)
+        n=int.from_bytes(b[a:a+k],'big'); a+=k
+    assert a+n<=len(b)
+    return (tag,a,a+n)
+def exact(b,tag):
+    t,a,e=node(b); assert t==tag and e==len(b)
+    return b[a:e]
+def children(b):
+    p=0; result=[]
+    while p<len(b):
+        assert len(result)<256
+        t,a,e=node(b,p); result.append((t,b[a:e])); p=e
+    return result
+
+def oid(b):
+    assert b
+    out=[min(b[0]//40,2),b[0]-40*min(b[0]//40,2)]; v=0
+    for c in b[1:]:
+        v=(v<<7)|(c&127)
+        if not c&128: out.append(v); v=0
+    assert not b[-1]&128
+    return '.'.join(map(str,out))
+def certificate(b):
+    ch=children(exact(b,0x30)); assert len(ch)==3 and ch[0][0]==ch[1][0]==0x30 and ch[2][0]==3
+    sig=children(ch[1][1]); assert sig[0][0]==6
+    tb=children(ch[0][1]); offset=1 if tb[0][0]==0xa0 else 0
+    sp=tb[offset+5]; assert sp[0]==0x30
+    sc=children(sp[1]); assert sc[0][0]==0x30 and sc[1][0]==3
+    alg=children(sc[0][1]); assert alg[0][0]==6
+    result={'kind':'x509-public-certificate','signatureOid':oid(sig[0][1]),'spkiAlgorithmOid':oid(alg[0][1]),'certificateDerSha256':sha(b),'certificateBytes':len(b)}
+    if oid(alg[0][1])=='1.2.840.113549.1.1.1':
+        assert sc[1][1][0]==0
+        rsa=children(exact(sc[1][1][1:],0x30)); assert rsa[0][0]==2
+        result['rsaModulusBits']=int.from_bytes(rsa[0][1],'big').bit_length()
+    if len(alg)>1 and alg[1][0]==6: result['curveOid']=oid(alg[1][1])
+    return result
+
+def content_info(b):
+    c=children(b); assert c[0][0]==6
+    k=oid(c[0][1]); assert len(c)==2 and c[1][0]==0xa0
+    return k,c[1][1]
+def pfx(b):
+    p=children(exact(b,0x30)); assert p[0]==(2,b'\x03') and p[1][0]==0x30
+    k,v=content_info(p[1][1]); assert k=='1.2.840.113549.1.7.1'
+    auth=children(exact(exact(v,4),0x30)); result={'kind':'pfx-v3','outerContentOid':k,'authenticatedSafeEntries':[],'publicCertificates':[],'macPresent':len(p)==3,'macVerified':False,'decryptionPerformed':False}
+    for t,c in auth:
+        assert t==0x30
+        k,v=content_info(c); row={'contentOid':k}
+        if k=='1.2.840.113549.1.7.6':
+            ec=children(exact(v,0x30)); assert ec[0][0]==2 and ec[1][0]==0x30
+            fields=children(ec[1][1]); assert fields[0][0]==6 and fields[1][0]==0x30
+            a=children(fields[1][1]); assert a[0][0]==6
+            row.update(encrypted=True,encryptedPayloadOpaque=True,encryptionAlgorithmOid=oid(a[0][1]),ciphertextBytes=len(fields[2][1]) if len(fields)>2 else 0)
+        elif k=='1.2.840.113549.1.7.1':
+            safe=children(exact(exact(v,4),0x30)); row['bagTypes']=[]
+            for bt,bag in safe:
+                assert bt==0x30
+                bc=children(bag); assert bc[0][0]==6 and bc[1][0]==0xa0
+                bag_oid=oid(bc[0][1]); row['bagTypes'].append(bag_oid)
+                if bag_oid=='1.2.840.113549.1.12.10.1.3':
+                    cc=children(exact(bc[1][1],0x30)); assert cc[0][0]==6 and oid(cc[0][1])=='1.2.840.113549.1.9.22.1' and cc[1][0]==0xa0
+                    result['publicCertificates'].append(certificate(exact(cc[1][1],4)))
+        else: row['unsupportedOpaque']=True
+        result['authenticatedSafeEntries'].append(row)
+    return result
+
+if __name__=='__main__':
+    c=load(R/'tests/quality/expanded-v2/corpus.json'); out=[]
+    for i,f in enumerate(c['files']):
+        b=bounded(R/f['source']); assert sha(b)==f['sha256']
+        if f['artifact']!='certificate': continue
+        try:
+            if f['path'].endswith(('.p12','.pfx')): obs=pfx(b)
+            else:
+                der=b
+                if b.startswith(b'-----BEGIN CERTIFICATE-----'):
+                    text=b.decode('ascii'); der=base64.b64decode(''.join(text.splitlines()[1:-1]),validate=True)
+                obs=certificate(der)
+        except (AssertionError,ValueError,IndexError): obs={'kind':'malformed-or-unavailable-public-structure','payloadNotExported':True}
+        out.append({'index':i,'path':f['path'],'inputSha256':sha(b),'inputBytes':len(b),'observation':obs})
+    write('public-structure.json',out)
+    print(json.dumps(out,indent=2))

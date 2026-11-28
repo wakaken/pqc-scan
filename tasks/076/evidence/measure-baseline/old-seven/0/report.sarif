@@ -1,0 +1,390 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "columnKind": "unicodeCodePoints",
+      "tool": {
+        "driver": {
+          "name": "pqc-scan",
+          "rules": [
+            {
+              "id": "PQC_GO_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "Standard Go PQC package imported; import alone does not prove negotiated protection."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "PQC_JAVA_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "Standard PQC algorithm requested through Java APIs; runtime success is not established."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "PQC_NODE_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "Node-style PQC key generation call; bindings and actual execution require confirmation."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "PQC_PYTHON_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "Python PQC key generation reference; backend support is not established."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "PQC_RUBY_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "Ruby PQC algorithm literal referenced; key generation or signing success is not established."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "PQC_RUST_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "Rust PQC crate symbol referenced; execution and protocol use require confirmation."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "PQC_STANDARD_REFERENCE",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "PQC_WEBCRYPTO_API",
+              "shortDescription": {
+                "text": "PQC"
+              },
+              "fullDescription": {
+                "text": "WebCrypto-style PQC algorithm request; this is not proof of browser support."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "PQC_JAVA_API",
+          "level": "note",
+          "message": {
+            "text": "Standard PQC algorithm requested through Java APIs; runtime success is not established. | migration_hint=JDK 24+ provides ML-KEM and ML-DSA; verify provider and protocol support independently."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Example.java"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 9
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "JDK 24+ provides ML-KEM and ML-DSA; verify provider and protocol support independently."
+          }
+        },
+        {
+          "ruleId": "PQC_GO_API",
+          "level": "note",
+          "message": {
+            "text": "Standard Go PQC package imported; import alone does not prove negotiated protection. | migration_hint=crypto/mlkem requires Go 1.24+; crypto/mldsa requires Go 1.27+. Verify actual call sites."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "example.go"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 8
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "crypto/mlkem requires Go 1.24+; crypto/mldsa requires Go 1.27+. Verify actual call sites."
+          }
+        },
+        {
+          "ruleId": "PQC_NODE_API",
+          "level": "note",
+          "message": {
+            "text": "Node-style PQC key generation call; bindings and actual execution require confirmation. | migration_hint=Node crypto requires 24.6+ for ML-DSA, 24.7+ for ML-KEM, and 24.8+ for SLH-DSA. Check runtime support."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "example.js"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Node crypto requires 24.6+ for ML-DSA, 24.7+ for ML-KEM, and 24.8+ for SLH-DSA. Check runtime support."
+          }
+        },
+        {
+          "ruleId": "PQC_STANDARD_REFERENCE",
+          "level": "note",
+          "message": {
+            "text": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established. | migration_hint=A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "example.js"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 22
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+          }
+        },
+        {
+          "ruleId": "PQC_PYTHON_API",
+          "level": "note",
+          "message": {
+            "text": "Python PQC key generation reference; backend support is not established. | migration_hint=cryptography 47 added ML-KEM and ML-DSA; 48 adds OpenSSL 3.5+ support. Confirm backend capability."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "example.py"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "cryptography 47 added ML-KEM and ML-DSA; 48 adds OpenSSL 3.5+ support. Confirm backend capability."
+          }
+        },
+        {
+          "ruleId": "PQC_RUBY_API",
+          "level": "note",
+          "message": {
+            "text": "Ruby PQC algorithm literal referenced; key generation or signing success is not established. | migration_hint=Verify openssl gem and linked OpenSSL/provider capabilities, not Ruby version alone."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "example.rb"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 28
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Verify openssl gem and linked OpenSSL/provider capabilities, not Ruby version alone."
+          }
+        },
+        {
+          "ruleId": "PQC_STANDARD_REFERENCE",
+          "level": "note",
+          "message": {
+            "text": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established. | migration_hint=A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "example.rb"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 29
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+          }
+        },
+        {
+          "ruleId": "PQC_RUST_API",
+          "level": "note",
+          "message": {
+            "text": "Rust PQC crate symbol referenced; execution and protocol use require confirmation. | migration_hint=Confirm crate version, features and provider; a RustCrypto reference alone does not enable PQC TLS."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "example.rs"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Confirm crate version, features and provider; a RustCrypto reference alone does not enable PQC TLS."
+          }
+        },
+        {
+          "ruleId": "PQC_STANDARD_REFERENCE",
+          "level": "note",
+          "message": {
+            "text": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established. | migration_hint=A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "example.rs"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 13
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+          }
+        },
+        {
+          "ruleId": "PQC_STANDARD_REFERENCE",
+          "level": "note",
+          "message": {
+            "text": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established. | migration_hint=A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "example.ts"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 28
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+          }
+        },
+        {
+          "ruleId": "PQC_WEBCRYPTO_API",
+          "level": "note",
+          "message": {
+            "text": "WebCrypto-style PQC algorithm request; this is not proof of browser support. | migration_hint=Node WebCrypto supports ML-KEM and ML-DSA from 24.7; browser support must be checked separately."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "example.ts"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 8
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "Node WebCrypto supports ML-KEM and ML-DSA from 24.7; browser support must be checked separately."
+          }
+        },
+        {
+          "ruleId": "PQC_STANDARD_REFERENCE",
+          "level": "note",
+          "message": {
+            "text": "Standard PQC algorithm or hybrid group name referenced; API execution, enabled state and conformance are not established. | migration_hint=A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "negative.js"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 16
+                }
+              }
+            }
+          ],
+          "properties": {
+            "migration_hint": "A standardized PQC name or hybrid group is referenced. Check implementation, parameter set, provider and actual use; this is not proof of execution, FIPS conformance or product security."
+          }
+        }
+      ]
+    }
+  ]
+}

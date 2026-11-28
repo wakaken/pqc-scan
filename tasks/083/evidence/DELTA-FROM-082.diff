@@ -1,0 +1,140 @@
+--- 082/crates/pqc_scan_detectors/tests/language_dependencies.rs
++++ 083/crates/pqc_scan_detectors/tests/language_dependencies.rs
+@@ -801,3 +801,114 @@
+     }
+     assert_eq!(count, 25);
+ }
++
++#[test]
++fn final_dependency_fixed_budgets_have_empty_below_at_and_above_controls() {
++    let f = Fixture::new();
++    // Actual format boundaries, including construction before allocation.
++    for bytes in [2 * 1024 * 1024 - 1, 2 * 1024 * 1024, 2 * 1024 * 1024 + 1] {
++        let data = format!("{{}}{}", " ".repeat(bytes - 2));
++        assert_eq!(
++            status(&f, "composer.json", &data).unwrap(),
++            if bytes > 2 * 1024 * 1024 {
++                DetectorStatus::Truncated
++            } else {
++                DetectorStatus::Complete
++            }
++        );
++    }
++    for count in [0, 49_997, 49_998, 49_999] {
++        // Object + array + count scalars: 50,000 total values at count=49,998.
++        let data = format!("{{\"ignored\":[{}]}}", vec!["0"; count].join(","));
++        assert_eq!(
++            status(&f, "composer.json", &data).unwrap(),
++            if count > 49_998 {
++                DetectorStatus::Truncated
++            } else {
++                DetectorStatus::Complete
++            },
++            "JSON values {count}"
++        );
++    }
++    for levels in [0, 62, 63, 64] {
++        // Root object adds one bracket level; the scalar also consumes depth.
++        let data = format!(
++            "{{\"ignored\":{}0{}}}",
++            "[".repeat(levels),
++            "]".repeat(levels)
++        );
++        assert_eq!(
++            status(&f, "composer.json", &data).unwrap(),
++            if levels > 63 {
++                DetectorStatus::Truncated
++            } else {
++                DetectorStatus::Complete
++            },
++            "JSON depth {levels}"
++        );
++    }
++    for children in [0, 49_997, 49_998, 49_999] {
++        // roxmltree includes the document and Project nodes in its 50k budget.
++        let data = format!("<Project>{}</Project>", "<None/>".repeat(children));
++        assert_eq!(
++            status(&f, "a.csproj", &data).unwrap(),
++            if children > 49_998 {
++                DetectorStatus::Truncated
++            } else {
++                DetectorStatus::Complete
++            },
++            "XML nodes {children}"
++        );
++    }
++    for levels in [1, 63, 64, 65] {
++        let data = format!(
++            "{}{}",
++            "<Project>".repeat(levels),
++            "</Project>".repeat(levels)
++        );
++        assert_eq!(
++            status(&f, "a.csproj", &data).unwrap(),
++            if levels > 64 {
++                DetectorStatus::Truncated
++            } else {
++                DetectorStatus::Complete
++            },
++            "XML depth {levels}"
++        );
++    }
++    for lines in [0, 49_999, 50_000, 50_001] {
++        assert_eq!(
++            status(&f, "conanfile.txt", &"#\n".repeat(lines)).unwrap(),
++            if lines > 50_000 {
++                DetectorStatus::Truncated
++            } else {
++                DetectorStatus::Complete
++            },
++            "Conan lines {lines}"
++        );
++    }
++    for tokens in [0, 49_999, 50_000, 50_001] {
++        let data = vec!["noop"; tokens].join(" ");
++        assert_eq!(
++            status(&f, "CMakeLists.txt", &data).unwrap(),
++            if tokens > 50_000 {
++                DetectorStatus::Truncated
++            } else {
++                DetectorStatus::Partial
++            },
++            "CMake tokens {tokens}"
++        );
++    }
++    for levels in [1, 63, 64, 65] {
++        let data = format!("noop{}{}", "(".repeat(levels), ")".repeat(levels));
++        assert_eq!(
++            status(&f, "CMakeLists.txt", &data).unwrap(),
++            if levels > 64 {
++                DetectorStatus::Truncated
++            } else {
++                DetectorStatus::Partial
++            },
++            "CMake depth {levels}"
++        );
++    }
++}
+--- 082/docs/user/COVERAGE.md
++++ 083/docs/user/COVERAGE.md
+@@ -190,4 +190,9 @@
+ 
+ The native dependency inventory keeps its existing six attributes. `composer`, `nuget`, `php-platform`, `dotnet-sdk`, `dotnet-framework`, `vcpkg`, `vcpkg-feature`, `vcpkg-baseline`, `conan` and `cmake` distinguish source assertions and environment/configuration references; the latter are not installed components. Feature identities use `port/feature`; baseline names are fixed registry-kind/ordinal labels rather than URLs. These records retain source file and ordinal, without a graph edge or inferred relationship between different assertions. Registry purls are generated only for representable Composer declarations and eligible NuGet records; native build references have none. Selected-file, no-symlink, in-root and resource bounds also apply to central context.
+ 
++The PHP `PHP_PQC_API` rule uses the `quantum-safe` / `info` reference label;
++other new source rules use `quantum-uncertain`. This label marks a recognized source
++reference, not verified deployment or complete protection. Unknown constructions
++remain unknown in migration assessment, and missing support cannot become ready.
++
+ New info/quantum-uncertain dependency rules add findings for these supported crypto packages. Existing broad package rules may also match new inputs; a historical risk label does not identify the selected algorithm. This can change finding counts and fail thresholds on newly covered files. Missing versions, active providers, peer support and runtime capabilities remain unknown. Guidance distinguishes PHP extensions/native libraries, .NET target/package/OS/backend and C/C++ build/provider prerequisites; exact OQS wrapper identities remain separate. API availability does not establish PQC TLS or require blanket replacement of symmetric AES.
+--- 082/docs/user/COVERAGE.ja.md
++++ 083/docs/user/COVERAGE.ja.md
+@@ -176,3 +176,8 @@
+ ネイティブの依存一覧は既存の6属性を保ちます。`composer`、`nuget`、`php-platform`、`dotnet-sdk`、`dotnet-framework`、`vcpkg`、`vcpkg-feature`、`vcpkg-baseline`、`conan`、`cmake`で、ソースの主張と環境・設定の参照を区別します。後者は導入済みの構成要素を表しません。featureは`port/feature`、baselineはURLではなくレジストリー種別と順序による固定名です。出所のファイルと順序を保持し、別の記録とのグラフ上の関係は推測しません。purlは表現できるComposerの宣言と、条件を満たすNuGetの記録に限り生成し、ネイティブのビルド参照には付けません。中央管理ファイルにも、選択済み・シンボリックリンク禁止・ルート内・解析上限の制約が適用されます。
+ 
+ 追加の依存ルールはinfo／quantum-uncertainの検出結果を作ります。既存の広いパッケージ名ルールも新しい入力に一致する場合がありますが、その従来のリスク表示は方式の選択を示しません。新しく対応したファイルでは件数や失敗判定が変わる場合があります。不明なバージョン、有効なプロバイダー、通信相手や実行環境の対応は未確認のままです。案内ではPHPの拡張機能とネイティブライブラリ、.NETの対象・パッケージ・OS・バックエンド、C/C++のビルドとプロバイダーを区別し、OQSラッパーの開発元も分けます。APIがあるだけでPQC TLS対応とは判断せず、AESの一律置換も勧めません。
++
++PHPの `PHP_PQC_API` は参照を示す分類として `quantum-safe` / `info` を使い、
++他の新しいソースルールは `quantum-uncertain` を使います。この分類はソース上の参照を示すもので、
++実環境での配備や保護全体を確認した意味ではありません。未対応の構成は移行評価でも不明のままで、
++対応状況が不足している対象を準備完了とは判定しません。

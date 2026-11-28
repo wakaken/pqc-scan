@@ -2,8 +2,8 @@
 
 [日本語](DISTRIBUTION.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
 
-This guide describes installation of **v0.4.0** for macOS Apple Silicon
-(`aarch64-apple-darwin`). See the [v0.4.0 release notes](../releases/v0.4.0.md) for changes.
+This guide explains installation on macOS Apple Silicon (`aarch64-apple-darwin`).
+See the [v0.5.0 release notes](../releases/v0.5.0.md) for changes.
 
 <a id="release-status"></a>
 
@@ -16,8 +16,8 @@ The compressed distribution file (`.tar.gz`) bundles the executable, rules and u
 
 | Variant | Filename | Features |
 |---|---|---|
-| `static` | `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz` | Local scanning, local web interface and migration review |
-| `network` | `pqc-scan-0.4.0-aarch64-apple-darwin-network.tar.gz` | All static features plus explicit TLS/SSH endpoint diagnostics |
+| `static` | `pqc-scan-0.5.0-aarch64-apple-darwin-static.tar.gz` | Local scanning, local web interface and migration review |
+| `network` | `pqc-scan-0.5.0-aarch64-apple-darwin-network.tar.gz` | All static features plus explicit TLS/SSH endpoint diagnostics |
 
 Download both the compressed file and its matching `.sha256` file separately from
 **Assets** on the same release page. The `.sha256` file checks the downloaded
@@ -26,8 +26,8 @@ Its name is the compressed filename with `.sha256` appended.
 
 For example, download these two files for `static`:
 
-- `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz`
-- `pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz.sha256`
+- `pqc-scan-0.5.0-aarch64-apple-darwin-static.tar.gz`
+- `pqc-scan-0.5.0-aarch64-apple-darwin-static.tar.gz.sha256`
 
 Endpoint diagnostics require the administrator's authorization; follow the [TLS/SSH guide](PROBING.md).
 Binaries for other operating systems or CPUs and installation through crates.io are outside this scope.

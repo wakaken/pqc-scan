@@ -60,11 +60,11 @@ JWT、TLS、PKI、SSHなどの暗号処理を変更する前に、調査する�
 
 | 成果物 | 対象言語・ファイルの例 | 確認する内容 |
 |---|---|---|
-| ソースコード | Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Ruby | 暗号API、方式名、関連する利用パターン |
+| ソースコード | Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Ruby、PHP、C#、C、C++ | 暗号API、方式名、関連する利用パターン |
 | 各種ミドルウェアの設定ファイル | Kubernetes／Ingress、nginx、Apache httpd、Envoy、Istio、HAProxy、Traefik | TLS、暗号スイート、鍵交換グループなどの設定 |
 | 証明書ファイル | `.pem`、`.crt`、`.cer`、`.der` | 署名方式と公開鍵の方式、対応する鍵長・曲線、有効期間、公開情報の指紋 |
 | 秘密鍵ヘッダー | RSA、汎用PKCS#8、OpenSSHの秘密鍵ヘッダー | 対応するヘッダーの存在（復号や秘密鍵の妥当性確認は行いません） |
-| 依存関係の定義・ロックファイル | `Cargo.toml`、`Cargo.lock`、`package.json`、npm／pnpmのロック、Python・Ruby・Java・Goの依存関係ファイル | 関連ライブラリ、指定されたバージョン条件、対応する解決済みレコード |
+| 依存関係の定義・ロックファイル | `Cargo.toml`、`Cargo.lock`、`package.json`、npm／pnpmのロック、Python・Ruby・Java・Goのファイル、Composer、NuGet／MSBuild、vcpkg、Conan、CMakeの静的な参照 | 関連ライブラリ、指定されたバージョン条件、対応する解決済みレコード |
 | SBOM | CycloneDX JSON、SPDX JSON | スキャン対象の成果物で利用しているSBOM（依存コンポーネントやパッケージ） |
 
 ファイルのサイズ上限はデフォルトで2MiBです。\
@@ -80,7 +80,14 @@ JWT、TLS、PKI、SSHなどの暗号処理を変更する前に、調査する�
 - 暗号利用の検出結果とソフトウェアの依存関係を、別々の一覧にまとめます。
 - 暗号の用途・利用状況を入力し、PQCへの移行に必要な確認事項を整理できます。
 
-なお、スキャン時にPQC方式の名前が見つかっても、アプリケーションで正しく使われているとは限りません。\
+v0.5.0は組み込み139ルールを備えています。\
+変更点は[v0.5.0のリリースノート](docs/releases/v0.5.0.ja.md)を参照してください。\
+スキャナーとルールは、同じバージョンのものを一組で使ってください。
+
+レポートでは通常の引数と前後のコードを表示し、認識した秘密の値をマスクします。\
+詳しくは[コード抜粋の表示と保護](docs/user/REPORTS.ja.md#source-excerpts)を参照してください。
+
+なお、スキャン時にPQC方式の名前が見つかっても、アプリケーションで正しく使われているとは限りません。
 このような検出結果は、[結果の読み方](docs/user/REPORTS.ja.md#pqc-findings)で例を使って説明しています。
 
 <a id="quick-start"></a>

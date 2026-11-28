@@ -1,0 +1,56 @@
+   Compiling num-traits v0.2.19
+   Compiling syn v2.0.117
+   Compiling zerofrom v0.1.8
+   Compiling ref-cast v1.0.27
+   Compiling indexmap v2.13.0
+   Compiling yoke v0.8.4
+   Compiling zerovec v0.11.9
+   Compiling potential_utf v0.1.6
+   Compiling displaydoc v0.2.5
+   Compiling serde_derive v1.0.228
+   Compiling thiserror-impl v2.0.18
+   Compiling tinystr v0.8.5
+   Compiling zerotrie v0.2.5
+   Compiling icu_collections v2.4.0
+   Compiling num-integer v0.1.46
+   Compiling num-complex v0.4.6
+   Compiling num-bigint v0.4.6
+   Compiling num-iter v0.1.46
+   Compiling thiserror v2.0.18
+   Compiling icu_locale_core v2.4.0
+   Compiling num-rational v0.4.2
+   Compiling serde v1.0.228
+   Compiling icu_provider v2.4.0
+   Compiling num v0.4.3
+   Compiling fraction v0.15.4
+   Compiling icu_properties v2.4.0
+   Compiling icu_normalizer v2.4.0
+   Compiling fluent-uri v0.3.2
+   Compiling ahash v0.8.12
+   Compiling yaml_serde v0.10.7
+   Compiling email_address v0.2.9
+   Compiling chrono v0.4.44
+   Compiling idna_adapter v1.2.2
+   Compiling referencing v0.29.1
+   Compiling idna v1.1.0
+   Compiling pqc_scan_rules v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_rules)
+   Compiling jsonschema v0.29.1
+   Compiling pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+error[E0432]: unresolved import `pqc_scan_core::AlgorithmSpec`
+ --> crates/pqc_scan_core/tests/source_api_capture.rs:1:21
+  |
+1 | use pqc_scan_core::{AlgorithmSpec, Detection, Detector, DetectorOutcome, DetectorStatus, Evidence, Location, NativeOptions, ObservationDr...
+  |                     ^^^^^^^^^^^^^ no `AlgorithmSpec` in the root
+  |
+  = help: consider importing this struct instead:
+          pqc_scan_core::observation::AlgorithmSpec
+
+error[E0599]: no method named `with_source_api_references` found for struct `ObservationDraft` in the current scope
+  --> crates/pqc_scan_core/tests/source_api_capture.rs:28:120
+   |
+28 | ...T_EXPORT ML-KEM-512",Some((0,5))).with_source_api_references(&["X-Wing".into(),"SECRET_DO_NOT_EXPORT".into()]);
+   |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `ObservationDraft`
+
+Some errors have detailed explanations: E0432, E0599.
+For more information about an error, try `rustc --explain E0432`.
+error: could not compile `pqc_scan_core` (test "source_api_capture") due to 2 previous errors

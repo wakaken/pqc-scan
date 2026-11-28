@@ -1,0 +1,24 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.05s
+     Running tests/php_source.rs (target/debug/deps/php_source-c6d1296cfdea76d2)
+
+running 1 test
+test every_frozen_php_case_matches_its_original_focal_expectation ... FAILED
+
+failures:
+
+---- every_frozen_php_case_matches_its_original_focal_expectation stdout ----
+
+thread 'every_frozen_php_case_matches_its_original_focal_expectation' (22827149) panicked at crates/pqc_scan_detectors/tests/php_source.rs:114:13:
+assertion `left == right` failed: php-oqs-native-sig: expected 10..24, {"assessment_status":"not_evaluated","assessments":[],"assets":[{"attributes":{"ambiguous":false,"anchor":"anchor-v1-015910506799e947d8dc78bc92e3a1e26cc7c7557613bcc5d2a583af0ae14902","local_ordinal":0,"method":"ast_pattern","path":"case.php"},"id":"asset-v1-e7088c34f1020904799afc8d7b8ba57824ff04c0c0d9c6549dc6d458b64b06ce","identity_basis":"scoped_weak_source_anchor","kind":"usage","relations":[],"uncertainty":["static_reference_not_active_use"]}],"catalog_version":"native-exact-identifiers-1","coverage":{"analysis_failed_files":0,"analyzed_files":1,"enumeration_failed_entries":0,"excluded_enumerated_files":0,"not_applicable_files":0,"not_enumerated_population":true,"partial_files":0,"read_failed_files":0,"read_ok_files":1,"selected_files":1,"status":"complete_within_scope","unknown_files":0,"unsupported_files":0},"diagnostics":[],"export_loss_notes":["raw_matches_snippets_and_arbitrary_metadata_omitted","unknown_raw_identifiers_not_guessed","legacy_snapshot_not_derived_from_inventory","legacy_ids_are_not_native_identity","legacy_dependency_version_provenance_unavailable","legacy_applicability_coverage_is_not_native_inventory_completeness","weak_anchors_and_duplicate_ordinals_do_not_prove_cross_scan_identity","cryptographic_trust_and_policy_not_evaluated"],"identity_scheme":"pqc-scan-length-prefixed-sha256-v1","legacy_associations":[{"legacy_id":"finding-v1-2a5b338f8bb222b71237546072db772d2ae894664b3a41e315646559331e235e","legacy_index":0,"observation_ids":["observation-v1-e8011b8a80c4d1592d6758cd3730a1ef5d43c24b8d5251180be3a1b112a8569d"]}],"legacy_loss_records":[],"native_completeness":"not_exhaustive","observations":[{"asset_ids":["asset-v1-e7088c34f1020904799afc8d7b8ba57824ff04c0c0d9c6549dc6d458b64b06ce"],"assurance":"syntactic","evidence":{"capture_status":"legacy_reported","marker_kind":null},"id":"observation-v1-e8011b8a80c4d1592d6758cd3730a1ef5d43c24b8d5251180be3a1b112a8569d","identity_confidence":"weak_structural_anchor","method":"ast_pattern","occurrence_key":"occurrence-v1-98cea2a7965dfe680b09a28d16622b215241bab49aa9f81d41afbb883e46062c","producer":"tree_sitter_detector","rule_id":"PHP_CRYPTO_REFERENCE","target":{"byte_end":24,"byte_start":10,"column":5,"column_kind":"unicode_code_points","line":2,"object_index":null,"path":"case.php"},"uncertainty":[],"usage":"referenced"}],"profile":"static-native-v1","repository_scope":"v05/php","rules_digest":"rules-v1-c4719a6042a0f13e069a9f18686cef7bb6b1025360d19a5d7e21d4a15e57a74f","run":{"attempt_id":"static-1","generated_at":"2026-11-24T03:48:46.717558+00:00","id":"scan-v1-c0e3099c75de409c6730c7c160b173a12dafd30fc869846c31ce0d1068e70396"},"scanner_version":"0.4.0","schema_version":1,"scope":{"default_excludes":[".git","node_modules","target","dist","docs","known non-scannable media, archives and binary data"],"git_exclude":true,"git_global":true,"git_ignore":true,"markdown_excluded":true,"max_file_size_bytes":2097152},"unassociated_observation_ids":[]}
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    every_frozen_php_case_matches_its_original_focal_expectation
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.10s
+
+error: test failed, to rerun pass `-p pqc_scan_detectors --test php_source`

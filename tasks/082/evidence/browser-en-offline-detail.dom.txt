@@ -1,0 +1,122 @@
+- text: Language / 言語
+- combobox "Language / 言語":
+  - option "English" [selected]
+  - option "日本語"
+- text: Theme / 表示
+- combobox "Theme / 表示":
+  - option "Light / ライト" [selected]
+  - option "Dark / ダーク"
+- main:
+  - heading "Migration response work items" [level=1]
+  - paragraph: input
+  - time: "Evaluation time: 24/11/2026, 18:23:57 (Japan time, UTC+09:00)"
+  - heading "Conclusion" [level=2]
+  - list:
+    - listitem: "▲ Urgent: 1"
+    - listitem: "？ Urgency undetermined: 3"
+  - generic "Applied declarations"
+  - heading "Migration decisions" [level=2]
+  - heading "Urgent · 1" [level=3]: ▲ Urgent · 1
+  - heading "Signing / authentication" [level=4]
+  - heading "Start hereIdentify the current configuration and affected systems" [level=5]
+  - term: What to do
+  - definition: Trace the signing settings and identify the components that verify the resulting signatures.
+  - term: When to proceed
+  - definition: Start testing after identifying the effective configuration and affected systems and choosing the candidate and its parameters.
+  - strong: Recorded locations
+  - list:
+    - code: rsa.php:2
+  - heading "After identifying the scopeDoes the proposed configuration work with the affected systems?" [level=5]
+  - term: What to do
+  - definition: Test signatures with the proposed configuration and verify both new and existing signatures at their consumers. Also verify the pending requirements (Runtime, Cryptographic parameters, Peer support, Protocol, Crypto provider).
+  - term: When to proceed
+  - definition: Pass the tests in the required environments and peers, keeping existing connections or data usable where required. Proceed to staged rollout once open requirements (Runtime, Cryptographic parameters, Peer support, Protocol, Crypto provider) have been resolved and verified.
+  - heading "After compatibility testingCan the rollout be expanded?" [level=5]
+  - term: What to do
+  - definition: Start with a limited scope. Monitor relevant errors and test how to restore the previous configuration.
+  - term: When to proceed
+  - definition: Expand the rollout after the agreed error criteria are met and rollback has been tested.
+  - button "View detection locations"
+  - button "▸ Assessment details"
+  - generic "Other checks · 3 items"
+  - heading "Urgency undetermined · 3" [level=3]: ？ Urgency undetermined · 3
+  - article:
+    - heading "Investigate · ML-KEM-768 · Key establishment" [level=4]
+    - term: What to do
+    - definition: Check support for the proposed configuration with the runtime, provider or peer responsible for it.
+    - term: When to proceed
+    - definition: Reassess once the support evidence covers the required configuration and affected environments.
+    - strong: Recorded locations
+    - list:
+      - code: kem.php:2
+    - button "View detection locations"
+    - button "▸ Assessment details"
+  - article:
+    - heading "Investigate · ML-DSA-65 / SLH-DSA-SHA2-128s · Signing / authentication" [level=4]
+    - term: What to do
+    - definition: Check support for the proposed configuration with the runtime, provider or peer responsible for it.
+    - term: When to proceed
+    - definition: Reassess once the support evidence covers the required configuration and affected environments.
+    - strong: Recorded locations
+    - list:
+      - code: signature.c:1
+      - code: signature.cpp:1
+      - code: signature.cs:1
+    - button "View detection locations"
+    - button "▸ Assessment details"
+  - article:
+    - heading "Dependency references and other evidence" [level=4]
+    - term: What to do
+    - definition: Use these locations to find the active configuration. Check which algorithm and parameters the application selects at runtime.
+    - term: When to proceed
+    - definition: Reassess with the effective algorithm, settings and use confirmed from the code, configuration or observation.
+    - strong: Check locations
+    - list:
+      - code: unknown.c:1
+    - button "View detection locations"
+    - button "▸ Assessment details"
+  - button "Save assessment data"
+  - dialog "Detection locations":
+    - button "Back to list" [active]
+    - button "Close": ×
+    - heading "ML-DSA-65" [level=3]
+    - paragraph: signature.cpp:1
+    - paragraph: Urgency undetermined · Information missing · Readiness unknown
+    - heading "Decision reasons" [level=4]
+    - list:
+      - listitem: The available facts do not establish a supported urgency branch.
+      - listitem: The exact parameter encoding is unknown.
+      - listitem: The business-system binding is unknown.
+    - table:
+      - rowgroup:
+        - row "Observation method Syntax pattern":
+          - rowheader "Observation method"
+          - cell "Syntax pattern"
+        - row "Scan rule ID C_FAMILY_PQC_API":
+          - rowheader "Scan rule ID"
+          - cell "C_FAMILY_PQC_API"
+        - row "Role Algorithm reference":
+          - rowheader "Role"
+          - cell "Algorithm reference"
+        - row "Observed purpose Signing / authentication":
+          - rowheader "Observed purpose"
+          - cell "Signing / authentication"
+        - row "Assessment system ID Unbound":
+          - rowheader "Assessment system ID"
+          - cell "Unbound"
+        - row "Quantum assessment Designed for quantum resistance; deployment unverified":
+          - rowheader "Quantum assessment"
+          - cell "Designed for quantum resistance; deployment unverified"
+        - row "Evidence assurance Syntactic reference":
+          - rowheader "Evidence assurance"
+          - cell "Syntactic reference"
+        - row "Collection Completed within recorded scope":
+          - rowheader "Collection"
+          - cell "Completed within recorded scope"
+        - row "Parameter encoding Unknown":
+          - rowheader "Parameter encoding"
+          - cell "Unknown"
+    - heading "Next checks" [level=4]
+    - list:
+      - listitem: Confirm actual use and the required cryptographic purpose.
+      - listitem: Obtain or refresh the missing, unknown or stale scoped claims.

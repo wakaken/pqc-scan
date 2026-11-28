@@ -96,10 +96,10 @@
   severity: low
   risk: quantum-uncertain
   confidence: 0.35
-  migration_hint: Confirm whether this reference belongs to active signing, verification, tests or documentation; assess JOSE formats and peer/library support before selecting PQC signatures.
+  migration_hint: Confirm the member's object and active use. If it selects signing or verification keys, assess JOSE formats and peer/library support before planning PQC key rotation.
   pattern: "\"kid\"\\s*:"
   scope: code
-  description: JWT kid header usage detected, indicating key-management touch points.
+  description: A kid member reference was found. This match does not distinguish a key object from a JWT header.
 - id: JWK_RSA_KEY
   kind: regex
   category: JWT

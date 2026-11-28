@@ -1,0 +1,14 @@
+   Compiling pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+error[E0616]: field `partial_files` of struct `CoverageSummary` is private
+   --> crates/pqc_scan_detectors/tests/display_text_quality.rs:130:31
+    |
+130 |     assert_eq!(doc.coverage().partial_files,1);
+    |                               ^^^^^^^^^^^^^ private field
+    |
+help: a method `partial_files` also exists, call it with parentheses
+    |
+130 |     assert_eq!(doc.coverage().partial_files(),1);
+    |                                            ++
+
+For more information about this error, try `rustc --explain E0616`.
+error: could not compile `pqc_scan_detectors` (test "display_text_quality") due to 1 previous error

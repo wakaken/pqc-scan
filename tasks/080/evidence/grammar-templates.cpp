@@ -1,0 +1,1 @@
+template<class RSA_new=Custom>void f(){RSA_new();} template<int OQS_KEM_new=0>void g(){OQS_KEM_new("ML-KEM-768");} template<template<class>class RSA_new>void h(){RSA_new();}

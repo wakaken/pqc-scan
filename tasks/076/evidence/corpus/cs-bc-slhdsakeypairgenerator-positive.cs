@@ -1,0 +1,1 @@
+class Sample { void Run() { new Org.BouncyCastle.Crypto.Generators.SlhDsaKeyPairGenerator(); } }

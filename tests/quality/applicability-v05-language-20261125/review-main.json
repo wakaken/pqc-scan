@@ -1,0 +1,52 @@
+{
+  "corpusSha256": "f16a9bdc2b2dbd5852059ff8ea4d9727093c537c620eed8491ec94de86740b5b",
+  "truthSha256": "e976696f5f71c965cb48b50e8bad065cbefb6119ce0b46fa73823a6d3c4f42a0",
+  "protocolSha256": "1353f6b0a117178068624db1b766762fb290a9ed22e601782525e4a9de0bbff9",
+  "contractBindings": {
+    "docs/user/COVERAGE.md": "c564da7c165dc766b318fa86f6562a3bd25b59af842833badaa784ca0cc942cd",
+    "docs/user/COVERAGE.ja.md": "66e5efee15b85d220461a05a680d237b65cc2936dfa82c9fdb66dee190ec2c46",
+    "crates/pqc_scan_detectors/src/certificate_detector/pkcs12.rs": "1e92e9b9852a7156d09548382ea03b2f8e49d4f32caeeeba3418d9190af54a0b",
+    "docs/architecture/STATIC-ANALYSIS.md": "23c3eab6664372289c1eeeb6b40722248612b5cdba17b45a423c774a8227bcf5"
+  },
+  "reviewer": "/root",
+  "timestampUtc": "2026-11-25T05:24:49.540194+00:00",
+  "sourceBased": true,
+  "postObservation": true,
+  "historicalMeasurementsSeen": true,
+  "otherApplicabilityReviewSeen": false,
+  "remainingUnitsReviewed": true,
+  "remainingScopeReason": "Main rehashed all203 original files against corpus and provenance and reviewed all246 existing question scopes by actual input kind, nominal truth, current paired coverage and technical/source contracts. Current rules are139, not the historical125, and language handlers/display privacy have changed; this is not an unchanged-runtime claim. None of the original source formats is PHP/C#/C/C++; original old-seven nominal references, dependency-presence assertions, static config/marker and readable public-certificate properties remain eligible. Unsupported/malformed/ambiguous truth remains unchanged, not newly excluded. The PKCS12 parser hash is exactly unchanged. Encrypted P12/PFX have the encryptedData OID, unlike the readable unencrypted controls, so only the same six inner attributes remain excluded; outer-container and unencrypted public-bag questions stay eligible. No prediction or specimen execution, new labels, accuracy result, threshold change or widened unsupported population. Main saw prior historical records/measurements; the new independent record/aggregate was not seen. Detailed246-unit applicability notes and203-hash receipt are retained separately.",
+  "unresolved": [],
+  "dispositions": [
+    {
+      "id": "x154",
+      "status": "unsupported",
+      "reason": "The original P12 contains encryptedData (OID1.2.840.113549.1.7.6). Its nominal source-certificate signature truth is retained, but the unchanged non-decrypting content branch cannot access this inner signature attribute. Outer container presence remains eligible."
+    },
+    {
+      "id": "x156",
+      "status": "unsupported",
+      "reason": "The original PFX has the same encrypted bytes as the P12. Public-certificate-only conversion provenance and empty password do not make its inner signature attribute readable without decryption."
+    },
+    {
+      "id": "v2-audit4",
+      "status": "unsupported",
+      "reason": "Original public-certificate provenance retains RSA3072 nominal truth. Extracting the inner SPKI modulus from encryptedData is outside the unchanged PKCS12 parser and current contract."
+    },
+    {
+      "id": "v2-audit5",
+      "status": "unsupported",
+      "reason": "The original manifest retains the source RSA signature truth. Reading that signature from the encrypted P12 requires unsupported decryption; preserve truth but exclude only this property extraction."
+    },
+    {
+      "id": "v2-audit6",
+      "status": "unsupported",
+      "reason": "The byte-identical encrypted PFX retains known source RSA3072 provenance. Its inner SPKI-size question remains outside the non-decrypting subset; container recognition remains eligible."
+    },
+    {
+      "id": "v2-audit7",
+      "status": "unsupported",
+      "reason": "The PFX certificate resides in encryptedData, not readable Data/SafeContents certificate bags. Preserve source RSA-signature truth while excluding only extraction of the inner signature property."
+    }
+  ]
+}

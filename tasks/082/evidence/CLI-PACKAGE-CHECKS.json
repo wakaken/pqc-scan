@@ -1,0 +1,335 @@
+{
+  "source_manifest_sha256": "da260b6ad768560e1c033d76717d561a070e3fb8321a35bd83821b35192c7679",
+  "binary_sha256": "c84498329bc81aa401c26e1d5fc0b75546a93341d59fb399799bb69559b29968",
+  "profile": "dev/default features, local preparation only",
+  "checks": [
+    {
+      "label": "cli-scan",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-integration-cli/input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "target/v05-integration-cli/rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/foundation",
+        "--out-dir",
+        "target/v05-integration-cli/output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/cli-scan.log"
+    },
+    {
+      "label": "cli-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-integration-cli/input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "target/v05-integration-cli/rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/foundation",
+        "--out-dir",
+        "target/v05-integration-cli/strict-output",
+        "--require-complete"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/082/evidence/cli-strict.log"
+    },
+    {
+      "label": "package-prepare",
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--binary",
+        "target/debug/pqc-scan",
+        "--variant",
+        "static",
+        "--out-dir",
+        "target/v05-integration-package"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/package-prepare.log"
+    },
+    {
+      "label": "package-verify",
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--verify",
+        "target/v05-integration-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/package-verify.log"
+    },
+    {
+      "label": "package-install",
+      "command": [
+        "python3",
+        "tests/distribution/check-install.py",
+        "target/v05-integration-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz",
+        "--out-dir",
+        "target/v05-integration-install"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/package-install.log"
+    },
+    {
+      "label": "cli-php-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-integration-cli/php-input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/php",
+        "--out-dir",
+        "target/v05-integration-cli/php-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/cli-php-default.log"
+    },
+    {
+      "label": "cli-dependencies-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-integration-cli/dependency-input",
+        "--rules-dir",
+        "rules",
+        "--threads",
+        "1",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/dependencies",
+        "--lang",
+        "ja",
+        "--out-dir",
+        "target/v05-integration-cli/dependency-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/cli-dependencies-default.log"
+    },
+    {
+      "label": "cli-dependencies-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-integration-cli/dependency-input",
+        "--rules-dir",
+        "rules",
+        "--threads",
+        "1",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/dependencies",
+        "--lang",
+        "ja",
+        "--out-dir",
+        "target/v05-integration-cli/dependency-output",
+        "--require-complete"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/082/evidence/cli-dependencies-strict.log"
+    },
+    {
+      "label": "cli-dependencies-assess",
+      "command": [
+        "target/debug/pqc-scan",
+        "assess",
+        "target/v05-integration-cli/dependency-output/scan.inventory.v1.json",
+        "--input-format",
+        "inventory-v1",
+        "--as-of",
+        "2026-11-24T09:29:02Z",
+        "--out-dir",
+        "target/v05-integration-cli/dependency-assessment"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/cli-dependencies-assess.log"
+    },
+    {
+      "label": "cli-dependencies-en",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-integration-cli/dependency-input",
+        "--rules-dir",
+        "rules",
+        "--threads",
+        "1",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/dependencies",
+        "--lang",
+        "en",
+        "--out-dir",
+        "target/v05-integration-cli/dependency-en"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/cli-dependencies-en.log"
+    },
+    {
+      "label": "cli-csharp-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-integration-cli/csharp-input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "rules",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/csharp",
+        "--out-dir",
+        "target/v05-integration-cli/csharp-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/cli-csharp-default.log"
+    },
+    {
+      "label": "cli-csharp-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-integration-cli/csharp-partial",
+        "--rules-dir",
+        "rules",
+        "--require-complete",
+        "--out-dir",
+        "target/v05-integration-cli/csharp-partial-output"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/082/evidence/cli-csharp-strict.log"
+    },
+    {
+      "label": "cli-c-family-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-integration-cli/c-family-input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "rules",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/c-family",
+        "--out-dir",
+        "target/v05-integration-cli/c-family-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/cli-c-family-default.log"
+    },
+    {
+      "label": "cli-c-family-assess",
+      "command": [
+        "target/debug/pqc-scan",
+        "assess",
+        "target/v05-integration-cli/c-family-output/scan.inventory.v1.json",
+        "--input-format",
+        "inventory-v1",
+        "--as-of",
+        "2026-11-24T09:29:04Z",
+        "--out-dir",
+        "target/v05-integration-cli/c-family-assessment"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/082/evidence/cli-c-family-assess.log"
+    },
+    {
+      "label": "cli-c-family-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-integration-cli/c-family-partial",
+        "--rules-dir",
+        "rules",
+        "--require-complete",
+        "--out-dir",
+        "target/v05-integration-cli/c-family-partial-output"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/082/evidence/cli-c-family-strict.log"
+    }
+  ],
+  "assertions": [
+    "7 files / 8 observations and legacy findings",
+    "real original-byte UTF16 and UTF8 spans",
+    "one header occurrence / distinct same-line IDs",
+    "strict exit3 for unrendered template",
+    "all four grammar notices present in verified package",
+    "Real PHP default-rule native and all report/export files omit private canary",
+    "Three PHP observations retain syntactic referenced assurance; imported OpenSSL key type stays unknown",
+    "25 immutable dependency inputs scanned with real defaults, strict3 for required incomplete/future schemas; six attributes and source-local typed claims",
+    "3 new predicates create no algorithm assets or runtime assurance; SDK/platform/baseline/revision/declared-vs-locked claims remain distinct",
+    "All outputs/CycloneDX1.7 omit credential/content-hash canaries; no invented native purls; held reader accepts open provenance strings",
+    "PHP/NET/native EN/JA advice and exact independent-wrapper IDs available; no official identity inferred from package similarity",
+    "Real C# default scan: eight observations; exact ML-KEM-768/RSA and unresolved HPKE; no canary in all reports or CycloneDX1.7 exports",
+    "C# unknown dynamic selector strict exit3",
+    "Each opaque library occurrence retains its own finite public label, native marker and exact legacy link after final export; source preview remains masked",
+    "C/C++ real default rules:17 typed source observations; exact5 primitives,3 include identities and3 provider/property/group references without algorithm assets; unknown digest key remains unknown",
+    "UTF16 shared header retains two original expression spans once each; legacy OpenSSL rule occurrences remain",
+    "All formats/CycloneDX1.7 omit key canary; saved native configuration/library markers ingest through existing inventory-v1 reader; dynamic selector strict3"
+  ],
+  "archive_sha256": "fee572d203dd8169103875d58e6eb984b51f18b15c148eae9c7c9a3cc22849a2",
+  "archive": "target/v05-integration-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz",
+  "environment": {
+    "CARGO_INCREMENTAL": "0"
+  }
+}

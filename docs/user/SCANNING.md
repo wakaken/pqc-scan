@@ -1,10 +1,8 @@
 # Scanning repositories
 
-[日本語](SCANNING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
+[日本語](SCANNING.ja.md) · [README](../../README.md)
 
-This guide covers v0.4.0 static scanning. See the [release notes](../releases/v0.4.0.md) for changes between versions.
-
-Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](https://github.com/wakaken/pqc-scan/blob/develop/docs/user/COVERAGE.md) for format-specific limits.
+Use this guide after the first scan when you need to select outputs, change CI exit behavior or understand incomplete inspection. See [report interpretation](REPORTS.md) for inventory and policy output, and [supported inputs](COVERAGE.md) for format-specific limits.
 
 ## Contents
 
@@ -34,6 +32,7 @@ Defaults are `--format all`, `--lang en`, `--out-dir ./pqc-report`, `--rules-dir
 
 Add `--cyclonedx-17` to write separate CycloneDX 1.7 inventories. The [report guide](REPORTS.md#cyclonedx)
 explains these documents and the completeness limits of [inventory comparison](REPORTS.md#diff).
+
 
 ### File size limit
 
@@ -159,15 +158,14 @@ Review the diagnostic reason, then split the scan scope or inspect the affected 
 Syntax errors retain available findings and mark inspection as incomplete.
 Binary inputs, unsupported source languages and absence of applicable rules are outside that detector's scope.
 
-For certificates, malformed input, unknown key attributes or mixed unsupported blocks yield `detector_partial`; unsupported containers yield `detector_unsupported`.
-Detecting a container does not prove its contents were inspected. A parsed certificate that matches no rule need not produce a finding.
+When certificates or dependencies are only partly parsed, diagnostics retain
+the available information and explain why inspection is incomplete. Recognizing
+a file does not establish that all its contents were inspected. Even complete
+parsing produces no finding when no rule matches.
 
-Dependency inspection distinguishes valid empty input, malformed supported input, partial success, unsupported versions and resource limits.
-Supported structured subsets can report completion; unrelated files are not applicable. Go modules, Maven POM, requirements and Ruby declarations/locks can complete within their explicitly parsed subsets. Literal Gemfile/gemspec dependency calls use bounded Ruby syntax inspection, including selected local gemspec references. Dynamic or unsupported declarations remain incomplete; Gradle lexical fallbacks remain `detector_not_reported`.
-Completion is not full package-manager validation or proof of installation.
-
-The `--require-complete` exit-code contract is unchanged, but actual returned codes depend on parser outcomes and supported scope.
-See [dependency declarations and resolution evidence](https://github.com/wakaken/pqc-scan/blob/develop/docs/architecture/DEPENDENCY-PROVENANCE.md) for format-specific details.
+Dependency inspection does not establish package-manager validation or the
+installed state. When using `--require-complete`, check the exit code and
+diagnostics as well as findings.
 
 ## Including normally excluded binary formats
 
@@ -473,10 +471,9 @@ for file roles and import operations.
 <details>
 <summary>Work-item counts and report names</summary>
 
-Decisions combine when system, purpose/role, statuses, reasons, missing facts,
-actions, blockers and candidate-support semantics agree. Counts vary, including
-zero; aggregation does not imply completed migration. Record counts and distinct
-recorded locations differ, and repeated detections are not independent uses or vulnerabilities.
+Common review items are grouped together. Counts depend on the results and do
+not equal detection-record or vulnerability counts. Zero items do not establish
+completed migration or that no action is needed.
 
 Web HTML uses the selected relative scope as its display label. CLI
 `assess --report-label "Project / scope"` sets a non-secret HTML name (up to 256

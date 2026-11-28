@@ -1,0 +1,5 @@
+# Selective source privacy
+
+User authorizes normal arguments/context instead of task086 API-only display. Preserve086 historical acceptance and entry snapshot. Existing blanket new-language flag and normalized API restoration cause the complaint; SourcePrivacy already records positions but whole-file snippet guards discard benign context.
+
+Use the inspected source snapshot, redact recognized secret spans before clipping, then construct a five-line window with original line numbers. Preserve actual public variables, selectors and messages; protect credential values/private blocks and literal cryptographic key inputs using bounded syntax/API roles, not canary spellings or repository names. Keep contextual fallback for unknown/unavailable locations. Retain public detection identity and native typed-fact semantics before display restoration; source excerpts must never become CBOM algorithms. Meaningful tests fail for the current API-only behavior first, then implement, run targeted/privacy/old-language/frozen tests, required workspace/default/allfeatures/Clippy/build/Node checks, two retained reviews and real four-report rescans/browser. No auto commit/push.

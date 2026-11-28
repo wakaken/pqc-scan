@@ -1,0 +1,48 @@
+    Checking pqc_scan_core v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_core)
+    Checking pqc_scan_rules v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_rules)
+    Checking pqc_scan_detectors v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_detectors)
+    Checking pqc_scan_report v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_report)
+    Checking pqc_scan_probe_ssh v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_probe_ssh)
+    Checking pqc_scan_probe_tls v0.4.0 (/Users/waka/.codex/worktrees/pqc-language-research/pqc-scan/crates/pqc_scan_probe_tls)
+error: this if-then-else expression assigns a bool literal
+   --> crates/pqc_scan_detectors/src/dependency_detector/languages/c_family.rs:453:21
+    |
+453 | /                     if !escaped && c == b'\\' {
+454 | |                         escaped = true;
+455 | |                     } else {
+456 | |                         escaped = false;
+457 | |                     }
+    | |_____________________^ help: you can reduce it to: `escaped = !escaped && c == b'\\';`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#needless_bool_assign
+    = note: `-D clippy::needless-bool-assign` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_bool_assign)]`
+
+error: usage of `contains_key` followed by `insert` on a `BTreeMap`
+   --> crates/pqc_scan_detectors/src/dependency_detector/languages/nuget.rs:97:9
+    |
+ 97 | /         if out.contains_key(&id) {
+ 98 | |             out.insert(id, None);
+ 99 | |         } else {
+100 | |             out.insert(id, value);
+101 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.93.0/index.html#map_entry
+    = note: `-D clippy::map-entry` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::map_entry)]`
+help: try
+    |
+ 97 ~         match out.entry(id) {
+ 98 +             std::collections::btree_map::Entry::Occupied(mut e) => {
+ 99 +                 e.insert(None);
+100 +             }
+101 +             std::collections::btree_map::Entry::Vacant(e) => {
+102 +                 e.insert(value);
+103 +             }
+104 +         }
+    |
+
+error: could not compile `pqc_scan_detectors` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `pqc_scan_detectors` (lib test) due to 2 previous errors

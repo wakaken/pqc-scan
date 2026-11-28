@@ -1,0 +1,1 @@
+class C{void M(){System.Security.Cryptography.MLKem.GenerateKey(dynamicAlgorithm);}}

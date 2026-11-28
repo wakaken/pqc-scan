@@ -1,0 +1,32 @@
+- id: PHP_CRYPTO_API
+  kind: tree_sitter
+  category: CryptoAPI
+  severity: medium
+  risk: quantum-uncertain
+  confidence: 0.80
+  migration_hint: Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use.
+  pattern: '(?i)\b(?:openssl_(?:pkey_new|pkey_derive|public_encrypt|private_decrypt|private_encrypt|public_decrypt|sign|verify)|sodium_crypto_(?:sign|scalarmult|box|kx)(?:_[A-Za-z0-9_]+)?|OQS_SIGNATURE|Oqs\\OqsSig|phpseclib3\\Crypt\\(?:RSA|EC|DH)::[A-Za-z_][A-Za-z0-9_]*)\s*\('
+  scope: php
+  description: PHP cryptographic API or library reference; key type may be unresolved.
+
+- id: PHP_PQC_API
+  kind: tree_sitter
+  category: PQC
+  severity: info
+  risk: quantum-safe
+  confidence: 0.80
+  migration_hint: Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection.
+  pattern: '(?i)\b(?:sodium_crypto_kem_[A-Za-z0-9_]+\s*\(|(?:PQCrypto|ParagonIE\\PQCrypto)\\(?:MLKem(?:512|768|1024)|MLDSA(?:44|65|87)|XWing|SLHDSA|Compat)(?:\\[A-Za-z_][A-Za-z0-9_]*)?\s*(?:::|\())'
+  scope: php
+  description: PHP PQC algorithm or X-Wing reference; runtime support requires verification.
+
+- id: PHP_CRYPTO_REFERENCE
+  kind: tree_sitter
+  category: CryptoAPI
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.60
+  migration_hint: Identify the specific third-party OQS wrapper and native library. A qualified reference does not establish installation, algorithm selection or enabled functionality.
+  pattern: '(?i)\b(?:OQS_KEYENCAPSULATION|Oqs\\OqsKem)\b'
+  scope: php
+  description: PHP OQS KEM wrapper reference; installation and selected algorithm are unresolved.

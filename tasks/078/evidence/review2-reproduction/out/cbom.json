@@ -1,0 +1,58 @@
+[
+  {
+    "component": "privacy.php",
+    "algorithm": "TLS_RSA_***ARY078",
+    "usage_type": "TLS",
+    "location": "privacy.php:1",
+    "quantum_risk": "quantum-vulnerable",
+    "migration_hint": "Identify static RSA key exchange versus RSA authentication in DHE/ECDHE suites; inspect active use before planning compatible hybrid key agreement and PQC authentication."
+  },
+  {
+    "component": "privacy.php",
+    "algorithm": "TLS_RSA_***ARY078",
+    "usage_type": "TLS",
+    "location": "privacy.php:1",
+    "quantum_risk": "quantum-vulnerable",
+    "migration_hint": "Evaluate standardized hybrid key exchange such as X25519MLKEM768 with compatible peers; draft Kyber groups have different wire formats."
+  },
+  {
+    "component": "computed.php",
+    "algorithm": "[masked-sensitive-content]",
+    "usage_type": "CryptoAPI",
+    "location": "computed.php:1",
+    "quantum_risk": "quantum-uncertain",
+    "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+  },
+  {
+    "component": "computed.php",
+    "algorithm": "[masked-sensitive-content]",
+    "usage_type": "CryptoAPI",
+    "location": "computed.php:1",
+    "quantum_risk": "quantum-uncertain",
+    "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+  },
+  {
+    "component": "spread.php",
+    "algorithm": "[masked-sensitive-content]",
+    "usage_type": "CryptoAPI",
+    "location": "spread.php:1",
+    "quantum_risk": "quantum-uncertain",
+    "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+  },
+  {
+    "component": "spread.php",
+    "algorithm": "[masked-sensitive-content]",
+    "usage_type": "CryptoAPI",
+    "location": "spread.php:1",
+    "quantum_risk": "quantum-uncertain",
+    "migration_hint": "Review the resolved primitive and purpose; PHP source alone does not establish loaded extensions, key type or active use."
+  },
+  {
+    "component": "keyedwrite.php",
+    "algorithm": "[masked-sensitive-content]",
+    "usage_type": "PQC",
+    "location": "keyedwrite.php:1",
+    "quantum_risk": "quantum-safe",
+    "migration_hint": "Verify the specific Sodium or ParagonIE implementation and version. X-Wing is distinct from standalone ML-KEM and TLS hybrids; source requests prove no runtime protection."
+  }
+]

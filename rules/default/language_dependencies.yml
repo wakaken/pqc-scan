@@ -1,0 +1,32 @@
+- id: DEP_PHP_CRYPTO
+  kind: dependency
+  category: CryptoAPI
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.60
+  migration_hint: Check the declared PHP package or platform requirement, loaded extension and linked native library separately; platform emulation is not deployment evidence.
+  pattern: '^(?:(?:paragonie/pqcrypto_compat|phpseclib/phpseclib|mir-evgenii/liboqs-php) \S(?:.*\S)? composer |(?:ext-(?:pqcrypto|oqsphp|sodium|openssl)|lib-(?:sodium|openssl)) \S(?:.*\S)? php-platform )'
+  scope: dependency
+  description: PHP cryptographic dependency or platform declaration; installed capability is unknown.
+
+- id: DEP_NUGET_CRYPTO
+  kind: dependency
+  category: CryptoAPI
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.60
+  migration_hint: Check the exact NuGet package, target framework, runtime, OS and native backend. A lock record is not an installed runtime or enabled TLS provider.
+  pattern: '^(?:bouncycastle\.cryptography|openforge\.cryptography\.liboqs(?:\.(?:kem|sig))?|liboqs-dotnet) \S(?:.*\S)? nuget '
+  scope: dependency
+  description: NuGet cryptographic package assertion; wrapper ownership and runtime support require verification.
+
+- id: DEP_NATIVE_CRYPTO
+  kind: dependency
+  category: CryptoAPI
+  severity: info
+  risk: quantum-uncertain
+  confidence: 0.60
+  migration_hint: Verify the native library, build flags and provider versions. vcpkg, Conan and CMake source declarations do not prove installation, selected algorithms or negotiated TLS.
+  pattern: '^(?:openssl|liboqs|liboqs-cpp|oqs-provider) \S(?:.*\S)? (?:vcpkg|conan|cmake) '
+  scope: dependency
+  description: C/C++ cryptographic dependency or literal build reference; effective configuration is unknown.

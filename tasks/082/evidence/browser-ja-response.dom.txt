@@ -1,0 +1,61 @@
+- link "本文へ移動":
+  - /url: "#main"
+- banner:
+  - generic: ◇
+  - generic: pqc-scan
+  - generic: Language / 言語
+  - combobox "Language / 言語":
+    - option "日本語" [selected]
+    - option "English"
+  - button "ライト表示"
+- main:
+  - navigation "移行の確認内の画面":
+    - strong: 移行の確認
+    - button "概要"
+    - button "用途を確認"
+    - button "対応項目"
+  - generic: input
+  - link "結果に戻る":
+    - /url: "#"
+  - status
+  - button "用途を修正"
+  - link "レポートを保存（HTML）":
+    - /url: reports/1/migration.assessment.html
+  - link "レポートを別タブで開く":
+    - /url: http://127.0.0.1:49705/b26aa551fd54ee4055240ded3ece9998e7ce2e28db4499c45c375a5b1794b23e/reports/1/migration.assessment.html?theme=dark&lang=ja
+  - link "入力内容を保存（JSON）":
+    - /url: reports/1/migration-context.json
+  - heading "移行に向けた確認事項" [level=1]
+  - paragraph: input
+  - time: "評価日時: 2026/11/24 18:23:57 （日本時間）"
+  - heading "結論" [level=2]
+  - list:
+    - listitem: "▲ 早急に対応: 1"
+    - listitem: "？ 緊急度を判断できない: 3"
+  - generic "反映した申告"
+  - heading "移行の判断" [level=2]
+  - heading "早急に対応 · 1 件" [level=3]: ▲ 早急に対応 · 1 件
+  - heading "署名・認証" [level=4]
+  - heading "最初に着手現在の設定と影響範囲を特定する" [level=5]
+  - term: やること
+  - definition: 署名設定をたどり、生成された署名を検証する処理を確認する。
+  - term: 次に進める条件
+  - definition: 実際の設定と影響範囲を特定し、試験する候補方式と設定値が決まれば互換性試験へ進む。
+  - strong: 記録された場所
+  - list:
+    - code: rsa.php:2
+  - heading "影響範囲の特定後候補方式で対象システムが動作するか" [level=5]
+  - term: やること
+  - definition: 候補方式で署名し、利用先で新旧両方の署名を検証する。 未対応の条件（実行環境、暗号パラメーター、接続先、プロトコル、プロバイダー）も試験で確かめる。
+  - term: 次に進める条件
+  - definition: 必要な実行環境・利用先で試験に合格し、移行中に必要な既存の接続やデータも使えること。 未対応の条件を解消し、その根拠を確認できたら段階切り替えへ進む。
+  - heading "互換性試験の合格後切り替え対象を広げられるか" [level=5]
+  - term: やること
+  - definition: 限定した範囲で切り替えてエラーを監視し、旧設定へ戻す手順を試す。
+  - term: 次に進める条件
+  - definition: エラーが合意した基準内に収まり、復旧手順を確認できたら、対象を段階的に広げる。
+  - button "検出箇所を見る"
+  - button "▸ 判定の詳細"
+  - generic "ほかの確認項目 · 3 件"
+  - text: ▸ ▸ ▸
+  - button "評価データを保存"

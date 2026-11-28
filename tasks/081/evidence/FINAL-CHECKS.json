@@ -1,0 +1,486 @@
+{
+  "source_manifest_sha256": "510e0e99bd9ea783db5b439b6179cadd64fc20619fd859e73f64087360438d79",
+  "all_source_and_input_hashes_rechecked": true,
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exit": 0,
+      "tool_session": 39174,
+      "log": "workspace-final.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_TARGET_DIR": "target/v05-feature"
+      },
+      "exit": 0,
+      "tool_session": 26662,
+      "log": "workspace-features-final.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exit": 0,
+      "log": "clippy-review2-final-2.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "fmt-review2.log"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "diff-review2.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "build",
+        "--workspace"
+      ],
+      "exit": 0,
+      "log": "tasks/081/evidence/build-final.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/081/evidence/check_cli_package.py"
+      ],
+      "exit": 0,
+      "log": "tasks/081/evidence/cli-package-final.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tasks/081/evidence/verify_compatibility.py"
+      ],
+      "exit": 0,
+      "log": "tasks/081/evidence/compat-final.log",
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      }
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "pqc_scan_detectors",
+        "--test",
+        "language_dependencies"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exit": 0,
+      "log": "test-review-parsers.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--all-features",
+        "--test",
+        "language_dependencies"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_TARGET_DIR": "target/v05-feature"
+      },
+      "exit": 0,
+      "log": "test-review-parsers-features.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "environment": {
+        "CARGO_INCREMENTAL": "0"
+      },
+      "exit": 0,
+      "log": "test-review-clippy.log"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "test-review-fmt.log"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "test-review-diff.log"
+    }
+  ],
+  "cli_subcommands": [
+    {
+      "label": "cli-scan",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-dependencies-cli/input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "target/v05-dependencies-cli/rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/foundation",
+        "--out-dir",
+        "target/v05-dependencies-cli/output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/cli-scan.log"
+    },
+    {
+      "label": "cli-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-dependencies-cli/input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "target/v05-dependencies-cli/rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/foundation",
+        "--out-dir",
+        "target/v05-dependencies-cli/strict-output",
+        "--require-complete"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/081/evidence/cli-strict.log"
+    },
+    {
+      "label": "package-prepare",
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--binary",
+        "target/debug/pqc-scan",
+        "--variant",
+        "static",
+        "--out-dir",
+        "target/v05-dependencies-package"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/package-prepare.log"
+    },
+    {
+      "label": "package-verify",
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--verify",
+        "target/v05-dependencies-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/package-verify.log"
+    },
+    {
+      "label": "package-install",
+      "command": [
+        "python3",
+        "tests/distribution/check-install.py",
+        "target/v05-dependencies-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz",
+        "--out-dir",
+        "target/v05-dependencies-install"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/package-install.log"
+    },
+    {
+      "label": "cli-php-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-dependencies-cli/php-input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/php",
+        "--out-dir",
+        "target/v05-dependencies-cli/php-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/cli-php-default.log"
+    },
+    {
+      "label": "cli-dependencies-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-dependencies-cli/dependency-input",
+        "--rules-dir",
+        "rules",
+        "--threads",
+        "1",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/dependencies",
+        "--lang",
+        "ja",
+        "--out-dir",
+        "target/v05-dependencies-cli/dependency-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/cli-dependencies-default.log"
+    },
+    {
+      "label": "cli-dependencies-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-dependencies-cli/dependency-input",
+        "--rules-dir",
+        "rules",
+        "--threads",
+        "1",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/dependencies",
+        "--lang",
+        "ja",
+        "--out-dir",
+        "target/v05-dependencies-cli/dependency-output",
+        "--require-complete"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/081/evidence/cli-dependencies-strict.log"
+    },
+    {
+      "label": "cli-dependencies-assess",
+      "command": [
+        "target/debug/pqc-scan",
+        "assess",
+        "target/v05-dependencies-cli/dependency-output/scan.inventory.v1.json",
+        "--input-format",
+        "inventory-v1",
+        "--as-of",
+        "2026-11-24T08:32:20Z",
+        "--out-dir",
+        "target/v05-dependencies-cli/dependency-assessment"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/cli-dependencies-assess.log"
+    },
+    {
+      "label": "cli-dependencies-en",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-dependencies-cli/dependency-input",
+        "--rules-dir",
+        "rules",
+        "--threads",
+        "1",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/dependencies",
+        "--lang",
+        "en",
+        "--out-dir",
+        "target/v05-dependencies-cli/dependency-en"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/cli-dependencies-en.log"
+    },
+    {
+      "label": "cli-csharp-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-dependencies-cli/csharp-input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "rules",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/csharp",
+        "--out-dir",
+        "target/v05-dependencies-cli/csharp-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/cli-csharp-default.log"
+    },
+    {
+      "label": "cli-csharp-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-dependencies-cli/csharp-partial",
+        "--rules-dir",
+        "rules",
+        "--require-complete",
+        "--out-dir",
+        "target/v05-dependencies-cli/csharp-partial-output"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/081/evidence/cli-csharp-strict.log"
+    },
+    {
+      "label": "cli-c-family-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-dependencies-cli/c-family-input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "rules",
+        "--format",
+        "all",
+        "--cyclonedx-17",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/c-family",
+        "--out-dir",
+        "target/v05-dependencies-cli/c-family-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/cli-c-family-default.log"
+    },
+    {
+      "label": "cli-c-family-assess",
+      "command": [
+        "target/debug/pqc-scan",
+        "assess",
+        "target/v05-dependencies-cli/c-family-output/scan.inventory.v1.json",
+        "--input-format",
+        "inventory-v1",
+        "--as-of",
+        "2026-11-24T08:32:22Z",
+        "--out-dir",
+        "target/v05-dependencies-cli/c-family-assessment"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/081/evidence/cli-c-family-assess.log"
+    },
+    {
+      "label": "cli-c-family-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-dependencies-cli/c-family-partial",
+        "--rules-dir",
+        "rules",
+        "--require-complete",
+        "--out-dir",
+        "target/v05-dependencies-cli/c-family-partial-output"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/081/evidence/cli-c-family-strict.log"
+    }
+  ],
+  "quality": "137unique rule rows/305 compiledtargetcontrols pass in workspace; exact134inherited rows preserved RULE-COMPATIBILITY",
+  "targeted": "14 parser tests incl25frozeninputs and3P2 controls; construction budget test0/below/at/above preservingold500k; guidance2 and report regressions pass in final workspace",
+  "browser": "BROWSER-CHECKS.json with actual PNG/DOM evidence; serverstopped",
+  "remaining": [
+    "retained independent test review;081notdoneuntilaccepted",
+    "082-083 milestone integration and final reconciliation"
+  ],
+  "reused_product_source_manifest": "8c2c3670531e82bf9d70faf5fcc6e363f7fb1c8c64b3393488209613b521f83f",
+  "test_only_reuse": "Only one integration test changed; everyproduct/doc/source fixture and binary hash unchanged. New default/all-feature target runs supersede weak position assertions; all other final workspace/CLI/package/compat/browser checks retain their exact input/config and product applicability. No broader rerun needed under VERIFICATION tests-only rule."
+}

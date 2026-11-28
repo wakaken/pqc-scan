@@ -1,0 +1,921 @@
+{
+  "generated_at": "2026-11-24T07:30:07.078123Z",
+  "findings": [
+    {
+      "finding_id": "finding-v1-e40945852ba56de9660830fedf45a34015831c1cb61b2a5e35861814c941083c",
+      "rule_id": "C_FAMILY_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+      "location": {
+        "file": "api.c",
+        "line": 3,
+        "column": 220
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "C/C++ provider configuration reference: oqsprovider",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-d6d5ee0250b926363281970264fac5532278a05ee67aff3b59ba8974e477a48c",
+      "rule_id": "C_FAMILY_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+      "location": {
+        "file": "api.c",
+        "line": 3,
+        "column": 259
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "C/C++ property configuration reference: provider=default",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-2f5f13d33b656e2f4bbbd5d4c4d32f309e6e738890d0958f98f73e9bc3fea52a",
+      "rule_id": "C_FAMILY_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+      "location": {
+        "file": "api.c",
+        "line": 3,
+        "column": 311
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "C/C++ TLS group configuration reference: X25519MLKEM768:P-256",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-3042e16611f55e79aa73388b951ae911c599ce21efa4a6df18f3f46d1301e86c",
+      "rule_id": "C_FAMILY_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+      "location": {
+        "file": "api.c",
+        "line": 3,
+        "column": 364
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-098e4b8675aa785d21793a3c336d51851ce2d80e5f4aa27f38aca5ef18b97e16",
+      "rule_id": "C_FAMILY_CRYPTO_API",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "medium",
+      "confidence": 0.8,
+      "description": "C/C++ cryptographic API or configuration reference; effective primitive and runtime use require verification.",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation.",
+      "location": {
+        "file": "api.c",
+        "line": 3,
+        "column": 411
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-db9985b76e5cd638d04c29141574d25cde54fab3dd564e3496347c7840810be0",
+      "rule_id": "API_OPENSSL_RSA_NEW",
+      "category": "CryptoAPI",
+      "risk": "quantum-vulnerable",
+      "severity": "medium",
+      "confidence": 0.55,
+      "description": "OpenSSL low-level RSA API usage detected.",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration.",
+      "location": {
+        "file": "api.c",
+        "line": 3,
+        "column": 411
+      },
+      "evidence": {
+        "type": "regex_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "plan.hybrid-migration",
+          "title": "Adopt a phased hybrid PQC migration plan",
+          "priority": "near-term",
+          "rationale": "The detected primitive is vulnerable to cryptographically relevant quantum attacks. Hybrid rollout minimizes compatibility risk.",
+          "steps": [
+            "Inventory all call sites using this algorithm and owner teams.",
+            "Check for an existing classical + PQC composition; if migration is needed, evaluate compatible staged or hybrid modes before hard cut-over.",
+            "Define retirement dates for legacy classical algorithms."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography",
+            "https://csrc.nist.gov/pubs/fips/203/final",
+            "https://csrc.nist.gov/pubs/fips/204/final"
+          ]
+        },
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-8eaf9afaca631725b5df90e2b9f6d99508ed1d3b000095b0f332f887792c7a50",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "api.c",
+        "line": 3,
+        "column": 28
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-fdc74472283e1419e9d5e305b597dc2c786500737d5c33a1bd4ee7b324807699",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "api.c",
+        "line": 3,
+        "column": 98
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-e1c4fdef68afa137fa53128fb80551c7a1ae3864a6e06eb6e8c74ecb68bf5f19",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "api.c",
+        "line": 3,
+        "column": 124
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 3,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-e395352065891e71977836286e38167ae7594aa7c083f7d8464c37071efb976a",
+      "rule_id": "C_FAMILY_TLS_REFERENCE",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "C/C++ cryptographic include or TLS library reference; linking and negotiation remain unverified.",
+      "migration_hint": "Check included libraries, exact TLS groups and provider configuration separately from deployment and negotiated connections. Includes alone do not prove linking or enabled algorithms.",
+      "location": {
+        "file": "api.c",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "C/C++ OpenSSL include reference",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-92a819cc6f48c41962f0817b1de0d2f64870d5665e1065ff34e2bad77914a773",
+      "rule_id": "C_FAMILY_TLS_REFERENCE",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "C/C++ cryptographic include or TLS library reference; linking and negotiation remain unverified.",
+      "migration_hint": "Check included libraries, exact TLS groups and provider configuration separately from deployment and negotiated connections. Includes alone do not prove linking or enabled algorithms.",
+      "location": {
+        "file": "api.c",
+        "line": 2,
+        "column": 1
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "C/C++ liboqs include reference",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 2,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-2ba10f372630463225d9deb462f431cc30a8834f9b16b4acdfb15dda2c365fdf",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "api.cpp",
+        "line": 2,
+        "column": 10
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 2,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-b5e575fcb38d0a2972119944c968021124864c5817eb2aa6a36d46711c3e107f",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "api.cpp",
+        "line": 2,
+        "column": 40
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 2,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-1bc4c82f0b8df754874e805ac0ee6f2155eb47d25f877c51c59e4c428720ebcd",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "api.cpp",
+        "line": 2,
+        "column": 113
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 2,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-2dd9c3d9269e1363e71ea463a63f38f8302472774003697a3cc72259fa63188e",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "api.cpp",
+        "line": 2,
+        "column": 151
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 2,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-7af645fba4d4f05c6afb12f89e85fc09238e8bb941f6cd53d30e9ed7a2dc89d0",
+      "rule_id": "C_FAMILY_TLS_REFERENCE",
+      "category": "CryptoAPI",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.6,
+      "description": "C/C++ cryptographic include or TLS library reference; linking and negotiation remain unverified.",
+      "migration_hint": "Check included libraries, exact TLS groups and provider configuration separately from deployment and negotiated connections. Includes alone do not prove linking or enabled algorithms.",
+      "location": {
+        "file": "api.cpp",
+        "line": 1,
+        "column": 1
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "C/C++ liboqs-cpp include reference",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "recommended_actions": [
+        {
+          "action_id": "cryptoapi.abstraction-layer",
+          "title": "Introduce crypto abstraction boundary for algorithm agility",
+          "priority": "near-term",
+          "rationale": "Direct algorithm calls create high migration cost. A boundary layer enables staged classical-to-PQC transitions.",
+          "steps": [
+            "Wrap signing, verification, keygen, and key exchange behind stable interfaces.",
+            "Add policy controls to select classical, hybrid, or PQC paths at runtime."
+          ],
+          "references": [
+            "https://www.nist.gov/itl/post-quantum-cryptography"
+          ]
+        }
+      ],
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-e1542714dfe532af3e065ededf982279ef28b0817f85f2e6ee7340386369b757",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "common.h",
+        "line": 1,
+        "column": 21
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    },
+    {
+      "finding_id": "finding-v1-b2d76a0164e9fdab6f562317f229b4a3dc6111f87e7516ac8ae646f5be47329f",
+      "rule_id": "C_FAMILY_PQC_API",
+      "category": "PQC",
+      "risk": "quantum-uncertain",
+      "severity": "info",
+      "confidence": 0.8,
+      "description": "C/C++ PQC source reference; requested parameter sets do not prove enabled mechanisms or active protection.",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection.",
+      "location": {
+        "file": "common.h",
+        "line": 1,
+        "column": 49
+      },
+      "evidence": {
+        "type": "tree_sitter_match",
+        "match": "[masked-sensitive-content]",
+        "snippet_preview": "[masked-sensitive-content]",
+        "metadata": {
+          "detector": "[masked-sensitive-content]",
+          "language": "[masked-sensitive-content]",
+          "node_kind": "[masked-sensitive-content]",
+          "scope": "[masked-sensitive-content]",
+          "source_resolution": "[masked-sensitive-content]"
+        }
+      },
+      "source_snippet": {
+        "lines": [
+          {
+            "line": 1,
+            "text": "[masked-sensitive-file-content]",
+            "highlighted": true
+          }
+        ]
+      }
+    }
+  ],
+  "cbom": [
+    {
+      "component": "api.c",
+      "algorithm": "C/C++ provider configuration reference: oqsprovider",
+      "usage_type": "CryptoAPI",
+      "location": "api.c:3",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation."
+    },
+    {
+      "component": "api.c",
+      "algorithm": "C/C++ property configuration reference: provider=default",
+      "usage_type": "CryptoAPI",
+      "location": "api.c:3",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation."
+    },
+    {
+      "component": "api.c",
+      "algorithm": "C/C++ TLS group configuration reference: X25519MLKEM768:P-256",
+      "usage_type": "CryptoAPI",
+      "location": "api.c:3",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation."
+    },
+    {
+      "component": "api.c",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "api.c:3",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation."
+    },
+    {
+      "component": "api.c",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "api.c:3",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the primitive, purpose, linked provider and build configuration. A source request or provider/group setting does not establish runtime capability or negotiation."
+    },
+    {
+      "component": "api.c",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "CryptoAPI",
+      "location": "api.c:3",
+      "quantum_risk": "quantum-vulnerable",
+      "migration_hint": "Prefer high-level OpenSSL EVP APIs to ease PQC migration."
+    },
+    {
+      "component": "api.c",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "api.c:3",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+    },
+    {
+      "component": "api.c",
+      "algorithm": "C/C++ OpenSSL include reference",
+      "usage_type": "CryptoAPI",
+      "location": "api.c:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Check included libraries, exact TLS groups and provider configuration separately from deployment and negotiated connections. Includes alone do not prove linking or enabled algorithms."
+    },
+    {
+      "component": "api.c",
+      "algorithm": "C/C++ liboqs include reference",
+      "usage_type": "CryptoAPI",
+      "location": "api.c:2",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Check included libraries, exact TLS groups and provider configuration separately from deployment and negotiated connections. Includes alone do not prove linking or enabled algorithms."
+    },
+    {
+      "component": "api.cpp",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "api.cpp:2",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+    },
+    {
+      "component": "api.cpp",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "api.cpp:2",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+    },
+    {
+      "component": "api.cpp",
+      "algorithm": "C/C++ liboqs-cpp include reference",
+      "usage_type": "CryptoAPI",
+      "location": "api.cpp:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Check included libraries, exact TLS groups and provider configuration separately from deployment and negotiated connections. Includes alone do not prove linking or enabled algorithms."
+    },
+    {
+      "component": "common.h",
+      "algorithm": "[masked-sensitive-content]",
+      "usage_type": "PQC",
+      "location": "common.h:1",
+      "quantum_risk": "quantum-uncertain",
+      "migration_hint": "Verify the exact standard or draft parameter set, linked OQS/OpenSSL version and build flags. Requested algorithms are not proof of enabled or active protection."
+    }
+  ],
+  "dependency_sbom": [],
+  "summary": {
+    "total_findings": 18,
+    "by_severity": {
+      "info": 12,
+      "medium": 6
+    },
+    "by_risk": {
+      "quantum-uncertain": 17,
+      "quantum-vulnerable": 1
+    },
+    "scanned_files": 3,
+    "skipped_files": 0
+  }
+}

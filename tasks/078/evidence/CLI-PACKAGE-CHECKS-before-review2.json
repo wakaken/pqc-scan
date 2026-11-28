@@ -1,0 +1,129 @@
+{
+  "source_manifest_sha256": "85609c3a060cfa6fa0e88b3d9b2f836d8b6edbe1d762ad7c2ad3ae7207af138c",
+  "binary_sha256": "60e7998ad86dbc164b7b6a7516b9743477500ac950a61b9af09acfe96b11eeb5",
+  "profile": "dev/default features, local preparation only",
+  "checks": [
+    {
+      "label": "cli-scan",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-php-cli-v2/input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "target/v05-php-cli-v2/rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/foundation",
+        "--out-dir",
+        "target/v05-php-cli-v2/output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/078/evidence/cli-scan.log"
+    },
+    {
+      "label": "cli-strict",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-php-cli-v2/input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "target/v05-php-cli-v2/rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/foundation",
+        "--out-dir",
+        "target/v05-php-cli-v2/strict-output",
+        "--require-complete"
+      ],
+      "exit": 3,
+      "expected_exit": 3,
+      "log": "tasks/078/evidence/cli-strict.log"
+    },
+    {
+      "label": "package-prepare",
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--binary",
+        "target/debug/pqc-scan",
+        "--variant",
+        "static",
+        "--out-dir",
+        "target/v05-php-package"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/078/evidence/package-prepare.log"
+    },
+    {
+      "label": "package-verify",
+      "command": [
+        "python3",
+        "scripts/package-release.py",
+        "--verify",
+        "target/v05-php-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/078/evidence/package-verify.log"
+    },
+    {
+      "label": "package-install",
+      "command": [
+        "python3",
+        "tests/distribution/check-install.py",
+        "target/v05-php-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz",
+        "--out-dir",
+        "target/v05-php-install"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/078/evidence/package-install.log"
+    },
+    {
+      "label": "cli-php-default",
+      "command": [
+        "target/debug/pqc-scan",
+        "scan",
+        "target/v05-php-cli-v2/php-input",
+        "--threads",
+        "1",
+        "--rules-dir",
+        "rules",
+        "--format",
+        "all",
+        "--diagnostics",
+        "--inventory-json",
+        "--repository-scope",
+        "v05/php",
+        "--out-dir",
+        "target/v05-php-cli-v2/php-output"
+      ],
+      "exit": 0,
+      "expected_exit": 0,
+      "log": "tasks/078/evidence/cli-php-default.log"
+    }
+  ],
+  "assertions": [
+    "7 files / 8 observations and legacy findings",
+    "real original-byte UTF16 and UTF8 spans",
+    "one header occurrence / distinct same-line IDs",
+    "strict exit3 for unrendered template",
+    "all four grammar notices present in verified package",
+    "Real PHP default-rule native and all report/export files omit private canary",
+    "Three PHP observations retain syntactic referenced assurance; imported OpenSSL key type stays unknown"
+  ],
+  "archive_sha256": "5daccc58930e60efd5349578ca9035d92d607908245b487d886237662a46dbfb",
+  "archive": "target/v05-php-package/pqc-scan-0.4.0-aarch64-apple-darwin-static.tar.gz"
+}

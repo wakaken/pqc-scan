@@ -156,7 +156,7 @@ impl CertificateDetector {
                         evidence: Evidence {
                             r#type: "certificate".into(),
                             r#match: mask_preview(file.file_name().unwrap_or("certificate")),
-                            snippet_preview: "certificate container detected".into(),
+                            snippet_preview: "certificate-related filename match. Content is not established by this signal.".into(),
                             metadata: BTreeMap::from([
                                 ("detector".into(), self.name().into()),
                                 ("extension".into(), ext.clone()),
@@ -806,7 +806,7 @@ YaIFrdcmPh3KlSLTCZod7SfAVUCY\n\
         assert_eq!(detection.evidence.r#match, "broken-cert.pem");
         assert_eq!(
             detection.evidence.snippet_preview,
-            "certificate container detected"
+            "certificate-related filename match. Content is not established by this signal."
         );
         assert_eq!(
             detection.evidence.metadata.get("extension"),

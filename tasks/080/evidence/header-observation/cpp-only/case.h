@@ -1,0 +1,1 @@
+void f(){oqs::Signature key("ML-DSA-65"); key.sign(data);}

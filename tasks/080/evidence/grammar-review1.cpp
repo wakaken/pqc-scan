@@ -1,0 +1,1 @@
+template<class RSA_new,int(*OQS_SIG_new)()> void f(){RSA_new();} namespace App {using Vendor::RSA_new; void f(){RSA_new();}} using Vendor::OQS_KEM_new;

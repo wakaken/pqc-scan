@@ -2,8 +2,8 @@
 
 [日本語](PROBING.ja.md) · [README](https://github.com/wakaken/pqc-scan/blob/develop/README.md)
 
-The macOS Apple Silicon v0.4 `network` variant includes three diagnostic commands.
-The `static` variant has no `probe` command. See [choosing a download](DISTRIBUTION.md#release-status).
+This guide describes the three diagnostic commands in the `network` variant.
+The `static` variant has no `probe` command. See [choosing a variant](DISTRIBUTION.md#release-status).
 
 | Goal | Command | What it establishes |
 |---|---|---|

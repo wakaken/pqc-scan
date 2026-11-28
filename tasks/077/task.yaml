@@ -1,0 +1,143 @@
+id: '077'
+title: Add PHP, C#, C and C++ routing and bounded typed-source foundation
+type: improvement
+priority: high
+status: done
+owner: Main agent
+milestone: v0.5
+phase: '2'
+plan_reference: docs/roadmap/v0.5/ROADMAP.md
+requirements_reference: docs/roadmap/v0.5/REQUIREMENTS.md
+task_map_reference: docs/roadmap/v0.5/TASKS.md
+design_reference: docs/product/PQC-LANGUAGE-IMPLEMENTATION-PLAN-20261119.md
+description: Provide verified four-language syntax routes and safe source-to-inventory capture without implementing
+  a second detector pipeline.
+quality_requirements:
+- L01
+- L02
+- L04
+- L08
+- L09
+- L14
+- L16
+- L25
+- L26
+depends_on:
+- '076'
+target_components:
+- Cargo.toml
+- Cargo.lock
+- crates/pqc_scan_detectors/
+- crates/pqc_scan_core/src/observation.rs
+- crates/pqc_scan_core/tests/
+- docs/user/
+problem:
+- The required new-language outcomes are not delivered by current seven-language source routing, limited normalization
+  or dependency formats. Existing v0.4 correctness/privacy/contracts must remain intact.
+acceptance:
+- Adopt only the exact feasible grammar pins and interfaces established by 076; preserve the fixed toolchain and
+  existing detector entrypoints.
+- Route PHP/PHTML/tagged INC, C# CS, C and C++ extensions including uppercase .C before lowercasing; bounded ambiguous-header
+  behavior cannot combine conflicting bindings or duplicate one lexical occurrence.
+- Preserve exact original spans and encoded/Unicode positions and diagnose parse errors, template limits and budget
+  exhaustion; generic/custom AST rules continue to use the documented matching path.
+- Reuse current typed algorithm references first; any necessary additive internal capture validates finite identifiers/parameters
+  and keeps ast_pattern/syntactic/referenced assurance. No mandatory public struct fields or serialized format change.
+- Ship routing/capture positive, negative, same-line, malformed, unknown, budget and privacy tests plus affected
+  paired user scope documentation; future source handlers must not be advertised complete by this foundation.
+deliverables:
+- tasks/077/TASK-077-RESULTS.md
+- tasks/077/evidence/
+- The scoped behavior or feasibility deliverable, meaningful verification, affected documentation and applicable
+  review evidence; no completion follows from registration.
+implementation_steps:
+- Write observable failing routing/capture tests from frozen 076 expectations.
+- Add minimal pinned grammars, extension/semantic-node adapters and bounded header policy.
+- Extend safe typed capture only where current v0.4 interfaces are insufficient, preserving old behavior.
+- Run relevant component and existing-language regression tests, update affected documentation and record final-source
+  evidence.
+testing_requirements:
+- Apply docs/agent/VERIFICATION.md for all affected categories, including targeted behavior, workspace tests, formatting/diff
+  inspection, Clippy, applicable builds/features and package/dependency provenance checks; record actual commands/exits
+  and final-source applicability.
+- For executable changes, obtain implementation review after initial checks and combined-diff inspection, then test
+  review after required tests. Reuse the same two stage reviewers within one authorized request; splitting tasks
+  or PRs grants no additional identities.
+- New source/rule/manifest coverage needs meaningful positive, negative, malformed/unknown, resource/position/identity
+  and private-data controls. Browser acceptance uses docs/agent/REPORTS.md where presentation/interaction is affected.
+- Exercise real detector/inventory behavior for all four grammars, mixed PHP, modern C#, .c/.C/.h routing, duplicate
+  spans and custom-scope controls.
+- Check malformed/unsupported/encoded inputs and shared budget boundaries; preserve incomplete inspection and private-data
+  masking.
+out_of_scope:
+- Full language-specific API packs, dependency-manager execution, unapproved schema/public-API break and language
+  completion claims from parser presence alone.
+risks:
+- An API/library name, dependency or syntactic reference may be promoted beyond its assurance, or historical evidence
+  may be mistaken for coverage of new final-source behavior.
+approval_boundary:
+- Definition and registration only under the 2026-11-24 steering; this task is not selected for execution. Dependencies
+  must complete and later explicit task selection is required.
+- Storage-format changes, high-risk architecture, unclear cryptographic logic and potentially incompatible rules
+  require the applicable AGENTS human decision; routine choices within agreed scope do not create a new approval
+  gate.
+- No extra agents, release/push/publication, outreach, fees or unagreed scope/criteria changes. Review budget remains
+  per authorized request.
+planning_record:
+  date: '2026-11-24'
+  source_head: 7e8cd91426fa21609a91c0511de44252eaa890d4
+  scope: Requirements/roadmap/task-definition work only; no new task execution, implementation acceptance or measurement
+    selected.
+  primary_requirements:
+  - L01
+  - L02
+  - L08
+  supporting_requirements:
+  - L04
+  - L09
+  - L14
+  - L16
+  - L25
+  - L26
+  scoped_acceptance: Primary clauses close only with all scoped supporting evidence; cross-cutting requirements
+    remain mandatory.
+  completion_evidence: Every original task criterion, applicable final-source validation and required reviews; preserve
+    failures, unknowns, prior evidence and source bindings.
+execution_authorization:
+  date: '2026-11-24'
+  request: Maintainer selected tasks 076 onward in roadmap dependency order. Continue implementation, applicable
+    checks, required reviews and final acceptance within original scope.
+  review_budget: Two identities for this combined request, implementation stage and test stage; reuse across tasks
+    and fixes.
+execution_record:
+  source_head: 7e8cd91426fa21609a91c0511de44252eaa890d4
+  plan: tasks/077/TASK-077-PLAN.md
+  prerequisite: 076 done; adopted FREEZE c207aaa30adb88d397357f2a21f6b37ef1ccd328d72bf2030b8262b2783ae319
+  lifecycle:
+  - 'pending -> planned: current maintainer request selects dependency order; plan reuses 076 freeze and S2 original
+    criteria.'
+  - 'planned -> in-progress: 076 completed both review stages; write observable failing foundation tests before
+    product edits.'
+  - 'in-progress -> review: main implementation, targeted checks, combined diff and package provenance prepared;
+    required independent stages and broader final checks remain.'
+  - 'review -> in-progress: test reviewer P2 requires exact shared boundaries for nodes/candidates/match-candidates/bytes;
+    add fixed five-node header evidence without changing production code.'
+  - 'in-progress -> review: all four exact shared-cap boundaries pass, source remains product-identical; same reviewers
+    confirming final test-only amendment.'
+  - 'review -> done: both existing reviewers accepted final source manifest6dc0c5dd; all original077 criteria and
+    applicable final-source checks/reuse verified.'
+  reviewers:
+    implementation:
+      id: /root/implementation_review
+      stage: implementation
+      source: IMPLEMENTATION-SOURCE.json 6dc0c5ddd65591721bd13c1fe20b69e2617a6dd19738d12b322075a07de7af79
+      decision: accepted
+      findings: []
+    test:
+      id: /root/test_review
+      stage: test
+      source: IMPLEMENTATION-SOURCE.json 6dc0c5ddd65591721bd13c1fe20b69e2617a6dd19738d12b322075a07de7af79
+      decision: accepted
+      findings: []
+  source_manifest: tasks/077/evidence/IMPLEMENTATION-SOURCE.json
+  result: tasks/077/TASK-077-RESULTS.md

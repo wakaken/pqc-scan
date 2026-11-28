@@ -49,3 +49,15 @@ ctrlc. The macOS network graph no longer selects the four Objective-C packages;
 their pinned records and review flags above remain unchanged for historical or
 other selected graphs. Native archive preparation must still verify the actual
 selected packages and require no missing/review-required notices before publication.
+
+The v0.5 parser foundation adds `tree-sitter-cpp 0.23.4`, whose registry archive
+omits its root MIT notice. Its fallback binds Cargo checksum and recorded upstream
+revision `f41e1a044c8a84ea9fa8577fdd2eab92ec96de02` to the unmodified LICENSE.
+The pinned PHP, C# and C grammar archives already include their license files.
+Existing review-required statements and publication boundaries remain unchanged.
+
+Public documentation in both package variants includes the paired root READMEs,
+security, coverage, scanning, report and saved-evidence guides. Preparation rejects
+missing ordinary inline local document/image targets; external URLs are not
+fetched and fragments are not validated as archive members. This keeps local
+document navigation valid in a prepared archive.

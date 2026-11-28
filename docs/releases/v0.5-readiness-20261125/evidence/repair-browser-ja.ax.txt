@@ -1,0 +1,262 @@
+Browser tab: 14, Title: "Bundled documentation preview", URL: "http://127.0.0.1:57489/docs/user/COVERAGE.ja.md#source-limits".
+1 AXWebArea Bundled documentation preview, URL: 127.0.0.1:57489/docs/user/COVERAGE.ja.md#source-limits
+	2 container
+		3 heading 対応する入力と検査範囲, Value: 1
+			4 text 対応する入力と検査範囲
+		5 link Description: English, Value: 127.0.0.1:57489/docs/user/COVERAGE.md
+		6 text  · 
+		7 link Description: README, Value: 127.0.0.1:57489/README.ja.md
+		8 text 現在のソースで検査できる入力を説明し、v0.5開発中のPHP・C#・C/C++と関連する依存ファイルも含みます。
+		9 text v0.4.0向けの配布アーカイブとは対応範囲が異なるため、スキャナーと同じ版のルールを使ってください。 
+		10 link Description: 入力の概要, Value: 127.0.0.1:57489/README.ja.md#targets
+		11 text と
+		12 link Description: スキャン手順, Value: 127.0.0.1:57489/docs/user/SCANNING.ja.md
+		13 text も参照してください。
+		14 heading 目次, Value: 2
+			15 text 目次
+		16 content list
+			17 container
+				18 AXListMarker • 
+				19 link Description: 依存関係ファイル, Value: 127.0.0.1:57489/docs/user/COVERAGE.ja.md#dependencies
+			20 container
+				21 AXListMarker • 
+				22 link Description: SBOM, Value: 127.0.0.1:57489/docs/user/COVERAGE.ja.md#sbom
+			23 container
+				24 AXListMarker • 
+				25 link Description: 証明書と秘密鍵マーカー, Value: 127.0.0.1:57489/docs/user/COVERAGE.ja.md#certificates
+			26 container
+				27 AXListMarker • 
+				28 link Description: 設定ファイルとルール, Value: 127.0.0.1:57489/docs/user/COVERAGE.ja.md#configuration
+			29 container
+				30 AXListMarker • 
+				31 link Description: ソースコード, Value: 127.0.0.1:57489/docs/user/COVERAGE.ja.md#source-limits
+			32 container
+				33 AXListMarker • 
+				34 link Description: 秘密情報と除外範囲, Value: 127.0.0.1:57489/docs/user/COVERAGE.ja.md#privacy
+		35 heading 依存関係ファイル, Value: 2
+			36 text 依存関係ファイル
+		37 text 次のファイルから、関連ライブラリとバージョン情報を調べます。
+		38 content list
+			39 container
+				40 AXListMarker • 
+				41 text Rust:  Cargo.toml 、 Cargo.lock
+			42 container
+				43 AXListMarker • 
+				44 text Ruby:  Gemfile 、 Gemfile.lock 、 gems.rb 、 gems.locked 、 *.gemspec
+			45 container
+				46 AXListMarker • 
+				47 text Java:  pom.xml 、 build.gradle 、 build.gradle.kts 、 gradle.lockfile
+			48 container
+				49 AXListMarker • 
+				50 text Go:  go.mod
+			51 container
+				52 AXListMarker • 
+				53 text JavaScript／TypeScript:  package.json 、 package-lock.json 、 pnpm-lock.yaml
+			54 container
+				55 AXListMarker • 
+				56 text Python:  requirements.txt 、 Pipfile.lock 、 poetry.lock
+			57 container
+				58 AXListMarker • 
+				59 text PHP:  composer.json 、 composer.lock
+			60 container
+				61 AXListMarker • 
+				62 text C#／.NET:  .csproj 、 Directory.Packages.props 、 Directory.Build.props 、 packages.config 、 packages.lock.json 、 global.json
+			63 container
+				64 AXListMarker • 
+				65 text C/C++:  vcpkg.json 、 vcpkg-configuration.json 、 conanfile.txt 、 conan.lock 、 CMakeLists.txt 、 *.cmake
+		66 text 対応する範囲と、宣言・ロック・ビルド参照の違いは、
+		67 link Description: PHP・.NET・ネイティブライブラリの依存ファイル, Value: 127.0.0.1:57489/docs/user/COVERAGE.ja.md#native-dependencies
+		68 text を参照してください。 宣言されたバージョンと、ロックファイルに記録されたバージョンは区別します。 動的に決まる値を確定した値として扱いません。ライブラリが見つかっても、その暗号方式が実際に使われているとは限りません。
+		69 heading SBOMの読み込み, Value: 2
+			70 text SBOMの読み込み
+		71 text CycloneDX JSON（1.4〜1.7、
+		72 text *.cdx.json
+		73 text ／
+		74 text *bom*.json
+		75 text ）と SPDX JSON（2.2〜2.3、
+		76 text *.spdx.json
+		77 text ／
+		78 text *sbom*.json
+		79 text ）に対応します。 記録されたコンポーネント・パッケージを調べるもので、インストール状態の検査ではありません。
+		80 heading 証明書と秘密鍵マーカー, Value: 2
+			81 text 証明書と秘密鍵マーカー
+		82 text .pem
+		83 text 、
+		84 text .crt
+		85 text 、
+		86 text .cer
+		87 text 、
+		88 text .der
+		89 text  の公開証明書から、署名方式、公開鍵の方式、 対応する鍵長・曲線、有効期間を確認します。証明書の署名と公開鍵は別々に表示します。 期限の判定はスキャン時点の日時に基づきます。証明書の信頼性や接続先での利用を保証するものではありません。
+		90 text .p12
+		91 text ／
+		92 text .pfx
+		93 text  は、読み取れる公開証明書を検査します。パスワード入力や復号には対応しません。 内容を検査できなかった場合は、未完了の表示を確認してください。 RSA・PKCS#8・OpenSSHの秘密鍵ヘッダーの存在も検出します。 秘密鍵を復号したり、正しい鍵か検証したりする機能ではありません。
+		94 heading 設定ファイルとルール, Value: 2
+			95 text 設定ファイルとルール
+		96 text Kubernetes／Ingress、nginx、Apache httpd、Envoy、Istio、HAProxy、Traefikの TLS・暗号スイート・鍵交換グループなどの設定を調べます。 ファイル上の設定であり、稼働中の接続で有効な方式を確認した結果ではありません。 組み込みルールは139件です。同梱の 
+		97 text rules/default
+		98 text  を指定して使ってください。
+		99 heading ソースコードの検査範囲, Value: 2
+			100 text ソースコードの検査範囲
+		101 text Java、Go、JavaScript、TypeScript／TSX、Python、Rust、Ruby、PHP、C#、C/C++の暗号APIや方式名の参照を調べます。 コードは実行しません。対応する利用パターンに範囲があるため、すべての暗号処理を発見するものではありません。 方式名が見つかっても、実行時の利用やPQC対応の完了を意味しません。 開発中のスキャナーでは、独自のASTルールをPHP（
+		102 text php
+		103 text ）、C#（
+		104 text csharp
+		105 text ）、 C（
+		106 text c
+		107 text ）、C++（
+		108 text cpp
+		109 text ）の構文で照合できます。組み込みAPI検出は、以下に示す範囲に限ります。 構文解析ができるだけで、任意のAPIを検出できるわけではありません。 PHPは
+		110 text .php
+		111 text 、
+		112 text .phtml
+		113 text 、明示的なPHP開始タグを持つ
+		114 text .inc
+		115 text が対象です。 HTMLとの混在では静的なPHP部分を調べ、Bladeは描画せず未完了として扱います。 C#は
+		116 text .cs
+		117 text が対象で、Razorやファイルをまたぐ意味解析は含みません。 Cは
+		118 text .c
+		119 text 、C++は
+		120 text .C
+		121 text 、
+		122 text .cc
+		123 text 、
+		124 text .cpp
+		125 text 、
+		126 text .cxx
+		127 text 、
+		128 text .hpp
+		129 text 、
+		130 text .hh
+		131 text 、
+		132 text .hxx
+		133 text を使います。 
+		134 text .h
+		135 text はCとC++で処理上限を分け合い、同じ位置・同じ意味の観測を1件にまとめます。 構文や束縛が食い違う範囲は未完了です。プリプロセッサー、include、ビルドは実行しません。 PHPの組み込みルールはOpenSSLの明示的な鍵種別、RSA操作、局所的に追跡できる DH/ECDH導出を調べます。汎用署名やインポートした鍵の種別は推測しません。 SodiumのEd25519/X25519、ML-KEM-768とX-Wingを区別し、ParagonIEのnative・ polyfill・Compatではパラメーター族と署名/KEM用の局所変数の役割を保持します。 SLH-DSAとphpseclibは修飾された参照、native oqsphpとComposer/FFIのOQSラッパーは 別々の不透明な参照として扱います。導入済み・有効・実装同等・実行済みとは判定しません。 名前空間、インポート、関数別名はソース順の限定的な範囲で追跡します。 名前の衝突、再代入、不明な書き込み、動的呼び出し・リフレクション・FFIでは 以前の鍵情報を流用しません。 通常の引数と周辺コードは表示し、認識した認証情報の値・秘密鍵ブロック・対応するAPIの鍵入力に埋め込まれた値を、表示を短くする前にマスクします。
+		136 text 解析が途中で止まった場合、未検査の範囲は広めに保護することがあります。
+		137 text 暗号方式名に似た鍵データを方式として登録せず、明示的なAPI由来の方式情報は保持します。
+		138 text 独自ルールは従来の照合方法と共通の秘密情報保護を使い、任意のファイル間解決は対象外です。
+		139 text 詳しくは
+		140 link Description: コード抜粋の表示と保護, Value: 127.0.0.1:57489/docs/user/REPORTS.ja.md#source-excerpts
+		141 text を参照してください。 1つの変数の追跡上限に達した後の値は、不明として扱います。
+		142 text 影響を受けないAPI参照は残しますが、検査状況は未完了です。 C#では標準のRSA/DSA/EC/ECDHの型、局所的に追跡できる操作、.NETのMLKem・ MLDsa・SlhDsaの生成・インポートと正確なpureパラメーター、対応するBouncy Castleの 鍵生成・KEM・署名（RSAの
+		143 text RsaDigestSigner
+		144 text を含む）を調べます。.NETのPQCクラスをAsymmetricAlgorithmの派生型とは 仮定しません。インポートや型の参照だけでは操作の成功と判定しません。 名前付き引数と局所変数を扱います。名前空間の別名はAlias.TypeとAlias::Typeに対応し、 型パラメーターやプロパティの同名を所有する型・メソッドの範囲で扱います。 不明な書き込みや遅延実行される関数の外側の変数では 古い鍵情報を流用しません。ファイル間のglobal using、フィールド・継承、 リフレクション、コード生成、プロジェクト全体のオーバーロード解決は対象外です。 プリプロセッサーの条件も実行しません。 1つの局所変数の追跡上限に達した後の値は、不明として扱います。
+		145 text 影響を受けないAPI参照は残しますが、検査状況は未完了です。 CompositeMLKem・CompositeMLDsa・Hpkeは構成不明の参照として残します。 汎用のHPKEはPQCとは限らず、表に含まれないprehashやOIDの選択も未解決として扱います。 BC TLS、廃止済みの公式dotnetOQS、独立したOpenForgeの名前空間を区別し、 ソースや対象フレームワークの記述だけでOS・プロバイダー・バージョンの実行能力を判断しません。 C#もPHPと同様に秘密の値を選んでマスクし、通常の引数と周辺コードは表示します。
+		146 text 明示的なAPI由来の方式情報はインベントリに保持します。
+		147 text ライブラリの参照は、検出結果・CBOMの固定プロジェクト名とネイティブインベントリの識別マーカーで位置ごとに区別します。
+		148 text 秘密の値を持つメタデータは保護します。
+		149 text これらの名前はライブラリの導入や実際の使用を示すものではなく、表示したコードを方式の確定情報として使うこともありません。 C/C++では、対応表にあるOpenSSLのRSA・DSA・DH・EC API、明示されたEVPの方式名と 局所的に追跡できるコンテキスト・生成したEVP鍵、OQSのC API、修飾されたliboqs-cppの KEM・署名用変数の操作を調べます。C++の括弧・波括弧による局所変数の初期化、 複数宣言、修飾された生成呼び出しとnew式の参照に対応します。newから先のポインター、 任意のinclude・テンプレート・関数ポインター、C++の名前空間・型の別名、継承・フィールド・ 大域の可変値、コンパイラーによるオーバーロード解決は対象外です。 マクロや条件分岐は実行せず、条件付きの参照は未完了として残します。 不明な呼び出し、間接的な書き込み、同名の宣言、鍵の役割の矛盾では古い束縛を流用しません。 低水準の鍵やOQSのオブジェクトをEVP鍵と同一視しません。 EVPのraw公開鍵・秘密鍵の取り込みは、Ed25519／X25519の数値IDと
+		150 text _ex
+		151 text 形式の方式名、ML-KEM／ML-DSAの
+		152 text _ex
+		153 text 形式の明示的なパラメーターセットを調べます。
+		154 text その他の指定は未解決とし、渡された鍵データの妥当性は検証しません。 対応するincludeはライブラリの参照として扱います。有限のプロバイダー・プロパティ値と 単純なコロン区切りのTLSグループは、公開された固定ラベル・マーカーに残します。 方式のアセットや、ロード済み・通信で合意済みという判定には使いません。 単独のMLKEM名、標準ハイブリッド、ドラフト、別表記を区別します。 その他のグループ指定構文、不明・エスケープ・動的な値、独自プロバイダー名は未解決です。 従来のOpenSSL文字列ルールとの重複は残し、既存のIDと検出位置を維持します。 通常の引数と周辺コードは表示し、認識した秘密の値と、それを持つメタデータをマスクします。
+		155 text ネイティブ観測は構文上の参照にとどめます。 プリプロセッサー、ビルド、リンク、パッケージ管理、暗号処理は実行しません。 C/C++では、EVPの数値IDと方式名、OpenSSLのSLH-DSA表記とliboqsの 大文字S/Fを使う機構名を区別します。出力先が明示されたEVP鍵・コンテキストは 局所情報を更新し、追跡できない出力ポインターでは古い束縛を使いません。 既知APIのバッファー書き込み後も、以前の文字列選択を流用しません。 C++のテンプレート引数やusing宣言は、所有する範囲の同名を検出するために扱い、 テンプレートの具体化やインポート先の意味解析は行いません。 構文エラー、未対応の記述、処理上限などで検査が終わらなかった場合も、取得できた検出結果は残ります。 
+		156 link Description: 検査状況と未完了の確認, Value: 127.0.0.1:57489/docs/user/SCANNING.ja.md#diagnostics
+		157 text を参照し、表示された理由と次の確認方法に沿って調べてください。
+		158 heading 秘密情報の扱いと除外範囲, Value: 2
+			159 text 秘密情報の扱いと除外範囲
+		160 text 認識できる秘密鍵や認証情報はレポートでマスクしますが、すべての秘密情報を検出するツールではありません。 ソース断片、パス、証明書の公開情報などが残るため、レポートは共有前に確認してください。 Gitの除外設定に従い、既定では 
+		161 text .git
+		162 text 、
+		163 text node_modules
+		164 text 、
+		165 text target
+		166 text 、
+		167 text dist
+		168 text 、
+		169 text docs
+		170 text 、 Markdown、既知の画像・アーカイブ・バイナリなどを除外します。 ファイルサイズは既定で2 MiBまでです。CLIとフォルダ選択画面で1〜64 MiBに変更できます。 
+		171 link Description: サイズ上限, Value: 127.0.0.1:57489/docs/user/SCANNING.ja.md#%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%B5%E3%82%A4%E3%82%BA%E3%81%AE%E4%B8%8A%E9%99%90
+		172 text と
+		173 link Description: 対象の選び方, Value: 127.0.0.1:57489/docs/user/SCANNING.ja.md
+		174 text を確認してください。 テストは既定で含みます。
+		175 text --exclude-tests
+		176 text  または画面の「テストコードを除外」で除外できます。 独自のパスは 
+		177 text .pqcignore
+		178 text  に指定できます。リンク先のファイルは読み取りません。 除外された範囲や未対応の入力もあるため、検出0件は安全性の証明ではありません。
+		179 heading PHP・.NET・ネイティブライブラリの依存ファイル, Value: 2
+			180 text PHP・.NET・ネイティブライブラリの依存ファイル
+		181 text 以下の範囲をオフラインで読み取ります。PHP、dotnet／MSBuild、パッケージマネージャー、コンパイラー、CMake、ConanのPythonは実行しません。依存関係のグラフや導入済み環境も推測しません。
+		182 table
+			183 row
+				184 cell
+					185 text 入力
+				186 cell
+					187 text 保持する情報と制限
+			188 row
+				189 cell
+					190 text composer.json／composer.lock
+				191 cell
+					192 text requireと開発用パッケージ、PHP・拡張機能・ネイティブライブラリの要件、config.platformやロックのplatform-overridesを読みます。拡張機能をfalseで無効化する設定を含め、エミュレート設定は配備先と区別します。Git・path・archive・独自のソースは未確認とし、レジストリーpurlや解決済みバージョンを付けません。
+			193 row
+				194 cell
+					195 text .csproj／Directory.Packages.props／Directory.Build.props／packages.config
+				196 cell
+					197 text リテラルのパッケージ宣言・対象フレームワーク・旧形式の記録を読みます。選択済みでルート内にある最も近いDirectory.Packages.propsだけを、条件のない中央管理のバージョン指定に使います。プロジェクト側も継承した宣言であり、有効なビルドとは扱いません。Build.propsは独立した記録です。条件式・プロパティ・importは評価しません。
+			198 row
+				199 cell
+					200 text global.json／packages.lock.json
+				201 cell
+					202 text SDKの指定をランタイムとは扱いません。NuGetロックのバージョン1／2で、要求・解決済みの主張と、対象フレームワーク／実行環境IDの区分名を別々に保持します。未対応の版はUnsupportedです。IDは大文字・小文字を区別せず比較しますが、別々の出所の記録は統合しません。
+			203 row
+				204 cell
+					205 text vcpkg.json／vcpkg-configuration.json
+				206 cell
+					207 text 依存先・リテラルの条件やfeature・override・レジストリーbaselineを宣言として扱います。featureとbaselineは別のecosystem・出所で区別し、導入済みバージョンやレジストリーpurlを付けません。独自レジストリーのURLは出力しません。
+			208 row
+				209 cell
+					210 text conanfile.txt／conan.lock
+				211 cell
+					212 text requires・tool／build／test用の宣言とロック0.5の参照を読みます。安全な改訂番号を報告値として保持しますが、user／channelのソースやビルド用依存は未解決です。未対応の版はUnsupportedです。Pythonのレシピは評価しません。
+			213 row
+				214 cell
+					215 text CMakeLists.txt／*.cmake
+				216 cell
+					217 text find_package・target_link_libraries・FetchContent_Declareのリテラル名を、不完全な字句上の参照として扱います。コメントや文字列内の命令、変数からパッケージを作りません。URLの出力、スクリプトの評価、ダウンロードは行いません。
+		218 text ネイティブの依存一覧は既存の6属性を保ちます。
+		219 text composer
+		220 text 、
+		221 text nuget
+		222 text 、
+		223 text php-platform
+		224 text 、
+		225 text dotnet-sdk
+		226 text 、
+		227 text dotnet-framework
+		228 text 、
+		229 text vcpkg
+		230 text 、
+		231 text vcpkg-feature
+		232 text 、
+		233 text vcpkg-baseline
+		234 text 、
+		235 text conan
+		236 text 、
+		237 text cmake
+		238 text で、ソースの主張と環境・設定の参照を区別します。後者は導入済みの構成要素を表しません。featureは
+		239 text port/feature
+		240 text 、baselineはURLではなくレジストリー種別と順序による固定名です。出所のファイルと順序を保持し、別の記録とのグラフ上の関係は推測しません。purlは表現できるComposerの宣言と、条件を満たすNuGetの記録に限り生成し、ネイティブのビルド参照には付けません。中央管理ファイルにも、選択済み・シンボリックリンク禁止・ルート内・解析上限の制約が適用されます。 追加の依存ルールはinfo／quantum-uncertainの検出結果を作ります。既存の広いパッケージ名ルールも新しい入力に一致する場合がありますが、その従来のリスク表示は方式の選択を示しません。新しく対応したファイルでは件数や失敗判定が変わる場合があります。不明なバージョン、有効なプロバイダー、通信相手や実行環境の対応は未確認のままです。案内ではPHPの拡張機能とネイティブライブラリ、.NETの対象・パッケージ・OS・バックエンド、C/C++のビルドとプロバイダーを区別し、OQSラッパーの開発元も分けます。APIがあるだけでPQC TLS対応とは判断せず、AESの一律置換も勧めません。 PHPの 
+		241 text PHP_PQC_API
+		242 text  は参照を示す分類として 
+		243 text quantum-safe
+		244 text  / 
+		245 text info
+		246 text  を使い、 他の新しいソースルールは 
+		247 text quantum-uncertain
+		248 text  を使います。この分類はソース上の参照を示すもので、 実環境での配備や保護全体を確認した意味ではありません。未対応の構成は移行評価でも不明のままで、 対応状況が不足している対象を準備完了とは判定しません。
+		249 heading 追加のソース参照, Value: 2
+			250 text 追加のソース参照
+		251 text wolfCryptのRSA、libsecp256k1のECDSA、BotanのPK_Signer／PK_Verifier、OpenSSLのX509_verify_cert、.NETのRSA署名フォーマッター・SignedXml・X509Chainの限定的な参照を調べます。
+		252 text PHPのFirebase JWTとXMLSecLibsでは、鍵や方式の指定が分からなければ暗号方式を確定しません。
+		253 text 同じ関数内のphpseclib秘密鍵型の検査と署名処理の関係を、不明な点を残した参照として記録する場合もあります。
+		254 text その型検査がすべての実行経路で成立するとは判断しません。 C++の入れ子になった直接初期化は、予約語nullptrが引数にあり、引数宣言ではないと区別できる場合に限って参照を復元します。
+		255 text 宣言の可能性が残る構文は未解決です。
+		256 text C#の値と型が同名の場合は、暗号の種類が同じだけでなく、宣言された型が同じ正規の型に解決できる場合に限って扱います。 SOURCE_IMPLEMENTATION_REFERENCEは、限定した実装入口の関数定義を記録します。
+		257 text .c.inc・.cc.inc・.cpp.incのように言語を明記した断片も対象です。
+		258 text SOURCE_CONSTRUCTION_REFERENCEは、既知の条件付きハイブリッド方式や正規の複合鍵生成クラスの構成要素を記録します。
+		259 text これらは呼び出し、ビルドで有効な分岐、仕様への適合、構成全体の耐性を確定するものではありません。
+
+The focused UI element is 1 AXWebArea Bundled documentation preview, URL: 127.0.0.1:57489/docs/user/COVERAGE.ja.md#source-limits

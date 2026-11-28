@@ -10,7 +10,8 @@ use std::collections::BTreeMap;
 
 /// A path hint, never proof of production/test applicability.
 pub fn migration_location(path: Option<&str>) -> &'static str {
-    let parts: Vec<_> = path.unwrap_or("").split(['/', '\\']).collect();
+    let lower = path.unwrap_or("").to_ascii_lowercase();
+    let parts: Vec<_> = lower.split(['/', '\\']).collect();
     let name = parts.last().copied().unwrap_or("");
     if parts.iter().any(|p| {
         [
@@ -20,8 +21,12 @@ pub fn migration_location(path: Option<&str>) -> &'static str {
             "test-framework",
             "__tests__",
             "spec",
+            "unittests",
+            "unit-tests",
+            "fixtures",
         ]
         .contains(p)
+            || p.ends_with(".tests")
     }) {
         "tests"
     } else if [
@@ -30,21 +35,34 @@ pub fn migration_location(path: Option<&str>) -> &'static str {
         "package-lock.json",
         "pnpm-lock.yaml",
         "yarn.lock",
-        "Cargo.toml",
-        "Cargo.lock",
+        "cargo.toml",
+        "cargo.lock",
         "go.mod",
         "go.sum",
-        "Gemfile",
-        "Gemfile.lock",
+        "gemfile",
+        "gemfile.lock",
         "requirements.txt",
         "pyproject.toml",
+        "composer.json",
+        "composer.lock",
+        "packages.lock.json",
+        "packages.config",
+        "project.assets.json",
+        "cmakelists.txt",
+        "vcpkg.json",
+        "conanfile.py",
+        "conanfile.txt",
     ]
     .contains(&name)
+        || [".csproj", ".fsproj", ".vbproj", ".props", ".targets"]
+            .iter()
+            .any(|ext| name.ends_with(ext))
     {
         "dependency"
     } else if [
         ".java", ".rs", ".go", ".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".h", ".cpp", ".kt",
-        ".rb", ".cs", ".php",
+        ".rb", ".cs", ".php", ".phtml", ".cc", ".cxx", ".hpp", ".hh", ".hxx", ".cc.inc",
+        ".cpp.inc", ".c.inc",
     ]
     .iter()
     .any(|ext| name.ends_with(ext))
